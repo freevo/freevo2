@@ -375,7 +375,8 @@ plugin.activate('tv.mplayer')
 # to use this you must reassign plugin_external_tuner in local_conf.py:
 # plugin_external_tuner = plugin.activate('tv.irsend_generic',
 #                                         args=('...', '...', ))
-# Please see each irsend plugin for individual arguments.
+# Please see each irsend plugin for individual arguments and be sure to
+# alter VIDEO_GROUPS to tell a VideoGroup to use it (tuner_type='external').
 plugin_external_tuner = 0
 
 # support for settings bookmarks (key RECORD) while playing. Also
