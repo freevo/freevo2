@@ -1,3 +1,41 @@
+#if 0 /*
+# -----------------------------------------------------------------------
+# ExtendedMenu_TV.py - TV Guide
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.8  2002/11/24 07:20:19  krister
+# Clean. Started working on a simple TV recording menu.
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
+
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 # Logging is initialized here, so it should be imported first
 import config
@@ -30,6 +68,9 @@ import config
 # The Electronic Program Guide
 import epg_xmltv as epg, epg_types
 
+import record_video
+
+
 rc   = rc.get_singleton()   # Create the remote control object
 osd  = osd.get_singleton()  # Create the OSD object
 skin = skin.get_singleton() # Create the Skin object
@@ -41,6 +82,7 @@ CHAN_NO_DATA = 'This channel has no data loaded'
 
 
 class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
+    
     def refresh(self):
         skin.DrawTVGuide()
         self.view.refresh()
@@ -81,7 +123,7 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
             s += 'Stop %s\n' % time.ctime(prog.stop)
             s += 'Tuner channel %s' % tv.get_tunerid(prog.channel_id)
             skin.PopupBox(s)
-            time.sleep(2)
+            time.sleep(0.5)
             self.refresh()
 
             cmd = (('/home/krister/proj/freevo/apps/test/C500/' +
@@ -90,8 +132,9 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
                     '/dev/dsp2 -mixsrc /dev/mixer2:line1 -o /home/' +
                     'krister/Movies/%s.avi &> /dev/null &') %
                    time.ctime().replace(' ', '_'))
-            os.system(cmd)
-            print 'Started cmd "%s"' % cmd
+            #os.system(cmd)
+            #print 'Started cmd "%s"' % cmd
+            record_video.main_menu(prog)
         elif event != rc.IDENTIFY_MEDIA:
             self.clear()
             t = self.listing.eventhandler(event)
@@ -121,7 +164,6 @@ class ExtendedMenuView_TV(ExtendedMenu.ExtendedMenuView):
         self.ToView(self.last_to_view)
 
 
-    
 class ExtendedMenuInfo_TV(ExtendedMenu.ExtendedMenuInfo):
     last_to_info = ''
     
@@ -137,18 +179,16 @@ class ExtendedMenuInfo_TV(ExtendedMenu.ExtendedMenuInfo):
         self.ToInfo(self.last_to_info)
 
 
-
-
-
-
 class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
+
     n_cols  = 4
     col_time = 30 # each col represents 30 minutes 
     last_to_listing = [ None, None, None , None ]
 
 
     # Parameters:
-    #    - to_listing: (start_time, stop_time, prg_start) to listing
+    #    - to_listing: (start_time, stop_time, start_channel,
+    #                   selected_prog) to listing
     def ToListing(self, to_listing):
         self.guide = epg.get_guide()
         channels = self.guide.GetPrograms(start=to_listing[0]+1, stop=to_listing[1]-1)
@@ -255,8 +295,10 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
             stop_time += (self.col_time * 60)
             
         channel = self.guide.chan_dict[last_prg.channel_id]
-        programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
-        programs = programs[0].programs        
+        all_programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
+
+        # Current channel programs
+        programs = all_programs[0].programs
         if programs:
             for i in range(len(programs)):
                 if programs[i].title == last_prg.title and programs[i].start == last_prg.start and programs[i].stop == last_prg.stop and programs[i].channel_id == last_prg.channel_id:
