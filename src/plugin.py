@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2004/11/21 11:12:06  dischi
+# some logging updates
+#
 # Revision 1.77  2004/10/09 16:24:54  dischi
 # add function to return number of plugins, activate callback change
 #
@@ -49,7 +52,6 @@
 
 
 import os, sys
-import traceback
 import gettext
 import copy
 
@@ -60,7 +62,9 @@ import config
 import eventhandler
 import notifier
 
-DEBUG = 0
+import logging
+log = logging.getLogger('config')
+
 
 if float(sys.version[0:3]) < 2.3:
     True  = 1
@@ -258,10 +262,8 @@ class InputPlugin(Plugin):
             except KeyError:
                 pass
         else:
-            print 'no event mapping for key %s in context %s' % \
-                  (key, self._eventhandler.context)
-            print 'send button event BUTTON arg=%s' % key
-
+            log.warning('no event mapping for key %s in context %s' % \
+                        (key, self._eventhandler.context))
 
 #
 # Some plugin names to avoid typos
@@ -291,9 +293,8 @@ def activate(name, type=None, level=10, args=None):
     for p in _all_plugins:
         if not isinstance(name, Plugin) and p[0] == name and \
                p[1] == type and p[3] == args:
-            print 'WARNING: duplicate plugin activation, ignoring:'
-            print '<%s %s %s>' % (name, type, args)
-            print
+            log.warning('duplicate plugin activation, ignoring:\n' + \
+                        '  <%s %s %s>' % (name, type, args))
             return
     if _initialized:
         _load_plugin(name, type, level, args, _plugin_number)
@@ -614,18 +615,15 @@ def _load_plugin(name, type, level, args, number):
             if module:
                 object = module + '.%s' % name[name.rfind('.')+1:]
             else:
-                print 'can\'t locate plugin %s' % name
-                print 'start \'freevo plugins -l\' to get a list of plugins'
+                log.critical('can\'t locate plugin %s' % name)
                 return
         else:
-            print 'can\'t locate plugin %s' % name
-            print 'start \'freevo plugins -l\' to get a list of plugins'
+            log.critical('can\'t locate plugin %s' % name)
             return
         
     try:
         if not isinstance(name, Plugin):
-            if DEBUG:
-                print 'loading %s as plugin %s' % (module, object)
+            log.debug('loading %s as plugin %s' % (module, object))
 
             exec('import %s' % module)
             if not args:
@@ -645,7 +643,7 @@ def _load_plugin(name, type, level, args, number):
                     reason = 'unknown\nThe plugin neither called __init__ '\
                              'nor set a reason why\nPlease contact the plugin'\
                              'author or the freevo list'
-                print 'plugin %s deactivated\nreason: %s' % (name, reason)
+                log.warning('plugin %s deactivated\n  reason: %s' % (name, reason))
                 return
         else:
             p = name
@@ -701,9 +699,7 @@ def _load_plugin(name, type, level, args, number):
 
 
     except:
-        print 'failed to load plugin %s' % name
-        print 'start \'freevo plugins -l\' to get a list of plugins'
-        traceback.print_exc()
+        log.exception('failed to load plugin %s' % name)
 
 
 def _sort_plugins():

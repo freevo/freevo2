@@ -195,14 +195,16 @@ logger = logging.getLogger()
 # set stdout logging
 # TODO: find a way to shut down that logger later when the user
 # wants to visible debug in the terminal
-formatter = logging.Formatter('%(name)s.%(module)s (%(lineno)s): %(message)s')
+formatter = logging.Formatter('%(levelname)s %(module)s'+\
+                              '(%(lineno)s): %(message)s')
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # set file logger
-formatter = logging.Formatter('%(asctime)s [%(name)6s] %(levelname)-8s ' + \
-                              '%(filename)s %(lineno)s: %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)6s] '+\
+                              '%(levelname)-8s %(filename)s %(lineno)s: '+\
+                              '%(message)s')
 fname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 fname = '%s/%s-%s' % (CONF.logdir, fname, os.getuid())
 handler = logging.FileHandler(fname)

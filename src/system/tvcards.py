@@ -40,7 +40,7 @@ import logging
 import config
 from util.ioctl import ioctl, pack, unpack
 
-log = logging.getLogger('system')
+log = logging.getLogger('config')
 
 
 class TVCard:
