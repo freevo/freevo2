@@ -5,42 +5,24 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#   To activate the idle bar, put the following in your local_conf.py. The
-#   plugins inside the idlebar are sorted based on the level (except the
-#   clock, it's always on the right side)
-#
-#   plugin.activate('idlebar')
-#   
-#   plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
-#
-#   plugin.activate('idlebar.tv',      level=20, args=(listings_threshold, ))
-#     listings_threshold must be a number in hours.  For example if you put
-#     args=(12, ) then 12 hours befor your xmltv listings run out the tv icon
-#     will present a warning.  Once your xmltv data is expired it will present
-#     a more severe warning.  If no args are given then no warnings will be
-#     given.
-#
-#   plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
-#     For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
-#     You can also set the unit as second parameter in args ('C', 'F', or 'K')
-#
-#   plugin.activate('idlebar.sensors', level=40, args=('cpusensor', 'casesensor', 'meminfo'))
-#     cpu and case sensor are the corresponding lm_sensors : this should be
-#     temp1, temp2 or temp3. defaults to temp3 for cpu and temp2 for case
-#     meminfo is the memory info u want, types ar the same as in /proc/meminfo :
-#     MemTotal -> SwapFree.
-#     casesensor and meminfo can be set to None if u don't want them
-#     This requires a properly configure lm_sensors! If the standard sensors frontend
-#     delivered with lm_sensors works your OK.
-#   
-#   plugin.activate('idlebar.clock',   level=50)
-#   plugin.activate('idlebar.cdstatus', level=30)
-#   plugin.activate('idlebar.clock',    level=50)
-#   
+# Documentation moved to the corresponding classes, so that the help
+# interface returns something usefull.
+# Available plugins:
+#       idlebar
+#       idlebar.clock
+#       idlebar.cdstatus
+#       idlebar.mail
+#       idlebar.tv
+#       idlebar.weather
+#       idlebar.holidays
+#       idlebar.procstats
+#       idlebar.sensors
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/10/14 18:11:22  dischi
+# patches from Magus Schmidt
+#
 # Revision 1.42  2003/10/01 19:02:09  dischi
 # add cpu usage patch from Viggo Fredriksen
 #
@@ -81,6 +63,7 @@ import os
 import config
 import sys
 import string
+import types
 import mailbox
 import skin
 import tv.tv_util as tv_util
@@ -138,7 +121,12 @@ class PluginInterface(plugin.DaemonPlugin):
 
 class IdleBarPlugin(plugin.Plugin):
     """
-    parent for all idlebar plugins
+    To activate the idle bar, put the following in your local_conf.py:
+        plugin.activate('idlebar')
+    You can then add various plugins. Plugins inside the idlebar are 
+    sorted based on the level (except the clock, it's always on the 
+    right side). Use "freevo plugins -l" to see all available plugins,
+    and "freevo plugins -i idlebar.<plugin>" for a specific plugin.
     """
     def __init__(self):
         plugin.Plugin.__init__(self)
@@ -150,7 +138,12 @@ class IdleBarPlugin(plugin.Plugin):
 
 class clock(IdleBarPlugin):
     """
-    show the current time
+    Shows the current time.
+
+    Activate with:
+    plugin.activate('idlebar.clock',   level=50)
+    Note: The clock will always be displayed on the right side of
+    the idlebar.
     """
     def __init__(self, format='%a %I:%M %P'):
         IdleBarPlugin.__init__(self)
@@ -175,7 +168,10 @@ class clock(IdleBarPlugin):
 
 class cdstatus(IdleBarPlugin):
     """
-    show the status of all rom drives
+    Show the status of all rom drives.
+
+    Activate with:
+    plugin.activate('idlebar.cdstatus')
     """
     def __init__(self):
         IdleBarPlugin.__init__(self)
@@ -209,7 +205,11 @@ class cdstatus(IdleBarPlugin):
 
 class mail(IdleBarPlugin):
     """
-    show if new mail is in the mailbox
+    Shows if new mail is in the mailbox.
+    
+    Activate with:
+    plugin.activate('idlebar.mail',    level=10, args=('path to mailbox', ))
+    
     """
     def __init__(self, mailbox):
         IdleBarPlugin.__init__(self)
@@ -242,7 +242,15 @@ class mail(IdleBarPlugin):
 
 class tv(IdleBarPlugin):
     """
-    show if the tv is locked or not
+    Informs you, when the xmltv-listings expires.
+
+    Activate with:
+    plugin.activate('idlebar.tv', level=20, args=(listings_threshold,))
+    listings_threshold must be a number in hours.  For example if you put
+    args=(12, ) then 12 hours befor your xmltv listings run out the tv icon
+    will present a warning.  Once your xmltv data is expired it will present
+    a more severe warning.  If no args are given then no warnings will be
+    given.
     """
     def __init__(self, listings_threshold=-1):
         IdleBarPlugin.__init__(self)
@@ -288,7 +296,13 @@ class tv(IdleBarPlugin):
 
 class weather(IdleBarPlugin):
     """
-    show the current weather
+    Shows the current weather.
+
+    Activate with:
+    plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
+
+    For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
+    You can also set the unit as second parameter in args ('C', 'F', or 'K')
     """
     def __init__(self, zone='CYYZ', units='C'):
         IdleBarPlugin.__init__(self)
@@ -517,20 +531,49 @@ class procstats(IdleBarPlugin):
 
 class sensors(IdleBarPlugin):
     """
-    read lm_sensors data for cpu temperature
+    Displays sensor temperature information (cpu,case) and memory-stats.
+
+    Activate with:
+       plugin.activate('idlebar.sensors', level=40, args=('cpusensor', 'casesensor', 'meminfo'))
+       plugin.activate('idlebar.sensors', level=40, args=(('cpusensor','compute expression'), 
+                                                          ('casesensor','compute_expression'),
+                                                          'meminfo'))
+    cpu and case sensor are the corresponding lm_sensors : this should be
+    temp1, temp2 or temp3. defaults to temp3 for cpu and temp2 for case
+    meminfo is the memory info u want, types ar the same as in /proc/meminfo :
+    MemTotal -> SwapFree.
+    casesensor and meminfo can be set to None if u don't want them
+    This requires a properly configure lm_sensors! If the standard sensors frontend
+    delivered with lm_sensors works your OK.
+    Some sensors return raw-values, which have to be computed in order 
+    to get correct values. This is normally stored in your /etc/sensors.conf.
+    Search in the corresponding section for your chipset, and search the 
+    compute statement, e.g. "compute temp3 @*2, @/2". Only the third
+    argument is of interest. Insert this into the plugin activation line, e.g.: 
+    "[...] args=(('temp3','@*2'),[...]". The @ stands for the raw value.
+    The compute expression  works for the cpu- and casesensor.
     """
     class sensor:
         """
         small class defining a temperature sensor
         """
-        def __init__(self, sensor, hotstack):
+        def __init__(self, sensor, compute_expression, hotstack):
             self.initpath = "/proc/sys/dev/sensors/"
             self.senspath = self.getSensorPath()
             self.sensor = sensor
+            self.compute_expression = compute_expression
             self.hotstack = hotstack
             self.washot = False
             
         def temp(self):
+            def temp_compute (rawvalue):
+                try:
+                    temperature = eval(self.compute_expression.replace ("@",str(rawvalue)))
+                except:
+                    print "ERROR in idlebar.sensors: Compute expression does not evaluate"
+                    temperature = rawvalue
+                return int(temperature)
+
             if self.senspath == -1 or not self.senspath:
                 return "?"        
             
@@ -539,13 +582,12 @@ class sensors(IdleBarPlugin):
             data = f.read()
             f.close()
             
-            temp = int(float(string.split(data)[2]))
-            hot = int(float(string.split(data)[0]))
+            temp = int(temp_compute (float(string.split(data)[2])))
+            hot = int(temp_compute (float(string.split(data)[0])))
             if temp > hot:
                 if self.washot == False:
                     self.hotstack = self.hotstack + 1
                     self.washot == True
-                    print temp
             else:
                 if self.washot == True:
                     self.hotstack = self.hotstack - 1
@@ -575,9 +617,17 @@ class sensors(IdleBarPlugin):
         self.hotstack = 0
         self.case = None
     
-        self.cpu = self.sensor(cpu, self.hotstack)
+        if isinstance (cpu,types.StringType):
+            self.cpu = self.sensor(cpu, '@', self.hotstack)
+        else:
+            self.cpu = self.sensor(cpu[0], cpu[1], self.hotstack)
+    
         if case: 
-            self.case = self.sensor(case, self.hotstack)
+            if isinstance (case,types.StringType):
+                self.cpu = self.sensor(case, '@', self.hotstack)
+            else:
+                self.cpu = self.sensor(case[0], case[1], self.hotstack)
+
 
         self.ram = ram
         self.retwidth = 0
