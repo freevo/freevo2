@@ -26,6 +26,7 @@ o Web interface for recording (freevoweb)
 o Gentoo ebuild support
 o Autodetect CD/DVD drives
 o Made the config file handling smarter
+o Changed the default PCM volume level from 100 to 90 to avoid distortion
 	
 	
 Release 1.3.0 (2002-11-13):

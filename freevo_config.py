@@ -85,7 +85,7 @@ AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
 MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
 CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
-MAX_VOLUME          = 100             # Set what you want maximum volume level to be.
+MAX_VOLUME          = 90             # Set what you want maximum volume level to be.
 DEFAULT_VOLUME      = 40              # Set default volume level.
 TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
 VCR_IN_VOLUME       = 90              # If you use different input from TV
