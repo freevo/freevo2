@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/06/07 11:32:17  dischi
+# added id to find the item if it changes
+#
 # Revision 1.51  2003/05/27 17:53:36  dischi
 # Added new event handler module
 #
@@ -173,8 +176,9 @@ class VideoItem(Item):
         self.audio_file = {}            # audio dubbing
 
         self.filename = filename
-        self.name    = util.getname(filename)
-        self.tv_show = FALSE
+        self.id       = filename
+        self.name     = util.getname(filename)
+        self.tv_show  = FALSE
         self.mplayer_options = ''
         self.xml_file = None
         
@@ -254,7 +258,7 @@ class VideoItem(Item):
             self.num_titles        = obj.num_titles
             self.label             = obj.label
             self.tv_show           = obj.tv_show
-
+            self.id                = obj.id
 
     def sort(self, mode=None):
         """
