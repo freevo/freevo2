@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/04/22 01:33:35  rshortt
+# Bugfixes.
+#
 # Revision 1.16  2003/04/21 19:31:37  rshortt
 # Add mplayer and ffmpeg.
 #
@@ -160,7 +163,7 @@ python_copy:
 	-rm -rf tmp
 	-mkdir -p lib
 	-mkdir -p apps
-	cp -a $(COPY_BASE)/lib/python2.2 lib
+	cp -a $(PREFIX)/lib/python2.2 lib
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
 	rm -rf lib/python2.2/config
@@ -174,7 +177,7 @@ python_copy:
 	cp -a lib/python2.2/site-packages/{pylircmodule.so,fchksum.so} tmp
 	rm -rf lib/python2.2/site-packages
 	mv tmp lib/python2.2/site-packages
-	cp -a $(COPY_BASE)/bin/python2.2 apps/freevo_python
+	cp -a $(PREFIX)/bin/python2.2 apps/freevo_python
 
 
 ################################################################################
@@ -198,7 +201,7 @@ mplayer_copy:
 mplayer_fonts_copy:
 	@echo Copying mplayer fonts
 	-mkdir -p apps/mplayer/font
-	cp $(COPY_BASE)/MPlayer/font/* apps/mplayer/font
+	cp $(PREFIX)/MPlayer/font/* apps/mplayer/font
 
 
 ################################################################################
@@ -208,7 +211,7 @@ mplayer_fonts_copy:
 ################################################################################
 cdparanoia_copy:
 	@echo Copying cdparanoia
-	cp -a $(COPY_BASE)/bin/cdparanoia apps/
+	cp -a $(PREFIX)/bin/cdparanoia apps/
 
 
 ################################################################################
@@ -218,7 +221,7 @@ cdparanoia_copy:
 ################################################################################
 lame_copy:
 	@echo Copying lame
-	cp -a $(COPY_BASE)/bin/lame apps/
+	cp -a $(PREFIX)/bin/lame apps/
 
 
 ################################################################################
@@ -228,7 +231,7 @@ lame_copy:
 ################################################################################
 jpegtran_copy:
 	@echo Copying jpegtran
-	cp -a $(COPY_BASE)/bin/jpegtran apps/
+	cp -a $(PREFIX)/bin/jpegtran apps/
 
 
 build_all_pkg: build_packageconfig build_libusb build_python build_jpeg build_png build_zlib build_ffmpeg build_dxr3 build_directfb build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_mp1e build_mplayer get_mplayer_fonts
