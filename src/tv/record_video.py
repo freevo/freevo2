@@ -34,6 +34,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/09/01 19:46:03  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.25  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -306,7 +309,7 @@ def set_schedule(arg=None, menuw=None):
     pop.destroy()
 
 
-def eventhandler( event):
+def eventhandler(event, menuw=None):
     if event == em.MENU_BACK_ONE_MENU or event == em.MENU_GOTO_MAINMENU:
         menu.MenuWidget.eventhandler( menuwidget, event )
         rc.app(None) #give control back to the main program

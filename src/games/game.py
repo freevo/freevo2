@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/01 19:46:02  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.9  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -125,7 +128,7 @@ class Game:
             time.sleep(0.3)
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         return self.item.eventhandler(event, menuwidget, self.thread)
 
  

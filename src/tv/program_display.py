@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/01 19:46:02  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.8  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -124,7 +127,7 @@ class ProgramDisplay(PopupBox):
         self.add_child(self.options)
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         if DEBUG: print 'ProgramDisplay: event = %s' % event
 
         trapped = em.MENU_EVENTS.values()
@@ -249,7 +252,7 @@ class ScheduledRecordings(PopupBox):
             self.results.toggle_selected_index(0)
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         if not self.result:
             self.destroy()
             return

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/01 19:46:03  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.6  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -139,7 +142,7 @@ class ProgramSearch(PopupBox):
                     self.results.add_item(text=' ', value=0)
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         if not self.server_available:
             self.destroy()
             return

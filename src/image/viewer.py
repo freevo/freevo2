@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/09/01 19:46:02  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.27  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -233,7 +236,7 @@ class ImageViewer(GUIObject):
             self.eventhandler(em.PLAY_END)
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         #if event == rc.SELECT and self.alertbox:
         #    self.alertbox.destroy()
         #    self.alertbox = None

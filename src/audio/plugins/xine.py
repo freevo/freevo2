@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/01 19:46:02  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.3  2003/08/26 20:24:07  outlyer
 # Apparently some files have spaces in them... D'oh :)
 #
@@ -181,7 +184,7 @@ class Xine:
             time.sleep(0.3)
             
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         """
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler

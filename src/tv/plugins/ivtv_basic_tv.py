@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/01 19:46:03  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.8  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -230,7 +233,7 @@ class IVTV_TV:
         if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()

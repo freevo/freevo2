@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/01 19:46:02  dischi
+# add menuw to eventhandler, it may be needed
+#
 # Revision 1.1  2003/08/06 00:25:40  rshortt
 # Update the commands plugin from Mike Ruelle and move it into the main
 # plugins directory.
@@ -121,7 +124,7 @@ class LogScroll(PopupBox):
         self.add_child(self.pb)
 
 
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
            return self.pb.eventhandler(event)
@@ -161,7 +164,7 @@ class CommandOptions(PopupBox):
         self.results.add_item(text='Show Stdout', value='out')
         self.results.toggle_selected_index(0)
         
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
                                                                                 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
             return self.results.eventhandler(event)
