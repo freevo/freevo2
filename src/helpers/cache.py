@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/01/19 20:25:53  dischi
+# sync metainfo before stopping
+#
 # Revision 1.15  2004/01/18 16:48:29  dischi
 # expand caching (including extendedadd.py)
 #
@@ -316,3 +319,6 @@ import time
 f = open(os.path.join(config.OVERLAY_DIR, 'cachetime'), 'w')
 f.write(str(long(time.time())))
 f.close()
+
+# close db
+util.mediainfo.sync()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/19 20:25:53  dischi
+# sync metainfo before stopping
+#
 # Revision 1.1  2003/12/30 15:30:08  dischi
 # put all shutdown stuff into one file
 #
@@ -54,9 +57,11 @@ def shutdown(menuw=None, arg=None, exit=False):
     import osd
     import plugin
     import childapp
-
-    osd = osd.get_singleton()
+    import util.mediainfo
     
+    osd = osd.get_singleton()
+
+    util.mediainfo.sync()
     if not osd.active:
         # this function is called from the signal handler, but
         # we are dead already.
