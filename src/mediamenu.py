@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/01/05 11:48:53  dischi
+# ignore .xvpics directories
+#
 # Revision 1.14  2002/12/31 04:02:18  krister
 # Bugfix for mismatched variable names.
 #
@@ -326,7 +329,7 @@ class DirItem(Playlist):
 
         # add sub-directories
         for dir in files:
-            if os.path.isdir(dir):
+            if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
                 items += [ DirItem(dir, self, display_type = self.display_type) ]
 
 
