@@ -6,6 +6,18 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/24 11:53:23  rshortt
+# ZIndexRenderer has a nasty bug which results in _huge_ memory usage.  For
+# every single instance of GUIObject (even if it is not drawn, visible, or
+# takes up any area) it creates a bitmap copy of the entire screen which are
+# all ~1.3 Mb.  Right now the ZIndexRenderer functionality is not used
+# anyway so I am temporarily commenting out the references to it in GUIObject.
+# I will be working to fix it and to store proger background images for all
+# visible objects.
+#
+# I have added some debugging code to ZIndexRenderer.py that dumps the bmp
+# file for each object into /tmp.
+#
 # Revision 1.2  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -57,6 +69,7 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
 import osd
+import pygame
 
 osd = osd.get_singleton()
 
@@ -173,6 +186,7 @@ class ZIndexRenderer:
         ol = self.zindex[(oi):]
 
         if object.bg_image: t_bg = object.bg_image.convert()
+        xx = 0
         for o in ol:
             if not o == object and o.is_visible():
                 if o.border:
@@ -184,9 +198,16 @@ class ZIndexRenderer:
                 o._erase() 
 
             o.bg_image = osd.screen.convert()
+            iname = '/tmp/bg1-%s.bmp' % xx
+            pygame.image.save( o.bg_image, iname )
+            xx = xx + 1
 
+        xx = 0
         for o in ol:
             if o == object or o.is_visible():
                 o.bg_image = osd.screen.convert()
+                iname = '/tmp/bg2-%s.bmp' % xx
+                pygame.image.save( o.bg_image, iname )
+                xx = xx + 1
                 o._draw()
 

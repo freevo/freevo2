@@ -7,6 +7,18 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/24 11:53:23  rshortt
+# ZIndexRenderer has a nasty bug which results in _huge_ memory usage.  For
+# every single instance of GUIObject (even if it is not drawn, visible, or
+# takes up any area) it creates a bitmap copy of the entire screen which are
+# all ~1.3 Mb.  Right now the ZIndexRenderer functionality is not used
+# anyway so I am temporarily commenting out the references to it in GUIObject.
+# I will be working to fix it and to store proger background images for all
+# visible objects.
+#
+# I have added some debugging code to ZIndexRenderer.py that dumps the bmp
+# file for each object into /tmp.
+#
 # Revision 1.3  2003/02/23 18:21:50  rshortt
 # Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
 #
@@ -103,7 +115,7 @@ class GUIObject:
         self.rc   = rc.get_singleton()
         self.osd  = osd.get_singleton()
         self.skin = skin.get_singleton()
-        self.zir  = ZIndexRenderer.get_singleton()
+        # self.zir  = ZIndexRenderer.get_singleton()
 
         self.left     = 0
         self.top      = 0
@@ -125,7 +137,7 @@ class GUIObject:
         # XXX At the moment we know about this since I hardcoded it, but
         # XXX maybe it's a good idea to supply zindex object at construction
         # XXX maybe get_zindex_handler and set_zindex_handler function.s
-        self.zindex_pos = self.zir.add_object(self)
+        # self.zindex_pos = self.zir.add_object(self)
         
         if left:   self.left   = left
         if top:    self.top    = top
@@ -246,8 +258,9 @@ class GUIObject:
 
         This is really handled by the render object.
         """
-        self.zir.update_show(self)
+        # self.zir.update_show(self)
         self.visible = 1    
+        self._draw()
 
 
     def hide(self):
@@ -261,7 +274,7 @@ class GUIObject:
         if DEBUG: wait_loop()
         self._erase()
         self.visible = 0
-        self.zir.update_hide(self)
+        # self.zir.update_hide(self)
 
 
     def move(self, x, y):
@@ -275,11 +288,11 @@ class GUIObject:
               moving, or we do it for him. Not decided yet.
         """
         self._erase()
-        self.zir.update_hide(self)
+        # self.zir.update_hide(self)
         self.visible = 0
         self.set_position( self.left+x, self.top+y )
         self._draw()
-        self.zir.update_show(self)
+        # self.zir.update_show(self)
         self.visible = 1
 
         
@@ -362,21 +375,18 @@ class GUIObject:
         if DEBUG: print 'GUIObject.destroy(): %s' % self
         if self.parent:
             # self.parent.children.remove(self)
-            if DEBUG: print 'GUIObject.destroy(): %s has a parent' % self
+            # if DEBUG: print 'GUIObject.destroy(): %s has a parent' % self
             if self.osd.focused_app == self:
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
                 self.osd.focused_app = self.parent
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
             self.parent.refresh()
-            self.parent = None
+            # self.parent = None
         if self.children:
             for child in self.children:
                 child.destroy()
-                child = None
             self.children = []
         self.set_parent(None)
-        self = None
-        if DEBUG: print 'GUIObject.destroy(): %s should be gone' % self
 
 
     def get_h_align(self):
@@ -448,10 +458,10 @@ class GUIObject:
         Private function to calculate correct positon of a widget.
         """
         if not self.parent: raise ParentException
-        if not self.font:   raise TypeError, 'No font'
+        # if not self.font:   raise TypeError, 'No font'
 
         # Render the surface if we don't have it to get correct size.
-        if not self.surface: self.render()
+        # if not self.surface: self.render()
         
         lx          = 0
         ly          = 0
