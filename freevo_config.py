@@ -291,7 +291,8 @@ EVENTS = {
     'vcd'     : VCD_EVENTS,             # only used by xine
     'audio'   : AUDIO_EVENTS,
     'games'   : GAMES_EVENTS,
-    'image'   : IMAGE_EVENTS
+    'image'   : IMAGE_EVENTS,
+    'global'  : GLOBAL_EVENTS
     }
 
 #

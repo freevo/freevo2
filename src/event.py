@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/02/27 20:13:01  dischi
+# add global events to avoid duplicate code
+#
 # Revision 1.41  2004/02/25 17:44:13  dischi
 # add special event mapping for tvmenu
 #
@@ -32,41 +35,6 @@
 # and the plugin doesn't know about it, I have to pass it along somehow.
 #
 # Anyone want to chime in with an idea on how?
-#
-# Revision 1.36  2004/01/15 20:46:02  outlyer
-# Added a "RATING" event... press a number from 0-5 to have the sqlite
-# database keep track of your score. The idea is to be able to build
-# playlists automatically of "top rated" songs. When you press the number,
-# the score is printed on the screen via tiny_osd
-#
-# Revision 1.34  2003/12/14 17:27:19  dischi
-# cleanup
-#
-# Revision 1.33  2003/12/10 19:10:35  dischi
-# AUDIO_PLAY_END is not needed anymore
-#
-# Revision 1.32  2003/12/10 19:01:04  dischi
-# add handler for events who know the needed eventhandler
-#
-# Revision 1.31  2003/11/30 19:41:19  dischi
-# add event to toggle interlacing, it is on no key and only works with xine
-#
-# Revision 1.30  2003/11/09 16:03:09  dischi
-# add step size in VOL+- an arg
-#
-# Revision 1.29  2003/11/09 12:01:25  dischi
-# add subtitle selection and osd info support for xine
-#
-# Revision 1.28  2003/10/23 02:26:52  outlyer
-# Bugfix for missing 'menu' button; it was here before, and it was removed
-# for some reason.
-#
-# Most DVDs have multiple menus, but not all DVDs have a TitleMenu, so under
-# the previous event structure, you could only move to the topmost menu, and
-# only if it was designated as such.
-#
-# This patch allows the old behaviour (from when I first implemented code to
-# support Dischi's Xine patches) which works with more DVDs.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -157,8 +125,7 @@ MIXER_MUTE             = Event('MIXER_MUTE')
 # To change the step size, but the following code in your
 # local.conf (setting VOL+ step size to 2)
 #
-# for k in EVENTS:
-#     EVENTS[k]['VOL+'] = Event('MIXER_VOLUP', arg=1)
+# EVENTS['global']['VOL+'] = Event('MIXER_VOLUP', arg=1)
 
 
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
@@ -230,6 +197,8 @@ DVDNAV_TITLEMENU       = Event('DVDNAV_TITLEMENU')
 DVDNAV_MENU            = Event('DVDNAV_MENU')
 NEXT                   = Event('NEXT')
 PREV                   = Event('PREV')
+
+
 #
 # Audio module
 #
@@ -319,10 +288,7 @@ MENU_EVENTS = {
     'PLAY'      : MENU_PLAY_ITEM,
     'ENTER'     : MENU_SUBMENU,
     'DISPLAY'   : MENU_CHANGE_STYLE,
-    'EJECT'     : EJECT,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'EJECT'     : EJECT
     } 
 
 TVMENU_EVENTS = {
@@ -336,10 +302,7 @@ TVMENU_EVENTS = {
     'EXIT'      : MENU_BACK_ONE_MENU,
     'SELECT'    : MENU_SELECT,
     'DISPLAY'   : MENU_CHANGE_STYLE,
-    'REC'       : TV_START_RECORDING,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'REC'       : TV_START_RECORDING
     } 
 
 INPUT_EVENTS = {
@@ -361,10 +324,7 @@ INPUT_EVENTS = {
     '9'         : INPUT_9,
     '0'         : INPUT_0,
     'CH+'       : MENU_PAGEUP,
-    'CH-'       : MENU_PAGEDOWN,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'CH-'       : MENU_PAGEDOWN
     }
 
 TV_EVENTS = {
@@ -380,9 +340,6 @@ TV_EVENTS = {
     'REW'       : Event(SEEK, arg=-10),
     'FFWD'      : Event(SEEK, arg=10),
     'DISPLAY'   : TOGGLE_OSD,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE,
     '0'         : INPUT_0,
     '1'         : INPUT_1,
     '2'         : INPUT_2,
@@ -411,10 +368,7 @@ VIDEO_EVENTS = {
     'MENU'      : MENU,
     'DISPLAY'   : TOGGLE_OSD,
     'REC'       : STORE_BOOKMARK,
-    '0'         : VIDEO_MANUAL_SEEK,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    '0'         : VIDEO_MANUAL_SEEK
     }
 
 DVD_EVENTS = {
@@ -434,9 +388,6 @@ DVD_EVENTS = {
     'FFWD'      : Event(SEEK, arg=10),
     'GUIDE'     : DVDNAV_TITLEMENU,
     'MENU'      : DVDNAV_MENU,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE,
     'CH+'       : NEXT,
     'CH-'       : PREV
     }
@@ -461,10 +412,7 @@ VCD_EVENTS = {
     '6'         : INPUT_6,
     '7'         : INPUT_7,
     '8'         : INPUT_8,
-    '9'         : INPUT_9,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    '9'         : INPUT_9
     }
 
 AUDIO_EVENTS = {
@@ -480,9 +428,6 @@ AUDIO_EVENTS = {
     'DOWN'      : PLAYLIST_NEXT,
     'CH+'       : PLAYLIST_PREV,
     'CH-'       : PLAYLIST_NEXT,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE,
     '1'         : INPUT_1,
     '2'         : INPUT_2,
     '3'         : INPUT_3,
@@ -516,10 +461,7 @@ IMAGE_EVENTS = {
     'UP'        : PLAYLIST_PREV,
     'DOWN'      : PLAYLIST_NEXT,
     'CH+'       : PLAYLIST_PREV,
-    'CH-'       : PLAYLIST_NEXT,
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'CH-'       : PLAYLIST_NEXT
     }
 
 GAMES_EVENTS = {
@@ -527,13 +469,15 @@ GAMES_EVENTS = {
     'SELECT'    : STOP,
     'MENU'      : MENU,
     'DISPLAY'   : GAMES_CONFIG,
-    'ENTER'     : GAMES_RESET,
+    'ENTER'     : GAMES_RESET
+}
+
+GLOBAL_EVENTS = {
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
     'MUTE'      : MIXER_MUTE
     }
-
-
+    
 
 import pygame.locals as key
 
