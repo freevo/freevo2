@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/03/13 22:30:58  dischi
+# fix crash on debug
+#
 # Revision 1.35  2004/03/07 18:31:08  dischi
 # even more debug
 #
@@ -79,6 +82,7 @@ import rc
 import osd
 import config
 import skin
+import traceback
 
 from Color import *
 
