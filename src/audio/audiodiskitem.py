@@ -32,7 +32,9 @@ from item import Item
 from audioitem import AudioItem
 from playlist import Playlist, RandomPlaylist
 
-            
+TRUE  = 1
+FALSE = 0
+
 class AudioDiskItem(Playlist):
     """
     class for handling audio disks
