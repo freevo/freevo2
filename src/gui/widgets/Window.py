@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.12  2004/08/24 19:23:37  dischi
 # more theme updates and design cleanups
 #
@@ -53,6 +56,10 @@ from mevas.container import CanvasContainer
 import eventhandler
 import gui
 
+
+class ContentPosition:
+    pass
+
 class Window(CanvasContainer):
     """
     """
@@ -90,6 +97,16 @@ class Window(CanvasContainer):
         self.button_normal   = self.content_layout.types['button']
         self.button_selected = self.content_layout.types['button selected']
 
+        self.content_pos = ContentPosition()
+        self.content_pos.x1 = int(eval(str(self.content_layout.x), { 'MAX': 0}))
+        self.content_pos.y1 = int(eval(str(self.content_layout.y), { 'MAX': 0}))
+        self.content_pos.x2 = -int(eval(str(self.content_layout.width),
+                                        { 'MAX': 0})) - self.content_pos.x1
+        self.content_pos.y2 = -int(eval(str(self.content_layout.height),
+                                        { 'MAX': 0})) - self.content_pos.y1
+        self.content_pos.width = self.content_pos.x1 + self.content_pos.x2
+        self.content_pos.height = self.content_pos.y1 + self.content_pos.y2
+        
         self._display  = None
 
 

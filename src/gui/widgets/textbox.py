@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.3  2004/09/07 18:48:57  dischi
 # internal colors are now lists, not int
 #
@@ -95,8 +98,10 @@ class Textbox(text.Text):
                 w = font.stringsize(fit)
                 formated_text.append((fit, w))
                 max_width = max(max_width, w)
-                text = rest.lstrip()
-
+                if rest and rest[0] == '\n':
+                    rest = rest[1:]
+                text = rest.lstrip(' \t')
+                
         # store not fitting text
         self.rest = text
 
@@ -136,7 +141,12 @@ class Textbox(text.Text):
         y0 = 0
         for text, width in formated_text:
             try:
-                self._render(text, (0, y0), (box_width, line_height))
+                x0 = 0
+                if align_h == 'center':
+                    x0 = (box_width - width) / 2
+                if align_h == 'right':
+                    x0 = box_width - width
+                self._render(text, (x0, y0), (width, line_height))
             except Exception, e:
                 _debug_(e, 0)
             y0 += line_height

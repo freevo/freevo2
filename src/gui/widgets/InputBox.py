@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.2  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -46,6 +49,5 @@ class InputBox(PopupBox):
                  icon=None, vertical_expansion=1, text_prop=None, input_text='',
                  numboxes=0, parent='osd'):
 
-        PopupBox.__init__(self, 'input box not working', handler, x, y, width, height,
-                          icon, vertical_expansion, text_prop, parent)
+        PopupBox.__init__(self, 'input box not working', handler)
         

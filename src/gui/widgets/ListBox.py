@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.2  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -44,6 +47,5 @@ class ListBox(PopupBox):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None, show_h_scrollbar=None, show_v_scrollbar=None):
 
-        PopupBox.__init__(self, 'list box not working', handler, x, y, width, height,
-                          icon, vertical_expansion, text_prop, parent)
+        PopupBox.__init__(self, 'list box not working', handler)
         

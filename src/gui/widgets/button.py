@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.3  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -52,14 +55,23 @@ class Button(CanvasImage):
     """
     """
     def __init__(self, text, pos, width, style):
-        label = Label(text, (0,0), (width - 20, style.font.height), style, 'center', 'center')
         CanvasImage.__init__(self, (width, style.font.height+4))
+        self.text = text
+        self.set_style(style)
+        self.set_pos(pos)
 
+
+    def set_style(self, style):
+        """
+        """
+        self.draw_rectangle((0,0), self.get_size(), (0, 0, 0, 0), True)
         r = Rectangle((0,0), self.get_size(),
                       style.rectangle.bgcolor,
                       style.rectangle.size,
                       style.rectangle.color,
                       style.rectangle.radius)
         self.draw_image(r, (0, 0))
+        width = self.get_size()[0]
+        label = Label(self.text, (0,0), (width - 20, style.font.height),
+                      style, 'center', 'center')
         self.draw_image(label, ((width - label.get_size()[0]) / 2, 2))
-        self.set_pos(pos)

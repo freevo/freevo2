@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.3  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -46,13 +49,9 @@ from progressbar import Progressbar
 class ProgressBox(PopupBox):
     """
     """
-    def __init__(self, text, x=None, y=None, width=None, height=None,
-                 icon=None, vertical_expansion=1, text_prop=None,
-                 full=0):
+    def __init__(self, text, full=0):
 
-        PopupBox.__init__(self, 'ProgressBox is broken...just wait :-)',
-                          None, x, y, width, height, icon, vertical_expansion,
-                          text_prop)
+        PopupBox.__init__(self, 'ProgressBox is broken...just wait :-)')
         return
 
         PopupBox.__init__(self, text, None, x, y, width, height,

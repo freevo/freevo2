@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.7  2004/09/07 18:48:57  dischi
 # internal colors are now lists, not int
 #
@@ -168,6 +171,10 @@ class Text(CanvasImage):
                 space = c
                 if ellipses_c == 0:
                     ellipses_space = c
+            if text[c-1] == '\n':
+                # Oops, line break, stop right here
+                break
+            
         # now we a have string that is too long, shorten it again
         if ellipses:
             # we have ellipses so the latest positions are not 'c' and

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/03 15:54:00  dischi
+# make PopupBoxes work again as they should
+#
 # Revision 1.4  2004/08/24 16:42:42  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -56,21 +59,18 @@ class AlertBox(PopupBox):
     """
     """
 
-    def __init__(self, text, handler=None, x=None, y=None, width=None, height=None,
-                 icon=None, vertical_expansion=1, text_prop=None):
+    def __init__(self, text, handler=None):
+        PopupBox.__init__(self, text, handler)
+        self.handler = handler
+        c = self.content_pos
 
-        PopupBox.__init__(self, text, handler, x, y, width, height,
-                          icon, vertical_expansion, text_prop)
-
-        # FIXME: that can't be correct
-        space = self.content_layout.spacing
-
-        w, h = self.get_size()
-        self.button = Button(_('OK'), (space,h-2*space), w-2*space, self.button_selected)
+        self.button = Button(_('OK'), (c.x1, c.y1), self.get_size()[0] - c.width,
+                             self.button_selected)
+        y = self.add_row(self.button.get_size()[1])
+        self.button.set_pos((self.button.get_pos()[0], y))
         self.add_child(self.button)
-        self.set_size((w, h + self.button.get_size()[1]))
         
-        
+
     def eventhandler(self, event):
         if event in (INPUT_ENTER, INPUT_EXIT):
             self.destroy()
