@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/23 19:43:30  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.16  2004/07/22 21:16:01  dischi
 # add first draft of new gui code
 #
@@ -33,6 +36,8 @@
 # ----------------------------------------------------------------------
 
 # include all the widgets
+# FIXME: needs cleanup!
+
 from widgets.Border            import *
 from widgets.Color             import *
 from widgets.GUIObject         import *
@@ -54,8 +59,11 @@ from widgets.ListBox           import *
 # the objects that can be drawn
 from base import Image, Rectangle, Text
 
-_screen = None
-_skin   = None
+_screen   = None
+_skin     = None
+
+import fxdparser
+settings = fxdparser.Settings()
 
 def get_screen():
     """
@@ -72,6 +80,7 @@ def get_screen():
             _screen = pygame_renderer.Screen()
     return _screen
 
+
 def get_skin():
     """
     return the skin object
@@ -79,7 +88,40 @@ def get_skin():
     global _skin
     if not _skin:
         import areas
-        _skin = areas.Skin()
+        _skin = areas.Skin(get_settings())
         _skin.set_screen(get_screen())
     return _skin
+
     
+
+def get_settings():
+    """
+    get current fxd settings
+    """
+    return settings.settings
+
+
+
+# Bad interface into settings based on current
+# skin interface.
+# FIXME: needs cleanup where used!
+
+def set_base_fxd(file):
+    return settings.set_base_fxd(file)
+
+
+def load_settings(filename, copy_content = 1):
+    return settings.load(filename, copy_content)
+
+
+def get_font(name):
+    return settings.settings.get_font(name)
+
+
+def get_image(name):
+    return settings.settings.get_image(name)
+
+
+def get_icon(name):
+    return settings.settings.get_icon(name)
+

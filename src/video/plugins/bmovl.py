@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/23 19:44:00  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.16  2004/07/17 08:56:12  dischi
 # fix typo in variable
 #
@@ -221,6 +224,9 @@ class PluginInterface(plugin.Plugin):
         """
         normal plugin init, but sets _type to 'mplayer_video'
         """
+        self.reason = 'not working while gui rebuild'
+        return
+    
         print
         print 'Activating video.bmovl plugin'
         print 'Warning: this plugin is only an example and not working in any'

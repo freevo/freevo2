@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.133  2004/07/23 19:43:59  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.132  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -57,6 +60,8 @@ import fxditem
 from item import Item, FileInformation
 from playlist import Playlist
 from event import *
+
+import gui
 from gui import InputBox, AlertBox, ProgressBox
 
 all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
@@ -753,7 +758,7 @@ class DirItem(Playlist):
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.skin_fxd:
-                item_menu.skin_settings = skin.load(self.skin_fxd)
+                item_menu.skin_settings = gui.load_settings(self.skin_fxd)
 
             menuw.pushmenu(item_menu)
 

@@ -9,20 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/23 19:43:31  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
-#
-# Revision 1.1  2004/07/16 19:51:54  dischi
-# new screen design test code, read future_ideas
-#
-# Revision 1.47  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.46  2004/07/09 11:20:12  dischi
-# do not load outdated skins
-#
-# Revision 1.45  2004/03/14 11:42:34  dischi
-# make idlebar have a background image
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,26 +37,17 @@
 # -----------------------------------------------------------------------
 
 
-import os, copy
-import stat
+import os
 import traceback
 
 import config
 import util
-import osd
 
 from area import Skin_Area
-from gui  import GUIObject
 
+# Bad: import back in directory tree
+from gui import GUIObject
 from gui import fxdparser as fxdparser
-
-# Create the OSD object
-osd = osd.get_singleton()
-
-###############################################################################
-# Skin main functions
-###############################################################################
-
 
 class Skin:
     """
@@ -76,13 +58,11 @@ class Skin:
     Image    = fxdparser.Image
     Area     = Skin_Area
 
-    def __init__(self):
+    def __init__(self, settings):
         """
         init the skin engine
         """
-        global skin_engine
-        skin_engine = self
-        
+        self.settings      = settings
         self.display_style = { 'menu' : 0 }
         self.force_redraw  = True
         self.last_draw     = None, None, None
@@ -103,20 +83,12 @@ class Skin:
 
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
         self.storage = util.read_pickle(self.storage_file)
-        if self.storage:
-            if not config.SKIN_XML_FILE:
-                config.SKIN_XML_FILE = self.storage['SKIN_XML_FILE']
-            else:
-                _debug_('skin forced to %s' % config.SKIN_XML_FILE, 2)
+        if self.storage and self.storage.has_key(config.SKIN_XML_FILE):
+            self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
         else:
-            if not config.SKIN_XML_FILE:
-                config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
-            self.storage = {}
-            
-        # load the fxd file
-        self.settings = fxdparser.FXDSettings()
-        self.set_base_fxd(config.SKIN_XML_FILE)
-
+            self.display_style['menu'] = 0
+        
+        
 
     def set_screen(self, screen):
         """
@@ -126,78 +98,6 @@ class Skin:
             self.areas[a].set_screen(screen)
         self.screen = screen
 
-        
-    def cachename(self, filename):
-        """
-        create cache name
-        """
-        geo  = '%sx%s-%s-%s' % (osd.width, osd.height, config.OSD_OVERSCAN_X,
-                                config.OSD_OVERSCAN_Y)
-        return vfs.getoverlay('%s.skin-%s-%s' % (filename, config.SKIN_XML_FILE, geo))
-
-        
-    def save_cache(self, settings, filename):
-        """
-        cache the fxd skin settings in 'settings' to the OVERLAY_DIR cachfile
-        for filename and this resolution
-        """
-        cache = self.cachename(filename)
-        if cache:
-            # delete font object, because it can't be pickled
-            for f in settings.font:
-                del settings.font[f].font
-            # save object and version information
-            util.save_pickle((fxdparser.FXD_FORMAT_VERSION, settings), cache)
-            # restore font object
-            for f in settings.font:
-                settings.font[f].font = osd.getfont(settings.font[f].name,
-                                                    settings.font[f].size)
-            
-
-    def load_cache(self, filename):
-        """
-        load a skin cache file
-        """
-        if hasattr(self, '__last_load_cache__') and self.__last_load_cache__[0] == filename:
-            return self.__last_load_cache__[1]
-            
-        if not os.path.isfile(filename):
-            return None
-        
-        cache = self.cachename(filename)
-        if not cache:
-            return None
-
-        if not os.path.isfile(cache):
-            return None
-        
-        version, settings = util.read_pickle(cache)
-        if not settings or version != fxdparser.FXD_FORMAT_VERSION:
-            return None
-
-        pdir = os.path.join(config.SHARE_DIR, 'skins/plugins')
-        if os.path.isdir(pdir):
-            ffiles = util.match_files(pdir, [ 'fxd' ])
-        else:
-            ffiles = []
-
-        for f in settings.fxd_files:
-            if not os.path.dirname(f).endswith(pdir):
-                ffiles.append(f)
-            
-        # check if all files used by the skin are not newer than
-        # the cache file
-        ftime = os.stat(cache)[stat.ST_MTIME]
-        for f in ffiles:
-            if os.stat(f)[stat.ST_MTIME] > ftime:
-                return None
-
-        # restore the font objects
-        for f in settings.font:
-            settings.font[f].font = osd.getfont(settings.font[f].name,
-                                                settings.font[f].size)
-        self.__last_load_cache__ = filename, settings
-        return settings
 
         
     def register(self, type, areas):
@@ -228,95 +128,6 @@ class Skin:
         exec('import skins.plugins.%s' % module)
         self.areas[name] = eval('skins.plugins.%s.%s()' % (module, object))
 
-        
-    def set_base_fxd(self, name):
-        """
-        set the basic skin fxd file
-        """
-        config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
-        _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
-        
-        # try to find the skin xml file
-        if not self.settings.load(name, clear=True):
-            print "skin not found, using fallback skin"
-            self.settings.load('basic.fxd', clear=True)
-            
-        for dir in config.cfgfilepath:
-            local_skin = '%s/local_skin.fxd' % dir
-            if os.path.isfile(local_skin):
-                _debug_('Skin: Add local config %s to skin' % local_skin,2)
-                self.settings.load(local_skin)
-                break
-
-        self.storage['SKIN_XML_FILE'] = config.SKIN_XML_FILE
-        util.save_pickle(self.storage, self.storage_file)
-
-        if self.storage.has_key(config.SKIN_XML_FILE):
-            self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
-        else:
-            self.display_style['menu'] = 0
-        
-        
-    def load(self, filename, copy_content = 1):
-        """
-        return an object with new skin settings
-        """
-        _debug_('load additional skin info: %s' % filename)
-        if filename and vfs.isfile(vfs.join(filename, 'folder.fxd')):
-            filename = vfs.abspath(os.path.join(filename, 'folder.fxd'))
-
-        elif filename and vfs.isfile(filename):
-            filename = vfs.abspath(filename)
-
-        else:
-            return None
-
-        settings = self.load_cache(filename)
-        if settings:
-            return settings
-            
-        if copy_content:
-            settings = copy.copy(self.settings)
-        else:
-            settings = fxdparser.FXDSettings()
-
-        if not settings.load(filename, clear=True):
-            return None
-
-        self.save_cache(settings, filename)
-        return settings
-    
-
-
-    def get_skins(self):
-        """
-        return a list of all possible skins with name, image and filename
-        """
-        ret = []
-        skin_files = util.match_files(os.path.join(config.SKIN_DIR, 'main'), ['fxd'])
-
-        # image is not usable stand alone
-        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
-        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/basic.fxd'))
-        
-        for skin in skin_files:
-            name  = os.path.splitext(os.path.basename(skin))[0]
-            if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
-                image = '%s.png' % os.path.splitext(skin)[0]
-            elif os.path.isfile('%s.jpg' % os.path.splitext(skin)[0]):
-                image = '%s.jpg' % os.path.splitext(skin)[0]
-            else:
-                image = None
-            ret += [ ( name, image, skin ) ]
-        return ret
-
-
-    def get_settings(self):
-        """
-        return the current loaded settings
-        """
-        return self.settings
-    
         
     def toggle_display_style(self, menu):
         """
@@ -366,86 +177,6 @@ class Skin:
         return self.display_style['menu']
 
 
-    def __find_current_menu__(self, widget):
-        if not widget:
-            return None
-        if not hasattr(widget, 'menustack'):
-            return self.__find_current_menu__(widget.parent)
-        return widget.menustack[-1]
-        
-
-    def get_popupbox_style(self, widget=None):
-        """
-        This function returns style information for drawing a popup box.
-
-        return backround, spacing, color, font, button_default, button_selected
-        background is ('image', Image) or ('rectangle', Rectangle)
-
-        Image attributes: filename
-        Rectangle attributes: color (of the border), size (of the border),
-           bgcolor (fill color), radius (round box for the border). There are also
-           x, y, width and height as attributes, but they may not be needed for the
-           popup box
-
-        button_default, button_selected are XML_item
-        attributes: font, rectangle (Rectangle)
-
-        All fonts are Font objects
-        attributes: name, size, color, shadow
-        shadow attributes: visible, color, x, y
-        """
-        menu = self.__find_current_menu__(widget)
-
-        if menu and hasattr(menu, 'skin_settings') and menu.skin_settings:
-            settings = menu.skin_settings
-        else:
-            settings = self.settings
-
-        layout = settings.popup
-
-        background = []
-        for bg in layout.background:
-            if isinstance(bg, fxdparser.Image):
-                background.append(( 'image', bg))
-            elif isinstance(bg, fxdparser.Rectangle):
-                background.append(( 'rectangle', bg))
-
-        return layout.content, background
-
-
-    def get_font(self, name):
-        """
-        Get the skin font object 'name'. Return the default object if
-        a font with this name doesn't exists.
-        """
-        try:
-            return self.settings.font[name]
-        except:
-            return self.settings.font['default']
-
-        
-    def get_image(self, name):
-        """
-        Get the skin image object 'name'. Return None if
-        an image with this name doesn't exists.
-        """
-        try:
-            return self.settings.images[name]
-        except:
-            return None
-
-        
-    def get_icon(self, name):
-        """
-        Get the icon object 'name'. Return the icon in the theme dir if it
-        exists, else try the normal image dir. If not found, return ''
-        """
-        icon = util.getimage(os.path.join(self.settings.icon_dir, name))
-        if icon:
-            return icon
-        return util.getimage(os.path.join(config.ICON_DIR, name), '')
-
-        
     def items_per_page(self, (type, object)):
         """
         returns the number of items per menu page
@@ -478,11 +209,10 @@ class Skin:
         """
         clean the screen
         """
-        _debug_('clear: %s' % osd_update, 2)
+        self.screen.clear()
         self.force_redraw = True
-        osd.clearscreen(osd.COL_BLACK)
         if osd_update:
-            osd.update()
+            self.screen.show()
 
 
     def redraw(self):
@@ -494,13 +224,6 @@ class Skin:
             self.draw(self.last_draw[0], self.last_draw[1], self.last_draw[2])
 
 
-    def prepare(self):
-        """
-        prepare the skin
-        """
-        self.settings.prepare()
-
-        
     def draw(self, type, object, menu=None):
         """
         draw the object.

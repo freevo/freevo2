@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/07/23 19:44:00  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.15  2004/07/22 21:18:37  dischi
 # replaced code with dummy pointing into gui
 #
@@ -61,10 +64,10 @@ _singleton = None
 
 # a list of all functions the skin needs to have
 __all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'change_area',
-            'set_base_fxd', 'load', 'get_skins', 'get_settings',
-            'toggle_display_style', 'get_display_style', 'get_popupbox_style',
-            'get_font', 'get_image', 'get_icon', 'items_per_page', 'clear', 'redraw',
-            'prepare', 'draw' )
+            'toggle_display_style', 'get_display_style', 'items_per_page',
+            'clear', 'redraw', 'draw' )
+    
+__all__gui__ = ( 'get_settings', 'get_font', 'get_image', 'get_icon' )
     
 
 def get_singleton():
@@ -97,7 +100,12 @@ if __freevo_app__ == 'main':
     # the all function to this module
     for i in __all__:
         exec('%s = _singleton.%s' % (i,i))
-        
+
+    import gui
+    
+    for i in __all__gui__:
+        exec('%s = gui.%s' % (i,i))
+
 else:
     # set all skin functions to the dummy function so nothing
     # bad happens when we call it from inside a helper

@@ -9,14 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/23 19:43:30  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.1  2004/07/22 21:16:01  dischi
 # add first draft of new gui code
-#
-# Revision 1.35  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.34  2004/03/14 17:22:47  dischi
-# seperate ellipses and dim in drawstringframed
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -1062,6 +1059,39 @@ class FXDSettings:
         self.prepared = False
         return
 
+
+    def get_font(self, name):
+        """
+        Get the skin font object 'name'. Return the default object if
+        a font with this name doesn't exists.
+        """
+        try:
+            return self.font[name]
+        except:
+            return self.font['default']
+
+        
+    def get_image(self, name):
+        """
+        Get the skin image object 'name'. Return None if
+        an image with this name doesn't exists.
+        """
+        try:
+            return self.images[name]
+        except:
+            return None
+
+        
+    def get_icon(self, name):
+        """
+        Get the icon object 'name'. Return the icon in the theme dir if it
+        exists, else try the normal image dir. If not found, return ''
+        """
+        icon = util.getimage(os.path.join(self.icon_dir, name))
+        if icon:
+            return icon
+        return util.getimage(os.path.join(config.ICON_DIR, name), '')
+
         
     def load(self, file, prepare=True, clear=False):
         """
@@ -1115,4 +1145,83 @@ class FXDSettings:
             print "ERROR: XML file corrupt"
             traceback.print_exc()
             return 0
+
+
+
+
+
+
+###
+# FIXME: Settings should be somewere else
+###
+
+
+class Settings:
+    """
+    Current settings for gui objects
+    """
+    def __init__(self):
+        self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
+        self.storage = util.read_pickle(self.storage_file)
+        if self.storage:
+            if not config.SKIN_XML_FILE:
+                config.SKIN_XML_FILE = self.storage['SKIN_XML_FILE']
+            else:
+                _debug_('skin forced to %s' % config.SKIN_XML_FILE, 2)
+        else:
+            if not config.SKIN_XML_FILE:
+                config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
+            self.storage = {}
+            
+        # load the fxd file
+        self.settings = FXDSettings()
+        self.set_base_fxd(config.SKIN_XML_FILE)
+
+
+    def set_base_fxd(self, name):
+        """
+        set the basic skin fxd file
+        """
+        config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
+        _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
+        
+        # try to find the skin xml file
+        if not self.settings.load(name, clear=True):
+            print "skin not found, using fallback skin"
+            self.settings.load('basic.fxd', clear=True)
+            
+        for dir in config.cfgfilepath:
+            local_skin = '%s/local_skin.fxd' % dir
+            if os.path.isfile(local_skin):
+                _debug_('Skin: Add local config %s to skin' % local_skin,2)
+                self.settings.load(local_skin)
+                break
+
+        self.storage['SKIN_XML_FILE'] = config.SKIN_XML_FILE
+        util.save_pickle(self.storage, self.storage_file)
+
+
+    def load(self, filename, copy_content = 1):
+        """
+        return an object with new skin settings
+        """
+        _debug_('load additional skin info: %s' % filename)
+        if filename and vfs.isfile(vfs.join(filename, 'folder.fxd')):
+            filename = vfs.abspath(os.path.join(filename, 'folder.fxd'))
+
+        elif filename and vfs.isfile(filename):
+            filename = vfs.abspath(filename)
+
+        else:
+            return None
+
+        if copy_content:
+            settings = copy.copy(self.settings)
+        else:
+            settings = FXDSettings()
+
+        if not settings.load(filename, clear=True):
+            return None
+
+        return settings
 

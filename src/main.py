@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.130  2004/07/23 19:44:00  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.129  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -158,8 +161,8 @@ class SkinSelectItem(Item):
         """
         Load the new skin and rebuild the main menu
         """
-        import plugin
-        skin.set_base_fxd(self.skin)
+        import gui
+        gui.set_base_fxd(self.skin)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
 
         parent = menuw.menustack[0].choices[0].parent
@@ -197,6 +200,29 @@ class MainMenu(Item):
         osd.add_app(menuw)
 
 
+    def get_skins(self):
+        """
+        return a list of all possible skins with name, image and filename
+        """
+        ret = []
+        skin_files = util.match_files(os.path.join(config.SKIN_DIR, 'main'), ['fxd'])
+
+        # image is not usable stand alone
+        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
+        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/basic.fxd'))
+        
+        for skin in skin_files:
+            name  = os.path.splitext(os.path.basename(skin))[0]
+            if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
+                image = '%s.png' % os.path.splitext(skin)[0]
+            elif os.path.isfile('%s.jpg' % os.path.splitext(skin)[0]):
+                image = '%s.jpg' % os.path.splitext(skin)[0]
+            else:
+                image = None
+            ret += [ ( name, image, skin ) ]
+        return ret
+
+
     def eventhandler(self, event = None, menuw=None, arg=None):
         """
         Automatically perform actions depending on the event, e.g. play DVD
@@ -205,7 +231,7 @@ class MainMenu(Item):
         # (only for the new skin code)
         if event == MENU_CHANGE_STYLE:
             items = []
-            for name, image, skinfile in skin.get_skins():
+            for name, image, skinfile in self.get_skins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
             menuw.pushmenu(menu.Menu(_('Skin Selector'), items))
@@ -447,9 +473,10 @@ try:
 
     # load all plugins
     import plugin
-
+    import gui
+    
     # prepare the skin
-    skin.prepare()
+    gui.settings.settings.prepare()
 
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'))
@@ -482,7 +509,7 @@ try:
         skin.delete('splashscreen')
 
     # prepare again, now that all plugins are loaded
-    skin.prepare()
+    gui.settings.settings.prepare()
 
     # start menu
     MainMenu().getcmd()

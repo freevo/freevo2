@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2004/07/23 19:44:00  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.95  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -50,6 +53,8 @@ import rc
 
 from event import *
 from item import Item
+
+import gui
 from gui import GUIObject, AlertBox
 
 
@@ -107,7 +112,7 @@ class Menu:
         self.umount_all = umount_all    # umount all ROM drives on display?
         self.skin_settings = None
         if fxd_file:
-            self.skin_settings = skin.load(fxd_file)
+            self.skin_settings = gui.load_settings(fxd_file)
 
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken

@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/23 19:43:31  dischi
+# move most of the settings code out of the skin engine
+#
 # Revision 1.1  2004/07/22 21:12:35  dischi
 # move all widget into subdir, code needs update later
 #
@@ -64,6 +67,7 @@ import skin
 import traceback
 
 from Color import *
+import gui
 
 class GUIObject:
     """
@@ -99,7 +103,7 @@ class GUIObject:
 
         self.event_context = None
 
-        style = skin.get_singleton().get_popupbox_style(self)
+        style = self.get_popupbox_style(self)
         self.content_layout, self.background_layout = style
         
         self.skin_info_widget = self.content_layout.types['widget']
@@ -115,6 +119,56 @@ class GUIObject:
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.NONE)
 
+
+    
+    def __find_current_menu__(self, widget):
+        if not widget:
+            return None
+        if not hasattr(widget, 'menustack'):
+            return self.__find_current_menu__(widget.parent)
+        return widget.menustack[-1]
+        
+
+    def get_popupbox_style(self, widget=None):
+        """
+        This function returns style information for drawing a popup box.
+
+        return backround, spacing, color, font, button_default, button_selected
+        background is ('image', Image) or ('rectangle', Rectangle)
+
+        Image attributes: filename
+        Rectangle attributes: color (of the border), size (of the border),
+           bgcolor (fill color), radius (round box for the border). There are also
+           x, y, width and height as attributes, but they may not be needed for the
+           popup box
+
+        button_default, button_selected are XML_item
+        attributes: font, rectangle (Rectangle)
+
+        All fonts are Font objects
+        attributes: name, size, color, shadow
+        shadow attributes: visible, color, x, y
+        """
+        import gui
+        from gui import fxdparser
+        menu = self.__find_current_menu__(widget)
+
+        if menu and hasattr(menu, 'skin_settings') and menu.skin_settings:
+            settings = menu.skin_settings
+        else:
+            settings = gui.settings.settings
+
+        layout = settings.popup
+
+        background = []
+        for bg in layout.background:
+            if isinstance(bg, fxdparser.Image):
+                background.append(( 'image', bg))
+            elif isinstance(bg, fxdparser.Rectangle):
+                background.append(( 'rectangle', bg))
+
+        return layout.content, background
+    
 
     def get_event_context(self):
         """
