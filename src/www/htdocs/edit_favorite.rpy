@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/08/10 14:32:56  rshortt
+# Make it "work", still some bugs.
+#
 # Revision 1.18  2004/08/10 12:54:22  outlyer
 # An impressive update to the guide code from Jason Tackaberry that
 # dramatically speeds up rendering and navigation of the guide.  I will be
@@ -117,7 +120,7 @@
 import sys, time, string
 
 from tv.record_types import Favorite
-import tv.epg_xmltv
+import util.tv_util as tv_util
 import tv.record_client as ri
 
 from www.web_types import HTMLResource, FreevoResource
@@ -193,17 +196,10 @@ class EditFavoriteResource(FreevoResource):
             return String(fv.res)
 
 
-        guide = tv.epg_xmltv.get_guide()
+        guide = tv_util.get_guide()
 
         fv.printHeader(_('Edit Favorite'), 'styles/main.css')
         fv.res += '&nbsp;<br/>\n'
-        # This seems out of place.
-        #fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        #fv.tableRowOpen('class="chanrow"')
-        #fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-        #fv.tableCell(_('Edit Favorite'), 'class="heading" align="left"')
-        #fv.tableRowClose()
-        #fv.tableClose()
 
         fv.res += '<br><form name="editfavorite" method="get" action="favorites.rpy">'
 
@@ -231,7 +227,8 @@ class EditFavoriteResource(FreevoResource):
         cell = '\n<select name="chan" selected="%s">\n' % fav.channel
         cell += '  <option value=ANY>'+_('ANY CHANNEL')+'</option>\n'
 
-        i=1
+        i = 1
+        chan_index = 0
         for ch in guide.chan_list:
             if ch.displayname == fav.channel:
                 chan_index = i
@@ -308,12 +305,6 @@ class EditFavoriteResource(FreevoResource):
         </select>
         """
         fv.tableCell(cell, 'class="'+status+'" colspan="1"')
-
-        # cell = '\n<select name="priority" selected="%s">\n' % fav.priority
-        # for i in range(num_favorites+1):
-        #     cell += '  <option value="%s">%s</option>\n' % (i+1, i+1)
-        # cell += '</select>\n'
-        # fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '<input type="hidden" name="priority" value="%s">' % fav.priority
         cell += '<input type="hidden" name="action" value="%s">' % action
