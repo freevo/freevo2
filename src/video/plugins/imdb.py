@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/23 19:52:55  dischi
+# change event key to imdb_search_or_cover_search
+#
 # Revision 1.8  2003/06/09 14:45:16  dischi
 # add support for DVD/VCD
 #
@@ -93,12 +96,12 @@ class PluginInterface(plugin.ItemPlugin):
         if item.type == 'video'  and not item.info:
             if item.mode == 'file':
                 return [ ( self.imdb_search_file, 'Search IMDB for this file',
-                           'imdb_search') ]
+                           'imdb_search_or_cover_search') ]
             if item.mode in ('dvd', 'vcd'):
                 s = self.imdb_get_disc_searchstring(self.item)
                 if s:
                     return [ ( self.imdb_search_disc, 'Search IMDB for [%s]' % s,
-                               'imdb_search') ]
+                               'imdb_search_or_cover_search') ]
         return []
 
 
