@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/07 18:50:56  dischi
+# make description shorter if it's too long
+#
 # Revision 1.17  2003/09/07 01:02:13  gsbarbieri
 # Fixed a bug in guide that appeared with the new PRECISION thing.
 #
@@ -115,6 +118,7 @@ DEBUG = 0
 TRUE = 1
 FALSE = 0
 
+MAX_DESCRIPTION_CHAR = 1000
 
 class GuideResource(FreevoResource):
 
@@ -307,6 +311,9 @@ class GuideResource(FreevoResource):
                         else:
                             desc = prog.desc
 
+                        desc = desc.lstrip()
+                        if MAX_DESCRIPTION_CHAR and len(desc) > MAX_DESCRIPTION_CHAR:
+                            desc=desc[:desc[:MAX_DESCRIPTION_CHAR].rfind('.')] + '. [...]'
                         pops += """
 <div id="%s" class="proginfo">
    <table width="100%%"
