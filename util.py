@@ -82,7 +82,7 @@ def resize(file, x0=25, y0=25):
 	# Since the filenames are not unique we need
 	# to cache them by content, not name.
 	mythumb = (config.FREEVO_CACHEDIR + '/' +
-                   os.path.basename(md5file(file)) + '.png')
+                   os.path.basename(md5file(file)) + '-%s-%s.png' % (x0, y0))
 	if os.path.isfile(mythumb):
 		return mythumb
 	else:
