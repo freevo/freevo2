@@ -1,6 +1,6 @@
 #!/bin/bash
-#
-# A boot script for the Freevo webserver.
+# chkconfig: 234 99 00
+# description: A boot script for the Freevo webserver.
 #
 # The Freevo webserver may also be started as a plugin by having 
 # plugin.activate('www') in your local_conf.py

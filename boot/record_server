@@ -1,6 +1,6 @@
 #!/bin/bash
-#
-# A boot script for the Freevo record server.
+# chkconfig: 234 99 00
+# description: A boot script for the Freevo record server.
 #
 # This file may be placed in your system's init.d startup directory and
 # setup to start at the appropriate runlevels.  You may instead use the
