@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/01 02:46:33  outlyer
+# Added lame and cdparanoia
+#
 # Revision 1.6  2003/06/27 10:58:06  rshortt
 # MOved tvtime command into the config.
 #
@@ -171,6 +174,8 @@ def main():
     check_program(conf, "xmame.SDL", "xmame", 0, sysfirst)
     check_program(conf, "ssnes9x", "snes", 0, sysfirst)
     check_program(conf, "zsnes", "snes", 0, sysfirst)
+    check_program(conf, "lame", "lame",0,sysfirst)
+    check_program(conf, "cdparanoia","cdparanoia",0,sysfirst)
 
     check_config(conf)
 
