@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/01/19 16:16:18  dischi
+# small bugfix
+#
 # Revision 1.8  2003/01/19 15:56:31  dischi
 # New option ROM_SPEED to set the drive speed. Default is 0 (don't set
 # speed), a good value seems to be 8.
@@ -167,20 +170,21 @@ class Identify_Thread(threading.Thread):
         # no? Maybe we can find a label regexp match
         else:
             for (re_label, movie_info_t) in config.MOVIE_INFORMATIONS_LABEL:
-                if re_label.match(label) and movie_info_t.name:
+                if re_label.match(label):
                     movie_info = movie_info_t
-                    title = movie_info.name
-                    m = re_label.match(label).groups()
-                    re_count = 1
+                    if movie_info_t.name:
+                        title = movie_info.name
+                        m = re_label.match(label).groups()
+                        re_count = 1
 
-                    # found, now change the title with the regexp. E.g.:
-                    # label is "bla_2", the label regexp "bla_[0-9]" and the title
-                    # is "Something \1", the \1 will be replaced with the first item
-                    # in the regexp group, here 2. The title is now "Something 2"
-                    for g in m:
-                        title=string.replace(title, '\\%s' % re_count, g)
-                        re_count += 1
-                    break
+                        # found, now change the title with the regexp. E.g.:
+                        # label is "bla_2", the label regexp "bla_[0-9]" and the title
+                        # is "Something \1", the \1 will be replaced with the first item
+                        # in the regexp group, here 2. The title is now "Something 2"
+                        for g in m:
+                            title=string.replace(title, '\\%s' % re_count, g)
+                            re_count += 1
+                        break
                 
         if movie_info:
             image = movie_info.image
