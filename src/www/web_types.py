@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/23 08:31:55  gsbarbieri
+# Helper functions.
+# Please use them to print messages to user.
+# printMessagesFinish() should be used to generate the page ending stuff (links,
+# foot, ...)
+#
 # Revision 1.22  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -271,8 +277,23 @@ class HTMLResource:
     <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20"/></div>
     </form>
     """
-    
-    
+
+    def printMessages( self, messages ):
+        self.res += "<h4>"+_("Messages")+":</h4>\n"
+        self.res += "<ul>\n"
+        for m in messages:
+            self.res += "   <li>%s</li>\n" % m
+            self.res += "</ul>\n"
+
+    def printMessagesFinish( self, messages ):
+        """
+        Print messages and add the search form, links and footer.
+        """
+        self.printMessages( messages )
+        self.printSearchForm()
+        self.printLinks()
+        self.printFooter()
+        
     def printLinks(self, prefix=0):
         #   
         #try:
