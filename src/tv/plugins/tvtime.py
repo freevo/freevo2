@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/20 17:41:36  mikeruelle
+# initial videogroups support.
+#
 # Revision 1.30  2004/02/06 01:15:06  mikeruelle
 # use new events in tv context
 #
@@ -112,6 +115,7 @@ import rc      # The RemoteControl class.
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 import event as em
+from tv.channels import FreevoChannels
 
 import plugin
 
@@ -231,7 +235,12 @@ class PluginInterface(plugin.Plugin):
     def writeTvtimeXML(self):
         tvtimexml = os.path.join(os.environ['HOME'], '.tvtime', 'tvtime.xml')
 	configcmd = os.path.join(os.path.dirname(config.TVTIME_CMD), "tvtime-configure")
-        cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+        #cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+	fc = FreevoChannels()
+	vg = fc.getVideoGroup(config.TV_CHANNELS[0][2])
+	cf_norm = vg.tuner_norm
+	cf_input = vg.input_num
+	cf_device = vg.vdev
         s_norm = cf_norm.upper()
 	daoptions = ''
         if os.path.isfile(tvtimexml):
@@ -398,7 +407,8 @@ class TVTime:
     def __init__(self):
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
-        
+	self.fc = FreevoChannels()
+        self.current_vg = None
 
     def TunerSetChannel(self, tuner_channel):
         for pos in range(len(config.TV_CHANNELS)):
@@ -446,19 +456,23 @@ class TVTime:
     def Play(self, mode, tuner_channel=None, channel_change=0):
 
         if tuner_channel != None:
-            
             try:
                 self.TunerSetChannel(tuner_channel)
             except ValueError:
                 pass
+        if not tuner_channel:
+            tuner_channel = self.fc.getChannel()
+        vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
+
 
 #        if mode == 'tv' or mode == 'vcr':
         if mode == 'tv':
             
-            tuner_channel = self.TunerGetChannel()
-
             w, h = config.TV_VIEW_SIZE
-            cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+            #cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+	    cf_norm = vg.tuner_norm
+	    cf_input = vg.input_num
+	    cf_device = vg.vdev
 
             s_norm = cf_norm.upper()
 
@@ -470,13 +484,14 @@ class TVTime:
             if config.CONF.display == 'dfbmga':
                 outputplugin = 'directfb'
 
-            command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s' % (config.TVTIME_CMD,
+            command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s -i %s' % (config.TVTIME_CMD,
                                                                    outputplugin,
                                                                    w,
                                                                    s_norm,
                                                                    cf_device,
                                                                    'freevo',
-                                                                   self.tuner_chidx)
+                                                                   self.tuner_chidx,
+								   cf_input)
 
             if osd.get_fullscreen() == 1:
                 command += ' -m'
