@@ -486,8 +486,7 @@ osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
                 uint32 fgcol, int *width)
 {
 
-   /*  fs_puts (pFont, x, y, fgcol, bgcol, str); */
-   ft_puts (pFont, ptsize, x, y, fgcol, str);
+   ft_puts (pFont, ptsize, x, y, fgcol, str); 
 
    if (width != (int *) NULL) {
       *width = 0;

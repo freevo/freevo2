@@ -54,19 +54,24 @@ int
 ft_puts (char *pFontFilename, int ptsize, int x, int y,
          uint32 fgcol, unsigned char *str)
 {
-   FT_Library  library;
+   static FT_Library  library;
    FT_Face      face;      /* handle to face object */
    int error;
    int i;
    int pen_x = x, pen_y = y;
    FT_GlyphSlot slot;
+   static int init = 0;
    
 
-   error = FT_Init_FreeType (&library);
-   
-   if (error) {
-      fprintf (stderr, "Couldn't initialize the library\n");
-      exit (1);
+   if (!init) {
+      error = FT_Init_FreeType (&library);
+      
+      if (error) {
+         fprintf (stderr, "Couldn't initialize the library\n");
+         exit (1);
+      }
+
+      init = 1;
    }
 
    error = FT_New_Face (library, pFontFilename, 0, &face );
@@ -138,6 +143,8 @@ ft_puts (char *pFontFilename, int ptsize, int x, int y,
     * border of the glyph bitmap. It is positive to indicate
     * an upwards distance.
     */
+
+   FT_Done_Face (face);
 
    return (pen_x - x);
 }
