@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2002/08/17 02:57:52  krister
+# Gustavi Barbieris changes for getting the main menu items from the skin.
+#
 # Revision 1.53  2002/08/14 12:38:05  krister
 # Made shutdown loop forever until dead. This hopefully fixes a bug where SDL crashes at polling after shutdown.
 #
@@ -188,16 +191,23 @@ def autostart():
 def getcmd():
     items = []
 
-    # XXX Move icons into skin
-    if config.ENABLE_TV:
-        items += [menu.MenuItem('TV', tv.main_menu, 'tv', None, None, 'icons/tv.png',0)]
-    items += [menu.MenuItem('MOVIES', movie.main_menu,'', None, None, 'icons/movies.png',0)]
-    items += [menu.MenuItem('MUSIC', music.main_menu,'', None, None, 'icons/mp3.png',0)]
-    if config.ENABLE_IMAGES:
-        items += [menu.MenuItem('IMAGES', imenu.main_menu,'',None, None, 'icons/images.png',0)]
-    if config.ENABLE_SHUTDOWN:
-        items += [menu.MenuItem('SHUTDOWN', shutdown, None, None, None, \
-                                'icons/shutdown.png', 0) ]
+    # XXX A kludge to handle Gustavo's new skin.
+    # XXX Change to 'mainmenu = skin.get_mainmenu()'
+    if config.OSD_SKIN == 'skins/barbieri/skin_barbieri.py':
+        menu_items = skin.settings.mainmenu.items
+        for i in menu_items:
+            if i.visible:
+                items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
+    else:
+        if config.ENABLE_TV:
+            items += [menu.MenuItem('TV', tv.main_menu, 'tv', None, None, 'icons/tv.png',0)]
+        items += [menu.MenuItem('Movies', movie.main_menu,'', None, None, 'icons/movies.png',0)]
+        items += [menu.MenuItem('Music', music.main_menu,'', None, None, 'icons/mp3.png',0)]
+        if config.ENABLE_IMAGES:
+            items += [menu.MenuItem('Images', imenu.main_menu,'',None, None, 'icons/images.png',0)]
+        if config.ENABLE_SHUTDOWN:
+            items += [menu.MenuItem('Shutdown', shutdown, None, None, None, \
+                                    'icons/shutdown2.png', 0) ]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
