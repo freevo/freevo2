@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/05 17:33:31  dischi
+# fix skin imports
+#
 # Revision 1.7  2004/08/05 17:04:22  outlyer
 # Oops.
 #
@@ -46,7 +49,8 @@
 # ----------------------------------------------------------------------- */
 
 
-import skin,audio.player,plugin
+import audio.player
+import plugin
 import config
 from event import *
 from util.dbutil import *

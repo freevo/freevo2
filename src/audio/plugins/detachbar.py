@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/08/05 17:33:31  dischi
+# fix skin imports
+#
 # Revision 1.12  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -53,7 +56,6 @@ import rc
 
 # freevo specific
 import config
-import skin
 import audio.player
 import plugin
 from event import *

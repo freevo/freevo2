@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/08/05 17:33:31  dischi
+# fix skin imports
+#
 # Revision 1.9  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -55,13 +58,12 @@ except:
 # from pygame import Rect, image, transform, Surface
 
 # freevo modules
-import plugin, config, rc, skin, osd, time
+import plugin, config, rc, osd, time
 
 from event          import *
 from gui.animation      import render, BaseAnimation
 
 mmap_file = '/tmp/mpav'
-skin = skin.get_singleton()
 osd  = osd.get_singleton()
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/08/05 17:33:30  dischi
+# fix skin imports
+#
 # Revision 1.24  2004/08/01 10:42:51  dischi
 # make the player an "Application"
 #
@@ -52,7 +55,7 @@ def get_singleton():
     if not _player_:
         _player_ = PlayerGUI()
         # register player to the skin
-        gui.get_areas().register('player', ('screen', 'title', 'view', 'info', 'plugin'))
+        gui.get_areas().register('player', ('screen', 'title', 'view', 'info'))
     return _player_
 
 
