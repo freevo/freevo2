@@ -150,7 +150,7 @@
     <!-- title -->
     <layout label="title">
       <background>
-	<image visible="not idlebar" filename="logo.png" x="0" y="0" 
+	<image visible="not idlebar" image="logo" x="0" y="0" 
 	  width="157" height="80"/>
       </background>
       <content x="170" y="0" type="menu" font="title area" align="center"
@@ -224,6 +224,9 @@
 
     <!-- background image -->
     <image label="background" filename="aubin_bg2"/>
+    
+    <!-- logo -->
+    <image label="logo" filename="logo.png"/>
 
 
 
