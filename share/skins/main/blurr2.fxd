@@ -21,8 +21,8 @@
     <menuset label="normal text style">
       <view x="20" y="100" width="300" height="300"/> 
       <listing layout="listing" x="330" y="110" width="460" height="430">
-	<image filename="blurr-up.png" label="uparrow" x="290" y="110"/>
-	<image filename="blurr-down.png" label="downarrow" x="290" y="max-32"/>
+	<image filename="blurr-up.png" label="uparrow" x="590" y="110"/>
+	<image filename="blurr-down.png" label="downarrow" x="590" y="max-32"/>
       </listing>
     </menuset>
 
@@ -85,7 +85,8 @@
       
     <menuset label="audio" inherits="normal text style">
       <screen layout="audio screen"/>
-      <view layout="view" x="10" y="90" width="280" height="250" align="left"/>
+      <view layout="view" x="15" y="90" width="280" height="280" align="center"/>
+      <info layout="audio info" x="28" y="370" width="273" height="150"/>
     </menuset>
       
     <menuset label="image" inherits="normal text style">
@@ -152,6 +153,8 @@
 	<image image="background" x="0" y="0" label="background"/>
 	<image filename="watermarks/music.png" x="435" y="230" width="370"
 	  height="380"/>
+          <rectangle size="0" bgcolor="0x80000000" radius="10" x="15" y="90"
+                width="290" height="450"/>
       </background>
     </layout>
 
@@ -173,6 +176,30 @@
       </background>
     </layout>
 
+   <layout label="audio info">
+      <content x="0" y="0" type="text" spacing="20" font="default">
+          <!-- audio dir -->
+          <item type="default">
+          <if expression="display_type == 'audio' and artist">
+            <text font="info tagline" expression="artist"/>
+            <newline/>
+            <if expression="album">
+              <text font="info value" height="max" expression="album" mode="soft" />
+              <newline/>
+            </if>
+            <if expression="year">
+              <text font="info value" expression="year"/>
+              <newline/>
+            </if>
+            <if expression="length">
+              <text font="info value" expression="length"/>
+            </if>
+          </if>
+          </item>
+      </content>
+    </layout>
+        
+	
 
     <layout label="video info">
       <content x="0" y="0" type="text" spacing="20" font="default">
@@ -261,7 +288,6 @@
         </content>
     </layout>
 
-
     <!-- main menu listing area -->
     <layout label="list_main">
       <content align="center" type="text" spacing="10">
@@ -277,14 +303,13 @@
 
     <!-- default view area -->
     <layout label="view">
-      <content align="center" valign="center">
+      <content align="center" valign="topr">
         <item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
 	    width="max+20" height="max+20"/>
         </item>
       </content>
     </layout>
-    
 
     <!-- default listing area -->
     <layout label="listing">
