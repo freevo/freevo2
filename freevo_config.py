@@ -541,10 +541,6 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 # SNES stands for Super Nintendo Entertainment System.  Freevo relies
 # on other programs that are not included in Freevo to play these games.
 # 
-# Where the mame and snes files can be found.
-# 
-
-DIR_GAMES = [ ('Test Games', './testfiles/Mame') ]
 # NEW GAMES SYSTEM :
 # =================
 # The DIR_GAMES structure is now build as follows :
