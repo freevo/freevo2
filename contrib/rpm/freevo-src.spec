@@ -46,12 +46,12 @@ and record video and audio.
 Available rpmbuild rebuild options :
 --without: us_defaults use_sysapps compile_obj
 
-Note: In order to build the source package, you must have an Internet connection.
-If you need to configure a proxy server, set the shell environmental variable 'http_proxy'
-to the URL of the proxy server before rebuilding the package.
-
-E.g. for bash:
-# export http_proxy=http://myproxy.server.net:3128
+#Note: In order to build the source package, you must have an Internet connection.
+#If you need to configure a proxy server, set the shell environmental variable 'http_proxy'
+#to the URL of the proxy server before rebuilding the package.
+#
+#E.g. for bash:
+## export http_proxy=http://myproxy.server.net:3128
 
 %package boot
 Summary: Files to enable a standalone Freevo system (started from initscript)
@@ -129,7 +129,7 @@ EOF
 
 %post
 # Copy old local_conf.py to replace dummy file
-freevo setup --geometry=%{geometry} --display=%{display} \
+%{_bindir}/freevo setup --geometry=%{geometry} --display=%{display} \
         --tv=%{tv_norm} --chanlist=%{chanlist} \
 	%{!?_without_use_sysapps:--sysfirst}
 

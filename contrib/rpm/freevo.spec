@@ -1,22 +1,12 @@
-%define _cvsdate %(date +%Y%m%d)
-
 ##########################################################################
-# Set the following variables for each new build
-%define freevoname freevo
-%define sourceonly no
-%define freevover 1.3.4
-%define freevorel 1
-%define runtimever 8
-
 # Set default freevo parameters
 %define geometry 800x600
 %define display  x11
-%define use_sysapps 0
-%define _us_defaults 1
+
 ##########################################################################
 
 
-%if %{_us_defaults}
+%if %{?_without_us_defaults:0}%{!?_without_us_defaults:1}
 %define tv_norm  ntsc
 %define chanlist us-cable
 %else
@@ -24,106 +14,68 @@
 %define chanlist europe-west
 %endif
 
-# Use system provided (not binary runtime) apps
-%if %{use_sysapps}
-%define _sysfirst "--sysfirst"
-%else
-%define _sysfirst ""
-%endif
-
-%define cvsrelease %(echo %{freevorel} | grep -c CVS)
-%define prerelease %(echo %{freevorel} | grep -c pre)
-
-# The following is needed as I can't get nested if-else-endif macros to work
-%if %{cvsrelease}
-%define realrelease 0
-%else
-%define realrelease %(echo %{prerelease} | grep -cv 1)
-%endif
-
-%define includeruntime %(echo %{sourceonly} | grep -cv yes)
-
-%if %{includeruntime}
-%define _tgzname freevo
-%else
-%define _tgzname freevo-src
-%endif
 ##########################################################################
-
-Summary:	Freevo
-Name:		%{freevoname}
-Version:	%{freevover}
-Release:	%{freevorel}
-License:	GPL
-Group:		Applications/Multimedia
-%if %{cvsrelease}
-Source:		http://freevo.sourceforge.net/%{_tgzname}-%{version}-%{_cvsdate}.tgz
-%endif
-%if %{prerelease}
-Source:		http://freevo.sourceforge.net/%{_tgzname}-%{version}-%{freevorel}.tgz
-%endif
-%if %{realrelease}
-Source:		http://freevo.sourceforge.net/%{_tgzname}-%{version}.tgz
-%endif
-
-URL:		http://freevo.sourceforge.net/
-Requires:	%{name}-runtime >= %{runtimever}
-Requires:	%{name}-apps
-%if %{includeruntime}
-Patch0:		%{name}-%{version}-runtime.patch
-Patch1:		%{name}-%{version}-Makefile.patch
-%else
-BuildRequires:	%{name}-runtime >= %{runtimever}
-%endif
-BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
+%define name freevo
+%define freevover 1.4
+%define release rc1
+%define runtimever 8.01
 
 %define _prefix /usr/local/freevo
 %define _cachedir /var/cache
 %define _logdir /var/log
-%define _optimize 2
+%define _optimize 0
+
+Summary:        Freevo
+Name: %{name}
+Version: %{freevover}
+Release: %{release}
+#Source0: %{name}-%{freevover}.tar.gz
+Source0: %{name}-%{freevover}-%{release}.tgz
+Source1: redhat-boot_config
+#Patch0: freevo-%{freevover}-%{release}-freevo_dep.patch
+Patch1:         %{name}-%{freevover}-runtime.patch
+
+Copyright: gpl
+Group: Applications/Multimedia
+BuildRoot: %{_tmppath}/%{name}-buildroot
+Requires:       %{name}-runtime >= %{runtimever}
+%{?_without_use_sysapps:Requires:       %{name}-apps}
+BuildRequires: docbook-utils, wget
+Prefix: %{_prefix}
+URL:            http://freevo.sourceforge.net/
 
 %description
 Freevo is a Linux application that turns a PC with a TV capture card
 and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
-other applications such as xine, mplayer, tvtime and mencoder to play 
+other applications such as xine, mplayer, tvtime and mencoder to play
 and record video and audio.
 
-%prep
-%if %{cvsrelease}
-%setup  -n %{name}
-%endif
-%if %{prerelease}
-%setup  -n %{name}-%{version}-%{freevorel}
-%endif
-%if %{realrelease}
-%setup  -n %{name}-%{version}
-%endif
+Available rpmbuild rebuild options :
+--without: us_defaults use_sysapps compile_obj 
 
-%if %{includeruntime}
-%patch0 -p0
-%patch1 -p0
-%else
-mv runtime runtime-src
-ln -s %{_prefix}/runtime .
-%endif
+#Note: In order to build the source package, you must have an Internet connection.
+#If you need to configure a proxy server, set the shell environmental variable 'http_proxy'
+#to the URL of the proxy server before rebuilding the package.
+#
+#E.g. for bash:
+## export http_proxy=http://myproxy.server.net:3128
 
+%package boot
+Summary: Files to enable a standalone Freevo system (started from initscript)
+Group: Applications/Multimedia
+Requires:       %{name}
 
-%build
-find . -name CVS | xargs rm -rf
-find . -name ".cvsignore" |xargs rm -f
-find . -name "*.pyc" |xargs rm -f
-find . -name "*.pyo" |xargs rm -f
-find . -name "*.py" |xargs chmod 644
+%description boot
+Freevo is a Linux application that turns a PC with a TV capture card
+and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
+other applications such as mplayer and mencoder to play and record
+video and audio.
 
-make clean; make
+Note: This installs the initscripts necessary for a standalone Freevo system.
 
-./freevo setup --geometry=%{geometry} --display=%{display} \
-	--tv=%{tv_norm} --chanlist=%{chanlist} %{_sysfirst}
-
-%if %{includeruntime}
 %package runtime
 Summary: Libraries used by freevo executable. Must be installed for freevo to work.
-Version:	%{runtimever}
+Version:        %{runtimever}
 Obsoletes: freevo_runtime
 Group: Applications/Multimedia
 AutoReqProv: no
@@ -131,13 +83,13 @@ AutoReqProv: no
 %description runtime
 This directory contains the Freevo runtime. It contains an executable,
 freevo_python, dynamic link libraries for running Freevo as well as a copy
-of the standard Python 2.2.2 libraries. 
+of the standard Python 2.2.2 libraries.
 
 Python 2.2.2 modules:
   CDDB DiscID Numeric PIL xmlplus xmms aomodule cdrom fchksum mmpython mx
   ogg pygame pygphoto pylirc pyshift twisted
 
-Please see the website at http://freevo.sourceforge.net for more information 
+Please see the website at http://freevo.sourceforge.net for more information
 on how to use Freevo. The website also contains links to the source code
 for all software included here.
 
@@ -150,140 +102,114 @@ AutoReqProv: no
 
 %description apps
 This directory contains the following external applications used by Freevo:
-  oggenc mpe1 lame jpegtran cdparanoia aumix 
-  
+  oggenc mpe1 lame jpegtran cdparanoia aumix
+
 NOTICE: Binaries of Media Player programs such as Mplayer, Xine and TVTime
 are no longer included in the Apps package.
 Please read the website at http://freevo.sourceforge.net for information on
 where you can obtain these packages.
-	
+
 Note: This package is not manadatory if standalone versions of the external
-applications are installed, though configuration issues may be minimized if 
+applications are installed, though configuration issues may be minimized if
 it is used.
 
-%endif
-
-%package boot
-Summary: Files to enable a standalone Freevo system (started from initscript)
-Group: Applications/Multimedia
-Requires:	%{name}
-
-%description boot
-Freevo is a Linux application that turns a PC with a TV capture card
-and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
-other applications such as mplayer and mencoder to play and record 
-video and audio.
-
-Note: This installs the initscripts necessary for a standalone Freevo system.
-
-%package testfiles
-Summary: Sample multimedia files to test freevo
-Group: Applications/Multimedia
-
-%description testfiles
-Test files that came with freevo. Placed in %{_cachedir}/freevo
-
-%install
+%prep
 rm -rf $RPM_BUILD_ROOT
-mkdir -p %{buildroot}%{_prefix}
-mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,contrib/lirc,helpers}
-%if %{includeruntime}
-mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
-%endif
-mkdir -p %{buildroot}%{_prefix}/{src,skins}
+%setup -n freevo-%{freevover}-%{release}
+#%setup -n freevo
+
+#%patch0 -p1 
+%patch1 -p0 
+
+%build
+find . -name CVS | xargs rm -rf
+find . -name ".cvsignore" |xargs rm -f
+find . -name "*.pyc" |xargs rm -f
+find . -name "*.pyo" |xargs rm -f
+find . -name "*.py" |xargs chmod 644
+
+#./autogen.sh
+
+env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
+
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
+# The following is needed to let RPM know that the files should be backed up
+touch %{buildroot}%{_sysconfdir}/freevo/freevo.conf
+
+# boot scripts
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Mame,Movies,Music,tv-show-images}
+mkdir -p %{buildroot}%{_bindir}
+install -m 755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
+#install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
+install -m 755 boot/record_server %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_recordserver
+install -m 755 boot/webserver %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_webserver
+install -m 755 boot/record_server_init %{buildroot}%{_bindir}/freevo_recordserver_init
+install -m 755 boot/webserver_init %{buildroot}%{_bindir}/freevo_webserver_init
+install -m 644 -D %{SOURCE1} %{buildroot}%{_sysconfdir}/freevo/boot_config
 
-install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
-install -m 644 freevo_config.py %{buildroot}%{_prefix}
-install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
-install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
-install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 
-cp -av helpers/* %{buildroot}%{_prefix}/helpers
+mkdir -p %{buildroot}%{_logdir}/freevo
+mkdir -p %{buildroot}%{_cachedir}/freevo
+mkdir -p %{buildroot}%{_cachedir}/freevo/{thumbnails,audio}
+mkdir -p %{buildroot}%{_cachedir}/xmltv/logos
+chmod 777 %{buildroot}%{_cachedir}/{freevo,freevo/thumbnails,freevo/audio,xmltv,xmltv/logos}
+chmod 777 %{buildroot}%{_logdir}/freevo
 
-%if %{includeruntime}
+mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
 install -m 644 runtime/*.py %{buildroot}%{_prefix}/runtime
 install -m 644 runtime/preloads %{buildroot}%{_prefix}/runtime
-#install -m 644 runtime/README %{buildroot}%{_prefix}/runtime
+install -m 644 runtime/README %{buildroot}%{_prefix}/runtime
 install -m 644 runtime/VERSION %{buildroot}%{_prefix}/runtime
+install -m 755 runtime/runapp %{buildroot}%{_prefix}/runtime
 cp -av runtime/apps/* %{buildroot}%{_prefix}/runtime/apps
 cp -av runtime/dll/* %{buildroot}%{_prefix}/runtime/dll
 cp -av runtime/lib/* %{buildroot}%{_prefix}/runtime/lib
-%endif
 
-cp -av src %{buildroot}%{_prefix}
 
-cp -av skins %{buildroot}%{_prefix}
+%install
+#python setup.py install %{?_without_compile_obj:--no-compile} \
+#		--root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
-install -m 644 freevo.conf local_conf.py record_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
-install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
-install -m 755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 contrib/*.py %{buildroot}%{_prefix}/contrib/
-install -m 755 contrib/lirc/* %{buildroot}%{_prefix}/contrib/lirc
+mkdir -p %{buildroot}%{_prefix}/contrib
+cp -av i18n share src %{buildroot}%{_prefix}
+cp -av contrib/examples contrib/fbcon contrib/xmltv %{buildroot}%{_prefix}/contrib
+install -m 755 freevo %{buildroot}%{_prefix}
+install -m 755 freevo_config.py %{buildroot}%{_prefix}
 
-cp -av testfiles/* %{buildroot}%{_cachedir}/freevo/testfiles
+rm -f INSTALLED_FILES
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%post
-#cd %{_prefix}; ./freevo setup --compile=%{_optimize},%{_prefix}
-cd %{_prefix}
-if [ -x /usr/bin/python2 ]; then
-/usr/bin/python2 src/setup_freevo.py --compile=%{_optimize},%{_prefix}
-else
-/usr/bin/python src/setup_freevo.py --compile=%{_optimize},%{_prefix}
-fi
-mkdir -p %{_cachedir}/freevo
-mkdir -p %{_cachedir}/freevo/{thumbnails,audio}
-mkdir -p %{_cachedir}/xmltv/logos
-mkdir -p %{_logdir}/freevo
-chmod 777 %{_cachedir}/{freevo,freevo/thumbnails,freevo/audio,xmltv,xmltv/logos}
-chmod 777 %{_logdir}/freevo
-
-%preun 
-rm -rf %{_logdir}/freevo
-find %{_prefix} -name "*.pyc" |xargs rm -f
-find %{_prefix} -name "*.pyo" |xargs rm -f
-
-%files
-%defattr(-,root,root,755)
+cat >>INSTALLED_FILES <<EOF
 %{_prefix}/freevo
-%{_prefix}/freevo_xwin
-%{_prefix}/runapp
-%{_prefix}/fbcon
-%{_prefix}/helpers
-%{_prefix}/src
 %{_prefix}/freevo_config.py
-%defattr(644,root,root,755)
 %{_prefix}/contrib
-%{_prefix}/skins
-
+%{_prefix}/i18n
+%{_prefix}/share
+%{_prefix}/src
+%doc BUGS COPYING ChangeLog FAQ INSTALL README TODO Docs local_conf.py.example
+%doc contrib/lirc 
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
+%attr(777,root,root) %dir %{_logdir}/freevo
+%attr(777,root,root) %dir %{_cachedir}/freevo
+%attr(777,root,root) %dir %{_cachedir}/freevo/audio
+%attr(777,root,root) %dir %{_cachedir}/freevo/thumbnails
+%attr(777,root,root) %dir %{_cachedir}/xmltv
+%attr(777,root,root) %dir %{_cachedir}/xmltv/logos
 %attr(644,root,root) %config %{_sysconfdir}/freevo/freevo.conf
-%attr(644,root,root) %config %{_sysconfdir}/freevo/local_conf.py
-%attr(644,root,root) %config %{_sysconfdir}/freevo/record_config.py
-%doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs 
+#%attr(644,root,root) %config %{_sysconfdir}/freevo/record_config.py
 
-%if %{includeruntime}
+EOF
+
 %files runtime
 %defattr(644,root,root,755)
 %{_prefix}/runtime/*.py
-#%{_prefix}/runtime/README
+%{_prefix}/runtime/README
 %{_prefix}/runtime/VERSION
 %{_prefix}/runtime/preloads
 %defattr(755,root,root,755)
 %{_prefix}/runtime/apps/freevo_python
+%{_prefix}/runtime/runapp
 %{_prefix}/runtime/dll
 %{_prefix}/runtime/lib
-
-%preun runtime
-find %{_prefix}/runtime -name "*.pyc" |xargs rm -f
-find %{_prefix}/runtime -name "*.pyo" |xargs rm -f
 
 %files apps
 %defattr(755,root,root,755)
@@ -291,95 +217,79 @@ find %{_prefix}/runtime -name "*.pyo" |xargs rm -f
 %{_prefix}/runtime/apps/cdparanoia
 %{_prefix}/runtime/apps/jpegtran
 %{_prefix}/runtime/apps/lame
+%{_prefix}/runtime/apps/matroxset
 %{_prefix}/runtime/apps/mp1e
 %{_prefix}/runtime/apps/oggenc
+
+%post
+# Copy old local_conf.py to replace dummy file
+cd %{_prefix}
+./freevo setup --geometry=%{geometry} --display=%{display} \
+        --tv=%{tv_norm} --chanlist=%{chanlist} \
+	%{!?_without_use_sysapps:--sysfirst} 
+
+%if %{!?_without_compile_obj:1}%{?_without_compile_obj:0}
+./freevo setup --compile=%{_optimize},%{_prefix}
 %endif
+
+%preun
+if [ -s %{_sysconfdir}/freevo/local_conf.py ]; then
+   cp %{_sysconfdir}/freevo/local_conf.py %{_sysconfdir}/freevo/local_conf.py.rpmsave
+fi
+
+find %{_prefix} -name "*.pyc" |xargs rm -f
+find %{_prefix} -name "*.pyo" |xargs rm -f
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files -f INSTALLED_FILES
+%defattr(-,root,root)
 
 %files boot
 %defattr(644,root,root,755)
+%attr(755,root,root) %{_sysconfdir}/rc.d/init.d
+%attr(755,root,root) %{_bindir}/freevo_*
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
-%attr(755,root,root) %{_sysconfdir}/rc.d/init.d/freevo
-%attr(755,root,root) %{_sysconfdir}/rc.d/init.d/freevo_dep
-%attr(755,root,root) %{_prefix}/boot/URC-7201B00
-%config %{_sysconfdir}/freevo/boot_config
+%attr(644,root,root) %config %{_sysconfdir}/freevo/boot_config
 
-%files testfiles
-%defattr(644,root,root,755)
-%{_cachedir}/freevo/testfiles
+%post boot
+# Add the service, but don't automatically invoke it
+# user has to enable it via ntsysv
+if [ -x /sbin/chkconfig ]; then
+     chkconfig --add freevo
+     chkconfig --levels 234 freevo off
+#     chkconfig --add freevo_dep
+     chkconfig --add freevo_recordserver
+     chkconfig --levels 234 freevo_recordserver off
+     chkconfig --add freevo_webserver
+     chkconfig --levels 234 freevo_webserver off
+fi
+depmod -a
 
-#
-# The boot scripts were not chkconfig enabled
-#
-#%post boot
-#if [ -x /sbin/chkconfig ]; then
-#  chkconfig --add freevo
-#fi
-#depmod -a
-#
-#%preun boot
-#if [ "$1" = 0 ] ; then
-#  if [ -x /sbin/chkconfig ]; then
-#    chkconfig --del freevo
-#  fi
-#fi
-
-%post testfiles
-mkdir -p %{_cachedir}/freevo/testfiles/Movies/Recorded
-ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
-
-%preun testfiles
-rm -f %{_prefix}/testfiles
+%preun boot
+if [ "$1" = 0 ] ; then
+  if [ -x /sbin/chkconfig ]; then
+     chkconfig --del freevo
+#     chkconfig --del freevo_dep
+     chkconfig --del freevo_recordserver
+     chkconfig --del freevo_webserver
+  fi
+fi
 
 %changelog
-* Wed Aug  6 2003 TC Wan <tcwan@cs.usm.my>
-- Fixed python compile error on RH systems, disabled chkconfig for freevo-boot
+* Wed Oct 15 2003 TC Wan <tcwan@cs.usm.my>
+- Revised for binary package
 
-* Mon Aug  4 2003 TC Wan <tcwan@cs.usm.my>
-- 1.3.4 release cleanup
+* Wed Oct  8 2003 TC Wan <tcwan@cs.usm.my>
+- Fixed boot scripts for RH 9, disabled freevo_dep since it's obsolete (?)
 
-* Mon Jun 30 2003 TC Wan <tcwan@cs.usm.my>
-- 1.3.2 release cleanup
+* Fri Sep 26 2003 TC Wan <tcwan@cs.usm.my>
+- Removed testfiles from build since it's no longer part of the package
+  Cleaned up conditional flags
 
-* Tue Jun 24 2003 TC Wan <tcwan@cs.usm.my>
-- 1.3.2-preX and runtime v.7 cleanup
+* Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
+- Added supporting directories and files to package
 
-* Mon Apr 28 2003 TC Wan <tcwan@cs.usm.my>
-- Rewrite build installation commands to recursively copy folder contents
-
-* Mon Apr 14 2003 TC Wan <tcwan@cs.usm.my>
-- Fixed SPEC file for source only builds, minor cleanups
-
-* Tue Feb 25 2003 TC Wan <tcwan@cs.usm.my>
-- Updated for 1.3.2 builds, automatically detect -pre and CVS builds
-
-* Tue Feb 18 2003 TC Wan <tcwan@cs.usm.my>
-- Updated for 1.3.2 cvs build
-
-* Thu Feb 13 2003 TC Wan <tcwan@cs.usm.my>
-- Updated for 1.3.1 cvs build
-- Requires freevo-runtime for build as setup_build.py needs it
-  to execute
-
-* Fri Feb  7 2003 TC Wan <tcwan@cs.usm.my>
-- Moved *.py bytecompilation to post-install to reduce RPM size
-- Disabled automatic requires checking for runtime and apps
-  (since we provide all the necessary libraries) to avoid
-  rpm installation issues
-
-* Tue Feb  4 2003 TC Wan <tcwan@cs.usm.my>
-- Merged 1.3.1 runtime release
-
-* Thu Jan 30 2003 TC Wan <tcwan@cs.usm.my>
-- Added www subdir to specfile
-
-* Wed Jan 29 2003 TC Wan <tcwan@cs.usm.my>
-- Minor tweak to helpers subdirectory install
-
-* Tue Dec 31 2002 TC Wan <tcwan@cs.usm.my>
-- Automate CVS date generation
-
-* Fri Dec 13 2002 TC Wan <tcwan@cs.usm.my>
-- Update dir structure to Dec 13 CVS
-
-* Fri Nov 29 2002 TC Wan <tcwan@cs.usm.my>
-- Complete revamp for new directory structure
+* Fri Sep  5 2003 TC Wan <tcwan@cs.usm.my>
+- Initial SPEC file for python site-packages installation

@@ -1,6 +1,6 @@
 %define freevoname freevo-src
 %define freevover 1.4
-%define freevorel 1_freevo
+%define freevorel 2_freevo
 ##############################################################################
 Summary: Meta-package for Freevo recording functionality
 Name: freevo-recording-suite
@@ -13,7 +13,6 @@ Requires: freevo-core-suite
 Requires: python-twisted >= 1.0.7 
 Requires: vorbis-tools, libvorbis, lame, cdparanoia
 Requires: mp1e >= 1.9.3
-Requires: pyogg, pyao, pyvorbis
 #Requires: ffmpeg >= 0.4.7
 Requires: %{freevoname}
 
@@ -37,6 +36,10 @@ for using freevo to record TV programs.
 %defattr(-,root,root)
 
 %changelog
+* Wed Oct 15 2003 TC Wan <tcwan@cs.usm.my>
+- Moved twisted dependency to core, removed pyao, pyogg, pyvorbis dependencies
+  since it's no longer needed
+
 * Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
 - Added pyao, pyogg, pyvorbis dependencies
 

@@ -1,6 +1,6 @@
 %define freevoname freevo-src
 %define freevover 1.4
-%define freevorel 1_freevo
+%define freevorel 2_freevo
 ##############################################################################
 Summary: Meta-package for Freevo core functionality
 Name: freevo-core-suite
@@ -14,6 +14,7 @@ Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
 Requires: python >= 2.2, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
 Requires: mmpython, python-fchksum, python-mx-base >= 2.0.4, 
 Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
+Requires: python-twisted >= 1.0.7
 #Requires: CDDB
 Requires: %{freevoname}
 
@@ -37,6 +38,9 @@ for using freevo.
 %defattr(-,root,root)
 
 %changelog
+* Wed Oct 15 2003 TC Wan <tcwan@cs.usm.my>
+- Moved twisted depedency to core
+
 * Sat Sep 20 2003 TC Wan <tcwan@cs.usm.my>
 - Removed CDDB dependency since it's part of mmpython
 
