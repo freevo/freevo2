@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/01 18:55:47  dischi
+# add table option to the menu
+#
 # Revision 1.9  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -308,7 +311,7 @@ class Listing_Area(Skin_Area):
                 if choice != menu.selected and hasattr( choice, 'outicon' ) and \
                        choice.outicon:
                     image = self.load_image(choice.outicon, (vspace-content.spacing,
-                                                          vspace-content.spacing))                    
+                                                          vspace-content.spacing))
                 elif choice.icon:
                     image = self.load_image(choice.icon, (vspace-content.spacing,
                                                           vspace-content.spacing))
@@ -390,9 +393,23 @@ class Listing_Area(Skin_Area):
                     else:
                         text = '%s %sx' % (sn[0], sn[1])
 
-                self.write_text(text, val.font, content, x=x0 + hskip + x_icon,
-                                y=y0 + vskip, width=width-icon_x, height=-1,
-                                align_h=val.align, mode='hard')
+                # if the menu has an attr table, the menu is a table. Each
+                # item _must_ have that many tabs as the table needs!!!
+                if hasattr(menu, 'table'):
+                    table_x = 0
+                    for i in range(len(menu.table)):
+                        table_w = ((width-icon_x)*menu.table[i]) / 100
+                        if i != len(menu.table) - 1:
+                            table_w += 5
+                        self.write_text(text.split('\t')[i], val.font, content,
+                                        x=x0 + hskip + x_icon + table_x,
+                                        y=y0 + vskip, width=table_w, height=-1,
+                                        align_h=val.align, mode='hard')
+                        table_x += table_w + 5
+                else:
+                    self.write_text(text, val.font, content, x=x0 + hskip + x_icon,
+                                    y=y0 + vskip, width=width-icon_x, height=-1,
+                                    align_h=val.align, mode='hard')
 
 
             elif content.type == 'image' or content.type == 'image+text':
