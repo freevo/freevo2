@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/10/01 09:33:49  dischi
+# small bugfix by closing the fd
+#
 # Revision 1.14  2002/09/30 05:56:28  krister
 # Fixed a bug in the file-close.
 #
@@ -72,7 +75,12 @@ class Identify_Thread(threading.Thread):
             fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
             s = ioctl(fd, cdrom.CDROM_DRIVE_STATUS, cdrom.CDSL_CURRENT)
         except:
-            os.close(fd)
+            # maybe we need to close the fd if ioctl fails, maybe
+            # open fails and there is no fd
+            try:
+                os.close(fd)
+            except:
+                pass
             media.drive_status = None
             media.info = None
             return
