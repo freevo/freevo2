@@ -6,6 +6,8 @@
 #
 # lirc = Linux Infrared Remote Control, www.lirc.org
 #
+# $Id$
+
 . /etc/rc.config
 #
 # This script schould be run in runlevel 3

@@ -13,6 +13,7 @@
 # model no. of remote control: URC-7201B00
 # devices being controlled by this remote:
 #
+# $Id$
 
 begin remote
 
