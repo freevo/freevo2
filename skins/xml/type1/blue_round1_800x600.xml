@@ -99,13 +99,13 @@
       <listing>
         <table border_size="0"> 
 	   <label>
-	      <background radius="10"/>
+	      <background radius="3"/>
 	   </label>
 	   <head>
 	      <background radius="3" />
 	   </head>
 	   <content>
-	      <background radius="5"/>
+	      <background radius="3"/>
 	   </content>
         </table>
       </listing>
