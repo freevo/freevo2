@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.139  2004/08/14 15:10:20  dischi
+# do not use skin.py
+#
 # Revision 1.138  2004/08/05 17:38:54  dischi
 # changes to adjust to the new menu code
 #
@@ -67,7 +70,6 @@ import config
 import util
 
 import menu
-import skin
 import plugin
 import fxditem
 import eventhandler
@@ -845,10 +847,10 @@ class DirItem(Playlist):
 
         # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
         if arg == 'FORCE_SKIN_LAYOUT':
-            if self.display_type and skin.get_settings().menu.has_key(self.display_type):
-                area = skin.get_settings().menu[self.display_type]
+            if self.display_type and gui.get_settings().menu.has_key(self.display_type):
+                area = gui.get_settings().menu[self.display_type]
             else:
-                area = skin.get_settings().menu['default']
+                area = gui.get_settings().menu['default']
             max = len(area.style) - 1
 
         # switch from no settings to 0
