@@ -20,79 +20,68 @@
 	visible="yes" icon="skins/icons/AquaFusion/shutdown.png"  />
     </main>
     
-    <!-- First we have to define the menu: a background and the five areas with -->
-    <!-- their dimensions. We point to a layout with the details -->
+    <!-- SKIN DEFINITION -->
+
+    <!-- 
+    At the beginning there are the menu definitions. A menu has a type for
+    the different types of media: video/audio/image/games, main for the
+    main menu and default for all the other menus. The type 'all' will
+    delete all existing special definitions. Inside the tag are different
+    styles which can be toggled with the DISPLAY key in Freevo. If an
+    image definition is present, it will be used except when all items
+    have the same or no image
+    -->
     <menu type="all">
+      <style text="normal text style"/>
+    </menu>
+
+    <!-- this points to a menu for the main menu -->
+    <menu type="main">
+      <style text="main menu"/>
+    </menu>
+
+    <!-- 
+    After defining which menu style to use for which item, we need to define
+    how the areas of each menuset look like. A menuset has a label (used by
+    menu) and the geometry and names for the five areas
+    -->
+    <menuset label="normal text style">
 
       <!-- 1. screen: the complete background area -->
-      <screen layout="screen0" visible="yes">
-	<area x="0" y="0" width="800" height="600"/>
-      </screen>
+      <screen layout="screen0" visible="yes" 
+	x="0" y="0" width="800" height="600"/>
 
       <!-- 2. title: the area where the title of the menu (e.g. directory name -->
       <!-- will be displayed -->
-      <title layout="title0" visible="yes">
-	<area x="10" y="10" width="780" height="60"/> 
-      </title>
+      <title layout="title0" visible="yes" 
+	x="10" y="10" width="780" height="60"/> 
 
       <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
-      <view layout="view0" visible="yes">
-	<area x="580" y="110" width="200" height="300"/> 
-      </view>
+      <view layout="view0" visible="yes" 
+	x="580" y="110" width="200" height="300"/> 
 
       <!-- 4. listing area: the list of all items -->
-      <listing layout="list0" visible="yes">
-	<area x="20" y="110" width="540" height="450"/>
-      </listing>
+      <listing layout="list0" visible="yes" 
+	x="20" y="110" width="540" height="450"/>
 
       <!-- 5. info area: additional info. This area is invisible in the default -->
       <!-- menu, it's only visible in the extended menus -->
       <info visible="no"/>
-    </menu>
+    </menuset>
 
 
-    <!-- 
+    <!-- Now the main menu -->
+    <menuset label="main menu">
+      <screen layout="screen0" visible="yes" 
+	x="0" y="0" width="800" height="600"/>
+      <listing layout="list_main" visible="yes" 
+	x="230" y="120" width="380" height="390"/>
 
-    Before the layouts are defined, there are other types of menus. The
-    skin supports 'audio', 'video', 'image', 'games' for the specific
-    sections, 'main' for the main menu and extended versions of the
-    sections (e.g. 'extended audio'). If nothing matches, the type 'default'
-    will be used. The type 'all' will change all types. If a skin inherits from
-    this skin and redefines type 'default', all special types will be deleted 
-
-    Based on the default screen, the extended menu for audio will override
-    some settings, others like screen will be identical, they are
-    unchanged. 
-    -->
-
-    <menu type="extended audio">
-      <screen layout="screen0" visible="yes">
-	<area x="0" y="0" width="800" height="600"/>
-      </screen>
-      <title layout="title1" visible="yes">
-	<area x="10" y="10" width="780" height="60"/> 
-      </title>
-      <view layout="view0" visible="yes">
-	<area x="580" y="110" width="200" height="300"/> 
-      </view>
-      <listing layout="image list" visible="yes">
-	<area x="20" y="110" width="540" height="250"/>
-      </listing>
-      <info visible="yes" layout="info">
-	<area x="20" y="390" width="760" height="190"/>
-      </info>
-    </menu>
-
-    <!-- Now some small changes for the main menu -->
-    <menu type="main">
-      <!-- disables view and title area. The info area is disabled because it's -->
-      <!-- disabled by type='default' -->
+      <!-- disables info, view and title area. -->
       <view visible="no"/>
+      <info visible="no"/>
       <title visible="no"/>
-      <listing layout="list_main" visible="yes">
-	<area x="230" y="120" width="380" height="390"/> 
-      </listing>
-    </menu>
+    </menuset>
 
 
     <!--
@@ -123,10 +112,6 @@
       <content x="210" type="menu" font="white big" align="center"/>
     </layout>
 
-    <layout label="title1">
-      <content x="210" type="item" font="white big" align="center"/>
-    </layout>
-
     <!-- default listing area -->
     <layout label="list0">
       <content type="text" spacing="2">
@@ -138,43 +123,12 @@
       </content>
     </layout>
 
-    <!-- listing area with images -->
-    <layout label="image list">
-      <content type="image" spacing="4">
-	<item type="default" width="100" height="100"/>
-	<item type="selected" width="100" height="100">
-	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-5" width="max+10"
-	    height="max+10"/>
-	</item>
-      </content>
-    </layout>
-
     <!-- default view area -->
     <layout label="view0">
       <content align="center" valign="top">
 	<item type="default">
 	  <rectangle size="1" bgcolor="0xff000000" x="-1" y="-1"
 	    width="max+2" height="max+2"/>
-	</item>
-      </content>
-    </layout>
-
-
-    <!-- extended info areas -->
-    <layout label="info">
-      <background>
-	<rectangle bgcolor="0x000000" height="2"/>
-      </background>
-      <content x="5" y="15" width="max-10" height="max-10" type="text"
-	spacing="20" font="grey">
-	<item type="audio">
-	  Title:   \t@title@
-	  Artist:  \t@artist@
-	  Album:   \t@album@ (@year@)
-	  Track:   \t@track@
-	</item>
-	<item type="dir">
-	  Directory: \t@name@
 	</item>
       </content>
     </layout>
@@ -267,16 +221,13 @@
     -->
     
     <player>
-      <screen layout="player screen" visible="yes">
-	<area x="0" y="0" width="800" height="600"/>
-      </screen>
+      <screen layout="player screen" visible="yes" 
+	x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
-      <view layout="player view" visible="yes">
-	<area x="430" y="200" width="420" height="360"/> 
-      </view>
-      <info layout="player info" visible="yes">
-	<area x="-50" y="80" width="550" height="300"/> 
-      </info>
+      <view layout="player view" visible="yes"
+	x="430" y="200" width="420" height="360"/> 
+      <info layout="player info" visible="yes"
+	x="-50" y="80" width="550" height="300"/> 
     </player>
 
     <layout label="player screen">
@@ -319,19 +270,15 @@
     -->
     
     <tv>
-      <screen layout="tv screen" visible="yes">
-	<area x="0" y="0" width="800" height="600"/>
-      </screen>
+      <screen layout="tv screen" visible="yes"
+	x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
-      <view layout="tv view" visible="no">
-	<area x="10" y="10" width="420" height="190"/> 
-      </view>
-      <info layout="tv info" visible="yes">
-	<area x="10" y="10" width="420" height="190"/> 
-      </info>
-      <listing layout="tv listing" visible="yes">
-	<area x="10" y="220" width="780" height="370"/> 
-      </listing>
+      <view layout="tv view" visible="no" 
+	x="10" y="10" width="420" height="190"/> 
+      <info layout="tv info" visible="yes" 
+	x="10" y="10" width="420" height="190"/> 
+      <listing layout="tv listing" visible="yes" 
+	x="10" y="220" width="780" height="370"/> 
     </tv>
 
     <layout label="tv screen">

@@ -10,7 +10,7 @@
   <skin include="blue1_small" geometry="800x600">
 
     <!-- Redefine of the type default -->
-    <menu type="all">
+    <menuset label="normal text style">
       <!-- screen0 is already defined in blue1_big -->
       <screen layout="screen0" visible="yes"/>
 
@@ -18,19 +18,14 @@
       title0 is already defined in blue1_big, but there will
       is a new definition of the font from the layout (white big)
       -->
-      <title layout="title0" visible="yes">
-	<area x="10" y="10" width="780" height="60"/> 
-      </title>
-
-      <view layout="view0" visible="yes">
-	<area x="545" y="90" width="245" height="450"/> 
-      </view>
-
-      <listing layout="transparent listing" visible="yes">
-	<area x="10" y="130" width="550" height="450"/>
-      </listing>
+      <title layout="title0" visible="yes" 
+	x="10" y="10" width="780" height="60"/> 
+      <view layout="view0" visible="yes" 
+	x="545" y="90" width="245" height="450"/> 
+      <listing layout="transparent listing" visible="yes" 
+	x="10" y="130" width="550" height="450"/>
       <info visible="no"/>
-    </menu>
+    </menuset>
 
     <!-- 
     the main menu isn't redefined, the area is the same.

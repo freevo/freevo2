@@ -19,7 +19,7 @@
     </main>
     
     <!-- Redefine of the type default -->
-    <menu type="all">
+    <menuset label="normal text style">
       <screen layout="screen0" visible="yes"/>
 
       <!-- 
@@ -27,20 +27,13 @@
       is a new definition of the font from the layout (white big)
       -->
       <title visible="no"/>
-
-      <view layout="view0" visible="yes">
-	<area x="20" y="100" width="300" height="300"/> 
-      </view>
-
-      <listing layout="listing" visible="yes">
-	<area x="330" y="110" width="460" height="450"/>
-      </listing>
-      <info visible="no"/>
-    </menu>
+      <view x="20" y="100" width="300" height="300"/> 
+      <listing layout="listing" x="330" y="110" width="460" height="450"/>
+    </menuset>
 
 
     <!-- definition of the main menu -->
-    <menu type="main">
+    <menuset label="main menu">
       <screen layout="screen watermark" visible="yes">
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
@@ -48,22 +41,35 @@
 	<area x="230" y="180" width="360" height="240"/> 
       </listing>
       <view visible="no"/>
-    </menu>
+    </menuset>
 
     <!-- definition of video/audio/image menu. The same as default, but with a -->
     <!-- different background -->
-    <menu type="video">
-      <screen layout="video screen"/>
-    </menu>
+<!--     <menu type="video"> -->
+<!--       <style text="video"/> -->
+<!--     </menu> -->
       
-    <menu type="audio">
-      <screen layout="audio screen"/>
-    </menu>
+<!--     <menu type="audio"> -->
+<!--       <style text="audio"/> -->
+<!--     </menu> -->
       
-    <menu type="image">
-      <screen layout="image screen"/>
-    </menu>
+<!--     <menu type="image"> -->
+<!--       <style text="image"/> -->
+<!--     </menu> -->
       
+<!--     <menuset label="video" inherits="normal text style"> -->
+<!--       <screen layout="video screen"/> -->
+<!--     </menuset> -->
+      
+<!--     <menuset label="audio" inherits="normal text style"> -->
+<!--       <screen layout="audio screen"/> -->
+<!--     </menuset> -->
+      
+<!--     <menuset label="image" inherits="normal text style"> -->
+<!--       <screen layout="image screen"/> -->
+<!--     </menuset> -->
+      
+
 
 
     <!-- ********************************************** -->
@@ -173,6 +179,15 @@
     <!-- AUDIO PLAYER DEFINITIONS -->
 
     <layout label="player screen">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <!-- ********************************************** -->
+    <!-- TV DEFINITIONS -->
+
+    <layout label="tv screen">
       <background>
 	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
       </background>
