@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/02/12 16:59:12  dischi
+# keep aspect for scaling
+#
 # Revision 1.32  2004/02/11 14:41:05  dischi
 # add all <background> images to the bgimage list
 #
@@ -699,7 +702,13 @@ class Skin_Area:
         cimage = self.imagecache[cname]
         if not cimage:
             cimage = osd.loadbitmap(image)
-            if cimage and w > 0 and h > 0:
+            if not cimage:
+                return
+            if w == -1:
+                w = h  * cimage.get_width() / cimage.get_height()
+            if h == -1:
+                h = w  * cimage.get_height() / cimage.get_width()
+            if w > 0 and h > 0:
                 cimage = pygame.transform.scale(cimage, (w, h))
             self.imagecache[cname] = cimage
         return cimage
