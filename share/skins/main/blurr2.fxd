@@ -574,6 +574,24 @@
       </content>
     </layout>
 
+    <!-- 
+    *******************************************************
+    ** Splashscreen
+    ******************************************************* -->
+
+    <splashscreen>
+      <screen layout="screen"/>
+      <content layout="splashscreen" x="0" y="0" width="800" height="600"/>
+    </splashscreen>
+
+    <layout label="splashscreen">
+      <background>
+        <image filename="blurrsplash.jpg"/>
+      </background>
+      <content x="30" y="400" width="740" font="splashscreen font" spacing="10"/>
+    </layout>
+
+    <font label="splashscreen font" name="Arial_Bold" size="20" color="0xffffff"/>
 
 
 
