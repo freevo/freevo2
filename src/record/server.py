@@ -57,7 +57,7 @@ from mcomm import RPCServer, RPCError, RPCReturn
 # record imports
 import recorder
 import external
-from types import *
+from record_types import *
 from recording import Recording
 from favorite import Favorite
 import conflict

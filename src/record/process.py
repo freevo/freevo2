@@ -43,7 +43,7 @@ from util.callback import *
 
 # record imports
 from record.recorder import Plugin
-from record.types import *
+from record.record_types import *
 
 # get logging object
 log = logging.getLogger('record')

@@ -33,7 +33,7 @@
 # freevo imports
 from util.videothumb import snapshot
 from record.plugins import Plugin
-from record.types import *
+from record.record_types import *
 
 class PluginInterface(Plugin):
     """

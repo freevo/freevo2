@@ -42,7 +42,7 @@ import config
 # get logging object
 log = logging.getLogger('record')
 
-from types import *
+from record_types import *
 
 class Recording:
     """

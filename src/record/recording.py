@@ -41,7 +41,7 @@ import logging
 # freevo imports
 import config
 import util.fxdparser as fxdparser
-from types import *
+from record_types import *
 
 # get logging object
 log = logging.getLogger('record')

@@ -40,7 +40,7 @@ import logging
 from util.popen import Process
 from util.fileops import find_file_in_path
 from record.plugins import Plugin
-from record.types import *
+from record.record_types import *
 
 # get logging object
 log = logging.getLogger('record')

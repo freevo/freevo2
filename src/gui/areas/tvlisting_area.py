@@ -49,7 +49,7 @@ import config
 from area import Area
 from gui import Rectangle
 from record.client import recordings
-from record.types import *
+from record.record_types import *
 
 import logging
 log = logging.getLogger('gui')

@@ -37,7 +37,7 @@ import time
 # freevo imports
 from record.plugins import Plugin
 from util.fxdimdb import FxdImdb, makeVideo
-from record.types import *
+from record.record_types import *
 
 class PluginInterface(Plugin):
     """

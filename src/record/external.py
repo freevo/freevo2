@@ -52,7 +52,7 @@ import notifier
 
 # record imports
 import recorder
-from types import *
+from record_types import *
 
 # get logging object
 log = logging.getLogger('record')
