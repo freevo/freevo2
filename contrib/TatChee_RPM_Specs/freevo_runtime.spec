@@ -1,13 +1,15 @@
 Summary:	Freevo_runtime
 Name:		freevo_runtime
 Version:	3
-Release:	2
+Release:	3
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}%{version}.tar.gz
-Patch:		%{name}%{version}-cgi.py.patch
+Patch0:		%{name}%{version}-cgi.py.patch
+Patch1:		%{name}%{version}-preloads.patch
 URL:		http://freevo.sourceforge.net/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
+BuildRequires:	/usr/lib/libvorbis.so.0 /usr/lib/libvorbisfile.so.0 
 
 %define _prefix /usr/local/%{name}%{version}
 %define _sqldir lib/python2.2/site-packages
@@ -26,7 +28,9 @@ or the website at http://freevo.sourceforge.net.
 
 %prep
 %setup  -n %{name}%{version}
-%patch -p1
+%patch0 -p1
+%patch1 -p1
+cp -L /usr/lib/libvorbis*.so.0 .
 cd %{_sqldir}; rm -rf *sql* *SQL*
 
 %build
@@ -57,6 +61,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc ChangeLog COPYING README 
 
 %changelog
+* Tue Oct 22 2002 TC Wan <tcwan@cs.usm.my>
+- Included libvorbis*.so.0 files into the runtime to avoid dependency issue on RH 8.0
+
 * Thu Oct 17 2002 TC Wan <tcwan@cs.usm.my>
 - Stripped symbols to reduce library size, removed mysql dependency
 
