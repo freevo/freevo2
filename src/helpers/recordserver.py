@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/06/28 20:40:16  dischi
+# make it possible to switch uid
+#
 # Revision 1.47  2004/06/23 21:20:10  dischi
 # put snapshot in again with a try except
 #
@@ -38,36 +41,6 @@
 # if your system doesn't suffer from this problem, so it should be safe. Any
 # problems, please let me know.
 #
-# Revision 1.40  2004/06/10 02:32:17  rshortt
-# Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
-#
-# Revision 1.39  2004/05/30 18:27:53  dischi
-# More event / main loop cleanup. rc.py has a changed interface now
-#
-# Revision 1.38  2004/04/18 14:39:19  mikeruelle
-# fix missing self, priorities still really don't do anything but at
-# least it looks like its doing something.
-#
-# Revision 1.37  2004/04/18 08:23:44  dischi
-# fix unicode problem
-#
-# Revision 1.36  2004/03/13 22:36:44  dischi
-# fix crashes on debug (unicode again)
-#
-# Revision 1.35  2004/03/13 03:28:32  outlyer
-# Someone must have fixed the str2XML part internal to the FxdIMDB code, since
-# I was getting
-# &amp&amp; (double-escaped) so I'm removing this one.
-#
-# Revision 1.34  2004/03/08 19:15:49  dischi
-# use our marmalade
-#
-# Revision 1.33  2004/03/05 20:49:11  rshortt
-# Add support for searching by movies only.  This uses the date field in xmltv
-# which is what tv_imdb uses and is really acurate.  I added a date property
-# to TvProgram for this and updated findMatches in the record_client and
-# recordserver.
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -90,14 +63,24 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, string, random, time, os, re
+import sys, string, random, time, os, re, pwd
+import config
+
+# change uid
+if __name__ == '__main__':
+    try:
+        if config.TV_RECORD_SERVER_UID and os.getuid() == 0:
+            os.setuid(config.TV_RECORD_SERVER_UID)
+            os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
+            os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
+    except Exception, e:
+        print e
 
 from twisted.web import xmlrpc, server
 from twisted.internet.app import Application
 from twisted.internet import reactor
 from twisted.python import log
 
-import config #config must always be the first freeevo module imported
 from util.marmalade import jellyToXML, unjellyFromXML
 
 import rc
@@ -180,7 +163,12 @@ class RecordServer(xmlrpc.XMLRPC):
         _debug_('SAVE: saving cached file (%s)' % config.TV_RECORD_SCHEDULE)
         _debug_("SAVE: ScheduledRecordings has %s items." % \
                 len(scheduledRecordings.programList))
-        f = open(config.TV_RECORD_SCHEDULE, 'w')
+        try:
+            f = open(config.TV_RECORD_SCHEDULE, 'w')
+        except IOError:
+            os.unlink(config.TV_RECORD_SCHEDULE)
+            f = open(config.TV_RECORD_SCHEDULE, 'w')
+            
         jellyToXML(scheduledRecordings, f)
         f.close()
         return TRUE
@@ -826,7 +814,7 @@ class RecordServer(xmlrpc.XMLRPC):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
         _debug_('top of the minute in %s seconds' % next_minute)
         reactor.callLater(next_minute, self.minuteCheck)
-
+        
     def minuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
         if next_minute != 60:
@@ -947,6 +935,7 @@ def main():
 if __name__ == '__main__':
     import traceback
     import time
+
     while 1:
         try:
             start = time.time()
