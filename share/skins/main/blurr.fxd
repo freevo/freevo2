@@ -48,6 +48,12 @@
             </content>
         </layout>
         
+        <layout label="view no border">
+            <content align="center" valign="center">
+                <item type="default"/>
+            </content>
+        </layout>
+        
         <!-- default listing area -->
         <layout label="listing">
             <background/>
@@ -97,7 +103,8 @@
         <menuset label="text with info style" inherits="normal text style">
             <!-- 4. listing area: the list of all items -->
             <screen layout="video screen" visible="yes"/>
-            <view layout="view" x="10" y="90" width="280" height="250" align="left"/>
+            <view layout="view no border" x="20" y="100" 
+		width="260" height="230" align="left"/>
             <listing x="30" y="350" width="710" height="230">
                 <image filename="up.png" label="uparrow" x="750" y="350"/>
                 <image filename="down.png" label="downarrow" x="750" y="max-32"/>
@@ -239,7 +246,7 @@
         
         <menuset label="audio" inherits="normal text style">
             <screen layout="audio screen"/>
-            <view layout="view" x="15" y="90" width="280" height="270"/>
+            <view layout="view no border" x="25" y="100" width="260" height="250"/>
             <info layout="audio info" x="28" y="370" width="273" height="190"/>
         </menuset>
         
@@ -281,7 +288,7 @@
                         <newline/>
                     </if>
                     <if expression="type == 'playlist'">
-                        <text font="info value" width="max" expression="len(playlist)"/>
+                        <text font="info value" expression="len(playlist)"/>
                         <text font="info value"> Items</text>
                         <newline/>
                     </if>
@@ -398,7 +405,7 @@
                 <item type="dir">
                     <text font="info tagline" width="max" expression="name"/>
                     <newline/>
-                    <text font="info value" width="max" expression="num_items"/>
+                    <text font="info value" expression="num_items"/>
                     <text font="info value"> Items</text>
                     <!-- other values are num_play_items and num_dir_items -->
                 </item>
@@ -406,7 +413,7 @@
                 <item type="playlist">
                     <text font="info tagline" width="max" expression="name"/>
                     <newline/>
-                    <text font="info value" width="max" expression="len(playlist)"/>
+                    <text font="info value" expression="len(playlist)"/>
                     <text font="info value"> Items</text>
                     <!-- other values are num_play_items and num_dir_items -->
                 </item>
