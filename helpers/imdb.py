@@ -141,7 +141,8 @@ def get_data(id):
     regexp_year    = re.compile('.*<A HREF="/Sections/Years/.*?([0-9]*)<', re.I)
     regexp_genre   = re.compile('.*href="/Sections/Genres(.*)$', re.I)
     regexp_tagline = re.compile('.*<B CLASS="ch">Tagline.*?</B>(.*?)<', re.I)
-    regexp_plot    = re.compile('.*<B CLASS="ch">Plot Outline.*?</B>(.*?)<', re.I)
+    regexp_plot1   = re.compile('.*<B CLASS="ch">Plot Outline.*?</B>(.*?)<', re.I)
+    regexp_plot2   = re.compile('.*<B CLASS="ch">Plot Summary.*?</B>(.*?)<', re.I)
     regexp_rating  = re.compile('.*<B>([0-9\.]*)/10</B> (.[0-9,]* votes.?)', re.I)
     regexp_image   = re.compile('.*ALT="cover".*src="(http://.*?)"', re.I)
     regexp_runtime = re.compile('.*<b class="ch">Runtime', re.I)
@@ -191,11 +192,14 @@ def get_data(id):
                 elif g != "" and g != "(more)": info['genre'] += " / "+ g
 
 
-        m = regexp_tagline.match(line)
+        m = regexp_tagline.match('%s<' % line)
         if m:
             info['tagline'] = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
 
-        m = regexp_plot.match(line)
+        m = regexp_plot1.match('%s<' % line)
+        if m: info['plot'] = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
+
+        m = regexp_plot2.match('%s<' % line)
         if m: info['plot'] = str2XML(re.compile('[\t ]+').sub(" ", ' ' + m.group(1))[1:])
 
         m = regexp_rating.match(line)
@@ -316,7 +320,8 @@ def write_fxd(imdb_number, filename, drive, image_url, type, files, cdid, imdb_d
     i.write("  <copyright>\n" +
             "    The information in this file are from the Internet " +
             "Movie Database (IMDb).\n" +
-            "    Please visit http://www.imdb.com for more informations.\n" +
+            "    Please visit http://www.imdb.com for more informations.\n")
+    i.write("    <source url=\"http://www.imdb.com/Title?%s\"/>\n"  % imdb_number +
             "  </copyright>\n")
 
     if cdid:
