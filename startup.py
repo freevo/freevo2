@@ -210,7 +210,7 @@ if __name__ == "__main__":
     os.system('rm -f /tmp/freevo-shutdown') # XXX kludge to signal startup.py to abort
 
     # Defaults
-    freevo = freevo_main_xterm
+    freevo = freevo_main_quiet
     osd = osd_x11
     remote = remote_xterm
     extra_args_dict = {  'videotools' : 'sim', 'remote' : 'sim' }
@@ -224,13 +224,15 @@ if __name__ == "__main__":
             print 'Cannot decode option "%s"' % arg
             usage(sys.argv[0])
 
-    # XXX TEST CODE BY KRISTER! This code fragment will load the experimental OSD SDL module
-    # if the symbol OSD_SDL is in the config module namespace, but will work fine if it is not.
-    # This is used to load my new version of the OSD module without messing around in the source
-    # too much...
+    # XXX TEST CODE BY KRISTER! This code fragment will load the
+    # experimental OSD SDL module if the symbol OSD_SDL is in the
+    # config module namespace, but will work fine if it is not.  This
+    # is used to load my new version of the OSD module without messing
+    # around in the source too much...
+
     if 'OSD_SDL' in dir(config):
-        # Do not use the regular remote control app and OSD server, they're both replaced by the
-        # SDL OSD server!
+        # Do not use the regular remote control app and OSD server,
+        # they're both replaced by the SDL OSD server!
         if remote == remote_quiet:
             task_args += [ freevo, remote ]
         else:

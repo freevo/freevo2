@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2002/08/14 07:47:18  dischi
+# freevo_main_quiet is now default
+#
 # Revision 1.50  2002/08/14 04:33:00  krister
 # Bugfixes in shutdown.
 #
@@ -145,7 +148,7 @@ def shutdown(menuw=None, arg=None):
     # Here are some different ways of exiting freevo for the
     # different ways that it could have been started.
     #
-    
+
     # XXX kludge to signal startup.py to abort
     os.system('touch /tmp/freevo-shutdown') 
     # XXX kludge to shutdown the runtime version (no linker)
