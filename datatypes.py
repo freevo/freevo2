@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/10/10 09:27:30  dischi
+# added runtime to MovieExtraInformation
+#
 # Revision 1.2  2002/10/08 15:50:54  dischi
 # Parse more infos from the xml file to MovieExtraInformation (maybe we
 # should change that name...)
@@ -78,5 +81,6 @@ class MovieInformation:
 
 class MovieExtraInformation:
     def __init__(self):
-        self.url = self.genre = self.tagline = self.plot = self.year = self.rating = ''
+        self.url = self.genre = self.tagline = self.plot = ''
+        self.runtime = self.year = self.rating = ''
         
