@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/02/22 20:46:46  dischi
+# oops, remove test code
+#
 # Revision 1.41  2004/02/22 20:46:09  dischi
 # add Unicode error warning
 #
@@ -552,10 +555,6 @@ class Skin:
             self.screen.clear()
             for a in self.all_areas:
                 a.draw(settings, object, menu, style, type, self.force_redraw)
-            if type == 'menu':
-                x = 'ä'
-                if x == u'ä':
-                    pass
             osd.update([self.screen.show(self.force_redraw)])
             self.force_redraw = False
         except UnicodeError, e:
