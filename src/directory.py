@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2003/12/31 16:40:24  dischi
+# small speed enhancements
+#
 # Revision 1.79  2003/12/30 15:33:01  dischi
 # remove unneeded copy function, make id a function
 #
@@ -68,6 +71,7 @@ import mmpython
 
 import config
 import util
+
 import menu
 import skin
 import plugin
@@ -335,10 +339,10 @@ class DirItem(Playlist):
         has_dirs  = False
 
         for f in os.listdir(self.dir):
-            if os.path.isfile(f):
+            if not has_files and os.path.isfile(f):
                 has_files = True
-            if os.path.isdir(f) and not (f.endswith('CVS') or f.endswith('.xvpics') or \
-                                         f.endswith('.thumbnails') or f.endswith('.pics')):
+            if not has_dirs and os.path.isdir(f) and \
+                   not f in ('CVS', '.xvpics', '.thumbnails', '.pics'):
                 has_dirs = True
             if has_dirs and has_files:
                 break
@@ -350,13 +354,10 @@ class DirItem(Playlist):
             items.reverse()
 
         if has_files:
-            items.append(Playlist(_('Random play all items'), [ (self.dir, 0) ],
-                                  self, display_type=display_type, random=True))
+            items.append((self.play_random, _('Random play all items')))
         if has_dirs:
-            items += [ Playlist(_('Recursive random play all items'), [ (self.dir, 1) ],
-                                self, display_type=display_type, random=True),
-                       Playlist(_('Recursive play all items'), [ (self.dir, 1) ],
-                                self, display_type=display_type, random=False) ]
+            items += [ (self.play_random_recursive, _('Recursive random play all items')),
+                       (self.play_recursive, _('Recursive play all items')) ]
 
         items.append((self.configure, _('Configure directory'), 'configure'))
         return items
@@ -370,7 +371,6 @@ class DirItem(Playlist):
         self.check_password_and_build(arg=None, menuw=menuw)
 
 
-
     def play(self, arg=None, menuw=None):
         """
         play directory
@@ -380,6 +380,27 @@ class DirItem(Playlist):
         else:
             self.check_password_and_build(arg='play', menuw=menuw)
 
+
+    def play_random(self, arg=None, menuw=None):
+        """
+        play in random order
+        """
+        self.check_password_and_build(arg='playlist:random', menuw=menuw)
+        
+
+    def play_recursive(self, arg=None, menuw=None):
+        """
+        play recursive
+        """
+        self.check_password_and_build(arg='playlist:recursive', menuw=menuw)
+        
+
+    def play_random_recursive(self, arg=None, menuw=None):
+        """
+        play recursive in random order
+        """
+        self.check_password_and_build(arg='playlist:random_recursive', menuw=menuw)
+        
 
     def check_password_and_build(self, arg=None, menuw=None):
         """
@@ -488,6 +509,18 @@ class DirItem(Playlist):
         self.dir_items  = []
         self.pl_items   = []
 
+        if arg and arg.startswith('playlist:'):
+            if arg.endswith(':random'):
+                Playlist(playlist = [ (self.dir, 0) ], parent = self,
+                         display_type=display_type, random=True).play()
+            elif arg.endswith(':recursive'):
+                Playlist(playlist = [ (self.dir, 1) ], parent = self,
+                         display_type=display_type, random=False).play()
+            elif arg.endswith(':random_recursive'):
+                Playlist(playlist = [ (self.dir, 1) ], parent = self,
+                         display_type=display_type, random=True).play()
+            return
+        
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
@@ -544,14 +577,18 @@ class DirItem(Playlist):
 
         # build play_items, pl_items and dir_items
         for p in plugin.mimetype(display_type):
-            for i in p.get(self, files):
-                if i.type == 'playlist':
-                    self.pl_items.append(i)
-                elif i.type == 'dir':
-                    self.dir_items.append(i)
-                else:
-                    self.play_items.append(i)
-            
+            if p.files_only:
+                self.play_items += p.get(self, files)
+            else:
+                for i in p.get(self, files):
+                    if i.type == 'playlist':
+                        self.pl_items.append(i)
+                    elif i.type == 'dir':
+                        self.dir_items.append(i)
+                    else:
+                        self.play_items.append(i)
+
+
         # normal DirItems
         for filename in files:
             if vfs.isdir(filename):

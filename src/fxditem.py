@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/12/31 16:40:25  dischi
+# small speed enhancements
+#
 # Revision 1.7  2003/12/29 22:07:14  dischi
 # renamed xml_file to fxd_file
 #
@@ -79,6 +82,8 @@ import config
 import util
 import item
 import plugin
+import os
+import stat
 
 
 class Mimetype(plugin.MimetypePlugin):
@@ -87,7 +92,7 @@ class Mimetype(plugin.MimetypePlugin):
     """
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
-
+        self.files_only = False
 
     def get(self, parent, files):
         """
@@ -99,19 +104,27 @@ class Mimetype(plugin.MimetypePlugin):
 
         # get the list of fxd files
         fxd_files = util.find_matches(files, ['fxd'])
-        for d in copy.copy(files):
-            if vfs.isdir(d) and vfs.isfile(vfs.join(d, vfs.basename(d) + '.fxd')):
-                fxd_files.append(vfs.join(d, vfs.basename(d) + '.fxd'))
-                files.remove(d)
 
         # removed covered files from the list
         for f in fxd_files:
-            if f in files:
+            try:
                 files.remove(f)
+            except:
+                pass
+            
+        # check of directories with a fxd covering it
+        for d in copy.copy(files):
+            if os.path.isdir(d):
+                f = os.path.join(d, os.path.basename(d) + '.fxd')
+                if vfs.isfile(f):
+                    fxd_files.append(f)
+                    files.remove(d)
 
         # return items
-        return self.parse(parent, fxd_files, files)
-
+        if fxd_files:
+            return self.parse(parent, fxd_files, files)
+        else:
+            return []
 
 
     def update(self, parent, new_files, del_files, new_items, del_items, current_items):
