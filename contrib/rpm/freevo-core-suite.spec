@@ -14,7 +14,7 @@ Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
 Requires: python >= 2.2, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
 Requires: mmpython, python-fchksum, python-mx-base >= 2.0.4, 
 Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
-Requires: CDDB
+#Requires: CDDB
 Requires: %{freevoname}
 
 
@@ -37,6 +37,9 @@ for using freevo.
 %defattr(-,root,root)
 
 %changelog
+* Sat Sep 20 2003 TC Wan <tcwan@cs.usm.my>
+- Removed CDDB dependency since it's part of mmpython
+
 * Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
 - Added CDDB dependency
 

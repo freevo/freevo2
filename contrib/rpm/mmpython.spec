@@ -1,8 +1,8 @@
 Summary: Python Media Meta Data module. 
 Name: mmpython
-Version: 0.1
+Version: 0.2
 Release: 1_freevo
-Source0: %{name}_%{version}.tar.gz
+Source0: %{name}_%{version}.tar.bz2
 Copyright: lgpl
 Group: Development/Libraries
 URL:  http://sourceforge.net/projects/mmpython
@@ -16,7 +16,8 @@ and Vorbis data into an object oriented structure.
 Further info can be obtained from http://sourceforge.net/projects/mmpython.
 
 %prep
-%setup -n %{name}_%{version}
+#%setup -n %{name}_%{version}
+%setup -n %{name}
 
 %build
 env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
@@ -31,6 +32,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Sat Sep 20 2003 TC Wan <tcwan@cs.usm.my>
+- Update to version 0.2
+
 * Mon Sep  8 2003 TC Wan <tcwan@cs.usm.my>
 - Disable generation of .pyc files using --no-compile flag
 
