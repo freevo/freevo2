@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/04/15 20:02:04  dischi
+# use the plugin interface
+#
 # Revision 1.47  2003/04/12 18:27:29  dischi
 # special video item handling
 #
@@ -127,6 +130,32 @@ rc = rc.get_singleton()
 skin = skin.get_singleton()
 
 dirwatcher_thread = None
+
+
+from plugin import MainMenuPlugin
+
+#
+# Plugin interface to integrate the MediaMenu into Freevo
+#
+class PluginInterface(MainMenuPlugin):
+    def __init__(self, type=None):
+        self.type = type
+
+    def items(self, parent):
+        import skin
+
+        skin = skin.get_singleton()
+        menu_items = skin.settings.mainmenu.items
+
+        icon = ""
+        if menu_items[self.type].icon:
+            icon = os.path.join(skin.settings.icon_dir, menu_items[self.type].icon)
+        return ( menu_module.MenuItem(menu_items[self.type].name, icon=icon,
+                                      action=MediaMenu().main_menu,
+                                      arg=self.type, type='main',
+                                      image=menu_items[self.type].image, parent=parent), )
+
+
 
 class MediaMenu(Item):
     """

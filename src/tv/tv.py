@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/15 20:02:06  dischi
+# use the plugin interface
+#
 # Revision 1.5  2003/04/06 21:12:58  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -54,6 +57,9 @@
 
 
 import time
+import os
+
+from plugin import MainMenuPlugin
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -93,6 +99,26 @@ tvapp = mplayer.get_singleton()
 
 
 
+#
+# Plugin interface to integrate the tv module into Freevo
+#
+class PluginInterface(MainMenuPlugin):
+
+    def items(self, parent):
+        import skin
+
+        skin = skin.get_singleton()
+        menu_items = skin.settings.mainmenu.items
+
+        icon = ""
+        if menu_items['tv'].icon:
+            icon = os.path.join(skin.settings.icon_dir, menu_items['tv'].icon)
+        return ( menu.MenuItem(menu_items['tv'].name, icon=icon,
+                               action=TVMenu().main_menu, type='main',
+                               image=menu_items['tv'].image, parent=parent), )
+
+
+
 def get_tunerid(channel_id):
     tuner_id = None
     for vals in config.TV_CHANNELS:
@@ -111,8 +137,9 @@ def start_tv(mode=None, channel_id=None):
 
 
 
-
-
+#
+# The TV menu
+#
 class TVMenu(Item):
     
     def __init__(self):
@@ -175,5 +202,4 @@ class TVMenu(Item):
         TVGuide(start_time, stop_time, guide.chan_list[0].id, prg, start_tv, menuw)
 
 
-   
 
