@@ -11,16 +11,27 @@ http://freevo.sourceforge.net/cgi-bin/moin.cgi/DocumentationPage
 Short description:
 ------------------
 
-You can either use the full binary package or the source
-distribution. The full binary versions conatins all needed
-dependencies for Freevo, except external programs like mplayer and
-xine. But this version may not work on all distributions. So you could
-install Freevo and all dependencies into your system.
+1. Using the runtime package:
 
-To install Freevo, run 'python setup.py install' as root. If you don't
-want to install freevo, you can also start freevo directly in the
-unpacked tarball. It is not possible to install the full binary
-version of Freevo into the system.
+   If you only want to test Freevo, you can download the runtime
+   package, containing all Python modules needed to run Freevo. You
+   only need to install the extra applications like mplayer.
+
+   You can download the runtime from the Freevo download page at
+   http://sourceforge.net/project/showfiles.php?group_id=46652&release_id=194955
+
+   Then run 'freevo install <path-to-runtime.tgz>' to install the
+   runtime into Freevo.
+
+
+2. Installing Freevo into the system:
+
+   To install Freevo, run 'python setup.py install' as root. If you
+   don't want to install freevo, you can also start freevo directly in
+   the unpacked tarball. 
+
+   You need to have all dependencies installed.
+
 
 
 
@@ -82,4 +93,5 @@ o If you want to install Freevo on a different distributions, here is
   XMLTV				http://membled.com/work/apps/xmltv/  
   tvtime                        http://tvtime.sourceforge.net/
   
-
+  You can find more details on
+  http://freevo.sourceforge.net/cgi-bin/moin.cgi/DocumentationPage_2fInstallDeps
