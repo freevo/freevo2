@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/09/23 21:13:50  dischi
+# make discs work again
+#
 # Revision 1.24  2003/09/23 20:05:29  dischi
 # imdb patch from Eirik Meland
 #
@@ -134,7 +137,12 @@ class PluginInterface(plugin.ItemPlugin):
         
         try:
             duplicates = []
-            for id,name,year,type in fxd.guessImdb(self.item.name, self.disc_set):
+            if self.disc_set:
+                self.searchstring = self.item.media.label
+            else:
+                self.searchstring = self.item.name
+                
+            for id,name,year,type in fxd.guessImdb(self.searchstring, self.disc_set):
                 try:
                     for i in self.item.parent.play_items:
                         if hasattr(i, 'fxd_file') and i.name == name:
