@@ -20,6 +20,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/05/05 15:14:55  outlyer
+# Fixed a crash in the bookmarks submenu, and fixed the long standing bug
+# where times greater than 999 seconds (16m39s) wouldn't be recorded, because
+# mplayer logs time like this:
+#
+# A: XXX
+#
+# but after it reaches 1000,
+#
+# A:XXXX
+#
+# and the regular expression that got the time used a space.
+#
 # Revision 1.35  2003/04/26 20:55:44  dischi
 # Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
 # all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
@@ -282,10 +295,11 @@ class MPlayer:
         self.thread.play_mode = self.mode
         self.thread.item  = item
         self.item  = item
-        
+         
         if DEBUG:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
-            
+        print "Adjusting brightness"
+        os.system('/usr/sbin/matroxcolor')     
         rc.app(self)
 
         self.thread.mode    = 'play'
@@ -301,6 +315,8 @@ class MPlayer:
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         self.thread.item = None
+        print "Restoring brightness..."
+        os.system('/usr/sbin/undomatroxcolor')
         rc.app(None)
         while self.thread.mode == 'stop':
             time.sleep(0.3)
@@ -535,7 +551,7 @@ class MPlayerApp(childapp.ChildApp):
             else:
                 print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
 
-        self.RE_TIME = re.compile("^A: +([0-9]+)").match
+        self.RE_TIME = re.compile("^A:?([0-9]+)").match
         self.item = item
         self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)

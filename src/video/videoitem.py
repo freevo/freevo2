@@ -9,6 +9,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/05/05 15:14:55  outlyer
+# Fixed a crash in the bookmarks submenu, and fixed the long standing bug
+# where times greater than 999 seconds (16m39s) wouldn't be recorded, because
+# mplayer logs time like this:
+#
+# A: XXX
+#
+# but after it reaches 1000,
+#
+# A:XXXX
+#
+# and the regular expression that got the time used a space.
+#
 # Revision 1.48  2003/05/04 11:52:51  dischi
 # small sort bugfix
 #
@@ -502,17 +515,12 @@ class VideoItem(Item):
             sec = int(sec%60)
             time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
             file.name = 'Jump to %s' % (time)
-            file.mplayer_options += " -ss %s" % (time)
+            file.mplayer_options = str(self.mplayer_options) +  ' -ss %s' % time
             items += [file]
-        
         moviemenu = menu.Menu(self.name, items, xml_file=self.xml_file)
-        self.menuw.pushmenu(moviemenu)
-
+        menuw.pushmenu(moviemenu)
+        
         return
-
-
-
-
 
     def dvd_vcd_title_menu(self, arg=None, menuw=None):
         """
