@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/12/29 22:30:35  dischi
+# move to new Item attributes
+#
 # Revision 1.14  2003/12/03 17:25:04  mikeruelle
 # they seem to have lost a patch i put in.
 #
@@ -75,7 +78,6 @@ class MameItem(Item):
         self.name = title
         self.filename = file
 
-        self.xml_file = None
         self.parent = parent
 
         # find image for this file

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/29 22:28:13  dischi
+# move to new Item attributes
+#
 # Revision 1.12  2003/11/28 20:08:57  dischi
 # renamed some config variables
 #
@@ -89,16 +92,14 @@ class PluginInterface(plugin.ItemPlugin):
         """
         create list of possible actions
         """
+        self.item = item
+
         items = []
-        if ((item.type == 'video' and item.mode == 'file') or \
-            item.type in ( 'audio', 'image','playlist' )) and not item.media:
-            self.item = item
-            items.append((self.confirm_delete, _('Delete file'), 'delete'))
-            if item.type == 'video' and hasattr(item, 'fxd_file'):
+        if hasattr(item, 'files') and item.files:
+            if item.files.delete_possible():
+                items.append((self.confirm_delete, _('Delete'), 'delete'))
+            if item.files.fxd_file:
                 items.append((self.confirm_info_delete, _('Delete info'), 'delete_info'))
-        if item.type == 'dir':
-            self.item = item
-            items.append((self.confirm_delete, _('Delete directory'), 'delete'))
         return items
 
 
@@ -118,45 +119,15 @@ class PluginInterface(plugin.ItemPlugin):
         except:
             print 'can\'t delete %s' % filename
         
-    def delete_pictures(self):
-        _debug_('Deleting pictures for %s' % self.item.filename)
-        if self.item.type in ('video', 'audio'):
-            base = os.path.splitext(self.item.filename)[0] + '.'
-            if os.path.isfile(base + 'jpg'):
-                self.safe_unlink(base + 'jpg')
-            if os.path.isfile(base + 'png'):
-                self.safe_unlink(base + 'png')
-
-    def delete_fxd(self):
-        _debug_('Deleting fxd for %s' % self.item.filename)
-        if self.item.type == 'video' and hasattr(self.item, 'fxd_file') and \
-               os.path.isfile(self.item.fxd_file) and \
-               ((not config.VIDEO_SHOW_DATA_DIR) or \
-                (self.item.fxd_file.find(config.VIDEO_SHOW_DATA_DIR) != 0)):
-            self.safe_unlink(self.item.fxd_file)
-
     def delete_file(self):
-        if self.item.type == 'dir':
-            _debug_('Deleting %s' % self.item.dir)
-            try:
-                util.rmrf(self.item.dir)
-            except:
-                print 'can\'t delete %s' % self.item.dir
-        else:
-            _debug_('Deleting %s' % self.item.filename)
-
-            self.delete_pictures()
-            self.delete_fxd()
-
-            if os.path.isfile(self.item.filename):
-                self.safe_unlink(self.item.filename)
-
+        _debug_('Deleting %s' % self.item.url)
+        self.item.files.delete()
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
 
     def delete_info(self):
-        _debug_('Deleting info for %s' % self.item.filename)
-        self.delete_pictures()
-        self.delete_fxd()
+        _debug_('Deleting info for %s' % self.item.url)
+        self.safe_unlink(self.files.image)
+        self.safe_unlink(self.files.fxd_file)
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/29 22:30:35  dischi
+# move to new Item attributes
+#
 # Revision 1.3  2003/12/03 17:25:06  mikeruelle
 # they seem to have lost a patch i put in.
 #
@@ -90,7 +93,6 @@ class GenesisItem(Item):
                 self.name =  os.path.splitext(os.path.basename(file))[0]
             else:
                 self.name = capwords(romName)
-        self.xml_file = None
         self.parent = parent
 
         # find image for this file

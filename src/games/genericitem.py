@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/29 22:30:35  dischi
+# move to new Item attributes
+#
 # Revision 1.3  2003/11/29 11:39:38  dischi
 # use the given menuw abd not a global one
 #
@@ -70,7 +73,6 @@ class GenericItem(Item):
         self.filename = file
 
         self.name = os.path.splitext(os.path.basename(file))[0]
-        self.xml_file = None
         self.parent = parent
 
         # find image for this file

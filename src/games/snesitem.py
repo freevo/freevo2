@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/29 22:30:35  dischi
+# move to new Item attributes
+#
 # Revision 1.12  2003/12/03 17:25:05  mikeruelle
 # they seem to have lost a patch i put in.
 #
@@ -249,7 +252,6 @@ class SnesItem(Item):
             self.name = os.path.splitext(os.path.basename(file))[0]  + ' (' + romCountryTxt + ' - ' + romLicTxt + ')'
         else:
             self.name = capwords(romName) + ' (' + romCountryTxt + ' - ' + romLicTxt + ')'
-        self.xml_file = None
         self.parent = parent
         
         # find image for this file

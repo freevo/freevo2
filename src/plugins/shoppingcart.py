@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/12/29 22:28:13  dischi
+# move to new Item attributes
+#
 # Revision 1.2  2003/12/14 11:53:03  dischi
 # o use os.system to move because Python 2.2.3 has no shutil.move
 # o add menu shortcuts
@@ -69,69 +72,62 @@ class PluginInterface(plugin.ItemPlugin):
     def __init__(self):
         plugin.ItemPlugin.__init__(self)
         self.item = None
-        self.pfile = os.path.join(config.FREEVO_CACHEDIR, 'cart')
+        self.cart = []
 
     def moveHere(self, arg=None, menuw=None):
-        cartfiles = util.read_pickle(self.pfile)
         popup = PopupBox(text=_('Moving files...'))
         popup.show()
-        for cartfile in cartfiles:
-            # python 2.2 has no shutil.move
-            os.system('mv "%s" "%s"' % (cartfile, self.item.dir))
-        os.unlink(self.pfile)
+        for cartfile in self.cart:
+            cartfile.files.move(self.item.dir)
         popup.destroy()
+        self.cart = []
         rc.post_event(em.MENU_BACK_ONE_MENU)
+
 
     def copyHere(self, arg=None, menuw=None):
-        cartfiles = util.read_pickle(self.pfile)
         popup = PopupBox(text=_('Copying files...'))
         popup.show()
-        for cartfile in cartfiles:
-            shutil.copy(cartfile, self.item.dir)
-        os.unlink(self.pfile)
+        for cartfile in cart:
+            cartfile.files.copy(self.item.dir)
         popup.destroy()
+        self.cart = []
         rc.post_event(em.MENU_BACK_ONE_MENU)
 
+
     def addToCart(self, arg=None, menuw=None):
-        if (os.path.isfile(self.pfile) == 0):
-            cartfiles = []
-        else:
-            cartfiles = util.read_pickle(self.pfile)
-        if self.item.type == 'dir':
-            cartfiles.append(self.item.dir)
-        else:
-            cartfiles.append(self.item.filename)
-        util.save_pickle(cartfiles, self.pfile)
+        self.cart.append(self.item)
         if isinstance(menuw.menustack[-1].selected, menu.MenuItem):
             rc.post_event(em.MENU_BACK_ONE_MENU)
         else:
             rc.post_event(em.Event(em.OSD_MESSAGE, arg=_('Added to Cart')))
             
+
     def deleteCart(self, arg=None, menuw=None):
-        if (os.path.isfile(self.pfile) != 0):
-            os.unlink(self.pfile)
+        self.cart = []
         rc.post_event(em.MENU_BACK_ONE_MENU)
+
 
     def actions(self, item):
         self.item = item
         myactions = []
-        if (os.path.isfile(self.pfile) == 0):
-            cartfiles = []
-        else:
-            cartfiles = util.read_pickle(self.pfile)
 
         if item.type == 'dir':
-            if len(cartfiles) > 0:
-                myactions.append((self.moveHere, _('Cart: Move Files Here')))
+            if len(self.cart) > 0:
+                for c in self.cart:
+                    if not c.files.move_possible():
+                        break
+                else:
+                    myactions.append((self.moveHere, _('Cart: Move Files Here')))
                 myactions.append((self.copyHere, _('Cart: Copy Files Here')))
-            if not item.dir in cartfiles:
+
+            if not item in self.cart:
                 myactions.append((self.addToCart, _('Add Directory to Cart'), 'cart:add'))
 
-        elif hasattr(item, 'filename'):
-            if not item.filename in cartfiles:
-                myactions.append((self.addToCart, _('Add File to Cart'), 'cart:add'))
+        elif hasattr(item, 'files') and item.files and item.files.copy_possible() and \
+                 not item in self.cart:
+            myactions.append((self.addToCart, _('Add File to Cart'), 'cart:add'))
 
-        if (os.path.isfile(self.pfile) != 0):
+        if self.cart:
             myactions.append((self.deleteCart, _('Delete Cart')))
 
         return myactions
