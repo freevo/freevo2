@@ -1,10 +1,6 @@
-Index: cfg-common.h
-===================================================================
-RCS file: /cvsroot/mplayer/main/cfg-common.h,v
-retrieving revision 1.82
-diff -u -u -r1.82 cfg-common.h
---- cfg-common.h	27 Jan 2003 23:41:38 -0000	1.82
-+++ cfg-common.h	29 Jan 2003 04:47:25 -0000
+diff -Naur mplayer-orig/cfg-common.h mplayer/cfg-common.h
+--- mplayer-orig/cfg-common.h	Mon Jan 27 17:41:38 2003
++++ mplayer/cfg-common.h	Tue Jan 28 23:54:25 2003
 @@ -22,6 +22,8 @@
  	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
  	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -14,13 +10,9 @@ diff -u -u -r1.82 cfg-common.h
  #else
  	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
  #endif
-Index: libmpdemux/stream.h
-===================================================================
-RCS file: /cvsroot/mplayer/main/libmpdemux/stream.h,v
-retrieving revision 1.55
-diff -u -u -r1.55 stream.h
---- libmpdemux/stream.h	4 Jan 2003 20:11:06 -0000	1.55
-+++ libmpdemux/stream.h	29 Jan 2003 04:47:25 -0000
+diff -Naur mplayer-orig/libmpdemux/stream.h mplayer/libmpdemux/stream.h
+--- mplayer-orig/libmpdemux/stream.h	Sat Jan  4 14:11:06 2003
++++ mplayer/libmpdemux/stream.h	Tue Jan 28 23:54:30 2003
 @@ -206,6 +206,13 @@
  
  #ifdef USE_DVDREAD
@@ -35,13 +27,9 @@ diff -u -u -r1.55 stream.h
  #ifdef USE_MPDVDKIT
  #if (USE_MPDVDKIT == 2)
  #include "../libmpdvdkit2/dvd_reader.h"
-Index: libmpdvdkit2/libdvdcss.c
-===================================================================
-RCS file: /cvsroot/mplayer/main/libmpdvdkit2/libdvdcss.c,v
-retrieving revision 1.7
-diff -u -u -r1.7 libdvdcss.c
---- libmpdvdkit2/libdvdcss.c	8 Jan 2003 16:10:39 -0000	1.7
-+++ libmpdvdkit2/libdvdcss.c	29 Jan 2003 04:47:26 -0000
+diff -Naur mplayer-orig/libmpdvdkit2/libdvdcss.c mplayer/libmpdvdkit2/libdvdcss.c
+--- mplayer-orig/libmpdvdkit2/libdvdcss.c	Wed Jan  8 10:10:39 2003
++++ mplayer/libmpdvdkit2/libdvdcss.c	Tue Jan 28 23:54:35 2003
 @@ -97,6 +97,8 @@
  #   include <unistd.h>
  #endif
