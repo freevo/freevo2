@@ -9,14 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/04 19:04:49  dischi
+# o fix item rectange calculation
+# o remove bad log message
+#
 # Revision 1.15  2004/02/04 18:37:14  dischi
-# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
-# needed to draw from -3 to max+6 for a 3 pixel border around the item.
-# This is stupid, max is the item width/height. So now it's max+3, same
-# value as on the other side. This changes fix some problems when
-# an item doesn't fit in it's own height anymore.
-# Changed is the complete skin code and all skins. But some skins may
-# depend on that error, so maybe they need more fixes in the future.
+# <removed wrong log message>
 #
 # Revision 1.14  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
@@ -134,12 +132,16 @@ class TVListing_Area(Skin_Area):
             r = self.get_item_rectangle(label_val.rectangle, 20, label_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
         if default_val.rectangle:
+            print default_val.font.h
+            print
             r = self.get_item_rectangle(default_val.rectangle, 20, default_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
         if selected_val.rectangle:
+            print selected_val.font.h
+            print
             r = self.get_item_rectangle(selected_val.rectangle, 20, selected_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
-
+            
         head_h = head_val.font.h
         if head_val.rectangle:
             r = self.get_item_rectangle(head_val.rectangle, 20, head_val.font.h)[2]
@@ -154,13 +156,13 @@ class TVListing_Area(Skin_Area):
     
         
 
-    def fit_item_in_rectangle(self, rectangle, width, height):
+    def fit_item_in_rectangle(self, rectangle, width, height, font_h):
         """
         calculates the rectangle geometry and fits it into the area
         """
         x = 0
         y = 0
-        r = self.get_item_rectangle(rectangle, width, height)[2]
+        r = self.get_item_rectangle(rectangle, width, font_h)[2]
         if r.width > width:
             r.width, width = width, width - (r.width - width)
         if r.height > height:
@@ -171,7 +173,6 @@ class TVListing_Area(Skin_Area):
         if r.y < 0:
             r.y, y = 0, -r.y
             height -= y
-
         return Geometry(x, y, width, height), r
     
 
@@ -247,7 +248,8 @@ class TVListing_Area(Skin_Area):
 
         ig = Geometry( 0, 0, col_size, head_h )
         if head_val.rectangle:
-            ig, r2 = self.fit_item_in_rectangle( head_val.rectangle, col_size, head_h )
+            ig, r2 = self.fit_item_in_rectangle( head_val.rectangle, col_size,
+                                                 head_h, head_h )
 
 
         self.drawroundbox( x_contents - r.width, y_contents - r.height,
@@ -387,7 +389,8 @@ class TVListing_Area(Skin_Area):
                     # calc the geometry values
                     ig = Geometry(0, 0, tx1-tx0+1, item_h)
                     if val.rectangle:
-                        ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1, item_h)
+                        ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1,
+                                                           item_h, font_h)
                         self.drawroundbox(tx0+r.x, ty0+r.y, r.width, item_h, r)
 
                     # draw left flag and reduce width and add to x0
@@ -409,8 +412,7 @@ class TVListing_Area(Skin_Area):
                     # draw the text
                     if tx0 < tx1:
                         self.drawstring(prg.title, font, content, x=tx0+ig.x,
-                                        y=ty0+ig.y, width=ig.width,
-                                        height=item_h - 2 * ig.y,
+                                        y=ty0+ig.y, width=ig.width, height=ig.height,
                                         align_v='center', align_h = val.align)
 
             i += 1
