@@ -9,7 +9,7 @@
 # Logging is initialized here, so it should be imported first
 import config
 
-import sys, socket, random, time, os
+import sys, socket, random, time, os, copy
 
 # Various utilities
 import util
