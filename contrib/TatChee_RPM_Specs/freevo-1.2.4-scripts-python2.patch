@@ -42,15 +42,10 @@
 +++ strptime.py	Tue Jul 16 11:54:39 2002
 @@ -1,4 +1,4 @@
 -#!/usr/bin/python
-
 +#!/usr/bin/env python2
-
  """Implements a pure Python version of strptime.
-
  
-
  
-
 --- helpers/grabcover.py.orig	Tue Jul 16 11:45:14 2002
 +++ helpers/grabcover.py	Tue Jul 16 11:45:27 2002
 @@ -1,4 +1,4 @@
