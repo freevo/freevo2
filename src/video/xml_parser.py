@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/19 16:26:35  dischi
+# small bugfix
+#
 # Revision 1.4  2003/01/12 13:51:51  dischi
 # Added the feature to remove items for videos, too. For that the interface
 # was modified (update instead of remove).
@@ -153,7 +156,7 @@ def xml_parseInfo(info_node, i):
 def parseMovieFile(file, parent, duplicate_check):
     dir = os.path.dirname(file)
     movies = []
-    
+
     try:
         parser = qp_xml.Parser()
         box = parser.parse(open(file).read())
