@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/12/09 20:34:36  dischi
+# this code will never used for helpers
+#
 # Revision 1.2  2003/12/06 16:45:13  dischi
 # do not create a screen for helpers
 #
@@ -43,10 +46,6 @@ osd = osd.get_singleton()
 singleton = None
 
 def get_singleton():
-    # we don't need this for helpers
-    if config.HELPER:
-        return
-    
     global singleton
     if not singleton:
         singleton = Screen()
