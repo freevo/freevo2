@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2003/06/24 21:37:06  outlyer
+# Allow skins screenshots for SkinSelector to be jpeg. The PNG files bloat the
+# size of the download dramatically.
+#
 # Revision 1.99  2003/06/22 10:15:16  gsbarbieri
 # Fixes some bugs introduced in the last commit (Sorry, but as I don't use TV, sometimes I forgot to test :( )
 #
@@ -299,6 +303,8 @@ class Skin:
             name  = os.path.splitext(os.path.basename(skin))[0]
             if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
                 image = '%s.png' % os.path.splitext(skin)[0]
+            elif os.path.isfile('%s.jpg' % os.path.splitext(skin)[0]):
+                image = '%s.jpg' % os.path.splitext(skin)[0]
             else:
                 image = None
             ret += [ ( name, image, skin ) ]
