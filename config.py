@@ -31,6 +31,13 @@ VIDREC_HQ = ''
 
 # XXX Need to do ratio and scaling
 
+#
+# btaudio notes:
+# use the analog channel, /dev/dsp2,mixer1 for a system with 1 soundcard and 1 bttv card
+# input levels seem high, set a low recgain
+# the samplerate cannot be set to exactly 44100, it becomes 44800 instead. 32000 works
+# NUVrec cannot do samplerates other than 44100, stereo, 16 bits.
+#
 def ConfigInit(videotools = 'sim'):
     print 'VIDEOTOOLS = %s' % videotools
 
