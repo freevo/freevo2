@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2003/08/26 20:19:25  outlyer
+# Found the cause of the hang when initializing Freevo; Freevo was hanging
+# on the set_mode call in Pygame, and it turns out it was simply because we didn't
+# do anything to tty0 which is where Freevo was running when called over a remote
+# shell.
+#
 # Revision 1.83  2003/08/24 10:17:11  dischi
 # fallback to default font when the font is not found (bad but better than crash)
 #
@@ -359,7 +365,7 @@ class OSD:
         # disable term blanking for mga and fbcon and restore the
         # tty so that sdl can use it
         if config.CONF.display in ('mga', 'fbcon'):
-            for i in range(1,7):
+            for i in range(0,7):
                 try:
                     fd = os.open('/dev/tty%s' % i, os.O_RDONLY | os.O_NONBLOCK)
                     try:
