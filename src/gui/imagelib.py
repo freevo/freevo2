@@ -66,13 +66,7 @@ def load(url, size=None, cache=False, vfs_save=False):
     try:
         image = mevas.imagelib.new(url.size, url.tostring(), url.mode)
     except:
-
-        if url[:8] == 'thumb://':
-            filename = os.path.abspath(url[8:])
-            thumbnail = True
-        else:
-            filename = os.path.abspath(url)
-            thumbnail = False
+        filename = os.path.abspath(url)
 
         if vfs_save:
             vfs_save = vfs.getoverlay('%s.raw-%sx%s' % (filename, width, height))
@@ -96,33 +90,12 @@ def load(url, size=None, cache=False, vfs_save=False):
             return None
 
         try:
-            if isstring(filename) and filename.endswith('.raw'):
-                # load cache
-                data  = util.read_thumbnail(filename)
-                # convert to image
-                image = mevas.imagelib.new(data[1], data[0], data[2])
-
-            elif thumbnail:
-                # load cache or create it
-                data = util.cache_image(filename)
-                # convert to image
-                try:
-                    image = mevas.imagelib.new(data[1], data[0], data[2])
-                    #image = mevas.imagelib.new(data[1], data[0], 'FIXME')
-                except:
-                    try:
-                        data = util.create_thumbnail(filename)
-                        image = mevas.imagelib.new(data[1], data[0], data[2])
-                        #image = mevas.imagelib.new(data[1], data[0], 'FIXME')
-                    except ValueError:
-                        image = mevas.imagelib.open(filename)
-            else:
-                try:
-                    image = mevas.imagelib.open(filename)
-                except Exception, e:
-                    print 'imagelib load problem: %s - trying Imaging' % e
-                    i = Image.open(filename)
-                    image = mevas.imagelib.new(i.tostring(), i.size, i.mode)
+            try:
+                image = mevas.imagelib.open(filename)
+            except Exception, e:
+                print 'imagelib load problem: %s - trying Imaging' % e
+                i = Image.open(filename)
+                image = mevas.imagelib.new(i.tostring(), i.size, i.mode)
 
         except:
             print 'Unknown Problem while loading image %s' % String(url)
@@ -146,7 +119,6 @@ def load(url, size=None, cache=False, vfs_save=False):
 
 
 item_imagecache = util.objectcache.ObjectCache(30, desc='item_image')
-load_imagecache = util.objectcache.ObjectCache(20, desc='load_image')
 
 def item_image(item, size, icon_dir, force=False):
     """
@@ -180,15 +152,17 @@ def item_image(item, size, icon_dir, force=False):
     imagefile = None
     
     if item.image:
-        if isinstance(item.image, ImageFile.ImageFile):
+        try:
+            # load the thumbnail
+            image = util.thumbnail.load(item.image)
+        except:
+            # maybe image is something else (like already an image object)
             image = load(item.image)
-        else:
-            image = load('thumb://%s' % item.image, None, load_imagecache)
 
-        if image and item['rotation']:
-            image = mevas.imagelib.rotate(image, item['rotation'])
-            
-    if not image:
+    if image:
+        if item['rotation']:
+            image.rotate(item['rotation'])
+    else:
         if not force:
             return None
 
@@ -225,19 +199,17 @@ def item_image(item, size, icon_dir, force=False):
         if not imagefile:
             return None
 
-        image = load('thumb://%s' % imagefile, None, load_imagecache)
-
+        # load the thumbnail
+        image = util.thumbnail.load(imagefile)
+            
         if not image:
             return None
-
-    else:
-        force = 0
 
     if type and len(type) > 4:
         type = type[:5]
         
-    i_w   = image.width
-    i_h   = image.height
+    i_w = image.width
+    i_h = image.height
     aspect = float(i_h)/i_w
 
     if type == 'audio' and aspect < 1.3 and aspect > 0.8:
@@ -252,11 +224,10 @@ def item_image(item, size, icon_dir, force=False):
         i_h = 7
         
     if int(float(width * i_h) / i_w) > height:
-        width =  int(float(height * i_w) / i_h)
+        width = int(float(height * i_w) / i_h)
     else:
         height = int(float(width * i_h) / i_w)
 
-    image = mevas.imagelib.scale(image, (width, height))
-
+    image.scale((width, height))
     item_imagecache[key] = image
     return image
