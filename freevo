@@ -5,6 +5,73 @@
 # $Id$
 #
 
+# Is runapp present? If not it needs to be compiled
+if ! test -a runapp ; then
+    echo ./runapp not found! You must compile freevo, see the INSTALL file.
+    exit
+fi
+
+#
+# At the moment we can use either version 1 or 2 of the runtime.
+# This ugly hack contains a lot of redundant code, we'll switch
+# over to version 2 only as soon as it is tested and released.
+#
+
+# Desired runtime version
+RUNTIME_VERSION=2
+
+# The runtime is stored in a directory one level up
+RT_DIR=../freevo_runtime$RUNTIME_VERSION
+
+
+# First check if the runtime is installed
+if test -a $RT_DIR/freevo_python ; then
+    
+    # Double-check that we have the correct runtime version
+    rt_ver=`cat $RT_DIR/VERSION`
+    if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
+        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
+        echo Please install the required version in $RT_DIR/
+        exit
+    fi
+
+    # Setup the Python environment variables
+    export PYTHONHOME=$RT_DIR
+    
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_runtime
+    export LD_PRELOAD=`cat $RT_DIR/preloads`
+
+    # Execute using the runtime:
+    echo "Using the Freevo runtime ($RT_DIR)"
+    
+    # Start the lirc remote control app if the device is present
+    if test -S /dev/lircd ; then
+        echo Found a lirc device, starting the remote control daemon
+        $RT_DIR/freevo_python rc_client/remote.py --remote=lirc &> /dev/null &
+    fi
+
+    # XXX Uncomment the command below to enable joystick input. 
+    # XXX It has not been tested! Please send in testreports!
+    # If JOY_DEV is 0 then joy.py just exits.
+    #$RT_DIR/freevo_python rc_client/joy.py &> /dev/null &
+
+    # Start the main freevo application
+    $RT_DIR/freevo_python main.py $*
+
+    # Freevo exited, make sure all children are killed
+    sleep 1
+    killall -9 freevo_python &> /dev/null
+    killall -9 freevo_xwin &> /dev/null
+    killall -9 mplayer &> /dev/null
+    exit
+
+fi
+
+echo
+echo Runtime version 2 not found, trying version 1...
+echo 
+
 # Required runtime version
 RUNTIME_VERSION=1
 
@@ -62,7 +129,7 @@ fi
 echo
 echo
 echo
-echo Runtime not found!
+echo No runtime found!
 echo 
 echo If Freevo does not work for you, download the runtime from 
 echo the website, http://freevo.sourceforge.net
