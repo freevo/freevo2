@@ -28,7 +28,7 @@
 	  </selection>
 	</item>
 
-	<item type="dir" image="/usr/share/pixmaps/gnome-folder.png">
+	<item type="dir" image="icons/gnome/gnome-folder.png">
 	  <font name="Arial_Bold" size="14" color="0xffff66"/>
 	  <shadow visible="no"/> 
 	  <selection visible="yes" bgcolor="0xff000000" radius="5" spacing="8">
@@ -37,7 +37,7 @@
 	  </selection>
 	</item>
 
-	<item type="playlist" image="/usr/share/pixmaps/gedit-icon.png">
+	<item type="playlist" image="icons/gnome/gedit-icon.png">
 	  <font name="Arial_Bold" size="14" color="0x6666ff"/>
 	  <shadow visible="no"/> 
 	  <selection visible="yes" bgcolor="0xff000000" radius="5" spacing="8">
