@@ -27,6 +27,9 @@ o Compile Freevo
   o Test the MGA G400 OSD framebuffer driver
 
 o Update the settings in config.py!
+  o TV_SETTINGS, VCR_SETTINGS, TV_CHANNELS depending on where you live.
+  o DIR_MP3, DIR_MOVIES, DIR_RECORD for where your files are
+  o EPG_URL if you want to use the Electronic Program Guide.
 
 o Test Freevo using the simulated OSD and remote, just start "freevo"
   in the main directory
