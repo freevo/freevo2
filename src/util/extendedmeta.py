@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/24 18:55:38  dischi
+# unicode fix
+#
 # Revision 1.10  2004/02/22 20:20:06  dischi
 # unicode fix again
 #
@@ -157,7 +160,7 @@ def addPathDB(path, dirtitle, type='*.mp3', verbose=True):
 
 ##### Audio Information
 
-various = '__various__'
+various = u'__various__'
 
 class AudioParser:
 
