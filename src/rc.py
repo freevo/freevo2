@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/11/02 10:50:15  dischi
+# better error handling
+#
 # Revision 1.26  2003/10/26 17:04:26  dischi
 # Patch from Soenke Schwardt to use the time to fix repeat problems with
 # some remote receiver.
@@ -49,6 +52,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import os
 import copy
 import socket
 import config
@@ -121,8 +125,11 @@ class RemoteControl:
 
         if self.pylirc:
             try:
-                pylirc.init('freevo', config.LIRCRC)
-                pylirc.blocking(0)
+                if os.path.isfile(config.LIRCRC):
+                    pylirc.init('freevo', config.LIRCRC)
+                    pylirc.blocking(0)
+                else:
+                    raise IOError
             except RuntimeError:
                 print 'WARNING: Could not initialize PyLirc!'
                 self.pylirc = 0
