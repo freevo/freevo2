@@ -54,8 +54,7 @@ def current_time():
     return time.strftime(format)
 
 # function calls to get more info from the skin
-function_calls = { 'comingup': record.client.comingup,
-                   'time': current_time }
+function_calls = { 'time': current_time }
 
 class InfoArea(Area):
     """
