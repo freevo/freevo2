@@ -40,15 +40,6 @@ def match_files(dir, suffix_list):
     files.sort(lambda l, o: cmp(l.upper(), o.upper()))
     return files
     
-    
-def strip_suffix(str):
-    pos = str.rfind('.')
-    if pos == -1:
-        return str
-    else:
-        return str[0:pos]
-    
-    
 def makeNonBlocking(fd):
 
     # XXX Ugly hack to work around Python <2.2 which doesn't

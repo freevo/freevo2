@@ -149,7 +149,7 @@ def cwd(arg=None, menuw=None):
 
     # "normal" movie files
     for file in mplayer_files:
-        title = util.strip_suffix(os.path.basename(file))
+        title = os.path.splitext(os.path.basename(file))[0]
         image = None
 
         # find image for tv show and build new title
@@ -165,10 +165,10 @@ def cwd(arg=None, menuw=None):
 
 
         # find image for this file
-        if os.path.isfile(util.strip_suffix(file) + ".png"):
-            image = util.strip_suffix(file) + ".png"
-        elif os.path.isfile(util.strip_suffix(file) + ".jpg"):
-            image = util.strip_suffix(file) + ".jpg"
+        if os.path.isfile(os.path.splitext(file)[0] + ".png"):
+            image = os.path.splitext(file)[0] + ".png"
+        elif os.path.isfile(os.path.splitext(file)[0] + ".jpg"):
+            image = os.path.splitext(file)[0] + ".jpg"
 
         # add file to list
         files += [ ( title, file, mplayer_files, image ) ]
