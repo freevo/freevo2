@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2002/09/21 10:12:11  dischi
+# Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
+# skin.
+#
 # Revision 1.20  2002/09/08 18:26:03  krister
 # Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
 #
@@ -512,37 +516,6 @@ class OSD:
         return surf
 
         
-    def popup_box(self, text):
-
-        if not pygame.display.get_init():
-            return None
-
-        """
-        Trying to make a standard popup/dialog box for various usages.
-        Currently it just draws itself in the middle of the screen.
-
-        Arguments: Text, the text to print.
-        Returns:   None
-        Todo:      Should be able to calculate size of box to draw.
-                   Maybe be able to set size manually as well.
-                   It'd look nice to have an icon drawn for some events
-                   such as ejects.
-        """
-        start_x = self.width/2 - 180
-        start_y = self.height/2 - 30
-        end_x   = self.width/2 + 180
-        end_y   = self.height/2 + 30
-
-        # XXX This is a hack to get a border around a white box to look
-        # XXX nicer.
-        self.drawbox(start_x-2, start_y-2, end_x+2, end_y+2, width=2,
-                     color=self.COL_BLACK)
-        self.drawbox(start_x, start_y, end_x, end_y, width=-1,
-                     color=((60 << 24) | self.COL_WHITE))
-        self.drawstring(text, start_x+20, start_y+10,
-                        fgcolor=self.COL_BLACK, bgcolor=self.COL_WHITE)
-        
-
     # Return a (width, height) tuple for the given string, font, size
     def stringsize(self, string, font=None, ptsize=0):
         if not pygame.display.get_init():

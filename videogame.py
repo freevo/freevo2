@@ -65,6 +65,9 @@ rc = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
+import skin    # The skin class
+skin = skin.get_singleton()
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -174,7 +177,7 @@ def main_menu(arg=None, menuw=None):
 
     # Check for the 'rominfo' helper app first, it is required!
     if not os.path.isfile('./rominfo'):
-        osd.popup_box('The "rominfo" program was not found!')
+        skin.PopupBox('The "rominfo" program was not found!')
         osd.update()
         time.sleep(2)
         rc.post_event(rc.REFRESH_SCREEN)

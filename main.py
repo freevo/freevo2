@@ -4,6 +4,10 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2002/09/21 10:12:11  dischi
+# Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
+# skin.
+#
 # Revision 1.67  2002/09/18 18:42:19  dischi
 # Some small changes here and there, nothing important
 #
@@ -381,7 +385,7 @@ class RemovableMedia:
 
         if dir == 'open':
             if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
-            osd.popup_box('Ejecting disc in drive %s' % self.drivename)
+            skin.PopupBox('Ejecting disc in drive %s' % self.drivename)
             osd.update()
             os.system('eject %s' % self.mountdir)
             self.tray_open = 1
@@ -389,7 +393,7 @@ class RemovableMedia:
         
         elif dir == 'close':
             if DEBUG: print 'Inserting %s' % self.drivename
-            osd.popup_box('Reading disc in drive %s' % self.drivename)
+            skin.PopupBox('Reading disc in drive %s' % self.drivename)
             osd.update()
 
             # close the tray, identifymedia does the rest,
@@ -402,7 +406,7 @@ class RemovableMedia:
         """
 
         if DEBUG: print 'Mounting disc in drive %s' % self.drivename
-        osd.popup_box('Locking disc in drive %s' % self.drivename)
+        skin.PopupBox('Locking disc in drive %s' % self.drivename)
         osd.update()
         util.mount(self.mountdir)
         return
@@ -413,7 +417,7 @@ class RemovableMedia:
         """
 
         if DEBUG: print 'Unmounting disc in drive %s' % self.drivename
-        osd.popup_box('Releasing disc in drive %s' % self.drivename)
+        skin.PopupBox('Releasing disc in drive %s' % self.drivename)
         osd.update()
         util.umount(self.mountdir)
         return
@@ -432,6 +436,8 @@ def main_func():
             media = RemovableMedia(mountdir=dir, devicename=device,
                                    drivename=name)
             media.move_tray(dir='close')
+            osd.clearscreen(color=osd.COL_BLACK)
+            osd.update()
             config.REMOVABLE_MEDIA.append(media)
 
     # Remove the ROM_DRIVES member to make sure it is not used by

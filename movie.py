@@ -11,6 +11,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2002/09/21 10:12:11  dischi
+# Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
+# skin.
+#
 # Revision 1.38  2002/09/19 19:10:18  dischi
 # bugfix
 #
@@ -108,6 +112,9 @@ rc = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
+import skin    # The skin class
+skin = skin.get_singleton()
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -167,7 +174,7 @@ def play_vcd(arg=None, menuw=None):
 def dvd_vcd_menu_generate(media, type, menuw):
 
     # Figure out the number of titles on this disc
-    osd.popup_box('Scanning disc, be patient...')
+    skin.PopupBox('Scanning disc, be patient...', icon='icons/cdrom_mount.png')
     osd.update()
     os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
 
