@@ -18,9 +18,6 @@ import md5
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-# XML support
-import movie_xml
-
 #
 # Get all subdirectories in the given directory
 #
