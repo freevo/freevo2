@@ -89,7 +89,7 @@ class PluginInterface(generic.PluginInterface):
         generic.PluginInterface.__init__(self)
         self.replex = find_file_in_path( 'replex' )
 
-        if self.replex and self.program == 'tzap':
+        if self.replex:
             log.info('using replex')
             self.suffix = '.mpg'
         else:
