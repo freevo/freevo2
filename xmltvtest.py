@@ -1,12 +1,12 @@
 import xmltv
-import time
+import time,config
 
 # Use the pure Python version until I can figure out
 # why the "time" module's version won't understand the
 # time zone part of XMLTV's date format. 
 import strptime
 
-programs = xmltv.read_programmes(open('/tmp/TV.xml'))
+programs = xmltv.read_programmes(open(config.XMLTV_FILE))
 nowtime = time.localtime() 
 
 for program in programs:

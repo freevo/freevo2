@@ -155,6 +155,7 @@ DIR_MOVIES = [ ('Test Movies', './testfiles/Movies') ]
 DIR_RECORD = './testfiles/Movies/Recorded'
 
 
+
 #
 # Electronic Program Guide (EPG) settings
 #
@@ -163,6 +164,12 @@ DIR_RECORD = './testfiles/Movies/Recorded'
 # 
 EPG_URL = 'http://tv.yahoo.com/grid?.intl=us&zip=63303&.done=&lineup=us_MO24526&dur=6'
 
+#
+# XMLTV File
+#
+# This is the XMLTV file that can be optionally used for TV listings
+#
+XMLTV_FILE = '/tmp/TV.xml'
 
 #
 # Remote control commands translation table. Replace this with the commands that
