@@ -526,16 +526,16 @@
 		   mode="hard" expression="filename" />
    	     <newline />	  
 	  </if>
-	  <if expression="len( playlist )>0">
+	  <if expression="len(playlist)>0">
   	     <text height="line_height"
 	           align="left" font="info value" 
-		   mode="hard" expression="len( playlist )" />
+		   mode="hard" expression="len(playlist)" />
   	     <text height="line_height"
 	           align="left" font="info value"
 		   mode="hard"> items in this playlist</text>
    	     <newline />	  
 	  </if>
-	  <if expression="len( playlist )==0">
+	  <if expression="len(playlist)==0">
   	     <text height="line_height"
 	           align="left" font="info value"
 		   mode="hard">This playlist is empty!</text>
