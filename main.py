@@ -7,6 +7,7 @@
 import sys, socket, random, time, os
 import traceback
 
+# XXX Add real logfile handling, using different log levels etc
 if 0:
     # Redirect stdout and stderr to log files, timestamp them
     sys.stderr = open('./log_main_err', 'a', 0)
