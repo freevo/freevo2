@@ -168,6 +168,7 @@ o Make a new release
   o "Processor Type" = "i386"
   o Paste in the "File Release Notes" from below
   o Paste in the "Changes" for this version from the Changelog file
+  o Select "Preserve preformatted text"
 
 ----------------------------------------------------------------------
 File release notes:
