@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/09/07 18:57:43  dischi
+# image viwer auto slideshow
+#
 # Revision 1.67  2004/08/27 14:22:01  dischi
 # The complete image code is working again and should not crash. The zoom
 # handling got a complete rewrite. Only the gphoto plugin is not working
@@ -91,7 +94,7 @@ class ImageViewer(Application):
                            str(IMAGE_ZOOM_GRID6):6, str(IMAGE_ZOOM_GRID7):7,
                            str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
-        self.slideshow   = False
+        self.slideshow   = True
         self.last_image  = None
         self.last_item   = None
         self.osd_text    = None
@@ -99,6 +102,7 @@ class ImageViewer(Application):
         self.filename    = None
         self.rotation    = None
         self.zomm        = None
+        self.signal_registered = False
 
 
     def hide(self):
@@ -123,8 +127,8 @@ class ImageViewer(Application):
 
         self.osd_mode = 0
         self.filename = None
-        self.slideshow = False
         # we don't need the signalhandler anymore
+        self.signal_registered = False
         rc.unregister(self.signalhandler)
         # reset bitmap cache
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
@@ -272,9 +276,9 @@ class ImageViewer(Application):
         gui.display.update()
 
         # start timer
-        if self.fileitem.duration:
-            rc.register(self.signalhandler, False, self.fileitem.duration)
-            self.slideshow = True
+        if self.fileitem.duration and self.slideshow and not self.signal_registered:
+            rc.register(self.signalhandler, False, self.fileitem.duration*100)
+            self.signal_registered = True
 
         self.last_image = image
         self.last_item  = item
@@ -308,8 +312,8 @@ class ImageViewer(Application):
         the duration is over.
         """
         self.hide()
+        self.signal_registered = False
         self.eventhandler(PLAY_END)
-        self.slideshow = False
 
 
     def eventhandler(self, event, menuw=None):
@@ -321,10 +325,12 @@ class ImageViewer(Application):
                 self.post_event(Event(OSD_MESSAGE, arg=_('pause')))
                 self.slideshow = False
                 rc.unregister(self.signalhandler)
+                self.signal_registered = False
             else:
                 self.post_event(Event(OSD_MESSAGE, arg=_('play')))
                 self.slideshow = True
                 rc.register(self.signalhandler, False, 100)
+                self.signal_registered = True
             return True
 
         if event == STOP:
@@ -334,7 +340,7 @@ class ImageViewer(Application):
         if event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
             # up and down will stop the slideshow and pass the
             # event to the playlist
-            self.slideshow = False
+            self.signal_registered = False
             rc.unregister(self.signalhandler)
             self.fileitem.eventhandler(event)
             return True

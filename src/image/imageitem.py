@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/09/07 18:57:43  dischi
+# image viwer auto slideshow
+#
 # Revision 1.28  2004/08/27 14:22:01  dischi
 # The complete image code is working again and should not crash. The zoom
 # handling got a complete rewrite. Only the gphoto plugin is not working
@@ -55,7 +58,7 @@ class ImageItem(MediaItem):
     """
     An item for image files
     """
-    def __init__(self, url, parent, name = None, duration = 0):
+    def __init__(self, url, parent, name = None, duration = config.IMAGEVIEWER_DURATION):
         # set autovars to 'rotation' so that this value is
         # stored between Freevo sessions
         self.autovars = [ ( 'rotation', 0 ) ]

@@ -108,7 +108,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.13
+LOCAL_CONF_VERSION  = 5.14
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -219,7 +219,9 @@ LOCAL_CONF_CHANGES = [
      the suffix, please remove it here'''),
     (5.13,
      '''Added TV_RECORD_SERVER_GID to set the gid for the recordserver. If you
-     use TV_RECORD_SERVER_UID, the gui _must_ match one of the users gids''' ) ]
+     use TV_RECORD_SERVER_UID, the gui _must_ match one of the users gids''' ),
+    (5.14,
+     '''Add IMAGEVIEWER_DURATION for auto slideshows''' )]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -783,6 +785,13 @@ IMAGEVIEWER_OSD = [
       (_('Software')+': ', 'software') ]
     ]
     
+
+#
+# Default duration for images in a playlist. If set to 0, you need
+# to press a button to get to the next image, a value > 0 is the time
+# in seconds for an auto slideshow
+#
+IMAGEVIEWER_DURATION = 0
 
 #
 # use exif thumbnail your thumbnail review. The quality is lower but
