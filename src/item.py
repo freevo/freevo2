@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/01/01 16:47:31  dischi
+# do not replace name with None
+#
 # Revision 1.40  2003/12/31 16:40:49  dischi
 # major speed enhancements
 #
@@ -261,7 +264,8 @@ class Item:
             if info:
                 self.info = info
                 if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(info, 'title'):
-                    self.name = info['title']
+                    if info['title']:
+                        self.name = info['title']
         
         if not self.name:
             if self.filename:
