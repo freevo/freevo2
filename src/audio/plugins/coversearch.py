@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/10/02 11:44:09  dischi
+# reactivate plugin
+#
 # Revision 1.35  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -82,16 +85,17 @@ from util import amazon
 
 class PluginInterface(plugin.ItemPlugin):
     """
-    This plugin will allow you to search for CD Covers for your albums. To do that
-    just go in an audio item and press 'e' (on your keyboard) or 'ENTER' on your
-    remote control. That will present you a list of options with Find a cover for
-    this music as one item, just select it press 'enter' (on your keyboard) or
-    'SELECT' on your remote control and then it will search the cover in amazon.com.
+    This plugin will allow you to search for CD Covers for your albums. To do
+    that just go in an audio item and press 'e' (on your keyboard) or 'ENTER'
+    on your remote control. That will present you a list of options with Find a
+    cover for this music as one item, just select it press 'enter' (on your
+    keyboard) or 'SELECT' on your remote control and then it will search the
+    cover in amazon.com.
 
-    Please Notice that this plugin use the Amazon.com web services and you will need
-    an Amazon developer key. You can get your at: http://www.amazon.com/webservices,
-    get that key and put it in a file named ~/.amazonkey or passe it as an argument
-    to this plugin.
+    Please Notice that this plugin use the Amazon.com web services and you will
+    need an Amazon developer key. You can get your at:
+    http://www.amazon.com/webservices, get that key and put it in a file named
+    ~/.amazonkey or passe it as an argument to this plugin.
 
     To activate this plugin, put the following in your local_conf.py.
 
@@ -102,8 +106,6 @@ class PluginInterface(plugin.ItemPlugin):
     plugin.activate( 'audio.coversearch', args=('YOUR_KEY',) ) 
     """
     def __init__(self, license=None):
-        self.reason = config.REDESIGN_UNKNOWN
-        return
         if not config.USE_NETWORK:
             self.reason = 'no network'
             return
@@ -113,8 +115,8 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             amazon.getLicense()
         except amazon.NoLicenseKey:
-            print String(_( 'To search for covers you need an Amazon.com Web Services\n' \
-                     'license key. You can get yours from:\n' ))
+            print String(_( 'To search for covers you need an Amazon.com Web' \
+                            'Services\nlicense key. You can get it from:\n'))
             print 'https://associates.amazon.com/exec/panama/associates/join/'\
                   'developer/application.html'
             self.reason = 'no amazon key'
@@ -147,32 +149,18 @@ class PluginInterface(plugin.ItemPlugin):
             try:
                 # use title for audicds and album for normal data
                 if self.item.getattr('artist') and \
-                   ((self.item.getattr('album') and item.type in ('audio', 'dir')) or \
+                   ((self.item.getattr('album') and \
+                     item.type in ('audio', 'dir')) or \
                     (self.item.getattr('title') and item.type == 'audiocd')):
-                    return [ ( self.cover_search_file, _( 'Find a cover for this music' ),
+                    return [ ( self.cover_search_file,
+                               _( 'Find a cover for this music' ),
                                'imdb_search_or_cover_search') ]
                 else:
-                    if config.DEBUG > 1:
-                        print String(_( "WARNING" )) + ": "+\
-                              String(_( "Plugin 'coversearch' was disabled for this item! " \
-                                 "'coversearch' needs an item with " \
-                                 "Artist and Album (if it's a mp3 or ogg) or " \
-                                 "Title (if it's a cd track) to be able to search. "  \
-                                 "So you need a file with a ID3 tag (mp3) or an Ogg Info. "  \
-                                 "Maybe you must fix this file (%s) tag?" )) % item.filename 
+                    _debug_('no artist or album')
             except KeyError:
-                if config.DEBUG > 1:
-                    print String(_( "WARNING" )) + ": " +\
-                          String(_( "Plugin 'coversearch' was disabled for this item! " \
-                             "'coversearch' needs an item with " \
-                             "Artist and Album (if it's a mp3 or ogg) or " \
-                             "Title (if it's a cd track) to be able to search. " \
-                             "So you need a file with a ID3 tag (mp3) or an Ogg Info. " \
-                             "Maybe you must fix this file (%s) tag?" )) % item.filename
+                _debug_('no artist or album')
             except AttributeError:
-                if config.DEBUG > 1:
-                    print String(_( "WARNING" )) + ": " +\
-                          String(_( "Unknown CD, cover searching is disabled" ))
+                _debug_('unknown disc')
         return []
 
 
@@ -191,11 +179,13 @@ class PluginInterface(plugin.ItemPlugin):
         search_string = '%s %s' % (String(artist), String(album))
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
-            cover = amazon.searchByKeyword(search_string , product_line="music")
+            cover = amazon.searchByKeyword(search_string ,
+                                           product_line="music")
         except amazon.AmazonError:
             box.destroy()
             dict_tmp = { "artist": String(artist), "album": String(album) }
-            box = PopupBox(text=_( 'No matches for %(artist)s - %(album)s' ) % dict_tmp )
+            box = PopupBox(text=_('No matches for %(artist)s - %(album)s') \
+                           % dict_tmp )
             box.show()
             time.sleep(2)
             box.destroy()
@@ -227,7 +217,8 @@ class PluginInterface(plugin.ItemPlugin):
             if not MissingFile and not (m.info()['Content-Length'] == '807'):
                 image = Image.open(cStringIO.StringIO(m.read()))
                 items += [ menu.MenuItem('%s' % cover[i].ProductName,
-                                         self.cover_create, cover[i].ImageUrlLarge,
+                                         self.cover_create,
+                                         cover[i].ImageUrlLarge,
                                          image=image) ]
                 m.close()
             else:
@@ -238,22 +229,28 @@ class PluginInterface(plugin.ItemPlugin):
                     n = urllib2.urlopen(cover[i].ImageUrlMedium)
                 except urllib2.HTTPError:
                     MissingFile = True
-                if not MissingFile and not (n.info()['Content-Length'] == '807'):
+                if not MissingFile and \
+                       not (n.info()['Content-Length'] == '807'):
                     image = Image.open(cStringIO.StringIO(n.read()))
-                    items += [ menu.MenuItem( ('%s [' + _( 'small' ) + ']') % cover[i].ProductName,
-                                    self.cover_create, cover[i].ImageUrlMedium) ]
+                    items.append(menu.MenuItem(('%s [' + _( 'small' ) + ']')%\
+                                               cover[i].ProductName,
+                                               self.cover_create,
+                                               cover[i].ImageUrlMedium))
                     n.close()
                 else:
                     if n: n.close()
                     # maybe the url is wrong, try to change '.01.' to '.03.'
-                    cover[i].ImageUrlLarge = cover[i].ImageUrlLarge.replace('.01.', '.03.')
+                    large = cover[i].ImageUrlLarge.replace('.01.', '.03.')
+                    cover[i].ImageUrlLarge = large
                     try:
                         n = urllib2.urlopen(cover[i].ImageUrlLarge)
 
                         if not (n.info()['Content-Length'] == '807'):
                             image = Image.open(cStringIO.StringIO(n.read()))
-                            items += [ menu.MenuItem( ('%s [' + _( 'small' ) + ']' ) % cover[i].ProductName,
-                                                     self.cover_create, cover[i].ImageUrlLarge) ]
+                            name = ('%s [' + _( 'small' ) + ']' ) % \
+                                   cover[i].ProductName
+                            items.append(menu.MenuItem(name, self.cover_create,
+                                                       cover[i].ImageUrlLarge))
                         n.close()
                     except urllib2.HTTPError:
                         pass
