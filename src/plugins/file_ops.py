@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/04 11:17:38  dischi
+# make it possible to delete only the image
+#
 # Revision 1.13  2003/12/29 22:28:13  dischi
 # move to new Item attributes
 #
@@ -100,6 +103,8 @@ class PluginInterface(plugin.ItemPlugin):
                 items.append((self.confirm_delete, _('Delete'), 'delete'))
             if item.files.fxd_file:
                 items.append((self.confirm_info_delete, _('Delete info'), 'delete_info'))
+            if item.files.image:
+                items.append((self.confirm_image_delete, _('Delete image'), 'delete_image'))
         return items
 
 
@@ -112,6 +117,11 @@ class PluginInterface(plugin.ItemPlugin):
         self.menuw = menuw
         ConfirmBox(text=_('Delete info about\n \'%s\'?') % self.item.name,
                    handler=self.delete_info, default_choice=1).show()
+
+    def confirm_image_delete(self, arg=None, menuw=None):
+        self.menuw = menuw
+        ConfirmBox(text=_('Delete image about\n \'%s\'?') % self.item.name,
+                   handler=self.delete_image, default_choice=1).show()
 
     def safe_unlink(self, filename):
         try:
@@ -127,7 +137,13 @@ class PluginInterface(plugin.ItemPlugin):
 
     def delete_info(self):
         _debug_('Deleting info for %s' % self.item.url)
-        self.safe_unlink(self.files.image)
-        self.safe_unlink(self.files.fxd_file)
+        self.safe_unlink(self.item.files.image)
+        self.safe_unlink(self.item.files.fxd_file)
+        if self.menuw:
+            self.menuw.back_one_menu(arg='reload')
+
+    def delete_image(self):
+        _debug_('Deleting image for %s' % self.item.url)
+        self.safe_unlink(self.item.files.image)
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
