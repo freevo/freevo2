@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-05-31 12:48+0200\n"
+"POT-Creation-Date: 2004-06-02 20:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgstr ""
 #: audio/plugins/cdbackup.py:266 audio/plugins/cdbackup.py:623
 #: audio/plugins/xine.py:88 audio/plugins/xine.py:107 childapp.py:291
 #: plugins/lcd.py:110 plugins/lcd.py:731 plugins/lcd.py:933 plugins/lcd.py:944
-#: plugins/lcd.py:955 skins/main/info_area.py:155 tv/channels.py:149
+#: plugins/lcd.py:955 skins/main/info_area.py:156 tv/channels.py:149
 #: tv/channels.py:186 tv/channels.py:189 tv/record_client.py:133
 #: video/plugins/xine.py:110 video/plugins/xine.py:134
 #: www/htdocs/help/howto.rpy:132 www/htdocs/help/doc.rpy:108
@@ -744,6 +744,7 @@ msgstr ""
 #: image/viewer.py:441 image/viewer.py:452 tv/edit_favorite.py:143
 #: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:191
 #: www/htdocs/search.rpy:184
+#: share/skins/main/info.fxd:390
 msgid "Title"
 msgstr ""
 
@@ -757,6 +758,8 @@ msgid "Author"
 msgstr ""
 
 #: image/viewer.py:453 plugins/lcd.py:149
+#: share/skins/main/info.fxd:331
+#: share/skins/main/noia.fxd:92
 msgid "Date"
 msgstr ""
 
@@ -897,26 +900,42 @@ msgid "You need pylcd to run \"lcd\" plugin."
 msgstr ""
 
 #: plugins/lcd.py:133 plugins/lcd.py:141
+#: share/skins/main/basic.fxd:386
+#: share/skins/main/blurr.fxd:696
+#: share/skins/main/info.fxd:218
 msgid "Length"
 msgstr ""
 
 #: plugins/lcd.py:134 plugins/lcd.py:138 plugins/lcd.py:249
+#: share/skins/main/info.fxd:201
+#: share/skins/main/info.fxd:356
+#: share/skins/main/info.fxd:396
 msgid "Artist"
 msgstr ""
 
 #: plugins/lcd.py:135 plugins/lcd.py:139 plugins/lcd.py:246
+#: share/skins/main/basic.fxd:368
+#: share/skins/main/blurr.fxd:677
+#: share/skins/main/info.fxd:207
+#: share/skins/main/info.fxd:361
 msgid "Album"
 msgstr ""
 
 #: plugins/lcd.py:136 plugins/lcd.py:140
+#: share/skins/main/blurr.fxd:683
+#: share/skins/main/info.fxd:458
 msgid "Year"
 msgstr ""
 
 #: plugins/lcd.py:137
+#: share/skins/main/blurr.fxd:338
+#: share/skins/main/info.fxd:401
 msgid "Tracks"
 msgstr ""
 
 #: plugins/lcd.py:142
+#: share/skins/main/info.fxd:287
+#: share/skins/main/info.fxd:493
 msgid "Resolution"
 msgstr ""
 
@@ -955,6 +974,8 @@ msgid "Item"
 msgstr ""
 
 #: plugins/lcd.py:222
+#: share/skins/main/info.fxd:282
+#: share/skins/main/info.fxd:487
 msgid "Type"
 msgstr ""
 
@@ -963,6 +984,7 @@ msgid "Information"
 msgstr ""
 
 #: plugins/lcd.py:243 plugins/lcd.py:590 www/htdocs/library.rpy:309
+#: share/skins/main/basic.fxd:21
 msgid "Music"
 msgstr ""
 
@@ -971,6 +993,7 @@ msgid "Video"
 msgstr ""
 
 #: plugins/lcd.py:287
+#: share/skins/main/info.fxd:464
 msgid "Genre"
 msgstr ""
 
@@ -978,15 +1001,21 @@ msgstr ""
 #: www/htdocs/edit_favorite.rpy:207 www/htdocs/favorites.rpy:177
 #: www/htdocs/manualrecord.rpy:219 www/htdocs/record.rpy:190
 #: www/htdocs/search.rpy:183
+#: share/skins/main/basic.fxd:547
+#: share/skins/main/basic.fxd:578
+#: share/skins/main/basic.fxd:609
 msgid "Channel"
 msgstr ""
 
 #: plugins/lcd.py:323 plugins/lcd.py:648 www/htdocs/edit_favorite.rpy:206
 #: www/htdocs/favorites.rpy:176
+#: share/skins/main/basic.fxd:603
 msgid "Program"
 msgstr ""
 
 #: plugins/lcd.py:326 www/htdocs/guide.rpy:209
+#: share/skins/main/basic.fxd:590
+#: share/skins/main/noia.fxd:95
 msgid "Time"
 msgstr ""
 
@@ -1036,6 +1065,8 @@ msgid "Image"
 msgstr ""
 
 #: plugins/mediamenu.py:187
+#: share/skins/main/basic.fxd:23
+#: share/skins/main/info.fxd:16
 msgid "Games"
 msgstr ""
 
@@ -1145,7 +1176,7 @@ msgstr ""
 msgid "TV GUIDE"
 msgstr ""
 
-#: skins/main/info_area.py:155
+#: skins/main/info_area.py:156
 msgid "missing 'src' attribute in skin tag!"
 msgstr ""
 
@@ -1368,6 +1399,8 @@ msgid "Edit Favorite"
 msgstr ""
 
 #: tv/edit_favorite.py:137
+#: share/skins/main/basic.fxd:572
+#: share/skins/main/info.fxd:269
 msgid "Name"
 msgstr ""
 
@@ -1724,7 +1757,7 @@ msgstr ""
 msgid "Move to [%s]"
 msgstr ""
 
-#: video/plugins/mplayer.py:473
+#: video/plugins/mplayer.py:476
 msgid "Seeking not possible"
 msgstr ""
 
@@ -2145,14 +2178,21 @@ msgid "Sorry, the program description for %s is unavailable."
 msgstr ""
 
 #: www/htdocs/genre.rpy:219 www/htdocs/guide.rpy:325
+#: share/skins/main/basic.fxd:553
+#: share/skins/main/basic.fxd:615
 msgid "Start"
 msgstr ""
 
 #: www/htdocs/genre.rpy:220 www/htdocs/guide.rpy:326
+#: share/skins/main/basic.fxd:559
+#: share/skins/main/basic.fxd:621
 msgid "Stop"
 msgstr ""
 
 #: www/htdocs/genre.rpy:221 www/htdocs/guide.rpy:327
+#: share/skins/main/info.fxd:277
+#: share/skins/main/info.fxd:302
+#: share/skins/main/info.fxd:481
 msgid "Runtime"
 msgstr ""
 
@@ -2264,6 +2304,7 @@ msgid "I do not process names (%s) with slashes for security reasons."
 msgstr ""
 
 #: www/htdocs/library.rpy:301
+#: share/skins/main/basic.fxd:20
 msgid "Movies"
 msgstr ""
 
@@ -2272,6 +2313,7 @@ msgid "Recorded TV"
 msgstr ""
 
 #: www/htdocs/library.rpy:313
+#: share/skins/main/basic.fxd:22
 msgid "Images"
 msgstr ""
 
@@ -2320,6 +2362,7 @@ msgid "Add to Recording Schedule"
 msgstr ""
 
 #: www/htdocs/record.rpy:192 www/htdocs/search.rpy:185
+#: share/skins/main/info.fxd:263
 msgid "Episode"
 msgstr ""
 
@@ -2338,111 +2381,149 @@ msgstr ""
 #: www/htdocs/search.rpy:236
 msgid "New favorite"
 msgstr ""
-# Manualy added from fxd skin files
+
+#: share/skins/main/blurr.fxd:186
+#: share/skins/main/info.fxd:542
+msgid "Playlist"
+msgstr ""
+
+#: share/skins/main/info.fxd:505
+msgid "Copyright"
+msgstr ""
+
+#: share/skins/main/info.fxd:405
+msgid "Disc ID"
+msgstr ""
+
+#: share/skins/main/blurr.fxd:212
+#: share/skins/main/info.fxd:309
+msgid "Audio tracks"
+msgstr ""
+
+#: share/skins/main/blurr.fxd:427
+msgid "Location"
+msgstr ""
+
+#: share/skins/main/blurr.fxd:451
+msgid "Play a Game"
+msgstr ""
+
+#: share/skins/main/info.fxd:227
+msgid "kb/s"
+msgstr ""
+
+#: share/skins/main/basic.fxd:19
 msgid "TV"
 msgstr ""
 
-msgid "Shutdown"
+#: share/skins/main/blurr.fxd:190
+#: share/skins/main/info.fxd:418
+#: share/skins/main/info.fxd:423
+#: share/skins/main/info.fxd:546
+msgid "items in this playlist"
 msgstr ""
 
-msgid "Watch TV"
-msgstr ""
-
-msgid "Watch a Movie"
-msgstr ""
-
+#: share/skins/main/blurr.fxd:449
+#: share/skins/main/info.fxd:14
 msgid "Listen to Music"
 msgstr ""
 
-msgid "Look at Pictures"
+#: share/skins/main/basic.fxd:392
+#: share/skins/main/blurr.fxd:702
+msgid "Elapsed"
 msgstr ""
 
-msgid " of "
+#: share/skins/main/blurr.fxd:448
+#: share/skins/main/info.fxd:13
+msgid "Watch a Movie"
 msgstr ""
 
-msgid " MB free"
+#: share/skins/main/info.fxd:231
+msgid "Link"
 msgstr ""
 
-msgid "Artist:"
+#: share/skins/main/info.fxd:224
+msgid "Bitrate"
 msgstr ""
 
-msgid "Album:"
+#: share/skins/main/basic.fxd:584
+msgid "Day"
 msgstr ""
 
-msgid " musics in this playlist."
+#: share/skins/main/blurr.fxd:217
+#: share/skins/main/info.fxd:313
+msgid "Subtitles"
 msgstr ""
 
-msgid "Just one music in this playlist."
+#: share/skins/main/info.fxd:317
+msgid "Chapter"
 msgstr ""
 
+#: share/skins/main/info.fxd:237
+msgid "Language"
+msgstr ""
+
+#: share/skins/main/blurr.fxd:180
+#: share/skins/main/blurr.fxd:284
+#: share/skins/main/blurr.fxd:401
+#: share/skins/main/blurr.fxd:409
+msgid "Items"
+msgstr ""
+
+#: share/skins/main/blurr.fxd:194
+#: share/skins/main/info.fxd:427
+#: share/skins/main/info.fxd:550
 msgid "This playlist is empty!"
 msgstr ""
 
-msgid " movies in this playlist."
+#: share/skins/main/info.fxd:305
+msgid "min."
 msgstr ""
 
-msgid "Just one movie in this playlist."
+#: share/skins/main/info.fxd:470
+msgid "Rating"
 msgstr ""
 
-msgid "Year:"
+#: share/skins/main/info.fxd:349
+#: share/skins/main/info.fxd:536
+msgid "MB free"
 msgstr ""
 
-msgid "Genre:"
+#: share/skins/main/blurr.fxd:447
+#: share/skins/main/info.fxd:12
+msgid "Watch TV"
 msgstr ""
 
-msgid "Rating:"
+#: share/skins/main/blurr.fxd:311
+#: share/skins/main/info.fxd:347
+#: share/skins/main/info.fxd:534
+msgid "of"
 msgstr ""
 
-msgid "Runtime:"
+#: share/skins/main/blurr.fxd:450
+#: share/skins/main/info.fxd:15
+msgid "Look at Pictures"
 msgstr ""
 
-msgid "Type:"
+#: share/skins/main/blurr.fxd:222
+msgid "Chapters"
 msgstr ""
 
-msgid "Resolution:"
+#: share/skins/main/basic.fxd:379
+#: share/skins/main/blurr.fxd:201
+#: share/skins/main/blurr.fxd:308
+#: share/skins/main/blurr.fxd:689
+msgid "Track"
 msgstr ""
 
-msgid "Copyright:"
+#: share/skins/main/blurr.fxd:452
+msgid "Weather Forecast"
 msgstr ""
 
-msgid "Geometry:"
+#: share/skins/main/basic.fxd:24
+msgid "Shutdown"
 msgstr ""
 
-msgid "Date:"
-msgstr ""
-
-msgid " pictures in this slideshow."
-msgstr ""
-
-msgid "Just one picture in this slideshow."
-msgstr ""
-
-msgid "This slideshow is empty!"
-msgstr ""
-
-msgid "Track:"
-msgstr ""
-
-msgid "Length:"
-msgstr ""
-
-msgid "Elapsed:"
-msgstr ""
-
-msgid " min. "
-msgstr ""
-
-msgid " Audiotracks, "
-msgstr ""
-
-msgid " Subtitles, "
-msgstr ""
-
-msgid " Chapter"
-msgstr ""
-
-msgid "Size:"
-msgstr ""
-
-msgid " items in this playlist"
+#: share/skins/main/info.fxd:323
+msgid "Size"
 msgstr ""

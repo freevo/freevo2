@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/06/02 19:04:35  dischi
+# translation updates
+#
 # Revision 1.22  2004/03/14 17:22:47  dischi
 # seperate ellipses and dim in drawstringframed
 #
@@ -55,6 +58,7 @@
 
 import copy
 import util
+import re
 
 from area import Skin_Area
 from skin_utils import *
@@ -79,7 +83,7 @@ class Info_Area(Skin_Area):
         self.list = None
         self.updated = 0
         self.sellist = None
-
+        self.i18n_re = re.compile('^( ?)(.*?)([:,]?)( ?)$')
 
     def update_content_needed( self ):
         """
@@ -292,6 +296,14 @@ class Info_Area(Skin_Area):
                             exp = str( exp )
                         if exp:
                             list[ i ].text = exp
+                else:
+                    # translate the text in the FormatText
+                    if list[ i ].expression_analized == 0:
+                        # not translated yet
+                        list[ i ].expression_analized = 1
+                        m = self.i18n_re.match(list[i].text).groups()
+                        # translate
+                        list[i].text = m[0] + _(m[1]) + m[2] + m[3]
                 # I add a tuple here to be able to compare lists and know if we need to
                 # update, this is useful in the mp3 player
                 ret_list += [ index + [ ( i, list[ i ].text ) ] ]
@@ -384,8 +396,7 @@ class Info_Area(Skin_Area):
                 # text position is the current position:
                 element.x = x
                 element.y = y
-                element.text = _(element.text)
-                
+
                 # Calculate the geometry
                 r = Geometry( x, y, element.width, element.height)
                 r = self.get_item_rectangle(r, self.content.width - x,

@@ -62,6 +62,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/06/02 19:04:35  dischi
+# translation updates
+#
 # Revision 1.6  2004/06/02 18:11:57  dischi
 # get real skin text strings for i18n
 #
@@ -267,6 +270,11 @@ class i18n (core.Command):
                             text = text[text.find('>')+1:text.find('</text>')]
                             if not text.strip(' /():-_"\'') or text == 'x':
                                 continue
+
+                            # strip ' ' at the beginnig and ' ', ': ', ':',
+                            # ',' or ', ' at the end
+                            text = text.strip(' ').rstrip(' :,')
+                            
                             if fxd_strings.has_key(text):
                                 fxd_strings[text].append('%s:%s' % (file, i))
                             else:
@@ -300,7 +308,7 @@ class i18n (core.Command):
                     for line in fxd_strings[text]:
                         f.write('#: %s\n' % line)
                     f.write('msgid "%s"\nmsgstr ""\n' % text)
-
+                f.close()
              
         if not self.no_merge and not self.compile_only:
             for file in ([ os.path.join('i18n', fname) for fname in os.listdir('i18n') ]):
