@@ -7,6 +7,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/11/06 17:56:21  dischi
+# Current status of the recordserver:
+# o add/delete/modify/list recordings
+# o add/list favorites
+# o tv_grab will force an internal favorite update
+# o create recordings based on favorites
+# o basic conflict detection
+# o store everything in a fxd file
+# Recording itself (a.k.a. record/plugins) is not working yet
+#
 # Revision 1.62  2004/11/02 20:15:51  dischi
 # replace recordserver with mbus test code
 #
@@ -47,6 +57,7 @@ import config
 import plugin
 
 import notifier
+import record.server
 
 # change uid
 try:
@@ -63,16 +74,12 @@ plugin.init(exclusive=['record'])
 
 while 1:
     try:
-        notifier.init( notifier.GENERIC )
-
-        # import recorder server
-        import record.server
-        start = time.time()
+        notifier.init(notifier.GENERIC)
         record.server.RecordServer()
         notifier.loop()
+    except KeyboardInterrupt:
         break
     except:
         traceback.print_exc()
-        if start + 10 > time.time():
-            print 'server problem, sleeping 1 min'
-            time.sleep(60)
+        print 'server problem, sleeping 1 min'
+        time.sleep(60)

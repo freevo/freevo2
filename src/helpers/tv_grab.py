@@ -11,6 +11,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/11/06 17:56:21  dischi
+# Current status of the recordserver:
+# o add/delete/modify/list recordings
+# o add/list favorites
+# o tv_grab will force an internal favorite update
+# o create recordings based on favorites
+# o basic conflict detection
+# o store everything in a fxd file
+# Recording itself (a.k.a. record/plugins) is not working yet
+#
 # Revision 1.12  2004/10/20 12:33:01  rshortt
 # Put epg loading inside xmltv results check.
 #
@@ -59,6 +69,7 @@ import os
 import shutil
 
 import config
+import mcomm
 
 import pyepg
 epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
@@ -128,11 +139,10 @@ if __name__ == '__main__':
 
     grab()
 
-    import tv.record_client as rc
-    
-    print 'Scheduling favorites for recording:  '
-
-    (result, response) = rc.updateFavoritesSchedule()
-    print '    %s' % response
-
-
+    print 'connecting to recordserver'
+    rs = mcomm.find('recordserver')
+    if not rs:
+        print 'recordserver not running'
+        sys.exit(0)
+    print 'update favorites'
+    rs.favorite_update()
