@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/12/29 22:31:10  dischi
+# do not delete empty strings as file
+#
 # Revision 1.36  2003/12/29 22:06:01  dischi
 # Add support for url inside an item. This is usefull for items depending
 # on files or other types of url. If set_url is used, other special
@@ -108,6 +111,8 @@ class FileInformation:
 
     def delete(self):
         for f in self.files + [ self.fxd_file, self.image ]:
+            if not f:
+                continue
             if os.path.isdir(f):
                 shutil.rmtree(f, ignore_errors=1)
             else:
