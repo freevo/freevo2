@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/14 16:24:34  dischi
+# Patch from Matthieu Weber with some bugfixes
+#
 # Revision 1.8  2003/02/17 18:32:24  dischi
 # Added the infos from the xml file to VideoItem
 #
@@ -226,7 +229,7 @@ def xml_parseVariants(variants_node):
                                 p['subtitle']['media-id'] = part_child.attrs[('',"media-id")].encode('ascii')
                             except KeyError:
                                 pass
-                            p['subtitle']['file'] = part_child.textof().encode('ascii')
+                            p['subtitle']['file'] = part_child.textof().encode('latin-1')
                         elif part_child.name == u'audio':
                             p['audio']['media-id'] = None
                             try:
@@ -285,6 +288,8 @@ def make_videoitem(video, variant):
                 subitem.audio_file = part['audio']
                 subitem.mplayer_options = variant['mplayer-options']
                 if video['items'][part_ref]['mplayer-options']:
+                    if not subitem.mplayer_options:
+                        subitem.mplayer_options = ""
                     subitem.mplayer_options += " " + video['items'][part_ref]['mplayer-options']
                 vitem.subitems += [ subitem ]
 
@@ -299,6 +304,8 @@ def make_videoitem(video, variant):
             vitem.audio_file = variant['parts'][0]['audio']
             vitem.mplayer_options = variant['mplayer-options']
             if video['items'][part_ref]['mplayer-options']:
+                if not vitem.mplayer_options:
+                    vitem.mplayer_options = ""
                 vitem.mplayer_options += " " + video['items'][part_ref]['mplayer-options']
     else:
         if len(video['items-list']) > 1:
@@ -370,7 +377,7 @@ def parseMovieFile(file, parent, duplicate_check):
             disc_set['info'] = {}
             
             try:
-                disc_set['title'] = freevo_child.attrs[('', "title")]
+                disc_set['title'] = freevo_child.attrs[('', "title")].encode('latin-1')
             except KeyError:
                 pass
                 
@@ -389,7 +396,7 @@ def parseMovieFile(file, parent, duplicate_check):
                     
                     disc['l_re'] = None
                     try:
-                        disc['l_re'] = disc_set_child.attrs[('', "l_re")]
+                        disc['l_re'] = disc_set_child.attrs[('', "label-regexp")]
                     except KeyError:
                         if label_required == 1:
                             continue
@@ -415,7 +422,8 @@ def parseMovieFile(file, parent, duplicate_check):
                 if disc['l_re']:
                     dsitem.rom_label += [ disc['l_re'] ]
                 for disc in disc_set['disc']:
-                    dsitem.rom_id += [ disc['media-id'] ]
+                    if disc['media-id']:
+                        dsitem.rom_id += [ disc['media-id'] ]
                 movies += [ dsitem ]
 
         elif freevo_child.name == 'movie':
@@ -455,10 +463,15 @@ def parseMovieFile(file, parent, duplicate_check):
                     if filename.find('://') == -1 and not video['items'][p]['media-id']:
                         video['items'][p]['data'] = os.path.join(dir, filename)
                     for i in range(len(duplicate_check)):
-                        if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
-                            os.path.join(dir, filename)):
-                            del duplicate_check[i]
-                            break
+                        try:
+                            if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
+                                os.path.join(dir, filename)):
+                                del duplicate_check[i]
+                                break
+                        except:
+                            if duplicate_check[i] == os.path.join(dir, filename):
+                                del duplicate_check[i]
+                                break
 
             mitem = None
             if variants:

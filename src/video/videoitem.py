@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/14 16:24:33  dischi
+# Patch from Matthieu Weber with some bugfixes
+#
 # Revision 1.18  2003/03/03 00:36:53  rshortt
 # Implimenting the new PopupBox for the 'Scanning disc, be patient...' messages.
 #
@@ -223,6 +226,9 @@ class VideoItem(Item):
         """
         self.parent.current_item = self
         
+        self.menuw = menuw
+        self.menuw_visible = menuw.visible
+
         if self.subitems:
             self.current_subitem = self.subitems[0]
             self.current_subitem.play(arg, menuw)
@@ -291,9 +297,6 @@ class VideoItem(Item):
         if self.deinterlace:
             mplayer_options += ' -vop pp=fd'
 
-
-        self.menuw = menuw
-        self.menuw_visible = menuw.visible
 
         if menuw.visible:
             menuw.hide()
