@@ -12,6 +12,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2002/10/13 14:15:22  dischi
+# o drawstringframed now returns a list. (rest_words, rectangle), where
+#   rectangle are positions x0,y0.x1,y1 between the text was drawn
+#
+# o New functions getsurface and putsurface to memorize a piece of
+#   the screen (for the redraw of the mp3 player)
+#
 # Revision 1.34  2002/10/12 20:48:59  outlyer
 # Added an exception in DrawStringFramed() to prevent a weird error when
 # drawing Gustavo's TV Guide. Has no other effect except to continue a loop
@@ -486,6 +493,14 @@ class OSD:
             c = self._sdlcol(color)
             pygame.draw.rect(self.screen, c, r, width)
 
+    def getsurface(self, x, y, width, height):
+        s = pygame.Surface((width, height))
+        s.blit(self.screen, (0,0), (x, y, width, height))
+        return s
+    
+    def putsurface(self, surface, x, y):
+        self.screen.blit(surface, (x, y))
+
 
     # Gustavo:
     # drawstringframed: draws a string (text) in a frame. This tries to fit the
@@ -514,6 +529,10 @@ class OSD:
         if not pygame.display.get_init():
             return string
 
+        return_x0 = 0
+        return_y0 = 0
+        return_x1 = 0
+        return_y1 = 0
 
         if DEBUG: print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y, w, h, s)
         
@@ -692,7 +711,11 @@ class OSD:
             y0 = y + (height - line_height * len(lines)) / 2
         elif align_v == 'bottom':
             y0 = y + (height - line_height * len(lines))
-        
+
+
+        if not return_y0:
+            return_y0 = y0
+
         if bgcolor != None:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor)
         for line_number in range(len(lines)):
@@ -703,9 +726,13 @@ class OSD:
                 # Calculate the space between words:
                 ## Disconsider the minimum space
                 x0 = x                    
-                lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * (len(lines[line_number]) -1 )
+                if not return_x0 or return_x0 > x0:
+                    return_x0 = x0
+                lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * \
+                                           (len(lines[line_number]) -1 )
                 if len(lines[line_number]) > 1:
-                    spacing = (width - lines_size[line_number]) / ( len(lines[line_number]) -1 )
+                    spacing = (width - lines_size[line_number]) / \
+                              ( len(lines[line_number]) -1 )
                 else:
                     spacing = (width - lines_size[line_number]) / 2
                     x0 += spacing
@@ -718,6 +745,8 @@ class OSD:
                     
             elif align_h == 'center':
                 x0 = x + (width - lines_size[line_number]) / 2
+                if not return_x0 or return_x0 > x0:
+                    return_x0 = x0
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS                
                 for word in lines[line_number]:
                     if word:
@@ -727,6 +756,9 @@ class OSD:
                         x0 += word_size
             elif align_h == 'left':
                 x0 = x
+                if not return_x0 or return_x0 > x0:
+                    return_x0 = x0
+        
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 for word in lines[line_number]:
                     if word:
@@ -736,20 +768,31 @@ class OSD:
                         x0 += word_size
             elif align_h == 'right':
                 x0 = x + width
+                if not return_x0 or return_x0 > x0:
+                    return_x0 = x0
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 line_len = len(lines[line_number])
                 for word_number in range(len(lines[line_number])):
                     if word:
                         pos = line_len - word_number -1
-                        word_size, word_height = self.stringsize(lines[line_number][pos], font,ptsize)
-                        self.drawstring(lines[line_number][pos], x0, y0, fgcolor, None, font, ptsize, 'right')
+                        word_size, word_height = \
+                                   self.stringsize(lines[line_number][pos], font,ptsize)
+                        self.drawstring(lines[line_number][pos], x0, y0, fgcolor, \
+                                        None, font, ptsize, 'right')
                         x0 -= spacing
                         x0 -= word_size
             # end if 
             # go down one line
+            if not return_x1 or return_x1 < x0:
+                return_x1 = x0
+        
             y0 += line_height
+            return_y1 = y0
         # end for
-        return rest_words
+
+        #self.drawbox(return_x0,return_y0, return_x1, return_y1, width=3)
+
+        return (rest_words, (return_x0,return_y0, return_x1, return_y1))
 
                     
 
