@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/09 16:22:24  dischi
+# create Container class inside widgets
+#
 # Revision 1.2  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -41,7 +44,18 @@
 
 # Container for widgets
 from mevas       import CanvasContainer
-from mevas       import CanvasContainer as Container
+
+class Container(CanvasContainer):
+    """
+    A CanvasContainer with an optional name for debugging
+    """
+    def __init__(self, name=''):
+        CanvasContainer.__init__(self)
+        self.__name = name
+
+    def __str__(self):
+        return 'Container %s' % self.__name
+
 
 # Simple widgets
 from image       import Image
