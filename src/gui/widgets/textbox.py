@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/12/18 18:12:24  dischi
+# fix \n handling
+#
 # Revision 1.6  2004/11/20 18:23:02  dischi
 # use python logger module for debug
 #
@@ -82,8 +85,6 @@ class Textbox(text.Text):
         max_lines = int((height + line_height - font.height) / line_height)
         max_width = 0
         
-        # split the text into lines
-        # FIXME: respect for '\n' is missing
         formated_text    = []
         current_ellipses = ''
         while text:
@@ -93,7 +94,7 @@ class Textbox(text.Text):
                 break
 
             w = font.stringsize(text)
-            if font.stringsize(text) <= width:
+            if font.stringsize(text) <= width and text.find('\n') == -1:
                 formated_text.append((text, w))
                 max_width = max(max_width, w)
                 text = ''
@@ -116,6 +117,7 @@ class Textbox(text.Text):
                 w = font.stringsize(fit)
                 formated_text.append((fit, w))
                 max_width = max(max_width, w)
+                rest = rest.lstrip(' \t')
                 if rest and rest[0] == '\n':
                     rest = rest[1:]
                 text = rest.lstrip(' \t')
