@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/11/08 13:18:23  dischi
+# support for unicode start strings
+#
 # Revision 1.39  2003/11/02 12:01:37  dischi
 # remove debug
 #
@@ -125,6 +128,9 @@ class ChildApp:
 
         prio = 0
 
+        if isinstance(app, unicode):
+            app = app.encode(config.LOCALE, 'ignore')
+            
         if isinstance(app, str):
             # app is a string to execute. It will be executed by 'sh -c '
             # inside the popen code
