@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/05/09 16:44:13  dischi
+# fix crash in m3u parsing
+#
 # Revision 1.69  2004/05/09 14:18:20  dischi
 # remove comments
 #
@@ -112,12 +115,16 @@ class Playlist(Item):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            print 'Cannot open file "%s"' % list
+            print 'Cannot open file "%s"' % plsname
             return 0
 
-        playlist_lines_dos = map(lambda l: l.strip(), lines)
-        playlist_lines     = filter(lambda l: l[0] != '#', playlist_lines_dos)
-
+        try:
+            playlist_lines_dos = map(lambda l: l.strip(), lines)
+            playlist_lines     = filter(lambda l: l[0] != '#', playlist_lines_dos)
+        except IndexError:
+            print 'Bad m3u playlist file "%s"' % plsname
+            return 0
+        
         (curdir, playlistname) = os.path.split(plsname)
         for line in playlist_lines:
             if line.endswith('\r\n'):
