@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/03/08 17:36:47  dischi
+# integration of the tv guide
+#
 # Revision 1.33  2003/03/07 17:27:48  dischi
 # added support for extended menus
 #
@@ -153,6 +156,7 @@ from area import Skin_Area
 from area import Screen
 
 from listing_area import Listing_Area
+from tvlisting_area import TVListing_Area
 from view_area import View_Area
 from info_area import Info_Area
 
@@ -242,13 +246,15 @@ class Skin:
     def __init__(self):
         self.display_style = 0
         self.force_redraw = TRUE
+        self.last_draw = None
         self.screen = Screen()
         self.area_names = ( 'screen', 'title', 'listing', 'view', 'info')
         for a in self.area_names:
             setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
                                               (a[0].upper(), a[1:])))
 
-
+        self.tvlisting = TVListing_Area(self, self.screen)
+        
         if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
     
         self.settings = xml_skin.XMLSkin()
@@ -377,27 +383,6 @@ class Skin:
         return (background, spacing, color, font, button_default, button_selected)
 
         
-    def ItemsPerMenuPage(self, menu):
-
-        if not menu:
-            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
-            return (0,0)
-
-        if menu.skin_settings:
-            settings = menu.skin_settings
-        else:
-            settings = self.settings
-
-        # hack for the main menu to fit all in one screen
-        if not menu.packrows:
-            menu.item_types = 'main'
-
-        rows, cols = self.listing_area.get_items_geometry(settings, menu,
-                                                          self.display_style)[:2]
-        return (cols, rows)
-        
-
-
     def SubMenuVisible(self, menu):
         """
         deprecated
@@ -412,6 +397,61 @@ class Skin:
         pass
         
 
+    def DrawMenu(self, menuw):
+        """
+        deprecated, dummy for now
+        """
+        self.draw(('menu', menuw))
+
+    def DrawMP3(self, info):
+        """
+        deprecated, dummy for now
+        """
+        self.draw(('player', info))
+
+    def DrawTVGuide(self, menuw):
+        """
+        deprecated, dummy for now
+        """
+        self.draw(('tv', menuw))
+    
+    def DrawTVGuide_ItemsPerPage(self, tv):
+        """
+        deprecated, dummy for now
+        """
+        return self.items_per_page(('tv', tv))
+
+
+    def ItemsPerMenuPage(self, menu):
+        """
+        deprecated, dummy for now
+        """
+        return self.items_per_page(('menu', menu))
+
+
+    def items_per_page(self, (type, object)):
+        if not object:
+            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            return
+        
+        if type == 'tv':
+            return self.tvlisting.get_items_geometry(self.settings, object)[4]
+
+        if object.skin_settings:
+            settings = object.skin_settings
+        else:
+            settings = self.settings
+
+        # hack for the main menu to fit all in one screen
+        if not object.packrows:
+            object.item_types = 'main'
+
+        rows, cols = self.listing_area.get_items_geometry(settings, object,
+                                                          self.display_style)[:2]
+        return (cols, rows)
+
+
+
     def Clear(self):
         """
         clean the screen
@@ -421,87 +461,66 @@ class Skin:
         osd.update()
 
 
-    def DrawMenu(self, menuw):
-        """
-        Called from the MenuWidget class to draw a menu page on the
-        screen
-        """
-        if not menuw.visible:
-            return
-
-        draw_allowed = TRUE
-        for child in menuw.children:
-            draw_allowed = draw_allowed and not child.visible
-
-        if not draw_allowed:
-            self.force_redraw = TRUE
-            return
+    def draw(self, (type, object)):
+        if type == 'menu':
+            menuw = object
             
-        menu = menuw.menustack[-1]
+            if not menuw.visible:
+                return
 
-        if not menu:
-            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
-            return
+            draw_allowed = TRUE
+            for child in menuw.children:
+                draw_allowed = draw_allowed and not child.visible
 
-        if menu.skin_settings:
-            settings = menu.skin_settings
+            if not draw_allowed:
+                self.force_redraw = TRUE
+                return
+
+            menu = menuw.menustack[-1]
+
+            if not menu:
+                osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+                return
+
+            if menu.skin_settings:
+                settings = menu.skin_settings
+            else:
+                settings = self.settings
+
+            # FIXME
+            if len(menuw.menustack) == 1:
+                menu.item_types = 'main'
+
+
         else:
             settings = self.settings
 
-        # FIXME
-        if len(menuw.menustack) == 1:
-            menu.item_types = 'main'
-            
+        if type == 'tv':
+            l = self.listing_area
+            self.listing_area = self.tvlisting
+
+        if self.last_draw != type:
+            self.force_redraw = TRUE
+            self.last_draw = type
+
         self.screen.clear()
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(settings, menuw, self.display_style)
+            area.draw(settings, object, self.display_style, self.last_draw,
+                      self.force_redraw)
 
         self.screen.show(self.force_redraw)
+
+        if type == 'tv':
+            self.listing_area = l
 
         osd.update()
         self.force_redraw = FALSE
-        
-
-    def DrawMP3(self, info):
-        self.screen.clear()
-
-        for a in self.area_names:
-            area = eval('self.%s_area' % a)
-            area.draw(self.settings, info, self.display_style, 'player')
-
-        self.screen.show(self.force_redraw)
-
-        osd.update()
 
 
-    # TV Guide:
 
-    def DrawTVGuide(self):
-        pass
-    
-    def DrawTVGuide_Clear(self):
-        pass
-
-    def DrawTVGuide_getExpand(self):
-        pass
-
-    def DrawTVGuide_setExpand(self, expand):
-        pass
-
-    def DrawTVGuide_View(self, to_view):
-        pass
-
-    def DrawTVGuide_Info(self, to_info):
-        pass
-                         
-    def DrawTVGuide_ItemsPerPage(self):
-        return (2,3)
-
-    def DrawTVGuide_Listing(self, to_listing):
-        pass
-
+            
     def format_track (self, array):
         """ Return a formatted string for use in music.py """
 	# This is the default - track name only

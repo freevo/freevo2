@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/08 17:40:42  dischi
+# integration of the tv guide
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -70,10 +73,13 @@ import epg_xmltv as epg
 # The Skin
 import skin
 
-# Extended Menu
-import ExtendedMenu
-import ExtendedMenu_TV
-
+if not config.NEW_SKIN:
+    # Extended Menu
+    import ExtendedMenu
+    import ExtendedMenu_TV
+else:
+    from tvmenu import TVmenu
+    
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
@@ -98,11 +104,13 @@ skin = skin.get_singleton()
 
 
 # Set up the extended menu
-view = ExtendedMenu_TV.ExtendedMenuView_TV()
-info = ExtendedMenu_TV.ExtendedMenuInfo_TV()
-listing = ExtendedMenu_TV.ExtendedMenuListing_TV()
-em = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
-
+if not config.NEW_SKIN:
+    view = ExtendedMenu_TV.ExtendedMenuView_TV()
+    info = ExtendedMenu_TV.ExtendedMenuInfo_TV()
+    listing = ExtendedMenu_TV.ExtendedMenuListing_TV()
+    em = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
+else:
+    tvmenu = TVmenu()
 
 def get_start_time():
     ttime = time.localtime()
@@ -144,20 +152,28 @@ def get_tunerid(channel_id):
     
    
 def eventhandler(event):
-    #print 'TV %s' % event
     
     if event == rc.EXIT or event == rc.MENU:
         rc.app = None
         menuwidget.refresh()
-    elif event == rc.SELECT or event == rc.PLAY:
-        start_tv('tv', em.listing.last_to_listing[3].channel_id)
-    else:
-        em.eventhandler(event)
 
+    elif event == rc.SELECT or event == rc.PLAY:
+        skin.Clear()
+        if not config.NEW_SKIN:
+            start_tv('tv', em.listing.last_to_listing[3].channel_id)
+        else:
+            start_tv('tv', tvmenu.selected.channel_id)
+    else:
+        if not config.NEW_SKIN:
+            em.eventhandler(event)
+        else:
+            tvmenu.eventhandler(event)
 
 def refresh():
-     em.refresh()
-
+    if not config.NEW_SKIN:
+        em.refresh()
+    else:
+        tvmenu.refresh()
 
 def main_menu(arg, menuw):
 
@@ -198,8 +214,10 @@ def main_menu(arg, menuw):
             prg = chan.programs[0]
             break
         
-    listing.ToListing([start_time, stop_time, guide.chan_list[0].id, prg])
-    em.eventhandler(rc.UP)
-
-    em.refresh()
-
+    if not config.NEW_SKIN:
+        listing.ToListing([start_time, stop_time, guide.chan_list[0].id, prg])
+        em.eventhandler(rc.UP)
+        em.refresh()
+    else:
+        tvmenu.rebuild(start_time, stop_time, guide.chan_list[0].id, prg)
+        tvmenu.refresh()

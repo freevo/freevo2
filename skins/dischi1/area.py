@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/03/08 17:36:47  dischi
+# integration of the tv guide
+#
 # Revision 1.17  2003/03/07 17:27:46  dischi
 # added support for extended menus
 #
@@ -269,7 +272,7 @@ class Skin_Area:
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
 
 
-    def draw(self, settings, obj, display_style=0, widget_type='menu'):
+    def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
@@ -281,6 +284,11 @@ class Skin_Area:
             self.menu  = obj.menustack[-1]
             self.item  = self.menu.selected
             item_type  = self.menu.item_types
+        elif widget_type == 'tv':
+            self.menuw = obj
+            self.menu  = obj
+            item_type = None
+            self.item = None
         else:
             item_type = None
             self.item = obj
@@ -288,7 +296,7 @@ class Skin_Area:
         self.bg_objects = []
         self.content_objects = []
         
-        self.redraw = FALSE
+        self.redraw = force_redraw
         self.mode = 0                   # start draw
         
         area = self.area_val
@@ -455,6 +463,8 @@ class Skin_Area:
 
         if widget_type == 'player':
             area = settings.player
+        elif widget_type == 'tv':
+            area = settings.tv
         else:
             if self.display_style and settings.menu.has_key('extended %s' % display_type):
                 area = settings.menu['extended %s' % display_type]

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/03/08 17:36:47  dischi
+# integration of the tv guide
+#
 # Revision 1.22  2003/03/07 22:54:12  dischi
 # First version of the extended menu with image support. Try the music menu
 # and press DISPLAY
@@ -494,6 +497,23 @@ class XML_player:
 
 # ======================================================================
 
+
+class XML_tv:
+    def __init__(self):
+        self.content = ( 'screen', 'title', 'view', 'info', 'listing' )
+        for c in self.content:
+            setattr(self, c, XML_area())
+
+
+    def parse(self, node, scale, current_dir):
+        for subnode in node.children:
+            for c in self.content:
+                if subnode.name == c:
+                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
+
+
+# ======================================================================
+
 #
 # Main XML skin class
 #
@@ -509,6 +529,7 @@ class XMLSkin:
         self.icon_dir = ""
         self.popup = ''
         self.player = XML_player()
+        self.tv = XML_tv()
         
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
@@ -560,6 +581,9 @@ class XMLSkin:
 
             if node.name == u'player':
                 self.player.parse(node, scale, c_dir)
+
+            if node.name == u'tv':
+                self.tv.parse(node, scale, c_dir)
 
 
 
