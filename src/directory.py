@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/09/05 16:10:46  mikeruelle
+# add an additional arg so new games system is happy
+#
 # Revision 1.32  2003/09/01 18:55:02  dischi
 # use progressbar when scanning
 #
@@ -113,7 +116,7 @@ class DirItem(Playlist):
     """
     class for handling directories
     """
-    def __init__(self, dir, parent, name = '', display_type = None):
+    def __init__(self, dir, parent, name = '', display_type = None, add_args = None):
         Item.__init__(self, parent)
         self.type = 'dir'
         self.menuw = None
@@ -128,6 +131,7 @@ class DirItem(Playlist):
         self.display_type = display_type
         self.info         = {}
         self.mountpoint   = None
+        self.add_args     = add_args
         
         # set directory variables to default
         global all_variables
