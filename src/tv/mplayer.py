@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/08 17:39:02  dischi
+# mplayer doesn't clear the screen, tv.py does
+#
 # Revision 1.7  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
 #
@@ -274,10 +277,6 @@ class MPlayer:
             mixer_vol = mixer.getPcmVolume()
             mixer.setPcmVolume(0)
 
-        # clear the screen for mplayer
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.update()
-        
         # Start up the TV task
         self.thread.mode = 'play'
         self.thread.command = command
