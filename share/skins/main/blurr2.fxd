@@ -20,9 +20,9 @@
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
       <view x="20" y="100" width="300" height="300"/> 
-      <listing layout="listing" x="330" y="110" width="460" height="430">
-	<image filename="blurr-up.png" label="uparrow" x="590" y="110"/>
-	<image filename="blurr-down.png" label="downarrow" x="590" y="max-32"/>
+      <listing layout="listing" x="330" y="110" width="440" height="430">
+	<image filename="blurr-up.png" label="uparrow" x="770" y="110"/>
+	<image filename="blurr-down.png" label="downarrow" x="770" y="max-32"/>
       </listing>
     </menuset>
 
@@ -196,6 +196,24 @@
             </if>
           </if>
           </item>
+          <item type="audio">
+          <if expression="artist">
+            <text font="info tagline" expression="artist"/>
+            <newline/>
+          </if>
+          <if expression="album">
+            <text font="info value" expression="album"/>
+            <newline/>
+          </if>
+          <if expression="date">
+              <text font="info value" expression="date"/>
+              <newline/>
+          </if>
+          <if expression="length">
+            <text font="info value" expression="length"/>
+            <newline/>
+          </if>
+        </item>
       </content>
     </layout>
         
