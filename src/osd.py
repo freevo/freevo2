@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/20 19:27:19  dischi
+# Fix drawstringframedhard: the ellipses must fit the width, too
+#
 # Revision 1.23  2003/03/15 10:15:43  dischi
 # Faster caching and there is no need for fchksum anymore
 #
@@ -946,7 +949,8 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedhard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                             font=None, ptsize=0, align_h='left', align_v='top', layer=None, ellipses='...'):
+                             font=None, ptsize=0, align_h='left', align_v='top',
+                             layer=None, ellipses='...'):
 
         if not pygame.display.get_init():
             return string
@@ -986,9 +990,10 @@ class OSD:
         # Fit chars in lines
         lines = [ '' ]
         line_number = 0
+        ellipse_size = self.stringsize(ellipses, font, ptsize)[0]
         for i in range(len(string)):
             char_size, char_height = self.charsize(string[i], font, ptsize)
-            if ((occupied_size + char_size) <= width) and (string[i] != '\n'):
+            if ((occupied_size + char_size + ellipse_size) <= width) and (string[i] != '\n'):
                 occupied_size += char_size
                 if string[i] == '\t':
                     lines[line_number] += '   '
@@ -1008,15 +1013,19 @@ class OSD:
                         occupied_size = char_size
                         lines[line_number] = string[i]
                 else:
-                    tmp_size, tmp_height = self.stringsize('...', font, ptsize)
                     j = 1
                     len_line = len(lines[line_number])
                     for j in range(len_line):
-                        if (occupied_size + tmp_size) <= width: break
-                        char_size, char_height = self.charsize(lines[line_number][len_line-j-1], font, ptsize)
+                        if (occupied_size + ellipse_size) <= width:
+                            break
+                        char_size = self.charsize(lines[line_number][len_line-j-1],
+                                                  font, ptsize)[0]
                         occupied_size -= char_size
                     lines[line_number] = lines[line_number][0:len_line-j]
                     if ellipses:
+                        while ellipses and ellipse_size >= width:
+                            ellipses = ellipses[:-1]
+                            ellipse_size = self.stringsize(ellipses, font, ptsize)[0]
                         lines[line_number] += ellipses
                     break
         rest_words = string[i:len(string)]
@@ -1031,6 +1040,11 @@ class OSD:
             y0 = y + (height - (line_number+1) * word_height)
         
         for line in lines:
+            # FIXME:
+            # shorten line, maybe it's too long. It may be ellipses, but
+            # sometimes it also too long, don't know why.
+            #while line and self.stringsize(line, font, ptsize)[0] > width:
+            #    line = line[:-1]
             if align_h == 'left':
                 x0 = x
             elif align_h == 'center' or align_h == 'justified':
