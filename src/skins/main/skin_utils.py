@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/15 19:25:15  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.1  2003/08/05 18:59:22  dischi
 # Directory cleanup, part 1:
 # move skins/main1/* to src/skins/main
@@ -60,7 +63,8 @@ def format_image(settings, item, width, height, force=0):
         except:
             type = item.type
 
-    cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
+    cname = '%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
+                                      item.type, width, height, force)
     if item.media and item.media.info == item:
         cname = '%s-%s' % (cname, item.media)
         

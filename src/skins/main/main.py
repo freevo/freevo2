@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/15 19:25:15  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.1  2003/08/05 18:59:22  dischi
 # Directory cleanup, part 1:
 # move skins/main1/* to src/skins/main
@@ -241,7 +244,7 @@ class Skin:
         # try to find the skin xml file
         if not self.settings.load(config.SKIN_XML_FILE):
             print "skin not found, using fallback skin"
-            self.settings.load("skins/xml/type1/blue1_big.fxd")
+            self.settings.load('blue.fxd')
         
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.fxd' % dir
@@ -289,14 +292,14 @@ class Skin:
         return a list of all possible skins with name, image and filename
         """
         ret = []
-        skin_files = util.match_files('skins/xml/type1', ['fxd'])
-        for d in util.getdirnames('skins/xml'):
-            skin = os.path.join(d, os.path.basename(d)+'.fxd')
-            if os.path.isfile(skin):
-                skin_files += [ skin ]
+        skin_files = util.match_files(os.path.join(config.SKIN_DIR, 'main'), ['fxd'])
+        # for d in util.getdirnames('skins/xml'):
+        #     skin = os.path.join(d, os.path.basename(d)+'.fxd')
+        #     if os.path.isfile(skin):
+        #         skin_files += [ skin ]
 
         # image is not usable stand alone
-        skin_files.remove('skins/xml/type1/image.fxd')
+        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
         
         for skin in skin_files:
             name  = os.path.splitext(os.path.basename(skin))[0]

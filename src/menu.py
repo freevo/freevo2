@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2003/08/15 19:25:14  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.56  2003/08/03 14:24:57  dischi
 # cosmetic fix
 #
@@ -342,7 +345,7 @@ class MenuWidget(GUIObject):
 
         for i in items:
             try:
-                if not i.image and item.image.find('skins/images/watermarks/'):
+                if not i.image and item.image.find('images/watermarks/'):
                     i.image = item.image
             except:
                 pass

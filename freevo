@@ -12,6 +12,8 @@
 helpers=src/helpers
 src=src
 
+export FREEVO_SHARE=share
+
 # end configuration
 
 

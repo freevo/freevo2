@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/08/15 19:25:14  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.36  2003/08/15 17:23:06  dischi
 # Added a new command line parameter -fs (Fullscreen). This will start Freevo
 # in a new xsession (even if one is running). Freevo will get _all_ keys
@@ -325,7 +328,16 @@ else:
     
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
     START_FULLSCREEN_X = 1
-        
+
+
+SHARE_DIR = os.environ['FREEVO_SHARE']
+SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
+ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
+IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
+FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
+
+OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
+
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 if not ROM_DRIVES:
     if os.path.isfile('/etc/fstab'):

@@ -576,7 +576,7 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
 #
 # OSD default font. It is only used for debug/error stuff, not regular skinning.
 #
-OSD_DEFAULT_FONTNAME = 'skins/fonts/Vera.ttf'
+OSD_DEFAULT_FONTNAME = 'Vera.ttf'
 OSD_DEFAULT_FONTSIZE = 18
 
 # Font aliases, all names must be lowercase!

@@ -40,6 +40,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/08/15 19:25:15  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.28  2003/08/05 17:54:33  dischi
 # added sensors plugin
 #
@@ -228,14 +231,15 @@ class cdstatus(IdleBarPlugin):
     """
     def __init__(self):
         IdleBarPlugin.__init__(self)
+        icondir = os.path.join(config.ICON_DIR, 'status')
         self.cdimages ={}
-        self.cdimages ['audio'] = 'skins/images/status/cd_audio.png'
-        self.cdimages ['empty_cdrom'] = 'skins/images/status/cd_inactive.png'
-        self.cdimages ['images'] = 'skins/images/status/cd_photo.png'
-        self.cdimages ['video'] = 'skins/images/status/cd_video.png'
-        self.cdimages ['burn'] ='skins/images/status/cd_burn.png'
-        self.cdimages ['cdrip'] = 'skins/images/status/cd_rip.png'
-        self.cdimages ['mixed'] = 'skins/images/status/cd_mixed.png'
+        self.cdimages ['audio']       = os.path.join(icondir, 'cd_audio.png')
+        self.cdimages ['empty_cdrom'] = os.path.join(icondir, 'cd_inactive.png')
+        self.cdimages ['images']      = os.path.join(icondir, 'cd_photo.png')
+        self.cdimages ['video']       = os.path.join(icondir, 'cd_video.png')
+        self.cdimages ['burn']        = os.path.join(icondir, 'cd_burn.png')
+        self.cdimages ['cdrip']       = os.path.join(icondir, 'cd_rip.png')
+        self.cdimages ['mixed']       = os.path.join(icondir, 'cd_mixed.png')
 
     def draw(self, (type, object), x, osd):
         image = self.cdimages['empty_cdrom']
@@ -259,8 +263,8 @@ class mail(IdleBarPlugin):
     """
     def __init__(self, mailbox):
         IdleBarPlugin.__init__(self)
-        self.NO_MAILIMAGE = 'skins/images/status/newmail_dimmed.png'
-        self.MAILIMAGE = 'skins/images/status/newmail_active.png'
+        self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_dimmed.png')
+        self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_active.png')
         self.MAILBOX = mailbox
 
     def checkmail(self):
@@ -297,10 +301,11 @@ class tv(IdleBarPlugin):
         self.next_guide_check = 0
         self.listings_expire = 0
         self.tvlockfile = config.FREEVO_CACHEDIR + '/record'
-        self.TVLOCKED = 'skins/images/status/television_active.png'
-        self.TVFREE = 'skins/images/status/television_inactive.png'
-        self.NEAR_EXPIRED = 'skins/images/status/television_near_expired.png'
-        self.EXPIRED = 'skins/images/status/television_expired.png'
+        icondir = os.path.join(config.ICON_DIR, 'status')
+        self.TVLOCKED     = os.path.join(icondir, 'television_active.png')
+        self.TVFREE       = os.path.join(icondir, 'television_inactive.png')
+        self.NEAR_EXPIRED = os.path.join(icondir, 'television_near_expired.png')
+        self.EXPIRED      = os.path.join(icondir, 'television_expired.png')
         
     def checktv(self):
         if os.path.exists(self.tvlockfile):
@@ -340,10 +345,7 @@ class weather(IdleBarPlugin):
         self.TEMPUNITS = units
         self.METARCODE = zone
         self.WEATHERCACHE = config.FREEVO_CACHEDIR + '/weather'
-        self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
-        if not os.path.isfile(self.CLOCKFONT):
-            # XXX Get this from the skin, but for now this will allow it to work
-            self.CLOCKFONT = config.OSD_DEFAULT_FONTNAME
+
 
     def checkweather(self):
         # We don't want to do this every 30 seconds, so we need
@@ -397,7 +399,8 @@ class weather(IdleBarPlugin):
     def draw(self, (type, object), x, osd):
         temp,icon = self.checkweather()
         font  = osd.get_font('weather')
-        osd.draw_image('skins/icons/weather/' + icon, (x, osd.y + 15, -1, -1))
+        osd.draw_image(os.path.join(config.ICON_DIR, 'weather/' + icon),
+                                    (x, osd.y + 15, -1, -1))
         temp = '%s°' % temp
         width = font.font.stringsize(temp)
         osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
@@ -423,12 +426,12 @@ class holidays(IdleBarPlugin):
             for i in config.HOLIDAYS:                        
                 holiday, icon = i
                 if todays_date == holiday:
-                    return icon
+                    return os.path.join(config.ICON_DIR, 'holidays', icon)
 
     def draw(self, (type, object), x, osd):
         icon = self.get_holiday_icon()
         if icon:
-            return osd.draw_image('skins/images/holidays/' + icon, (x, osd.y + 10, -1, -1))[0]
+            return osd.draw_image(icon, (x, osd.y + 10, -1, -1))[0]
             
             
 #----------------------------------- SENSOR --------------------------------
@@ -527,7 +530,8 @@ class sensors(IdleBarPlugin):
         
         cputemp = self.cpu.temp()        
         widthcpu = font.font.stringsize(cputemp)
-        osd.draw_image('skins/icons/misc/cpu.png', (x, osd.y + 8, -1, -1))    
+        osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
+                       (x, osd.y + 8, -1, -1))    
         osd.write_text(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
                        'left', 'top')
         widthcpu = max(widthcpu, 32) + 10
@@ -536,8 +540,8 @@ class sensors(IdleBarPlugin):
             casetemp = self.case.temp()
             
             widthcase = font.font.stringsize(casetemp)
-            osd.draw_image('skins/icons/misc/case.png', (x + 15 + widthcpu,
-                                                         osd.y + 7, -1, -1))
+            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/case.png'),
+                                        (x + 15 + widthcpu, osd.y + 7, -1, -1))
             osd.write_text(casetemp, font, None, x + 40 + widthcpu,
                            osd.y + 55 - font.h, widthcase, font.h,
                            'left', 'top')
@@ -550,7 +554,8 @@ class sensors(IdleBarPlugin):
                 img_width = x + 15 + widthcpu + widthcase + 15
             else:
                 img_width = x + 15 + widthcpu
-            osd.draw_image('skins/icons/misc/memory.png', (img_width, osd.y + 7, -1, -1))
+            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
+                           (img_width, osd.y + 7, -1, -1))
             osd.write_text(text, font, None, img_width + 15, osd.y + 55 - font.h,
                            widthram, font.h, 'left', 'top')
                        

@@ -71,9 +71,9 @@ if __name__ == '__main__':
     
     osd.clearscreen()
     
-    osd.drawbitmap( 'skins/images/aubin_bg1.png' )
+    osd.drawbitmap( 'share/images/aubin_bg1.png' )
     osd.drawstring('Hello Sailor' + str(time.time()), 10, 10,
-                   font='skins/fonts/Arial_Bold.ttf',ptsize=14)
+                   font='share/fonts/Vera.ttf',ptsize=14)
     
     osd.update()
 

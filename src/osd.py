@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/08/15 19:25:15  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.78  2003/08/06 19:35:55  dischi
 # included vtrelease directly into freevo
 #
@@ -287,7 +290,7 @@ class OSDFont:
             # Ok, see if there is an alternate font to use
             fontname = os.path.basename(filename).lower()
             if fontname in config.OSD_FONT_ALIASES:
-                alt_fname = './skins/fonts/' + config.OSD_FONT_ALIASES[fontname]
+                alt_fname = os.path.join(config.FONT_DIR, config.OSD_FONT_ALIASES[fontname])
                 print 'trying alternate: %s' % alt_fname
                 try:
                     font = pygame.font.Font(alt_fname, ptsize)
@@ -368,7 +371,8 @@ class OSD:
         if config.CONF.display == 'dxr3':
             self.depth = 32
             
-        self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
+        self.screen = pygame.display.set_mode((self.width, self.height),
+                                              self.hw | DOUBLEBUF,
                                               self.depth)
 
         self.depth = self.screen.get_bitsize()
@@ -384,7 +388,8 @@ class OSD:
         help += ['h = Help']
         help_str = '    '.join(help)
         pygame.display.set_caption('Freevo' + ' '*7 + help_str)
-        icon = pygame.image.load('skins/icons/freevo_app.png').convert()
+        icon = pygame.image.load(os.path.join(config.ICON_DIR,
+                                              'misc/freevo_app.png')).convert()
         pygame.display.set_icon(icon)
         
         self.clearscreen(self.COL_BLACK)
@@ -394,6 +399,8 @@ class OSD:
             os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
 
         self.sdl_driver = pygame.display.get_driver()
+        if DEBUG:
+            print self.sdl_driver
 
         pygame.mouse.set_visible(0)
         self.mousehidetime = time.time()
@@ -1126,7 +1133,7 @@ class OSD:
                 cmd = line[8:]
                 
                 print '"%s" "%s" %s %s' % (ks, cmd, x, y)
-                fname = 'skins/fonts/Vera.ttf'
+                fname = config.OSD_DEFAULT_FONTNAME
                 if ks: self.drawstring(ks, x, y, font=fname, ptsize=14)
                 if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=14)
                 row += 1

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/15 19:25:15  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.1  2003/08/05 18:59:22  dischi
 # Directory cleanup, part 1:
 # move skins/main1/* to src/skins/main
@@ -56,9 +59,6 @@ TRUE  = 1
 FALSE = 0
 
 osd = osd.get_singleton()
-
-# XXX Shouldn't this be moved to the config file?
-OSD_FONT_DIR = 'skins/fonts/'
 
 geometry = (config.CONF.width, config.CONF.height)
 
@@ -155,14 +155,14 @@ def attr_font(node, attr, default):
         fontext = os.path.splitext(node.attrs[('', attr)])[1]
         if fontext:
             # There is an extension (e.g. '.pfb'), use the full name
-            font = os.path.join(OSD_FONT_DIR,
+            font = os.path.join(config.FONT_DIR,
                                 node.attrs[('', attr)]).encode('latin-1')
         else:
             # '.ttf' is the default extension
-            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
+            font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
                                 '.ttf').encode('latin-1')
             if not os.path.isfile(font):
-                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] +
+                font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
                                     '.TTF').encode('latin-1')
         if not font:
             print "can find font >%s<" % font
@@ -845,7 +845,7 @@ class XMLSkin:
                     self._images[label] = value
                         
             if node.name == u'iconset':
-                self.icon_dir = attr_str(node, 'dir', self.icon_dir)
+                self.icon_dir = attr_str(node, 'theme', self.icon_dir)
 
             if node.name == u'popup':
                 self._popup = attr_str(node, 'layout', self._popup)
@@ -865,8 +865,10 @@ class XMLSkin:
         
         self.font   = copy.deepcopy(self._font)
         layout      = copy.deepcopy(self._layout)
-        
-        search_dirs = self.skin_directories + [ 'skins/images', self.icon_dir, '.' ]
+
+        if not os.path.isdir(self.icon_dir):
+            self.icon_dir = os.path.join(config.ICON_DIR, 'themes', self.icon_dir)
+        search_dirs = self.skin_directories + [ config.IMAGE_DIR, self.icon_dir, '.' ]
         
         for f in self.font:
             self.font[f].prepare(self._color, scale=self.font_scale)
@@ -907,10 +909,10 @@ class XMLSkin:
         if not os.path.isfile(file):
             if os.path.isfile(file+".fxd"):
                 file += ".fxd"
-            elif os.path.isfile('skins/xml/%s/%s.fxd' % (file, file)):
-                file = 'skins/xml/%s/%s.fxd' % (file, file)
+            elif os.path.isfile(os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))):
+                file = os.path.join(config.SKIN_DIR, '%s/%s.fxd' % (file, file))
             else:
-                file = "skins/xml/type1/%s" % file
+                file = os.path.join(config.SKIN_DIR, 'main/%s' % file)
                 if os.path.isfile(file+".fxd"):
                     file += ".fxd"
 

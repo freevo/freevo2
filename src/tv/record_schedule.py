@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/15 19:25:15  dischi
+# search all the share stuff in $FREEVO_SHARE now
+#
 # Revision 1.6  2003/06/24 11:52:55  outlyer
 # A quick fix for the problem reported by Wan Tat Chee, if there are
 # no entries in the recording schedule, don't crash. Should be more
@@ -193,12 +196,12 @@ class ScheduleEdit(Item):
     	    line = line.replace('_',' ')
             line = line.replace(',','\t\t ')
    
-            recicon = 'skins/icons/blurr/recordinglater.png'
+            recicon = os.path.join(config.ICON_DIR, 'themes/blurr/recordinglater.png')
             #skip multiple occurences of the same thing
             if oldline != line and line != '':
                 itemline = line
                 if recordingflag:
-    	            recicon = 'skins/icons/blurr/recordingnow.png'
+    	            recicon = os.path.join(config.ICON_DIR, 'themes/blurr/recordingnow.png')
     	        if arg == 0:                
     	            items += [ menu.MenuItem(itemline, icon=recicon)]
     	        elif arg == 1:
