@@ -37,13 +37,16 @@ class IdleTool:
         self.idlecount = -1
 
     def checkmail(self):
-        mb = mailbox.UnixMailbox (file(self.MAILBOX,'r'))
-        msg = mb.next()
-        count = 0
-        while msg is not None:
-            count = count + 1
+        if os.path.isfile(self.MAILBOX):
+            mb = mailbox.UnixMailbox (file(self.MAILBOX,'r'))
             msg = mb.next()
-        return count
+            count = 0
+            while msg is not None:
+                count = count + 1
+                msg = mb.next()
+            return count
+        else:
+            return 0
 
     def checktv(self):
         if os.path.exists(self.tvlockfile):
@@ -62,7 +65,7 @@ class IdleTool:
             if (weather.getTemperatureCelsius()):
                 temperature = '%2d' % weather.getTemperatureCelsius()
             else:
-                temperature = 0
+                temperature = '0'  # Make it a string to match above.
             if weather.extractSkyConditions():
                 icon = weather.extractSkyConditions()[1] + '.png'
             else:
@@ -74,7 +77,7 @@ class IdleTool:
         else:
             cachefile = open(self.WEATHERCACHE,'r')
             newlist = map(string.rstrip, cachefile.readlines())
-            temperature,icon = newlist 
+            temperature,icon = newlist
             cachefile.close()
         return temperature, icon
 
