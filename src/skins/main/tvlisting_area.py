@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/21 22:40:55  gsbarbieri
+# Now left-top corner cell (date) use vertical padding from head and
+# horizontal padding from label.
+#
 # Revision 1.1  2003/08/05 18:59:22  dischi
 # Directory cleanup, part 1:
 # move skins/main1/* to src/skins/main
@@ -199,14 +203,6 @@ class TVListing_Area(Skin_Area):
             pad_y = 0
             if r.x < 0: pad_x = -1 * r.x
             if r.y < 0: pad_y = -1 * r.y
-        self.drawroundbox( x_contents, y_contents,
-                           r.width+1, head_h+1, r )
-
-        self.write_text( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
-                         head_font, content,
-                         x=( x_contents + pad_x ), y=( y_contents + pad_y ),
-                         width=( r.width - 2 * pad_x ), height=-1,
-                         align_v='center', align_h=head_val.align )
 
         x_contents += r.width
         y_contents += r.height
@@ -215,18 +211,33 @@ class TVListing_Area(Skin_Area):
 
         # 1 sec = x pixels
         prop_1sec = float(w_contents) / float(n_cols * col_time * 60)
+        col_size = prop_1sec * 1800 # 30 minutes
+
+
+        ig = Geometry( 0, 0, col_size, head_h )
+        if head_val.rectangle:
+            ig, r2 = self.fit_item_in_rectangle( head_val.rectangle, col_size, head_h )
+
+
+        self.drawroundbox( x_contents - r.width, y_contents - r.height,
+                           r.width+1, head_h+1, r )
+
+        # use label padding for x; head padding for y
+        self.write_text( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
+                         head_font, content,
+                         x=( x_contents  - r.width + pad_x ),
+                         y=( y_contents - r.height + ig.y ),
+                         width=( r.width - 2 * pad_x ), height=-1,
+                         align_v='center', align_h=head_val.align )
+
+
 
         # Print the time at the table's top
         x0 = x_contents
-        col_size = prop_1sec * 1800 # 30 minutes
         ty0 = y_contents - r.height
         for i in range( n_cols ):
-            ig = Geometry( 0, 0, col_size, head_h )
-            if head_val.rectangle:
-                ig, r = self.fit_item_in_rectangle( head_val.rectangle, col_size, head_h )
-
             self.drawroundbox( math.floor(x0), ty0,
-                               math.floor( col_size + x0 ) - math.floor( x0 ) + 1, head_h + 1, r )
+                               math.floor( col_size + x0 ) - math.floor( x0 ) + 1, head_h + 1, r2 )
 
             self.write_text( time.strftime( timeformat, time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
                              head_font, content,
