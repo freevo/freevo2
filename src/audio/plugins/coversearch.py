@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2005/01/02 11:49:05  dischi
+# use fthread to be non blocking
+#
 # Revision 1.37  2004/11/20 18:23:00  dischi
 # use python logger module for debug
 #
@@ -84,6 +87,7 @@ from xml.dom import minidom # ParseError used by amazon module
 from gui import PopupBox, AlertBox
 
 from util import amazon
+import util.fthread as fthread
 
 import logging
 log = logging.getLogger('audio')
@@ -185,8 +189,8 @@ class PluginInterface(plugin.ItemPlugin):
         search_string = '%s %s' % (String(artist), String(album))
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
-            cover = amazon.searchByKeyword(search_string ,
-                                           product_line="music")
+            cover = fthread.call(amazon.searchByKeyword, search_string,
+                                 product_line="music")
         except amazon.AmazonError:
             box.destroy()
             dict_tmp = { "artist": String(artist), "album": String(album) }
@@ -216,7 +220,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         for i in range(len(cover)):
             try:
-                m = urllib2.urlopen(cover[i].ImageUrlLarge)
+                m = fthread.call(urllib2.urlopen, cover[i].ImageUrlLarge)
             except urllib2.HTTPError:
                 # Amazon returned a 404
                 MissingFile = True
@@ -232,7 +236,7 @@ class PluginInterface(plugin.ItemPlugin):
                 MissingFile = False
                 # see if a small one is available
                 try:
-                    n = urllib2.urlopen(cover[i].ImageUrlMedium)
+                    n = fthread.call(urllib2.urlopen, cover[i].ImageUrlMedium)
                 except urllib2.HTTPError:
                     MissingFile = True
                 if not MissingFile and \
@@ -249,7 +253,7 @@ class PluginInterface(plugin.ItemPlugin):
                     large = cover[i].ImageUrlLarge.replace('.01.', '.03.')
                     cover[i].ImageUrlLarge = large
                     try:
-                        n = urllib2.urlopen(cover[i].ImageUrlLarge)
+                        n = fthread.call(urllib2.urlopen, cover[i].ImageUrlLarge)
 
                         if not (n.info()['Content-Length'] == '807'):
                             image = Image.open(cStringIO.StringIO(n.read()))
@@ -295,7 +299,7 @@ class PluginInterface(plugin.ItemPlugin):
         else:
             filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
 
-        fp = urllib2.urlopen(str(arg))
+        fp = fthread.call(urllib2.urlopen, str(arg))
         m = vfs.open(filename,'wb')
         m.write(fp.read())
         m.close()
@@ -337,6 +341,5 @@ class PluginInterface(plugin.ItemPlugin):
         for i in range(back):
             menuw.delete_menu()
 
-        if back == 0:
-            menuw.refresh()
         box.destroy()
+        menuw.refresh()
