@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/02/21 05:27:28  krister
+# Ignore CVS dirs.
+#
 # Revision 1.33  2003/02/21 05:00:23  krister
 # Don't display .pics folders
 #
@@ -451,6 +454,7 @@ class DirItem(Playlist):
         dir_items = []
         for filename in files:
             if (os.path.isdir(filename) and
+                os.path.basename(filename) != 'CVS' and
                 os.path.basename(filename) != '.xvpics' and
                 os.path.basename(filename) != '.pics'):
                 dir_items += [ DirItem(filename, self, display_type =
@@ -585,6 +589,7 @@ class DirItem(Playlist):
         new_dir_items = []
         for dir in new_files:
             if (os.path.isdir(dir) and
+                os.path.basename(dir) != 'CVS' and
                 os.path.basename(dir) != '.xvpics' and
                 os.path.basename(dir) != '.pics'):
                 new_dir_items += [ DirItem(dir, self,
