@@ -1,0 +1,13 @@
+I just finished my xmltv listing-grabber for Sweden and Norway.. It grabs the 
+listings from http://www.dagenstv.com ...
+
+I've submitted it to Ed (xmltv author), but here it is anyway if there are any 
+of you who want it! ;-)
+
+Usage:  dagenstv2xmltv <days> <lang> <filename>
+where days = number of days to fetch, lang = sv for swedish and no for 
+norvegian, filename = output filename :)
+
+// Per Wigren
+
+
