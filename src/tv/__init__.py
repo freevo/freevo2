@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/12/06 16:52:11  dischi
+# only import stuff we need
+#
 # Revision 1.8  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -49,8 +52,6 @@
 
 
 import plugin
-import menu
-import os
 
 #
 # Plugin interface to integrate the tv module into Freevo
@@ -59,6 +60,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
     def items(self, parent):
         import tvmenu
+        import menu
         return [ menu.MenuItem('', action=tvmenu.TVMenu().main_menu,
                                type='main', parent=parent, skin_type='tv') ]
 
