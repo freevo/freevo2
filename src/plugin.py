@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/09/09 18:36:11  dischi
+# add a plugin helper to get more informations about the plugins
+#
 # Revision 1.37  2003/09/05 16:29:28  dischi
 # make special function to init only one specific plugin
 #
@@ -445,58 +448,3 @@ def __sort_plugins__():
     for key in __plugin_type_list__:
         __plugin_type_list__[key].sort(lambda l, o: cmp(l._level, o._level))
 
-
-
-
-#
-# Main function
-#
-if __name__ == "__main__":
-    import util
-    import re
-    import os
-    
-    start = re.compile('^class *(.*)\((.*Plugin).:')
-    stop  = re.compile('^[\t ]*def.*:')
-    comment = re.compile('^[\t ]*"""')
-
-    print_line = 0
-    ptypes = {}
-
-    print '------------------------------------------'
-    print 'LIST OF PLUGINS'
-    print
-    print
-    
-    for file in util.recursefolders('src',1, '*.py',1):
-        if file == 'src/plugin.py':
-            continue
-        for line in util.readfile(file):
-            if (comment.match(line) and print_line == 2) or \
-               (stop.match(line) and print_line == 1):
-                print_line = 0
-                print
-                
-            if print_line == 2:
-                print line[1:-1]
-
-            if comment.match(line) and print_line == 1:
-                print_line = 2
-                
-            if start.match(line):
-                file = re.sub('/', '.', os.path.splitext(file)[0])
-                file = re.sub('src.', '', file)
-                file = re.sub('plugins.', '', file)
-                file = re.sub('.__init__', '', file)
-
-                type = start.match(line).group(2)
-                if re.match('^plugin.(.*)', type):
-                    type = re.match('^plugin.(.*)', type).group(1)
-                if start.match(line).group(1) == 'PluginInterface':
-                    name = file
-                else:
-                    name = '%s.%s' % ( file, start.match(line).group(1))
-                
-                print '%s (%s)' % (name, type)
-                print_line = 1
-        
