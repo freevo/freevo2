@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/11/21 10:28:24  dischi
+# move rom drive detection to system
+#
 # Revision 1.70  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -73,10 +76,13 @@ import util.mediainfo
 from struct import *
 import array
 
+import config
 import eventhandler
 
 import logging
 log = logging.getLogger()
+
+config.detect('rom_drives')
 
 try:
     from CDROM import *

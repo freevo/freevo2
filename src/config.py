@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.134  2004/11/21 10:28:24  dischi
+# move rom drive detection to system
+#
 # Revision 1.133  2004/11/21 10:12:46  dischi
 # improve system detect, use config.detect now
 #
@@ -299,8 +302,8 @@ RUNAPP = os.environ['RUNAPP']
 for dirname in cfgfilepath[1:]:
     freevoconf = dirname + '/freevo_config.py'
     if os.path.isfile(freevoconf):
-        print (('\nERROR: freevo_config.py found in %s, please remove it ' +
-                'and use local_conf.py instead!') % freevoconf)
+        log.critical(('freevo_config.py found in %s, please remove it ' +
+                      'and use local_conf.py instead!') % freevoconf)
         sys.exit(1)
         
 #
@@ -347,9 +350,7 @@ if os.path.isfile(os.environ['FREEVO_CONFIG']):
     execfile(os.environ['FREEVO_CONFIG'], globals(), locals())
     
 else:
-    print
-    print "Error: %s: no such file" % os.environ['FREEVO_CONFIG']
-    print
+    log.critical("Error: %s: no such file" % os.environ['FREEVO_CONFIG'])
     sys.exit(1)
 
 
@@ -359,7 +360,7 @@ else:
 for dirname in cfgfilepath:
     overridefile = dirname + '/local_conf.py'
     if os.path.isfile(overridefile):
-        if DEBUG: print 'Loading cfg overrides: %s' % overridefile
+        log.info('Loading cfg overrides: %s' % overridefile)
         execfile(overridefile, globals(), locals())
 
         try:
@@ -448,9 +449,7 @@ for type in ('video', 'audio', 'image', 'games'):
         x.append(('Root', '/'))
         exec('%s = x' % n)
         if not HELPER and plugin.is_active('mediamenu', type):
-            print
-            print 'Error: %s not set, set it to Home directory' % n
-            print
+            log.warning('%s not set, set it to Home directory' % n)
         if type == 'video':
             VIDEO_ONLY_SCAN_DATADIR = True
 
@@ -495,106 +494,14 @@ for type in ('video', 'audio', 'image', 'games'):
 if not TV_RECORD_DIR:
     TV_RECORD_DIR = VIDEO_ITEMS[0][1]
     if not HELPER and plugin.is_active('tv'):
-        print
-        print 'Error: TV_RECORD_DIR not set'
-        print 'Please set TV_RECORD_DIR to the directory, where recordings should be stored'
-        print 'or remove the tv plugin. Autoset variable to %s.' % TV_RECORD_DIR
-        print
+        log.warning('TV_RECORD_DIR not set')
+        log.warning('Please set TV_RECORD_DIR to the directory, where recordings')
+        log.warning('should be stored or remove the tv plugin. Autoset variable')
+        log.warning('to %s.' % TV_RECORD_DIR)
         
 if not VIDEO_SHOW_DATA_DIR and not HELPER:
-    print 'Error: VIDEO_SHOW_DATA_DIR not found'
+    log.warning('VIDEO_SHOW_DATA_DIR not found')
     
-#
-# Autodetect the CD/DVD drives in the system if not given in local_conf.py
-#
-# ROM_DRIVES == None means autodetect
-# ROM_DRIVES == [] means ignore ROM drives
-#
-if ROM_DRIVES == None:
-    ROM_DRIVES = []
-    if os.path.isfile('/etc/fstab'):        
-        re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/[am]?cd[0-9]+[a-z]?)[ \t]+([^ \t]+)[ \t]+', re.I )
-        re_cdrec     = re.compile( '^(/dev/cdrecorder[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
-        re_dvd       = re.compile( '^(/dev/dvd[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
-        re_iso       = re.compile( '^([^ \t]+)[ \t]+([^ \t]+)[ \t]+(iso|cd)9660', re.I )
-        re_automount = re.compile( '^none[ \t]+([^ \t]+).*supermount.*dev=([^,]+).*', re.I )
-        re_bymountcd = re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*cdrom[0-9]*)[ \t]+', re.I )
-        re_bymountdvd= re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*dvd[0-9]*)[ \t]+', re.I )
-        fd_fstab = open('/etc/fstab')
-        for line in fd_fstab:
-            # Match on the devices /dev/cdrom, /dev/dvd, and fstype iso9660
-            match_cd        = re_cd.match(line)
-            match_cdrec     = re_cdrec.match(line)
-            match_dvd       = re_dvd.match(line)
-            match_iso       = re_iso.match(line)
-            match_automount = re_automount.match(line)
-            match_bymountcd = re_bymountcd.match(line)
-            match_bymountdvd= re_bymountdvd.match(line)
-            mntdir = devname = ''
-            if match_cd or match_bymountcd:
-                m = match_cd or match_bymountcd
-                mntdir = m.group(2)
-                devname = m.group(1)
-                dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
-            elif match_cdrec: 
-                mntdir = match_cdrec.group(2)
-                devname = match_cdrec.group(1)
-                dispname = 'CDREC-%s' % (len(ROM_DRIVES)+1)
-            elif match_dvd or match_bymountdvd:
-                m = match_dvd or match_bymountdvd
-                mntdir = m.group(2)
-                devname = m.group(1)
-                dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
-            elif match_iso:
-                mntdir = match_iso.group(2)
-                devname = match_iso.group(1)
-                dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
-            elif match_automount:
-                mntdir = match_automount.group(1)
-                devname = match_automount.group(2)
-                # Must check that the supermount device is cd or dvd
-                if devname.lower().find('cd') != -1:
-                    dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
-                elif devname.lower().find('dvd') != -1:
-                    dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
-	    	elif devname.lower().find('hd') != -1:
-		    print 'Trying to autodetect type of %s' %devname
-		    if os.path.exists('/proc/ide/' + re.sub(r'^(/dev/)', '', devname) +\
-                                      '/media'):
-		     if open('/proc/ide/'+  re.sub(r'^(/dev/)', '', devname) +\
-                             '/media','r').read().lower().find('cdrom') !=1:
-			    dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
-			    print ("%s is a cdrom drive" %devname)
-		    else:
-			print ("%s doesn't seems to be a cdrom drive" %devname)
-                    	mntdir = devname = dispname = ''
-                else:
-                    mntdir = devname = dispname = ''
-
-            if os.uname()[0] == 'FreeBSD':
-                # FreeBSD-STABLE mount point is often device name + "c",
-                # strip that off
-                if devname and devname[-1] == 'c':
-                    devname = devname[:-1]
-                # Use native FreeBSD device names
-                dispname = devname[5:]
- 
-            # Weed out duplicates
-            for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:
-                if os.path.realpath(rd_devname) == os.path.realpath(devname):
-                    if not HELPER:
-                        print (('ROM_DRIVES: Auto-detected that %s is the same ' +
-                                'device as %s, skipping') % (devname, rd_devname))
-                    break
-            else:
-                # This was not a duplicate of another device
-                if mntdir and devname and dispname:
-                    ROM_DRIVES += [ (mntdir, devname, dispname) ]
-                    if not HELPER:
-                        print 'ROM_DRIVES: Auto-detected and added "%s"' % (ROM_DRIVES[-1], )
-        fd_fstab.close()
-                
-
 
 #
 # List of objects representing removable media, e.g. CD-ROMs,
@@ -613,7 +520,7 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + \
 
 try:
     LOCALE
-    print 'Error: LOCALE is deprecated. Please set encoding in freevo.conf.'
+    log.critical('Error: LOCALE is deprecated. Please set encoding in freevo.conf.')
     sys.exit(0)
 except NameError, e:
     pass
@@ -622,8 +529,8 @@ encoding = LOCALE = sysconfig.CONF.encoding
 
 try:
     OVERLAY_DIR
-    print 'Error: OVERLAY_DIR is deprecated. Please set vfs_dir in freevo.conf'
-    print 'to change the location of the virtual file system'
+    log.critical('OVERLAY_DIR is deprecated. Please set vfs_dir in freevo.conf')
+    log.critical('to change the location of the virtual file system')
     sys.exit(0)
 except NameError, e:
     pass
