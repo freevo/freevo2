@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/04/24 11:46:30  dischi
+# fixed 'to many open files' bug
+#
 # Revision 1.15  2003/04/23 10:41:05  dischi
 # fixed item plugin list
 #
@@ -389,7 +392,7 @@ if __name__ == "__main__":
     for file in util.recursefolders('src',1, '*.py',1):
         if file == 'src/plugin.py':
             continue
-        for line in open(str(file),'r').readlines():
+        for line in util.readfile(file):
             if (comment.match(line) and print_line == 2) or \
                (stop.match(line) and print_line == 1):
                 print_line = 0

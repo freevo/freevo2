@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/04/24 11:46:30  dischi
+# fixed 'to many open files' bug
+#
 # Revision 1.19  2003/04/21 12:57:16  dischi
 # moved SynchronizedObject to util.py
 #
@@ -438,7 +441,11 @@ def format_text(text):
     return text
 
 
-
+def readfile(filename):
+    fd = open(str(filename), 'r')
+    ret = fd.readlines()
+    close(fd)
+    return ret
 
 #
 # synchronized objects and methods.

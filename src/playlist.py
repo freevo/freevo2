@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/04/24 11:46:29  dischi
+# fixed 'to many open files' bug
+#
 # Revision 1.16  2003/04/21 18:17:46  dischi
 # Moved the code from interface.py for video/audio/image/games to __init__.py
 #
@@ -97,7 +100,7 @@ class Playlist(Item):
         """
 
         try:
-            lines = open(plsname).readlines()
+            lines = util.readfile(plsname)
         except IOError:
             print 'Cannot open file "%s"' % list
             return 0
@@ -124,7 +127,7 @@ class Playlist(Item):
         """
 
         try:
-            lines = open(plsname).readlines()
+            lines = util.readfile(plsname)
         except IOError:
             print 'Cannot open file "%s"' % list
             return 0
@@ -166,7 +169,7 @@ class Playlist(Item):
         (curdir, playlistname) = os.path.split(ssrname)
         out_lines = []
         try:
-            lines = open(ssrname).readlines()
+            lines = util.readfile(ssrname)
         except IOError:
             print 'Cannot open file "%s"' % list
             return 0

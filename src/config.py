@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/04/24 11:46:29  dischi
+# fixed 'to many open files' bug
+#
 # Revision 1.24  2003/04/20 17:36:49  dischi
 # Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
 # images like before, but also fxd files for the tv show with global
@@ -225,9 +228,9 @@ def print_config_changes(conf_version, file_version, changelist):
     
 def read_config(filename, conf):
     if DEBUG: print 'Reading config file %s' % filename
-    
-    lines = open(filename).readlines()
-    for line in lines:
+
+    c = open(filename)
+    for line in c.readlines():
         vals = line.strip().split()
         if DEBUG: print 'Cfg file data: "%s"' % line.strip()
         try:
@@ -237,6 +240,7 @@ def read_config(filename, conf):
             continue
         conf.__dict__[name] = val
 
+    c.close()
     w, h = conf.geometry.split('x')
     conf.width, conf.height = int(w), int(h)
         

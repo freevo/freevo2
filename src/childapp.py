@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/24 11:46:29  dischi
+# fixed 'to many open files' bug
+#
 # Revision 1.7  2003/04/06 21:12:54  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -136,6 +139,14 @@ class ChildApp:
 
         except OSError:
             # Already dead
+            pass
+
+        try:
+            self.outfile.close()
+            self.errfile.close()
+            self.infile.close()
+        except:
+            print 'error closing filehandler'
             pass
 
         

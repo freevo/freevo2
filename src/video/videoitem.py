@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/04/24 11:46:30  dischi
+# fixed 'to many open files' bug
+#
 # Revision 1.40  2003/04/21 17:35:12  dischi
 # also remove images on delete
 #
@@ -506,8 +509,7 @@ class VideoItem(Item):
         """
         bookmarkfile = self.bookmarkfile
         items = []
-        lines = open(str(bookmarkfile),'r').readlines()
-        for line in lines: 
+        for line in util.readfile(bookmarkfile):
             file = copy.copy(self)
             sec = int(line)
             hour = int(sec/3600)
@@ -580,8 +582,7 @@ class VideoItem(Item):
 
             if done and self.mode == 'dvd':
                 # Look for 'There are NNN titles on this DVD'
-                lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
-                for line in lines:
+                for line in util.readfile('/tmp/mplayer_dvd_%s.log' % uid):
                     if line.find('titles on this DVD') != -1:
                         self.num_titles = int(line.split()[2])
                         print 'Got num_titles = %s from str "%s"' % (self.num_titles, line)
@@ -590,8 +591,7 @@ class VideoItem(Item):
 
             elif done:
                 # Look for 'track NN'
-                lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
-                for line in lines:
+                for line in util.readfile('/tmp/mplayer_dvd_%s.log' % uid):
                     if line.find('track ') == 0:
                         self.num_titles = int(line[6:8])
                         found = 1
@@ -688,7 +688,7 @@ class VideoItem(Item):
                     break
 
             p = mplayer.MPlayerParser(self)
-            for line in open('/tmp/mplayer_dvd_%s.log' % uid).readlines():
+            for line in util.readfile('/tmp/mplayer_dvd_%s.log' % uid):
                 p.parse(line)
 
             
