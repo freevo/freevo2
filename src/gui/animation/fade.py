@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/12/18 13:45:25  dischi
+# fix crash
+#
 # Revision 1.2  2004/10/12 11:31:58  dischi
 # make animation frame selection timer based
 #
@@ -86,5 +89,5 @@ class FadeAnimation(BaseAnimation):
         finish the animation
         """
         self.max_frames = 1
-        self.update()
+        self.update(self.max_frames)
         BaseAnimation.finish(self)
