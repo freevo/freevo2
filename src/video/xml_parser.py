@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/08/22 18:38:39  gsbarbieri
+# Fixed previously introduced bug.
+#
 # Revision 1.31  2003/08/21 20:54:45  gsbarbieri
 #    *ROM media just shows up when needed, ie: audiocd is not displayed in
 # video main menu.
@@ -618,7 +621,7 @@ def parseMovieFile(file, parent, duplicate_check):
                 mitem = make_videoitem(video, variants[0])
             else:
                 mitem = make_videoitem(video, None)
-
+            mitem.parent = parent
             mitem.name = title
             mitem.image = image
             mitem.xml_file = file
