@@ -864,18 +864,12 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
 # Builtin WWW server settings
 # ======================================================================
 
-# XXX THIS IS WORK IN PROGRESS! PLEASE DON'T USE IT UNLESS YOU KNOW
-# XXX WHAT YOU'RE DOING! DO NOT ASK FOR HELP USING IT YET!
-
+# XXX THIS IS WORK IN PROGRESS! 
 #
-# The builtin WWW server must be started separately using the
-# following commandline:
-#   "freevo execute src/www/webserver.py"
-# It uses local_conf.py to find files and TV channels, so it
-# matters where it is started from! If you start it from the 
-# freevo source directory, and there is a standard local_conf.py there,
-# you will not get your local settings!
+# To activate the build in web server, please activate the www plugin
+# in your local_conf.py:
 #
+# plugin.activate('www')
 
 #
 # Web server port number. 80 is the standard port, but is often
@@ -889,6 +883,7 @@ WWW_PORT = 8080
 # Allowed IP addresses list. Set to [] to allow all addresses.
 #
 WWW_IP_ALLOW = ['127.0.0.1']
+
 
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know
