@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/10/08 03:14:51  outlyer
+# Make sure get_size() always returns int
+#
 # Revision 1.28  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -222,7 +225,7 @@ class GUIObject:
         Arguments: None
         Returns:   (width, height) - as list.
         """
-        return (self.width, self.height)
+        return (int(self.width), int(self.height))
 
 
     def set_size(self, width, height=None):
