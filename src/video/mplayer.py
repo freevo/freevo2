@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/01 20:53:03  dischi
+# Added better support for mov files. This _only_ works with the mplayer
+# CVS for now
+#
 # Revision 1.3  2002/11/26 22:02:10  dischi
 # Added key to enable/disable subtitles. This works only with mplayer pre10
 # (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
@@ -157,7 +161,51 @@ class MPlayer:
             return
 
 
+        # XXX testcode to play mov files
+        if util.match_suffix(filename, [ "mov", ]):
+            # Use the uid to make a user-unique filename
+            uid = os.getuid()
 
+            probe_cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
+            probe_cmd += '\"%s\" 2> /dev/null > /tmp/mplayer_mov_%s.log' % (filename, uid)
+
+            os.system(probe_cmd + (' ; touch /tmp/mplayer_mov_done_%s' % uid))
+            timeout = time.time() + 5.0
+            while 1:
+                if time.time() >= timeout:
+                    print 'mov reading failed!'
+                    return
+
+                if os.path.isfile('/tmp/mplayer_mov_done_%s' % uid):
+                    break
+
+            lines = open('/tmp/mplayer_mov_%s.log' % uid).readlines()
+            vid   = -1
+            image = ''
+            codec = ''
+            for line in lines:
+                # get vid number
+                if line.find('MOV track #') == 0:
+                    vid = int(line[11])
+                # check if it's not an audio-only track
+                elif line.find('Image size') == 0:
+                    image = line
+                # check if it's not a jpeg still image
+                elif line.find('Fourcc:') == 0 and line.find('Fourcc: jpeg') != 0:
+                    codec = line
+
+                # test
+                elif line.find('----') == 0:
+                    if vid != -1 and image and codec:
+                        break
+                    vid   = -1
+                    image = ''
+                    codec = ''
+
+            if vid == -1:
+                print 'no informations found, let\'s hope it works'
+            else:
+                mpl += ' -vid %s' % vid
             
         # Mplayer command and standard arguments
         mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV)
