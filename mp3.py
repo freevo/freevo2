@@ -98,7 +98,7 @@ def m3u_playlist(arg=None, menuw=None):
 
     for filename in playlist_lines:
         songname = util.strip_suffix(os.path.basename(filename))
-        items += [menu.MenuItem(songname, play_mp3, (filename, playlist_filenames))]
+        items += [menu.MenuItem(songname, play_mp3, (filename, playlist_lines))]
 
     title = os.path.basename(arg)[:-4]
     
