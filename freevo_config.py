@@ -109,7 +109,7 @@ from event import *
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 2.0
-LOCAL_CONF_VERSION  = 3.3
+LOCAL_CONF_VERSION  = 3.4
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [

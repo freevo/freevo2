@@ -27,7 +27,7 @@
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-CONFIG_VERSION = 3.1
+CONFIG_VERSION = 3.4
 
 # How Freevo finds the config files (freevo.conf, local_conf.py, local_skin.xml)
 # ==============================================================================
