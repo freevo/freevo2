@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/08/22 20:10:38  dischi
+# changes to new mevas based gui code
+#
 # Revision 1.23  2004/08/05 17:39:34  dischi
 # remove skin dep
 #
@@ -79,6 +82,7 @@ import plugin
 import util.tv_util as tv_util
 import util.pymetar as pymetar
 import gui
+import gui.imagelib
 import eventhandler
 from event import *
 
@@ -106,6 +110,9 @@ class PluginInterface(plugin.DaemonPlugin):
         self.visible        = False
         self.bar            = None
         self.barfile        = ''
+        self.background     = None
+        self.container      = gui.CanvasContainer()
+        self.container.set_zindex(10)
         # Getting current LOCALE
         try:
             locale.resetlocale()
@@ -117,32 +124,19 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         draw a background and all idlebar plugins
         """
-        screen  = gui.get_screen()
+        screen  = gui.get_display()
         changed = False
 
-        if not self.visible:
-            _debug_('clear idlebar')
-            for p in plugin.get('idlebar'):
-                p.clear()
-            if self.bar:
-                self.bar.screen.remove(self.bar)
-                self.bar = None
-                self.barfile = ''
-            return True
-        
         w = screen.width
         h = config.OSD_OVERSCAN_Y + 60
         f = gui.get_image('idlebar')
 
         if self.barfile != f:
             if self.bar:
-                screen.remove(self.bar)
+                self.container.remove_child(self.bar)
             self.barfile = f
-            bg = screen.renderer.loadbitmap(f, False, w, h)
-            if bg:
-                self.bar = gui.Image(0, 0, w, h, bg)
-                self.bar.layer = 5
-                screen.add(self.bar)
+            self.bar = gui.Image(self.barfile, (0,0), (w, h))
+            self.container.add_child(self.bar)
             changed = True
 
         x1 = config.OSD_OVERSCAN_X
@@ -165,16 +159,13 @@ class PluginInterface(plugin.DaemonPlugin):
 
             if p.align == 'left':
                 for o in p.objects:
-                    o.set_position(o.x1 + x1, o.y1 + y1, o.x2 + x1, o.y2 + y1)
-                    o.layer = 6
-                    screen.add(o)
+                    o.set_pos((o.get_pos()[0] + x1, o.get_pos()[1] + y1))
+                    self.container.add_child(o)
                 x1 = x1 + width
             else:
-                m = x2 - width
                 for o in p.objects:
-                    o.set_position(o.x1 + m, o.y1 + y1, o.x2 + m, o.y2 + y1)
-                    o.layer = 6
-                    screen.add(o)
+                    o.set_pos((o.get_pos()[0] + x2 - width, o.get_pos()[1] + y1))
+                    self.container.add_child(o)
                 x2 = x2 - width
             p.width = width
             changed = True
@@ -182,30 +173,73 @@ class PluginInterface(plugin.DaemonPlugin):
         return changed
             
 
-    def show(self):
+    def show(self, update=True):
         if self.visible:
             return
+
+        gui.get_display().add_child(self.container)
         self.visible = True
         self.update()
-        
+        if update:
+            gui.get_display().update()
 
-    def hide(self):
+
+    def hide(self, update=True):
         if not self.visible:
             return
+        self.container.unparent()
         self.visible = False
-        self.update()
+        if update:
+            gui.get_display().update()
         
 
+    def add_background(self):
+        """
+        add a background behind the bar
+        """
+        if not self.background:
+            s = gui.get_display()
+            self.background = gui.imagelib.load('background', (s.width, s.height))
+            if self.background:
+                size = (s.width, config.OSD_OVERSCAN_Y + 60)
+                self.background.crop((0,0), size)
+                self.background = gui.Image(self.background, (0,0))
+                self.background.set_alpha(230)
+                self.background.set_zindex(-1)
+                self.container.add_child(self.background)
+                
+                                                  
+    def remove_background(self):
+        """
+        remove the background behind the bar
+        """
+        if self.background:
+            self.background.unparent()
+            self.background = None
+            
     def eventhandler(self, event, menuw=None):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
-        plugin wants to redraw)
+        plugin wants to redraw). Also catch SCREEN_CONTENT_CHANGE in case we
+        need to hide/show the bar.
         """
         if event == SCREEN_CONTENT_CHANGE:
+            # react on toggle fullscreen, hide or show the bar, but not update
+            # the screen itself, this is done by the app later
             app, fullscreen = event.arg
+            if fullscreen:
+                # add the background behind the bar
+                self.add_background()
+            else:
+                # remove the background again, it's done by the
+                # 'not in fullscreen' app.
+                self.remove_background()
             if fullscreen == self.visible:
                 _debug_('set visible %s' % (not fullscreen))
-                self.visible = not fullscreen
+                if not self.visible:
+                    self.show(False)
+                else:
+                    self.hide(False)
                 self.update()
             return
         
@@ -213,7 +247,7 @@ class PluginInterface(plugin.DaemonPlugin):
             return False
         if plugin.isevent(event) == 'IDENTIFY_MEDIA':
             if self.update():
-                gui.get_screen().update()
+                gui.get_display().update()
         return False
 
 
@@ -224,7 +258,7 @@ class PluginInterface(plugin.DaemonPlugin):
         if not self.visible:
             return
         if self.update():
-            gui.get_screen().update()
+            gui.get_display().update()
 
 
 
@@ -243,7 +277,7 @@ class IdleBarPlugin(plugin.Plugin):
 
     def clear(self):
         for o in self.objects:
-            o.screen.remove(o)
+            o.unparent()
         self.objects = []
         
             
@@ -269,27 +303,24 @@ class clock(IdleBarPlugin):
         self.object = None
         self.align  = 'right'
         self.width  = 0
-
+        self.text   = ''
 
     def draw(self, width, height):
         clock  = time.strftime(self.format)
 
-        if self.objects and self.objects[0].text == clock:
+        if self.objects and self.text == clock:
             return self.NO_CHANGE
 
         self.clear()
 
-        screen = gui.get_screen()
-        font   = gui.get_font('clock')
+        font  = gui.get_font('clock')
+        width = min(width, font.stringsize(clock))
 
-        w = font.stringsize(clock)
-        h = font.font.height
-        if h > height:
-            h = height
-
-        txt = gui.Text(0, 0, w, h, clock, font, align_v='center', align_h='right')
+        txt = gui.Text(clock, (0, 0), (width, height), font,
+                       align_v='center', align_h='right')
         self.objects.append(txt)
-        return w
+        self.text = clock
+        return width
 
 
 
@@ -387,6 +418,8 @@ class tv(IdleBarPlugin):
     given.
     """
     def __init__(self, listings_threshold=-1):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
         IdleBarPlugin.__init__(self)
 
         self.listings_threshold = listings_threshold
@@ -437,7 +470,7 @@ class tv(IdleBarPlugin):
         self.clear()
         self.status = status
         i = gui.get_icon('status/television_%s' % status)
-        i = gui.get_screen().renderer.loadbitmap(i, None, None, height)
+        i = gui.get_display().renderer.load(i, (None, height))
         
         w,h  = i.get_size()
         self.objects.append(gui.Image(0, 0, w, h, i))
@@ -618,12 +651,10 @@ class logo(IdleBarPlugin):
         self.file = image
         self.clear()
             
-        screen = gui.get_screen()
-        i = screen.renderer.loadbitmap(image, None, None, height + 10)
+        i = gui.imagelib.load(image, (None, height + 10))
         if not i:
             return 0
 
-        w,h  = i.get_size()
-        self.objects.append(gui.Image(0, 0, w, h, i))
+        self.objects.append(gui.Image(i, (0, 0)))
         print 'add', self.objects
-        return w
+        return i.width

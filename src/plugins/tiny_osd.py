@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/08/22 20:12:16  dischi
+# changes to new mevas based gui code
+#
 # Revision 1.13  2004/08/01 10:49:06  dischi
 # move to new gui code
 #
@@ -71,18 +74,18 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def update(self):
         """
-        update the screen
+        update the display
         """
-        screen = gui.get_screen()
+        display = gui.get_display()
         if self.gui_object:
-            # remove the current text from the screen
-            self.gui_object.screen.remove(self.gui_object)
+            # remove the current text from the display
+            self.gui_object.unparent()
             self.gui_object = None
 
         if not self.message:
             # if we don't have a text right now,
-            # update the screen without the old message
-            screen.update()
+            # update the display without the old message
+            display.update()
             return
 
         # get the osd from from the settings
@@ -90,18 +93,18 @@ class PluginInterface(plugin.DaemonPlugin):
 
         # create the text object
         # FIXME: do respect the idlebar if active
-        self.gui_object = gui.Text(config.OSD_OVERSCAN_X,
-                                   config.OSD_OVERSCAN_Y + 10,
-                                   screen.width - 10 - 2 * config.OSD_OVERSCAN_X,
-                                   config.OSD_OVERSCAN_Y + 10 + font.height, 
-                                   self.message, font, align_h='right')
+        self.gui_object = gui.Text(self.message,
+                                   (config.OSD_OVERSCAN_X, config.OSD_OVERSCAN_Y + 10),
+                                   (display.width - 10 - 2 * config.OSD_OVERSCAN_X,
+                                    config.OSD_OVERSCAN_Y + 10 + font.height), 
+                                   font, align_h='right')
 
         # make sure the object is on top of everything else
-        self.gui_object.layer = 20
+        self.gui_object.set_zindex(200)
 
-        # add the text and update the screen
-        screen.add(self.gui_object)
-        screen.update()
+        # add the text and update the display
+        display.add_child(self.gui_object)
+        display.update()
 
 
     def eventhandler(self, event, menuw=None):
