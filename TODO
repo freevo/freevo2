@@ -6,14 +6,12 @@ $Id$
 
 Short-term
 ----------
-o Replace mpg123 with mplayer
 o Check that the applications exist in startup.py, now it will
   just loop forever trying to start them
 o Add rcs id to all files!
 o Channel guide layout
 o A switch to turn off the EPG altogether if no listings are available.
 o Make the EPG handling more modular
-o Add xmltv to the EPG
 o Use btaudio for audio recording from the video card
 o Add page numbers to the menus, i.e. "Page 3/14"
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)

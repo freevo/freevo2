@@ -117,7 +117,12 @@ class MPG123:
 	    # it's a real png, and not a lying one :)
 	    if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
                 mp3info.image = cover_logo
-                
+           
+	
+	    # Allow per mp3 covers. As per Chris' request ;)
+	    if os.path.isfile(filename + '.png'):
+	    	mp3info.image = filename + '.png'
+
             mp3info.filename = filename
             mp3info.id3 = ID3(filename)
             if mp3info.id3.track == None:
