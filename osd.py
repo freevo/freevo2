@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2002/09/07 06:16:51  krister
+# Cleanup.
+#
 # Revision 1.18  2002/09/01 05:15:55  krister
 # Switched to the new freely distributable fonts.
 #
@@ -438,6 +441,7 @@ class OSD:
             tx = x - w
             
         self.screen.blit(ren, (tx, y))
+
 
     # Render a string to an SDL surface. Uses a cache for speedup.
     def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
