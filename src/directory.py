@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/06/07 11:28:33  dischi
+# use an id to find the new selected item (e.g. after creating a fxd file
+#
 # Revision 1.13  2003/06/03 19:10:28  outlyer
 # Prevent a crash if a directory is removed while you're inside it. This just
 # wasn't adapted to the new event framework, the bulk was there.
@@ -486,6 +489,10 @@ class DirItem(Playlist):
             video.update(self, new_files, del_files, 
                                    new_items, del_items, self.play_items)
 
+
+        # store the current selected item
+        selected = self.menu.selected
+        
         # delete play items from the menu
         for i in del_items:
             self.menu.delete_item(i)
@@ -577,6 +584,14 @@ class DirItem(Playlist):
         # finally add the items
         for i in new_items + new_dir_items + new_pl_items:
             self.menu.add_item(i, items.index(i))
+
+        if not selected in self.menu.choices:
+            if hasattr(selected, 'id'):
+                id = selected.id
+                for i in self.menu.choices:
+                    if hasattr(i, 'id') and i.id == selected.id:
+                        self.menu.selected = i
+                        break
                     
         # reload the menu, use an event to avoid problems because this function
         # was called by a thread
