@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/25 04:53:21  krister
+# More network libs werer needed.
+#
 # Revision 1.2  2003/02/21 04:36:43  krister
 # Bugfix for missing network libs.
 #
@@ -64,7 +67,10 @@ def main():
     check_dir('apps', libdeps)
 
     extra_libs = ['/lib/libnss_files.so.2',
-                  '/lib/libnss_dns.so.2'] # These are not autodetected
+                  '/lib/libnss_dns.so.2',
+                  '/lib/libnss_compat.so.2',
+                  '/lib/libnss_nis.so.2',
+                  '/lib/libnss_nisplus.so.2'] # These are not autodetected
     for extra_lib in extra_libs:
         libdeps[extra_lib] = 1
         check_lib(extra_lib, libdeps)
