@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/18 08:33:36  dischi
+# do not restart if the server crashed in 10 secs
+#
 # Revision 1.7  2003/09/24 00:21:05  mikeruelle
 # rewrite for styles too
 #
@@ -99,16 +102,19 @@ def main():
     
     application = app.Application('web')
     application.listenTCP(config.WWW_PORT, site)
-    
     application.run(save=0)
 
 
 if __name__ == '__main__':
     import traceback
+    import time
     while 1:
         try:
+            start = time.time()
             main()
         except:
             traceback.print_exc()
-            pass
+            if start + 10 > time.time():
+                print 'server problem, sleeping 1 min'
+                time.sleep(60)
 
