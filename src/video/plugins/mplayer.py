@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/01 16:41:37  dischi
+# send PLAY_START event
+#
 # Revision 1.16  2003/08/30 17:05:42  dischi
 # remove bookmark support, add support for ItemPlugin eventhandler
 #
@@ -274,6 +277,7 @@ class MPlayer:
         self.thread.mode    = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
+        print command
         return None
     
 
@@ -520,6 +524,8 @@ class MPlayer_Thread(threading.Thread):
                 if config.STOP_OSD_WHEN_PLAYING:
                     osd.stopdisplay()			
                
+                rc.post_event(Event(PLAY_START, arg=self.item))
+
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     

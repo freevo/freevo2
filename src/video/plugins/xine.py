@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/01 16:41:37  dischi
+# send PLAY_START event
+#
 # Revision 1.13  2003/08/30 18:52:53  dischi
 # Aubin, don't do that :-)
 # Make a nice ItemPlugin do set the color values. Take a look at
@@ -391,6 +394,8 @@ class Xine_Thread(threading.Thread):
             elif self.mode == 'play':
                 if config.STOP_OSD_WHEN_PLAYING:
                     osd.stopdisplay()			
+
+                rc.post_event(Event(PLAY_START, arg=self.item))
 
                 if DEBUG:
                     print 'Xine_Thread.run(): Started, cmd=%s' % self.command
