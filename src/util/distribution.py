@@ -62,6 +62,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/06/02 18:11:57  dischi
+# get real skin text strings for i18n
+#
 # Revision 1.5  2004/02/25 19:51:17  dischi
 # add helpers to __init__ del list
 #
@@ -101,6 +104,7 @@
 
 import os
 import sys
+import re
 
 try:
     import version
@@ -232,29 +236,71 @@ class i18n (core.Command):
         if not self.compile_only:
             print 'updating pot file'
 
-            # for freevo main package: remember the skin settings
+            # for freevo main package: get the skin settings
+            fxd_strings = {}
             if i18n_application == 'freevo':
-                f = open('i18n/freevo.pot')
-                fxd_strings = []
-                add = 0
-                for line in f.readlines():
-                    if line.find('Manualy added from fxd skin files') > 0:
-                        add = 1
-                    if add:
-                        fxd_strings.append(line)
-                f.close()
+                for file in ([ os.path.join('share/skins/main', fname)
+                               for fname in os.listdir('share/skins/main') ]):
+                    if file.endswith('.fxd'):
+                        f = open(file)
+                        data = f.readlines()
+                        f.close()
+                        for i in range(len(data)):
+                            # find main menu names
+                            if 0 < data[i].find('<item label') < data[i].find('name'):
+                                text = data[i][data[i].find('name="')+6:]
+                                text = text[:text.find('"')]
+                                if fxd_strings.has_key(text):
+                                    fxd_strings[text].append('%s:%s' % (file, i))
+                                else:
+                                    fxd_strings[text] = [ '%s:%s' % (file, i) ]
+                                continue
+
+                            # find <text></text>
+                            if data[i][:-1].find('<text') == -1:
+                                continue
+                            text = data[i][:-1]
+                            if data[i][:-1].find('>') == -1:
+                                text += data[i+1][:-1]
+                            if text.find('/>') > 0 or text.find('</text>') == -1:
+                                continue
+                            text = text[text.find('>')+1:text.find('</text>')]
+                            if not text.strip(' /():-_"\'') or text == 'x':
+                                continue
+                            if fxd_strings.has_key(text):
+                                fxd_strings[text].append('%s:%s' % (file, i))
+                            else:
+                                fxd_strings[text] = [ '%s:%s' % (file, i) ]
 
             # update
             os.system('(cd src ; find . -name "*.*py" | xargs xgettext -L Python -o ../i18n/%s.pot)' % \
                       i18n_application)
 
-            # for freevo main package: restore the skin settings
+            # for freevo main package: check skin
             if i18n_application == 'freevo':
-                f = open('i18n/freevo.pot', 'a')
-                for line in fxd_strings:
-                    f.write(line)
+                # load pot file into mem
+                f = open('i18n/freevo.pot')
+                data = f.readlines()
                 f.close()
-   
+
+                # search for duplicates from freevo.pot and skin
+                f = open('i18n/freevo.pot', 'w')
+                for line in data:
+                    if line.find('msgid "') == 0:
+                        text = line[line.find('"')+1:line.rfind('"')]
+                        if text in fxd_strings:
+                            for found in fxd_strings[text]:
+                                f.write('#: %s\n' % found)
+                            del fxd_strings[text]
+                    f.write(line)
+
+                # write skin strings
+                for text in fxd_strings:
+                    f.write('\n')
+                    for line in fxd_strings[text]:
+                        f.write('#: %s\n' % line)
+                    f.write('msgid "%s"\nmsgstr ""\n' % text)
+
              
         if not self.no_merge and not self.compile_only:
             for file in ([ os.path.join('i18n', fname) for fname in os.listdir('i18n') ]):
