@@ -120,7 +120,15 @@ main (int ac, char *av[])
              "[us-bcast|us-cable|europe-west|...] channelname)...\n");
      if (fscanf (stdin, "%s %s %s %s", norm, input, std, chan) == 4) {
         printf ("Got %s %s %s %s\n", norm, input, std, chan);
-        freq = get_freq (std, chan);
+
+        if (!strcmp (chan, "fine_plus")) {
+           freq += 1.0/16.0;
+        } else if (!strcmp (chan, "fine_minus")) {
+           freq -= 1.0/16.0;
+        } else {
+           freq = get_freq (std, chan);
+        }
+
         if (freq != 0.0) {
            printf ("Got freq %6.2f MHz\n", freq);
            set_input (fd, norm, input, freq);

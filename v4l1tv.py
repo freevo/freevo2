@@ -156,6 +156,22 @@ class V4L1TV:
             self.thread.app.write(config.TV_SETTINGS + ' ' + channel + '\n')
             time.sleep(0.1)
             mixer.setLineinVolume(90)
+        elif event == rc.LEFT:
+            if self.mode == 'vcr':
+                return
+            # Fintune minus
+            mixer.setLineinVolume(0)
+            self.thread.app.write(config.TV_SETTINGS + ' ' + 'fine_minus' + '\n')
+            time.sleep(0.1)
+            mixer.setLineinVolume(90)
+        elif event == rc.RIGHT:
+            if self.mode == 'vcr':
+                return
+            # Fintune minus
+            mixer.setLineinVolume(0)
+            self.thread.app.write(config.TV_SETTINGS + ' ' + 'fine_plus' + '\n')
+            time.sleep(0.1)
+            mixer.setLineinVolume(90)
             
 
 
