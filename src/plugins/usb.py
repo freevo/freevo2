@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/28 11:28:56  dischi
+# add hotplugging
+#
 # Revision 1.5  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -42,26 +45,45 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import os
+
+import config
 import plugin
 import util
 import rc
+from gui import PopupBox
 
 class PluginInterface(plugin.DaemonPlugin):
     """
     This Plugin to scan for usb devices. You should activate this
     plugin if you use mainmenu plugins for special usb devices
     like camera.py.
+
+    You can also set USB_HOTPLUG in your local_config.py to call
+    an external program when a device is added. USB_HOTPLUG is a
+    list with actions. Each action is also a list of device, message
+    and program to call. Limitation: this works only when Freevo shows
+    the menu and is not running a video.
+    
+    Example:
+    call pilot-xfer when a pda with the id 082d:0100 is pluged in:
+    USB_HOTPLUG = [ ('082d:0100', 'Synchronizing',
+                     '/usr/bin/pilot-xfer -t -u /local/visor/current') ]
     """
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.devices = util.list_usb_devices()
         self.poll_interval = 10
 
+
+    def config(self):
+        return [( 'USB_HOTPLUG', [], 'action list when a devices comes up' )]
+
+    
     def poll(self, menuw=None, arg=None):
         """
         poll to check for devices
         """
-
         changes = False
 
         current_devices = util.list_usb_devices()
@@ -69,9 +91,17 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 self.devices.remove(d)
             except ValueError:
-                changes = True
                 print 'usb.py: new device %s' %d
-
+                for device, message, action in config.USB_HOTPLUG:
+                    if d == device:
+                        pop = PopupBox(text=message)
+                        pop.show()
+                        os.system(action)
+                        pop.destroy()
+                        break
+                else:
+                    changes = True
+                        
         for d in self.devices:
             changes = True
             print 'usb.py: removed device %s' % d
