@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/08/13 02:08:25  rshortt
+# Add reference to config.TV_DEFAULT_SETTINGS and settings() to Channel class.
+# TODO: add logic to include something like TV_SETTINGS_ALTERNATES = { 'tv0' : 'tv1' }
+# to say that tv0 and tv1 have the same channels.
+#
 # Revision 1.22  2004/08/10 19:37:22  dischi
 # better pyepg integration
 #
@@ -62,6 +67,7 @@
 import os
 import time
 import stat
+import string
 
 import config
 import tv.freq, tv.v4l2
@@ -100,8 +106,7 @@ class Channel:
         add a frequence to the internal list where to find that channel
         """
         if freq.find(':') == -1:
-            # FIXME: but this into the config file
-            freq = 'dvb:%s' % freq
+            freq = '%s:%s' % (config.TV_DEFAULT_SETTINGS, freq)
         self.freq.append(freq)
 
 
@@ -118,6 +123,21 @@ class Channel:
                 if p.rate(self, device, freq):
                     return p, device, freq
         return None
+
+
+    def settings(self):
+        """
+        return a dict of settings for this channel
+        """
+        settings = {}
+
+        for f in self.freq:
+            type = string.split(f, ':')[0]
+            settings[type] = config.TV_SETTINGS.get(type)
+
+        return settings
+
+
 
                     
 
