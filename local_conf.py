@@ -355,3 +355,36 @@ CONFIG_VERSION = 3.1
 #                 ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
 #                ('103 Station 3b', 'Station 3b', '103',
 #                 ('1234567', '1600', '2159'))]
+
+
+# ======================================================================
+# Freevo Web Interface:
+# ======================================================================
+
+#
+# To activate the build in web server, please activate the www plugin:
+#
+# plugin.activate('www')
+
+#
+# Web server port number. 80 is the standard port, but is often
+# taken already by apache, and cannot be used unless the server
+# runs as root. Use port 8080 as the default, change to 80 if
+# needed.
+#
+# WWW_PORT = 8080
+
+#
+# Web server host addres to bind to.  If set to localhost you will
+# only be able to access it from the same machine. 
+#
+# WWW_VHOST = 'localhost'
+
+#
+# Username / Password combinations to login to the web interface.
+# These should be overridden in local_conf.py
+# 
+# WWW_USERS = { "user1" : "changeme", 
+#            "optional" : "changeme2" }
+#
+
