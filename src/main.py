@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2003/12/04 21:50:20  dischi
+# include Splashscreen here
+#
 # Revision 1.94  2003/12/03 21:52:07  dischi
 # rename some skin function calls
 #
@@ -285,9 +288,53 @@ class MainMenu(Item):
         
     
 
+
+class Splashscreen(skin.Area):
+    """
+    A simple splash screen for osd startup
+    """
+    def __init__(self):
+        skin.Area.__init__(self, 'content')
+
+        self.pos          = 0
+        self.bar_border   = skin.Rectange(bgcolor=0xff000000, size=2)
+        self.bar_position = skin.Rectange(bgcolor=0xa0000000L)
+
+
+    def update_content(self):
+        """
+        there is no content in this area
+        """
+        layout    = self.layout
+        area      = self.area_val
+        content   = self.calc_geometry(layout.content, copy_object=True)
+
+        self.write_text(_('Starting Freevo, please wait ...'),
+                        content.font, content, height=-1, align_h='center')
+
+        pos = 0
+        x0, x1 = content.x, content.x + content.width
+        y = content.y + content.font.font.height + content.spacing
+        if self.pos:
+            pos = round(float((x1 - x0 - 4)) / (float(100) / self.pos))
+        self.drawroundbox(x0, y, x1-x0, 20, self.bar_border)
+        self.drawroundbox(x0+2, y+2, pos, 16, self.bar_position)
+
+
+    def progress(self, pos):
+        """
+        set the progress position and refresh the screen
+        """
+        self.pos = pos
+        skin.draw(('splashscreen', None))
+
+
+
+
 def signal_handler(sig, frame):
     if sig in (signal.SIGTERM, signal.SIGINT):
         shutdown(allow_sys_shutdown=0, exit=True)
+
 
 #
 # Main init
@@ -299,17 +346,25 @@ def main_func():
 
     # load all plugins
     import plugin
-    
-    if hasattr(skin, 'Splashscreen'):
-        plugin.init(skin.Splashscreen().progress)
-    else:
-        plugin.init()
 
+    # prepare the skin
+    skin.prepare()
+
+    # Fire up splashscreen and load the plugins
+    splash = Splashscreen()
+    skin.register('splashscreen', ('screen', splash))
+    plugin.init(splash.progress)
+    skin.delete('splashscreen')
+
+    # prepare again, now that all plugins are loaded
+    skin.prepare()
+
+    # signal handler
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
-    main = MainMenu()
-    main.getcmd()
+    # start menu
+    MainMenu().getcmd()
 
     poll_plugins = plugin.get('daemon_poll')
     eventhandler_plugins  = []
