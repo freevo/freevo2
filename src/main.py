@@ -349,9 +349,6 @@ try:
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
-    # prepare the skin
-    gui.get_theme().prepare()
-
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'),
                           plugin.get_number()-1)
