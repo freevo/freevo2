@@ -38,9 +38,6 @@ import sys
 import time
 import logging
 
-# notifier
-import notifier
-
 # pyepg
 import pyepg
 
@@ -49,6 +46,9 @@ import sysconfig
 import config
 import util
 import plugin
+import plugins
+
+from util.callback import *
 
 # mbus support
 from mcomm import RPCServer, RPCError, RPCReturn
@@ -67,9 +67,6 @@ log = logging.getLogger('record')
 # FIXME: move to config file
 EPGDB = sysconfig.datafile('epgdb')
 
-# external recording daemon
-DAEMON = {'type': 'home-theatre', 'module': 'record-daemon'}
-
 class RecordServer(RPCServer):
     """
     Class for the recordserver. It handles the rpc calls and checks the
@@ -78,8 +75,8 @@ class RecordServer(RPCServer):
     """
     def __init__(self):
         RPCServer.__init__(self, 'recordserver')
-        self.initialized = False
         self.clients = []
+        self.last_listing = []
         config.detect('tvcards', 'channels')
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
@@ -87,163 +84,121 @@ class RecordServer(RPCServer):
         self.load(True)
         # init the recorder
         plugin.init(exclusive = [ 'record' ])
-        # get list of best recorder for each channel
-        self.check_recorder()
-        # variables for check_recordings
-        self.check_timer = None
-        self.check_running = False
-        self.check_needed = False
-        # wait 2 seconds for external plugins
-        log.info('waiting for external plugins')
-        notifier.addTimer(2000, self.check_favorites)
+
+        # add external event handling
+        mbus = self.mbus_instance
+        mbus.register_event('vdr.start_recording', external.start_event)
+        mbus.register_event('vdr.stop_recording', external.stop_event)
         # add notify callback
-        self.mbus_instance.register_entity_notification(self.__entity_update)
+        mbus.register_entity_notification(self.entity_update)
+
+        self.check_favorites()
+        recorder.recorder.connect(self)
 
 
-    def check_recorder(self):
-        """
-        Check all possible recorders. If 'update' is True, all recordings
-        will be re-checked.
-        """
-        # clear the conflict cache
-        conflict.clear_cache()
-        # reset best recorder list
-        self.best_recorder = {}
-        for p in recorder.plugins:
-            p.server = self
-            for dev, rating, listing in p.get_channel_list():
-                for l in listing:
-                    for c in l:
-                        if not self.best_recorder.has_key(c):
-                            self.best_recorder[c] = -1, None
-                        if self.best_recorder[c][0] < rating:
-                            self.best_recorder[c] = rating, p, dev
-        for c in self.best_recorder:
-            self.best_recorder[c] = self.best_recorder[c][1:]
-        # update recordings (won't work on startup)
-        self.check_recordings()
-
-
-    def send_update(self):
+    def send_update(self, update):
         """
         Send and updated list to the clients
         """
-        ret = []
-        for r in self.recordings:
-            ret.append(r.short_list())
         for c in self.clients:
             log.info('send update to %s' % c)
-            self.mbus_instance.send_event(c, 'record.list.update', ret)
+            self.mbus_instance.send_event(c, 'record.list.update', update)
+
+        # save fxd file
+        self.save()
 
 
-    def __check_epg(self):
+    def check_epg(self, recordings = [], changed = False):
         """
         Update the recording list with the epg
         """
-        ctime = time.time()
-        to_check = (CONFLICT, SCHEDULED, RECORDING)
-        next_recordings = filter(lambda r: r.stop + r.stop_padding > ctime \
-                                 and r.status in to_check, self.recordings)
-
-        # check if the show is still in the db or maybe moved
-        for r in next_recordings:
-            if r.status == RECORDING:
-                # do not move a current running recording
-                continue
-            results = pyepg.search(r.name, r.channel)
-            for p in results:
-                if p.start == r.start and p.stop == r.stop:
-                    break
-            else:
-                # try to find it
-                for p in results:
-                    if r.start - 20 * 60 < p.start < r.start + 20 * 60:
-                        # found it again
-                        r.start = p.start
-                        r.stop = p.stop
-                        log.info('changed schedule\n%s' % r)
-                        break
-                else:
-                    log.info('unable to find recording in epg:\n%s' % r)
-        return True
-
-
-    def check_recordings(self):
-        """
-        Wrapper for __check_recordings to avoid recursive calling
-        """
-        if not self.initialized:
+        if not recordings and changed:
+            # callback for a finished check and with changed schedule.
+            # This is a fake, we really want to call check_recordings
+            self.check_recordings()
             return
-        if not self.check_running:
-            self.check_timer   = notifier.addTimer(0, self.__check_recordings)
-            self.check_running = True
-            self.check_needed  = False
+        
+        if not recordings:
+            # get list of recordings to check. Only check recordings with
+            # a start time greater 15 minutes from now to avoid
+            # changing running recordings
+            ctime = time.time() + 60 * 15
+            recordings = filter(lambda r: r.start - r.start_padding > ctime \
+                                and r.status in (CONFLICT, SCHEDULED),
+                                self.recordings)
+
+        if not recordings:
+            # no recordings
+            return
+        
+        # get first recording to check
+        rec = recordings[0]
+        # search epg for that recording
+        results = pyepg.search(rec.name, rec.channel)
+        epginfo = None
+        for p in results:
+            # check all results
+            if p.start == rec.start and p.stop == rec.stop:
+                # found the recording
+                epginfo = p
+                break
         else:
-            self.check_needed  = True
-
-
-    def __check_recordings(self):
-        """
-        Check the current recordings. This includes checking conflicts,
-        removing old entries. At the end, the timer is set for the next
-        recording.
-        """
-        notifier.removeTimer(self.check_timer)
-        self.check_timer = None
-
-        ctime = time.time()
-        # remove informations older than one week
-        self.recordings = filter(lambda r: r.start > ctime - 60*60*24*7,
-                                 self.recordings)
-        # sort by start time
-        self.recordings.sort(lambda l, o: cmp(l.start,o.start))
-
-        # check recordings we missed
-        for r in self.recordings:
-            if r.stop < ctime and r.status != SAVED:
-                r.status = MISSED
-
-        # scan for conflicts
-        to_check = (CONFLICT, SCHEDULED, RECORDING)
-        next_recordings = filter(lambda r: r.stop + r.stop_padding > ctime \
-                                 and r.status in to_check, self.recordings)
-
-        # check if the show is still in the db or maybe moved
-        for r in next_recordings:
-            results = pyepg.search(r.name, r.channel)
+            # try to find it
             for p in results:
-                if p.start == r.start and p.stop == r.stop:
+                if rec.start - 20 * 60 < p.start < rec.start + 20 * 60:
+                    # found it again, set new start and stop time
+                    old_info = str(rec)
+                    rec.start = p.start
+                    rec.stop = p.stop
+                    log.info('changed schedule\n%s\n%s' % (old_info, rec))
+                    changed = True
+                    epginfo = p
                     break
             else:
-                # try to find it
-                for p in results:
-                    if r.start - 20 * 60 < p.start < r.start + 20 * 60:
-                        # found it again
-                        log.info('changed schedule\n%s' % r)
-                        r.start = p.start
-                        r.stop = p.stop
-                        break
-                else:
-                    log.info('unable to find recording in epg:\n%s' % r)
+                log.info('unable to find recording in epg:\n%s' % rec)
 
-        for r in next_recordings:
-            try:
-                r.recorder = self.best_recorder[r.channel]
-                if r.status != RECORDING:
-                    r.status   = SCHEDULED
-            except KeyError:
-                r.recorder = None, None
-                r.status   = CONFLICT
-                log.error('no recorder for recording:\n  %s', str(r))
+        if epginfo:
+            # check if attributes changed
+            if String(rec.description) != String(epginfo.description):
+                log.info('description changed for %s' % \
+                         String(rec.name))
+                rec.description = epginfo.description
+            if String(rec.episode) != String(epginfo.episode):
+                log.info('episode changed for %s' % String(rec.name))
+                rec.episode = epginfo.episode
+            if String(rec.subtitle) != String(epginfo.subtitle):
+                log.info('subtitle changed for %s' % String(rec.name))
+                rec.subtitle = epginfo.subtitle
 
-        # resolve conflicts (and get the time it took for debug)
-        t1 = time.time()
-        conflict.resolve(next_recordings)
-        t2 = time.time()
+        if len(recordings) > 1:
+            # check the rest later
+            call_later(self.check_epg, recordings[1:], changed)
+        elif changed:
+            # check recordings again
+            call_later(self.check_epg, [], True)
+        return False
 
+
+    def print_schedule(self):
+        """
+        Print current schedule (for debug only)
+        """
+        if hasattr(self, 'only_print_current'):
+            # print only latest recordings
+            all = False
+        else:
+            # print all recordings in the list
+            all = True
+            # mark that all are printed once
+            self.only_print_current = True
+
+        # print only from the last 24 hours
+        maxtime = time.time() - 60 * 60 * 24
+        
         info = 'recordings:\n'
         for r in self.recordings:
-            info += '%s\n' % r
+            if all or r.stop > maxtime:
+                info += '%s\n' % r
         log.info(info)
         info = 'favorites:\n'
         for f in self.favorites:
@@ -252,35 +207,102 @@ class RecordServer(RPCServer):
         log.info('next ids: record=%s favorite=%s' % \
                  (self.rec_id, self.fav_id))
 
-        # save status
-        self.save()
+        
+    def check_recordings(self, force=False):
+        """
+        Check the current recordings. This includes checking conflicts,
+        removing old entries. At the end, the timer is set for the next
+        recording.
+        """
+        ctime = time.time()
+        # remove informations older than one week
+        self.recordings = filter(lambda r: r.start > ctime - 60*60*24*7,
+                                 self.recordings)
+        # sort by start time
+        self.recordings.sort(lambda l, o: cmp(l.start,o.start))
 
-        # send schedule to plugins
-        for p in recorder.plugins:
-            p.schedule(filter(lambda x: x.recorder[0] == p, next_recordings))
+        to_check = (CONFLICT, SCHEDULED, RECORDING)
 
-        log.info('checking took %2.2f seconds' % (t2 - t1))
+        # check recordings we missed
+        for r in self.recordings:
+            if r.stop < ctime and r.status in to_check:
+                r.status = MISSED
 
+        # scan for conflicts
+        next_recordings = filter(lambda r: r.stop + r.stop_padding > ctime \
+                                 and r.status in to_check, self.recordings)
+
+        for r in next_recordings:
+            try:
+                r.recorder = recorder.recorder.best_recorder[r.channel]
+                if r.status != RECORDING:
+                    r.status = SCHEDULED
+                    r.respect_start_padding = True
+                    r.respect_stop_padding  = True
+            except KeyError:
+                r.recorder = None, None
+                r.status   = CONFLICT
+
+        if force:
+            # clear conflict resolve cache
+            conflict.clear_cache()
+            
+        # Resolve conflicts. This will resolve the conflicts for the
+        # next recordings now, the others will be resolved with a timer
+        conflict.resolve(next_recordings, self.check_recordings_callback)
+
+        # sort by start time
+        self.recordings.sort(lambda l, o: cmp(l.start,o.start))
+
+        # schedule recordings in recorder
+        self.schedule()
+
+
+    def check_recordings_callback(self):
         # send update
-        self.send_update()
+        sending = []
+        listing = []
+        for r in self.recordings:
+            short_list = r.short_list()
+            listing.append(short_list)
+            if not short_list in self.last_listing:
+                sending.append(short_list)
+        self.last_listing = listing
+        self.send_update(sending)
 
-        # check if something requested a new check while this function was
-        # running. If so, call the check_recordings functions again
-        self.check_running = False
-        if self.check_needed:
-            self.check_recordings()
+        # print some debug
+        self.print_schedule()
 
+
+
+    def schedule(self):
+        """
+        Schedule recordings on recorder for the next SCHEDULE_TIMER seconds.
+        """
+        ctime = time.time()
+        for r in self.recordings:
+            if r.start > ctime + SCHEDULE_TIMER:
+                # do not schedule to much in the future
+                break
+            if r.status == SCHEDULED:
+                r.schedule(r.recorder[0], r.recorder[1])
+            if r.status in (DELETED, CONFLICT):
+                r.remove()
+        call_later(SCHEDULE_TIMER / 2, self.schedule)
         return False
-
-
+    
+        
     def check_favorites(self):
         """
         Check favorites against the database and add them to the list of
         recordings
         """
         log.info('recordserver.check_favorites')
+
         # check epg if something changed
-        self.__check_epg()
+        call_later(self.check_epg)
+
+        update = []
         for f in copy.copy(self.favorites):
             for p in pyepg.search(f.name):
                 if not f.match(p.title, p.channel.id, p.start):
@@ -300,11 +322,12 @@ class RecordServer(RPCServer):
                 f.add_data(r)
                 self.recordings.append(r)
                 self.rec_id += 1
+                update.append(r.short_list())
                 if f.once:
                     self.favorites.remove(f)
                     break
-        # initialized now
-        self.initialized = True
+        # send update about the new recordings
+        self.send_update(update)
         # now check the schedule again
         self.check_recordings()
 
@@ -384,21 +407,61 @@ class RecordServer(RPCServer):
             log.exception('lost the recordings.fxd, send me the trace')
 
 
-    def __entity_update(self, entity):
+    #
+    # function to change a status
+    #
+
+    def start_recording(self, recording):
+        log.info('recording started')
+        recording.status = RECORDING
+        # send update to mbus entities
+        self.send_update([recording.short_list()])
+        # call plugins
+        for p in plugins.list:
+            p.start_recording(recording)
+        # print some debug
+        self.print_schedule()
+
+    
+    def stop_recording(self, recording):
+        log.info('recording stopped')
+        if recording.url.startswith('file:'):
+            filename = recording.url[5:]
+            if os.path.isfile(filename):
+                recording.status = SAVED
+            else:
+                log.info('failed: file not found')
+                recording.status = FAILED
+        else:
+            recording.status = SAVED
+
+        if recording.status == SAVED and time.time() + 100 < recording.stop:
+            # something went wrong
+            log.info('failed: stopped %s secs to early' % \
+                     (recording.stop - time.time()))
+            recording.status = FAILED
+        # send update to mbus entities
+        self.send_update([recording.short_list()])
+        # call plugins
+        for p in plugins.list:
+            p.stop_recording(recording)
+        # print some debug
+        self.print_schedule()
+        
+    
+    #
+    # global mbus stuff
+    #
+
+    def entity_update(self, entity):
         if not entity.present and entity in self.clients:
             log.info('lost client %s' % entity)
             self.clients.remove(entity)
-
-        if not entity.matches(DAEMON):
             return
+        external.entity_update(entity)
+        return
 
-        if entity.present:
-            rec = external.Recorder(entity)
-            rec.server = self
-        else:
-            # FIXME
-            pass
-
+    
     #
     # home.theatre.recording rpc commands
     #
@@ -473,8 +536,10 @@ class RecordServer(RPCServer):
         if r in self.recordings:
             r = self.recordings[self.recordings.index(r)]
             if r.status == DELETED:
-                r.status   = 'scheduled'
+                r.status   = SCHEDULED
                 r.favorite = False
+                # send update about the new recording
+                self.send_update(r.short_list())
                 self.check_recordings()
                 return RPCReturn(self.rec_id - 1)
             return RPCError('Already scheduled')
@@ -497,6 +562,9 @@ class RecordServer(RPCServer):
                     r.status = SAVED
                 else:
                     r.status = DELETED
+                # send update about the new recording
+                self.send_update(r.short_list())
+                # update listing
                 self.check_recordings()
                 return RPCReturn()
         return RPCError('Recording not found')
@@ -517,6 +585,10 @@ class RecordServer(RPCServer):
                 for key in key_val:
                     setattr(cp, key, key_val[key])
                 self.recordings[self.recordings.index(r)] = cp
+                # send update about the new recording
+                self.send_update(r.short_list())
+                # update listing
+                self.check_recordings()
                 return RPCReturn()
         return RPCError('Recording not found')
 
@@ -529,8 +601,7 @@ class RecordServer(RPCServer):
         """
         updates favorites with data from the database
         """
-        if self.initialized:
-            self.check_favorites()
+        self.check_favorites()
         return RPCReturn()
 
 

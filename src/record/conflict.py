@@ -59,12 +59,13 @@ __all__ = [ 'resolve', 'clear_cache' ]
 
 # python imports
 import logging
-
-# notifier
-import notifier
+import time
 
 # objectcache
 from util.objectcache import ObjectCache
+
+# call_later
+from util.callback import *
 
 # record imports
 import recorder
@@ -73,8 +74,6 @@ from types import *
 # get logging object
 log = logging.getLogger('conflict')
 
-# global variable to keep the notifier alive
-call_notifier = 0
 
 class Device:
     def __init__(self, information=None):
@@ -93,10 +92,12 @@ class Device:
 
 
     def is_possible(self):
-        if self.rec[-1].status == RECORDING:
+        latest = self.rec[-1]
+        latest.conflict_padding = []
+        if latest.status == RECORDING:
             # the recording is running right now, do not move it to
             # a new plugin
-            if self.rec[-1].recorder[0] == self.plugin:
+            if latest.recorder[0] == self.plugin:
                 # same recorder, everything ok
                 return True
             else:
@@ -105,17 +106,32 @@ class Device:
         if not self.plugin:
             # dummy recorder, it is always possible not record it
             return True
-        if not self.rec[-1].channel in self.all_channels:
+        if not latest.channel in self.all_channels:
             # channel not supported
             return False
-        if scan(self.rec, False):
-            # conflict not possible
-            # FIXME: maybe ok
-            return False
+        conflict = scan(self.rec, True)
+        if not conflict:
+            # possible without conflict
+            return True
+        # we now know that it is a conflict, maybe removing the padding
+        # helps to solve it. The conflict list only contains one item (!)
+        # Note: the recordings are sorted by time
+        conflict = conflict[0]
+        for c in conflict:
+            if c == latest:
+                continue
+            if c.stop + c.stop_padding < latest.start - latest.start_padding:
+                continue
+            if c.stop <= latest.start:
+                # works when removing padding
+                latest.conflict_padding.append(c)
+            else:
+                # will never work
+                return False
         return True
 
 
-def scan(recordings, include_padding):
+def scan(recordings, include_padding, all=True):
     """
     Scan the schedule for conflicts. A conflict is a list of recordings
     with overlapping times.
@@ -133,11 +149,17 @@ def scan(recordings, include_padding):
     # recordings already scanned
     scanned   = []
 
+    # get current time
+    ctime = time.time()
+    
     # Check all recordings in the list for conflicts
     for r in recordings:
         if r in scanned:
             # Already marked as conflict
             continue
+        if not all and r.start > ctime + SCHEDULE_TIMER:
+            # That's enough for now
+            break
         current = []
         # Set stop time for the conflict area to current stop time. The
         # start time doesn't matter since the recordings are sorted by
@@ -187,21 +209,21 @@ def rate_conflict(clist):
         return 0
     for c in clist:
         for pos, r1 in enumerate(c[:-1]):
-            # check all pairs of conflicts (stop from x with start from x + 1)
-            # next recording
-            r2 = c[pos+1]
-            # overlapping time in seconds
-            time_diff = r1.stop + r1.stop_padding - r2.start - r2.start_padding
-            # min priority of the both recordings
-            min_prio = min(r1.priority, r2.priority)
-            # average priority of the both recordings
-            average_prio = (r1.priority + r2.priority) / 2
+          # check all pairs of conflicts (stop from x with start from x + 1)
+          # next recording
+          r2 = c[pos+1]
+          # overlapping time in seconds
+          time_diff = r1.stop + r1.stop_padding - r2.start - r2.start_padding
+          # min priority of the both recordings
+          min_prio = min(r1.priority, r2.priority)
+          # average priority of the both recordings
+          average_prio = (r1.priority + r2.priority) / 2
 
-            # Algorithm for the overlapping rating detection:
-            # min_prio / 2 (difference between 5 card types) +
-            # average_prio / 100 (low priority in algorithm) +
-            # number of overlapping minutes
-            ret -= min_prio / 2 + average_prio / 100 + time_diff / 60
+          # Algorithm for the overlapping rating detection:
+          # min_prio / 2 (difference between 5 card types) +
+          # average_prio / 100 (low priority in algorithm) +
+          # number of overlapping minutes
+          ret -= min_prio / 2 + average_prio / 100 + time_diff / 60
     return ret
 
 
@@ -214,19 +236,14 @@ def rate(devices, best_rating):
     for d in devices[:-1]:
         for r in d.rec:
             rating += (0.1 * d.rating + 1) * r.priority
-        # overlapping padding gives minus points
-        rating += rate_conflict(scan(d.rec, True)) - \
-                  rate_conflict(scan(d.rec, False))
+            if len(r.conflict_padding):
+                rating += rate_conflict([[ r ] + r.conflict_padding])
+#                 padding = r.priority
+#                 for c in r.conflict_padding:
+#                     padding += c.priority
+#                 # overlapping padding gives minus points
+#                 rating -= (1 + 0.03 * padding) / (len(r.conflict_padding) + 1)
 
-
-    if not devices[-1].rec:
-        info = 'possible solution:\n'
-        for d in devices[:-1]:
-            info += 'device %s\n' % d.id
-            for r in d.rec:
-                info += '%s\n' % str(r)[:str(r).rfind(' ')]
-        info += 'rating: %d\n' % rating
-        log.debug(info)
     if rating > best_rating:
         # remember
         best_rating = rating
@@ -236,89 +253,148 @@ def rate(devices, best_rating):
                 if r.status != RECORDING:
                     r.status = SCHEDULED
                     r.recorder = d.plugin, d.id
+                    r.respect_start_padding = True
+                    r.respect_stop_padding = True
+                    if r.conflict_padding:
+                        # the start_padding conflicts with the stop paddings
+                        # the recordings in r.conflict_padding. Fix it by
+                        # removing the padding
+                        # FIXME: maybe start != stop
+                        r.respect_start_padding = False
+                        for c in r.conflict_padding:
+                            c.respect_stop_padding = False
         for r in devices[-1].rec:
             r.status   = CONFLICT
             r.recorder = None, None
     return best_rating
 
 
-def check(devices, fixed, to_check, best_rating):
+
+def check(devices, fixed, to_check, best_rating, dropped=1000):
     """
     Check all possible combinations from the recordings in to_check on all
     devives. Call recursive again.
     """
-    if not to_check:
-        return rate(devices, best_rating)
+    if not dropped and len(devices[-1].rec):
+        # There was a solution without any recordings dropped.
+        # It can't get better because devices[-1].rec already contains
+        # at least one recording
+        return best_rating, dropped
 
-    global call_notifier
-    call_notifier = (call_notifier + 1) % 1000
-    if not call_notifier:
-        notifier.step(False, False)
+    if not to_check:
+        return rate(devices, best_rating), len(devices[-1].rec)
 
     c = to_check[0]
     for d in devices:
         d.rec.append(c)
         if d.is_possible():
-            best_rating = check(devices, fixed + [ c ], to_check[1:],
-                                best_rating)
+            best_rating, dropped = check(devices, fixed + [ c ], to_check[1:],
+                                         best_rating, dropped)
         d.rec.remove(c)
-    return best_rating
+    return best_rating, dropped
 
 
 # interface
 
 _conflict_cache = ObjectCache(30, 'conflict')
 
-def resolve(recordings):
+def _resolve(conflicts, resolve_now):
+    """
+    Resolve conflicts. If resolve_now is True, everything will be
+    resolved now, else timer will used to resolve the conflicts
+    later.
+    """
+    for c in conflicts:
+        info = 'found conflict:\n'
+        conflict_id = ''
+        for r in c:
+            info += '%s\n' % str(r)[:str(r).rfind(' ')]
+            conflict_id += str(r)
+        result = _conflict_cache[conflict_id]
+        if result:
+            for r in c:
+                r.status, r.recorder = result[r.id]
+            continue
+        log.debug(info)
+        check(_devices, [], c, 0)
+        result = {}
+        for r in c:
+            result[r.id] = (r.status, r.recorder)
+        info ='solved by setting:\n'
+        for r in c:
+            info += '%s\n' % str(r)
+        log.debug(info)
+        # store cache result
+        _conflict_cache[conflict_id] = result
+
+        if not resolve_now and len(conflicts) > 1:
+            # schedule again for the other conflicts
+            call_later('conflict:resolve', _resolve, conflicts[1:], False)
+            return False
+
+    if not resolve_now:
+        log.debug('no more conflicts')
+        _resolve_callback()
+    return False
+
+
+def _resolve_next(recordings):
+    """
+    Resolve the next conflicts in recordings based on SCHEDULE_TIMER
+    now and return.
+    """
+    conflicts = scan(recordings, True, False)
+    if conflicts:
+        _resolve(conflicts, True)
+    return False
+
+    
+def _resolve_all(recordings):
+    """
+    Resolve all conflicts in recordings using timer. After calling
+    the function, the conflicts won't be resolved, it will take some time
+    (10 msec for each conflict).
+    """
+    conflicts = scan(recordings, True, True)
+    if conflicts:
+        _resolve(conflicts, False)
+    else:
+        _resolve_callback()
+    return False
+
+
+# callback to call after resolving all conflicts
+_resolve_callback = None
+# list of devices
+_devices          = []
+
+def resolve(recordings, callback):
     """
     Find and resolve conflicts in recordings.
     """
-    # sort by start time
-    recordings.sort(lambda l, o: cmp(l.start,o.start))
-
-    # make sure to call notifier.step from time to time
-    global call_notifier
-    call_notifier = 0
-
-    conflicts = scan(recordings, True)
-    if conflicts:
+    global _resolve_callback
+    _resolve_callback = callback
+    if not _devices:
         # create 'devices'
-        devices = [ Device() ]
-        for p in recorder.plugins:
+        _devices.append(Device())
+        for p in recorder.recorder:
             for d in p.get_channel_list():
-                devices.append(Device(([ p, ] + d)))
-        devices.sort(lambda l, o: cmp(o.rating,l.rating))
+                _devices.append(Device(([ p, ] + d)))
+        _devices.sort(lambda l, o: cmp(o.rating,l.rating))
 
-        for c in conflicts:
-            info = 'found conflict:\n'
-            conflict_id = ''
-            for r in c:
-                info += '%s\n' % str(r)[:str(r).rfind(' ')]
-                conflict_id += str(r)
-            result = _conflict_cache[conflict_id]
-            if result:
-                log.info('use cache for conflict resolving')
-                for r in c:
-                    r.status, r.recorder = result[r.id]
-                continue
-            log.info(info)
-            check(devices, [], c, 0)
-            result = {}
-            for r in c:
-                result[r.id] = (r.status, r.recorder)
-            info ='solved by setting:\n'
-            for r in c:
-                info += '%s\n' % str(r)
-            log.info(info)
-            # store cache result
-            _conflict_cache[conflict_id] = result
-    return True
-
+    # sort recordings
+    recordings.sort(lambda l, o: cmp(l.start,o.start))
+    # resolve next recordings based in SCHEDULE_TIMER
+    _resolve_next(recordings)
+    # set callback to resolve all conflicts
+    call_later('conflict:resolve', _resolve_all, recordings)
+    
 
 def clear_cache():
     """
     Clear the global conflict resolve cache
     """
     global _conflict_cache
+    global _devices
     _conflict_cache = ObjectCache(30, 'conflict')
-
+    _devices = []

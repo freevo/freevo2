@@ -51,8 +51,8 @@ import mbus
 import notifier
 
 # record imports
-from record.recorder import Plugin
-from record.types import *
+import recorder
+from types import *
 
 # get logging object
 log = logging.getLogger('record')
@@ -61,46 +61,42 @@ log = logging.getLogger('record')
 UNKNOWN_ID  = -1
 IN_PROGRESS = -2
 
+# external recording daemon
+DAEMON = {'type': 'home-theatre', 'module': 'record-daemon'}
 
-class Recording:
+
+class RemoteRecording:
     """
     Wrapper for recordings to add 'id' and 'valid' for internal use inside
     the recorder.
     """
-    def __init__(self, rec):
-        self.rec = rec
+    def __init__(self, recording, device, start):
+        self.recording = recording
+        self.device = device
         self.id = UNKNOWN_ID
         self.valid = True
-
-
-    def __eq__(self, obj):
-        """
-        Compare two Recordings
-        """
-        if hasattr(obj, 'rec'):
-            obj = obj.rec
-        return self.rec == obj
+        self.start = start
 
 
 
-class Recorder(Plugin):
+class Recorder(recorder.Plugin):
     """
     External recorder plugin for one mbus entity
     """
     def __init__(self, entity):
-        Plugin.__init__(self)
-        self.entity  = entity
+        recorder.Plugin.__init__(self)
+        self.entity = entity
+        self.name = entity.addr['id']
         self.devices = []
         self.recordings = []
+        self.check_timer = None
         # FIXME: use pyepg for this during runtime
         self.channels = {}
         for channel in pyepg.channels:
             self.channels[channel.id] = channel.access_id
         self.suffix = '.mpg'
         self.entity.call('devices.list', self.__devices_list)
-        # add check timer every 30 minutes
-        notifier.addTimer(30000, self.check_recordings)
-        log.info('add external plugin')
+        log.info('%s: add external plugin' % self.name)
 
 
     def __devices_list(self, result):
@@ -145,18 +141,8 @@ class Recorder(Plugin):
             listing.append(bouquet)
         self.devices.append(result.arguments[:2] + [listing])
         # let the server recheck it's recorder, this one is updated
-        self.server.check_recorder()
-
-
-    def deactivate(self):
-        """
-        Deactivate this plugin because something went wrong.
-        """
-        log.warning('Plugin deactivated')
-        self.channels = {}
-        # let the recordserver recheck it's recorders, this one is
-        # broken and everything needs to be recalculated
-        self.server.check_recorder()
+        log.info('%s: activate external plugin' % self.name)
+        self.activate()
 
 
     def get_channel_list(self):
@@ -183,9 +169,9 @@ class Recorder(Plugin):
             self.deactivate()
             return
         # result is an unique id
-        for rec in copy.copy(self.recordings):
-            if rec.id == IN_PROGRESS:
-                rec.id = result.arguments[0]
+        for remote in self.recordings:
+            if remote.id == IN_PROGRESS:
+                remote.id = result.arguments[0]
         # check more recordings
         self.check_recordings()
 
@@ -194,11 +180,11 @@ class Recorder(Plugin):
         """
         Callback for vdr.remove
         """
-        if isinstance(result, mbus.types.MError):
+        if 0 and isinstance(result, mbus.types.MError):
             log.error(str(result))
             self.deactivate()
             return
-        if not result.appStatus:
+        if 0 and not result.appStatus:
             log.error(str(result.appDescription))
             self.deactivate()
             return
@@ -211,54 +197,113 @@ class Recorder(Plugin):
         Check the internal list of recordings and add or remove them from
         the external application.
         """
-        for rec in copy.copy(self.recordings):
-            if rec.rec.start - rec.rec.start_padding > time.time() + 60000:
-                # only schedule for the next hour
-                continue
-            if rec.id == IN_PROGRESS:
+        if self.check_timer:
+            notifier.removeTimer(self.check_timer)
+        for remote in copy.copy(self.recordings):
+            if remote.id == IN_PROGRESS:
                 # already checking
                 break
-            if rec.id == UNKNOWN_ID and not rec.valid:
+            if remote.id == UNKNOWN_ID and not remote.valid:
                 # remove it from the list, the external app still doesn't
                 # know about this
                 self.recordings.remove(rec)
                 continue
-            if rec.id == UNKNOWN_ID:
+            if remote.id == UNKNOWN_ID:
                 # add the recording
-                device   = rec.rec.recorder[1]
-                channel  = self.channels[rec.rec.channel]
-                filename = self.get_url(rec.rec)
-                filename = filename.replace('file:/', 'file-mpeg:///')
-                log.info('schedule %s' % String(rec.rec.name))
-                self.entity.call('vdr.record', self.__vdr_record, device,
-                                 channel, rec.rec.start - rec.rec.start_padding,
-                                 rec.rec.stop + rec.rec.stop_padding,
-                                 filename, 0, ())
-                rec.id = IN_PROGRESS
+                rec      = remote.recording
+                channel  = self.channels[rec.channel]
+                filename = self.get_url(rec)
+                log.info('%s: schedule %s' % (self.name, String(rec.name)))
+                self.entity.call('vdr.record', self.__vdr_record,
+                                 remote.device, channel,
+                                 remote.start, rec.stop + rec.stop_padding,
+                                 filename, ())
+                remote.id = IN_PROGRESS
                 break
-            if not rec.valid:
+            if not remote.valid:
                 # remove the recording
-                self.entity.call('vdr.remove', self.__vdr_remove, rec.id)
-                self.recordings.remove(rec)
+                log.info('%s: remove %s' % (self.name, String(rec.name)))
+                try:
+                    self.entity.call('vdr.remove', self.__vdr_remove,
+                                     remote.id)
+                except:
+                    pass
+                self.recordings.remove(remote)
                 break
-        # return True to be rescheduled by notifier
-        return True
+        # return False, the function will be rescheduled by mbus return
+        return False
     
 
-    def schedule(self, recordings, server=None):
+    def record(self, recording, device, start, stop):
         """
-        Function called from the server. This function updates the
-        recordings scheduled by the plugin.
+        Add a recording to this plugin
         """
-        for rec in recordings:
-            if rec not in self.recordings:
-                # add new recording
-                self.recordings.append(Recording(rec))
-
-        for rec in self.recordings:
-            if rec.rec not in recordings:
-                # set old recordings to valid = False
-                rec.valid = False
+        self.recordings.append(RemoteRecording(recording, device, start))
 
         # update recordings at the remote application
-        self.check_recordings()
+        if self.check_timer:
+            notifier.removeTimer(self.check_timer)
+        self.check_timer = notifier.addTimer(100, self.check_recordings)
+
+
+    def remove(self, recording):
+        """
+        Remove a recording
+        """
+        for remote in self.recordings:
+            if remote.recording == recording:
+                remote.valid = False
+                
+        # update recordings at the remote application
+        if self.check_timer:
+            notifier.removeTimer(self.check_timer)
+        self.check_timer = notifier.addTimer(100, self.check_recordings)
+
+
+
+def entity_update(entity):
+    """
+    Update external recorders on entity changes.
+    """
+    if not entity.matches(DAEMON):
+        # no external recorder
+        return
+
+    if entity.present:
+        rec = Recorder(entity)
+        return
+
+    for r in recorder.recorder:
+        if isinstance(r, Recorder) and r.entity == entity:
+            log.info('lost external recorder')
+            r.deactivate()
+            return
+
+
+def _find_recording(event):
+    addr = event.header.srcAdr
+    args = event.payload[0].args
+    for r in recorder.recorder:
+        if isinstance(r, Recorder) and r.entity.addr == addr:
+            break
+    else:
+        log.error('unable to recorder for event')
+        return None, None
+
+    for rec in r.recordings:
+        if rec.id == args[0]:
+            break
+    else:
+        log.error('unable to recording for event')
+        return None, r.server
+    return rec.recording, r.server
+    
+
+def start_event(event):
+    rec, server = _find_recording(event)
+    server.start_recording(rec)
+
+
+def stop_event(event):
+    rec, server = _find_recording(event)
+    server.stop_recording(rec)

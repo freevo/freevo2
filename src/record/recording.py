@@ -81,6 +81,12 @@ class Recording:
         self.url         = ''
         self.fxdname     = ''
 
+        # recorder where the recording is scheduled
+        self.scheduled_recorder = None
+        self.scheduled_device   = None
+        self.scheduled_start    = 0
+        self.scheduled_stop     = 0
+        
         self.start_padding = config.TV_RECORD_START_PADDING
         self.stop_padding  = config.TV_RECORD_STOP_PADDING
         for i in info:
@@ -97,6 +103,8 @@ class Recording:
             else:
                 self.info[i] = Unicode(info[i])
         self.recorder = None, None
+        self.respect_start_padding = True
+        self.respect_stop_padding = True
 
 
     def short_list(self):
@@ -170,10 +178,22 @@ class Recording:
         status = self.status
         if status == 'scheduled' and self.recorder[1]:
             status = self.recorder[1]
-        return '%3d %10s %-25s %4d %s-%s %s' % \
+
+        if self.respect_start_padding:
+            start_padding = int(self.start_padding/60)
+        else:
+            start_padding = 0
+            
+        if self.respect_stop_padding:
+            stop_padding = int(self.stop_padding/60)
+        else:
+            stop_padding = 0
+            
+        return '%3d %10s %-25s %4d %s-%s %2s %2s %s' % \
                (self.id, String(channel), String(name),
                 self.priority, _int2time(self.start)[4:],
-                _int2time(self.stop)[9:], String(status))
+                _int2time(self.stop)[9:], start_padding,
+                stop_padding, String(status))
 
 
     def __fxd__(self, fxd):
@@ -210,3 +230,41 @@ class Recording:
         return self.name != obj.name or self.channel != obj.channel or \
                self.start != obj.start or self.stop != obj.stop
 
+
+    def schedule(self, recorder, device):
+        """
+        Schedule the recording on the given recorder
+        """
+        start = self.start
+        if self.respect_start_padding:
+            start -= self.start_padding
+        stop = self.stop
+        if self.respect_stop_padding:
+            stop += self.stop_padding
+
+        if self.scheduled_recorder == recorder and \
+               self.scheduled_device == device and \
+               self.scheduled_start == start and \
+               (self.scheduled_stop == stop or \
+                self.status == RECORDING):
+            # no update
+            return
+            
+        if self.scheduled_recorder:
+            self.scheduled_recorder.remove(self)
+        self.scheduled_recorder = recorder
+        self.scheduled_device   = device
+        self.scheduled_start    = start
+        self.scheduled_stop     = stop
+        recorder.record(self, device, start, stop)
+
+
+    def remove(self):
+        """
+        Remove from scheduled recorder.
+        """
+        if self.scheduled_recorder:
+            self.scheduled_recorder.remove(self)
+        self.scheduled_recorder = None
+        self.scheduled_device   = None
+            

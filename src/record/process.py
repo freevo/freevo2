@@ -36,12 +36,10 @@ import os
 import string
 import logging
 
-# notifier
-import notifier
-
 # freevo imports
 import config
 from util.popen import Process
+from util.callback import *
 
 # record imports
 from record.recorder import Plugin
@@ -49,25 +47,6 @@ from record.types import *
 
 # get logging object
 log = logging.getLogger('record')
-
-class Childapp(Process):
-    """
-    ChildApp wrapper for use inside a recorder plugin
-    """
-    def __init__(self, app, control):
-        """
-        Init the childapp
-        """
-        Process.__init__(self, app)
-        self.control = control
-
-
-    def finished(self):
-        """
-        Callback when the child died
-        """
-        self.control.stopped()
-        self.control = None
 
 
 
@@ -87,13 +66,9 @@ class Recorder(Plugin):
         # childapp running the external program
         self.app  = None
         # recording item
-        self.item = None
-        # timer for stop the child when it's all done
-        self.stop_timer = None
+        self.current_recording = None
         # the recordings scheduled by the plugin
         self.recordings = []
-        # timer for next recording
-        self.rec_timer = None
         # suffix for filename
         self.suffix = '.suffix'
 
@@ -108,163 +83,116 @@ class Recorder(Plugin):
 
     def get_channel_list(self):
         raise Exception('generic: get_channel_list() missing')
+
+
+    def __sort(self, r1, r2):
+        """
+        Sort by scheduled_start time.
+        """
+        return cmp(r1.scheduled_start, r2.scheduled_start)
+
+
+    def record(self, recording, device, start, stop):
+        self.recordings.append(recording)
+        call_later(self.schedule)
+
+
+    def remove(self, recording):
+        self.recordings.remove(recording)
+        if recording == self.current_recording:
+            log.info('%s: remove running recording' % self.name)
+            self.stop()
+        call_later(self.schedule)
+
+
+    def get_time(self, timer, msg):
+        txt = time.strftime('%H:%M', time.localtime(timer))
+        # minumum 5 seconds
+        sec = max(5, int(timer - time.time()))
+        log.info('%s: %s at %s (%s sec)' % (self.name, msg, txt, sec))
+        return sec * 1000
     
 
-    def schedule(self, recordings):
-        """
-        Function called from the server. This function updates the
-        recordings scheduled by the plugin.
-        """
-        if self.item and not self.item in recordings:
-            log.info('%s.schedule: recording item no longer in list' % \
-                     self.name)
-            log.info(str(self.item))
-            self.stop()
-            # return here, this function gets called by notifier using the
-            # new rec_timer at once because stop() called schedule again.
-            return False
-
-        self.recordings = recordings
-
-        if self.rec_timer:
-            notifier.removeTimer(self.rec_timer)
-            self.rec_timer = None
+    def schedule(self):
+        # sort by start time
+        self.recordings.sort(self.__sort)
 
         if not self.recordings:
             log.info('%s.schedule: nothing scheduled' % self.name)
             return
-        
-        # sort by start time
-        recordings.sort(lambda l, o: cmp(l.start,o.start))
-        if recordings[0].status == RECORDING:
-            # the first one is running right now, so the timer
-            # should be set to the next one
-            if len(self.recordings) == 1:
-                log.info('%s.schedule: already scheduled' % self.name)
-                return
-            log.info('%s.schedule: currently recording' % self.name)
-            rec0 = recordings[0]
-            rec1 = recordings[1]
-            # get end time of current recording incl. padding
-            end = rec0.stop + rec0.stop_padding
-            if end < rec1.start - rec1.start_padding:
-                # both recordings don't overlap at the start time
-                start = rec1.start - rec1.start_padding
-            else:
-                # recordings overlap in the padding
-                # start new recording with mimimum padding possible
-                start = min(end, rec1.start)
+
+        # get first recording in list
+        rec = self.recordings[0]
+
+        if rec.status == RECORDING:
+            # The first one is running right now. The next will be
+            # scheduled on stop event
+            log.info('%s.schedule: already scheduled' % self.name)
+            return
         else:
-            rec   = recordings[0]
-            start = rec.start - rec.start_padding
-            
-        secs = max(0, int(start - time.time()))
-        log.info('%s.schedule: next in %s sec' % (self.name, secs))
-        
-        self.rec_timer = notifier.addTimer(secs * 1000, self.record)
+            # schedule first recording
+            msecs = self.get_time(rec.scheduled_start, 'next recording')
+            call_later(msecs, self.start)
+
+        # get stop timer
+        msecs = self.get_time(rec.scheduled_stop, 'stop timer')
+        # schedule stop timer
+        call_later(msecs, self.stop)
+        return False
 
 
-
-    def record(self):
+    def start(self):
         """
         Record the next item in the recordings list. If the first is
         currently recording, stop the recording and record the next.
         """
-        # remove the timer, just to be sure
-        notifier.removeTimer(self.rec_timer)
-        self.rec_timer = None
-
-        if self.item:
-            log.info('%s.record: there is something running, stopping it' % \
-                     self.name)
-            log.info(str(self.item))
-            self.stop()
-            # return here, this function gets called by notifier using the
-            # new rec_timer at once because stop() called schedule again.
-            return False
-
+        # The start function can only be called when no recording is
+        # currently running, so no conflicts are possible
         rec = self.recordings[0]
-        rec.status = 'recording'
-
         rec.url = self.get_url(rec)
 
-        log.info('start new recording')
-        log.info(str(self.item))
+        # notify server about a started recording
+        self.server.start_recording(rec)
+
+        log.info('%s: start new recording:\n%s' % (self.name, str(rec)))
 
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
-        self.item = rec
-        self.app = Childapp(cmd, self)
-        rec.recorder = self
-
-        # Set auto stop for stop time + padding + 10 secs
-        if self.stop_timer:
-            notifier.removeTimer(self.stop_timer)
-        timer = max(0, int(rec.stop + rec.stop_padding + 10 - time.time()))
-        log.info('%s.record: add stop timer for %s sec' % (self.name, timer))
-        self.stop_timer = notifier.addTimer(timer * 1000, self.stop)
-
-        # Create fxd file now, even if we don't know if it is working. It
-        # will be deleted later when there is a problem
-        self.create_fxd(rec)
-
-        # schedule next recording
-        self.schedule(self.recordings)
-
-        if self.server:
-            # FIXME: find a better way to notify the server
-            self.server.send_update()
-
+        self.app = Process(cmd, callback = self.stopped)
         return False
-    
+
 
     def stop(self):
         """
         Stop the current running recording
         """
-        if not self.item:
-            # nothing to stop here
-            return False
-        log.info('%s.stop: stop recording: %s' % \
-                 (self.name, String(self.item.name)))
-        # remove the stop timer, we don't need it anymore
-        notifier.removeTimer(self.stop_timer)
-        self.stop_timer = None
-        # stop the application
+        rec = self.recordings[0]
+        log.info('%s.stop: stop recording' % (self.name))
+        # stop the application, this will trigger a reschedule
+        # and schedule the next recording
         self.app.stop()
         return False
 
 
-    def stopped(self):
+    def stopped(self, child):
         """
         Callback when the recording has stopped
         """
-        if self.stop_timer:
-            notifier.removeTimer(self.stop_timer)
-        if not self.item:
-            # this shouldn't happen ... but does
-            return
-        if self.item.url.startswith('file:'):
-            filename = self.item.url[5:]
-            if os.path.isfile(filename):
-                self.item.status = SAVED
-                self.create_thumbnail(self.item)
-            else:
-                self.item.status = FAILED
-                self.delete_fxd(self.item)
-        else:
-            self.item.status = SAVED
-        if time.time() - 10 > self.item.stop + self.item.stop_padding:
-            # something went wrong
-            self.item.status = FAILED
-        log.info('%s.stopped: recording finished, new status' % self.name)
-        log.info(str(self.item))
-        if self.server:
-            # FIXME: find a better way to notify the server
-            self.server.send_update()
-        self.server.save()
-        self.item.recorder = None
-        self.item = None
+        # maybe the app stopped without 'stop' being called, remove
+        # the callback, just in case
+        remove_callback(self.stop)
+
+        # get current recording
+        rec = self.recordings[0]
+
+        # notify server about a stopped recording
+        self.server.stop_recording(rec)
+
+        log.info('%s: recording finished:\n%s' % (self.name, str(rec)))
+
+        # remove recording from the list
+        self.recordings.remove(rec)
         self.app = None
-        # reset our timer by calling schedule again with the shorter list
-        self.schedule(self.recordings[1:])
+
+        # schedule next recording
+        call_later(self.schedule)

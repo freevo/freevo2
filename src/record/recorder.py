@@ -38,13 +38,62 @@ import string
 # freevo imports
 import config
 import plugin
-from util.fxdimdb import FxdImdb, makeVideo
-from util.videothumb import snapshot
 
-# list of possible plugins
-plugins = []
+class RecorderList:
+    def __init__(self):
+        self.recorder = []
+        self.best_recorder = {}
+        self.server = None
 
 
+    def append(self, recorder):
+        if not recorder in self.recorder:
+            self.recorder.append(recorder)
+            recorder.server = self.server
+            self.check()
+        
+
+    def remove(self, recorder):
+        if recorder in self.recorder:
+            self.recorder.remove(recorder)
+            self.check()
+
+        
+    def check(self):
+        """
+        Check all possible recorders.
+        """
+        # reset best recorder list
+        self.best_recorder = {}
+        for p in self.recorder:
+            for dev, rating, listing in p.get_channel_list():
+                for l in listing:
+                    for c in l:
+                        if not self.best_recorder.has_key(c):
+                            self.best_recorder[c] = -1, None
+                        if self.best_recorder[c][0] < rating:
+                            self.best_recorder[c] = rating, p, dev
+        for c in self.best_recorder:
+            self.best_recorder[c] = self.best_recorder[c][1:]
+
+        if self.server:
+            self.server.check_recordings(True)
+            
+
+    def best_recorder(self, channel):
+        return self.best_recorder[channel]
+    
+
+    def __iter__(self):
+        return self.recorder.__iter__()
+
+
+    def connect(self, server):
+        self.server = server
+        for p in self.recorder:
+            p.server = server
+        
+        
 class Plugin(plugin.Plugin):
     """
     Plugin template for a recorder plugin
@@ -55,68 +104,16 @@ class Plugin(plugin.Plugin):
         # reference to the recordserver
         self.server = None
         self.suffix = 'suffix'
-        plugins.append(self)
 
 
-    def create_fxd(self, rec):
-        """
-        Create fxd file for the recording
-        """
-        if not rec.url.startswith('file:'):
-            return
-        filename = rec.url[5:]
-
-        fxd = FxdImdb()
-        (filebase, fileext) = os.path.splitext(filename)
-        fxd.setFxdFile(filebase, overwrite = True)
-
-        video = makeVideo('file', 'f1', os.path.basename(filename))
-        fxd.setVideo(video)
-        if rec.episode:
-            fxd.info['episode'] = fxd.str2XML(rec.episode)
-            if rec.subtitle:
-                fxd.info['subtitle'] = fxd.str2XML(rec.subtitle)
-        elif rec.subtitle:
-            fxd.info['tagline'] = fxd.str2XML(rec.subtitle)
-        for i in rec.info:
-            if i == 'description':
-                fxd.info['plot'] = fxd.str2XML(rec.info[i])
-            else:
-                fxd.info[i] = fxd.str2XML(rec.info[i])
-
-        fxd.info['runtime'] = '%s min.' % int((rec.stop - rec.start) / 60)
-        fxd.info['record-start'] = str(int(time.time()))
-        fxd.info['record-stop'] = str(rec.stop + rec.stop_padding)
-        fxd.info['year'] = time.strftime('%m-%d %H:%M',
-                                         time.localtime(rec.start))
-        if rec.fxdname:
-            fxd.title = rec.fxdname
-        else:
-            fxd.title = rec.name
-        fxd.writeFxd()
+    def activate(self):
+        recorder.append(self)
 
 
-    def delete_fxd(self, rec):
-        """
-        Delete the recording fxd file.
-        """
-        if not rec.url.startswith('file:'):
-            return
-        filename = os.path.splitext(rec.url[5:])[0] + '.fxd'
-        if vfs.isfile(filename):
-            vfs.unlink(filename)
+    def deactivate(self):
+        recorder.remove(self)
 
-
-    def create_thumbnail(self, rec):
-        """
-        Create a thumbnail for the recording
-        """
-        if not rec.url.startswith('file:'):
-            return
-        filename = rec.url[5:]
-        snapshot(filename)
-
-
+        
     def get_url(self, rec):
         """
         Return url (e.g. filename) for the given recording
@@ -153,5 +150,12 @@ class Plugin(plugin.Plugin):
         raise Exception('plugin has not defined get_channel_list()')
 
 
-    def schedule(self, recordings):
-        raise Exception('plugin has not defined schedule()')
+    def record(self, recording, device):
+        raise Exception('plugin has not defined record()')
+
+
+    def remove(self, recording):
+        raise Exception('plugin has not defined remove()')
+
+
+recorder = RecorderList()
