@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <sys/poll.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 extern int errno;
 
@@ -25,9 +27,20 @@ main (int ac, char *av[])
    int i;
    FILE *fp;
    char *newav[ac];
+   struct stat statbuf;
+   char logfile[256];
+   
 
-
-   fp = fopen (RUNAPP_LOG, "a");
+   /* Does the logdir exist? */
+   if (!stat (RUNAPP_LOGDIR, &statbuf)) {
+     sprintf (logfile, "%s/internal-runapp.log", RUNAPP_LOGDIR);
+   } else {
+     /* No, log to the /tmp/freevo dir instead */
+     sprintf (logfile, "/tmp/freevo/internal-runapp.log");
+     mkdir ("/tmp/freevo", 0777); /* Make sure the dir exists, ignore errors */
+   }
+   
+   fp = fopen (logfile, "a");
 
    fprintf (fp, "PATH = %s\n", getenv ("PATH"));
    

@@ -19,6 +19,14 @@
 import sys, os, time
 
 
+if os.path.isdir('/var/log/freevo'):
+    LOGDIR = '/var/log/freevo'
+else:
+    LOGDIR = '/tmp/freevo'
+    if not os.path.isdir(LOGDIR):
+        os.makedirs(LOGDIR)
+
+
 # Logging class. Logs stuff on stdout and /tmp/freevo.log
 class Logger:
 
@@ -26,12 +34,16 @@ class Logger:
         self.lineno = 1
         self.logtype = logtype
 	try:
-        	self.fp = open('/var/log/freevo/internal.log', 'a')
+            appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+            logfile = '%s/internal-%s.log' % (LOGDIR, appname)
+            self.fp = open(logfile, 'a')
+            print 'Logging info in %s' % logfile
 	except IOError:
-		print 'Could not open logfile: /var/log/freevo/internal.log' 
-		self.fp = open('/dev/null','a')
+            print 'Could not open logfile: %s' % logfile
+            self.fp = open('/dev/null','a')
         self.softspace = 0
         ts = time.asctime(time.localtime(time.time()))
+        self.write('-' * 79 + '\n')
         self.write('Starting %s at %s\n' % (logtype, ts))
         
         

@@ -108,7 +108,13 @@ REMOTE_CONTROL_HOST = '127.0.0.1'
 REMOTE_CONTROL_PORT = 16310
 
 # Cache for Freevo data
-FREEVO_CACHEDIR = '/var/cache/freevo/'
+
+if os.path.isdir('/var/cache/freevo'):
+    FREEVO_CACHEDIR = '/var/cache/freevo'
+else:
+    if not os.path.isdir('/tmp/freevo/cache'):
+        os.makedirs('/tmp/freevo/cache')
+    FREEVO_CACHEDIR = '/tmp/freevo/cache'
 
 #
 # The mpg123 application
@@ -243,7 +249,12 @@ XMLTV_FILE = '/tmp/TV.xml'
 # Use the "makelogos.py" script to download all the
 # Station logos into a directory. And then put the path
 # to those logos here
-TV_LOGOS = '/var/cache/xmltv/logos'
+if os.path.isdir('/var/cache/xmltv/logos'):
+    TV_LOGOS = '/var/cache/xmltv/logos'
+else:
+    if not os.path.isdir('/tmp/freevo/xmltv/logos'):
+        os.makedirs('/tmp/freevo/xmltv/logos')
+    TV_LOGOS = '/tmp/freevo/xmltv/logos'
 
 #
 # Remote control commands translation table. Replace this with the commands that
