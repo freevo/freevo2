@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/05 17:03:07  outlyer
+# Prevent a crash.
+#
 # Revision 1.5  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -66,11 +69,12 @@ class PluginInterface(plugin.DaemonPlugin):
         self.db.commit()
 
     def log_track(self, filename):
-        query = 'UPDATE music SET play_count=play_count+1,last_play=%f WHERE \
-                 path = "%s" and filename = "%s"' % (time.time(),  
-                 util.escape(os.path.dirname(filename)), 
-                 util.escape(os.path.basename(filename)) )
-        self.runquery(query)
+        if filename:
+            query = 'UPDATE music SET play_count=play_count+1,last_play=%f WHERE \
+                     path = "%s" and filename = "%s"' % (time.time(),  
+                     util.escape(os.path.dirname(filename)), 
+                     util.escape(os.path.basename(filename)) )
+            self.runquery(query)
 
     def log_rating(self, filename, rating):
         query = 'UPDATE music SET rating=%i WHERE \
