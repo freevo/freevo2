@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/08/31 17:33:49  dischi
+# The selection will be shorten if there is a image for an item to avoid
+# overlapping. If the item name is too long it will be shorten, too and "..."
+# will be added at the end.
+#
 # Revision 1.16  2002/08/19 05:52:08  krister
 # Changed to Gustavos new XML code for more settings in the skin. Uses columns for the TV guide.
 #
@@ -216,8 +221,35 @@ class Skin:
         else:
             spacing = selection_height / max(len(menuw.menu_items),1)
 
-        # image to display
-        image = None
+        image_x = 0
+
+        # display the image and store the x0 position of the image
+        for item in menuw.menu_items:
+            image = item.image
+            if image:
+                (type, image) = image
+            if image:
+                if type == 'photo' and val.cover_image.visible:
+                    image_x = val.cover_image.x
+                    if menu.selected == item:
+                        thumb = util.getExifThumbnail(image, val.cover_image.width, \
+                                                      val.cover_image.height)
+                        if thumb:
+                            osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
+                elif type == 'movie' and val.cover_movie.visible:
+                    image_x = val.cover_movie.x
+                    if menu.selected == item:
+                        osd.drawbitmap(util.resize(image, val.cover_movie.width, \
+                                                   val.cover_movie.height),\
+                                       val.cover_movie.x, val.cover_movie.y)
+
+                elif type == 'music' and val.cover_music.visible:
+                    image_x = val.cover_music.x
+                    if menu.selected == item:
+                        osd.drawbitmap(util.resize(image, val.cover_music.width, \
+                                                   val.cover_music.height),\
+                                       val.cover_music.x, val.cover_music.y)
+
         
         for choice in menuw.menu_items:
 
@@ -258,17 +290,37 @@ class Skin:
             else:
                 top = y0
 
+            # if there is an image and the selection will be cover the image
+            # shorten the selection
+
+            selection_length = item.selection.length
+
+            if image_x and item.x - 8 + selection_length > image_x - 30:
+                selection_length = image_x - 30 - val.items.x + 8
+
+
             # Draw the selection bar for selected items
             if menu.selected == choice:
                 osd.drawbox(item.x - 8, top - 2,
-                            item.x - 8 + obj.length,
+                            item.x - 8 + selection_length,
                             top + str_h + 2,
                             width = -1,
                             color = ((160 << 24) |
                                      obj.bgcolor))
 
-            # Draw the menu item text
-            self.DrawText(choice.name, item.x, top,
+            # Draw the menu item text, shorten the text before to fit
+            # the selection length
+            text = choice.name
+
+            font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
+            if font_w + 26 > selection_length:
+                text = text + "..."
+                    
+            while font_w + 26 > selection_length:
+                text = text[0:-4] + "..."
+                font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
+                
+            self.DrawText(text, item.x, top,
                           obj.color, 
                           obj.shadow_color, None,
                           obj.font,
@@ -286,32 +338,12 @@ class Skin:
             y0 += spacing
 
 
-        # draw the image
-        if image:
-            (type, image) = image
-        if image:
-            if type == 'photo' and val.cover_image.visible:
-                thumb = util.getExifThumbnail(image, val.cover_image.width, 
-                                              val.cover_image.height)
-                if thumb:
-                    osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
-                    
-            elif type == 'movie' and val.cover_movie.visible:
-                osd.drawbitmap(util.resize(image, val.cover_movie.width, 
-                                           val.cover_movie.height),
-                               val.cover_movie.x, val.cover_movie.y)
-                
-            elif type == 'music' and val.cover_music.visible:
-                osd.drawbitmap(util.resize(image, val.cover_music.width, 
-                                           val.cover_music.height),
-                               val.cover_music.x, val.cover_music.y)
-            
-
         # Draw the menu choices for the meta selection
         x0 = val.submenu.x
         y0 = val.submenu.y
         
         for item in menuw.nav_items:
+            text
             if menu.selected == item:
                 osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu.selection.length, 
                             y0 + val.submenu.selection.size*1.5,
