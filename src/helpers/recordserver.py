@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/01/14 02:28:22  outlyer
+# We do call videothumb in the recording plugins so this note isn't needed.
+#
 # Revision 1.26  2004/01/13 15:17:02  outlyer
 # Appending won't work in this case anyway, so skip the error message.
 #
@@ -832,8 +835,6 @@ class RecordServer(xmlrpc.XMLRPC):
         fxd.info['year'] = time.strftime('%m-%d %I:%M', time.localtime(rec_prog.start))
         fxd.title = fxd.str2XML(rec_prog.title)     # I don't know why this has to be done twice?
         fxd.writeFxd()
-        # Maybe we should call util.videothumb.snapshot to make a snapshot too, but
-        # we'd have to do it after a few minutes of recording
             
 
     def startMinuteCheck(self):
