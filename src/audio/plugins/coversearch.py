@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/08/06 18:49:17  gsbarbieri
+# Now it shows an AlertBox() when user doesn't have a key.
+#
 # Revision 1.14  2003/07/19 19:41:26  dischi
 # o remove some debug strings
 # o remove (...) and [...] from search string
@@ -129,9 +132,12 @@ import time
 import config
 import Image
 import cStringIO
+from xml.dom import minidom # ParseError used by amazon module
 
 from gui.PopupBox import PopupBox
+from gui.AlertBox import AlertBox
 
+SHOW_WARNING=1
 
 class PluginInterface(plugin.ItemPlugin):
     def __init__(self, license=None):
@@ -141,12 +147,11 @@ class PluginInterface(plugin.ItemPlugin):
 	if license:
 	    self.license = license
         else:
-	    self.license = 'empty'
+	    self.license = None
 
 
     def actions(self, item):
         self.item = item
-
         # don't allow this for items on an audio cd, only on the disc itself
         if item.type == 'audio' and item.parent.type == 'audiocd':
             return []
@@ -163,8 +168,22 @@ class PluginInterface(plugin.ItemPlugin):
                     (self.item.getattr('title') and item.type == 'audiocd')):
                     return [ ( self.cover_search_file, 'Find a cover for this music',
                                'imdb_search_or_cover_search') ]
+                else:
+                    if SHOW_WARNING:
+                        print "WARNING: coversearch disabled for this item! " + \
+                              "coversearch needs an item with " + \
+                              "Artist and Album (if it's a mp3 or ogg) or " + \
+                              "Title (if it's a cd track) to be able to search. " + \
+                              "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
+                              "Maybe you must fix this file (%s) tag?" % item.filename 
             except KeyError:
-                pass
+                if SHOW_WARNING:
+                    print "WARNING: coversearch disabled for this item! " + \
+                          "coversearch needs an item with " + \
+                          "Artist and Album (if it's a mp3 or ogg) or " + \
+                          "Title (if it's a cd track) to be able to search. " + \
+                          "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
+                          "Maybe you must fix this file (%s) tag?" % item.filename
         return []
 
 
@@ -184,7 +203,8 @@ class PluginInterface(plugin.ItemPlugin):
 
         artist = self.item.info['artist']
 
-        amazon.setLicense(self.license)
+        if self.license:
+            amazon.setLicense(self.license)
         search_string = '%s %s' % (artist,album)
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
@@ -196,6 +216,7 @@ class PluginInterface(plugin.ItemPlugin):
             time.sleep(2)
             box.destroy()
             return
+
         except amazon.ParseError:
             box.destroy()
             box = PopupBox(text='The cover provider returned bad information.')
@@ -204,6 +225,15 @@ class PluginInterface(plugin.ItemPlugin):
             box.destroy()
             return
 
+        except amazon.NoLicenseKey:
+            box.destroy()
+            text='To search for covers you need an ' + \
+                  'Amazon.com Web Services license key. You can get yours from: https://associates.amazon.com/exec/panama/associates/join/developer/application.html'
+            box = AlertBox(text=text)
+            print "ERROR: coversearch: %s" % text
+            box.show()
+            return
+        
         items = []
         
         # Check if they're valid before presenting the list to the user

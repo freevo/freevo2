@@ -74,6 +74,7 @@ HTTP_PROXY = None
 
 # don't touch the rest of these constants
 class AmazonError(Exception): pass
+class ParseError(Exception): pass
 class NoLicenseKey(Exception): pass
 _amazonfile1 = ".amazonkey"
 _amazonfile2 = "amazonkey.txt"
