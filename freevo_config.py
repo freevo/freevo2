@@ -909,7 +909,6 @@ MPLAYER_ARGS = { 'dvd'    : '-cache 8192',
                  'rm'     : '-cache 5000 -forceidx',
                  'rmvb'   : '-cache 5000 -forceidx',
                  'webcam' : 'tv:// -tv driver=v4l:width=352:height=288:outfmt=yuy2:device=/dev/video2',
-                 'ivtv'   : '-cache 1024',
                  'default': '-cache 5000'
                  }
 
