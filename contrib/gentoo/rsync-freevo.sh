@@ -23,13 +23,14 @@ fi
 
 cd $PORTDIR_OVERLAY
 
-if [ '!' -e app-misc ]; then
-    mkdir app-misc
+if [ '!' -e media-video ]; then
+    mkdir media-video
 fi
 
-cd app-misc
-rm -rf freevo_runtime freevo_snapshot freevo
+rm -rf app-misc/freevo_runtime app-misc/freevo_snapshot \
+    media-video/freevo_runtime media-video/freevo_snapshot media-video/freevo
 
+cd media-video
 tar -zxvf /tmp/ebuild.tgz
 rm /tmp/ebuild.tgz
 

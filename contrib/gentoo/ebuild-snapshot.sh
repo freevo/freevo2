@@ -8,7 +8,8 @@
 
 fname=freevo_snapshot-`date +%Y%m%d`
 
-sudo cp `dirname $0`/freevo.ebuild /usr/local/portage/app-misc/freevo_snapshot/$fname.ebuild
+sudo cp `dirname $0`/freevo.ebuild \
+    /usr/local/portage/media-video/freevo_snapshot/$fname.ebuild
 
 cd `dirname $0`/../../
 echo cvs update
@@ -29,7 +30,7 @@ sudo tar -zcvf /usr/portage/distfiles/$fname.tgz $fname
 echo remove tmp dir
 sudo rm -rf $fname
 
-cd /usr/local/portage/app-misc/freevo_snapshot
+cd /usr/local/portage/media-video/freevo_snapshot
 sudo chown -R root.root .
 sudo ebuild $fname.ebuild digest 
 
