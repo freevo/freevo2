@@ -50,6 +50,7 @@ class PluginInterface(plugin.DaemonPlugin):
         # register in list (is this necessery?)
         self.plugin_name = 'audio.detachbar'       
         plugin.register(self, self.plugin_name)
+        self.image = None
 
     def reset(self):
         self.status=BAR_HIDE
@@ -135,9 +136,19 @@ class PluginInterface(plugin.DaemonPlugin):
 
             if font==osd.get_font('default'):
                 font = osd.get_font('info value')
-            
+       
             self.calculatesizes(osd,font)
-            osd.drawroundbox(self.x, self.y , self.w, osd.height, (0xf0000000L, 1, 0xb0000000L, 10))
+
+            if self.image:
+                origin = self.x-70
+                width = self.w+60
+            else:
+                orgin = self.x
+                width = self.w
+
+            osd.drawroundbox(origin, self.y, width, osd.height, (0xf0000000L, 1, 0xb0000000L, 10))
+            
+            if self.image: osd.draw_image(self.image, (origin-5,self.y,50,50))
 
             y = self.t_y
         
@@ -157,7 +168,8 @@ class PluginInterface(plugin.DaemonPlugin):
         self.render = []
         self.calculate = True
         info = self.player.item.info
-        
+       
+        self.image =  self.player.item.image
         # artist : album
         if info['artist'] and info['album']:
             self.render += [ '%s : %s' % ( info['artist'], info['album']) ]
