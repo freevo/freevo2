@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/10/21 20:30:50  dischi
+# The new alpha layer support slows the system down. For that, the skin
+# now saves the last background/alpha layer combination and can reuse it.
+# It's quite a hack, the main skin needs to call drawroundbox in main1_utils
+# to make the changes to the alpha layer. Look in the code, it's hard to
+# explain, but IMHO it's faster now.
+#
 # Revision 1.5  2002/10/20 06:30:01  krister
 # Fixed TV guide listing, draw border after icons.
 #
@@ -178,8 +185,8 @@ class Skin_TV:
         x = conf_x
         y = conf_y
         # Display the Channel on top
-        DrawBox(x, y, x+val.label.width, y+str_h_label + 2 * val.spacing,
-                val.label.bgcolor, 1, val.border_color)
+        drawroundbox(x, y, x+val.label.width, y+str_h_label + 2 * val.spacing,
+                     val.label.bgcolor, 1, val.border_color)
         DrawTextFramed(time.strftime("%m/%d",time.localtime(to_listing[0][1])), \
                        val.label, x + val.spacing, y + val.spacing, \
                        val.label.width - 2 * val.spacing, str_h_label)
@@ -189,8 +196,8 @@ class Skin_TV:
             x0 = int(x_contents + (float(w_contents) / n_cols) * i)
             x1 = int(x_contents + (float(w_contents) / n_cols) * (i+1))
             
-            DrawBox(x0, y, x1, y+ str_h_label + 2 * val.spacing,
-                    val.label.bgcolor, 1, val.border_color)   
+            drawroundbox(x0, y, x1, y+ str_h_label + 2 * val.spacing,
+                         val.label.bgcolor, 1, val.border_color)   
             DrawText(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
                      val.label, x0 + val.spacing, y + val.spacing, align='left')
 
@@ -289,7 +296,7 @@ class Skin_TV:
 
                         cur_val = val2.selection
                         
-                    DrawBox(x0, y0, x1, y1, cur_val.bgcolor, 1, val2.border_color)
+                    drawroundbox(x0, y0, x1, y1, cur_val.bgcolor, 1, val2.border_color)
 
                     tx0 = min(x1, x0+(flag_left+1)*spacing+flag_left*left_arrow_size[0])
                     tx1 = max(x0, x1-(flag_right+1)*spacing-flag_right*right_arrow_size[0])
@@ -304,8 +311,8 @@ class Skin_TV:
                                        y0+spacing+int((str_h - right_arrow_size[1])/2))
 
             else:
-                DrawBox(x_contents, y0, x_contents+w_contents, y1,
-                        val2.bgcolor, 1, val2.border_color)
+                drawroundbox(x_contents, y0, x_contents+w_contents, y1,
+                             val2.bgcolor, 1, val2.border_color)
                 DrawTextFramed('-[ NO DATA ]-', val, x_contents+val.spacing,
                                y0+val.spacing, w_contents - 2 * val2.spacing, h)
 

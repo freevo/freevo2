@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2002/10/21 20:30:50  dischi
+# The new alpha layer support slows the system down. For that, the skin
+# now saves the last background/alpha layer combination and can reuse it.
+# It's quite a hack, the main skin needs to call drawroundbox in main1_utils
+# to make the changes to the alpha layer. Look in the code, it's hard to
+# explain, but IMHO it's faster now.
+#
 # Revision 1.45  2002/10/20 16:03:20  outlyer
 # Force seconds in mp3 player to be displayed as two digits. (Previously, if
 # a track was 2 min, 03 sec, it would show as 2:3, now it's 2:03)
@@ -286,7 +293,7 @@ class Skin:
                 osd.drawbitmap(icon, val.x+25, y0 + (y1-y0) / 2 - (icon_height/2))
                 
         else:            
-            osd.drawroundbox(x0-val.spacing, y0-val.spacing, x1+val.spacing,
+            drawroundbox(x0-val.spacing, y0-val.spacing, x1+val.spacing,
                              y1+val.spacing, color=val.bgcolor,
                              border_size=val.border_size, border_color=val.border_color,
                              radius=val.radius)
@@ -345,7 +352,7 @@ class Skin:
 
 
     
-    def DrawMenu_Selection(self, menuw, settings, x0, y0, width, height, layer=None):
+    def DrawMenu_Selection(self, menuw, settings, x0, y0, width, height):
         val = settings
         menu = menuw.menustack[-1]
 
@@ -408,9 +415,9 @@ class Skin:
 
             # Draw the selection bar for selected items
             if menu.selected == choice and obj.visible:
-                osd.drawroundbox(x0 - obj.spacing, top - 2, x0 + obj.spacing + width,
+                drawroundbox(x0 - obj.spacing, top - 2, x0 + obj.spacing + width,
                                  top + font_h + 2, color = obj.bgcolor,
-                                 radius=obj.radius, layer=layer)
+                                 radius=obj.radius)
 
             if not text:
                 print "no text to display ... strange. Use default"
@@ -425,7 +432,7 @@ class Skin:
             # TV show, align the text with all files from the same show
             if show_name[0]:
                 x = x0
-                DrawText(show_name[0], obj, x=x, y=top, layer=layer)
+                DrawText(show_name[0], obj, x=x, y=top)
 
                 season_w = 0
                 volume_w = 0
@@ -443,24 +450,23 @@ class Skin:
                     osd.stringsize('%s  ' % show_name[0], font=obj.font, \
                                    ptsize=obj.size)[0] - season_w + \
                     osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
-                DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top,
-                         layer=layer)
+                DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top)
 
                 x = x + season_w + volume_w + \
                     osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
-                DrawText('-  %s' % show_name[3], obj, x=x, y=top, layer=layer)
+                DrawText('-  %s' % show_name[3], obj, x=x, y=top)
                 
 
             # normal items
             else:
-                DrawText(text, obj, x=x0, y=top, layer=layer)
+                DrawText(text, obj, x=x0, y=top)
 
             # draw icon
             if choice.icon != None:
                 icon_x = x0 - icon_size - 15
                 icon_y = y0 - (icon_size - font_h) / 2
                 osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x,
-                               icon_y, layer=layer)
+                               icon_y)
 
             y0 += spacing
         
@@ -495,26 +501,26 @@ class Skin:
         image_x, image_val, image_file = self.DrawMenu_Cover(menuw, val)
 
         if image_val:
-            layer = InitScreen(val, (val.background.mask, image_val.mask), image_x)
+            InitScreen(val, (val.background.mask, image_val.mask), image_x)
         else:
-            layer = InitScreen(val, (val.background.mask, None), image_x)
+            InitScreen(val, (val.background.mask, None), image_x)
 
         # Menu heading
         if val.title.visible:
             if val.title.text:
                 menu.heading = val.title.text
 
-            DrawText(menu.heading, val.title, layer=layer)
+            DrawText(menu.heading, val.title)
 
         if val.logo.image and val.logo.visible:
             if val.logo.width and val.logo.height:
                 osd.drawbitmap(util.resize(val.logo.image, val.logo.width, val.logo.height),
                                val.logo.x, val.logo.y)
             else:
-                osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y, layer=layer)
+                osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
 
         if image_file:
-            osd.drawbitmap(image_file, image_val.x, image_val.y, layer=layer)
+            osd.drawbitmap(image_file, image_val.x, image_val.y)
 
             if image_val and image_val.border_size > 0:
                 osd.drawbox(image_val.x - image_val.border_size,
@@ -522,8 +528,7 @@ class Skin:
                             image_val.x + image_val.width + image_val.border_size,
                             image_val.y + image_val.height + image_val.border_size,
                             width = image_val.border_size,
-                            color = image_val.border_color,
-                            layer=layer)
+                            color = image_val.border_color)
             
 
         # Draw the menu choices for the main selection
@@ -538,7 +543,7 @@ class Skin:
             selection_length = image_x - val.items.x
 
         self.DrawMenu_Selection(menuw, val, val.items.x, val.items.y, selection_length, \
-                                val.items.height, layer=layer)
+                                val.items.height)
 
 
         # Draw the menu choices for the meta selection
@@ -553,24 +558,24 @@ class Skin:
         
         for item in menuw.nav_items:
             if menu.selected == item:
-                osd.drawroundbox(x0, y0, x0 + val.submenu.selection.length, 
+                drawroundbox(x0, y0, x0 + val.submenu.selection.length, 
                                  y0 + h,
                                  color=val.submenu.selection.bgcolor,
-                                 radius=val.submenu.selection.radius, layer=layer)
+                                 radius=val.submenu.selection.radius)
                 
                 DrawTextFramed(item.name, val.submenu.selection,
                                x0+val.submenu.selection.spacing, y0,
                                x0 + val.submenu.selection.length-\
                                2*val.submenu.selection.spacing, 
-                               y0 + h, layer=layer)
+                               y0 + h)
                 
             else:
                 DrawTextFramed(item.name, val.submenu, x0+val.submenu.spacing, y0,
                                x0 + val.submenu.selection.length-2*val.submenu.spacing, 
-                               y0 + h, layer=layer)
+                               y0 + h)
             x0 += 190
 
-        ShowScreen(layer)
+        osd.update()
         
 
     def DrawMP3(self, info):
@@ -594,9 +599,9 @@ class Skin:
         if info.drawall:
 
             if info.image:
-                PutLayer(InitScreen(val, (val.background.mask,val.cover.mask), info.image))
+                InitScreen(val, (val.background.mask,val.cover.mask), info.image)
             else:
-                PutLayer(InitScreen(val, (val.background.mask,), info.image))
+                InitScreen(val, (val.background.mask,), info.image)
             
             if val.title.visible:
                 osd.drawstring('Playing Music', val.title.x, val.title.y,

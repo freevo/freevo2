@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/10/21 20:30:50  dischi
+# The new alpha layer support slows the system down. For that, the skin
+# now saves the last background/alpha layer combination and can reuse it.
+# It's quite a hack, the main skin needs to call drawroundbox in main1_utils
+# to make the changes to the alpha layer. Look in the code, it's hard to
+# explain, but IMHO it's faster now.
+#
 # Revision 1.5  2002/10/20 09:19:12  dischi
 # bugfix
 #
@@ -56,6 +63,7 @@
 # The OSD class, used to communicate with the OSD daemon
 import osd
 import util
+import pygame
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -63,7 +71,7 @@ osd = osd.get_singleton()
 
 
 # Draws a text based on the settings in the XML file
-def DrawText(text, settings, x=-1, y=-1, align='', layer=None):
+def DrawText(text, settings, x=-1, y=-1, align=''):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
     if not align: align = settings.align
@@ -71,13 +79,13 @@ def DrawText(text, settings, x=-1, y=-1, align='', layer=None):
     if settings.shadow_visible:
         osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                        settings.shadow_color, None, settings.font,
-                       settings.size, align, layer)
+                       settings.size, align)
     osd.drawstring(text, x, y, settings.color, None, settings.font,
-                   settings.size, align, layer)
+                   settings.size, align)
 
 
 # Draws a text inside a frame based on the settings in the XML file
-def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard', layer=None):
+def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard'):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
 
@@ -88,29 +96,37 @@ def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard',
         osd.drawstringframed(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                              width, height, settings.shadow_color, None,
                              font=settings.font, ptsize=settings.size,
-                             align_h=settings.align, align_v=settings.valign, mode=mode,
-                             layer=layer)
+                             align_h=settings.align, align_v=settings.valign, mode=mode)
     osd.drawstringframed(text, x, y, width, height, settings.color, None,
                          font=settings.font, ptsize=settings.size,
-                         align_h=settings.align, align_v=settings.valign, mode=mode,
-                         layer=layer)
+                         align_h=settings.align, align_v=settings.valign, mode=mode)
 
+
+
+
+
+last_screen_id = None
+last_screen = pygame.Surface((osd.width, osd.height), 0, 32)
+
+last_bg = pygame.Surface((osd.width, osd.height), 0, 32)
+last_bg_name = None
+last_alpha = None
 
 def InitScreen(settings, masks, cover_visible = 0):
-    osd.clearscreen(osd.COL_BLACK)
+    global last_screen
+    global last_screen_id
+    global last_bg
+    global last_bg_name
+    global last_alpha
 
-    if settings.background.image:
-        apply(osd.drawbitmap, (settings.background.image, -1, -1))
 
-    layer = None
+
+    # generate an id of the screen to draw: background+masks,logo
+    screen_id = [ settings.background.image ]
     
     for i in masks:
         if i:
-            if not layer:
-                layer = osd.createlayer()
-
             if isinstance(i, list):
-
                 for r in i:
                     visible = r.visible
 
@@ -118,36 +134,111 @@ def InitScreen(settings, masks, cover_visible = 0):
                         visible = cover_visible
                     
                     if visible:
-                        osd.drawroundbox(r.x, r.y, r.x+r.width, r.y+r.height, r.color,
-                                         r.border_size, r.border_color, r.radius, layer)
-                    
+                        screen_id += [ r ]
             else:
-                osd.drawbitmap(i,-1,-1, layer=layer)
+                screen_id += [ i ]
+
 
     val = settings.logo
     if val.image and val.visible:
-        if val.width and val.height:
-            osd.drawbitmap(util.resize(val.image, val.width, val.height),
-                           val.x, val.y)
+        screen_id += [val.image, val.width, val.height, val.x, val.y ]
+
+
+    # is the new screen to draw the same as the last one?
+    if screen_id == last_screen_id:
+        # re-use background
+        osd.screen.blit(last_screen, (0,0))
+
+
+    else:
+        # generate new background
+        last_screen_id = screen_id
+
+        osd.clearscreen(osd.COL_BLACK)
+
+        # same background?
+        if last_bg_name == settings.background.image:
+            #re-use
+            osd.screen.blit(last_bg, (0,0))
+
+        # no? than load the image and save the background
+        elif settings.background.image:
+            apply(osd.drawbitmap, (settings.background.image, -1, -1))
+
+            # save background
+            last_bg.blit(osd.screen, (0,0))
+            last_bg_name = settings.background.image
+
+        # draw all the alpha layer
+        layer = None
+
+        for i in masks:
+            if i:
+                if not layer:
+                    layer = osd.createlayer()
+
+                if isinstance(i, list):
+
+                    for r in i:
+                        visible = r.visible
+
+                        if visible=='cover':
+                            visible = cover_visible
+
+                        if visible:
+                            osd.drawroundbox(r.x, r.y, r.x+r.width, r.y+r.height, r.color,
+                                             r.border_size, r.border_color, r.radius, layer)
+
+                else:
+                    osd.drawbitmap(i,-1,-1, layer=layer)
+
+        # draw the logo
+        val = settings.logo
+        if val.image and val.visible:
+            if val.width and val.height:
+                osd.drawbitmap(util.resize(val.image, val.width, val.height),
+                               val.x, val.y)
+            else:
+                osd.drawbitmap(val.image, val.x, val.y)
+
+
+        # save everything for re-use
+        if layer:
+            last_alpha = layer
+            osd.putlayer(layer)
         else:
-            osd.drawbitmap(val.image, val.x, val.y)
-
-    return layer
-
-
-def DrawBox(x0, y0, x1, y1, color = None, border_size = 0, border_color = None):
-    osd.drawbox(x0, y0, x1, y1, width=-1, color=color)
-    if border_size >= 0:
-        osd.drawbox(x0, y0, x1, y1, width=border_size, color=border_color)
-    
-
-
-def PutLayer(layer):
-    if layer:
-        osd.putlayer(layer)
+            last_alpha = None
+            
+        last_screen.blit(osd.screen, (0,0))
+        
     return None
+
+
+# mapper to draw the round box into the alpha layer
+def drawroundbox(x0, y0, x1, y1, color=None, border_size=0, border_color=None, radius=0):
+    if last_alpha:
+        # Make sure the order is top left, bottom right
+        x0, x1 = min(x0, x1), max(x0, x1)
+        y0, y1 = min(y0, y1), max(y0, y1)
+        
+        h = y1 - y0
+        w = x1 - x0
+
+        # load old background
+        bg = pygame.Surface((w,h), 0, 32)
+        bg.blit(last_bg, (0,0), (x0,y0, w, h))
+
+        # load old alpha layer
+        a = osd.createlayer(w,h)
+        a.blit(last_alpha, (0,0), (x0,y0, w, h))
+
+        # draw the round box
+        osd.drawroundbox(0, 0, w, h, color, border_size, border_color, radius, layer=a)
+
+        # put it all back
+        bg.blit(a, (0, 0))
+        osd.screen.blit(bg, (x0, y0))
+    else:
+        osd.drawroundbox(x0, y0, x1, y1, color, border_size, border_color, radius)
+
     
-def ShowScreen(layer):
-    if layer:
-        osd.putlayer(layer)
-    osd.update()
