@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/03/13 23:44:02  dischi
+# audio stream selection fixes
+#
 # Revision 1.35  2004/02/28 21:04:17  dischi
 # unicode fixes
 #
@@ -320,6 +323,10 @@ class MMCache(Cache):
         if hasattr(object, 'mime'):
             # mimetype may be good to have :-)
             ret['mime'] = object.mime
+
+        if hasattr(object, 'id'):
+            # mimetype may be good to have :-)
+            ret['id'] = object.id
 
         # something with tracks (e.g. dvd on disc)
         if hasattr(object, 'tracks'):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/03/13 23:44:02  dischi
+# audio stream selection fixes
+#
 # Revision 1.65  2004/02/23 19:17:53  dischi
 # bugfix
 #
@@ -281,7 +284,7 @@ class MPlayer:
         elif item.selected_subtitle:
             additional_args += [ '-sid', str(item.selected_subtitle) ]
             
-        if item.selected_audio:
+        if item.selected_audio != None:
             additional_args += [ '-aid', str(item.selected_audio) ]
 
         if self.version >= 1 and item['deinterlace']:

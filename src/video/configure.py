@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/03/13 23:44:02  dischi
+# audio stream selection fixes
+#
 # Revision 1.23  2004/01/31 16:39:03  dischi
 # fix function to check if we have to show configure
 #
@@ -95,10 +98,18 @@ def audio_selection_menu(arg=None, menuw=None):
     global current_fxd_file
     items = []
     for a in arg.info['audio']:
-        if not a['id']:
+        if not a.has_key('id') or a['id'] in ('', None):
             a['id'] = arg.info['audio'].index(a) + 1
-        if not a['language']:
-            a['language'] = 'Unknown'
+        
+        if not a.has_key('language') or not not a['language']:
+            a['language'] = _('Stream %s') % a['id']
+
+        if not a.has_key('channels') or not not a['channels']:
+            a['channels'] = 2 # wild guess :-)
+
+        if not a.has_key('codec') or not not a['codec']:
+            a['codec'] = _('Unknown')
+
         txt = '%s (channels=%s, codec=%s, id=%s)' % (a['language'], a['channels'],
                                                      a['codec'], a['id'])
         items.append(menu.MenuItem(txt, audio_selection, (arg, a['id'])))
