@@ -30,7 +30,6 @@ class Display(MPlayerCanvas):
         if self.start_video and not self.child:
             import childapp
             arg = ['/local/install/mplayer-cvs/mplayer'] + self.mplayer_args.split(' ') + \
-            #arg = ['/home/tack/src/main/mplayer'] + self.mplayer_args.split(' ') + \
                   [config.BMOVL_OSD_VIDEO]
             self.child = childapp.ChildApp2(arg)
             time.sleep(2)
