@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/05/11 19:01:50  dischi
+# make sure we have a menu
+#
 # Revision 1.46  2004/05/09 10:00:37  dischi
 # update selected item in the menu when showing an image
 #
@@ -266,7 +269,7 @@ class ImageViewer(GUIObject):
 
         # XXX Hack to move the selected item to the current showing image
         # XXX TODO: find a way to add it to directory.py or playlist.py
-        if item.parent and hasattr(item.parent, 'menu') and \
+        if item.parent and hasattr(item.parent, 'menu') and item.parent.menu and \
                item in item.parent.menu.choices:
             item.parent.menu.selected = item
             item.menuw.force_page_rebuild = True
