@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/28 19:32:59  dischi
+# set type to linkbrowser
+#
 # Revision 1.4  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -75,7 +78,7 @@ class Link(Item):
         self.autoplay = autoplay
         self.counter = 1
         self.all_links = all_links
-
+        self.type = 'linkbrowser'
 
     def actions(self):
         """
@@ -347,6 +350,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         self.blacklist_regexp = []
         self.autoplay = autoplay
         self.all_links = all_links
+        self.type = 'linkbrowser'
         for b in blacklist_regexp:
             self.blacklist_regexp.append(re.compile(b).match)
         
