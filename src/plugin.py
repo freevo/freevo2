@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/01/10 16:49:04  dischi
+# make it possible to shut down all kinds of plugins
+#
 # Revision 1.59  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -362,10 +365,11 @@ def shutdown(plugin_name=None):
     """
     called to shutdown one or all daemon plugins
     """
-    shutdown_plugins = get('daemon_shutdown')
-    for p in shutdown_plugins:
-        if not plugin_name or p.plugin_name == plugin_name:
-            p.shutdown()
+    for key in __plugin_type_list__:
+        for p in __plugin_type_list__[key]:
+            if (not plugin_name or p.plugin_name == plugin_name) and hasattr(p, 'shutdown'):
+                _debug_('shutdown plugin %s' % p.plugin_name, 2)
+                p.shutdown()
 
  
 def get(type):
