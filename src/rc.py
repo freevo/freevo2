@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.22  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -51,10 +54,6 @@ except ImportError:
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
-
-
-TRUE = 1
-FALSE = 0
 
 # Module variable that contains an initialized RemoteControl() object
 _singleton = None

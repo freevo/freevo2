@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.19  2003/09/05 16:11:45  mikeruelle
 # allow games to get its additional args
 #
@@ -78,9 +81,6 @@ import event as em
 
 from item import Item
 from directory import DirItem
-
-TRUE  = 1
-FALSE = 0
 
 import plugin
 import plugins.rom_drives

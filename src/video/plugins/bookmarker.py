@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.2  2003/09/06 21:13:39  mikeruelle
 # fix a crash reported by denRDC
 #
@@ -58,9 +61,6 @@ import util
 import menu
 
 from event import *
-
-FALSE = 0
-TRUE = 1
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -151,8 +151,8 @@ class PluginInterface(plugin.ItemPlugin):
                    not item.subitems and item.elapsed:
                 self.bookmarks[item.getattr('item_id')] = (time.time, item.elapsed)
                 util.save_pickle((self.VERSION, self.bookmarks), self.file)
-            elif config.DEBUG:
-                print 'auto-bookmark not supported for this item'
+            else:
+                _debug_('auto-bookmark not supported for this item')
                 
         if event == PLAY_END:
             try:

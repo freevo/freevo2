@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.5  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -53,11 +56,6 @@ import os
 skin = skin.get_singleton()
 
 from item import Item
-
-
-TRUE  = 1
-FALSE = 0
-
 
 class ShutdownItem(Item):
     """

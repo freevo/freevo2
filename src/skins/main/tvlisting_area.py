@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.8  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -63,10 +66,6 @@ import config
 import math
 from area import Skin_Area, Geometry
 from skin_utils import *
-
-
-TRUE = 1
-FALSE = 0
 
 
 class TVListing_Area(Skin_Area):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.23  2003/09/13 10:08:21  dischi
 # i18n support
 #
@@ -57,10 +60,6 @@ import games
 from audio import AudioItem
 from video import VideoItem
 from image import ImageItem
-
-TRUE  = 1
-FALSE = 0
-
 
 class Playlist(Item):
     def read_m3u(self, plsname):

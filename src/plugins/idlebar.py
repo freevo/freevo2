@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.39  2003/09/12 20:32:49  dischi
 # move holiday settings into the plugin
 #
@@ -104,12 +107,6 @@ import plugin
 import pymetar
 
 import re
-
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
-
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -291,9 +288,9 @@ class tv(IdleBarPlugin):
             now = time.time()
 
             if now > self.next_guide_check:
-                if DEBUG: print 'TV: checking guide'
+                _debug_('TV: checking guide')
                 self.listings_expire = tv_util.when_listings_expire()
-                if DEBUG: print 'TV: listings expire in %s hours' % self.listings_expire
+                _debug_('TV: listings expire in %s hours' % self.listings_expire)
                 # check again in 10 minutes
                 self.next_guide_check = now + 10*60
 

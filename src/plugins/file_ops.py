@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.3  2003/09/03 18:03:06  dischi
 # fix crash in DEBUG
 #
@@ -48,9 +51,6 @@ import plugin
 
 from gui.ConfirmBox import ConfirmBox
 
-TRUE  = 1
-FALSE = 0
-
 class PluginInterface(plugin.ItemPlugin):
     """
     small plugin to delete files
@@ -79,8 +79,7 @@ class PluginInterface(plugin.ItemPlugin):
             print 'can\'t delete %s' % filename
         
     def delete_file(self):
-        if config.DEBUG:
-            print 'Deleting %s' % self.item.filename
+        _debug_('Deleting %s' % self.item.filename)
 
         if self.item.type in ('video', 'audio'):
             base = os.path.splitext(self.item.filename)[0] + '.'

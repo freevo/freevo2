@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.7  2003/09/05 02:36:12  mikeruelle
 # load the item plugin automatically so we can change the playlist from inside freevo
 #
@@ -51,10 +54,6 @@ import signal
 import time
 
 import plugin
-
-TRUE  = 1
-FALSE = 0
-
 
 class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):

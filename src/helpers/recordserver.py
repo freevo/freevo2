@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.7  2003/09/11 21:24:04  outlyer
 # Move most of the verbose logging into "DEBUG" since logs were growing at
 # a drastic rate ( > 250k per hour)
@@ -91,13 +94,10 @@ os.environ['LD_PRELOAD'] = ''
 
 DEBUG = config.DEBUG
 
-TRUE = 1
-FALSE = 0
-
 if DEBUG: print 'PLUGIN_RECORD: %s' % config.plugin_record
 
 appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-logfile = '%s/internal-%s-%s.log' % (config.LOGDIR, appname, os.getuid())
+logfile = '%s/%s-%s.log' % (config.LOGDIR, appname, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
 plugin.init_special_plugin(config.plugin_record)

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.81  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -60,12 +63,6 @@ import md5
 
 import config
 import util
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 import rc
 import event as em

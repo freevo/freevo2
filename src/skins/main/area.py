@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.7  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -77,13 +80,6 @@ import xml_skin
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-# Set to 1 for debug output
-DEBUG = 1
-
-TRUE = 1
-FALSE = 0
-
 
 class SkinObjects:
     def __init__(self):

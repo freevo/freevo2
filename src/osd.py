@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.90  2003/09/14 11:10:57  dischi
 # fix return values for bad parameter
 #
@@ -134,13 +137,6 @@ from mmpython.image import EXIF as exif
 import cStringIO
         
 
-# Set to 1 for debug output. A lot of the debug statements are only
-# printed if set to 3 or higher.
-DEBUG = config.DEBUG
-TRUE  = 1
-FALSE = 0
-
-
 help_text = """\
 h       HELP
 z       Toggle Fullscreen
@@ -251,15 +247,11 @@ class OSDFont:
     def __getfont__(self, filename, ptsize):
         ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
 
-        if DEBUG >= 3:
-            print 'OSD: Loading font "%s"' % filename
+        _debug_('Loading font "%s"' % filename)
         try:
             font = pygame.font.Font(filename, ptsize)
         except (RuntimeError, IOError):
             print 'Couldnt load font "%s"' % filename
-            if DEBUG >= 2:
-                print 'Call stack:'
-                traceback.print_stack()
                 
             # Are there any alternate fonts defined?
             if not 'OSD_FONT_ALIASES' in dir(config):
@@ -392,8 +384,7 @@ class OSD:
             os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
 
         self.sdl_driver = pygame.display.get_driver()
-        if DEBUG:
-            print self.sdl_driver
+        _debug_(self.sdl_driver)
 
         pygame.mouse.set_visible(0)
         self.mousehidetime = time.time()
@@ -423,8 +414,8 @@ class OSD:
         for _time in range(_times):
             self.app_list.remove(app)
         if _times and hasattr(self.focused_app(), 'event_context'):
-            if DEBUG: print 'app is %s' % self.focused_app()
-            if DEBUG: print 'Setting context to %s' % self.focused_app().event_context
+            _debug_('app is %s' % self.focused_app())
+            _debug_('Setting context to %s' % self.focused_app().event_context)
             rc.set_context(self.focused_app().event_context)
 
 
@@ -508,7 +499,7 @@ class OSD:
         self.fullscreen = (self.fullscreen+1) % 2
         if pygame.display.get_init():
             pygame.display.toggle_fullscreen()
-        if DEBUG: print 'OSD: Setting fullscreen mode to %s' % self.fullscreen
+        _debug_('Setting fullscreen mode to %s' % self.fullscreen)
 
 
     def get_fullscreen(self):
@@ -1008,8 +999,8 @@ class OSD:
             try:
                 pygame.display.update(rect)
             except:
-                if DEBUG: print 'osd.update(rect) failed, bad rect? - (%s,%s,%s,%s)' % rect
-                if DEBUG: print 'updating whole screen'
+                _debug_('osd.update(rect) failed, bad rect? - (%s,%s,%s,%s)' % rect)
+                _debug_('updating whole screen')
                 pygame.display.flip()
         else:
             pygame.display.flip()
@@ -1041,8 +1032,7 @@ class OSD:
             
         try:
             thumb = None
-            if DEBUG >= 3:
-                print 'Trying to load file "%s"' % filename
+            _debug_('Trying to load file "%s"' % filename, level=3)
 
             if thumbnail:
                 sinfo = os.stat(filename)
@@ -1112,7 +1102,7 @@ class OSD:
         self._help = {0:1, 1:0}[self._help]
         
         if self._help:
-            if DEBUG: print 'Help on'
+            _debug_('Help on')
             # Save current display
             self._help_saved.blit(self.screen, (0, 0))
             self.clearscreen(self.COL_WHITE)
@@ -1138,7 +1128,7 @@ class OSD:
 
             self.update()
         else:
-            if DEBUG: print 'Help off'
+            _debug_('Help off')
             self.screen.blit(self._help_saved, (0, 0))
             self.update()
 

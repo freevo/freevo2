@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.4  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -69,9 +72,6 @@ from gui.GUIObject import Align
 #get the sinfletons so we can add our menu and get skin info
 skin = skin.get_singleton()
 menuwidget = menu.get_singleton()
-
-TRUE = 1
-FALSE = 0
 
 class LogScroll(PopupBox):
     """

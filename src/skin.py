@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.5  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -56,8 +59,6 @@ import config # Freevo configuration.
 import sys
 import os.path
 
-DEBUG = config.DEBUG
-
 _singleton = None
 
 def get_singleton():
@@ -70,7 +71,7 @@ def get_singleton():
         # Loads the skin implementation defined in freevo_config.py
         exec('import skins.' + config.OSD_SKIN  + '.' + config.OSD_SKIN  + ' as skinimpl')
 
-        if DEBUG: print 'Imported skin %s' % config.OSD_SKIN
+        _debug_('Imported skin %s' % config.OSD_SKIN)
     
         _singleton = skinimpl.Skin()
 

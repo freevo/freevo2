@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.12  2003/09/07 15:43:06  dischi
 # tv guide can now also have different styles
 #
@@ -85,9 +88,6 @@ import plugin
 
 # XML support
 from xml.utils import qp_xml
-
-TRUE  = 1
-FALSE = 0
 
 osd = osd.get_singleton()
 

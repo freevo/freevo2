@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.40  2003/09/10 19:29:29  dischi
 # if plugins do not call __init__ they want to be disabled
 #
@@ -74,10 +77,6 @@
 import os
 import traceback
 from event import Event
-
-TRUE  = 1
-FALSE = 0
-
 
 DEBUG = 0
 

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -45,10 +48,6 @@ import config
 
 from video.fxdimdb import FxdImdb, makeVideo
 from random import Random
-
-
-FALSE = 0
-TRUE = 1
 
 def usage():
     print 'imdb.py -s string:   search imdb for string'

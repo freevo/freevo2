@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.9  2003/09/01 20:35:28  gsbarbieri
 # Video Player support
 #
@@ -75,8 +78,6 @@ import time
 import plugin
 from event import *
 import config
-
-DEBUG=config.DEBUG
 
 # Configuration: (Should move to freevo_conf.py?)
 sep_str = " | " # use as separator between two strings. Like: "Length: 123<sep_str>Plot: ..."
@@ -669,7 +670,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.disable = 1
             return
         
-        if DEBUG > 0:
+        if config.DEBUG > 0:
             print "Connecting to LCD: %s" % cm
             print "Info as know by the module:"
             self.lcd.getinfo()
@@ -859,8 +860,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:                
                 screens = layouts[ l ]
             except KeyError:
-                if DEBUG > 0:
-                    print "WARNING: Could not find screens for %d lines LCD!" % l
+                _debug_("WARNING: Could not find screens for %d lines LCD!" % l)
                 l -= 1
                 if l < 1:
                     print "ERROR: No screens found!"
@@ -871,8 +871,8 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:
                 screens = layouts[ l ][ c ]
             except KeyError:
-                if DEBUG > 0:
-                    print "WARNING: Could not find screens for %d lines and %d columns LCD!" % ( l, c )
+                _debug_("WARNING: Could not find screens for %d lines and %d "\
+                        "columns LCD!" % ( l, c ))
                 c -= 1
                 if c < 1:
                     print "ERROR: No screens found!"
@@ -885,8 +885,8 @@ class PluginInterface( plugin.DaemonPlugin ):
         try:
             self.screens = screens = layouts[ l ][ c ]
         except KeyError:
-            if DEBUG > 0:
-                print "WARNING: Could not find screens for %d lines and %d columns LCD!" % ( self.height, self.width )                
+            _debug_("WARNING: Could not find screens for %d lines"\
+                    " and %d columns LCD!" % ( self.height, self.width ))
             print "ERROR: No screens found!"
             self.disable = 1
             return

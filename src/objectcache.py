@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.4  2003/08/26 20:07:50  outlyer
 # Declare encoding, remove another warning.
 #
@@ -45,9 +48,6 @@
 #endif
 
 import config
-
-DEBUG = config.DEBUG
-
 
 class ObjectCache:
     '''Provides a cache for objects indexed by a string. It should

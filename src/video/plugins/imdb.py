@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.20  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -57,9 +60,6 @@ import time
 from video.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 
 from gui.PopupBox import PopupBox
-
-FALSE = 0
-TRUE = 1
 
 class PluginInterface(plugin.ItemPlugin):
     def __init__(self, license=None):

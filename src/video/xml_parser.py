@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.35  2003/08/30 19:00:56  dischi
 # multi movie files fixed
 #
@@ -53,13 +56,6 @@ import util
 from xml.utils import qp_xml
 
 from videoitem import VideoItem
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
 
 #
 # parse <video> tag    
@@ -635,7 +631,7 @@ def hash_xml_database():
             print
             return 0
 
-    if DEBUG: print "Building the xml hash database...",
+    _debug_("Building the xml hash database...")
 
     if not config.ONLY_SCAN_DATADIR:
         for name,dir in config.DIR_MOVIES:
@@ -674,5 +670,5 @@ def hash_xml_database():
             config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options,
                                               file)
             
-    if DEBUG: print 'done'
+    _debug_('done')
     return 1

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -42,10 +45,6 @@ import copy
 from area import Geometry
 
 import traceback
-
-TRUE  = 1
-FALSE = 0
-
 
 class Info_Area(Skin_Area):
     """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.2  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -37,9 +40,6 @@
 
 from area import Skin_Area
 from skin_utils import *
-
-TRUE  = 1
-FALSE = 0
 
 class View_Area(Skin_Area):
     """

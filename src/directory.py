@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.34  2003/09/13 10:08:21  dischi
 # i18n support
 #
@@ -99,10 +102,6 @@ from xml.utils import qp_xml
             
 # Add support for bins album files
 from mmpython.image import bins
-
-TRUE  = 1
-FALSE = 0
-DEBUG = config.DEBUG
 
 skin = skin.get_singleton()
 
@@ -768,7 +767,7 @@ class DirwatcherThread(threading.Thread):
                 del_files += [ f ]
 
         if new_files or del_files:
-            if DEBUG: print 'directory has changed'
+            _debug_('directory has changed')
             self.item.update(new_files, del_files, files)
                     
         self.files = files

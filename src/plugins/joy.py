@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.8  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -49,12 +52,6 @@ import plugin
 import rc
 
 rc = rc.get_singleton()
-
-DEBUG = 0
-
-TRUE = 1
-FALSE = 0
-
 
 class PluginInterface(plugin.DaemonPlugin):
 
@@ -98,9 +95,9 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def poll(self):
         command = ''    
-        if DEBUG > 5: print 'self.joyfd = %s' % self.joyfd
+        _debug_('self.joyfd = %s' % self.joyfd, level=3)
         (r, w, e) = select.select([self.joyfd], [], [], 0)
-        if DEBUG > 5: print 'r,w,e = %s,%s,%s' % (r,w,e)
+        _debug_('r,w,e = %s,%s,%s' % (r,w,e), level=3)
         
         if r:
             c = os.read(self.joyfd, 8)
@@ -126,7 +123,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 button = 'right'
                 command = config.JOY_CMDS['right']
         if command != '':
-            if DEBUG: print 'Translation: "%s" -> "%s"' % (button, command)
+            _debug_('Translation: "%s" -> "%s"' % (button, command))
             command = rc.key_event_mapper(command)
             if command:
                 rc.post_event(command)

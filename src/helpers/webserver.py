@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.4  2003/09/08 19:58:21  dischi
 # run servers in endless loop in case of a crash
 #
@@ -55,10 +58,6 @@ from twisted.internet import app
 from twisted.web import static, server, vhost, script
 from twisted.python import log
 
-DEBUG = 1
-
-TRUE = 1
-FALSE = 0
 
 if len(sys.argv)>1 and sys.argv[1] == '--help':
     print 'start or stop the internal webserver'
@@ -69,7 +68,7 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
 def main():
     # the start and stop stuff will be handled from the freevo script
 
-    logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
+    logfile = '%s/webserver-%s.log' % (config.LOGDIR, os.getuid())
     log.startLogging(open(logfile, 'a'))
 
     if os.path.isdir(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):

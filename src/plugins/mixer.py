@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.5  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -45,11 +48,6 @@ import os
 import plugin
 import event as em
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
 
 class PluginInterface(plugin.DaemonPlugin):
     # These magic numbers were determined by writing a C-program using the
@@ -105,7 +103,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 # XXX Please tell if you have problems with this.
                 self.setOgainVolume(config.MAX_VOLUME)
         else:
-            if DEBUG: print "No appropriate audio channel found for mixer"
+            _debug_("No appropriate audio channel found for mixer")
 
         if config.CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
@@ -145,7 +143,7 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def _setVolume(self, device, volume):
         if self.mixfd:
-            if DEBUG: print 'Volume = %d' % volume
+            _debug_('Volume = %d' % volume)
             if volume < 0: volume = 0
             if volume > 100: volume = 100
             vol = (volume << 8) | (volume)

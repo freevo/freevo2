@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.4  2003/09/14 11:12:47  dischi
 # Show details when selecting the item. The cache dir is now a subdir of
 # CACHE_DIR.
@@ -68,9 +71,6 @@ from item import Item
 #get the singletons so we get skin info and access the osd
 skin = skin.get_singleton()
 osd  = osd.get_singleton()
-
-TRUE = 1
-FALSE = 0
 
 #check every 30 minutes
 MAX_HEADLINE_AGE = 1800

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.27  2003/08/30 18:49:44  dischi
 # small fix
 #
@@ -50,10 +53,6 @@
 
 import event as em
 import plugin
-
-TRUE  = 1
-FALSE = 0
-
 
 #
 # Item class. Inherits from MenuItem and is a template for other info items

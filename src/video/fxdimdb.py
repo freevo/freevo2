@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.12  2003/09/14 16:14:25  dischi
 # Oops, remove debug
 #
@@ -98,10 +101,8 @@ from xml_parser import parseMovieFile
 from mmpython.disc.discinfo import cdrom_disc_id
 #Constants
 
-freevo_version = '1.3.2'
+freevo_version = '1.3.4'
 
-FALSE = 0
-TRUE = 1
 imdb_title_list = '/tmp/imdb-movies.list'
 imdb_title_list_url = 'ftp://ftp.funet.fi/pub/mirrors/ftp.imdb.com/pub/movies.list.gz'
 imdb_titles = None

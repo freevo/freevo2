@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.8  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -65,9 +68,6 @@ import copy
 from area import Skin_Area
 from skin_utils import *
 import config
-
-TRUE  = 1
-FALSE = 0
 
 class Listing_Area(Skin_Area):
     """88

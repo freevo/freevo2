@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.20  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -90,11 +93,6 @@ import plugin
 
 # RegExp
 import re
-
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 # Setting up the default objects:
 osd        = osd.get_singleton()
@@ -196,8 +194,7 @@ class MPlayer:
 
         self.mode = mode   # setting global var to mode.
 
-        if DEBUG:
-            print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
+        _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename))
 
         if mode == 'file' and not os.path.isfile(filename) and not network_play:
             # This event allows the videoitem which contains subitems to
@@ -300,8 +297,7 @@ class MPlayer:
         self.thread.item  = item
         self.item  = item
 
-        if DEBUG:
-            print 'MPlayer.play(): Starting thread, cmd=%s' % command
+        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
         rc.app(self)
 
         self.thread.mode    = 'play'
@@ -344,13 +340,13 @@ class MPlayer:
                 self.seek_timer.cancel()
                 self.seek *= 60
                 self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
-                if DEBUG: print "seek "+str(self.seek)+" 2\n"
+                _debug_("seek "+str(self.seek)+" 2\n")
                 self.seek = 0
                 rc.set_context('video')
                 return TRUE
 
             elif event == INPUT_EXIT:
-                if DEBUG: print 'seek stopped'
+                _debug_('seek stopped')
                 self.seek_timer.cancel()
                 self.seek = 0
                 rc.set_context('video')
@@ -396,7 +392,7 @@ class MPlayer:
 
     
     def reset_seek(self):
-        if DEBUG: print 'seek timeout'
+        _debug_('seek timeout')
         self.seek = 0
         rc.set_context('video')
         
@@ -479,9 +475,7 @@ class MPlayerApp(childapp.ChildApp):
         # down properly and releases all resources before it gets
         # reaped by childapp.kill().wait()
         childapp.ChildApp.kill(self, signal.SIGINT)
-
-        # XXX Krister testcode for proper X11 video
-        if DEBUG: print 'Killing mplayer'
+        _debug_('Killing mplayer')
 
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
@@ -555,8 +549,7 @@ class MPlayer_Thread(threading.Thread):
                
                 rc.post_event(Event(PLAY_START, arg=self.item))
 
-                if DEBUG:
-                    print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
+                _debug_('MPlayer_Thread.run(): Started, cmd=%s' % self.command)
                     
                 self.app = MPlayerApp(self.command, self.item)
 

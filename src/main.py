@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.72  2003/09/13 10:08:21  dischi
 # i18n support
 #
@@ -17,56 +20,6 @@
 # add USE_NETWORK
 #
 # Revision 1.70  2003/09/08 14:40:24  mikeruelle
-# need the os to not crash
-#
-# Revision 1.69  2003/09/03 17:54:38  dischi
-# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
-# doesn't exist anymore.
-#
-# Revision 1.68  2003/09/02 18:39:30  dischi
-# turn of x blanking
-#
-# Revision 1.67  2003/08/31 14:19:11  dischi
-# show splashscreen on startup
-#
-# Revision 1.66  2003/08/26 20:28:05  outlyer
-# Black the screen on shutdown
-#
-# Revision 1.65  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.64  2003/08/22 18:21:24  dischi
-# fix to prevent pygame from crashing
-#
-# Revision 1.63  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
-#
-# Revision 1.62  2003/08/20 22:29:37  gsbarbieri
-# UPPER CASE TEXT IS UGLY! :)
-#
-# Revision 1.61  2003/08/16 12:55:06  dischi
-# wait when shutdown
-#
-# Revision 1.60  2003/08/15 19:23:20  dischi
-# support --force-fs for freevo -fs
-#
-# Revision 1.59  2003/08/12 19:39:06  dischi
-# Added event_lister to get all events
-#
-# Revision 1.56  2003/08/04 20:38:59  dischi
-# Notice the user that pre-caching is missing
-#
-# Revision 1.55  2003/08/01 13:17:48  outlyer
-# Added Matthew Weber's "rc repeat" patch; it requires pylirc 0.0.4 or newer (CVS)
-#
-# Revision 1.54  2003/07/30 15:13:00  outlyer
-# Add encoding to remove some warnings from Python 2.3. Has no effect on
-# Python < 2.3
-#
-# Revision 1.53  2003/07/13 19:35:44  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -118,10 +71,6 @@ except: # unavailable, define '_' for all modules
     __builtin__.__dict__['_']= lambda m: m
 
 
-# Gentoo runtime has some python files in runtime/python
-if os.path.exists('./runtime/python'):
-    sys.path.append('./runtime/python')
-
 import config
 
 import util    # Various utilities
@@ -137,11 +86,6 @@ import event as em
 
 skin    = skin.get_singleton()
 
-
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 # Create the remote control object
 rc_object = rc.get_singleton()
@@ -325,7 +269,7 @@ def main_func():
             eventhandler_plugins.append(p)
     
     # Kick off the main menu loop
-    if config.DEBUG: print 'Main loop starting...'
+    _debug_('Main loop starting...')
 
     while 1:
 
@@ -366,14 +310,14 @@ def main_func():
                     if p.eventhandler(event=event):
                         break
                 else:
-                    if DEBUG: print 'no eventhandler for event %s' % event
+                    _debug_('no eventhandler for event %s' % event)
 
         else:
             app = osd.focused_app()
             if app:
                 app.eventhandler(event)
             else:
-                if DEBUG: print 'no target for events given'
+                _debug_('no target for events given')
                 
 #
 # Main function
@@ -434,8 +378,13 @@ if __name__ == "__main__":
 
     # setup mmpython
     mmpython.use_cache(mmcache)
-    mmpython.mediainfo.DEBUG = DEBUG
-    mmpython.factory.DEBUG = DEBUG
+    if config.DEBUG > 2:
+        mmpython.mediainfo.DEBUG = config.DEBUG
+        mmpython.factory.DEBUG   = config.DEBUG
+    else:
+        mmpython.mediainfo.DEBUG = 0
+        mmpython.factory.DEBUG   = 0
+        
     mmpython.USE_NETWORK = config.USE_NETWORK
     
     if not os.path.isfile(os.path.join(mmcache, 'VERSION')):

@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.15  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -84,11 +87,6 @@ import plugin
 
 # RegExp
 import re
-
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 # contains an initialized Xine() object
 xine = None
@@ -196,8 +194,7 @@ class Xine:
 
         command = self.command
 
-        if DEBUG:
-            print 'Xine.play(): Starting thread, cmd=%s' % command
+        _debug_('Xine.play(): Starting thread, cmd=%s' % command)
 
         if item.deinterlace:
             if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
@@ -400,8 +397,7 @@ class Xine_Thread(threading.Thread):
 
                 rc.post_event(Event(PLAY_START, arg=self.item))
 
-                if DEBUG:
-                    print 'Xine_Thread.run(): Started, cmd=%s' % self.command
+                _debug_('Xine_Thread.run(): Started, cmd=%s' % self.command)
                     
                 self.app = XineApp(self.command, self.item)
 
@@ -418,8 +414,7 @@ class Xine_Thread(threading.Thread):
                     else:
                         rc.post_event(PLAY_END)
                         
-                if DEBUG:
-                    print 'Xine_Thread.run(): Stopped'
+                _debug_('Xine_Thread.run(): Stopped')
 
                 if config.STOP_OSD_WHEN_PLAYING:
                     osd.restartdisplay()

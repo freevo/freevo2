@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.11  2003/09/14 11:12:00  dischi
 # add a function to get fonts from the skin settings
 #
@@ -17,27 +20,6 @@
 #
 # Revision 1.9  2003/09/07 16:02:11  dischi
 # fix hiding for idlebar
-#
-# Revision 1.8  2003/09/07 15:43:06  dischi
-# tv guide can now also have different styles
-#
-# Revision 1.7  2003/09/05 18:24:40  dischi
-# o create a BlankScreen only with the current background
-# o rewrite Splashscreen which now inherits from BlankScreen and uses
-#   an alpha layer image from William Holt
-#
-# Revision 1.6  2003/09/03 19:50:36  dischi
-# make the progressbar look nicer and add some text
-#
-# Revision 1.5  2003/08/31 14:17:16  dischi
-# added Splashscreen support
-#
-# Revision 1.4  2003/08/25 18:44:31  dischi
-# Moved HOURS_PER_PAGE into the skin fxd file, default=2
-#
-# Revision 1.3  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -86,13 +68,6 @@ import xml_skin
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
 
 from area import Skin_Area, Screen
 
@@ -361,7 +336,7 @@ class Skin:
                 self.tvlisting = o
             self.tv_areas.append(o)
         
-        if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
+        _debug_('Skin: Loading XML file %s' % config.SKIN_XML_FILE)
     
         self.settings = xml_skin.XMLSkin()
         
@@ -373,7 +348,7 @@ class Skin:
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.fxd' % dir
             if os.path.isfile(local_skin):
-                if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
+                _debug_('Skin: Add local config %s to skin' % local_skin)
                 self.settings.load(local_skin)
                 break
 

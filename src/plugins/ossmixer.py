@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.2  2003/08/26 19:46:47  outlyer
 # Should be working now; does not require aumix for SBLive control, and
 # will silently ignore any requests to adjust a control that isn't provided
@@ -63,11 +66,6 @@ import event as em
 
 import ossaudiodev
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
 
 class PluginInterface(plugin.DaemonPlugin):
     SOUND_MIXER_LINE = 7
@@ -107,7 +105,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.setMainVolume(config.MAX_VOLUME)
                 self.setOgainVolume(config.MAX_VOLUME)
         else:
-            if DEBUG: print "No appropriate audio channel found for mixer"
+            _debug_("No appropriate audio channel found for mixer")
 
         if config.CONTROL_ALL_AUDIO:
             self.setLineinVolume(0)
@@ -146,8 +144,9 @@ class PluginInterface(plugin.DaemonPlugin):
 
 
     def _setVolume(self, device, volume):
-        if self.mixfd and (self.mixfd.controls() & (1 << device)):        # Don't do anything if there is no control
-            if DEBUG: print 'Volume = %d' % volume
+        if self.mixfd and (self.mixfd.controls() & (1 << device)):
+            # Don't do anything if there is no control
+            _debug_('Volume = %d' % volume)
             if volume < 0: volume = 0
             if volume > 100: volume = 100
             self.mixfd.set(device, (volume,volume))

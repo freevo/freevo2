@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/09/14 20:09:37  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.28  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -90,16 +93,11 @@ from audio.audiodiskitem import AudioDiskItem
 from video.videoitem import VideoItem
 from item import Item
 
-TRUE  = 1
-FALSE = 0
-
 import mmpython
 
 
 from video import xml_parser, videoitem
 from directory import DirItem
-
-DEBUG = config.DEBUG   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
@@ -285,8 +283,7 @@ class RemovableMedia:
                 dir = 'open'
 
         if dir == 'open':
-            if DEBUG:
-                print 'Ejecting disc in drive %s' % self.drivename
+            _debug_('Ejecting disc in drive %s' % self.drivename)
 
             if notify:
                 pop = PopupBox(text=_('Ejecting disc in drive %s') % self.drivename) 
@@ -314,8 +311,7 @@ class RemovableMedia:
 
         
         elif dir == 'close':
-            if DEBUG:
-                print 'Inserting %s' % self.drivename
+            _debug_('Inserting %s' % self.drivename)
 
             if notify:
                 pop = PopupBox(text=_('Reading disc in drive %s') % self.drivename)
@@ -351,7 +347,7 @@ class RemovableMedia:
         """Mount the media
         """
 
-        if DEBUG: print 'Mounting disc in drive %s' % self.drivename
+        _debug_('Mounting disc in drive %s' % self.drivename)
         util.mount(self.mountdir, force=TRUE)
         return
 
@@ -360,7 +356,7 @@ class RemovableMedia:
         """Mount the media
         """
 
-        if DEBUG: print 'Unmounting disc in drive %s' % self.drivename
+        _debug_('Unmounting disc in drive %s' % self.drivename)
         util.umount(self.mountdir)
         return
     
@@ -555,10 +551,9 @@ class Identify_Thread(threading.Thread):
             util.umount(media.mountdir)
 
 
-        if DEBUG > 2:
-            print 'identifymedia: mplayer = "%s"' % mplayer_files
-            print 'identifymedia: mp3="%s"' % mp3_files
-            print 'identifymedia: image="%s"' % image_files
+        _debug_('identifymedia: mplayer = "%s"' % mplayer_files, level = 2)
+        _debug_('identifymedia: mp3="%s"' % mp3_files, level = 2)
+        _debug_('identifymedia: image="%s"' % image_files, level = 2)
             
         media.info = DirItem(media.mountdir, None)
         
@@ -690,15 +685,13 @@ class Identify_Thread(threading.Thread):
             self.identify(media)
 
             if last_status != media.drive_status:
-                if DEBUG:
-                    print 'MEDIA: Status=%s' % media.drive_status
-                    print 'Posting IDENTIFY_MEDIA event'
+                _debug_('MEDIA: Status=%s' % media.drive_status)
+                _debug_('Posting IDENTIFY_MEDIA event')
                 if last_status:
                     self.last_media = media
                 rc.post_event(plugin.event('IDENTIFY_MEDIA'))
             else:
-                if DEBUG > 1:
-                    print 'MEDIA: Status=%s' % media.drive_status
+                _debug_('MEDIA: Status=%s' % media.drive_status)
         self.lock.release()
 
                 

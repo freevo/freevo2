@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/09/14 20:09:36  dischi
+# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
+#
 # Revision 1.27  2003/09/07 11:15:17  dischi
 # add basic refresh function
 #
@@ -101,10 +104,6 @@ import ZIndexRenderer
 from Color import *
 
 DEBUG = 0
-
-TRUE = 1
-FALSE = 0
-
 
 class GUIObject:
     """
