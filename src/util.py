@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/08/28 18:09:39  dischi
+# use pickle.HIGHEST_PROTOCOL for python 2.3
+#
 # Revision 1.45  2003/08/23 18:33:29  dischi
 # add default parameter to getimage
 #
@@ -44,13 +47,18 @@
 
 
 import glob
-import os
+import os, sys
 import statvfs
 import string, fnmatch, re
 import md5
 import Image # PIL
 import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
+
+if float(sys.version[0:3]) < 2.3:
+    PICKLE_PROTOCOL = 1
+else:
+    PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -460,18 +468,20 @@ def format_text(text):
 
 
 def read_pickle(file):
-    f = open(file, 'r')
     try:
-        data = cPickle.load(f)
+        f = open(file, 'r')
+        try:
+            data = cPickle.load(f)
+        except:
+            data = pickle.load(f)
+        f.close()
+        return data
     except:
-        data = pickle.load(f)
-    f.close()
-    return data
-
+        return None
 
 def save_pickle(data, file):
     f = open(file, 'w')
-    cPickle.dump(data, f, 1)
+    cPickle.dump(data, f, PICKLE_PROTOCOL)
     f.close()
 
 
