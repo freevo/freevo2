@@ -13,6 +13,8 @@ sys.path.append(STARTDIR + '/src/tv')
 
 import config
 
+sys.stdout = sys.__stdout__
+
 # Had to copy over get_tunerid, progname2filename since including the 
 # record_video code resulted in an attempt to open the graphic device. 
 
