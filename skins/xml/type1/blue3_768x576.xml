@@ -3,7 +3,7 @@
    <skin include="blue1_small_768x576">
 
     <menu type="all">
-      <background image="../../images/aubin_bg2_800x600.png">
+      <background image="../../images/aubin_bg2.png">
 	<mask>
 	  <rectangle x="-5" y="70" width="800" height="440" color="0xeeffffff"
 	    border_size="2" border_color="0xee000000"/>
