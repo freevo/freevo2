@@ -16,6 +16,12 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/08/03 18:10:52  dischi
+# Patch from Thomas Malt:
+# Discovered some bugs and got rid of them:
+#  - Added exception handling a couple of more places where I craches on
+#    ogg files with freak corrupt headers.
+#
 # Revision 1.8  2002/08/03 11:19:21  krister
 # Made MP3 track string= if None.
 #
@@ -136,14 +142,17 @@ class AudioInfo:
 
 	temp = self.get_cover_image ( self.filename )
         if DEBUG:
-            print "DEBUG:"
-            print "  Album: " + str(self.album)
-            print " Artist: " + str(self.artist)
-            print "  Title: " + str(self.title)
-            print "  Track: " + str(self.track)
-            print "   Year: " + str(self.year)
-            print " Length: " + str(self.length)
-	    print "  Image: " + str(temp)
+            try:
+                print "DEBUG:"
+                print "  Album: " + str(self.album)
+                print " Artist: " + str(self.artist)
+                print "  Title: " + str(self.title)
+                print "  Track: " + str(self.track)
+                print "   Year: " + str(self.year)
+                print " Length: " + str(self.length)
+                print "  Image: " + str(temp)
+            except UnicodeError:
+                print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
     def get_cover_image( self, filename ):
     	cover_logo = os.path.dirname(filename)
@@ -191,29 +200,29 @@ class AudioInfo:
         
         try:
             if 'ALBUM' in vc.keys():
-                self.album  = vc['ALBUM'][0]
+                self.album  = str(vc['ALBUM'][0])
             else:
                 self.album  = ''
                 
             if 'ARTIST' in vc.keys():
-                self.artist = vc['ARTIST'][0]
+                self.artist = str(vc['ARTIST'][0])
             else:
                 self.artist = ''
                 
             if 'TITLE' in vc.keys():
-                self.title  = vc['TITLE'][0]
+                self.title  = str(vc['TITLE'][0])
             else:
                 self.title  = ''
                 
             if 'TRACK' in vc.keys():
-                self.track  = vc['TRACK'][0]
+                self.track  = str(vc['TRACK'][0])
             elif 'TRACKNUMBER' in vc.keys():
-                self.track  = vc['TRACKNUMBER'][0]
+                self.track  = str(vc['TRACKNUMBER'][0])
             else:
                 self.track  = ''
                 
             if 'YEAR' in vc.keys():
-                self.year = vc['YEAR'][0]
+                self.year = str(vc['YEAR'][0])
             else:
                 self.year = ''
         except UnicodeError:
