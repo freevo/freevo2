@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/12 18:34:35  rshortt
+# xmame should run through runapp.
+#
 # Revision 1.10  2003/07/11 19:49:23  dischi
 # use pickle wrapper
 #
@@ -143,7 +146,7 @@ def updateMameRomList():
     # borrowed from pyrecade - http://pyrecade.sf.net.
 
     try:
-        listinfo = os.popen(config.MAME_CMD + ' --listinfo', 'r')
+        listinfo = os.popen('./runapp ' + config.MAME_CMD + ' --listinfo', 'r')
     except:
         print 'Unable to get mame listinfo.'
 	return FALSE
