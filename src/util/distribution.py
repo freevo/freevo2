@@ -62,6 +62,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/22 12:03:31  dischi
+# do not install __init__ files from freevo
+#
 # Revision 1.1  2003/11/18 15:56:38  dischi
 # distutils.py replacement after 1.4
 #
@@ -106,6 +109,12 @@ distutils = imp.load_module('distutils', fp, pathname, description)
 
 fp, pathname, description = imp.find_module('core' , distutils.__path__)
 core = imp.load_module('core', fp, pathname, description)
+
+fp, pathname, description = imp.find_module('command' , distutils.__path__)
+command = imp.load_module('command', fp, pathname, description)
+
+fp, pathname, description = imp.find_module('install_lib' , command.__path__)
+install_lib = imp.load_module('install_lib', fp, pathname, description)
 
 Extension = core.Extension
 
@@ -253,7 +262,18 @@ class i18n (core.Command):
         i18n_mo()
 
 
+class freevo_install_lib (install_lib.install_lib):
+    def install (self):
+        if os.path.isdir(self.build_dir):
+            # remove __init__.py which will override the normal Freevo files
+            for i in [ 'plugins', 'plugins/idlebar', 'video/plugins', 'audio/plugins',
+                       'image/plugins', 'tv/plugins']:
+                init = os.path.join(self.build_dir, 'freevo', i, '__init__.py')
+                if os.path.isfile(init):
+                    os.remove(init)
+        install_lib.install_lib.install(self)
 
+        
 def setup(**attrs):
     for i in ('name', 'version', 'description', 'author', 'author_email', 'url'):
         if not attrs.has_key(i):
@@ -264,6 +284,10 @@ def setup(**attrs):
             attrs[i] = []
 
     cmdclass = {}
+
+    if not attrs.has_key('i18n') or attrs['i18n'] != 'freevo':
+        # this is a plugin, replace the cmdclass install_lib
+        cmdclass['install_lib'] = freevo_install_lib
     
     if attrs.has_key('i18n'):
         global i18n_application
