@@ -1,6 +1,9 @@
 Installation instructions for Freevo
 ------------------------------------
 
+$Id$
+
+
 o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
   are compiled in statically. If they're compiled as modules instead you
   have to make sure that they're loaded before Freevo.
