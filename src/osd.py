@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.147  2004/03/14 12:59:34  dischi
+# fix crash
+#
 # Revision 1.146  2004/03/14 12:55:11  dischi
 # dim support for texts
 #
@@ -927,7 +930,7 @@ class OSD:
 
         # transform all the alpha values in x,y range
         # any speedup could help alot
-        for x in range((w-pixels), w):
+        for x in range(max(w-pixels, 1), w):
             for y in range(1, h):
                 if alpha[x,y][0] != 0:
                     alpha[x,y] = int(alpha[x,y][0]*opaque_mod)
