@@ -224,13 +224,13 @@ class Guide:
                 # program timeslot is unchanged, see if there's anything
                 # that we should update
                 if old_prog['subtitle'] != subtitle:
-                    log.info('different subtitles: %s - %s' % \
+                    log.debug('different subtitles: %s - %s' % \
                              (String(old_prog['subtitle']), String(subtitle)))
                     query = 'update programs set subtitle="%s" where id=%d'
                     self.sql_execute(query % (subtitle, old_prog.id))
                     self.sql_commit()
                 if old_prog['description'] != description:
-                    log.info('different descs: %s - %s' % \
+                    log.debug('different descs: %s - %s' % \
                              (String(old_prog['description']),
                               String(description)))
                     query = 'update programs set description="%s" where id=%d'
