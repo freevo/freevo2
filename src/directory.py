@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2003/11/03 17:24:21  dischi
+# check if we have write permission
+#
 # Revision 1.56  2003/10/27 17:36:56  dischi
 # NOOOOOOOOOOOOOOOOOO, stupid!!!!!! (sorry, I mean bugfix)
 #
@@ -408,7 +411,8 @@ class DirItem(Playlist):
             fxd.save()
         except IndexError:
             return 0
-        
+        except IOError:
+            AlertBox(text='Unable to save folder.fxd').show()
         return 1 
 
 
