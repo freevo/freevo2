@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/21 19:33:56  dischi
+# use eventhandler from letter box
+#
 # Revision 1.12  2004/02/18 21:55:11  dischi
 # update to new gui code
 #
@@ -160,41 +163,20 @@ class ProgramSearch(PopupBox):
             return
 
         if self.get_selected_child() == self.lbg:
-            if event == em.INPUT_LEFT:
-                self.lbg.change_selected_box('left')
+            if self.lbg.eventhandler(event):
                 self.draw()
-                return
+                return True
 
-            elif event == em.INPUT_RIGHT:
-                self.lbg.change_selected_box('right')
-                self.draw()
-                return
-
-            elif event == em.INPUT_ENTER:
+            if event == em.INPUT_ENTER:
                 self.searchProg(self.lbg.get_word())
                 self.draw()
-                return
+                return True
 
-            elif event == em.INPUT_UP:
-                self.lbg.get_selected_box().charUp()
-                self.draw()
-                return
-
-            elif event == em.INPUT_DOWN:
-                self.lbg.get_selected_box().charDown()
-                self.draw()
-                return
-
-            elif event == em.MENU_PAGEDOWN:
+            if event == em.MENU_PAGEDOWN:
                 self.lbg.get_selected_box().toggle_selected()
                 self.results.toggle_selected_index(0)
                 self.draw()
-                return
-
-            elif event in em.INPUT_ALL_NUMBERS:
-                self.lbg.get_selected_box().cycle_phone_char(event)
-                self.draw()
-                return
+                return True
 
         elif self.get_selected_child() == self.results:
             if event == em.INPUT_UP or event == em.INPUT_DOWN:
