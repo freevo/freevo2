@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/05 09:25:00  dischi
+# use new osd font class for stringsize
+#
 # Revision 1.8  2003/07/03 22:05:37  dischi
 # set line_height to -1
 #
@@ -689,7 +692,7 @@ class XML_font(XML_data):
         if color.has_key(self.color):
             self.color = color[self.color]
         self.size = int(float(self.size) * scale)
-        self.h = osd.stringsize('Ajg', self.name, self.size)[1]
+        self.h = osd.getFontInfo(self.name, self.size).height
 
         if self.shadow.visible:
             if color.has_key(self.shadow.color):

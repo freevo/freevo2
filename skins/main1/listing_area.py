@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/05 09:25:00  dischi
+# use new osd font class for stringsize
+#
 # Revision 1.6  2003/06/29 20:38:58  dischi
 # switch to the new info area
 #
@@ -309,24 +312,19 @@ class Listing_Area(Skin_Area):
                     else:
                         season  = 0
                         episode = 0
+                        font = osd.getFontInfo(val.font.name, val.font.size)
                         for c in menuw.menu_items:
                             if c.type == 'video' and hasattr(c,'tv_show') and \
                                c.tv_show and c.show_name[0] == sn[0]:
-                                season  = max(season, osd.stringsize(c.show_name[1],
-                                                                     val.font.name,
-                                                                     val.font.size)[0])
-                                episode = max(episode, osd.stringsize(c.show_name[2],
-                                                                      val.font.name,
-                                                                      val.font.size)[0])
+                                season  = max(season, font.stringsize(c.show_name[1]))
+                                episode = max(episode, font.stringsize(c.show_name[2]))
                             else:
                                 all_tvs = FALSE
 
                         if all_tvs and choice.image:
-                            tvs_w = osd.stringsize('x', val.font.name,
-                                                   val.font.size)[0] + season + episode
+                            tvs_w = font.stringsize('x') + season + episode
                         else:
-                            tvs_w = osd.stringsize('%s x' % sn[0], val.font.name,
-                                                   val.font.size)[0] + season + episode
+                            tvs_w = font.stringsize('%s x' % sn[0]) + season + episode
                         last_tvs = (sn[0], tvs_w)
                         
                     self.write_text(' - %s' % sn[3], val.font, content,
