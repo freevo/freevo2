@@ -108,8 +108,7 @@ class ManualRecordResource(Resource):
                             prog.stop = stoptime
                             # use ri to add to schedule
                             ri.scheduleRecording(prog)
-                            # redirect to record.rpy to show new program in schedule
-                            print "Location: record.rpy\n\n"
+                            return '<html><head><meta HTTP-EQUIV="REFRESH" CONTENT="0;URL=record.rpy"></head></html>'
                     else:
                         errormsg = "start time is not before stop time." 
                 else:
@@ -201,8 +200,8 @@ class ManualRecordResource(Resource):
                 fv.tableRowClose()
                 fv.tableClose()
 
-            print '<form name="manrec">'
-            print '<center>'
+            fv.res += '<form name="manrec" action="manualrecord.rpy" method="GET">'
+            fv.res += '<center>'
             fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="100%"')
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
@@ -220,12 +219,12 @@ class ManualRecordResource(Resource):
             fv.tableCell('<textarea name="desc" rows="1" cols="20" wrap="soft"></textarea>', 'class="basic" align="left" colspan="1"')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<center><input type="hidden" name="action" value="add"><input type="submit" value="Add to Recording Schedule"></center>', 'class="basic" align="center" colspan="5"')
+            fv.tableCell('<center><input type="hidden" name="action" value="add" /><input type="submit" value="Add to Recording Schedule" /></center>', 'class="basic" align="center" colspan="5"')
             fv.tableRowClose()
 
             fv.tableClose()
-            print '</center>'
-            print '</form>'
+            fv.res += '</center>'
+            fv.res += '</form>'
             fv.printSearchForm()
             fv.printLinks()
             fv.printFooter()
