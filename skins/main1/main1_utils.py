@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/18 07:27:23  gsbarbieri
+# Corrected the misspelled 'elipses' -> 'ellipses'
+# Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
+#
 # Revision 1.10  2003/02/18 06:05:21  gsbarbieri
 # Bug fixes and new UI features.
 #
@@ -100,7 +104,7 @@ def DrawText(text, settings, x=-1, y=-1, align=''):
 
 
 # Draws a text inside a frame based on the settings in the XML file
-def DrawTextFramed(text, settings, x=-1, y=-1, width=None, height=None, size=0, mode='hard', elipses='...'):
+def DrawTextFramed(text, settings, x=-1, y=-1, width=None, height=None, size=0, mode='hard', ellipses='...'):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
 
@@ -113,10 +117,10 @@ def DrawTextFramed(text, settings, x=-1, y=-1, width=None, height=None, size=0, 
         osd.drawstringframed(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                              width, height, settings.shadow_color, None,
                              font=settings.font, ptsize=size,
-                             align_h=settings.align, align_v=settings.valign, mode=mode, elipses=elipses)
+                             align_h=settings.align, align_v=settings.valign, mode=mode, ellipses=ellipses)
     osd.drawstringframed(text, x, y, width, height, settings.color, None,
                          font=settings.font, ptsize=size,
-                         align_h=settings.align, align_v=settings.valign, mode=mode, elipses=elipses)
+                         align_h=settings.align, align_v=settings.valign, mode=mode, ellipses=ellipses)
 
 
 

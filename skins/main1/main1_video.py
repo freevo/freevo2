@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/18 07:27:23  gsbarbieri
+# Corrected the misspelled 'elipses' -> 'ellipses'
+# Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
+#
 # Revision 1.3  2003/02/18 06:05:21  gsbarbieri
 # Bug fixes and new UI features.
 #
@@ -236,7 +240,7 @@ class Skin_Video:
                     y+=str_h                
 
                 if 'plot' in item.info:
-                    DrawTextFramed('Plot: %s' % item.info['plot'], val, x, y, w, (val.height-h))
+                    DrawTextFramed('Plot: %s' % item.info['plot'], val, x, y, w, (val.height-h), mode='soft')
                                     
                     
                                 
@@ -380,7 +384,7 @@ class Skin_Video:
                 ch = y0 + (video_height - i_h) /2
                 osd.drawsurface(preview, cx, ch)
             if text:
-                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width, str_h, elipses=None)
+                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width, str_h, ellipses=None)
                     
             x0 = x0 + video_width + spacing_x
 

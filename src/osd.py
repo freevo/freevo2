@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/18 07:27:23  gsbarbieri
+# Corrected the misspelled 'elipses' -> 'ellipses'
+# Now, main1_video uses osd.drawtext(mode='soft') to render text, so it should be better displayed
+#
 # Revision 1.14  2003/02/18 05:48:55  gsbarbieri
 # osd.drawstring*() now has the elipses param, which will be used when the text doesn't fit.
 # You can set it to None, so it doesn't show anything when the text doesn't fit.
@@ -567,13 +571,13 @@ class OSD:
     #  - Improve it
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
                          font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
-                         layer=None, elipses='...'):
+                         layer=None, ellipses='...'):
         if mode == 'hard':
             return self.drawstringframedhard(string,x,y,width, height, fgcolor, bgcolor,
-                                             font, ptsize, align_h, align_v, layer, elipses)
+                                             font, ptsize, align_h, align_v, layer, ellipses)
         elif mode == 'soft':
             return self.drawstringframedsoft(string,x,y,width, height, fgcolor, bgcolor,
-                                             font, ptsize, align_h, align_v, layer, elipses)
+                                             font, ptsize, align_h, align_v, layer, ellipses)
 
     # Gustavo:
     # drawstringframedsoft: draws a string (text) in a frame. This tries to fit the
@@ -600,7 +604,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedsoft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top', layer=None, elipses='...'):
+                         font=None, ptsize=0, align_h='left', align_v='top', layer=None, ellipses='...'):
 
         if not pygame.display.get_init():
             return string
@@ -762,12 +766,12 @@ class OSD:
                 else:
                     # No, and we cannot add another line, truncate this text
                     # and save text that does not fit
-                    next_word_size , next_word_height = self.stringsize(elipses, font,ptsize)
-                    if elipses:
+                    next_word_size , next_word_height = self.stringsize(ellipses, font,ptsize)
+                    if ellipses:
                         # We need to remove the last word to place the '...' ?
                         if (occupied_size + next_word_size) <= width:
                             # No, just add it
-                            lines[line_number].append(elipses)
+                            lines[line_number].append(ellipses)
                             lines_size[line_number] += next_word_size + MINIMUM_SPACE_BETWEEN_WORDS
                         else:
                             # Yes, put '...' in the last word place
@@ -797,6 +801,8 @@ class OSD:
 
         if not return_y0:
             return_y0 = y0
+
+        print "osd.drawstringframed_soft():\n\n%s\n" % lines
 
         if bgcolor != None:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
@@ -902,7 +908,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedhard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                             font=None, ptsize=0, align_h='left', align_v='top', layer=None, elipses='...'):
+                             font=None, ptsize=0, align_h='left', align_v='top', layer=None, ellipses='...'):
 
         if not pygame.display.get_init():
             return string
@@ -972,8 +978,8 @@ class OSD:
                         char_size, char_height = self.charsize(lines[line_number][len_line-j-1], font, ptsize)
                         occupied_size -= char_size
                     lines[line_number] = lines[line_number][0:len_line-j]
-                    if elipses:
-                        lines[line_number] += elipses
+                    if ellipses:
+                        lines[line_number] += ellipses
                     break
         rest_words = string[i:len(string)]
 
