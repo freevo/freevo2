@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/02/15 11:33:19  dischi
+# auto select item if there is only one
+#
 # Revision 1.33  2004/02/05 19:48:49  dischi
 # handle directory stuff as strings
 #
@@ -222,7 +225,14 @@ class MediaMenu(Item):
                 traceback.print_exc()
 
 
-        item_menu = menu.Menu(menutitle, self.main_menu_generate(),
+        items = self.main_menu_generate()
+
+        # autoselect one item
+        if len(items) == 1:
+            items[0](menuw=menuw)
+            return
+        
+        item_menu = menu.Menu(menutitle, items,
                               item_types = '%s main menu' % self.display_type,
                               umount_all=1, reload_func = self.reload)
         item_menu.skin_force_text_view = force_text_view
@@ -270,7 +280,8 @@ class MediaMenu(Item):
             if menu == menuw.menustack[-1] and not rc.app():
                 menuw.init_page()
                 menuw.refresh()
-            return True
+            # others may need this event, too
+            return False
 
         if event in (PLAY_END, USER_END, STOP) and event.context != 'menu':
             menuw.show()
