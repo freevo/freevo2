@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/03/10 20:33:40  rshortt
+# Fix selected tab.
+#
 # Revision 1.17  2004/03/09 00:14:35  rshortt
 # Add advanced search and link to search page.  Next will probably add genre
 # options.
@@ -128,7 +131,7 @@ class SearchResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader(_('Search Results'), 'styles/main.css')
+            fv.printHeader(_('Search Results'), 'styles/main.css', selected=_('Search'))
             fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
             fv.printAdvancedSearchForm()
             fv.printLinks()
@@ -152,7 +155,7 @@ class SearchResource(FreevoResource):
             if result:
                 rec_progs = recordings.getProgramList()
 
-        fv.printHeader(_('Search'), 'styles/main.css')
+        fv.printHeader(_('Search'), 'styles/main.css', selected=_('Search'))
 
         fv.res += '<br /><br />'
         fv.printAdvancedSearchForm()
