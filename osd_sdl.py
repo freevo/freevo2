@@ -31,6 +31,9 @@ from pygame.locals import *
 DEBUG = 0
 
 help_text = """\
+h       HELP
+z       Toggle Fullscreen
+F1      SLEEP
 F1      SLEEP
 HOME    MENU
 g       GUIDE
@@ -39,7 +42,7 @@ UP      UP
 DOWN    DOWN
 LEFT    LEFT
 RIGHT   RIGHT
-SPACE   SELECT
+RETURN  SELECT
 F2      POWER
 F3      MUTE
 PLUS    VOL+
@@ -82,7 +85,7 @@ cmds_sdl = {
     K_DOWN        : 'DOWN',
     K_LEFT        : 'LEFT',
     K_RIGHT       : 'RIGHT',
-    K_SPACE       : 'SELECT',
+    K_RETURN      : 'SELECT',
     K_F2          : 'POWER',
     K_F3          : 'MUTE',
     K_PLUS        : 'VOL+',
@@ -179,7 +182,8 @@ class OSD:
 
         self.screen = pygame.display.set_mode((width, height), 0, 32)
 
-        pygame.display.set_caption('Freevo')
+        pygame.display.set_caption('Freevo      z = Toggle Fullscreen'
+                                   '      Arrow Keys = Move      Return = Select')
         icon = pygame.image.load('icons/freevo_app.png').convert()
         pygame.display.set_icon(icon)
         
@@ -203,6 +207,8 @@ class OSD:
         if event.type == KEYDOWN:
             if event.key == K_h:
                 self._helpscreen()
+            elif event.key == K_z:
+                pygame.display.toggle_fullscreen()
             elif event.key in cmds_sdl:
                 # Turn off the helpscreen if it was on
                 if self._help:
