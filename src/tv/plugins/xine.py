@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/09/15 20:45:13  dischi
+# fix to stop event
+#
 # Revision 1.5  2004/08/05 17:27:17  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -178,9 +181,9 @@ class Xine(TVPlayer):
         """
         Stop xine
         """
+        TVPlayer.stop(self)
         if self.app:
             self.app.stop('quit\n')
-        self.destroy()
         
 
     def eventhandler(self, event, menuw=None):
