@@ -9,15 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/05/02 08:55:52  dischi
+# dvd as .iso support
+#
 # Revision 1.66  2004/03/13 23:44:02  dischi
 # audio stream selection fixes
 #
 # Revision 1.65  2004/02/23 19:17:53  dischi
 # bugfix
-#
-# Revision 1.64  2004/02/19 04:57:58  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
 #
 # Revision 1.63  2004/02/11 20:13:46  dischi
 # do not seek beyond file length
@@ -265,7 +264,7 @@ class MPlayer:
                 # if defined
                 additional_args += [ '-slang', config.DVD_SUBTITLE_PREF ]
 
-        if hasattr(item.media,'devicename'):
+        if hasattr(item.media, 'devicename'):
             additional_args += [ '-dvd-device', item.media.devicename ]
         elif mode == 'dvd':
             # dvd on harddisc

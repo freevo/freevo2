@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/05/02 08:55:52  dischi
+# dvd as .iso support
+#
 # Revision 1.40  2004/02/19 04:57:58  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -165,6 +168,9 @@ class Xine:
         0 = unplayable
         """
         if item.url.startswith('dvd://'):
+            if hasattr(item, 'filename') and item.filename and \
+                   item.filename.endswith('.iso'):
+                return 0
             return 2
         if item.url.startswith('vcd://'):
             if self.version > 922 and item.url == 'vcd://':

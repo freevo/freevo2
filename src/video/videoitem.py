@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.133  2004/05/02 08:55:52  dischi
+# dvd as .iso support
+#
 # Revision 1.132  2004/03/21 18:20:38  mikeruelle
 # needed by encoding server
 #
@@ -221,15 +224,23 @@ class VideoItem(Item):
                 if not self.name:
                     self.name = util.getname(self.filename)
                 self.files.append(self.filename)
+            elif self.url.rfind('.iso') + 4 == self.url.rfind('/'):
+                # iso
+                self.filename = self.url[5:self.url.rfind('/')]
             else:
                 self.filename = ''
+                
+        elif url.endswith('.iso') and self.info['mime'] == 'video/dvd':
+            self.mimetype = 'dvd'
+            self.mode     = 'dvd'
+            self.url      = 'dvd' + self.url[4:] + '/'
             
         if not self.image or (self.parent and self.image == self.parent.image):
            image = vfs.getoverlay(self.filename + '.raw')
            if os.path.exists(image):
                self.image = image
                self.files.image = image
-
+               
         
     def id(self):
         """
@@ -500,6 +511,10 @@ class VideoItem(Item):
                                  self.name, handler=self.play ).show()
             return
 
+        print 'XXX'
+        print self.media
+        print self.url
+        print self.filename
         # normal plackback of one file
         if self.url.startswith('file://'):
             file = self.filename
@@ -528,6 +543,7 @@ class VideoItem(Item):
                            handler=self.play).show()
                 return
 
+        print self.media
         if self.player_rating < 10:
             AlertBox(text=_('No player for this item found')).show()
             return
