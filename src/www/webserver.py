@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/26 00:40:24  rshortt
+# Backing out the vhost code because it was unneccessary and only made things
+# harder.  There is no need to use it as a form of security now because of the
+# user / pass authentication.  The webserver will now listen on all local adresses.
+#
 # Revision 1.7  2003/05/12 23:33:50  rshortt
 # Cleanup.
 #
@@ -69,14 +74,9 @@ docRoot = './src/www/htdocs'
 root = static.File(docRoot)
 root.processors = { '.rpy': script.ResourceScript, }
 
-default = static.Data('text/html', '')
-default.putChild('vhost', vhost.VHostMonsterResource())
+root.putChild('vhost', vhost.VHostMonsterResource())
+site = server.Site(root)
 
-resource = vhost.NameVirtualHost()
-resource.default = default
-resource.addHost(config.WWW_VHOST, root)
-
-site = server.Site(resource)
 application = app.Application('web')
 application.listenTCP(config.WWW_PORT, site)
 
