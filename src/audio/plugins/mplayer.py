@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/12/29 22:33:30  dischi
+# Oops
+#
 # Revision 1.31  2003/12/29 22:09:19  dischi
 # move to new Item attributes
 #
@@ -128,7 +131,7 @@ class MPlayer:
         play a audioitem with mplayer
         """
         self.playerGUI = playerGUI
-        filename       = vfs.url2filename(item.url)
+        filename       = item.filename
 
         if filename and not os.path.isfile(filename):
             return _('%s\nnot found!') % item.url
