@@ -765,7 +765,11 @@ class DirItem(Playlist):
         elif len(items) == 1 and items[0].actions() and \
                  self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
             # autoplay
-            items[0].actions()[0][0](menuw=menuw)
+	    action = items[0].actions()[0]
+	    if isinstance( action, tuple ):
+	    	action[ 0 ](menuw=menuw)
+	    else:
+	    	action(menuw=menuw)
 
         elif arg=='play' and self.play_items:
             # called by play function

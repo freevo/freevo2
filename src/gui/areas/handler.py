@@ -109,6 +109,8 @@ class AreaHandler:
             self.storage = util.cache.load(self.storage_file)
             if self.storage and self.storage.has_key(config.GUI_XML_FILE):
                 self.display_style['menu'] = self.storage[config.GUI_XML_FILE]
+	else:
+	    self.storage = None
 
 
     def __del__(self):
@@ -150,8 +152,9 @@ class AreaHandler:
         self.display_style['menu'] = (self.display_style['menu'] + 1) % \
                                      len(area.style)
 
-        self.storage[config.GUI_XML_FILE] = self.display_style['menu']
-        util.cache.save(self.storage_file, self.storage)
+        if self.storage and self.storage.has_key(config.GUI_XML_FILE):
+            self.storage[config.GUI_XML_FILE] = self.display_style['menu']
+            util.cache.save(self.storage_file, self.storage)
 
 
 
