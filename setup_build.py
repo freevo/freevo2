@@ -79,7 +79,7 @@ def create_config(settings):
 def print_usage():
     print 'Usage: ./configure [--osd=fb | --osd=x11 | --osd=sdl | --osd=dxr3]'
     print '       or to use the Python SDL interface:'
-    print '       ./configure [--output=x11_800x600 | --output=mga_pal | --output=mga_ntcs]'
+    print '       ./configure [--output=x11_800x600 | --output=mga_pal | --output=mga_ntsc]'
     
 if __name__ == '__main__':
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         elif sys.argv[1] == '--output=mga_pal':
             settings = 'OUTPUT=\'mga_768x576_pal\''
             buildops = ''
-        elif sys.argv[1] == '--output=mga_ntcs':
+        elif sys.argv[1] == '--output=mga_ntsc':
             settings = 'OUTPUT=\'mga_768x576_ntsc\''
             buildops = ''
         else:
