@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/30 20:41:02  dischi
+# some debug added at level 2
+#
 # Revision 1.9  2004/01/29 14:45:40  dischi
 # stat may also crash when file is a broken link
 #
@@ -132,6 +135,7 @@ class Cache:
                 self.cache_modified = False
                 return
         if self.cache_modified:
+            _debug_('save cache %s' % self.current_cachefile, 2)
             util.save_pickle(self.current_objects, self.current_cachefile)
             self.cache_modified = False
 
@@ -147,6 +151,7 @@ class Cache:
             self.save_cache()
             
         cachefile = self.__get_filename__(dirname)
+        _debug_('load cache %s' % cachefile, 2)
         if os.path.isfile(cachefile):
             self.current_objects = util.read_pickle(cachefile)
         else:
