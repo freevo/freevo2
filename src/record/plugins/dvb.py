@@ -1,12 +1,22 @@
 import os
 import config
-from record.recorder import Plugin
+import generic
 
-class PluginInterface(Plugin):
+class PluginInterface(generic.PluginInterface):
 
     def __init__(self):
-        print 'plugin: activating dvb record'
-        Plugin.__init__(self)
+        self.name = 'dvb0'
+        generic.PluginInterface.__init__(self)
+
+        channels = []
+        f = open(os.path.expanduser('~/.mplayer/channels.conf'))
+        for l in f.readlines():
+            dvbname = l[:l.find(':')]
+            for c in config.TV_CHANNELS:
+                if c[2] == dvbname:
+                    channels.append([c[0]])
+        self.channels = [ 'dvb0', 10, channels ]
+
 
     def get_cmd(self, rec):
         # FIXME
@@ -26,4 +36,8 @@ class PluginInterface(Plugin):
 
         return [ config.CONF.mplayer, '-dumpstream', '-dumpfile',
                  filename, 'dvb://' + String(tunerid) ]
+
     
+    def get_channel_list(self):
+        return [ self.channels ]
+

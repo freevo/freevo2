@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/11/12 20:39:21  dischi
+# recordserver is working now
+#
 # Revision 1.64  2004/11/07 16:42:33  dischi
 # activate child dispatcher and move plugin init to server.py
 #
@@ -83,4 +86,6 @@ while 1:
     except:
         traceback.print_exc()
         print 'server problem, sleeping 1 min'
+        break
         time.sleep(60)
+        
