@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/12/06 17:50:52  mikeruelle
+# a small change. gonna use childapp in command.py soon. allows me to change filenames to ones command.py looks for
+#
 # Revision 1.43  2003/11/28 20:23:43  dischi
 # renamed more config variables
 #
@@ -125,7 +128,7 @@ def shutdown():
         
 class ChildApp:
 
-    def __init__(self, app):
+    def __init__(self, app, debugname=None, doeslogging=0):
         global __all_childapps__
         __all_childapps__.append(self)
 
@@ -184,16 +187,22 @@ class ChildApp:
         else:
             debug_name = debug_name
 
+        if debugname:
+	    debug_name = debugname
+	
+	if doeslogging or config.CHILDAPP_DEBUG:
+	    doeslogging = 1
+	
         self.child   = util.popen3.Popen3(start_str)
         self.outfile = self.child.fromchild 
         self.errfile = self.child.childerr
         self.infile  = self.child.tochild
         
-        self.t1 = Read_Thread('stdout', self.outfile, self.stdout_cb, debug_name)
+        self.t1 = Read_Thread('stdout', self.outfile, self.stdout_cb, debug_name, doeslogging)
         self.t1.setDaemon(1)
         self.t1.start()
         
-        self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb, debug_name)
+        self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb, debug_name, doeslogging)
         self.t2.setDaemon(1)
         self.t2.start()
 
@@ -330,13 +339,13 @@ class ChildApp:
         
 class Read_Thread(threading.Thread):
 
-    def __init__(self, name, fp, callback, logger=None):
+    def __init__(self, name, fp, callback, logger=None, doeslogging=0):
         threading.Thread.__init__(self)
         self.name = name
         self.fp = fp
         self.callback = callback
         self.logger = None
-        if logger and config.CHILDAPP_DEBUG:
+        if logger and doeslogging:
             logger = os.path.join(config.LOGDIR, '%s-%s.log' % (logger, name))
             try:
                 try:
