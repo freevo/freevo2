@@ -302,20 +302,8 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
 # EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='contrast -100')
 #
 # See src/event.py for a list of all possible events.
-EVENTS = {
-    'menu'       : MENU_EVENTS,
-    'tvmenu'     : TVMENU_EVENTS,
-    'input'      : INPUT_EVENTS,
-    'tv'         : TV_EVENTS,
-    'video'      : VIDEO_EVENTS,
-    'dvd'        : DVD_EVENTS,             # only used by xine
-    'vcd'        : VCD_EVENTS,             # only used by xine
-    'audio'      : AUDIO_EVENTS,
-    'games'      : GAMES_EVENTS,
-    'image'      : IMAGE_EVENTS,
-    'image_zoom' : IMAGE_ZOOM_EVENTS,
-    'global'     : GLOBAL_EVENTS
-    }
+#
+EVENTS = input.EVENTMAP
 
 #
 # Use arrow keys for back and select (alternate way of navigating)
@@ -326,7 +314,7 @@ MENU_ARROW_NAVIGATION = 0
 # Keymap to map keyboard keys to event strings. You can also add new keys
 # here, e.g. KEYMAP[K_x] = 'SUBTITLE'. The K_-names are defined by pygame.
 #
-# KEYMAP = DEFAULT_KEYMAP
+KEYMAP = input.KEYMAP
 
 #
 # Use Internet resources to fetch information?
@@ -1011,6 +999,9 @@ OSD_FADE_STEPS = 3
 #
 LIRCRC = '/etc/freevo/lircrc'
 
+if os.path.exists('/dev/lirc'):
+    plugin.activate('input.lirc')
+    
 #
 # Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
 # Supports as many buttons as your controller has,
