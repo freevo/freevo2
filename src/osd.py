@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/03/11 20:24:06  dischi
+# Fixed some return values
+#
 # Revision 1.21  2003/03/06 21:06:04  dischi
 # catch empty strings first
 #
@@ -680,7 +683,7 @@ class OSD:
         s = re.sub(r'([ ]$)','',s)
         s = re.sub(r'(^[ ])','',s)
         if s == '': # string was only a space ' '
-            return
+            return s, (0,0,0,0)
         words = s.split(' ')
         occupied_size = 0
         line_number = 0
@@ -701,7 +704,7 @@ class OSD:
         if height == -1:
             height = line_height
         if line_height > height:
-            return string
+            return string, (0,0,0,0)
         # Fit words in lines
         rest_words = ''
         for word_number in range(len_words):
