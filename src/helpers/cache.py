@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/07 13:08:41  dischi
+# also remove covers in vfs if directory is gone
+#
 # Revision 1.18  2004/02/05 20:39:11  dischi
 # check mmpython cache version
 #
@@ -119,10 +122,10 @@ def delete_old_files_2():
     for file in subdirs:
         if not os.path.isdir(file[len(config.OVERLAY_DIR):]) and not \
                file.startswith(config.OVERLAY_DIR + '/disc'):
-            if os.path.isfile(os.path.join(file, 'mmpython.cache')):
-                os.unlink(os.path.join(file, 'mmpython.cache'))
-            if os.path.isfile(os.path.join(file, 'freevo.cache')):
-                os.unlink(os.path.join(file, 'freevo.cache'))
+            for metafile in ('cover.png', 'cover.png.raw', 'cover.jpg', 'cover.jpg.raw',
+                             'mmpython.cache', 'freevo.cache'):
+                if os.path.isfile(os.path.join(file, metafile)):
+                    os.unlink(os.path.join(file, metafile))
             if not os.listdir(file):
                 os.rmdir(file)
     print 'done'
