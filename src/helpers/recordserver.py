@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/07/11 13:54:33  dischi
+# cache scheduledRecordings in memory
+#
 # Revision 1.55  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -65,7 +68,7 @@
 # ----------------------------------------------------------------------- */
 
 
-import sys, string, random, time, os, re, pwd
+import sys, string, random, time, os, re, pwd, stat
 import config
 from util import vfs
 
@@ -142,6 +145,15 @@ class RecordServer(xmlrpc.XMLRPC):
 
         if os.path.isfile(config.TV_RECORD_SCHEDULE):
             _debug_('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
+            if hasattr(self, 'scheduledRecordings_cache'):
+                mod_time, scheduledRecordings = self.scheduledRecordings_cache
+                try:
+                    if os.stat(config.TV_RECORD_SCHEDULE)[stat.ST_MTIME] == mod_time:
+                        _debug_('Return cached data')
+                        return scheduledRecordings
+                except OSError:
+                    pass
+                
             f = open(config.TV_RECORD_SCHEDULE, 'r')
             scheduledRecordings = unjellyFromXML(f)
             f.close()
@@ -166,6 +178,11 @@ class RecordServer(xmlrpc.XMLRPC):
         _debug_('ScheduledRecordings has %s items.' % \
                 len(scheduledRecordings.programList))
     
+        try:
+            mod_time = os.stat(config.TV_RECORD_SCHEDULE)[stat.ST_MTIME]
+            self.scheduledRecordings_cache = mod_time, scheduledRecordings
+        except OSError:
+            pass
         return scheduledRecordings
     
     
@@ -189,6 +206,13 @@ class RecordServer(xmlrpc.XMLRPC):
             
         jellyToXML(scheduledRecordings, f)
         f.close()
+
+        try:
+            mod_time = os.stat(config.TV_RECORD_SCHEDULE)[stat.ST_MTIME]
+            self.scheduledRecordings_cache = mod_time, scheduledRecordings
+        except OSError:
+            pass
+
         return TRUE
 
  
