@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2004/08/23 20:36:42  dischi
+# rework application handling
+#
 # Revision 1.104  2004/08/23 15:13:30  dischi
 # fade menu in and out
 #
@@ -225,7 +228,7 @@ class MenuWidget(Application):
     The MenuWidget handles a stack of Menus
     """
     def __init__(self, engine=None):
-        Application.__init__(self, 'menu widget', 'menu', False)
+        Application.__init__(self, 'menu widget', 'menu', False, True)
         self.menustack = []
         self.eventhandler_plugins = None
         if not engine:
@@ -249,7 +252,7 @@ class MenuWidget(Application):
         """
         Application.show(self)
         self.refresh(reload=1)
-        self.engine.show()
+        self.engine.show(config.OSD_FADE_STEPS)
 
                 
     def hide(self, clear=True):
@@ -257,8 +260,8 @@ class MenuWidget(Application):
         hide the menu
         """
         Application.hide(self)
-        self.engine.hide()
-            
+        self.engine.hide(config.OSD_FADE_STEPS)
+        
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         """

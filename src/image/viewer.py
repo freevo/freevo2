@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/08/23 20:36:42  dischi
+# rework application handling
+#
 # Revision 1.64  2004/08/23 14:33:45  dischi
 # oops, revert last change
 #
@@ -107,14 +110,28 @@ class ImageViewer(Application):
         self.zomm        = None
 
 
-    def destroy(self):
+    def hide(self):
         """
-        Destroy the viewer. This clears the cache and removes the application
+        Hide the viewer. This clears the cache and removes the application
         from the eventhandler stack. It is still possible to show() this
         object again.
         """
-        Application.destroy(self)
-        _debug_('destroy image viewer')
+        Application.hide(self)
+        if self.last_image[1]:
+            self.last_image[1].unparent()
+        self.last_image = (None, None)
+
+        if self.osd_text:
+            self.osd_text.unparent()
+            self.osd_text = None
+        if self.osd_box:
+            self.osd_box.unparent()
+            self.osd_box = None
+
+        self.osd_mode = 0
+        self.filename = None
+        self.slideshow = False
+        rc.unregister(self.signalhandler)
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
         
         
@@ -343,6 +360,13 @@ class ImageViewer(Application):
         return None
 
 
+    def stop(self):
+        """
+        stop the current viewing
+        """
+        Application.stop(self)
+
+        
     def cache(self, fileitem):
         """
         cache the next image (most likely we need this)
@@ -376,22 +400,7 @@ class ImageViewer(Application):
             return True
         
         if event == STOP:
-            _debug_('event == STOP: clear image viewer')
-            if self.last_image[1]:
-                self.last_image[1].unparent()
-            self.last_image = (None, None)
-
-            if self.osd_text:
-                self.osd_text.unparent()
-                self.osd_text = None
-            if self.osd_box:
-                self.osd_box.unparent()
-                self.osd_box = None
-
-            self.destroy()
-            self.filename = None
-            self.slideshow = False
-            rc.unregister(self.signalhandler)
+            self.stop()
             return True
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2004/08/23 20:36:42  dischi
+# rework application handling
+#
 # Revision 1.74  2004/08/01 10:55:08  dischi
 # do not show the menu, it can do that itself
 #
@@ -454,7 +457,7 @@ class Playlist(Item):
             pos = (pos+1) % len(self.playlist)
 
             if pos or self.repeat:
-                if hasattr(self.current_item, 'stop'):
+                if self.current_item:
                     self.current_item.stop()
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')

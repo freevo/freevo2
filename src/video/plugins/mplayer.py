@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2004/08/23 20:36:44  dischi
+# rework application handling
+#
 # Revision 1.81  2004/08/23 15:54:15  dischi
 # hide osd on startup
 #
@@ -368,14 +371,12 @@ class MPlayer(Application):
         """
         Stop mplayer
         """
+        Application.stop(self)
         for p in self.plugins:
             command = p.stop()
-
         if not self.app:
             return
-        
         self.app.stop('quit\n')
-        self.destroy()
         self.app = None
 
 

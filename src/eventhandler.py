@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 20:36:42  dischi
+# rework application handling
+#
 # Revision 1.3  2004/08/22 20:12:11  dischi
 # class application doesn't change the display (screen) type anymore
 #
@@ -47,10 +50,10 @@
 
 
 import time
-import thread
 import traceback
 
 import config
+import plugin
 import gui
 
 from event import *
@@ -101,7 +104,8 @@ def unregister(application, event):
     
 def get():
     """
-    Return the application which has the focus
+    Return the application which has the focus or the
+    PopupBox that is active
     """
     return get_singleton().get()
 
@@ -142,40 +146,61 @@ class Application:
     """
     A basic application
     """
-    def __init__(self, name, event_context, fullscreen):
-        self.evt_name       = name
-        self.evt_context    = event_context
-        self.evt_fullscreen = fullscreen
-        self.evt_handler    = get_singleton()
-        self.post_event     = self.evt_handler.post
-        self.visible        = False
+    def __init__(self, name, event_context, fullscreen, animated=False):
+        self._evt_name       = name
+        self._evt_context    = event_context
+        self._evt_fullscreen = fullscreen
+        self._evt_handler    = get_singleton()
+        self._evt_stopped    = False
+        self._animated       = animated
+        self.post_event      = self._evt_handler.post
+        self.visible         = False
+
         
     def eventhandler(self, event, menuw=None):
+        """
+        eventhandler for this application
+        """
         print 'Error, no eventhandler defined for %s' % self.application
 
 
     def show(self):
-        self.visible = True
-        self.evt_handler.append(self)
+        """
+        Show this application. This function will return False if the
+        application is already visible in case this function is overloaded.
+        In case it is not overloaded, this function will also update the
+        display.
+        """
+        self._evt_handler.append(self)
+        if self.visible:
+            return False
+        # check if the new app uses animation to show itself
+        if not self._animated:
+            _debug_('no show animation for %s -- waiting' % self)
+            gui.animation.render().wait()
         if traceback.extract_stack(limit = 2)[0][3] != 'Application.show(self)':
-            gui.get_display().update()
-            
+            gui.display.update()
+        self.visible = True
+        return True
+
         
     def hide(self):
-        if self.evt_handler.applications[-1] == self:
-            _debug_('WARNING: hiding focused application')
-            self.evt_handler.remove(self)
+        """
+        Hide this application. This can be either because a different application
+        has started or that the application was stopped and is no longer needed.
+        """
         self.visible = False
 
 
-    def destroy(self):
-        self.evt_handler.remove(self)
-        self.visible = False
-        
+    def stop(self):
+        """
+        Stop the application. If it is not shown again in the same cycle, the
+        hide() function will be called.
+        """
+        self._evt_stopped = True
 
-APPEND = 'append'
-REMOVE = 'remove'
 
+    
 class Eventhandler:
     """
     This is the main application for Freevo, handling applications
@@ -189,24 +214,38 @@ class Eventhandler:
         self.eventhandler_plugins = None
         self.queue = []
         self.registered = {}
-        self.focus_change = None
+        self.stack_change = None
         
 
     def set_focus(self):
-        app = self.applications[-1]
-        if not self.popups:
-            self.context = app.evt_context
+        """
+        change the focus
+        """
+        if self.stack_change:
+            previous, app = self.stack_change
         else:
-            self.context = self.popups[-1].evt_context
-            
+            previous, app = None, self.applications[-1]
+        if not self.popups:
+            self.context = app._evt_context
+        else:
+            self.context = self.popups[-1]._evt_context
+
         if str(SCREEN_CONTENT_CHANGE) in self.registered:
+            fade = app._animated
+            if previous:
+                if previous.visible:
+                    # wait until all application change animations are
+                    # done. There should be none, but just in case to
+                    # avoid fading in and out the same object
+                    gui.animation.render().wait()
+                    previous.hide()
+                fade = fade or previous._animated
+            arg = app, app._evt_fullscreen, fade
             for c in self.registered[str(SCREEN_CONTENT_CHANGE)]:
-                arg = app, app.evt_fullscreen
                 c.eventhandler(Event(SCREEN_CONTENT_CHANGE, arg=arg))
-        if self.focus_change == REMOVE:
-            _debug_('show hidden application')
+        self.stack_change = None
+        if not app.visible:
             app.show()
-        self.focus_change = None
         
 
     def append(self, app):
@@ -214,17 +253,33 @@ class Eventhandler:
         Add app the list of applications and set the focus
         """
         if isinstance(app, Application):
-            if app in self.applications:
-                return
-
-            self.applications.append(app)
-            if len(self.applications) > 1:
-                self.applications[-2].hide()
-            self.context = app.evt_context
-            self.set_focus()
+            # do will have a stack or is this the first application?
+            if len(self.applications) == 0:
+                # just add the application
+                self.applications.append(app)
+                return self.set_focus()
+            # check about the old app if it is marked as removed
+            # or if it is the same application as before
+            previous = self.applications[-1]
+            if previous == app:
+                previous._evt_stopped = False
+            else:
+                # wait until all application change animations are
+                # done. There should be none, but just in case to
+                # avoid fading in and out the same object
+                gui.animation.render().wait()
+                # hide the application and mark the application change
+                previous.hide()
+                self.stack_change = previous, app
+                if previous._evt_stopped:
+                    # the previous application is stopped, remove it
+                    self.applications.remove(previous)
+                self.stack_change = previous, app
+                self.applications.append(app)
+                self.set_focus()
         else:
             self.popups.append(app)
-            self.context = app.evt_context
+            self.context = app._evt_context
 
 
     def remove(self, app):
@@ -232,12 +287,7 @@ class Eventhandler:
         Remove app the list of applications and set the focus
         """
         if isinstance(app, Application):
-            if not app in self.applications:
-                return
-            if self.applications[-1] == app:
-                self.focus_change = REMOVE
-            self.applications.remove(app)
-                
+            _debug_('FIXME: DO NOT CALL ME!!!!!', 0)
         else:
             if not app in self.popups:
                 return
@@ -246,9 +296,9 @@ class Eventhandler:
                 return
             self.popups.remove(app)
             if self.popups:
-                self.context = self.popups[-1].evt_context
+                self.context = self.popups[-1]._evt_context
             else:
-                self.context = self.applications[-1].evt_context
+                self.context = self.applications[-1]._evt_context
                 
 
     def register(self, application, event):
@@ -271,7 +321,7 @@ class Eventhandler:
     
     def get(self):
         """
-        Return the application which has the focus
+        Return the application
         """
         if len(self.popups):
             return self.popups[-1]
@@ -341,7 +391,6 @@ class Eventhandler:
         _debug_('handling event %s' % str(event), 2)
 
         if self.eventhandler_plugins == None:
-            import plugin
             _debug_('init', 1)
             self.eventhandler_plugins  = []
             self.eventlistener_plugins = []
@@ -380,7 +429,14 @@ class Eventhandler:
                     _debug_('no eventhandler for event %s (app: %s)' \
                             % (event, self.applications[-1]), 2)
 
-            if self.focus_change:
+            if self.stack_change:
+                # our stack has changed, reset the focus
+                self.set_focus()
+            elif self.applications[-1]._evt_stopped:
+                # the current application wants to be removed
+                previous, current = self.applications[-2:]
+                self.applications.remove(current)
+                self.stack_change = current, previous
                 self.set_focus()
                 
             if config.TIME_DEBUG:

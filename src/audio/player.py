@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/08/23 20:36:43  dischi
+# rework application handling
+#
 # Revision 1.26  2004/08/14 15:12:55  dischi
 # use new AreaHandler
 #
@@ -65,7 +68,7 @@ class PlayerGUI(Application):
     basic object to handle the different player
     """
     def __init__(self):
-        Application.__init__(self, 'mplayer', 'audio', False)
+        Application.__init__(self, 'mplayer', 'audio', False, True)
         self.player     = None
         self.running    = False
         self.bg_playing = False
@@ -145,11 +148,11 @@ class PlayerGUI(Application):
         """
         stop playing
         """
+        Application.stop(self)
         if self.player:
             self.player.stop()
         self.running = False
-        self.destroy()
-        
+
 
     def show(self):
         """
@@ -158,6 +161,7 @@ class PlayerGUI(Application):
         Application.show(self)
         self.bg_playing = False
         self.refresh()
+        self.draw_engine.show(config.OSD_FADE_STEPS)
 
 
     def hide(self):
@@ -165,18 +169,11 @@ class PlayerGUI(Application):
         hide the player gui
         """
         Application.hide(self)
-        self.draw_engine.clear()
-        self.bg_playing = True
+        self.draw_engine.hide(config.OSD_FADE_STEPS)
+        if self.running:
+            self.bg_playing = True
             
 
-    def destroy(self):
-        """
-        destroy the gui (remove it from handling)
-        """
-        Application.destroy(self)
-        self.draw_engine.clear()
-
-        
     def refresh(self):
         """
         update the screen

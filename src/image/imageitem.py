@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/08/23 20:36:42  dischi
+# rework application handling
+#
 # Revision 1.26  2004/08/01 10:44:20  dischi
 # remove menuw hiding
 #
@@ -129,3 +132,10 @@ class ImageItem(Item):
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()
+
+
+    def stop(self):
+        """
+        stop viewing this item
+        """
+        viewer.get_singleton().stop()

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/08/23 20:36:44  dischi
+# rework application handling
+#
 # Revision 1.49  2004/08/22 20:12:12  dischi
 # class application doesn't change the display (screen) type anymore
 #
@@ -216,9 +219,9 @@ class Xine(Application):
         """
         Stop xine
         """
+        Application.stop(self)
         if self.app:
             self.app.stop('quit\n')
-        self.destroy()
             
 
     def eventhandler(self, event, menuw=None):
