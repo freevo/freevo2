@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/03 01:55:19  rshortt
+# More realistic height's.
+#
 # Revision 1.2  2003/06/03 01:41:38  rshortt
 # More progress, still ots to do.
 #
@@ -74,7 +77,7 @@ class ProgramSearch(PopupBox):
 
         
     def __init__(self, parent='osd', text=None, search=None, handler=None, 
-                 left=None, top=None, width=600, height=450, bg_color=None, 
+                 left=None, top=None, width=600, height=340, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None):
 
