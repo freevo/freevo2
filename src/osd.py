@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.116  2004/01/02 14:29:20  dischi
+# correct font outline drawing
+#
 # Revision 1.115  2004/01/01 17:40:24  dischi
 # added border support for drawstringframed
 #
@@ -918,7 +921,7 @@ class OSD:
                         # the border effect
                         for ox in (-border_radius, 0, border_radius):
                             for oy in (-border_radius, 0, border_radius):
-                                if ox and oy:
+                                if ox or oy:
                                     layer.blit(font.font.render(l, 1, border_color),
                                                (x0+ox, y0+oy))
                     if shadow:
