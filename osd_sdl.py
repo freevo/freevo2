@@ -30,7 +30,7 @@ from pygame.locals import *
 # Set to 1 for debug output
 DEBUG = 0
 
-help_text = """
+help_text = """\
 F1      SLEEP
 HOME    MENU
 g       GUIDE
@@ -199,14 +199,15 @@ class OSD:
         event = pygame.event.poll()
         if event.type == NOEVENT:
             return None
-        
-        #print 'SDL: Got event %s' % event
 
-        #if event.type == MOUSEBUTTONDOWN:
-        #    self._helpscreen(1)
-            
         if event.type == KEYDOWN:
-            if event.key in cmds_sdl:
+            if event.key == K_h:
+                self._helpscreen()
+            elif event.key in cmds_sdl:
+                # Turn off the helpscreen if it was on
+                if self._help:
+                    self._helpscreen()
+                    
                 return cmds_sdl[event.key]
 
     
@@ -486,39 +487,29 @@ class OSD:
         return image
 
     
-    def _helpscreen(self, on):
-        self._help = on
-        #self._help = {0:1, 1:0}[self._help]
-        #if time.time() > self._help_last + 1:
-        #    self._help = {0:1, 1:0}[self._help]
-        #else:
-        #    return
-
-        #self._help_last = time.time()
+    def _helpscreen(self):
+        self._help = {0:1, 1:0}[self._help]
         
         if self._help:
             if DEBUG: print 'Help on'
             # Save current display
             self._help_saved.blit(self.screen, (0, 0))
             self.clearscreen(self.COL_WHITE)
-            self.drawstring('FREEVO keyboard commands will be added here later on....', 10, 10)
-
-            self.update()
-            return # XXX Test, crashes below
             lines = help_text.split('\n')
 
             row = 0
             col = 0
             for line in lines:
-                x = 30 + col*200
+                x = 55 + col*250
                 y = 50 + row*30
 
                 ks = line[:8]
                 cmd = line[8:]
                 
                 print '"%s" "%s" %s %s' % (ks, cmd, x, y)
-                if ks: self.drawstring(ks, x, y)
-                if cmd: self.drawstring(cmd, x+100, y)
+                fname = 'skins/fonts/SF Arborcrest Medium.ttf'
+                if ks: self.drawstring(ks, x, y, font=fname, ptsize=11)
+                if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=11)
                 row += 1
                 if row >= 15:
                     row = 0
