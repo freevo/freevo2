@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/01 17:10:09  dischi
+# add thumbnail generation as directory config variable
+#
 # Revision 1.23  2004/01/10 13:22:17  dischi
 # reflect self.fxd_file changes
 #
@@ -59,6 +62,7 @@ import re
 
 import config
 import util
+import util.videothumb
 import plugin
 
 from videoitem import VideoItem
@@ -103,6 +107,10 @@ class PluginInterface(plugin.MimetypePlugin):
         items = []
 
         for file in util.find_matches(files, config.VIDEO_SUFFIX):
+            if parent and parent.type == 'dir' and \
+                   parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
+                util.videothumb.snapshot(file, update=False, popup=True)
+
             x = VideoItem(file, parent)
             if parent.media:
                 file_id = parent.media.id + \
@@ -133,6 +141,17 @@ class PluginInterface(plugin.MimetypePlugin):
                 diritem.image = tvinfo[0]
             if not diritem.skin_fxd:
                 diritem.skin_fxd = tvinfo[3]
+
+
+    def dirconfig(self, diritem):
+        """
+        adds configure variables to the directory
+        """
+        return [ ('VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS',
+                  _('Directory Autobuild Thumbnails '),
+                  _('Build video thumbnails for all items (may yake a while when entering).'),
+                  False) ]
+
 
 
 def hash_fxd_movie_database():
