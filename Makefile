@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/07/18 20:03:06  dischi
+# we do not need the audio dir anymore
+#
 # Revision 1.33  2003/07/01 01:50:47  outlyer
 # Added two additional targets for runapp:
 #
@@ -180,9 +183,6 @@ install: all python_compile
 
 	-mkdir -p $(CACHEDIR)/thumbnails
 	chmod ugo+rwx $(CACHEDIR)/thumbnails
-
-	-mkdir -p $(CACHEDIR)/audio
-	chmod ugo+rwx $(CACHEDIR)/audio
 
 	-mkdir -p $(CACHEDIR)/xmltv/logos
 	chmod -R ugo+rwx $(CACHEDIR)/xmltv
