@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/14 01:20:08  rshortt
+# Get the channels list / epg from memory or disk cache.
+#
 # Revision 1.4  2004/08/13 12:29:14  rshortt
 # This should keep updateFavoritesSchedule from stopping a running recording
 # if it is a favorite.
@@ -74,6 +77,7 @@ import util.tv_util as tv_util
 import plugin
 import util.popen3
 from   util.videothumb import snapshot
+from tv.channels import get_channels
 
 def _debug_(text):
     if config.DEBUG:
@@ -170,18 +174,16 @@ class RecordServer(xmlrpc.XMLRPC):
 
  
     def scheduleRecording(self, prog=None):
-        guide = tv_util.get_guide()
-
         if not prog:
             return (FALSE, 'no prog')
     
         if prog.stop < time.time():
             return (FALSE, 'cannot record it if it is over')
             
-        for chan in guide.chan_list:
+        for chan in get_channels().get_all():
             if prog.channel_id == chan.id:
-                _debug_('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid))
-                prog.tunerid = chan.tunerid
+                _debug_('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.epg.tunerid="%s"' % (prog.channel_id, chan.id, chan.epg.tunerid))
+                prog.tunerid = chan.epg.tunerid
     
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.addProgram(prog, tv_util.getKey(prog))
@@ -242,17 +244,15 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def findProg(self, chan=None, start=None):
-        guide = tv_util.get_guide()
-
         _debug_('findProg: %s, %s' % (chan, start))
 
         if not chan or not start:
             return (FALSE, 'no chan or no start')
 
-        for ch in guide.chan_list:
+        for ch in get_channels().get_all():
             if chan == ch.id:
                 _debug_('CHANNEL MATCH: %s' % ch.id)
-                for prog in ch.programs:
+                for prog in ch.epg.programs:
                     if start == '%s' % prog.start:
                         _debug_('PROGRAM MATCH: %s' % prog.title)
                         return (TRUE, prog)
@@ -261,8 +261,6 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def findMatches(self, find=None, movies_only=None):
-        guide = tv_util.get_guide()
-
         _debug_('findMatches: %s' % find)
     
         matches = []
@@ -276,8 +274,8 @@ class RecordServer(xmlrpc.XMLRPC):
         regex = re.compile(pattern, re.IGNORECASE)
         now = time.time()
 
-        for ch in guide.chan_list:
-            for prog in ch.programs:
+        for ch in get_channels().get_all():
+            for prog in ch.epg.programs:
                 if prog.stop < now:
                     continue
                 if not find or regex.match(prog.title) or regex.match(prog.desc) \
@@ -572,12 +570,11 @@ class RecordServer(xmlrpc.XMLRPC):
     
     
     def addFavoriteToSchedule(self, fav):
-        guide = tv_util.get_guide()
         favs = {}
         favs[fav.name] = fav
 
-        for ch in guide.chan_list:
-            for prog in ch.programs:
+        for ch in get_channels().get_all():
+            for prog in ch.epg.programs:
                 (isFav, favorite) = self.isProgAFavorite(prog, favs)
                 if isFav:
                     prog.isFavorite = favorite
@@ -590,12 +587,10 @@ class RecordServer(xmlrpc.XMLRPC):
         #  TODO: do not re-add a prog to record if we have
         #        previously decided not to record it.
 
-        guide = tv_util.get_guide()
-    
         # First get the timeframe of the guide.
         last = 0
-        for ch in guide.chan_list:
-            for prog in ch.programs:
+        for ch in get_channels().get_all():
+            for prog in ch.epg.programs:
                 if prog.start > last: last = prog.start
     
         scheduledRecordings = self.getScheduledRecordings()
@@ -623,8 +618,8 @@ class RecordServer(xmlrpc.XMLRPC):
                not (prog.start <= now and prog.stop > now):
                 self.removeScheduledRecording(prog)
     
-        for ch in guide.chan_list:
-            for prog in ch.programs:
+        for ch in get_channels().get_all():
+            for prog in ch.epg.programs:
                 (isFav, favorite) = self.isProgAFavorite(prog, favs)
                 if isFav:
                     prog.isFavorite = favorite
