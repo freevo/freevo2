@@ -3,7 +3,7 @@ import os, sys, time
 DEBUG = 0
 
 ignore = ['site', 'user', 'FCNTL', 'TERMIOS', 'posixfile', 'regsub', 'this',
-          'knee', 'tzparse', 'PIL']
+          'knee', 'tzparse', 'PIL', 'regex_syntax', 'reconvert', 'regsub']
 
 def testmodule(modname):
     if modname in ignore:
