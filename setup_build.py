@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/01/28 03:46:02  krister
+# Fixed a bug in application checking.
+#
 # Revision 1.24  2003/01/24 07:25:23  krister
 # Added check for apps in the runtime/apps dir.
 #
@@ -232,10 +235,11 @@ def check_program(conf, name, variable, necessary):
 
     print 'checking for %-13s' % (name+'...'),
 
-    for dir in search_dirs:
-        if os.path.exists(os.path.join(dir,name)):
-            print os.path.join(dir,name)
-            conf.__dict__[variable] = os.path.join(dir,name)
+    for dirname in search_dirs:
+        filename = os.path.join(dirname, name)
+        if os.path.exists(filename) and os.path.isfile(filename):
+            print filename
+            conf.__dict__[variable] = filename
             break
     else:
         if necessary:
