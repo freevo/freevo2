@@ -58,6 +58,7 @@ src_install() {
 	install -m 644 freevo.conf local_conf.py ${D}/etc/freevo
 
 	# install boot scripts
+	install -d ${D}/etc/init.d
 	install -m 755 boot/gentoo-recordserver ${D}/etc/init.d/freevo-recordserver
 	install -m 755 boot/gentoo-webserver ${D}/etc/init.d/freevo-webserver
 	use matrox && install -m 755 boot/gentoo-freevo-mga ${D}/etc/init.d/freevo
@@ -76,7 +77,7 @@ src_install() {
 	cd $FREEVO_INSTALL_DIR
 	rm -rf $mydocs Docs runtime freevo.conf local_conf.py \
 	    configure setup_build.py *.c *.h Makefile fbcon/Makefile fbcon/vtrelease.c \
-	    contrib boot WIP
+	    contrib boot WIP freevo_setup~ freevo~
 
 }
 
@@ -87,6 +88,22 @@ pkg_postinst() {
         einfo "run /opt/freevo/freevo setup"
 	einfo
 
+        if [ -e /opt/freevo/runtime/preloads ]; then
+                ewarn "This version of freevo doesn't need the runtime anymore"
+                ewarn "Please unmerge freevo_runtime"
+                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
+                echo -ne "\a" ; sleep 1
+                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
+                echo -ne "\a" ; sleep 1
+                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
+                echo -ne "\a" ; sleep 1
+                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
+                echo -ne "\a" ; sleep 1
+                echo -ne "\a" ; sleep 0.1 &>/dev/null ; sleep 0,1 &>/dev/null
+                echo -ne "\a" ; sleep 1
+                sleep 5
+        fi
+        
 	if [ -e /etc/freevo/freevo_config.py ]; then
 		ewarn "Please remove /etc/freevo/freevo_config.py"
 		sleep 5
