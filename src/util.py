@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/06/13 18:19:57  outlyer
+# A cmpfunc for doing a "smart sort" which is to say, a sort that ignores
+# "The" at the beginning of titles. Doesn't do anything yet.
+#
 # Revision 1.28  2003/06/08 05:43:25  outlyer
 # Moved 'image-viewer-thumb.jpg' into the thumbnails part of the cachedir
 # to keep it clean.
@@ -512,7 +516,20 @@ def freespace(path):
     s = os.statvfs(path)
     return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
         
-        
+def smartsort(x,y): # A compare function for use in list.sort()
+    """
+    Compares strings after stripping off 'The' to be "smarter"
+    """
+    if x.find('The ') == 0:
+        m = x.replace('The ','',1)
+    else:
+        m=x
+    if y.find('The ') == 0:
+        n = y.replace('The ','',1)
+    else:
+        n=y
+    return cmp(m.upper(),n.upper()) # be case insensitive
+
 def totalspace(path):
     """
     totalspace(path) -> integer
