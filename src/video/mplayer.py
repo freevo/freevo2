@@ -9,6 +9,21 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/01/29 17:20:25  outlyer
+# According to the mplayer documentation, -forceidx is required for RealPlayer
+# files...
+#
+# Perhaps we should move the filetype specific stuff (like the one for vob)
+# into the config files...
+#
+# i.e.
+#
+# MP_CUSTOM = {
+#     '.vob' = '-ac hwac3 ...',
+#     '.rm'  = '-forceidx',
+#     ...
+#     }
+#
 # Revision 1.14  2003/01/22 01:49:30  krister
 # Fixed typo.
 #
@@ -208,6 +223,9 @@ class MPlayer:
         else:
             mpl += ' -ao %s' % config.MPLAYER_AO_DEV
 
+	# Forceidx is required for RealAudio/Video files
+	if (os.path.splitext(filename)[1] == '.rm'):
+	    mpl += ' -forceidx'
 
         if mode == 'file':
             default_args = config.MPLAYER_ARGS_MPG
