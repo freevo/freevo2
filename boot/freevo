@@ -19,24 +19,6 @@ test -f $DAEMON || exit 0
 
 case "$1" in
   start)
-  	echo -n "Setting startup resolution: "
-        # XXX Document the matroxset stuff (PAL/NTSC, cloning, etc)
-	$MATROXSET -f /dev/fb0 -m 0 > /dev/null 2> /dev/null
-	$MATROXSET -f /dev/fb1 -m 0 > /dev/null 2> /dev/null
-	$MATROXSET -f /dev/fb0 -m 2 > /dev/null 2> /dev/null
-	$MATROXSET -f /dev/fb1 -m 1 > /dev/null 2> /dev/null
-	$MATROXSET -f /dev/fb0 2 2 > /dev/null 2> /dev/null
-	$FBSET -db $FBSETDB -fb /dev/fb0 "ntsc-768x576" > /dev/null 2> /dev/null
-
-	# Define TVNORM in boot_config
-	if [ "$TVNORM" = "PAL" ]; then
-		$MATROXSET 1
-		echo -n "PAL "
-	else
-		echo -n "NTSC "
-	fi
-	echo "768x576."
-
 	echo -n "Starting $DESC: "
 	export SDL_NOKEYBOARD=true
 	export SDL_VIDEODRIVER=fbcon
