@@ -3,6 +3,10 @@ Freevo Changelog
 
 $Id$
 
+Release 1.4.0-rc? (2003-??-??):
+-------------------------------
+ * Added a playlist plugin
+
 Release 1.4.0-rc1 (2003-10-05):
 -------------------------------
  * changes in the directory structure
