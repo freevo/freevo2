@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/06/23 21:10:20  dischi
+# make nicer filename
+#
 # Revision 1.4  2004/06/22 01:03:25  rshortt
 # getProgFilename() now returns the entire filename (path) including
 # TV_RECORD_DIR and TV_RECORDFILE_SUFFIX.
@@ -94,9 +97,9 @@ def getProgFilename(prog):
     filemask = config.TV_RECORDFILE_MASK % filename_array
     filemask = time.strftime(filemask, time.localtime(prog.start))
     filename = os.path.join(config.TV_RECORD_DIR, 
-                            progname2filename(filemask) + 
+                            progname2filename(filemask).rstrip(' -_:') + 
                             config.TV_RECORDFILE_SUFFIX)
-    return filename.rstrip(' -_:')
+    return filename
 
 
 def minToTOD(min):
