@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.125  2004/10/18 01:29:39  rshortt
+# Remove XMLTV TV_CHANNELS autogeneration because this comes from pyepg now.
+# Also is should be normal to have an empty TV_CHANNELS.
+#
 # Revision 1.124  2004/10/06 19:18:02  dischi
 # add mainloop broken warning
 #
@@ -858,133 +862,6 @@ if ROM_DRIVES == None:
 REMOVABLE_MEDIA = []
 
 
-#
-# Auto detect xmltv channel list
-#
-
-def sortchannels(list, key):
-    # This should be more generic, but I couldn't get it
-    # to sort properly without specifying the nested array
-    # index for the tunerid and forcing 'int'
-    for l in list:
-        if len(l[key]) == 1:
-            l[key].append(('0',))
-    nlist = map(lambda x, key=key: (string.split(x[key][1][0])[0], x), list)
-    nlist.sort()
-    return map(lambda (key, x): x, nlist)
-
-
-def detect_channels():
-    """
-    Auto detect a list of possible channels in the xmltv file
-    """
-    import codecs
-    import cPickle, pickle
-
-    file = XMLTV_FILE
-    path = FREEVO_CACHEDIR
-    pfile = 'xmltv_channels.pickle'
-
-    pname = os.path.join(path,pfile)
-
-    if not os.path.isfile(file):
-        if not HELPER:
-            print
-            print 'Error: can\'t find %s' % file
-            print 'Use xmltv to create this file or when you don\'t want to use the tv'
-            print 'module at all, add TV_CHANNELS = [] and plugin.remove(\'tv\') to your'
-            print 'local_conf.py. TVguide is deactivated now.'
-            print
-        return []
-        
-    elif os.path.isfile(pname) and (os.path.getmtime(pname) >
-                                    os.path.getmtime(file)):
-        try:
-            f = open(pname, 'r')
-            try:
-                data = cPickle.load(f)
-            except:
-                data = pickle.load(f)
-            f.close()
-            return data
-        except:
-            print 'Error: unable to read cachefile %s' % pname
-            return []
-
-    else:
-        from tv import xmltv
-        input = open(file, 'r')
-        tmp   = open('/tmp/xmltv_parser', 'w')
-        while(1):
-            line =input.readline()
-            if not line:
-                break
-            if line.find('<programme') > 0:
-                tmp.write('</tv>\n')
-                break
-            tmp.write(line)
-
-        input.close()
-        tmp.close()
-
-        tmp   = open('/tmp/xmltv_parser', 'r')
-        xmltv_channels = xmltv.read_channels(tmp)
-        tmp.close()
-
-        xmltv_channels = sortchannels(xmltv_channels,'display-name')
-        chanlist = []
-
-        for a in xmltv_channels:
-            if (a['display-name'][1][0][0].isdigit()):
-                display_name = a['display-name'][0][0].encode(LOCALE, 'ignore')
-                tunerid = string.split(a['display-name'][1][0].encode(LOCALE, 'ignore'))[0]
-            else:
-                display_name = a['display-name'][1][0].encode(LOCALE, 'ignore')
-                tunerid = string.split(a['display-name'][0][0].encode(LOCALE, 'ignore'))[0]
-            id = a['id'].encode(LOCALE, 'ignore')
-
-            chanlist += [(id,display_name,tunerid)]
-
-        f = lambda a, b: cmp(int(a[2]), int(b[2]))
-        chanlist.sort(f)
-
-        try:
-            if os.path.isfile(pname):
-                os.unlink(pname)
-            f = open(pname, 'w')
-            cPickle.dump(chanlist, f, 1)
-            f.close()
-        except IOError:
-            print 'Error: unable to save to cachefile %s' % pname
-
-        for c in chanlist:
-            if c[2] == 0:
-                print_list = 1
-                if not HELPER:
-                    print 
-                    print 'Error: XMLTV auto detection failed'
-                    print 'Some channels in the channel list have no station id. Please add'
-                    print 'it by putting the list in your local_conf.py. Start '
-                    print '\'freevo tv_grab --help\' for more informations'
-                    print
-                break
-        else:
-            print 'XMTV: Auto-detected channel list'
-
-        return chanlist
-         
-
-if TV_CHANNELS == None and plugin.is_active('tv'):
-    # auto detect them
-    try:
-        TV_CHANNELS = detect_channels()
-    except Exception, e:
-        print
-        print 'Error in TV.xml file, unable to set TV_CHANNELS'
-        print e
-        print
-        TV_CHANNELS = []
-        
 #
 # compile the regexp
 #
