@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2004/10/30 18:47:47  dischi
+# move progressbar to gui/area
+#
 # Revision 1.89  2004/10/06 19:01:32  dischi
 # use new childapp interface
 #
@@ -492,80 +495,6 @@ class MPlayer(Application):
 
 # ======================================================================
 
-from gui.areas.area import Area as Area
-
-class Progressbar(Area):
-    def __init__(self):
-        Area.__init__(self, 'content')
-        self.content = []
-        Rectangle = gui.theme_engine.Rectangle
-        self.bar_border   = Rectangle(bgcolor=(255, 255, 255, 95), radius=4)
-        self.bar_position = Rectangle(bgcolor=(0, 0, 150), radius=4)
-        self.bar          = None
-        self.last_width   = 0
-        self.last_layout  = None
-        
-    def clear(self):
-        """
-        clear all content objects
-        """
-        for c in self.content:
-            c.unparent()
-        self.content = []
-        if self.bar:
-            self.bar.unparent()
-            self.bar = None
-
-
-    def update(self):
-        """
-        update the splashscreen
-        """
-        content = self.calc_geometry(self.layout.content, copy_object=True)
-
-        if self.last_layout != (content.x, content.y, content.width,
-                                content.height):
-            for c in self.content:
-                c.unparent()
-            self.content = []
-            self.last_layout = content.x, content.y, content.width, \
-                               content.height
-            self.last_width = 0
-            
-        if not self.content:
-            self.content.append(self.drawbox(content.x, content.y,
-                                             content.width, content.height,
-                                             self.bar_border))
-        try:
-            length = int(self.infoitem.info['length'])
-        except Exception, e:
-            _debug_(e, 0)
-            length = 0
-        start = 0
-        if self.infoitem.info['start']:
-            start = int(self.infoitem.info['start'])
-
-        # get start pos
-        pos = self.infoitem.elapsed - start
-        # make sure the length is ok
-        length = max(pos, length)
-
-        if not length:
-            width = content.width -4 
-        else:
-            width = ((content.width-4) * pos) / length
-
-        width = max(0, min(width, content.width-4))
-
-        if width != self.last_width:
-            self.last_width = width
-            if self.bar:
-                self.bar.unparent()
-            self.bar = self.drawbox(content.x+2, content.y+2, pos,
-                                    content.height-4, self.bar_position)
-        
-
-
 # ======================================================================
 
 class MPlayerApp( childapp.Instance ):
@@ -635,7 +564,7 @@ class MPlayerApp( childapp.Instance ):
             _debug_('starting Bmovl')
             self.screen = gui.set_display('Bmovl', (self.width, self.height))
         self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
-                                                      Progressbar()])
+                                                      'progress'])
         self.area_handler.hide(False)
         self.area_handler.draw(self.item)
         self.write('osd 0\n')
@@ -726,6 +655,7 @@ class MPlayerApp( childapp.Instance ):
         """
         for p in self.stdout_plugins:
             p.stdout(line)
+
 
     def stop(self, cmd=''):
         if self.screen:
