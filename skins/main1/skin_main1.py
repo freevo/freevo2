@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2003/06/22 09:57:13  gsbarbieri
+# Feature to change display_style to a text one when all images are equal.
+#
 # Revision 1.97  2003/05/04 16:44:45  dischi
 # height=-1 for text in title area
 #
@@ -327,8 +330,34 @@ class Skin:
         """
         return current display style
         """
-        if menu and menu.force_skin_layout != -1:
-            return menu.force_skin_layout
+        if menu:            
+            if  menu.force_skin_layout != -1:
+                return menu.force_skin_layout
+            else:
+                different = 0
+                last = menu.choices[ 0 ].image
+                for i in menu.choices:
+                    if last != i.image:
+                        different = 1
+                        break
+                    last = i.image
+                if not different:
+                    if menu and menu.skin_settings:
+                        settings = menu.skin_settings
+                    else:
+                        settings = self.settings
+
+                    # get the correct <menu>
+                    if settings.menu.has_key(menu.item_types):
+                        area = settings.menu[menu.item_types]
+                    else:
+                        area = settings.menu['default']
+                        
+                    # search for a text menu:
+                    for i in range( len( area.style ) ):
+                        if area.style[ i ][ 1 ] and not area.style[ i ][ 0 ]:
+                            return i
+
         return self.display_style
 
 
@@ -413,8 +442,12 @@ class Skin:
         else:
             settings = self.settings
 
+        menu = None
+        if type == 'menu':
+            menu = object
+
         rows, cols = self.listing_area.get_items_geometry(settings, object,
-                                                          self.display_style)[:2]
+                                                          self.GetDisplayStyle( menu ))[:2]
         return (cols, rows)
 
 
@@ -488,7 +521,7 @@ class Skin:
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(settings, object, self.display_style, self.last_draw,
+            area.draw(settings, object, self.GetDisplayStyle( menu ), self.last_draw,
                       self.force_redraw)
 
         self.screen.show(self.force_redraw)
