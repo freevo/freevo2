@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/01 15:20:38  dischi
+# better howto support
+#
 # Revision 1.3  2003/10/31 18:56:14  dischi
 # Add framework for plugin writing howto
 #
@@ -59,20 +62,28 @@ import util, config
 SEARCH_PATH = (os.path.join(config.SHARE_DIR, '../doc/freevo-%s' % version.__version__),
                os.path.join(config.SHARE_DIR, '../Docs'))
 
+# to add a new docbook style howto, just add the identifier to this
+# list
+TYPES = {
+    'install': ('installation', 'Freevo Installation HOWTO',
+                'Freevo Installation HOWTO: Build your own media box with Freevo and Linux'),
+    'plugin':  ('plugin_writing', 'Freevo Plugin Writing HOWTO',
+                'Freevo Plugin Writing HOWTO: Writing your own plugins for Freevo')
+    }
+                
 class HowtoResource(FreevoResource):
     def __init__(self):
         FreevoResource.__init__(self)
         self.BASEDIR = {}
-        for d in SEARCH_PATH:
-            if os.path.isdir(os.path.join(d, 'freevo_howto')):
-                self.BASEDIR['howto'] = os.path.join(d, 'freevo_howto')
-            elif os.path.isdir(os.path.join(d, 'howto')):
-                self.BASEDIR['howto'] = os.path.join(d, 'howto')
-
-            if os.path.isdir(os.path.join(d, 'plugin_writing/html')):
-                self.BASEDIR['plugin'] = os.path.join(d, 'plugin_writing/html')
-            elif os.path.isfile(os.path.join(d, 'plugin_writing/index.html')):
-                self.BASEDIR['plugin'] = os.path.join(d, 'plugin_writing')
+        for type in TYPES:
+            dirname = TYPES[type][0]
+            for d in SEARCH_PATH:
+                if os.path.isdir(os.path.join(d, dirname, 'html')):
+                    self.BASEDIR[type] = os.path.join(d, dirname, 'html')
+                elif os.path.isfile(os.path.join(d, dirname, 'index.html')):
+                    self.BASEDIR[type] = os.path.join(d, dirname)
+                elif os.path.isfile(os.path.join(d, dirname, 'book1.html')):
+                    self.BASEDIR[type] = os.path.join(d, dirname)
         
     def _render(self, request):
         fv = HTMLResource()
@@ -85,12 +96,9 @@ class HowtoResource(FreevoResource):
 
         type = fv.formValue(form, 'type')
         if not type:
-            type = 'howto'
+            type = 'install'
             
-        if type == 'howto':
-            name = 'Freevo Installation HOWTO'
-        else:
-            name = 'Freevo Plugin Writing HOWTO'
+        name = TYPES[type][1]
             
         if not self.BASEDIR.has_key(type):
             fv.printHeader(name, '/styles/main.css')
@@ -98,20 +106,28 @@ class HowtoResource(FreevoResource):
             fv.res += 'If you use a CVS version of Freevo, run "autogen.sh". '\
                       'The files are searched in the following locations:<br><ol>'
             for d in SEARCH_PATH:
-                fv.res += '<li>%s</li>\n' % d
+                fv.res += '<li>%s/%s</li>\n' % (d, TYPES[type][0])
             fv.res += '</ol>'
 
         else:
+            if not os.path.isfile(os.path.join(self.BASEDIR[type], file)) \
+                   and file == 'index.html':
+                file = 'book1.html'
+
             for line in util.readfile(os.path.join(self.BASEDIR[type], file)):
                 if line.find('HREF') == 0 and line.find('http') == -1:
                     line = line[:line.find('="')+2] + 'howto.rpy?type=' + \
                            type + '&file=' + line[line.find('="')+2:]
-                if line.find('>Freevo Installation HOWTO: Build your own media '\
-                             'box with Freevo and Linux</TH') == 0:
+
+                for t in TYPES:
+                    if line.find('>%s</TH' % TYPES[t][2]) == 0:
+                        line = ''
+                        break
+
+                # remove border for some DocBook stylesheets
+                if line.find('BGCOLOR="#E0E0E0"') == 0:
                     line = ''
-                if line.find('>Freevo Plugin Writing HOWTO: Writing your own '\
-                             'plugins for Freevo</TH') == 0:
-                    line = ''
+                    
                 if pos == 0 and line.find('><TITLE') == 0:
                     pos = 1
                 elif pos == 1:

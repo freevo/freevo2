@@ -13,20 +13,20 @@ gen_i18n() {
     done
 }
 
-howto() {
+docbook () {
     echo
-    echo generating freevo_howto html files
+    echo generating $1 howto html files
 
-    cd Docs
-    docbook2html -o howto freevo_howto.sgml
-
-    echo
-    echo
-    echo generating plugin writing howto html files
-    cd plugin_writing
+    cd Docs/$1
     docbook2html -o html howto.sgml
-
     cd ../..
+    echo
+    echo
+}
+    
+howto() {
+    docbook installation
+    docbook plugin_writing
 }
 
 wiki() {

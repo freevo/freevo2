@@ -26,7 +26,7 @@ util.distutils.check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
 
 
 # check if everything is in place
-if not os.path.isdir('./Docs/howto'):
+if not os.path.isdir('./Docs/installation/html'):
     print 'Docs/howto not found. Looks like you are using the CVS version'
     print 'of Freevo. Please run ./autogen.sh first'
     sys.exit(0)
@@ -40,6 +40,11 @@ data_files.append(('share/doc/freevo-%s' % version.__version__, ['Docs/CREDITS' 
 # copy freevo_config.py to share/freevo. It's the best place to put it
 # for now, but the location should be changed
 data_files.append(('share/freevo', [ 'freevo_config.py' ]))
+
+# add docbook style howtos
+os.path.walk('./Docs/installation', util.distutils.docbook_finder, data_files)
+os.path.walk('./Docs/plugin_writing', util.distutils.docbook_finder, data_files)
+
 
 scripts = ['freevo']
 

@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/01 15:21:20  dischi
+# better howto support
+#
 # Revision 1.7  2003/10/31 18:56:14  dischi
 # Add framework for plugin writing howto
 #
@@ -141,8 +144,19 @@ def data_finder(result, dirname, names):
                        replace('./i18n', 'share/locale').\
                        replace('./contrib', 'share/freevo/contrib').\
                        replace('./Docs', 'share/doc/freevo-%s' % version.__version__).\
-                       replace('/plugin_writing/html', '/plugin_writing'). \
                        replace('./helpers', 'share/freevo/helpers'), files))
+    return result
+
+
+def docbook_finder(result, dirname, names):
+    files = []
+    for name in names:
+        if os.path.splitext(name)[1] == '.html':
+            files.append(os.path.join(dirname, name))
+            
+    if files and dirname.find('/CVS') == -1:
+        result.append((dirname.replace('/html', ''). \
+                       replace('./Docs', 'share/doc/freevo-%s' % version.__version__), files))
     return result
 
 
@@ -217,6 +231,3 @@ os.path.walk('./contrib/fbcon', data_finder, data_files)
 os.path.walk('./contrib/xmltv', data_finder, data_files)
 os.path.walk('./src/www/htdocs', data_finder, data_files)
 os.path.walk('./i18n', data_finder, data_files)
-os.path.walk('./Docs/howto', data_finder, data_files)
-os.path.walk('./Docs/plugin_writing/html', data_finder, data_files)
-
