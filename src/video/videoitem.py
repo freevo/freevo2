@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/28 19:56:12  dischi
+# Added copy function
+#
 # Revision 1.2  2002/11/26 20:58:44  dischi
 # o Fixed bug that not only the first character of mplayer_options is used
 # o added the configure stuff again (without play from stopped position
@@ -89,7 +92,7 @@ class VideoItem(Item):
             file = files
             self.files = [ file, ]
             
-        self.name    = os.path.splitext(os.path.basename(file))[0]
+        self.name    = util.getname(file)
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
@@ -110,6 +113,7 @@ class VideoItem(Item):
 
         self.video_player = mplayer.get_singleton()
 
+        # variables only for VideoItem
         self.available_audio_tracks = []
         self.available_subtitles    = []
         self.available_chapters     = 0
@@ -121,7 +125,7 @@ class VideoItem(Item):
 
     def copy(self, obj):
         """
-        Special copy value videoitems
+        Special copy value VideoItems
         """
         Item.copy(self, obj)
         if obj.type == 'video':

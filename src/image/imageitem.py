@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/11/28 19:56:12  dischi
+# Added copy function
+#
 # Revision 1.3  2002/11/27 20:25:17  dischi
 # small "name" fix
 #
@@ -57,6 +60,8 @@ class ImageItem(Item):
         self.type     = 'image'
         self.file     = file
         self.image    = file
+
+        # variables only for ImageItem
         self.duration = duration
 	self.binsdesc = {}
 
@@ -64,21 +69,35 @@ class ImageItem(Item):
 	if os.path.isfile(file + '.xml'):
 	    self.binsdesc = bins.get_bins_desc(file)
 
+        # set name
         if name:
             self.name = name
 	elif self.binsdesc.has_key('title'):
 	    self.name = self.binsdesc['title']
         else:
-            self.name    = os.path.splitext(os.path.basename(file))[0]
+            self.name = util.getname(file)
 
         self.image_viewer = viewer.get_singleton()
+
+
+
+    def copy(self, obj):
+        """
+        Special copy value ImageItem
+        """
+        Item.copy(self, obj)
+        if obj.type == 'image':
+            self.duration = obj.duration
+            self.binsdesc = obj.binsdesc
 
         
     def actions(self):
         return [ ( self.view, 'View Image' ) ]
 
+
     def cache(self):
         self.image_viewer.cache(self)
+
 
     def view(self, arg=None, menuw=None):
         self.parent.current_item = self

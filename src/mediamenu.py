@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/11/28 19:56:12  dischi
+# Added copy function
+#
 # Revision 1.5  2002/11/26 16:28:10  dischi
 # added patch for better bin support
 #
@@ -197,10 +200,18 @@ class DirItem(Playlist):
     def __init__(self, dir, parent, name = '', display_type = None):
         Item.__init__(self, parent)
         self.type = 'dir'
-        self.dir = dir
-        self.display_type = display_type
         self.media = None
         
+        # variables only for Playlist
+        self.current_item = 0
+        self.playlist = []
+        self.autoplay = FALSE
+
+        # variables only for DirItem
+        self.dir          = dir
+        self.display_type = display_type
+
+
         if name:
             self.name = name
 	elif os.path.isfile(dir + '/album.xml'):
@@ -220,10 +231,16 @@ class DirItem(Playlist):
         if os.path.isfile(dir+'/skin.xml'): 
             self.xml_file = dir+'/skin.xml'
 
-        # playlist stuff
-        self.current_item = 0
-        self.playlist = []
 
+    def copy(self, obj):
+        """
+        Special copy value DirItem
+        """
+        Playlist.copy(self, obj)
+        if obj.type == 'dir':
+            self.dir          = obj.dir
+            self.display_type = obj.display_type
+            
 
     def actions(self):
         return [ ( self.cwd, 'browse directory' ) ]

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/28 19:56:12  dischi
+# Added copy function
+#
 # Revision 1.2  2002/11/25 04:55:29  outlyer
 # Two small changes:
 #  o Removed some 'print sys.path' lines I left in my last commit
@@ -53,6 +56,7 @@ import imghdr
 import traceback
 import config
 import mplayer
+import util
 
 from item import Item
 
@@ -70,6 +74,9 @@ class AudioItem(Item):
         Item.__init__(self, parent)
         self.drawall    = 1
         self.filename   = file
+        self.name       = util.getname(self.filename)
+
+        # variables only for AudioItem
         self.title      = ''
         self.album      = ''
         self.artist     = ''
@@ -83,7 +90,6 @@ class AudioItem(Item):
         self.done       = 0.0
         self.pause      = 0
 	self.valid	= 1
-        self.name = os.path.splitext(os.path.basename(self.filename))[0]
 
         # XXX This is really not a very smart way to do it. We should be
         # XXX able to handle files with messed up extentions.
@@ -134,6 +140,28 @@ class AudioItem(Item):
                 print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
         self.audio_player = mplayer.get_singleton()
+
+
+    def copy(self, obj):
+        """
+        Special copy value AudioItem
+        """
+        Item.copy(self, obj)
+        if obj.type == 'audio':
+            self.title      = obj.title
+            self.album      = obj.album
+            self.artist     = obj.artist
+            self.length     = onj.length
+            self.track      = obj.track
+            self.trackof    = obj.trackof
+            self.year       = obj.year
+            self.start      = obj.start
+            self.elapsed    = obj.elapsed
+            self.remain     = obj.remain
+            self.done       = obj.done
+            self.pause      = obj.pause
+            self.valid	    = obj.valid
+
 
     def set_info_ogg(self, file):
         """

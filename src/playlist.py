@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/28 19:56:12  dischi
+# Added copy function
+#
 # Revision 1.2  2002/11/27 20:22:19  dischi
 # Fixed some playlist problems. Sometimes the playlist stopped playing
 # after one item is finished. By playling a playlist again, it will start
@@ -176,6 +179,8 @@ class Playlist(Item):
     def __init__(self, file, parent):
         Item.__init__(self, parent)
         self.type     = 'playlist'
+
+        # variables only for Playlist
         self.current_item = None
         self.playlist = []
         self.autoplay = FALSE
@@ -201,6 +206,17 @@ class Playlist(Item):
             else:
                 self.read_m3u(file)
 
+
+    def copy(self, obj):
+        """
+        Special copy value Playlist
+        """
+        Item.copy(self, obj)
+        if obj.type == 'playlist':
+            self.current_item = obj.current_item
+            self.playlist     = obj.playlist
+            self.autoplay     = obj.autoplay
+            
 
     def randomize(self):
         """
