@@ -16,8 +16,8 @@ A:hover {
     }
 
 A:visited { 
-    color: #000;
     text-decoration: none;
+    color: #000; 
 }
 
 p { padding-left: 1em;
@@ -27,17 +27,20 @@ p { padding-left: 1em;
 
 table { 
         border-collapse:        collapse;
-        width: 100%; 
-        border-width: none;  }
+        width: 95%; 
+        border-width: none;
+        margin-right: auto;
+        margin-left: auto; }
 
 table.library { margin-left: auto;
                 margin-right: auto;
                 background-color: #fff;
                 padding: 1em; 
-                width: inherit; 
+                width: 90%;
                 }
 
 table.library td { padding: 1em; }
+table.library img { float: right; }
 
 td { padding: 4px; margin: 0px; border-style: none; }
 
@@ -168,6 +171,10 @@ td.chanrow {
 table.popup {
     background: #638bca;
     color: #000000;
+    border-collapse: collapse;
+    border-width: none;
+    border-style: none;
+    width: 100%; 
 }
 
 table.popup thead {
@@ -199,7 +206,7 @@ table.popupbuttons tbody td {
     background: #2A577E; 
     color: white; 
     text-align: center;
-    border: #2a577e 2px solid;
+    /* #border: #2a577e 2px solid; */
     padding: 2px;
     margin: 10px;
 }
@@ -208,7 +215,7 @@ table.popupbuttons td:hover {
     text-indent: 0;
     background: #0B1C52; 
     color: #FFFFFF;
-    border: #0b1c52 2px solid;
+    /* border: #0b1c52 2px solid; */
     padding: 2px;
     margin: 10px;
 }
@@ -251,12 +258,18 @@ p {     padding-left: 0em;
 h2 {    margin-top: 3em;
         font-weight: bold;
        } 
-
+/*
 #titlebar { background-image: url(../images/headerfreevo.jpg);
                     background-repeat: no-repeat;
                     background-color: #4D77AA;
                     color: #000;
                     height: 101px ; }
+*/
+
+#titlebar { background: #666699 url(../images/freevoheader2.jpg) left no-repeat;
+            height: 101px;
+            color: #000;
+            }
 
 #subtitle { background-image: url(../images/headertxtbg.png);
             height: 21px;
@@ -333,7 +346,7 @@ h2.SUBTITLE { padding-left: 0em; }
     #header {
       float:left;
       width:100%;
-      background: #91AECE url("/images/tab/bg.gif") repeat-x bottom;
+      background: #666699 url("/images/tab/bg.gif") repeat-x bottom;
       font-size:93%;
       line-height:normal;
       }
