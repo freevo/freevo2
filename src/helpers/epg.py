@@ -19,7 +19,7 @@ def usage():
     print '  [-c|--update-channels]            Use config to add new channels.'
     print '  [-h|--help]                       Print help and exit.'
     print '  [-i|--info]                       Print some information.'
-    print '  [-l|--list]                       List all DB tables.'
+    print '  [-l|--list]                       List your channels.'
     print '  [-f|--fill]                       Fill DB with XMLTV data.'
     print '  [-p chan|--list-programs chan]    List programs in a given chan.'
     print '  [-s|--search]                     Search DB for matching program.'
@@ -43,8 +43,8 @@ def list_channels():
 
 
 def list_programs(channel):
-    # print epg.get_programs(channel)
-    channels = get_channels()
+    print epg.get_programs(channel)
+    # channels = get_channels()
 
 
 def fill_xmltv(xmltv_file):
@@ -57,7 +57,16 @@ def fill_xmltv(xmltv_file):
 
 
 def info():
-    print epg.execute('select * from program_types')
+    print 'Version:'
+    print epg.execute('select * from admin')
+    print 'Channel Types:'
+    print epg.execute('select * from channel_types')
+    print 'Categories:'
+    print epg.execute('select * from categories')
+    print 'Advisories:'
+    print epg.execute('select * from advisories')
+    print 'Ratings:'
+    print epg.execute('select * from ratings')
    
 
 def list_tables():
