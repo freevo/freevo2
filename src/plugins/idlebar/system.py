@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/01 20:28:52  rshortt
+# Use small0 instead of weather font.
+#
 # Revision 1.5  2003/11/02 20:06:44  mikeruelle
 # some fixes from den_RDC. adds 2.6 support too
 #
@@ -141,7 +144,7 @@ class procstats(IdleBarPlugin):
         self.currentCpu = _('%s%%') % round(usage,self.precision)
  
     def draw(self, (type, object), x, osd):
-        font = osd.get_font('weather')
+        font = osd.get_font('small0')
         self.getStats()
         widthmem = 0
         widthcpu = 0
