@@ -30,7 +30,7 @@
 # it easier to update this file. When you get a new version of Freevo,
 # Freevo will tell you any changes made in freevo_config.py. After you
 # merged those changes into this file, set this number to the new one.
-CONFIG_VERSION  = 3.91
+CONFIG_VERSION  = 4.00
 
 
 # ======================================================================
@@ -132,17 +132,6 @@ HIDE_UNUSABLE_DISCS = 1
 # </freevo>
 
 #
-# Should playlists be available for movies, and all movies in a directory
-# be played in succession (unless you press STOP/EXIT)?
-#
-# MOVIE_PLAYLISTS = 0
-
-#
-# Should a Random Playlist be generated for Music?
-#
-# AUDIO_RANDOM_PLAYLIST = 1
-
-#
 # Should directories sorted by date instead of filename
 # 0 = no, 1 = yes, 2 = no for normal menus, yes for DIR_RECORD
 #
@@ -151,7 +140,7 @@ HIDE_UNUSABLE_DISCS = 1
 #
 # Show the items in the list in reverse order
 #
-DIRECTORY_REVERSE_SORT = 0
+# DIRECTORY_REVERSE_SORT = 0
 
 #
 # Should we use "smart" sorting to ignore 'The' in directories
@@ -185,6 +174,38 @@ DIRECTORY_REVERSE_SORT = 0
 # 1 all the time and only be disabled in directories with broken tags
 #
 # USE_MEDIAID_TAG_NAMES = 1
+
+
+#
+# The next varibales are a list of types in which the feature should be
+# enabled (video, audio, image, games). E.g. to enable audoplay for
+# audio and images set DIRECTORY_AUTOPLAY_ITEMS = [ 'audio', 'image' ]
+#
+# If you set this variable in a folder.fxd, the value is 1 (enabled)
+# or 0 (disabled).
+#
+
+#
+# Make all items a playlist. So when one is finished, the next one will
+# start. It's also possible to browse through the list with UP and DOWN
+#
+# DIRECTORY_CREATE_PLAYLIST      = [ 'audio', 'image' ]
+
+#
+# Add playlist files ('m3u') to the directory
+#
+# DIRECTORY_ADD_PLAYLIST_FILES   = [ 'audio' ]
+
+#
+# Add an item 'Random Playlist' to the directory
+#
+# DIRECTORY_ADD_RANDOM_PLAYLIST  = [ 'audio' ]
+
+#
+# Make 'Play' not 'Browse' the default action when only items and not
+# subdirectories are in the directory
+#
+# DIRECTORY_AUTOPLAY_ITEMS       = [ ]
 
 # ======================================================================
 # Freevo movie settings:
@@ -231,7 +252,7 @@ DIRECTORY_REVERSE_SORT = 0
 # speed up startup, 0 may be needed if you have fxd files with disc links
 # in your normal movie tree.
 #
-ONLY_SCAN_DATADIR = 1
+# ONLY_SCAN_DATADIR = 1
 
 
 # ======================================================================
