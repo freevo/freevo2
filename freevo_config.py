@@ -59,13 +59,11 @@
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-FREEVO_CONF_VERSION = 1.1
-LOCAL_CONF_VERSION  = 2.0
+FREEVO_CONF_VERSION = 1.0
+LOCAL_CONF_VERSION  = 2.1
 
 # Description of changes in each new version
-FREEVO_CONF_CHANGES = [
-    (1.1,
-     '''Added MPLAYER_ARGS_AUDIOCD for aido cd playback settings.'''),]
+FREEVO_CONF_CHANGES = [] # None so far
 
 LOCAL_CONF_CHANGES = [
     (1.1,
@@ -78,7 +76,9 @@ LOCAL_CONF_CHANGES = [
     (2.0,
      '''Remote control config has changed from Freevo Python files to the
      standard Lirc program config files, see freevo_config.py for
-     more info.''')]
+     more info.'''),
+    (2.1,
+     '''Added MPLAYER_ARGS_AUDIOCD for aido cd playback settings.''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
