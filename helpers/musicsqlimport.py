@@ -81,7 +81,7 @@ def make_query(filename,dirtitle):
            'mp3',escape(a['artist']),escape(a['title']),escape(a['album']),inti(a['date']),trackno, \
            trackof, 100,0,0,'0','262',0,'null')
 
-    SQL = 'INSERT INTO music VALUES ' + VALUES
+    SQL = 'INSERT OR IGNORE INTO music VALUES ' + VALUES
 
     return SQL
 
