@@ -170,8 +170,7 @@ LOCAL_CONF_CHANGES = [
      DIRECTORY_CREATE_PLAYLIST, DIRECTORY_ADD_PLAYLIST_FILES,
      DIRECTORY_ADD_RANDOM_PLAYLIST and DIRECTORY_AUTOPLAY_ITEMS. The directory
      updated now uses stat, set DIRECTORY_USE_STAT_FOR_CHANGES = 0 if you have
-     problems with it. Also new: IMAGEVIEWER_BLEND_SPEED to control blending
-     one image to the next in the image viewer.'''),
+     problems with it.'''),
     (4.01,
      '''Removed SUFFIX_VIDEO_FILES and replaced it with SUFFIX_VIDEO_MPLAYER_FILES
      and SUFFIX_VIDEO_XINE_FILES. Use PREFERED_VIDEO_PLAYER to choose a prefered
@@ -210,7 +209,8 @@ LOCAL_CONF_CHANGES = [
      '''Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
      skin. Also added RESTART_SYS_CMD, OSD_DIM_TEXT and OSD_UPDATE_COMPLETE_REDRAW.'''),
     (5.09,
-     '''Add CACHE_IMAGES to turn off image caching.''') ]
+     '''Add CACHE_IMAGES to turn off image caching. A new variable is
+     IMAGEVIEWER_BLEND_MODE to control the blending effect in the image viewer''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -727,16 +727,16 @@ IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
 
 #
-# The number of blend steps between images 
-# 0 = Disable blending
+# Mode of the blending effect in the image viewer between two images
+# Possible values are:
 #
-IMAGEVIEWER_BLEND_STEPS = 10
+# None: no blending
+# -1    random effect
+#  0    alpha blending
+#  1    wipe effect
+#
+IMAGEVIEWER_BLEND_MODE = -1
     
-#
-# Total time in seconds for blending from one image to the next
-#
-IMAGEVIEWER_BLEND_TIME  = 0.75
-
 #
 # use exif thumbnail your thumbnail review. The quality is lower but
 # it's much faster

@@ -11,6 +11,12 @@
 #    you # want a alsa as mplayer audio out, just put
 #    "MPLAYER_AO_DEV = # 'alsa9'" in local_conf.py
 #
+#    This is no normal config file, it's Python code. Because of that, you 
+#    need to follow some rules to avoid crashes. The examples should explain
+#    the settings, but make sure a line starting with a variable has 
+#    NO SPACES OR TABS at the beginning.
+#
+#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -32,6 +38,8 @@
 #
 # -----------------------------------------------------------------------
 #endif
+
+
 
 
 CONFIG_VERSION = 5.09
@@ -396,15 +404,16 @@ CACHE_IMAGES = 1
 # IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
 #
-# The number of blend steps between images 
-# 0 = Disable blending
+# Mode of the blending effect in the image viewer between two images
+# Possible values are:
 #
-# IMAGEVIEWER_BLEND_STEPS = 10
-
-#    
-# Total time in seconds for blending from one image to the next
+# None: no blending
+# -1    random effect
+#  0    alpha blending
+#  1    wipe effect
 #
-# IMAGEVIEWER_BLEND_TIME  = 0.75
+IMAGEVIEWER_BLEND_MODE = -1
+    
 
 
 # ======================================================================

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/05/07 17:46:53  dischi
+# Make it possible to choose the image viewer blend effect
+#
 # Revision 1.44  2004/05/02 09:21:16  dischi
 # no need to convert layer
 #
@@ -20,39 +23,6 @@
 #
 # Revision 1.41  2004/01/24 18:57:14  dischi
 # rotation is now stored in mediainfo
-#
-# Revision 1.40  2004/01/19 20:26:41  dischi
-# free image viewer cache on menuw.show()
-#
-# Revision 1.39  2003/12/15 04:12:54  outlyer
-# Fix a crash...
-#
-# When you are going through a bunch of images manually (up/down) when you reach
-# the last image, it used to crash because the 'osd' object lacks a "drawstringframed"
-# method. By sending the proper initialized object (self.osd) it works nicely instead
-# showing the message over the image in the top right corner.
-#
-# Revision 1.38  2003/12/14 17:46:02  dischi
-# cleanup
-#
-# Revision 1.37  2003/12/07 19:08:15  dischi
-# Add blending for slideshows.
-#
-# Revision 1.36  2003/12/07 11:12:56  dischi
-# small bugfix
-#
-# Revision 1.35  2003/11/29 11:27:40  dischi
-# move objectcache to util
-#
-# Revision 1.34  2003/11/28 20:08:57  dischi
-# renamed some config variables
-#
-# Revision 1.33  2003/11/23 19:48:59  krister
-# Added optional new blend settings (nr of steps and total time), must be enabled
-# explicitly in freevo_config
-#
-# Revision 1.32  2003/11/21 12:22:15  dischi
-# move blending effect to osd.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -253,7 +223,7 @@ class ImageViewer(GUIObject):
         last_image = self.last_image[1]
 
         if (last_image and self.last_image[0] != item and
-            config.IMAGEVIEWER_BLEND_STEPS):
+            config.IMAGEVIEWER_BLEND_MODE != None):
             screen = self.osd.screen.convert()
             screen.fill((0,0,0,0))
             screen.blit(self.osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
@@ -261,12 +231,11 @@ class ImageViewer(GUIObject):
             # update the OSD
             self.drawosd(layer=screen)
 
-            if config.IMAGEVIEWER_BLEND_STEPS:
-                blend = Transition(self.osd.screen, screen)
-                blend.start()
-                while not blend.finished:
-                    self.osd.sleep(0)
-                blend.remove()
+            blend = Transition(self.osd.screen, screen, config.IMAGEVIEWER_BLEND_MODE)
+            blend.start()
+            while not blend.finished:
+                self.osd.sleep(0)
+            blend.remove()
 
         else:
             self.osd.clearscreen(color=self.osd.COL_BLACK)
