@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/14 00:18:55  rshortt
+# Better error handling.
+#
 # Revision 1.5  2003/05/14 00:04:54  rshortt
 # Better error handling.
 #
@@ -103,7 +106,7 @@ def saveScheduledRecordings(scheduledRecordings):
     return (status, message)
 
 
-def connectionTest(teststr):
+def connectionTest(teststr='testing'):
     try:
         (status, message) = server.echotest(teststr)
     except:

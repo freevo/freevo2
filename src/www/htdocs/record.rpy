@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/14 00:18:56  rshortt
+# Better error handling.
+#
 # Revision 1.2  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -61,6 +64,22 @@ class RecordResource(FreevoResource):
         chan = fv.formValue(form, 'chan')
         start = fv.formValue(form, 'start')
         action = fv.formValue(form, 'action')
+
+        (server_available, message) = ri.connectionTest()
+        if not server_available:
+            fv.printHeader('Scheduled Recordings', 'styles/main.css')
+            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
+            fv.tableCell('Scheduled Recordings', 'class="heading" align="left"')
+            fv.tableRowClose()
+            fv.tableClose()
+            fv.res += '<hr /><h2>ERROR: recording server is unavailable</h2><hr />'
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+
+            return fv.res
 
         if action == 'remove':
             (status, recordings) = ri.getScheduledRecordings()
@@ -138,9 +157,7 @@ class RecordResource(FreevoResource):
         fv.tableClose()
     
         fv.printSearchForm()
-
         fv.printLinks()
-
         fv.printFooter()
 
         return fv.res
