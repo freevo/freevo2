@@ -62,6 +62,7 @@ def ConfigInit(videotools = 'sim'):
 SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[mM][pP][gG]',
                          '/*.[mM][pP][eE][gG]',
+                         '/*.[wW][mM][vV]',
                          '/*.[bB][iI][nN]' ]
 
 #
