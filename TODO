@@ -15,6 +15,7 @@ o Add view related bitmap to mp3/movie lists/playing
 o A switch to turn off the EPG altogether if no listings are available.
 o Make the EPG handling more modular
 o Add xmltv to the EPG
+o Use alsaplayer instead of mpg123
 o Installation instructions, clean up config stuff
   Paul Aubin:
   2) The lirc stuff is tricky. I'm used to an lircrc file, as I imagine
