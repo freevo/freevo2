@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/14 01:17:16  rshortt
+# We can't marshal boolean types.  It might be worth trying to fix the problem
+# in Twisted.
+#
 # Revision 1.1  2004/08/10 19:35:45  dischi
 # o better index generation
 # o split into different files
@@ -59,13 +63,14 @@ class TvProgram:
         self.categories = []
         self.date       = None
         self.pos        = None
+
+        # Due to problems with Twisted's marmalade these should not be changed
+        # to a boolean types. 
         if title == NO_DATA:
-            self.valid = False
+            self.valid = 0
         else:
-            self.valid = True
+            self.valid = 1
         
-        # Due to problems with Twisted's marmalade this should not be changed
-        # to a boolean type. 
         self.scheduled  = 0
 
 
