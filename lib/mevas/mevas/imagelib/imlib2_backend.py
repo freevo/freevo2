@@ -4,8 +4,8 @@ import base
 
 def get_capabilities():
 	return {
-		"to-raw-formats": [ "BGRA", "ABGR", "RGBA", "ARGB", "YV12A" ],
-		"from-raw-formats": [ "BGRA", "ABGR", "RGBA", "ARGB" ],
+		"to-raw-formats": [ "BGRA", "BGR", "ABGR", "RGBA", "RGB", "ARGB", "YV12A" ],
+		"from-raw-formats": [ "BGRA", "ABGR", "RGBA", "ARGB", "BGR", "RGB" ],
 		"preferred-format": "BGRA",  # Native format
 		"shmem": True,
 		"pickling": True,
