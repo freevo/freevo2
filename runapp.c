@@ -9,6 +9,7 @@
  * $Id$
  */
  
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,6 +25,8 @@
 extern int errno;
 
 static void runapp_setprio (int newprio, FILE *fp);
+static int check_runtime (void);
+static char * get_preload_str (void);
 
 
 int
@@ -32,17 +35,20 @@ main (int ac, char *av[])
   sigset_t set;
   int i;
   FILE *fp;
-  char *newav[ac];
+  int ac_idx = 1;               /* Inc. when args are "consumed". Ignore argv[0] */
+  char *newav[1000];
+  int newac = 0;
   struct stat statbuf;
   char logfile[256];
   char cmd_str[1000];
   char currdir[1000];
   int newprio;
-  int first_arg;
-  
-  
+  int got_runtime;
+
+
   /* Does the logdir exist? */
   if (!stat (RUNAPP_LOGDIR, &statbuf)) {
+    /* XXX Also check that it is writeable for this uid */
     sprintf (logfile, "%s/internal-runapp-%d.log", RUNAPP_LOGDIR, getuid());
   } else {
     /* No, log to the /tmp/freevo dir instead */
@@ -51,8 +57,8 @@ main (int ac, char *av[])
   }
   
   fp = fopen (logfile, "a");
-
   
+  /* Dump some debug info to the logfile */
   fprintf (fp, "PATH = %s\n", getenv ("PATH"));
   fprintf (fp, "CWD = %s\n", getcwd (currdir, sizeof (currdir)));
   
@@ -72,27 +78,76 @@ main (int ac, char *av[])
   
   fflush (fp);
   
+  /* Check for the full runtime. */
+  got_runtime = check_runtime ();
+  fprintf (fp, "runapp: runtime %s\n", got_runtime ? "FOUND" : "NOT FOUND");
+  
+  /* Add check for Gentoo too, different handling from the runtime */
+  /* XXX */
+
+  /* Got a valid commandstring? */
   if (ac < 2) {
     return (0);
   }
 
   /* Is the first arg the priority setting? */
-  if (sscanf (av[1], "--prio=%d", &newprio) == 1) {
+  if (sscanf (av[ac_idx], "--prio=%d", &newprio) == 1) {
     
     /* Yes, set the process priority */
     runapp_setprio (newprio, fp);
 
-    first_arg = 2;
-  } else {
-    first_arg = 1;
+    ac_idx++;                   /* Skip this parameter for the exec() */
   }
+
+  /*
+   * Build the new command string (newav)
+   */
+  
+  /* Do we need to use the freevo_loader (ld.so) from the runtime? */
+  if (got_runtime) {
+    char *pPreloads;
+
     
-  /* Copy the counted argv array to the NULL-terminated newav */
-  for (i = first_arg; i < ac; i++) {
-    newav[i-first_arg] = av[i];
+    /* Yes, so the executable to start is the freevo_loader.
+     * This must be newav[0] */
+    newav[newac++] = "./runtime/dll/freevo_loader";
+    //newav[newac++] = "--library-path";
+    //newav[newac++] = "./runtime/dll";
+
+    pPreloads = get_preload_str();
+    fprintf (fp, "runapp: LD_PRELOAD = '%s'\n", pPreloads);
+
+    setenv ("LD_PRELOAD", pPreloads, 1);
+    
   }
   
-  newav[ac-first_arg] = NULL;
+  /* Is the application "python"? Substitute for the runtime python,
+   * or from the os.
+   * The freevo_loader will be in newav[0] if present
+   */
+  if (strcmp (av[ac_idx], "python") == 0) {
+
+    if (got_runtime) {
+      newav[newac++] = "./runtime/apps/freevo_python";
+      ac_idx++;
+    } else {
+      /* XXX Should have special checks for Red Hat which uses python2 etc */
+      newav[newac++] = "python";
+      ac_idx++;
+    }
+  }
+
+  /* Copy the counted argv array to the NULL-terminated newav */
+  for (i = ac_idx; i < ac; i++) {
+    newav[newac++] = av[ac_idx++];
+  }
+  
+  newav[newac++] = NULL;
+
+  /* Debug */
+  for (i = 0; newav[i] != NULL; i++) {
+    fprintf (fp, "runapp: newav[%d] = '%s'\n", i, newav[i]);
+  }
   
   /* Set up signals (turn off blocking!) */
   sigemptyset (&set);
@@ -170,4 +225,51 @@ runapp_setprio (int newprio, FILE *fp)
   /* Done */
   return;
   
+}
+
+
+/* Is there a runtime here? */
+static int
+check_runtime (void)
+{
+  struct stat statbuf;
+
+
+  /* The freevo startscript must cd to the freevo dir for this to work */
+  if ((!stat ("./runtime/dll/freevo_loader", &statbuf)) &&
+      (!stat ("./runtime/apps/freevo_python", &statbuf))) {
+    return 1;
+  } else {
+    return 0;
+  }
+  
+}
+
+  
+static char *
+get_preload_str (void)
+{
+  static char preload_str[10000];
+  int fd;
+  int len;
+  
+
+  fd = open ("./runtime/preloads", O_RDONLY);
+
+  if (fd < 0) {
+    close (fd);
+    return ("");
+  }
+
+  len = read (fd, preload_str, sizeof (preload_str) - 1);
+
+  if (len < 1) {
+    close (fd);
+    return ("");
+  }
+
+  preload_str[len-1] = 0;         /* Remove the trailing \n */
+
+  return preload_str;
+
 }

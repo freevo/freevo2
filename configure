@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/06 09:52:25  krister
+# Changed the runtime handling to use runapp to start programs with the supplied dlls
+#
 # Revision 1.14  2003/02/05 19:56:05  krister
 # Missed the commandline args
 #
@@ -44,6 +47,26 @@ if ! [ -e src/identifymedia.py ]; then
     cd `dirname $0`
 fi
 
-./startprog python setup_build.py $@
+# Is runapp present? If not, the user must have a good python installation
+if ! [ -e runapp ]; then
+    echo
+    echo
+    echo "WARNING: ./runapp not found."
+    echo
+    echo "Please make sure you have the most recent version of Freevo,"
+    echo "and *please* use the full binary version that includes all"
+    echo "dependencies including ./runapp unless you're an experienced user."
+    echo 
+    echo "Trying to start the configure program..."
+    echo
+    echo
+    
+    # XXX Check for python2 etc?
+    python setup_build.py $@
+    exit 0
+fi
+
+# ./runapp will figure out which python to use
+./runapp python setup_build.py $@
 
 exit 0

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/06 09:52:26  krister
+# Changed the runtime handling to use runapp to start programs with the supplied dlls
+#
 # Revision 1.16  2003/02/04 13:11:00  dischi
 # remove the AC3 config stuff and reformat some lines to 80 chars/line
 #
@@ -252,11 +255,11 @@ class MPlayer:
                 config.MPLAYER_VO_DEV_OPTS)
             
         # XXX Some testcode by Krister:
-        if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and \
-           config.MPLAYER_USE_WID:
+        if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and 
+            config.MPLAYER_USE_WID):
             if DEBUG: print 'Got freevo_xwin and x11'
             os.system('rm -f /tmp/freevo.wid')
-            os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
+            os.system('./runapp ./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
                       (osd.width, osd.height))
             time.sleep(1)
             if os.path.isfile('/tmp/freevo.wid'):
@@ -458,7 +461,7 @@ class MPlayerApp(childapp.ChildApp):
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
-        os.system('killall -9 freevo_xwin 2&> /dev/null')
+        util.killall('freevo_xwin')
         os.system('rm -f /tmp/freevo.wid')
 
 

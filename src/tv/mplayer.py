@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/06 09:52:26  krister
+# Changed the runtime handling to use runapp to start programs with the supplied dlls
+#
 # Revision 1.4  2003/01/22 01:48:26  krister
 # Use slave mode to change channels.
 #
@@ -217,12 +220,11 @@ class MPlayer:
             return
 
         # Support for X11, getting the keyboard events
-        if (os.path.isfile('./freevo_xwin') and
-            (osd.sdl_driver == 'x11' or osd.sdl_driver == 'xv') and
+        if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and
             config.MPLAYER_USE_WID):
-            if DEBUG: print 'Got freevo_xwin and x11/xv'
+            if DEBUG: print 'Got freevo_xwin and x11'
             os.system('rm -f /tmp/freevo.wid')
-            os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
+            os.system('./runapp ./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
                       (osd.width, osd.height))
 
             # Wait until freevo_xwin signals us, but have a timeout so we
@@ -398,7 +400,7 @@ class MPlayerApp(childapp.ChildApp):
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
-        os.system('killall -9 freevo_xwin 2&> /dev/null')
+        util.killall('freevo_xwin')
         os.system('rm -f /tmp/freevo.wid')
 
 

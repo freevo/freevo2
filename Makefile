@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/02/06 09:52:25  krister
+# Changed the runtime handling to use runapp to start programs with the supplied dlls
+#
 # Revision 1.19  2003/02/05 15:22:51  krister
 # Updated build stuff, Changelog
 #
@@ -70,7 +73,8 @@ python_compile:
 	./startprog python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
-	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
+	$(CC) $(CFLAGS) -static -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
+	strip runapp
 
 freevo_xwin: freevo_xwin.c
 	$(CC) $(CFLAGS) -o freevo_xwin freevo_xwin.c $(XINC) $(XLIBS)

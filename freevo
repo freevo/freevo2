@@ -24,7 +24,8 @@ fi
 
 # Support for using just Python
 if [ "$1" = "prompt" ] ; then
-    ./startprog python
+    export PYTHONPATH=./src
+    ./runapp python
     exit 0
 fi
     
@@ -33,23 +34,23 @@ fi
 if [ "$1" = "execute" ] ; then
     export PYTHONPATH=./src
     shift 1
-    ./startprog python $@
+    ./runapp python $@
     exit 0
 fi
 
 # Start the lirc remote control app if the device is present
 if [ -S /dev/lircd ] ; then
     echo Found a lirc device, starting the remote control daemon
-    ./startprog python rc_client/remote.py --remote=lirc > /dev/null 2>&1 &
+    ./runapp python rc_client/remote.py --remote=lirc > /dev/null 2>&1 &
 fi
 
 # XXX Uncomment the command below to enable joystick input. 
 # XXX It has not been tested much! Please send in testreports!
 # If JOY_DEV is 0 then joy.py just exits.
-# ./startprog python rc_client/joy.py > /dev/null 2>&1 &
+# ./runapp python rc_client/joy.py > /dev/null 2>&1 &
 
 # Start the main freevo application
-./startprog python src/main.py $@
+./runapp python src/main.py $@
 
 # Freevo exited, make sure all children are killed
 sleep 1

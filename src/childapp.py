@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/06 09:52:25  krister
+# Changed the runtime handling to use runapp to start programs with the supplied dlls
+#
 # Revision 1.4  2003/02/05 06:10:46  krister
 # Changed the start scripts and childapp.py to use startprog to start all programs.
 #
@@ -69,17 +72,7 @@ class ChildApp:
         # Start the child app through 'runapp' which will unblock signals and
         # sets the priority.
 
-        # Actually, we need to use the 'startprog' script too for everything since
-        # it uses the runtime loader and dlls if available.
-        m = re.match(r'\s*--prio=([-+0-9]+)\s+(.*)', app)
-        if m:
-            # Need to put a 'startprog' after the '--prio'
-            prio, cmdline = m.groups()
-            start_str = './startprog ./runapp --prio=%s ./startprog %s' % (prio, cmdline)
-            './startprog ./runapp ' + app.lstrip().replace('--prio=', './startprog ./runapp --prio=')
-        else:
-            # No --prio given
-            start_str = './startprog ./runapp ./startprog ' + app
+        start_str = './runapp ' + app
         
         self.child = popen2.Popen3(start_str, 1, 100) 
         self.outfile = self.child.fromchild 
