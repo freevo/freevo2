@@ -63,6 +63,10 @@
       <style text="tv"/>
     </menu>
       
+    <menu type="games">
+      <style text="games"/>
+    </menu>
+      
     <menuset label="video" inherits="normal text style">
       <screen layout="video screen"/>
     </menuset>
@@ -73,6 +77,10 @@
       
     <menuset label="image" inherits="normal text style">
       <screen layout="image screen"/>
+    </menuset>
+      
+    <menuset label="games" inherits="normal text style">
+      <screen layout="games screen"/>
     </menuset>
       
     <menuset label="tv" inherits="normal text style">
@@ -132,6 +140,13 @@
       </background>
     </layout>
 
+    <layout label="games screen">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+        <!-- Note: find a good background -->
+      </background>
+    </layout>
+
 
 
     <!-- default view area -->
@@ -144,6 +159,13 @@
       </content>
     </layout>
     
+    <!-- default screen area -->
+    <layout label="screen0">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
 
     <!-- default listing area -->
     <layout label="listing">
