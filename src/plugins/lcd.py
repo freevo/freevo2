@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/24 19:42:25  gsbarbieri
+# Support 2x16 displays
+#
 # Revision 1.5  2003/08/20 22:48:25  gsbarbieri
 # Try-Except to avoid crashes + MAME items handling
 #
@@ -247,8 +250,7 @@ layouts = { 4 : # 4 lines display
                                  "7 4 %d 4 h 2 \"%s\"",
                                  "( self.width, tv.desc )" )
                   }              
-                },
-            
+                },              
 
               20 : # 20 chars per line
               
@@ -315,9 +317,49 @@ layouts = { 4 : # 4 lines display
                                  "1 4 %d 4 h 2 \"%s\"",
                                  "( self.width, tv.desc )" )
                   }              
-                }
-              }
-            }
+                } # screens
+              }, # chars per line
+
+
+            2 : # 2 lines display            
+            { 16 : # 16 chars per line
+              # Welcome screen
+              { "welcome" :
+                { "title"    : ( "title",
+                                 "1 1 Freevo",
+                                 None )
+                  },
+
+                 "menu"    :
+                 { "title_v"  : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                  "( self.width, menu.heading )" ),
+                   "item_v"   : ( "scroller",
+                                  "1 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, title )" )
+                   },
+
+                 "audio_player"  :
+                 { "music_v"   : ( "scroller",
+                                   "1 1 %d 1 h 2 \"%s\"",
+                                   "( self.width, title )" ),
+                   "time_v"    : ( "string",
+                                   "1 2 '  % 2d:%02d/% 2d:%02d'",
+                                   "( int(player.length / 60), int(player.length % 60)," +
+                                   " int(player.elapsed / 60), int(player.elapsed % 60))" )
+                   },
+
+                 "tv"            :
+                 { "chan_v"   : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                  "( self.width, tv.display_name) )" ),
+                   "prog_v"   : ( "scroller",
+                                  "1 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, tv.title )" )
+                   }
+                 } # screens
+              } # chars per line            
+            } # lines per display
              
 # poll_widgets: widgets that should be refreshed during the pool
 # Structure:
@@ -328,8 +370,8 @@ layouts = { 4 : # 4 lines display
 #                }
 poll_widgets = { 4 : {
     40 : { "welcome" : [ "clock" ] },
-    20 : { "welcome" : [ "clock" ] }
-    }
+    20 : { "welcome" : [ "clock" ] },    
+    },
                  }
 
 DEBUG = config.DEBUG
@@ -419,7 +461,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             # get info:
             if menu.selected.type and menu_info.has_key( menu.selected.type ):
                 info = get_info( menu.selected, menu_info[ menu.selected.type ] )
-                if menu.strinfo.has_key( menu.selected.type ) and menu_strinfo[ menu.selected.type ]:
+                if menu_strinfo.has_key( menu.selected.type ) and menu_strinfo[ menu.selected.type ]:
                     if info:
                         info += sep_str
                     info += time.strftime( menu_strinfo[ menu.selected.type ] )
