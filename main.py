@@ -5,20 +5,12 @@
 #
 # $Id$
 
+# Configuration file. Determines where to look for AVI/MP3 files, etc
+# Logging is initialized here, so it should be imported first
+import config
+
 import sys, socket, random, time, os
 import traceback
-
-# XXX Add real logfile handling, using different log levels etc
-if 0:
-    # Redirect stdout and stderr to log files, timestamp them
-    sys.stderr = open('./log_main_err', 'a', 0)
-    sys.stderr.write('\n\n' + time.ctime(time.time()) + '\n')
-
-    sys.stdout = open('./log_main_out', 'a', 0)
-    sys.stdout.write('\n\n' + time.ctime(time.time()) + '\n')
-
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
 
 # Various utilities
 import util

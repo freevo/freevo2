@@ -1,5 +1,5 @@
 #
-# config.py - Handle the configuration file init.
+# config.py - Handle the configuration file init. Also start logging.
 #
 # Try to find the freevo_config.py config file in the following places:
 # 1) ~/.freevo/freevo_config.py       The user's private config
@@ -16,8 +16,59 @@
 # $Id$
 #
 
-import sys, os
+import sys, os, time
 
+
+# Logging class. Logs stuff on stdout and /tmp/freevo.log
+class Logger:
+
+    def __init__(self, logtype='(unknown)'):
+        self.lineno = 1
+        self.logtype = logtype
+        self.fp = open('/tmp/freevo.log', 'a') # XXX Add try...catch
+        self.softspace = 0
+        ts = time.asctime(time.localtime(time.time()))
+        self.write('Starting %s at %s\n' % (logtype, ts))
+        
+        
+    def write(self, msg):
+        sys.__stdout__.write(msg)
+        self.fp.write(msg)
+        self.fp.flush()
+
+        return
+
+        # XXX Work in progress...
+        lines = msg.split('\n')
+        ts = time.asctime(time.localtime(time.time()))
+        for line in lines:
+            logmsg = '%d: %-20s (%s): %s\n' % (self.lineno, self.logtype, ts, line)
+            self.lineno += 1
+            self.fp.write(logmsg)
+            self.fp.flush()
+            sys.__stdout__.write(logmsg)    # Original stdout
+            sys.__stdout__.flush()
+
+
+    def flush():
+        pass
+
+
+    def close():
+        pass
+    
+            
+
+#
+# Redirect stdout and stderr to stdout and /tmp/freevo.log
+# 
+sys.stdout = Logger(sys.argv[0] + ':stdin')
+sys.stderr = Logger(sys.argv[0] + ':stderr')
+
+
+#
+# Config file handling
+#
 cfgfilepath = [ '/etc/freevo',
                 os.path.expanduser('~/.freevo'),
                 '.'
@@ -36,7 +87,8 @@ for dir in cfgfilepath:
 
 if not found:
     # This is a fatal error, the freevo_config.py file must be loaded!
-    print 'Freevo: Fatal error, cannot find freevo_config.py. Looked in the following dirs:'
+    print ('Freevo: Fatal error, cannot find freevo_config.py. ' +
+          'Looked in the following dirs:')
     for dir in cfgfilepath:
         print ' '*5 + dir
 

@@ -26,34 +26,34 @@ def ConfigInit(videotools = 'sim'):
     # 
     if videotools == 'real':
         MPLAYER_CMD = 'mplayer'
-        MPLAYER_ARGS_MPG = '-nolirc -nobps -idx -framedrop -cache 5000 ' +
-                           '-vo mga -screenw 768 -screenh 576 -fs ' +
-                           ' -ao oss:/dev/dsp0'
-        MPLAYER_ARGS_DVD = '-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
-                           '-ao oss:/dev/dsp0 -dvd %s -alang en,se  ' +      
-                           '-screenw 768 -screenh 576 -fs '
-        VIDREC_MQ_TV = 'DIVX4rec -F 300000 -norm NTSC ' +
-                       '-input Television -m -r 22050 -w 320 -h 240 ' +
-                       '-ab 80 -vg 100 -vb 800 -H 50 -o %s'
+        MPLAYER_ARGS_MPG = ('-nolirc -nobps -idx -framedrop -cache 5000 ' +
+                            '-vo mga -screenw 768 -screenh 576 -fs ' +
+                            ' -ao oss:/dev/dsp0')
+        MPLAYER_ARGS_DVD = ('-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
+                            '-ao oss:/dev/dsp0 -dvd %s -alang en,se  ' +      
+                            '-screenw 768 -screenh 576 -fs ')
+        VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
+                        '-input Television -m -r 22050 -w 320 -h 240 ' +
+                        '-ab 80 -vg 100 -vb 800 -H 50 -o %s')
         # Under development
-        VIDREC_MQ_VCR = 'DIVX4rec -F 300000 -norm NTSC ' +
-                        '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
-                        ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s'
+        VIDREC_MQ_VCR = ('DIVX4rec -F 300000 -norm NTSC ' +
+                         '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
+                         ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s')
         # Under development
-        VIDREC_MQ_NUVTV = '-F 10000 -norm NTSC -input Television -m ' +
-                          '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
-                          '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s'
+        VIDREC_MQ_NUVTV = ('-F 10000 -norm NTSC -input Television -m ' +
+                           '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
+                           '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s')
         VIDREC_MQ = VIDREC_MQ_TV
     else:
         MPLAYER_CMD = 'mplayer'
-        MPLAYER_ARGS_MPG = '-nobps -idx -framedrop -cache 512 -vo xv ' +
-                           ' -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0'
-        MPLAYER_ARGS_DVD = '-nobps -framedrop -cache 4096 -vo xv ' +
-                           '-ao oss:/dev/dsp0 -dvd %s -alang en,se ' +
-                           '  -screenw 768 -screenh 576 -fs '
-        VIDREC_MQ = 'DIVX4rec -F 300000 -norm NTSC ' +
-                    '-input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 ' +
-                    '-vg 300 -vb 800 -H 50 -o %s'
+        MPLAYER_ARGS_MPG = ('-nobps -idx -framedrop -cache 512 -vo xv ' +
+                            ' -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0')
+        MPLAYER_ARGS_DVD = ('-nobps -framedrop -cache 4096 -vo xv ' +
+                            '-ao oss:/dev/dsp0 -dvd %s -alang en,se ' +
+                            '  -screenw 768 -screenh 576 -fs ')
+        VIDREC_MQ = ('DIVX4rec -F 300000 -norm NTSC ' +
+                     '-input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 ' +
+                     '-vg 300 -vb 800 -H 50 -o %s')
         
 #
 # The list of filename suffixes that are used to match the files that
