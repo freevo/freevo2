@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/06 19:40:01  dischi
+# fix menu title
+#
 # Revision 1.7  2003/05/28 09:10:00  dischi
 # bugfix
 #
@@ -160,8 +163,8 @@ class MediaMenu(Item):
         # add default items
         for d in dirs:
             try:
-                (title, dir) = d
-                d = DirItem(dir, self, name = title,
+                (t, dir) = d
+                d = DirItem(dir, self, name = t,
                             display_type = self.display_type)
                 self.normal_items += [ d ]
             except:
