@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/02/01 17:08:38  dischi
+# speedup, remove unneeded stuff
+#
 # Revision 1.57  2004/01/31 16:38:23  dischi
 # changes because of mediainfo changes
 #
@@ -174,12 +177,12 @@ class Item:
             self.type     = None            # e.g. video, audio, dir, playlist
 
         self.name         = ''              # name in menu
+        self.parent       = parent          # parent item to pass unmapped event
         self.icon         = None
         if info and isinstance(info, util.mediainfo.Info):
             self.info     = copy.copy(info)
         else:
             self.info     = util.mediainfo.Info(None, None, info)
-        self.parent       = parent          # parent item to pass unmapped event
         self.menuw        = None
         self.description  = ''
 
@@ -230,14 +233,14 @@ class Item:
         Set a new url to the item and adjust all attributes depending
         on the url.
         """
-        self.network_play = True        # network url, like http
-        self.url          = url         # the url itself
-        self.filename     = ''          # filename if it's a file:// url
+        self.url              = url     # the url itself
 
         if not url:
-            self.mode     = ''          # the type of the url (file, http, dvd...)
-            self.files    = None        # FileInformation
-            self.mimetype = ''          # extention or mode
+            self.network_play = True    # network url, like http
+            self.filename     = ''      # filename if it's a file:// url
+            self.mode         = ''      # the type of the url (file, http, dvd...)
+            self.files        = None    # FileInformation
+            self.mimetype     = ''      # extention or mode
             return
         
         if url.find('://') == -1:
@@ -252,47 +255,33 @@ class Item:
         if self.mode == 'file':
             self.network_play = False
             self.filename     = self.url[7:]
-            if os.path.exists(self.filename):
-                self.files.append(self.filename)
-                if search_image:
-                    image = util.getimage(self.filename[:self.filename.rfind('.')])
-                    if image:
-                        self.image = image
-                        self.files.image = image
-                    elif self.parent and self.parent.type != 'dir':
-                        self.image = util.getimage(os.path.dirname(self.filename)+\
-                                                   '/cover', self.image)
-
-            else:
-                self.filename = ''
-                self.url      = ''
-                self.mimetype = ''
-                return
-
-            try:
-                self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
-            except:
-                self.mimetype = self.type
-
-        elif self.network_play:
-            self.mimetype = self.type
-        else:
-            self.mimetype = self.mode
-
-            
-        if info and self.filename:
-            self.info = util.mediainfo.get(self.filename)
-            if self.parent and \
-                   hasattr(self.parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
-                   self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
-                   self.info.has_key('title'):
-                self.name = self.info['title']
-
-        if not self.name:
-            if self.filename:
+            self.files.append(self.filename)
+            if search_image:
+                image = util.getimage(self.filename[:self.filename.rfind('.')])
+                if image:
+                    self.image = image
+                    self.files.image = image
+                elif self.parent and self.parent.type != 'dir':
+                    self.image = util.getimage(os.path.dirname(self.filename)+\
+                                               '/cover', self.image)
+            self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
+            if info:
+                self.info = util.mediainfo.get(self.filename)
+                try:
+                    if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
+                        self.name = self.info['title'] or self.name
+                except:
+                    pass
+            if not self.name:
                 self.name = util.getname(self.filename)
-            else:
-                self.name = self.url
+
+        else:
+            self.network_play = True
+            self.filename     = ''
+            self.mimetype     = self.type
+            if not self.name:
+                self.name     = self.url
+
             
     def __setitem__(self, key, value):
         """
