@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/22 23:51:22  rshortt
+# updates
+#
 # Revision 1.1  2003/04/09 01:38:10  rshortt
 # Initial commit of some in-progress classes.
 #
@@ -32,6 +35,8 @@
 #
 # ----------------------------------------------------------------------
 
+import copy
+import pygame
 import config
 from Container      import Container
 from LayoutManagers import FlowLayout
@@ -49,10 +54,27 @@ class Panel(Container):
         Container.__init__(self, left, top, width, height, bg_color, fg_color,
                            border, bd_color, bd_width)
 
+        self.h_margin = 0
+        self.v_margin = 0
 
-    def _render(self):
-        if isinstance(self.parent.get_layout(), FlowLayout):
-            self.set_size((self.parent.width - 2 * self.parent.h_margin),
-                          self.height)
 
-        Container._render(self)
+    def set_parent(self, parent):
+        Container.set_parent(self, parent)
+
+        if self.parent:
+            if isinstance(self.parent.get_layout(), FlowLayout):
+                self.width = self.parent.width - 2 * self.parent.h_margin
+
+
+    def _draw(self):
+        # leaving comments in until done debugging
+        # self.surface = self.parent.surface.subsurface((0,0,self.width,self.height))
+        self.surface = self.parent.surface.subsurface((self.left,self.top,self.width,self.height))
+
+        #self.surface = pygame.Surface(self.get_size(), 0, 32)
+        ## self.surface.fill(None)
+        #self.surface.set_alpha(255)
+
+        Container._draw(self)
+
+        self.parent.surface.blit(self.surface, self.get_position())
