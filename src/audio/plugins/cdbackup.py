@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/08 02:06:18  outlyer
+# Just some cleanup of commented out or disabled code.
+#
 # Revision 1.19  2003/09/20 09:42:32  dischi
 # cleanup
 #
@@ -329,9 +332,6 @@ class main_backup_thread(threading.Thread):
             track = i +1        
             self.current_track = track
 
-            # store start time
-            begin = time.time()
-
             # CD_RIP_PATH = '%(artist)s/%(album)/%(song)s'
 
             # Add the song and track key back into user_rip_path_prefs to be used
@@ -364,9 +364,6 @@ class main_backup_thread(threading.Thread):
                 path_tail_cdparanoia = path_tail
                             
             # Build the cdparanoia command to be run
-
-            # XXX Sending output to dev /null; someone should move this into runapp
-            # and parse the output
             cdparanoia_command = '%s -s %s "%s%s.wav" >/dev/null 2>&1' % \
                                  (config.CDPAR_CMD, str(i+1), 
                                   pathname_cdparanoia, path_tail_cdparanoia)
@@ -378,8 +375,6 @@ class main_backup_thread(threading.Thread):
              
             # Build the lame command to be run if mp3 format is selected
             if string.upper(rip_format) == 'MP3':
-          
-                # XXX Sending output to /dev/null too; move this into runapp, parse output
                 lame_command = '%s --nohist -h %s "%s%s.wav" "%s%s.mp3" >/dev/null 2>&1' % \
                                (config.LAME_CMD, config.CD_RIP_LAME_OPTS,
                                 pathname_cdparanoia, path_tail_cdparanoia,
@@ -435,17 +430,8 @@ class main_backup_thread(threading.Thread):
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
                 if os.path.exists (rm_command): os.unlink(rm_command)
         
-        # Flash a popup window indicating copying is done
-        time_taken = time.time() - begin + 300
-        min = int(time_taken/60)
-        sec = int(time_taken%60)
-        popup_string="Finished Copying CD in %im%is" % (min,sec)
         for media in config.REMOVABLE_MEDIA:
             media.info.handle_type = 'audio'
-        #pop = AlertBox(text=popup_string)
-        #pop.show()
-        # Disabled because if the popup happens when you're listening to music,
-        # you can no longer do anything in Freevo.
 
         # done
         global rip_thread
