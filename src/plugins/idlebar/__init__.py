@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/08/27 14:27:54  dischi
+# change to new animation class name
+#
 # Revision 1.27  2004/08/24 16:42:42  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -189,7 +192,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def show(self, update=True, fade=0):
         if self.visible:
             return
-        gui.animation.Fade([self.container], fade, 0, 255).start()
+        gui.animation.FadeAnimation([self.container], fade, 0, 255).start()
         self.visible = True
         self.update()
         if update:
@@ -199,7 +202,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def hide(self, update=True, fade=0):
         if not self.visible:
             return
-        gui.animation.Fade([self.container], fade, 255, 0).start()
+        gui.animation.FadeAnimation([self.container], fade, 255, 0).start()
         self.visible = False
         if update:
             gui.get_display().update()
