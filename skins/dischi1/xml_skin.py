@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/16 19:32:05  dischi
+# function prepaire to resolve all the references
+# color can be a reference to a <color> tag
+#
 # Revision 1.25  2003/03/14 19:38:03  dischi
 # Support the new <menu> and <menuset> structure. See the blue2 skins
 # for example
@@ -86,12 +90,15 @@ import re
 import traceback
 import config
 
+import osd
+
 # XML support
 from xml.utils import qp_xml
 
 TRUE  = 1
 FALSE = 0
 
+osd = osd.get_singleton()
 
 # XXX Shouldn't this be moved to the config file?
 
@@ -134,13 +141,16 @@ def attr_int(node, attr, default, scale=0.0):
     return default
 
 
-def attr_hex(node, attr, default):
+def attr_col(node, attr, default):
     """
-    return the attribute in hex as integer
+    return the attribute in hex as integer or str for color name
     """
     try:
         if node.attrs.has_key(('', attr)):
-            return long(node.attrs[('', attr)], 16)
+            if node.attrs[('', attr)][:2] == '0x':
+                return long(node.attrs[('', attr)], 16)
+            else:
+                return node.attrs[('', attr)].encode('latin-1')
     except ValueError:
         pass
     return default
@@ -272,8 +282,8 @@ XML_types = {
     'width'    : ('int',  1),
     'height'   : ('int',  2),
     'spacing'  : ('int',  3),
-    'color'    : ('hex',  0),
-    'bgcolor'  : ('hex',  0),
+    'color'    : ('col',  0),
+    'bgcolor'  : ('col',  0),
     'size'     : ('int',  3),
     'radius'   : ('int',  3),
     'label'    : ('str',  0),
@@ -340,6 +350,55 @@ class XML_data:
 
 # ======================================================================
 
+
+class XML_menu:
+    """
+    the menu style definitions
+    """
+    def __init__(self):
+        self.style = []
+        pass
+    
+    def parse(self, node, scale, current_dir):
+        for subnode in node.children:
+            if subnode.name == 'style':
+                self.style += [ [ attr_str(subnode, 'image', ''),
+                                  attr_str(subnode, 'text', '') ] ]
+
+    def prepare(self, menuset, layout):
+        for s in self.style:
+            for i in range(2):
+                if s[i]:
+                    s[i] = copy.deepcopy(menuset[s[i]])
+                    s[i].prepare(layout)
+                else:
+                    s[i] = None
+
+        
+
+class XML_menuset:
+    """
+    the complete menu with the areas screen, title, view, listing and info in it
+    """
+    def __init__(self):
+        self.content = ( 'screen', 'title', 'view', 'listing', 'info' )
+        for c in self.content:
+            setattr(self, c, XML_area())
+
+
+    def parse(self, node, scale, current_dir):
+        for subnode in node.children:
+            for c in self.content:
+                if subnode.name == c:
+                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
+
+
+    def prepare(self, layout):
+        for c in self.content:
+            eval('self.%s.prepare(layout)' % c)
+
+
+
 class XML_area(XML_data):
     """
     area class (inside menu)
@@ -358,6 +417,12 @@ class XML_area(XML_data):
         if y != self.y:
             self.y += config.OVERSCAN_Y
 
+    def prepare(self, layout):
+        if self.visible:
+            self.layout = layout[self.layout]
+        else:
+            self.layout = None
+            
     def rect(self, type):
         if type == 'screen':
             return (self.x - config.OVERSCAN_X, self.y - config.OVERSCAN_X,
@@ -373,62 +438,35 @@ class XML_area(XML_data):
 
 # ======================================================================
 
-class XML_menuset:
+class XML_layout:
     """
-    the complete menu with the areas screen, title, view, listing and info in it
+    layout tag
     """
-    def __init__(self):
-        self.content = ( 'screen', 'title', 'view', 'listing', 'info' )
-        for c in self.content:
-            setattr(self, c, XML_area())
-
-
+    def __init__(self, label):
+        self.label = label
+        self.background = ()
+        self.content = XML_content()
+        
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
-            for c in self.content:
-                if subnode.name == c:
-                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
-        pass
+            if subnode.name == u'background':
+                self.background = []
+                for bg in subnode.children:
+                    if bg.name in ( 'image', 'rectangle' ):
+                        b = eval('XML_%s()' % bg.name)
+                        b.parse(bg, scale, current_dir)
+                        self.background += [ b ]
+            if subnode.name == u'content':
+                self.content.parse(subnode, scale, current_dir)
 
+    def prepare(self, font, color):
+        self.content.prepare(font, color)
+        for b in self.background:
+            b.prepare(color)
+            
+    def __cmp__(self, other):
+        return not (self.background == other.background and self.content == other.content)
 
-# ======================================================================
-
-class XML_menu:
-    """
-    the menu style definitions
-    """
-    def __init__(self):
-        self.style = []
-        pass
-    
-    def parse(self, node, scale, current_dir):
-        for subnode in node.children:
-            if subnode.name == 'style':
-                self.style += [ ( attr_str(subnode, 'image', ''),
-                                  attr_str(subnode, 'text', '') ) ]
-
-# ======================================================================
-
-class XML_image(XML_data):
-    """
-    an image
-    """
-    def __init__(self):
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
-
-
-# ======================================================================
-
-class XML_rectangle(XML_data):
-    """
-    a rectangle
-    """
-    def __init__(self):
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
-                                 'bgcolor', 'size', 'radius' ))
-
-
-# ======================================================================
 
 class XML_content(XML_data):
     """
@@ -465,33 +503,52 @@ class XML_content(XML_data):
             self.types['default'].cdata = ''
         
 
+    def prepare(self, font, color):
+        if self.font:
+            self.font = font[self.font]
+        else:
+            self.font = None
+
+        if color.has_key(self.color):
+            self.color = color[self.color]
+
+        for type in self.types:
+            if self.types[type].font:
+                self.types[type].font = font[self.types[type].font]
+            else:
+                self.types[type].font = None
+            if self.types[type].rectangle:
+                self.types[type].rectangle.prepare(color)
         
-class XML_layout:
-    """
-    layout tag
-    """
-    def __init__(self, label):
-        self.label = label
-        self.background = ()
-        self.content = XML_content()
-        
-    def parse(self, node, scale, current_dir):
-        for subnode in node.children:
-            if subnode.name == u'background':
-                self.background = []
-                for bg in subnode.children:
-                    if bg.name in ( 'image', 'rectangle' ):
-                        b = eval('XML_%s()' % bg.name)
-                        b.parse(bg, scale, current_dir)
-                        self.background += [ b ]
-            if subnode.name == u'content':
-                self.content.parse(subnode, scale, current_dir)
-
-    def __cmp__(self, other):
-        return not (self.background == other.background and self.content == other.content)
-
-
 # ======================================================================
+
+class XML_image(XML_data):
+    """
+    an image
+    """
+    def __init__(self):
+        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
+
+    def prepare(self, color):
+        pass
+    
+
+
+class XML_rectangle(XML_data):
+    """
+    a rectangle
+    """
+    def __init__(self):
+        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
+                                 'bgcolor', 'size', 'radius' ))
+
+    def prepare(self, color):
+        if color.has_key(self.color):
+            self.color = color[seld.color]
+        if color.has_key(self.bgcolor):
+            self.bgcolor = color[self.bgcolor]
+
+
 
 class XML_font(XML_data):
     """
@@ -501,14 +558,24 @@ class XML_font(XML_data):
         XML_data.__init__(self, ('name', 'size', 'color'))
         self.label = label
         self.shadow = XML_data(('visible', 'color', 'x', 'y'))
+        self.shadow.visible = FALSE
         
     def parse(self, node, scale, current_dir):
+        XML_data.parse(self, node, scale, current_dir)
         for subnode in node.children:
-            if subnode.name == u'definition':
-                XML_data.parse(self, subnode, scale, current_dir)
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
 
+    def prepare(self, color):
+        if color.has_key(self.color):
+            self.color = color[self.color]
+        self.h = osd.stringsize('Ajg', self.name, self.size)[1]
+
+        if self.shadow.visible:
+            if color.has_key(self.shadow.color):
+                self.shadow.color = color[self.shadow.color]
+            self.h += self.shadow.y
+        
     def __cmp__(self, other):
         return not (not XML_data.__cmp__(self, other) and self.shadow == other.shadow)
 
@@ -532,6 +599,9 @@ class XML_player:
                 if subnode.name == c:
                     eval('self.%s.parse(subnode, scale, current_dir)' % c)
 
+    def prepare(self, layout):
+        for c in self.content:
+            eval('self.%s.prepare(layout)' % c)
 
 # ======================================================================
 
@@ -552,6 +622,9 @@ class XML_tv:
                 if subnode.name == c:
                     eval('self.%s.parse(subnode, scale, current_dir)' % c)
 
+    def prepare(self, layout):
+        for c in self.content:
+            eval('self.%s.prepare(layout)' % c)
 
 # ======================================================================
 
@@ -562,18 +635,19 @@ class XMLSkin:
     skin main settings class
     """
     def __init__(self):
-        self.menu = {}
-        self.menuset = {}
 
-        self.layout = {}
-        self.font = {}
+        self._layout = {}
+        self._font = {}
+        self._color = {}
+        self._menuset = {}
+        self._menu = {}
+        self._popup = ''
+        self._player = XML_player()
+        self._tv = XML_tv()
         
         self.mainmenu = XML_mainmenu()
         self.icon_dir = ""
-        self.popup = ''
-        self.player = XML_player()
-        self.tv = XML_tv()
-        
+
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
@@ -589,53 +663,58 @@ class XMLSkin:
                     self.menu = {}
                     type = 'default'
                     
-                self.menu[type] = XML_menu()
-                self.menu[type].parse(node, scale, c_dir)
+                self._menu[type] = XML_menu()
+                self._menu[type].parse(node, scale, c_dir)
 
 
             if node.name == u'menuset':
                 label   = attr_str(node, 'label', '')
                 inherit = attr_str(node, 'inherits', '')
                 if inherit:
-                    self.menuset[label] = copy.deepcopy(self.menuset[inherit])
-                elif not self.menuset.has_key(label):
-                    self.menuset[label] = XML_menuset()
-                self.menuset[label].parse(node, scale, c_dir)
+                    self._menuset[label] = copy.deepcopy(self._menuset[inherit])
+                elif not self._menuset.has_key(label):
+                    self._menuset[label] = XML_menuset()
+                self._menuset[label].parse(node, scale, c_dir)
 
 
             if node.name == u'layout':
                 label = attr_str(node, 'label', '')
                 if label:
-                    if not self.layout.has_key(label):
-                        self.layout[label] = XML_layout(label)
-                    self.layout[label].parse(node, scale, c_dir)
+                    if not self._layout.has_key(label):
+                        self._layout[label] = XML_layout(label)
+                    self._layout[label].parse(node, scale, c_dir)
                         
-                self.mainmenu.parse(node, scale, c_dir)
 
             if node.name == u'font':
                 label = attr_str(node, 'label', '')
                 if label:
-                    if not self.font.has_key(label):
-                        self.font[label] = XML_font(label)
-                    self.font[label].parse(node, scale, c_dir)
+                    if not self._font.has_key(label):
+                        self._font[label] = XML_font(label)
+                    self._font[label].parse(node, scale, c_dir)
                         
-                self.mainmenu.parse(node, scale, c_dir)
+
+            if node.name == u'color':
+                label = attr_str(node, 'label', '')
+                if label:
+                    value = attr_col(node, 'value', '')
+                    self._color[label] = value
+                        
 
             if node.name == u'iconset':
                 self.icon_dir = attr_str(node, 'dir', self.icon_dir)
 
             if node.name == u'popup':
-                self.popup = attr_str(node, 'layout', self.popup)
+                self._popup = attr_str(node, 'layout', self._popup)
 
             if node.name == u'player':
-                self.player.parse(node, scale, c_dir)
+                self._player.parse(node, scale, c_dir)
 
             if node.name == u'tv':
-                self.tv.parse(node, scale, c_dir)
+                self._tv.parse(node, scale, c_dir)
 
 
 
-    def load(self, file, copy_content = 0):
+    def load(self, file, copy_content = 0, prepare = TRUE):
         """
         load and parse the skin file
         """
@@ -671,13 +750,37 @@ class XMLSkin:
                     include  = attr_file(freevo_type, "include", "", \
                                          os.path.dirname(file), guessing = FALSE)
                     if include:
-                        self.load(include, copy_content)
+                        self.load(include, copy_content, prepare = FALSE)
 
                     self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
+
+            if not prepare:
+                return 1
+        
+            self.menu   = copy.deepcopy(self._menu)
+            self.tv     = copy.deepcopy(self._tv)
+            self.player = copy.deepcopy(self._player)
+
+            font        = copy.deepcopy(self._font)
+            layout      = copy.deepcopy(self._layout)
+
+            for f in font:
+                font[f].prepare(self._color)
+                
+            for l in layout:
+                layout[l].prepare(font, self._color)
+
+            for menu in self.menu:
+                self.menu[menu].prepare(self._menuset, layout)
+
+            self.player.prepare(layout)
+            self.tv.prepare(layout)
+
+            self.popup = layout[self._popup]
+            return 1
 
         except:
             print "ERROR: XML file corrupt"
             traceback.print_exc()
             return 0
 
-        return 1
