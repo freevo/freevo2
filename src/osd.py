@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/24 04:48:59  krister
+# Changed keyboard volume +/- keys
+#
 # Revision 1.7  2003/01/17 03:50:21  krister
 # Doh! The X11 menus were slow because of stupid SDL event handling, fixed!
 #
@@ -92,8 +95,8 @@ SPACE   SELECT
 RETURN  SELECT
 F2      POWER
 F3      MUTE
-PLUS    VOL+
-MINUS   VOL-
+n/KEYP- VOL-
+m/KEYP+ VOL+
 c       CH+
 v       CH-
 1       1
@@ -138,8 +141,10 @@ cmds_sdl = {
     K_RETURN      : 'SELECT',
     K_F2          : 'POWER',
     K_F3          : 'MUTE',
-    K_PLUS        : 'VOL+',
-    K_MINUS       : 'VOL-',
+    K_KP_MINUS    : 'VOL-',
+    K_n           : 'VOL-',
+    K_KP_PLUS     : 'VOL+',
+    K_m           : 'VOL+',
     K_c           : 'CH+',
     K_v           : 'CH-',
     K_1           : '1',

@@ -13,8 +13,11 @@ o Fixed lot's of bugs
 o Replaced the icons
 o Moved a number of doc files to the Freevo Wiki.
 o Bins support (http://jsautret.free.fr/BINS/index.html)
+o Faster TV channel change
+o Added Thomas Schüppels objectcache patch.
 o Code cleanup / restructuring (xmms support dropped for now)
 o Speeded up the keyboard handling.
+o Changed keyboard volume +/- keys
 	
 	
 Release 1.3.0 (2002-11-13):
