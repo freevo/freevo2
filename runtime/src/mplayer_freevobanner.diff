@@ -1,0 +1,40 @@
+diff -Naur mplayer-orig/mencoder.c mplayer/mencoder.c
+--- mplayer-orig/mencoder.c	Thu Jan 23 19:04:50 2003
++++ mplayer/mencoder.c	Wed Jan 29 00:01:12 2003
+@@ -362,7 +362,16 @@
+   mp_msg_init();
+   mp_msg_set_level(MSGL_STATUS);
+   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
++  
++  {
++    static char msg_freevo[] =
++      "\n\n\n\nFREEVO (http://www.freevo.org) VERSION!!!!!\n\n"
++      "DO NOT REQUEST SUPPORT FROM THE MPLAYER PROJECT WHEN "
++      "USING THIS VERSION OF MENCODER!!!!\n\n\n";
+ 
++    mp_msg(MSGT_CPLAYER,MSGL_INFO,msg_freevo);
++  }
++    
+   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
+   GetCpuCaps(&gCpuCaps);
+ #ifdef ARCH_X86
+diff -Naur mplayer-orig/mplayer.c mplayer/mplayer.c
+--- mplayer-orig/mplayer.c	Mon Jan 27 18:59:15 2003
++++ mplayer/mplayer.c	Wed Jan 29 00:00:56 2003
+@@ -652,6 +652,16 @@
+   mp_msg_set_level(MSGL_STATUS);
+ 
+   mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
++  
++  {
++    static char msg_freevo[] =
++      "\n\n\n\nFREEVO (http://www.freevo.org) VERSION!!!!!\n\n"
++      "DO NOT REQUEST SUPPORT FROM THE MPLAYER PROJECT WHEN "
++      "USING THIS VERSION OF MPLAYER!!!!\n\n\n";
++
++    mp_msg(MSGT_CPLAYER,MSGL_INFO,msg_freevo);
++  }
++    
+   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
+   GetCpuCaps(&gCpuCaps);
+ #ifdef ARCH_X86
