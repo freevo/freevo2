@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2002/11/28 22:06:25  outlyer
+# Reverting the switch to "DrawTextFramed" to "DrawText" since it was
+# making a bunch of text disappear. DrawTextFramed is the better way to do it,
+# but 50% of my menu items disappeared.
+#
 # Revision 1.67  2002/11/28 04:57:19  gsbarbieri
 # Now do not draw the "selected box" under the icon in DrawMenu_Selection
 #
@@ -503,8 +508,7 @@ class Skin:
 
             # normal items
             else:
-                DrawTextFramed(text, obj, x=x0+ icon_present*icon_size*1.2, y=top,
-                               width=width,height=font_h, mode='hard')
+		DrawText(text, obj, x=x0+icon_present*icon_size*1.2, y=top)
 
 
             y0 += spacing
