@@ -245,8 +245,8 @@
     <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
     <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
     <font label="player" name="Arial_Bold" size="18" color="0xffffff"/>
-    <font label="widget" name="Arial_Bold" size="14"/>
-    <font label="widget selected" name="Arial_Bold" size="14"/>
+    <font label="widget" name="Arial_Bold" size="12"/>
+    <font label="widget selected" name="Arial_Bold" size="12"/>
      
 
 
