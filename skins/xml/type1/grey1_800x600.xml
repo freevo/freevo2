@@ -119,9 +119,7 @@
     </popup>
 
 
-
-
-
+    <!-- setup for the extended menu tv -->
 
     <extendedmenu type="tv">
       <background image="../../images/aubin_bg1_800x600.png" mask=""/>
@@ -147,7 +145,7 @@
 	<shadow visible="no"/>
       </view>
       
-      <listing>
+      <listing type="table">
         <geometry x="10" y="210" width="780" height="300"/>
 	<background color="0xbb58677c"/>
 	
@@ -155,31 +153,27 @@
 	  <geometry x="10" y="100" width="780" height="410"/>
 	  <background color="0xffffffff"/>
 	</expand>
+	
+	<table border_color="0xaa000000" border_size="2" spacing="2">
+	  <label bgcolor="0x88000066" width="158">
+	    <font name="bluehigh" size="18" color="0xffffff" align="center" valign="center"/>
+	    <shadow visible="no"/>
+	  </label>
+	  
+	  <content>
+	    <font name="bluehigh" size="18" color="0x111111" align="left"/>
+	    <shadow visible="no"/>
+	    
+	    <selection bgcolor="0xff000000">
+	      <font name="bluehigh" size="18" color="0x000000"/>
+	      <shadow visible="no"/>
+	    </selection>
+	    
+	    <indicator type="left" image="skins/images/arrow_left.png"/>
+	    <indicator type="right" image="skins/images/arrow_right.png"/>
+	  </content>
+	</table>
 
-	<font name="bluehigh" size="18" color="0x111111" align="left"/>
-	<shadow visible="no"/>
-
-	<selection bgcolor="0xff000000">
-	  <font name="bluehigh" size="18" color="0x000000"/>
-	  <shadow visible="no"/>
-	</selection>
-
-
-	<!-- I don't like the name and structure of the next tags -->
-
-	<head bgcolor="0x88000066" x="393" y="20">
-	  <font name="bluehigh" size="18" color="0xffffff" align="center" valign="center"/>
-	  <shadow visible="no"/>
-	</head>
-
-
-	<border color="0xaa000000" size="2"/>
-	<spacing value="2"/>
-	<channel_width value="158"/>
-	<indicator>
-	  <left image="skins/images/arrow_left.png"/>
-	  <right image="skins/images/arrow_right.png"/>
-	</indicator>
       </listing>
     </extendedmenu>
 

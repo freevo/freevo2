@@ -32,10 +32,17 @@
 	<font size="14"/>
       </info>
       <listing>
-	<font size="14"/>
-	<selection>
-	  <font size="14"/>
-	</selection>
+	<table>
+	  <label>
+	    <font size="14"/>
+	  </label>
+	  <content>
+	    <font size="14"/>
+	    <selection>
+	      <font size="14"/>
+	    </selection>
+	  </content>
+	</table>
       </listing>
     </extendedmenu>
 

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/10/16 19:38:56  dischi
+# o Removed older xml files
+# o changed to structure in the xml files. In listings is now a section
+#   table (that's what the tv menu is) with label (ex-head) and content
+# o support in xml_skin.py for that, changed also skin_main1
+#
 # Revision 1.12  2002/10/16 04:58:16  krister
 # Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
 #
@@ -223,12 +229,11 @@ class XML_mainmenu:
 class XML_listingmenuitem(XML_menuitem):
     def __init__(self):
         XML_menuitem.__init__(self)
-        self.head = XML_data()
+        self.label = XML_data()
         self.expand = XML_data()
         self.border_color = 0
         self.border_size = 1
-        self.spacing = 2
-        self.channel_width = 100
+        self.spacing = 0
         self.left_arrow = None
         self.right_arrow = None
         self.up_arrow = None
@@ -329,7 +334,6 @@ class XMLSkin:
     def __init__(self):
         self.menu_default = XML_menu()
         self.menu_main    = XML_menu()
-        self.menu_tv      = XML_menu()
         self.mp3          = XML_mp3()
         self.popup        = XML_popup()
 
@@ -504,6 +508,20 @@ class XMLSkin:
                 self.parse_mainmenunode(node, item)
                 self.mainmenu.items[item.pos] = item                
 
+    def parse_listingnode_content(self, node, data):
+        self.parse_node(node, data)
+        for subnode in node.children:
+            if subnode.name == u'indicator':
+                type = attr_str(subnode, 'type', 'None')
+                if type == 'left':
+                    data.left_arrow = attr_str(subnode,'image', data.left_arrow)
+                if type == 'right':
+                    data.right_arrow = attr_str(subnode,'image', data.right_arrow)
+                if type == 'down':
+                    data.down_arrow = attr_str(subnode,'image', data.down_arrow)
+                if type == 'up':
+                    data.up_arrow = attr_str(subnode,'image', data.up_arrow)
+
 
     # parse listing conf from extendedmenu
     def parse_listingnode(self, node, data):
@@ -511,25 +529,16 @@ class XMLSkin:
         for subnode in node.children:
             if subnode.name == u'expand':
                 self.parse_node(subnode, data.expand)
-            elif subnode.name == u'head':
-                self.parse_node(subnode, data.head)
-            elif subnode.name == u'border':
-                data.border_size = attr_int(subnode,'size', data.border_size)
-                data.border_color = attr_hex(subnode,'color', data.border_color)
-            elif subnode.name == u'spacing':
-                data.spacing = attr_int(subnode,'value', data.spacing, self.scale)
-            elif subnode.name == u'channel_width':
-                data.channel_width = attr_int(subnode,'value', data.channel_width, self.scale)
-            elif subnode.name == u'indicator':
-                for sub_subnode in subnode.children:
-                    if sub_subnode.name == u'left':
-                        data.left_arrow = attr_str(sub_subnode,'image', data.left_arrow)
-                    if sub_subnode.name == u'right':
-                        data.right_arrow = attr_str(sub_subnode,'image', data.right_arrow)
-                    if sub_subnode.name == u'down':
-                        data.down_arrow = attr_str(sub_subnode,'image', data.down_arrow)
-                    if sub_subnode.name == u'up':
-                        data.up_arrow = attr_str(sub_subnode,'image', data.up_arrow)
+
+            elif subnode.name == u'table':
+                data.spacing = attr_int(subnode,'spacing', data.spacing, self.scale)
+                self.parse_node(subnode, data)
+                for subsubnode in subnode.children:
+                    if subsubnode.name == u'label':
+                        self.parse_node(subsubnode, data.label)
+                    elif subsubnode.name == u'content':
+                        self.parse_listingnode_content(subsubnode, data)
+
                         
 
     #
@@ -589,16 +598,11 @@ class XMLSkin:
                                 if copy_content:
                                     self.menu_default = copy.deepcopy(self.menu_default)
                                     self.menu_main = copy.deepcopy(self.menu_main)
-                                    self.menu_tv = copy.deepcopy(self.menu_tv)
                                 self.read_menu(file, node, self.menu_default)
                                 self.read_menu(file, node, self.menu_main)
-                                self.read_menu(file, node, self.menu_tv)
 
                             if type == "main":
                                 self.read_menu(file, node, self.menu_main)
-
-                            if type == "tv":
-                                self.read_menu(file, node, self.menu_tv)
 
                         if node.name == u'mp3':
                             self.read_mp3(file, node, copy_content)
