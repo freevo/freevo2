@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2002/08/11 09:05:18  krister
+# Added a killall for the runtime tasks at shutdown.
+#
 # Revision 1.42  2002/08/08 06:05:32  outlyer
 # Small changes:
 #  o Made Images menu a config file option "ENABLE_IMAGES"
@@ -113,8 +116,10 @@ def shutdown(menuw=None, arg=None):
     if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
         if config.ENABLE_SHUTDOWN_SYS:
             os.system("shutdown -h now")
-            
+
+
     os.system('touch /tmp/freevo-shutdown') # XXX kludge to signal startup.py to abort
+    os.system('killall -9 freevo_rt/ld-linux.so.2') # XXX kludge to shutdown the runtime version
 
 
 def autostart():
