@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2002/11/20 22:07:32  dischi
+# small fix for my code cleanup
+#
 # Revision 1.60  2002/11/20 03:44:57  krister
 # Dirty fix in the skin to display the new icons better, the icons should be resized instead.
 #
@@ -407,6 +410,11 @@ class Skin:
 
             if image:
                 type = item.type
+
+                # fix for the new code, I renamed some stuff
+                if type == 'video':
+                    type = 'movie'
+                    
                 if type == 'photo' and val.cover_image.visible:
                     image_x = val.cover_image.x-val.cover_image.spacing
                     if menu.selected == item:
