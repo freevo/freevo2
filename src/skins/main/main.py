@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/07 16:02:11  dischi
+# fix hiding for idlebar
+#
 # Revision 1.8  2003/09/07 15:43:06  dischi
 # tv guide can now also have different styles
 #
@@ -237,7 +240,7 @@ class BlankScreen:
         osd.clearscreen(color=osd.COL_BLACK)
         if not skin_engine.settings.prepared:
             skin_engine.settings.prepare()
-
+            
         if skin_engine.settings.images.has_key('background'):
             image = osd.loadbitmap(skin_engine.settings.images['background'])
             image = pygame.transform.scale(image, (osd.width, osd.height))
@@ -271,6 +274,9 @@ class Splashscreen(BlankScreen):
     """
     def __init__(self):
         BlankScreen.__init__(self)
+        # reset skin engine prepared mode, maybe the idlebar will
+        # be used and than some things will change
+        skin_engine.settings.prepared = FALSE
         self.initialized = FALSE
         self.pos = 0
 
