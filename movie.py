@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2002/08/08 03:16:56  krister
+# Changed move playing so that the next movie is not started automatically.
+#
 # Revision 1.20  2002/08/07 18:54:08  dischi
 # changed the "mounting..." box to osd.popup_box
 #
@@ -245,7 +248,7 @@ def cwd(arg=None, menuw=None):
             image = os.path.splitext(file)[0] + ".jpg"
 
         # add file to list
-        files += [ ( title, 'video', file, mplayer_files, None, image ) ]
+        files += [ ( title, 'video', file, [], None, image ) ]
 
 
     # sort "normal" files and xml files by title
