@@ -1,0 +1,81 @@
+#!/sbin/runscript
+# Distributed under the terms of the GNU General Public License, v2 or later
+
+
+depend() {
+	need lircd
+	need net
+	need xfs
+}
+
+checkconfig() {
+        if [ ! -e /etc/conf.d/freevo ] ; then
+	        eerror "This script requires /etc/conf.d/freevo"
+                return 1
+        fi
+	. /etc/conf.d/freevo
+	if [ "$freevo" = "no" ] && [ "$webserver" = "no" ] && \
+		[ "$recordserver" = "no" ]; then
+	        eerror "Please check /etc/conf.d/freevo"
+                return 1
+        fi
+}
+
+start() {
+        checkconfig || return 1
+	. /etc/conf.d/freevo
+
+        sysctl -w dev.rtc.max-user-freq=1024 > /dev/null
+
+	if [ "$freevo" == "daemon" ]; then
+	        ebegin "Starting Freevo daemon"
+	        $freevo_bin daemon start
+	        eend $?
+
+	elif [ "$freevo" == "yes" ]; then
+	        ebegin "Starting Freevo"
+		if egrep 'display.*=.*(x11|dga)' /etc/freevo/freevo.conf >/dev/null; then
+	                $freevo_bin -fs & >/dev/null 2>/dev/null
+		else
+	        	$freevo_bin start
+		fi
+	        eend $?
+	fi
+
+	if [ "$recordserver" == "yes" ]; then
+	        ebegin "Starting Freevo recordserver"
+	        $freevo_bin recordserver start
+	        eend $?
+	fi
+
+	if [ "$webserver" == "yes" ]; then
+	        ebegin "Starting Freevo webserver"
+	        $freevo_bin webserver start
+	        eend $?
+	fi
+}
+
+stop() {
+	if [ "$webserver" == "yes" ]; then
+	        ebegin "Stopping Freevo webserver"
+	        $freevo_bin webserver stop
+	        eend $?
+	fi
+
+	if [ "$recordserver" == "yes" ]; then
+	        ebegin "Stopping Freevo recordserver"
+	        $freevo_bin recordserver stop
+	        eend $?
+	fi
+
+	if [ "$freevo" == "daemon" ]; then
+	        ebegin "Stopping Freevo daemon"
+	        $freevo_bin stop
+	        $freevo_bin daemon stop
+	        eend $?
+	elif [ "$freevo" == "yes" ]; then
+	        ebegin "Stopping Freevo"
+	        $freevo_bin stop
+	        eend $?
+	fi
+}
