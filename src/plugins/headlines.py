@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/21 16:47:15  dischi
+# use utils html2txt function now
+#
 # Revision 1.5  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -75,8 +78,6 @@ osd  = osd.get_singleton()
 #check every 30 minutes
 MAX_HEADLINE_AGE = 1800
 
-import htmlentitydefs
-
 class PluginInterface(plugin.MainMenuPlugin):
     """
     A plugin to list headlines from an XML (RSS) feed.
@@ -122,14 +123,6 @@ class ShowHeadlineDetails(skin.BlankScreen):
         self.item = item
         self.menuw = menuw
 
-        # fix some non latin-1 problems
-        self.entitydefs = copy.deepcopy(htmlentitydefs.entitydefs)
-        self.entitydefs['ndash'] = "-";
-        self.entitydefs['bull'] = "-";
-        self.entitydefs['rsquo'] = "'";
-        self.entitydefs['lsquo'] = "`";
-        self.entitydefs['hellip'] = '...'
-
         rc.app(self)
         self.refresh()
 
@@ -138,31 +131,10 @@ class ShowHeadlineDetails(skin.BlankScreen):
         """
         Basic renderer. Remove all tags, replace <p> and <br> with a newline.
         """
-        string = string.encode('Latin-1', 'ignore')
         string = string.replace('\n\n', '&#xxx;').replace('\n', ' ').\
                  replace('&#xxx;', '\n')
-        string = string.replace('<p>', '\n').replace('<bt>', '\n').\
-                 replace("&#039", "'")
-
-        i = 0
-        while i < len(string):
-            amp = string.find("&", i) # find & as start of entity
-            if amp == -1: # not found
-                break
-            i = amp + 1
-            if string[amp + 1] == "#": # numerical entity like "&#039;"
-                continue
-            semicolon = string.find(";", amp) # find ; as end of entity
-            entity = string[amp:semicolon + 1]
-            if semicolon - amp > 7:
-                continue
-            try:
-                # the array has mappings like "Uuml" -> "ü"
-                replacement = self.entitydefs[entity[1:-1]]
-            except KeyError:
-                continue
-            string = string.replace(entity, replacement)
-
+        string = string.replace('<p>', '\n').replace('<bt>', '\n')
+        string = util.htmlenties2txt(string)
         return re.sub('<.*?>', '', string)
         
 
