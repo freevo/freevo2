@@ -6,7 +6,7 @@
 #
 
 # Keep track of where we started. This env var is used inside Freevo.
-export FREEVO_STARTDIR=$cwd
+export FREEVO_STARTDIR=$PWD
 
 
 # cd to the freevo directory if necessary
