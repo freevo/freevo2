@@ -8,6 +8,8 @@
 # Keep track of where we started. This env var is used inside Freevo.
 export FREEVO_STARTDIR=$PWD
 
+# Set this globaly, everything here should have access to these modules.
+export PYTHONPATH=./src:./src/www:./src/tv
 
 # cd to the freevo directory if necessary
 if ! [ -e src/identifymedia.py ]; then
@@ -46,7 +48,6 @@ fi
 
 # Create the config file.
 if [ "$1" = "setup" ] ; then
-    export PYTHONPATH=./src
     shift 1
     ./runapp python setup_freevo.py $@
     exit 0
@@ -67,7 +68,6 @@ fi
 
 # Support for using just Python
 if [ "$1" = "prompt" ] ; then
-    export PYTHONPATH=./src
     ./runapp python
     exit 0
 fi
@@ -75,7 +75,6 @@ fi
 # Support executing a standalone Python application, e.g. epg_xmltv.py
 # Usage: freevo execute appname.py arg1 arg2...
 if [ "$1" = "execute" ] ; then
-    export PYTHONPATH=./src:./src/www:./src/tv
     shift 1
     ./runapp python $@
     exit 0
