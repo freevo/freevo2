@@ -6,6 +6,8 @@
 <!ENTITY daemon SYSTEM "code/daemon.py" CDATA linespecific>
 <!ENTITY daemonpoll SYSTEM "code/daemon_poll.py" CDATA linespecific>
 <!ENTITY daemonaction SYSTEM "code/daemon_action.py" CDATA linespecific>
+<!ENTITY skin SYSTEM "code/skin.fxd" CDATA linespecific>
+<!ENTITY skin2 SYSTEM "code/skin2.fxd" CDATA linespecific>
 <!ENTITY item SYSTEM "code/item.py" CDATA linespecific>
 <!ENTITY plugindir SYSTEM "code/dir" CDATA linespecific>
 <!ENTITY setup SYSTEM "code/setup.py" CDATA linespecific>
@@ -226,6 +228,72 @@
       <para><emphasis>not written yet</emphasis></para>
     </sect1>
 
+    <sect1>
+      <title>Using the skin</title>
+      <para>
+	Some plugins may want to draw something on the screen. One example is
+	the weather plugin (external plugin, download it from
+	<varname>http://freevo.sf.net/addons/</varname>). Since this has
+	nothing to do with the normal menu system, such plugins also need an
+	eventhandler to react on buttons. 
+      </para>
+      <para>
+	Since Freevo knows nothing about which elements should be displayed
+	and were to put them, the plugin needs to define a fxd file in
+	<filename>share/skins/plugins</filename> with the needed
+	information. 
+      </para>
+      <para>
+	<programlisting><inlinegraphic entityref="skin"></inlinegraphic>
+	</programlisting>
+      </para>
+      <para>
+	Now the freevo skin has fxd information about the type
+	<varname>foo</varname>, but doesn't know which areas are allowed (ok,
+	the skin could guess it). So the plugin needs to call
+	<programlisting>
+skin.register('foo', ('screen', 'title', 'view', 'plugin'))</programlisting> 
+	once. Now the plugin can call
+	<programlisting>skin.draw('foo', item)</programlisting> to draw
+	<varname>item</varname> with the settings of <varname>foo</varname>. 
+      </para>
+      <para>So far so good, but it may happen that the plugin needs an area
+	which isn't defined right now. The default areas for Freevo are
+	<varname>screen</varname>, <varname>title</varname>,
+	<varname>subtitle</varname>, <varname>listing</varname>,
+	<varname>info</varname>, <varname>view</varname> and
+	<varname>plugin</varname>. The plugin area is used for smaller
+	plugins to draw on the screen, e.g. the idlebar.
+      </para>
+      <para>
+	To create an area of your own, you first need to define it in the fxd
+	file:
+      </para>
+      <para>
+	<programlisting><inlinegraphic entityref="skin2"></inlinegraphic>
+	</programlisting>
+      </para>
+      <para>
+	Now the skin has fxd information about an area
+	<varname>foo</varname>. The skin knows were it is and can also draw
+	the background of the layout. But it needs an object to draw the real
+	content. The following example defines a class which inherits from
+	<varname>skin.Area</varname>. It defines itself as class to draw
+	<varname>foo_area</varname>. The skin now calls the function
+	<function>update_content_needed</function> to check if the area needs
+	an update (return <varname>True</varname> or
+	<varname>False</varname>). When Freevo knows that an update is
+	needed, this function may not be called after all. The real work is
+	done is <function>update_content</function>. 
+      </para>
+<!--       <para> -->
+<!-- 	<programlisting><inlinegraphic entityref="skin2"></inlinegraphic> -->
+<!-- 	</programlisting> -->
+<!--       </para> -->
+      <para>
+	(add more doc here)
+      </para>
+    </sect1>
   </chapter>
 
   <chapter> 

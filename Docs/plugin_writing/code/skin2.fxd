@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<freevo>
+  <skin geometry="800x600">
+    <foo>
+      <screen layout="screen" x="0" y="0" width="800" height="600"/>
+      <foo_area layout="foo" x="10" y="100" width="300" height="200"/>
+    </foo>
+  </skin>
+
+  <layout label="foo">
+    <background>
+      ...
+    </background>
+    <content ...>
+      ...
+    </content>
+  </layout>
+</freevo>
