@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/01/17 21:20:15  dischi
+# try to generate a better title
+#
 # Revision 1.19  2004/01/10 13:16:15  dischi
 # remove self.fxd_file, not needed anymore
 #
@@ -129,8 +132,16 @@ class PluginInterface(plugin.MimetypePlugin):
                 if covers:
                     diritem.image = os.path.join(diritem.dir, covers[0])
 
-            
-
+        if not diritem.info.has_key('title'):
+            # ok, try some good name creation
+            if diritem['album']:
+                diritem.name = diritem['album']
+            else:
+                # maybe we can use the artist
+                if diritem['artist'] and diritem.parent and \
+                   diritem.parent['artist'] != diritem['artist']:
+                    diritem.name = diritem['artist']
+                
     def fxdhandler(self, fxd, node):
         """
         parse audio specific stuff from fxd files
