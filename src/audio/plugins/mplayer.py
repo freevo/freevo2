@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/02/19 04:37:21  gsbarbieri
+# MPlayer Audio Visualization support.
+# Get mpav from http://gsbarbieri.sytes.net/mpav/
+#
 # Revision 1.34  2004/01/31 12:39:47  dischi
 # delete unused audio variables
 #
@@ -185,7 +189,11 @@ class MPlayer:
             command.append('-playlist')
             
         command.append(filename)
-        
+
+        self.plugins = plugin.get('mplayer_audio')
+        for p in self.plugins:
+            command = p.play(command, self)
+            
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
@@ -203,6 +211,9 @@ class MPlayer:
         """
         self.app.stop('quit\n')
 
+        for p in self.plugins:
+            command = p.stop()
+
 
     def is_playing(self):
         return self.app.isAlive()
@@ -217,6 +228,10 @@ class MPlayer:
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+
+        for p in self.plugins:
+            if p.eventhandler(event):
+                return True
 
         if event == PLAY_END and event.arg:
             self.stop()
@@ -257,6 +272,15 @@ class MPlayerApp(childapp.ChildApp2):
         self.stop_reason = 0 # 0 = ok, 1 = error
         self.RE_TIME     = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
+
+        # check for mplayer plugins
+        self.stdout_plugins  = []
+        self.elapsed_plugins = []
+        for p in plugin.get('mplayer_audio'):
+            if hasattr(p, 'stdout'):
+                self.stdout_plugins.append(p)
+            if hasattr(p, 'elapsed'):
+                self.elapsed_plugins.append(p)
         childapp.ChildApp2.__init__(self, app, stop_osd=0)
 
 
@@ -295,9 +319,19 @@ class MPlayerApp(childapp.ChildApp2):
             if self.item.elapsed != self.elapsed:
                 self.player.refresh()
             self.elapsed = self.item.elapsed
+            
+            for p in self.elapsed_plugins:
+                p.elapsed(self.elapsed)
+            
+        elif not self.item.elapsed:
+            for p in self.stdout_plugins:
+                p.stdout(line)
+                
 
 
 
     def stderr_cb(self, line):
         if line.startswith('Failed to open'):
             self.stop_reason = 1
+        for p in self.stdout_plugins:
+            p.stdout(line)

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/19 04:37:21  gsbarbieri
+# MPlayer Audio Visualization support.
+# Get mpav from http://gsbarbieri.sytes.net/mpav/
+#
 # Revision 1.14  2004/02/15 11:18:47  dischi
 # better detachbar plugin, does not need stuff in other files now
 #
@@ -81,6 +85,9 @@ class PluginInterface(plugin.MainMenuPlugin):
         gui  = audio.player.get()
 
         # hide the player and show the menu
+        mpav = plugin.getbyname( 'audio.mpav' )
+        if mpav:
+            mpav.stop_mpav()
         gui.hide()
         gui.menuw.show()
 
@@ -113,3 +120,6 @@ class PluginInterface(plugin.MainMenuPlugin):
         # hide the menu and show the player
         menuw.hide()
         gui.show()
+        mpav = plugin.getbyname( 'audio.mpav' )
+        if mpav:
+            mpav.start_mpav()
