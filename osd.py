@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/09/01 04:12:04  krister
+# Added error checking for font rendering.
+#
 # Revision 1.16  2002/08/31 17:18:29  dischi
 # added function to delete a bitmap from cache
 #
@@ -453,7 +456,11 @@ class OSD:
 
         # Render string with anti-aliasing
         if bgcolor == None:
-            surf = f.render(string, 1, self._sdlcol(fgcolor))
+            try:
+                surf = f.render(string, 1, self._sdlcol(fgcolor))
+            except:
+                print 'FAILED: str="%s" col="%s"' % (string, fgcolor)
+                raise
         else:
             surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
 
