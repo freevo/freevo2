@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/12 10:41:10  dischi
+# Removed some stuff we don't need anymore with the new menu extention
+#
 # Revision 1.13  2003/02/12 10:28:27  dischi
 # Added new xml file support. The old xml files won't work, you need to
 # convert them.
@@ -100,7 +103,6 @@ import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
 import tv.tv   # The TV module
-import image.image # The Image module
 
 import identifymedia
 import signal
