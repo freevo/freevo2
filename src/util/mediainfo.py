@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/16 20:36:42  dischi
+# fix crash
+#
 # Revision 1.29  2004/02/15 15:30:52  dischi
 # improved item with track storage
 #
@@ -333,9 +336,9 @@ class MMCache(Cache):
             if info.has_key('tracks') and info['tracks'] and not info.has_key('length'):
                 info['length'] = 0
                 for track in info['tracks']:
-                    if track.has_key('length'):
+                    if track.has_key('length') and track['length']:
                         info['length'] += track['length']
-                if info['tracks'][0].has_key('length') and \
+                if info['tracks'][0].has_key('length') and info['tracks'][0]['length'] and \
                    info['tracks'][0]['length'] * len(info['tracks']) == info['length']:
                     # badly masted dvd
                     info['length'] = info['tracks'][0]['length']
