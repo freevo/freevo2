@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/17 06:19:32  outlyer
+# Replaced orange on black screen error message with skin.Popup to match
+# behaviour elsewhere.
+#
 # Revision 1.13  2003/02/15 20:44:48  dischi
 # Bugfix: the osd uses objectcache for a long time now. We should write more
 # docs, nobody noticed this bug.
@@ -164,11 +168,12 @@ class ImageViewer:
             image = item.loadimage( )
 
         if not image:
-            osd.clearscreen(color=osd.COL_BLACK)
-            osd.drawstring('Image error on "%s"' % filename, osd.width/2, osd.height/2,
-                           fgcolor=osd.COL_ORANGE, align='center')
+            #osd.clearscreen(color=osd.COL_BLACK)
+            #osd.drawstring('Image error on "%s"' % filename, osd.width/2, osd.height/2,
+            #               fgcolor=osd.COL_ORANGE, align='center')
             # update the OSD
             osd.update()
+            skin.PopupBox('Can\'t Open Image\n"%s"' % (filename))
             return
         
 	width, height = image.get_size()
