@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/27 19:12:21  dischi
+# add dvd events
+#
 # Revision 1.14  2003/07/12 19:56:18  rshortt
 # Fix for when event arg is 0, like with INPUT_0.
 #
@@ -182,9 +185,17 @@ TOGGLE_OSD             = Event('TOGGLE_OSD')
 
 VIDEO_SEND_MPLAYER_CMD = Event('VIDEO_SEND_MPLAYER_CMD')
 VIDEO_MANUAL_SEEK      = Event('VIDEO_MANUAL_SEEK')
+VIDEO_NEXT_AUDIOLANG   = Event('VIDEO_NEXT_AUDIOLANG')
 STORE_BOOKMARK         = Event('STORE_BOOKMARK')
 MENU                   = Event('MENU')
 
+DVDNAV_LEFT            = Event('DVDNAV_LEFT')
+DVDNAV_RIGHT           = Event('DVDNAV_RIGHT')
+DVDNAV_UP              = Event('DVDNAV_UP')
+DVDNAV_DOWN            = Event('DVDNAV_DOWN')
+DVDNAV_SELECT          = Event('DVDNAV_SELECT')
+DVDNAV_TITLEMENU       = Event('DVDNAV_TITLEMENU')
+DVDNAV_MENU            = Event('DVDNAV_MENU')
 
 #
 # Audio module
@@ -340,10 +351,25 @@ VIDEO_EVENTS = {
     'DISPLAY'   : TOGGLE_OSD,
     'REC'       : STORE_BOOKMARK,
     '0'         : VIDEO_MANUAL_SEEK,
-    'UP'        : PLAYLIST_PREV,
-    'DOWN'      : PLAYLIST_NEXT,
-    'CH+'       : PLAYLIST_PREV,
-    'CH-'       : PLAYLIST_NEXT,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
+    }
+
+DVD_EVENTS = {
+    'PLAY'      : PLAY,
+    'PAUSE'     : PAUSE,
+    'STOP'      : STOP,
+    'EXIT'      : STOP,
+    'UP'        : DVDNAV_UP,
+    'DOWN'      : DVDNAV_DOWN,
+    'LEFT'      : DVDNAV_LEFT,
+    'RIGHT'     : DVDNAV_RIGHT,
+    'ENTER'     : DVDNAV_SELECT,
+    'SELECT'    : DVDNAV_SELECT,
+    'REW'       : Event(SEEK, arg=-10),
+    'FFWD'      : Event(SEEK, arg=10),
+    'MENU'      : DVDNAV_TITLEMENU,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
     'MUTE'      : MIXER_MUTE
