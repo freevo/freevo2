@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/04 13:12:03  dischi
+# removed some debug
+#
 # Revision 1.7  2003/01/12 18:29:41  dischi
 # Make shutdown inherit from Item. Now you have an item menu to select
 # freevo or system shutdown. The default isn't changed
@@ -230,7 +233,6 @@ def getcmd():
 
     for i in menu_items:
         if menu_items[i].visible:
-            print menu_items[i].action
 
             # if it's has actions() it is an item already
             if hasattr(eval(menu_items[i].action), 'actions'):
