@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/12/04 21:49:53  dischi
+# change to new plugin code
+#
 # Revision 1.13  2003/12/03 21:52:08  dischi
 # rename some skin function calls
 #
@@ -96,6 +99,8 @@ from item import Item
 skin = skin.get_singleton()
 osd  = osd.get_singleton()
 
+skin.register('headlines', ('screen', 'title', 'info', 'plugin'))
+              
 #check every 30 minutes
 MAX_HEADLINE_AGE = 1800
 
@@ -130,52 +135,15 @@ class PluginInterface(plugin.MainMenuPlugin):
         return [ HeadlinesMainMenuItem(parent) ]
 
 
-class ShowHeadlineDetails(skin.BlankScreen):
+class ShowHeadlineDetails:
     """
     Screen to show the details of the headline items
     """
     def __init__(self, (item, menuw)):
-        skin.BlankScreen.__init__(self)
-        self.allow_plugins = True
-        self.item = item
         self.menuw = menuw
-
         self.menuw.hide(clear=False)
         rc.app(self)
-        self.refresh()
-
-
-    def render(self, string):
-        """
-        Basic renderer. Remove all tags, replace <p> and <br> with a newline.
-        """
-        string = string.replace('\n\n', '&#xxx;').replace('\n', ' ').\
-                 replace('&#xxx;', '\n')
-        string = string.replace('<p>', '\n').replace('<bt>', '\n')
-        string = util.htmlenties2txt(string)
-        return re.sub('<.*?>', '', string)
-        
-
-    def draw(self, x0, y0, x1, y1):
-        """
-        draw the description
-        """
-        font = skin.get_font('default')
-        titlefont = skin.get_font('title')
-        x0 += 10
-        y0 += 10
-        x1 -= 10
-        y1 -= 10
-        
-        self.write_text(self.item.name, titlefont, None, x0, y0, x1-x0, -1,
-                        align_h='center', mode='hard')
-
-        y0 += titlefont.font.height + 30
-
-        self.write_text(self.render(self.item.description) +
-                        '\n\nLink: %s' % self.item.link, font, None, x0, y0, x1-x0, y1-y0,
-                        mode='soft')
-            
+        skin.draw(('headlines', item))
 
 
     def eventhandler(self, event, menuw=None):
@@ -271,6 +239,7 @@ class HeadlinesSiteItem(Item):
     def show_details(self, arg=None, menuw=None):
         ShowHeadlineDetails(arg)
 
+
     def getheadlines(self, arg=None, menuw=None):
         headlines = [] 
         rawheadlines = []
@@ -279,8 +248,17 @@ class HeadlinesSiteItem(Item):
             mi = menu.MenuItem('%s' % title, self.show_details, 0)
             mi.arg = (mi, menuw)
             mi.link = link
-            mi.description = description
+
+            description = description.replace('\n\n', '&#xxx;').replace('\n', ' ').\
+                          replace('&#xxx;', '\n')
+            description = description.replace('<p>', '\n').replace('<bt>', '\n')
+            description = description + '\n \n \nLink: ' + link
+            description = util.htmlenties2txt(description)
+
+            mi.description = re.sub('<.*?>', '', description)
+
             headlines.append(mi)
+
 
         if (len(headlines) == 0):
             headlines += [menu.MenuItem(_('No Headlines found'), menuw.goto_prev_page, 0)]
