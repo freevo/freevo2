@@ -17,7 +17,7 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import re, os, string, stat;
+import re, os, string, stat, shutil;
 import utils, frames, binfuncs, mp3;
 from utils import *;
 from binfuncs import *;
@@ -29,22 +29,21 @@ version = utils.version;
 maintainer = utils.maintainer;
 
 # Constants
-ID3_ANY = 0;
-ID3_V1  = 1;
-ID3_V2  = 2;
+ID3_V1              = 0x10;
+ID3_V1_0            = 0x11;
+ID3_V1_1            = 0x12;
+ID3_V2              = 0x20;
+#ID3_V2_2            = 0x21; # All versions < v2.3 are obsolete.
+ID3_V2_3            = 0x22;
+ID3_V2_4            = 0x24;
+#ID3_V2_5            = 0x28; # This does not seem imminent.
+ID3_DEFAULT_VERSION = ID3_V2_3;
+ID3_ANY             = ID3_V1 | ID3_V2;
+
+ID3_V1_COMMENT_DESC = "ID3 v1 Comment";
 
 #######################################################################
 class TagException:
-   msg = "";
-
-   def __init__(self, msg):
-      self.msg = msg;
-
-   def __str__(self):
-      return self.msg;
-
-#######################################################################
-class FrameException:
    msg = "";
 
    def __init__(self, msg):
@@ -133,204 +132,11 @@ class TagHeader:
       return 1;
 
 #######################################################################
-class FrameHeader:
-   # The tag header
-   tagHeader = None;
-   # The 4 character frame ID.
-   id = None;
-   # An array of 16 "bits"...
-   flags = NULL_FRAME_FLAGS;
-   # ...and the info they store.
-   tagAlter = 0;
-   fileAlter = 0;
-   readOnly = 0;
-   compressed = 0;
-   encrypted = 0;
-   grouped = 0;
-   unsync = 0;
-   dataLen = 0;
-   # The size of the data following this header.
-   dataSize = 0;
-
-   # 2.4 not only added flag bits, but also reordered the previously defined
-   # flags.  So these are mapped once we know the version.
-   TAG_ALTER   = None;   
-   FILE_ALTER  = None;   
-   READ_ONLY   = None;   
-   COMPRESSION = None;   
-   ENCRYPTION  = None;   
-   GROUPING    = None;   
-   UNSYNC      = None;   
-   DATA_LEN    = None;   
-
-   # Constructor.
-   def __init__(self, tagHeader):
-      self.tagHeader = tagHeader;
-      major = tagHeader.majorVersion;
-      minor = tagHeader.minorVersion;
-      # 1.x tags are converted to 2.4 frames internally.  These frames are
-      # created with frame flags \x00.
-      if (major == 1 and (minor == 0 or minor == 1)) or \
-         (major == 2 and minor == 3):
-         self.TAG_ALTER   = 0;   
-         self.FILE_ALTER  = 1;   
-         self.READ_ONLY   = 2;   
-         self.COMPRESSION = 8;   
-         self.ENCRYPTION  = 9;   
-         self.GROUPING    = 10;   
-         # This is not really in 2.3 frame header flags, but there is
-         # a "global" unsync bit in the tag header and that is written here
-         # so access to the tag header is not required.
-         self.UNSYNC      = 14;   
-         # And this is mapped to an used bit, so that 0 is returned.
-         self.DATA_LEN    = 4;
-      elif major == 2 and minor == 4:
-         self.TAG_ALTER   = 1;   
-         self.FILE_ALTER  = 2;   
-         self.READ_ONLY   = 3;   
-         self.COMPRESSION = 12;   
-         self.ENCRYPTION  = 13;   
-         self.GROUPING    = 9;   
-         self.UNSYNC      = 14;   
-         self.DATA_LEN    = 15;   
-      else:
-         raise ValueError("ID3 v" + str(major) + "." + str(minor) +\
-                          " is not supported.");
-
-   # Returns 1 on success and 0 when a null tag (marking the beginning of
-   # padding).  In the case of an invalid frame header, a TagExeption is 
-   # thrown.
-   def parse(self, f):
-      TRACE_MSG("FrameHeader [start byte]: %d (0x%X)" % (f.tell(),
-                                                         f.tell()));
-      frameId = f.read(4);
-      TRACE_MSG("FrameHeader [id]: " + frameId);
-
-      if self.isFrameIdValid(frameId):
-         self.id = frameId;
-         # dataSize corresponds to the size of the data segment after
-         # encryption, compression, and unzynchronization.
-         sz = f.read(4);
-         # In ID3 v2.4 this value became a synch-safe integer, meaning only
-         # the low 7 bits are used per byte.
-         if self.tagHeader.minorVersion == 3:
-            self.dataSize = bin2dec(bytes2bin(sz, 8));
-         else:
-            self.dataSize = bin2dec(bytes2bin(sz, 7));
-         TRACE_MSG("FrameHeader [data size]: %d (0x%X)" % (self.dataSize,
-                                                           self.dataSize));
- 
-         # Frame flags.
-         flags = f.read(2);
-         self.flags = bytes2bin(flags);
-         self.tagAlter = self.flags[self.TAG_ALTER];
-         self.fileAlter = self.flags[self.FILE_ALTER];
-         self.readOnly = self.flags[self.READ_ONLY];
-         self.compressed = self.flags[self.COMPRESSION];
-         self.encrypted = self.flags[self.ENCRYPTION];
-         self.grouped = self.flags[self.GROUPING];
-         self.unsync = self.flags[self.UNSYNC];
-         self.dataLen = self.flags[self.DATA_LEN];
-         TRACE_MSG("FrameHeader [flags]: ta(%d) fa(%d) ro(%d) co(%d) "\
-                   "en(%d) gr(%d) un(%d) dl(%d)" % (self.tagAlter,
-                                                    self.fileAlter,
-                                                    self.readOnly,
-                                                    self.compressed,
-                                                    self.encrypted,
-                                                    self.grouped,
-                                                    self.unsync,
-                                                    self.dataLen));
-      elif frameId == '\x00\x00\x00\x00':
-         TRACE_MSG("FrameHeader: Null frame id found at byte " +\
-                   str(f.tell()));
-         return 0;
-      else:
-         raise TagException("FrameHeader: Illegal Frame ID: " + frameId);
-      return 1;
-
-
-   def isFrameIdValid(self, id):
-      return re.compile(r"^[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]$").match(id);
-
-   def clearFlags(self):
-      flags = [0] * 16;
-
-#######################################################################
-# A class for containing and managing ID3v2.Frame objects.
-class FrameSet(list):
-
-   def __init__(self, l = None):
-      if l:
-         for f in l:
-            if not isinstance(f, Frame):
-               raise TypeError("Invalid type added to FrameSet: " +\
-                               f.__class__);
-            self.append(f);
-
-   # Setting a FrameSet instance like this 'fs = []' morphs the instance into
-   # a list object.
-   def clear(self):
-      del self[0:];
-
-   # Read frames starting from the current read position of the file object.
-   # Returns the amount of padding which occurs after the tag, but before the
-   # audio content.  A return valule of 0 DOES NOT imply an error.
-   def parse(self, f, tagHeader):
-      paddingSize = 0;
-      sizeLeft = tagHeader.tagSize;
-
-      while sizeLeft > 0:
-         TRACE_MSG("sizeLeft: " + str(sizeLeft));
-         TRACE_MSG("FrameSet: Reading Frame #" + str(len(self) + 1));
-         frameHeader = FrameHeader(tagHeader);
-         if not frameHeader.parse(f):
-            paddingSize = sizeLeft;
-            break;
-
-         # The tag header has a global unsync flag that overrides the frame
-         # header bit, so it's copied.
-         if not frameHeader.unsync and tagHeader.unsync:
-            frameHeader.unsync = tagHeader.unsync;
-            TRACE_MSG("FrameSet: Tag header unsync overridding frame unsync "\
-                      "bit.");
- 
-         # Frame data.
-         TRACE_MSG("FrameSet: Reading %d (0x%X) bytes of data from byte "\
-                   "pos %d (0x%X)" % (frameHeader.dataSize,
-                                      frameHeader.dataSize, f.tell(),
-                                      f.tell()));
-         data = f.read(frameHeader.dataSize);
-           
-         frm = createFrame(frameHeader, data);
- 
-         self.append(frm);
-         # Each frame contains dataSize + headerSize(10) bytes.
-         sizeLeft -= (frameHeader.dataSize + TagHeader.TAG_HEADER_SIZE);
-
-      return paddingSize;
-
-   #######################################################################
-   # Accepts both int and string keys. Throws IndexError and TypeError.
-   def __getitem__(self, key):
-      if isinstance(key, int):
-         if key >= 0 and key < len(self):
-            return list.__getitem__(self, key);
-         else:
-            raise IndexError("FrameSet index out of range");
-      elif isinstance(key, str):
-         for f in self:
-            if f.header.id == key:
-               return f;
-         return None;
-      else:
-         raise TypeError("FrameSet key must be type int or string");
-
-#######################################################################
 # ID3 tag class.  The class is capable of reading v1 and v2 tags.  ID3 v1.x
 # are converted to v2 frames.
 class Tag:
-   # ISO-8859-1
-   encoding = '\x00';
+   # ISO-8859-1 is the default (0x00)
+   encoding = DEFAULT_ENCODING;
 
    # ID3v1 tags do not contain a header.  The only ID3v1 values stored
    # in this header are the major/minor version.
@@ -371,11 +177,12 @@ class Tag:
 
    # Returns true when an ID3 tag is read from f which may be a file name
    # or an aleady opened file object.  In the latter case, the file object 
-   # is not closed by the Tag object.
+   # is not closed when this method returns.
    #
    # By default, both ID3 v2 and v1 tags are parsed in that order.
    # If a v2 tag is found then a v1 parse is not performed.  This behavior
-   # can be refined by passing ID3_V1 or ID3_V2 as the second argument.
+   # can be refined by passing ID3_V1 or ID3_V2 as the second argument 
+   # instead of the default ID3_ANY.
    #
    # Converts all ID3v1 data into ID3v2 frames internally.
    # May throw IOError, or TagException if parsing fails.
@@ -388,19 +195,307 @@ class Tag:
          raise TagException("Invalid type passed to Tag.link: " + 
                             str(type(f)));
 
-      TRACE_MSG("Linking File: " + self.fileName);
+      if v != ID3_V1 and v != ID3_V2 and v != ID3_ANY:
+         raise TagException("Invalid version: " + str(v));
+
       self.frames.clear();
-      if v == ID3_ANY:
-         if self.__loadV2Tag(f) or self.__loadV1Tag(f):
+      self.header = TagHeader();
+      TRACE_MSG("Linking File: " + self.fileName);
+      if v == ID3_V1:
+         if self.__loadV1Tag(f):
             return 1;
       elif v == ID3_V2:
          if self.__loadV2Tag(f):
             return 1;
-      elif v == ID3_V1:
-         if self.__loadV1Tag(f):
+      elif v == ID3_ANY:
+         if self.__loadV2Tag(f) or self.__loadV1Tag(f):
             return 1;
-	 
+
       return 0;
+
+   # Write the current tag state to the linked file.
+   # The version of the ID3 file format should be written to the file can
+   # be passed as an argument; the default is ID3_DEFAULT_VERSION.
+   def save(self, version = ID3_DEFAULT_VERSION, backup = 1, removePrev = 1):
+      if not self.fileName:
+         raise TagException("The Tag is not linked to a file.");
+
+      if backup:
+         shutil.copyfile(self.fileName, self.fileName + ".orig");
+      
+      # If there are no frames then simply remove the current tag.
+      if len(self.frames) == 0:
+         self.__removeCurrentTag();
+         self.header = TagHeader();
+         return;
+
+      if version & ID3_V1:
+         if removePrev and self.header.majorVersion == 2:
+            self.__removeCurrentTag();
+         self.__saveV1Tag(version);
+         return 1;
+      else:
+         if removePrev and self.header.majorVersion == 1:
+            self.__removeCurrentTag();
+         self.__saveV2Tag(version);
+         return 1;
+      return 0;
+         
+   def getArtist(self):
+      # I've seen many different frame IDs for artists in the wild.
+      # Look for the common ones, but prefer TPE1
+      for fid in ARTIST_FIDS:
+         f = self.frames[fid];
+         if f:
+            return f[0].text;
+      return ""; 
+
+   # Set the artist name.  Arguments equal to None or "" cause the frame to
+   # be removed.
+   def setArtist(self, a):
+      if not a:
+         for id in ARTIST_FIDS:
+            self.frames.removeFrames(id);
+      else:
+         # XXX: Using the preferred ID.  What about if another is present?
+         self.frames.setTextFrame(ARTIST_FIDS[0], a, self.encoding);
+ 
+   def getAlbum(self):
+      f = self.frames[ALBUM_FID];
+      if f:
+         return f[0].text;
+      else:
+         return "";
+
+   # Set the album name.  Arguments equal to None or "" cause the frame to
+   # be removed.
+   def setAlbum(self, a):
+      if not a:
+         self.frames.removeFrames(ALBUM_FID);
+      else:
+         self.frames.setTextFrame(ALBUM_FID, a, self.encoding);
+
+   def getTitle(self):
+      f = self.frames[TITLE_FID];
+      if f:
+         return f[0].text;
+      else:
+         return "";
+
+   # Set the track title.  Arguments equal to None or "" cause the frame to
+   # be removed.
+   def setTitle(self, t):
+      if not t:
+         self.frames.removeFrames(TITLE_FID);
+      else:
+         self.frames.setTextFrame(TITLE_FID, t, self.encoding);
+ 
+   def getYear(self):
+      f = self.frames[YEAR_FID];
+      if f:
+         return f[0].text;
+      else:
+         return "";
+
+   # Set the year.  Arguments equal to None or "" cause the frame to
+   # be removed.
+   def setYear(self, y):
+      if not y:
+         self.frames.removeFrames(YEAR_FID);
+      else:
+         self.frames.setTextFrame(YEAR_FID, y, self.encoding);
+
+   # Throws GenreException when the tag contains an unrecognized genre format.
+   # Note this method returns a eyeD3.Genre object, not a raw string.
+   def getGenre(self):
+      f = self.frames[GENRE_FID];
+      if f:
+         g = Genre();
+         g.parse(f[0].text);
+         return g;
+      else:
+         return None;
+
+   # Three types are accepted for the genre parameter.  A Genre object, an
+   # acceptable (see Genre.parse) genre string, or an integer genre id.
+   # Arguments equal to None or "" cause the frame to be removed.
+   def setGenre(self, g):
+      if g == None or g == "":
+         self.frames.removeFrames(GENRE_FID);
+         return;
+
+      if isinstance(g, Genre):
+         self.frames.setTextFrame(GENRE_FID, str(g), self.encoding);
+      elif isinstance(g, str):
+         gObj = Genre();
+         g.parse(g);
+         self.frames.setTextFrame(GENRE_FID, str(gObj), self.encoding);
+      elif isinstance(g, int):
+         gObj = Genre();
+         gObj.id = g;
+         self.frames.setTextFrame(GENRE_FID, str(gObj), self.encoding);
+      else:
+         raise TagException("Invalid type passed to setGenre: %s" +
+                            str(type(g)));
+
+   # Returns a tuple with the first value containing the track number and the
+   # second the total number of tracks.  One or both of these values may be
+   # None depending on what is available in the tag. 
+   def getTrackNum(self):
+      f = self.frames[TRACKNUM_FID];
+      if f:
+         n = string.split(f[0].text, '/');
+         if len(n) == 2:
+            return (n[0], n[1]);
+         else:
+            return (n[0], None);
+      else:
+         return (None, None);
+
+   # Accepts a tuple with the first value containing the track number and the
+   # second the total number of tracks.  One or both of these values may be
+   # None.  If both values are None, the frame is removed.
+   def setTrackNum(self, n):
+      if n[0] == None and n[1] == None:
+         self.frames.removeFrames(TRACKNUM_FID);
+         return;
+
+      totalStr = "";
+      zPadding = 1;
+      if n[1] != None:
+         if n[1] >= 0 and n[1] <= 9:
+            totalStr = "0" + str(n[1]);
+         else:
+            totalStr = str(n[1]);
+         zPadding = len(totalStr) - 1;
+
+      # Pad with zeros according to how large the total count is.
+      trackStr = "";
+      if n[0] >= 0 and n[0] <= int("9" * zPadding):
+         trackStr = ("0" * zPadding) + str(n[0]);
+      elif n[0] != None:
+         trackStr = str(n[0]);
+
+      if trackStr and totalStr:
+         s = trackStr + "/" + totalStr;
+      elif trackStr and not totalStr:
+         s = trackStr;
+
+      self.frames.setTextFrame(TRACKNUM_FID, s, self.encoding);
+
+   # Add a comment.  This adds a comment unless one is already present with
+   # the same language and description in which case the current value is
+   # either changed (cmt evalues true) or removed (cmt equals "" or None).
+   def addComment(self, cmt, desc = "", lang = DEFAULT_LANG):
+      if not cmt:
+         # A little more then a call to removeFrames is involved since we
+         # need to look at more than the frame ID.
+         comments = self.frames[COMMENT_FID];
+         for c in comments:
+            if c.lang == lang and c.description == desc:
+               self.frames.remove(c);
+               break;
+      else:
+         self.frames.setCommentFrame(cmt, desc, lang, self.encoding);
+
+   # Since multiple comment frames are allowed this returns a list with 0
+   # or more elements.  The elements are not the comment strings, they are
+   # eyeD3.frames.CommentFrame objects.
+   def getComments(self):
+      return self.frames[COMMENT_FID];
+
+   # Returns a list (possibly empty) of eyeD3.frames.ImageFrame objects.
+   def getImages(self):
+      return self.frames[IMAGE_FID];
+
+   # Returns a list (possibly empty) of eyeD3.frames.URLFrame objects.
+   # Both URLFrame and UserURLFrame objects are returned.  UserURLFrames
+   # add a description and encoding, and have a different frame ID.
+   def getURLs(self):
+      urls = list();
+      for fid in frames.URL_FIDS:
+         urls.extend(self.frames[fid]);
+      urls.extend(self.frames[frames.USERURL_FID]);
+      return urls;
+
+   def getUserTextFrames(self):
+      return self.frames[USERTEXT_FID];
+
+   def getCDID(self):
+      return self.frames[frames.CDID_FID];
+
+   # Test ID3 major version.
+   def isV1(self):
+      return self.header.majorVersion == 1;
+   def isV2(self):
+      return self.header.majorVersion == 2;
+
+   def getVersion(self):
+      v = str(self.header.majorVersion) + "." + str(self.header.minorVersion);
+      if self.header.revVersion:
+         v += "." + str(self.header.revVersion);
+      return v;
+
+   def clear(self):
+      self.frames.clear();
+
+   #######################################################################
+   def __saveV1Tag(self, version):
+      if not version & ID3_V1:
+         raise ValueError;
+
+      # Build tag buffer.
+      tag = "TAG";
+      tag += self.fixToWidth(self.getTitle(), 30);
+      tag += self.fixToWidth(self.getArtist(), 30);
+      tag += self.fixToWidth(self.getAlbum(), 30);
+      tag += self.fixToWidth(self.getYear(), 4);
+
+      cmt = "";
+      for c in self.getComments():
+         if c.description == ID3_V1_COMMENT_DESC:
+            cmt = c.comment;
+            # We prefer this one over "";
+            break; 
+         elif c.description == "":
+            cmt = c.comment;
+            # Keep searching in case we find the description eyeD3 uses.
+      cmt = self.fixToWidth(cmt, 30);
+      if version != ID3_V1_0:
+         track = self.getTrackNum()[0];
+         if track != None:
+            cmt = cmt[0:28] + "\x00" + chr(int(track) & 0xff);
+      tag += cmt;
+
+      if not self.getGenre():
+         genre = 255;
+      else:
+         genre = self.getGenre().getId();
+      tag += chr(genre & 0xff);
+
+      if len(tag) != 128:
+         raise "BUG: Contact the author";
+
+      tagFile = file(self.fileName, "rw+b");
+      # Write the tag over top an original or append it.
+      if self.isV1():
+         tagFile.seek(-128, 2);
+      else:
+         tagFile.seek(0, 2);
+      tagFile.write(tag);
+      tagFile.flush();
+      tagFile.close();
+      
+      self.header.majorVersion = 1; 
+      if version == ID3_V1_1:
+         self.header.minorVersion = 1; 
+      else:
+         self.header.minorVersion = 0; 
+
+   def fixToWidth(self, s, n):
+      str = s[0:n];
+      str = str + ("\x00" * (n - len(str)));
+      return str;
 
    #######################################################################
    # Returns false when an ID3 v1 tag is not present, or contains no data.
@@ -413,10 +508,10 @@ class Tag:
          closeFile = 0;
 
       # Seek to the end of the file where all ID3v1 tags are written.
-      fp.seek(0, 2)
+      fp.seek(0, 2);
       if fp.tell() > 127:
-         fp.seek(-128, 2)
-         id3tag = fp.read(128)
+         fp.seek(-128, 2);
+         id3tag = fp.read(128);
          if id3tag[0:3] == "TAG":
             TRACE_MSG("Located ID3 v1 tag");
             # 1.0 is implied until a 1.1 feature is recognized.
@@ -424,42 +519,45 @@ class Tag:
             self.header.minorVersion = 0;
             self.header.revVersion = 0;
 
-            title = re.sub("\x00+$", "", id3tag[3:33].strip())
+            title = re.sub("\x00+$", "", id3tag[3:33].strip());
             TRACE_MSG("Tite: " + title);
             if title:
                self.setTitle(title);
 
-            artist = re.sub("\x00+$", "", id3tag[33:63].strip())
+            artist = re.sub("\x00+$", "", id3tag[33:63].strip());
             TRACE_MSG("Artist: " + artist);
             if artist:
                self.setArtist(artist);
 
-            album = re.sub("\x00+$", "", id3tag[63:93].strip())
+            album = re.sub("\x00+$", "", id3tag[63:93].strip());
             TRACE_MSG("Album: " + album);
             if album:
                self.setAlbum(album);
 
-            year = re.sub("\x00+$", "", id3tag[93:97].strip())
+            year = re.sub("\x00+$", "", id3tag[93:97].strip());
             TRACE_MSG("Year: " + year);
-            if year: #and int(year): # We're ignoring invalid year codes they /should/ be int().
+            if year and int(year):
                self.setYear(year);
 
-	    comment = id3tag[97:127] 
-	    
-	    if ord(comment[-2]) == 0 and ord(comment[-1]) != 0:
-	        # Parse track number (added to ID3v1.1) if present
-	        track = ord(comment[-1])
-		TRACE_MSG("Contains track per v1.1 spec")
-		comment = comment[:2]
-		TRACE_MSG("Track: " + str(track))
-		self.setTrackNum((track, None));
-		TRACE_MSG("Setting minor version to 1")
-		self.header.minorVersion = 1
-            else:
-                track = None
-                self.header.minorVersion = 0;
-            
-	    self.setComment(comment);
+	    if re.sub("\x00+$", "", id3tag[97:127]):
+	       comment = id3tag[97:127];
+               if comment[-2] == "\x00" and comment[-1] != "\x00":
+                  # Parse track number (added to ID3v1.1) if present.
+                  TRACE_MSG("Comment contains track number per v1.1 spec");
+                  track = ord(comment[-1]);
+                  self.setTrackNum((track, None));
+                  TRACE_MSG("Track: " + str(track));
+                  TRACE_MSG("Setting minor version to 1.");
+                  self.header.minorVersion = 1;
+		  comment = comment[:-2];
+               else:
+                  track = None
+                  TRACE_MSG("Setting minor version to 0.");
+                  self.header.minorVersion = 0;
+               comment = re.sub("\x00+$", "", comment).rstrip();
+               TRACE_MSG("Comment: " + comment);
+               if comment:
+                  self.addComment(comment, ID3_V1_COMMENT_DESC);
 
             genre = ord(id3tag[127:128])
             TRACE_MSG("Genre ID: " + str(genre));
@@ -468,6 +566,10 @@ class Tag:
       if closeFile:
          fp.close()
       return len(self.frames);
+
+   #######################################################################
+   def __saveV2Tag(self, version):
+      raise "NOT IMPLEMENTED -- TODO";
 
    #######################################################################
    # Returns false when an ID3 v2 tag is not present, or contains 0 frames.
@@ -496,195 +598,38 @@ class Tag:
          return 1;
       else:
          return 0;
-         
+
    #######################################################################
-   def getFrame(self, frameId):
-      for f in self.frames:
-         if f.header.id == frameId:
-            return f;
-      return None;
-         
-   def removeFrame(self, frameId):
-      i = 0;
-      while i < len(self.frames):
-         if self.frames[i].id == frameId:
-            del self.frames[i];
-            return 1;
-         i += 1;
+   def __removeCurrentTag(self):
+      if self.header.majorVersion == 1:
+         tagFile = file(self.fileName, "rw+b");
+         tagFile.seek(-128, 2);
+         tagFile.truncate();
+         tagFile.close();
+         return 1;
+      elif self.header.majorVersion == 2:
+         tagSize = self.header.tagSize + self.header.TAG_HEADER_SIZE;
+         tagFile = file(self.fileName, "rw+b");
+         tagFile.seek(tagSize);
+         data = tagFile.read();
+         tagFile.seek(0);
+         tagFile.write(data);
+         tagFile.truncate();
+         tagFile.close();
+         return 1;
       return 0;
 
-   # Use with care, very low-level wrt data (i.e. encoding bytes and UserText
-   # description)
-   def setTextFrame(self, frameId, data, frameHeader = None):
-      if not re.compile("^T[A-Z0-9][A-Z0-9][A-Z0-9]$").match(frameId):
-         raise FrameException("Invalid Frame ID: " + frameId);
-
-      if not frameHeader:
-         replaceHeader = 0;
-         frameHeader = FrameHeader(self.header);
-      else:
-         replaceHeader = 1;
-      frameHeader.id = frameId;
-
-      if frameHeader.id == USERTEXT_FID:
-         userText = 1;
-      else:
-         userText = 0;
-
-      f = self.getFrame(frameHeader.id);
-      if f:
-         if replaceHeader:
-            f.set(frameHeader, data);
-         else:
-            f.set(f.header, data);
-      else:
-         if userText:
-            self.frames.append(UserTextInfo(frameHeader, data));
-         else:
-            self.frames.append(TextInfo(frameHeader, data));
-      return 1;
-
-   def setCommentFrame(self, data, frameHeader = None):
-      if not frameHeader:
-         replaceHeader = 0;
-         frameHeader = FrameHeader(self.header);
-      else:
-         replaceHeader = 1;
-      frameHeader.id = "COMM";
-
-      f = self.frames[COMMENT_FID];
-      if f:
-         if replaceHeader:
-            f.set(frameHeader, data);
-         else:
-            f.set(f.header, data);
-      else:
-         self.frames.append(Comment(frameHeader, data));
-
-   def getArtist(self):
-      # I've seen many different frame IDs for artists in the wild.
-      # Look for the common ones, but prefer TPE1
-      for fid in ARTIST_FIDs:
-         f = self.frames[fid];
-         if f:
-            return f.value;
-      return None; 
-
-   def setArtist(self, a):
-      self.setTextFrame(ARTIST_FIDs[0], self.encoding + a);
- 
-   def getAlbum(self):
-      f = self.frames[ALBUM_FID];
-      if f:
-         return f.value;
-      else:
-         return None;
-
-   def setAlbum(self, a):
-      self.setTextFrame(ALBUM_FID, self.encoding + a);
-
-   def getTitle(self):
-      f = self.frames[TITLE_FID];
-      if f:
-         return f.value;
-      else:
-         return None;
-
-   def setTitle(self, t):
-      self.setTextFrame(TITLE_FID, self.encoding + t);
- 
-   def getYear(self):
-      f = self.frames[YEAR_FID];
-      if f:
-         return f.value;
-      else:
-         return None;
-
-   def setYear(self, y):
-      self.setTextFrame(YEAR_FID, self.encoding + y);
-
-   # Throws GenreException when the tag contains an unrecognized genre format.
-   def getGenre(self):
-      f = self.frames[GENRE_FID];
-      if f:
-         g = Genre();
-         g.parse(f.value);
-         return g;
-      else:
-         return None;
-
-   def setGenre(self, g):
-      self.setTextFrame(GENRE_FID, self.encoding + str(g));
-
-   # Returns a tuple with the first value containing the track number and the
-   # second the total number of tracks.  One or both of these values may be
-   # None depending on what is available in the tag. 
-   def getTrackNum(self):
-      f = self.frames[TRACKNUM_FID];
-      if f:
-         n = string.split(f.value, '/');
-         if len(n) == 2:
-            return (n[0], n[1]);
-         else:
-            return (n[0], None);
-      else:
-         return (None, None);
-
-   # Accepts a tuple with the first value containing the track number and the
-   # second the total number of tracks.  One or both of these values may be
-   # None.
-   def setTrackNum(self, n):
-      if n[0] != None and n[1] != None:
-         s = str(n[0]) + "/" + str(n[1]);
-      elif n[0] != None and n[1] == None:
-         s = str(n[0]);
-      else:
-         s = None;
-
-      if s:
-         self.setTextFrame(TRACKNUM_FID, self.encoding + s);
-      else:
-         self.removeFrame(TRACKNUM_FID);
-
-   def setComment(self, cmt, desc = "", lang = "eng"):
-      if self.isV2():
-         data = self.encoding + lang + desc + "\x00" + cmt;
-      else:
-         data = self.encoding + lang + "" + "\x00" + cmt;
-      self.setCommentFrame(data);
-
+   #######################################################################
+   # DEPRECATED
+   # This method will return the first comment in the FrameSet
+   # and not all of them.  Multiple COMM frames are common and useful.  Use
+   # getComments which returns a list.
    def getComment(self):
       f = self.frames[COMMENT_FID];
       if f:
-         return f.comment;
+         return f[0].comment;
       else:
          return None;
-
-   def getCommentLang(self):
-      f = self.frames[COMMENT_FID];
-      if f:
-         return f.lang;
-      else:
-         return None;
-
-   def getCommentDesc(self):
-      f = self.frames[COMMENT_FID];
-      if f:
-         return f.description;
-      else:
-         return None;
-
-   # Test ID3 major version.
-   def isV1(self):
-      return self.header.majorVersion == 1;
-   def isV2(self):
-      return self.header.majorVersion == 2;
-
-   def getVersion(self):
-      v = str(self.header.majorVersion) + "." + str(self.header.minorVersion);
-      if self.header.revVersion:
-         v += "." + str(self.header.revVersion);
-      return v;
 
 
 #######################################################################
@@ -718,7 +663,7 @@ class Genre:
    # This behavior can be disabled by passing 0 as the second argument.
    def setId(self, id, verify = 1):
       if not isinstance(id, int):
-         raise GenreException("Invalid genre id: " + str(id));
+         raise TypeError("Invalid genre id: " + str(id));
 
       try:
          name = genres[id];
@@ -789,10 +734,10 @@ class Genre:
          raise TypeError("genreStr must be a string");
 
       genreStr = genreStr.strip();
+      self.id = None;
+      self.name = None;
 
       if not genreStr:
-         self.id = None;
-         self.name = None;
          return;
 
       # ID3 v1 style.
@@ -830,7 +775,12 @@ class Genre:
       raise GenreException("Genre string cannot be parsed: " + genreStr);
 
    def __str__(self):
-      return str(self.id) + ": " + self.name;
+      s = "";
+      if self.id != None:
+         s += "(" + str(self.id) + ")"
+      if self.name:
+         s += self.name;
+      return s;
 
 #######################################################################
 class InvalidAudioFormatException:
@@ -856,13 +806,12 @@ class Mp3AudioFile:
    def __init__(self, fileName, tagVersion = ID3_ANY):
       self.playTime = None;
       self.fileName = fileName;
-      mp3Match = re.compile(".*\.[Mm][Pp]3$");
 
-      if not mp3Match.match(fileName):
+      if not isMp3File(fileName):
          raise self.invalidFileExc;
-      f = file(fileName, "rb");
 
-      # Create ID3 tag.
+      # Parse ID3 tag.
+      f = file(fileName, "rb");
       tag = Tag();
       hasTag = tag.link(f, tagVersion);
       if not hasTag:
@@ -873,7 +822,7 @@ class Mp3AudioFile:
          framePos = 0;
       else:
          # XXX: Note that v2.4 allows for appended tags, and we'll need to 
-         # account for that. I've never seen one in the wild though....
+         # account for that.
          framePos = tag.header.TAG_HEADER_SIZE + tag.header.tagSize;
       f.seek(framePos);
       bString = f.read(4);
@@ -971,6 +920,12 @@ class Mp3AudioFile:
       if vbr:
          brs = "~" + brs;
       return brs;
+
+#######################################################################
+def isMp3File(fileName):
+   # This could be way more thorough....
+   mp3Match = re.compile(".*\.[Mm][Pp]3$");
+   return mp3Match.match(fileName) != None;
 
 #######################################################################
 class GenreMap(list):

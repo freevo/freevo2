@@ -15,7 +15,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-version = "0.3.0";
+version = "0.4.0";
 maintainer = "Travis Shirk <travis@pobox.com>";
 
 TRACE = 0;
