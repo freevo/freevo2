@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/11/09 12:10:14  dischi
+# do not rip last track for mixed cds
+#
 # Revision 1.26  2003/11/02 13:48:19  outlyer
 # My first post 1.4rc2 commit... allows you to make sure your ripped mp3's had
 # properly case'd tags.
@@ -501,7 +504,11 @@ class main_backup_thread(threading.Thread):
         song_names = []                        
         for track in cd_info.tracks:
             song_names.append(self.fix_case(self.replace_special_char(track.title, '-')))
-            
+
+        if hasattr(cd_info, 'mixed') and cd_info.mixed:
+            # remove last tracks if it's a mixed cd
+            song_names = song_names[:-1]
+
         return [cd_info.id, artist, album, genre, song_names]                
     
 
