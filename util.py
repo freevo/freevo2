@@ -90,3 +90,24 @@ def resize(file, x0=25, y0=25):
 		im_res = im.resize((x0,y0))
 		im_res.save(mythumb,'PNG')
 		return mythumb
+
+def getExifThumbnail(file, x0=0, y0=0):
+    import Image
+
+    # EXIF parser
+    import exif
+
+    f=open(file, 'rb')
+    tags=exif.process_file(f)
+    
+    if tags.has_key('JPEGThumbnail'):
+        thumb_name='%s/image-viewer-thumb.jpg' % config.FREEVO_CACHEDIR
+        open(thumb_name, 'wb').write(tags['JPEGThumbnail'])
+        if x0 >0 :
+            return resize(thumb_name, x0, y0)
+        return thumb_name
+        
+    if tags.has_key('TIFFThumbnail'):
+        print "TIFF thumbnail not supported yet"
+
+    
