@@ -10,7 +10,7 @@
   <skin include="blue1_small" geometry="800x600">
 
     <!-- Redefine of the type default -->
-    <menu type="default">
+    <menu type="all">
       <!-- screen0 is already defined in blue1_big -->
       <screen layout="screen0" visible="yes"/>
 

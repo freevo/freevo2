@@ -19,7 +19,7 @@
     </main>
     
     <!-- Redefine of the type default -->
-    <menu type="default">
+    <menu type="all">
       <screen layout="screen0" visible="yes"/>
 
       <!-- 
@@ -47,6 +47,7 @@
       <listing layout="main listing" visible="yes">
 	<area x="230" y="180" width="360" height="240"/> 
       </listing>
+      <view visible="no"/>
     </menu>
 
     <!-- definition of video/audio/image menu. The same as default, but with a -->
