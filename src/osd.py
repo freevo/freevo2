@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2003/07/06 19:39:40  dischi
+# Return the max_y, int() rounds down
+#
 # Revision 1.62  2003/07/06 19:27:53  dischi
 # remove some old stuff
 #
@@ -783,7 +786,10 @@ class OSD:
                 max_x = x0 + w
             y0 += line_height
 
-        return r, (min_x, y, max_x, int(y+height_needed))
+        max_y = int(y+height_needed)
+        if max_y < y+height_needed:
+            max_y += 1
+        return r, (min_x, y, max_x, max_y)
     
 
 
