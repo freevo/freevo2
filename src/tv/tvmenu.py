@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/24 19:34:19  dischi
+# make it possible to start a plugin guide
+#
 # Revision 1.15  2004/02/24 04:40:23  rshortt
 # Make 'View Favorites' a menu based plugin, still incomplete.
 #
@@ -176,6 +179,8 @@ class TVMenu(Item):
             start_tv(None, ('record', None))
             return
 
-        TVGuide(self.get_start_time(), start_tv, menuw)
-
-
+        guide = plugin.getbyname('tvguide')
+        if guide:
+            guide.start(self.get_start_time(), start_tv, menuw)
+        else:
+            TVGuide(self.get_start_time(), start_tv, menuw)
