@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/09/20 18:54:04  dischi
+# brute force if the app refuces to die
+#
 # Revision 1.15  2003/09/20 17:32:49  dischi
 # less debug
 #
@@ -71,6 +74,14 @@ class ChildApp:
                 pass
             app = app[app.find(' ')+1:]
 
+        if app.find('--prio=') == 0:
+            self.binary = app[app.find(' ')+1:].lstrip()
+        else:
+            self.binary = app.lstrip()
+
+        if self.binary.find(' ') > 0:
+            self.binary=self.binary[:self.binary.find(' ')]
+
         start_str = '%s %s' % (config.RUNAPP, app)
 
         self.child = popen2.Popen3(start_str, 1, 100) 
@@ -130,10 +141,9 @@ class ChildApp:
 
         # maybe child is dead and only waiting?
         if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
-            self.outfile.close()
-            self.errfile.close()
-            self.infile.close()
             self.child = None
+            if not self.infile.closed:
+                self.infile.close()
             return
         
         if signal:
@@ -155,16 +165,40 @@ class ChildApp:
 
         except OSError:
             pass
-        
-        # this may cause some problems with threads
-        # in the child because not everything died :-(
-        # try:
-        # self.outfile.close()
-        # self.errfile.close()
-        # self.infile.close()
-        # except:
-        #    print 'error closing filehandler'
-        #    pass
+
+        # now check if the app is really dead. If it is, outfile
+        # should be closed by the reading thread
+        for i in range(5):
+            if self.outfile.closed:
+                break
+            time.sleep(0.1)
+        else:
+            # Problem: the program had more than one thread, each thread has a
+            # pid. We killed only a part of the program. The filehandles are
+            # still open, the program still lives. If we try to close the infile
+            # now, Freevo will be dead.
+            # Solution: there is no good one, let's try killall on the binary. It's
+            # ugly but it's the _only_ way to stop this nasty app
+            print 'Oops, command refuses to die, try bad hack....'
+            os.system('killall %s' % self.binary)
+            for i in range(20):
+                if self.outfile.closed:
+                    break
+                time.sleep(0.1)
+            else:
+                # still not dead. Puh, something is realy broekn here.
+                # Try killall -9 as last chance
+                print 'Try harder to kill the app....'
+                os.system('killall -9 %s' % self.binary)
+                for i in range(20):
+                    if self.outfile.closed:
+                        break
+                    time.sleep(0.1)
+                else:
+                    # Oops...
+                    print 'PANIC'
+            if not self.infile.closed:
+                self.infile.close()
         self.child = None
 
 
@@ -192,10 +226,10 @@ class Read_Thread(threading.Thread):
         saved = ''
         while 1:
 
-            # XXX There should be a C helper app that converts CR to LF.
             data = self.fp.readline(300)
             if not data:
                 _debug_('%s: No data, stopping (pid %s)!' % (self.name, os.getpid()))
+                self.fp.close()
                 break
             else:
                 data = data.replace('\r', '\n')
@@ -260,7 +294,7 @@ class ChildThread(threading.Thread):
     def stop(self, cmd=None):
         if self.mode != 'play':
             return
-        
+
         if cmd:
             self.manual_stop = True
             _debug_('sending exit command to app')
@@ -275,8 +309,7 @@ class ChildThread(threading.Thread):
         self.mode_flag.set()
         while self.mode == 'stop':
             time.sleep(0.3)
-
-        
+                
     def run(self):
         while 1:
             if self.mode == 'idle':
