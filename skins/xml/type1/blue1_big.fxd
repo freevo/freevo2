@@ -154,6 +154,9 @@
     <font label="main" name="Arial_Bold" size="35" color="0xdddddd"/>
     <font label="main selected" name="Arial_Bold" size="35" color="0xffffff"/>
     <font label="default" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="widget" name="Arial_Bold" size="13" color="0xffffff"/>
+    <font label="selected widget" name="Arial_Bold" size="13" color="0x164668"/>
+
 
     <!--
     **********************************************
@@ -176,17 +179,18 @@
 
     <layout label="popup">
       <background>
-	<rectangle color="0x000000" size="1" bgcolor="0xa0000000"/>
+        <rectangle color="0x000000" size="1" bgcolor="0x001F4A95"/>
       </background>
       <content type="text" spacing="10" color="0xffffff" font="default">
-	<item type="default" font="default">
-	  <rectangle bgcolor="0xa0000000" size="0"/>
-	</item>
-	<item type="selected" font="default">
-	  <rectangle bgcolor="0xa0ffffff" size="0"/>
-	</item>
+        <item type="default" font="widget">
+          <rectangle bgcolor="0x00164668" size="0"/>
+        </item>
+        <item type="selected" font="selected widget">
+          <rectangle bgcolor="0x00ffffff" size="0"/>
+        </item>
       </content>
     </layout>
+
 
 
 
