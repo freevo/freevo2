@@ -6,9 +6,11 @@
 
     <image label="background" filename="blurr_naxos"/>
     
-    <font label="title" name="VeraSeBd" size="29" color="0xffdc71">
+    <font label="title" name="VeraBd" size="29" color="0xffffff">
       <shadow visible="yes" color="0x80000000" x="3" y="3"/>
     </font>
+
+    <font label="item" color="0xffffff"/>
 
     <font label="info value" color="0xffdc71">
       <shadow x="1" y="1" color="0x000000" visible="yes"/>
@@ -33,7 +35,7 @@
     </font>
 
     <color label="widget background" value="0xffdc71"/>
-    <font label="widget" name="VeraBD.ttf" size="16" color="0x000000"/>
+    <font label="widget" name="VeraBd.ttf" size="16" color="0x000000"/>
     <color label="widget text" value="0x000000"/>
 
     <font label="default" name="Vera" size="18" color="0xffffff"/>
