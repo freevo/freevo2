@@ -21,7 +21,7 @@
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
       <view x="20" y="100" width="300" height="300"/> 
-      <listing layout="listing" x="330" y="110" width="430" height="460">
+      <listing layout="listing" x="330" y="100" width="430" height="470">
 	<image filename="up.png" label="uparrow" x="760" y="110"/>
 	<image filename="down.png" label="downarrow" x="760" y="max-32"/>
       </listing>
