@@ -15,7 +15,9 @@ Release 1.4.0-rc2 (2003-10-22):
      added support for custom tuned channels using FREQUENCY_TABLE
  * Additional translations: da, de, fi, it
  * Changed the Shutdown function to ask for confirmation first
-
+ * Support for external plugins and themes
+ * And as usual: bugfixes
+	
 	
 Release 1.4.0-rc1 (2003-10-05):
 -------------------------------
