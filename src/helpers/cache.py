@@ -29,7 +29,9 @@ def delete_old_files():
 
 
 def cache_helper(result, dirname, names):
-    result.append(dirname)
+    if not dirname in result and not \
+           os.path.basename(dirname) in ('.xvpics', '.thumbnails', 'CVS'):
+        result.append(dirname)
     return result
 
 def cache_directories():
