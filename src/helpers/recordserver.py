@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/04/18 14:39:19  mikeruelle
+# fix missing self, priorities still really don't do anything but at least it looks like its doing something.
+#
 # Revision 1.37  2004/04/18 08:23:44  dischi
 # fix unicode problem
 #
@@ -574,7 +577,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def adjustPriority(self, favname, mod=0):
         save = []
         mod = int(mod)
-        (status, me) = getFavorite(favname)
+        (status, me) = self.getFavorite(favname)
         oldprio = int(me.priority)
         newprio = oldprio + mod
     
