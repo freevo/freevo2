@@ -1,29 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # database.py - interface to access all video fxd files
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes: The file is ugly. The acces to the data should be covered
-#        by a freevo global database interface
 #
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.3  2004/11/20 18:23:05  dischi
-# use python logger module for debug
-#
-# Revision 1.2  2004/10/22 18:42:28  dischi
-# fix crash when item is no VideoItem
-#
-# Revision 1.1  2004/09/14 20:05:19  dischi
-# split __init__ into interface.py and database.py
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -40,14 +28,15 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-__all__ = [ 'fxd_database', 'discset_informations', 'tv_show_informations',
-            'create_movie_database' ]
+
+__all__ = [ 'update', 'get_media', 'discset', 'tv_shows' ]
 
 # python imports
 import os
 import re
+import copy
 
 # freevo imports
 import config
@@ -57,28 +46,28 @@ import logging
 log = logging.getLogger('video')
 
 # variables for the hashing function
-fxd_database         = {}
-discset_informations = {}
-tv_show_informations = {}
+fxd      = {}
+discset  = {}
+tv_shows = {}
 
 
-def create_movie_database():
+def update():
     """
     hash fxd movie files in some directories. This is used e.g. by the
     rom drive plugin, but also for a directory and a videoitem.
     """
-    global tv_show_informations
-    global discset_informations
-    global fxd_database
+    global tv_shows
+    global discset
+    global fxd
 
     # import fxditem here, we may get in trouble doing it at the
     # beginning (maybe, maybe not). FIXME!
     import fxditem
     
-    fxd_database['id']    = {}
-    fxd_database['label'] = []
-    discset_informations  = {}
-    tv_show_informations  = {}
+    fxd['id']    = {}
+    fxd['label'] = []
+    discset      = {}
+    tv_shows     = {}
 
     rebuild_file = os.path.join(config.FREEVO_CACHEDIR,
                                 'freevo-rebuild-database')
@@ -110,11 +99,11 @@ def create_movie_database():
     for info in fxditem.mimetype.parse(None, files, display_type='video'):
         if hasattr(info, '__fxd_rom_info__'):
             for i in info.__fxd_rom_id__:
-                fxd_database['id'][i] = info
+                fxd['id'][i] = info
             for l in info.__fxd_rom_label__:
-                fxd_database['label'].append((re.compile(l), info))
+                fxd['label'].append((re.compile(l), info))
             for fo in info.__fxd_files_options__:
-                discset_informations[fo['file-id']] = fo['mplayer-options']
+                discset[fo['file-id']] = fo['mplayer-options']
 
     if config.VIDEO_SHOW_DATA_DIR:
         files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
@@ -122,11 +111,42 @@ def create_movie_database():
             if info.type != 'video':
                 continue
             k = vfs.splitext(vfs.basename(info.files.fxd_file))[0]
-            tv_show_informations[k] = (info.image, info.info,
+            tv_shows[k] = (info.image, info.info,
                                        info.mplayer_options, info.skin_fxd)
             if hasattr(info, '__fxd_rom_info__'):
                 for fo in info.__fxd_files_options__:
-                    discset_informations[fo['file-id']] = fo['mplayer-options']
+                    discset[fo['file-id']] = fo['mplayer-options']
             
     log.info('done')
     return 1
+
+
+def get_media(media):
+    """
+    Return informations based on the id or label. Return None if not found.
+    """
+    if media.id in fxd['id']:
+        return fxd['id'][media.id]
+    for (re_label, movie_info_t) in fxd['label']:
+        if re_label.match(media.label):
+            movie_info = copy.copy(movie_info_t)
+            if movie_info.name:
+                title = movie_info.name
+                m = re_label.match(media.label).groups()
+                re_count = 1
+
+                # found, now change the title with the regexp.
+                # E.g.: label is "bla_2", the label regexp
+                # "bla_[0-9]" and the title is "Something \1",
+                # the \1 will be replaced with the first item in
+                # the regexp group, here 2. The title is now
+                # "Something 2"
+                for g in m:
+                    title = title.replace('\\%s' % re_count, g)
+                    re_count += 1
+                movie_info.name = title
+                return movie_info
+    return None
+
+
+update()
