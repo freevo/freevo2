@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/03/19 05:40:58  outlyer
+# Bugfixes to the 'bookmark' facility.
+#
+# 1. Why was I opening the file twice?
+# 2. Clobboring the sub_item variable for use as a temporary holder was a bad idea.
+# 3. Likewise, I shouldn't have clobbered file.filename in the bookmark function.
+# 4. This wasn't working properly for single AVI files, only for XML-style movies.
+#
+# I've tried it some more, and while I think it works well enough, we really need a way to
+# provide feedback. I don't actually know how without trying to use bmovl which might be
+# too much.
+#
+# I think I may resurrect Krister's slave mode code to pass text to the screen.
+#
 # Revision 1.22  2003/03/17 19:22:31  outlyer
 # Bookmarks are working now.
 #
@@ -144,6 +158,7 @@ class VideoItem(Item):
         self.variants = []              # if this item has variants
         self.subitems = []              # if this item has more than one file/track to play
         self.current_subitem = None
+        self.bookmarkfile = None
 
         self.subtitle_file = {}         # text subtitles
         self.audio_file = {}            # audio dubbing
@@ -254,8 +269,13 @@ class VideoItem(Item):
                 #items += [( self.play, 'Play %s' % (os.path.basename(m.filename)))]  # XXX Doesn't work
                 if os.path.exists(util.get_bookmarkfile(m.filename)):
                     myfilename = util.get_bookmarkfile(m.filename)
-                    self.current_subitem = myfilename
-                    items += [( self.bookmark_menu, 'Bookmark: %s' % (os.path.basename(m.filename)))]
+                    self.bookmarkfile = myfilename
+                    items += [( self.bookmark_menu, 'Bookmarks')]   # % (os.path.basename(m.filename)))]
+        else:
+            if os.path.exists(util.get_bookmarkfile(self.filename)):
+                self.bookmarkfile = util.get_bookmarkfile(self.filename) 
+                items += [( self.bookmark_menu, 'Bookmarks ')] 
+
         return items
 
 
@@ -386,19 +406,18 @@ class VideoItem(Item):
         """
         Bookmark list
         """
-        bookmarkfile = self.current_subitem
+        bookmarkfile = self.bookmarkfile
         items = []
-        m = open(bookmarkfile,'r')
-        lines = open(bookmarkfile,'r').readlines()
+        lines = open(str(bookmarkfile),'r').readlines()
         for line in lines: 
             file = copy.copy(self)
             sec = int(line)
             hour = int(sec/3600)
             min = int(sec/60)
             sec = int(sec%60)
-            file.filename = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
-            file.name = 'Jump to %s' % (file.filename)
-            file.mplayer_options += " -ss %s" % (file.filename)
+            time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
+            file.name = 'Jump to %s' % (time)
+            file.mplayer_options += " -ss %s" % (time)
             items += [file]
         
         moviemenu = menu.Menu(self.name, items)
