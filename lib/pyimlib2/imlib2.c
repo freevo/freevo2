@@ -53,6 +53,7 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
 
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
 	o->image = image;
+	o->raw_data = NULL;
 	return (PyObject *)o;
 
 }
@@ -76,6 +77,7 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
 	}
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
 	o->image = image;
+	o->raw_data = NULL;
 	return (PyObject *)o;
 } 
 
@@ -90,6 +92,7 @@ PyObject *imlib2_add_font_path(PyObject *self, PyObject *args)
 	Py_INCREF(Py_None);
 	return Py_None;
 } 
+
 PyObject *imlib2_load_font(PyObject *self, PyObject *args)
 {
 	char *font_spec;
@@ -135,20 +138,6 @@ PyObject *imlib2__shm_unlink(PyObject *self, PyObject *args)
 	return Py_None;
 } 
 
-PyObject *imlib2__free_buffer(PyObject *self, PyObject *args)
-{
-	void *buffer;
-
-	if (!PyArg_ParseTuple(args, "l", &buffer))
-                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
-	
-	if (buffer)
-		free(buffer);
-	
-	Py_INCREF(Py_None);
-	return Py_None;
-} 
-
 PyMethodDef Imlib2_methods[] = {
     { "new_display", imlib2_new_display, METH_VARARGS }, 
     { "add_font_path", imlib2_add_font_path, METH_VARARGS }, 
@@ -156,7 +145,6 @@ PyMethodDef Imlib2_methods[] = {
     { "create", imlib2_create, METH_VARARGS }, 
     { "open", imlib2_open, METH_VARARGS }, 
     { "_shm_unlink", imlib2__shm_unlink, METH_VARARGS }, 
-    { "_free_buffer", imlib2__free_buffer, METH_VARARGS }, 
     { NULL }
 };
 
