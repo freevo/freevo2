@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/06/20 12:40:07  dischi
+# better handling of very long programs
+#
 # Revision 1.31  2004/06/13 00:28:19  outlyer
 # Fix a crash.
 #
@@ -70,7 +73,7 @@ from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
 
 import config, skin
-import event as em
+from event import *
 
 # The Electronic Program Guide
 import epg_xmltv, epg_types
@@ -136,7 +139,7 @@ class TVGuide(Item):
     def eventhandler(self, event):
         _debug_('TVGUIDE EVENT is %s' % event, 2)
 
-        if event == em.MENU_CHANGE_STYLE:
+        if event == MENU_CHANGE_STYLE:
             if skin.toggle_display_style('tv'):
                 start_time    = self.start_time
                 stop_time     = self.stop_time
@@ -173,39 +176,39 @@ class TVGuide(Item):
                 self.rebuild(start_time, stop_time, start_channel, selected)
                 self.menuw.refresh()
             
-        if event == em.MENU_UP:
+        if event == MENU_UP:
             self.event_change_channel(-1)
             self.menuw.refresh()
 
-        elif event == em.MENU_DOWN:
+        elif event == MENU_DOWN:
             self.event_change_channel(1)
             self.menuw.refresh()
 
-        elif event == em.MENU_LEFT:
+        elif event == MENU_LEFT:
             self.event_change_program(-1)
             self.menuw.refresh()
 
-        elif event == em.MENU_RIGHT:
+        elif event == MENU_RIGHT:
             self.event_change_program(1)
             self.menuw.refresh()
 
-        elif event == em.MENU_PAGEUP:
+        elif event == MENU_PAGEUP:
             self.event_change_channel(-self.n_items)
             self.menuw.refresh()
 
-        elif event == em.MENU_PAGEDOWN:
+        elif event == MENU_PAGEDOWN:
             self.event_change_channel(self.n_items)
             self.menuw.refresh()
 
-        elif event == em.MENU_SUBMENU:
+        elif event == MENU_SUBMENU:
             
             pass
 
-        elif event == em.TV_START_RECORDING:
+        elif event == TV_START_RECORDING:
             self.event_RECORD()
             self.menuw.refresh()
  
-        elif event == em.MENU_SELECT or event == em.PLAY:
+        elif event == MENU_SELECT or event == PLAY:
             tvlockfile = config.FREEVO_CACHEDIR + '/record'
 
             # jlaska -- START
@@ -226,7 +229,7 @@ class TVGuide(Item):
                 self.hide()
                 self.player('tv', self.selected.channel_id)
         
-        elif event == em.PLAY_END:
+        elif event == PLAY_END:
             self.show()
 
         else:
@@ -350,22 +353,18 @@ class TVGuide(Item):
         pi.display_program(menuw=self.menuw)
 
 
-    def event_change_program(self, value):
+    def event_change_program(self, value, full_scan=False):
         start_time    = self.start_time
         stop_time     = self.stop_time
         start_channel = self.start_channel
         last_prg      = self.selected
 
-        if last_prg.stop >= stop_time:
-            start_time += (self.col_time * 60)
-            stop_time += (self.col_time * 60)
-
-        elif last_prg.start <= start_time:
-            start_time -= (self.col_time * 60)
-            stop_time -= (self.col_time * 60)
-            
         channel = self.guide.chan_dict[last_prg.channel_id]
-        all_programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
+        if full_scan:
+            all_programs = self.guide.GetPrograms(start_time-24*60*60, stop_time+24*60*60,
+                                                  [ channel.id ])
+        else:
+            all_programs = self.guide.GetPrograms(start_time+1, stop_time-1, [ channel.id ])
 
         # Current channel programs
         programs = all_programs[0].programs
@@ -378,13 +377,23 @@ class TVGuide(Item):
                     break
 
             prg = None
+
             if value > 0:
                 if i + value < len(programs):
                     prg = programs[i+value]
-                else:
+                elif full_scan:
+                    print 'Oops'
                     prg = programs[-1]
+                else:
+                    return self.event_change_program(value, True)
             else:
-                prg = programs[max(0, i+value)]
+                if i+value >= 0:
+                    prg = programs[i+value]
+                elif full_scan:
+                    print 'Oops'
+                    prg = programs[0]
+                else:
+                    return self.event_change_program(value, True)
 
             if prg.sub_title:
                 procdesc = '"' + prg.sub_title + '"\n' + prg.desc
@@ -400,6 +409,19 @@ class TVGuide(Item):
             prg.title = CHAN_NO_DATA
             prg.desc = ''
             to_info = CHAN_NO_DATA
+
+        # set new (better) start / stop times
+        extra_space = 0
+        if prg.stop - prg.start > self.col_time * 60:
+            extra_space = self.col_time * 60
+                
+        while prg.start + extra_space >= stop_time:
+            start_time += (self.col_time * 60)
+            stop_time += (self.col_time * 60)
+
+        while prg.start + extra_space <= start_time:
+            start_time -= (self.col_time * 60)
+            stop_time -= (self.col_time * 60)
 
         self.rebuild(start_time, stop_time, start_channel, prg)
 
