@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/09/07 18:47:36  dischi
+# fix missing import
+#
 # Revision 1.8  2004/08/26 15:29:18  dischi
 # make the tv guide work again (but very slow)
 #
@@ -78,7 +81,7 @@ import time
 import config
 import math
 from area import Area, Geometry
-
+from gui import Rectangle
 
 class TVListing_Area(Area):
     """
@@ -272,7 +275,7 @@ class TVListing_Area(Area):
 
 
         self.objects.append(self.drawbox( x_contents - r.width, y_contents - r.height,
-                                 r.width+1, head_h+1, r ))
+                                          r.width+1, head_h+1, r ))
 
     
         # use label padding for x; head padding for y
