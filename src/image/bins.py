@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/20 15:42:58  dischi
+# use the new text format function
+#
 # Revision 1.5  2003/03/16 19:28:04  dischi
 # Item has a function getattr to get the attribute as string
 #
@@ -138,11 +141,9 @@ def get_bins_desc(binsname):
 
      # remove whitespace at the beginning
      for d in dh.desc:
-         while len(dh.desc[d]) and dh.desc[d][0] in (' ', '\t', '\n'):
-             dh.desc[d] = dh.desc[d][1:]
+         dh.desc[d] = util.format_text(dh.desc[d])
      for d in dh.exif:
-         while len(dh.exif[d]) and dh.exif[d][0] in (' ', '\t', '\n'):
-             dh.exif[d] = dh.exif[d][1:]
+         dh.exif[d] = util.format_text(dh.exif[d])
 
      return {'desc':dh.desc , 'exif':dh.exif}
 
