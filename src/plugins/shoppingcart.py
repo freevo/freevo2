@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/01/19 21:18:53  mikeruelle
+# missing self. that's positively freudian
+#
 # Revision 1.3  2003/12/29 22:28:13  dischi
 # move to new Item attributes
 #
@@ -87,7 +90,7 @@ class PluginInterface(plugin.ItemPlugin):
     def copyHere(self, arg=None, menuw=None):
         popup = PopupBox(text=_('Copying files...'))
         popup.show()
-        for cartfile in cart:
+        for cartfile in self.cart:
             cartfile.files.copy(self.item.dir)
         popup.destroy()
         self.cart = []
