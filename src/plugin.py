@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/17 21:21:57  dischi
+# Moved the idle bar to plugins and changed the plugin interface
+#
 # Revision 1.2  2003/04/16 08:47:00  dischi
 # bugfix for bad plugins
 #
@@ -41,10 +44,6 @@
 
 import os
 
-mainmenu  = []
-videomenu = []
-
-
 class Plugin:
     def __init__(self):
         pass
@@ -57,11 +56,27 @@ class MainMenuPlugin(Plugin):
     def items(self, parent):
         return []
 
+class DaemonPlugin(Plugin):
+    def __init__(self):
+        self.poll    = None
+        self.refresh = None
+        self.osd     = 0
 
+
+#
+# the plugin dictionary
+#
+ptl = {}
+        
 #
 # activate a plugin
 #
 def activate(name, type, level, args):
+    global ptl
+
+    if not ptl.has_key(type):
+        ptl[type] = []
+    type = ptl[type]
     for i in range(len(type)):
         if type[i][1] > level:
             type.insert(i, (name, level, args ))
@@ -73,7 +88,9 @@ def activate(name, type, level, args):
 # load and init all the plugins
 #
 def init():
-    for l in (mainmenu, videomenu):
+    global ptl
+    for type in ptl:
+        l = ptl[type]
         remove = []
         for i in range(len(l)):
             module = l[i][0][:l[i][0].rfind('.')]
@@ -107,3 +124,11 @@ def init():
         for i in remove:
             l.remove(l[i])
 
+
+def get(type):
+    global ptl
+
+    if not ptl.has_key(type):
+        return []
+    return ptl[type]
+    

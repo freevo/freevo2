@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/04/17 21:21:56  dischi
+# Moved the idle bar to plugins and changed the plugin interface
+#
 # Revision 1.35  2003/04/15 20:00:19  dischi
 # make MenuItem inherit from Item
 #
@@ -103,8 +106,6 @@ from gui.PopupBox import PopupBox
 
 import identifymedia
 import signal
-
-import idle
 
 from item import Item
 
@@ -218,7 +219,7 @@ def get_main_menu(parent):
     import plugin
 
     items = []
-    for p in plugin.mainmenu:
+    for p in plugin.get('mainmenu'):
         items += p.items(parent)
         
     return items
@@ -423,30 +424,23 @@ def main_func():
         config.FREEVO_PLUGINS[t] = []
         dirname = 'src/%s/plugins' % t
         if os.path.isdir(dirname):
-            for plugin in [ os.path.splitext(fname)[0] for fname in os.listdir(dirname)
+            for iplugin in [ os.path.splitext(fname)[0] for fname in os.listdir(dirname)
                             if os.path.isfile(os.path.join(dirname, fname))\
                             and os.path.splitext(fname)[1].lower()[1:] == 'py' \
                             and not fname == '__init__.py']:
                 try:
-                    exec('import %s.plugins.%s' % (t, plugin))
-                    if hasattr(eval('%s.plugins.%s'  % (t, plugin)), 'actions'):
-                        print 'load %s plugin %s ' % (t, plugin)
+                    exec('import %s.plugins.%s' % (t, iplugin))
+                    if hasattr(eval('%s.plugins.%s'  % (t, iplugin)), 'actions'):
+                        print 'load %s plugin %s ' % (t, iplugin)
                     config.FREEVO_PLUGINS[t] += [ eval('%s.plugins.%s.actions'\
-                                                       % (t, plugin)) ]
+                                                       % (t, iplugin)) ]
                 except:
                     traceback.print_exc()
 
     main = MainMenu()
     main.getcmd()
 
-    # XXX TEST CODE
-    if config.SKIN_XML_FILE.find('aubin_round') != -1:
-        print 'Enabled the IdleTool'
-        m = idle.IdleTool()
-    else:
-        m = None
-    m and m.refresh()
-
+    daemon_plugins = plugin.get('daemon')
 
     # Kick off the main menu loop
     print 'Main loop starting...'
@@ -463,11 +457,16 @@ def main_func():
             if event:
                 break
             if not rc.func:
-                m and m.poll()
+                for p in daemon_plugins:
+                    if p.poll:
+                        p.poll()
             time.sleep(0.1)
 
         if not rc.func:
-            m and m.refresh()
+            for p in daemon_plugins:
+                if p.poll:
+                    p.poll()
+
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
             print "Got VOLUP in main!"
