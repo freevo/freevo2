@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/02/24 05:45:50  krister
+# Improved cleaning
+#
 # Revision 1.26  2003/02/24 05:15:35  krister
 # Added trace.txt to the clean target.
 #
@@ -110,9 +113,12 @@ clean:
 	cd fbcon ; $(MAKE) clean
 
 realclean: clean
+	find . -name "*.rej" -exec rm {} \;
+	find . -name "*.orig" -exec rm {} \;
+	find . -name ".#*" -exec rm {} \;
 	-rm -f freevo.conf
 
-# Remove all compiled python files
+# Remove all compiled python files, and other stuff
 distclean:
 	find . -name "*.pyc*" -exec rm -f {} \;
 	$(MAKE) -C fbcon distclean
