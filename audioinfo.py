@@ -16,6 +16,15 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/07/31 00:59:09  outlyer
+# Patch from Thomas Malt <tm@false.linpro.no>
+# 1) When paused the timer for the audio did not pause, so when
+#    you continued to play the statusbar and stuff would leap forward.
+#    fixed.
+# 2) On some ogg files with corrupted info I found that audioinfo.py
+#    would crash throwing an UnicodeError. Added code to catch the
+#    exception, but it doesn't do anything smart to resolve yet.
+#
 # Revision 1.3  2002/07/29 06:25:29  outlyer
 # Added imghdr.what() call back to verify the image is actually an image
 # and not lying via the extension. That of course, would make for a crash.
@@ -73,6 +82,9 @@ class AudioInfo:
     """
     This is the common class to get information about audiofiles.
     """
+    __pause_timer = 0 # Private variable to store time for pause.
+    __lastupdate  = 0.0
+    
     def __init__( self, file, drawall=0 ):
         self.drawall    = drawall
         self.filename   = file
@@ -87,8 +99,8 @@ class AudioInfo:
         self.remain     = 0
         self.done       = 0.0
         self.image      = ''
-        self.lastupdate = 0.0
         self.pause      = 0
+
         # XXX This is really not a very smart way to do it. We should be
         # XXX able to handle files with messed up extentions.
         if self.is_ogg():
@@ -132,8 +144,11 @@ class AudioInfo:
     def toggle_pause( self ):
         if self.pause:
             self.pause = 0
+            self.start = self.start + (time.time()-self.__pause_timer)
+            self.__pause_timer = 0
         else:
             self.pause = 1
+            self.__pause_timer = time.time()
             
     def set_info_ogg( self, file ):
         """
@@ -153,35 +168,37 @@ class AudioInfo:
             if DEBUG: print "Got VorbisError.. not an ogg file."
             return 0
         
-        if 'ALBUM' in vc.keys():
-            self.album  = vc['ALBUM'][0]
-        else:
-            self.album  = ''
+        try:
+            if 'ALBUM' in vc.keys():
+                self.album  = vc['ALBUM'][0]
+            else:
+                self.album  = ''
                 
-        if 'ARTIST' in vc.keys():
-            self.artist = vc['ARTIST'][0]
-        else:
-            self.artist = ''
+            if 'ARTIST' in vc.keys():
+                self.artist = vc['ARTIST'][0]
+            else:
+                self.artist = ''
                 
-        if 'TITLE' in vc.keys():
-            self.title  = vc['TITLE'][0]
-        else:
-            self.title  = ''
+            if 'TITLE' in vc.keys():
+                self.title  = vc['TITLE'][0]
+            else:
+                self.title  = ''
                 
-        if 'TRACK' in vc.keys():
-            self.track  = vc['TRACK'][0]
-        elif 'TRACKNUMBER' in vc.keys():
-            self.track  = vc['TRACKNUMBER'][0]
-        else:
-            self.track  = ''
+            if 'TRACK' in vc.keys():
+                self.track  = vc['TRACK'][0]
+            elif 'TRACKNUMBER' in vc.keys():
+                self.track  = vc['TRACKNUMBER'][0]
+            else:
+                self.track  = ''
                 
-        if 'YEAR' in vc.keys():
-            self.year = vc['YEAR'][0]
-        else:
-            self.year = ''
-                
-        self.length = vf.time_total( -1 )
+            if 'YEAR' in vc.keys():
+                self.year = vc['YEAR'][0]
+            else:
+                self.year = ''
+        except UnicodeError:
+            if DEBUG: print "Oops, got UnicodeError"
 
+        self.length = vf.time_total( -1 )
         return 1
 
     def set_info_mp3( self, file ):
@@ -246,18 +263,20 @@ class AudioInfo:
         """
         Give information to the skin..
         """
-        # done    = round((float(elapsed) / total) * 100.0)
-
         # XXX Let's wait a whole second :)
-        if time.time() > (self.lastupdate + 0.5):
+        if time.time() > (self.__lastupdate + 0.5):
             # print "Doing update of audio GUI..."
             self.elapsed = self.get_elapsed()
             self.remain  = self.get_remain()
             self.done    = self.get_done()
-            self.lastupdate = time.time()
+            self.__lastupdate = time.time()
             skin.DrawMP3( self )
 
         return
+
+# ======================================================================
+# End of AudioInfo class
+# ======================================================================
 
 
 
