@@ -99,7 +99,6 @@
 
 import plugin
 from event import *
-from util import getXMLTVChannels
 
 ########################################################################
 # If you want to change some things for your personal setup, please
@@ -742,7 +741,7 @@ MPLAYER_NICE         = -20
 
 if CONF.display == 'dfbmga':
     MPLAYER_ARGS_DEF     = ('-ac mad, -autosync 100 -nolirc ' +
-                            '-autoq 100 -fs -vsync -double')
+                            '-autoq 100 -fs ')
 else:
     MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
@@ -1124,6 +1123,16 @@ WWW_PORT = 8080
 #            "optional" : "changeme2" }
 #
 WWW_USERS = { 0 : 0 }
+
+# The tv guide is divided into 30 minute intervals
+WWW_GUIDE_INTERVAL = 60*30
+
+# Show this many blocks at once
+WWW_GUIDE_COLS = 6
+
+WWW_STYLESHEET = 'styles/main.css'
+
+WWW_JAVASCRIPT = 'scripts/display_prog-head.js'
 
 
 # ======================================================================
