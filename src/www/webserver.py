@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/01 13:43:14  dischi
+# Thanks to Michael Ruelle the webserver is now a plugin
+#
 # Revision 1.2  2003/03/04 05:43:39  krister
 # Added port settings for the builtin webserver. This is still work in progress!
 #
@@ -42,6 +45,8 @@ import os
 import sys
 import urllib
 import time
+import traceback
+
 from BaseHTTPServer import HTTPServer
 from CGIHTTPServer import CGIHTTPRequestHandler
 
@@ -96,7 +101,13 @@ class FreevoCGIHTTPRequestHandler(CGIHTTPRequestHandler):
     CGI apps, instead it knows about some builtin scripts that can
     be run.
     """
-    
+
+    def translate_path(self, path):
+        p = CGIHTTPRequestHandler.translate_path(self, path)
+        p = '%s/src/www/htdocs%s' % ( os.getcwd(), p[len(os.getcwd()):])
+        return p
+
+
     def is_cgi(self):
         if '?' in self.path:
             if self.path.split('?')[0].endswith('.cgi'):
@@ -177,13 +188,13 @@ class FreevoCGIHTTPRequestHandler(CGIHTTPRequestHandler):
         sys.stdout = self.wfile
         self.send_response(200, "Script output follows")
 
+        sys.__stdout__.write('cgi_app starting...\n')
         t0 = time.time()
         cgi_app()
         self.log_message('CGI script done (%1.1f seconds)', (time.time() - t0))
         
 
 def run():
-    os.chdir('src/www/htdocs')
     srvaddr = ('', config.WWW_PORT)
 
     while 1:
@@ -193,10 +204,12 @@ def run():
         except KeyboardInterrupt:
             sys.exit()
         except:
+            traceback.print_exc()
             pass
         sys.__stdout__.write('Ooops, server went down, restarting...\n')
         time.sleep(3)
 
 
 if __name__ == '__main__':
+    os.chdir(os.environ['FREEVO_STARTDIR'])
     run()
