@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/27 20:26:39  dischi
+# Added slideshow timer and made some playlist and cosmetic fixes
+#
 # Revision 1.2  2002/11/27 15:07:36  dischi
 # added basic bins support to the osd
 #
@@ -80,18 +83,14 @@ class ImageViewer:
     zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
                   rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
 
-    # Slide Show variables
-    total_slides = 0	# Total slides in slide show
-    slide_num = 0	# Current slide being displayed
+    slideshow = TRUE                    # currently in slideshow mode
 
-    def view(self, info, zoom=0, rotation=0):
-        filename = info.file
-        caption = info.name
+    def view(self, item, zoom=0, rotation=0):
+        filename = item.file
 
-        self.fileinfo = info
+        self.fileitem = item
 
         self.filename = filename
-        self.caption = caption
         self.rotation = rotation
 
         rc.app = self.eventhandler
@@ -198,26 +197,38 @@ class ImageViewer:
         # draw
         osd.update()
 
+        # start timer
+        if self.fileitem.duration:
+            signal.signal(signal.SIGALRM, self.signalhandler)
+            signal.alarm(self.fileitem.duration)
 
-    def cache(self, fileinfo):
+
+    def cache(self, fileitem):
         # cache the next image (most likely we need this)
-        osd.bitmapsize(fileinfo.file)
+        osd.bitmapsize(fileitem.file)
         
-            
+
+    def signalhandler(self, signum, frame):
+        if rc.app == self.eventhandler and self.slideshow:
+            rc.app = None
+            self.eventhandler(rc.PLAY_END)
+
 
     def eventhandler(self, event):
 
-        if event == rc.PAUSE:
-            signal.alarm(0)
+        if event == rc.PAUSE or event == rc.PLAY:
+            if self.slideshow:
+                self.slideshow = FALSE
+                signal.alarm(0)
+            else:
+                self.slideshow = TRUE
+                signal.alarm(1)
 
-        elif event == rc.PLAY:
-            signal.alarm(1)
-
-        elif event == rc.STOP or event == rc.EXIT or event == rc.MENU:
+        elif event == rc.STOP or event == rc.EXIT:
             rc.app = None
             signal.alarm(0)
             menuwidget.refresh()
-
+            
         # rotate image
         elif event == rc.LEFT or event == rc.RIGHT:
             osd.clearscreen(color=osd.COL_BLACK)
@@ -256,7 +267,7 @@ class ImageViewer:
         elif event == rc.DISPLAY:
             self.osd_mode = {0:1, 1:2, 2:0}[self.osd_mode] # Toggle on/off
             # Redraw
-            self.view(self.fileinfo, zoom=self.zoom, rotation = self.rotation)
+            self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
@@ -266,11 +277,11 @@ class ImageViewer:
             if self.zoom:
                 # Zoom one third of the image, don't load the next
                 # image in the list
-                self.view(self.fileinfo, zoom=self.zoom, rotation = self.rotation)
+                self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
             else:
                 # Display entire picture, don't load next image in case
                 # the user wants to zoom around some more.
-                self.view(self.fileinfo, zoom=0, rotation = self.rotation)
+                self.view(self.fileitem, zoom=0, rotation = self.rotation)
                 
         # save the image with the current rotation
         elif event == rc.REC:
@@ -283,7 +294,7 @@ class ImageViewer:
                 osd._deletefromcache(self.filename)
 
         else:
-            self.fileinfo.eventhandler(event)
+            self.fileitem.eventhandler(event)
             
     def drawosd(self):
 
@@ -295,15 +306,15 @@ class ImageViewer:
 	    osdstring = []
 
 	    # Use the bins caption if it exists
-            if self.fileinfo.binsdesc.has_key('title'):
-                osdstring.append('Title: ' + self.fileinfo.binsdesc['title'])
-            elif self.caption:
-	        osdstring = [self.caption]
+            if self.fileitem.binsdesc.has_key('title'):
+                osdstring.append('Title: ' + self.fileitem.binsdesc['title'])
+            elif self.fileitem.name:
+	        osdstring = [self.fileitem.name]
             else:
 	        osdstring = ['No Title']
 
-            if self.fileinfo.binsdesc.has_key('description'):
-                osdstring.append('Description: ' + self.fileinfo.binsdesc['description'])
+            if self.fileitem.binsdesc.has_key('description'):
+                osdstring.append('Description: ' + self.fileitem.binsdesc['description'])
 
             # Now print the string on screen
 	    # First reverse the list
@@ -315,8 +326,7 @@ class ImageViewer:
 
 	    for line in range(len(osdstring)):
 	        h=osd.height - (50 + ( line * 30))
-                osd.drawstring(osdstring[line], 10, h, fgcolor=osd.COL_ORANGE, 
-                               bgcolor=osd.COL_BLACK)
+                osd.drawstring(osdstring[line], 10, h, fgcolor=osd.COL_ORANGE)
             return
             
         f = open(self.filename, 'r')
