@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2002/09/23 16:53:33  dischi
+# check mplayer, nice, jpegtrans and xmame.SDL in configure
+#
 # Revision 1.66  2002/09/19 10:17:46  dischi
 # Added mp4, viv and nuv to SUFFIX_MPLAYER_FILES
 #
@@ -271,7 +274,7 @@ DIR_MAME = [ ('Test Games', './testfiles/Mame') ]
 # 
 SUFFIX_MAME_FILES = [ '/*.[zZ][iI][pP]' ]
 
-MAME_CMD	 = 'xmame.SDL'
+MAME_CMD	 = CONF.xmame_SDL
 
 MAME_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
                                       # <0 is higher prio, >0 lower prio. You must run
@@ -332,7 +335,7 @@ if os.path.isfile('../freevo_apps/mplayer/mplayer'):
     MPLAYER_CMD = '../freevo_apps/mplayer/mplayer' # Binary dist
     print 'Using ../freevo_apps/mplayer'
 else:
-    MPLAYER_CMD         = 'mplayer'       # Lets hope it is in the path
+    MPLAYER_CMD = CONF.mplayer
     print 'Using system MPlayer'
     
 MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
@@ -342,7 +345,7 @@ MPLAYER_VO_DEV       = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer doc
 
 DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
-NICE                 = '/usr/bin/nice' # Priority setting app
+NICE                 = CONF.nice       # Priority setting app
 MPLAYER_NICE         = '0'             # Priority of mplayer process. 0 is unchanged,
                                        # <0 is higher prio, >0 lower prio. You must run
                                        # freevo as root to use prio <0 !

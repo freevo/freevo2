@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/09/23 16:53:33  dischi
+# check mplayer, nice, jpegtrans and xmame.SDL in configure
+#
 # Revision 1.16  2002/09/06 05:18:52  krister
 # Added a 640x480 mode. Have not adapted the skin yet.
 #
@@ -57,7 +60,7 @@
 import sys
 import os
 import getopt
-
+import string
 
 
 # Help text
@@ -131,7 +134,13 @@ def main():
         if o == '--chanlist':
             conf.chanlist = a
 
+    check_program(conf, "mplayer", "mplayer", 1)
+    check_program(conf, "nice", "nice", 1)
+    check_program(conf, "jpegtran", "jpegtran", 0)
+    check_program(conf, "xmame.SDL", "xmame_SDL", 0)
 
+    print
+    print
     print 'Settings:'
     print '  %20s = %s' % ('geometry', conf.geometry)
     print '  %20s = %s' % ('display', conf.display)
@@ -196,7 +205,27 @@ def create_config(conf):
         fd.write('%s = %s\n' % (val, conf.__dict__[val]))
         
     print 'done'
-    
+
+def check_program(conf, name, variable, necessary):
+    print 'checking for %-13s' % (name+'...'),
+    for dir in os.environ['PATH'].split(':'):
+        if os.path.exists(os.path.join(dir,name)):
+            print os.path.join(dir,name)
+            conf.__dict__[variable] = os.path.join(dir,name)
+            break
+    else:
+        conf.__dict__[variable] = ""
+        if necessary:
+            print "********************************************************************"
+            print "ERROR: can't find %s" % name
+            print "Please install the application respectively put it in your path."
+            print "Freevo won't work without it."
+            print "********************************************************************"
+            print
+            print
+            sys.exit(1)
+        else:
+            print "not found (deactivated)"
 
 if __name__ == '__main__':
     main()
