@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/08/04 16:49:20  dischi
+# DISPLAY toggles the mplayer OSD
+#
 # Revision 1.19  2002/08/03 18:55:44  outlyer
 # Last change to config file :)
 #
@@ -408,7 +411,8 @@ def mplayerKey(rcCommand):
         'STOP'           : 'q',
         'UP'             : '\x1bOA',
         'VOLUMEUP'       : '*',
-        'VOLUMEDOWN'     : '/'
+        'VOLUMEDOWN'     : '/',
+        'DISPLAY'        : 'o'
         }
     
     key = mplayerKeys.get(rcCommand, '')
