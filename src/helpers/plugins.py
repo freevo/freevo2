@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/14 15:06:59  dischi
+# make sure all regexps end
+#
 # Revision 1.9  2004/01/31 13:20:38  dischi
 # maybe there is no config string, do not crash on that
 #
@@ -96,7 +99,7 @@ def parse_plugins():
         parse_status = 0
         whitespaces  = 0
         scan_config  = 0
-        for line in util.readfile(file):
+        for line in util.readfile(file) + [ 'class Foo' ]:
             if config_end.match(line) and scan_config:
                 scan_config = 0
                 all_plugins[-1][-1] = config
@@ -164,7 +167,6 @@ def print_info(plugin_name, all_plugins):
             print '------------'
             print desc
             print
-
             if config_string.find('config') > 0:
                 exec(config_string)
                 config_list = return_config()
