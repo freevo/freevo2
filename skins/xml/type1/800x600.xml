@@ -14,17 +14,17 @@
       </selection>
 
       <item pos="0" name="TV"       action="tv.main_menu"  arg="" 
-	visible="yes" icon="icons/tv.png"   />
+	visible="yes" icon="icons/64x64/tv.png"   />
       <item pos="1" name="Movies"   action="movie.main_menu" arg="" 
-	visible="yes" icon="icons/movies.png"  />
+	visible="yes" icon="icons/64x64/movies.png"  />
       <item pos="2" name="Music"    action="music.main_menu" arg="" 
-	visible="yes" icon="icons/mp3.png"  />
+	visible="yes" icon="icons/64x64/mp3.png"  />
       <item pos="3" name="Images"   action="imenu.main_menu" arg="" 
-	visible="yes" icon="icons/images.png"  />
+	visible="yes" icon="icons/64x64/images.png"  />
       <item pos="4" name="Video Games" action="videogame.main_menu" arg="" 
 	visible="no" icon="icons/mame.png"  />
       <item pos="5" name="Shutdown" action="shutdown" arg="" 
-	visible="yes" icon="icons/shutdown2.png"  />
+	visible="yes" icon="icons/64x64/shutdown.png"  />
     </main>
     
     <!-- Settings for a normal menu -->
