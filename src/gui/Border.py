@@ -7,6 +7,9 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/01 18:50:04  dischi
+# fix pygame bug by drawing more than one 1 pixel rec
+#
 # Revision 1.6  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -179,10 +182,14 @@ class Border(GUIObject):
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
             c = self.color.get_color_sdl()
-            self.rect = pygame.draw.rect(self.parent.surface, c, 
-                                         self.parent.surface.get_rect(),
-                                         self.thickness)
-        if DEBUG: print 'Border: x=%s, y=%s, w=%s, h=%s' % (self.left, self.top, self.width, self.height)
+            for i in range(0, self.thickness):
+                w, h = self.parent.surface.get_size()
+                # looks strange, but sometimes thinkness doesn't work
+                self.rect = pygame.draw.rect(self.parent.surface, c, 
+                                             (i, i, w-2*i, h-2*i), 1)
+                                             
+        if DEBUG: print 'Border: x=%s, y=%s, w=%s, h=%s' % \
+           (self.left, self.top, self.width, self.height)
 
         # if self.style == self.BORDER_SHADOW:
         #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,
