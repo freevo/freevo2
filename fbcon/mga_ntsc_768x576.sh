@@ -13,17 +13,15 @@
 # I'm only using a TV on vga-connector 2
 # /Krister
 
-# Goto the fbcon dir
-cd `dirname $0`
 
 # disconnect both heads
-./matroxset/matroxset -f /dev/fb0 -m 0 > /dev/null 2> /dev/null
-./matroxset/matroxset -f /dev/fb1 -m 0 > /dev/null 2> /dev/null
+`dirname $0`/matroxset/matroxset -f /dev/fb0 -m 0 > /dev/null 2> /dev/null
+`dirname $0`/matroxset/matroxset -f /dev/fb1 -m 0 > /dev/null 2> /dev/null
 
 # swap heads
-./matroxset/matroxset -f /dev/fb0 -m 2 > /dev/null 2> /dev/null
-./matroxset/matroxset -f /dev/fb1 -m 1 > /dev/null 2> /dev/null
-./matroxset/matroxset -f /dev/fb0 2 2 > /dev/null 2> /dev/null
+`dirname $0`/matroxset/matroxset -f /dev/fb0 -m 2 > /dev/null 2> /dev/null
+`dirname $0`/matroxset/matroxset -f /dev/fb1 -m 1 > /dev/null 2> /dev/null
+`dirname $0`/matroxset/matroxset -f /dev/fb0 2 2 > /dev/null 2> /dev/null
 
 #
 # The following is a modeline for setting up NTSC on the TV output (vga 2) on 

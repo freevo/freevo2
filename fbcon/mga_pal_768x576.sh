@@ -11,21 +11,20 @@
 #
 # /Dischi
 
-# goto the matrox_g400 dir
-cd `dirname $0`
 
 # I don't want this is doing exacly, but it should enable the
 # clone mode with IMHO looks better than the others
 
-matroxset -f /dev/fb1 -m 0
-matroxset -f /dev/fb0 -m 3
+`dirname $0`/matroxset/matroxset -f /dev/fb1 -m 0
+`dirname $0`/matroxset/matroxset -f /dev/fb0 -m 3
 
 # switch to PAL
-matroxset 1
+`dirname $0`/matroxset/matroxset 1
 
 # set the 768x576 output
-fbset -fb /dev/fb0 -depth 32 -left 23 -right -5 -upper 39 -lower 10 -hslen 46 -vslen 4 \
-	-xres 768 -yres 576 -vxres 768 -vyres 576 -depth 32 -laced false -bcast true
+/usr/sbin/fbset -fb /dev/fb0 -depth 32 -left 23 -right -5 -upper 39 -lower 10 \
+    -hslen 46 -vslen 4 -xres 768 -yres 576 -vxres 768 -vyres 576 -depth 32 \
+    -laced false -bcast true
 
 
 setterm -blank 0
