@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/11 23:00:03  rshortt
+# Fix logging and doc root.
+#
 # Revision 1.4  2003/05/11 22:44:02  rshortt
 # A new webserver based on twisted web.  This webserver will support user authentication.
 #
@@ -38,13 +41,12 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys
+import sys, os
 
 import config
 
 from twisted.internet import app
 from twisted.web import static, server, vhost, twcgi, script, trp
-
 from twisted.python import log
 
 DEBUG = 1
@@ -52,10 +54,10 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
-logfile = '/tmp/freevoweb.log'
+logfile = '%s/internal-webserver-%s.log' % (config.LOGDIR, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
-docRoot = './htdocs'
+docRoot = './src/www/htdocs'
 
 root = static.File(docRoot)
 root.processors = {
