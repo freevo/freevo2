@@ -42,6 +42,7 @@ import pyepg
 
 # freevo imports
 import config
+import sysconfig
 import plugin
 import item
 
@@ -50,7 +51,7 @@ log = logging.getLogger('tv')
 # tv imports
 from program import ProgramItem
 
-EPGDB = os.path.join(config.FREEVO_CACHEDIR, 'epgdb')
+EPGDB = sysconfig.datafile('epgdb')
 
 _channels = None
 _epg = None
@@ -74,43 +75,6 @@ def get_new_epg():
     _epg = pyepg.get_epg(EPGDB)
 
     return _epg
-
-
-def get_channels():
-    """
-    Return an already created ChannelList, this may save a bit of time.
-    """
-    global _channels
-    if not _channels:
-        log.info('no channels in memory, loading')
-        _channels = ChannelList()
-    return _channels
-
-
-def get_settings_by_id(chan_id):
-    """
-    """
-    settings = []
-    for c in get_channels().get_all():
-        if c.id == chan_id:
-            for u in c.uri:
-                which = u.split(':')[0]
-                settings.append(which)
-            return settings
-    return None
-
-
-def get_settings_by_name(chan_name):
-    """
-    """
-    settings = []
-    for c in get_channels().get_all():
-        if c.name == chan_name:
-            for u in c.uri:
-                which = u.split(':')[0]
-                settings.append(which)
-            return settings
-    return None
 
 
 def get_lockfile(which):
@@ -270,23 +234,23 @@ class ChannelItem(item.Item):
     Information about one specific channel, also containing
     epg informations.
     """
-    def __init__(self, id, display_name, uri):
+    def __init__(self, id, display_name, access_id):
         item.Item.__init__(self)
 
         self.chan_id  = id
-        self.tuner_id = ''
+        self.access_id = ''
         self.uri      = []
         self.programs = []
         self.logo     = ''
 
-        if isinstance(uri, list) or isinstance(uri, tuple):
-            for u in uri:
-                self.__add_uri__(u)
+        if isinstance(access_id, list) or isinstance(access_id, tuple):
+            for a_id in access_id:
+                self.__add_uri__(a_id)
         else:
-            self.__add_uri__(uri)
+            self.__add_uri__(access_id)
 
         # XXX Change this to config.TV_CHANNEL_DISPLAY_FORMAT or something as
-        # XXX many people won't want to see the tuner_id.
+        # XXX many people won't want to see the access_id.
         # XXX What should we use, name or title, or both?
         self.name = self.title = display_name
 
@@ -294,14 +258,36 @@ class ChannelItem(item.Item):
     def __add_uri__(self, uri):
         """
         Add a URI to the internal list where to find that channel.
-        Also save the tuner_id because many people, mostly North Americans,
+        Also save the access_id because many people, mostly North Americans,
         like to use it (usually in the display).
         """
         if uri.find(':') == -1:
-            self.info['tuner_id'] = uri
-            uri = '%s:%s' % (config.TV_DEFAULT_SETTINGS, uri)
+            self.access_id = uri
+            defaults = []
+            if isinstance(config.TV_DEFAULT_SETTINGS, list) or \
+               isinstance(config.TV_DEFAULT_SETTINGS, tuple):
+                for s in config.TV_DEFAULT_SETTINGS:
+                    defaults.append(s)
+            else:
+                defaults.append(config.TV_DEFAULT_SETTINGS)
+
+            for which in defaults:
+                try:
+                    int(which[-1:])
+                except ValueError: 
+                    # This means that TV_DEFAULT_SETTINGS does NOT end with
+                    # a number (it is dvb/tv/ivtv) so we add this channel
+                    # to all matching TV_SETTINGS.
+                    log.debug('TV_DEFAULT_SETTINGS does NOT end with a number') 
+        
+                    for s in config.TV_SETTINGS.keys():
+                        if s.find(which) == 0:
+                            self.__add_uri__('%s:%s' % (s, uri))
+                            return
+
+                uri = '%s:%s' % (which, uri)
         else:
-            self.info['tuner_id'] = uri.split(':')[1]
+            self.access_id = uri.split(':')[1]
 
         self.uri.append(uri)
 
@@ -315,6 +301,7 @@ class ChannelItem(item.Item):
             print device, uri
             # try all internal URIs
             for p in plugin.getbyname(plugin.TV, True):
+                print p
                 # FIXME: better handling for rate == 1 or 2
                 if p.rate(self, device, uri):
                     return p, device, uri
@@ -494,8 +481,62 @@ class ChannelList:
             traceback.print_exc()
             return
 
+        # Check the EPGDB for channels.  If some of these exist in TV_CHHANELS
+        # we use that information if not we use the info from the database.
+        for c in self.epg.get_channels():
+            if String(c['id']) in config.TV_CHANNELS_EXCLUDE:
+                # Skip channels that we explicitly do not want.
+                continue
+
+            override = False
+            for cc in config.TV_CHANNELS:
+                if String(c['id']) == cc[0]:
+                    # Override with config data.
+                    self.add_channel(ChannelItem(cc[0], cc[1], cc[2:]))
+                    override = True
+                    break
+                
+            if not override:
+                self.add_channel(ChannelItem(c['id'], c['display_name'], c['access_id']))
+
+        # Check TV_CHANNELS for any channels that aren't in EPGDB then
+        # at them to the list.
         for c in config.TV_CHANNELS:
-            self.add_channel(ChannelItem(c[0], c[1], c[2]))
+            if c[0] in config.TV_CHANNELS_EXCLUDE:
+                # Skip channels that we explicitly do not want.
+                continue
+            if not c[0] in self.channel_dict.keys():
+                self.add_channel(ChannelItem(c[0], c[1], c[2:]))
+
+
+    def sort_channels(self):
+        pass
+
+
+    def get_settings_by_id(self, chan_id):
+        """
+        """
+        settings = []
+        chan = self.channel_dict.get(chan_id)
+        if chan:
+            for u in c.uri:
+                which = u.split(':')[0]
+                settings.append(which)
+
+        return settings
+
+
+    def get_settings_by_name(self, chan_name):
+        """
+        """
+        settings = []
+        for c in self.channel_list:
+            if c.name == chan_name:
+                for u in c.uri:
+                    which = u.split(':')[0]
+                    settings.append(which)
+
+        return settings
 
 
     def add_channel(self, channel):
