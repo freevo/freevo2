@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/09 11:58:15  rshortt
+# Clean comments and add one.
+#
 # Revision 1.2  2004/08/08 19:07:08  rshortt
 # The first new recording plugin:
 #
@@ -17,39 +20,6 @@
 # -Impliments an eventhandler.
 # -Will handle recordings on multiple devices.
 #
-# Revision 1.1  2004/08/05 17:35:40  dischi
-# move recordserver and plugins into extra dir
-#
-# Revision 1.28  2004/07/26 18:10:19  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.27  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.26  2004/06/28 18:23:34  rshortt
-# I guess this shouldn't be in here since its back in recordserver.
-#
-# Revision 1.25  2004/06/23 19:07:05  outlyer
-# The snapshot in the event doesn't work. I've tried it numerous times, and it
-# is being killed before completing.
-#
-# Did no one else actually try this change?
-#
-# Revision 1.24  2004/06/22 01:05:51  rshortt
-# Get the filename from tv_util.getProgFilename().
-#
-# Revision 1.23  2004/06/10 02:32:17  rshortt
-# Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
-#
-# Revision 1.22  2004/06/07 16:46:00  rshortt
-# Didn't mean to add partial support for multiple recording plugins yet.
-#
-# Revision 1.21  2004/06/07 16:10:51  rshortt
-# Change 'RECORD' to plugin.RECORD.
-#
-# Revision 1.20  2004/05/28 01:48:22  outlyer
-# Florian Demmer's patch for consecutive recordings and a patch to move the
-# snapshot to after we set the flag to idle, just to be safe.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -92,8 +62,14 @@ from event import Event
 
 DEBUG = config.DEBUG
 
+# XXX:  Calculate CHUNKSIZE based on the configured ivtv bitrate/max bitrate
+#       and the poll_interval of the plugin.  The size of the ivtv encoding 
+#       buffer (in the driver or card) does matter here.  If we don't read
+#       enough data on each poll() it will overflow, if we read too much the
+#       plugin will block for too long.  The value of 65536 is working quite
+#       well for me with a constant bitrate of 4.5 Mb/sec and 0.1 sec poll().
 CHUNKSIZE = 65536
-#CHUNKSIZE = 450000
+
 
 class IVTVRecordSession:
 
@@ -110,7 +86,6 @@ class IVTVRecordSession:
             pass
                 
         elif self.mode == 'stop':
-            # do stopping stuff
             self.v_in.close()
             self.v_out.close()
             self.vdev.close()
@@ -156,7 +131,6 @@ class IVTVRecordSession:
                 self.mode = 'stop'
 
             buf = self.v_in.read(CHUNKSIZE)
-            #buf = self.v_in.read()
             self.v_out.write(buf)
 
         else:
