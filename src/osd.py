@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/06/21 10:18:34  dischi
+# small fix
+#
 # Revision 1.44  2003/06/21 08:17:45  gsbarbieri
 # Small fix
 #
@@ -1004,10 +1007,9 @@ class OSD:
             char_size, char_height = self.stringsize(char, font, ptsize)
 
             if ((occupied_size + char_size) <= width) and (char != '\n'):
-
                 occupied_size += char_size
                 lines[line_number] += char
-                
+
             else:
                 if (occupied_height + char_height) <= height:
                     # we can add one more line
@@ -1025,25 +1027,28 @@ class OSD:
                 else:
                     # we can NOT add more lines :(
                     # add the ellipses indicating we did truncate
-                    j = 1
+                    j = 0
                     len_line = len(lines[line_number])
                     for j in range(len_line):
                         if (occupied_size + ellipses_size) <= width:
                             break
+                        
+                        # shorten the line again to make space for 'ellipses'
                         char_size = self.charsize(lines[line_number][len_line-j-1],
                                                   font, ptsize)[0]
                         occupied_size -= char_size
                     lines[line_number] = lines[line_number][0:len_line-j]
+                    i -= j + 1
                     occupied_size = self.stringsize( lines[line_number], font, ptsize )[0]
                     if ellipses:
                         while ellipses and \
-                                  (occupied_size + self.stringsize(ellipses, font, ptsize)[0]) \
-                                  > width:
-                              ellipses = ellipses[:-1]
+                                  (occupied_size + \
+                                   self.stringsize(ellipses, font, ptsize)[0]) > width:
+                            ellipses = ellipses[:-1]
                         lines[line_number] += ellipses
-
                     break
-        rest_words = string[i:len(string)]
+
+        rest_words = string[i+1:len(string)]
 
         if bgcolor != None:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
