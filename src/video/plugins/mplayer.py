@@ -20,6 +20,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/10/08 02:04:04  outlyer
+# BUGFIX: For some reason, I was seeing a lot of 'killing with signal 9' in
+# my log files when I played certain video files. Adding the 'double' quit here
+# seems to cause it to quit cleanly, and immediately instead of an annoying
+# two seconds later.
+#
 # Revision 1.30  2003/10/04 14:38:10  dischi
 # Try to auto-correct av sync problems. Set MPLAYER_SET_AUDIO_DELAY to
 # enable it. You need mmpython > 0.2 to make it work.
@@ -411,6 +417,7 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
+        self.thread.app.write('quit\n')
         self.thread.stop('quit\n')
         rc.app(None)
         if self.bmovl:
