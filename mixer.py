@@ -1,14 +1,47 @@
-#
-# mixer.py
-#
-# This is the mixer interface
-#
+# ----------------------------------------------------------------------
+# mixer.py - The mixer interface for freevo.
+# ----------------------------------------------------------------------
 # $Id$
+#
+# Authors: Aubin Paul <aubin@debian.org>
+#          Thomas Malt <thomas@malt.no>
+# Notes:
+# Todo:  - Add get/set routines to functions for sb live later.
+#
+# ----------------------------------------------------------------------
+# $Log$
+# Revision 1.5  2002/08/03 18:17:53  dischi
+# Patch from Thomas Malt:
+# - Added get, set, inc and dec functions for Pcm, Igain, Ogain
+#   (used at least on SB Live cards).
+#
+# ----------------------------------------------------------------------
+# 
+# Copyright (C) 2002 Krister Lagerstrom
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------
+#
+"""For manipulating the mixer.
+"""
 
-import fcntl, struct
-
-# Configuration file. Determines where to look for AVI/MP3 files, etc
+import fcntl
+import struct
 import config
+import os     # popen is used to manipulate the mixer for SB Live cards.
 
 # Set to 1 for debug output
 DEBUG = 0
@@ -39,17 +72,21 @@ class Mixer:
     SOUND_MASK_LINE = 64
     
     def __init__(self):
-        self.mixfd = open(config.DEV_MIXER, 'r')   
-        self.mainVolume = 0
-        self.pcmVolume = 0
+        self.mixfd        = open(config.DEV_MIXER, 'r')   
+        self.mainVolume   = 0
+        self.pcmVolume    = 0
         self.lineinVolume = 0
-        self.micVolume = 0
-        self.setMainVolume(self.mainVolume)
-        self.setPcmVolume(self.pcmVolume)
-        self.setLineinVolume(self.lineinVolume)
-        self.setMicVolume(self.micVolume)
-        data = struct.pack('L', self.SOUND_MASK_LINE)
-        fcntl.ioctl(self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data)
+        self.micVolume    = 0
+        self.igainVolume  = 0 # XXX Used on SB Live
+        self.ogainVolume  = 0 # XXX Ditto
+        
+        self.setMainVolume( self.mainVolume )
+        self.setPcmVolume( self.pcmVolume )
+        self.setLineinVolume( self.lineinVolume )
+        self.setMicVolume( self.micVolume )
+
+        data = struct.pack( 'L', self.SOUND_MASK_LINE )
+        fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
         
         
     def _setVolume(self, device, volume):
@@ -75,24 +112,65 @@ class Mixer:
         if self.mainVolume > 100: self.mainVolume = 100
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
-        
     def decMainVolume(self):
         self.mainVolume -= 5
         if self.mainVolume < 0: self.mainVolume = 0
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
-        
+    def getPcmVolume( self ):
+        return( self.pcmVolume )
+    
     def setPcmVolume(self, volume):
+        self.pcmVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_PCM, volume)
 
-        
-    def setLineinVolume(self, volume):
-        self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
-       
+    def incPcmVolume( self ):
+        self.pcmVolume += 5
+        if self.pcmVolume > 100: self.pcmvolume = 100
+        self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
 
-    def setMicVolume(self, volume):
-        self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
+    def decPcmVolume( self ):
+        self.pcmVolume -= 5
+        if self.pcmVolume < 0: self.pcmVolume = 0
+        self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
+    
+    def setLineinVolume(self, volume):
+        self.lineinVolume = volume
+        self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
+
+    def getLineinVolume( self ):
+        return self.lineinVolume
        
+    def setMicVolume(self, volume):
+        self.micVolume = volume
+        self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
+
+    def setIgainVolume( self, volume ):
+        """For Igain (input from TV etc) on emu10k cards"""
+        if volume > 100: volume = 100 
+        elif volume < 0: volume = 0
+        self.igainVolume = volume
+        os.popen( 'aumix -i' + str(volume) )
+
+    def getIgainVolume( self ):
+        return self.igainVolume
+
+    def decIgainVolume( self ):
+        self.igainVolume -= 5
+        if self.igainVolume < 0: self.igainVolume = 0
+        os.popen( 'aumix -i-5' )
+        
+    def incIgainVolume( self ):
+        self.igainVolume += 5
+        if self.igainVolume > 100: self.igainVolume = 100
+        os.popen( 'aumix -i+5' )
+        
+    def setOgainVolume( self, volume ):
+        """For Ogain on SB Live Cards"""
+        if volume > 100: volume = 100 
+        elif volume < 0: volume = 0
+        self.ogainVolume = volume
+        os.popen( 'aumix -o' + str(volume) ) 
 
 # Simple test...
 if __name__ == '__main__':
