@@ -32,6 +32,7 @@
 
 import sys
 import time
+import copy
 import logging
 
 import mcomm
@@ -55,6 +56,25 @@ class Recording:
         self.stop = stop
         self.status = status
         self.description = {}
+
+
+    def __unicode__(self):
+        if self.description.has_key('title') and self.description['title']:
+            s = self.description['title']
+        else:
+            s = 'No Title'
+        if self.description.has_key('episode') and self.description['episode']:
+            s += u' %s' % self.description['episode']
+        if self.description.has_key('subtitle') and \
+           self.description['subtitle']:
+            s += u' - %s' % self.description['subtitle']
+        start = time.strftime('%I:%M%p', time.localtime(self.start))
+        return s + u' at %s' % Unicode(start)
+
+
+    def __str__(self):
+        return String(self.__unicode__())
+
         
 class Recordings:
     def __init__(self):
@@ -63,11 +83,13 @@ class Recordings:
         self.server = None
         mcomm.register_entity_notification(self.__entity_update)
         mcomm.register_event('record.list.update', self.__list_update)
+        self.comingup = _('The recordserver is down')
         
 
     def __entity_update(self, entity):
         if not entity.present and entity == self.server:
             log.info('recordserver lost')
+            self.comingup = _('The recordserver is down')
             self.server = None
             return
 
@@ -120,10 +142,12 @@ class Recordings:
             log.error(str(status))
             return
         self.last_update = time.time()
-        description = dict(rec[9])
-        description['title'] = rec[1]
+        description = {} 
+        description['title'] = Unicode(rec[1], 'UTF-8')
         description['start_padding'] = rec[7]
         description['stop_padding'] = rec[8]
+        for key, value in dict(rec[9]).items():
+            description[key] = Unicode(value, 'UTF-8')
         key = '%s-%s-%s' % (rec[2], rec[4], rec[5])
         self.__recordings[key].description = description
         self.__request_description()
@@ -139,7 +163,41 @@ class Recordings:
                                                callback=cb)
                 return
         log.info('got all recording descriptions')
-        return
+
+
+        # create coming up text list
+        reclist = copy.copy(self.__recordings.values())
+        reclist.sort(lambda x,y: cmp(x.start, y.start))
+        today = []
+        tomorrow = []
+        later = []
+
+        date0 = time.localtime()[:3]
+        date1 = time.localtime(time.time() + 60 * 60 * 24)[:3]
+
+        for what in reclist:
+            if time.localtime(what.start)[:3] == date0:
+                today.append(what)
+            elif time.localtime(what.start)[:3] == date1:
+                tomorrow.append(what)
+            elif what.start > time.time():
+                later.append(what)
+
+        self.comingup = ''
+        if len(today) > 0:
+            self.comingup += _('Today') + u':\n'
+            for r in today:
+                self.comingup += u'%s\n' % Unicode(r)
+        if len(tomorrow) > 0:
+            self.comingup += _('Tomorrow') + u':\n'
+            for r in tomorrow:
+                self.comingup += u'  %s\n' % Unicode(r)
+        if len(later) > 0:
+            self.comingup += _('This Week') + u':\n'
+            for r in later:
+                self.comingup += u'  %s\n' % Unicode(r)
+        if not self.comingup:
+            self.comingup = _('No recordings are scheduled')
         
         
     def get(self, channel, start, stop):
@@ -266,3 +324,6 @@ class Favorites:
 
 recordings = Recordings()
 favorites  = Favorites()
+
+def comingup():
+    return recordings.comingup

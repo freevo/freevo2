@@ -40,7 +40,7 @@ import time
 
 # freevo imports
 import util
-import util.tv_util
+import record.client
 
 # gui imports
 from area import Area
@@ -54,7 +54,7 @@ def current_time():
     return time.strftime(format)
 
 # function calls to get more info from the skin
-function_calls = { 'comingup': util.tv_util.comingup,
+function_calls = { 'comingup': record.client.comingup,
                    'time': current_time }
 
 class InfoArea(Area):
