@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2004/02/23 16:09:34  dischi
+# make it possible to print unicode
+#
 # Revision 1.98  2004/02/22 21:01:39  rshortt
 # Make sure input_num is actually an int.
 #
@@ -103,7 +106,7 @@ VERSION = version.__version__
 # an exception is raised with Python 2.1 if LANG is unavailable.
 import gettext
 try:
-    gettext.install('freevo', os.environ['FREEVO_LOCALE'], True)
+    gettext.install('freevo', os.environ['FREEVO_LOCALE'], 1)
 except: # unavailable, define '_' for all modules
     import __builtin__
     __builtin__.__dict__['_']= lambda m: m
@@ -140,6 +143,8 @@ class Logger:
         
     def write(self, msg):
         global DEBUG_STDOUT
+        if isinstance(msg, unicode):
+            msg = msg.encode(LOCALE)
         if DEBUG_STDOUT:
             sys.__stdout__.write(msg)
         self.fp.write(msg)
