@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/15 20:44:48  dischi
+# Bugfix: the osd uses objectcache for a long time now. We should write more
+# docs, nobody noticed this bug.
+#
 # Revision 1.12  2003/02/13 07:47:25  krister
 # Bugfixes for image errors.
 #
@@ -365,7 +369,7 @@ class ImageViewer:
                 os.system(cmd)
                 os.system('mv /tmp/freevo-iview %s' % self.filename)
                 self.rotation = 0
-                osd._deletefromcache(self.filename)
+                osd.bitmapcache.__delitem__(self.filename)
 
         else:
             self.fileitem.eventhandler(event)
