@@ -1,3 +1,9 @@
+#
+# Freevo main makefile
+# 
+# $Id$
+#
+
 SUBDIRS = matrox_g400 rc_client osd_server
 
 all: subdirs runapp
