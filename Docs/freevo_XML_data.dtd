@@ -1,0 +1,159 @@
+<!DOCTYPE freevo [
+<!ELEMENT freevo (disc-set|movie)+              -- root element -- 
+  -- TO BE DISCUSSED: should a mix of disc and movie elements be allowed? Does
+     it make sense?
+  --
+>
+
+<!-- *** Common elements *** -->
+
+<!ELEMENT cover-img (#PCDATA)                   -- cover picture -- >
+<!ATTLIST cover-img
+                source CDATA #IMPLIED           -- source filename --
+>
+
+<!ELEMENT info      (copyright?,url?,genre?,year,?,runtime?,
+                     tagline?,plot?,rating?)    -- info about the movie   -- >
+<!ELEMENT copyright (#PCDATA)>
+<!ELEMENT url       (#PCDATA)>
+<!ELEMENT genre     (#PCDATA)>
+<!ELEMENT year      (#PCDATA)>
+<!ELEMENT runtime   (#PCDATA)>
+<!ELEMENT tagline   (#PCDATA)>
+<!ELEMENT plot      (#PCDATA)>
+<!ELEMENT rating    (#PCDATA)>
+
+<!-- *** disc-set declaration *** -->
+
+<!ELEMENT disc-set (disc+, cover-img?, info?)   -- set of discs --
+  -- A disc-set contains a set of related discs, e.g. all CD-ROMS of
+     containing files of a given TV show
+  -- >
+<!ATTLIST disc-set
+                title    CDATA #IMPLIED         -- label for the menu --
+                filename-regexp CDATA #IMPLIED  -- regular expression for
+                                                   displaying the filenames
+                                                   NOT IMPLEMENTED IN PARSER --
+>
+<!ELEMENT disc EMPTY                            -- disc definition --
+  -- This element allows to associate the given cover-img with all the files
+     on the disc. It is a shortcut, that replaces defining movie elements for
+     each file on the disc
+  -- >
+<!ATTLIST disc
+                media-id CDATA #IMPLIED         -- identifies the media --
+                label-regexp   CDATA #IMPLIED   -- regular expression for
+                                                   matching the media's label --
+  -- One of those two attributes is mandatory. This constraint cannot be
+     expressed with DTD symtax, AFAIK :( 
+
+     Another solution would be:
+       identifier-type ( media-id | regexp-label ) #REQUIRED
+       identifier-data CDATA #REQUIRED
+  --
+>
+                                                      
+<!-- *** movie declaration *** -->
+
+<!ELEMENT movie     (cover-img?, video, variants,
+                     info?)                     -- Movie definition --
+  -- A movie has a title, a cover, infos, video parts and variants.
+     E.g. two .avi files, located on two different CDs,
+     or one .mpg file and 1 VCD track (don't laugh, I have one movie like
+     this :)
+  -- >
+<!ATTLIST movie
+                title CDATA #IMPLIED            -- Title of the movie --
+  -- This one is displayed when some parts of the movie are available.
+     When SELECTed, a submenu is entered, letting the user choose between:
+      - files submenu (containing the raw files/vcd tracks/dvd movie's name
+        attribute, or filename/track number/movie number if there is no name)
+      - variant 1 submenu (can be SELECTed/PLAYed or ENTERed)
+      - variant 2 submenu (can be SELECTed/PLAYed or ENTERed)
+      - ...
+      If there is no variant defined, the content of what would have been the
+      files submenu is displayed here.
+  --
+>
+
+<!-- *** video parts declaration *** -->
+
+<!ELEMENT video (dvd|vcd|file)+                 -- movie parts            --
+  -- A set of movie parts makes one movie (e.g. part 1 and 2)
+     Those parts can be located on different media and can be of different
+     types.
+  -- >
+<!ATTLIST video
+                mplayer-options CDATA #IMPLIED  -- movie-specific opts    --
+>
+<!ELEMENT dvd  (#PCDATA)                        -- param for -dvd         -- >
+<!ATTLIST dvd  
+               id               ID    #REQUIRED -- unique ID              --
+               name             CDATA #IMPLIED  -- name of the video clip --
+               media-id         CDATA #IMPLIED  -- Is there one ?         --
+               mplayer-options  CDATA #IMPLIED  -- dvd-specific opts      --
+>                              
+<!ELEMENT vcd  (#PCDATA)                        -- param for -vcd         -- >
+<!ATTLIST vcd  
+               id               ID    #REQUIRED -- unique ID              --
+               name             CDATA #IMPLIED  -- name of the video clip --
+               media-id         CDATA #IMPLIED  -- media ID               --
+               mplayer-options  CDATA #IMPLIED  -- vcd-specific opts      --
+>                              
+<!ELEMENT file (#PCDATA)                        -- filename               -- >
+<!ATTLIST file 
+               id               ID    #REQUIRED -- unique ID              --
+               name             CDATA #IMPLIED  -- name of the video clip --
+               media-id         CDATA #IMPLIED  -- media ID               --
+               mplayer-options  CDATA #IMPLIED  -- file-specific opts     --
+>
+
+<!-- *** variant declaration *** -->
+<!ELEMENT variants (variant+)                   -- container for variant  -- >
+
+<!ELEMENT variant (part+)                       -- variant of the movie   --
+  -- This is what is actually played when a movie is SELECTed or PLAYed.
+     When all parts of a variant are not available, only the available parts
+     are played. The user can be prompted for the unavailable parts (e.g.
+     "please insert CD").
+     A variant is displayed as a menu (with the name attribute), which can
+     also be ENTERed. When not all the parts of the variant are available, the
+     available parts are displayed along with the variant's name.
+  -- >
+<!ATTLIST variant
+               name             CDATA #REQUIRED -- name of the variant    --
+               mplayer-options  CDATA #IMPLIED  -- variant-specific opts  --
+>
+
+<!ELEMENT part (subtitle?, audio?)              --                        --
+  -- This defines what options are applied to the video clip refered with
+  attribute ref when playing.
+  It is displayed as a file/vcd track/dvd movie that can be SELECTed/PLAYed.
+  It's displayed name is build from the file/track/movie name and the
+  variant's name.
+  -- >
+<!ATTLIST part
+               ref              IDREF #REQUIRED -- ref to a video element --
+               mplayer-options  CDATA #IMPLIED  -- part-specific opts     --
+>
+
+<!ELEMENT subtitle (#PCDATA)                    -- subtitle data          -- >
+<!ATTLIST subtitle
+               media-id         CDATA #IMPLIED  -- subtitle data's media  --
+>
+<!ELEMENT audio    (#PCDATA)                    -- audio data             -- >
+<!ATTLIST audio
+               media-id         CDATA #IMPLIED  -- audio data's media     --
+>
+
+]>
+
+<!-- Note on media-id attributes:
+  Those attributes are designed for finding on what media the file/track/movie
+  is located. Subtitles/audio tracks might be located on another media than
+  the original movie.
+  Resolving the media-id into an actual mountpoint must not be done when
+  reading the XML file, since the media is probably not present at that time.
+  Thus, the media-id resolution must happen as late as possible (typically
+  when building the arguments passed to mplayer just before playing the movie).
+-->
