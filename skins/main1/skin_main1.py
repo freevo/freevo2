@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2002/10/30 16:34:25  outlyer
+# Don't crash if show_name[0][-1] is undefined.
+#
+# (I had files named: 1x14 - something.avi, and it matched the TV SHOW regexp
+# but it crashed since show_name[0] was undefined, so FIRST check if show_name[0]
+# is undefined before doing something with the show_name[0])
+#
 # Revision 1.56  2002/10/28 21:32:42  dischi
 # Oops
 #
@@ -529,7 +536,7 @@ class Skin:
             show_name = (None, None, None, None)
             if config.TV_SHOW_REGEXP_MATCH(text):
                 show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(text))
-                if show_name[0][-1] == '(':
+                if show_name[0] and show_name[0][-1] == '(':
                     show_name[0] = None
 
             # TV show, align the text with all files from the same show
