@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/04/12 05:44:34  dischi
+# unicode problems with mp3 tag fix
+#
 # Revision 1.35  2004/03/22 11:04:51  dischi
 # improve caching
 #
@@ -362,9 +365,9 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None,
 
     tag = eyeD3.Tag(filename)
     tag.header.setVersion(eyeD3.ID3_V2_3)
-    if artist: tag.setArtist(artist)
-    if album:  tag.setAlbum(album)
-    if title:  tag.setTitle(title)
+    if artist: tag.setArtist(String(artist))
+    if album:  tag.setAlbum(String(album))
+    if title:  tag.setTitle(String(title))
     if track:  tag.setTrackNum((track,tracktotal))   # eyed3 accepts None for tracktotal
     if year:   tag.setDate(year) 
     tag.update()
