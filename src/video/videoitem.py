@@ -25,6 +25,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/08/23 18:33:03  dischi
+# use util.getimage to get the cover image file
+#
 # Revision 1.76  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -123,12 +126,9 @@ class VideoItem(Item):
             show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
                 self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
-                             " - " + show_name[3] 
-                if os.path.isfile((config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()):
-                    self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()
-                elif os.path.isfile((config.TV_SHOW_DATA_DIR + \
-                                     show_name[0] + ".jpg").lower()):
-                    self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".jpg").lower()
+                            " - " + show_name[3]
+                self.image = util.getimage((config.TV_SHOW_DATA_DIR + \
+                                            show_name[0].lower()), self.image)
 
                 if config.TV_SHOW_INFORMATIONS.has_key(show_name[0].lower()):
                     tvinfo = config.TV_SHOW_INFORMATIONS[show_name[0].lower()]
@@ -145,16 +145,10 @@ class VideoItem(Item):
             
         # find image for this file
         # First check in COVER_DIR
-        if os.path.isfile(config.COVER_DIR+self.basename+'.png'):
-            self.image = config.COVER_DIR+self.basename+'.png'
-        elif os.path.isfile(config.COVER_DIR+self.basename+'.jpg'):
-            self.image = config.COVER_DIR+self.basename+'.jpg'
-        # Then check for episode in TV_SHOW_DATA_DIR
-        if os.path.isfile(os.path.splitext(filename)[0] + ".png"):
-            self.image = os.path.splitext(filename)[0] + ".png"
-        elif os.path.isfile(os.path.splitext(filename)[0] + ".jpg"):
-            self.image = os.path.splitext(filename)[0] + ".jpg"
+        self.image = util.getimage(config.COVER_DIR+self.basename, self.image)
 
+        # Then check for episode in TV_SHOW_DATA_DIR
+        self.image = util.getimage(os.path.splitext(filename)[0], self.image)
 
         self.video_player = plugin.getbyname(plugin.VIDEO_PLAYER)
 
