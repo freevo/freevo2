@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2003/07/07 21:39:50  dischi
+# add special handling for mmpython video informations
+#
 # Revision 1.60  2003/07/05 15:53:25  outlyer
 # Quiet some debugging stuff.
 #
@@ -284,6 +287,28 @@ class VideoItem(Item):
             self.tv_show           = obj.tv_show
             self.id                = obj.id
 
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if attr in ('length', 'geometry', 'aspect'):
+            try:
+                video = self.info.video[0]
+                if attr == 'length':
+                    length = video.length
+                    if length / 3600:
+                        return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
+                                                  length % 60)
+                    else:
+                        return '%d:%02d' % (length / 60, length % 60)
+                if attr == 'geometry':
+                    return '%sx%s' % (video.width, video.height)
+                if attr == 'aspect':
+                    aspect = getattr(video, attr)
+                    return aspect[:aspect.find(' ')].replace('/', ':')
+            except:
+                pass
+        return Item.getattr(self, attr)
                 
     def sort(self, mode=None):
         """
