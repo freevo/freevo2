@@ -390,7 +390,6 @@ class Image(base.Image):
         oldcol = self.get_color()
         self.set_color(color)
        
-        # TODO: figure out what to do with amplitude.
         self._image.drawEllipse(center, amplitude, fill)
         self.set_color(oldcol)
 
