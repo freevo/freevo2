@@ -115,8 +115,8 @@ class CanvasImage(CanvasObject):
 			self.filename = image
 			image = imagelib.open(image)
 		elif isinstance(image, CanvasImage):
-			image = image.image
-			self.filanem = None
+			image = image.image.copy()
+			self.filename = None
 		if self.image == image:
 			return
 		if image == None:
