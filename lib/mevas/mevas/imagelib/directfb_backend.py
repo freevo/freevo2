@@ -5,9 +5,8 @@
 # Note: This doesn't work yet don't don't bother trying. :)
 #
 # TODO: 
-#      -SurfaceDescription support in pydirectfb
+#      -improve SurfaceDescription support in pydirectfb (set data)
 #      -image transformations
-#      -revive blend method
 #      -support other raw formats
 #      -revise _capabilities
 #      -a way to save an image to disk
@@ -62,8 +61,8 @@ _capabilities =  {
     "shmem": False,
     "pickling": True,
     "unicode": True,
-    "layer-alpha": False,
-    "alpha-mask": False,
+    "layer-alpha": True,
+    "alpha-mask": True,
     "cache": True
     }
 
@@ -118,6 +117,7 @@ class Image(base.Image):
         self.imageDescription = None
         self.filename = None
         self.has_alpha = 1
+        self._color = (255, 255, 255, 255)
 
         if isinstance(image_or_filename, Image):
             self._image = image_or_filename._image
@@ -125,18 +125,22 @@ class Image(base.Image):
             self._image = image_or_filename
         elif isinstance(image_or_filename, ImageProvider):
             self._image = dfb.createSurface(description=image_or_filename.getSurfaceDescription())
+            image_or_filename.renderTo(self._image)
         elif type(image_or_filename) in types.StringTypes:
-            # Should we copy(provider.getSurfaceDescription()) 
-            # then del(provider)?
             self.filename = image_or_filename
             provider = dfb.createImageProvider(self.filename)
             self.imageDescription = provider.getImageDescription()
             self._image = dfb.createSurface(description=provider.getSurfaceDescription())
+            provider.renderTo(self._image)
         elif isinstance(image_or_filename, SurfaceDescription):
             self._image = dfb.createSurface(description=image_or_filename)
         else:
             raise ValueError, "Unsupported image type: %s" % \
                   type(image_or_filename)
+
+        self._image.setBlittingFlags(DSBLIT_BLEND_ALPHACHANNEL)
+        self._image.setDrawingFlags(DSDRAW_BLEND)
+
 
     def __getattr__(self, attr):
         if attr == "format":
@@ -189,22 +193,109 @@ class Image(base.Image):
 
 
     def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
-        # TODO: use StretchBlit
-        # self._image =  self._image.scale(size, src_pos, src_size)
-        print 'Image.scale not implimented'
-        pass
+        print 'Image.scale called'
+         
+        if src_size[0] == -1:
+            s_w = self.width
+        else:
+            s_w = src_size[0]
+
+        if src_size[1] == -1:
+            s_h = self.height
+        else:
+            s_h = src_size[1]
+
+        newsurf = dfb.createSurface(caps=self._image.getCapabilities(),
+                                    width=size[0], height=size[1],
+                                    pixelformat=self._image.getPixelFormat())
+
+        newsurf.stretchBlit(self._image,
+                            (src_pos[0], src_pos[1], s_w, s_h),
+                            (0, 0, size[0], size[1]))
+
+        self._image = newsurf
 
 
     def blend(self, srcimg, dst_pos = (0, 0), dst_size = (-1, -1),
-          src_pos = (0, 0), src_size = (-1, -1),
-          alpha = 255, merge_alpha = True):
-        #return self._image.blend(srcimg._image, src_pos, src_size, dst_pos,
-        #                         dst_size, alpha, merge_alpha)
-        print 'Image.blend not implimented'
+              src_pos = (0, 0), src_size = (-1, -1),
+              alpha = 255, merge_alpha = True):
+
+        print 'Image.blend called'
+        # print 'src_size: %s,%s' % src_size
+        # print 'src_pos: %s,%s' % src_pos
+        # print 'dst_pos: %s,%s' % dst_pos
+
+        blittingFlags = DSBLIT_NOFX  
+
+        if alpha == 256: 
+            merge_alpha = False
+        elif merge_alpha:
+            blittingFlags |= DSBLIT_BLEND_ALPHACHANNEL 
+
+        self._image.setBlittingFlags(blittingFlags)
+
+        real_src_size = srcimg._image.getSize()
+
+        if src_size[0] == -1:
+            s_w = real_src_size[0]
+        else:
+            s_w = src_size[0]
+
+        if src_size[1] == -1:
+            s_h = real_src_size[1]
+        else:
+            s_h = src_size[1]
+
+        if dst_size[0] == -1:
+            d_w = real_src_size[0]
+        else:
+            d_w = dst_size[0]
+
+        if dst_size[1] == -1:
+            d_h = real_src_size[1]
+        else:
+            d_h = dst_size[1]
+
+        if (s_w, s_h) == (d_w, d_h):
+            # no scaling involved
+            print 'use blit: %s %s (%s %s %s %s)' % (dst_pos[0], dst_pos[1],src_pos[0], src_pos[1], s_w, s_h)
+            #
+            # XXX: This blit call segfaults!!!
+            #
+            #self._image.blit(srcimg._image, dst_pos[0], dst_pos[1], 
+            #                 (src_pos[0], src_pos[1], s_w, s_h))
+            #
+            # replace it with this stretchBlit() call for now, and maybe
+            # for good.  If so we can remove the above if statement.
+            self._image.stretchBlit(srcimg._image, 
+                                    (src_pos[0], src_pos[1], s_w, s_h),
+                                    (dst_pos[0], dst_pos[1], d_w, d_h))
+        else:
+            # scaling, use stretchBlit()
+            print 'use stretchBlit'
+            self._image.stretchBlit(srcimg._image, 
+                                    (src_pos[0], src_pos[1], s_w, s_h),
+                                    (dst_pos[0], dst_pos[1], d_w, d_h))
 
 
     def clear(self, pos = (0, 0), size = (-1, -1)):
-        print 'Image.clear not implimented'
+        print 'Image.clear called'
+        real_size = self._image.getSize()
+
+        if size[0] == -1:
+            s_w = real_size[0]
+        else:
+            s_w = size[0]
+
+        if size[1] == -1:
+            s_h = real_size[1]
+        else:
+            s_h = size[1]
+
+        # Is position 0,0 top left?
+        self._image.setClip((pos[0], pos[1], pos[0]+s_w, pos[1]-s_h))
+        self._image.clear(0,0,0,0)
+        self._image.setClip()
 
 
     def draw_mask(self, maskimg, pos):
@@ -212,6 +303,7 @@ class Image(base.Image):
 
 
     def copy(self):
+        print 'Image.copy called'
         return Image(copy(self._image))
 
 
@@ -235,12 +327,17 @@ class Image(base.Image):
             r, g, b, a = color
         else:
             return
-        print 'color now: %x,%x,%x,%x' % (r, g, b, a)
+        # print 'color now: %x,%x,%x,%x' % (r, g, b, a)
 
         try:
             self._image.setColor(r, g, b, a)
+            self._color = (r, g, b, a)
         except:
             traceback.print_exc()
+
+
+    def get_color(self):
+        return self._color
 
 
     def draw_text(self, pos, text, color = None, font_or_fontname = None):
@@ -251,35 +348,51 @@ class Image(base.Image):
 
             self.set_font(font_or_fontname)
 
-        if color:
-            self.set_color(color)
+        
+        oldcol = self.get_color()
 
-        return self._image.drawString(text, pos[0], pos[1], DSTF_LEFT | DSTF_TOP)
+        if color and not color == self.get_color():
+            self.set_color(color)
+            self._image.drawString(text, pos[0], pos[1], DSTF_LEFT | DSTF_TOP)
+            self.set_color(oldcol)
+        else:
+            self._image.drawString(text, pos[0], pos[1], DSTF_LEFT | DSTF_TOP)
 
 
     def draw_rectangle(self, pos, size, color, fill = True):
+        oldcol = self.get_color()
         self.set_color(color)
        
         x, y = pos
         w, h = size
-        print 'rect: %d %d %d %d' % (x, y, w, h)
         if 0 in [w, h]:  
             print 'Bad rect!'
+            print 'rect: %d %d %d %d' % (x, y, w, h)
             return
 
-        # print 'rect: %d %d %d %d' % (pos[0], pos[1], size[0], size[1])
-        # self._image.drawRectangle(pos[0], pos[1], size[0], size[1])
-        self._image.drawRectangle(x, y, w, h)
+        self._image.setDrawingFlags(DSDRAW_BLEND)
 
         if fill:
             self._image.fillRectangle(x, y, w, h)
+        else:
+            self._image.drawRectangle(x, y, w, h)
+
+        self.set_color(oldcol)
 
 
-    def draw_ellipse(self, center, size, amplitude, fill = True):
-        # TODO: find some way to easily draw an ellipse as there's
-        #       no way to in the DirectFB API.  Maybe find (or build)
-        #       another library.
-        print 'Image.draw_ellipse not implimented'
+    def draw_ellipse(self, center, amplitude, color, fill = True):
+        print 'Image.draw_ellipse called'
+        if fill: fill = 1
+        else: fill = 0
+
+        self._image.setDrawingFlags(DSDRAW_BLEND)
+
+        oldcol = self.get_color()
+        self.set_color(color)
+       
+        # TODO: figure out what to do with amplitude.
+        self._image.drawEllipse(center, amplitude, fill)
+        self.set_color(oldcol)
 
 
     def move_to_shmem(self, format = "BGRA", id = None):
@@ -298,8 +411,15 @@ class Image(base.Image):
 
 
     def crop(self, pos, size):
-        #self._image = self._image.crop(pos, size)
-        print 'Image.crop not implimented'
+        print 'Image.crop called'
+         
+        newsurf = dfb.createSurface(caps=self._image.getCapabilities(),
+                                    width=size[0], height=size[1],
+                                    pixelformat=self._image.getPixelFormat())
+
+        newsurf.blit(self._image, 0, 0, (pos[0], pos[1], size[0], size[1]))
+
+        self._image = newsurf
 
 
     def scale_preserve_aspect(self, size):
@@ -308,6 +428,7 @@ class Image(base.Image):
 
 
     def copy_rect(self, src_pos, size, dst_pos):
+        print 'Image.copy_rect called'
         self._image.blit(self._image, dst_pos[0], dst_pos[1], 
                          (src_pos[0], src_pos[1], size[0], size[1]))
 
@@ -331,6 +452,7 @@ class Font(base.Font):
 
 
     def get_text_size(self, text):
+        # TODO: This most definately needs to be refined.
         w = self._font.getStringWidth(text)
         h = self._font.getHeight()
         ha = self._font.getMaxAdvance()
@@ -344,6 +466,7 @@ class Font(base.Font):
 
 
     def __getattr__(self, attr):
+        # TODO: this needs some fixing
         if attr in ("ascent", "descent", "max_ascent", "max_descent"):
             return getattr(self._font, attr)
         return base.Font.__getattr__(self, attr)
