@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/06/20 19:52:59  dischi
+# Oops
+#
 # Revision 1.16  2003/06/20 19:38:31  dischi
 # moved getattr to item.py
 #
@@ -178,7 +181,7 @@ class Item:
         """
         return the specific attribute as string or an empty string
         """
-        if hasattr(self, attr):
+        if hasattr(self, attr) and str(getattr(self,attr)):
             return str(getattr(self,attr))
         if hasattr(self, 'info') and self.info:
             if self.info.has_key(attr):
