@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/08/05 18:37:02  dischi
+# fix mplayer plugin to work with dfbmga, too
+#
 # Revision 1.12  2003/07/13 19:35:44  rshortt
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
@@ -465,7 +468,8 @@ class MPlayer_Thread(threading.Thread):
             elif self.mode == 'play':
                 # The DXR3 device cannot be shared between our SDL session
                 # and MPlayer.
-                if (osd.sdl_driver == 'dxr3'):
+                if (osd.sdl_driver == 'dxr3' or \
+                    config.CONF.display == 'dfbmga'):
                     if DEBUG:
                         print "Stopping Display for Video Playback on DXR3"
                     osd.stopdisplay()			
@@ -483,7 +487,7 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3':
+                if osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga':
                     osd.restartdisplay()
                     osd.update()
                     print "Display back online"
