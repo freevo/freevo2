@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 4.02
+LOCAL_CONF_VERSION  = 4.03
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -179,7 +179,10 @@ LOCAL_CONF_CHANGES = [
     (4.02,
      '''Added CHILDAPP_DEBUG to debug all kinds of childapps. MPLAYER_DEBUG will be
      removed soon. Renamed PREFERED_VIDEO_PLAYER to VIDEO_PREFERED_PLAYER and
-     added AUDIO_PREFERED_PLAYER.''')]
+     added AUDIO_PREFERED_PLAYER.'''),
+    (4.03,
+     '''Removed MOVIE_DATA_DIR and COVER_DIR. It has been replaved by the new
+     virtual filesystem controlled by OVERLAY_DIR''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -279,6 +282,17 @@ USE_NETWORK = 1
 # store output of started processes for debug
 #
 CHILDAPP_DEBUG = 0
+
+#
+# directory structure to save files when the normal filesystem
+# doesn't allow saving. This directory can handle covers and fxd files
+# for read only filesystems like a rom drive. Set this variable to your
+# old MOVIE_DATA_DIR if you have one. It needs to be set to a directory
+# freevo can write to.
+#
+# TODO: add a default value, right now the vfs is deactived (value == '')
+#
+OVERLAY_DIR = ''
 
 # ======================================================================
 # Plugins:
@@ -507,6 +521,7 @@ if not os.path.isdir(FREEVO_CACHEDIR):
                     os.makedirs( FREEVO_CACHEDIR )
         print 'Using %s as cache directory, but this is a bad idea' % FREEVO_CACHEDIR
         print
+
 # ======================================================================
 # Freevo movie settings:
 # ======================================================================
@@ -523,26 +538,12 @@ DIR_MOVIES = None
 DIR_RECORD = None
 
 #
-# Directory for XML definitions for DVDs and VCDs. Items in this
-# directory won't be in the MOVIE MAIN MENU, but will be used to find
-# titles and images for the current DVD/VCD
-#
-MOVIE_DATA_DIR = None
-
-#
 # Directory containing images for tv shows. A tv show maches the regular
 # expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
 # name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
 # image
 #
 TV_SHOW_DATA_DIR = None
-
-#
-# Directory for cover images for CD/VCD/DVD and music CDs or when you can't
-# add a cover image to the dir you want. Not for replacing the normal
-# cover file function.
-#
-COVER_DIR = None
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -565,7 +566,7 @@ SUFFIX_VIDEO_XINE_FILES = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
 VIDEO_PREFERED_PLAYER = 'mplayer'
 
 #
-# Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
+# Only scan OVERLAY_DIR and TV_SHOW_DATA_DIR for fxd files containing
 # informations about a disc. If you only have the fxd files for discs in
 # one of this directories (and subdirectories), set this to 1, it will
 # speed up startup, 0 may be needed if you have fxd files with disc links
@@ -823,9 +824,6 @@ JOY_CMDS = {
 
 TVTIME_CMD = CONF.tvtime
 
-# ======================================================================
-# Holiday idlebar plugin
-# ======================================================================
 
 # ======================================================================
 # MPlayer section:
@@ -929,7 +927,8 @@ if CONF.display == 'dxr3' and CONF.fbxine:
     
 if CONF.display == 'x11' and CONF.xine:
     XINE_VO_DEV  = 'xv'
-    XINE_COMMAND = '%s -g -B --geometry %sx%s+0+0' % (CONF.xine, CONF.width, CONF.height)
+    XINE_COMMAND = '%s -pq -g -B --geometry %sx%s+0+0' % \
+                   (CONF.xine, CONF.width, CONF.height)
 
 XINE_AO_DEV = 'oss'                     # alsa or oss
 XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2003/11/22 20:35:10  dischi
+# config changes for the use new vfs
+#
 # Revision 1.69  2003/11/21 17:55:09  dischi
 # new SUFFIX_VIDEO_FILES layout
 #
@@ -562,12 +565,6 @@ if not DIR_RECORD:
         
 if not TV_SHOW_DATA_DIR and not HELPER:
     print 'Error: TV_SHOW_DATA_DIR not found'
-    
-if not COVER_DIR and not HELPER:
-    print 'COVER_DIR not found'
-    
-if not MOVIE_DATA_DIR and not HELPER:
-    print 'MOVIE_DATA_DIR not found'
     
 #
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
