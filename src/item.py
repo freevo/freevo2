@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/01/07 18:13:25  dischi
+# respect overlay files and create dir if needed
+#
 # Revision 1.43  2004/01/04 18:19:16  dischi
 # fix len() calc
 #
@@ -111,7 +114,13 @@ class FileInformation:
     def copy(self, destdir):
         for f in self.files + [ self.fxd_file, self.image ]:
             if f:
-                shutil.copy(f, destdir)
+                if vfs.isoverlay(f):
+                    d = vfs.getoverlay(destdir)
+                else:
+                    d = destdir
+                if not os.path.isdir(d):
+                    os.makedirs(d)
+                shutil.copy(f, d)
 
 
     def move_possible(self):
@@ -121,7 +130,14 @@ class FileInformation:
     def move(self, destdir):
         for f in self.files + [ self.fxd_file, self.image ]:
             if f:
-                os.system('mv "%s" "%s"' % (f, destdir))
+                if vfs.isoverlay(f):
+                    d = vfs.getoverlay(destdir)
+                else:
+                    d = destdir
+                if not os.path.isdir(d):
+                    os.makedirs(d)
+                os.system('mv "%s" "%s"' % (f, d))
+
 
     def delete_possible(self):
         return self.files and not self.read_only
