@@ -301,13 +301,13 @@ plugin.activate('tv.mplayer')
 # For recording tv
 #
 # generic_record plugin needs VCR_CMD to be set correctly
-plugin_record = plugin.activate('plugins.generic_record')
+plugin_record = plugin.activate('tv.generic_record')
 #
 # Use this ivtv_record instead if you have an ivtv based card (PVR-250/350)
 # and want freevo to do everthing for you.  TV_SETTINGS must be set 
 # correctly.  To use you need the following two lines in local_conf.py:
-# plugin.remove('plugins.generic_record')
-# plugin_record = plugin.activate('plugins.ivtv_record')
+# plugin.remove('tv.generic_record')
+# plugin_record = plugin.activate('tv.ivtv_record')
 
 # For CD ripping
 # plugin.activate('audio.cdbackup')
