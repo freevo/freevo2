@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/09/22 20:17:04  dischi
+# do not use dxr3 output for helpers
+#
 # Revision 1.55  2003/09/20 15:21:08  dischi
 # bugfix
 #
@@ -341,7 +344,11 @@ if not HELPER:
                   'has no DISPLAY set.'
             print 'Setting display to fbdev.'
             CONF.display='fbdev'
-
+elif CONF.display == 'dxr3':
+    # don't use dxr3 for helpers. They don't use the osd anyway, but
+    # it may mess up the dxr3 output (don't ask why).
+    CONF.display='fbdev'
+    
 #
 # Load freevo_config.py:
 #
