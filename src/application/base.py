@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/26 15:32:35  dischi
+# some logic change
+#
 # Revision 1.1  2004/08/25 12:51:43  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -69,16 +72,16 @@ class Application:
         In case it is not overloaded, this function will also update the
         display.
         """
-        self._evt_handler.append(self)
         if self.visible:
             return False
+        self.visible = True
+        self._evt_handler.append(self)
         # check if the new app uses animation to show itself
         if not self._animated:
             _debug_('no show animation for %s -- waiting' % self)
             gui.animation.render().wait()
         if traceback.extract_stack(limit = 2)[0][3] != 'Application.show(self)':
             gui.display.update()
-        self.visible = True
         return True
 
         
