@@ -208,9 +208,9 @@ logger.addHandler(handler)
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)6s] '+\
                               '%(filename)s %(lineno)s: '+\
                               '%(message)s')
-fname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-fname = '%s/%s-%s' % (CONF.logdir, fname, os.getuid())
-handler = logging.FileHandler(fname)
+syslogfile = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+syslogfile = '%s/%s-%s' % (CONF.logdir, syslogfile, os.getuid())
+handler = logging.FileHandler(syslogfile)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
