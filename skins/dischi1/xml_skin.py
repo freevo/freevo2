@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/21 19:50:54  dischi
+# moved some main menu settings from skin to freevo_config.py
+#
 # Revision 1.26  2003/03/16 19:32:05  dischi
 # function prepaire to resolve all the references
 # color can be a reference to a <color> tag
@@ -240,23 +243,16 @@ def attr_font(node, attr, default):
 
 class XML_mainmenuitem:
     def __init__(self):
-        self.name = ''
-        self.visible = 'yes'
-        self.icon = ''
+        self.label = ''
+        self.name  = ''
+        self.icon  = ''
         self.image = ''
-        self.pos = 0
-        self.action = None
-        self.arg = None
 
     def parse(self, node, scale, c_dir=''):
-        self.name = attr_str(node, "name", self.name)
-        self.visible = attr_visible(node, "visible", self.visible)
-        self.icon = attr_str(node, "icon", self.icon)
+        self.label = attr_str(node, "label", self.label)
+        self.name  = attr_str(node, "name",  self.name)
+        self.icon  = attr_str(node, "icon",  self.icon)
         self.image = attr_str(node, "image", self.image)
-        self.pos = attr_int(node, "pos", self.pos)
-
-        self.action = attr_str(node,"action", self.action)
-        self.arg = attr_str(node,"arg", self.arg)
 
 
 # ======================================================================
@@ -270,7 +266,7 @@ class XML_mainmenu:
             if node.name == u'item':
                 item = XML_mainmenuitem()
                 item.parse(node, scale, c_dir)
-                self.items[item.pos] = item                
+                self.items[item.label] = item                
 
     
 # ======================================================================

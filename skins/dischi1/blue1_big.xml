@@ -6,18 +6,12 @@
 
     <!-- Items of the main menu (will change soon) -->
     <main>        
-      <item pos="0" name="TV"       action="tv.tv.main_menu"  arg="" 
-        visible="yes" icon="skins/icons/AquaFusion/tv.png"   />
-      <item pos="1" name="Movies" action="MediaMenu().main_menu" arg="video" 
-        visible="yes" icon="skins/icons/AquaFusion/movies.png"  />
-      <item pos="2" name="Music"   action="MediaMenu().main_menu" arg="audio" 
-        visible="yes" icon="skins/icons/AquaFusion/mp3.png"  />
-      <item pos="3" name="Images"   action="MediaMenu().main_menu" arg="image" 
-        visible="yes" icon="skins/icons/AquaFusion/images.png"  />
-      <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
-        visible="no" icon="skins/icons/AquaFusion/package_games.png"  />
-      <item pos="5" name="Shutdown" action="ShutdownItem" arg="" 
-	visible="yes" icon="skins/icons/AquaFusion/shutdown.png"  />
+      <item label="tv"    name="TV"     icon="tv.png"/>
+      <item label="video" name="Movies" icon="movies.png"/>
+      <item label="audio" name="Music"  icon="mp3.png"/>
+      <item label="image" name="Images" icon="images.png"/>
+      <item label="games" name="Games"  icon="package_games.png"/>
+      <item label="shutdown" name="Shutdown" icon="shutdown.png"/>
     </main>
     
     <!-- SKIN DEFINITION -->

@@ -4,18 +4,17 @@
   <skin include="blue1_small" geometry="800x600">
 
     <main>
-      <item pos="0" name="Watch TV"       action="tv.tv.main_menu"  arg="" 
-	visible="yes" icon="" image="skins/dischi1/tv_watermark.png" />
-      <item pos="1" name="Watch a Movie" action="MediaMenu().main_menu" arg="video" 
-	visible="yes" icon="" image="skins/dischi1/movie_watermark.png"  />
-      <item pos="2" name="Listen to Music"   action="MediaMenu().main_menu" arg="audio" 
-	visible="yes" icon="" image="skins/dischi1/music_watermark.png" />
-      <item pos="3" name="Look at Pictures"   action="MediaMenu().main_menu" arg="image" 
-	visible="yes" icon="" image="skins/dischi1/image_watermark.png" />
-      <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
-	visible="no" icon="" image="" />
-      <item pos="5" name="Shutdown" action="ShutdownItem" arg="" 
-	visible="yes" icon="" image="skins/dischi1/shutdown_watermark.png" />
+      <item label="tv" name="Watch TV" icon="" 
+	image="skins/dischi1/tv_watermark.png"/>
+      <item label="video" name="Watch a Movie" icon=""
+	image="skins/dischi1/movie_watermark.png"/>
+      <item label="audio" name="Listen to Music" icon="" 
+	image="skins/dischi1/music_watermark.png"/>
+      <item label="image" name="Look at Pictures" icon="" 
+	image="skins/dischi1/image_watermark.png"/>
+      <item label="games" name="Games" icon="" image=""/>
+      <item label="shutdown" name="Shutdown" icon="" 
+	image="skins/dischi1/shutdown_watermark.png" />
     </main>
     
     <!-- Redefine of the type default -->
