@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/06 19:13:14  dischi
+# Remove the GUI object from the parent when the parent changes
+#
 # Revision 1.8  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -386,6 +389,9 @@ class GUIObject:
     def set_parent(self, parent):
         """Set the parent of this widget
         """
+        if self.parent != parent and self.parent and self in self.parent.children:
+            self.parent.children.remove(self)
+            
         self.parent = parent
 
 
