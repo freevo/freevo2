@@ -140,7 +140,7 @@ HIDE_UNUSABLE_DISCS = 1
 
 #
 # Should directories sorted by date instead of filename
-# 0 = no, 1 = yes, 2 = no for normal menus, yes for DIR_RECORD
+# 0 = no, 1 = yes, 2 = no for normal menus, yes for TV_RECORD_DIR
 #
 # DIRECTORY_SORT_BY_DATE = 2
 
@@ -164,23 +164,23 @@ HIDE_UNUSABLE_DISCS = 1
 # Force the skin to a specific layout number. -1 == no force. The layout
 # toggle with DISPLAY will be disabled
 #
-# FORCE_SKIN_LAYOUT = -1
+# DIRECTORY_FORCE_SKIN_LAYOUT = -1
 
 #
 # Formatstring for the audio item names, possible strings:
 # a = artist, n = tracknumber, t = title, y = year, f = filename
 #
 # This will show the title and the track number 
-# AUDIO_FORMAT_STRING = '%(n)s - %(t)s'
+# DIRECTORY_AUDIO_FORMAT_STRING = '%(n)s - %(t)s'
 # This is the default - track name only
 #
-# AUDIO_FORMAT_STRING = '%(t)s'
+# DIRECTORY_AUDIO_FORMAT_STRING = '%(t)s'
 
 #
 # Use media id tags to generate the name of the item. This should be
 # 1 all the time and only be disabled in directories with broken tags
 #
-# USE_MEDIAID_TAG_NAMES = 1
+# DIRECTORY_USE_MEDIAID_TAG_NAMES = 1
 
 
 #
@@ -221,14 +221,14 @@ HIDE_UNUSABLE_DISCS = 1
 #
 # Where the movie files can be found.
 #
-# DIR_MOVIES = [ ('action movies', 'movies/action'),
+# VIDEO_ITEMS = [ ('action movies', 'movies/action'),
 #                ('funny stuff', 'movies/comedy') ]
 
 #
 # This is where recorded video is written.
 #
 # XXX the path doesn't work from the www cgi scripts!
-# DIR_RECORD = 'testfiles/Movies/Recorded'
+# TV_RECORD_DIR = 'testfiles/Movies/Recorded'
 
 #
 # Directory for XML definitions for DVDs and VCDs. Items in this
@@ -239,11 +239,11 @@ HIDE_UNUSABLE_DISCS = 1
 
 #
 # Directory containing images for tv shows. A tv show maches the regular
-# expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
+# expression VIDEO_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
 # name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
 # image
 #
-# TV_SHOW_DATA_DIR = "testfiles/tv-show-images/"
+# VIDEO_SHOW_DATA_DIR = "testfiles/tv-show-images/"
 
 #
 # Directory for cover images for CD/VCD/DVD and music CDs or when you can't
@@ -253,13 +253,13 @@ HIDE_UNUSABLE_DISCS = 1
 # COVER_DIR = 'testfiles/Covers/'
 
 #
-# Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
+# Only scan MOVIE_DATA_DIR and VIDEO_SHOW_DATA_DIR for fxd files containing
 # informations about a disc. If you only have the fxd files for discs in
 # one of this directories (and subdirectories), set this to 1, it will
 # speed up startup, 0 may be needed if you have fxd files with disc links
 # in your normal movie tree.
 #
-# ONLY_SCAN_DATADIR = 1
+# VIDEO_ONLY_SCAN_DATADIR = 1
 
 
 # ======================================================================
@@ -272,7 +272,7 @@ HIDE_UNUSABLE_DISCS = 1
 #           ('Title2', 'directory2'), ... ]
 # The 'mplayer options' field can be omitted.
 #
-# DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
+# AUDIO_ITEMS = [ ('Test Files', 'testfiles/Music') ]
 
 
 # ======================================================================
@@ -281,7 +281,7 @@ HIDE_UNUSABLE_DISCS = 1
 
 # Where the image files can be found.
 
-# DIR_IMAGES = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
+# IMAGE_ITEMS = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
 #                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
 #                ('Pics',  '/video/SlideShows') ]
 
@@ -289,10 +289,10 @@ HIDE_UNUSABLE_DISCS = 1
 # It also has the slideshow alarm signal handler for automated shows.
 # It uses a new configuration option:
 
-# SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
+# IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
-# This defines the file extensions of slideshow playlists. When DIR_IMAGES
-# is parsed, it will look for entries that match the SUFFIX_IMAGE_SSHOW
+# This defines the file extensions of slideshow playlists. When IMAGE_ITEMS
+# is parsed, it will look for entries that match the IMAGE_SSHOW_SUFFIX
 # patterns. If it finds a match, then it will classify that entry as a
 # slideshow playlist instead of a directory of images. For example:
 
@@ -313,7 +313,7 @@ HIDE_UNUSABLE_DISCS = 1
 # 
 # NEW GAMES SYSTEM :
 # =================
-# The DIR_GAMES structure is now build as follows :
+# The GAMES_ITEMS structure is now build as follows :
 # <NAME>, <FOLDER>, (<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
 # [<FILE_SUFFIX_FOR_GENERIC>])
 # where :
@@ -325,7 +325,7 @@ HIDE_UNUSABLE_DISCS = 1
 #              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
 #                                            type, then you must specify here
 #                                        the file suffix used by the emulator
-# DIR_GAMES = [ ('MAME', '/home/media/games/xmame/roms',     
+# GAMES_ITEMS = [ ('MAME', '/home/media/games/xmame/roms',     
 #                ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', 
 #                 '/home/media/games/xmame/shots', None)),
 #               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
@@ -341,7 +341,7 @@ GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
                               # <0 is higher prio, >0 lower prio.
                               # prio <0 has no effect unless run as root.
  
-MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
+GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 # ======================================================================
 # freevo OSD section:
@@ -388,8 +388,8 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # Exec a script after startup
 # OSD_SDL_EXEC_AFTER_STARTUP = ""
 
-# OVERSCAN_X = 0
-# OVERSCAN_Y = 0
+# OSD_OVERSCAN_X = 0
+# OSD_OVERSCAN_Y = 0
 
     
 # ======================================================================
@@ -518,7 +518,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # XXX You must change this to fit your local conditions!
 #
 # TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
-# VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
+# TV_VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1
@@ -563,10 +563,10 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
 
 # if using the persitant record_server
-# RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
+# TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
-# RECORD_SERVER_IP = 'localhost'
-# RECORD_SERVER_PORT = 18001
+# TV_RECORD_SERVER_IP = 'localhost'
+# TV_RECORD_SERVER_PORT = 18001
 
 #
 # XXX Please see the mencoder docs for more info about the settings
@@ -596,7 +596,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 #            '-o %(filename)s.avi ')                   # Filled in by Freevo
 
 # XXX Not used yet
-# VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
+# TV_VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
@@ -629,7 +629,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # Options are: 0 (mpeg2_ps), 1 (mpeg2_ts), 2 (mpeg1), 3 (mpeg2_pes_av),
 #              5 (mpeg2_pes_v), 7 (mpeg2_pes_a), 10 (dvd)
 
-# IVTV_OPTIONS = {
+# TV_IVTV_OPTIONS = {
 #     'input'         : 4,
 #     'resolution'    : '720x480',
 #     'aspect'        : 2,
