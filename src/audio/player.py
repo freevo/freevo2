@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/15 20:06:02  dischi
+# error handling when mplayer does not start
+#
 # Revision 1.5  2003/08/27 15:27:08  mikeruelle
 # Start of Radio Support
 #
@@ -52,6 +55,7 @@ from gui.GUIObject import GUIObject
 import skin
 import rc
 import plugin
+import event
 
 skin = skin.get_singleton()
 
@@ -82,10 +86,18 @@ class PlayerGUI(GUIObject):
             self.menuw.hide()
 
         self.running = TRUE
-        self.player.play(self.item, self)
-        if self.visible:
-            rc.app(self.player)
-        self.refresh()
+        error = self.player.play(self.item, self)
+        if error:
+            print error
+            self.running = FALSE
+            if self.visible:
+                rc.app(None)
+            self.item.eventhandler(event.PLAY_END)
+            
+        else:
+            if self.visible:
+                rc.app(self.player)
+            self.refresh()
 
     def stop(self):
         self.player.stop()
