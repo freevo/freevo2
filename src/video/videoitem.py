@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2003/07/29 19:07:25  dischi
+# cleanup and use VCD_PLAYER plugin if defined
+#
 # Revision 1.67  2003/07/25 20:54:03  dischi
 # prevent some crashes
 #
@@ -363,14 +366,21 @@ class VideoItem(Item):
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
         if not self.filename or self.filename == '0':
+
             if self.mode == 'dvd':
                 title_list = ( self.dvd_vcd_title_menu, 'DVD title list' )
                 if plugin.getbyname(plugin.DVD_PLAYER):
                     items = [ items[0], title_list ] + items[1:]
                 else:
                     items = [ title_list ] + items
+
             if self.mode == 'vcd':
-                items = [( self.dvd_vcd_title_menu, 'VCD title list' )] + items
+                title_list = ( self.dvd_vcd_title_menu, 'VCD title list' )
+                if plugin.getbyname(plugin.VCD_PLAYER):
+                    items = [ items[0], title_list ] + items[1:]
+                else:
+                    items = [ title_list ] + items
+
             for m in self.subitems:
                 # Allow user to watch one of the subitems instead of always both
                 # XXX Doesn't work
@@ -429,6 +439,11 @@ class VideoItem(Item):
         if (not self.filename or self.filename == '0') and \
                self.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER):
             plugin.getbyname(plugin.DVD_PLAYER).play(self)
+            return
+        
+        if (not self.filename or self.filename == '0') and \
+               self.mode == 'vcd' and plugin.getbyname(plugin.VCD_PLAYER):
+            plugin.getbyname(plugin.VCD_PLAYER).play(self)
             return
         
         if self.subitems:
@@ -560,40 +575,6 @@ class VideoItem(Item):
         """
         self.video_player.stop()
 
-
-    def dvdnav(self, arg=None, menuw=None):
-        """
-        dvdnav support, it's also still buggy in mplayer
-        """
-        
-        self.parent.current_item = self
-        mplayer_options = self.mplayer_options
-
-        mplayer_options += ' -dvd-device %s' % self.media.devicename
-
-        if self.selected_subtitle:
-            mplayer_options += ' -sid %s' % self.selected_subtitle
-
-        if self.selected_audio:
-            mplayer_options += ' -aid %s' % self.selected_audio
-
-        if arg:
-            mplayer_options += ' %s' % arg
-
-        if not self.menuw:
-            self.menuw = menuw
-
-        if self.menuw.visible:
-            self.menuw.hide()
-
-        error = self.video_player.play('', mplayer_options, self, 'dvdnav')
-
-        if error:
-            self.menuw.show()
-            info = AlertBox(self.menuw, 'error')
-            info.show()
-            #info.destroy()
-            rc.post_event(em.PLAY_END)
 
     def bookmark_menu(self,arg=None, menuw=None):
         """
