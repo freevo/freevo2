@@ -344,7 +344,7 @@ h2.SUBTITLE { padding-left: 0em; }
     #header {
       float:left;
       width:100%;
-      background: #666699 url("../images/tab/bg.gif") repeat-x bottom;
+      background: #666699 url("../images/bg.gif") repeat-x bottom;
       font-size:93%;
       line-height:normal;
       }
