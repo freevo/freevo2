@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/11/14 03:16:47  krister
+# Bigfixes for VCD playing.
+#
 # Revision 1.44  2002/11/13 14:34:21  krister
 # Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
 #
@@ -153,8 +156,12 @@ def match_files(dirname, suffix_list):
     '''Find all files in a directory that has matches a list of suffixes.
     Returns a list that is case insensitive sorted.'''
 
-    files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
-              os.path.isfile(os.path.join(dirname, fname)) ]
+    try:
+        files = [ os.path.join(dirname, fname) for fname in os.listdir(dirname) if
+                  os.path.isfile(os.path.join(dirname, fname)) ]
+    except OSError:
+        print 'util:match_files(): Got error on dir = "%s"' % dirname
+        return []
 
     matches = [ fname for fname in files if match_suffix(fname, suffix_list) ]
         

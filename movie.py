@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/11/14 03:16:47  krister
+# Bigfixes for VCD playing.
+#
 # Revision 1.44  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -204,32 +207,26 @@ def play_movie(arg=None, menuw=None):
 #
 def dvd_vcd_handler(media, type, menuw):
 
+    # Use the uid to make a user-unique filename
+    uid = os.getuid()
+    
     # Figure out the number of titles on this disc
     skin.PopupBox('Scanning disc, be patient...', icon='icons/cdrom_mount.png')
     osd.update()
-    os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
-
-    mplayer_options = '-cdrom-device %s -dvd-device %s' % \
-                      (media.devicename, media.devicename)
-
-    # find mplayer_options from the xml data file
-    if media.info and media.info.info:
-        mplayer_options = '%s %s' % (mplayer_options, \
-                                     media.info.info.playlist[0].mplayer_options)
-    
-    cmd = ('%s -ao null -nolirc -vo null -frames 0 %s %s ' +
-           '2>/dev/null > /tmp/mplayer_dvd.log')
+    os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
     if type == 'dvd':
-        #mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 2> &1 > /tmp/mplayer_dvd.log
-        cmd = cmd % (config.MPLAYER_CMD, '-dvd 1', media.devicename)
+        # Get the number of titles on the DVD
+        probe_file = '-dvd 1'
     else:
         # play track 99 which isn't there (very sure!), scan mplayers list
         # of found tracks to get the total number of tracks
-        #mplayer -ao null -nolirc -vo null -frames 0 -vcd 99 2> &1 > /tmp/mplayer_dvd.log
-        cmd = cmd % (config.MPLAYER_CMD, '-vcd 99', media.devicename)
+        probe_file = '-vcd 99'
 
-    os.system(cmd + ' ; touch /tmp/mplayer_dvd_done')
+    cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
+    cmd += ' %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % (probe_file, uid)
+
+    os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
 
     timeout = time.time() + 20.0
     done = 0
@@ -238,7 +235,7 @@ def dvd_vcd_handler(media, type, menuw):
             print 'DVD/VCD disc read failed!'
             break
 
-        if os.path.isfile('/tmp/mplayer_dvd_done'):
+        if os.path.isfile('/tmp/mplayer_dvd_done_%s' % uid):
             done = 1
             break
 
@@ -247,7 +244,7 @@ def dvd_vcd_handler(media, type, menuw):
 
     if done and type == 'dvd':
         # Look for 'There are NNN titles on this DVD'
-        lines = open('/tmp/mplayer_dvd.log').readlines()
+        lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
         for line in lines:
             if line.find('titles on this DVD') != -1:
                 num_titles = int(line.split()[2])
@@ -257,7 +254,7 @@ def dvd_vcd_handler(media, type, menuw):
 
     elif done:
         # Look for 'track NN'
-        lines = open('/tmp/mplayer_dvd.log').readlines()
+        lines = open('/tmp/mplayer_dvd_%s.log' % uid).readlines()
         for line in lines:
             if line.find('track ') == 0:
                 num_titles = int(line[6:8])
@@ -265,18 +262,27 @@ def dvd_vcd_handler(media, type, menuw):
 
         # Count the files on the VCD
         util.mount(media.mountdir)
-        for dir in ('/mpegav/', '/MPEG2/', '/mpeg2/'):
-            num_files += len(util.match_files(media.mountdir + dir,
-                                              [ '*.[mM][pP][gG]',
-                                                '*.[dD][aA][tT]' ]))
+        for dirname in ('/mpegav/', '/MPEG2/', '/mpeg2/'):
+            num_files += len(util.match_files(media.mountdir + dirname,
+                                              [ 'mpg', 'dat' ]))
         util.umount(media.mountdir)
         
     if not done or not found:
         num_titles = 100 # XXX Kludge
 
+    #
+    # Done scanning the disc, set up the menu.
+    #
+    mplayer_options = ('-cdrom-device %s -dvd-device %s' % 
+                       (media.devicename, media.devicename))
 
-    # Now let's see what we can do now:
+    # find mplayer_options from the xml data file
+    if media.info and media.info.info:
+        mplayer_options = '%s %s' % (mplayer_options, 
+                                     media.info.info.playlist[0].mplayer_options)
     
+    
+    # Now let's see what we can do now:
     # only one track, play it
     if num_titles == 1:
         file = FileInformation(type, '1', mplayer_options)
@@ -302,7 +308,11 @@ def dvd_vcd_handler(media, type, menuw):
             items += [m]
 
         label = media.info.label
-        moviemenu = menu.Menu(label, items, xml_file = media.info.xml_file, umount_all = 1)
+        if media.info.info:
+            xml_file = media.info.info.xml_file
+        else:
+            xml_file = None
+        moviemenu = menu.Menu(label, items, xml_file = None, umount_all = 1)
         menuw.pushmenu(moviemenu)
         return
     

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/11/14 03:16:47  krister
+# Bigfixes for VCD playing.
+#
 # Revision 1.5  2002/11/09 17:33:13  dischi
 # Small change in the mplayer_options
 #
@@ -59,7 +62,7 @@
 
 
 class RemovableMediaInfo:
-    def __init__(self, type, label = None, image = None, play_options = None, \
+    def __init__(self, type, label = None, image = None, play_options = None, 
                  info = None):
         self.type = type
         self.label = label
@@ -79,9 +82,10 @@ class FileInformation:
         # 3. settings only for the next mplayer start (e.g. -ss, -chapter)
         self.mplayer_options = [ mplayer_options, None, '' ]
         self.mplayer_config = ""
+        
 
 class MovieInformation:
-    def __init__(self, title=None, image=None, playlist=None, disc_id=None, \
+    def __init__(self, title=None, image=None, playlist=None, disc_id=None, 
                  disc_label=None, info=None, xml_file = ''):
         self.title = title
         self.image = image
@@ -90,6 +94,7 @@ class MovieInformation:
         self.disc_label = disc_label
         self.info = info
         self.xml_file = xml_file
+
 
 class MovieExtraInformation:
     def __init__(self):
