@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/19 05:46:59  krister
+# Added mplayer patch for CDDA problems. Remove if/when accepted into mplayer.
+#
 # Revision 1.7  2003/02/18 04:54:05  krister
 # runtime builder updates.
 #
@@ -280,6 +283,7 @@ mplayer: Archive/mplayer-CVS200302132230.tgz
 	tar xvzf $<
 	(cd mplayer ; patch -p1 < ../../src/mplayer_dvdprot.diff ; \
 	patch -p1 < ../../src/mplayer_freevobanner.diff ; \
+	patch -p0 < ../../src/mplayer_cdda_seeking.diff ; \
 	./configure $(MPLAYER_CONF) ; make)
 
 Archive/mplayer-CVS200302132230.tgz:
