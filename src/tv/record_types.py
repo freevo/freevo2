@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/22 06:23:51  gsbarbieri
+# Unicode support: name could be an unicode object and unicode doesn't provide
+# translate() method.
+#
 # Revision 1.10  2004/01/09 19:43:56  outlyer
 # Was that \x0 supposed to be there? If so, sorry. I didn't think it was
 # supposed to be there and it was causing warnings in the recordserver
@@ -177,7 +181,7 @@ class Favorite:
 
         self.name = name
         if name:
-            self.name = name.translate(translation_table)
+            self.name = string.translate(name,translation_table)
         self.priority = priority
 
         if prog:
