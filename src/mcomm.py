@@ -66,7 +66,9 @@ import mbus
 import sysconfig
 import config
 
-
+# fix encoding in mbus
+import mbus.types
+mbus.types.encoding = sysconfig.ENCODING
 
 # dict of all our mbus instances
 _instance_list = {}
@@ -86,6 +88,30 @@ def instance(name='default'):
     return i
 
 
+def _build_args(args):
+    """
+    Internal function to build argument list
+    """
+    ret     = []
+    is_dict = False
+    if args.__class__ == dict:
+        is_dict = True
+    for a in args:
+        if is_dict:
+            var = args[a]
+        else:
+            var = a
+        if var.__class__ == str:
+            var = Unicode(var)
+        if var.__class__ in (list, tuple, dict):
+            var = _build_args(var)
+        if is_dict:
+            ret.append((Unicode(a), var))
+        else:
+            ret.append(var)
+    return ret
+
+
 class MException(Exception):
     """
     Mbus related exception
@@ -99,7 +125,8 @@ class RPCReturn(mbus.RPCReturn):
     was sucessfull.
     """
     def __init__(self, result = [], description = 'success'):
-        mbus.RPCReturn.__init__(self, result, 'OK', description)
+        mbus.RPCReturn.__init__(self, _build_args([result])[0], 'OK',
+                                description)
 
 
 class RPCError(mbus.RPCReturn):
@@ -160,30 +187,6 @@ class RemoteEntity:
         self.result = return_list
 
 
-    def __build_args(self, args):
-        """
-        Internal function to build argument list
-        """
-        ret     = []
-        is_dict = False
-        if args.__class__ == dict:
-            is_dict = True
-        for a in args:
-            if is_dict:
-                var = args[a]
-            else:
-                var = a
-            if var.__class__ == str:
-                var = Unicode(var)
-            if var.__class__ in (list, tuple, dict):
-                var = self.__build_args(var)
-            if is_dict:
-                ret.append((Unicode(a), var))
-            else:
-                ret.append(var)
-        return ret
-    
-    
     def __call(self, *args, **kargs):
         """
         Internal function to do the real RPC call.
@@ -202,7 +205,7 @@ class RemoteEntity:
             wait        = True
             self.result = None
         self.mbus_instance.sendRPC(self.addr, 'home-theatre.' + self.cmd,
-                                   self.__build_args(cmdargs), callback)
+                                   _build_args(cmdargs), callback)
 
         if self.result == True:
             return True
@@ -281,8 +284,8 @@ class RPCServer:
             else:
                 ret.append(pattern[i](val[i]))
         return ret
-            
-            
+
+
     def parse_parameter(self, val, pattern):
         """
         Parse the given parameter and send a TypeError if the parameters
@@ -358,7 +361,7 @@ class Instance(mbus.Guides):
         self.lostEntityFunction = self.lost_entity
         self.errorFunction = self.mbus_error
         self.onErrorInvokeRPCCallback = True
-        
+
         # application short name
         self.module = addr['module']
 
@@ -375,7 +378,7 @@ class Instance(mbus.Guides):
         """
         print 'mcomm error:', error
 
-        
+
     def register_entity_notification(self, func):
         """
         Register to callback to get notification when an entity joins or leaves
