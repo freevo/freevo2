@@ -12,9 +12,21 @@ import socket, time, sys
 import config
 
 # The PyGame Python SDL interface.
-# Dependencies: Freetype2, SDL, SDL_ttf, SDL_image, PyGame
+# Dependencies: Freetype2 (already in Freevo!), SDL, SDL_ttf, SDL_image, PyGame
 # The PyGame+SDL websites has good install instructions.
-# RPMs are available for most stuff.
+
+
+# RPMs are available for most stuff (XXX devel needed too?):
+# 
+# SDL: http://www.libsdl.org/download-1.2.php
+# SDL_image RPMs/debs: http://www.libsdl.org/projects/SDL_image/
+# SDL_ttf RPMs/debs: http://www.libsdl.org/projects/SDL_ttf/
+# PyGame: http://www.pygame.org/download.shtml
+#    To build, make sure you have the correct sdl-config in your path! Then:
+#    python setup.py build
+#    python setup.py install
+
+
 
 import pygame
 from pygame.locals import *
