@@ -76,14 +76,14 @@ class Area:
         settings in the theme definition.
         """
         self.area_name    = name
-        self.area_values  = None
-        self.layout       = None
-        self.name         = name
         self.screen       = None
         self.imagelib     = None
+        self.__area       = None
+        self.__layout     = None
         self.__background = []
+        self.settings     = None
 
-
+        
     def set_screen(self, screen, bg_layer, content_layer):
         """
         Move this area to a new screen object.
@@ -115,7 +115,7 @@ class Area:
         Clear the complete area. This clears the content and the background.
         """
         if not self.screen:
-            log.info('ERROR in area %s: no screen defined' % self.name)
+            log.info('ERROR in area %s: no screen defined' % self.area_name)
             return
 
         for b in self.__background:
@@ -137,125 +137,99 @@ class Area:
         self.viewitem = viewitem
         self.infoitem = infoitem
 
-        if not self.__init_vars(settings, area_definitions):
-            return
+        try:
+            # get the area based on the area name
+            area = getattr(area_definitions, self.area_name)
+        except AttributeError:
+            try:
+                # maybe areas is a special attribute
+                area = area_definitions.areas[self.area_name]
+            except (KeyError, AttributeError):
+                # area defintions not found
+                log.warning('no skin information for %s' % self.area_name)
+                return
 
-        if not self.area_values.visible or not self.layout:
+        if self.settings:
+            self.settings.changed = False
+            
+        # check if the area definitions changed
+        if (not self.__area) or area != self.__area:
+            area.r = (area.x, area.y, area.width, area.height)
+            self.__area = area
+            # set layout
+            self.__layout = area.layout
+            if area.layout:
+                # recalculate self.settings
+                self.settings = self.__calc_geometry(area.layout.content)
+                self.settings.images = area.images
+                self.settings.changed = True
+                self.settings.box_under_icon = settings.box_under_icon
+                self.settings.icon_dir = settings.icon_dir
+                
+        elif area and self.__layout != area.layout:
+            # set layout
+            self.__layout = area.layout
+            # recalculate self.settings
+            self.settings = self.__calc_geometry(area.layout.content)
+            self.settings.images = area.images
+            self.settings.changed = True
+            self.settings.box_under_icon = settings.box_under_icon
+            self.settings.icon_dir = settings.icon_dir
+
+        if not area.visible or not self.__layout:
+            # not visible
             self.clear_all()
             return
 
+        # set layer to background
         self.layer = self.bg_layer
+        # draw background
         self.__draw_background()
+        # set layer to content
         self.layer = self.content_layer
+        # draw content
         self.update()
 
 
 
-    def calc_geometry(self, obj, copy_object=0):
+    def __calc_geometry(self, obj):
         """
         Calculate the real values of the obj (e.g. content) based
         on the geometry of the area.
         """
-        if copy_object:
-            obj = copy.copy(obj)
-
+        obj = copy.copy(obj)
         font_h=0
 
         if isinstance(obj.width, str):
-            obj.width = int(eval(obj.width, {'MAX': self.area_values.width}))
+            obj.width = int(eval(obj.width, {'MAX': self.__area.width}))
 
         if isinstance(obj.height, str):
-            obj.height = int(eval(obj.height,{'MAX': self.area_values.height}))
+            obj.height = int(eval(obj.height,{'MAX': self.__area.height}))
 
         if isinstance(obj.x, str):
-            obj.x = int(eval(obj.x, {'MAX':self.area_values.height}))
+            obj.x = int(eval(obj.x, {'MAX':self.__area.height}))
 
         if isinstance(obj.y, str):
-            obj.y = int(eval(obj.y, {'MAX':self.area_values.height}))
+            obj.y = int(eval(obj.y, {'MAX':self.__area.height}))
 
-        obj.x += self.area_values.x
-        obj.y += self.area_values.y
+        obj.x += self.__area.x
+        obj.y += self.__area.y
 
         if not obj.width:
-            obj.width = self.area_values.width
+            obj.width = self.__area.width
 
         if not obj.height:
-            obj.height = self.area_values.height
+            obj.height = self.__area.height
 
-        if obj.width + obj.x > self.area_values.width + \
-               self.area_values.x:
-            obj.width = self.area_values.width - obj.x
+        if obj.width + obj.x > self.__area.width + \
+               self.__area.x:
+            obj.width = self.__area.width - obj.x
 
-        if obj.height + obj.y > self.area_values.height + \
-               self.area_values.y:
-            obj.height = self.area_values.height + self.area_values.y - \
-                            obj.y
+        if obj.height + obj.y > self.__area.height + \
+               self.__area.y:
+            obj.height = self.__area.height + self.__area.y - obj.y
 
         return obj
-
-
-    def calc_rectangle(self, rectangle, width, height):
-        """
-        Calculates the values for a rectangle to fit width and height
-        inside it.
-        """
-        r = copy.copy(rectangle)
-
-        # get the x and y value, based on MAX
-        if isinstance(r.x, str):
-            r.x = int(eval(r.x, {'MAX':width}))
-        if isinstance(r.y, str):
-            r.y = int(eval(r.y, {'MAX':height}))
-
-        # set rect width and height to something
-        if not r.width:
-            r.width = width
-
-        if not r.height:
-            r.height = height
-
-        # calc width and height based on MAX settings
-        if isinstance(r.width, str):
-            r.width = int(eval(r.width, {'MAX':width}))
-
-        if isinstance(r.height, str):
-            r.height = int(eval(r.height, {'MAX':height}))
-
-        # correct width and height to fit the rect
-        width = max(width, r.width)
-        height = max(height, r.height)
-        if r.x < 0:
-            width -= r.x
-        if r.y < 0:
-            height -= r.y
-
-        # return needed width and height to fit original width and height
-        # and the rectangle attributes
-        return max(width, r.width), max(height, r.height), r
-
-
-
-    def __init_vars(self, settings, area):
-        """
-        Check which layout is used and set variables for the object
-        """
-        self.settings = settings
-
-        try:
-            area = getattr(area, self.area_name)
-        except AttributeError:
-            try:
-                area = area.areas[self.area_name]
-            except (KeyError, AttributeError):
-                log.warning('no skin information for %s' % self.area_name)
-                return False
-
-        if (not self.area_values) or area != self.area_values:
-            area.r = (area.x, area.y, area.width, area.height)
-            self.area_values = area
-
-        self.layout = area.layout
-        return True
 
 
     def __draw_background(self):
@@ -265,8 +239,8 @@ class Area:
         background_image = []
         background_rect  = []
 
-        for bg in self.layout.background:
-            bg = self.calc_geometry(bg, copy_object=True)
+        for bg in self.__layout.background:
+            bg = self.__calc_geometry(bg)
             if bg.type == 'image' and bg.visible:
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
@@ -295,24 +269,21 @@ class Area:
 
 
         for b in copy.copy(self.__background):
+            # remove the background objects already on the screen
             try:
+                # maybe it's a rectangle
                 background_rect.remove(b.info)
             except ValueError:
                 try:
+                    # maybe it's an image
                     background_image.remove(b.info)
                 except ValueError:
+                    # not found, remove this old object
                     self.__background.remove(b)
                     b.unparent()
 
-        for rec in background_rect:
-            x, y, width, height, bgcolor, size, color, radius = rec
-            box = self.drawbox(x, y, width, height, (bgcolor, size, color,
-                                                     radius))
-            self.__background.append(box)
-            box.info = rec
-            box.set_zindex(-1)
-
         for image in background_image:
+            # add the new images to the screen
             imagefile, x, y, width, height = image
             i = self.drawimage(imagefile, (x, y, width, height),
                                background=True)
@@ -320,6 +291,15 @@ class Area:
                 self.__background.append(i)
                 i.info = image
                 i.set_zindex(-1)
+
+        for rec in background_rect:
+            # add the new rectangles to the screen
+            x, y, width, height, bgcolor, size, color, radius = rec
+            box = self.drawbox(x, y, width, height, (bgcolor, size, color,
+                                                     radius))
+            self.__background.append(box)
+            box.info = rec
+            box.set_zindex(-1)
 
 
 
@@ -338,7 +318,7 @@ class Area:
         return r
 
 
-    def drawstring(self, text, font, content, x=-1, y=-1, width=None,
+    def drawstring(self, text, font, settings, x=-1, y=-1, width=None,
                    height=None, align_h = None, align_v = None, mode='hard',
                    ellipses='...', dim=True):
         """
@@ -348,24 +328,24 @@ class Area:
         if not text:
             return None
 
-        # set default values from 'content'
+        # set default values from 'settings'
         if x == -1:
-            x = content.x
+            x = settings.x
         if y == -1:
-            y = content.y
+            y = settings.y
 
         if width == None:
-            width  = content.width
+            width  = settings.width
         if height == None:
-            height = content.height
+            height = settings.height
 
-        if not align_h and content:
-            align_h = content.align
+        if not align_h and settings:
+            align_h = settings.align
         if not align_h:
             align_h = 'left'
 
-        if not align_v and content:
-            align_v = content.valign
+        if not align_v and settings:
+            align_v = settings.valign
         if not align_v:
             align_v = 'top'
 
@@ -398,9 +378,9 @@ class Area:
         if background:
             if not (x == 0 and y == 0 and w == self.screen.width and \
                     h == self.screen.height) and \
-                    self.area_values.x == x and self.area_values.y == y and \
-                    self.area_values.width == w and \
-                    self.area_values.height == h:
+                    self.__area.x == x and self.__area.y == y and \
+                    self.__area.width == w and \
+                    self.__area.height == h:
                 i = Image(image, (0, 0), (self.screen.width,
                                           self.screen.height))
                 i.crop((x,y), (w,h))
@@ -417,4 +397,4 @@ class Area:
         """
         delete function of memory debugging
         """
-        _mem_debug_('Area', self.name)
+        _mem_debug_('Area', self.area_name)
