@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/04 19:05:36  dischi
+# remove bad log message
+#
 # Revision 1.13  2004/01/14 21:30:44  dischi
 # add ==, != and string support to exp
 #
@@ -20,28 +23,6 @@
 #
 # Revision 1.10  2004/01/10 16:53:22  dischi
 # make eval more secure (and remove trailing whitespaces)
-#
-# Revision 1.9  2004/01/01 15:53:18  dischi
-# move the shadow code into osd.py
-#
-# Revision 1.8  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.7  2003/12/06 13:43:02  dischi
-# more cleanup
-#
-# Revision 1.6  2003/12/05 18:07:55  dischi
-# renaming of XML_xxx variables to Xxx
-#
-# Revision 1.5  2003/10/21 23:46:21  gsbarbieri
-# Info_Area now support images as
-#    <img src="file" x="1" y="2" width="123" height="456" />
-# x and y are optional and will be set to "pen position" when not specified.
-# width and height are also optional and defaults to the image size.
-# file is the filename.
-#
-# <img> will define FLOAT images, not inline ones. You can simulate inline
-# images with <goto_pos>... Maybe someday, if needed, someone can implement it.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

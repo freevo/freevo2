@@ -9,14 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/04 19:05:36  dischi
+# remove bad log message
+#
 # Revision 1.23  2004/02/04 18:37:14  dischi
-# Major skin bugfix. The rectange calc was wrong. Before this cahnge you
-# needed to draw from -3 to max+6 for a 3 pixel border around the item.
-# This is stupid, max is the item width/height. So now it's max+3, same
-# value as on the other side. This changes fix some problems when
-# an item doesn't fit in it's own height anymore.
-# Changed is the complete skin code and all skins. But some skins may
-# depend on that error, so maybe they need more fixes in the future.
+# <removed wrong log message>
 #
 # Revision 1.22  2004/02/01 17:03:58  dischi
 # speedup
