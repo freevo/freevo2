@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/09 16:32:23  outlyer
+# A bugfix and support for mga output via Tvtime.
+#
+# o self.app_mode was missing so remote support was broken
+# o Added -D to tvtime command-line so it can use mga if you have
+# mga in freevo.conf; uses x11 as before too.
+#
 # Revision 1.4  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -94,6 +101,7 @@ class TVTime:
         self.thread.setDaemon(1)
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
+        self.app_mode = 'tv'
         
 
     def TunerSetChannel(self, tuner_channel):
@@ -179,7 +187,11 @@ class TVTime:
                 
             # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
             # Most of these options are only available in tvtime ver >= 0.9.8
-            command = 'tvtime -k -I %s -n %s -d %s -f %s -c %s' % (w,
+
+            # config.CONF.display
+
+            command = 'tvtime -D %s -k -I %s -n %s -d %s -f %s -c %s' % (config.CONF.display,
+                                                                   w,
                                                                    s_norm,
                                                                    cf_device,
                                                                    s_clist,
