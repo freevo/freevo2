@@ -16,8 +16,8 @@
 
       <bgbitmap>../../images/aubin_bg1.png</bgbitmap>
 
-      <title visible="yes" x="-1" y="15">
-	<font name="oliversb" size="38" color="0x000000"/>
+      <title visible="yes" x="-1" y="18">
+	<font name="oliversb" size="34" color="0x000000"/>
       </title>
 
       <item_main x="230">
