@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2002/08/12 11:36:33  dischi
+# removed some unneeded code
+#
 # Revision 1.45  2002/08/11 19:23:35  krister
 # Updated shutdown code.
 #
@@ -225,15 +228,6 @@ def getcmd():
             config.ROM_DRIVES[0] = (rom_dir, name, (tray + 1) % 2)
             if tray_open:
                 if DEBUG: print 'Inserting %s' % rom_dir
-                # XXX FIXME: this doesn't look very good, we need
-                # XXX some sort of a pop-up widget
-                # osd.drawbox(osd.width/2 - 180, osd.height/2 - 30,
-                # osd.width/2 + 180,\
-                #            osd.height/2+30, width=-1,
-                #            color=((60 << 24) | osd.COL_BLACK))
-                # osd.drawstring('mounting %s' % rom_dir, \
-                #               osd.width/2 - 160, osd.height/2 - 10,
-                #               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
                 osd.popup_box( 'mounting %s' % rom_dir )
                 osd.update()
 
