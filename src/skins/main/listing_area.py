@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/01/10 13:20:21  dischi
+# fix stringsize for tv shows and blurr2
+#
 # Revision 1.17  2004/01/04 18:17:24  dischi
 # fix tv show listing
 #
@@ -364,10 +367,12 @@ class Listing_Area(Skin_Area):
                         for c in menu.choices:
                             if c.type == 'video' and hasattr(c,'tv_show') and \
                                c.tv_show and c.show_name[0] == sn[0]:
-                                season  = max(season,
-                                              val.font.stringsize(c.show_name[1]))
-                                episode = max(episode,
-                                              val.font.stringsize(c.show_name[2]))
+                                # do not use val.font.stringsize because this will
+                                # add shadow and outline values we add later for the
+                                # normal text again. So just use val.font.font.stringsize
+                                stringsize = val.font.font.stringsize
+                                season  = max(season, stringsize(c.show_name[1]))
+                                episode = max(episode, stringsize(c.show_name[2]))
                                 if tvs_shortname and not c.image:
                                     tvs_shortname = False
                             else:
