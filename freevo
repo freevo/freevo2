@@ -1,6 +1,3 @@
-#!/hdb3/home/krister/build/busybox-0.60.5/_install/bin/ash
-
-
 #!/bin/sh
 
 # freevo - the main entry point to the whole suite of applications
