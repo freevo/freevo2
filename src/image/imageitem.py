@@ -4,11 +4,17 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
+# An ImageItem is an Item handling image files for Freevo. It will
+# use the viewer in viewer.py to display the image
+#
 # Notes:
 # Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/09/13 18:00:49  dischi
+# last cleanups for the image module in Freevo
+#
 # Revision 1.29  2004/09/07 18:57:43  dischi
 # image viwer auto slideshow
 #
@@ -58,7 +64,8 @@ class ImageItem(MediaItem):
     """
     An item for image files
     """
-    def __init__(self, url, parent, name = None, duration = config.IMAGEVIEWER_DURATION):
+    def __init__(self, url, parent, name = None,
+                 duration = config.IMAGEVIEWER_DURATION):
         # set autovars to 'rotation' so that this value is
         # stored between Freevo sessions
         self.autovars = [ ( 'rotation', 0 ) ]
@@ -106,7 +113,7 @@ class ImageItem(MediaItem):
         """
         return a list of possible actions on this item.
         """
-        return [ ( self.view, _('View Image') ) ]
+        return [ ( self.play, _('View Image') ) ]
 
 
     def cache(self):
@@ -116,7 +123,7 @@ class ImageItem(MediaItem):
         imageviewer().cache(self)
 
 
-    def view(self, arg=None, menuw=None):
+    def play(self, arg=None, menuw=None):
         """
         view the image
         """
@@ -130,7 +137,7 @@ class ImageItem(MediaItem):
             self.parent.cache_next()
 
 
-    def stop(self):
+    def stop(self, arg=None, menuw=None):
         """
         stop viewing this item
         """

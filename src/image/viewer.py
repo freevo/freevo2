@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/09/13 18:00:50  dischi
+# last cleanups for the image module in Freevo
+#
 # Revision 1.69  2004/09/12 21:19:36  mikeruelle
 # for those of us without idlebars
 #
@@ -279,7 +282,8 @@ class ImageViewer(Application):
         gui.display.update()
 
         # start timer
-        if self.fileitem.duration and self.slideshow and not self.signal_registered:
+        if self.fileitem.duration and self.slideshow and \
+               not self.signal_registered:
             rc.register(self.signalhandler, False, self.fileitem.duration*100)
             self.signal_registered = True
 
@@ -484,7 +488,8 @@ class ImageViewer(Application):
 
         if newosd:
             # show the idlebar but not update the screen now
-            plugin.getbyname('idlebar').show(False)
+            if plugin.getbyname('idlebar'):
+                plugin.getbyname('idlebar').show(False)
             # get y movement value
             move_y = self.osd_box.get_size()[1]
             # hide the widgets to let them move in

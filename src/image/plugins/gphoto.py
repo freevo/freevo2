@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/09/13 18:00:51  dischi
+# last cleanups for the image module in Freevo
+#
 # Revision 1.8  2004/08/01 10:43:14  dischi
 # deactivate plugin
 #
@@ -46,19 +49,24 @@ import menu
 import util
 import config
 from item import Item
-import pygame
-import pygphoto
+# import pygame
+# import pygphoto
 import cStringIO
-import image.viewer
+# import image.viewer
 
 import plugin
 
 class PluginInterface(plugin.MainMenuPlugin):
-
-    # XXX remove the __init__ function after checking if the plugin still
-    # XXX works.
     def __init__(self):
-        self.reason = config.REDESIGN_UNKNOWN
+        print
+        print 'The gphoto plugin is broken right now. Reasons for this are'
+        print 'that pygphoto doesn\'t work with the latest version of gphoto'
+        print 'and this plugin also needs to be adjusted to the new Freevo'
+        print 'gui design.'
+        print 'Since no developer uses this plugin, you can either fix it when'
+        print 'you need it or use a different way to access your photos.'
+        print
+        self.reason = 'broken'
         return
     
     def detectCameras(self):
@@ -67,7 +75,8 @@ class PluginInterface(plugin.MainMenuPlugin):
         list = []
         while count > 0:
             count = count - 1
-            list.append( [pygphoto.gp_name(gplist, count),pygphoto.gp_value(gplist,count)] )
+            list.append( [pygphoto.gp_name(gplist, count),
+                          pygphoto.gp_value(gplist,count)] )
         return list
 
 
@@ -158,7 +167,8 @@ class CameraFolder( Item ):
         while number > 0:
             number = number - 1
             name = pygphoto.gp_name( folders, number )
-            subFolder = CameraFolder( self, self.gCamera, parentPath + "/" + name, name )
+            subFolder = CameraFolder( self, self.gCamera,
+                                      parentPath + "/" + name, name )
             items.append( subFolder )
         files = pygphoto.gp_getfiles( self.gCamera, self.path )
         number = pygphoto.gp_list_count( files )
