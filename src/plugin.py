@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/10/27 20:09:38  dischi
+# Rewrote the function to find the plugins to make it more generic
+#
 # Revision 1.46  2003/10/19 14:03:25  dischi
 # external i18n support for plugins
 #
@@ -392,6 +395,39 @@ def __add_to_ptl__(type, object):
     
 
 
+def __find_plugin_file__(filename):
+    global __plugin_basedir__
+    full_filename = os.path.join(__plugin_basedir__, filename)
+
+    if os.path.isfile(full_filename + '.py'):
+        return filename.replace('/', '.'), None
+
+    if os.path.isdir(full_filename):
+        return filename.replace('/', '.'), None
+
+    full_filename = os.path.join(__plugin_basedir__, 'plugins', filename)
+
+    if os.path.isfile(full_filename + '.py'):
+        return 'plugins.' + filename.replace('/', '.'), None
+
+    if os.path.isdir(full_filename):
+        return 'plugins.' + filename.replace('/', '.'), None
+
+    if filename.find('/') > 0:
+        special = filename[:filename.find('/')]
+        filename = os.path.join(special, 'plugins', filename[filename.find('/')+1:])
+        full_filename = os.path.join(__plugin_basedir__, filename)
+
+        if os.path.isfile(full_filename + '.py'):
+            return filename.replace('/', '.'), special
+
+        if os.path.isdir(full_filename):
+            return filename.replace('/', '.'), special
+
+    return None, None
+
+        
+
 def __load_plugin__(name, type, level, args, number):
     """
     load the plugin and add it to the lists
@@ -400,34 +436,33 @@ def __load_plugin__(name, type, level, args, number):
     global __named_plugins__
     global __plugin_basedir__
 
-    module = name[:name.rfind('.')]
+    # fallback
+    module  = name
+    object  = '%s.PluginInterface' % module
+    special = None
 
-    # locate the plugin
-    if os.path.isfile(os.path.join(__plugin_basedir__, 'plugins/%s.py' % module)):
-        module  = 'plugins.%s' % module
-        object  = 'plugins.%s' % name
-        special = None
-    elif os.path.isfile(os.path.join(__plugin_basedir__, 'plugins/%s.py' % name)):
-        module  = 'plugins.%s' % name
-        object  = 'plugins.%s.PluginInterface' % name
-        special = None
-    elif os.path.isfile(os.path.join(__plugin_basedir__, '%s/plugins/%s.py' % \
-                                     (module, name[name.rfind('.')+1:]))):
-        special = module
-        module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
-        object  = '%s.PluginInterface' % module
-    elif os.path.isdir(os.path.join(__plugin_basedir__, '%s' % name)):
-        module  = name
-        object  = '%s.PluginInterface' % module
-        special = None
+    # locate the plugin:
+    files = []
+
+    module, special = __find_plugin_file__(name.replace('.', '/'))
+    if module:
+        object = module + '.PluginInterface'
+    elif name.find('.') > 0:
+        module, special = __find_plugin_file__(name[:name.rfind('.')].replace('.', '/'))
+        if module:
+            object = module + '.%s' % name[name.rfind('.')+1:]
+        else:
+            print 'can\'t locate plugin %s' % name
+            print 'start \'freevo plugins -l\' to get a list of plugins'
+            return
     else:
-        module  = name
-        object  = '%s.PluginInterface' % module
-        special = None
-
+        print 'can\'t locate plugin %s' % name
+        print 'start \'freevo plugins -l\' to get a list of plugins'
+        return
+        
     try:
         if DEBUG:
-            print 'loading %s as plugin %s' % (module, name)
+            print 'loading %s as plugin %s' % (module, object)
             
         exec('import %s' % module)
         if not args:
@@ -485,6 +520,7 @@ def __load_plugin__(name, type, level, args, number):
 
     except:
         print 'failed to load plugin %s' % name
+        print 'start \'freevo plugins -l\' to get a list of plugins'
         traceback.print_exc()
 
 
