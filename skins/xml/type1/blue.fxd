@@ -370,10 +370,16 @@
       <background>
 	<rectangle size="0" bgcolor="player mask" radius="10" width="max"/>
       </background>
-      <content x="70" y="10" height="max-20" width="max-75" type="text"	spacing="10">
+      <content x="70" y="10" height="max-20" width="max-80" type="text" spacing="10">
 	<item type="default">
 	  <if expression="title">
 	    <text font="player title" expression="title"/>
+	    <text font="player title">yes</text>
+	    <newline/>
+	  </if>
+	  <if expression="not title">
+	    <text font="player title" expression="name"/>
+	    <text font="player title">no</text>
 	    <newline/>
 	  </if>
 	  <if expression="artist">

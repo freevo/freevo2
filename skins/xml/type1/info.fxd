@@ -85,7 +85,7 @@
     <menuset label="text with info style" inherits="normal text style">
       <!-- 4. listing area: the list of all items -->
       <listing height="330">
-	<image y="374" label="downarrow"/>
+	<image y="405" label="downarrow"/>
       </listing>
       <!-- 5. info area: additional info. This area is invisible in the default -->
       <!-- menu, it's only visible in the extended menus -->
