@@ -49,8 +49,6 @@
       </listing>
     </menu>
 
-
-
     <!-- ********************************************** -->
     <!-- LAYOUT DEFINITIONS -->
 
@@ -90,8 +88,6 @@
       </content>
     </layout>
 
-
-
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
@@ -115,5 +111,24 @@
       <shadow visible="no"/>
     </font>
 
+
+
+
+    <popup type="default" layout="popup"/>
+
+    <layout label="popup">
+      <background>
+	<rectangle color="0x000000" size="1" bgcolor="a0000000"/>
+      </background>
+      <content type="text" spacing="10" color="0xffffff" font="white">
+	<item type="default" font="grey">
+	  <rectangle bgcolor="0xa0000000" size="0"/>
+	</item>
+	<item type="selected" font="white">
+	  <rectangle bgcolor="0xa0ffffff" size="0"/>
+	</item>
+      </content>
+    </layout>
+    
   </skin>
 </freevo>

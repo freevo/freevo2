@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/03/02 11:46:32  dischi
+# Added GetPopupBoxStyle to return popup box styles to the gui
+#
 # Revision 1.22  2003/02/27 22:39:50  dischi
 # The view area is working, still no extended menu/info area. The
 # blue_round1 skin looks like with the old skin, blue_round2 is the
@@ -261,7 +264,81 @@ class Skin:
 
     def GetDisplayStyle(self):
         return 0
-    
+
+    def GetPopupBoxStyle(self, menu=None):
+        """
+        This function returns style information for drawing a popup box.
+
+        return backround, spacing, color, font, button_default, button_selected
+        background is ('image', XML_image) or ('rectangle', XML_rectangle)
+
+        XML_image attributes: filename
+        XML_rectangle attributes: color (of the border), size (of the border),
+           bgcolor (fill color), radius (round box for the border). There are also
+           x, y, width and height as attributes, but they may not be needed for the
+           popup box
+
+        button_default, button_selected are XML_item
+        attributes: font, rectangle (XML_rectangle)
+
+        All fonts are XML_font objects
+        attributes: name, size, color, shadow
+        shadow attributes: visible, color, x, y
+        """
+
+        if menu and menu.skin_settings:
+            settings = menu.skin_settings
+        else:
+            settings = self.settings
+
+        if not settings.layout.has_key(settings.popup):
+            print '*** layout <%s> not found' % settings.popup
+            return None
+
+        layout = settings.layout[settings.popup]
+
+        background = None
+
+        for bg in layout.background:
+            if isinstance(bg, xml_skin.XML_image):
+                background = ( 'image', bg)
+            elif isinstance(bg, xml_skin.XML_rectangle):
+                background = ( 'rectangle', bg)
+
+        button_default  = None
+        button_selected = None
+
+        spacing = layout.content.spacing
+        color   = layout.content.color
+
+        if not settings.font.has_key(layout.content.font):
+            print '*** font <%s> not found' % layout.content.font
+            font = None
+        else:
+            font = settings.font[layout.content.font]
+                
+        if layout.content.types.has_key('default'):
+            button_default = copy.copy(layout.content.types['default'])
+
+            if not settings.font.has_key(button_default.font):
+                print '*** font <%s> not found' % button_default.font
+                button_default.font = None
+            else:
+                button_default.font = settings.font[button_default.font]
+
+            
+        if layout.content.types.has_key('selected'):
+            button_selected = copy.copy(layout.content.types['selected'])
+
+            if not settings.font.has_key(button_selected.font):
+                print '*** font <%s> not found' % button_selected.font
+                button_selected.font = None
+            else:
+                button_selected.font = settings.font[button_selected.font]
+
+        return (background, spacing, color, font, button_default, button_selected)
+
+        
     def ItemsPerMenuPage(self, menu):
 
         if not menu:

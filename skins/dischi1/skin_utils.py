@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/02 11:46:32  dischi
+# Added GetPopupBoxStyle to return popup box styles to the gui
+#
 # Revision 1.1  2003/02/27 22:39:50  dischi
 # The view area is working, still no extended menu/info area. The
 # blue_round1 skin looks like with the old skin, blue_round2 is the
@@ -53,7 +56,9 @@ def format_image(item, width, height):
         
     if item.image:
         image = osd.loadbitmap('thumb://%s' % item.image)
-
+        if not image:
+            return None
+        
     if type == 'audio':
         m = min(height, width)
         height = m

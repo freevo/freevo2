@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/03/02 11:46:32  dischi
+# Added GetPopupBoxStyle to return popup box styles to the gui
+#
 # Revision 1.16  2003/03/01 00:12:20  dischi
 # Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
 # but on the main menu the idle bar still flickers (stupid watermarks),
@@ -354,7 +357,7 @@ class XML_rectangle(XML_data):
 class XML_content(XML_data):
     def __init__(self):
         XML_data.__init__(self, ('type', 'spacing', 'x', 'y', 'width',
-                                 'height', 'font', 'align', 'valign'))
+                                 'height', 'font', 'align', 'valign', 'color'))
         self.types = {}
         
     def parse(self, node, scale, current_dir):
@@ -435,7 +438,7 @@ class XMLSkin:
         
         self.mainmenu = XML_mainmenu()
         self.icon_dir = ""
-        
+        self.popup = ''
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
@@ -471,6 +474,9 @@ class XMLSkin:
 
             if node.name == u'iconset':
                 self.icon_dir = attr_str(node, 'dir', self.icon_dir)
+
+            if node.name == u'popup':
+                self.popup = attr_str(node, 'layout', self.popup)
 
 
     #
