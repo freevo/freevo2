@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/10/29 18:17:48  dischi
+# moved misc util to this file
+#
 # Revision 1.14  2004/08/24 16:42:44  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -67,6 +70,12 @@ import eventhandler
 
 from event import *
 
+def get_bookmarkfile(filename):
+    myfile = vfs.basename(filename)
+    myfile = sysconfig.CACHEDIR + "/" + myfile + '.bookmark'
+    return myfile
+
+
 class PluginInterface(plugin.ItemPlugin):
     """
     class to handle auto bookmarks
@@ -79,7 +88,7 @@ class PluginInterface(plugin.ItemPlugin):
         if item.type == 'dir' or item.type == 'playlist':
             return items    
         if item.mode == 'file' and not item.variants and \
-               not item.subitems and os.path.exists(util.get_bookmarkfile(item.filename)):
+               not item.subitems and os.path.exists(get_bookmarkfile(item.filename)):
             items.append(( self.bookmark_menu, _('Bookmarks')))
             
         return items
@@ -104,7 +113,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         Bookmark list
         """
-        bookmarkfile = util.get_bookmarkfile(self.item.filename)
+        bookmarkfile = get_bookmarkfile(self.item.filename)
         items = []
         for line in util.readfile(bookmarkfile):
             file = copy.copy(self.item)
@@ -145,7 +154,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         # Bookmark the current time into a file
         if event == STORE_BOOKMARK:
-            bookmarkfile = util.get_bookmarkfile(item.filename)
+            bookmarkfile = get_bookmarkfile(item.filename)
             
             handle = open(bookmarkfile,'a+') 
             handle.write(str(item.elapsed))
