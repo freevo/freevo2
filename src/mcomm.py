@@ -88,6 +88,10 @@ def instance(name='default'):
     return i
 
 
+def get_instance(name='default'):
+    return _instance_list.get(name)
+
+
 def _build_args(args):
     """
     Internal function to build argument list
