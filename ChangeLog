@@ -16,7 +16,7 @@ Release 1.3.X (???):
  * New skins 'info' and 'noia' which use the new info area
  * Major speed enhancements in the skin drawing code
  * Replaced fonts with Bitstream Vera fonts.
- * Basic Xine support for DVD/VCD (dvdnav/vcdnav)
+ * Xine support for DVD/VCD (dvdnav/vcdnav)
  * Support for Python 2.3
  * Bugfixes and many other things
 
