@@ -105,9 +105,9 @@ class SearchResource(FreevoResource):
                                            time.localtime(p.stop)), 
                              'class="'+status+'" colspan="1"')
 
-                fv.tableCell(p.channel.title, 'class="'+status+'" colspan="1"')
-                fv.tableCell(p.title, 'class="'+status+'" colspan="1"')
-                fv.tableCell(p.subtitle, 'class="'+status+'" colspan="1"')
+                fv.tableCell(Unicode(p.channel.title), 'class="'+status+'" colspan="1"')
+                fv.tableCell(Unicode(p.title), 'class="'+status+'" colspan="1"')
+                fv.tableCell(Unicode(p.subtitle), 'class="'+status+'" colspan="1"')
     
                 if Unicode(p.description) == u'':
                     cell = \
@@ -138,7 +138,7 @@ class SearchResource(FreevoResource):
 
             fv.tableClose()
 
-        fv.res += '</div>'
+            fv.res += '</div>'
 
         fv.printAdvancedSearchForm()
         fv.printFooter()
