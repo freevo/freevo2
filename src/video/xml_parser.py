@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/04/24 18:07:45  dischi
+# use format_text for plot and tagline
+#
 # Revision 1.14  2003/04/20 17:36:50  dischi
 # Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
 # images like before, but also fxd files for the tv show with global
@@ -277,9 +280,9 @@ def xml_parseInfo(info_node):
         elif node.name == u'runtime':
             i['runtime'] = node.textof().encode('latin-1')
         elif node.name == u'tagline':
-            i['tagline'] = node.textof().encode('latin-1')
+            i['tagline'] = util.format_text(node.textof().encode('latin-1'))
         elif node.name == u'plot':
-            i['plot'] = node.textof().encode('latin-1')
+            i['plot'] = util.format_text(node.textof().encode('latin-1'))
         elif node.name == u'year':
             i['year'] = node.textof().encode('latin-1')
         elif node.name == u'rating':
