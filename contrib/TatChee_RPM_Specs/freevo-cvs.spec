@@ -1,8 +1,8 @@
 %define geometry 800x600
-%define display  xv
+%define display  x11
 %define tv_norm  pal
 %define chanlist europe-west
-%define _cvsdate 20021118
+%define _cvsdate 20021120
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.0
@@ -65,7 +65,7 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,eyed3,fbcon,gui,helpers,icons,plugins,rc_client,skins,tv}
+mkdir -p %{buildroot}%{_prefix}/{boot,eyed3,fbcon,gui,helpers,icons,image,plugins,rc_client,skins,tv,video}
 mkdir -p %{buildroot}%{_prefix}/icons/64x64
 mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather}
 mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
@@ -85,14 +85,16 @@ install -m 755 fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 install -m 644 gui/* %{buildroot}%{_prefix}/gui
 install -m 644 eyed3/* %{buildroot}%{_prefix}/eyed3
-install -m 644 tv/* %{buildroot}%{_prefix}/tv
 install -m 644 helpers/* %{buildroot}%{_prefix}/helpers
+install -m 644 image/* %{buildroot}%{_prefix}/image
+install -m 644 tv/* %{buildroot}%{_prefix}/tv
+install -m 644 video/* %{buildroot}%{_prefix}/video
 install -m 644 icons/[a-z]* %{buildroot}%{_prefix}/icons
 install -m 644 icons/64x64/* %{buildroot}%{_prefix}/icons/64x64
 install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
-install -m 644 rc_client/*py %{buildroot}%{_prefix}/rc_client
+install -m 644 rc_client/* %{buildroot}%{_prefix}/rc_client
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
 install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
@@ -133,55 +135,35 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %dir %{_prefix}
-%attr(755,root,root) %dir %{_prefix}/eyed3
 %attr(755,root,root) %dir %{_prefix}/fbcon
-%attr(755,root,root) %dir %{_prefix}/gui
-%attr(755,root,root) %dir %{_prefix}/helpers
 %attr(755,root,root) %dir %{_prefix}/plugins
 %attr(755,root,root) %dir %{_prefix}/plugins/cddb
-%attr(755,root,root) %dir %{_prefix}/plugins/weather
-%attr(755,root,root) %dir %{_prefix}/plugins/weather/icons
-%attr(755,root,root) %dir %{_prefix}/rc_client
-%attr(755,root,root) %dir %{_prefix}/skins
-%attr(755,root,root) %dir %{_prefix}/skins/fonts
-%attr(755,root,root) %dir %{_prefix}/skins/images
-%attr(755,root,root) %dir %{_prefix}/skins/main1
-%attr(755,root,root) %dir %{_prefix}/skins/xml
-%attr(755,root,root) %dir %{_prefix}/skins/xml/type1
-%attr(755,root,root) %dir %{_prefix}/skins/aubin1
-%attr(755,root,root) %dir %{_prefix}/skins/barbieri
-#%attr(755,root,root) %dir %{_prefix}/skins/dischi1
-#%attr(755,root,root) %dir %{_prefix}/skins/krister1
-%attr(755,root,root) %dir %{_prefix}/skins/malt1
+%{_prefix}/eyed3
+%{_prefix}/gui
+%{_prefix}/helpers
+%{_prefix}/icons
+%{_prefix}/image
+%{_prefix}/rc_client
+%{_prefix}/skins
+%{_prefix}/tv
+%{_prefix}/video
+
+
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
+
 %attr(755,root,root) %{_prefix}/freevo
 %attr(755,root,root) %{_prefix}/freevo_xwin
 %attr(755,root,root) %{_prefix}/runapp
 %attr(644,root,root) %{_prefix}/*.py
-%attr(644,root,root) %{_prefix}/eyed3/*
 %attr(644,root,root) %{_prefix}/fbcon/fbset.db
 %attr(755,root,root) %{_prefix}/fbcon/vtrelease
 %attr(755,root,root) %{_prefix}/fbcon/*.sh
 %attr(755,root,root) %{_prefix}/fbcon/matroxset
-%attr(644,root,root) %{_prefix}/gui/*
-%attr(644,root,root) %{_prefix}/tv/*
-%attr(644,root,root) %{_prefix}/helpers/*
-%attr(755,root,root) %{_prefix}/icons
+
 %attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
 %attr(644,root,root) %{_prefix}/plugins/cddb/*.py
-%attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
-%attr(644,root,root) %{_prefix}/plugins/weather/*.py
-%attr(644,root,root) %{_prefix}/plugins/weather/icons/*
-%attr(644,root,root) %{_prefix}/rc_client/*
-%attr(644,root,root) %{_prefix}/skins/fonts/*
-%attr(644,root,root) %{_prefix}/skins/images/*
-%attr(644,root,root) %{_prefix}/skins/main1/*
-%attr(644,root,root) %{_prefix}/skins/xml/type1/*
-%attr(644,root,root) %{_prefix}/skins/aubin1/*
-%attr(644,root,root) %{_prefix}/skins/barbieri/*
-#%attr(644,root,root) %{_prefix}/skins/dischi1/*
-#%attr(644,root,root) %{_prefix}/skins/krister1/*
-%attr(644,root,root) %{_prefix}/skins/malt1/*
+%{_prefix}/plugins/weather
+
 %config %{_sysconfdir}/freevo/freevo_config.py
 %config %{_sysconfdir}/freevo/freevo.conf
 %doc BUGS ChangeLog COPYING FAQ INSTALL* README TODO Docs/*
@@ -196,10 +178,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %files testfiles
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/Images
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/Movies
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/Music
-%attr(755,root,root) %{_cachedir}/freevo/testfiles/tv-show-images
+%{_cachedir}/freevo/testfiles
 
 %post boot
 if [ -x /sbin/chkconfig ]; then
@@ -222,6 +201,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Wed Nov 20 2002 TC Wan <tcwan@cs.usm.my>
+- Cleaned up files directive
+
 * Wed Nov 13 2002 TC Wan <tcwan@cs.usm.my>
 - Disabled display=sdl as mplayer doesn't work reliably with this option
 
