@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2003/01/07 07:18:56  krister
+# Added autosync as a default option for MPlayer.
+#
 # Revision 1.103  2003/01/05 12:48:29  dischi
 # MAME_CACHE contains the uid to avoid conflicts when you start freevo as
 # different users
@@ -384,10 +387,10 @@ MPLAYER_NICE         = -20             # Priority of mplayer process. 0 is uncha
                                        # prio <0 has no effect unless run as root.
 
 if CONF.display == 'dfbmga':
-    MPLAYER_ARGS_DEF     = '-nobps -nolirc -autoq 100 -fs -vsync -double'
+    MPLAYER_ARGS_DEF     = '-autosync 30 -nobps -nolirc -autoq 100 -fs -vsync -double'
 else:
-    MPLAYER_ARGS_DEF     = ('-nobps -nolirc -autoq 100 -screenw %s -screenh %s -fs' %
-                            (CONF.width, CONF.height))
+    MPLAYER_ARGS_DEF     = (('-autosync 30 -nobps -nolirc -autoq 100 -screenw %s '
+                             + '-screenh %s -fs') % (CONF.width, CONF.height))
 
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
