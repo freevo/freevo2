@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/10/18 17:56:58  dischi
+# more childapp fixes
+#
 # Revision 1.30  2003/10/18 16:51:34  outlyer
 # Fix a crash when skipping through tracks.
 #
@@ -20,63 +23,6 @@
 #
 # Revision 1.27  2003/10/11 11:21:14  dischi
 # use util killall function
-#
-# Revision 1.26  2003/10/04 18:42:45  dischi
-# do not kill a dead child
-#
-# Revision 1.25  2003/10/04 18:40:48  dischi
-# try except before trying to kill the child
-#
-# Revision 1.24  2003/10/02 16:20:55  dischi
-# add lock() to make it thread save
-#
-# Revision 1.23  2003/09/27 00:36:21  outlyer
-# Dischi was right, this probably doesn't do anything... the problem still
-# exists, though it's fairly intermittent. Reversing this change.
-#
-# Revision 1.22  2003/09/25 20:46:26  outlyer
-# It's still killing processes if they don't respond immmediately. I've
-# realized that this mostly happens with high-bitrate MP3s, of which I have
-# many.
-#
-# The extra second if no data usually solves the problem. This appears to
-# be seperate from Dischi's earlier fix.
-#
-# Revision 1.21  2003/09/25 14:08:03  outlyer
-# Bump the priority of this message down.
-#
-# Revision 1.20  2003/09/25 14:07:02  outlyer
-# My autocolor plugin which allows me to run a system command before plaaying
-# video. It doesn't have to be a color command, you can change mixer settings
-# or anything else you can do in a shell script.
-#
-# Revision 1.19  2003/09/25 09:39:27  dischi
-# fix childapp killing problem
-#
-# Revision 1.18  2003/09/24 18:01:56  outlyer
-# A workaround for the problems with playback being aborted for every
-# 2nd song when played in sequence.
-#
-# Revision 1.17  2003/09/21 10:49:58  dischi
-# add shutdown to kill all running children
-#
-# Revision 1.16  2003/09/20 18:54:04  dischi
-# brute force if the app refuces to die
-#
-# Revision 1.15  2003/09/20 17:32:49  dischi
-# less debug
-#
-# Revision 1.14  2003/09/20 17:30:23  dischi
-# do not close streams when we have to kill the app by force
-#
-# Revision 1.13  2003/09/19 22:07:57  dischi
-# add unified PlayerThread function to avoid duplicate code
-#
-# Revision 1.12  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.11  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -118,17 +64,20 @@ import rc
 
 __all_childapps__ = []
 
+freevo_shutdown = False
 
 def shutdown():
     """
     shutdown all running childapps
     """
     global __all_childapps__
-
+    global freevo_shutdown
+    
     if not len(__all_childapps__):
         return
         
     print '%d child(s) still running, terminate them' % len(__all_childapps__)
+    freevo_shutdown = True
     while __all_childapps__:
         print 'shutting down %s' % __all_childapps__[0].binary
         __all_childapps__[0].kill()
@@ -222,7 +171,7 @@ class ChildApp:
             traceback.print_stack()
 
         # killed already
-        if hasattr(self,'child'):
+        if not self.child:
             _debug_('already dead', 2)
             return
 
@@ -388,21 +337,22 @@ class ChildThread(threading.Thread):
 
 
     def stop(self, cmd=None):
+        if not hasattr(self.app, 'child'):
+            _debug_('child still starting, ignoring stop', 1)
+            _debug_('slow down or buy a faster machine :-)', 1)
+            raise OSError
+        
         if config.DEBUG > 1:
             _debug_('got stop command')
             traceback.print_stack()
             
-        if self.mode != 'play':
-            _debug_('not playing anymore')
-            return
-
-        if cmd:
+        if cmd and self.app.isAlive():
             self.manual_stop = True
             _debug_('sending exit command to app')
             self.app.write(cmd)
             # wait for the app to terminate itself
             for i in range(20):
-                if self.mode != 'play':
+                if not self.app.isAlive():
                     break
                 time.sleep(0.1)
 
@@ -411,9 +361,11 @@ class ChildThread(threading.Thread):
         while self.mode == 'stop':
             # we are the main thread, we should call the real waitpid()
             util.popen3.waitpid()
-            time.sleep(0.3)
-                
+            time.sleep(0.1)
+
+    
     def run(self):
+        global freevo_shutdown
         while 1:
             if self.mode == 'idle':
                 self.mode_flag.wait()
@@ -435,29 +387,30 @@ class ChildThread(threading.Thread):
                 while self.mode == 'play' and self.app.isAlive():
                     time.sleep(0.1)
 
-                # remember if we have to send the STOP signal
-                send_stop = self.mode == 'play' and not self.manual_stop
-
-                # kill the app
-                self.app.kill()
-
-                # Ok, we can use the OSD again.
-                if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
-                    osd.restart()
-
-                if self.stop_osd:       # Implies a video file
-                    rc.post_event(Event(VIDEO_END))
-
-                # send mode to idle
-                self.mode = 'idle'
-
                 # inform Freevo that the app stopped itself
-                if send_stop:
+                if self.mode == 'play' and not self.manual_stop:
                     if hasattr(self.app, 'stopped'): 
                         self.app.stopped()
                     else:
                         _debug_('app has no stopped function, send PLAY_END')
                         rc.post_event(PLAY_END)
-                        
+
+                if not freevo_shutdown:
+                    while self.mode == 'play':
+                        _debug_('waiting for main to be ready for the killing', 2)
+                        time.sleep(0.1)
+
+                    # kill the app
+                    self.app.kill()
+
+                    # Ok, we can use the OSD again.
+                    if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
+                        osd.restart()
+
+                    if self.stop_osd:       # Implies a video file
+                        rc.post_event(Event(VIDEO_END))
+
+                self.mode = 'idle'
+
             else:
                 self.mode = 'idle'

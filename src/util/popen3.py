@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/18 17:56:58  dischi
+# more childapp fixes
+#
 # Revision 1.1  2003/10/18 10:45:46  dischi
 # our own thread working version of popen and waitpid
 #
@@ -82,7 +85,13 @@ wait_lock   = thread.allocate_lock()
 def waitpid(pid=0):
     global dead_childs
     if pid == 0:
-        pid = os.waitpid(pid, os.WNOHANG)[0]
+        _debug_('main checking childs', 2)
+        try:
+            pid = os.waitpid(pid, os.WNOHANG)[0]
+        except OSError:
+            # child anymore
+            return
+        
         if pid:
             wait_lock.acquire()
             dead_childs.append(pid)
@@ -101,6 +110,7 @@ def waitpid(pid=0):
     if traceback.extract_stack()[0][0].find('thread') == -1:
         return os.waitpid(pid, os.WNOHANG)[0] == pid
         
+    _debug_('poll', 2)
     wait_lock.acquire()
     if pid in dead_childs:
         dead_childs.remove(pid)
