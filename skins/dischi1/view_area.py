@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/05 21:56:12  dischi
+# Small changes to integrate the audio player
+#: view_area.py,v $
 # Revision 1.2  2003/03/02 11:46:32  dischi
 # Added GetPopupBoxStyle to return popup box styles to the gui
 #
@@ -57,36 +60,35 @@ class View_Area(Skin_Area):
         self.image = None
 
 
-    def update_content_needed(self, settings, menuw):
+    def update_content_needed(self):
         """
         check if the content needs an update
         """
-        menu = menuw.menustack[-1]
+        item = self.item
         image = None
 
-        if hasattr(menu.selected, 'image') and menu.selected.image:
-            image = menu.selected.image
+        if hasattr(item, 'image') and item.image:
+            image = item.image
 
         return image != self.image
     
 
-    def update_content(self, settings, menuw):
+    def update_content(self):
         """
         update the view area
         """
-        menu = menuw.menustack[-1]
-        item = menu.selected
+        item = self.item
         
         layout    = self.layout
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        if content.types.has_key(menu.selected.type):
-            val = content.types[menu.selected.type]
+        if content.types.has_key(item.type):
+            val = content.types[item.type]
         else:
             val = content.types['default']
 
-        if hasattr(menu.selected, 'image') and item.image:
+        if hasattr(item, 'image') and item.image:
             self.image = item.image
         else:
             self.image = None

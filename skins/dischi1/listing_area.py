@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/05 21:56:10  dischi
+# Small changes to integrate the audio player
+#
 # Revision 1.3  2003/03/02 19:03:42  dischi
 # Add [] for directories
 #
@@ -177,27 +180,28 @@ class Listing_Area(Skin_Area):
 
 
 
-    def update_content_needed(self, settings, menuw):
+    def update_content_needed(self):
         """
         check if the content needs an update
         """
-        menu = menuw.menustack[-1]
-        if self.last_choices[0] != menu.selected:
+        if self.last_choices[0] != self.menu.selected:
             return TRUE
 
         i = 0
-        for choice in menuw.menu_items:
+        for choice in self.menuw.menu_items:
             if self.last_choices[1][i] != choice:
                 return TRUE
             i += 1
 
         
-    def update_content(self, settings, menuw):
+    def update_content(self):
         """
         update the listing area
         """
-        menu = menuw.menustack[-1]
 
+        menuw     = self.menuw
+        menu      = self.menu
+        settings  = self.settings
         layout    = self.layout
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
