@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-14 20:57+0100\n"
+"POT-Creation-Date: 2004-03-21 10:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -530,23 +530,23 @@ msgstr ""
 msgid "Exit in %s seconds"
 msgstr ""
 
-#: osd.py:412 pyui_renderer.py:277
+#: osd.py:415 pyui_renderer.py:277
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:413 pyui_renderer.py:278
+#: osd.py:416 pyui_renderer.py:278
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:414 pyui_renderer.py:279
+#: osd.py:417 pyui_renderer.py:279
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:415 pyui_renderer.py:280
+#: osd.py:418 pyui_renderer.py:280
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:416 pyui_renderer.py:281
+#: osd.py:419 pyui_renderer.py:281
 msgid "h = Help"
 msgstr ""
 
@@ -559,7 +559,7 @@ msgstr ""
 msgid "Browse Playlist"
 msgstr ""
 
-#: playlist.py:370 video/configure.py:212 video/videoitem.py:329
+#: playlist.py:370 video/configure.py:212 video/videoitem.py:332
 msgid "Play"
 msgstr ""
 
@@ -583,7 +583,7 @@ msgstr ""
 msgid "no previous item in playlist"
 msgstr ""
 
-#: menu.py:575
+#: menu.py:587
 msgid "No action defined for this choice!"
 msgstr ""
 
@@ -1132,8 +1132,8 @@ msgstr ""
 msgid "This directory is empty"
 msgstr ""
 
-#: skins/main/tvlisting_area.py:364 tv/tvguide.py:116 tv/tvguide.py:581
-#: tv/tvguide.py:583 www/htdocs/guide.rpy:251
+#: skins/main/tvlisting_area.py:364 tv/tvguide.py:119 tv/tvguide.py:585
+#: tv/tvguide.py:587 www/htdocs/guide.rpy:251
 msgid "This channel has no data loaded"
 msgstr ""
 
@@ -1582,19 +1582,19 @@ msgstr ""
 msgid "program is scheduled"
 msgstr ""
 
-#: tv/tvguide.py:125
+#: tv/tvguide.py:128
 msgid "Preparing the program guide"
 msgstr ""
 
-#: tv/tvguide.py:128
+#: tv/tvguide.py:131
 msgid "TV Guide is corrupt!"
 msgstr ""
 
-#: tv/tvguide.py:250
+#: tv/tvguide.py:254
 msgid "Sorry, you cannot watch TV while recording. "
 msgstr ""
 
-#: tv/tvguide.py:251
+#: tv/tvguide.py:255
 msgid "If this is not true then remove "
 msgstr ""
 
@@ -1797,66 +1797,66 @@ msgstr ""
 msgid "Config Menu"
 msgstr ""
 
-#: video/videoitem.py:315
+#: video/videoitem.py:318
 msgid "Play DVD"
 msgstr ""
 
-#: video/videoitem.py:316 video/videoitem.py:318
+#: video/videoitem.py:319 video/videoitem.py:321
 msgid "DVD title list"
 msgstr ""
 
-#: video/videoitem.py:319 video/videoitem.py:327
+#: video/videoitem.py:322 video/videoitem.py:330
 msgid "Play default track"
 msgstr ""
 
-#: video/videoitem.py:323
+#: video/videoitem.py:326
 msgid "Play VCD"
 msgstr ""
 
-#: video/videoitem.py:324 video/videoitem.py:326
+#: video/videoitem.py:327 video/videoitem.py:329
 msgid "VCD title list"
 msgstr ""
 
-#: video/videoitem.py:332
+#: video/videoitem.py:335
 msgid "Play with maximum cache"
 msgstr ""
 
-#: video/videoitem.py:337
+#: video/videoitem.py:340
 msgid "Show variants"
 msgstr ""
 
-#: video/videoitem.py:340
+#: video/videoitem.py:343
 msgid "Create Thumbnail"
 msgstr ""
 
-#: video/videoitem.py:361
+#: video/videoitem.py:364
 msgid "Please wait...."
 msgstr ""
 
-#: video/videoitem.py:483
+#: video/videoitem.py:486
 #, python-format
 msgid "No media found for \"%s\".\n"
 msgstr ""
 
-#: video/videoitem.py:484 video/videoitem.py:498 video/videoitem.py:512
+#: video/videoitem.py:487 video/videoitem.py:501 video/videoitem.py:515
 msgid "Please insert the media."
 msgstr ""
 
-#: video/videoitem.py:497
+#: video/videoitem.py:500
 #, python-format
 msgid "Media not found for file \"%s\".\n"
 msgstr ""
 
-#: video/videoitem.py:511
+#: video/videoitem.py:514
 #, python-format
 msgid "Media not found for \"%s\".\n"
 msgstr ""
 
-#: video/videoitem.py:517
+#: video/videoitem.py:520
 msgid "No player for this item found"
 msgstr ""
 
-#: video/videoitem.py:583
+#: video/videoitem.py:594
 #, python-format
 msgid "Play Title %s"
 msgstr ""
