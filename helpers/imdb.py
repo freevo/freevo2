@@ -91,6 +91,7 @@ if imdb_number == '--add-id':
     x = open(sys.argv[3], 'w')
     x.write(content)
     x.close()
+    os.system('touch /tmp/freevo-rebuild-database')
     sys.exit(0)
 
 
@@ -293,3 +294,6 @@ i.write("\
 </freevo>\n")
 
 i.close()
+
+os.system('touch /tmp/freevo-rebuild-database')
+
