@@ -27,19 +27,19 @@ except ImportError:
 	print "Python Checksum module is missing."
 
 # Build everything
-
 if len(sys.argv) > 1:
 	if sys.argv[1] == 'x11':
 		buildops = 'x11'
-	if sys.argv[1] == 'sdl':
+	elif sys.argv[1] == 'sdl':
 		buildops = 'sdl'
 	else:
 		buildops = ''
 else:
 	buildops = ''
 
-print "Building Freevo Binaries..."
+print "Building Freevo Binaries (buildops='%s')..." % buildops
 os.system('make %s > /dev/null' % buildops)
+print
 print "Done. Now you can type make install to put the binaries"
 print "into /usr/local/freevo or run them from here\n"
 
