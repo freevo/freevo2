@@ -13,7 +13,6 @@
 #         move subitem and variant handling to extra file
 #       o create better 'arg' handling in play
 #       o maybe xine options?
-#       o merge tv shows and episode/subtitle info in tv recordings
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -69,10 +68,6 @@ class VideoItem(MediaItem):
     def __init__(self, url, parent, info=None, parse=True):
         self.autovars = [ ('deinterlace', 0) ]
         MediaItem.__init__(self, 'video', parent)
-        self.set_url(url, info=parse)
-
-        if info:
-            self.info.set_variables(info)
 
         self.variants          = []         # if this item has variants
         self.subitems          = []         # more than one file/track to play
@@ -83,10 +78,6 @@ class VideoItem(MediaItem):
         self.audio_file        = {}         # audio dubbing
 
         self.mplayer_options   = ''
-        self.tv_show           = False
-
-        self.video_width       = 0
-        self.video_height      = 0
 
         self.selected_subtitle = None
         self.selected_audio    = None
@@ -94,31 +85,12 @@ class VideoItem(MediaItem):
 
         self.possible_player   = []
 
-        # find image for tv show and build new title
-        if config.VIDEO_SHOW_REGEXP_MATCH(self.name) and not \
-               self.network_play and config.VIDEO_SHOW_DATA_DIR:
-            show_name = config.VIDEO_SHOW_REGEXP_SPLIT(self.name)
-            if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
-                self.name = show_name[0] + u" " + show_name[1] + u"x" + \
-                            show_name[2] + u" - " + show_name[3]
-                image = util.getimage((config.VIDEO_SHOW_DATA_DIR + \
-                                       show_name[0].lower()))
-                if self.filename and not image:
-                    image = util.getimage(os.path.dirname(self.filename)+'/'+ \
-                                          show_name[0].lower())
-                if image:
-                    self.image = image
-                if database.tv_shows.has_key(show_name[0].lower()):
-                    tvinfo = database.tv_shows[show_name[0].lower()]
-                    self.info.set_variables(tvinfo[1])
-                    if not self.image:
-                        self.image = tvinfo[0]
-                    self.skin_fxd = tvinfo[3]
-                    self.mplayer_options = tvinfo[2]
-                self.tv_show       = True
-                self.show_name     = show_name
-                self.tv_show_name  = show_name[0]
-                self.tv_show_ep    = show_name[3]
+        # set url and parse the name
+        self.set_url(url, info=parse)
+
+        if info:
+            # set info variables
+            self.info.set_variables(info)
 
         # extra infos in database.discset
         if parent and parent.media:
@@ -128,6 +100,53 @@ class VideoItem(MediaItem):
                 self.mplayer_options = database.discset[fid]
 
 
+    def set_name(self, name):
+        """
+        Set the item name and parse additional informations after title and
+        filename is set.
+        """
+        self.name = name
+        show_name = None
+        self.tv_show = False
+
+        if self.info['episode'] and self.info['subtitle']:
+            # get informations for recordings
+            show_name = (self.name, '', self.info['episode'], \
+                         self.info['subtitle'])
+        elif config.VIDEO_SHOW_REGEXP_MATCH(self.name) and not \
+                 self.network_play:
+            # split tv show files based on regexp
+            show_name = config.VIDEO_SHOW_REGEXP_SPLIT(self.name)
+            if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
+                self.name = show_name[0] + u" " + show_name[1] + u"x" + \
+                            show_name[2] + u" - " + show_name[3]
+            else:
+                show_name = None
+                
+        if show_name:
+            # This matches a tv show with a show name, an epsiode and
+            # a title of the specific episode
+            sn = String(show_name[0].lower())
+            if config.VIDEO_SHOW_DATA_DIR:
+                image = util.getimage((config.VIDEO_SHOW_DATA_DIR + sn))
+                if self.filename and not image:
+                    fname = os.path.dirname(self.filename)+'/'+ sn
+                    image = util.getimage(fname)
+                if image:
+                    self.image = image
+            if database.tv_shows.has_key(sn):
+                tvinfo = database.tv_shows[sn]
+                self.info.set_variables(tvinfo[1])
+                if not self.image:
+                    self.image = tvinfo[0]
+                self.skin_fxd = tvinfo[3]
+                self.mplayer_options = tvinfo[2]
+            self.tv_show      = True
+            self.show_name    = show_name
+            self.tv_show_name = show_name[0]
+            self.tv_show_ep   = show_name[3]
+
+        
     def set_url(self, url, info=True):
         """
         Sets a new url to the item. Always use this function and not set 'url'
@@ -148,12 +167,14 @@ class VideoItem(MediaItem):
                     self.name = util.getname(self.filename)
                 self.files.append(self.filename)
             elif self.url.rfind('.iso') + 4 == self.url.rfind('/'):
-                # iso
+                # dvd or vcd iso
                 self.filename = self.url[5:self.url.rfind('/')]
             else:
+                # normal dvd or vcd
                 self.filename = ''
 
         elif url.endswith('.iso') and self.info['mime'] == 'video/dvd':
+            # dvd iso
             self.mimetype = 'dvd'
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
@@ -169,8 +190,11 @@ class VideoItem(MediaItem):
             # force deinterlacing
             self['deinterlace'] = 1
 
+        # start name parser by setting name to itself
+        self.set_name(self.name)
+        
 
-    def id(self):
+    def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
         item is rebuild later with the same informations
@@ -178,10 +202,10 @@ class VideoItem(MediaItem):
         ret = self.url
         if self.subitems:
             for s in self.subitems:
-                ret += s.id()
+                ret += s.__id__()
         if self.variants:
             for v in self.variants:
-                ret += v.id()
+                ret += v.__id__()
         return ret
 
 

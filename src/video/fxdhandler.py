@@ -38,6 +38,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/12/30 11:32:35  dischi
+# add set_name for tv show handling, rename id to __id__
+#
 # Revision 1.24  2004/09/14 20:06:40  dischi
 # add doc
 #
@@ -126,8 +129,8 @@ def parse_movie(fxd, node):
     dirname  = os.path.dirname(fxd.filename)
     image      = ''
     title      = fxd.getattr(node, 'title')
-    item.name  = title
     item.image = fxd.childcontent(node, 'cover-img')
+    item.set_name(title)
     if item.image:
         item.image = vfs.abspath(os.path.join(dirname, item.image))
         image = item.image
@@ -243,7 +246,7 @@ def parse_movie(fxd, node):
         else:
             item.set_url(url, info=False)
         if title:
-            item.name = title
+            item.set_name(title)
         if player:
             item.force_player = player
         if is_playlist:
