@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/02 19:10:22  dischi
+# Basic mplayer version detection. Convert -vop to -vf if cvs or 1.0pre1
+# is used
+#
 # Revision 1.18  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -94,6 +98,8 @@ osd        = osd.get_singleton()
 # contains an initialized MPlayer() object
 mplayer = None
 
+mplayer_version = 0
+
 class PluginInterface(plugin.Plugin):
     """
     Mplayer plugin for the video player. Use mplayer to play all video
@@ -101,8 +107,22 @@ class PluginInterface(plugin.Plugin):
     """
     def __init__(self):
         global mplayer
+        global mplayer_version
+        
         # create the mplayer object
         plugin.Plugin.__init__(self)
+
+        child = popen2.Popen3('%s --version' % config.MPLAYER_CMD, 1, 100)
+        while(1):
+            data = child.fromchild.readline()
+            if not data:
+                break
+            if data.find('MPlayer 1') == 0:
+                mplayer_version = 1.0
+            if data.find('MPlayer 0') == 0:
+                mplayer_version = 0.9
+        child.wait()
+
         mplayer = util.SynchronizedObject(MPlayer())
 
         # register it as the object to play audio
@@ -115,6 +135,7 @@ def vop_append(command):
     parameter. This function will grep all -vop parameter from
     the command and add it at the end as one vop argument
     """
+    global mplayer_version
     ret = ''
     vop = ''
     next_is_vop = FALSE
@@ -123,12 +144,14 @@ def vop_append(command):
         if next_is_vop:
             vop += ',%s' % arg
             next_is_vop = FALSE
-        elif arg == '-vop':
+        elif (arg == '-vop' or arg == '-vf'):
             next_is_vop=TRUE
         else:
             ret += '%s ' % arg
 
     if vop:
+        if mplayer_version == 1:
+            return '%s -vf %s' % (ret,vop[1:])
         return '%s -vop %s' % (ret,vop[1:])
     return ret
 
