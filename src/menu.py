@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2004/02/14 13:02:34  dischi
+# o remove unneeded functions
+# o add function to delete the submenu or do nothing (avoid duplicate code)
+# o use new skin functions and do not call get_singleton()
+#
 # Revision 1.85  2004/02/12 16:27:06  dischi
 # fix watermark problem once and for all
 #
@@ -20,12 +25,11 @@
 #
 # Revision 1.82  2004/02/04 22:32:42  gsbarbieri
 # Changed LEFT/RIGHT behaviour.
-# Now in single column mode it behaves like BACK_ONE_MENU/SELECT and in multi-column mode (2d menus) it goes one item LEFT/RIGHT (as before).
+# Now in single column mode it behaves like BACK_ONE_MENU/SELECT and in
+# multi-column mode (2d menus) it goes one item LEFT/RIGHT (as before).
 #
-# This was asked in freevo-devel because it improve usability and it really does, since you just have to use arrows (UP/DOWN,LEFT/RIGHT) to navigate.
-#
-# Revision 1.81  2004/02/01 17:07:13  dischi
-# cosmetic changes
+# This was asked in freevo-devel because it improve usability and it really
+# does, since you just have to use arrows (UP/DOWN,LEFT/RIGHT) to navigate.
 #
 # Revision 1.80  2004/01/19 20:26:41  dischi
 # free image viewer cache on menuw.show()
@@ -76,11 +80,10 @@ from event import *
 from item import Item
 from gui import GUIObject, AlertBox
 
-skin = skin.get_singleton()
 
 class MenuItem(Item):
     """
-    Default item for the main menu actions
+    Default item for the menu. It includes one action
     """
     def __init__( self, name, action=None, arg=None, type=None, image=None,
                   icon=None, parent=None, skin_type=None):
@@ -98,17 +101,25 @@ class MenuItem(Item):
 
             
     def actions(self):
+        """
+        return the default action
+        """
         return [ ( self.select, self.name ) ]
 
 
     def select(self, arg=None, menuw=None):
+        """
+        call the default acion
+        """
         if self.function:
             self.function(arg=self.arg, menuw=menuw)
 
 
 
 class Menu:
-
+    """
+    a Menu with Items for the MenuWidget
+    """
     def __init__(self, heading, choices, fxd_file=None, umount_all = 0,
                  reload_func = None, item_types = None, force_skin_layout = -1):
 
@@ -142,43 +153,12 @@ class Menu:
         self.back_one_menu = 1
 
 
-    def delete_item(self, item):
-        try:
-            pos = self.choices.index(item)
-        except ValueError:
-            # item not in list
-            return
-        
-        self.choices.remove(item)
-
-        if self.selected == item:
-            if self.choices:
-                self.selected = self.choices[max(pos-1,0)]
-            else:
-                self.selected = None
-
-        if len(self.choices) <= self.page_start:
-            if self.page_start != 0:
-                self.page_start = self.previous_page_start.pop()
-            
-
     def items_per_page(self):
+        """
+        return the number of items per page for this skin
+        """
         return skin.items_per_page(('menu', self))
     
-
-    def add_item(self, item, pos):
-        try:
-            sel_pos = self.choices.index(self.selected)
-        except:
-            sel_pos = 0
-            
-        self.choices.insert(pos, item)
-
-        rows, cols = self.items_per_page()
-        items_per_page = rows*cols
-        if sel_pos >= self.page_start + items_per_page - 1:
-            self.previous_page_start.append(self.page_start)
-            self.page_start += items_per_page
 
 
 
@@ -224,6 +204,21 @@ class MenuWidget(GUIObject):
                 
             self.init_page()
 
+
+    def delete_submenu(self, refresh=True, reload=False):
+        """
+        Delete the last menu if it is a submenu
+        """
+        if len(self.menustack) > 1 and hasattr(self.menustack[-1], 'is_submenu') and \
+               self.menustack[-1].is_submenu:
+            if refresh and reload:
+                self.back_one_menu(arg='reload')
+            elif refresh:
+                self.back_one_menu()
+            else:
+                self.delete_menu()
+
+            
     def back_one_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
             try:
@@ -701,7 +696,5 @@ class MenuWidget(GUIObject):
             menu.selected = self.all_items[0]
 
 
-if __freevo_app__ == 'main':
-    areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin')
-    skin.register('menu', areas)
-
+# register menu to the skin
+skin.register('menu', ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'))
