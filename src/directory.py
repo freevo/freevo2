@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 16:08:50  dischi
+# take directory image based on TV_SHOW_IMAGES
+#
 # Revision 1.2  2003/04/20 12:43:32  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -166,6 +169,13 @@ class DirItem(Playlist):
                     image = os.path.join(dir, covers[0])
             self.image = image
 
+        if not self.image:
+            f = os.path.join(config.TV_SHOW_IMAGES, os.path.basename(dir).lower())
+            if os.path.isfile(f+'.png'):
+                self.image = f+'.png'
+            if os.path.isfile(f+'.jpg'):
+                self.image = f+'.jpg'
+            
         if os.path.isfile(dir+'/folder.fxd'): 
             self.xml_file = dir+'/folder.fxd'
 
