@@ -1,0 +1,517 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <skin geometry="800x600">
+    <iconset theme="AquaFusion"/>
+
+    <!-- Items of the main menu -->
+    <main>
+      <item label="tv"    name="TV"     icon="tv.png"/>
+      <item label="video" name="Movies" icon="movies.png"/>
+      <item label="audio" name="Music"  icon="mp3.png"/>
+      <item label="image" name="Images" icon="images.png"/>
+      <item label="games" name="Games"  icon="package_games.png"/>
+      <item label="shutdown" name="Shutdown" icon="shutdown.png"/>
+    </main>
+
+    <!-- 
+    *******************************************************
+    ** MENU DEFINITIONS
+    ******************************************************* -->
+
+    <!--
+    At the beginning there are the menu definitions. A menu has a type for
+    the different types of media: video/audio/image/games, main for the
+    main menu and default for all the other menus. The type 'all' will
+    delete all existing special definitions. Inside the tag are different
+    styles which can be toggled with the DISPLAY key in Freevo. If an
+    image definition is present, it will be used except when all items
+    have the same or no image
+    -->
+    <menu type="all">
+      <style text="normal text style"/>
+    </menu>
+
+    <!-- this points to a menu for the main menu -->
+    <menu type="main">
+      <style text="main menu"/>
+    </menu>
+
+    <!--
+    After defining which menu style to use for which item, we need to define
+    how the areas of each menuset look like. A menuset has a label (used by
+    menu) and the geometry and names for the five areas
+    -->
+    <menuset label="normal text style">
+
+      <!-- 1. screen: the complete background area -->
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+
+      <!-- 2. title: the area where the title of the menu (e.g. directory name -->
+      <!-- will be displayed -->
+      <title visible="not idlebar" layout="title0" x="10" y="10" width="780" height="60"/>
+
+      <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
+      <view layout="view0" x="580" y="110" width="200" height="300"/>
+
+      <!-- 4. listing area: the list of all items -->
+      <listing layout="list0" x="50" y="110" width="510" height="470">
+	<image x="10" y="110" width="32" height="32" label="uparrow"
+	  filename="up.png"/>
+	<image x="10" y="544" width="32" height="32" label="downarrow"
+	  filename="down.png"/>
+      </listing>
+      <!-- 5. info area: additional info. This area is invisible in the default -->
+      <!-- menu, it's only visible in the extended menus -->
+      <info visible="no"/>
+    </menuset>
+
+
+    <!-- Now the main menu -->
+    <menuset label="main menu">
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <listing layout="list_main" x="230" y="120" width="380" height="390"/>
+
+      <!-- disables info, view and title area. -->
+      <view visible="no"/>
+      <info visible="no"/>
+      <title visible="no"/>
+    </menuset>
+
+
+    <!--
+    The menus defined a layout to use. Now here are the definitions of the
+    layouts. Based on the type of area, some attributes have no effect
+    (e.g. the background has no content
+    -->
+
+    <!-- The background for the screen. By redefining layout label=screen0 you -->
+    <!-- can change only the background image -->
+    <layout label="screen0">
+      <background>
+	<!-- an image with the label background will ignore OVERSCAN settings -->
+	<!-- in freevo to make sure the complete screen is filled -->
+	<image image="background" x="0" y="0" label="background"/>
+	<image visible="not idlebar" filename="logo.png" x="10" y="0" 
+	  width="200" height="98"/>
+      </background>
+    </layout>
+    
+    <!-- blank screen, not needed here -->
+    <layout label="screen blank">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <!-- title -->
+    <layout label="title0">
+      <content x="210" type="menu" font="title" align="center"/>
+    </layout>
+
+    <!-- default listing area -->
+    <layout label="list0">
+      <content type="text" spacing="2">
+	<item type="default" font="item"/>
+	<item type="selected" font="selected">
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-3" width="max+10"
+	    height="max+6"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- default view area -->
+    <layout label="view0">
+      <content align="center" valign="top">
+	<item type="default">
+	  <rectangle size="1" x="-1" y="-1" width="max+2" height="max+2"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- main menu listing area -->
+    <layout label="list_main">
+      <content type="text" spacing="10">
+	<item type="default" font="main"/>
+	<item type="selected" font="main selected">
+	  <rectangle bgcolor="selection" size="0" y="-5" x="-10"
+	    width="max+20" height="max+10"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- font and colors used in this layouts -->
+    <font label="title" name="VeraBd.ttf" size="30" color="0xffffff"/>
+    <font label="item" name="VeraBd.ttf" size="16" color="0xdddddd"/>
+    <font label="selected" name="VeraBd.ttf" size="16" color="0xffffff"/>
+    <font label="main" name="VeraBd.ttf" size="30" color="0xdddddd"/>
+    <font label="main selected" name="VeraBd.ttf" size="30" color="0xffffff"/>
+    <font label="default" name="VeraBd.ttf" size="16" color="0xffffff"/>
+
+    <color label="selection" value="0xa0000000"/>
+
+
+    <!-- background image -->
+    <image label="background" filename="aubin_bg2"/>
+
+
+    <!-- 
+    *******************************************************
+    ** INFO AREA (not used in this skin but in skins which 
+    ** inherit from this one)
+    ******************************************************* -->
+
+    <layout label="info">
+      <content x="0" y="0" type="text" spacing="20" font="default">
+
+	<item type="audio">
+	  <if expression="artist">
+	    <text width="120" font="info label">Artist:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="artist"/>
+	    <newline/>
+	  </if>
+	  <if expression="album">
+	    <text width="120" font="info label">Album:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="album"/>
+	    <if expression="year">
+	      <text font="info value"> (</text>
+	      <text font="info value" expression="year"/>
+	      <text font="info value">)</text>
+	    </if>
+	    <newline/>
+	  </if>
+	  <if expression="length">
+	    <text width="120" font="info label">Length:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="length"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="video">
+	  <if expression="tagline">
+	    <text font="info tagline" expression="tagline"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="plot">
+	    <text height="max" font="info plot" mode="soft" expression="plot"/>
+	    <newline/>
+	  </if>
+	  <if expression="not plot">
+	    <text width="120" font="info label">Type:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="type"/>
+	    <newline/>
+	    <if expression="length">
+	      <text width="120" font="info label">Runtime:</text>
+	      <goto_pos x="10" mode="relative"/>
+	      <text font="info value" expression="length"/>
+	      <text font="info value"> min.</text>
+	      <newline/>
+	    </if>
+	    <if expression="geometry">
+	      <text width="120" font="info label">Resolution:</text>
+	      <goto_pos x="10" mode="relative"/>
+	      <text font="info value" expression="geometry"/>
+	      <if expression="aspect">
+		<text font="info value"> (</text>
+		<text font="info value" expression="aspect"/>
+		<text font="info value">)</text>
+	      </if>
+	      <newline/>
+	    </if>
+	  </if>
+	</item>
+
+	<item type="track">
+	  <if expression="length">
+	    <text width="120" font="info label">Runtime:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="length"/>
+	    <text font="info value"> min. </text>
+	  </if>
+	  <if expression="len(audio)">
+	    <text font="info value" expression="len(audio)"/>
+	    <text font="info value"> Audiotracks, </text>
+	  </if>
+	  <if expression="len(subtitles)">
+	    <text font="info value" expression="len(subtitles)"/>
+	    <text font="info value"> Subtitles, </text>
+	  </if>
+	  <if expression="chapters">
+	    <text font="info value" expression="chapters"/>
+	    <text font="info value"> Chapter</text>
+	  </if>
+	</item>
+
+	<item type="image">
+	  <if expression="width and height">
+	    <text width="70" font="info label">Size:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="width"/>
+	    <text font="info value">x</text>
+	    <text font="info value" expression="height"/>
+	    <newline/>
+	  </if>
+	  <if expression="date">
+	    <text width="70" font="info label">Date:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="date"/>
+	    <newline/>
+	  </if>
+	  <if expression="description">
+	    <text font="info plot" height="max" mode="soft" expression="description"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="dir">
+	  <text font="info label" expression="type"/>
+	  <newline/>
+	  <goto_pos y="20" mode="relative"/>
+	  <if expression="tagline">
+	    <text font="info tagline" width="max" expression="tagline"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="plot"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="playlist">
+	  <if expression="len(playlist)>0">
+  	     <text font="info value" expression="len(playlist)"/>
+  	     <text font="info value"> items in this playlist</text>
+   	     <newline/>
+	  </if>
+	  <if expression="len(playlist)==0">
+	    <text font="info value">This playlist is empty!</text>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="default"/>
+
+      </content>
+    </layout>
+
+    <!-- font used in the info area -->
+    <font label="info plot"    name="VeraBd.ttf" size="16" color="0xffffff"/>
+    <font label="info tagline" name="VeraBI.ttf" size="18" color="0xffffff"/>
+    <font label="info label"   name="VeraBd.ttf" size="14" color="0xffffff"/>
+    <font label="info value"   name="VeraBd.ttf" size="14" color="0xffffaa"/>
+
+
+
+    <!-- 
+    *******************************************************
+    ** POPUP DEFINITIONS
+    ******************************************************* -->
+
+    <popup type="default" layout="popup"/>
+
+    <layout label="popup">
+      <background>
+        <rectangle color="0x000000" size="1" bgcolor="widget background"/>
+      </background>
+      <content type="text" spacing="10" color="widget text" font="default">
+        <item type="default" font="widget">
+          <rectangle bgcolor="widget item background" size="0"/>
+        </item>
+        <item type="selected" font="selected widget">
+          <rectangle bgcolor="widget selected background" size="0"/>
+        </item>
+      </content>
+    </layout>
+
+    <font label="widget" name="VeraBd.ttf" size="16" color="0xffffff"/>
+    <font label="selected widget" name="VeraBd.ttf" size="16" color="0x164668"/>
+
+    <color label="widget text" value="0xffffff"/>
+    <color label="widget background" value="0x001F4A95"/>
+    <color label="widget item background" value="0x00164668"/>
+    <color label="widget selected background" value="0x00ffffff"/>
+
+
+    <!-- 
+    *******************************************************
+    ** AUDIO PLAYER DEFINITIONS
+    ******************************************************* -->
+
+    <player>
+      <screen layout="player screen" x="0" y="0" width="800" height="600"/>
+      <view layout="player view" x="430" y="200" width="420" height="360"/>
+      <info layout="player info" x="-50" y="80" width="550" height="300"/>
+      <title visible="no"/>
+    </player>
+
+    <layout label="player screen">
+      <background>
+	<image image="background" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <layout label="player view">
+      <content type="text" spacing="10">
+	<item type="default">
+	  <rectangle size="0" bgcolor="player mask" radius="10" x="-15" y="-15"
+	    width="max+80" height="max+30"/>
+	</item>
+      </content>
+    </layout>
+
+    <layout label="player info">
+      <background>
+	<rectangle size="0" bgcolor="player mask" radius="10" width="max"/>
+      </background>
+      <content x="70" y="10" height="max-20" width="max-80" type="text" spacing="10">
+	<item type="default">
+	  <if expression="title">
+	    <text font="player title" expression="title"/>
+	    <newline/>
+	  </if>
+	  <if expression="not title">
+	    <text font="player title" expression="name"/>
+	    <newline/>
+	  </if>
+	  <if expression="artist">
+	    <text font="player artist" expression="artist"/>
+	    <newline/>
+	  </if>
+	  <goto_pos y="15" mode="relative"/>
+	  <if expression="album">
+	    <text width="100" align="right" font="player info">Album:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="player info" expression="album"/>
+	    <if expression="date">
+	      <text font="player info"> (</text>
+	      <text font="player info" expression="date"/>
+	      <text font="player info">)</text>
+	    </if>
+	    <newline/>
+	  </if>
+	  <if expression="trackno">
+	    <text width="100" align="right" font="player info">Track:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="player info" expression="trackno"/>
+	    <newline/>
+	  </if>
+	  <goto_pos y="15" mode="relative"/>
+	  <if expression="length">
+	    <text width="100" align="right" font="player info">Length:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="player info" expression="length"/>
+	    <newline/>
+	  </if>
+	  <if expression="elapsed">
+	    <text width="100" align="right" font="player info">Elapsed:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="player info" expression="elapsed"/>
+	    <newline/>
+	  </if>
+	</item>
+      </content>
+    </layout>
+
+    <font label="player title" name="VeraBd.ttf" size="24" color="0xffffff">
+      <shadow x="2" y="2" color="0x000000" visible="yes"/>
+    </font>
+    <font label="player artist" name="VeraBd.ttf" size="18" color="0xffffff"/>
+    <font label="player info"   name="VeraBd.ttf" size="14" color="0xffffaa"/>
+
+    <color label="player mask" value="0x80000000"/>
+
+
+
+    <!-- 
+    *******************************************************
+    ** TV DEFINITIONS
+    ******************************************************* -->
+
+    <tv>
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <title visible="not idlebar" layout="title0" x="10" y="10" width="780" height="60"/>
+      <listing layout="tv listing" x="10" y="100" width="750" height="300">
+	<image x="765" y="100" width="32" height="32" label="uparrow"
+	  filename="up.png"/>
+	<image x="765" y="354" width="32" height="32" label="downarrow"
+	  filename="down.png"/>
+	<image width="16" height="16" label="leftarrow" filename="left.png"/>
+	<image width="16" height="16" label="rightarrow" filename="right.png"/>
+      </listing>
+      <info layout="tv info" x="10" y="400" width="780" height="190"/>
+    </tv>
+
+    <!-- tv listing area -->
+    <layout label="tv listing">
+      <content type="text" spacing="0">
+
+	<item type="label" font="tv" width="80">
+	  <rectangle bgcolor="tv label" size="1" color="0x000000" x="-5" y="-5"
+	    width="max+10" height="max+10"/>
+	</item>
+
+	<item type="head" font="tv">
+	  <rectangle bgcolor="tv label" size="1" color="0x000000" x="-5" y="-5"
+	    width="max+10" height="max+10"/>
+	</item>
+
+	<item type="default" font="tv">
+	  <rectangle bgcolor="0xff000000" color="0x000000" size="1" x="-5"
+	    y="-5" width="max+10" height="max+10"/>
+	</item>
+	
+	<item type="selected" font="tv selected">
+	  <rectangle bgcolor="tv selection" size="1" color="0x000000" x="-5"
+	    y="-5" width="max+10" height="max+10"/>
+	</item>
+	
+      </content>
+    </layout>
+
+    <!-- tv info area -->
+    <layout label="tv info">
+      <content x="10" y="10" height="max-20" width="max-20" type="text"
+	spacing="10" font="tv">
+	<item type="default">
+	  <if expression="title">
+	    <text font="tv title" width="630" expression="title"/>
+	  </if>
+          <text font="tv time" valign="center" expression="start"/>
+          <text font="tv time" valign="center">-</text>
+          <text font="tv time" valign="center" expression="stop"/>
+	  <newline/>
+	  <if expression="sub_title">
+	    <text font="info tagline" expression="sub_title"/>
+	    <newline/>
+	  </if>
+	  <if expression="desc">
+	    <text font="info plot" height="max" mode="soft" expression="desc"/>
+	    <newline/>
+	  </if>
+	</item>
+      </content>
+    </layout>
+
+
+    <font label="tv" name="VeraBd.ttf" size="16" color="0xffffff"/>
+    <font label="tv selected" name="VeraBd.ttf" size="16" color="0xffff66">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+    <font label="tv time" name="VeraBd.ttf" size="14" color="0xffffaa"/>
+    <font label="tv title" name="VeraBd.ttf" size="24" color="0xffffff">
+      <shadow x="2" y="2" color="0x000000" visible="yes"/>
+    </font>
+
+
+    <color label="tv label" value="0x88000066"/>
+    <color label="tv selection" value="0x88ffffff"/>
+
+  </skin>
+</freevo>
