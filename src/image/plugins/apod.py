@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/24 16:29:19  mikeruelle
+# make the plugin name and description show in the menu
+#
 # Revision 1.2  2003/12/01 05:12:02  mikeruelle
 # remove a couple debug statements
 #
@@ -56,7 +59,10 @@ class ApodMainMenuItem(Item):
     def __init__(self, parent, apoddir):
         Item.__init__(self, parent, skin_type='image')
         self.name = _( 'APOD' )
+        self.title = _( 'APOD' )
         self.apoddir = apoddir
+	self.info = { 'name' : 'APOD', 'description' : 'Astronomy Picture of the day', 'title' : 'APOD' }
+	self.type = 'image'
 
     def actions(self):
         return [ ( self.create_apod_menu , 'APOD Pictures' ) ]
