@@ -1394,6 +1394,9 @@ def init_module():
     storage = {}
     if vfs.isfile(cachefile):
         storage = util.read_pickle(cachefile)
+        if not storage.has_key('GUI_XML_FILE'):
+            # storage file too old
+            storage = {}
     if storage:
         if not config.GUI_XML_FILE:
             config.GUI_XML_FILE = storage['GUI_XML_FILE']
