@@ -50,7 +50,7 @@ setup (name         = "freevo",
        author       = "Krister Lagerstrom, et al.",
        author_email = "freevo-devel@lists.sourceforge.net",
        url          = "http://www.freevo.org",
-       licence      = "GPL",
+       license      = "GPL",
 
        scripts=scripts,
        package_dir = util.distutils.package_dir,
