@@ -16,6 +16,8 @@
 # The format of freevo_config.py might change, in that case you'll
 # have to update your customized version.
 #
+# Note: this file needs a huge cleanup!!!
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -52,7 +54,6 @@ import logging
 # freevo imports
 import sysconfig
 import version
-import system
 import input
 
 # get logging object
@@ -70,12 +71,6 @@ except: # unavailable, define '_' for all modules
     __builtin__.__dict__['_']= lambda m: m
 
 
-# temp solution until this is fixed to True and False
-# in all freevo modules
-__builtin__.__dict__['TRUE']  = 1
-__builtin__.__dict__['FALSE'] = 0
-
-
 # String helper function. Always use this function to detect if the
 # object is a string or not. It checks against str and unicode
 def __isstring__(s):
@@ -83,61 +78,41 @@ def __isstring__(s):
         
 __builtin__.__dict__['isstring'] = __isstring__
 
-
-def print_config_changes(conf_version, file_version, changelist):
-    """
-    print changes made between version on the screen
-    """
-    ver_old = float(file_version)
-    ver_new = float(conf_version)
-    if ver_old == ver_new:
-        return
-    print
-    print 'You are using version %s, changes since then:' % file_version
-    changed = [(cv, cd) for (cv, cd) in changelist if cv > ver_old]
-    if not changed:
-        print 'The changelist has not been updated, please notify the developers!'
-    else:
-        for change_ver, change_desc in changed:
-            print 'Version %s:' % change_ver
-            for line in change_desc.split('\n'):
-                print '    ', line.strip()
-            print
-    print
-            
-
-#
-# get information about what is started here:
-# helper = some script from src/helpers or is webserver or recordserver
-#
-HELPER          = 0
-IS_RECORDSERVER = 0
-IS_WEBSERVER    = 0
-
 app = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 __builtin__.__dict__['__freevo_app__'] = app
 
+
+# XXX ************************************************************
+
+# XXX The following code will be removed before the next release
+# XXX Please do NOT use this varaibles anymore and fix code were it
+# XXX is used.
+
+# use True/False
+__builtin__.__dict__['TRUE']  = 1
+__builtin__.__dict__['FALSE'] = 0
+
+# use __freevo_app__
+HELPER = 0
 if sys.argv[0].find('main.py') == -1:
     HELPER=1
-if sys.argv[0].find('recordserver.py') != -1:
-    IS_RECORDSERVER = 1
-elif sys.argv[0].find('webserver.py') != -1:
-    IS_WEBSERVER = 1
 
-# remove this later
+# use logger
 DEBUG = 0
 
-
+# use sysconfig code
 LOGDIR = sysconfig.CONF.logdir
 FREEVO_CACHEDIR = sysconfig.CONF.cachedir
 
+# use special logger
 def _mem_debug_function_(type, name='', level=1):
     if MEMORY_DEBUG < level:
         return
     print '<mem> %s: %s' % (type, name)
 
-
 __builtin__.__dict__['_mem_debug_']= _mem_debug_function_
+
+# XXX ************************************************************
 
 #
 # Default settings
@@ -173,14 +148,6 @@ TV_SETTINGS = TVSettings()
 
 TV_DEFAULT_SETTINGS = None
 
-
-#
-# Config file handling
-#
-cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo',
-                '/usr/local/etc/freevo' ]
-
-
 #
 # Read the environment set by the start script
 #
@@ -192,19 +159,7 @@ ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
 IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
 FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
 
-RUNAPP = os.environ['RUNAPP']
 
-
-#
-# Check that freevo_config.py is not found in the config file dirs
-#
-for dirname in cfgfilepath[1:]:
-    freevoconf = dirname + '/freevo_config.py'
-    if os.path.isfile(freevoconf):
-        log.critical(('freevo_config.py found in %s, please remove it ' +
-                      'and use local_conf.py instead!') % freevoconf)
-        sys.exit(1)
-        
 #
 # search missing programs at runtime
 #
@@ -242,92 +197,12 @@ elif CONF.display == 'dxr3':
     # don't use dxr3 for helpers. They don't use the osd anyway, but
     # it may mess up the dxr3 output (don't ask why).
     CONF.display='fbdev'
-    
-#
-# Load freevo_config.py:
-#
-if os.path.isfile(os.environ['FREEVO_CONFIG']):
-    log.info('Loading cfg: %s' % os.environ['FREEVO_CONFIG'])
-    execfile(os.environ['FREEVO_CONFIG'], globals(), locals())
-    
-else:
-    log.critical("Error: %s: no such file" % os.environ['FREEVO_CONFIG'])
-    sys.exit(1)
 
 
 #
-# Search for local_conf.py:
+# load the config file
 #
-for dirname in cfgfilepath:
-    overridefile = dirname + '/local_conf.py'
-    if os.path.isfile(overridefile):
-        log.info('Loading cfg overrides: %s' % overridefile)
-        execfile(overridefile, globals(), locals())
-
-        try:
-            CONFIG_VERSION
-        except NameError:
-            print
-            print 'Error: your local_config.py file has no version information'
-            print 'Please check freevo_config.py for changes and set'
-            print 'CONFIG_VERSION in %s to %s' % \
-                  (overridefile, LOCAL_CONF_VERSION)
-            print
-            sys.exit(1)
-
-        if int(str(CONFIG_VERSION).split('.')[0]) != \
-           int(str(LOCAL_CONF_VERSION).split('.')[0]):
-            print
-            print 'Error: The version information in freevo_config.py doesn\'t'
-            print 'match the version in your local_config.py.'
-            print 'Please check freevo_config.py for changes and set'
-            print 'CONFIG_VERSION in %s to %s' % \
-                  (overridefile, LOCAL_CONF_VERSION)
-            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION,
-                                 LOCAL_CONF_CHANGES)
-            sys.exit(1)
-
-        if int(str(CONFIG_VERSION).split('.')[1]) != \
-           int(str(LOCAL_CONF_VERSION).split('.')[1]):
-            log.warning('freevo_config.py was changed.\n' +
-                        'Please check your local_config.py')
-            print_config_changes(LOCAL_CONF_VERSION, CONFIG_VERSION, 
-                                 LOCAL_CONF_CHANGES)
-        break
-
-else:
-    locations = ''
-    for dirname in cfgfilepath:
-        locations += '  %s\n' % dirname
-    log.critical("""local_conf.py not found
-Freevo is not completely configured to start
-
-The configuration is based on three files. This may sound oversized, but this
-way it's easier to configure. First Freevo loads a file called 'freevo.conf'.
-This file will be generated by 'freevo setup'. Use 'freevo setup --help' to get
-information about the parameter. Based on the informations in that file, Freevo
-will guess some settings for your system. This takes place in a file called
-'freevo_config.py'. Since this file may change from time to time, you should
-not edit this file. After freevo_config.py is loaded, Freevo will look for a
-file called 'local_conf.py'. You can overwrite the variables from
-'freevo_config.py' in here. There is an example for 'local_conf.py' called
-'local_conf.py.example' in the Freevo distribution.
-    
-If you need more help, use the internal webserver to get more informations
-how to setup Freevo. To do this, you need to set
-WWW_USERS = { 'username' : 'password' }
-in your local_conf.py and then you can access the doc at
-http://localhost:8080/help/
-    
-The location of freevo_config.py is %s
-Freevo searches for freevo.conf and local_conf.py in the following locations:
-%s
-
-Since it's highly unlikly you want to start Freevo without further
-configuration, Freevo will exit now.
-"""  % (os.environ['FREEVO_CONFIG'], locations))
-    sys.exit(0)
-
+execfile(os.path.join(os.path.dirname(__file__), 'configfile.py'))
 
 # set the umask
 os.umask(UMASK)
@@ -467,7 +342,10 @@ except NameError, e:
 OVERLAY_DIR = sysconfig.VFS_DIR
 
 # auto detect function
-detect = system.detect
+def detect(*what):
+    for module in what:
+        exec('import %s' % module)
+
 
 # make sure USER and HOME are set
 os.environ['USER'] = pwd.getpwuid(os.getuid())[0]

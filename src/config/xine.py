@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2004/11/28 17:31:24  dischi
+# merge system/ and config.py into config/, needs more cleanup
+#
 # Revision 1.3  2004/11/21 10:12:47  dischi
 # improve system detect, use config.detect now
 #
