@@ -23,9 +23,10 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
+	mkdir `pwd`/Docs/howto
 	-python2.3 setup.py clean
 	rm -f `find . | grep freevo.mo`
-	rm -rf Docs/howto 
+	rm -rf `pwd`/Docs/howto 
 	rm -rf src/www/htdocs/help/wiki
 	rm -f *.pyc
 	rm -fr build
