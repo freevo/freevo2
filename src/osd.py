@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/01 17:26:40  dischi
+# _getbitmap now generates and stores thumbnails for large images without
+# EXIF header and thumb:// in the url. This speeds up the image menu
+# (and most of it the extended version). This requires fchksum (should
+# be added to the runtime)
+#
 # Revision 1.18  2003/02/24 06:00:30  outlyer
 # Allow update to optionally use a screen region rather than flipping the whole
 # display.
@@ -104,6 +110,8 @@ import socket
 import time
 import sys
 import os
+import stat
+import Image
 import re
 import traceback
 from types import *
@@ -112,6 +120,13 @@ import urlparse
 import objectcache
 import util
 
+try:
+    import fchksum
+    thumbs_fchksum = 1
+except:
+    print 'fchksum not available, thumbnails deactivated'
+    thumbs_fchksum = 0
+    
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
@@ -1360,6 +1375,7 @@ class OSD:
             return image
         
         try:
+            thumb = None
             if DEBUG >= 3:
                 print 'Trying to load file "%s"' % filename
 
@@ -1367,9 +1383,32 @@ class OSD:
                 tmp = util.getExifThumbnail(filename)
                 if tmp:
                     filename = tmp
-                    
+                elif thumbs_fchksum:
+                    if os.stat(filename)[stat.ST_SIZE] > 50000:
+                        thumb = os.path.join('%s/%s.thumb.png' % \
+                                             (config.FREEVO_CACHEDIR,
+                                              fchksum.fmd5t(filename)[0]))
+                        if not os.path.isfile(thumb):
+                            # convert with Imaging, pygame doesn't work
+                            image = Image.open(filename)
+                            width  = 300
+                            height = 300
+
+                            w, h = image.size
+                            if int(float(width * h) / w) > height:
+                                width = int(float(height * w) / h)
+                            else:
+                                height = int(float(width * h) / w)
+                            image = image.resize((width, height), Image.BICUBIC)
+                            image.save(thumb, 'PNG')
+
+                            
+                        filename = thumb
+
+                            
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
             image = tmp.convert_alpha()  # XXX Cannot load everything
+
         except pygame.error, e:
             print 'SDL image load problem: %s' % e
             return None
