@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2004/01/24 17:35:51  dischi
+# fix crash
+#
 # Revision 1.100  2004/01/20 09:58:09  dischi
 # fix directory update problem
 #
@@ -502,6 +505,10 @@ class DirItem(Playlist):
             if hasattr(self.menu, 'skin_force_text_view'):
                 del self.menu.skin_force_text_view
 
+        display_type = self.display_type
+        if self.display_type == 'tv':
+            display_type = 'video'
+
         if arg and arg.startswith('playlist:'):
             if arg.endswith(':random'):
                 Playlist(playlist = [ (self.dir, 0) ], parent = self,
@@ -514,10 +521,6 @@ class DirItem(Playlist):
                          display_type=display_type, random=True).play()
             return
         
-        display_type = self.display_type
-        if self.display_type == 'tv':
-            display_type = 'video'
-
         if config.OSD_BUSYICON_TIMER:
             osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
         
