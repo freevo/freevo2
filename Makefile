@@ -15,6 +15,9 @@ x11: all osds_x11
 osds_x11:
 	cd osd_server ; $(MAKE) osds_x11
 
+runapp:
+	gcc -o runapp runapp.c -DRUNAPP_LOG=\"/var/log/freevo/runapp.log\"
+
 subdirs: $(SUBDIRS)
 
 $(SUBDIRS):
@@ -33,4 +36,5 @@ install: all
 	-mv /usr/local/freevo /usr/local/freevo_old_`date +%Y%m%d_%H%M%S`
 	-rm -rf /usr/local/freevo
 	mkdir /usr/local/freevo
+	mkdir /var/log/freevo
 	cp -r * /usr/local/freevo

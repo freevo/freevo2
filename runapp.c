@@ -27,7 +27,7 @@ main (int ac, char *av[])
    char *newav[ac];
 
 
-   fp = fopen ("/tmp/runapp.log", "a");
+   fp = fopen (RUNAPP_LOG, "a");
 
    fprintf (fp, "PATH = %s\n", getenv ("PATH"));
    
