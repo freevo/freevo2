@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/08/26 18:13:18  dischi
+# always use Text not Textbox
+#
 # Revision 1.11  2004/08/26 15:29:18  dischi
 # make the tv guide work again (but very slow)
 #
@@ -486,16 +489,10 @@ class Area:
         if not align_v:
             align_v = 'top'
 
-        height2 = height
-        if height2 == -1:
-            height2 = font.height + 2
-
         if height == -1:
-            t = Text(text, (x, y), (width, height2), font, align_h, align_v,
-                     mode, ellipses, dim)
-        else:
-            t = Textbox(text, (x, y), (width, height2), font, align_h, align_v,
-                        mode, ellipses)
+            height = font.height
+
+        t = Text(text, (x, y), (width, height), font, align_h, align_v, mode, ellipses, dim)
         self.screen.layer[2].add_child(t)
         return t
 
