@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/11/04 19:55:48  dischi
+# make it possible to schedule recordings for testing
+#
 # Revision 1.44  2004/10/23 15:19:32  rshortt
 # Stub off some functions with Alerts.
 #
@@ -75,6 +78,8 @@ from item import Item
 from gui import AlertBox
 from gui import InputBox
 # from tv.record_types import Favorite
+
+import recordings
 
 DEBUG = config.DEBUG
 
@@ -297,11 +302,7 @@ class ProgramItem(Item):
 
 
     def schedule_program(self, arg=None, menuw=None):
-        msg = 'WORK IN PROGRESS'
-        AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
-        return
-
-        (result, msg) = record_client.scheduleRecording(self.prog)
+        (result, msg) = recordings.schedule_recording(self)
         if result:
             if menuw:
 	        if self.context=='search':
@@ -309,11 +310,9 @@ class ProgramItem(Item):
                     menuw.delete_menu()
                 menuw.back_one_menu(arg='reload')
             AlertBox(text=_('"%s" has been scheduled for recording') % \
-                     self.prog.title).show()
+                     self.title).show()
         else:
             AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
-        # then menu back one or refresh the menu with remove option
-	# instead of schedule
 
 
     def remove_program(self, arg=None, menuw=None):

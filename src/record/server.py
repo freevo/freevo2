@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/11/04 19:55:49  dischi
+# make it possible to schedule recordings for testing
+#
 # Revision 1.10  2004/11/04 19:14:08  dischi
 # add mbus parameter parsing
 #
@@ -40,18 +43,54 @@
 
 
 import notifier
+
+import sysconfig
+import util.cache
 import mcomm
 
-class RecordServer(mcomm.RPCServer):
+VERSION = 1
 
+class RecordServer(mcomm.RPCServer):
+    def __init__(self):
+        mcomm.RPCServer.__init__(self)
+        self.cachefile = sysconfig.cachefile('recordserver.dump')
+        self.load()
+        
+
+    def load(self):
+        c = util.cache.load(self.cachefile, VERSION)
+        print c
+        if c:
+            self.next_id, self.recordings = c
+        else:
+            self.recordings = {}
+            self.next_id = 0
+
+        print self.next_id
+        print self.recordings
+
+
+    def save(self):
+        print (self.next_id, self.recordings)
+        util.cache.save(self.cachefile, (self.next_id, self.recordings), VERSION)
+
+        
     def __rpc_recording_list__(self, addr, val):
         self.parse_parameter(val, () )
-        return mcomm.RPCReturn()
+        ret = []
+        for id in self.recordings:
+            name, channel, prio, start, stop, info = self.recordings[id]
+            ret.append((id, channel, prio, start, stop))
+        return mcomm.RPCReturn(ret)
+
 
     def __rpc_recording_add__(self, addr, val):
         name, channel, prio, start, stop, info = \
               self.parse_parameter(val, ( unicode, unicode, int, int, int, dict ) )
         print 'RecordRequest: %s' % String(name)
+        self.recordings[self.next_id] = (name, channel, prio, start, stop, info)
+        self.next_id += 1
+        self.save()
         return mcomm.RPCReturn()
 
         

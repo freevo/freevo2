@@ -1,13 +1,22 @@
-# test code, replacing record_client and record_server in the future
-
 import sys
 import mcomm
 
 server = None
 
-def list_recordings_return(return_list, data = None):
-    print return_list
-    
+def schedule_recording(prog):
+    if not server:
+        return False, 'Recordserver unavailable'
+    info = {}
+    # if prog['description']:
+    #     info['description'] = prog['description']
+    try:
+        return server.recording_add(prog['title'], prog['channel'],
+                                    0, prog['start'], prog['stop'], info)
+    except mcomm.MException, e:
+        print e
+        return False, 'Internal server error'
+
+
 def notification(entity):
     global server
     if not entity.present and entity == server:
@@ -22,13 +31,4 @@ def notification(entity):
             print server.recording_list()  # wait
         except mcomm.MException, e:
             print 'recordings.notification:', e
-        info = { 'description': 'foo', 'sub_title': 1 }
-        print server.recording_add(String('Umlaut ö'), Unicode('ÖRF'), 2, 78, 100, info)
-        sys.exit(0)
-        return
-    
-mcomm.register_entity_notification(notification)
 
-if __name__ == '__main__':
-    import notifier
-    notifier.loop()
