@@ -18,7 +18,7 @@ test -f /etc/freevo/boot_config || exit 0
 . /etc/freevo/boot_config
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-DAEMON_START="$FREEVO_HOME/freevo execute $FREEVO_HOME/src/tv/record_server.py"
+DAEMON_START="$FREEVO_HOME/freevo execute $FREEVO_HOME/src/record_server.py"
 DAEMON_STOP="$FREEVO_HOME/freevo stop record_server.py"
 NAME="record server"
 
