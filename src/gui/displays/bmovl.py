@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 20:33:39  dischi
+# smaller bugfixes, restart has some problems
+#
 # Revision 1.3  2004/08/23 14:29:46  dischi
 # displays have information about animation support now
 #
@@ -37,10 +40,14 @@
 #
 # ----------------------------------------------------------------------
 
+# python imports
+import os
+
 # mevas imports
 import mevas
 from mevas.displays.bmovlcanvas import BmovlCanvas
 
+# freevo imports
 import config
 
 class Display(BmovlCanvas):
@@ -75,8 +82,11 @@ class Display(BmovlCanvas):
             import childapp
             arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
                   [config.OSD_BACKGROUND_VIDEO]
-            self.child = childapp.ChildApp2(arg)
-            
+            self.child = childapp.ChildApp2(arg, stop_osd=0)
+            if hasattr(self, 'fifo') and not self.fifo:
+                self.fifo = os.open('/tmp/bmovl', os.O_WRONLY)
+                _debug_('rebuild bmovl')
+                self.rebuild()
 
     def stop(self):
         """
@@ -85,8 +95,14 @@ class Display(BmovlCanvas):
         if self.start_video and self.child:
             self.child.stop('quit')
             self.child = None
-            
-
+        if not self.fifo:
+            return
+        try:
+            os.close(self.fifo)
+        except (IOError, OSError):
+            print 'IOError on bmovl.fifo'
+        self.fifo = None
+        
     def hide(self):
         """
         Hide the display. This results in shutting down the

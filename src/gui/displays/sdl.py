@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 20:33:41  dischi
+# smaller bugfixes, restart has some problems
+#
 # Revision 1.3  2004/08/23 14:29:46  dischi
 # displays have information about animation support now
 #
@@ -95,7 +98,7 @@ class Display(PygameCanvas):
         Restart the display if it is currently stopped
         """
         if not self.running:
-            self._screen  = pygame.display.set_mode(size, 0, 32)
+            self._screen  = pygame.display.set_mode((self.width, self.height), 0, 32)
             self.thaw()
             self.running = True
 
@@ -104,6 +107,9 @@ class Display(PygameCanvas):
         """
         callback for SDL event
         """
+        if not pygame.display.get_init():
+            return
+        
         # Check if mouse should be visible or hidden
         mouserel = pygame.mouse.get_rel()
         mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
