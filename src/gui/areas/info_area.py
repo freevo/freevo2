@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/23 15:11:50  dischi
+# avoid redraw when not needed
+#
 # Revision 1.4  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -73,6 +76,7 @@ class Info_Area(Area):
     def __init__(self):
         Area.__init__(self, 'info')
         self.last_item = None
+        self.last_content = None
         self.content = None
         self.layout_content = None
         self.list = None
@@ -92,6 +96,12 @@ class Info_Area(Area):
     def update(self):
         # init some stuff
         self.set_list(self.set_content())
+
+        if self.canvas and self.infoitem == self.last_item and \
+           self.content == self.last_content:
+            self.canvas.rebuild()
+            return
+        
         t = InfoText((self.content.x, self.content.y),
                      (self.content.width, self.content.height),
                      self.infoitem, self.list, function_calls)
@@ -101,6 +111,7 @@ class Info_Area(Area):
         self.canvas = t
         self.screen.layer[2].add_child(t)
         self.last_item = self.infoitem
+        self.last_content = self.content
 
 
     def set_content( self ):

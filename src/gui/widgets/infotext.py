@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/23 15:11:50  dischi
+# avoid redraw when not needed
+#
 # Revision 1.1  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -51,6 +54,7 @@ class InfoText(CanvasContainer):
         self.item = item
         self.expression_list = expression_list
         self.function_calls  = function_calls
+        self.old_content     = None
         self.rebuild()
         self.set_pos(pos)
 
@@ -60,12 +64,15 @@ class InfoText(CanvasContainer):
         Update the container items to attribute changes
         FIXME: right now, this is a complete redraw
         """
-        self.clear()
         exp_list = self._eval_expression(self.item, self.expression_list,
                                          self.function_calls)
+        if exp_list == self.old_content:
+            return
+        self.clear()
         if exp_list:
             self._format(self.size, self.item, exp_list)
-
+        self.old_content = exp_list
+        
         
     def _eval_expression(self, item, expression_list, function_calls):
         """
