@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/10/14 18:47:00  dischi
+# o added scale support, you can define a scale value for the import
+#   grey640x480 and grey768x576 are very simple now
+# o renamed the xml files
+#
 # Revision 1.14  2002/10/13 14:16:55  dischi
 # Popup box and mp3 player are now working, too. This skin can look
 # like main1 and aubin1. I droped the support for the gui classes
@@ -103,13 +108,23 @@ osd = osd.get_singleton()
 # Skin main functions
 ###############################################################################
 
+XML_SKIN_DIRECTORY = 'skins/dischi1'
+
 class Skin:
 
     if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
     
     settings = xml_skin.XMLSkin()
-    settings.load(config.SKIN_XML_FILE)
 
+    # try to find the skin xml file
+    
+    if not settings.load(config.SKIN_XML_FILE):
+        if not settings.load("%s%s.xml" % (config.SKIN_XML_FILE, config.CONF.geometry)):
+            if not settings.load("%s/%s_%s.xml" % (XML_SKIN_DIRECTORY, config.SKIN_XML_FILE, \
+                                                   config.CONF.geometry)):
+                print "skin not found, using fallback skin"
+                settings.load("%s/grey_%s.xml" % (XML_SKIN_DIRECTORY, config.CONF.geometry))
+        
     if os.path.isfile("local_skin.xml"):
         if DEBUG: print 'Skin: Add local config to skin'
         settings.load("local_skin.xml")
@@ -346,7 +361,7 @@ class Skin:
 
 
         for choice in menuw.menu_items:
-            
+
             if menu.selected == choice:
                 image = choice.image
 

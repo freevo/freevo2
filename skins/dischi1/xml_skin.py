@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/10/14 18:47:00  dischi
+# o added scale support, you can define a scale value for the import
+#   grey640x480 and grey768x576 are very simple now
+# o renamed the xml files
+#
 # Revision 1.3  2002/10/14 17:10:26  dischi
 # One skin can inherit from another. Example 800x600.xml defines everything,
 # 768x576 only the differences.
@@ -196,17 +201,30 @@ class XMLSkin:
         self.menu_tv      = XML_menu()
         self.mp3          = XML_mp3()
         self.popup        = XML_popup()
-        
-        # compatibilty mode, remove later
+
         self.mainmenu = XML_mainmenu()
-    
+
+        self.scale = 0.0
+
+        
     #
     # Help functions
     #
-    def attr_int(self, node, attr, default):
+    def attr_int(self, node, attr, default, scale=0.0):
         try:
             if node.attrs.has_key(('', attr)):
-                return int(node.attrs[('', attr)])
+                val = int(node.attrs[('', attr)])
+                if scale:
+                    val = scale*val
+                return val
+        except ValueError:
+            pass
+        return default
+
+    def attr_float(self, node, attr, default):
+        try:
+            if node.attrs.has_key(('', attr)):
+                return float(node.attrs[('', attr)])
         except ValueError:
             pass
         return default
@@ -265,11 +283,12 @@ class XMLSkin:
     # parse one node
     #
     def parse_node(self, node, data, c_dir=''):
-        data.x = self.attr_int(node, "x", data.x)
-        data.y = self.attr_int(node, "y", data.y)
-        data.height = self.attr_int(node, "height", data.height)
-        data.width = self.attr_int(node, "width", data.width)
-        data.length = self.attr_int(node, "length", data.length)
+        data.x = self.attr_int(node, "x", data.x, self.scale)
+        data.y = self.attr_int(node, "y", data.y, self.scale)
+        data.height = self.attr_int(node, "height", data.height, self.scale)
+        data.width = self.attr_int(node, "width", data.width, self.scale)
+        data.length = self.attr_int(node, "length", data.length, self.scale)
+
         data.visible = self.attr_bool(node, "visible", data.visible)
         data.bgcolor = self.attr_hex(node, "bgcolor", data.bgcolor)
         data.color = self.attr_hex(node, "color", data.color) # will be overrided by font
@@ -281,7 +300,7 @@ class XMLSkin:
         for subnode in node.children:
             if subnode.name == u'font':
                 data.color = self.attr_hex(subnode, "color", data.color)
-                data.size = self.attr_int(subnode, "size", data.size)
+                data.size = self.attr_int(subnode, "size", data.size, self.scale)
                 data.font = self.attr_font(subnode, "name", data.font)
                 data.align = self.attr_str(subnode, "align", data.align)
             if subnode.name == u'selection':
@@ -300,10 +319,10 @@ class XMLSkin:
     # parse <items>
     #
     def parseItems(self, node, data, copy_content):
-        data.x = self.attr_int(node, "x", data.x)
-        data.y = self.attr_int(node, "y", data.y)
-        data.height = self.attr_int(node, "height", data.height)
-        data.width  = self.attr_int(node, "width", data.width)
+        data.x = self.attr_int(node, "x", data.x, self.scale)
+        data.y = self.attr_int(node, "y", data.y, self.scale)
+        data.height = self.attr_int(node, "height", data.height, self.scale)
+        data.width  = self.attr_int(node, "width", data.width, self.scale)
 
         for subnode in node.children:
             if subnode.name == u'item':
@@ -451,17 +470,24 @@ class XMLSkin:
     # parse the skin file
     #
     def load(self, file, copy_content = 0):
+        if not os.path.isfile(file):
+            return 0
+        
         try:
-
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
+
+                    scale = self.attr_float(freevo_type, "scale", 0.0)
                     include = self.attr_file(freevo_type, "include", "", \
                                              os.path.dirname(file))
                     if include:
+                        self.scale = scale
+                        print "load %s" % include
                         self.load(include + ".xml")
-
+                        self.scale = 0.0
+                    
                     for node in freevo_type.children:
                         if node.name == u'menu':
                             type = self.attr_str(node, "type", "all")
@@ -489,8 +515,10 @@ class XMLSkin:
                             self.read_popup(file, node, copy_content)
                         if node.name == u'main':
                             self.read_mainmenu(file, node)
-                    
+                        
         except:
             print "ERROR: XML file corrupt"
             traceback.print_exc()
-         
+            return 0
+
+        return 1
