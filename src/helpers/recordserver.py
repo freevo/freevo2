@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/05 20:27:18  rshortt
+# Changing the filename again for consistencies sake.
+#
 # Revision 1.1  2003/09/05 15:03:28  mikeruelle
 # welcome to your new home
 #
