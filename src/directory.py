@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2003/11/22 02:31:15  gsbarbieri
+# Please don't use:
+#     _( "string A" + \
+#        "string B" )
+#
+#  that sucks translation, cause it's split in 2 separate strings.
+# Instead, use this:
+#
+#     _( "string A" \
+#        "string B" )
+#
 # Revision 1.60  2003/11/21 11:48:03  dischi
 # Reworked the directory settings: MOVIE_PLAYLISTS and AUDIO_RANDOM_PLAYLIST
 # are removed, the new variables to control a directory style are
@@ -103,7 +114,7 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                  ('AUDIO_FORMAT_STRING', '', ''),
 
                  ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
-                  _('Handle the directory as playlist. After one file is played, the next '+\
+                  _('Handle the directory as playlist. After one file is played, the next '\
                     'one will be started.')) ,
 
                  ('DIRECTORY_ADD_PLAYLIST_FILES', _('Directory Add Playlist Files'),
@@ -113,7 +124,7 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Add an item for a random playlist')) ,
 
                  ('DIRECTORY_AUTOPLAY_ITEMS', _('Directory Autoplay Items'),
-                  _('Autoplay the whole directory (as playlist) when it contains only '+\
+                  _('Autoplay the whole directory (as playlist) when it contains only '\
                     'files and no directories' ))]
 
 # varibales that contain a type list
