@@ -9,7 +9,7 @@ import httplib, urllib
 import sys
 import string
 import codecs
-
+import os
 
 freevo_version = '1.2.5'
 
@@ -18,12 +18,19 @@ freevo_version = '1.2.5'
 # Return the CD ID for cd in the drive
 #
 
+LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
+
 def getCDID(drive):
     img = open(drive)
     img.seek(0x0000832d)
     id = img.read(16)
+    img.seek(32808, 0)
+    label = img.read(32)
+    m = LABEL_REGEXP(label)
+    if m:
+        label = m.group(1)
     img.close()
-    return id
+    return id+label
     
 #
 # make the string XML valid
@@ -179,7 +186,7 @@ for line in r.read().split("\n"):
     if m: rating = m.group(1) + '/10 ' + m.group(2)
         
     m = regexp_image.match(line)
-    if m:
+    if m and not os.path.exists(filename + ".jpg"):
         # hack for amazon images
         url = re.compile('MZZZZZ').sub('LZZZZZ', m.group(1))
 
@@ -228,7 +235,7 @@ index = 3
 
 try:
     if sys.argv[3] == "-id":
-        i.write("    <id>%s</id>\n" % getCDID(sys.argv[4]))
+        i.write("    <id type=\"timestamp\">%s</id>\n" % getCDID(sys.argv[4]))
         index += 2
 except IndexError:
     pass
