@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/24 16:36:25  dischi
+# add support for y=max-... in listing area arrows
+#
 # Revision 1.4  2003/08/24 10:04:05  dischi
 # added font_h as variable for y and height settings
 #
@@ -797,7 +800,7 @@ class Skin_Area:
 
         if not image:
             return 0,0
-        
+
         if isinstance(image, str):
             if isinstance(val, tuple):
                 image = self.load_image(image, val[2:])

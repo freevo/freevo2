@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/24 16:36:25  dischi
+# add support for y=max-... in listing area arrows
+#
 # Revision 1.4  2003/08/24 10:27:54  dischi
 # o Don't add [] or PL: if we have an icon for the text
 # o Only re-align tv shows if we align left
@@ -406,7 +409,13 @@ class Listing_Area(Skin_Area):
             if menuw.menu_items[0] != menu.choices[0] and area.images['uparrow']:
                 self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
             if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
-                self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
+                if isinstance(area.images['downarrow'].y, str):
+                    v = copy.copy(area.images['downarrow'])
+                    MAX=item_y0-vskip
+                    v.y = eval(v.y)
+                else:
+                    v = area.images['downarrow']
+                self.draw_image(area.images['downarrow'].filename, v)
         except:
             # empty menu / missing images
             pass

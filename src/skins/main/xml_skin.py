@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/24 16:36:25  dischi
+# add support for y=max-... in listing area arrows
+#
 # Revision 1.6  2003/08/24 11:01:59  dischi
 # use round not int after scaling
 #
@@ -424,9 +427,15 @@ class XML_area(XML_data):
         y = self.y
         XML_data.parse(self, node, scale, current_dir)
         if x != self.x:
-            self.x += config.OVERSCAN_X
+            try:
+                self.x += config.OVERSCAN_X
+            except TypeError:
+                pass
         if y != self.y:
-            self.y += config.OVERSCAN_Y
+            try:
+                self.y += config.OVERSCAN_Y
+            except TypeError:
+                pass
         for subnode in node.children:
             if subnode.name == u'image' and self.name == 'listing':
                 label = attr_str(subnode, 'label', '')
@@ -436,9 +445,15 @@ class XML_area(XML_data):
                     x,y = self.images[label].x, self.images[label].y
                     self.images[label].parse(subnode, scale, current_dir)
                     if x != self.images[label].x:
-                        self.images[label].x += config.OVERSCAN_X
+                        try:
+                            self.images[label].x += config.OVERSCAN_X
+                        except TypeError:
+                            pass
                     if y != self.images[label].y:
-                        self.images[label].y += config.OVERSCAN_Y
+                        try:
+                            self.images[label].y += config.OVERSCAN_Y
+                        except TypeError:
+                            pass
 
     def prepare(self, layout):
         XML_data.prepare(self)

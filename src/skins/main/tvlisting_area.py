@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/24 16:36:25  dischi
+# add support for y=max-... in listing area arrows
+#
 # Revision 1.4  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -239,9 +242,11 @@ class TVListing_Area(Skin_Area):
         ty0 = y_contents - r.height
         for i in range( n_cols ):
             self.drawroundbox( math.floor(x0), ty0,
-                               math.floor( col_size + x0 ) - math.floor( x0 ) + 1, head_h + 1, r2 )
+                               math.floor( col_size + x0 ) - math.floor( x0 ) + 1,
+                               head_h + 1, r2 )
 
-            self.write_text( time.strftime( timeformat, time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
+            self.write_text( time.strftime( timeformat,
+                                            time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
                              head_font, content,
                              x=( x0 + ig.x ), y=( ty0 + ig.y ),
                              width=ig.width, height=-1,
@@ -279,7 +284,8 @@ class TVListing_Area(Skin_Area):
 
             channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
             if os.path.isfile(channel_logo):
-                channel_logo = self.load_image(channel_logo, logo_geo[2:])
+                channel_logo = self.load_image(channel_logo, (r.width+1-2*r.size,
+                                                              item_h-2*r.size))
             else:
                 channel_logo = None
 
@@ -383,7 +389,13 @@ class TVListing_Area(Skin_Area):
         if menuw.display_up_arrow and area.images['uparrow']:
             self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
         if menuw.display_down_arrow and area.images['downarrow']:
-            self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
+            if isinstance(area.images['downarrow'].y, str):
+                v = copy.copy(area.images['downarrow'])
+                MAX=y0
+                v.y = eval(v.y)
+            else:
+                v = area.images['downarrow']
+            self.draw_image(area.images['downarrow'].filename, v)
 
     def check_schedule (self):
 
