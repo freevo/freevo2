@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/12 06:33:21  krister
+# Cosmetic changes.
+#
 # Revision 1.5  2002/12/11 16:04:32  dischi
 # make an item callable (actions()[0][0])
 #
@@ -97,7 +100,7 @@ class Item(MenuItem):
         self.rom_label = []
         self.media = None
 
-        # interactive stuff for video, parsed my mplayer
+        # interactive stuff for video, parsed by mplayer
         self.elapsed = 0
 
         if parent:

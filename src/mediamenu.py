@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/02/12 06:33:21  krister
+# Cosmetic changes.
+#
 # Revision 1.25  2003/02/11 06:53:01  krister
 # Fixed small bugs.
 #
@@ -86,12 +89,11 @@ import traceback
 
 import util
 import config
-import menu
+import menu as menu_module
 import copy
 import rc
 import string
 import skin
-import menu
 
 from item import Item
 from playlist import Playlist, RandomPlaylist
@@ -133,8 +135,8 @@ class MediaMenu(Item):
 
     def main_menu_generate(self):
         """
-        generate the items for the main menu. This is needed by first generating
-        the menu and when something cahnges by pressing the EJECT button
+        generate the items for the main menu. This is needed when first generating
+        the menu and if something changes by pressing the EJECT button
         """
         items = []
         dirs  = []
@@ -208,8 +210,8 @@ class MediaMenu(Item):
             title = 'GAMES'
         else:
             title = 'MEDIA'
-        item_menu = menu.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
-                              umount_all=1)
+        item_menu = menu_module.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
+                                     umount_all=1)
         menuw.pushmenu(item_menu)
 
 
@@ -221,7 +223,7 @@ class MediaMenu(Item):
         """
         if event == rc.IDENTIFY_MEDIA:
             if not menuw:               # this shouldn't happen
-                menuw = menu.get_singleton() 
+                menuw = menu_module.get_singleton() 
 
             menu = menuw.menustack[1]
 
@@ -284,10 +286,10 @@ class DirItem(Playlist):
 
 
         # set directory variables to default
-        all_variables = ( 'MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
-                          'DIRECTORY_AUTOPLAY_SINGLE_ITEM' )
+        all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
+                         'DIRECTORY_AUTOPLAY_SINGLE_ITEM')
         for v in all_variables:
-            setattr ( self, v, eval('config.%s' % v))
+            setattr(self, v, eval('config.%s' % v))
 
         # set variables to values in xml file
         if self.xml_file and os.path.isfile(self.xml_file):
@@ -384,9 +386,9 @@ class DirItem(Playlist):
 
         # build items for sub-directories
         dir_items = []
-        for dir in files:
-            if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
-                dir_items += [ DirItem(dir, self, display_type =
+        for filename in files:
+            if os.path.isdir(filename) and os.path.basename(filename) != '.xvpics':
+                dir_items += [ DirItem(filename, self, display_type =
                                        self.display_type) ]
 
         dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
@@ -434,7 +436,7 @@ class DirItem(Playlist):
            self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
             items[0].actions()[0][0](menuw=menuw)
         else:
-            item_menu = menu.Menu(title, items, reload_func=self.reload)
+            item_menu = menu_module.Menu(title, items, reload_func=self.reload)
             if self.xml_file:
                 item_menu.skin_settings = skin.LoadSettings(self.xml_file)
 
