@@ -378,19 +378,20 @@
 	  <text font="info value"> Items</text>
 	  <!-- other values are num_play_items and num_dir_items -->
         </item> 
+        <item type="playlist">
+	  <text font="info tagline" width="max" expression="name"/>
+	  <newline/>
+	  <text font="info value" width="max" expression="len(playlist)"/>
+	  <text font="info value"> Items</text>
+	  <!-- other values are num_play_items and num_dir_items -->
+        </item> 
         <item type="image">
-	  <text width="300" font="info value" expression="name"/>
-          <goto_pos x="10" mode="relative"/>
-          <if expression="width and height">
-            <text font="info value" expression="width"/>
-            <text font="info value">x</text>
-            <text font="info value" expression="height"/>
-          </if>
-          <goto_pos x="500" mode="absolute"/>
+	  <text font="info tagline" expression="name"/>
+          <goto_pos x="50" mode="relative"/>
           <if expression="date">
-            <text font="info value" expression="date"/>
-            <newline/>
+            <text font="info value" width="max" align="right" expression="date"/>
           </if>
+	  <newline/>
           <if expression="description">
             <text font="info plot" height="max" mode="soft" expression="description"/>
             <newline/>
@@ -399,6 +400,11 @@
 	    <if expression="location">
 	      <text font="info label">Location: </text>
 	      <text font="info value" mode="soft" expression="location"/>
+	    </if>
+	    <if expression="not location">
+	      <if expression="geometry">
+		<text font="info value" expression="geometry"/>
+	      </if>
 	    </if>
 	  </if>
         </item>
