@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/02 21:33:17  dischi
+# The main menu is a class of its own, all items in the main menu inherit
+# from Item. If the new skin code is active, DISPLAY will pop up a skin
+# selector.
+#
 # Revision 1.24  2003/02/24 04:03:25  krister
 # Added a --trace option to see all function calls in freevo.
 #
@@ -50,59 +55,6 @@
 # menuwidget which is the parent UI object.  I also made MenuWidget into
 # a subclass of GUIObject so that it can closely take advantage of the
 # parent / child relationship therein.
-#
-# Revision 1.14  2003/02/12 10:41:10  dischi
-# Removed some stuff we don't need anymore with the new menu extention
-#
-# Revision 1.13  2003/02/12 10:28:27  dischi
-# Added new xml file support. The old xml files won't work, you need to
-# convert them.
-#
-# Revision 1.12  2003/02/08 23:31:37  gsbarbieri
-# hanged the Image menu to ExtendedMenu.
-#
-# OBS:
-#    main1_tv: modified to handle the <indicator/> as a dict
-#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
-#    main: modified to use the ExtendedMenu
-#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
-#
-# Revision 1.11  2003/02/07 12:43:30  dischi
-# Removed some stuff Krister (?) checked in by accident
-#
-# Revision 1.10  2003/02/07 07:31:43  krister
-# Added a fix for LD_PRELOAD problems, turned out some stuff ran before it was turned off.
-#
-# Revision 1.9  2003/02/06 09:22:06  krister
-# Added a python killall() function instead of the shell call.
-#
-# Revision 1.8  2003/02/04 13:12:03  dischi
-# removed some debug
-#
-# Revision 1.7  2003/01/12 18:29:41  dischi
-# Make shutdown inherit from Item. Now you have an item menu to select
-# freevo or system shutdown. The default isn't changed
-#
-# Revision 1.6  2003/01/09 18:56:19  dischi
-# Make the autostart work again. If you close a cd tray while you are at the
-# main menu, the disc will be autostart (show dir or play dvd)
-#
-# Revision 1.5  2003/01/02 19:57:34  dischi
-# Delete LD_PRELOAD after freevo is running to avoid problems with
-# programs freevo will start (e.g. shutdown with gentoo linux)
-#
-# Revision 1.4  2002/12/07 13:30:21  dischi
-# Add plugin support
-#
-# Revision 1.3  2002/12/03 05:13:03  krister
-# Changed so that the EPG can be run standalone again. Disabled mplayer process killing, not good on a multiuser machine.
-#
-# Revision 1.2  2002/11/24 20:30:52  dischi
-# automouter still not working :-(
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -278,136 +230,117 @@ class ShutdownItem(Item):
         shutdown(menuw=menuw, arg=TRUE)
     
 
-#
-# Eventhandler for stuff like CD inserted
-#
-def eventhandler(event = None, menuw=None, arg=None):
+class MainMenuItem(Item):
     """
-    Automatically perform actions depending on the event, e.g. play DVD
+    Default item for the main menu actions
     """
-
-    global im_thread
-
-    # if we are at the main menu and there is an IDENTIFY_MEDIA event,
-    # try to autorun the media
-    if event == rc.IDENTIFY_MEDIA and im_thread and im_thread.last_media and \
-       menuw and len(menuw.menustack):
-        media = im_thread.last_media
-        if media.info and media.info.actions():
-            media.info.actions()[0][0](menuw=menuw)
-        else:
-            menuw.refresh()
-        return TRUE
-
-    print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
-    
-#
-# Setup the main menu and handle events (remote control, etc)
-#
-def getcmd():
-    items = []
-
-    # Load the main menu items from the skin
-    menu_items = skin.settings.mainmenu.items
-
-    for i in menu_items:
-        if menu_items[i].visible:
-
-            # if it's has actions() it is an item already
-            if hasattr(eval(menu_items[i].action), 'actions'):
-                item = eval(menu_items[i].action)(None)
-                if menu_items[i].icon:
-                    item.icon = menu_items[i].icon
-                if menu_items[i].name:
-                    item.name = menu_items[i].name
-                item.eventhandler = eventhandler
-                
-                items += [ item ]
-
-            else:
-                items += [menu.MenuItem(menu_items[i].name, eval(menu_items[i].action),\
-                                        menu_items[i].arg, eventhandler,
-                                        None, 'main', menu_items[i].icon)]
-                if menu_items[i].image:
-                    items[-1].setImage(('image', menu_items[i].image))
-    
-    mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
-    menuwidget.pushmenu(mainmenu)
-    osd.focused_app = menuwidget
-
-    muted = 0
-    mainVolume = 0 # XXX We are using this for PcmVolume as well.
-
-    # XXX TEST CODE
-    if config.SKIN_XML_FILE.find('aubin_round') != -1:
-        print 'Enabled the IdleTool'
-        m = idle.IdleTool()
-    else:
-        m = None
-    m and m.refresh()
-    while 1:
+    def __init__(self, parent, name, icon, image, action, arg):
+        Item.__init__(self, parent)
+        self.name     = name
+        self.icon     = icon
+        self.image    = image
+        self.function = action
+        self.arg      = arg
+        self.type     = 'main'
         
-        # Get next command
-        while 1:
+    def actions(self):
+        return [ ( self.select, '' ) ]
 
-            event = osd._cb()
-            if event:
-                break
-            event = rc.poll()
-            if event:
-                break
-            if not rc.app:
-                m and m.poll()
-            time.sleep(0.1)
+    def select(self, arg=None, menuw=None):
+        self.function(arg=self.arg, menuw=menuw)
 
-        m and m.refresh()
-        # Handle volume control   XXX move to the skin
-        if event == rc.VOLUP:
-            print "Got VOLUP in main!"
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.incMainVolume()
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.incPcmVolume()
-                
-        elif event == rc.VOLDOWN:
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.decMainVolume()
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.decPcmVolume()
-                
-        elif event == rc.MUTE:
-            if muted:
-                if config.MAJOR_AUDIO_CTRL == 'VOL':
-                    mixer.setMainVolume(mainVolume)
-                elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                    mixer.setPcmVolume(mainVolume)
-                muted = 0
-            else:
-                if config.MAJOR_AUDIO_CTRL == 'VOL':
-                    mainVolume = mixer.getMainVolume()
-                    mixer.setMainVolume(0)
-                elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                    mainVolume = mixer.getPcmVolume()
-                    mixer.setPcmVolume(0)
-                muted = 1
 
-        # Handle the EJECT key for the main menu
-        elif event == rc.EJECT and len(menuwidget.menustack) == 1:
-
-            # Are there any drives defined?
-            if not config.REMOVABLE_MEDIA: continue
-            
-            media = config.REMOVABLE_MEDIA[0]  # The default is the first drive in the list
-            media.move_tray(dir='toggle')
-
-        # Send events to either the current app or the menu handler
-        if rc.app:
-            rc.app(event)
-        else:
-            if osd.focused_app:
-                osd.focused_app.eventhandler(event)
+class SkinSelectItem(Item):
+    """
+    Icon for the skin selector
+    """
+    def __init__(self, parent, name, image, skin):
+        Item.__init__(self, parent)
+        self.name  = name
+        self.image = image
+        self.skin  = skin
         
+    def actions(self):
+        return [ ( self.select, '' ) ]
 
+    def select(self, arg=None, menuw=None):
+        skin.settings = skin.LoadSettings(self.skin, copy_content = FALSE)
+        menuw.back_one_menu()
+
+        
+class MainMenu(Item):
+    """
+    this class handles the main menu
+    """
+    
+    def getcmd(self):
+        """
+        Setup the main menu and handle events (remote control, etc)
+        """
+        
+        items = []
+
+        # Load the main menu items from the skin
+        menu_items = skin.settings.mainmenu.items
+
+        for i in menu_items:
+            if menu_items[i].visible:
+
+                # if it's has actions() it is an item already
+                if hasattr(eval(menu_items[i].action), 'actions'):
+                    item = eval(menu_items[i].action)(None)
+                    if menu_items[i].icon:
+                        item.icon = menu_items[i].icon
+                    if menu_items[i].name:
+                        item.name = menu_items[i].name
+                    item.parent = self
+                    items += [ item ]
+
+                else:
+                    items += [ MainMenuItem(self, menu_items[i].name,
+                                            menu_items[i].icon,
+                                            menu_items[i].image,
+                                            eval(menu_items[i].action),
+                                            menu_items[i].arg) ]
+                                            
+
+        mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
+        menuwidget.pushmenu(mainmenu)
+        osd.focused_app = menuwidget
+
+        muted = 0
+        mainVolume = 0 # XXX We are using this for PcmVolume as well.
+
+
+    def eventhandler(self, event = None, menuw=None, arg=None):
+        """
+        Automatically perform actions depending on the event, e.g. play DVD
+        """
+
+        global im_thread
+        
+        # if we are at the main menu and there is an IDENTIFY_MEDIA event,
+        # try to autorun the media
+        if event == rc.IDENTIFY_MEDIA and im_thread and im_thread.last_media and \
+           menuw and len(menuw.menustack) == 1:
+            media = im_thread.last_media
+            if media.info and media.info.actions():
+                media.info.actions()[0][0](menuw=menuw)
+            else:
+                menuw.refresh()
+            return TRUE
+
+        # pressing DISPLAY on the main menu will open a skin selector
+        # (only for the new skin code)
+        if event == rc.DISPLAY and config.NEW_SKIN:
+            items = []
+            for name, image, skinfile in skin.GetSkins():
+                items += [ SkinSelectItem(self, name, image, skinfile) ]
+
+            menuwidget.pushmenu(menu.Menu('SKIN SELECTOR', items))
+
+        print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
+    
 
 class RemovableMedia:
 
@@ -493,7 +426,7 @@ def signal_handler(sig, frame):
         # XXX Kludge to shutdown if started with "python main.py"
         os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
 
-    
+
 #
 # Main init
 #
@@ -542,9 +475,83 @@ def main_func():
                 except:
                     traceback.print_exc()
 
+    main = MainMenu()
+    main.getcmd()
+
+    # XXX TEST CODE
+    if config.SKIN_XML_FILE.find('aubin_round') != -1:
+        print 'Enabled the IdleTool'
+        m = idle.IdleTool()
+    else:
+        m = None
+    m and m.refresh()
+
+
     # Kick off the main menu loop
     print 'Main loop starting...'
-    getcmd()
+
+    while 1:
+
+        # Get next command
+        while 1:
+
+            event = osd._cb()
+            if event:
+                break
+            event = rc.poll()
+            if event:
+                break
+            if not rc.app:
+                m and m.poll()
+            time.sleep(0.1)
+
+        m and m.refresh()
+        # Handle volume control   XXX move to the skin
+        if event == rc.VOLUP:
+            print "Got VOLUP in main!"
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                mixer.incMainVolume()
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                mixer.incPcmVolume()
+
+        elif event == rc.VOLDOWN:
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                mixer.decMainVolume()
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                mixer.decPcmVolume()
+
+        elif event == rc.MUTE:
+            if muted:
+                if config.MAJOR_AUDIO_CTRL == 'VOL':
+                    mixer.setMainVolume(mainVolume)
+                elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                    mixer.setPcmVolume(mainVolume)
+                muted = 0
+            else:
+                if config.MAJOR_AUDIO_CTRL == 'VOL':
+                    mainVolume = mixer.getMainVolume()
+                    mixer.setMainVolume(0)
+                elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                    mainVolume = mixer.getPcmVolume()
+                    mixer.setPcmVolume(0)
+                muted = 1
+
+        # Handle the EJECT key for the main menu
+        elif event == rc.EJECT and len(menuwidget.menustack) == 1:
+
+            # Are there any drives defined?
+            if not config.REMOVABLE_MEDIA: continue
+
+            # The default is the first drive in the list
+            media = config.REMOVABLE_MEDIA[0]  
+            media.move_tray(dir='toggle')
+
+        # Send events to either the current app or the menu handler
+        if rc.app:
+            rc.app(event)
+        else:
+            if osd.focused_app:
+                osd.focused_app.eventhandler(event)
 
 
 #
