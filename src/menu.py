@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2004/01/04 13:06:02  dischi
+# MENU_CALL_ITEM_ACTION also checks the item itself
+#
 # Revision 1.75  2004/01/03 17:43:14  dischi
 # OVERLAY_DIR is always used
 #
@@ -585,6 +588,11 @@ class MenuWidget(GUIObject):
         elif event == MENU_CALL_ITEM_ACTION:
             _debug_('calling action %s', event.arg)
 
+            for a in menu.selected.actions():
+                if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
+                    a[0](arg=None, menuw=self)
+                    return
+                
             plugins = plugin.get('item') + plugin.get('item_%s' % menu.selected.type)
 
             if hasattr(menu.selected, 'display_type'):
