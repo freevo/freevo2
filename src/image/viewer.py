@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/05/28 15:03:15  dischi
+# small bugfixes
+#
 # Revision 1.23  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -87,11 +90,11 @@ class ImageViewer(GUIObject):
         GUIObject.__init__(self)
         self.osd_mode = 0    # Draw file info on the image
         self.zoom = 0   # Image zoom
-        self.zoom_btns = { em.IMAGE_NO_ZOOM.name:0, em.IMAGE_ZOOM_GRID1.name:1,
-                           em.IMAGE_ZOOM_GRID2.name:2, em.IMAGE_ZOOM_GRID3.name:3,
-                           em.IMAGE_ZOOM_GRID4.name:4, em.IMAGE_ZOOM_GRID5.name:5,
-                           em.IMAGE_ZOOM_GRID6.name:6, em.IMAGE_ZOOM_GRID7.name:7,
-                           em.IMAGE_ZOOM_GRID8.name:8, em.IMAGE_ZOOM_GRID9.name:9 }
+        self.zoom_btns = { str(em.IMAGE_NO_ZOOM):0, str(em.IMAGE_ZOOM_GRID1):1,
+                           str(em.IMAGE_ZOOM_GRID2):2, str(em.IMAGE_ZOOM_GRID3):3,
+                           str(em.IMAGE_ZOOM_GRID4):4, str(em.IMAGE_ZOOM_GRID5):5,
+                           str(em.IMAGE_ZOOM_GRID6):6, str(em.IMAGE_ZOOM_GRID7):7,
+                           str(em.IMAGE_ZOOM_GRID8):8, str(em.IMAGE_ZOOM_GRID9):9 }
 
         self.slideshow = TRUE  # currently in slideshow mode
         self.alertbox  = None  # AlertBox active
@@ -323,8 +326,8 @@ class ImageViewer(GUIObject):
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
-        elif event in self.zoom_btns:
-            self.zoom = self.zoom_btns[event]
+        elif str(event) in self.zoom_btns:
+            self.zoom = self.zoom_btns[str(event)]
                 
             if self.zoom:
                 # Zoom one third of the image, don't load the next
