@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/08 13:19:06  dischi
+# add AUDIOCD as plugin type
+#
 # Revision 1.8  2003/10/12 11:01:19  dischi
 # Don't show black screen between selecting and playing an audio file
 #
@@ -76,8 +79,11 @@ class PlayerGUI(GUIObject):
 
         self.menuw = menuw
         self.item = item
+
         if item.type == 'radio':
             self.player = plugin.getbyname(plugin.RADIO_PLAYER)
+        elif item.filename.startswith('cdda:/'):
+            self.player = plugin.getbyname(plugin.AUDIOCD_PLAYER)
         else:
             self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
         self.running = False

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/11/08 13:18:48  dischi
+# add AUDIOCD as plugin type
+#
 # Revision 1.47  2003/10/27 20:09:38  dischi
 # Rewrote the function to find the plugins to make it more generic
 #
@@ -175,11 +178,12 @@ class DaemonPlugin(Plugin):
 # Some plugin names to avoid typos
 #
 
-AUDIO_PLAYER = 'AUDIO_PLAYER'
-VIDEO_PLAYER = 'VIDEO_PLAYER'
-DVD_PLAYER   = 'DVD_PLAYER'
-VCD_PLAYER   = 'VCD_PLAYER'
-TV           = 'TV'
+AUDIO_PLAYER   = 'AUDIO_PLAYER'
+AUDIOCD_PLAYER = 'AUDIOCD_PLAYER'
+VIDEO_PLAYER   = 'VIDEO_PLAYER'
+DVD_PLAYER     = 'DVD_PLAYER'
+VCD_PLAYER     = 'VCD_PLAYER'
+TV             = 'TV'
 RADIO_PLAYER   = 'RADIO_PLAYER'
 
 
