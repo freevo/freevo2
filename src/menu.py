@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2004/08/26 15:31:15  dischi
+# improve menu/menuapplication handling
+#
 # Revision 1.107  2004/08/25 12:51:20  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -16,45 +19,6 @@
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
 # know that the theme is changed.
-#
-# Revision 1.105  2004/08/23 20:36:42  dischi
-# rework application handling
-#
-# Revision 1.104  2004/08/23 15:13:30  dischi
-# fade menu in and out
-#
-# Revision 1.103  2004/08/22 20:14:58  dischi
-# remove test code
-#
-# Revision 1.102  2004/08/14 15:09:54  dischi
-# use new AreaHandler
-#
-# Revision 1.101  2004/08/05 17:36:13  dischi
-# remove "page" code, the skin takes care of that now
-#
-# Revision 1.100  2004/08/01 10:57:34  dischi
-# make the menu an "Application"
-#
-# Revision 1.99  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.98  2004/07/25 19:47:38  dischi
-# use application and not rc.app
-#
-# Revision 1.97  2004/07/25 18:22:27  dischi
-# changes to reflect gui update
-#
-# Revision 1.96  2004/07/23 19:44:00  dischi
-# move most of the settings code out of the skin engine
-#
-# Revision 1.95  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.94  2004/06/02 21:38:02  dischi
-# fix crash
-#
-# Revision 1.93  2004/05/09 09:58:43  dischi
-# make it possible to force a page rebuild
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -79,17 +43,17 @@
 
 
 import copy
+import traceback
 
 import config
 import plugin
 import util
+import gui
 
 from event import *
 from item import Item
 from application import Application
 
-import gui
-from gui import AlertBox
 
 
 class MenuItem(Item):
@@ -134,8 +98,8 @@ class Menu:
     def __init__(self, heading, choices=[], theme=None, umount_all = 0,
                  reload_func = None, item_types = None, force_skin_layout = -1):
 
-        self.heading = heading
-        self.choices = choices             # List of MenuItem:s
+        self.heading = heading          # name of the menu
+        self.choices = choices          # List of MenuItem:s
         if len(self.choices):
             self.selected     = self.choices[0]
             self.selected_pos = 0
@@ -143,8 +107,8 @@ class Menu:
             self.selected     = None
             self.selected_pos = -1
             
-        self.umount_all    = umount_all    # umount all ROM drives on display?
-        self.theme = None
+        self.umount_all = umount_all    # umount all ROM drives on display?
+        self.theme = None               # skin theme for this menu
         if theme:
             self.theme = theme
 
@@ -188,56 +152,17 @@ class Menu:
             self.selected_pos = -1
 
 
-
-class MenuApplication(Application):
-    """
-    An application inside the menu
-    """
-    def __init__(self, name, event_context, fullscreen):
-        Application.__init__(self, name, event_context, fullscreen)
-        self.menuw = None
-        
-
-    def eventhandler(self, event):
+    def __del__(self):
         """
-        Eventhandler for basic menu functions
+        delete function of memory debugging
         """
-        if not self.menuw:
-            return False
-        if event == MENU_GOTO_MAINMENU:
-            self.destroy()
-            self.menuw.goto_main_menu()
-            return True
-        if event == MENU_BACK_ONE_MENU:
-            self.destroy()
-            self.menuw.back_one_menu()
-            return True
-        return False
-
-
-    def show(self):
-        """
-        show the menu on the screen
-        """
-        Application.show(self)
-
-
-    def destroy(self):
-        """
-        destroy the menu
-        """
-        Application.stop(self)
-
-
-    def refresh(self):
-        """
-        refresh display
-        """
-        pass
+        _mem_debug_('menu', self.heading)
+        map(lambda a: a.delete(), self.choices)
 
 
 
-        
+
+
 class MenuWidget(Application):
     """
     The MenuWidget handles a stack of Menus
@@ -250,7 +175,8 @@ class MenuWidget(Application):
             engine = gui.AreaHandler('menu', ('screen', 'title', 'subtitle', 'view',
                                               'listing', 'info'))
         self.engine = engine
-        
+        self.inside_menu = False
+
 
     def get_event_context(self):
         """
@@ -267,7 +193,11 @@ class MenuWidget(Application):
         """
         Application.show(self)
         self.refresh(reload=1)
-        self.engine.show(config.OSD_FADE_STEPS)
+        if self.inside_menu:
+            self.engine.show(0)
+            self.inside_menu = False
+        else:
+            self.engine.show(config.OSD_FADE_STEPS)
 
                 
     def hide(self, clear=True):
@@ -275,7 +205,11 @@ class MenuWidget(Application):
         hide the menu
         """
         Application.hide(self)
-        self.engine.hide(config.OSD_FADE_STEPS)
+        if self.inside_menu:
+            self.engine.hide(0)
+            self.inside_menu = False
+        else:
+            self.engine.hide(config.OSD_FADE_STEPS)
         
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
@@ -316,62 +250,119 @@ class MenuWidget(Application):
 
             
     def back_one_menu(self, arg=None, menuw=None):
-        if len(self.menustack) > 1:
-            try:
-                count = self.menustack[-1].back_one_menu
-            except:
-                count = 1
+        """
+        Go back on menu. Or if the current menu has a variable called
+        'back_one_menu' it is the real number of menus to go back
+        """
+        if len(self.menustack) == 1:
+            return
+        previous = self.menustack[-1]
+        if previous and hasattr(previous, 'back_one_menu'):
+            self.menustack = self.menustack[:-previous.back_one_menu]
+        else:
+            self.menustack = self.menustack[:-1]
 
-            for i in range(count):
-                del self.menustack[-1]
-            menu = self.menustack[-1]
+        # get the current shown menu
+        menu = self.menustack[-1]
 
-            if not isinstance(menu, Menu):
-                self.refresh()
-                return True
-            
-            if menu.reload_func:
-                reload = menu.reload_func()
-                if reload:
-                    self.menustack[-1] = reload
-                    menu = self.menustack[-1]
-
-            if isinstance(menu, Menu):
-                gui.set_theme(menu.theme)
-            if arg == 'reload':
-                self.refresh(reload=1)
+        if not isinstance(menu, Menu):
+            # The new menu is no 'Menu', it is a 'MenuApplication'
+            # Mark both the previous shown Menu (app or self) and the
+            # new one with 'inside_menu' to avoid fading in/out because
+            # we still are in the menu and why should we fade here?
+            menu.inside_menu = True
+            if isinstance(previous, Menu):
+                self.inside_menu = True
             else:
-                self.refresh()
+                previous.inside_menu = True
+            # refresh will do the rest
+            self.refresh()
+            return True
+
+        if not isinstance(previous, Menu):
+            # Now we show a 'Menu' buit the previous is a 'MenuApplication'.
+            # Make the widget and the previous app as 'inside_menu' to
+            # avoid fading effects
+            previous.inside_menu = True
+            self.inside_menu = True
+
+        if menu.reload_func:
+            # The menu has a reload function. Call it to rebuild
+            # this menu. If the functions returns something, replace
+            # the old menu with the returned one.
+            reload = menu.reload_func()
+            if reload:
+                self.menustack[-1] = reload
+                menu = self.menustack[-1]
+
+        # the the theme
+        if isinstance(menu, Menu):
+            gui.set_theme(menu.theme)
+        if arg == 'reload':
+            self.refresh(reload=1)
+        else:
+            self.refresh()
                 
 
     def goto_main_menu(self, arg=None, menuw=None):
-        while len(self.menustack) > 1:
-            del self.menustack[-1]
+        """
+        Go back to the main menu
+        """
+        self.menustack = [ self.menustack[0] ]
         menu = self.menustack[0]
         gui.set_theme(menu.theme)
         self.refresh()
 
     
     def pushmenu(self, menu):
-        if len(self.menustack) > 0 and not isinstance(self.menustack[-1], Menu):
-            _debug_('menu auto-hide %s' % self.menustack[-1])
-            self.menustack[-1].hide()
+        """
+        Add a new Menu to the stack and show it
+        """
+        if len(self.menustack) > 0:
+            previous = self.menustack[-1]
+        else:
+            previous = None
+        # If the current shown menu is no Menu but a MenuApplication
+        # hide it from the screen. Mark 'inside_menu' to avoid a
+        # fade effect for hiding
+        if previous and not isinstance(previous, Menu):
+            self.inside_menu = True
+            previous.inside_menu = True
+            previous.hide()
         self.menustack.append(menu)
+        # Check the new menu. Maybe we need to set 'inside_menu' if we
+        # switch between MenuApplication(s) and also set a new theme
+        # for the global Freevo look
         if isinstance(menu, Menu):
             if not menu.theme:
-                menu.theme = self.menustack[-2].theme
+                menu.theme = previous.theme
             if isinstance(menu.theme, str):
-                if menu.theme == self.menustack[-2].theme.filename:
-                    menu.theme = self.menustack[-2].theme
+                if menu.theme == previous.theme.filename:
+                    menu.theme = previous.theme
                 else:
                     menu.theme = gui.set_theme(menu.theme)
             gui.set_theme(menu.theme)
+            if previous and not isinstance(previous, Menu):
+                # Current showing is no Menu, we are hidden.
+                self.show()
         else:
+            # The current Menu is a MenuApplication, set menuw
+            # to it so it can reference back to us. Also set
+            # theme and 'inside_menu'.
             menu.menuw = self
+            menu.theme = previous.theme
+            self.inside_menu = True
+            menu.inside_menu = True
+
+        # refresh will do the update
         self.refresh()
 
 
     def refresh(self, reload=0):
+        """
+        Refresh the menuwidget. This includes some basic stuff
+        like mounting/unmounting and also update the areas
+        """
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
@@ -392,6 +383,9 @@ class MenuWidget(Application):
 
 
     def make_submenu(self, menu_name, actions, item):
+        """
+        Make a submenu based on all actions for this item
+        """
         items = []
         for a in actions:
             if isinstance(a, Item):
@@ -417,6 +411,9 @@ class MenuWidget(Application):
             
         
     def eventhandler(self, event):
+        """
+        Eventhandler for menu controll
+        """
         menu = self.menustack[-1]
 
         if isinstance(menu, Menu) and menu.cols == 1:
@@ -536,7 +533,7 @@ class MenuWidget(Application):
                         action = action[0]
             if not action:
                 print 'No action.. '
-                AlertBox(text=_('No action defined for this choice!')).show()
+                gui.AlertBox(text=_('No action defined for this choice!')).show()
             else:
                 action( arg=arg, menuw=self )
             return True
