@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/03/07 17:27:46  dischi
+# added support for extended menus
+#
 # Revision 1.16  2003/03/05 22:14:06  dischi
 # Bugfix: one enhancement doesn't work right
 #
@@ -266,7 +269,7 @@ class Skin_Area:
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
 
 
-    def draw(self, settings, obj, widget_type='menu'):
+    def draw(self, settings, obj, display_style=0, widget_type='menu'):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
@@ -294,7 +297,8 @@ class Skin_Area:
             visible = area.visible
         else:
             visible = FALSE
-            
+
+        self.display_style = display_style
         self.redraw = self.init_vars(settings, item_type, widget_type)
             
         if area and area != self.area_val:
@@ -312,9 +316,9 @@ class Skin_Area:
             self.last_bg_objects      = []
             self.last_content_objects = []
 
-        if not area.visible:
+        if not area.visible or not self.layout:
             return
-        
+
         self.draw_background()
 
         # dependencies haven't changed
@@ -452,10 +456,12 @@ class Skin_Area:
         if widget_type == 'player':
             area = settings.player
         else:
-            if settings.menu.has_key(display_type):
-                area = settings.menu[display_type][0]
+            if self.display_style and settings.menu.has_key('extended %s' % display_type):
+                area = settings.menu['extended %s' % display_type]
+            elif settings.menu.has_key(display_type):
+                area = settings.menu[display_type]
             else:
-                area = settings.menu['default'][0]
+                area = settings.menu['default']
 
         try:
             area = eval('area.%s' % self.area_name)
@@ -470,6 +476,7 @@ class Skin_Area:
         if not settings.layout.has_key(area.layout):
             if self.area_val.visible:
                 print '*** layout <%s> not found' % area.layout
+            self.layout = None
             return redraw
 
         old_layout = self.layout

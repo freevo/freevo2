@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/03/07 17:27:48  dischi
+# added support for extended menus
+#
 # Revision 1.32  2003/03/05 21:57:11  dischi
 # Added audio player. The info area is empty right now, but this skin
 # can player audio files
@@ -237,6 +240,7 @@ XML_SKIN_DIRECTORY = 'skins/dischi1'
 class Skin:
 
     def __init__(self):
+        self.display_style = 0
         self.force_redraw = TRUE
         self.screen = Screen()
         self.area_names = ( 'screen', 'title', 'listing', 'view', 'info')
@@ -293,10 +297,11 @@ class Skin:
         
     # Got DISPLAY event from menu
     def ToggleDisplayStyle(self, menu):
-        return FALSE
+        self.display_style = not self.display_style
+        return 1
 
     def GetDisplayStyle(self):
-        return 0
+        return self.display_style
 
     def GetPopupBoxStyle(self, menu=None):
         """
@@ -387,7 +392,8 @@ class Skin:
         if not menu.packrows:
             menu.item_types = 'main'
 
-        rows, cols = self.listing_area.get_items_geometry(settings, menu)[:2]
+        rows, cols = self.listing_area.get_items_geometry(settings, menu,
+                                                          self.display_style)[:2]
         return (cols, rows)
         
 
@@ -450,7 +456,7 @@ class Skin:
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(settings, menuw)
+            area.draw(settings, menuw, self.display_style)
 
         self.screen.show(self.force_redraw)
 
@@ -463,7 +469,7 @@ class Skin:
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw(self.settings, info, 'player')
+            area.draw(self.settings, info, self.display_style, 'player')
 
         self.screen.show(self.force_redraw)
 

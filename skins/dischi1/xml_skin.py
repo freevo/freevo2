@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/07 17:28:40  dischi
+# added support for extended menus
+#
 # Revision 1.20  2003/03/06 21:42:57  dischi
 # Added text as content
 #
@@ -271,7 +274,14 @@ XML_types = {
 }
 
 class XML_data:
+    """
+    a basic data element for parsing the attributes
+    """
+
     def __init__(self, content):
+        """
+        create all object variables for this type
+        """
         self.content = content
         for c in content:
             if XML_types[c][0] in ('str', 'file', 'font'):
@@ -283,6 +293,9 @@ class XML_data:
 
     
     def parse(self, node, scale, current_dir):
+        """
+        parse the node
+        """
         for attr in node.attrs:
             c = attr[1].encode('latin-1')
 
@@ -302,19 +315,24 @@ class XML_data:
 
 
     def __cmp__(self, other):
+        """
+        compare function, return 0 if the objects are identical, 1 otherwise
+        """
         for c in self.content:
             if eval("self.%s != other.%s" % (c, c)):
                 return 1
         return 0
     
-# ======================================================================
+
 # ======================================================================
 
 class XML_area(XML_data):
+    """
+    area class (inside menu)
+    """
     def __init__(self):
         XML_data.__init__(self, ('visible', 'layout', 'x', 'y', 'width', 'height'))
-        pass
-    
+
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
         for subnode in node.children:
@@ -335,8 +353,13 @@ class XML_area(XML_data):
             return (self.x - config.OVERSCAN_X, self.y - config.OVERSCAN_X)
         return (self.x, self.y)
 
-        
+
+# ======================================================================
+
 class XML_menu:
+    """
+    the complete menu with the areas screen, title, view, listing and info in it
+    """
     def __init__(self):
         self.content = ( 'screen', 'title', 'view', 'listing', 'info' )
         for c in self.content:
@@ -354,15 +377,25 @@ class XML_menu:
 # ======================================================================
 
 class XML_image(XML_data):
+    """
+    an image
+    """
     def __init__(self):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
 
 
+# ======================================================================
+
 class XML_rectangle(XML_data):
+    """
+    a rectangle
+    """
     def __init__(self):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
                                  'bgcolor', 'size', 'radius' ))
 
+
+# ======================================================================
 
 class XML_content(XML_data):
     def __init__(self):
@@ -462,7 +495,7 @@ class XML_player:
 class XMLSkin:
     def __init__(self):
         self.menu = {}
-        self.menu['default'] = [ XML_menu(), ]
+        self.menu['default'] = XML_menu()
 
         self.layout = {}
         self.font = {}
@@ -481,11 +514,20 @@ class XMLSkin:
             if node.name == u'menu':
                 type = attr_str(node, "type", "default")
 
+                if type == 'all':
+                    # if type is all, all types except default are deleted and
+                    # the settings will be loaded for default
+                    tmp = self.menu['default']
+                    self.menu = {}
+                    self.menu['default'] = tmp
+                    type = 'default'
+                    
                 if not type in self.menu:
                     self.menu[type] = copy.deepcopy(self.menu['default'])
 
-                display = attr_int(node, 'display', 0)
-                self.menu[type][display].parse(node, scale, c_dir)
+                self.menu[type].parse(node, scale, c_dir)
+
+
 
             if node.name == u'layout':
                 label = attr_str(node, 'label', '')
