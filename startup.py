@@ -92,6 +92,10 @@ osd_fb_quiet = ('osd_fb', 'sh', ['-c',
 osd_x11 = ('osd_x11', 'sh', ['-c',
                              './osd_server/osds_x11'])
 
+# The SDL framebuffer driver
+osd_sdl = ('osd_sdl', 'sh', ['-c',
+                             './osd_server/osds_sdl'])
+
 # The Freevo main application, debug output in an Xterm
 freevo_main_xterm = ('freevo', 'xterm',
                      [  '-geom', '80x15', '-title', 'Freevo Main',
@@ -129,6 +133,7 @@ options = {
     '--remote=sim-xterm'  : 'extra_args_dict["remote"] = "sim"',
     '--osd=fb'            : 'osd = osd_fb_quiet',
     '--osd=x11'           : 'osd = osd_x11',
+    '--osd=sdl'           : 'osd = osd_sdl',
     '--freevo=main-xterm' : 'freevo = freevo_main_xterm',
     '--freevo=main-quiet' : 'freevo = freevo_main_quiet',
     '--videotools=real'   : 'extra_args_dict["videotools"] = "real"',

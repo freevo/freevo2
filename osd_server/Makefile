@@ -9,7 +9,8 @@ CFLAGS = -O2 -Wall `freetype-config --cflags`
 LIBS = -lm -lpng -lz `freetype-config --libs`
 
 # Uncomment the following line to enable fullscren/vidmode support
-# X11_FULLSCREEN = 1
+#X11_FULLSCREEN = 1
+#xSDL_FULLSCREEN = 1
 
 ifdef X11_FULLSCREEN
 	XLIBS = -L/usr/X11R6/lib -lX11 -lXext -lXxf86vm
@@ -18,6 +19,12 @@ else
 	XLIBS = -L/usr/X11R6/lib -lX11
 	DFLAGS = -DOSD_X11
 endif
+
+ifdef xSDL_FULLSCREEN 
+	SDLFLAGS = -DSDL_FULLSCREEN
+endif
+
+SDLLIBS = -lSDL -lpthread
 				
 all: osds_fb vtrelease
 
@@ -27,8 +34,14 @@ osds_fb: main.c ft.c ft.h fb.c fb.h readpng.c readpng.h
 osds_x11: main.c ft.c ft.h x11.c x11.h readpng.c readpng.h
 	gcc $(DFLAGS) $(CFLAGS) main.c ft.c x11.c -o osds_x11 readpng.c $(XLIBS) $(LIBS)
 
+osds_sdl: main.c ft.c ft.h sdl.c sdl.h readpng.c readpng.h
+	gcc -DOSD_SDL $(CFLAGS) $(SDLFLAGS) main.c ft.c sdl.c -o osds_sdl readpng.c $(SDLLIBS) $(LIBS)
+
 x11test: x11.c x11.h readpng.c readpng.h
 	gcc $(CFLAGS) -DTEST x11.c readpng.c -o x11test $(XLIBS) $(LIBS)
+
+sdltest: sdl.c sdl.h readpng.c readpng.h
+	gcc $(CFLAGS) $(DFLAGS) -DTEST sdl.c readpng.c -o sdltest $(SDLLIBS) $(LIBS)
 
 fttest: ft.c
 	gcc $(CFLAGS) -g  `freetype-config --cflags` -Wall ft.c -o fttest -DTEST 
@@ -37,4 +50,4 @@ pngtest: readpng.c readpng.h
 	gcc -DPNGTEST $(CFLAGS) -Wall readpng.c -o pngtest $(LIBS)
 
 clean:
-	-rm -f *.o *.pyc osds_fb osds_x11 x11test pngtest fttest
+	-rm -f *.o *.pyc osds_fb osds_x11 x11test pngtest fttest sdltest osds_sdl

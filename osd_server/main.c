@@ -29,6 +29,7 @@
 #include "ft.h"
 #include "fb.h"
 #include "x11.h"
+#include "sdl.h"
 
 
 #ifdef OSD_X11
@@ -41,7 +42,9 @@
 
 #ifndef OSD_FB
 #ifndef OSD_X11
+#ifndef OSD_SDL
 #error Either OSD_FB or OSD_X11 must be defined!
+#endif
 #endif
 #endif
 
@@ -236,6 +239,10 @@ udpserver (int port)
     x11_pollevents ();
 #endif
 
+#ifdef OSD_SDL
+    sdl_pollevents ();
+#endif
+
   }
   
       
@@ -252,6 +259,10 @@ osd_close (void)
 #ifdef OSD_X11
    x11_close ();
 #endif
+
+#ifdef OSD_SDL
+   sdl_close();
+#endif
 }
 
 
@@ -264,6 +275,10 @@ osd_update (void)
 
 #ifdef OSD_X11
     x11_update ((uint8 *) framebuffer);
+#endif
+
+#ifdef OSD_SDL
+    sdl_update ((uint8 *) framebuffer);
 #endif
 }
 
@@ -550,6 +565,10 @@ main (int ac, char *av[])
 
 #ifdef OSD_X11
    x11_open (SCREEN_WIDTH, SCREEN_HEIGHT);
+#endif
+
+#ifdef OSD_SDL
+   sdl_open (SCREEN_WIDTH, SCREEN_HEIGHT);
 #endif
 
    udpserver (16480);           /* XXX get config info from central file */

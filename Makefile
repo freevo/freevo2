@@ -10,10 +10,15 @@ all: subdirs runapp
 
 x11: all osds_x11
 
+sdl: all osds_sdl
+
 .PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
 
 osds_x11:
 	cd osd_server ; $(MAKE) osds_x11
+
+osds_sdl:
+	cd osd_server ; $(MAKE) osds_sdl
 
 runapp:
 	gcc -o runapp runapp.c -DRUNAPP_LOG=\"/var/log/freevo/runapp.log\"
