@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/03 20:49:37  dischi
+# do not simplifiy dvds on disc/vcds cue/bin
+#
 # Revision 1.15  2004/02/01 19:45:46  dischi
 # store some more infos from mmpython
 #
@@ -318,6 +321,10 @@ class MMCache(Cache):
         list of one of those above. This makes the caching much faster
         """
         ret = {}
+        if hasattr(object, 'tracks'):
+            # do not simplifiy dvds on disc/vcds cue/bin
+            return object
+        
         for k in object.keys:
             if not k in self.uncachable_keys and getattr(object,k) != None:
                 value = getattr(object,k)
