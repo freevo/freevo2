@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/02/14 19:01:49  mikeruelle
+# move main menu item into this file.
+#
 # Revision 1.6  2004/02/14 15:44:21  dischi
 # add more doc and add <stdout> to supress showing the stdout
 #
@@ -282,7 +285,7 @@ def fxdparser(fxd, node):
     fxd.getattr(None, 'items', []).append(item)
     
 
-class CommandMainMenuItem(Item):
+class CommandMenuItem(Item):
     """
     this is the item for the main menu and creates the list
     of commands in a submenu.
@@ -359,7 +362,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         
     def items(self, parent):
-        return [ CommandMainMenuItem(parent) ]
+        return [ CommandMenuItem(parent) ]
 
     def config(self):
         return [ ('COMMANDS_DIR', '/usr/local/bin', 'The directory to show commands from.'),
@@ -402,3 +405,31 @@ class fxdhandler(plugin.Plugin):
     def config(self):
         return [ ('COMMAND_SPAWN_WM', '', 'command to start window manager.'),
                  ('COMMAND_KILL_WM', '', 'command to stop window manager.') ]
+
+
+class CommandMainMenuItem(plugin.MainMenuPlugin):
+    """
+    A small plugin to put a command in the main menu.
+    Uses the command.py fxd file format to say which command to run.
+    All output is logged in the freevo logdir.
+    to activate it, put the following in your local_conf.py:
+
+    plugin.activate('command.CommandMainMenuItem', args=(/usr/local/freevo_data/Commands/Mozilla.fxd', ), level=45) 
+
+    The level argument is used to influence the placement in the Main Menu.
+    consult freevo_config.py for the level of the other Menu Items if you
+    wish to place it in a particular location.
+    """
+    def __init__(self, commandxmlfile):
+        plugin.MainMenuPlugin.__init__(self)
+        self.cmd_xml = commandxmlfile
+    
+    def items(self, parent):
+        command_items = []
+        parser = util.fxdparser.FXD(self.cmd_xml)
+        parser.setattr(None, 'items', command_items)
+        parser.set_handler('command', fxdparser)
+        parser.parse()
+        cmd_item = command_items[0]
+        return [ cmd_item ]
+
