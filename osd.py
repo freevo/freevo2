@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2002/09/30 09:28:02  dischi
+# small ugly fix to work around the unicode-escape problem. The is only
+# a temporal fix to make freevo working again.
+#
 # Revision 1.26  2002/09/28 04:36:09  krister
 # Bugfix for 8-bit chars in bitmap filenames by Alex Polite
 #
@@ -213,7 +217,10 @@ def get_singleton():
 def stringproxy(str):
     result = str
     if type(str) == StringType:
-        result = unicode(str, 'unicode-escape')
+        try:
+            result = unicode(str, 'unicode-escape')
+        except:
+            pass
         return result
 
 
