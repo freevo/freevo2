@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/04/12 14:58:38  dischi
+# prevent crash for bad TV.xml
+#
 # Revision 1.4  2004/03/14 01:14:39  mikeruelle
 # not really the same file but the name got reused for new skin version
 #
@@ -361,4 +364,6 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
 
     def items(self, parent):
+        if config.TV_CHANNELS:
             return [ ManualRecordItem(parent) ]
+        return []

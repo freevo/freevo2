@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2004/04/12 14:58:38  dischi
+# prevent crash for bad TV.xml
+#
 # Revision 1.104  2004/04/11 18:51:59  mikeruelle
 # do dir processing for games too. fixes annoying crashes due to trailing slashes
 #
@@ -851,8 +854,15 @@ def detect_channels():
 
 if TV_CHANNELS == None and plugin.is_active('tv'):
     # auto detect them
-    TV_CHANNELS = detect_channels()
-
+    try:
+        TV_CHANNELS = detect_channels()
+    except Exception, e:
+        print
+        print 'Error in TV.xml file, unable to set TV_CHANNELS'
+        print e
+        print
+        TV_CHANNELS = []
+        
 #
 # compile the regexp
 #
