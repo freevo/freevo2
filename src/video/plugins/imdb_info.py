@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/16 17:41:05  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.10  2003/09/23 21:15:14  dischi
 # show info not only for files
 #
@@ -89,7 +92,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         infolist = xml_parser.parseMovieFile(file)
         for info in infolist:
-            box = AlertBox(icon=info.image, width=550, height=400, text='%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s' % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
+            box = AlertBox(icon=info.image, width=550, height=400, text=_('%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s') % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
             box.show()
         return
 

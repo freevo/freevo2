@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/11/16 17:38:48  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.18  2003/10/21 15:16:17  outlyer
 # A workaround for the problem wherein Twisted Python cannot serialize
 # boolean types.
@@ -201,8 +204,8 @@ class TVGuide(gui.GUIObject):
             if os.path.exists(tvlockfile):
                 # XXX: In the future add the options to watch what we are
                 #      recording or cencel it and watch TV.
-                AlertBox(text='Sorry, you cannot watch TV while recording. '+ \
-                              'If this is not true then remove ' + \
+                AlertBox(text=_('Sorry, you cannot watch TV while recording. ')+ \
+                              _('If this is not true then remove ') + \
                               tvlockfile + '.', height=200).show()
                 return TRUE
 

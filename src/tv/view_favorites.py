@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/16 17:38:48  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.4  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -77,20 +80,20 @@ class ViewFavorites(PopupBox):
                  bd_width=None):
 
         if not text:
-            text = 'View Favorites'
+            text = _('View Favorites')
         
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
-            errormsg = Label('Record server unavailable: %s' % msg, 
+            errormsg = Label(_('Record server unavailable: %s') % msg, 
                              self, Align.CENTER)
             return 
 
         self.internal_h_align = Align.CENTER
 
-        legend = Label('Name\tTitle\tChannel\tDOW\tTOD', self, Align.CENTER)
+        legend = Label(_('Name\tTitle\tChannel\tDOW\tTOD'), self, Align.CENTER)
 
         items_height = 40
         self.num_shown_items = 7

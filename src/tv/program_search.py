@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/16 17:38:48  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.10  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
 #
@@ -90,7 +93,7 @@ class ProgramSearch(PopupBox):
                  bd_width=None, vertical_expansion=1):
 
         if not text:
-            text = 'Program Search'
+            text = _('Program Search')
         
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width,
@@ -98,7 +101,7 @@ class ProgramSearch(PopupBox):
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
-            errormsg = Label('Record server unavailable: %s\n\nFeel free to impliment this function inside the main guide.' % msg, 
+            errormsg = Label(_('Record server unavailable: %s\n\nFeel free to impliment this function inside the main guide.') % msg, 
                              self, Align.CENTER)
             return 
 
@@ -126,7 +129,7 @@ class ProgramSearch(PopupBox):
 
     def searchProg(self, find):
         if DEBUG: print 'SEARCHING FOR: %s' % find
-        pop = PopupBox(parent=self, text='Searching, please wait...')
+        pop = PopupBox(parent=self, text=_('Searching, please wait...'))
         pop.show()
 
         (result, matches) = record_client.findMatches(find)

@@ -428,7 +428,7 @@
 	  </if>
 	  <goto_pos y="15" mode="relative"/>
 	  <if expression="album">
-	    <text width="100" align="right" font="player info">Album:</text>
+	    <text width="140" align="right" font="player info">Album:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="player info" expression="album"/>
 	    <if expression="date">
@@ -439,20 +439,20 @@
 	    <newline/>
 	  </if>
 	  <if expression="trackno">
-	    <text width="100" align="right" font="player info">Track:</text>
+	    <text width="140" align="right" font="player info">Track:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="player info" expression="trackno"/>
 	    <newline/>
 	  </if>
 	  <goto_pos y="15" mode="relative"/>
 	  <if expression="length">
-	    <text width="100" align="right" font="player info">Length:</text>
+	    <text width="140" align="right" font="player info">Length:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="player info" expression="length"/>
 	    <newline/>
 	  </if>
 	  <if expression="elapsed">
-	    <text width="100" align="right" font="player info">Elapsed:</text>
+	    <text width="140" align="right" font="player info">Elapsed:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="player info" expression="elapsed"/>
 	    <newline/>

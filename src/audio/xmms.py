@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/16 17:41:04  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.4  2003/09/13 10:08:21  dischi
 # i18n support
 #
@@ -321,7 +324,7 @@ class AudioPlayer(AbstractAudioPlayer):
 	    self.mode = mode # setting global var to mode.
 	    self.repeat = repeat # Repeat playlist setting
 	    
-	    globals.skin.PopupBox("Lanching xmms.")
+	    globals.skin.PopupBox(_'Lanching xmms.'))
 	    self.set_mixer_levels()
         
 	    self.thread.mode  = constants.playmode
@@ -346,7 +349,7 @@ class AudioPlayer(AbstractAudioPlayer):
 		if DEBUG:
 		    print "xmms timeout"
 		menuwidget.refresh()
-		skin.PopupBox("Timed launching xmms.")
+		skin.PopupBox(_('Timed launching xmms.'))
 		time.sleep(3)
 		menuwidget.refresh()
 		break

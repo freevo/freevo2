@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/11/16 17:38:48  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.38  2003/10/26 17:40:52  dischi
 # small fix
 #
@@ -140,7 +143,7 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
-EPG_TIME_EXC = 'Time conversion error'
+EPG_TIME_EXC = _('Time conversion error')
 
 
 cached_guide = None
@@ -184,18 +187,18 @@ def get_guide(popup=None):
             try:
                 epg_ver = cached_guide.EPG_VERSION
             except AttributeError:
-                print 'EPG does not have a version number, must be reloaded'
+                print _('EPG does not have a version number, must be reloaded')
                 print dir(cached_guide)
 
             if epg_ver != epg_types.EPG_VERSION:
-                print (('EPG version number %s is stale (new is %s), must ' +
-                        'be reloaded') % (epg_ver, epg_types.EPG_VERSION))
+                print ((_('EPG version number %s is stale (new is %s), must ') +
+                        _('be reloaded')) % (epg_ver, epg_types.EPG_VERSION))
 
             elif cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE):
                 # Hmmm, weird, there is a pickled file newer than the TV.xml
                 # file, but the timestamp in it does not match the TV.xml
                 # timestamp. We need to reload!
-                print 'EPG: Pickled file timestamp mismatch, reloading!'
+                print _('EPG: Pickled file timestamp mismatch, reloading!')
                 
             else:
                 if DEBUG:
@@ -215,7 +218,7 @@ def get_guide(popup=None):
 	    except:
 	    	# Don't violently crash on a incomplete or empty TV.xml please.
 	    	cached_guide = None
-                print "Couldn't load the TV Guide, got an exception!"
+                print _("Couldn't load the TV Guide, got an exception!")
                 print
                 traceback.print_exc()
             else:
@@ -314,7 +317,7 @@ def load_guide():
                     c.tunerid = displayname.split()[0]
                 else:
                     c.displayname = displayname
-                    c.tunerid = 'REPLACE WITH TUNERID FOR %s' % displayname
+                    c.tunerid = _('REPLACE WITH TUNERID FOR %s') % displayname
 
             guide.AddChannel(c)
 

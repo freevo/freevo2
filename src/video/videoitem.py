@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2003/11/16 17:41:05  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.90  2003/11/09 16:24:30  dischi
 # fix subtitle selection
 #
@@ -517,7 +520,7 @@ class VideoItem(Item):
         if self.video_player:
             error = self.video_player.play(file, mplayer_options, self)
         else:
-            error = "No video player avaiable!"
+            error = _('No video player available!')
 
         if error:
             AlertBox(text=error).show()

@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/16 17:38:48  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.4  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -99,7 +102,7 @@ class EditFavorite(PopupBox):
             
 
 
-        PopupBox.__init__(self, text='Edit Favorite', left=left, top=top, width=width, 
+        PopupBox.__init__(self, text=_('Edit Favorite'), left=left, top=top, width=width, 
                           height=height)
 
         self.v_spacing = 15
@@ -113,15 +116,15 @@ class EditFavorite(PopupBox):
 
         guide = tv.epg_xmltv.get_guide()
 
-        name = Label('Name:\t', self, Align.LEFT)
+        name = Label(_('Name:\t'), self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)
         self.name_input.h_align = Align.NONE
         self.add_child(self.name_input)
 
 
-        title = Label('Title:\t%s' % self.fav.title, self, Align.LEFT)
+        title = Label(_('Title:\t%s') % self.fav.title, self, Align.LEFT)
 
-        chan = Label('Channel:\t', self, Align.LEFT)
+        chan = Label(_('Channel:\t'), self, Align.LEFT)
 
         self.chan_box = OptionBox('ANY')
         self.chan_box.h_align = Align.NONE
@@ -139,26 +142,26 @@ class EditFavorite(PopupBox):
         self.chan_box.toggle_selected_index(chan_index)
         self.add_child(self.chan_box)
 
-        dow = Label('Day of Week:\t', self, Align.LEFT)
+        dow = Label(_('Day of Week:\t'), self, Align.LEFT)
         self.dow_box = OptionBox('ANY DAY')
         self.dow_box.h_align = Align.NONE
 
-        self.dow_box.add_item(text='ANY DAY', value='ANY')
-        self.dow_box.add_item(text='Mon', value=0)
-        self.dow_box.add_item(text='Tues', value=1)
-        self.dow_box.add_item(text='Wed', value=2)
-        self.dow_box.add_item(text='Thurs', value=3)
-        self.dow_box.add_item(text='Fri', value=4)
-        self.dow_box.add_item(text='Sat', value=5)
-        self.dow_box.add_item(text='Sun', value=6)
+        self.dow_box.add_item(text=_('ANY DAY'), value='ANY')
+        self.dow_box.add_item(text=_('Mon'), value=0)
+        self.dow_box.add_item(text=_('Tues'), value=1)
+        self.dow_box.add_item(text=_('Wed'), value=2)
+        self.dow_box.add_item(text=_('Thurs'), value=3)
+        self.dow_box.add_item(text=_('Fri'), value=4)
+        self.dow_box.add_item(text=_('Sat'), value=5)
+        self.dow_box.add_item(text=_('Sun'), value=6)
 
         self.dow_box.toggle_selected_index(0)
         self.add_child(self.dow_box)
 
-        tod = Label('Time of Day:\t', self, Align.LEFT)
+        tod = Label(_('Time of Day:\t'), self, Align.LEFT)
         self.tod_box = OptionBox('ANY')
         self.tod_box.h_align = Align.NONE
-        self.tod_box.add_item(text='ANY TIME', value='ANY')
+        self.tod_box.add_item(text=_('ANY TIME'), value='ANY')
         self.tod_box.add_item(text='12:00 AM', value=0)
         self.tod_box.add_item(text='11:30 AM', value=30)
         self.tod_box.add_item(text='1:00 AM', value=60)
@@ -211,7 +214,7 @@ class EditFavorite(PopupBox):
         self.tod_box.toggle_selected_index(0)
         self.add_child(self.tod_box)
 
-        self.save = Button('Save')
+        self.save = Button(_('Save'))
         self.add_child(self.save)
 
 
@@ -335,7 +338,7 @@ class EditFavorite(PopupBox):
                     tv.view_favorites.ViewFavorites(parent=self.parent, text='Favorites').show()
                     self.destroy()
                 else:
-                    AlertBox(parent=self, text='Failed: %s' % msg)
+                    AlertBox(parent=self, text=_('Failed: %s') % msg)
                 return
             elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):
                 self.save.toggle_selected()

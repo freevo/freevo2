@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/16 17:38:48  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.1  2003/10/11 14:55:29  rshortt
 # A new module to handle all of the channel requirements of Freevo from
 # one place.  This will also be used as a layer between Freevo's channel
@@ -131,7 +134,7 @@ class FreevoChannels:
                 self.chan_index = pos
 
         if not new_chan:
-            print 'ERROR: Cannot find tuner channel "%s" in the TV channel listing' % chan
+            print _('ERROR: Cannot find tuner channel "%s" in the TV channel listing') % chan
             return
 
         vg = self.getVideoGroup(new_chan)
@@ -178,7 +181,7 @@ class FreevoChannels:
                     vd.setfreq_old(freq)
                 vd.close()
             except:
-                print 'Failed to set freq for channel %s' % chan
+                print _('Failed to set freq for channel %s') % chan
 
 
     def getChannel(self):

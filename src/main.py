@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2003/11/16 17:41:04  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.89  2003/11/16 14:35:08  dischi
 # better help doc when deps are missing
 #
@@ -468,20 +471,20 @@ if __name__ == "__main__":
             
             for i in range(1, 0, -1):
                 osd.clearscreen(color=osd.COL_BLACK)
-                osd.drawstring('Freevo crashed!', 70, 70,
+                osd.drawstring(_('Freevo crashed!'), 70, 70,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring('Filename: %s' % fname, 70, 130,
+                osd.drawstring(_('Filename: %s') % fname, 70, 130,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring('Lineno: %s' % lineno, 70, 160,
+                osd.drawstring(_('Lineno: %s') % lineno, 70, 160,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring('Function: %s' % funcname, 70, 190,
+                osd.drawstring(_('Function: %s') % funcname, 70, 190,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring('Text: %s' % text, 70, 220,
+                osd.drawstring(_('Text: %s') % text, 70, 220,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring('Please see the logfiles for more info', 70, 280,
+                osd.drawstring(_('Please see the logfiles for more info'), 70, 280,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
                 
-                osd.drawstring('Exit in %s seconds' % i, 70, 340,
+                osd.drawstring(_('Exit in %s seconds') % i, 70, 340,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
                 osd.update()
                 time.sleep(1)

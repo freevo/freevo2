@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/16 17:41:04  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.4  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -116,7 +119,7 @@ class PluginInterface(plugin.MainMenuPlugin):
             mediamarks = os.path.join(config.SHARE_DIR, 'gxine-mediamarks')
             
         if not os.path.isfile(mediamarks):
-            self.reason = '%s: file not found' % mediamarks
+            self.reason = _('%s: file not found') % mediamarks
             return
 
         try:
@@ -125,7 +128,7 @@ class PluginInterface(plugin.MainMenuPlugin):
             self.mediamarks = parser.parse(f.read())
             f.close()
         except:
-            self.reason = 'mediamarks file corrupt'
+            self.reason = _('mediamarks file corrupt')
             return
 
         # init the plugin

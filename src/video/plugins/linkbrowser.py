@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/16 17:41:05  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.5  2003/10/28 19:32:59  dischi
 # set type to linkbrowser
 #
@@ -84,9 +87,9 @@ class Link(Item):
         """
         list of possible actions for a Link
         """
-        p = [ ( self.play,           'Browse links (autoplay)' ), 
-              ( self.play_max_cache, 'Browse links (autoplay, maximum caching)' ) ]
-        b = [ ( self.cwd,            'Browse links' ) ]
+        p = [ ( self.play,           _('Browse links (autoplay)') ), 
+              ( self.play_max_cache, _('Browse links (autoplay, maximum caching)') ) ]
+        b = [ ( self.cwd,            _('Browse links') ) ]
 
         if self.autoplay:
             return p + b
@@ -162,7 +165,7 @@ class Link(Item):
             response = urllib2.urlopen(req)
         except:
             popup.destroy()
-            box = AlertBox(text=_('Failed to download %s' % self.url))
+            box = AlertBox(text=_('Failed to download %s') % self.url)
             box.show()
             return
 

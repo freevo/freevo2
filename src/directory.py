@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/11/16 17:41:04  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.57  2003/11/03 17:24:21  dischi
 # check if we have write permission
 #
@@ -412,7 +415,7 @@ class DirItem(Playlist):
         except IndexError:
             return 0
         except IOError:
-            AlertBox(text='Unable to save folder.fxd').show()
+            AlertBox(text=_('Unable to save folder.fxd')).show()
         return 1 
 
 

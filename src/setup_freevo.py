@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/16 17:41:04  dischi
+# i18n patch from David Sagnol
+#
 # Revision 1.10  2003/10/12 09:54:27  dischi
 # BSD patches from Lars
 #
@@ -89,7 +92,7 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
 
 # Help text
 def print_usage():
-    usage = '''\
+    usage = _('''\
 Usage: ./freevo setup [OPTION]...
 Set up Freevo for your specific environment.
 
@@ -117,7 +120,7 @@ Set up Freevo for your specific environment.
 
 The default is "--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-cable"
 Please report bugs to <freevo-users@lists.sourceforge.net>.
-'''
+''')
 
     print usage
     
