@@ -1,12 +1,37 @@
 <?xml version="1.0" ?>
 <freevo>
   <container title="Web Radio" type="webradio">
+    <container title="News and Talk">
+      <audio title="BBC World Service">
+       <url>rtsp://rmlivev8.bbc.net.uk/farm/*/ev7/live24/worldservice/liveinfent.ra</url>
+      </audio>
+      <audio title="Air America Radio">
+       <url>mms://ccdig.liquidviewer.com/KPOJ</url>
+      <info>Alternate Air America Stream via KPOJ</info>
+      </audio>
+      <audio title="Air America Radio (Ogg Stream)">
+       <url>http://bigelow-springs.net:8000/airamerica.ogg.m3u</url>
+      <info>Alternate Air America Stream via KPOJ</info>
+      </audio>
+      <audio title="CBC Radio One">
+      <url>http://www.cbc.ca/livemedia/cbcr1-toronto.asx</url>
+      </audio>
+      <audio title="CBC Radio Two">
+      <url>http://www.cbc.ca/livemedia/cbcr2-toronto.asx</url>
+      </audio>
+    </container>
     <container title="Alternative">
       <audio title="KQRX 95x">
 	<url>mms://media.apex2000.net/KQRX</url>
       </audio>
       <audio title="WBER 90.5 FM">
 	<url>rtsp://media.monroe.edu/encoder/live2.ra</url>
+      </audio>
+      <audio title="Punk Radio Cast">
+        <url>http://www.emptydirectoryradio.com:8000</url>
+      </audio>
+      <audio title="Radio Take Over">
+        <url>http://www.radiotakeover.com/rto128.m3u</url>
       </audio>
       <audio title="Heavy Metal Radio">
 	<url>http://war.str3am.com:7080</url>
