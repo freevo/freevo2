@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/05/02 09:21:16  dischi
+# no need to convert layer
+#
 # Revision 1.43  2004/04/25 11:23:58  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
 #
@@ -259,8 +262,7 @@ class ImageViewer(GUIObject):
             self.drawosd(layer=screen)
 
             if config.IMAGEVIEWER_BLEND_STEPS:
-                blend = Transition(self.osd.screen.convert(),
-                                   screen.convert() )
+                blend = Transition(self.osd.screen, screen)
                 blend.start()
                 while not blend.finished:
                     self.osd.sleep(0)
