@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/10 11:43:32  dischi
+# Added patch from Matthieu Weber for Ogg/Vorbis files which contains an
+# artist/title/album text which is not pure ASCII (7 bits).
+#
 # Revision 1.5  2002/12/22 12:59:34  dischi
 # Added function sort() to (audio|video|games|image) item to set the sort
 # mode. Default is alphabetical based on the name. For mp3s and images
@@ -202,17 +206,17 @@ class AudioItem(Item):
         
         try:
             if 'ALBUM' in vc.keys():
-                self.album  = str(vc['ALBUM'][0])
+                self.album  = vc['ALBUM'][0].encode('latin-1')
             else:
                 self.album  = ''
                 
             if 'ARTIST' in vc.keys():
-                self.artist = str(vc['ARTIST'][0])
+                self.artist = vc['ARTIST'][0].encode('latin-1')
             else:
                 self.artist = ''
                 
             if 'TITLE' in vc.keys():
-                self.title  = str(vc['TITLE'][0])
+                self.title  = vc['TITLE'][0].encode('latin-1')
                 
             if 'TRACK' in vc.keys():
                 self.track  = str(vc['TRACK'][0])
