@@ -117,10 +117,10 @@ find . -name "*.pyc" |xargs rm -f
 find . -name "*.py" |xargs chmod 644
 
 make clean; make
-pushd src/games/rominfo
-	make
-popd
-
+#pushd src/games/rominfo
+#	make
+#popd
+#
 ./freevo setup --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist} %{_sysfirst}
 
@@ -135,8 +135,11 @@ AutoReqProv: no
 %description runtime
 This directory contains the Freevo runtime. It contains an executable,
 freevo_python, dynamic link libraries for running Freevo as well as a copy
-of the standard Python 2.2 libraries. It also contains the Freevo external 
-applications. Right now that is MPlayer, cdparanoia and lame.
+of the standard Python 2.2.2 libraries. 
+
+Python 2.2.2 modules:
+  CDDB DiscID Numeric PIL xmlplus xmms aomodule cdrom fchksum mmpython mx
+  ogg pygame pygphoto pylirc pyshift twisted
 
 Please see the website at http://freevo.sourceforge.net for more information 
 on how to use Freevo. The website also contains links to the source code
@@ -150,8 +153,12 @@ Requires: %{name}-runtime >= %{runtimever}
 AutoReqProv: no
 
 %description apps
-This directory contains the Freevo external applications. 
-Right now that is MPlayer, aumix, cdparanoia, jpegtran and lame.
+This directory contains the following external applications used by Freevo:
+  mplayer mencoder tvtime oggenc mpe1 lame jpegtran cdparanoia fceu aumix 
+  
+NOTICE: Please do not bug the mplayer developers with issues regarding the
+        freevo distributed version of mplayer and mencoder.
+	
 Note: This package is not manadatory if standalone versions of the external
 applications are installed, though configuration issues may be minimized if 
 it is used.
@@ -165,8 +172,8 @@ Requires:	%{name}
 %description boot
 Freevo is a Linux application that turns a PC with a TV capture card
 and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
-other applications such as mplayer, mpg321 and nvrec to play and
-record video and audio.
+other applications such as mplayer and mencoder to play and record 
+video and audio.
 
 Note: This installs the initscripts necessary for a standalone Freevo system.
 
@@ -186,10 +193,7 @@ mkdir -p %{buildroot}%{_prefix}/plugins/weather
 %if %{includeruntime}
 mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
 %endif
-mkdir -p %{buildroot}%{_prefix}/src/{audio,games/rominfo,gui,image,plugins,tv,video,www}
-mkdir -p %{buildroot}%{_prefix}/src/www/{bin,htdocs,htdocs2}
-mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml}
-mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,dischi1}
+mkdir -p %{buildroot}%{_prefix}/{src,skins}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Mame,Movies,Music,tv-show-images}
@@ -207,36 +211,17 @@ cp -av rc_client/* %{buildroot}%{_prefix}/rc_client
 %if %{includeruntime}
 install -m 644 runtime/*.py %{buildroot}%{_prefix}/runtime
 install -m 644 runtime/preloads %{buildroot}%{_prefix}/runtime
-install -m 644 runtime/README %{buildroot}%{_prefix}/runtime
+#install -m 644 runtime/README %{buildroot}%{_prefix}/runtime
 install -m 644 runtime/VERSION %{buildroot}%{_prefix}/runtime
 cp -av runtime/apps/* %{buildroot}%{_prefix}/runtime/apps
 cp -av runtime/dll/* %{buildroot}%{_prefix}/runtime/dll
 cp -av runtime/lib/* %{buildroot}%{_prefix}/runtime/lib
 %endif
 
-install -m 644 src/*.py %{buildroot}%{_prefix}/src
-cp -av src/audio/* %{buildroot}%{_prefix}/src/audio
-install -m 644 src/games/*.py %{buildroot}%{_prefix}/src/games
-install -m 755 src/games/rominfo/rominfo %{buildroot}%{_prefix}/src/games/rominfo
-install -m 644 src/games/rominfo/rominfo.* %{buildroot}%{_prefix}/src/games/rominfo
-cp -av src/gui/* %{buildroot}%{_prefix}/src/gui
-cp -av src/image/* %{buildroot}%{_prefix}/src/image
-cp -av src/plugins/* %{buildroot}%{_prefix}/src/plugins
-cp -av src/tv/* %{buildroot}%{_prefix}/src/tv
-cp -av src/video/* %{buildroot}%{_prefix}/src/video
+cp -av src %{buildroot}%{_prefix}
+chmod 755 %{buildroot}%{_prefix}/src/www/bin/*
 
-install -m 644 src/www/*.py %{buildroot}%{_prefix}/src/www
-cp -av src/www/bin/* %{buildroot}%{_prefix}/src/www/bin
-cp -av src/www/htdocs/* %{buildroot}%{_prefix}/src/www/htdocs
-cp -av src/www/htdocs2/* %{buildroot}%{_prefix}/src/www/htdocs2
-
-cp -av skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
-cp -av skins/icons/* %{buildroot}%{_prefix}/skins/icons
-cp -av skins/images/* %{buildroot}%{_prefix}/skins/images
-cp -av skins/main1/* %{buildroot}%{_prefix}/skins/main1
-cp -av skins/xml/* %{buildroot}%{_prefix}/skins/xml
-cp -av skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
-#cp -av skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
+cp -av skins %{buildroot}%{_prefix}
 
 install -m 644 freevo.conf local_conf.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
 install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
@@ -281,13 +266,13 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(644,root,root) %config %{_sysconfdir}/freevo/freevo.conf
 %attr(644,root,root) %config %{_sysconfdir}/freevo/local_conf.py
-%doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs 
+%doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs contrib/AndreasLeitner/*
 
 %if %{includeruntime}
 %files runtime
 %defattr(644,root,root,755)
 %{_prefix}/runtime/*.py
-%{_prefix}/runtime/README
+#%{_prefix}/runtime/README
 %{_prefix}/runtime/VERSION
 %{_prefix}/runtime/preloads
 %defattr(755,root,root,755)
@@ -302,9 +287,14 @@ find %{_prefix}/runtime -name "*.pyc" |xargs rm -f
 %defattr(755,root,root,755)
 %{_prefix}/runtime/apps/aumix
 %{_prefix}/runtime/apps/cdparanoia
+%{_prefix}/runtime/apps/fceu
 %{_prefix}/runtime/apps/jpegtran
 %{_prefix}/runtime/apps/lame
+%{_prefix}/runtime/apps/mp1e
+%{_prefix}/runtime/apps/oggenc
+%defattr(-,root,root,755)
 %{_prefix}/runtime/apps/mplayer
+%{_prefix}/runtime/apps/tvtime
 %endif
 
 %files boot
@@ -340,6 +330,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Tue Jun 24 2003 TC Wan <tcwan@cs.usm.my>
+- 1.3.2-preX and runtime v.7 cleanup
+
 * Mon Apr 28 2003 TC Wan <tcwan@cs.usm.my>
 - Rewrite build installation commands to recursively copy folder contents
 
