@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/11/24 06:32:01  krister
+# Cleanup.
+#
 # Revision 1.9  2002/11/13 14:28:53  krister
 # Fixed the channel logos to be sized better.
 #
@@ -233,7 +236,7 @@ class Skin_TV:
         # define start and stop time
         date = time.strftime("%x", time.localtime())
         start_time = to_listing[0][1]
-        stop_time = to_listing[0][len(to_listing[0])-1]
+        stop_time = to_listing[0][-1]
         stop_time += (col_time*60)
 
         str_h = max( str_h_label, str_h_selection, str_h_normal )
