@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/09/01 04:31:35  krister
+# Removed the 'text' on an empty line, looks like Dischis cat walked over the clicked the paste-button on his mouse...
+#
 # Revision 1.17  2002/08/31 17:33:49  dischi
 # The selection will be shorten if there is a image for an item to avoid
 # overlapping. If the item name is too long it will be shorten, too and "..."
@@ -343,7 +346,6 @@ class Skin:
         y0 = val.submenu.y
         
         for item in menuw.nav_items:
-            text
             if menu.selected == item:
                 osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu.selection.length, 
                             y0 + val.submenu.selection.size*1.5,
