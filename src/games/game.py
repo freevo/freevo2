@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/13 05:55:15  krister
+# Rob Shortts bugfix for games.
+#
 # Revision 1.1  2002/12/09 14:23:53  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
 #
@@ -171,14 +174,12 @@ class Game_Thread(threading.Thread):
                 
                 osd.stopdisplay()     
                 self.app = GameApp(self.command)
-                time.sleep(2.0)
+                self.app.child.wait()
+
+                if config.OSD_SDL_EXEC_AFTER_STARTUP:
+                    os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
+
                 osd.restartdisplay()
-
-                while self.mode == 'play' and self.app.isAlive():
-                    # if DEBUG: print "Still running..."
-                    time.sleep(0.1)
-
-                self.app.kill()
 
                 if self.mode == 'play':
                     rc.post_event(rc.STOP)
