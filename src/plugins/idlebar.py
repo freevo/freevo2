@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/07/12 18:52:22  dischi
+# fixed overscan bug
+#
 # Revision 1.20  2003/07/12 17:29:58  dischi
 # redraw when polling
 #
@@ -140,7 +143,7 @@ class interface(plugin.DaemonPlugin):
         self.visible = TRUE
         
     def draw(self, (type, object), osd):
-        osd.drawroundbox(0, 0, osd.width, osd.y + 60, (0x80000000, 0, 0, 0))
+        osd.drawroundbox(0, 0, osd.width + 2 * osd.x, osd.y + 60, (0x80000000, 0, 0, 0))
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
         x = osd.x + 10
