@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/11 04:37:29  krister
+# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
+#
 # Revision 1.5  2003/02/06 09:52:26  krister
 # Changed the runtime handling to use runapp to start programs with the supplied dlls
 #
@@ -381,43 +384,57 @@ class MPlayerApp(childapp.ChildApp):
     class controlling the in and output from the mplayer process
     """
 
+    def __init__(self, app):
+        if config.MPLAYER_DEBUG:
+            startdir = os.environ['FREEVO_STARTDIR']
+            fname_out = os.path.join(startdir, 'mplayer_stdout.log')
+            fname_err = os.path.join(startdir, 'mplayer_stderr.log')
+            try:
+                self.log_stdout = open(fname_out, 'a')
+                self.log_stderr = open(fname_err, 'a')
+            except IOError:
+                print
+                print (('ERROR: Cannot open "%s" and "%s" for ' +
+                        'MPlayer logging!') % (fname_out, fname_err))
+                print 'Please set MPLAYER_DEBUG=0 in local_conf.py, or '
+                print 'start Freevo from a directory that is writeable!'
+                print
+            else:
+                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
 
-    def kill(self):
-        # This seems to be the only way mplayer is sure to have released
-        # /dev/video by the time it returns, and not a second
-        # later which interferes with starting mplayer again for a different
-        # channel.
-        self.write(mplayerKey('STOP'))
-        childapp.ChildApp.kill(self, 0)
-
-        if DEBUG: print 'Killing mplayer'
+        childapp.ChildApp.__init__(self, app)
+        
 
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
         # down properly and releases all resources before it gets
         # reaped by childapp.kill().wait()
+        self.write('quit')
         childapp.ChildApp.kill(self, signal.SIGINT)
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         util.killall('freevo_xwin')
         os.system('rm -f /tmp/freevo.wid')
-
-
-    def stdout_cb(self, str):
-
         if config.MPLAYER_DEBUG:
-            fd = open('./mplayer_stdout.log', 'a')
-            fd.write(str + '\n')
-            fd.close()
+            self.log_stdout.close()
+            self.log_stderr.close()
+
+
+    def stdout_cb(self, line):
+        if config.MPLAYER_DEBUG:
+            try:
+                self.log_stdout.write(line + '\n')
+            except ValueError:
+                pass # File closed
                      
 
-    def stderr_cb(self, str):
-
+    def stderr_cb(self, line):
         if config.MPLAYER_DEBUG:
-            fd = open('./mplayer_stderr.log', 'a')
-            fd.write(str + '\n')
-            fd.close()
+            try:
+                self.log_stderr.write(line + '\n')
+            except ValueError:
+                pass # File closed
 
 
 # ======================================================================

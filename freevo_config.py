@@ -52,10 +52,10 @@
 
 ########################################################################
 # If you want to change some things for your personal setup, please
-# write this in a file called local_conf.py in the same directory.
+# write this in a file called local_conf.py, see that file for more info.
 ########################################################################
 
-# Version informations for the two config files. When the major version
+# Version information for the two config files. When the major version
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
@@ -111,7 +111,7 @@ if os.path.isfile('/etc/fstab'):
                               'CD-%s' % (len(ROM_DRIVES)+1)) ]
 
 ROM_SPEED = 0                         # try to set the drive speed of the rom
-                                      #drive a good value for playing movies
+                                      # drive a good value for playing movies
                                       # with a silent drive is 8
 
 
@@ -447,18 +447,13 @@ MPLAYER_USE_WID      = 1
 #
 # The runtime version of MPlayer/MEncoder are patched to disable DVD
 # protection override (a.k.a decss) by using the flag
-# "-nodvdprotection-override". This flag is used by default if the runtime version
+# "-nodvdprotection-override". This flag is set by default if the runtime version
 # of MPlayer is used to play DVDs, since it is illegal (TBC) to use it in some
 # countries. You can modify the program to use the protection override,
 # but only if you're 100% sure that it is legal in your jurisdiction!
 #
-if CONF.mplayer.find('runtime/apps/mplayer') != -1:
-    print
-    print 'WARNING: DVD protection override disabled! You will not be able to play'
-    print 'protected DVDs!'
-    print
-    MPLAYER_ARGS_DVD += ' -nodvdprotection-override'
-    
+MPLAYER_DVD_PROTECTION = 1
+
 # ======================================================================
 # XMMS section:
 # ======================================================================

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/02/11 04:37:29  krister
+# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
+#
 # Revision 1.17  2003/02/06 09:52:26  krister
 # Changed the runtime handling to use runapp to start programs with the supplied dlls
 #
@@ -448,6 +451,23 @@ class MPlayerApp(childapp.ChildApp):
     """
 
     def __init__(self, app, item):
+        if config.MPLAYER_DEBUG:
+            startdir = os.environ['FREEVO_STARTDIR']
+            fname_out = os.path.join(startdir, 'mplayer_stdout.log')
+            fname_err = os.path.join(startdir, 'mplayer_stderr.log')
+            try:
+                self.log_stdout = open(fname_out, 'a')
+                self.log_stderr = open(fname_err, 'a')
+            except IOError:
+                print
+                print (('ERROR: Cannot open "%s" and "%s" for ' +
+                        'MPlayer logging!') % (fname_out, fname_err))
+                print 'Please set MPLAYER_DEBUG=0 in local_conf.py, or '
+                print 'start Freevo from a directory that is writeable!'
+                print
+            else:
+                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
+
         self.item = item
         self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)
@@ -464,29 +484,33 @@ class MPlayerApp(childapp.ChildApp):
         util.killall('freevo_xwin')
         os.system('rm -f /tmp/freevo.wid')
 
+        if config.MPLAYER_DEBUG:
+            self.log_stdout.close()
+            self.log_stderr.close()
 
 
-    def stdout_cb(self, str):
+    def stdout_cb(self, line):
 
         if config.MPLAYER_DEBUG:
-            fd = open('./mplayer_stdout.log', 'a')
-            fd.write(str + '\n')
-            fd.close()
+            try:
+                self.log_stdout.write(line + '\n')
+            except ValueError:
+                pass # File closed
                      
-        if str.find("A:") == 0:
-            self.item.elapsed = str
+        if line.find("A:") == 0:
+            self.item.elapsed = line
 
         # this is the first start of the movie, parse infos
         elif not self.item.elapsed:
-            self.parser.parse(str)
+            self.parser.parse(line)
 
 
-    def stderr_cb(self, str):
-
+    def stderr_cb(self, line):
         if config.MPLAYER_DEBUG:
-            fd = open('./mplayer_stderr.log', 'a')
-            fd.write(str + '\n')
-            fd.close()
+            try:
+                self.log_stderr.write(line + '\n')
+            except ValueError:
+                pass # File closed
                      
 
 # ======================================================================

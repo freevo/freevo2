@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/11 04:37:29  krister
+# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
+#
 # Revision 1.10  2003/02/07 19:26:56  dischi
 # check freevo.conf version _before_ parsing freevo_config.py and REMOTE ist
 # searched using cfgfilepath
@@ -212,6 +215,14 @@ def read_config(filename, conf):
     conf.width, conf.height = int(w), int(h)
         
 
+# Check that freevo_config.py is not found in the config file dirs
+for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
+    freevoconf = dirname + '/freevo_config.py'
+    if os.path.isfile(freevoconf):
+        print (('\nERROR: freevo_config.py found in %s, please remove it ' +
+                'and use local_conf.py instead!') % freevoconf)
+        sys.exit(1)
+        
 # Search for freevo.conf:
 for dir in cfgfilepath:
     freevoconf = dir + '/freevo.conf'
@@ -227,13 +238,13 @@ if os.path.isfile(cfgfilename):
     execfile(cfgfilename, globals(), locals())
 
 else:
-    print '\nERROR: can\' find freevo_config.py'
+    print "\nERROR: can't find freevo_config.py"
     sys.exit(1)
 
 
 # Search for local_conf.py:
-for dir in cfgfilepath:
-    overridefile = dir + '/local_conf.py'
+for dirname in cfgfilepath:
+    overridefile = dirname + '/local_conf.py'
     if os.path.isfile(overridefile):
         print 'Loading cfg overrides: %s' % overridefile
         execfile(overridefile, globals(), locals())
@@ -263,16 +274,32 @@ else:
     print 'No overrides loaded'
     
 
-#search the remote
+#
+# The runtime version of MPlayer/MEncoder are patched to disable DVD
+# protection override (a.k.a decss) by using the flag
+# "-nodvdprotection-override". This flag is used by default if the runtime version
+# of MPlayer is used to play DVDs, since it is illegal (TBC) to use it in some
+# countries. You can modify the program to use the protection override,
+# but only if you're 100% sure that it is legal in your jurisdiction!
+#
+if CONF.mplayer.find('runtime/apps/mplayer') != -1 and MPLAYER_DVD_PROTECTION:
+    print
+    print 'WARNING: DVD protection override disabled! You will not be able to play',
+    print 'protected DVDs!'
+    print
+    MPLAYER_ARGS_DVD += ' -nodvdprotection-override'
+    
+
+# Search for the remote
 if REMOTE:
-    for dir in cfgfilepath:
-        if os.path.isfile('%s/%s.py' % (dir, REMOTE)):
-            print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
+    for dirname in cfgfilepath:
+        if os.path.isfile('%s/%s.py' % (dirname, REMOTE)):
+            print 'load REMOTE file %s/%s.py' % (dirname, REMOTE)
             execfile('%s/%s.py' % (dir, REMOTE), globals(), locals())
             break
-        if os.path.isfile('%s/rc_client/%s.py' % (dir, REMOTE)):
-            print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
-            execfile('%s/rc_client/%s.py' % (dir, REMOTE), globals(), locals())
+        if os.path.isfile('%s/rc_client/%s.py' % (dirname, REMOTE)):
+            print 'load REMOTE file %s/%s.py' % (dirname, REMOTE)
+            execfile('%s/rc_client/%s.py' % (dirname, REMOTE), globals(), locals())
             break
     else:
         print 'No remote config found'
