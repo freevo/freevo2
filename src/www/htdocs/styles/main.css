@@ -222,11 +222,10 @@ table.popupbuttons td:hover {
 .proginfo {
     width: 450px;
     position: absolute;
-    left: 250px;
-    top: 200px;
+    background: #0B1C52;
+    color: white;
     font-size: 13px;
     font-family: "Trebuchet MS", Helvetica, Verdana, sans-serif;
-    visibility: hidden;
     border: #000 3px solid;
 }
 

@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/08/10 12:54:22  outlyer
+# An impressive update to the guide code from Jason Tackaberry that
+# dramatically speeds up rendering and navigation of the guide.  I will be
+# applying this patch to future 1.5.x Debian packages, but I'm not applying
+# it to 1.5 branch of CVS unless people really want it.
+#
 # Revision 1.26  2004/08/08 19:07:55  rshortt
 # Use tv_util to cache the guide.
 #
@@ -97,8 +103,6 @@ DEBUG = 0
 
 TRUE = 1
 FALSE = 0
-
-MAX_DESCRIPTION_CHAR = 1000
 
 class GuideResource(FreevoResource):
 
@@ -203,7 +207,6 @@ class GuideResource(FreevoResource):
                 [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
                 )
 
-        pops = ''
         desc = ''
 
         fv.tableOpen()
@@ -215,7 +218,7 @@ class GuideResource(FreevoResource):
         fv.tableRowClose()
         fv.tableClose()
 
-        fv.tableOpen('cols=\"%d\"' % \
+        fv.tableOpen('id="guide" cols=\"%d\"' % \
                      ( n_cols*cpb + 1 ) )
         showheader = 0
         for chan in guide.chan_list:
@@ -243,14 +246,15 @@ class GuideResource(FreevoResource):
                 fv.tableRowClose()
             showheader+= 1
                 
+            rowdata = []
             now = mfrguidestart
-            fv.tableRowOpen('class="chanrow"')
             # chan.displayname = string.replace(chan.displayname, "&", "SUB")
-            fv.tableCell(chan.displayname, 'class="channel"')
+            rowdata.append("<tr class='chanrow'>")
+            rowdata.append("<td class='channel'>%s</td>" % chan.displayname)
             c_left = n_cols * cpb
 
             if not chan.programs:
-                fv.tableCell('&laquo; '+_('This channel has no data loaded')+' &raquo;', 'class="programnodata" colspan="%s"' % (n_cols* cpb) )
+                rowdata.append('<td class="programnodata" colspan="%s">&laquo; ' % (n_cols*cpb) + _('This channel has no data loaded') + ' &raquo;' )
 
             for prog in chan.programs:
                 if prog.stop > mfrguidestart and \
@@ -288,96 +292,70 @@ class GuideResource(FreevoResource):
                             colspan = c_left
                         popid = '%s:%s' % (prog.channel_id, prog.start)
 
-                        if prog.desc == '':
-                            desc = (_('Sorry, the program description for ' \
-                                      '%s is unavailable.')) % ('<b>'+prog.title+'</b>')
-                        else:
-                            desc = prog.desc
-
-                        desc = desc.lstrip()
-                        if MAX_DESCRIPTION_CHAR and len(desc) > MAX_DESCRIPTION_CHAR:
-                            desc=desc[:desc[:MAX_DESCRIPTION_CHAR].rfind('.')] + '. [...]'
-
-                        
-
-                        if prog.sub_title:
-                            desc = '"%s"<br/>%s' % (prog.sub_title,desc)
-
-
-                        pops += (
-                            u"<div id=\"%s\" class=\"proginfo\">\n"\
-                            u"   <table class=\"popup\"\n"\
-                            u"          onmouseover=\"focusPop('%s');\"\n"\
-                            u"          onmouseout=\"unfocusPop('%s');\">\n"\
-                            u"      <thead>\n"\
-                            u"         <tr>\n"\
-                            u"            <td>\n"\
-                            u"               %s\n"\
-                            u"            </td>\n"\
-                            u"         </tr>\n"\
-                            u"      </thead>\n"\
-                            u"      <tbody>\n"\
-                            u"         <tr>\n"\
-                            u"            <td class=\"progdesc\">\n"\
-                            u"               %s\n"\
-                            u"            </td>\n"\
-                            u"         </tr>\n"\
-                            u"         <tr>\n"\
-                            u"         <td class=\"progtime\">\n"\
-                            u"            <b>"+_('Start')+u":</b> %s, \n"\
-                            u"            <b>"+_('Stop')+u":</b> %s, \n"\
-                            u"            <b>"+_('Runtime')+u":</b> %smin\n"\
-                            u"            </td>\n"\
-                            u"         </td>\n"\
-                            u"      </tbody>\n"\
-                            u"      <tfoot>\n"\
-                            u"         <tr>\n"\
-                            u"            <td>\n"\
-                            u"               <table class=\"popupbuttons\">\n"\
-                            u"                  <tbody>\n"\
-                            u"                     <tr>\n"\
-                            u"                        <td onclick=\"document.location='record.rpy?chan=%s&start=%s&action=add'\">\n"\
-                            u"                           "+_('Record')+u"\n"\
-                            u"                        </td>\n"\
-                            u"                        <td onclick=\"document.location='edit_favorite.rpy?chan=%s&start=%s&action=add'\">\n"\
-                            u"                        "+_('Add to Favorites')+u"\n"\
-                            u"                        </td>\n"\
-                            u"                        <td onclick=\"javascript:closePop('%s');\">\n"\
-                            u"                        "+_('Close Window')+u"\n"\
-                            u"                        </td>\n"\
-                            u"                     </tr>\n"\
-                            u"                  </tbody>\n"\
-                            u"               </table>\n"\
-                            u"            </td>\n"\
-                            u"         </tr>\n"\
-                            u"      </tfoot>\n"\
-                            u"   </table>\n"\
-                            u"</div>\n"
-                            ) % ( popid, popid, popid, prog.title, desc,
-                                  time.strftime(config.TV_TIMEFORMAT,
-                                                time.localtime( prog.start ) ),
-                                  time.strftime(config.TV_TIMEFORMAT,
-                                                time.localtime( prog.stop ) ),
-                                  int( ( prog.stop - prog.start ) / 60 ),
-                                  prog.channel_id, prog.start,
-                                  prog.channel_id, prog.start, popid )
-                        
                         style = ''
                         if colspan == n_cols * cpb:
                             style += 'text-align: center; '
-                        
-                        fv.tableCell(cell, 'class="'+status+'" onclick="showPop(\'%s\', this)" colspan="%s" style="%s"' % (popid, colspan, style))
+
+                        rowdata.append('<td class="%s" onclick="guide_click(this, event)" id="%s" colspan="%s", style="%s">%s</td>' % (status, popid, colspan, style, cell))
                         now += colspan * PRECISION
                         c_left -= colspan
 
-            fv.tableRowClose()
+            rowdata.append("</tr>")
+            fv.res += string.join(rowdata, "\n")
         fv.tableClose()
         
-        fv.res += pops
-
         fv.printSearchForm()
         fv.printLinks()
         fv.res += '</div>'
+        fv.res += (
+            u"<div id=\"popup\" class=\"proginfo\" style=\"display:none\">\n"\
+            u"<div id=\"program-waiting\" style=\"background-color: #0B1C52; position: absolute\">\n"\
+            u"  <br /><b>Fetching program information ...</b>\n"\
+            u"</div>\n"\
+            u"   <table id=\"program-info\" class=\"popup\">\n"\
+            u"      <thead>\n"\
+            u"         <tr>\n"\
+            u"            <td id=\"program-title\">\n"\
+            u"            </td>\n"\
+            u"         </tr>\n"\
+            u"      </thead>\n"\
+            u"      <tbody>\n"\
+            u"         <tr>\n"\
+            u"            <td class=\"progdesc\" id=\"program-desc\">\n"\
+            u"            </td>\n"\
+            u"         </tr>\n"\
+            u"         <tr>\n"\
+            u"         <td class=\"progtime\">\n"\
+            u"            <b>"+_('Start')+u":</b> <span id=\"program-start\"></span>, \n"\
+            u"            <b>"+_('Stop')+u":</b> <span id=\"program-end\"></span>, \n"\
+            u"            <b>"+_('Runtime')+u":</b> <span id=\"program-runtime\"></span> min\n"\
+            u"            </td>\n"\
+            u"         </td>\n"\
+            u"      </tbody>\n"\
+            u"      <tfoot>\n"\
+            u"         <tr>\n"\
+            u"            <td>\n"\
+            u"               <table class=\"popupbuttons\">\n"\
+            u"                  <tbody>\n"\
+            u"                     <tr>\n"\
+            u"                        <td id=\"program-record-button\">\n"\
+            u"                           "+_('Record')+u"\n"\
+            u"                        </td>\n"\
+            u"                        <td id=\"program-favorites-button\">\n"\
+            u"                        "+_('Add to Favorites')+u"\n"\
+            u"                        </td>\n"\
+            u"                        <td onclick=\"program_popup_close();\">\n"\
+            u"                        "+_('Close Window')+u"\n"\
+            u"                        </td>\n"\
+            u"                     </tr>\n"\
+            u"                  </tbody>\n"\
+            u"               </table>\n"\
+            u"            </td>\n"\
+            u"         </tr>\n"\
+            u"      </tfoot>\n"\
+            u"   </table>\n"\
+            u"</div>\n" )
+        fv.res += "<iframe id='hidden' style='visibility: hidden; width: 1px; height: 1px'></iframe>\n"
         fv.printFooter()
 
         return String( fv.res )

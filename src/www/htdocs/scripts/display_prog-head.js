@@ -5,29 +5,46 @@ var popY;
 
 N = (document.all) ? 0 : 1;
 
-function focusPop(pop) {
-  popid = pop;
-  over = true;
+function
+guide_click(item, event)
+{
+	var iframe = document.getElementById("hidden");
+	iframe.src="proginfo.rpy?id=" + item.id;
+	document.getElementById("program-waiting").style.display = "";
+	document.getElementById("program-info").style.visibility = "hidden";
+	var popup = document.getElementById("popup");
+	popup.style.display = "";
+
+	w = N ? window.innerWidth : document.body.clientWidth;
+	h = N ? window.innerHeight : document.body.clientHeight;
+
+	//alert(event.clientX + "  "  + popup.clientWidth + "  " + w + "  " + h);
+	if (event.clientX + popup.clientWidth > w)
+		x = (w - popup.clientWidth) - 30;
+	else
+		x = event.clientX;
+	popup.style.left = x + "px";
+
+	page_top = N ? window.pageYOffset : document.body.scrollTop;
+
+	// We can't use popup.clientHeight because it's not valud until
+	// after proginfo.rpy gets executed, so we guess that it'll be
+	// about 175.  Someone else can fix this. :)
+	if (event.clientY + 175 > h)
+		y = page_top + (h - 175) - 20;
+	else
+		y = page_top + event.clientY;
+	popup.style.top = y + "px";
 }
 
-function unfocusPop(pop) {
-  popid = '';
-  over = false;
-}
-
-function showPop(pop, cell) {
-  pop = document.getElementById(pop);
-  pop.style.top = (popY-100) + "px";
-  pop.style.visibility = 'visible';
-}
-
-function closePop(pop) {
-  pop = document.getElementById(pop);
-  pop.style.visibility = 'hidden';
+function
+program_popup_close()
+{
+	var popup = document.getElementById("popup");
+	popup.style.display = "none";
 }
 
 function mouseDown(e) {
-  popY = (N) ? e.pageY : event.y+document.body.scrollTop;
   if(over) {
     if(N) {
       ob = document.getElementById(popid);
