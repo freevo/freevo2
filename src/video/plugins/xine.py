@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/02/06 19:29:06  dischi
+# fix/cleanup dvd on hd handling
+#
 # Revision 1.38  2004/02/03 20:51:12  dischi
 # fix/enhance dvd on disc
 #
@@ -203,19 +206,17 @@ class Xine:
         self.max_subtitle     = 0
         self.current_subtitle = -1
 
-        if item.url == 'dvd://':
+        if item.mode == 'dvd':
             for track in item.info['tracks']:
                 self.max_audio = max(self.max_audio, len(track['audio']))
 
             for track in item.info['tracks']:
                 self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
 
-        if item.mode == 'dvd' and hasattr(item.media,'devicename'):
+        if item.mode == 'dvd' and hasattr(item.media, 'devicename'):
             # dvd:///dev/dvd/2
-            print item.media
             command.append('dvd://%s/%s' % (item.media.devicename, item.url[6:]))
         elif item.mode == 'dvd': # no devicename? Probably a mirror image on the HD
-            print item.url
             command.append(item.url)
 
         elif item.mode == 'vcd':

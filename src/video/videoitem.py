@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.123  2004/02/06 19:28:51  dischi
+# fix/cleanup dvd on hd handling
+#
 # Revision 1.122  2004/02/03 20:51:12  dischi
 # fix/enhance dvd on disc
 #
@@ -177,15 +180,16 @@ class VideoItem(Item):
         if url.startswith('dvd://') or url.startswith('vcd://'):
             self.network_play = False
             self.mimetype = self.url[:self.url.find('://')].lower()
-
             if self.url.find('/VIDEO_TS/') > 0:
                 # dvd on harddisc
-                self.filename = self.url[5:self.url.rfind('/VIDEO_TS/')]
-                self.info  = util.mediainfo.get(self.filename)
-                self.files = FileInformation()
-                self.files.append(self.filename)
+                self.filename   = self.url[5:self.url.rfind('/VIDEO_TS/')]
+                self.info       = util.mediainfo.get(self.filename)
+                self.files      = FileInformation()
                 self.num_titles = len(self.info['tracks'])
-                
+                self.files.append(self.filename)
+            else:
+                self.filename   = ''
+            
         if not self.image or (self.parent and self.image == self.parent.image):
            image = vfs.getoverlay(self.filename + '.raw')
            if os.path.exists(image):
@@ -469,17 +473,16 @@ class VideoItem(Item):
             elif self.media:
                 util.mount(os.path.dirname(self.filename))
 
-        elif self.url.startswith('dvd://') or self.url.startswith('vcd://'):
-            if self.url.rfind('/') < 6 and not self.media:
-                media = util.check_media(self.media_id)
-                if media:
-                    self.media = media
-                else:
-                    self.menuw.show()
-                    ConfirmBox(text=(_('Media not not found for "%s".\n')+
-                                     _('Please insert the media.')) % self.url,
-                               handler=self.play).show()
-                    return
+        elif self.mode in ('dvd', 'vcd') and not self.filename and not self.media:
+            media = util.check_media(self.media_id)
+            if media:
+                self.media = media
+            else:
+                self.menuw.show()
+                ConfirmBox(text=(_('Media not not found for "%s".\n')+
+                                 _('Please insert the media.')) % self.url,
+                           handler=self.play).show()
+                return
 
         if self.player_rating < 10:
             AlertBox(text=_('No player for this item found')).show()

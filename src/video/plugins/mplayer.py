@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/02/06 19:28:51  dischi
+# fix/cleanup dvd on hd handling
+#
 # Revision 1.61  2004/02/03 20:51:12  dischi
 # fix/enhance dvd on disc
 #
@@ -246,7 +249,7 @@ class MPlayer:
             additional_args += [ '-dvd-device', item.media.devicename ]
         elif mode == 'dvd':
             # dvd on harddisc
-            additional_args += [ '-dvd-device', url[5:url.rfind('/VIDEO_TS/')] ]
+            additional_args += [ '-dvd-device', item.filename ]
             url = url[:6] + url[url.rfind('/')+1:]
             
         if item.media and hasattr(item.media,'devicename'):
