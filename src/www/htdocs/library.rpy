@@ -11,6 +11,10 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/24 11:55:38  rshortt
+# Removed the menu images for now because they are missing and I am not even
+# sure they look all that great (when there).
+#
 # Revision 1.10  2003/07/24 00:09:02  rshortt
 # Bugfix.
 #
@@ -229,18 +233,18 @@ class LibraryResource(FreevoResource):
         if not action_mediatype:
             fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="85%"')
             fv.tableRowOpen('class="chanrow"')
-            movmuslink = '<a href="%s?media=%s"><img src="images/%s.png" border=0 align="center">%s</a>' 
-            rectvlink = '<a href="%s?media=%s&dir=%s"><img src="images/%s.png" border=0 align="center">%s</a>' 
-            fv.tableCell(movmuslink % (action_script, "movies","movies","Movies"), 'align=center')
+            movmuslink = '<a href="%s?media=%s">%s</a>' 
+            rectvlink = '<a href="%s?media=%s&dir=%s">%s</a>' 
+            fv.tableCell(movmuslink % (action_script, "movies","Movies"), 'align=center')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(rectvlink % (action_script, "rectv", config.DIR_RECORD, "tv","Recorded TV"), 'align=center')
+            fv.tableCell(rectvlink % (action_script, "rectv", config.DIR_RECORD, "Recorded TV"), 'align=center')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(movmuslink % (action_script,"music","mp3","Music"), 'align=center')
+            fv.tableCell(movmuslink % (action_script,"music","Music"), 'align=center')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(movmuslink % (action_script,"images","images","Images"), 'align=center')
+            fv.tableCell(movmuslink % (action_script,"images","Images"), 'align=center')
             fv.tableRowClose()
             fv.tableClose()
             fv.printSearchForm()
