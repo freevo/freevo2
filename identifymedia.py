@@ -67,9 +67,18 @@ class Identify_Thread(threading.Thread):
             label = m.group(1)
         img.close()
 
-        if id in config.MOVIE_INFORMATIONS:
-            title, image, xml_filename = config.MOVIE_INFORMATIONS[id]
-
+        if id in config.MOVIE_INFORMATIONS_ID:
+            title, image, xml_filename = config.MOVIE_INFORMATIONS_ID[id]
+        else:
+            for db_info in config.MOVIE_INFORMATIONS_LABEL:
+                if db_info[0].match(label):
+                    title, image, xml_filename = db_info[1:]
+                    m = db_info[0].match(label).groups()
+                    re_count = 1
+                    for k in m:
+                        title=string.replace(title, '\\%s' % re_count, k)
+                        re_count += 1
+                        
         # Disc is data of some sort. Mount it to get the file info
         util.mount(media.mountdir)
 
@@ -82,7 +91,7 @@ class Identify_Thread(threading.Thread):
 
                 media.info = RemovableMediaInfo(mediatype[0], title, image,\
                                                 (mediatype[2], media.mountdir, []),\
-                                                xml_filename)
+                                                xml_file = xml_filename)
                 return
                 
         mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)

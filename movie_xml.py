@@ -9,6 +9,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/09/15 14:57:16  dischi
+# Support for <label> instead of <id> in the movie xml files. You can use a
+# regexp to match a hole set of discs (use with care!)
+#
 # Revision 1.5  2002/09/13 18:07:51  dischi
 # Added tag <mplayer_options> inside <video>
 #
@@ -54,7 +58,10 @@
 
 
 import os
-# XXX Dirk, this is _really circular. Any other way you can do it? :^)
+import re
+
+# XXX > Dirk, this is _really circular. Any other way you can do it? :^)
+# XXX Not that I know, sorry
 import config
 import util
 
@@ -123,6 +130,7 @@ def parse(file, dir, mplayer_files):
     info = []
     id = []
     mode = 'video'
+    label = []
     
     try:
         parser = qp_xml.Parser()
@@ -141,13 +149,15 @@ def parse(file, dir, mplayer_files):
                         image = os.path.join(dir, node.textof())
                     elif node.name == u'id':
                         id += [node.textof()]
+                    elif node.name == u'label':
+                        label += [node.textof()]
                     elif node.name == u'video':
                         (mode, first_file, playlist, mplayer_options) = \
                                parseVideo(dir, mplayer_files, node)
                     elif node.name == u'info':
                         parseInfo(node)
 
-    return title, image, (mode, first_file, playlist, mplayer_options), id, info
+    return title, image, (mode, first_file, playlist, mplayer_options), id, label, info
 
 
 
@@ -155,7 +165,8 @@ def parse(file, dir, mplayer_files):
 # hash all XML movie files
 #
 def hash_xml_database():
-    config.MOVIE_INFORMATIONS = {}
+    config.MOVIE_INFORMATIONS_ID    = {}
+    config.MOVIE_INFORMATIONS_LABEL = []
 
     if os.path.exists("/tmp/freevo-rebuild-database"):
         os.system('rm -f /tmp/freevo-rebuild-database')
@@ -164,20 +175,28 @@ def hash_xml_database():
 
     for name,dir in config.DIR_MOVIES:
         for file in util.recursefolders(dir,1,'*.xml',1):
-            title, image, None, id, info = parse(file, os.path.dirname(file),[])
-            if title and id:
+            title, image, None, id, label, info = parse(file, os.path.dirname(file),[])
+            if id:
                 for i in id:
                     if len(i) > 16:
                         i = i[0:16]
-                    config.MOVIE_INFORMATIONS[i] = (title, image, file)
-
+                    config.MOVIE_INFORMATIONS_ID[i] = (title, image, file)
+            if label:
+                for l in label:
+                    l_re = re.compile(l)
+                    config.MOVIE_INFORMATIONS_LABEL += [(l_re, title, image, file)]
+                
     for file in util.recursefolders(config.MOVIE_DATA_DIR,1,'*.xml',1):
-        title, image, None, id, info = parse(file, os.path.dirname(file),[])
-        if title and id:
+        title, image, None, id, label, info = parse(file, os.path.dirname(file),[])
+        if id:
             for i in id:
                 if len(i) > 16:
                     i = i[0:16]
-                config.MOVIE_INFORMATIONS[i] = (title, image, file)
-
+                config.MOVIE_INFORMATIONS_ID[i] = (title, image, file)
+        if label:
+            for l in label:
+                l_re = re.compile(l)
+                config.MOVIE_INFORMATIONS_LABEL += [(l_re, title, image, file)]
+                
 
     if DEBUG: print 'done'

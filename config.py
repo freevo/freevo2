@@ -190,7 +190,8 @@ REMOVABLE_MEDIA = []
 # and also if the file '/tmp/freevo-rebuild-database' is created.
 #
 
-MOVIE_INFORMATIONS = {}
+MOVIE_INFORMATIONS_ID    = {}
+MOVIE_INFORMATIONS_LABEL = []
 
 #
 # compile the regexp
