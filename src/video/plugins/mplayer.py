@@ -4,11 +4,15 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# Notes: 
+#
+# Todo:  Copy some stuff in an application for mplayer video and tv      
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2004/09/14 20:05:44  dischi
+# bmovl updates, remove mplayer 0.90 support
+#
 # Revision 1.87  2004/09/13 19:40:02  dischi
 # fix non vobsub subtitle handling
 #
@@ -77,51 +81,15 @@ class PluginInterface(plugin.Plugin):
     VIDEO_MPLAYER_SUFFIX. This is the default video player for Freevo.
     """
     def __init__(self):
-        mplayer_version = 0
+        # XXX Removed the version detection code. Mplayer 0.90 is too old,
+        # XXX even the mplayer people don't support it anymore. 
+        # XXX Removing the check also removes some strange startup problems
 
-        # Detect version of mplayer. Possible values are
-        # 0.9 (for 0.9.x series), 1.0 (for 1.0preX series) and 9999 for cvs
-        if not hasattr(config, 'MPLAYER_VERSION'):
-            child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100)
-            data  = True
-            while data:
-                data = child.fromchild.readline()
-                if data:
-                    res = re.search( "^MPlayer (?P<version>\S+)", data )
-                    if res:
-                        data = res
-                        break
-
-            if data:                
-                _debug_("MPlayer version is: %s" % data.group( "version" ))
-                data = data.group( "version" )
-                if data[ 0 ] == "1":
-                    config.MPLAYER_VERSION = 1.0
-                elif data[ 0 ] == "0":
-                    config.MPLAYER_VERSION = 0.9
-                elif data[ 0 : 7 ] == "dev-CVS":
-                    config.MPLAYER_VERSION = 9999
-            else:
-                config.MPLAYER_VERSION = None
-            _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
-            child.wait()
-
-        if not config.MPLAYER_VERSION:
-            print
-            print 'Failed to detect mplayer version. Please set MPLAYER_VERSION in your'
-            print 'local_conf.py to 0.9  (for 0.9.x series), 1.0 (for 1.0preX series)'
-            print 'or 9999 for cvs.'
-            print
-            self.reason = 'failed to detect mplayer version'
-            return
-        
         # create plugin structure
         plugin.Plugin.__init__(self)
 
         # register mplayer as the object to play video
-        plugin.register(MPlayer(config.MPLAYER_VERSION), plugin.VIDEO_PLAYER, True)
-
-
+        plugin.register(MPlayer(), plugin.VIDEO_PLAYER, True)
 
 
 
@@ -129,17 +97,17 @@ class MPlayer(Application):
     """
     the main class to control mplayer
     """
-    def __init__(self, version):
+    def __init__(self):
         """
         init the mplayer object
         """
         Application.__init__(self, 'mplayer', 'video', True)
         self.name       = 'mplayer'
-        self.version    = version
         self.seek       = 0
         self.app        = None
         self.plugins    = []
         self.hide_osd_cb = False
+        self.use_bmovl  = True
 
     def rate(self, item):
         """
@@ -210,11 +178,13 @@ class MPlayer(Application):
 
         if mode == 'dvd':
             if config.DVD_LANG_PREF:
-                # There are some bad mastered DVDs out there. E.g. the specials on
-                # the German Babylon 5 Season 2 disc claim they have more than one
-                # audio track, even more then on en. But only the second en works,
-                # mplayer needs to be started without -alang to find the track
-                if hasattr(item, 'mplayer_audio_broken') and item.mplayer_audio_broken:
+                # There are some bad mastered DVDs out there. E.g. the specials
+                # on the German Babylon 5 Season 2 disc claim they have more
+                # than one audio track, even more then on en. But only the
+                # second on works, mplayer needs to be started without -alang
+                # to find the track
+                if hasattr(item, 'mplayer_audio_broken') and \
+                       item.mplayer_audio_broken:
                     print '*** dvd audio broken, try without alang ***'
                 else:
                     additional_args += [ '-alang', config.DVD_LANG_PREF ]
@@ -249,11 +219,9 @@ class MPlayer(Application):
         if item.selected_audio != None:
             additional_args += [ '-aid', str(item.selected_audio) ]
 
-        if self.version >= 1 and item['deinterlace']:
-            additional_args += [ '-vf',  'pp=de/fd' ]
-        elif item['deinterlace']:
-            additional_args += [ '-vop', 'pp=fd' ]
-        elif self.version >= 1:
+        if item['deinterlace']:
+            additional_args += [ '-vf-pre',  'pp=de/fd' ]
+        else:
             additional_args += [ '-vf',  'pp=de' ]
                 
         mode = item.mimetype
@@ -279,12 +247,15 @@ class MPlayer(Application):
         if options:
             command += options
 
-        # use software scaler?
+        # Use software scaler? If not, we also deactivate
+        # bmovl because resizing doesn't work
+        self.use_bmovl = False
         if '-nosws' in command:
             command.remove('-nosws')
 
         elif not '-framedrop' in command:
             command += config.MPLAYER_SOFTWARE_SCALER.split(' ')
+            self.use_bmovl = True
 
         # correct avi delay based on mmpython settings
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
@@ -296,13 +267,16 @@ class MPlayer(Application):
             command.remove('')
 
         # autocrop
-        if config.MPLAYER_AUTOCROP and str(' ').join(command).find('crop=') == -1:
+        if config.MPLAYER_AUTOCROP and \
+               str(' ').join(command).find('crop=') == -1:
             _debug_('starting autocrop')
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
-            crop_cmd = command[1:] + ['-ao', 'null', '-vo', 'null', '-ss', '60',
-                                      '-frames', '20', '-vop', 'cropdetect' ]
-            child = popen2.Popen3(self.sort_filter(crop_cmd), 1, 100)
-            exp = re.compile('^.*-vop crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*')
+            crop_cmd = command[1:] + ['-ao', 'null', '-vo', 'null', '-ss',
+                                      '60', '-frames', '20', '-vf',
+                                      'cropdetect' ]
+            child = popen2.Popen3(self.vf_chain(crop_cmd), 1, 100)
+            crop = '^.*-vf crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*'
+            exp = re.compile(crop)
             while(1):
                 data = child.fromchild.readline()
                 if not data:
@@ -315,7 +289,8 @@ class MPlayer(Application):
                     y2 = max(y2, int(m.group(2)) + int(m.group(4)))
         
             if x1 < 1000 and x2 < 1000:
-                command = command + [ '-vop' , 'crop=%s:%s:%s:%s' % (x2-x1, y2-y1, x1, y1) ]
+                command = command + [ '-vf' , 'crop=%s:%s:%s:%s' % \
+                                      (x2-x1, y2-y1, x1, y1) ]
             
             child.wait()
 
@@ -329,23 +304,25 @@ class MPlayer(Application):
             util.mount(d)
             command += ['-audiofile', f]
 
-        if config.MPLAYER_BMOVL2_POSSIBLE:
-            self.overlay = MPlayerOverlay()
-            command += [ '-vf', 'bmovl2=%s' % self.overlay.fifo_fname ]
-        else:
-            command += [ '-vf', 'bmovl=1:0:/tmp/bmovl' ]
+        if self.use_bmovl:
+            if config.MPLAYER_BMOVL2_POSSIBLE:
+                self.overlay = MPlayerOverlay()
+                command += [ '-vf', 'bmovl2=%s' % self.overlay.fifo_fname ]
+            else:
+                if not os.path.exists('/tmp/bmovl-%s' % os.getpid()):
+                    os.mkfifo('/tmp/bmovl-%s' % os.getpid())
+                command += [ '-vf', 'bmovl=1:0:/tmp/bmovl-%s' % os.getpid() ]
 
         self.plugins = plugin.get('mplayer_video')
 
         for p in self.plugins:
             command = p.play(command, self)
 
-        command=self.sort_filter(command)
+        command=self.vf_chain(command)
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        
         self.app = MPlayerApp(command, self)
         self.osd_visible = False
         self.show()
@@ -364,6 +341,8 @@ class MPlayer(Application):
             return
         self.app.stop('quit\n')
         self.app = None
+        if os.path.exists('/tmp/bmovl-%s' % os.getpid()):
+            os.unlink('/tmp/bmovl-%s' % os.getpid())
 
 
     def hide_osd(self):
@@ -410,14 +389,21 @@ class MPlayer(Application):
             return True
 
         if event == TOGGLE_OSD:
+            if not self.use_bmovl:
+                # We don't use bmovl so we use the normal mplayer osd
+                self.app.write('osd\n')
+                return True
+
+            if not self.app.area_handler:
+                # Bmovl not ready yet
+                return True
+            
             self.osd_visible = not self.osd_visible
             if self.osd_visible:
-                #plugin.getbyname('idlebar').show()
                 self.app.area_handler.display_style['video'] = 1
                 self.app.area_handler.draw(self.item)
                 self.app.area_handler.show()
             else:
-                #plugin.getbyname('idlebar').hide()
                 self.app.area_handler.hide()
                 gui.get_display().update()
                 self.app.area_handler.display_style['video'] = 0
@@ -429,7 +415,8 @@ class MPlayer(Application):
             return True
 
         if event == SEEK:
-            if event.arg > 0 and self.item_length != -1 and self.dynamic_seek_control:
+            if event.arg > 0 and self.item_length != -1 and \
+                   self.dynamic_seek_control:
                 # check if the file is growing
                 if self.item_info.get_endpos() == self.item_length:
                     # not growing, deactivate this
@@ -444,19 +431,19 @@ class MPlayer(Application):
                     seek_safety_time = 500
 
                 # check if seek is allowed
-                if self.item_length <= self.item.elapsed + event.arg + seek_safety_time:
+                if self.item_length <= self.item.elapsed + event.arg + \
+                       seek_safety_time:
                     # get new length
                     self.item_length = self.item_info.get_endpos()
                     
                 # check again if seek is allowed
-                if self.item_length <= self.item.elapsed + event.arg + seek_safety_time:
+                if self.item_length <= self.item.elapsed + event.arg + \
+                       seek_safety_time:
                     _debug_('unable to seek %s secs at time %s, length %s' % \
                             (event.arg, self.item.elapsed, self.item_length))
-                    # FIXME:
-                    # self.app.write('osd_show_text "%s"\n' % _('Seeking not possible'))
                     return False
                 
-            if not self.osd_visible:
+            if self.use_bmovl and not self.osd_visible:
                 if self.hide_osd_cb:
                     rc.unregister(self.hide_osd)
                 else:
@@ -472,29 +459,25 @@ class MPlayer(Application):
 
 
 
-    def sort_filter(self, command):
+    def vf_chain(self, command):
         """
-        Change a mplayer command to support more than one -vop
-        parameter. This function will grep all -vop parameter from
-        the command and add it at the end as one vop argument
+        Change a mplayer command to support more than one -vf
+        parameter. This function will grep all -vf parameter from
+        the command and add it at the end as one vf argument
         """
         ret = []
-        vop = ''
-        next_is_vop = False
-    
+        vf = ''
+        next_is_vf = False
         for arg in command:
-            if next_is_vop:
-                vop += ',%s' % arg
-                next_is_vop = False
+            if next_is_vf:
+                vf += ',%s' % arg
+                next_is_vf = False
             elif (arg == '-vop' or arg == '-vf'):
-                next_is_vop=True
+                next_is_vf=True
             else:
-                ret += [ arg ]
-
-        if vop:
-            if self.version >= 1:
-                return ret + [ '-vf', vop[1:] ]
-            return ret + [ '-vop', vop[1:] ]
+                ret.append(arg)
+        if vf:
+            return ret + [ '-vf-add', vf[1:] ]
         return ret
 
 
@@ -507,8 +490,9 @@ class Progressbar(Area):
     def __init__(self):
         Area.__init__(self, 'content')
         self.content = []
-        self.bar_border   = gui.theme_engine.Rectangle(bgcolor=(255, 255, 255, 95), radius=4)
-        self.bar_position = gui.theme_engine.Rectangle(bgcolor=(0, 0, 150), radius=4)
+        Rectangle = gui.theme_engine.Rectangle
+        self.bar_border   = Rectangle(bgcolor=(255, 255, 255, 95), radius=4)
+        self.bar_position = Rectangle(bgcolor=(0, 0, 150), radius=4)
         self.bar          = None
         self.last_width   = 0
         self.last_layout  = None
@@ -531,18 +515,19 @@ class Progressbar(Area):
         """
         content = self.calc_geometry(self.layout.content, copy_object=True)
 
-        if self.last_layout != (content.x, content.y, content.width, content.height):
-            _debug_('layout change')
+        if self.last_layout != (content.x, content.y, content.width,
+                                content.height):
             for c in self.content:
                 c.unparent()
             self.content = []
-            self.last_layout = content.x, content.y, content.width, content.height
+            self.last_layout = content.x, content.y, content.width, \
+                               content.height
             self.last_width = 0
             
         if not self.content:
-            self.content.append(self.drawbox(content.x, content.y, content.width,
-                                             content.height, self.bar_border))
-
+            self.content.append(self.drawbox(content.x, content.y,
+                                             content.width, content.height,
+                                             self.bar_border))
         try:
             length = int(self.infoitem.info['length'])
         except Exception, e:
@@ -590,7 +575,8 @@ class MPlayerApp(childapp.ChildApp2):
                        
         # DVD items also store mplayer_audio_broken to check if you can
         # start them with -alang or not
-        if hasattr(self.item, 'mplayer_audio_broken') or self.item.mode != 'dvd':
+        if hasattr(self.item, 'mplayer_audio_broken') or \
+               self.item.mode != 'dvd':
             self.check_audio = 0
         else:
             self.check_audio = 1
@@ -642,7 +628,6 @@ class MPlayerApp(childapp.ChildApp2):
             self.screen = gui.set_display('Bmovl', (self.width, self.height))
         self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
                                                       Progressbar()])
-        self.area_handler.screen.frames_per_fade = 10
         self.area_handler.hide(False)
         self.area_handler.draw(self.item)
         self.write('osd 0\n')
@@ -667,9 +652,9 @@ class MPlayerApp(childapp.ChildApp2):
         #             line = 'Connecting to server'
         #         self.osd.clearscreen(self.osd.COL_BLACK)
         #         self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10,
-        #                                   config.OSD_OVERSCAN_Y+10,
-        #                                   self.osd.width - 2 * (config.OSD_OVERSCAN_X+10),
-        #                                   -1, self.osdfont, self.osd.COL_WHITE)
+        #              config.OSD_OVERSCAN_Y+10,
+        #              self.osd.width - 2 * (config.OSD_OVERSCAN_X+10),
+        #              -1, self.osdfont, self.osd.COL_WHITE)
         #         self.osd.update()
 
         # current elapsed time
