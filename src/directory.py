@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/12/07 14:45:57  dischi
+# make the busy icon thread save
+#
 # Revision 1.72  2003/12/07 12:26:55  dischi
 # add osd busy icon (work in progress)
 #
@@ -525,7 +528,7 @@ class DirItem(Playlist):
             display_type = 'video'
 
         if config.OSD_BUSYICON_TIMER:
-            osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER)
+            osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
         
         files = vfs.listdir(self.dir)
 
@@ -557,7 +560,7 @@ class DirItem(Playlist):
             callback=pop.tick
 
 
-        elif len(files) > 200 and config.OSD_BUSYICON_TIMER:
+        elif config.OSD_BUSYICON_TIMER and len(files) > config.OSD_BUSYICON_TIMER[1]:
             # many files, just show the busy icon now
             osd.get_singleton().busyicon.wait(0)
         
@@ -601,6 +604,12 @@ class DirItem(Playlist):
             # the drive
             if self.media:
                 self.media.mount()
+
+        if config.OSD_BUSYICON_TIMER:
+            # stop the timer. If the icons is drawn, it will stay there
+            # until the osd is redrawn, if not, we don't need it to pop
+            # up the next milliseconds
+            osd.get_singleton().busyicon.stop()
 
         # autoplay
         if len(items) == 1 and items[0].actions() and \

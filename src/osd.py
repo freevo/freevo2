@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2003/12/07 14:45:57  dischi
+# make the busy icon thread save
+#
 # Revision 1.109  2003/12/07 12:26:55  dischi
 # add osd busy icon (work in progress)
 #
@@ -60,6 +63,7 @@ import stat
 import Image
 import re
 import traceback
+import threading, thread
 from types import *
 import util
 import md5
@@ -244,7 +248,6 @@ class OSDFont:
 
         
 
-import threading
 
 class BusyIcon(threading.Thread):
     def __init__(self, osd):
@@ -256,14 +259,19 @@ class BusyIcon(threading.Thread):
         self.osd    = osd
         self.active = False
         self.icon   = os.path.join(config.SHARE_DIR, 'icons/popup/popup_wait.png')
+        self.lock   = thread.allocate_lock()
 
     def wait(self, timer):
+        self.lock.acquire()
         self.active = True
         self.timer  = timer
         self.mode_flag.set()
+        self.lock.release()
         
     def stop(self):
+        self.lock.acquire()
         self.active = False
+        self.lock.release()
     
     def run(self):
         while (1):
@@ -273,6 +281,7 @@ class BusyIcon(threading.Thread):
                 self.timer -= 0.01
                 time.sleep(0.01)
             if self.active:
+                self.lock.acquire()
                 image  = self.osd.loadbitmap(self.icon)
                 width  = image.get_width()
                 height = image.get_height()
@@ -293,6 +302,7 @@ class BusyIcon(threading.Thread):
 
                 # restore the screen
                 self.osd.screen.blit(screen, (x,y))
+                self.lock.release()
                 
             while self.active:
                 time.sleep(0.01)

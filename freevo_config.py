@@ -730,9 +730,11 @@ OSD_DEFAULT_FONTSIZE = 18
 # All alternate fonts must be in './share/fonts/'
 OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
 
-# number seconds until the busy icon is shown in the
-# menu. Set it to 0 to disable this
-OSD_BUSYICON_TIMER = 0.7
+# (seconds, files)
+# number seconds until the busy icon is shown in the menu.
+# or show it right away when we know it takes some time (more than files number
+# of files in a directory. Set this to None to disable this
+OSD_BUSYICON_TIMER = (0.7, 200)
 
 OSD_SDL_EXEC_AFTER_STARTUP = ""
 OSD_OVERSCAN_X = 0
