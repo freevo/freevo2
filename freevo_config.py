@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2002/10/21 18:34:16  dischi
+# TV_SHOW_IMAGES points to the new example dir
+#
 # Revision 1.85  2002/10/21 05:09:50  krister
 # Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
 #
@@ -155,7 +158,7 @@ MOVIE_DATA_DIR = 'movie-data/'
 # expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image name.(png|jpg)
 # (lowercase) is in this directory, it will be taken as cover image
 #
-TV_SHOW_IMAGES = "tv-show-images/"
+TV_SHOW_IMAGES = "testfiles/tv-show-images/"
 
 #
 # The list of filename suffixes that are used to match the files that
