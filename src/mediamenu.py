@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/01/18 10:27:45  dischi
+# Go up one menu when freevo can't read the current directory anymore. Since
+# it may be inside a thread or it happens when freevo rebuilds the menu, scan
+# sends rc.EXIT to go back instead of going back one menu itself.
+#
 # Revision 1.20  2003/01/14 18:54:26  dischi
 # Added gphoto support from Thomas Schüppel. You need gphoto and the
 # Python bindings to get this working. I added try-except to integrate
@@ -553,9 +558,20 @@ class DirwatcherThread(threading.Thread):
 
     def scan(self):
         self.lock.acquire()
+
+        try:
+            files = ([ os.path.join(self.dir, fname)
+                       for fname in os.listdir(self.dir) ])
+        except OSError:
+            # the directory is gone
+            print 'unable to read directory'
+
+            # send EXIT to go one menu up:
+            rc.post_event(rc.EXIT)
+            self.lock.release()
+            return
         
-        files = ([ os.path.join(self.dir, fname)
-                   for fname in os.listdir(self.dir) ])
+        
         new_files = []
         del_files = []
         
@@ -572,7 +588,8 @@ class DirwatcherThread(threading.Thread):
                     
         self.files = files
         self.lock.release()
-        
+
+    
     def run(self):
         while 1:
             if self.dir and self.menuw and self.menuw.menustack[-1] == self.item_menu and \
