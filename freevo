@@ -5,11 +5,65 @@
 # $Id$
 #
 
+
+
+# begin configuration
+
+helpers=helpers
+src=src
+
+# end configuration
+
+
+
+
+# get information about freevo dir and the name we called with
+if stat $0 | head -n 1 | grep "' -> \`" > /dev/null ; then
+    script=`stat $0 | head -n 1 | sed "s/.*' -> .\\(.*\\)./\\1/"`
+else
+    script=`echo $0`
+fi
+
+call=`basename $0`
+export FREEVO_HOME=`dirname $script`
+
+
 # Keep track of where we started. This env var is used inside Freevo.
 export FREEVO_STARTDIR=$PWD
 
 # Set this globaly, everything here should have access to these modules.
-export PYTHONPATH=./src:./src/www:./src/tv
+export PYTHONPATH=$FREEVO_HOME:$FREEVO_HOME/$src:$FREEVO_HOME/$src/www:$FREEVO_HOME/$src/tv
+
+# Is runapp present? If not it needs to be compiled
+if ! [ -e "$FREEVO_HOME/runapp" ]; then
+    echo
+    echo "*************************************************************"
+    echo "* Please note that there is a standalone binary release     *"
+    echo "* of Freevo with all dependencies included. Use that unless *"
+    echo "* you are really capable of installing Freevo from source   *"
+    echo "* without assistance from the mailing lists or irc!         *"
+    echo "*************************************************************"
+    echo
+    echo "Freevo not compiled (runapp executable not found)"
+    echo
+    exit 1
+fi
+
+# call helper if the script is called as wrapper
+if [ "$call" == "freevo" ]; then
+    script="$FREEVO_HOME/$helpers/$1.py"
+    if [ -e "$script" ]; then
+	shift
+    fi
+else
+    script="$FREEVO_HOME/$helpers/$call.py"
+fi
+
+if [ -e "$script" ]; then
+    "$FREEVO_HOME/runapp" python "$script" "$@"
+    exit 0
+fi
+
 
 if [ -w /var/run ] ; then
     PID_DIR=/var/run
@@ -19,7 +73,8 @@ fi
 
 # cd to the freevo directory if necessary
 if ! [ -e src/identifymedia.py ]; then
-    cd `dirname $0`
+    cd $FREEVO_HOME
+    unset FREEVO_HOME
 fi
 
 if [ "$1" = "update" ] ; then
@@ -37,31 +92,33 @@ if [ "$1" = "update" ] ; then
     exit 0
 fi
 
-# Is runapp present? If not it needs to be compiled
-if ! [ -e runapp ]; then
-    echo
-    echo "*************************************************************"
-    echo "* Please note that there is a standalone binary release     *"
-    echo "* of Freevo with all dependencies included. Use that unless *"
-    echo "* you are really capable of installing Freevo from source   *"
-    echo "* without assistance from the mailing lists or irc!         *"
-    echo "*************************************************************"
-    echo
-    echo "Freevo not compiled (runapp executable not found)"
-    echo
-    exit 1
-fi
 
 # Help
 if [ "$1" = "--help" ] || [ "$1" = "-" ] ; then
-    echo "freevo [ options]"
+    echo "freevo [ script | options]"
     echo "options:"
     echo "  setup          run freevo setup to scan your environment"
     echo "  execute [file] execute a script inside the freevo environment"
     echo "  stop           stop the current freevo process"
     echo
+    echo "freevo can start the following scripts, use --help on these"
+    echo "scripts to get more informations about options"
+    echo
+
+    for i in $helpers/*.py; do
+	s=`echo $i | sed "s/^$helpers.\\(.*\\).py/\\1/"`
+	if [ "$s" != "__init__" ]; then
+	    echo $s
+	fi
+    done
+    echo
+    echo "You can also create a symbolic link to free with the name of the"
+    echo "script you want to execute. E.g. put a link imdb pointing to freevo"
+    echo "in your patch to access the imdb helper script"
+    echo
     echo "Before running freevo the first time, you need to run 'freevo setup'"
     echo "After that, you can run freevo without parameter."
+    echo
     exit 0
 fi
 
