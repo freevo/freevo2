@@ -22,6 +22,7 @@ static int xres, yres;
 static XImage *pImage;
 static uint8 *pFrameBuffer;
 static int swap = 0;            /* RGB => BGR */
+static int depth = 0;           /* If 16, use soft-based conv from 32 */
 
 static void hidecursor (void);
 
@@ -47,12 +48,18 @@ x11_open (int width, int height)
       
       /* Try to get a 32-bit visual */
       if (!XMatchVisualInfo (dpy, DefaultScreen(dpy), 32, TrueColor, &visinf)) {
-         fprintf (stderr, "Cannot get a 32-bit window, exiting!\n");
-         exit (1);
+        fprintf (stderr, "Cannot get a 32-bit color window!\n");
+      	/* Try to get a 16-bit visual */
+        depth = 16;
+        
+      	if (!XMatchVisualInfo (dpy, DefaultScreen(dpy), 16, TrueColor, &visinf)) {
+          fprintf (stderr, "Cannot get a 16-bit window, exiting!\n");
+          exit (1);
+        }
       }
    }
 
-   /* If we get here we have either a 24- or 32-bit visual */
+   /* If we get here we have a 24- or 32-bit or 16-bit visual */
    printf ("Matched visual info, id = 0x%02x, depth = %d\n",
            (uint32) visinf.visualid, visinf.depth);
    
@@ -67,11 +74,21 @@ x11_open (int width, int height)
 
    printf( "Using fullscreen mode. %i %i\n", xres, yres);
    attr.override_redirect = True;
-   w = XCreateWindow (dpy, DefaultRootWindow(dpy), 0, 0,
+
+   if (depth == 16) {
+     w = XCreateWindow (dpy, DefaultRootWindow(dpy), 0, 0,
+                      xres, yres, 0, 16, InputOutput,
+                      visinf.visual,
+                      CWBackingStore | CWBackPixel | CWOverrideRedirect,
+                      &attr);
+   } else {
+     w = XCreateWindow (dpy, DefaultRootWindow(dpy), 0, 0,
                       xres, yres, 0, 24, InputOutput,
                       visinf.visual,
                       CWBackingStore | CWBackPixel | CWOverrideRedirect,
                       &attr);
+   }
+   
    memset(&old_mode, 0, sizeof(old_mode));
    XF86VidModeGetModeLine(dpy, DefaultScreen(dpy),
                           &old_dotclock, &old_mode);
@@ -91,11 +108,20 @@ x11_open (int width, int height)
 }
 #else
    printf( "Using windowed mode. %i %i\n", xres, yres);
-   w = XCreateWindow (dpy, DefaultRootWindow(dpy), xres/4, yres/4,
-                         xres, yres, 0, 24, InputOutput,
-                         visinf.visual,
-                         CWBackingStore | CWBackPixel,
-                         &attr);
+
+   if(depth == 16) {
+     w = XCreateWindow (dpy, DefaultRootWindow(dpy), xres/4, yres/4,
+                        xres, yres, 0, 16, InputOutput,
+                        visinf.visual,
+                        CWBackingStore | CWBackPixel,
+                        &attr);
+   } else {
+     w = XCreateWindow (dpy, DefaultRootWindow(dpy), xres/4, yres/4,
+                        xres, yres, 0, 24, InputOutput,
+                        visinf.visual,
+                        CWBackingStore | CWBackPixel,
+                        &attr);
+   }
 #endif
 
    XSelectInput (dpy, w, StructureNotifyMask | KeyPressMask |
@@ -118,12 +144,21 @@ x11_open (int width, int height)
    }
 
    /* X11 emulated framebuffer memory */
-   pFrameBuffer = (uint8 *) malloc (width * height * 4);
+   if (depth == 16) {
+     pFrameBuffer = (uint8 *) malloc (width * height * 2);
 
-   memset (pFrameBuffer, 0x80, width * height * 4);
+     memset (pFrameBuffer, 0x80, width * height * 2);
    
-   pImage = XCreateImage (dpy, visinf.visual, 24, ZPixmap, 0,
+     pImage = XCreateImage (dpy, visinf.visual, 16, ZPixmap, 0,
+                          pFrameBuffer, width, height, 8, width*2);
+   } else {
+     pFrameBuffer = (uint8 *) malloc (width * height * 4);
+
+     memset (pFrameBuffer, 0x80, width * height * 4);
+   
+     pImage = XCreateImage (dpy, visinf.visual, 24, ZPixmap, 0,
                           pFrameBuffer, width, height, 8, width*4);
+   }
 
    printf ("XImage: bitmap_bit_order=%d, depth=%d, bitmap_pad=%d, "
            "bits_per_pixel=%d, (%08lx, %08lx, %08lx)\n",
@@ -133,6 +168,12 @@ x11_open (int width, int height)
 
    if (pImage->red_mask == 0xff) {
       swap = 1;
+
+      if (depth == 16) {
+        fprintf (stderr, "Swapped pixels (RGB => BGR) not supported "
+                 "for 16-bit pixels!");
+        exit (1);
+      }
    }
    
    XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, width, height);
@@ -176,10 +217,16 @@ x11_update (uint8 *pFB)
    uint8 *pRedDst = (uint8 *) (&pFrameBuffer[0]);
    uint8 *pGreenDst = (uint8 *) (&pFrameBuffer[1]);
    uint8 *pBlueDst = (uint8 *) (&pFrameBuffer[2]);
-
+   uint16 *pDst = (uint16 *) pFrameBuffer;
 
    if (!swap) {
-      memcpy (pFrameBuffer, pFB, xres*yres*4);
+      if(depth == 16) {
+        for (i = 0; i < xres * yres * 4; i += 4)
+          /* convert 8888 colour to 565 for each pixel */
+          pDst[(i/4)] = (pBlueSrc[i] >> 3) +
+            ((pGreenSrc[i] >> 2) << 5) + ((pRedSrc[i] >> 3) << 11);
+      } else
+        memcpy (pFrameBuffer, pFB, xres*yres*4);
    } else {
       /* RGB => BGR conversion needed */
       for (i = 0; i < xres*yres*4; i += 4) {
