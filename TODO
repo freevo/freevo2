@@ -19,6 +19,7 @@ o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
 o clean up Docs/Notes
 o Add basic DVD navigation (titles, chapters, languages, subtitles)
 o Play audio CD-roms
+o Add generic emulator support for ZSNES, scummvm and Boycott Advance
 o Add DVD backups
   o mencoder works fine with XviD/FFMPEG, but it cannot be started from Freevo yet
 o Add a digital filter to remove 50/60 Hz line-noise from audio line input

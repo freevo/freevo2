@@ -25,7 +25,7 @@ class Logger:
     def __init__(self, logtype='(unknown)'):
         self.lineno = 1
         self.logtype = logtype
-        self.fp = open('/tmp/freevo.log', 'a') # XXX Add try...catch
+        self.fp = open('/var/log/freevo/internal.log', 'a') # XXX Add try...catch
         self.softspace = 0
         ts = time.asctime(time.localtime(time.time()))
         self.write('Starting %s at %s\n' % (logtype, ts))

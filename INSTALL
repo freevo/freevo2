@@ -27,7 +27,7 @@ o Compile and install all the programs in apps/
 o Compile Freevo
   o Requires freetype 2 (2.0.9 is preferred for now)
   o Requires libpng
-  o Requires Python >= version 2.1 (1.5 OK?)
+  o Requires Python >= version 2.1 (We've had reports of problems with 1.5.x)
   o Optionally install Python Imaging Library for cover art.
   o Test the remote using the lirc application irw, and using the 
     remote_control_lirc.py Freevo application
