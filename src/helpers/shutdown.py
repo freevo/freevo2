@@ -182,19 +182,22 @@ class Shutdown:
         return idle
 
 
-    def rpcreturn(self, return_list):
+    def rpcreturn(self, result):
         """
         Handle status.return messages.
         """
-        if isinstance(return_list, mbus.types.MError):
+        if isinstance(result, mbus.types.MError):
+            # error, entity can't answer to that request
+            return
+        if not result.appStatus:
             # error, entity can't answer to that request
             return
 
         # some debug
-        log.info('Answer from %s' % return_list[0][0])
+        log.info('Answer from %s' % result.source)
 
         # get the attributes as dict
-        attributes = dict(return_list[0][2])
+        attributes = dict(result.arguments)
 
         if attributes.has_key('idle'):
             # set minimum entity idletime
@@ -266,7 +269,7 @@ class Shutdown:
 
         # check wakeup time
         wakeup = int((self.wakeuptime - time.time()) / 60)
-        if wakeup < 0:
+        if self.wakeuptime and wakeup < 0:
             log.error('Correct buggy wakeup time from %s minutes' % wakeup)
             wakeup = 10
 
@@ -281,7 +284,7 @@ class Shutdown:
             # set a new timer
             self.timer = notifier.addTimer(wait * 60000, self.check_mbus)
             # reset counter
-            self.shutdown_counter = 6
+            self.shutdown_counter = max(self.shutdown_counter, 6)
             return False
 
         # Wakeup seems possible based on the mbus entities, check important
@@ -291,8 +294,9 @@ class Shutdown:
             log.info('Next check in 5 minutes')
             # reschedule checking
             self.timer = notifier.addTimer(5 * POLL_INTERVALL, self.check_mbus)
-            # reset counter
-            self.shutdown_counter = 6
+            # set counter to 31 ( == 30 minutes after important the program
+            # has quit)
+            self.shutdown_counter = 31
             return False
 
         # check logins based on 'who' next
@@ -308,7 +312,7 @@ class Shutdown:
                 # set a new timer
                 self.timer = notifier.addTimer(wait * 60000, self.check_mbus)
                 # reset counter
-                self.shutdown_counter = 6
+                self.shutdown_counter = max(self.shutdown_counter, 6)
                 return False
         except:
             # maybe the 'who' parser is buggy
