@@ -246,7 +246,7 @@ class CanvasObject(object):
 		self.set_pos( (x, y) )
 
 
-	def move_relative( (offset_x, offset_y) ):
+	def move_relative(self, (offset_x, offset_y) ):
 		x, y = self.get_pos()
 		return self.move( (x + offset_x, y + offset_y) )
 
