@@ -4,7 +4,7 @@
 # This file contains utility functions for Freevo
 #
 import sys
-import socket
+import socket, glob
 import random
 import termios, tty, time, os
 import string, popen2, fcntl, select, struct
@@ -16,6 +16,29 @@ import fcntl
 import config
 
 
+#
+# Get all subdirectories in the given directory
+#
+#
+def getdirnames(dir):
+    files = glob.glob(dir + '/*')
+    dirnames = filter(lambda d: os.path.isdir(d), files)
+    dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    return dirnames
+
+
+#
+# Find all files in a directory that matches a list of glob.glob() rules.
+# It returns a list that is case insensitive sorted.
+#
+def match_files(dir, suffix_list):
+    files = []
+    for suffix in suffix_list:
+        files += glob.glob(dir + suffix)
+    files.sort(lambda l, o: cmp(l.upper(), o.upper()))
+    return files
+    
+    
 def strip_suffix(str):
     pos = str.rfind('.')
     if pos == -1:

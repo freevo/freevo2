@@ -48,6 +48,15 @@ def ConfigInit(videotools = 'sim'):
         VIDREC_MQ = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 -vg 300 -vb 800 -H 50 -o %s'
         
 #
+# The list of filename suffixes that are used to match the files that
+# are played wih MPlayer. They are used as the argument to glob.glob()
+# 
+SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
+                         '/*.[mM][pP][gG]',
+                         '/*.[mM][pP][eE][gG]',
+                         '/*.[bB][iI][nN]' ]
+
+#
 # OSD server, standalone application in osd_server/
 #
 OSD_HOST = '127.0.0.1'      # The remote host
@@ -65,6 +74,13 @@ REMOTE_CONTROL_PORT = 16310
 # The mpg123 application
 #
 MPG123_APP = '/usr/bin/mpg123'
+
+#
+# The list of filename suffixes that are used to match the files that
+# are played wih mpg123. They are used as the argument to glob.glob()
+# 
+SUFFIX_MPG123_FILES = [ '/*.[mM][pP]3' ]
+SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 
 #
 # Watching TV

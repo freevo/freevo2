@@ -6,7 +6,7 @@
 
 import sys
 import random
-import time, os, glob
+import time, os
 import string, popen2, fcntl, select, struct
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -31,38 +31,6 @@ FALSE = 0
 # Create the mpg123 object
 mpg123 = mpg123.get_singleton()
 
-
-#
-# Get all mp3 files in the directory
-#
-#
-def getsoundfiles(dir):
-    files = glob.glob(dir + '/*.[mM][pP]3')
-    files.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return files
-
-
-#
-# Get all playlists in the directory
-#
-#
-def getplaylists(dir):
-    files = glob.glob(dir + '/*.[mM]3[uU]')
-    files.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return files
-
-
-#
-# Get all subdirectories in the given directory
-#
-#
-def getdirnames(dir):
-    files = glob.glob(dir + '/*')
-    dirnames = filter(lambda d: os.path.isdir(d), files)
-    dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return dirnames
-
-        
 
 #
 # Play an MP3 file using the slave mode interface in the mpg123 application.
@@ -94,9 +62,9 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     dir = arg
 
-    dirnames = getdirnames(dir)
-    playlists = getplaylists(dir)
-    files = getsoundfiles(dir)
+    dirnames = util.getdirnames(dir)
+    playlists = util.match_files(dir, config.SUFFIX_MPG123_PLAYLISTS)
+    files = util.match_files(dir, config.SUFFIX_MPG123_FILES)
 
     items = []
 

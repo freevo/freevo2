@@ -6,7 +6,7 @@
 
 import sys
 import random
-import time, os, glob
+import time, os
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -29,29 +29,6 @@ FALSE = 0
 
 # Create the mplayer object
 mplayer = mplayer.get_singleton()
-
-
-#
-# Get all movie files in the directory
-#
-#
-def getmoviefiles(dir):
-    files = glob.glob(dir + '/*.[aA][vV][iI]')
-    files += glob.glob(dir + '/*.[mM][pP][gG]')
-    files += glob.glob(dir + '/*.[mM][pP][eE][gG]')
-    files.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return files
-
-
-#
-# Get all subdirectories in the given directory
-#
-#
-def getdirnames(dir):
-    files = glob.glob(dir + '/*')
-    dirnames = filter(lambda d: os.path.isdir(d), files)
-    dirnames.sort(lambda l, o: cmp(l.upper(), o.upper()))
-    return dirnames
 
 
 #
@@ -84,8 +61,8 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     dir = arg
 
-    dirnames = getdirnames(dir)
-    files = getmoviefiles(dir)
+    dirnames = util.getdirnames(dir)
+    files = util.match_files(dir, config.SUFFIX_MPLAYER_FILES)
 
     items = []
 
