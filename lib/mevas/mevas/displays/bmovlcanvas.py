@@ -10,12 +10,17 @@ class BmovlCanvas(BitmapCanvas):
 		self._update_rect = None
 		self.fifo = os.open('/tmp/bmovl-%s' % os.getpid(), os.O_WRONLY)
 		self.bmovl_visible = True
+		self.send('SHOW\n')
+
+
+	def send(self, msg):
 		try:
-			os.write(self.fifo, 'SHOW\n')
+			os.write(self.fifo, msg)
+			return True
 		except (IOError, OSError):
 			print 'IOError on bmovl.fifo'
-
-
+			return False
+		
 	def has_visible_child(self):
 		for c in self.children:
 			if c.visible and c.get_alpha():
@@ -32,33 +37,23 @@ class BmovlCanvas(BitmapCanvas):
 
 		if self.bmovl_visible and not self.has_visible_child():
 			print 'bmovl hide'
-			try:
-				os.write(self.fifo, 'HIDE\n')
-				os.write(self.fifo, 'CLEAR %s %s 0 0\n' % \
-					 (self.width, self.height))
-			except (IOError, OSError):
-				print 'IOError on bmovl.fifo'
+			self.send('HIDE\n')
+			self.send('CLEAR %s %s 0 0\n' % \
+				  (self.width, self.height))
 			self.bmovl_visible = False
 			return
 		
 		pos, size = self._update_rect
 		img = imagelib.crop(self._backing_store, pos, size)
-		try:
-			print 'bmovl update', pos, size
-			os.write(self.fifo, 'RGBA32 %d %d %d %d %d %d\n' % \
-				 (size[0], size[1], pos[0], pos[1], 0, 0))
-
-			os.write(self.fifo, str(img.get_raw_data('RGBA')))
-		except (IOError, OSError):
-			print 'IOError on bmovl.fifo'
+		print 'bmovl update', pos, size
+		self.send('RGBA32 %d %d %d %d %d %d\n' % \
+			  (size[0], size[1], pos[0], pos[1], 0, 0))
+		self.send(str(img.get_raw_data('RGBA')))
 		self._update_rect = None
 
 		if not self.bmovl_visible and self.has_visible_child():
 			print 'bmovl show'
-			try:
-				os.write(self.fifo, 'SHOW\n')
-			except (IOError, OSError):
-				print 'IOError on bmovl.fifo'
+			self.send('SHOW\n')
 			self.bmovl_visible = True
 
 
