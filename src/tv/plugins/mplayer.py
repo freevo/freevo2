@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/04 23:01:44  rshortt
+# Some event fixes but I can't test them with my card.
+#
 # Revision 1.5  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -103,6 +106,7 @@ class MPlayer:
         self.thread.setDaemon(1)
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
+        self.app_mode = 'tv'
 
 
     def TunerSetChannel(self, tuner_channel):
@@ -323,9 +327,9 @@ class MPlayer:
             
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
-                self.TunerPrevChannel()
-            else:
                 self.TunerNextChannel()
+            else:
+                self.TunerPrevChannel()
 
             new_channel = self.TunerGetChannel()
             self.thread.app.write('tv_set_channel %s\n' % new_channel)
