@@ -86,8 +86,13 @@ class OSD:
         self._send('setpixel;' + args)
 
         
-    def drawbitmap(self, filename, x=-1, y=-1):
-        args = filename + ';' + str(x) + ';' + str(y)
+    def drawbitmap(self, filename, x=-1, y=-1, scaling=None):
+        if scaling == None:
+            zoom = 1000
+        else:
+            zoom = int(scaling * 1000)
+            
+        args = filename + ';' + str(x) + ';' + str(y) + ';' + str(zoom)
         self._send('drawbitmap;' + args)
 
         

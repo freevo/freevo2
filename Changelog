@@ -7,6 +7,7 @@ $Id$
 Release 1.2.5 (2002-XX-XX):
 ---------------------------
 o Added JPEG support to the OSD server
+o Added bitmap scaling support to the OSD server
 
 
 Release 1.2.4 (2002-07-10):

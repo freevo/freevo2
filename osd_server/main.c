@@ -61,13 +61,16 @@ static uint8 framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH][4]; /* BGR0 */
 
 void osd_close (void);
 void osd_update (void);
-void osd_drawbitmap (char *filename, int x0, int y0);
+void osd_drawbitmap (char *filename, int x0, int y0, int scalefactor);
 void osd_drawline (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_clearscreen (int color);
 void osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
                      uint32 fgcol, int *width);
 static int strcasecmp_tail (char *str, char *tail);
+static void
+resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
+              uint32 **ppScaledBM, uint16 *pScaledRows, uint16 *pScaledCols);
 
 
 void
@@ -146,7 +149,7 @@ executecommand (char command[], char args[][1000], int argc)
 
   if (!strcmp ("drawbitmap", command)) {
     printf ("Exec: drawbitmap\n");
-    osd_drawbitmap (args[0], atoi (args[1]), atoi (args[2]));
+    osd_drawbitmap (args[0], atoi (args[1]), atoi (args[2]), atoi (args[3]));
   }
 
   if (!strcmp ("drawline", command)) {
@@ -356,9 +359,10 @@ strcasecmp_tail (char *str, char *tail)
   
 }
 
-/* Draw a bitmap at the specified x0;y0. PNG and JPEG are supported */
+/* Draw a bitmap at the specified x0;y0. PNG and JPEG are supported.
+ * Scaling = (scalefactor / 1000), i.e. 500 means half size. */
 void
-osd_drawbitmap (char *filename, int x0, int y0)
+osd_drawbitmap (char *filename, int x0, int y0, int scalefactor)
 {
    uint32 *pBM, *pBMorg, val;
    uint16 w, h, bmx, bmy;
@@ -380,9 +384,27 @@ osd_drawbitmap (char *filename, int x0, int y0)
      DBG ("Filename '%s', unrecognized suffix!", filename);
      return;
    }
-   
+
    pBMorg = pBM;
 
+   /* Perform scaling, if any */
+   if (scalefactor != 1000) {
+     double zoom = scalefactor / 1000.0;
+     uint32 *pScaledBM;
+     uint16 sw, sh;             /* Scaled width and height */
+
+     
+     resizebitmap (pBM, h, w, zoom, &pScaledBM, &sh, &sw);
+     free (pBM);
+
+     DBG ("Scaled bitmap. Zoom = %d, org size %dx%d, new size %dx%d",
+          scalefactor, w, h, sw, sh);
+
+     pBMorg = pBM = pScaledBM;
+     w = sw;
+     h = sh;
+   }
+   
    /* Should the bitmap be tiled? */
    if ((x0 == -1) || (y0 == -1)) {
       /* Yes, tile it */
@@ -609,5 +631,101 @@ main (int ac, char *av[])
    osd_close ();
    
    exit (0);
+  
+}
+
+
+/* Allocs an output image buffer, into which a scaled version of the input
+ * image is written. The output buffer must be free()-d by the caller! */
+static void
+resizebitmap (uint32 *pBM, uint16 rows, uint16 cols, double zoom,
+              uint32 **ppScaledBM, uint16 *pScaledRows, uint16 *pScaledCols)
+{
+  int x, y;
+  int ddax, dday, izoom, i, j, k;
+  int new_cols = 0, last_row;
+  uint32 *pTmp, *pLine;
+  
+
+  /* Calculate the differential amount */
+  izoom = (int) ((1.0/zoom) * 1000);
+
+  DBG ("zoom = %f, %dx%d", zoom, (int) (zoom * cols + 10),
+       (int) (zoom * rows + 10));
+       
+  /* Allocate a buffer for the scaled image, and a line buffer. */
+  /* XXX The +10 is a fudge factor, don't know the exact formula, but this seems to be big enough for now! */
+  pTmp = (uint32 *) malloc((zoom * cols + 10) * (zoom * rows + 10) * 4);
+  pLine = (uint32 *) malloc((zoom * cols + 10) * 4);
+
+  if (!pTmp) {
+    EXIT ("malloc() error!");
+  }
+  
+  /* Initialize the output Y value and vertical differential */
+  x = 0;
+  y = 0;
+  dday = 0;
+
+  /* Loop over rows in the original image */
+  for (i = 0; i < rows; i++) {
+    
+    /* Adjust the vertical accumulated differential, initialize the
+     * output X pixel and horizontal accumulated differential */
+    dday -= 1000;
+    x = 0;
+    ddax = 0;
+    
+    /* Loop over pixels in the original image */
+    for (j = 0; j < cols; j++) {
+
+      
+      /* Adjust the horizontal accumulated differential */
+      ddax -= 1000;
+
+      while (ddax < 0) {
+        /* Store RGBA values from the original image scanline into the scaled
+        ** buffer until accumulated differential crosses threshold */
+        pLine[x] = pBM[i*cols + j];
+
+        x++;
+        ddax += izoom;
+      }
+    }
+
+    /* Set the scaled cols variable. It will be the same for each iteration, and
+     * not needed on the first iteration */
+    new_cols = x;
+
+    if (i == 0) DBG ("new_cols = %d", new_cols);
+
+    /* The last converted scanline */
+    last_row = y;
+
+    while (dday < 0) {
+
+      /* The 'outer loop' -- output resized scan lines until the
+       * vertical threshold is crossed */
+      dday += izoom;
+
+      for (k = 0; k < new_cols; k++) {
+        uint32 *pDst;
+
+        
+        /* Duplicate a whole converted scanline */
+        pDst = &(pTmp[y*new_cols]);
+        memcpy (pDst, pLine, new_cols*4);
+      }
+      y++;
+    }
+  }
+
+  /* Output parameters */
+  *ppScaledBM = pTmp;
+  *pScaledRows = y;
+  *pScaledCols = x;
+
+  /* Done */
+  return;
   
 }
