@@ -80,10 +80,10 @@ LOCAL_CONF_CHANGES = [
     (2.1,
      '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.'''),
     (3.0,
-     '''New skin engine. The new engine has no automatic TV overscan support, you
-     need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables for this
-     engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu will be activated
-     automaticly if setup.py found mame or snes''')]
+     '''New skin engine. The new engine has no automatic TV overscan support,
+     you need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables
+     for this engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu
+     will be activated automaticly if setup.py found mame or snes''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
