@@ -15,6 +15,12 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/06/21 12:21:00  outlyer
+# Ouch... there isn't a <bt> tag, but supporting the <br> tag would be a
+# good idea ;) Ditto for the 'XHTML' version, <br/>
+#
+# Works properly now.
+#
 # Revision 1.15  2003/12/06 13:47:28  dischi
 # changes to the new draw function in skin
 #
@@ -254,7 +260,8 @@ class HeadlinesSiteItem(Item):
 
             description = description.replace('\n\n', '&#xxx;').replace('\n', ' ').\
                           replace('&#xxx;', '\n')
-            description = description.replace('<p>', '\n').replace('<bt>', '\n')
+            description = description.replace('<p>', '\n').replace('<br>', '\n')
+            description = description.replace('<p>', '\n').replace('<br/>', '\n')
             description = description + '\n \n \nLink: ' + link
             description = util.htmlenties2txt(description)
 
