@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2002/09/23 19:01:06  dischi
+# o Added alignment from the xml file for fonts
+# o Added PopupBox from gui classes (looks better)
+# o cleanup: improved DrawText(...) and now the code looks much
+#   better, also alignment works for all texts
+#
 # Revision 1.25  2002/09/23 18:16:48  dischi
 # removed shadow mode
 #
@@ -88,6 +94,7 @@ import mixer
 
 # The OSD class, used to communicate with the OSD daemon
 import osd
+import gui
 
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
@@ -221,42 +228,48 @@ class Skin:
 
     def PopupBox(self, text=None, icon=None):
         """
-        Trying to make a standard popup/dialog box for various usages.
-        Currently it just draws itself in the middle of the screen.
+        text  STring to display
 
-        Arguments: Text, the text to print.
-        Returns:   None
-        Todo:      Should be able to calculate size of box to draw.
-                   Maybe be able to set size manually as well.
-                   It'd look nice to have an icon drawn for some events
-                   such as ejects.
+        Draw a popupbox with an optional icon and a text.
+        
+        Notes: Should maybe be named print_message or show_message.
+               Maybe I should use one common box item.
         """
-        start_x = osd.width/2 - 180
-        start_y = osd.height/2 - 30
-        end_x   = osd.width/2 + 180
-        end_y   = osd.height/2 + 30
+        left   = (osd.width/2)-180
+        top    = (osd.height/2)-30
+        width  = 360
+        height = 60
+        icn    = icon
+        bd_w   = 2
+        bg_c   = gui.Color(osd.default_bg_color)
+        fg_c   = gui.Color(osd.default_fg_color)
 
-        # XXX This is a hack to get a border around a white box to look
-        # XXX nicer.
-        osd.drawbox(start_x-2, start_y-2, end_x+2, end_y+2, width=2,
-                    color=osd.COL_BLACK)
-        osd.drawbox(start_x, start_y, end_x, end_y, width=-1,
-                    color=((60 << 24) | osd.COL_WHITE))
-        osd.drawstring(text, start_x+20, start_y+10,
-                       fgcolor=osd.COL_BLACK, bgcolor=osd.COL_WHITE)
+        bg_c.set_alpha(192)
+
+        pb = gui.PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
+                          fg_color=fg_c, border='flat', bd_width=bd_w)
+
+        pb.set_text(text)
+        pb.set_h_align(gui.Label.CENTER)
+        pb.set_font('skins/fonts/bluehigh.ttf', 24)
+        pb.show()
+        
+        osd.update()
         
 
-
-    def DrawText(self, text, x, y, color, shadow_color = 0x000000,
-                 bgcolor = None, font = None, ptsize = None,
-                 drop_shadow=None, shadow_pad_x=2, shadow_pad_y=2):
-        
-        if drop_shadow:
-            osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y,
-                           shadow_color, bgcolor, font, ptsize)
-                
-        osd.drawstring(text, x, y, color, None, font, ptsize)
-
+    # Draws a text based on the settings in the XML file
+    def DrawText(self, text, settings, x=-1, y=-1):
+        if x == -1:
+            x = settings.x
+        if y == -1:
+            y = settings.y
+            
+        if settings.shadow_visible:
+            osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
+                           settings.shadow_color, None, settings.font,
+                           settings.size, settings.align)
+        osd.drawstring(text, x, y, settings.color, None, settings.font,
+                       settings.size, settings.align)
 
 
     def DrawMenu_Cover(self, menuw, settings):
@@ -378,9 +391,7 @@ class Skin:
             # TV show, align the text with all files from the same show
             if show_name[0]:
                 x = x0
-                self.DrawText(show_name[0], x, top, obj.color, obj.shadow_color, None,
-                              obj.font, obj.size, obj.shadow_visible, 
-                              obj.shadow_pad_x, obj.shadow_pad_y)
+                self.DrawText(show_name[0], obj, x=x, y=top)
 
                 season_w = 0
                 volume_w = 0
@@ -398,26 +409,16 @@ class Skin:
                     osd.stringsize('%s  ' % show_name[0], font=obj.font, \
                                    ptsize=obj.size)[0] - season_w + \
                     osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
-                
-                self.DrawText('%sx%s' % (show_name[1], show_name[2]), x, top,
-                              obj.color, obj.shadow_color, None, obj.font,
-                              obj.size, obj.shadow_visible, 
-                              obj.shadow_pad_x, obj.shadow_pad_y)
+                self.DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top)
 
                 x = x + season_w + volume_w + \
                     osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
-
-                self.DrawText('-  %s' % show_name[3], x, top,
-                              obj.color, obj.shadow_color, None, obj.font, obj.size,
-                              obj.shadow_visible, obj.shadow_pad_x,
-                              obj.shadow_pad_y)
+                self.DrawText('-  %s' % show_name[3], obj, x=x, y=top)
                 
 
             # normal items
             else:
-                self.DrawText(text, x0, top, obj.color, obj.shadow_color, None, obj.font,
-                              obj.size, obj.shadow_visible,
-                              obj.shadow_pad_x, obj.shadow_pad_y)
+                self.DrawText(text, obj, x=x0, y=top)
 
             # draw icon
             if choice.icon != None:
@@ -461,17 +462,9 @@ class Skin:
             if val.title.text:
                 menu.heading = val.title.text
 
-            # x == -1 is a magic value for center alignment
-            if val.title.x == -1:
-                al = 'center'
-                tx = osd.width / 2
-            else:
-                al = 'left'
-                tx = val.title.x
-
-            osd.drawstring(menu.heading, tx, val.title.y, val.title.color,
+            osd.drawstring(menu.heading, val.title.x, val.title.y, val.title.color,
                            font=val.title.font,
-                           ptsize=val.title.size, align=al)
+                           ptsize=val.title.size, align=val.title.align)
             
 
         # Draw the menu choices for the main selection
@@ -502,19 +495,10 @@ class Skin:
                             width=-1,
                             color=((160 << 24) | val.submenu.selection.bgcolor))
                 
-                self.DrawText(item.name, x0, y0, val.submenu.selection.color, 
-                              val.submenu.selection.shadow_color, None,
-                              val.submenu.selection.font,
-                              val.submenu.selection.size,
-                              val.submenu.selection.shadow_visible,
-                              val.submenu.selection.shadow_pad_x,
-                              val.submenu.selection.shadow_pad_y)
+                self.DrawText(item.name, val.submenu.selection, x=x0, y=y0)
                 
             else:
-                self.DrawText(item.name, x0, y0, val.submenu.color, 
-                              val.submenu.shadow_color, None, val.submenu.font,
-                              val.submenu.size, val.submenu.shadow_visible,
-                              val.submenu.shadow_pad_x, val.submenu.shadow_pad_y)
+                self.DrawText(item.name, val.submenu, x=x0, y=y0)
             x0 += 190
 
         osd.update()
@@ -555,9 +539,9 @@ class Skin:
         if val.title.visible:
             if val.title.text:
                 menu.heading = val.title.text
-            osd.drawstring(menu.heading, osd.width/2, val.title.y,
+            osd.drawstring(menu.heading, val.title.x, val.title.y,
                            val.title.color, font=val.title.font,
-                           ptsize=val.title.size, align='center')
+                           ptsize=val.title.size, align=val.title.align)
 
         # Sub menus
         icon_size = 25
@@ -658,19 +642,9 @@ class Skin:
                             width=-1, color=((160 << 24) |
                                              val.submenu.selection.bgcolor))
                 
-                self.DrawText(item.name, x0, y0, val.submenu.selection.color, 
-                              val.submenu.selection.shadow_color, None,
-                              val.submenu.selection.font,
-                              val.submenu.selection.size,
-                              val.submenu.selection.shadow_visible,
-                              val.submenu.selection.shadow_pad_x,
-                              val.submenu.selection.shadow_pad_y)
-                
+                self.DrawText(item.name, val.submenu.selection, x=x0, y=y0)
             else:
-                self.DrawText(item.name, x0, y0, val.submenu.color, 
-                              val.submenu.shadow_color, None, val.submenu.font,
-                              val.submenu.size, val.submenu.shadow_visible,
-                              val.submenu.shadow_pad_x, val.submenu.shadow_pad_y)
+                self.DrawText(item.name, val.submenu, x=x0, y=y0)
             x0 += 190
 
         osd.update()
@@ -689,17 +663,9 @@ class Skin:
                 apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
             
             if val.title.visible:
-                # x == -1 is a magic value for center alignment
-                if val.title.x == -1:
-                    al = 'center'
-                    tx = osd.width / 2
-                else:
-                    al = 'left'
-                    tx = val.title.x
-
-                osd.drawstring('Playing Music', tx, val.title.y,
+                osd.drawstring('Playing Music', val.title.x, val.title.y,
                                val.title.color, font=val.title.font,
-                               ptsize=val.title.size, align=al)
+                               ptsize=val.title.size, align=val.title.align)
 
 
             # Display the cover image file if it is present
@@ -714,64 +680,25 @@ class Skin:
 
             file_name = file_name[i+1]
             py = val.progressbar.y
-            self.DrawText('Dir: '+dir_name, 5, py + 20, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
-            self.DrawText('File: '+file_name, 5, py + 40, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Dir: '+dir_name, val, x=5, y=(py + 20))
+            self.DrawText('File: '+file_name, val, 5, y=(py + 40))
                 
-            self.DrawText('Title:', 30, 100, val.font.color, val.shadow.color,
-                          None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
-            self.DrawText('%s ' % info.title, left, 100, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Title:', val, x=30, y=100)
+            self.DrawText('%s ' % info.title, val, x=left, y=100)
  
-            self.DrawText('Artist:', 30, 130, val.font.color, val.shadow.color,
-                          None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
-            self.DrawText('%s ' % info.artist, left, 130, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Artist:', val, x=30, y=130)
+            self.DrawText('%s ' % info.artist, val, x=left, y=130)
 
-            self.DrawText('Album:', 30, 160, val.font.color, val.shadow.color,
-                          None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
-            self.DrawText('%s ' % info.album, left, 160, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Album:', val, x=30, y=160)
+            self.DrawText('%s ' % info.album, val, x=left, y=160)
         
-            self.DrawText('Year:', 30, 190, val.font.color, val.shadow.color,
-                          None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
-            self.DrawText('%s ' % info.year, left, 190, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Year:', val, x=30, y=190)
+            self.DrawText('%s ' % info.year, val, x=left, y=190)
 
-            self.DrawText('Track:', 30, 220, val.font.color, val.shadow.color,
-                          None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
-            self.DrawText('%s ' % info.track, left, 220, val.font.color,
-                          val.shadow.color, None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Track:', val, x=30, y=220)
+            self.DrawText('%s ' % info.track, val, x=left, y=220)
 
-            self.DrawText('Time:', 30, 250, val.font.color, val.shadow.color,
-                          None, val.font.font, val.font.size,
-                          val.shadow.visible, val.shadow.x,
-                          val.shadow.y)
+            self.DrawText('Time:', val, x=30, y=250)
 
                 
         else:
@@ -789,9 +716,7 @@ class Skin:
 
         str = '%s:%02d/-%s:%02d (%0.1f%%) ' % (el_min, el_sec, rem_min,
                                                rem_sec, info.done)
-        self.DrawText(str, left, 250, val.font.color, val.shadow.color, None,
-                      val.font.font, val.font.size, val.shadow.visible,
-                      val.shadow.x, val.shadow.y)
+        self.DrawText(str, val, x=left, y=250)
 
         # Draw the progress bar
         if val.progressbar.visible:
