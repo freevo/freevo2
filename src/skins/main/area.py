@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/01/01 16:03:53  dischi
+# use vfs.open because it creates the needed dirs
+#
 # Revision 1.23  2004/01/01 12:25:48  dischi
 # use pickle to cache the large background images
 #
@@ -644,7 +647,7 @@ class Skin_Area:
                         if image:
                             image = pygame.transform.scale(image,(bg.width,bg.height))
                         if image and config.OVERLAY_DIR:
-                            f = open(cache, 'w')
+                            f = vfs.open(cache, 'w')
                             f.write(pygame.image.tostring(image, 'RGBA'))
                             f.close()
                         self.imagecache[cname] = image
