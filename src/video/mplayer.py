@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/03 20:01:53  dischi
+# improved dvdnav support
+#
 # Revision 1.4  2002/12/01 20:53:03  dischi
 # Added better support for mov files. This _only_ works with the mplayer
 # CVS for now
@@ -105,12 +108,13 @@ class MPlayer:
         self.mode = None
 
                          
-    def play(self, filename, options, item):
+    def play(self, filename, options, item, mode = None):
         """
         play a audioitem with mplayer
         """
 
-        mode = item.mode
+        if not mode:
+            mode = item.mode
 
         # Is the file streamed over the network?
         if filename.find('://') != -1:
@@ -287,6 +291,7 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
         print event
+
         if event == rc.STOP or event == rc.SELECT:
             if self.mode == 'dvdnav':
                 self.thread.app.write('S')
@@ -295,6 +300,13 @@ class MPlayer:
                 self.thread.item = None
                 rc.app = None
                 menuwidget.refresh()
+            return TRUE
+
+        if event == rc.EXIT:
+            self.stop()
+            self.thread.item = None
+            rc.app = None
+            menuwidget.refresh()
             return TRUE
         
         if event == rc.PLAY_END:
