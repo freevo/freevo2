@@ -30,7 +30,7 @@
 # it easier to update this file. When you get a new version of Freevo,
 # Freevo will tell you any changes made in freevo_config.py. After you
 # merged those changes into this file, set this number to the new one.
-LOCAL_CONF_VERSION  = 3.7
+CONFIG_VERSION  = 3.91
 
 
 # ======================================================================
