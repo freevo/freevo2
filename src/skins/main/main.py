@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/01/01 12:26:15  dischi
+# use pickle to cache parsed skin files
+#
 # Revision 1.27  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -30,21 +33,6 @@
 # o all objects that need a skin need to register what they areas they need
 # o remove all 'player' and 'tv' stuff to make it more generic
 # o renamed some skin function names
-#
-# Revision 1.21  2003/11/29 11:27:41  dischi
-# move objectcache to util
-#
-# Revision 1.20  2003/11/28 20:08:58  dischi
-# renamed some config variables
-#
-# Revision 1.19  2003/11/22 20:34:23  dischi
-# use new vfs
-#
-# Revision 1.18  2003/11/22 12:02:11  dischi
-# make the skin blankscreen a real plugin area
-#
-# Revision 1.17  2003/10/31 17:00:20  dischi
-# splashscreen for bsd
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -112,7 +100,6 @@ class Skin:
         self.force_redraw  = True
         self.last_draw     = None, None, None
         self.screen        = screen.get_singleton()
-        self.xml_cache     = util.objectcache.ObjectCache(3, desc='xmlskin')
         self.areas         = {}
 
         # load default areas
@@ -133,7 +120,8 @@ class Skin:
         if not self.settings.load(config.SKIN_XML_FILE):
             print "skin not found, using fallback skin"
             self.settings.load('blue.fxd')
-        
+            config.SKIN_XML_FILE = 'blue.fxd'
+            
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.fxd' % dir
             if os.path.isfile(local_skin):
@@ -142,6 +130,53 @@ class Skin:
                 break
 
 
+    def save_cache(self, settings, filename):
+        """
+        cache the fxd skin settings in 'settings' to the OVERLAY_DIR cachfile
+        for filename and this resolution
+        """
+        cache = vfs.getoverlay('%s.skin-%sx%s' % (filename, osd.width, osd.height))
+        if cache:
+            # delete font object, because it can't be pickled
+            for f in settings.font:
+                del settings.font[f].font
+            # save object and version information
+            util.save_pickle((xml_skin.FXD_FORMAT_VERSION, settings), cache)
+            # restore font object
+            for f in settings.font:
+                settings.font[f].font = osd.getfont(settings.font[f].name,
+                                                    settings.font[f].size)
+            
+
+    def load_cache(self, filename):
+        """
+        load a skin cache file
+        """
+        cache = vfs.getoverlay('%s.skin-%sx%s' % (filename, osd.width, osd.height))
+        if not cache:
+            return None
+
+        if not os.path.isfile(cache):
+            return None
+        
+        version, settings = util.read_pickle(cache)
+        if not settings or version != xml_skin.FXD_FORMAT_VERSION:
+            return None
+
+        # check if all files used by the skin are not newer than
+        # the cache file
+        ftime = os.stat(cache)[stat.ST_MTIME]
+        for f in settings.fxd_files:
+            if os.stat(f)[stat.ST_MTIME] > ftime:
+                return None
+
+        # restore the font objects
+        for f in settings.font:
+            settings.font[f].font = osd.getfont(settings.font[f].name,
+                                                settings.font[f].size)
+        return settings
+
+        
     def register(self, type, areas):
         """
         register a new type objects to the skin
@@ -174,24 +209,18 @@ class Skin:
         else:
             return None
 
+        settings = self.load_cache(filename)
+        if settings:
+            return settings
+            
         if copy_content:
-            cname = '%s%s%s' % (str(self.settings), filename,
-                                os.stat(filename)[stat.ST_MTIME])
-            settings = self.xml_cache[cname]
-            if not settings:
-                settings = copy.copy(self.settings)
-                if not settings.load(filename, copy_content, clear=True):
-                    return None
-                self.xml_cache[cname] = settings
+            settings = copy.copy(self.settings)
         else:
-            cname = '%s%s' % (filename, os.stat(filename)[stat.ST_MTIME])
-            settings = self.xml_cache[cname]
-            if not settings:
-                settings = xml_skin.XMLSkin()
-                if not settings.load(filename, copy_content, clear=True):
-                    return None
-                self.xml_cache[cname] = settings
+            settings = xml_skin.XMLSkin()
 
+        if not settings.load(filename, copy_content, clear=True):
+            return None
+        self.save_cache(settings, filename)
         return settings
     
 
