@@ -9,8 +9,32 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.26  2003/11/24 13:17:48  rshortt
-# Reverting to r1.23 until we sort out some nasties.
+# Revision 1.27  2003/11/25 09:36:13  krister
+# Manual merge of rshortt:s new channel handling code
+#
+# Revision 1.26.2.3  2003/11/25 01:24:12  rshortt
+# Some further fixes and improvements, aldo removed MPLAYER_DEBUG since
+# ChildApp does this now.
+#
+# Please test if you can.  VideoGroup configuration is still much undocumented
+# but I am planning to do so.  Ping me if you need a quick hand.
+#
+# To test this you must check it out by:
+# cvs update -r rob src/tv/plugins/mplayer.py
+#
+# Revision 1.26.2.2  2003/11/24 17:16:40  rshortt
+# Bugfixes.
+#
+# Revision 1.26.2.1  2003/11/24 13:25:00  rshortt
+# Some unstable changes on a branch.
+#
+# Revision 1.24  2003/11/23 19:53:01  rshortt
+# Move some code into src/tv/channels.py and also make use of Freevo's
+# frequency tables (and custom frequencies).
+#
+# This plugin indirectly makes use of the new VIDEO_GROUPS config item.
+#
+# Please test.  I don't have the setup to test this myself.
 #
 # Revision 1.23  2003/11/06 06:08:38  krister
 # Added testcode for viewing the VCR/Composite1 input on the TV card
@@ -74,7 +98,8 @@ import rc      # The RemoteControl class.
 import event as em
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
-
+from tv.channels import FreevoChannels
+ 
 import plugin
 
 # Set to 1 for debug output
@@ -108,126 +133,53 @@ class MPlayer:
         self.thread.stop_osd = True
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
-
-    def TunerSetChannel(self, tuner_channel):
-        for pos in range(len(config.TV_CHANNELS)):
-            channel = config.TV_CHANNELS[pos]
-            if channel[2] == tuner_channel:
-                self.tuner_chidx = pos
-                return
-        print 'ERROR: Cannot find tuner channel "%s" in the TV channel listing' % tuner_channel
-        self.tuner_chidx = 0
+        self.fc = FreevoChannels()
+        self.current_vg = None
 
 
-    def TunerGetChannelInfo(self):
-        '''Get program info for the current channel'''
-        
-        tuner_id = config.TV_CHANNELS[self.tuner_chidx][2]
-        chan_name = config.TV_CHANNELS[self.tuner_chidx][1]
-        chan_id = config.TV_CHANNELS[self.tuner_chidx][0]
-
-        channels = epg.get_guide().GetPrograms(start=time.time(),
-                                               stop=time.time(), chanids=[chan_id])
-
-        if channels and channels[0] and channels[0].programs:
-            start_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].start))
-            stop_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].stop))
-            ts = '(%s-%s)' % (start_s, stop_s)
-            prog_info = '%s %s' % (ts, channels[0].programs[0].title)
-        else:
-            prog_info = 'No info'
-            
-        return tuner_id, chan_name, prog_info
-
-
-    def TunerGetChannel(self):
-        return config.TV_CHANNELS[self.tuner_chidx][2]
-
-
-    def TunerNextChannel(self):
-        self.tuner_chidx = (self.tuner_chidx+1) % len(config.TV_CHANNELS)
-
-
-    def TunerPrevChannel(self):
-        self.tuner_chidx = (self.tuner_chidx-1) % len(config.TV_CHANNELS)
-
-        
     def Play(self, mode, tuner_channel=None, channel_change=0):
 
-        if tuner_channel != None:
+        if not tuner_channel:
+            tuner_channel = self.fc.getChannel()
             
-            try:
-                self.TunerSetChannel(tuner_channel)
-            except ValueError:
-                pass
+        tuner_freq = self.fc.chanSet(tuner_channel, app='mplayer')
+        vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
+
+
+        # Convert to MPlayer TV setting strings
+        norm = 'norm=%s' % vg.norm
+        input = 'input=%s' % vg.input_num
+        device= 'device=%s' % vg.vdev
+            
+        w, h = config.TV_VIEW_SIZE
+        outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
+
 
         if mode == 'tv':
-            tuner_channel = self.TunerGetChannel()
-
-            cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
-
-            # Convert to MPlayer TV setting strings
-            norm = 'norm=%s' % cf_norm.upper()
-            if os.uname()[0] == 'FreeBSD':
-                # XXX fix
-                tmp = { 'television':1, 'composite1':0, 'composite2':2,   
-                        's-video':3}[cf_input.lower()]
-            else:
-                tmp = { 'television':0, 'composite1':1, 'composite2':2,
-                        's-video':3}[cf_input.lower()]
-            input = 'input=%s' % tmp
-            chanlist = 'chanlist=%s' % cf_clist
-            device= 'device=%s' % cf_device
-            
-            w, h = config.TV_VIEW_SIZE
-            outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
-
-            tvcmd = ('tv://%s -tv driver=%s:%s:%s:%s:'
+            tvcmd = ('tv:// -tv driver=%s:freq=%s:%s:%s:'
                      '%s:width=%s:height=%s:%s %s' %
-                     (tuner_channel, config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt, config.TV_OPTS))
-            
-            # Build the MPlayer command
-            args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                    config.MPLAYER_VO_DEV_OPTS, tvcmd)
-
-            if config.MPLAYER_ARGS.has_key('tv'):
-                args += (config.MPLAYER_ARGS['tv'],)
-
-            mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
+                     (config.TV_DRIVER, tuner_freq, device, input, norm, 
+                      w, h, outfmt, config.TV_OPTS))
 
         elif mode == 'vcr':
-            cf_norm, cf_input, tmp, cf_device = config.VCR_SETTINGS.split()
-
-            # Convert to MPlayer TV setting strings
-            norm = 'norm=%s' % cf_norm.upper()
-            if os.uname()[0] == 'FreeBSD':
-                # XXX fix
-                tmp = { 'television':1, 'composite1':0, 'composite2':2,
-                        's-video':3}[cf_input.lower()]
-            else:
-                tmp = { 'television':0, 'composite1':1, 'composite2':2,
-                        's-video':3}[cf_input.lower()]
-            input = 'input=%s' % tmp
-            device= 'device=%s' % cf_device
-
-            w, h = config.TV_VIEW_SIZE
-            outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
-            
             tvcmd = ('tv:// -tv driver=%s:%s:%s:'
                      '%s:width=%s:height=%s:%s %s' %
-                     (config.TV_DRIVER, device, input, norm, w, h, outfmt, config.TV_OPTS))
-
-            args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                    config.MPLAYER_VO_DEV_OPTS, tvcmd)
-
-            if config.MPLAYER_ARGS.has_key('tv'):
-                args += (config.MPLAYER_ARGS['tv'],)
-
-            mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
+                     (config.TV_DRIVER, device, input, norm, 
+                      w, h, outfmt, config.TV_OPTS))
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
             return
+
+
+        # Build the MPlayer command
+        args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
+                config.MPLAYER_VO_DEV_OPTS, tvcmd)
+
+        if config.MPLAYER_ARGS.has_key('tv'):
+            args += (config.MPLAYER_ARGS['tv'],)
+
+        mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
 
         command = mpl
         self.mode = mode
@@ -303,16 +255,15 @@ class MPlayer:
             
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
-                self.TunerNextChannel()
+                new_freq = self.fc.chanUp(app=self.thread.app)
             else:
-                self.TunerPrevChannel()
+                new_freq = self.fc.chanDown(app=self.thread.app)
 
-            new_channel = self.TunerGetChannel()
-            self.thread.app.write('tv_set_channel %s\n' % new_channel)
+            self.thread.app.write('tv_set_freq %s\n' % new_freq)
 
             # Display a channel changed message
             # XXX Experimental, disabled for now
-            #tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
+            #tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
             #now = time.strftime('%H:%M')
             #msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             #cmd = 'show_osd_msg "%s" 4000\n' % msg
@@ -324,7 +275,7 @@ class MPlayer:
         
             # Display the channel info message
             # XXX Experimental, disabled for now
-            tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
+            tuner_id, chan_name, prog_info = self.fc.getChannelInfo()
             now = time.strftime('%H:%M')
             msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             cmd = 'show_osd_msg "%s" 4000\n' % msg
@@ -341,22 +292,6 @@ class MPlayerApp(childapp.ChildApp):
     """
 
     def __init__(self, app):
-        if config.MPLAYER_DEBUG:
-            fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
-            fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
-            try:
-                self.log_stdout = open(fname_out, 'a')
-                self.log_stderr = open(fname_err, 'a')
-            except IOError:
-                print
-                print (('ERROR: Cannot open "%s" and "%s" for ' +
-                        'MPlayer logging!') % (fname_out, fname_err))
-                print 'Please set MPLAYER_DEBUG=0 in local_conf.py, or '
-                print 'start Freevo from a directory that is writeable!'
-                print
-            else:
-                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
-
         childapp.ChildApp.__init__(self, app)
         
 
@@ -369,22 +304,5 @@ class MPlayerApp(childapp.ChildApp):
 
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
-        if config.MPLAYER_DEBUG:
-            self.log_stdout.close()
-            self.log_stderr.close()
 
 
-    def stdout_cb(self, line):
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stdout.write(line + '\n')
-            except ValueError:
-                pass # File closed
-                     
-
-    def stderr_cb(self, line):
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stderr.write(line + '\n')
-            except ValueError:
-                pass # File closed
