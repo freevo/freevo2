@@ -386,7 +386,7 @@ class Instance(mbus.Guides):
         self.__notification_callbacks = []
 
         # a list of all known entities
-        self.__entities = []
+        self.entities = []
 
 
     def mbus_error(self, error):
@@ -403,7 +403,7 @@ class Instance(mbus.Guides):
         attribute 'present' of this entity can be used to check if the entity
         joined the bus (present = True) or is gone now (present = False).
         """
-        for e in self.__entities:
+        for e in self.entities:
             func(e)
         self.__notification_callbacks.append(func)
 
@@ -417,7 +417,7 @@ class Instance(mbus.Guides):
         addr = get_address(name)
         t1 = time.time()
         while 1:
-            for e in self.__entities:
+            for e in self.entities:
                 if mbus.isAddressedTo(addr, e.addr):
                     return e
             if t1 + float(timeout) / 1000 < time.time():
@@ -445,7 +445,7 @@ class Instance(mbus.Guides):
         pyMbus callback for new entity
         """
         e = RemoteEntity(maddr, self)
-        self.__entities.append(e)
+        self.entities.append(e)
         for c in self.__notification_callbacks:
             c(e)
 
@@ -454,9 +454,9 @@ class Instance(mbus.Guides):
         """
         pyMbus callback for lost entity
         """
-        for e in self.__entities:
+        for e in self.entities:
             if e == maddr:
-                self.__entities.remove(e)
+                self.entities.remove(e)
                 e.present = False
                 for c in self.__notification_callbacks:
                     c(e)
