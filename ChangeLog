@@ -24,7 +24,8 @@ o removed .mplayer feature for movie files. Please use <mplayer_options>
 o Movie xml files can now contain skin informations as well.
 o Skin improvements
 o configure now checks for external programs
-
+o Bugfix for 8-bit chars in bitmap filenames by Alex Polite 
+	
 	
 Release 1.2.5 (2002-08-21):
 ---------------------------

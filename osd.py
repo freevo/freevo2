@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2002/09/28 04:36:09  krister
+# Bugfix for 8-bit chars in bitmap filenames by Alex Polite
+#
 # Revision 1.25  2002/09/25 01:41:09  gsbarbieri
 # Updated osd.drawstringframed() with new break points to words that are
 # larger than the width.
@@ -84,7 +87,12 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import socket, time, sys, os, re
+import socket
+import time
+import sys
+import os
+import re
+from types import *
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -199,6 +207,16 @@ def get_singleton():
     return _singleton
 
         
+#
+# Return a unicode representation of a String or Unicode object
+#
+def stringproxy(str):
+    result = str
+    if type(str) == StringType:
+        result = unicode(str, 'unicode-escape')
+        return result
+
+
 class Font:
 
     filename = ''
@@ -883,7 +901,7 @@ class OSD:
         
         for i in range(len(self.bitmapcache)):
             fname, image = self.bitmapcache[i]
-            if fname == filename:
+            if stringproxy(fname) == stringproxy(filename):
                 # Move to front of FIFO
                 del self.bitmapcache[i]
                 self.bitmapcache.append((fname, image))
@@ -904,11 +922,13 @@ class OSD:
 
         return image
 
+
     def _deletefromcache(self, filename):
         for i in range(len(self.bitmapcache)):
             fname, image = self.bitmapcache[i]
-            if fname == filename:
+            if stringproxy(fname) == stringproxy(filename):
                 del self.bitmapcache[i]
+
         
     def _helpscreen(self):
         if not pygame.display.get_init():
