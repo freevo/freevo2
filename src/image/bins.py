@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/26 16:28:10  dischi
+# added patch for better bin support
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -47,7 +50,7 @@ def normalize_whitespace(text):
     # Remove Redundant whitespace from a string
     return ' '.join(text.split())
 
-class GetAlbum(ContentHandler):
+class BinsDiscription(ContentHandler):
     """
     This is a handler for getting the information from a bins Album.
     """
@@ -77,16 +80,23 @@ class GetAlbum(ContentHandler):
         if name == 'field':
             self.inField = 0
 
-def get_album_title(dirname):
+def get_bins_desc(binsname):
      parser = make_parser()
      parser.setFeature(feature_namespaces,0)
-     dh = GetAlbum()
+     dh = BinsDiscription()
      parser.setContentHandler(dh)
-     parser.parse(dirname + '/album.xml')
+     # check that the xml file exists for a dir or image
+     if os.path.isfile(binsname + '/album.xml'):
+         binsname = binsname + '/album.xml'
+     elif os.path.isfile(binsname + '.xml'):
+         binsname = binsname + '.xml'
+     else:
+         dh.desc['title'] == os.path.basename(dirname)
+
      # Check that there is a title
-     if dh.desc['title'] == '':
-         dh.desc['title'] = os.path.basename(dirname)
-     return dh.desc['title']
+     parser.parse(binsname)
+
+     return dh.desc
 
 if __name__ == '__main__':
     parser = make_parser()

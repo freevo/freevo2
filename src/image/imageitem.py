@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/26 16:28:10  dischi
+# added patch for better bin support
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -40,6 +43,7 @@ import util
 import os
 
 import viewer
+import bins
 
 
 from item import Item
@@ -51,9 +55,18 @@ class ImageItem(Item):
         self.file     = file
         self.image    = file
         self.duration = duration
+	self.binsdesc = {'title':''}
+
+        # This should check for bins compatable info
+	if os.path.isfile(file + '.xml'):
+	    self.binsdesc = bins.get_bins_desc(file)
+
+
 
         if name:
             self.name = name
+	elif self.binsdesc['title']:
+	    self.name = self.binsdesc['title']
         else:
             self.name    = os.path.splitext(os.path.basename(file))[0]
 

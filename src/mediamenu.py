@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/11/26 16:28:10  dischi
+# added patch for better bin support
+#
 # Revision 1.4  2002/11/26 12:17:57  dischi
 # re-added bin album.xml support
 #
@@ -201,7 +204,7 @@ class DirItem(Playlist):
         if name:
             self.name = name
 	elif os.path.isfile(dir + '/album.xml'):
-	    self.name = '[' + bins.get_album_title(dir) + ']'
+	    self.name = '[' + bins.get_bins_desc(dir)['title'] + ']'
         else:
             self.name = '[' + os.path.basename(dir) + ']'
         
