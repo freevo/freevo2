@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/11 11:13:50  dischi
+# make it a valid python file
+#
 # Revision 1.4  2004/01/09 16:36:21  outlyer
 # Adding this back in... going to work on sqlite a little (music only at
 # first)
@@ -81,10 +84,10 @@ def check_db():
 def create_db():
     db = sqlite.connect(DATABASE)
     cursor = db.cursor()
-    cursor.execute("CREATE TABLE music (id INTEGER PRIMARY KEY, dirtitle VARCHAR(255), path VARCHAR(255), 
+    cursor.execute("""CREATE TABLE music (id INTEGER PRIMARY KEY, dirtitle VARCHAR(255), path VARCHAR(255), 
         filename VARCHAR(255), type VARCHAR(3), artist VARCHAR(255), title VARCHAR(255), album VARCHAR(255), 
         year VARCHAR(255), track NUMERIC(3), track_total NUMERIC(3), bpm NUMERIC(3), last_play float, 
-        play_count NUMERIC, start_time NUMERIC, end_time NUMERIC, rating NUMERIC, eq  VARCHAR)")
+        play_count NUMERIC, start_time NUMERIC, end_time NUMERIC, rating NUMERIC, eq  VARCHAR)""")
     db.commit()
     db.close()
 
