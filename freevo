@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2004/01/10 20:45:50  mikeruelle
+# can not start freevo -fs without this change
+#
 # Revision 1.106  2004/01/10 18:24:17  dischi
 # fix uid storage for execute and runapp calls
 #
@@ -395,7 +398,7 @@ elif arg and not arg.startswith('-'):
             sys.argv = [ sys.argv[0] ] + sys.argv[2:]
 
 
-elif arg and name == 'freevo' and not arg in ('-force-fs' '-trace' '-doc'):
+elif arg and name == 'freevo' and not (arg in ['-force-fs', '-trace', '-doc']):
     # ok, don't know about that arg, freevo should be started, but
     # it's also no freevo arg
     print 'unknown command line option: %s' % sys.argv[1:]
