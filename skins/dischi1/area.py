@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/11 20:25:59  dischi
+# Small fixes
+#
 # Revision 1.18  2003/03/08 17:36:47  dischi
 # integration of the tv guide
 #
@@ -270,6 +273,7 @@ class Skin_Area:
         self.last_content_objects = []
         
         self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
+        self.dummy_layer = pygame.Surface((osd.width, osd.height), 1, 32)
 
 
     def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):
@@ -288,7 +292,7 @@ class Skin_Area:
             self.menuw = obj
             self.menu  = obj
             item_type = None
-            self.item = None
+            self.item = obj.selected
         else:
             item_type = None
             self.item = obj
@@ -609,6 +613,11 @@ class Skin_Area:
         self.screen.draw('content', ('text', text, font, x, y, width, height, align_h,
                                      align_v, mode, ellipses ))
 
+        ret = osd.drawstringframed(text, x, y, width, height, None, None,
+                                   font=font.name, ptsize=font.size,
+                                   align_h = align_h, align_v = align_v,
+                                   mode=mode, ellipses=ellipses, layer=self.dummy_layer)
+        
         height2 = height
         if height2 == -1:
             height2 = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] + 10
@@ -616,7 +625,8 @@ class Skin_Area:
         self.content_objects += [ ( 'text', x, y, width, height2, height, text, font, align_h,
                                   align_v, mode, ellipses ) ]
 
-
+        return ret[1]
+    
 
     def draw_image(self, image, val, redraw=TRUE):
         """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/11 20:25:59  dischi
+# Small fixes
+#
 # Revision 1.4  2003/03/07 22:54:12  dischi
 # First version of the extended menu with image support. Try the music menu
 # and press DISPLAY
@@ -87,7 +90,7 @@ class View_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        if content.types.has_key(item.type):
+        if hasattr(item, 'type') and content.types.has_key(item.type):
             val = content.types[item.type]
         else:
             val = content.types['default']
