@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/11/21 13:29:13  dischi
+# fix config import
+#
 # Revision 1.67  2004/11/19 02:10:28  rshortt
 # First crack at moving autodetect code for TV cards into src/system.  Added a
 # detect() to system/__init__.py that will call detect() on a system/ module.
@@ -74,6 +77,8 @@ import os
 import pwd
 import traceback
 
+import config
+
 # change uid
 try:
     if config.TV_RECORD_SERVER_UID and os.getuid() == 0:
@@ -84,7 +89,6 @@ try:
 except Exception, e:
     print e
 
-import config
 import system
 import plugin
 import childapp
