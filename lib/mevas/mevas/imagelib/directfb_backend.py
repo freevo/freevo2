@@ -5,7 +5,6 @@
 # Note: This doesn't work yet don't don't bother trying. :)
 #
 # TODO: 
-#      -fontpath support
 #      -SurfaceDescription support in pydirectfb
 #      -image transformations
 #      -revive blend method
@@ -44,13 +43,16 @@
 import copy
 import types
 import traceback
+import glob
+import os.path
 
 # mevas imports
 import base
 
 # pydirectfb
 from directfb import *
-import directfb.Font as DFBFont
+
+dfb = DirectFB()
 
 
 _capabilities =  {
@@ -60,8 +62,8 @@ _capabilities =  {
     "shmem": False,
     "pickling": True,
     "unicode": True,
-    "layer-alpha": True,
-    "alpha-mask": True,
+    "layer-alpha": False,
+    "alpha-mask": False,
     "cache": True
     }
 
@@ -100,6 +102,9 @@ _mevas_pixel_format = {
     DSPF_YV12     : ''
     }
 
+_font_path = []
+_fonts = {}
+
 
 
 class Image(base.Image):
@@ -112,37 +117,49 @@ class Image(base.Image):
     def __init__(self, image_or_filename):
         self.imageDescription = None
         self.filename = None
+        self.has_alpha = 1
 
         if isinstance(image_or_filename, Image):
             self._image = image_or_filename._image
         elif isinstance(image_or_filename, Surface):
             self._image = image_or_filename
         elif isinstance(image_or_filename, ImageProvider):
-            self._image = createSurface(desc=image_or_filename.getSurfaceDescription))
+            self._image = dfb.createSurface(description=image_or_filename.getSurfaceDescription())
         elif type(image_or_filename) in types.StringTypes:
             # Should we copy(provider.getSurfaceDescription()) 
             # then del(provider)?
             self.filename = image_or_filename
-            provider = createImageProvider(self.filename)
-            self.imageDescription = provider.getImagedescription()
-            self._image = createSurface(desc=provider.getSurfaceDescription))
+            provider = dfb.createImageProvider(self.filename)
+            self.imageDescription = provider.getImageDescription()
+            self._image = dfb.createSurface(description=provider.getSurfaceDescription())
         elif isinstance(image_or_filename, SurfaceDescription):
-            self._image = createSurface(desc=image_or_filename)
+            self._image = dfb.createSurface(description=image_or_filename)
         else:
             raise ValueError, "Unsupported image type: %s" % \
                   type(image_or_filename)
 
     def __getattr__(self, attr):
         if attr == "format":
-            return _mevas_pixel_format[self._image.getSurfaceDescription().format]
+            return _mevas_pixel_format[self._image.getPixelFormat()]
 
-        elif attr in ("width", "height", "size", "pitch"):
+        elif attr == "width":
+            return self._image.getSize()[0]
+
+        elif attr == "height":
+            return self._image.getSize()[1]
+
+        elif attr == "size":
+            return self._image.getSize()
+
+        print 'DEBUG: want attr "%s"' % attr
+
+        if attr in ("pitch"):
             return getattr(self._image.getSurfaceDescription(), attr)
 
-        if attr in ("mode", "filename", "has_alpha", "rowstride", "get_pixel"):
+        elif attr in ("mode", "has_alpha", "rowstride", "get_pixel"):
             return getattr(self._image, attr)
 
-        return super(Image, self).__getattr__(attr)
+        return base.Image.__getattr__(self, attr)
 
 
     def get_raw_data(self, format = "BGRA"):
@@ -160,20 +177,21 @@ class Image(base.Image):
     #       with some image transformations, or use pyimlib2.
 
     def rotate(self, angle):
-        pass
+        print 'Image.rotate not implimented'
 
 
     def flip(self):
-        pass
+        print 'Image.flip not implimented'
 
 
     def mirror(self):
-        pass
+        print 'Image.mirror not implimented'
 
 
     def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
         # TODO: use StretchBlit
         # self._image =  self._image.scale(size, src_pos, src_size)
+        print 'Image.scale not implimented'
         pass
 
 
@@ -182,15 +200,15 @@ class Image(base.Image):
           alpha = 255, merge_alpha = True):
         #return self._image.blend(srcimg._image, src_pos, src_size, dst_pos,
         #                         dst_size, alpha, merge_alpha)
-        pass
+        print 'Image.blend not implimented'
 
 
     def clear(self, pos = (0, 0), size = (-1, -1)):
-        pass
+        print 'Image.clear not implimented'
 
 
     def draw_mask(self, maskimg, pos):
-        pass
+        print 'Image.draw_mask not implimented'
 
 
     def copy(self):
@@ -200,7 +218,7 @@ class Image(base.Image):
     def set_font(self, font_or_fontname):
         if isinstance(font_or_fontname, Font):
             font_or_fontname = font_or_fontname._font
-        return self._image.setFont(font_or_fontname._font)
+        return self._image.setFont(font_or_fontname)
 
 
     def get_font(self):
@@ -208,8 +226,19 @@ class Image(base.Image):
 
 
     def set_color(self, color):
+        print 'set_color: %s' % str(color)
+
+        if len(color) == 3:
+            r, g, b = color
+            a = 0xFF
+        elif len(color) == 4:
+            r, g, b, a = color
+        else:
+            return
+        print 'color now: %x,%x,%x,%x' % (r, g, b, a)
+
         try:
-            self._image.setColor(color)
+            self._image.setColor(r, g, b, a)
         except:
             traceback.print_exc()
 
@@ -220,8 +249,7 @@ class Image(base.Image):
             if isinstance(font_or_fontname, Font):
                 font_or_fontname = font_or_fontname._font
 
-            if self._image.getFont() != font_or_fontname:
-                self.set_font(font_or_fontname)
+            self.set_font(font_or_fontname)
 
         if color:
             self.set_color(color)
@@ -232,28 +260,37 @@ class Image(base.Image):
     def draw_rectangle(self, pos, size, color, fill = True):
         self.set_color(color)
        
-        self._image.drawRectangle(pos[0], pos[1], size[0], size[1])
+        x, y = pos
+        w, h = size
+        print 'rect: %d %d %d %d' % (x, y, w, h)
+        if 0 in [w, h]:  
+            print 'Bad rect!'
+            return
+
+        # print 'rect: %d %d %d %d' % (pos[0], pos[1], size[0], size[1])
+        # self._image.drawRectangle(pos[0], pos[1], size[0], size[1])
+        self._image.drawRectangle(x, y, w, h)
 
         if fill:
-            self._image.fillRectangle(pos[0], pos[1], size[0], size[1])
+            self._image.fillRectangle(x, y, w, h)
 
 
     def draw_ellipse(self, center, size, amplitude, fill = True):
         # TODO: find some way to easily draw an ellipse as there's
         #       no way to in the DirectFB API.  Maybe find (or build)
         #       another library.
-        pass
+        print 'Image.draw_ellipse not implimented'
 
 
     def move_to_shmem(self, format = "BGRA", id = None):
         # TODO: decide if we need this, if not, remove it
-        pass
+        print 'Image.move_to_shmem not implimented'
 
 
     def save(self, filename, format = None):
         # TODO: find a way to save an image to file because
         #       IDirectFBImageProvider doesn't support this.
-        pass
+        print 'Image.save not implimented'
 
 
     def get_capabilities(self):
@@ -262,10 +299,11 @@ class Image(base.Image):
 
     def crop(self, pos, size):
         #self._image = self._image.crop(pos, size)
-        pass
+        print 'Image.crop not implimented'
 
 
     def scale_preserve_aspect(self, size):
+        print 'Image.scale_preserve_aspect called'
         self.scale(size)
 
 
@@ -277,15 +315,28 @@ class Image(base.Image):
 
 
 class Font(base.Font):
-    def __init__(self, fontdesc, color = (255, 255, 255, 255)):
-        (name, size) = fontdesc.split('/')
-        fontfile = '/usr/share/fonts/truetype/ttf-bitstream-vera/VeraBd.ttf'
-        # TODO: fontfile = find.in.fontpath(name)
-        self._font = DFBFont(fontfile, height=size)
+    def __init__(self, font_or_fontdesc, color = (255, 255, 255, 255)):
+        global _fonts
+
+        if not type(font_or_fontdesc) in types.StringTypes:
+            self._font = font_or_fontdesc
+        else:
+            (name, size) = font_or_fontdesc.split('/')
+
+            print 'want to load font %s from %s' % (name, _fonts[name])
+            try:
+                self._font = dfb.createFont(_fonts[name], height=int(size))
+            except:
+                raise IOError, 'Failed to load font %s' % name
 
 
     def get_text_size(self, text):
-        return self._font.getStringWidth(text)
+        w = self._font.getStringWidth(text)
+        h = self._font.getHeight()
+        ha = self._font.getMaxAdvance()
+        va = h
+
+        return (w, h, ha, va)
 
 
     def set_color(self, color):
@@ -295,7 +346,7 @@ class Font(base.Font):
     def __getattr__(self, attr):
         if attr in ("ascent", "descent", "max_ascent", "max_descent"):
             return getattr(self._font, attr)
-        return super(Font, self).__getattr__(attr)
+        return base.Font.__getattr__(self, attr)
 
 
 
@@ -307,21 +358,42 @@ def open(file):
     return Image(file)
 
 
-def new(size, rawdata = None, from_format = "BGRA"):
-    if from_format not in _capabilities["from-raw-formats"]:
-        raise ValueError, "Unsupported raw format: %s" % from_format
+def new(size, rawdata = None, from_format = 'BGRA'):
+    if from_format not in _capabilities['from-raw-formats']:
+        raise ValueError, 'Unsupported raw format: %s' % from_format
+    if rawdata:
+        raise ValueError, 'New Image from raw data not yet supported.'
+
     # TODO: create a new SurfaceDescription using rawdata then pass it
     #       through Image contructor.
-    pass
+
+    return Image(dfb.createSurface(width=size[0], height=size[1]))
 
 
 
 def add_font_path(path):
-    pass
+    global _font_path
+    global _fonts
+
+    _font_path.append(path)
+
+    for font in glob.glob( os.path.join(path, '*.[T|t][T|t][F|f]')):
+        fontname = os.path.basename(font).split('.')[0]
+        _fonts[fontname] = font
+
+    print 'added font path %s, fonts now:' % path
+    print _fonts
 
 
 def load_font(font, size):
-    pass
+    global _fonts
+
+    if font.find('.'):
+        font = font.split('.')[0]
+    if not _fonts.get(font):
+        raise IOError, 'Failed to find font %s' % font
+
+    return Font('%s/%s' % (font, size))
 
 
 
