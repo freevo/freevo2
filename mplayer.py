@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2002/08/13 02:01:02  krister
+# Made EXIT event stop the music player.
+#
 # Revision 1.25  2002/08/11 19:25:20  krister
 # Added more debug output.
 #
@@ -274,7 +277,7 @@ class MPlayer:
             if DEBUG: print "Oops.. got not audio mode in audio eventhandler"
             return 0
         
-        if event == rc.STOP or event == rc.SELECT:
+        if event == rc.EXIT or event == rc.STOP or event == rc.SELECT:
             # XXX Not sure if I want stop and select to be the same.
             self.thread.audioinfo = None
             self.stop ()
