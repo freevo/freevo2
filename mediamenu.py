@@ -9,6 +9,8 @@ from menu import Info
 from video.videoinfo import VideoInfo
 from image.imageinfo import ImageInfo
 
+TRUE  = 1
+FALSE = 0
 
 class MediaMenu(Info):
     def __init__(self):
@@ -25,7 +27,7 @@ class MediaMenu(Info):
             dirs += config.DIR_IMAGES
             
         for (title, dir) in dirs:
-            d = DirInfo(dir, name = title, display_type = self.display_type)
+            d = DirInfo(dir, self, name = title, display_type = self.display_type)
             items += [ d ]
 
         return items
@@ -33,20 +35,27 @@ class MediaMenu(Info):
 
     def main_menu(self, arg=None, menuw=None):
         self.display_type = arg
-        moviemenu = menu.Menu('XXX MAIN MENU', self.main_menu_generate(), umount_all=1)
+        if self.display_type == 'video':
+            title = 'MOVIE'
+        elif self.display_type == 'image':
+            title = 'IMAGE'
+        else:
+            title = 'MEDIA'
+        moviemenu = menu.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
+                              umount_all=1)
         menuw.pushmenu(moviemenu)
-
 
 
 
 
     
 class DirInfo(Info):
-    def __init__(self, dir, name = None, display_type = None):
+    def __init__(self, dir, calling_info, name = None, display_type = None):
         Info.__init__(self)
         self.type = 'dir'
         self.dir = dir
         self.display_type = display_type
+        self.calling_info = calling_info
 
         if name:
             self.name = name
@@ -65,22 +74,26 @@ class DirInfo(Info):
         items = []
 
         for dir in util.getdirnames(self.dir):
-            items += [ DirInfo(dir, display_type = self.display_type) ]
+            items += [ DirInfo(dir, self, display_type = self.display_type) ]
 
         if self.display_type == 'video' or not self.display_type:
-            for file in util.match_files(self.dir, config.SUFFIX_MPLAYER_FILES):
-                items += [ VideoInfo(file) ]
+            video_files = util.match_files(self.dir, config.SUFFIX_MPLAYER_FILES)
 
             for file in util.match_files(self.dir, config.SUFFIX_FREEVO_FILES):
-                x = xmlinfo.parseMovieFile(file)
+                x = xmlinfo.parseMovieFile(file, self, video_files)
                 if x:
                     items += x
 
+            for file in video_files:
+                items += [ VideoInfo(file, self) ]
+
+
         if self.display_type == 'image' or not self.display_type:
             for file in util.match_files(self.dir, config.SUFFIX_IMAGE_FILES):
-                items += [ ImageInfo(file) ]
-        
-        moviemenu = menu.Menu(self.name, items)
-        menuw.pushmenu(moviemenu)
+                items += [ ImageInfo(file, self) ]
 
-        
+        title = self.name
+        if title[0] == '[' and title[-1] == ']':
+            title = self.name[1:-1]
+        moviemenu = menu.Menu(title, items)
+        menuw.pushmenu(moviemenu)
