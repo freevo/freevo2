@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/11/27 14:59:04  dischi
+# bugfix
+#
 # Revision 1.7  2004/09/13 19:34:24  dischi
 # move interface/fxdhandler into extra file
 #
@@ -96,7 +99,7 @@ class PluginInterface(plugin.MimetypePlugin):
         return items
 
 
-    def _cover_filter(x):
+    def _cover_filter(self, x):
         """
         filter function to get valid cover names
         """
