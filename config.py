@@ -20,7 +20,7 @@ import sys, os, time, re
 import movie_xml
 
 # Send debug to stdout as well as to the logfile?
-DEBUG_STDOUT = 0
+DEBUG_STDOUT = 1
 
 # Automatically turn on all DEBUG flags in all modules?
 DEBUG_ALL = 1
@@ -178,12 +178,19 @@ else:
 
 
 #
-# find movie informations
+# List of objects representing removable media, e.g. CD-ROMs,
+# DVDs, etc.
 #
 
-MOVIE_INFORMATIONS = {} 
+REMOVABLE_MEDIA = []
 
-movie_xml.hash_xml_database()
+#
+# Movie information database.
+# The database is built at startup in the identifymedia thread,
+# and also if the file '/tmp/freevo-rebuild-database' is created.
+#
+
+MOVIE_INFORMATIONS = {}
 
 #
 # compile the regexp
