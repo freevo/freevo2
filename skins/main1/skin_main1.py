@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2003/02/21 19:42:21  outlyer
+# Added a small note/reminder to figure out why we do this.
+#
 # Revision 1.83  2003/02/21 18:31:22  dischi
 # Small fix for Aubin
 #
@@ -614,7 +617,8 @@ class Skin:
         if self.hold:
             print 'skin.drawmenu() hold!'
             return
-        
+       
+        # XXX Is this necessary? We're re-initializing the screen later.
         osd.clearscreen(osd.COL_BLACK)
 
         menu = menuw.menustack[-1]
