@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2003/10/20 19:25:15  dischi
+# show more than one newline as free space
+#
 # Revision 1.98  2003/10/18 13:05:39  dischi
 # also search share dir for images
 #
@@ -830,10 +833,16 @@ class OSD:
                     # still nothing? Use the 'hard' way
                     (w, s, r) = self.__drawstringframed_line__(string, width, font,
                                                                'hard', None, ' ')
-            string = r.strip()
 
             lines.append((w, s))
+            while r and r[0] == '\n':
+                lines.append((0, ' '))
+                num_lines_left -= 1
+                r = r[1:]
+
+            string = r.strip()
             num_lines_left -= 1
+
             if not r:
                 # finished, everything fits
                 break
