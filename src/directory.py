@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2004/01/24 19:57:24  dischi
+# check if dir exists
+#
 # Revision 1.101  2004/01/24 17:35:51  dischi
 # fix crash
 #
@@ -832,6 +835,10 @@ class Dirwatcher(plugin.DaemonPlugin):
         Get listing of overlay dir for change checking. 
         Do not count *.cache, directories and *.raw (except videofiles.raw)
         """
+        if not os.path.isdir(vfs.getoverlay(self.dir)):
+            # dir does not exist. Strange, there should be at least an
+            # mmpython cache file in there
+            return []
         ret = []
         for f in os.listdir(vfs.getoverlay(self.dir)):
             if f.endswith('.raw'):
