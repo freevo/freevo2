@@ -62,10 +62,10 @@ o XMLTV Method
 o Yahoo Method
   o Set the EPG_URL and TV_CHANNELS variable to use Yahoo TV listings. (U.S. Only!)
 
-o Test Freevo using the simulated OSD and remote, just start "freevo"
+o Test Freevo using the X11 OSD and remote, just start "freevo"
   in the main directory
 
-o Run Freevo using the real OSD framebuffer driver and the lirc remote
+o Run Freevo using the framebuffer OSD driver and the lirc remote
 
 o Create a boot-script that will start Freevo when Linux is booting.
   boot/freevo is a good start.

@@ -10,11 +10,15 @@ countries and regions into a standard XML based format. This is the
 only way to get TV listings for Canada, and Europe, for use in Freevo
 currently.
 
+
 Installation:
 ==
 
+XMLTV:
+http://prdownloads.sourceforge.net/xmltv/xmltv-0.5.tar.gz?download
+
 To install XMLTV, a number of modules are required, for convenience,
-here are some places to get the modules, "precompiled"
+here are some places to get the modules, "precompiled":
 
 RPMS:
 http://www.doc.ic.ac.uk/~epa98/work/apps/xmltv/prerequisites/rpm/
@@ -22,6 +26,14 @@ http://www.funktronics.ca/openpvr/xmltvrpms/
 
 Debian Packages:
 deb http://freevo.sourceforge.net/debian unstable main
+
+The XMLTV README has instructions for using the Perl CPAN method 
+of downloading and installing missing modules. 
+Try using "force install <modulename>" if the regular install 
+fails due to broken tests. The CPAN install process is quite
+noisy, make sure to read all output to find the real problem
+when a step fails.
+
 
 Grabbings listings:
 ==
@@ -33,6 +45,7 @@ crontab:
 0 3 * * * /usr/bin/tv_grab_na --days=2 > /var/cache/xmltv/TV.xml
 -
 
+
 Use in Freevo:
 ==
 
@@ -43,6 +56,7 @@ listings in freevo, set the following options in freevo_config
 TV_GUIDE_METHOD = 'xmltv'
 ...
 XMLTV_FILE = '/path/to/TV.xml'
+
 
 Thanks
 ==
