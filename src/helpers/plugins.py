@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/09 20:26:35  dischi
+# add short description for -l
+#
 # Revision 1.1  2003/09/09 18:36:11  dischi
 # add a plugin helper to get more informations about the plugins
 #
@@ -101,7 +104,8 @@ def parse_plugins():
 
                 parse_status = 1
                 desc = ''
-                all_plugins.append([name, file, type, status, ''])
+                if not name in ('idlebar.IdleBarPlugin', ):
+                    all_plugins.append([name, file, type, status, ''])
     return all_plugins
 
 
@@ -131,8 +135,30 @@ def print_info(plugin_name, all_plugins):
 
 # show a list of all plugins
 if len(sys.argv)>1 and sys.argv[1] == '-l':
-    for name, file, type, status, desc in parse_plugins():
-        print '%s (%s, %s)' % (name, type, status)
+    all_plugins = parse_plugins()
+
+    types = []
+    for p in all_plugins:
+        if not p[2] in types:
+            types.append(p[2])
+    for t in types:
+        print
+        print '%ss:' % t
+        underline = '--'
+        for i in range(len(t)):
+            underline += '-'
+        print underline
+        for name, file, type, status, desc in all_plugins:
+            if type == t:
+                if desc.find('\n') > 0 and desc.find('\n\n') == desc.find('\n'):
+                    smalldesc = desc[:desc.find('\n')]
+                else:
+                    smalldesc = desc
+                if len(smalldesc) > 48:
+                    smalldesc = smalldesc[:45] + '...'
+                if status == 'active':
+                    name = '%s (%s)' % (name, status)
+                print '%-30s %s' % (name, smalldesc)
 
 # show info about a plugin
 elif len(sys.argv)>2 and sys.argv[1] == '-i':
