@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2002/10/09 22:25:55  gsbarbieri
+# Bug fixes to osd.drawstringframed()
+#
 # Revision 1.31  2002/10/09 04:54:22  krister
 # Removed the workaround for the missing encodings modules in the old runtime.
 #
@@ -503,6 +506,7 @@ class OSD:
         if not pygame.display.get_init():
             return string
 
+
         if DEBUG: print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y, w, h, s)
         
         if fgcolor == None:
@@ -513,7 +517,6 @@ class OSD:
         if not ptsize:
             ptsize = config.OSD_DEFAULT_FONTSIZE
 
-        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
 
         if DEBUG: print 'FONT: %s %s' % (font, ptsize)        
 
@@ -524,7 +527,11 @@ class OSD:
         line = []
         s = string.replace('\t',' \t ')
         s = s.replace('\n',' \n ')
-        s = s.replace('  ',' ')        
+        s = s.replace('  ',' ')
+        s = re.sub(r'([ ]$)','',s)
+        s = re.sub(r'(^[ ])','',s)
+        if s == '': # string was only a space ' '
+            return
         words = s.split(' ')
         occupied_size = 0
         line_number = 0
@@ -578,8 +585,10 @@ class OSD:
                         tmp_pieces = words[word_number]
                         # The chars where we can split words (making it less ugly to read)
                         tmp_pieces = re.sub(r'(?P<str>[aeiou!@#$%\*\(\)\\/\-~`\'"\?\.,\[\]]+)',' \g<str> ',tmp_pieces)
-                        tmp_pieces = tmp_pieces.replace('  ',' ')                        
+                        tmp_pieces = tmp_pieces.replace('  ',' ')                     
                         tmp_pieces = tmp_pieces.split(' ')
+                        tmp_pieces = re.sub(r'([ ]$)','',tmp_pieces)
+                        tmp_pieces = re.sub(r'(^[ ])','',tmp_pieces)
                         pieces = []
                         # check if any pieces still is larger than the width
                         for i in range(len(tmp_pieces)):
@@ -650,8 +659,12 @@ class OSD:
                         lines_size[line_number] += next_word_size + MINIMUM_SPACE_BETWEEN_WORDS
                     else:
                         # Yes, put '...' in the last word place
-                        tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)
-                        lines[line_number][len(lines[line_number])-1] = '...'
+                        if len(lines[line_number]) > 0:
+                            lines[line_number][len(lines[line_number])-1] = '...'
+                        else:
+                            lines[line_number].append('...')
+                            
+                        tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)                        
                         lines_size[line_number] += next_word_size - tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
                     # save the text that does not fit.
                     for tmp in range(word_number, len_words):
@@ -673,6 +686,7 @@ class OSD:
             self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor)
         for line_number in range(len(lines)):
             x0 = x
+            #print "WORDS: %s" % lines[line_number]
             spacing = MINIMUM_SPACE_BETWEEN_WORDS
             if align_h == 'justified':
                 # Calculate the space between words:
