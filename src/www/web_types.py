@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/09 21:29:32  outlyer
+# New web functions...
+#
 # Revision 1.19  2004/01/28 03:35:01  outlyer
 # Cleanup...
 #
@@ -132,23 +135,63 @@ class HTMLResource:
         self.res += 'Content-type: %s\n\n' % content_type
 
 
-    def printHeader(self, title='unknown page', style=None, script=None):
+    def printHeader(self, title='unknown page', style=None, script=None, selected='Help',prefix=0):
+
+        strprefix = '../' * prefix
+
+
+        self.res += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n'
+        self.res += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
         self.res += '<html>\n\t<head>\n'
-        self.res += '<title>Freevo | '+title+'</title>\n'
+        self.res += '\t<title>Freevo | '+title+'</title>\n'
+        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset=us-ascii"/>\n'
         if style != None:
-            self.res += '<link rel="stylesheet" href="styles/main.css" type="text/css" />\n'
+            self.res += '\t<link rel="stylesheet" href="styles/main.css" type="text/css" />\n'
         if script != None:
-            self.res += '<script language="JavaScript" src="'+script+'"></script>\n'
+            self.res += '\t<script language="JavaScript" src="'+script+'"></script>\n'
         self.res += '</head>\n'
         self.res += '\n\n\n\n<body>\n'
         # Header
-        self.res += '<!-- Header Logo and Status Line -->'
-        self.res += '<div id="titlebar"></div>\n'
-        self.res += '<div id="subtitle">\n'
-        self.res += str(title) + '\n'
-        self.res += '</div>\n'
-        self.res += '<!-- Main Content -->'
-        self.res+=('<br />')
+        self.res += '<!-- Header Logo and Status Line -->\n'
+        self.res += '<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></div>\n'
+     
+        items = [('Home','Home','%sindex.rpy' % str(strprefix)),
+                 ('TV Guide','View TV Listings','%sguide.rpy' % str(strprefix)),
+                 ('Scheduled Recordings','View Scheduled Recordings','%srecord.rpy' % str(strprefix)),
+                 ('Favorites','View Favorites','%sfavorites.rpy' % str(strprefix)),
+                 ('Media Library','View Media Library','%slibrary.rpy' % str(strprefix)),
+                 ('Manual Recording','Schedule a Manual Recording','%smanualrecord.rpy' % str(strprefix)),
+                 ('Help','View Online Help and Documentation','%shelp/' % str(strprefix))]
+
+        try:
+            if config.ICECAST_WWW_PAGE:
+                items.append(('Icecast List','Change Icecast List','%siceslistchanger.rpy' % (strprefix)))
+        except AttributeError:
+            pass
+
+        self.res += '<div id="header">\n<ul>'
+
+        for i in items:
+            if selected == i[0]:
+                self.res += '<li id="current">'
+            else:
+                self.res += '<li>'
+            self.res += "<a href=\"%s\" title=\"%s\">%s</a></li>\n" % (i[2], i[1],i[0])
+        self.res += '</ul>\n</div>'
+        
+        #self.res += '<li id="current"><a href="#">Home</a></li>\n'
+        #self.res += '<li><a href="#">TV Guide</a></li>\n'
+        #self.res += '<li><a href="#">Scheduled Recordings</a></li>\n'
+        #self.res += '<li><a href="#">Media Library</a></li>\n'
+        #self.res += '<li><a href="#">Manual Record</a></li>\n'
+        #self.res += '<li><a href="#">Help</a></li>\n'
+        #self.res += '</ul>\n'
+        #self.res += '</div>\n<br/>'
+ 
+        #self.res += '<div id="subtitle">\n'
+        #self.res += str(title) + '\n'
+        #self.res += '</div>\n'
+        self.res += '\n<!-- Main Content -->\n';
 
 
 
@@ -209,45 +252,22 @@ class HTMLResource:
 
 
     def printFooter(self):
-        # self.res += '</ul>\n'
-        self.res += "</body></html>\n"
+        self.res += '</body>\n</html>\n'
     
     
     def printSearchForm(self):
         self.res += """
-    <form name="SearchForm" action="search.rpy" METHOD="GET">
-    <div class="searchform"><b>Search:</b><input type="text" name="find" size="20" onBlur="document.SearchForm.submit()" /></div>
+    <form id="SearchForm" action="search.rpy" method="get">
+    <div class="searchform"><b>Search:</b><input type="text" name="find" size="20"/></div>
     </form>
     """
     
     
     def printLinks(self, prefix=0):
-        strprefix = '../' * prefix
-        self.res += """
-    <center>
-    <table border="0" cellpadding="0" cellspacing="0">
-      <tr>
-        <td height="24" width="11" background="images/round_left.png">&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%sindex.rpy\'"><a title="Home" href="%sindex.rpy">Home</a></td>
-        <td class="tablelink" onClick="document.location=\'%sguide.rpy\'"><a title="View Guide" href="%sguide.rpy">TV Guide</a></td>
-        <td class="tablelink" onClick="document.location=\'%srecord.rpy\'"><a title="View Scheduled Recordings" href="%srecord.rpy">Scheduled Recordings</a></td>
-        <td class="tablelink" onClick="document.location=\'%sfavorites.rpy\'"><a title="View Favourites" href="%sfavorites.rpy">Favorites</a></td>
-        <td class="tablelink" onClick="document.location=\'%slibrary.rpy\'"><a title="View Media Library" href="%slibrary.rpy">Media Library</a></td>
-        <td class="tablelink" onClick="document.location=\'%smanualrecord.rpy\'"><a title="Schedule a Manual Recording" href="%smanualrecord.rpy">Manually Record</a></td>
-     """ % (strprefix,strprefix,strprefix,strprefix,strprefix,strprefix,
-            strprefix,strprefix,strprefix,strprefix,strprefix,strprefix)
-        try:
-            if config.ICECAST_WWW_PAGE:
-                self.res += '<td class="tablelink" onClick="document.location=\'%siceslistchanger.rpy\'">Change Icecast List</td>' % strprefix
-        except AttributeError:
-            pass
-
-        self.res += '<td class="tablelink" onClick="document.location=\'%shelp/\'"><a href="%shelp/" title="Get Help with Freevo">Help</a></td>' % (strprefix, strprefix)
-
-        self.res += """
-	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
-      </tr>
-    </table>
-    </center>
-    """
-
+        #   
+        #try:
+        #    if config.ICECAST_WWW_PAGE:
+        #        self.res += '<a href="%siceslistchanger.rpy">Change Icecast List</a>' % strprefix
+        #except AttributeError:
+        #    pass
+        return
