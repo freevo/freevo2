@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/02/02 23:06:03  outlyer
+# This probably isn't neccessary to show every startup.
+#
 # Revision 1.36  2004/02/01 17:03:58  dischi
 # speedup
 #
@@ -125,7 +128,7 @@ class Skin:
             if not config.SKIN_XML_FILE:
                 config.SKIN_XML_FILE = self.storage['SKIN_XML_FILE']
             else:
-                print 'skin forced to %s' % config.SKIN_XML_FILE
+                _debug_('skin forced to %s' % config.SKIN_XML_FILE, 2)
         else:
             if not config.SKIN_XML_FILE:
                 config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
