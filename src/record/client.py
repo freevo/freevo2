@@ -34,6 +34,7 @@ import sys
 import time
 import copy
 import logging
+import mbus
 
 import mcomm
 import config
