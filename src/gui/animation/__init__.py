@@ -1,15 +1,17 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # __init__.py - Animation support
-# Author: Viggo Fredriksen <viggo@katatonic.org>
 # -----------------------------------------------------------------------
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/27 14:15:15  dischi
+# split animations into different files
+#: __init__.py,v $
 # Revision 1.4  2004/08/23 14:28:22  dischi
 # fix animation support when changing displays
 #
@@ -19,21 +21,9 @@
 # mevas, there are some problems left, some popup boxes and the tv
 # listing isn't working yet.
 #
-# Revision 1.2  2004/07/27 18:52:30  dischi
-# support more layer (see README.txt in backends for details
-#
-# Revision 1.1  2004/07/22 21:11:40  dischi
-# move the animation into gui, code needs update later
-#
-# Revision 1.2  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.1  2004/04/25 11:23:58  dischi
-# Added support for animations. Most of the code is from Viggo Fredriksen
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -53,11 +43,11 @@
 # ----------------------------------------------------------------------- */
 
 
-# from render     import *
-# from base       import *
-# from marquee    import *
-# from transition import *
-
+# animations
+from move import *
+from fade import *
 from transition import *
+
+# animation controller
 from render import get_singleton as render
 from render import create

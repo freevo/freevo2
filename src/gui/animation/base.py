@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/27 14:15:25  dischi
+# split animations into different files
+#
 # Revision 1.7  2004/08/23 20:35:33  dischi
 # o support for displays too slow to do the animation.
 # o add wait function to wait until an animation is finshed, or
@@ -66,7 +69,6 @@
 #
 # ----------------------------------------------------------------------- */
 
-import pygame.time
 import render
 
 class BaseAnimation:
@@ -74,7 +76,7 @@ class BaseAnimation:
     Base class for animations, this should perhaps be changed to use sprites
     in the future (if one decides to go with a RenderGroup model)
 
-     @rectstyle  : the rectangle defining the position on the screen (pygame)
+     @rectstyle  : the rectangle defining the position on the screen
      @fps        : Desired fps
      @bg_update  : update the animation with background from screen
      @bg_wait    : initially wait for updated background before activating

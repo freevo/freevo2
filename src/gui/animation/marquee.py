@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/27 14:15:25  dischi
+# split animations into different files
+#
 # Revision 1.1  2004/07/22 21:11:40  dischi
 # move the animation into gui, code needs update later
 #
@@ -42,7 +45,6 @@
 
 
 from base   import BaseAnimation
-from pygame import Rect
 
 class Marquee(BaseAnimation):
     """

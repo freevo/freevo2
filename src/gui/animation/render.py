@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/27 14:15:25  dischi
+# split animations into different files
+#
 # Revision 1.6  2004/08/23 20:35:33  dischi
 # o support for displays too slow to do the animation.
 # o add wait function to wait until an animation is finshed, or
@@ -98,12 +101,6 @@ class Render:
     Problems:
       How to do everything correctly so we don't end up with garbled screens.
       Currently there's probably tons of problems with this.
-
-    Notes:
-      Perhaps we should utilize spritegroups for this, as it is supposed
-      to be optimized for this kind of stuff - pluss we get alot of code
-      for free. (ex. RenderUpdates). All animations objects would need to
-      extend the pygame.sprite.Sprite object.
     """
 
     def __init__(self, display):
