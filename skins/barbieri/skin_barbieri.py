@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/18 22:46:22  gsbarbieri
+# Skin updated to use new features of menu.py
+#
 # Revision 1.2  2002/08/18 06:12:30  krister
 # Converted tabs to spaces. Please use tabnanny in the future!
 #
@@ -74,6 +77,10 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+
+ICON_SIZE=64
+PADDING=5   # Padding/spacing between items
+
 ###############################################################################
 
 # Set up the mixer
@@ -113,6 +120,65 @@ class Skin:
         pass
 
 
+    # This function calculates how many menu items fit in one page
+    def ItemsPerMenuPage(self, menu):
+        
+        if not menu:
+            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            return
+
+        # get the settings
+        if menu.skin_settings:
+            val = menu.skin_settings.menu
+        else:
+            val = self.settings.menu
+
+        used_height = 0;
+        height = val.items.height
+        n_items = 0;
+
+        for item in menu.choices[menu.page_start : len(menu.choices)]:
+            if item.type:
+                if item.type == 'dir':
+                    pref_item = val.item_dir
+                elif item.type == 'list':
+                    pref_item = val.item_pl
+                elif item.type == 'main':
+                    pref_item = val.item_main
+                else:
+                    pref_item = val.items;
+            else:
+                pref_item = val.items;
+
+
+            # Size of the non-selected item
+            ns_str_w, ns_str_h = osd.stringsize('Ajg', font=pref_item.font,
+                                                ptsize=pref_item.size)            
+            # Size of the selected item
+            s_str_w, s_str_h = osd.stringsize('Ajg', font=pref_item.font,
+                                              ptsize=pref_item.selection.size)
+
+            item_icon_size_x = item_icon_size_y = 0
+            if item.icon != None:
+                item_icon_size_x, item_icon_size_y = osd.bitmapsize(item.icon)
+            
+
+            # the size used will be:
+            str_h = max(ns_str_h, s_str_h, item_icon_size_y)
+            str_h += 2*PADDING
+            str_h += max(pref_item.shadow_pad_y, pref_item.selection.shadow_pad_y)
+        
+            used_height += str_h;
+            if used_height < height:
+                n_items+=1
+            else:
+                return n_items
+
+        return n_items
+
+
+
+    
 
     # Parse XML files with additional settings
     # TODO: parse also parent directories
@@ -124,18 +190,16 @@ class Skin:
         return None
 
 
+
+
+
     def DrawText(self, text, x, y, color, shadow_color = 0x000000, bgcolor = None,
                  font = None, ptsize = None,
-                 drop_shadow=None, shadow_mode=None, shadow_pad_x=2, shadow_pad_y=2):
+                 drop_shadow=None, shadow_pad_x=2, shadow_pad_y=2,
+                 align='left'):
         if drop_shadow:
-            if shadow_mode == 'translucent':
-                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y, (160 << 24) | shadow_color, bgcolor, font, ptsize)
-            elif shadow_mode == 'solid':
-                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y, shadow_color, bgcolor, font, ptsize)
-            else: # solid
-                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y, shadow_color, bgcolor, font, ptsize)
-                
-        osd.drawstring(text, x, y, color, None, font, ptsize)
+                osd.drawstring(text, x+shadow_pad_x, y+shadow_pad_y, shadow_color, bgcolor, font, ptsize, align)
+        osd.drawstring(text, x, y, color, None, font, ptsize, align)
 
 
     # Called from the MenuWidget class to draw a menu page on the
@@ -161,138 +225,88 @@ class Skin:
         # Menu heading
         if val.title.visible:
             if val.title.text: menu.heading = val.title.text
-            
-            osd.drawstring(menu.heading, val.title.x, val.title.y, val.title.color,
-                           font=val.title.font,
-                           ptsize=val.title.size)
+            self.DrawText(menu.heading, val.title.x, val.title.y,
+                          val.title.color, val.title.shadow_color, None,
+                          val.title.font, val.title.size,
+                          val.title.shadow_visible,
+                          val.title.shadow_pad_x, val.title.shadow_pad_y,
+                          val.title.align)
             
         # Draw the menu choices for the main selection
-        x0 = val.items.x
-        y0 = val.items.y
-        selection_height = val.items.height
-        icon_size = 75
-
-#        if len(menuw.menu_items) == 5:
-#            icon_size = 64
-
-        if menu.packrows:
-            spacing = selection_height / menuw.items_per_page
-        else:
-            spacing = selection_height / max(len(menuw.menu_items),1)
+        x0 = val.items.x + PADDING
+        y0 = val.items.y + PADDING
 
         # image to display
         image = None
-        
+
         for choice in menuw.menu_items:
-            if len(menuw.menustack) == 1:
-                ptscale = 2.0
-            else:
-                ptscale = 1.0
-            fontsize = val.items.size*ptscale
             w = 0
             h = 0
-            if choice.icon != None: 
-                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), x0, y0)
-                w = icon_size + 20
-                h = 5
+
+            pref_item = None
+            if choice.type:
+                if choice.type == 'dir':
+                    pref_item = val.item_dir
+                elif choice.type == 'list':
+                    pref_item = val.item_pl                    
+                elif choice.type == 'main':
+                    pref_item = val.item_main                    
+                else:
+                    pref_item = val.items                    
+            else:
+                pref_item = val.items                    
+
+
+            # Size of the non-selected item
+            ns_str_w, ns_str_h = osd.stringsize(choice.name, font=pref_item.font,
+                                                ptsize=pref_item.size)            
+            # Size of the selected item
+            s_str_w, s_str_h = osd.stringsize(choice.name, font=pref_item.selection.font,
+                                              ptsize=pref_item.selection.size)
+
+            
+            # the size used will be:
+            str_h = max(ns_str_h, s_str_h)
+            str_h += max(pref_item.shadow_pad_y, pref_item.selection.shadow_pad_y)
+
+            str_w = max(ns_str_w, s_str_w, pref_item.selection.length)
+            str_w += max(pref_item.shadow_pad_x, pref_item.selection.shadow_pad_x)
+
+
+            pref_item_use = pref_item
+            icon = choice.icon
+
             if menu.selected == choice:
                 image = choice.image
+                if choice.selected_icon != None:
+                    icon = choice.selected_icon
 
-            if choice.eventhandler_args:
-                if choice.eventhandler_args[0] == 'dir':
-                    if menu.selected == choice:
-                        osd.drawbox(x0 - 8 + w, y0 - 3 + h,
-                                    x0 - 8 + val.item_dir.selection.length, y0 + val.item_dir.selection.size*1.5 + h, width=-1,
-                                    color=((160 << 24) | val.item_dir.selection.bgcolor))
-                        
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.item_dir.selection.color, 
-                                      val.item_dir.selection.shadow_color, None, val.item_dir.selection.font,
-                                      val.item_dir.selection.size, val.item_dir.selection.shadow_visible,
-                                      val.item_dir.selection.shadow_mode,
-                                      val.item_dir.selection.shadow_pad_x, val.item_dir.selection.shadow_pad_y)
-                        
-                    else:
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.item_dir.color, 
-                                      val.item_dir.shadow_color, None, val.item_dir.font,
-                                      val.item_dir.size, val.item_dir.shadow_visible,
-                                      val.item_dir.shadow_mode,
-                                      val.item_dir.shadow_pad_x, val.item_dir.shadow_pad_y)
+            item_icon_size_x = item_icon_size_y = 0            
+            if icon != None:
+                item_icon_size_x, item_icon_size_y = osd.bitmapsize(icon) 
+                w = item_icon_size_x + 20
+                h = (int)(item_icon_size_y - str_h) / 2
+            
+            if menu.selected == choice:
+                osd.drawbox(x0 - PADDING + w,     y0 - PADDING + h,
+                            x0 + str_w +PADDING, y0 + h + str_h + PADDING,
+                            width=-1,
+                            color=pref_item.selection.bgcolor)
+                pref_item_use = pref_item.selection
 
-                elif choice.eventhandler_args[0] == 'list':
-                    if menu.selected == choice:
-                        osd.drawbox(x0 - 8 + w, y0 - 3 + h,
-                                    x0 - 8 + val.item_pl.selection.length, y0 + val.item_pl.selection.size*1.5 + h, width=-1,
-                                    color=((160 << 24) | val.item_pl.selection.bgcolor))
-                        
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.item_pl.selection.color, 
-                                      val.item_pl.selection.shadow_color, None, val.item_pl.selection.font,
-                                      val.item_pl.selection.size, val.item_pl.selection.shadow_visible,
-                                      val.item_pl.selection.shadow_mode,
-                                      val.item_pl.selection.shadow_pad_x, val.item_pl.selection.shadow_pad_y)
-                        
-                    else:
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.item_pl.color, 
-                                      val.item_pl.shadow_color, None, val.item_pl.font,
-                                      val.item_pl.size, val.item_pl.shadow_visible,
-                                      val.item_pl.shadow_mode,
-                                      val.item_pl.shadow_pad_x, val.item_pl.shadow_pad_y)
 
-                elif choice.eventhandler_args[0] == 'main':
-                    if menu.selected == choice:
-                        osd.drawbox(x0 - 8 + w, y0 - 3 + h,
-                                    x0 - 8 + val.item_main.selection.length, y0 + val.item_main.selection.size*1.5 + h, width=-1,
-                                    color=((160 << 24) | val.item_main.selection.bgcolor))
-                        
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.item_main.selection.color, 
-                                      val.item_main.selection.shadow_color, None, val.item_main.selection.font,
-                                      val.item_main.selection.size, val.item_main.selection.shadow_visible,
-                                      val.item_main.selection.shadow_mode,
-                                      val.item_main.selection.shadow_pad_x, val.item_main.selection.shadow_pad_y)
-                        
-                    else:
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.item_main.color, 
-                                      val.item_main.shadow_color, None, val.item_main.font,
-                                      val.item_main.size, val.item_main.shadow_visible,
-                                      val.item_main.shadow_mode,
-                                      val.item_main.shadow_pad_x, val.item_main.shadow_pad_y)
+            if icon != None: 
+                osd.drawbitmap(util.resize(icon, item_icon_size_x, item_icon_size_y), x0, y0)
 
-                else:
-                    if menu.selected == choice:
-                        osd.drawbox(x0 - 8 + w, y0 - 3 + h,
-                                    x0 - 8 + val.items.selection.length, y0 + val.items.selection.size*1.5 + h, width=-1,
-                                    color=((160 << 24) | val.items.selection.bgcolor))
-                        
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.items.selection.color, 
-                                      val.items.selection.shadow_color, None, val.items.selection.font,
-                                      val.items.selection.size, val.items.selection.shadow_visible,
-                                      val.items.selection.shadow_mode,
-                                      val.items.selection.shadow_pad_x, val.items.selection.shadow_pad_y)
-                    else:
-                        self.DrawText(choice.name, (x0+w+10), y0+h, val.items.color, 
-                                      val.items.shadow_color, None, val.items.font,
-                                      val.items.size, val.items.shadow_visible,
-                                      val.items.shadow_mode,
-                                      val.items.shadow_pad_x, val.items.shadow_pad_y)
-            else:
-                if menu.selected == choice:
-                    osd.drawbox(x0 - 8 + w, y0 - 3 + h,
-                                x0 - 8 + val.items.selection.length, y0 + val.items.selection.size*1.5 + h, width=-1,
-                                color=((160 << 24) | val.items.selection.bgcolor))
-                    
-                    self.DrawText(choice.name, (x0+w+10), y0+h, val.items.selection.color, 
-                                  val.items.selection.shadow_color, None, val.items.selection.font,
-                                  val.items.selection.size, val.items.selection.shadow_visible,
-                                  val.items.selection.shadow_mode,
-                                  val.items.selection.shadow_pad_x, val.items.selection.shadow_pad_y)
 
-                else:
-                    self.DrawText(choice.name, (x0+w+10), y0+h, val.items.color, 
-                                  val.items.shadow_color, None, val.items.font,
-                                  val.items.size, val.items.shadow_visible,
-                                  val.items.shadow_mode,
-                                  val.items.shadow_pad_x, val.items.shadow_pad_y)
+            self.DrawText(choice.name,
+                          x0+w, y0+h, pref_item_use.color, 
+                          pref_item_use.shadow_color, None, pref_item_use.font,
+                          pref_item_use.size, pref_item_use.shadow_visible,
+                          pref_item_use.shadow_pad_x, pref_item_use.shadow_pad_y)                
+            
 
-            y0 += spacing
+            y0 += 2*PADDING + max(str_h, item_icon_size_y)
 
 
         # draw the image
@@ -325,19 +339,17 @@ class Skin:
                 osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu.selection.length, \
                             y0 + val.submenu.selection.size*1.5,
                             width=-1,
-                            color=((160 << 24) | val.submenu.selection.bgcolor))
+                            color=val.submenu.selection.bgcolor)
                 
                 self.DrawText(item.name, x0, y0, val.submenu.selection.color, 
                               val.submenu.selection.shadow_color, None, val.submenu.selection.font,
                               val.submenu.selection.size, val.submenu.selection.shadow_visible,
-                              val.submenu.selection.shadow_mode,
                               val.submenu.selection.shadow_pad_x, val.submenu.selection.shadow_pad_y)
                 
             else:
                 self.DrawText(item.name, x0, y0, val.submenu.color, 
                               val.submenu.shadow_color, None, val.submenu.font,
                               val.submenu.size, val.submenu.shadow_visible,
-                              val.submenu.shadow_mode,
                               val.submenu.shadow_pad_x, val.submenu.shadow_pad_y)
             x0 += 190
 
@@ -380,31 +392,31 @@ class Skin:
                 dir_name += file_name[i] + '/'
 
             file_name = file_name[i+1]
-            self.DrawText('Dir: '+dir_name, 5, 510, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
-            self.DrawText('File: '+file_name, 5, 540, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Dir: '+dir_name, 5, 510, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
+            self.DrawText('File: '+file_name, 5, 540, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
                 
                 
 
-            self.DrawText('Title:', 30, 100, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
-            self.DrawText('%s ' % info.title, left, 100, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Title:', 30, 100, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
+            self.DrawText('%s ' % info.title, left, 100, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
  
             
-            self.DrawText('Artist:', 30, 130, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
-            self.DrawText('%s ' % info.artist, left, 130, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Artist:', 30, 130, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
+            self.DrawText('%s ' % info.artist, left, 130, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
 
 
-            self.DrawText('Album:', 30, 160, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
-            self.DrawText('%s ' % info.album, left, 160, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Album:', 30, 160, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
+            self.DrawText('%s ' % info.album, left, 160, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
         
 
-            self.DrawText('Year:', 30, 190, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
-            self.DrawText('%s ' % info.year, left, 190, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Year:', 30, 190, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
+            self.DrawText('%s ' % info.year, left, 190, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
 
 
-            self.DrawText('Track:', 30, 220, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
-            self.DrawText('%s ' % info.track, left, 220, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Track:', 30, 220, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
+            self.DrawText('%s ' % info.track, left, 220, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
 
-            self.DrawText('Time:', 30, 250, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+            self.DrawText('Time:', 30, 250, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
 
                 
         else:
@@ -420,7 +432,7 @@ class Skin:
         rem_min = int(info.remain)/60
         rem_sec = int(info.remain)%60
 
-        self.DrawText('%s:%02d/-%s:%02d (%0.1f%%) ' % (el_min, el_sec, rem_min, rem_sec, info.done), left, 250, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible, val.shadow.mode, val.shadow.x, val.shadow.y)
+        self.DrawText('%s:%02d/-%s:%02d (%0.1f%%) ' % (el_min, el_sec, rem_min, rem_sec, info.done), left, 250, val.font.color, val.shadow.color, None, val.font.font, val.font.size, val.shadow.visible,  val.shadow.x, val.shadow.y)
 
 
         # Draw the progress bar
@@ -450,4 +462,4 @@ class Skin:
                         color = val.progressbar.color)
             
         osd.update()
-    
+
