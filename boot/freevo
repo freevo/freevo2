@@ -28,7 +28,15 @@ case "$1" in
 	$MATROXSET -f /dev/fb0 2 2 > /dev/null 2> /dev/null
 	$FBSET -db $FBSETDB -fb /dev/fb0 "ntsc-768x576" > /dev/null 2> /dev/null
 	$FBSET -db $FBSETDB -fb /dev/fb1 "640x480-60" > /dev/null 2> /dev/null
-	echo "NTSC 768x576."
+
+	# Define TVNORM in boot_config
+	if [ "$TVNORM" = "PAL" ]; then
+		$MATROXSET 1
+		echo -n "PAL "
+	else
+		echo -n "NTSC "
+	fi
+	echo "768x576."
 
 	echo -n "Starting $DESC: "
 	(cd $FREEVO_HOME && $DAEMON $FREEVO_OPTIONS >> $FREEVO_LOG 2>&1 &)
