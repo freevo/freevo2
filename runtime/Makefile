@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/11/09 16:36:46  rshortt
+# Some pygphoto and gphoto plugin fixes.
+#
 # Revision 1.20  2003/10/31 20:13:01  rshortt
 # Changes for the 1.4 runtime and add runtime_release target.
 #
@@ -207,7 +210,7 @@ python_copy:
 	-mkdir -p tmp
 	cp -a lib/python2.3/site-packages/{Numeric,Numeric.pth} tmp
 	cp -a lib/python2.3/site-packages/{PIL,PIL.pth,_xmlplus,aomodule.so} tmp
-	cp -a lib/python2.3/site-packages/{ogg,pygame,pygphoto.so} tmp
+	cp -a lib/python2.3/site-packages/{ogg,pygame,_pygphoto.so,pygphoto.py} tmp
 	cp -a lib/python2.3/site-packages/{pylircmodule.so,fchksum.so,pylcd.py} tmp
 	cp -a lib/python2.3/site-packages/{mmpython,twisted} tmp
 	rm -rf lib/python2.3/site-packages

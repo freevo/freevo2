@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/09 16:36:46  rshortt
+# Some pygphoto and gphoto plugin fixes.
+#
 # Revision 1.4  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -46,7 +49,7 @@ import util
 import config
 from item import Item
 import pygame
-import _pygphoto as pygphoto
+import pygphoto
 import cStringIO
 import image.viewer
 
