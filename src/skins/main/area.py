@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/01/17 12:35:59  dischi
+# make eval saver
+#
 # Revision 1.26  2004/01/11 15:43:16  dischi
 # better display type handling, added type main menu
 #
@@ -419,13 +422,11 @@ class Skin_Area:
 
         font_h=0
 
-        MAX=self.area_val.width
         if isinstance(object.width, str):
-            object.width = int(eval(object.width))
+            object.width = int(eval(object.width, {'MAX':self.area_val.width}))
 
-        MAX=self.area_val.height
         if isinstance(object.height, str):
-            object.height = int(eval(object.height))
+            object.height = int(eval(object.height, {'MAX':self.area_val.height}))
 
         object.x += self.area_val.x
         object.y += self.area_val.y
@@ -457,17 +458,15 @@ class Skin_Area:
         if not r.height:
             r.height = item_h
 
-        MAX=item_w
         if isinstance(r.x, str):
-            r.x = int(eval(r.x))
+            r.x = int(eval(r.x, {'MAX':item_w}))
         if isinstance(r.width, str):
-            r.width = int(eval(r.width))
+            r.width = int(eval(r.width, {'MAX':item_w}))
             
-        MAX=item_h
         if isinstance(r.y, str):
-            r.y = int(eval(r.y))
+            r.y = int(eval(r.y, {'MAX':item_h}))
         if isinstance(r.height, str):
-            r.height = int(eval(r.height))
+            r.height = int(eval(r.height, {'MAX':item_h}))
             
         if r.x < 0:
             item_w -= r.x
