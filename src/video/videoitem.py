@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.113  2004/01/07 17:11:20  mikeruelle
+# make screensaver videos not blowup
+#
 # Revision 1.112  2004/01/04 18:18:56  dischi
 # add more infos about tv shows
 #
@@ -407,7 +410,8 @@ class VideoItem(Item):
             return
 
         self.player_rating, self.player = self.possible_player[0]
-        self.parent.current_item = self
+	if self.parent:
+            self.parent.current_item = self
 
         if not self.menuw:
             self.menuw = menuw
