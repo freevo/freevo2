@@ -174,6 +174,14 @@ EPG_URL = 'http://tv.yahoo.com/grid?.intl=us&zip=63303&.done=&lineup=us_MO24526&
 XMLTV_FILE = '/tmp/TV.xml'
 
 #
+# XML TV Logo Location
+#
+# Use the "makelogos.py" script to download all the
+# Station logos into a directory. And then put the path
+# to those logos here
+TV_LOGOS = '/var/cache/xmltv/logos'
+
+#
 # Remote control commands translation table. Replace this with the commands that
 # lirc sends for your remote. NB: The .lircrc file is not used.
 #

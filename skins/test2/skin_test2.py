@@ -97,14 +97,17 @@ class Skin(skin_test1.Skin):
             else:
                 ptscale = 1.0
             fontsize = self.OSD_FONTSIZE_ITEMS*ptscale
-            osd.drawstring(choice.name, (x0+115), y0,
+	    w = 0
+	    h = 0
+	    if choice.icon != None: 
+ 		w,h = util.pngsize(choice.icon)
+		osd.drawbitmap(choice.icon, x0, y0)
+		# Align the logo based on image size
+		
+            osd.drawstring(choice.name, (x0+w), y0,
                            font=self.OSD_FONTNAME_ITEMS,
                            ptsize=fontsize)
-	    if choice.icon != None: 
-	    	osd.drawbitmap(choice.icon, x0, y0)
-		#print type(choice.icon)
-		#print choice.icon
-            if menu.selected == choice:
+	    if menu.selected == choice:
                 osd.drawbox(x0 - 8, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
                             color=((160 << 24) | osd.COL_BLUE))
             y0 += spacing
