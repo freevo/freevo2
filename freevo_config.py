@@ -97,6 +97,9 @@ OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
 REMOTE_CONTROL_HOST = '127.0.0.1'
 REMOTE_CONTROL_PORT = 16310
 
+# Cache for Freevo data
+FREEVO_CACHEDIR = '/var/cache/freevo/'
+
 #
 # The mpg123 application
 #

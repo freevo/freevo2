@@ -10,6 +10,11 @@ countries and regions into a standard XML based format. This is the
 only way to get TV listings for Canada, and Europe, for use in Freevo
 currently.
 
+Also, if your listing provider supports it, you can use station cover logos
+into the freevo interface. To download and prepare the cover logos for 
+usage in freevo, all you need to do is run the makelogos.py program. Then,
+the next time you go into the TV guide, you'll see all the stations logos.
+
 
 Installation:
 ==

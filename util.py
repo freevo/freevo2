@@ -90,3 +90,17 @@ def pngsize(file):
 	image = Image.open(file)
 	width, height = image.size
 	return width,height
+
+def thumb(file):
+	import Image
+	# Cache the thumbnails
+	# thumbnail file is file.png.thumb
+	mythumb = config.FREEVO_CACHEDIR + os.path.basename(file) + '.thumb'
+	if os.path.isfile(mythumb):
+		return mythumb
+	else:
+		im = Image.open(file)
+		im.thumbnail((100,100))
+		im.save(mythumb,'PNG')
+		return mythumb
+		
