@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/22 22:32:12  krister
+# Init FREEVO_STARTDIR if not set.
+#
 # Revision 1.16  2003/02/20 19:03:42  dischi
 # Removed REMOTE because we use lirc now
 #
@@ -109,7 +112,11 @@
 import sys, os, time, re
 import traceback
 
-# Fallback for a new option, remove later.
+if not 'FREEVO_STARTDIR' in os.environ:
+    print 'WARNING: FREEVO_STARTDIR is not set!'
+    os.environ['FREEVO_STARTDIR'] = os.environ['PWD']
+    
+# XXX Fallback for a new option, remove later.
 MOVIE_PLAYLISTS = 0
 
 # Send debug to stdout as well as to the logfile?
