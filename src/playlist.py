@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/12/30 15:33:29  dischi
+# add random playing an option for normal playlist files
+#
 # Revision 1.46  2003/12/29 22:07:14  dischi
 # renamed xml_file to fxd_file
 #
@@ -279,17 +282,6 @@ class Playlist(Item):
         self.__build__ = True
                 
 
-    def copy(self, obj):
-        """
-        Special copy value Playlist
-        """
-        Item.copy(self, obj)
-        if obj.type == 'playlist':
-            self.current_item = obj.current_item
-            self.playlist     = obj.playlist
-            self.autoplay     = obj.autoplay
-            
-
     def randomize(self):
         """
         resort the playlist by random
@@ -307,13 +299,20 @@ class Playlist(Item):
         return the actions for this item: play and browse
         """
         self.build()
+        items = [ ( self.browse, _('Browse Playlist') ) ]
+
+        play_item = ( self.play, _('Play') )
+        
         if self.autoplay:
-            return [ ( self.play, _('Play') ),
-                     ( self.browse, _('Browse Playlist') ) ]
+            items = [ play_item ] + items
+        else:
+            items.append(play_item)
 
-        return [ ( self.browse, _('Browse Playlist') ),
-                 ( self.play, _('Play') ) ]
+        if not self.random:
+            items.append((self.random_play, _('Random play all items')))
 
+        return items
+    
 
     def browse(self, arg=None, menuw=None):
         """
@@ -340,6 +339,15 @@ class Playlist(Item):
         moviemenu = menu.Menu(self.name, self.playlist)
         menuw.pushmenu(moviemenu)
         
+
+    def random_play(self, arg=None, menuw=None):
+        """
+        play the playlist in random order
+        """
+        Playlist(playlist=self.playlist, parent=self.parent,
+                 display_type=self.display_type, random=True,
+                 repeat=self.repeat).play(arg,menuw)
+
         
     def play(self, arg=None, menuw=None):
         """
