@@ -30,15 +30,12 @@ class Image(base.Image):
 			raise ValueError, "Unsupported image type: %s" % type(image_or_filename)
 
 	def __getattr__(self, attr):
-		if attr in ("width", "height", "size", "format", "mode", "filename", "has_alpha", "rowstride"):
+		if attr in ("width", "height", "size", "format", "mode", "filename", "has_alpha", "rowstride", "get_pixel", "crop", "scale_preserve_aspect", "copy_rect"):
 			return getattr(self._image, attr)
 		return super(Image, self).__getattr__(attr)
 
 	def get_raw_data(self, format = "BGRA"):
 		return self._image.get_bytes(format)
-
-	def crop(self, pos, size):
-		self._image = self._image.crop(pos, size) 
 
 	def rotate(self, angle):
 		while angle >= 360: angle -= 360
@@ -60,12 +57,6 @@ class Image(base.Image):
 
 	def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
 		self._image =  self._image.scale(size, src_pos, src_size) 
-
-	def scale_preserve_aspect(self, size):
-		self._image = self._image.scale_preserve_aspect(size) 
-
-	def copy_rect(self, src_pos, size, dst_pos):
-		return self._image.copy_rect( src_pos, size, dst_pos )
 
 	def blend(self, srcimg, dst_pos = (0, 0), dst_size = (-1, -1), 
 	          src_pos = (0, 0), src_size = (-1, -1), 
