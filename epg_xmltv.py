@@ -48,19 +48,23 @@ def myversion():
 def get_guide():
     global cached_guide
 
-    # Yes, but can we use the cached version (if same as the file)?
+    # Can we use the cached version (if same as the file)?
     if (cached_guide == None or
-          cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE)):
+        (os.path.isfile(config.XMLTV_FILE) and 
+         cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE))):
 
         # No, is there a pickled version ("file cache") in a file?
         pname = config.XMLTV_FILE + '.pickled'
-        if os.path.isfile(pname) and (os.path.getmtime(pname) >
-                                      os.path.getmtime(config.XMLTV_FILE)):
+        if (os.path.isfile(config.XMLTV_FILE) and
+            os.path.isfile(pname) and (os.path.getmtime(pname) >
+                                       os.path.getmtime(config.XMLTV_FILE))):
             if DEBUG: print 'XMLTV, reading cached file (%s)' % pname
             cached_guide = pickle.load(open(pname, 'r'))
         else:
             # No, need to reload it
-            if DEBUG: print 'XMLTV, reading raw file (%s)' % config.XMLTV_FILE
+            if DEBUG:
+                print 'XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE
+                
             cached_guide = load_guide()
 
             # Dump a pickled version for later reads
@@ -79,11 +83,12 @@ def get_guide():
 def load_guide():
     # Create a new guide
     guide = epg_types.TvGuide()
-    guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
 
     # Is there a file to read from?
-    gotfile = 1
-    if not os.path.isfile(config.XMLTV_FILE):
+    if os.path.isfile(config.XMLTV_FILE):
+        gotfile = 1
+        guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
+    else:
         if DEBUG: print 'XMLTV file (%s) missing!' % config.XMLTV_FILE
         gotfile = 0
 
