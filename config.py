@@ -113,6 +113,8 @@ CONF.width, CONF.height = 800, 600
 CONF.display = 'x11'
 CONF.tv = 'ntsc'
 CONF.chanlist = 'us-cable'
+CONF.xmame_SDL = ''
+CONF.jpegtran = ''
 
 def read_config(filename, conf):
     if DEBUG: print 'Reading config file %s' % filename
