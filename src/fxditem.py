@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/11/01 20:14:14  dischi
+# fix debug
+#
 # Revision 1.14  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -146,7 +149,7 @@ class Mimetype(plugin.MimetypePlugin):
                 items += parser.getattr(None, 'items')
 
             except:
-                print "fxd file %s corrupt" % fxd_file
+                _debug_("fxd file %s corrupt" % fxd_file, 0)
                 traceback.print_exc()
         return items
 

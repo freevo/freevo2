@@ -38,6 +38,7 @@ import os
 import stat
 import traceback
 import codecs
+import re
 
 # xml support
 from xml.utils import qp_xml
@@ -197,7 +198,7 @@ class FXD:
         elif mode == 'w':
             self.write_callback[name] = [ callback, force ]
         else:
-            print 'fxdparser: unknown mode %s for fxd handler' % mode
+            print 'fxdparser.set_handler: unknown mode %s' % mode
 
 
     def __format_text(self, text):
@@ -214,7 +215,7 @@ class FXD:
         parse the tree and call all the callbacks
         """
         if self.tree.tree.name != 'freevo':
-            print 'fxdparser error: first node not <freevo>'
+            print 'fxdparser.parse: ERROR: first node not <freevo>'
             return
         for node in self.tree.tree.children:
             if node.name == 'skin':

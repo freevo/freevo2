@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.144  2004/11/01 20:14:14  dischi
+# fix debug
+#
 # Revision 1.143  2004/09/25 05:04:01  rshortt
 # Ignore lost+found directories.
 #
@@ -209,7 +212,7 @@ class DirItem(Playlist):
                 parser.set_handler('skin', self.read_folder_fxd)
                 parser.parse()
             except:
-                print "fxd file %s corrupt" % self.folder_fxd
+                _debug_("fxd file %s corrupt" % self.folder_fxd, 0)
                 traceback.print_exc()
 
 
@@ -509,7 +512,7 @@ class DirItem(Playlist):
 
         # FIXME: add support again when InputBox is working
 	if vfs.isfile(self.dir + '/.password') and 0:
-	    print 'password protected dir'
+	    _debug_('password protected dir', 0)
             self.arg   = arg
             self.menuw = menuw
 	    pb = InputBox(text=_('Enter Password'), handler=self.pass_cmp_cb,
@@ -528,8 +531,8 @@ class DirItem(Playlist):
 	    pwfile = vfs.open(self.dir + '/.password')
 	    line = pwfile.readline()
 	except IOError, e:
-	    print 'error %d (%s) reading password file for %s' % \
-		  (e.errno, e.strerror, self.dir)
+	    _debug_('error %d (%s) reading password file for %s' % \
+                    (e.errno, e.strerror, self.dir), 0)
 	    return
 
 	pwfile.close()
@@ -897,7 +900,7 @@ class DirItem(Playlist):
             parser.set_handler('folder', self.write_folder_fxd, 'w', True)
             parser.save()
         except:
-            print "fxd file %s corrupt" % self.folder_fxd
+            _debug_("fxd file %s corrupt" % self.folder_fxd, 0)
             traceback.print_exc()
 
         # rebuild menu

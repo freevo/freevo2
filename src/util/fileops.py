@@ -168,7 +168,7 @@ def rmrf(top=None):
             try:
                 os.rmdir(d)
             except (IOError, OSError), e:
-                print e
+                print 'fileops.rmrf: %s' % e
 
 
 #
@@ -194,8 +194,8 @@ def match_files(dirname, suffix_list):
     try:
         files = [ vfs.join(dirname, fname) for fname in os.listdir(dirname) if
                   vfs.isfile(vfs.join(dirname, fname)) ]
-    except OSError:
-        print 'util:match_files(): Got error on dir = "%s"' % dirname
+    except OSError, e:
+        print 'fileops:match_files: %s' % e
         return []
     matches = [ fname for fname in files if match_suffix(fname, suffix_list) ]
     matches.sort(lambda l, o: cmp(l.upper(), o.upper()))

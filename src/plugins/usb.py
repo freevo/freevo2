@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/11/01 20:15:41  dischi
+# fix debug
+#
 # Revision 1.12  2004/10/29 18:17:20  dischi
 # moved usb util functions to this file
 #
@@ -105,7 +108,7 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 self.devices.remove(d)
             except ValueError:
-                print 'usb.py: new device %s' %d
+                _debug_('new device %s' %d, 0)
                 for device, message, action in config.USB_HOTPLUG:
                     if d == device:
                         pop = PopupBox(message)
@@ -118,7 +121,7 @@ class PluginInterface(plugin.DaemonPlugin):
                         
         for d in self.devices:
             changes = True
-            print 'usb.py: removed device %s' % d
+            _debug_('removed device %s' % d, 0)
 
         if changes:
             eventhandler.post(plugin.event('USB'))

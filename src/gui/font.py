@@ -31,12 +31,12 @@ class Font:
         try:
             return mevas.imagelib.load_font(name, ptsize)
         except IOError:
-            _debug_('Couldn\'t load font "%s"' % name)
+            _debug_('Couldn\'t load font "%s"' % name, 2)
 
             # Ok, see if there is an alternate font to use
             if name in config.OSD_FONT_ALIASES:
                 alt_fname = config.OSD_FONT_ALIASES[name]
-                _debug_('trying alternate: %s' % alt_fname)
+                _debug_('trying alternate: %s' % alt_fname, 2)
                 try:
                     return mevas.imagelib.load_font(alt_fname, ptsize)
                 except IOError:

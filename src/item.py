@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2004/11/01 20:14:14  dischi
+# fix debug
+#
 # Revision 1.82  2004/10/26 19:14:50  dischi
 # adjust to new sysconfig file
 #
@@ -141,7 +144,7 @@ class FileInformation:
                 try:
                     os.unlink(f)
                 except:
-                    print 'can\'t delete %s' % f
+                    _debug_('can\'t delete %s' % f, 0)
         
                 
 
@@ -247,7 +250,7 @@ class Item:
         if isinstance(self.info, mediainfo.Info):
             return self.info.delete(key)
         else:
-            print 'unable to delete info for that kind of item'
+            _debug_('unable to delete info for that kind of item', 0)
 
         
     def id(self):

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/11/01 20:12:45  dischi
+# fix debug
+#
 # Revision 1.7  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -148,7 +151,6 @@ class FxdImdb:
         m = re.match(regexp_get_imdb_id, response.geturl())
         if m:
             data = self.parsedata(response)
-            #print 'data[0]: ' + data[0]
             self.imdb_id_list = [ ( m.group('id'),
                                     data[0], 
                                     data[1]['year'],
@@ -698,7 +700,7 @@ class FxdImdb:
         try:
             r = urllib2.urlopen(req)
         except urllib2.HTTPError, error:
-            print error
+            _debug_(error, 0)
             return (self.title, self.info, self.image_urls)
 
         data = r.read().replace('</a>', '\n').replace('</A>', '\n')
@@ -742,7 +744,7 @@ class FxdImdb:
             except:
                 pass
         if not self.image_url:
-            print "Image dowloading failed"
+            _debug_('Image dowloading failed', 0)
             return
         
         self.image = (self.fxdfile + '.jpg')
@@ -892,7 +894,6 @@ def makeVideo(type, id_ref, file, **values):
         raise FxdImdb_XML_Error("Invalid type passed to makeVideo")
         
     if values:
-        #print values
         if 'device' in values: device = values['device']
         if 'mplayer_opt' in values: mplayer_opt = values['mplayer_opt']
     

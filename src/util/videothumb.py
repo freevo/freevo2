@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/11/01 20:12:11  dischi
+# fix debug
+#
 # Revision 1.19  2004/10/29 18:12:14  dischi
 # move stdout function to this file, only needed here (FIXME: it blocks)
 #
@@ -153,9 +156,9 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
             else:
                 image.save(imagefile)
         except (OSError, IOError), e:
-            print e
+            _debug_(e, 0)
     else:
-        print 'no imagefile found'
+        _debug_('no imagefile found', 0)
         
     if popup:
         pop.destroy()

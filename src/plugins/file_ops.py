@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/11/01 20:15:40  dischi
+# fix debug
+#
 # Revision 1.21  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -99,7 +102,7 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             os.unlink(filename)
         except:
-            print 'can\'t delete %s' % filename
+            _debug_('can\'t delete %s' % filename, 0)
         
     def delete_file(self):
         self.item.files.delete()

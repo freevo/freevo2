@@ -121,12 +121,12 @@ def open(name, mode='r'):
             if not os.path.isdir(os.path.dirname(overlay)):
                 os.makedirs(os.path.dirname(overlay), mode=04775)
         except IOError:
-            print 'error creating dir %s' % os.path.dirname(overlay)
+            print 'vfs.open: error creating dir %s' % os.path.dirname(overlay)
             raise IOError
         try:
             return file(overlay, mode)
         except IOError:
-            print 'error opening file %s' % overlay
+            print 'vfs.open: error opening file %s' % overlay
             raise IOError
 
 
@@ -144,12 +144,12 @@ def codecs_open(name, mode, encoding):
             if not os.path.isdir(os.path.dirname(overlay)):
                 os.makedirs(os.path.dirname(overlay))
         except IOError:
-            print 'error creating dir %s' % os.path.dirname(overlay)
+            print 'vfs.codecs_open: error creating dir %s' % os.path.dirname(overlay)
             raise IOError
         try:
             return codecs.open(overlay, mode, encoding=encoding)
         except IOError, e:
-            print 'error opening file %s' % overlay
+            print 'vfs.codecs_open: error opening file %s' % overlay
             raise IOError, e
 
 
@@ -185,7 +185,7 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
         return files
 
     except OSError:
-        print 'vfs.py: Error in dir %s' % directory
+        print 'vfs.listdir: Error in dir %s' % directory
         traceback.print_exc()
         if not handle_exception:
             raise OSError

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/11/01 20:15:40  dischi
+# fix debug
+#
 # Revision 1.40  2004/08/14 08:40:08  dischi
 # bugfix for new menu interface
 #
@@ -182,6 +185,7 @@ class MediaMenu(Item):
                             if os.system( config.HOST_ALIVE_CHECK % hostname ) != 0:
                                 reachable = 0
                         except:
+                            _debug_('Error parsing %s' % filename, 0)
                             traceback.print_exc()
                        
                 if reachable:
@@ -207,6 +211,7 @@ class MediaMenu(Item):
                             self.normal_items += items
                             
             except:
+                _debug_('Error parsing %s' % String(item), 0)
                 traceback.print_exc()
 
 

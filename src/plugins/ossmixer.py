@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/11/01 20:15:40  dischi
+# fix debug
+#
 # Revision 1.10  2004/10/21 12:32:22  dischi
 # fix variable type
 #
@@ -86,7 +89,7 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 self.mixfd = ossaudiodev.openmixer() #open(config.DEV_MIXER, 'r')
             except IOError:
-                print 'Couldn\'t open mixer %s' % config.DEV_MIXER
+                _debug_('Couldn\'t open mixer %s' % config.DEV_MIXER, 0)
                 return
 
         if 0:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2004/11/01 20:14:14  dischi
+# fix debug
+#
 # Revision 1.109  2004/10/08 20:20:17  dischi
 # remove unneeded eventhandler calls
 #
@@ -520,7 +523,6 @@ class MenuWidget(Application):
                     else:
                         action = action[0]
             if not action:
-                print 'No action.. '
                 gui.AlertBox(text=_('No action defined for this choice!')).show()
             else:
                 action( arg=arg, menuw=self )

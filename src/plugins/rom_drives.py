@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/11/01 20:15:40  dischi
+# fix debug
+#
 # Revision 1.68  2004/09/14 20:09:07  dischi
 # adjust to video changes
 #
@@ -326,8 +329,9 @@ class RemovableMedia:
                 else:
                     s = ioctl(fd, CDROMEJECT)
                 os.close(fd)
-            except:
+            except Exception, e:
                 try:
+                    _debug_(String(e), 0)
                     traceback.print_exc()
                 except IOError:
                     # believe it or not, this sometimes causes an IOError if
@@ -361,7 +365,8 @@ class RemovableMedia:
                 else:
                     s = ioctl(fd, CDROMCLOSETRAY)
                 os.close(fd)
-            except:
+            except Exception, e:
+                _debug_(String(e), 0)
                 traceback.print_exc()
                 # maybe we need to close the fd if ioctl fails, maybe
                 # open fails and there is no fd

@@ -96,7 +96,7 @@ def save(file, data, version=None):
         cPickle.dump(data, f, PICKLE_PROTOCOL)
         f.close()
     except IOError, e:
-        print e
+        print 'cache.save: %s' % e
 
 
 

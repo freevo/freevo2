@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2004/11/01 20:14:14  dischi
+# fix debug
+#
 # Revision 1.77  2004/08/29 18:37:30  dischi
 # make playlist an mediaitem
 #
@@ -119,14 +122,14 @@ class Playlist(MediaItem):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            print 'Cannot open file "%s"' % plsname
+            _debug_('Cannot open file "%s"' % plsname, 0)
             return 0
 
         try:
             playlist_lines_dos = map(lambda l: l.strip(), lines)
             playlist_lines     = filter(lambda l: l[0] != '#', playlist_lines_dos)
         except IndexError:
-            print 'Bad m3u playlist file "%s"' % plsname
+            _debug_('Bad m3u playlist file "%s"' % plsname, 0)
             return 0
         
         (curdir, playlistname) = os.path.split(plsname)
@@ -147,7 +150,7 @@ class Playlist(MediaItem):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            print String(_('Cannot open file "%s"')) % list
+            _debug_(String(_('Cannot open file "%s"')) % list, 0)
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -187,7 +190,7 @@ class Playlist(MediaItem):
         try:
             lines = util.readfile(ssrname)
         except IOError:
-            print String(_('Cannot open file "%s"')) % list
+            _debug_(String(_('Cannot open file "%s"')) % list, 0)
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -253,7 +256,7 @@ class Playlist(MediaItem):
                 else:
                     self.read_m3u(playlist)
             except (OSError, IOError), e:
-                print 'playlist error: %s' % e
+                _debug_('playlist error: %s' % e, 0)
             self.set_url(playlist)
 
         # self.playlist is a list of Items or strings (filenames)
@@ -355,7 +358,7 @@ class Playlist(MediaItem):
 
         if not self.playlist:
             # XXX PopupBox please
-            print String(_('empty playlist'))
+            _debug_(String(_('empty playlist')), 0)
             return False
         
         if not arg or arg != 'next':

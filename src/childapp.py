@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/11/01 20:14:04  dischi
+# fix debug
+#
 # Revision 1.65  2004/10/30 18:47:14  dischi
 # fix missing import
 #
@@ -171,7 +174,7 @@ class Instance:
             start_str = app
             
             debug_name = app[ 0 ]
-            print 'running', self.binary
+            _debug_('running', self.binary, 1)
         
         if debug_name.rfind('/') > 0:
             debug_name = debug_name[ debug_name.rfind( '/' ) + 1 : ]
@@ -279,12 +282,12 @@ class Instance:
         except OSError:
             pass
 
-        print 'kill -%d %s' % ( signal, self.binary )
+        _debug_('kill -%d %s' % ( signal, self.binary ), 1)
         if signal == 15:
             cb = notifier.Callback( self._killall, 9 )
             self.__kill_timer = notifier.addTimer( 1000, cb )
         else:
-            print 'PANIC', self.binary
+            _debug_('PANIC', self.binary, 0)
             
         return False
 
@@ -339,13 +342,9 @@ class IO_Handler:
                 except:
                     pass
                 self.logger = open(logger, 'w')
-                print String(_( 'logging child to "%s"' )) % logger
+                _debug_('logging child to "%s"' % logger, 1)
             except IOError:
-                print
-                print String(_('ERROR')) + ': ' + \
-                      String(_( 'Cannot open "%s" for logging!')) % logger
-                print String(_('Set CHILDAPP_DEBUG=0 in local_conf.py, '+\
-                               'or make %s writable!' )) % config.LOGDIR
+                _debug_('Error: Cannot open "%s" for logging' % logger, 0)
             
     def cleanup( self ):
         notifier.removeSocket( self.fp )
@@ -416,9 +415,9 @@ class _Watcher:
                 remove_proc.append( p )
                 continue
             if not pid: continue
-            print ">>> DEAD CHILD: %s (%s)" % ( pid, status )
+            _debug_(">>> DEAD CHILD: %s (%s)" % ( pid, status ), 1)
             if status == -1:
-                print "error retrieving process information from %d" % p
+                _debug_("error retrieving process information from %d" % p, 0)
             elif os.WIFEXITED( status ) or os.WIFSIGNALED( status ) or \
                      os.WCOREDUMP( status ):
                 self.__processes[ p ]( p )

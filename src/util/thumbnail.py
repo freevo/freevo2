@@ -47,7 +47,7 @@ try:
     import epeg
     USE_EPEG = True
 except ImportError:
-    print 'thumbnail.py: pyepeg not found'
+    print 'thumbnail: pyepeg not found'
     USE_EPEG = False
 
 # freevo utils
@@ -129,13 +129,13 @@ def create(filename):
             epeg.jpg_thumbnail(filename, thumb, 255, 255)
             return mevas.imagelib.open(thumb)
         except Exception, e:
-            print e
+            print 'thumbnail.create: %s' % e
 
     thumb = vfs.getoverlay(filename + '.raw')
     try:
         return create_raw_thumbnail(filename, thumb)
     except Exception, e:
-        print e
+        print 'thumbnail.create: %s' % e
         fileops.touch(thumb)
         return None
 
