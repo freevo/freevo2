@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/09/20 09:44:23  dischi
+# cleanup
+#
 # Revision 1.35  2003/09/10 19:35:49  dischi
 # fix length during runtime
 #
@@ -56,17 +59,12 @@ from item import Item
 import mmpython
 
 
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
-
 class AudioItem(Item):
     """
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, name = None, scan = TRUE):
+    def __init__(self, file, parent, name = None, scan = True):
         if scan:
             if parent and parent.media:
                 url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,

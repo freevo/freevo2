@@ -9,12 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/09/20 09:44:23  dischi
+# cleanup
+#
 # Revision 1.21  2003/09/13 10:08:21  dischi
 # i18n support
-#
-# Revision 1.20  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,9 +45,6 @@ import os
 from item import Item
 from audioitem import AudioItem
 from playlist import Playlist, RandomPlaylist
-
-TRUE  = 1
-FALSE = 0
 
 class AudioDiskItem(Playlist):
     """
@@ -107,7 +103,7 @@ class AudioDiskItem(Playlist):
         play_items = []
         for i in range(0, len(self.info['tracks'])):
             title=self.info['tracks'][i]['title']
-            item = AudioItem('cdda://%d' % (i+1), self, title, scan=FALSE)
+            item = AudioItem('cdda://%d' % (i+1), self, title, scan=False)
 
             # XXX FIXME: set also all the other infos here if AudioInfo
             # XXX will be based on mmpython

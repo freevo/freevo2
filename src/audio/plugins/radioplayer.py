@@ -9,13 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/20 09:42:32  dischi
+# cleanup
+#
 # Revision 1.2  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
 # Revision 1.1  2003/08/27 15:30:12  mikeruelle
 # Start of Radio Support
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,16 +46,9 @@ import re
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
-
-import rc
 import plugin
+
 from event import *
-
-
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
 
 
 class PluginInterface(plugin.Plugin):
@@ -100,14 +94,17 @@ class PluginInterface(plugin.Plugin):
         mixer.setMicVolume(0)
         os.system('%s -m' % config.RADIO_CMD)
 
+
     def is_playing(self):
         print 'Radio Player IS PLAYING?'
         return self.mode == 'play'
+
 
     def refresh(self):
         print 'Radio Player refresh'
         self.playerGUI.refresh()
         
+
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for mplayer control. If an event is not bound in this

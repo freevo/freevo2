@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/20 09:42:32  dischi
+# cleanup
+#
 # Revision 1.1  2003/08/27 15:30:12  mikeruelle
 # Start of Radio Support
 #
@@ -50,15 +53,7 @@ import os, popen2, fcntl, select, time
 #freevo modules
 import config, menu, rc, plugin, skin, util
 from audio.player import PlayerGUI
-import event as em
 from item import Item
-
-#get the sinfletons so we can add our menu and get skin info
-skin = skin.get_singleton()
-menuwidget = menu.get_singleton()
-
-TRUE = 1
-FALSE = 0
 
 
 # This is the class that actually runs the commands. Eventually
@@ -75,7 +70,7 @@ class RadioItem(Item):
 
     def play(self, arg=None, menuw=None):
         print self.station+" "+str(self.station_index)+" "+self.name
-#        self.parent.current_item = self
+        # self.parent.current_item = self
         self.elapsed = 0
 
         if not self.menuw:
@@ -120,21 +115,22 @@ class RadioMainMenuItem(Item):
             radio_item.elapsed = 0
             station_items += [ radio_item ]
         if (len(station_items) == 0):
-            station_items += [menu.MenuItem('No Stations found', menuwidget.goto_prev_page, 0)]
+            station_items += [menu.MenuItem('No Stations found', menwu.goto_prev_page, 0)]
         station_menu = menu.Menu('Stations', station_items)
         rc.app(None)
-        menuwidget.pushmenu(station_menu)
-        menuwidget.refresh()
+        menuw.pushmenu(station_menu)
+        menuw.refresh()
 
 # our plugin wrapper, just creates the main menu item and adds it.
 class PluginInterface(plugin.MainMenuPlugin):
     def items(self, parent):
-        menu_items = skin.settings.mainmenu.items
+        menu_items = skin.get_singleton().settings.mainmenu.items
 
         item = RadioMainMenuItem()
         item.name = 'Radio'
         if menu_items.has_key('radio') and menu_items['radio'].icon:
-            item.icon = os.path.join(skin.settings.icon_dir, menu_items['radio'].icon)
+            item.icon = os.path.join(skin.get_singleton().settings.icon_dir,
+                                     menu_items['radio'].icon)
         if menu_items.has_key('radio') and menu_items['radio'].image:
             item.image = menu_items['radio'].image
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/20 09:42:32  dischi
+# cleanup
+#
 # Revision 1.7  2003/09/19 22:10:11  dischi
 # check self.player before using it
 #
@@ -42,14 +45,11 @@
 #endif
 
 
-import plugin
 import config
-import event as em
-
+import plugin
 import menu
 
-TRUE  = 1
-FALSE = 0
+from event import *
 
 class PluginInterface(plugin.MainMenuPlugin):
     """
@@ -58,7 +58,7 @@ class PluginInterface(plugin.MainMenuPlugin):
     """
     def __init__(self):
         plugin.MainMenuPlugin.__init__(self)
-        config.EVENTS['audio']['DISPLAY'] = em.Event(em.FUNCTION_CALL, arg=self.detach)
+        config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL, arg=self.detach)
         self.player = None
         self.show_item = menu.MenuItem(_('Show player'), action=self.show)
         
@@ -100,7 +100,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def eventhandler(self, event, menuw=None):
-        if self.player and event == em.AUDIO_PLAY_END:
+        if self.player and event == AUDIO_PLAY_END:
             self.player.eventhandler(event=event)
-            return TRUE
-        return FALSE
+            return True
+        return False

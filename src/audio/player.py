@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/20 09:44:23  dischi
+# cleanup
+#
 # Revision 1.6  2003/09/15 20:06:02  dischi
 # error handling when mplayer does not start
 #
@@ -59,16 +62,14 @@ import event
 
 skin = skin.get_singleton()
 
-TRUE  = 1
-FALSE = 0
 
 class PlayerGUI(GUIObject):
     def __init__(self, item, menuw):
         GUIObject.__init__(self)
         if menuw:
-            self.visible = TRUE
+            self.visible = True
         else:
-            self.visible = FALSE
+            self.visible = False
 
         self.menuw = menuw
         self.item = item
@@ -76,7 +77,7 @@ class PlayerGUI(GUIObject):
             self.player = plugin.getbyname(plugin.RADIO_PLAYER)
         else:
             self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
-        self.running = FALSE
+        self.running = False
         
     def play(self):
         if self.player.is_playing():
@@ -85,11 +86,11 @@ class PlayerGUI(GUIObject):
         if self.menuw and self.menuw.visible:
             self.menuw.hide()
 
-        self.running = TRUE
+        self.running = True
         error = self.player.play(self.item, self)
         if error:
             print error
-            self.running = FALSE
+            self.running = False
             if self.visible:
                 rc.app(None)
             self.item.eventhandler(event.PLAY_END)
@@ -101,7 +102,7 @@ class PlayerGUI(GUIObject):
 
     def stop(self):
         self.player.stop()
-        self.running = FALSE
+        self.running = False
         if self.visible:
             rc.app(None)
         

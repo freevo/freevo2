@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/20 09:42:32  dischi
+# cleanup
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -41,19 +44,16 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-
-import plugin
-from item import Item
-from audio.audioitem import AudioItem
-import config
-import event as em
-from xml.utils import qp_xml
 import os
+from xml.utils import qp_xml
 
+import config
+import plugin
 import menu
 
-TRUE  = 1
-FALSE = 0
+from item import Item
+from audio.audioitem import AudioItem
+
 
 class EntryList(Item):
     def __init__(self, mediamarks, parent):
@@ -75,7 +75,7 @@ class EntryList(Item):
                 if info.name == u'REF':
                     url = info.attrs[('', 'HREF')]
             if title and url:
-                items.append(AudioItem(url, self, title, scan=FALSE))
+                items.append(AudioItem(url, self, title, scan=False))
                 
         menuw.pushmenu(menu.Menu(self.name, items))
 
@@ -101,19 +101,32 @@ class GenreList(Item):
 
 class PluginInterface(plugin.MainMenuPlugin):
     """
-    plugin to detach the audio player to e.g. view pictures while listening
-    to music
+    Show radio stations defined in an xml file. The file format is based on
+    the gxine mediamarks file.
+
+    plugin.activate('audio.webradio', args='file')
+
+    If no file is given, the default mediamarks file will be taken
     """
-    def __init__(self, mediamarks='./WIP/Dischi/gxine-mediamarks'):
-        plugin.MainMenuPlugin.__init__(self)
-        if os.path.isfile(mediamarks):
+    def __init__(self, mediamarks=None):
+        if not mediamarks:
+            mediamarks = os.path.join(config.SHARE_DIR, 'gxine-mediamarks')
+            
+        if not os.path.isfile(mediamarks):
+            self.reason = '%s: file not found' % mediamarks
+            return
+
+        try:
             parser = qp_xml.Parser()
             f = open(mediamarks)
             self.mediamarks = parser.parse(f.read())
             f.close()
-        else:
-            print '%s: file not found, webradio plugin deactivated' % mediamarks
-            self.mediamarks = None
+        except:
+            self.reason = 'mediamarks file corrupt'
+            return
+
+        # init the plugin
+        plugin.MainMenuPlugin.__init__(self)
 
             
     def items(self, parent):

@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/20 09:42:32  dischi
+# cleanup
+#
 # Revision 1.18  2003/09/14 20:47:48  outlyer
 # * TRUE/FALSE wasn't working in Python 2.3...
 # * Wrapped the tagging function in a try: except because it failed on a data
@@ -89,13 +92,6 @@ from gui.AlertBox import AlertBox
 
 # Included to be able to access the info for Audio CDs
 import mmpython
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
 
 rip_thread = None
 
@@ -206,8 +202,7 @@ class PluginInterface(plugin.ItemPlugin):
                     return [ ( self.show_status, 'Show CD ripping status') ]
                 else:
                     self.device = self.item.devicename
-                    if DEBUG:
-                        print 'devicename = %s' %self.device
+                    _debug_('devicename = %s' %self.device)
                     return [ ( self.create_backup_menu,
                                _('Rip the CD to the hard drive'),
                                _('Get CDs available for ripping')) ]
@@ -322,8 +317,7 @@ class main_backup_thread(threading.Thread):
         try: 
             os.makedirs(pathname, 0777)
         except:
-            if DEBUG:
-                print 'Directory %s already exists' % pathname
+            _debug_('Directory %s already exists' % pathname)
 
         self.output_directory = pathname
         cdparanoia_command = []
@@ -377,7 +371,7 @@ class main_backup_thread(threading.Thread):
                                  (config.CDPAR_CMD, str(i+1), 
                                   pathname_cdparanoia, path_tail_cdparanoia)
 
-            if DEBUG: print 'cdparanoia:  %s' % cdparanoia_command
+            _debug_('cdparanoia:  %s' % cdparanoia_command)
     
             # Have the OS execute the CD Paranoia rip command            
             os.system(cdparanoia_command)
@@ -391,7 +385,7 @@ class main_backup_thread(threading.Thread):
                                 pathname_cdparanoia, path_tail_cdparanoia,
                                 pathname, path_tail)
 
-                if DEBUG: 'lame: %s' %lame_command                          
+                _debug_('lame: %s' %lame_command)
                 os.system(lame_command)
                 try: 
                     util.tagmp3(pathname+path_tail+'.mp3', title=song_names[i],
@@ -417,7 +411,7 @@ class main_backup_thread(threading.Thread):
                                   pathname_cdparanoia, path_tail_cdparanoia, pathname,
                                   path_tail)
 
-                if DEBUG: 'oggenc_command: %s' %oggenc_command                          
+                _debug_('oggenc_command: %s' %oggenc_command)
                 os.system(oggenc_command)
                     
                 # Remove the .wav file.
@@ -434,8 +428,8 @@ class main_backup_thread(threading.Thread):
                     '--set-vc-field=TITLE="%s" --set-vc-field=TRACKNUMBER="%s/%s" '\
                     '"%s%s.flac"' % (artist, album, song_names[i], track,
                                      len(song_names), pathname, path_tail)
-                if DEBUG: 'flac_command: %s' % (flac_command)
-                if DEBUG: 'metaflac    : %s' % (metaflac_command)
+                _debug_('flac_command: %s' % (flac_command))
+                _debug_('metaflac    : %s' % (metaflac_command))
                 os.system(flac_command)
                 os.system(metaflac_command)
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
