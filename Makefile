@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/02/07 20:49:09  dischi
+# safety check
+#
 # Revision 1.23  2003/02/07 20:35:18  dischi
 # moved python_compile to install
 #
@@ -115,6 +118,7 @@ release: clean
 
 
 install: all python_compile
+	test "$(PREFIX)" != "${PWD}" || false
 	-rm -rf $(PREFIX)
 	-mkdir -p $(PREFIX)
 
