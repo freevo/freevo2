@@ -7,7 +7,7 @@ Release 1.4.0-rc1 (2003-??-??):
 -------------------------------
  * changes in the directory structure
  * setup.py for normal python installation
- * i18n support: fr, es, sv, nl, pt_BR
+ * i18n support: fr, es, sv, nl, pt_BR, no
  * new record server
  * idlebar plugin for lmsensors
  * Merged latest xmltv parsing support
