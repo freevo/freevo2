@@ -1,7 +1,9 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
+<!ENTITY doc SYSTEM "code/doc.py" CDATA linespecific>
 <!ENTITY daemon SYSTEM "code/daemon.py" CDATA linespecific>
 <!ENTITY daemonpoll SYSTEM "code/daemon_poll.py" CDATA linespecific>
 <!ENTITY daemonaction SYSTEM "code/daemon_action.py" CDATA linespecific>
+<!ENTITY item SYSTEM "code/item.py" CDATA linespecific>
 ]>
 
 <book>
@@ -127,10 +129,6 @@
       <para><emphasis>not written yet</emphasis></para>
     </sect1>
 
-    <sect1>
-      <title>i18n support</title>
-      <para><emphasis>not written yet</emphasis></para>
-    </sect1>
   </chapter>
 
   <chapter> 
@@ -157,10 +155,45 @@
       </para>
       <sect2>
 	<title>Documenting the Plugin</title>
-	<para><emphasis>not written yet</emphasis></para>
+	<para>
+	  You should not forget to document the plugin. Freevo can scan all
+	  available plugins by calling the plugins helper:
+	  <screen>
+<prompt>-> </prompt><command>freevo plugins -l</command>
+&lt;list of plugins&gt;
+
+<prompt>-> </prompt><command>freevo plugins -i audio.playlist</command>
+Name: audio.playlist
+Type: ItemPlugin
+File: src/audio/plugins/playlist.py
+
+Description:
+&lt;...&gt;
+	  </screen>
+	  This documentation comes directly from the python source code. Use
+	  the Python docstring to document the plugin class. The first line
+	  will be used to show the short information for <command>-l</command>,
+	  the hole text will be used for <command>-i</command>.
+	</para>
+	<para>
+	  Example:
+	  <programlisting><inlinegraphic entityref="doc"></inlinegraphic>
+	  </programlisting>
+	</para>
       </sect2>
+
       <sect2>
 	<title>Which files to Import</title>
+	<para><emphasis>not written yet</emphasis></para>
+      </sect2>
+
+      <sect2>
+	<title>User Configuartion</title>
+	<para><emphasis>not written yet</emphasis></para>
+      </sect2>
+
+      <sect2>
+	<title>i18n support</title>
 	<para><emphasis>not written yet</emphasis></para>
       </sect2>
     </sect1>
@@ -240,12 +273,60 @@
 
     <sect1>
       <title>MainMenuPlugin</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>
+	A MainMenuPlugin is a plugin that adds items to the main menu. The main
+	menu can also be the main menu for the different types of media, like
+	the video main menu. E.g. if you put your plugin in
+	<filename>video/plugins</filename>, it will be shown in the video main
+	menu. The user can also force which kind of menu by setting the
+	<varname>type</varname> when calling
+	<function>plugin.activate</function>.
+      </para>
+      <para>
+	Examples for this kind of plugin are all items in the main menu and the
+	<varname>rom_drives</varname> plugin, adding all possible rom drives to
+	the sub main menus.
+      </para>
+      <para>
+	A MainMenuPlugin only needs to define the function
+	<programlisting>def items(self, parent):</programlisting>returning a list
+	of items for the menu.
+      </para>
+
+      <para><emphasis>TODO: add an example</emphasis></para>
     </sect1>
+
 
     <sect1>
       <title>ItemPlugin</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>
+	An ItemPlugin adds something to the submenu of an item. You get this
+	menu by pressing <varname>ENTER</varname> on an item. When the submenu
+	is generated, all global ItemPlugins and for this media type are
+	called. 
+      </para>
+      <para>
+	The function to be called is 
+	<programlisting>def actions(self, item):</programlisting> 
+	and should return
+	a list of actions. The function can check all attributes of the item to
+	decide what actions to return. On action can either be a MenuItem (from
+	file <filename>menu.py</filename>) or a list. This list conatins a
+	callback function, a text for the menu and optional a shortcut which
+	can be put on a button for the remote. 
+      </para>
+      <para>
+	Examples for this kind of plugin are the coversearch and the imdb
+	plugin. They check if it makes sense to call the function and return
+	actions.
+      </para>
+      <para>
+	Here is a simple example for an ItemPlugin. It checks if it's a
+	video item and adds two actions to turn the software scaler on and off
+	(by changing the global config variable, Ouch):
+	<programlisting><inlinegraphic entityref="item"></inlinegraphic>
+	</programlisting>
+      </para>
     </sect1>
 
     <sect1>
