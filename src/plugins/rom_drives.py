@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/04/20 10:53:23  dischi
+# moved identifymedia and mediamenu to plugins
+#
 # Revision 1.25  2003/04/19 21:28:38  dischi
 # identifymedia.py is now a plugin and handles everything related to
 # rom drives (init, autostarter, items in menus)
@@ -83,7 +86,7 @@ except:
     pass
 
 from video import xml_parser, videoitem
-from mediamenu import DirItem
+from directory import DirItem
 
 rc = rc.get_singleton()
 

@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# mediamenu.py - Basic menu for all kinds of media
+# directory.py - Directory handling
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,66 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.51  2003/04/19 21:28:39  dischi
-# identifymedia.py is now a plugin and handles everything related to
-# rom drives (init, autostarter, items in menus)
+# Revision 1.1  2003/04/20 10:53:23  dischi
+# moved identifymedia and mediamenu to plugins
 #
-# Revision 1.50  2003/04/18 15:01:36  dischi
-# support more types of plugins and removed the old item plugin support
-#
-# Revision 1.49  2003/04/18 10:22:06  dischi
-# You can now remove plugins from the list and plugins know the list
-# they belong to (can be overwritten). level and args are optional.
-#
-# Revision 1.48  2003/04/15 20:02:04  dischi
-# use the plugin interface
-#
-# Revision 1.47  2003/04/12 18:27:29  dischi
-# special video item handling
-#
-# Revision 1.46  2003/04/06 21:12:55  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.45  2003/03/30 21:21:25  rshortt
-# Fix for people not using the new skin (skins/dischi1/skin_dischi1.py).
-#
-# Revision 1.44  2003/03/30 20:55:25  rshortt
-# Commiting Brian J. Murrell's password protected folder patch so that people can hide their porn.  This uses the new PasswordInputBox and modified for other new gui code as well.
-#
-# Revision 1.43  2003/03/30 14:18:16  dischi
-# Added FORCE_SKIN_LAYOUT and changed to layout of folder.fxd (see
-# freevo_config.py for details)
-#
-# Revision 1.42  2003/03/29 21:45:26  dischi
-# added display_type tv for the new skin
-#
-# Revision 1.41  2003/03/15 17:19:44  dischi
-# renamed skin.xml to folder.fxd for the new skin
-#
-# Revision 1.40  2003/03/15 17:13:22  dischi
-# store rom drive type in media
-#
-# Revision 1.39  2003/03/02 19:01:16  dischi
-# removed [] from the directory name
-#
-# Revision 1.38  2003/02/25 05:31:48  krister
-# Made CD audio playing use -cdrom-device for mplayer.
-#
-# Revision 1.37  2003/02/24 05:17:18  krister
-# Fixed a bug in the update function.
-#
-# Revision 1.36  2003/02/23 09:24:31  dischi
-# Activate extended menu in the (VIDEO|AUDIO|IMAGE|GAMES) menu, too
-#
-# Revision 1.35  2003/02/22 07:13:19  krister
-# Set all sub threads to daemons so that they die automatically if the main thread dies.
-#
-# Revision 1.34  2003/02/21 05:27:28  krister
-# Ignore CVS dirs.
-#
-# Revision 1.33  2003/02/21 05:00:23  krister
-# Don't display .pics folders
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -136,135 +79,6 @@ skin = skin.get_singleton()
 dirwatcher_thread = None
 
 
-import plugin
-
-#
-# Plugin interface to integrate the MediaMenu into Freevo
-#
-class PluginInterface(plugin.MainMenuPlugin):
-    def __init__(self, type=None):
-        plugin.MainMenuPlugin.__init__(self)
-        self.type = type
-
-    def items(self, parent):
-        import skin
-
-        skin = skin.get_singleton()
-        menu_items = skin.settings.mainmenu.items
-
-        icon = ""
-        if menu_items[self.type].icon:
-            icon = os.path.join(skin.settings.icon_dir, menu_items[self.type].icon)
-        return ( menu_module.MenuItem(menu_items[self.type].name, icon=icon,
-                                      action=MediaMenu().main_menu,
-                                      arg=self.type, type='main',
-                                      image=menu_items[self.type].image, parent=parent), )
-
-
-
-class MediaMenu(Item):
-    """
-    This is the main menu for audio, video and images. It displays the default
-    directories and the ROM_DRIVES
-    """
-    
-    def __init__(self):
-        Item.__init__(self)
-        self.type = 'mediamenu'
-
-    def main_menu_generate(self):
-        """
-        generate the items for the main menu. This is needed when first generating
-        the menu and if something changes by pressing the EJECT button
-        """
-        items = []
-        dirs  = []
-        
-        if self.display_type == 'video':
-            dirs += config.DIR_MOVIES
-        if self.display_type == 'audio':
-            dirs += config.DIR_AUDIO
-        if self.display_type == 'image':
-            dirs += config.DIR_IMAGES
-        if self.display_type == 'games':
-            dirs += config.DIR_GAMES
-
-        if self.display_type:
-            plugins = plugin.get('mainmenu_%s' % self.display_type)
-        else:
-            plugins = []
-            
-        # add default items
-        for d in dirs:
-            try:
-                (title, dir) = d
-                d = DirItem(dir, self, name = title,
-                            display_type = self.display_type)
-                items += [ d ]
-            except:
-                traceback.print_exc()
-
-        for p in plugins:
-            items += p.items(self)
-
-        return items
-
-
-
-    def main_menu(self, arg=None, menuw=None):
-        """
-        display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
-        """
-        self.display_type = arg
-        if self.display_type == 'video':
-            title = 'MOVIE'
-        elif self.display_type == 'audio':
-            title = 'AUDIO'
-        elif self.display_type == 'image':
-            title = 'IMAGE'
-        elif self.display_type == 'games':
-            title = 'GAMES'
-        else:
-            title = 'MEDIA'
-        item_menu = menu_module.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
-                                     item_types = self.display_type, umount_all=1)
-        self.menuw = menuw
-        menuw.pushmenu(item_menu)
-
-
-
-    def eventhandler(self, event = None, menuw=None):
-        """
-        eventhandler for the main menu. The menu must be regenerated
-        when a disc in a rom drive changes
-        """
-        if plugin.isevent(event):
-            if not menuw:               # this shouldn't happen
-                menuw = menu_module.get_singleton() 
-
-            menu = menuw.menustack[1]
-
-            sel = menu.choices.index(menu.selected)
-            menuw.menustack[1].choices = self.main_menu_generate()
-            if not menu.selected in menu.choices:
-                menu.selected = menu.choices[sel]
-
-            if menu == menuw.menustack[-1] and not rc.app:
-                menuw.init_page()
-                menuw.refresh()
-            return TRUE
-
-        if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
-            menuw.show()
-            return TRUE
-
-        # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
-
-
-
-# ======================================================================
-    
 class DirItem(Playlist):
     """
     class for handling directories
