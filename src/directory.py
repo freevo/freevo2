@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/08/30 12:19:00  dischi
+# new mmpython cache call to only scan the needed directory
+#
 # Revision 1.30  2003/08/24 14:08:58  dischi
 # add import to folder.fxd options
 #
@@ -407,18 +410,20 @@ class DirItem(Playlist):
 
         mmpython_dir = self.dir
         if self.media:
-            if self.media.cached:
+            dir_on_disc = self.dir[len(self.media.mountdir)+1:]
+            if self.media.cached and dir_on_disc == '':
                 mmpython_dir = None
                 num_changes = 0
             else:
-                mmpython_dir = 'cd://%s:%s:' % (self.media.devicename, self.media.mountdir)
+                mmpython_dir = 'cd://%s:%s:%s' % (self.media.devicename,
+                                                  self.media.mountdir, dir_on_disc)
 
         if mmpython_dir:
             num_changes = mmpython.check_cache(mmpython_dir)
             
         pop = None
         if (num_changes > 10) or (num_changes and self.media):
-            if self.media:
+            if self.media and dir_on_disc == '':
                 pop = PopupBox(text='Scanning disc, be patient...')
             else:
                 pop = PopupBox(text='Scanning directory, be patient...')
