@@ -41,8 +41,6 @@ import sysconfig
 import mcomm
 
 import pyepg
-pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
-pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
 
 
 def grab_xmltv():
@@ -88,8 +86,8 @@ def main():
     parser = OptionParser()
 
     parser.add_option('-s', '--source', dest='source', default='xmltv',
-                      help='set the source for the guide: xmltv (default) ' + \
-                            'or vdr')
+                      help='set the source for the guide: xmltv (default), ' + \
+                            'xmltv_nofetch, vdr, or none')
     parser.add_option('-q', '--query', action="store_true", dest='query', 
                       default=False,
                       help='print a list that can be used to set TV_CHANNELS')
@@ -99,6 +97,9 @@ def main():
                            'TV_CHANNELS_EXCLUDE')
 
     (options, args) = parser.parse_args()
+
+    pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
+    pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
 
 
     if options.query:
@@ -139,8 +140,12 @@ def main():
 
     if options.source == 'xmltv':
         grab_xmltv()
+    elif options.source == 'xmltv_nofetch':
+        pyepg.update('xmltv', config.XMLTV_FILE)
     elif options.source == 'vdr':
         grab_vdr()
+    elif options.source == 'none':
+        pass
     else:
         print 'ERROR: source "%s" not supported.' % options.source
         sys.exit(0)
