@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/27 14:16:10  dischi
+# do not draw outside the given size
+#
 # Revision 1.2  2004/08/23 15:11:50  dischi
 # avoid redraw when not needed
 #
@@ -126,6 +129,9 @@ class InfoText(CanvasContainer):
         line_height = 0
         
         for element, text in exp_list:
+            if y >= size[1]:
+                return
+            
             newline = 0
 
             #
@@ -166,15 +172,18 @@ class InfoText(CanvasContainer):
                     # simple text
                     w = element.width
                     if isinstance(w, str):
-                        w = int(eval(w, {'MAX': size[0]}))
+                        w = int(eval(w, {'MAX': (size[0] - x)}))
                     elif w == 0:
                         # use the complete free space
                         w = size[0] - x
+                    else:
+                        w = min(w, size[0] - x)
                     if w > 0:
                         t = Text(text, (x,y), (w, font.height), font,
                                  element.align, element.valign,
                                  element.mode, element.ellipses, element.dim)
-                        self.add_child(t)
+                        if y + t.get_size()[1] <= size[1]:
+                            self.add_child(t)
                         line_height = max(line_height, t.get_size()[1])
                         if element.width == 0:
                             # flow text
@@ -197,7 +206,7 @@ class InfoText(CanvasContainer):
                         # use the complete free space
                         w = size[0] - x
                     if isinstance(h, str):
-                        h = int(eval(h, {'MAX': size[1]}))
+                        h = min(int(eval(h, {'MAX': size[1]})), size[1])
                     elif h == 0:
                         # use the complete free space
                         h = size[1] - y
