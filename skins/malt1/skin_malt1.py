@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/08/18 22:18:47  tfmalt
+# o Started transformation to new gui code. Still WIP.
+#
 # Revision 1.4  2002/08/18 09:52:08  tfmalt
 # o Small changes nothing major.
 #
@@ -252,22 +255,20 @@ class Skin:
     """
     Skin
     """
-    if DEBUG: print "Starting Malt 1 skin!"
     
-    # OSD XML specifiaction
     OSD_XML_DEFINITIONS = 'skins/malt1/768x576.xml'
-
-    settings = XMLSkin()
-    settings.load(OSD_XML_DEFINITIONS)
-
-    items_per_page = 13 # XXX Sigh! tm.
-
 
     def __init__(self):
         if DEBUG: print "Loading Malt 1 skin!"
         # Push main menu items
-        pass
 
+        self.settings = XMLSkin()
+        self.settings.load(self.OSD_XML_DEFINITIONS)
+        self.items_per_page = 13 # XXX Sigh! tm.
+
+        if DEBUG: print self.settings.menu.bgbitmap
+        self.bg_image = self.settings.menu.bgbitmap
+    
 
     # This function is called from the rc module and other places
     def HandleEvent(self, ev):
@@ -291,47 +292,83 @@ class Skin:
 
 
 
-    def message(text=None, icon=None):
+    def draw_shutdown(self, text=None):
         """
         text  String, text to display.
-        icon  String, path to filename or pygame imageobject.
         
-        General function for displaying messages.
+        Draw a shutdown message on shutdown.
+        """
+        if DEBUG: print "skin.message: Text: ", text
+
+        left   = (osd.width/2)-280
+        top    = (osd.height/2)-60
+        width  = 560
+        height = 120
+        icn    = 'icons/shutdown2.png'
+        bd_w   = 2
+        bg_c   = gui.Color(osd.default_bg_color)
+        fg_c   = gui.Color(osd.default_fg_color)
+
+        bg_c.set_alpha(192)
+
+        # osd.drawbitmap(self.bg_image)
+        mb = gui.PopupBox(left, top, width, height, icon=icn,
+                          bg_color=bg_c, fg_color=fg_c,
+                          border='flat', bd_width=bd_w)
+        mb.set_text(text)
+        mb.set_h_align(gui.Label.LEFT)
+        mb.set_font(config.OSD_DEFAULT_FONTNAME, 36)
+        mb.show()
+        osd.update()
+
+
+    def popup_box(self, text=None, icon=None):
+        """
+        text  STring to display
+
+        Draw a popupbox with an optional icon and a text.
         
         Notes: Should maybe be named print_message or show_message.
                Maybe I should use one common box item.
         """
-        # XXX Since I'm not messing with the osd_sdl module yet I
-        # XXX reimplement stuff found in osd.clearscreen.
-        left     = (osd.width/2)-180
-        top      = (osd.height/2)-30
-        width    =  360
-        height   = 60
-        bd_w     = 1
-        bg_color = gui_sdl.Color(osd.default_bg_color)
-        fg_color = gui_sdl.Color(osd.default_fg_color)
+        left   = (osd.width/2)-180
+        top    = (osd.height/2)-30
+        width  = 360
+        height = 60
+        icn    = icon
+        bd_w   = 2
+        bg_c   = gui.Color(osd.default_bg_color)
+        fg_c   = gui.Color(osd.default_fg_color)
 
-        bg_color.set_alpha(192)
+        bg_c.set_alpha(192)
+
+        pb = gui.PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
+                          fg_color=fg_c, border='flat', bd_width=bd_w)
+
+        pb.set_text(text)
+        pb.set_h_align(gui.Label.LEFT)
+        pb.set_font('skins/fonts/Arial_Bold.ttf', 24)
+        pb.show()
         
-        mb = gui_sdl.PopupBox(left, top, width, height, text, bg_color,
-                              fg_color, icon, border='flat', bd_width=bd_w)
-        mb.show()
         osd.update()
-        time.sleep(2.0)
-        mb.hide()
-        osd.update()
-        
     
-    # Called from the MenuWidget class to draw a menu page on the
-    # screen
-    def DrawMenu(self, menuw):
-        osd.clearscreen(osd.COL_WHITE)
 
+
+    def draw_menu(self, menuw):
+        """
+        Called from the MenuWidget class to draw a menu page on the
+        screen
+
+        Note: This is really messy... I don't know what to make of it.
+        """
+        if DEBUG: print "Inside draw_menu..."
+        
+        # XXX Why are we getting the last item , but not popping...
         menu = menuw.menustack[-1]
 
         if not menu:
-            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
-            return
+            # osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            raise StandardError, 'Internal error, no menu.'
 
         # get the settings
         if menu.skin_settings:
@@ -341,14 +378,18 @@ class Skin:
 
         if val.bgbitmap[0]:
             apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-        
+    
         # Menu heading
         if val.title.visible:
-            if val.title.text:
-                menu.heading = val.title.text
-            osd.drawstring(menu.heading, osd.width/2, val.title.y, val.title.color,
-                           font=val.title.font,
-                           ptsize=val.title.size, align='center')
+            if val.title.text: menu.heading = val.title.text
+            mh = gui.Label(menu.heading)
+            mh.set_parent(osd)
+            mh.set_h_align(gui.Label.CENTER)
+            mh.set_v_align(gui.Label.TOP)
+            mh.set_font(val.title.font, (val.title.size))
+            mh.set_v_margin( val.title.y ) 
+            mh.show()
+
 
         # Draw the menu choices for the main selection
         if len(menuw.menustack) == 1:
@@ -493,81 +534,144 @@ class Skin:
         
 
 
+    def draw_audio_gui(self, ai, val=None):
+        """
+        Draw the audio GUI main function.
 
-    def DrawMP3(self, info):
+        Arguments: val - settings.mp3: this is the settings from the
+                         skin xml-file.
+                   ai  - Audioinfo object.           
+        """
 
-        val = self.settings.mp3
-
-        left = 170
-
-        if info.drawall:
-            osd.clearscreen()
-
-            if val.bgbitmap[0]:
-                apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-
-
-            # Display the cover image file if it is present
-            if info.image:
-                # Check size to adjust image placement 
-                (w, h) = util.pngsize(info.image)
-                
-                # Calculate best image placement
-                logox = int(osd.width) - int(w) - 55
+        left_margin  = 30
+        right_margin = 30
+        top_margin   = 100
+        
+        if ai.drawall:
+            self.clearscreen()
             
-                # Draw border for image
-                osd.drawbox(int(logox), 100, (int(logox) + int(w)), 100 + int(h),
-                            width=6, color=0x000000)
-                osd.drawbitmap(info.image, logox, 100)
+            if val.bgbitmap[0]: self.drawbitmap( val.bgbitmap, -1, -1 )
+            if ai.image: self.draw_audio_cover(ai, right_margin)
+            self.draw_audio_info(ai, left_margin, top_margin)
 
-            osd.drawstring(info.filename, 30, 520)
+        self.draw_audio_timer(ai, val, left_margin, right_margin)
+        # self.drawstring(ai.filename, 30, 520) # Draws filename on bottom.
+        self.update()    
 
-            osd.drawstring('Title:', 30, 100)
-            osd.drawstring('%s ' % info.title, left, 100)
+    def draw_audio_info(self, ai, left=30, top=100):
+        """
+        Draw the box with ID3-info.
+
+        Arguments: ai          - audioinfo object.
+                   left_margin - offset from the left edge.
+        Returns:   None
+        Todo:      At some point: get_text i8n.
+                   We should have some way of determinate length of text
+                   string in pixels.
+                   Should probably do some sanity check of data from
+                   audioinfo.
+        """
         
-            osd.drawstring('Artist:', 30, 130)
-            osd.drawstring('%s ' % info.artist, left, 130)
+        tabpos    = 170
+        linespace = 30
         
-            osd.drawstring('Album:', 30, 160)
-            osd.drawstring('%s ' % info.album, left, 160)
+        self.drawstring('Title', left, top)
+        self.drawstring('%s' % ai.title, tabpos, top)
+
+        self.drawstring('Artist:', left, top+(linespace*1))
+        self.drawstring('%s ' % ai.artist, tabpos, top+(linespace*1))
         
-            osd.drawstring('Year:', 30, 190)
-            osd.drawstring('%s ' % info.year, left, 190)
+        self.drawstring('Album:', left, top+(linespace*2))
+        self.drawstring('%s ' % ai.album, tabpos, top+(linespace*2))
         
-            osd.drawstring('Track:', 30, 220)
-            osd.drawstring('%s ' % info.track, left, 220)
+        self.drawstring('Year:', left, top+(linespace*3))
+        self.drawstring('%s ' % ai.year, tabpos, top+(linespace*3))
+        
+        self.drawstring('Track:', left, top+(linespace*4))
+        self.drawstring('%s ' % ai.track, tabpos, top+(linespace*4))
+        return 1
 
 
-            osd.drawstring('Elapsed:', 30, 300, osd.default_fg_color)
-            osd.drawstring('Remain:', 30, 340, osd.default_fg_color)
-            osd.drawstring('Done:', 30, 380, osd.default_fg_color)
+    def draw_audio_timer(self, ai, val=None, left=30, right=30, top=360):
+        """
+        Draws the box with time and stuff. on the bottom.
 
-        else:
-            # Erase the portion that will be redrawn
-            if val.bgbitmap[0]:
-                osd.drawbitmap( val.bgbitmap, left, 300, None, left,
-                                300, 100, 100 )
-
-        # XXX I changed this because round rounds up on 3.58 etc. instead
-        # XXX of giving us the desired "round down modulo" effect.
-        el_min  = int(info.elapsed)/60
-        el_sec  = int(info.elapsed)%60
-        rem_min = int(info.remain)/60
-        rem_sec = int(info.remain)%60
-
-        osd.drawstring('%s:%02d   ' % (el_min, el_sec), left, 300,
-                       osd.default_fg_color)
+        Arguments: ai    - Audioinfo object.
+                   left  - Offset to the left
+                   right - offset to the right
+                   top   - Offset from top
+                   val   - Settings from the skin configfile.
+        """
+        linespace = 40
+        tab_x    = 170
         
-        osd.drawstring('%s:%02d   ' % (rem_min,rem_sec), left, 340,
-                       osd.default_fg_color)
-        
-        osd.drawstring('%0.1f%%   ' % info.done, left, 380,
-                       osd.default_fg_color)
+        self.drawstring('Elapsed:', left, top, self.default_fg_color)
+        self.drawstring('Remain:', left, top+int(linespace),
+                        self.default_fg_color)
+        self.drawstring('Done:', left, top+int(linespace*2),
+                        self.default_fg_color)
+
+        el_min  = int(ai.elapsed)/60
+        el_sec  = int(ai.elapsed)%60
+        rem_min = int(ai.remain)/60
+        rem_sec = int(ai.remain)%60
+
 
         # Draw the progress bar
-        osd.drawbox(33, 440, 635, 460, width = 3)
-        osd.drawbox(34, 441, 634, 459, width = -1, color = osd.default_bg_color)
-        pixels = int(round((info.done) * 6.0))
-        osd.drawbox(34, 441, 34 + pixels, 459, width = -1, color = osd.COL_BLUE)
+        bar_thickness = 22
+        bar_width     = self.width-right-(tab_x)-100
+        bar_top       = top+(linespace*2)
+        bar_bottom    = bar_top+bar_thickness
+        done_x        = tab_x+bar_width+left
+        done_y        = bar_top
+        sv = 5 # dropshadow vertical. :/
+        sh = 5 # dropshadow horisontal.
+        
+        # This only draws to the section needing to be redrawn for the timer.
+        if val.bgbitmap[0]:
+            self.drawbitmap(val.bgbitmap, tab_x, top, None,
+                            tab_x, top, 100, 100)
+            # for end of bar.
+            self.drawbitmap(val.bgbitmap, done_x, done_y, None,
+                            done_x, done_y, 100, 40)
 
-        osd.update()
+        # Draw the progress bar
+        # XXX oh.. no. I can't help myself: dropshadow.
+        self.draw_3D_border(tab_x, bar_top, tab_x+bar_width, bar_bottom,
+                            fg_color=self.default_fg_color, bg_color=None,
+                            width=1)
+        self.drawbox(tab_x, bar_top, tab_x+bar_width, bar_bottom,
+                     width=-1, color=self.default_bg_color)
+
+        done_width = int(round(((ai.done*bar_width)/100)))
+        # XXX We just have to make this a gradient at some point. :)
+        self.drawbox(tab_x, bar_top, tab_x+done_width, bar_bottom,
+                     width=-1, color=self.COL_BLUE)
+
+        self.drawstring('%s:%02d   ' % (el_min, el_sec), tab_x,
+                        top, self.default_fg_color)
+        self.drawstring('%s:%02d   ' % (rem_min,rem_sec), tab_x,
+                        top+linespace, self.default_fg_color)
+        self.drawstring('%0.1f%%   ' % ai.done, done_x, done_y,
+                        self.default_fg_color)
+        
+
+
+    def draw_audio_cover(self, ai, right=30):
+        """
+        Draw the CD cover if it exist on the audio GUI.
+        Lots of things here should be configurable from the outside.
+        """
+        if not ai.image:
+            return 0
+
+        top_offset   = 100   # How far from the top to draw.
+        (iw, ih)     = util.pngsize(ai.image)
+        start_x      = self.width-iw-right
+
+        self.draw_3D_border(start_x, top_offset, start_x+iw, top_offset+ih,
+                            fg_color=self.default_fg_color, bg_color=None,
+                            width=1)
+        self.drawbitmap(ai.image, start_x, top_offset)
+        return 1
+
