@@ -89,3 +89,8 @@ Q: If I watch a movie that has a different aspect ratio than the
 A: This is a known problem with the X11/Xv display in MPlayer, 
    hopefully this will be fixed later.
 
+----------------------------------------------------------------------
+Q: /dev/dsp doesn't work under KDE, it complains that the sound device 
+   is busy.
+
+A: Try setting AUDIO_DEVICE in freevo_config.py to '/dev/dsp1' instead.
