@@ -1,0 +1,35 @@
+Some tips on how to use Python for Freevo
+=========================================
+
+Nothing here is mandatory. Some stuff is meant to as tips for stuff
+that I've seen that people don't know about, other stuff is meant
+to keep the code more consistent (while not being too fascist).
+
+                / Krister
+
+
+o Strings: Use single-quotes in general (less visual clutter IMHO):
+    'Some "doublequoted" text inside a string'
+  Use double-quote if you want to use single-quotes inside:
+    "I can't believe how easy Python is"
+  Also use double-qoutes for multi-line string constants:
+  """A multi-
+     line
+     comment.
+  """
+
+o Python's linebreak rules are not entirely straight-forward. 
+  Most lines cannot be broken without a backslash (\). 
+  The exception is for expressions with parenthesis and 
+  braces (both kinds), Python doesn't need back-slashes there.
+  I think it looks better with extra parenthesis instead of 
+  backslashes.
+
+o The builtin function "print" is very similar to printf() in C.
+  The major difference is that it automatically adds a linefeed.
+  \n, \r, \t etc can be used for extra spacing.
+  A comma after the print statement prevents the linebreak:
+    print 'test',
+  It has all the regular %s, %d, %f etc, but usually only %s is
+  needed since it will print any kind of variable after converting
+  it to a string.
