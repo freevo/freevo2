@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/02/24 19:36:25  dischi
+# add function to change a skin area
+#
 # Revision 1.42  2004/02/22 20:46:46  dischi
 # oops, remove test code
 #
@@ -153,7 +156,6 @@ class Skin:
         self.set_base_fxd(config.SKIN_XML_FILE)
 
 
-
     def cachename(self, filename):
         """
         create cache name
@@ -244,6 +246,15 @@ class Skin:
         self.last_draw = None, None, None
 
 
+    def change_area(self, name, module, object):
+        """
+        replace an area with the code from module.object()
+        """
+        print name, module, object
+        exec('import %s' % module)
+        self.areas[name] = eval('%s.%s()' % (module, object))
+
+        
     def set_base_fxd(self, name):
         """
         set the basic skin fxd file

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/24 19:36:25  dischi
+# add function to change a skin area
+#
 # Revision 1.10  2004/02/14 13:01:08  dischi
 # copy all needed function from the skin implementation to this module
 #
@@ -57,10 +60,11 @@ import os.path
 _singleton = None
 
 # a list of all functions the skin needs to have
-__all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'set_base_fxd',
-            'load', 'get_skins', 'get_settings', 'toggle_display_style',
-            'get_display_style', 'get_popupbox_style', 'get_font', 'get_icon',
-            'items_per_page', 'clear', 'redraw', 'prepare', 'draw' )
+__all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'change_area',
+            'set_base_fxd', 'load', 'get_skins', 'get_settings',
+            'toggle_display_style', 'get_display_style', 'get_popupbox_style',
+            'get_font', 'get_icon', 'items_per_page', 'clear', 'redraw',
+            'prepare', 'draw' )
     
 
 def get_singleton():
