@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2003/03/30 14:14:31  dischi
+# Added an extra parameter to GetDisplayStyle, needed for force to style
+# in the new skin
+#
 # Revision 1.86  2003/03/02 19:02:15  dischi
 # Add [] for directories in the normal menu and don't change the name
 # for the extended once.
@@ -242,7 +246,7 @@ class Skin:
             return TRUE
         return FALSE
 
-    def GetDisplayStyle(self):
+    def GetDisplayStyle(self, menu=None):
         return self.extended_menu
     
     def ItemsPerMenuPage(self, menu):

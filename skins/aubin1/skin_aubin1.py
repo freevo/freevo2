@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/03/30 14:14:31  dischi
+# Added an extra parameter to GetDisplayStyle, needed for force to style
+# in the new skin
+#
 # Revision 1.14  2003/03/17 00:24:16  outlyer
 # I don't even know why or how I broke this, but this is a fix for the
 # total "directory" time for a directory of mp3s showing up as 0.
@@ -285,7 +289,7 @@ class Skin:
             return TRUE
         return FALSE
 
-    def GetDisplayStyle(self):
+    def GetDisplayStyle(self, menu=None):
         return self.extended_menu
     
     def ItemsPerMenuPage(self, menu):
