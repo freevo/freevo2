@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/02/23 21:51:15  dischi
+# fix unicode problem
+#
 # Revision 1.25  2004/02/23 03:54:25  rshortt
 # Use ProgramItem and display_program rather than clunky popup-gui.  Because
 # of this the tvguide does no longer need to extend GUIObject.  For now it
@@ -149,7 +152,7 @@ class TVGuide(Item):
         if got_schedule:
             l = schedule.getProgramList()
             for k in l:
-                self.scheduled_programs.append(l[k])
+                self.scheduled_programs.append(l[k].encode())
 
         
     def eventhandler(self, event):
