@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/09/15 19:37:42  dischi
+# add control toggle key
+#
 # Revision 1.52  2004/08/26 15:28:20  dischi
 # add event for switching tv guide look
 #
@@ -123,6 +126,7 @@ class Event:
 MIXER_VOLUP            = Event('MIXER_VOLUP', arg=5)
 MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', arg=5)
 MIXER_MUTE             = Event('MIXER_MUTE')
+TOGGLE_CONTROL         = Event('TOGGLE_CONTROL')
 
 # To change the step size, but the following code in your
 # local_conf.py (setting VOL+ step size to 2)
@@ -509,9 +513,10 @@ GAMES_EVENTS = {
 }
 
 GLOBAL_EVENTS = {
-    'VOL+'      : MIXER_VOLUP,
-    'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'VOL+'             : MIXER_VOLUP,
+    'VOL-'             : MIXER_VOLDOWN,
+    'MUTE'             : MIXER_MUTE,
+    'TOGGLE_CONTROL'   : TOGGLE_CONTROL
     }
     
 
@@ -552,6 +557,7 @@ DEFAULT_KEYMAP = {
     key.K_o           : 'PIP_ONOFF',
     key.K_w           : 'PIP_SWAP',
     key.K_i           : 'PIP_MOVE',
+    key.K_j           : 'TOGGLE_CONTROL',
     key.K_F4          : 'TV_VCR',
     key.K_r           : 'REW',
     key.K_p           : 'PLAY',
