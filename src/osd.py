@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/18 05:48:55  gsbarbieri
+# osd.drawstring*() now has the elipses param, which will be used when the text doesn't fit.
+# You can set it to None, so it doesn't show anything when the text doesn't fit.
+# The default is '...'
+#
 # Revision 1.13  2003/02/15 20:48:41  dischi
 # drawbitmap can now draw surfaces, too
 #
@@ -562,13 +567,13 @@ class OSD:
     #  - Improve it
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
                          font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
-                         layer=None):
+                         layer=None, elipses='...'):
         if mode == 'hard':
             return self.drawstringframedhard(string,x,y,width, height, fgcolor, bgcolor,
-                                             font, ptsize, align_h, align_v, layer)
+                                             font, ptsize, align_h, align_v, layer, elipses)
         elif mode == 'soft':
             return self.drawstringframedsoft(string,x,y,width, height, fgcolor, bgcolor,
-                                             font, ptsize, align_h, align_v, layer)
+                                             font, ptsize, align_h, align_v, layer, elipses)
 
     # Gustavo:
     # drawstringframedsoft: draws a string (text) in a frame. This tries to fit the
@@ -595,7 +600,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedsoft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                         font=None, ptsize=0, align_h='left', align_v='top', layer=None):
+                         font=None, ptsize=0, align_h='left', align_v='top', layer=None, elipses='...'):
 
         if not pygame.display.get_init():
             return string
@@ -757,21 +762,22 @@ class OSD:
                 else:
                     # No, and we cannot add another line, truncate this text
                     # and save text that does not fit
-                    next_word_size , next_word_height = self.stringsize('...', font,ptsize)
-                    # We need to remove the last word to place the '...' ?
-                    if (occupied_size + next_word_size) <= width:
-                        # No, just add it
-                        lines[line_number].append('...')
-                        lines_size[line_number] += next_word_size + MINIMUM_SPACE_BETWEEN_WORDS
-                    else:
-                        # Yes, put '...' in the last word place
-                        if len(lines[line_number]) > 0:
-                            lines[line_number][len(lines[line_number])-1] = '...'
+                    next_word_size , next_word_height = self.stringsize(elipses, font,ptsize)
+                    if elipses:
+                        # We need to remove the last word to place the '...' ?
+                        if (occupied_size + next_word_size) <= width:
+                            # No, just add it
+                            lines[line_number].append(elipses)
+                            lines_size[line_number] += next_word_size + MINIMUM_SPACE_BETWEEN_WORDS
                         else:
-                            lines[line_number].append('...')
-                            
-                        tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)                        
-                        lines_size[line_number] += next_word_size - tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
+                            # Yes, put '...' in the last word place
+                            if len(lines[line_number]) > 0:
+                                lines[line_number][len(lines[line_number])-1] = '...'
+                            else:
+                                lines[line_number].append('...')
+
+                            tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)                        
+                            lines_size[line_number] += next_word_size - tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
                     # save the text that does not fit.
                     for tmp in range(word_number, len_words):
                         rest_words += words[tmp]                        
@@ -896,7 +902,7 @@ class OSD:
     #  - Debug it
     #  - Improve it
     def drawstringframedhard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                             font=None, ptsize=0, align_h='left', align_v='top', layer=None):
+                             font=None, ptsize=0, align_h='left', align_v='top', layer=None, elipses='...'):
 
         if not pygame.display.get_init():
             return string
@@ -965,7 +971,9 @@ class OSD:
                         if (occupied_size + tmp_size) <= width: break
                         char_size, char_height = self.charsize(lines[line_number][len_line-j-1], font, ptsize)
                         occupied_size -= char_size
-                    lines[line_number] = lines[line_number][0:len_line-j]+'...'                        
+                    lines[line_number] = lines[line_number][0:len_line-j]
+                    if elipses:
+                        lines[line_number] += elipses
                     break
         rest_words = string[i:len(string)]
 
