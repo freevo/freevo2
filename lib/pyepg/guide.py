@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/11/27 15:00:37  dischi
+# create db if missing
+#
 # Revision 1.9  2004/11/27 02:22:38  rshortt
 # -Some verbose prints for debug.
 # -Debugging and changes to add_program().
@@ -129,6 +132,12 @@ class EPGDB:
     """
 
     def __init__(self, dbpath):
+        if not os.path.isfile(dbpath):
+            print 'epg database missing, creating it'
+            scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
+            os.system('sqlite %s < %s 2>/dev/null >/dev/null' % (dbpath, scheme))
+            print 'done'
+            
         self.db = sqlite.connect(dbpath, client_encoding='utf-8', timeout=10)
         self.cursor = self.db.cursor()
 
@@ -259,15 +268,15 @@ class EPGDB:
                 # program timeslot is unchanged, see if there's anything
                 # that we should update
                 if old_prog['subtitle'] != subtitle:
-                    print 'different subtitles: %s - %s' % (old_prog['subtitle'], subtitle)
+                    print 'different subtitles: %s - %s' % (String(old_prog['subtitle']), String(subtitle))
                     self.execute('update programs set subtitle="%s" where id=%d' % (subtitle, old_prog.id))
                     self.commit()
                 if old_prog['description'] != description:
-                    print 'different descs: %s - %s' % (old_prog['description'], description)
+                    print 'different descs: %s - %s' % (String(old_prog['description']), String(description))
                     self.execute('update programs set description="%s" where id=%d' % (description, old_prog.id))
                     self.commit()
                 if old_prog['episode'] != episode:
-                    print 'different episodes: %s - %s' % (old_prog['episode'], episode)
+                    print 'different episodes: %s - %s' % (String(old_prog['episode']), String(episode))
                     self.execute('update programs set episode="%s" where id=%d' % (episode, old_prog.id))
                     self.commit()
     
@@ -275,14 +284,14 @@ class EPGDB:
                 return
 
             else:
-                print 'different titles: %s - %s' % (old_prog.title, title)
+                print 'different titles: %s - %s' % (String(old_prog.title), String(title))
                 # old prog and new prog have same times but different title,
                 # this is probably a schedule change, remove the old one
                 # TODO: check for shifting times and program overlaps
 
                 #print 'add_program step 4: %f' % float(time.time()-now)
                 print 'got old_prog with different title: %s - %s' % \
-                      (old_prog['title'], title)
+                      (String(old_prog['title']), String(title))
                 self.remove_program(old_prog['id'])
 
         #
@@ -319,7 +328,7 @@ class EPGDB:
             self.execute(query)
             self.commit()
         except IntegrityError:
-            print 'Program for (%s, %s) exists:' % (channel_id, start)
+            print 'Program for (%s, %s) exists:' % (String(channel_id), start)
             rows = self.execute('select * from programs where channel_id="%s" \
                                  and start=%s' % (channel_id, start))
             for row in rows:
