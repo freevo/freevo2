@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.9  2003/05/21 00:02:47  rshortt
 # Updates for changes elsewhere.
 #
@@ -79,7 +82,7 @@ from Border         import *
 from Label          import *
 from types          import *
 
-import rc
+import event as em
 
 DEBUG = 0
 
@@ -118,11 +121,12 @@ class scrolldemo(PopupBox):
 
     def eventhandler(self, event):
 
-        scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
-        if scrolldirs.count(event) > 0:
-            return self.pb.eventhandler(event)
-        elif event == rc.ENTER or event == rc.SELECT or event == rc.EXIT:
+        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
+           return self.pb.eventhandler(event)
+
+        elif event == em.INPUT_ENTER or event == em.INPUT_EXIT:
             self.destroy()
+
         else:
             return self.parent.eventhandler(event)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.2  2003/04/24 19:56:04  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -38,7 +41,7 @@
 
 import plugin
 import config
-import rc
+import event as em
 
 import menu
 
@@ -94,7 +97,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def eventhandler(self, event, menuw=None):
-        if event == 'AUDIO_PLAY_END':
+        if event == em.AUDIO_PLAY_END:
             self.player.eventhandler(event=event)
             return TRUE
         return FALSE

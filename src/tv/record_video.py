@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.14  2003/05/05 01:19:49  outlyer
 # An attempt to fix the daylight savings issue; it makes one potentially bad
 # assumption, that daylight savings time is one hour rather than more.
@@ -330,9 +333,10 @@ def set_schedule(arg=None, menuw=None):
 
 def eventhandler( event):
     print 'using record_video event handler'
-    if event == rc.DISPLAY:
+    # XXX Hack, make it better!!!!
+    if event == em.MENU_CHANGE_STYLE:
         record_schedule.main_menu()
-    elif event == rc.EXIT or event == rc.MENU:
+    elif event == em.MENU_BACK_ONE_MENU or event == em.MENU_GOTO_MAINMENU:
         menu.MenuWidget.eventhandler( menuwidget, event )
         rc.app(None) #give control back to the main program
     else:

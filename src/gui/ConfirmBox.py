@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.14  2003/05/21 00:01:31  rshortt
 # Contructors may now accept a handler method to call when ok/enter is selected.
 #
@@ -99,7 +102,7 @@ from types     import *
 
 DEBUG = 0
 
-import rc
+import event as em
 
 class ConfirmBox(PopupBox):
     """
@@ -143,22 +146,21 @@ class ConfirmBox(PopupBox):
     def eventhandler(self, event):
         if DEBUG: print 'ConfirmBox: EVENT = %s' % event
 
-        trapped = [rc.UP, rc.DOWN]
-        if trapped.count(event) > 0:
-            return
-        elif event == rc.LEFT or event == rc.RIGHT:
+        if event in (em.INPUT_LEFT, em.INPUT_RIGHT):
             self.b0.toggle_selected()
             self.b1.toggle_selected()
             self.draw()
             self.osd.update(self.get_rect())
             return
-        elif event == rc.ENTER or event == rc.SELECT:
+        
+        elif event == em.INPUT_ENTER:
             if self.b0.selected:
                 if DEBUG: print 'HIT OK'
                 self.destroy()
                 if self.handler: self.handler()
             else:
                 self.destroy()
+
         else:
             return self.parent.eventhandler(event)
 

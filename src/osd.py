@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.39  2003/05/06 10:36:46  dischi
 # Added OSD_SDL_EXEC_AFTER_CLOSE patch from Petri Damstén
 #
@@ -363,7 +366,6 @@ class OSD:
                     # Turn off the helpscreen if it was on
                     if self._help:
                         self._helpscreen()
-
                     return cmds_sdl[event.key]
 
     

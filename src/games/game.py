@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.6  2003/04/24 19:56:10  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -66,6 +69,7 @@ import menu       # The menu widget class
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
 import plugin
+import event as em
 
 DEBUG = config.DEBUG
 
@@ -95,7 +99,7 @@ class Game:
         self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
-                         
+        self.app_mode = 'games'
 
     def play(self, item):
 
@@ -142,7 +146,7 @@ class Game:
 
 
     def eventhandler(self, event):
-           return self.item.eventhandler(event, menuwidget, self.thread)
+        return self.item.eventhandler(event, menuwidget, self.thread)
 
  
 # ======================================================================
@@ -185,7 +189,7 @@ class Game_Thread(threading.Thread):
                 osd.restartdisplay()
 
                 if self.mode == 'play':
-                    rc.post_event(rc.STOP)
+                    rc.post_event(em.STOP)
 
                 self.mode = 'idle'
                 

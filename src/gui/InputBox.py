@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.9  2003/05/21 00:01:31  rshortt
 # Contructors may now accept a handler method to call when ok/enter is selected.
 #
@@ -84,7 +87,7 @@ from types          import *
 
 DEBUG = 0
 
-import rc
+import event as em
 
 class InputBox(PopupBox):
     """
@@ -116,44 +119,46 @@ class InputBox(PopupBox):
 
     def eventhandler(self, event):
 
-        if event == rc.LEFT:
+        if event == em.INPUT_LEFT:
             self.lbg.change_selected_box('left')
             self.draw()
             self.osd.update(self.get_rect())
-            return
-        elif event == rc.RIGHT:
+
+        elif event == em.INPUT_RIGHT:
             self.lbg.change_selected_box('right')
             self.draw()
             self.osd.update(self.get_rect())
-            return
-        elif event == rc.ENTER or event == rc.SELECT:
+
+        elif event == em.INPUT_ENTER:
             self.destroy()
             if self.handler: self.handler(self.lbg.get_word())
-            return
-        elif event == rc.EXIT:
+
+        elif event == em.INPUT_EXIT:
             self.destroy()
-            return
-        elif event == rc.UP:
+
+        elif event == em.INPUT_UP:
             self.lbg.get_selected_box().charUp()
             self.draw()
             self.osd.update(self.get_rect())
-            return
-        elif event == rc.DOWN:
+
+        elif event == em.INPUT_DOWN:
             self.lbg.get_selected_box().charDown()
             self.draw()
             self.osd.update(self.get_rect())
-            return
-        elif [rc.K1, rc.K2, rc.K3, rc.K4, rc.K5, 
-              rc.K6, rc.K7, rc.K8, rc.K9, 
-              rc.K0].count(event) > 0:
-            self.lbg.get_selected_box().cycle_phone_char(event)
+
+        elif event in (em.INPUT_0, em.INPUT_1, em.INPUT_2, em.INPUT_3,
+                       em.INPUT_4, em.INPUT_5, em.INPUT_6, em.INPUT_7,
+                       em.INPUT_8, em.INPUT_9, em.INPUT_0 ):
+            event = event.name[6:]
+            print event
+            self.lbg.get_selected_box().cycle_phone_char(event.arg)
             self.draw()
             self.osd.update(self.get_rect())
             # a,b,c,d = self.lbg.get_selected_box().get_rect()
             # print 'rectangle: %s' % dir(self.lbg.get_selected_box().get_rect())
             # if DEBUG: print 'a: "%s", b: "%s", c: "%s", d: "%s"' % (a,b,c,d)
             # self.osd.update_area(self.lbg.get_selected_box().get_rect())
-            return
+
         else:
             return self.parent.eventhandler(event)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.5  2003/05/04 12:05:45  dischi
 # make it possible to force the mediamenu to text or image view
 #
@@ -59,6 +62,7 @@ import copy
 import config
 import menu as menu_module
 import rc
+import event as em
 
 from item import Item
 from directory import DirItem
@@ -206,7 +210,7 @@ class MediaMenu(Item):
                 menuw.refresh()
             return TRUE
 
-        if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
+        if event in (em.PLAY_END, em.USER_END, em.STOP) and em.context != 'menu':
             menuw.show()
             return TRUE
 

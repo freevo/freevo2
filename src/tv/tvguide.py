@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.4  2003/04/20 12:43:34  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -45,7 +48,7 @@
 
 import gui.GUIObject
 import skin
-import rc
+import event as em
 
 # The Electronic Program Guide
 import epg_xmltv as epg, epg_types
@@ -82,22 +85,22 @@ class TVGuide(gui.GUIObject):
             eval('self.event_%s()' % event)
             self.menuw.refresh()
             
-        elif event == rc.CHUP:
+        elif event == em.MENU_PAGEUP:
             self.event_PageUp()
             self.menuw.refresh()
 
-        elif event == rc.CHDOWN:
+        elif event == em.MENU_PAGEDOWN:
             self.event_PageDown()
             self.menuw.refresh()
 
-        elif event == rc.REC:
+        elif event == em.TV_START_RECORDING:
             record_video.main_menu(self.selected)
 
-        elif event == rc.SELECT or event == rc.PLAY:
+        elif event == em.SELECT or event == em.PLAY:
             self.hide()
             self.player('tv', self.selected.channel_id)
 
-        elif event == rc.PLAY_END:
+        elif event == em.PLAY_END:
             self.show()
 
         else:

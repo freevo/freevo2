@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.14  2003/04/27 17:43:30  dischi
 # secure RemoteControl against different threads
 #
@@ -70,6 +73,10 @@
 import socket
 import config
 import util
+from event import Event, BUTTON
+import osd
+
+osd = osd.get_singleton()
 
 PYLIRC = 1
 try:
@@ -101,80 +108,27 @@ def get_singleton():
 def post_event(event):
     return get_singleton().post_event(event)
 
-def app(application=0, func=None):
+
+def app(application=0):
     if not application == 0:
-        if hasattr(application, 'app_mode') and not func:
-            func = application.app_mode
+        context = 'menu'
+        if hasattr(application, 'app_mode'):
+            context = application.app_mode
         if hasattr(application, 'eventhandler'):
             application = application.eventhandler
-        get_singleton().app = application
-        get_singleton().func = func
-        
-    return get_singleton().app
+        get_singleton().set_app(application, context)
+
+    return get_singleton().get_app()
+
+def set_context(context):
+    get_singleton().set_context(context)
 
 
-# Remote control buttons. This is taken from a universal remote
-# that has a large (but not ridiculous) number of buttons.
-# Try to use a common subset for the common operations, and
-# don't add buttons that only exist on a specific remote since
-# no-one else will be able to use it.
-
-NONE     = ''
-SLEEP    = 'SLEEP'
-MENU     = 'MENU'
-GUIDE    = 'GUIDE'
-EXIT     = 'EXIT'
-UP       = 'UP'
-DOWN     = 'DOWN'
-LEFT     = 'LEFT'
-RIGHT    = 'RIGHT'
-SELECT   = 'SELECT'
-POWER    = 'POWER'
-MUTE     = 'MUTE'
-VOLUP    = 'VOL+'
-VOLDOWN  = 'VOL-'
-CHUP     = 'CH+'
-CHDOWN   = 'CH-'
-K1       = '1'
-K2       = '2'
-K3       = '3'
-K4       = '4'
-K5       = '5'
-K6       = '6'
-K7       = '7'
-K8       = '8'
-K9       = '9'
-K0       = '0'
-DISPLAY  = 'DISPLAY'
-ENTER    = 'ENTER'
-PREV_CH  = 'PREV_CH'
-PIP_ONOFF= 'PIP_ONOFF'
-PIP_SWAP = 'PIP_SWAP'
-PIP_MOVE = 'PIP_MOVE'
-TV_VCR   = 'TV_VCR'
-REW      = 'REW'
-PLAY     = 'PLAY'
-FFWD     = 'FFWD'
-PAUSE    = 'PAUSE'
-STOP     = 'STOP'
-REC      = 'REC'      
-EJECT    = 'EJECT'
-SUBTITLE = 'SUBTITLE'
-
-# Application generated codes
-PLAY_END = 'PLAY_END'     # Reached end of song, movie, etc
-USER_END = 'USER_END'     # User ended the song, etc
-
-REFRESH_SCREEN = 'REFRESH_SCREEN'
-REBUILD_SCREEN = 'REBUILD_SCREEN'
-DVD_PROTECTED  = 'DVD_PROTECTED' # Cannot play prot. DVDs
-
-
+    
 class RemoteControl:
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
         self.pylirc = PYLIRC
-        
         if self.pylirc:
             try:
                 pylirc.init('freevo', config.LIRCRC)
@@ -193,24 +147,62 @@ class RemoteControl:
             self.sock.bind(('', self.port))
 
         self.app = None
-        self.func = None
+        self.context = 'menu'
         self.queue = []
-        
-    def post_event(self, event):
-        self.queue += [event]
 
+
+    def set_app(self, app, context):
+        self.app     = app
+        self.context = context
+
+
+    def get_app(self):
+        return self.app
+
+
+    def set_context(self, context):
+        self.context = context
+        
+    def post_event(self, e):
+        if not isinstance(e, Event):
+            self.queue += [ Event(e, context=self.context) ]
+        self.queue += [ e ]
+
+    def key_event_mapper(self, key):
+        if not key:
+            return None
+
+        for c in (self.context, 'global'):
+            try:
+                e = config.EVENTS[c][key]
+                e.context = self.context
+                return e
+            except KeyError:
+                pass
+
+        print 'no event mapping for key %s in context %s' % (key, self.context)
+        print 'send button event BUTTON arg=%s' % key
+        return Event(BUTTON, arg=key)
+    
         
     def poll(self):
         if len(self.queue):
             ret = self.queue[0]
             del self.queue[0]
             return ret
+
+        e = self.key_event_mapper(osd._cb())
+        if e:
+            return e
+        
         if self.pylirc:
             list = pylirc.nextcode()
             if list:
                 for code in list:
-                    data = code
-                    return data
+                    e = self.key_event_mapper(osd._cb())
+                    if e:
+                        return e
+                
         if config.ENABLE_NETWORK_REMOTE:
             try:
                 data = self.sock.recv(100)

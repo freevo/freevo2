@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.3  2003/04/24 19:56:37  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -51,7 +54,7 @@ import config
 import os
 
 import plugin
-import rc
+import event as em
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -125,7 +128,7 @@ class PluginInterface(plugin.DaemonPlugin):
         eventhandler to handle the VOL events
         """
         # Handle volume control
-        if event == rc.VOLUP:
+        if event == em.MIXER_VOLUP:
             print "Got VOLUP"
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
                 self.incMainVolume()
@@ -133,14 +136,14 @@ class PluginInterface(plugin.DaemonPlugin):
                 self.incPcmVolume()
             return TRUE
         
-        elif event == rc.VOLDOWN:
+        elif event == em.MIXER_VOLDOWN:
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
                 self.decMainVolume()
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
                 self.decPcmVolume()
             return TRUE
 
-        elif event == rc.MUTE:
+        elif event == em.MIXER_MUTE:
             if self.getMuted() == 1: self.setMuted(0)
             else: self.setMuted(1)
             return TRUE

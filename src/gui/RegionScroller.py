@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.12  2003/05/15 02:21:54  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -94,7 +97,7 @@ from Label     import *
 from types     import * 
 from osd import Font
 
-import rc
+import event as em
 
 DEBUG = 0
 
@@ -287,8 +290,7 @@ class RegionScroller(Container):
 
     def eventhandler(self, event):
 
-        scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
-        if scrolldirs.count(event) > 0:
+        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
             self.scroll(event)
             self.parent.draw()
             self.osd.update(self.parent.get_rect())

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.14  2003/05/21 00:04:26  rshortt
 # General improvements to layout and drawing.
 #
@@ -293,8 +296,7 @@ class ListBox(RegionScroller):
 
     def eventhandler(self, event):
 
-        scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
-        if scrolldirs.count(event) > 0:
+        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
             self.scroll(event)
             self.parent.draw()
             self.osd.update(self.parent.get_rect())

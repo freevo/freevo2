@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.18  2003/04/27 17:59:07  dischi
 # better plugin poll() handling
 #
@@ -77,6 +80,7 @@
 
 import os
 import traceback
+from event import Event
 
 TRUE  = 1
 FALSE = 0
@@ -337,15 +341,15 @@ def event(name):
     """
     create plugin event
     """
-    return 'PLUGIN_EVENT %s' % name
+    return Event('PLUGIN_EVENT %s' % name)
 
 
 def isevent(event):
     """
     plugin event parsing
     """
-    if event[:12] == 'PLUGIN_EVENT':
-        return event[13:]
+    if event.name[:12] == 'PLUGIN_EVENT':
+        return event.name[13:]
     else:
         return None
 

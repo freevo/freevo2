@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.13  2003/05/21 00:01:31  rshortt
 # Contructors may now accept a handler method to call when ok/enter is selected.
 #
@@ -104,7 +107,7 @@ from types     import *
 
 DEBUG = 0
 
-import rc
+import event as em
 
 class AlertBox(PopupBox):
     """
@@ -137,13 +140,11 @@ class AlertBox(PopupBox):
     def eventhandler(self, event):
         if DEBUG: print 'AlertBox: EVENT = %s for %s' % (event, self)
 
-        trapped = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
-        if trapped.count(event) > 0:
-            return
-        elif [rc.ENTER, rc.SELECT, rc.EXIT].count(event) > 0:
+        if event in (em.INPUT_ENTER, em.INPUT_EXIT):
             if DEBUG: print 'HIT OK'
             self.destroy()
-            if self.handler: self.handler()
+            if self.handler:
+                self.handler()
         else:
             return self.parent.eventhandler(event)
 

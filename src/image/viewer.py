@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.22  2003/04/27 17:37:26  dischi
 # handle image loading failures
 #
@@ -48,6 +51,7 @@ import time
 import config # Configuration file. 
 import osd    # The OSD class, used to communicate with the OSD daemon
 import rc
+import event as em
 import exif
 
 from gui.GUIObject import GUIObject
@@ -83,11 +87,15 @@ class ImageViewer(GUIObject):
         GUIObject.__init__(self)
         self.osd_mode = 0    # Draw file info on the image
         self.zoom = 0   # Image zoom
-        self.zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
-                           rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
+        self.zoom_btns = { em.IMAGE_NO_ZOOM.name:0, em.IMAGE_ZOOM_GRID1.name:1,
+                           em.IMAGE_ZOOM_GRID2.name:2, em.IMAGE_ZOOM_GRID3.name:3,
+                           em.IMAGE_ZOOM_GRID4.name:4, em.IMAGE_ZOOM_GRID5.name:5,
+                           em.IMAGE_ZOOM_GRID6.name:6, em.IMAGE_ZOOM_GRID7.name:7,
+                           em.IMAGE_ZOOM_GRID8.name:8, em.IMAGE_ZOOM_GRID9.name:9 }
 
         self.slideshow = TRUE  # currently in slideshow mode
         self.alertbox  = None  # AlertBox active
+        self.app_mode  = 'image'
 
         
     def view(self, item, zoom=0, rotation=0):
@@ -116,8 +124,6 @@ class ImageViewer(GUIObject):
             # Using Container-Image
             image = item.loadimage( )
 
-        if rc.app() != self.eventhandler:
-            rc_app_bkp = rc.app()
         rc.app(self)
 
         if not image:
@@ -241,16 +247,16 @@ class ImageViewer(GUIObject):
     def signalhandler(self, signum, frame):
         if rc.app() == self.eventhandler and self.slideshow:
             rc.app(None)
-            self.eventhandler(rc.PLAY_END)
+            self.eventhandler(em.PLAY_END)
 
 
     def eventhandler(self, event):
-        if event == rc.SELECT and self.alertbox:
-            self.alertbox.destroy()
-            self.alertbox = None
-            return TRUE
+        #if event == rc.SELECT and self.alertbox:
+        #    self.alertbox.destroy()
+        #    self.alertbox = None
+        #    return TRUE
         
-        if event == rc.PAUSE or event == rc.PLAY:
+        if event == em.PAUSE or event == em.PLAY:
             if self.slideshow:
                 self.slideshow = FALSE
                 signal.alarm(0)
@@ -259,7 +265,7 @@ class ImageViewer(GUIObject):
                 signal.alarm(1)
             return TRUE
         
-        elif event == rc.STOP or event == rc.EXIT:
+        elif event == em.STOP:
             rc.app(rc_app_bkp)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
@@ -267,17 +273,17 @@ class ImageViewer(GUIObject):
 
         # up and down will stop the slideshow and pass the
         # event to the playlist
-        elif event == rc.UP or event == rc.DOWN:
+        elif event == em.PLAYLIST_NEXT or event == em.PLAYLIST_PREV:
             self.slideshow = FALSE
             signal.alarm(0)
             self.fileitem.eventhandler(event)
             return TRUE
             
         # rotate image
-        elif event == rc.LEFT or event == rc.RIGHT:
+        elif event == em.IMAGE_ROTATE:
             osd.clearscreen(color=osd.COL_BLACK)
 
-            if event == rc.RIGHT:
+            if event.arg == 'right':
                 self.rotation = (self.rotation + 270) % 360
             else:
                 self.rotation = (self.rotation + 90) % 360
@@ -309,7 +315,7 @@ class ImageViewer(GUIObject):
             return TRUE
 
         # print image information
-        elif event == rc.DISPLAY:
+        elif event == em.TOGGLE_OSD:
             self.osd_mode = {0:1, 1:2, 2:0}[self.osd_mode] # Toggle on/off
             # Redraw
             self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
@@ -331,7 +337,7 @@ class ImageViewer(GUIObject):
             return TRUE                
 
         # save the image with the current rotation
-        elif event == rc.REC:
+        elif event == em.IMAGE_SAVE:
             if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
                 cmd = 'jpegtran -copy all -rotate %s -outfile /tmp/freevo-iview %s' \
                       % ((self.rotation + 180) % 360, self.filename)

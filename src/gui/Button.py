@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.10  2003/05/21 00:04:25  rshortt
 # General improvements to layout and drawing.
 #
@@ -209,6 +212,6 @@ class Button(Container):
 
 
     def eventhandler(self, event):
-            return self.parent.eventhandler(event)
+        return self.parent.eventhandler(event)
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.3  2003/04/24 05:20:57  krister
 # Bugfix for fullscreen/windowed mode using the new tvtime option '-M'. Added a translation table for the different freq table names.
 #
@@ -55,6 +58,7 @@ import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
+import event as em
 
 import plugin
 
@@ -254,18 +258,17 @@ class TVTime:
 
     def eventhandler(self, event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
-        if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
-            event == rc.SELECT or event == rc.PLAY_END):
+        if event == em.STOP or event == em.PLAY_END:
             self.Stop()
-            rc.post_event(rc.PLAY_END)
+            rc.post_event(em.PLAY_END)
             return TRUE
         
-        elif event == rc.CHUP or event == rc.CHDOWN:
+        elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
             if self.mode == 'vcr':
                 return
             
             # Go to the prev/next channel in the list
-            if event == rc.CHUP:
+            if event == em.TV_CHANNEL_UP:
                 self.TunerPrevChannel()
             else:
                 self.TunerNextChannel()
@@ -282,7 +285,7 @@ class TVTime:
             #self.thread.app.write(cmd)
             return TRUE
             
-        elif event == rc.DISPLAY:
+        elif event == em.TOGGLE_OSD:
             return FALSE
         
             # Display the channel info message
@@ -342,21 +345,24 @@ class TVTimeApp(childapp.ChildApp):
 
 
     def stdout_cb(self, line):
-        events = { 'n' : rc.VOLDOWN,
-                   'm' : rc.VOLUP,
-                   'c' : rc.CHUP,
-                   'v' : rc.CHDOWN,
-                   'Escape' : rc.EXIT,
-                   'Up' : rc.UP,
-                   'Down' : rc.DOWN,
-                   'Left' : rc.LEFT,
-                   'Right' : rc.RIGHT,
-                   ' ' : rc.SELECT,
-                   'Enter' : rc.SELECT,
-                   'F3' : rc.MUTE,
-                   'e' : rc.ENTER,
-                   'd' : rc.DISPLAY,
-                   's' : rc.STOP }
+        # XXX FIXME to the new event handling
+        events = { 'n' : em.MIXER_VOLDOWN,
+                   'm' : em.MIXER_VOLUP,
+                   'c' : em.TV_CHANNEL_UP,
+                   'v' : em.TV_CHANNEL_DOWN,
+                   'Escape' : em.STOP,
+
+                   # 'Up' : rc.UP,
+                   # 'Down' : rc.DOWN,
+                   # 'Left' : rc.LEFT,
+                   # 'Right' : rc.RIGHT,
+                   # ' ' : rc.SELECT,
+                   # 'Enter' : rc.SELECT,
+
+                   'F3' : em.MIXER_MUTE,
+                   # 'e' : rc.ENTER,
+                   # 'd' : rc.DISPLAY,
+                   's' : em.STOP }
         
         print 'TVTIME 1 KEY EVENT: "%s"' % str(list(line)) # XXX TEST
 
@@ -441,7 +447,7 @@ class TVTime_Thread(threading.Thread):
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
-                    rc.post_event(rc.PLAY_END)
+                    rc.post_event(em.PLAY_END)
 
                 self.mode = 'idle'
                 

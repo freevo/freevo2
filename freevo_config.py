@@ -97,6 +97,7 @@
 
 
 import plugin
+import event
 
 ########################################################################
 # If you want to change some things for your personal setup, please
@@ -199,6 +200,7 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
+EVENTS = event.default_events
 
 # ======================================================================
 # Plugins:

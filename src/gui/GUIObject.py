@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.22  2003/05/21 00:04:25  rshortt
 # General improvements to layout and drawing.
 #
@@ -123,7 +126,8 @@ class GUIObject:
         self.height   = height
         self.bg_color = bg_color
         self.fg_color = fg_color
-        
+
+        self.event_context = None
 
         if DEBUG: print "inside GUIOBJECT INIT"
 
@@ -424,6 +428,8 @@ class GUIObject:
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
                                  self.osd.focused_app
                 self.osd.focused_app = self.parent
+                if self.parent.event_context:
+                    rc.set_context(self.parent.event_context) 
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
                                  self.osd.focused_app
             else:

@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.38  2003/05/06 03:11:20  outlyer
 # Whoops... commited something specific to my machine...
 #
@@ -126,6 +129,7 @@ import util       # Various utilities
 import childapp   # Handle child applications
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
+import event as em
 import plugin
 
 # RegExp
@@ -330,7 +334,7 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
 
-        if event == rc.STOP and not self.seek:
+        if event == em.STOP and not self.seek:
             if self.mode == 'dvdnav':
                 self.thread.app.write('dvdnav 6\n')
                 return TRUE
@@ -338,7 +342,7 @@ class MPlayer:
                 self.stop()
                 return self.item.eventhandler(event)
 
-        if event == rc.REC:
+        if event == em.STORE_BOOKMARK:
             # Bookmark the current time into a file
             
             bookmarkfile = util.get_bookmarkfile(self.filename)
@@ -352,118 +356,113 @@ class MPlayer:
             print "Added bookmark at position " + str(self.item.elapsed)
             return TRUE
 
-        if event in ( rc.EXIT, rc.PLAY_END, rc.USER_END, rc.DVD_PROTECTED ):
+        if event in ( em.STOP, em.PLAY_END, em.USER_END, em.DVD_PROTECTED ):
             self.stop()
             return self.item.eventhandler(event)
 
         # try to find the event in RC_MPLAYER_CMDS 
-        e = config.RC_MPLAYER_CMDS.get(event, None)
+        e = config.RC_MPLAYER_CMDS.get(event.name, None)
         if e:
             self.thread.app.write('%s\n' % config.RC_MPLAYER_CMDS[event][0])
             return TRUE
 
-        if event == rc.MENU:
+        if event == em.MENU:
             if self.mode == 'dvdnav':
                 self.thread.app.write('dvdnav 5\n')
                 return TRUE
 
-        if event == rc.DISPLAY:
+        if event == em.TOGGLE_OSD:
             self.thread.app.write('osd\n')
             return TRUE
 
-        if event == rc.PAUSE or event == rc.PLAY:
+        if event == em.PAUSE or event == em.PLAY:
             self.thread.app.write('pause\n')
             return TRUE
 
-        if event == rc.FFWD:
-            self.thread.app.write('seek 10\n')
+        if event == em.SEEK:
+            self.thread.app.write('seek %s\n', em.arg)
             return TRUE
 
-        if event == rc.UP:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('dvdnav 1\n')
-                return TRUE
+        #if event == rc.UP and self.mode == 'dvdnav':
+        #    self.thread.app.write('dvdnav 1\n')
+        #    return TRUE
 
-        if event == rc.REW:
-            self.thread.app.write('seek -10\n')
-            return TRUE
+        #if event == rc.DOWN:
+        #    if self.mode == 'dvdnav':
+        #        self.thread.app.write('dvdnav 2\n')
+        #        return TRUE
 
-        if event == rc.DOWN:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('dvdnav 2\n')
-                return TRUE
+        #if event == rc.LEFT:
+        #    if self.mode == 'dvdnav':
+        #        self.thread.app.write('dvdnav 3\n')
+        #    else:
+        #        self.thread.app.write('seek -60\n')
+        #    return TRUE
 
-        if event == rc.LEFT:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('dvdnav 3\n')
-            else:
-                self.thread.app.write('seek -60\n')
-            return TRUE
-
-        if event == rc.RIGHT:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('dvdnav 4\n')
-            else:
-                self.thread.app.write('seek 60\n')
-            return TRUE
+        #if event == rc.RIGHT:
+        #    if self.mode == 'dvdnav':
+        #        self.thread.app.write('dvdnav 4\n')
+        #    else:
+        #        self.thread.app.write('seek 60\n')
+        #    return TRUE
         
-        if event == rc.ENTER:
-            self.seek_timer.cancel()
-            self.seek *= 60
-            self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
-            print "seek "+str(self.seek)+" 2\n"
-            self.seek = 0
-            return TRUE
-        
-        if event == rc.K0:
-            self.reset_seek_timeout()
-            self.seek *= 10;
-            return TRUE
-        
-        elif event == rc.K1:
-            self.reset_seek_timeout()
-            self.seek += self.seek * 10 + 1
-            return TRUE
-            
-        elif event == rc.K2:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 2
-                return TRUE
-        
-        elif event == rc.K3:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 3
-                return TRUE
-                
-        elif event == rc.K4:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 4
-                return TRUE
-                
-        elif event == rc.K5:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 5
-                return TRUE
-                
-        elif event == rc.K6:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 6
-                return TRUE
-                
-        elif event == rc.K7:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 7
-                return TRUE
-                
-        elif event == rc.K8:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 8
-                return TRUE
-                
-        elif event == rc.K9:
-                self.reset_seek_timeout()
-                self.seek += self.seek * 10 + 9
-                return TRUE
+        #if event == rc.ENTER:
+        #    self.seek_timer.cancel()
+        #    self.seek *= 60
+        #    self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
+        #    print "seek "+str(self.seek)+" 2\n"
+        #    self.seek = 0
+        #    return TRUE
+        #
+        #if event == rc.K0:
+        #    self.reset_seek_timeout()
+        #    self.seek *= 10;
+        #    return TRUE
+        #
+        #elif event == rc.K1:
+        #    self.reset_seek_timeout()
+        #    self.seek += self.seek * 10 + 1
+        #    return TRUE
+        #    
+        #elif event == rc.K2:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 2
+        #        return TRUE
+        #
+        #elif event == rc.K3:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 3
+        #        return TRUE
+        #        
+        #elif event == rc.K4:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 4
+        #        return TRUE
+        #        
+        #elif event == rc.K5:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 5
+        #        return TRUE
+        #        
+        #elif event == rc.K6:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 6
+        #        return TRUE
+        #        
+        #elif event == rc.K7:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 7
+        #        return TRUE
+        #        
+        #elif event == rc.K8:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 8
+        #        return TRUE
+        #        
+        #elif event == rc.K9:
+        #        self.reset_seek_timeout()
+        #        self.seek += self.seek * 10 + 9
+        #        return TRUE
 
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
@@ -609,7 +608,7 @@ class MPlayerApp(childapp.ChildApp):
             print 'DVD protection is normally enabled, please see the docs'
             print 'for more information.'
             print
-            rc.post_event(rc.DVD_PROTECTED)
+            rc.post_event(em.DVD_PROTECTED)
             
         if config.MPLAYER_DEBUG:
             try:
@@ -663,12 +662,12 @@ class MPlayer_Thread(threading.Thread):
 
                 if self.mode == 'play':
                     if self.app.exit_type == "End of file":
-                        rc.post_event(rc.PLAY_END)
+                        rc.post_event(em.PLAY_END)
                     elif self.app.exit_type == "Quit":
-                        rc.post_event(rc.USER_END)
+                        rc.post_event(em.USER_END)
                     else:
                         print 'error while playing file'
-                        rc.post_event(rc.PLAY_END)
+                        rc.post_event(em.PLAY_END)
                         
                 # Ok, we can use the OSD again.
                 if osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga':

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.14  2003/04/24 19:55:46  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -58,7 +61,7 @@
 #endif
 
 
-import rc
+import event as em
 
 TRUE  = 1
 FALSE = 0
@@ -158,7 +161,7 @@ class Item:
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event == rc.PLAY_END or event == rc.USER_END and menuw:
+            if event == em.PLAY_END or event == em.USER_END and menuw:
                 if menuw.visible:
                     menuw.refresh()
                 else:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.4  2003/04/29 20:59:04  outlyer
 # Fixed a crash caused here, because this code was trying to append a str to a
 # tuple; the proper way to do it (apparently) is to treat the string as a single
@@ -63,6 +66,7 @@ import signal
 import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
+import event as em
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 
@@ -308,18 +312,17 @@ class MPlayer:
 
     def eventhandler(self, event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
-        if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
-            event == rc.SELECT or event == rc.PLAY_END):
+        if event == em.STOP or event == em.PLAY_END:
             self.Stop()
-            rc.post_event(rc.PLAY_END)
+            rc.post_event(em.PLAY_END)
             return TRUE
         
-        elif event == rc.CHUP or event == rc.CHDOWN:
+        elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
             if self.mode == 'vcr':
                 return
             
             # Go to the prev/next channel in the list
-            if event == rc.CHUP:
+            if event == em.TV_CHANNEL_UP:
                 self.TunerPrevChannel()
             else:
                 self.TunerNextChannel()
@@ -336,7 +339,7 @@ class MPlayer:
             #self.thread.app.write(cmd)
             return TRUE
             
-        elif event == rc.DISPLAY:
+        elif event == em.TOGGLE_OSD:
             return FALSE
         
             # Display the channel info message
@@ -456,7 +459,7 @@ class MPlayer_Thread(threading.Thread):
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
-                    rc.post_event(rc.PLAY_END)
+                    rc.post_event(em.PLAY_END)
 
                 self.mode = 'idle'
                 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/27 17:53:35  dischi
+# Added new event handler module
+#
 # Revision 1.6  2003/04/26 15:09:19  dischi
 # changes for the new mount/umount
 #
@@ -64,6 +67,7 @@ import copy
 import config
 import util
 import rc
+import event as em
 import plugin
 
 from audio.audiodiskitem import AudioDiskItem
@@ -158,7 +162,7 @@ class autostart(plugin.DaemonPlugin):
             return TRUE
 
         # Handle the EJECT key for the main menu
-        elif event == rc.EJECT and len(menuw.menustack) == 1:
+        elif event == em.EJECT and len(menuw.menustack) == 1:
 
             # Are there any drives defined?
             if config.REMOVABLE_MEDIA:
@@ -223,7 +227,7 @@ class rom_items(plugin.MainMenuPlugin):
         """
         handle EJECT for the rom drives
         """
-        if event == rc.EJECT and item.media and menuw and \
+        if event == em.EJECT and item.media and menuw and \
            menuw.menustack[1] == menuw.menustack[-1]:
             item.media.move_tray(dir='toggle')
             return TRUE

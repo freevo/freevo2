@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.46  2003/04/28 18:07:45  dischi
 # restore the correct item
 #
@@ -76,9 +79,7 @@ import util
 # The skin class
 import skin
 
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
+import event as em
 
 from gui.GUIObject import *
 from gui.AlertBox import AlertBox
@@ -209,7 +210,8 @@ class MenuWidget(GUIObject):
         self.cols = 0
         self.visible = 1
         self.eventhandler_plugins = None
-
+        self.event_context = 'menu'
+        
     def show(self):
         if not self.visible:
             self.visible = 1
@@ -359,28 +361,28 @@ class MenuWidget(GUIObject):
     def eventhandler(self, event):
         menu = self.menustack[-1]
 
-        if event == rc.MENU:
+        if event == em.MENU_GOTO_MAINMENU:
             self.goto_main_menu()
             return
         
-        if event == rc.EXIT:
+        if event == em.MENU_BACK_ONE_MENU:
             self.back_one_menu()
             return
 
         if not isinstance(menu, Menu) and menu.eventhandler(event):
             return
 
-        if event == rc.REFRESH_SCREEN:
+        if event == 'MENU_REFRESH':
             self.refresh()
             return
         
-        if event == rc.REBUILD_SCREEN:
+        if event == 'MENU_REBUILD':
             self.init_page()
             self.refresh()
             return
         
         if not self.menu_items:
-            if event in ( rc.ENTER, rc.SELECT,event == rc.PLAY):
+            if event in ( em.MENU_SELECT, em.MENU_SUBMENU, em.MENU_PLAY_ITEM):
                 self.back_one_menu()
             return
             
@@ -395,7 +397,7 @@ class MenuWidget(GUIObject):
             print 'no eventhandler for event %s' % event
             return
 
-        if event == rc.UP:
+        if event == em.MENU_UP:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected-self.cols < 0 and \
                    menu.selected != menu.choices[0]:
@@ -415,7 +417,7 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == rc.DOWN:
+        elif event == em.MENU_DOWN:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected+self.cols > len(self.all_items)-1 and \
                    menu.page_start + len(self.all_items) < len(menu.choices):
@@ -436,12 +438,12 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == rc.LEFT or event == rc.CHUP:
+        elif event == em.MENU_LEFT or event == em.MENU_PAGEUP:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
             
-            if event == rc.LEFT and self.cols > 1:
+            if event == em.MENU_LEFT and self.cols > 1:
                 curr_selected = self.all_items.index(menu.selected)
                 if curr_selected == 0:
                     self.goto_prev_page(arg='no_refresh')
@@ -468,7 +470,7 @@ class MenuWidget(GUIObject):
                     self.refresh()
             return
 
-        elif event == rc.RIGHT or event == rc.CHDOWN:
+        elif event == em.MENU_RIGHT or event == em.MENU_PAGEDOWN:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -476,7 +478,7 @@ class MenuWidget(GUIObject):
             if menu.selected == menu.choices[-1]:
                 return
             
-            if event == rc.RIGHT and self.cols > 1:
+            if event == em.MENU_RIGHT and self.cols > 1:
                 curr_selected = self.all_items.index(menu.selected)
                 if curr_selected == len(self.all_items)-1:
                     self.goto_next_page(arg='no_refresh')
@@ -506,7 +508,10 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == rc.SELECT or event == rc.PLAY:
+        elif event == em.MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
+            menu.selected.play(menuw=self)
+            
+        elif event == em.MENU_SELECT or event == em.MENU_PLAY_ITEM:
             try:
                 action = menu.selected.action
             except AttributeError:
@@ -523,7 +528,7 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == rc.ENTER:
+        elif event == em.MENU_SUBMENU:
             actions = menu.selected.actions()
 
             if hasattr(menu.selected, 'display_type'):
@@ -542,7 +547,7 @@ class MenuWidget(GUIObject):
             return
             
 
-        elif event == rc.DISPLAY and len(self.menustack) > 1:
+        elif event == em.MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
             if skin.ToggleDisplayStyle(menu):
                 self.rebuild_page()
@@ -561,7 +566,7 @@ class MenuWidget(GUIObject):
             if p.eventhandler(event=event, menuw=self):
                 return
 
-        print 'no eventhandler for event %s' % event
+        print 'no eventhandler for event %s' % event.name
         return 0
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.10  2003/05/11 18:08:06  dischi
 # added AUDIO_FORMAT_STRING to format the audio items
 #
@@ -568,7 +571,7 @@ class DirItem(Playlist):
                     
         # reload the menu, use an event to avoid problems because this function
         # was called by a thread
-        rc.post_event(rc.REBUILD_SCREEN)
+        rc.post_event('REBUILD_SCREEN')
 
 
 
@@ -610,7 +613,7 @@ class DirwatcherThread(threading.Thread):
             print 'unable to read directory'
 
             # send EXIT to go one menu up:
-            rc.post_event(rc.EXIT)
+            rc.post_event(em.MENU_BACK_ONE_MENU)
             self.lock.release()
             return
         

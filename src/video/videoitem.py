@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/05/27 17:53:36  dischi
+# Added new event handler module
+#
 # Revision 1.50  2003/05/05 21:11:15  dischi
 # save video width and height
 #
@@ -133,6 +136,7 @@ TRUE  = 1
 FALSE = 0
 
 import rc
+import event as em
 import menu
 import time
 import copy
@@ -249,7 +253,7 @@ class VideoItem(Item):
             self.selected_audio    = obj.selected_audio
             self.num_titles        = obj.num_titles
             self.label             = obj.label
-            self.tv_show           = onj.tv_show
+            self.tv_show           = obj.tv_show
 
 
     def sort(self, mode=None):
@@ -374,7 +378,7 @@ class VideoItem(Item):
                 else:
                     # TODO: prompt for the right media
                     AlertBox(text = 'Media not found for file %s' % (file)).show()
-                    rc.post_event(rc.PLAY_END)
+                    rc.post_event(em.PLAY_END)
                     return
 
             elif self.media:
@@ -388,7 +392,7 @@ class VideoItem(Item):
                 else:
                     AlertBox(text='Media not found for %s track %s' % \
                              (self.mode, file)).show()
-                    rc.post_event(rc.PLAY_END)
+                    rc.post_event(em.PLAY_END)
                     return
 
         if not self.filename or self.filename == '0':
@@ -462,7 +466,7 @@ class VideoItem(Item):
 
         if error:
             AlertBox(text=error).show()
-            rc.post_event(rc.PLAY_END)
+            rc.post_event(em.PLAY_END)
 
 
     def stop(self, arg=None, menuw=None):
@@ -504,7 +508,7 @@ class VideoItem(Item):
             info = AlertBox(self.menuw, 'error')
             info.show()
             #info.destroy()
-            rc.post_event(rc.PLAY_END)
+            rc.post_event(em.PLAY_END)
 
     def bookmark_menu(self,arg=None, menuw=None):
         """
@@ -706,13 +710,13 @@ class VideoItem(Item):
             menuw = self.menuw
 
         # DVD protected
-        if event == rc.DVD_PROTECTED:
+        if event == em.DVD_PROTECTED:
             AlertBox(text='The DVD is protected, see the docs for more info!').show()
-            event = rc.PLAY_END
+            event = em.PLAY_END
 
         # PLAY_END: do have have to play another file?
         if self.subitems:
-            if event == rc.PLAY_END:
+            if event == em.PLAY_END:
                 try:
                     pos = self.subitems.index(self.current_subitem)
                     if pos < len(self.subitems)-1:
@@ -722,11 +726,11 @@ class VideoItem(Item):
                         return TRUE
                 except:
                     pass
-            elif event == rc.USER_END:
+            elif event == em.USER_END:
                 pass
 
         # show configure menu
-        if event == rc.MENU:
+        if event == em.MENU:
             self.video_player.stop()
             self.settings(menuw=menuw)
             menuw.show()

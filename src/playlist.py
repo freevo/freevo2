@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.19  2003/05/11 17:44:13  dischi
 # load playlist only when really needed
 #
@@ -77,6 +80,7 @@ import copy
 import menu
 import util
 import config
+import event as em
 
 from item import Item
 
@@ -88,8 +92,6 @@ import games
 from audio import AudioItem
 from video import VideoItem
 from image import ImageItem
-
-import rc
 
 TRUE  = 1
 FALSE = 0
@@ -230,7 +232,7 @@ class Playlist(Item):
         """
         Read the playlist from file and create the items
         """
-        if self.filename and not self.playlist:
+        if hasattr(self, 'filename') and self.filename and not self.playlist:
             f=open(self.filename, "r")
             line = f.readline()
             f.close
@@ -321,8 +323,8 @@ class Playlist(Item):
         if not menuw:
             menuw = self.menuw
             
-        if (event == rc.DOWN or event == rc.PLAY_END or event == rc.USER_END) \
-           and self.current_item and self.playlist:
+        if event in ( em.PLAYLIST_NEXT, em.PLAY_END, em.USER_END) \
+               and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
             pos = (pos+1) % len(self.playlist)
 
@@ -334,14 +336,14 @@ class Playlist(Item):
                 return TRUE
 
         # end and no next item
-        if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
+        if event in (em.PLAY_END, em.USER_END, em.STOP):
             self.current_item = None
             if menuw:
                 menuw.show()
             return TRUE
             
 
-        if event == rc.UP and self.current_item and self.playlist:
+        if event == em.PLAYLIST_PREV and self.current_item and self.playlist:
             pos = self.playlist.index(self.current_item)
             if pos:
                 if hasattr(self.current_item, 'stop'):
@@ -420,7 +422,7 @@ class RandomPlaylist(Playlist):
         if not menuw:
             menuw = self.menuw
 
-        if (event == rc.DOWN or event == rc.PLAY_END) and self.unplayed:
+        if (event == em.PLAYLIST_NEXT or event == em.PLAY_END) and self.unplayed:
             if self.current_item:
                 self.current_item.parent = self.parent
                 if hasattr(self.current_item, 'stop'):
@@ -428,7 +430,7 @@ class RandomPlaylist(Playlist):
             return self.play_next(menuw=menuw)
         
         # end and no next item
-        if event == rc.PLAY_END:
+        if event == em.PLAY_END:
             if self.current_item:
                 self.current_item.parent = self.parent
             self.current_item = None
@@ -436,7 +438,7 @@ class RandomPlaylist(Playlist):
                 menuw.show()
             return TRUE
             
-        if event == rc.UP:
+        if event == em.PLAYLIST_PREV:
             print 'random playlist up: not implemented yet'
 
         # give the event to the next eventhandler in the list

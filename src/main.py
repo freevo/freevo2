@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/05/27 17:53:33  dischi
+# Added new event handler module
+#
 # Revision 1.42  2003/04/27 17:59:06  dischi
 # better plugin poll() handling
 #
@@ -84,6 +87,7 @@ import rc      # The RemoteControl class.
 import signal
 
 from item import Item
+import event as em
 
 
 skin    = skin.get_singleton()
@@ -218,7 +222,7 @@ class MainMenu(Item):
 
         # pressing DISPLAY on the main menu will open a skin selector
         # (only for the new skin code)
-        if event == rc.DISPLAY:
+        if event == em.MENU_CHANGE_STYLE:
             items = []
             for name, image, skinfile in skin.GetSkins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
@@ -268,9 +272,6 @@ def main_func():
         # Get next command
         while 1:
 
-            event = osd._cb()
-            if event:
-                break
             event = rc_object.poll()
             if event:
                 break
@@ -299,7 +300,7 @@ def main_func():
                     if p.eventhandler(event=event):
                         break
                 else:
-                    print 'no eventhandler for event %s' % event
+                    print 'no eventhandler for event %s' % event.name
 
         else:
             if osd.focused_app:

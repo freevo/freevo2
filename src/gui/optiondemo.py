@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.9  2003/05/21 00:02:47  rshortt
 # Updates for changes elsewhere.
 #
@@ -80,7 +83,7 @@ from Border         import *
 from Label          import *
 from types          import *
 
-import rc
+import event as em
 
 DEBUG = 0
 
@@ -130,17 +133,19 @@ class optiondemo(PopupBox):
 
     def eventhandler(self, event):
 
-        scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
-        if scrolldirs.count(event) > 0:
+        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
             self.ob.change_item(event)
             self.draw()
-        elif event == rc.ENTER or event == rc.SELECT:
+
+        elif event == em.ENTER:
             if self.ob.selected or self.ob.list.is_visible():
                 print '  Want to toggle_box'
                 self.ob.toggle_box()
                 self.draw()
-        elif event == rc.EXIT:
+
+        elif event == em.EXIT:
             self.destroy()
+
         else:
             return self.parent.eventhandler(event)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.7  2003/04/24 19:56:13  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -65,6 +68,7 @@ import time
 import copy
 
 from item import Item
+import event as em
 
 
 class SnesItem(Item):
@@ -133,20 +137,25 @@ class SnesItem(Item):
     def eventhandler(self, event, menuw=None, mythread=None):
 
         if not mythread == None:
-            if event == rc.STOP or event == rc.SELECT:
+            if event == em.STOP:
                 self.stop()
                 rc.app(None)
                 if not menuw == None:
                     menuw.refresh(reload=1)
-            elif event == rc.MENU:
+
+            elif event == em.MENU:
                 mythread.app.write('M')
-            elif event == rc.DISPLAY:
+
+            elif event == em.GAMES_CONFIG:
                 mythread.cmd( 'config' )
-            elif event == rc.PAUSE or event == rc.PLAY:
+
+            elif event == em.PAUSE or event == em.PLAY:
                 mythread.cmd('pause')
-            elif event == rc.ENTER:
+
+            elif event == em.GAMES_RESET:
                 mythread.cmd('reset')
-            elif event == rc.REC:
+
+            elif event == em.GAMES_SNAPSHOT:
                 mythread.cmd('snapshot')
 
         # give the event to the next eventhandler in the list

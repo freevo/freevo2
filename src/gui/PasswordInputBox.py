@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.6  2003/05/21 00:01:31  rshortt
 # Contructors may now accept a handler method to call when ok/enter is selected.
 #
@@ -67,7 +70,7 @@ from Label          import *
 from LetterBoxGroup import *
 from types          import *
 
-import rc
+import event as em
 
 DEBUG = 0
 
@@ -102,33 +105,36 @@ class PasswordInputBox(PopupBox):
 
     def eventhandler(self, event):
 
-        if event == rc.LEFT or event == rc.UP:
+        if event == em.INPUT_LEFT or event == em.INPUT_UP:
             self.lbg.change_selected_box('left')
             self.draw()
             self.osd.update(self.get_rect())
-            return
-        elif event == rc.RIGHT or event == rc.DOWN:
+
+        elif event == em.INPUT_RIGHT or event == em.INPUT_DOWN:
             self.lbg.change_selected_box('right')
             self.draw()
             self.osd.update(self.get_rect())
-            return
-        elif event == rc.ENTER or event == rc.SELECT:
+
+        elif event == em.INPUT_ENTER:
             self.destroy()
             if self.handler: self.handler(self.lbg.get_word())
-            return
-        elif event == rc.EXIT:
+
+        elif event == em.INPUT_EXIT:
             self.destroy()
-            return
-        elif [rc.K1, rc.K2, rc.K3, rc.K4, rc.K5, 
-              rc.K6, rc.K7, rc.K8, rc.K9, 
-              rc.K0].count(event) > 0:
+
+        elif event in (em.INPUT_0, em.INPUT_1, em.INPUT_2, em.INPUT_3,
+                       em.INPUT_4, em.INPUT_5, em.INPUT_6, em.INPUT_7,
+                       em.INPUT_8, em.INPUT_9, em.INPUT_0 ):
+            event = event.name[6:]
+            print event
+
             the_box = self.lbg.get_selected_box()
             the_box.cycle_phone_char(event)
             if self.lbg.boxes.index(the_box) != len(self.lbg.boxes)-1:
                 self.lbg.change_selected_box('right')
             self.draw()
             self.osd.update(self.get_rect())
-            return
+
         else:
             return self.parent.eventhandler(event)
 

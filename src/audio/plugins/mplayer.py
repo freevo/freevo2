@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.5  2003/05/08 14:17:38  outlyer
 # Initial version of Paul's FXD radio station support. I made some changes from
 # the original patch, in that I added an URL field to the audioitem class instead of
@@ -56,7 +59,7 @@ import threading, signal
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-import rc         # The RemoteControl class.
+import event as em
 
 # RegExp
 import re
@@ -192,9 +195,9 @@ class MPlayer:
         """
 
         if event == 'AUDIO_PLAY_END':
-            event = rc.PLAY_END
+            event = em.PLAY_END
             
-        if event in ( rc.EXIT, rc.PLAY_END, rc.USER_END, rc.STOP ):
+        if event in ( em.STOP, em.PLAY_END, em.USER_END ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
 
@@ -208,24 +211,12 @@ class MPlayer:
                 self.thread.app.write('%s\n' % e)
             return TRUE
 
-        elif event == rc.PAUSE or event == rc.PLAY:
+        elif event == em.PAUSE or event == em.PLAY:
             self.thread.app.write('pause\n')
             return TRUE
 
-        elif event == rc.FFWD:
-            self.thread.app.write('seek 10\n')
-            return TRUE
-
-        elif event == rc.RIGHT:
-            self.thread.app.write('seek 60\n')
-            return TRUE
-
-        elif event == rc.REW:
-            self.thread.app.write('seek -10\n')
-            return TRUE
-
-        elif event == rc.LEFT:
-            self.thread.app.write('seek -60\n')
+        elif event == em.SEEK:
+            self.thread.app.write('seek %s\n', em.arg)
             return TRUE
 
         else:
@@ -332,7 +323,7 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 if self.mode == 'play':
-                    rc.post_event('AUDIO_PLAY_END')
+                    rc.post_event(em.AUDIO_PLAY_END)
 
                 self.mode = 'idle'
                 

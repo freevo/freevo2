@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/05/27 17:53:34  dischi
+# Added new event handler module
+#
 # Revision 1.19  2003/05/21 00:02:02  rshortt
 # Labels are now handled better and there is no need for the Panel class here.
 #
@@ -99,6 +102,8 @@ from types     import *
 
 DEBUG = 0
 
+import rc
+import event as em
 
 class PopupBox(Container):
     """
@@ -132,6 +137,9 @@ class PopupBox(Container):
 
         if DEBUG: print 'set focus to %s' % self
         self.osd.focused_app = self
+
+        self.event_context = 'input'
+        rc.set_context(self.event_context) 
 
 
         self.internal_h_align = Align.CENTER
@@ -279,12 +287,7 @@ class PopupBox(Container):
     def eventhandler(self, event):
         if DEBUG: print 'PopupBox: event = %s' % event
 
-        trapped = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT,
-                   rc.ENTER, rc.SELECT]
-
-        if trapped.count(event) > 0:
-            return
-        elif [rc.EXIT, ].count(event) > 0:
+        elif event == em.INPUT_EXIT:
             self.destroy()
         else:
             return self.parent.eventhandler(event)
