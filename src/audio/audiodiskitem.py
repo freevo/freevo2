@@ -90,7 +90,7 @@ class AudioDiskItem(Playlist):
         play_items = []
         for i in range(0, len(self.info['tracks'])):
             title=self.info['tracks'][i]['title']
-            item = AudioItem('cdda://%d' % (i+1), self, None, title)
+            item = AudioItem('cdda://%d' % (i+1), self, title, scan=FALSE)
 
             # XXX FIXME: set also all the other infos here if AudioInfo
             # XXX will be based on mmpython

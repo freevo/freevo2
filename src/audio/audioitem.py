@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/07/04 16:11:02  dischi
+# removed info again from AudioItem parameter at both places
+#
 # Revision 1.29  2003/07/04 14:37:17  outlyer
 # Missing named parameter 'info' was causing crashes when using cdaudio.
 # Also had to make a change in mmpython:
@@ -103,14 +106,17 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, info = None, name = None):
-        if parent and parent.media:
-            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                     file[len(parent.media.mountdir)+1:])
+    def __init__(self, file, parent, name = None, scan = TRUE):
+        if scan:
+            if parent and parent.media:
+                url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                         file[len(parent.media.mountdir)+1:])
+            else:
+                url = file
+            Item.__init__(self, parent, mmpython.parse(url))
         else:
-            url = file
-
-        Item.__init__(self, parent, mmpython.parse(url))
+            Item.__init__(self, parent)
+            
         self.filename   = file[:]
         self.url        = None
         if name:
