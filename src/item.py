@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/12/30 15:33:01  dischi
+# remove unneeded copy function, make id a function
+#
 # Revision 1.37  2003/12/29 22:31:10  dischi
 # do not delete empty strings as file
 #
@@ -190,33 +193,6 @@ class Item:
             
 
 
-    def copy(self, obj):
-        """
-        copy all known attributes from 'obj'
-        """
-        if not self.image:
-            self.image = obj.image
-        if not self.name:
-            self.name  = obj.name
-            
-        self.fxd_file     = obj.fxd_file
-        self.handle_type  = obj.handle_type
-        self.info         = obj.info
-        self.media        = obj.media
-
-        # copy additional attributes if the item has an url, which
-        # means it also has attributes like mimetype
-        if hasattr(obj, 'url'):
-            self.url          = obj.url
-            self.network_play = obj.network_play
-            self.id           = obj.id
-            self.media_id     = obj.media_id
-            self.mimetype     = obj.mimetype
-            self.filename     = obj.filename
-            self.dirname      = obj.dirname
-            self.files        = obj.files
-
-
     def set_url(self, url, info=True):
         """
         Set a new url to the item and adjust all attributes depending
@@ -276,7 +252,6 @@ class Item:
             else:
                 self.name = self.url
 
-        self.id   = self.url
         self.mode = self.url[:self.url.find('://')]
 
         if self.mode == 'file':
@@ -290,6 +265,16 @@ class Item:
             self.mimetype = self.url[:self.url.find('://')].lower()
 
 
+    def id(self):
+        """
+        Return a unique id of the item. This id should be the same when the
+        item is rebuild later with the same informations
+        """
+        if hasattr(self, 'url'):
+            return self.url
+        return self.name
+
+    
     def translation(self, application):
         """
         Loads the gettext translation for this item (and all it's children).

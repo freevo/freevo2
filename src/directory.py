@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/12/30 15:33:01  dischi
+# remove unneeded copy function, make id a function
+#
 # Revision 1.78  2003/12/29 22:07:14  dischi
 # renamed xml_file to fxd_file
 #
@@ -260,18 +263,6 @@ class DirItem(Playlist):
                 val = getattr(self, v)
             fxd.add(fxd.XMLnode('setvar', (('name', v.lower()), ('val', val))), node, 0)
 
-
-    def copy(self, obj):
-        """
-        Special copy value DirItem
-        """
-        Playlist.copy(self, obj)
-        if obj.type == 'dir':
-            self.dir           = obj.dir
-            self.display_type  = obj.display_type
-            self.info          = obj.info
-            self.skin_settings = obj.skin_settings
-            
 
     def getattr(self, attr):
         """
@@ -686,12 +677,11 @@ class DirItem(Playlist):
 
         # maybe change selected item
         if not selected in self.menu.choices:
-            if hasattr(selected, 'id'):
-                id = selected.id
-                for i in self.menu.choices:
-                    if hasattr(i, 'id') and i.id == selected.id:
-                        self.menu.selected = i
-                        break
+            id = selected.id()
+            for i in self.menu.choices:
+                if i.id() == selected.id():
+                    self.menu.selected = i
+                    break
                     
         # reload the menu
         if hasattr(self.menu,'skin_force_text_view'):
