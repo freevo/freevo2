@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/06/20 13:56:24  dischi
+# add self.minuteCheck right after scheduling
+#
 # Revision 1.41  2004/06/18 12:12:02  outlyer
 # Patch from Brian J.Murrel to compensate for timer drift. It will do nothing
 # if your system doesn't suffer from this problem, so it should be safe. Any
@@ -18,7 +21,8 @@
 # More event / main loop cleanup. rc.py has a changed interface now
 #
 # Revision 1.38  2004/04/18 14:39:19  mikeruelle
-# fix missing self, priorities still really don't do anything but at least it looks like its doing something.
+# fix missing self, priorities still really don't do anything but at
+# least it looks like its doing something.
 #
 # Revision 1.37  2004/04/18 08:23:44  dischi
 # fix unicode problem
@@ -39,141 +43,6 @@
 # which is what tv_imdb uses and is really acurate.  I added a date property
 # to TvProgram for this and updated findMatches in the record_client and
 # recordserver.
-#
-# Revision 1.32  2004/03/04 05:10:54  rshortt
-# Make it work with rc.py changes.
-#
-# Revision 1.31  2004/02/23 21:46:22  dischi
-# start some unicode fixes, still not working every time
-#
-# Revision 1.30  2004/02/11 04:20:46  outlyer
-# Yet another place where we aren't following the user's time format... fixed now.
-#
-# Revision 1.29  2004/02/05 02:33:00  outlyer
-# <sigh> Escape ALL the text that goes into the FXD file.
-#
-# Revision 1.28  2004/01/31 01:52:53  mikeruelle
-# at least be able to set another extension manually until we can do this more properly
-#
-# Revision 1.27  2004/01/14 02:28:22  outlyer
-# We do call videothumb in the recording plugins so this note isn't needed.
-#
-# Revision 1.26  2004/01/13 15:17:02  outlyer
-# Appending won't work in this case anyway, so skip the error message.
-#
-# Revision 1.25  2004/01/09 18:57:06  dischi
-# stop on normal exit
-#
-# Revision 1.24  2004/01/09 06:30:49  outlyer
-# Two fixes:
-#
-# o the 'str2XML' function is a method of the FxdImdb() class, so call it as
-#     part of the object
-# o Don't say "Image downloading failed" since an image url isn't always
-#     provided. If it actually is provided and fails, show the message.
-#
-# Revision 1.23  2004/01/09 05:09:12  outlyer
-# I know that the str2XML call is supposed to happen in fxdimdb, but I kept
-# running into this problem when trying to record a show with an '&' in the
-# title. Adding the call here seems to fix it.
-#
-# Revision 1.22  2004/01/09 02:07:05  rshortt
-# Marmalade name and title for favorites.  Thanks Matthieu Weber.
-#
-# Revision 1.21  2004/01/08 17:38:59  outlyer
-# Write an FXD file with some of the XMLTV info for recorded programs. I just
-# wrote this and it's fairly simple, but please make sure it works on your end.
-# I plan to remove the hardcoded stuff ASAP, but I wanted to get it out there
-# for people to try.
-#
-# Revision 1.20  2003/11/30 16:30:58  rshortt
-# Convert some tv variables to new format (TV_).
-#
-# Revision 1.19  2003/11/30 13:07:27  rshortt
-# Make the search function check the sub_title of the programs.
-#
-# Revision 1.18  2003/11/24 01:59:59  rshortt
-# Adding support for the padding of recordings with X minutes before and
-# after the show.  Thanks to Eirik Meland for the initial patch.
-#
-# Revision 1.17  2003/10/20 01:41:55  rshortt
-# Moving tv_util from src/tv/ to src/util/.
-#
-# Revision 1.16  2003/10/19 16:15:52  rshortt
-# Added OS_EVENT_KILL.  recordserver will now kill and wait.
-#
-# Revision 1.15  2003/10/19 14:19:44  rshortt
-# Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
-# can pick it up and wait on its own child.  Child processes from recordserver
-# now get signals and clean up properly.
-#
-# Revision 1.14  2003/10/19 12:46:30  rshortt
-# Calling popen from the main loop now but signals still aren't getting thgough.
-#
-# Revision 1.13  2003/10/18 21:33:33  rshortt
-# Subscribe to events and poll them from a callback method.
-#
-# Revision 1.12  2003/10/18 08:33:36  dischi
-# do not restart if the server crashed in 10 secs
-#
-# Revision 1.11  2003/10/15 12:49:53  rshortt
-# Patch from Eirik Meland that stops recording when you remove a recording
-# program from the recording schedule.  There exists a race condition where
-# removing a recording right before it starts recording the entry in the
-# schedule will go away but recording will start anyways.  We should figure
-# out a good way to eliminate this.
-#
-# A similar method should be created for the generic_record.py plugin.
-#
-# Revision 1.10  2003/10/13 12:49:46  rshortt
-# Fixed a bad return in findMatches when there was no search string.
-#
-# Revision 1.9  2003/09/18 00:36:06  mikeruelle
-# need to import config before any other freevo module
-#
-# Revision 1.8  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.7  2003/09/11 21:24:04  outlyer
-# Move most of the verbose logging into "DEBUG" since logs were growing at
-# a drastic rate ( > 250k per hour)
-#
-# Revision 1.6  2003/09/08 19:58:21  dischi
-# run servers in endless loop in case of a crash
-#
-# Revision 1.5  2003/09/06 15:12:53  rshortt
-# Now using plugin.init_special_plugin() to load the recording plugin.
-#
-# Revision 1.4  2003/09/05 20:27:18  rshortt
-# Changing the filename again for consistencies sake.
-#
-# Revision 1.1  2003/09/05 15:03:28  mikeruelle
-# welcome to your new home
-#
-# Revision 1.3  2003/09/05 02:48:12  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.2  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.1  2003/08/13 13:08:36  rshortt
-# Moving record_server.py into the main src directory to resolve some nasty
-# namespace issues that was preventing it from import needed modules, use
-# the plugin system, and in some cases find a way to create an osd singleton
-# and init the display (bad!).
-#
-# Revision 1.11  2003/08/11 18:07:09  rshortt
-# Use config.LOGDIR.
-#
-# Revision 1.10  2003/08/11 18:01:24  rshortt
-# Further integration of record_server.  Moved config items and plugin info
-# into freevo_config.py.  Also in freevo_config.py I moved FREEVO_CACHEDIR
-# higher up in the file so more things can use it.
-#
-# Revision 1.9  2003/07/13 18:08:52  rshortt
-# Change tv_util.get_chan_displayname() to accept channel_id instead of
-# a TvProgram object and also use config.TV_CHANNELS when available, which
-# is 99% of the time.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -223,14 +92,10 @@ from   util.videothumb import snapshot
 
 from event import *
 
-# We won't be needing LD_PRELOAD.
-os.environ['LD_PRELOAD'] = ''
-
 def _debug_(text):
     if config.DEBUG:
         log.debug(String(text))
         
-
 _debug_('PLUGIN_RECORD: %s' % config.plugin_record)
 
 appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
@@ -316,7 +181,9 @@ class RecordServer(xmlrpc.XMLRPC):
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.addProgram(prog, tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
-       
+
+        # check, maybe we need to start right now
+        self.minuteCheck()
         return (TRUE, 'recording scheduled')
     
 
@@ -460,7 +327,6 @@ class RecordServer(xmlrpc.XMLRPC):
                 # then end the loop, and figure out which has priority,
                 # remember to take into account the full length of the shows
                 # and how much they overlap, or chop one short
-
                 duration = int((prog.stop + config.TV_RECORD_PADDING ) - now - 10)
                 if duration < 10:
                     return FALSE
@@ -896,7 +762,7 @@ class RecordServer(xmlrpc.XMLRPC):
         from util.fxdimdb import FxdImdb, makeVideo
         fxd = FxdImdb()
 
-	(filebase, fileext) = os.path.splitext(rec_prog.filename)
+        (filebase, fileext) = os.path.splitext(rec_prog.filename)
         fxd.setFxdFile(filebase, overwrite = True)
 
         video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename))
@@ -915,17 +781,18 @@ class RecordServer(xmlrpc.XMLRPC):
         _debug_('top of the minute in %s seconds' % next_minute)
         reactor.callLater(next_minute, self.minuteCheck)
 
-
     def minuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
         if next_minute != 60:
             # Compensate for timer drift 
-            if DEBUG: log.debug('top of the minute in %s seconds' % next_minute)
+            if config.DEBUG:
+                log.debug('top of the minute in %s seconds' % next_minute)
             reactor.callLater(next_minute, self.minuteCheck)
         else:
             reactor.callLater(60, self.minuteCheck)
         rec_prog = self.checkToRecord()
         if rec_prog:
+            _debug_('start recording')
             self.record_app = plugin.getbyname('RECORD')
             self.record_app.Record(rec_prog)
             
