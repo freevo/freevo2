@@ -1346,3 +1346,4 @@ DIRECTORY_USE_STAT_FOR_CHANGES = True
 # ./mplayer_stderr.log
 MPLAYER_DEBUG = 0
 
+TIME_DEBUG = 0
