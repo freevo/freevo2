@@ -41,6 +41,7 @@ import plugin
 
 log = logging.getLogger('config')
 
+
 def add_uri(channel, uri):
     """
     Add a URI to the internal list where to find that channel.
@@ -110,11 +111,21 @@ def refresh():
         c.uri = []
         c.get_uri = get_uri
         c.player  = player
+
         if isinstance(c.access_id, (list, tuple)):
             for a_id in c.access_id:
                 add_uri(c, a_id)
         else:
             add_uri(c, c.access_id)
+
+        chan_display_opts = {
+            'id' : c.id,
+            'tunerid' : c.access_id,
+            'name' : c.name
+        }
+
+        c.title = config.TV_CHANNELS_DISPLAY_FORMAT % chan_display_opts
+
 
     # add all possible channels to the cards
     for card in config.TV_CARDS:

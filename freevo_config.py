@@ -1263,6 +1263,18 @@ FREQUENCY_TABLE = {
 
 TV_CHANNELS = []
 
+# If you would like to change the display format of your channels and prefer
+# not to list your entire TV_CHANNELS then you can apply rules using 
+# TV_CHANNELS_DISPLAY_FORMAT.  This defaults to the plain name of the channel
+# in order to not mess with TV_CHANNELS. 
+# Valid keywords are:
+#     %(id)s
+#     %(tunerid)s
+#     %(name)s
+# For example, if you prefer to see the channel number with the name you 
+# could use '%(tunerid)s %(name)s'.
+ 
+TV_CHANNELS_DISPLAY_FORMAT = '%(name)s'
 
 # Sometimes we can't control the contents of our XMLTV file and it may contain
 # channels we don't want.  Here you can specify a list of channel_id values
