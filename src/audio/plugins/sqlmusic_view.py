@@ -48,7 +48,6 @@ class PluginInterface(plugin.ItemPlugin):
         sql = 'SELECT md5, last_play,play_count,rating FROM music' + \
                ' WHERE path = \'%s\' and filename = \'%s\'' % (os.path.dirname(file), 
                os.path.basename(file))
-        print sql
         cursor.execute(sql)
         md5,last_play,play_count,rating = cursor.fetchone()
        
