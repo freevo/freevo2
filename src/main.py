@@ -10,7 +10,7 @@
 # It also contains the splashscreen and the skin chooser.
 #
 # First edition: Krister Lagerstrom <krister-freevo@kmlager.com>
-# Maintainer: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -50,13 +50,12 @@ except ImportError:
 # init notifier
 notifier.init( notifier.GENERIC )
     
-# i18n support
-
-# First load the xml module. It's not needed here but it will mess
-# up with the domain we set (set it from freevo 4Suite). By loading it
-# first, Freevo will override the 4Suite setting to freevo
-
 try:
+    # i18n support
+
+    # First load the xml module. It's not needed here but it will mess
+    # up with the domain we set (set it from freevo 4Suite). By loading it
+    # first, Freevo will override the 4Suite setting to freevo
     from xml.utils import qp_xml
     from xml.dom import minidom
     
@@ -66,8 +65,7 @@ try:
         import twisted
     except ImportError, e:
         print e
-    import Numeric
-    
+
     import config
     import system
 
@@ -81,6 +79,7 @@ try:
 
     if config.OSD_DISPLAY == 'SDL':
         import pygame
+        import Numeric
 
     if not config.CONF.lsdvd:
         print
@@ -119,16 +118,22 @@ except ImportError:
     print
     sys.exit(0)
 
+
 # freevo imports
 import eventhandler
+import childapp
 import gui
 import util
 import menu
+import plugin
 
 from item import Item
 from event import *
 from cleanup import shutdown
-from gui.areas import Area
+
+# load the fxditem to make sure it's the first in the
+# mimetypes list
+import fxditem
 
 
 class SkinSelectItem(Item):
@@ -169,7 +174,6 @@ class MainMenu(Item):
         """
         Setup the main menu and handle events (remote control, etc)
         """
-        import plugin
         menuw = menu.MenuWidget()
         items = []
         for p in plugin.get('mainmenu'):
@@ -229,19 +233,16 @@ class MainMenu(Item):
         
     
 
-class Splashscreen(Area):
+class Splashscreen(gui.Area):
     """
     A simple splash screen for osd startup
     """
-    def __init__(self, text):
-        Area.__init__(self, 'content')
-        self.pos          = 0
-        self.bar_border   = gui.theme_engine.Rectangle(color=(0,0,0), size=2)
-        self.bar_position = gui.theme_engine.Rectangle(bgcolor=(0,0,0,95))
-        self.text         = text
-        self.content      = []
-        self.bar          = None
-        self.engine       = gui.AreaHandler('splashscreen', ('screen', self))
+    def __init__(self, text, max_value):
+        gui.Area.__init__(self, 'content')
+        self.max_value = max_value
+        self.text      = text
+        self.bar       = None
+        self.engine    = gui.AreaHandler('splashscreen', ('screen', self))
         self.engine.show()
 
         
@@ -249,43 +250,35 @@ class Splashscreen(Area):
         """
         clear all content objects
         """
-        for c in self.content:
-            c.unparent()
-        self.content = []
-        if self.bar:
-            self.bar.unparent()
-            self.bar = None
+        self.bar.unparent()
+        self.text.unparent()
             
         
     def update(self):
         """
         update the splashscreen
         """
-        content   = self.calc_geometry(self.layout.content, copy_object=True)
+        if self.bar:
+            return
 
+        content = self.calc_geometry(self.layout.content, copy_object=True)
         x0, x1 = content.x, content.x + content.width
         y = content.y + content.font.font.height + content.spacing
 
-        if not self.content:
-            s = self.drawstring(self.text, content.font, content, height=-1,
-                                align_h='center')
-            b = self.drawbox(x0, y, x1-x0, 20, self.bar_border)
-            self.content.append(s)
-            self.content.append(b)
+        self.text = self.drawstring(self.text, content.font, content,
+                                    height=-1, align_h='center')
+        self.bar = gui.Progressbar((x0, y), (x1-x0, 20), 2, (0,0,0),
+                                   None, 0, None, (0,0,0,95), 0,
+                                   self.max_value)
+        self.layer.add_child(self.bar)
 
-        pos = 0
-        if self.pos:
-            pos = round(float((x1 - x0 - 4)) / (float(100) / self.pos))
-        if self.bar:
-            self.bar.unparent()
-        self.bar = self.drawbox(x0+2, y+2, pos, 16, self.bar_position)
-        
 
-    def progress(self, pos):
+    def progress(self):
         """
         set the progress position and refresh the screen
         """
-        self.pos = pos
+        if self.bar:
+            self.bar.tick()
         if self.engine:
             self.engine.draw(None)
 
@@ -314,33 +307,6 @@ def signal_handler(sig, frame):
 
 
 
-def tracefunc(frame, event, arg, _indent=[0]):
-    """
-    function to trace everything inside freevo for debugging
-    """
-    if event == 'call':
-        filename = frame.f_code.co_filename
-        funcname = frame.f_code.co_name
-        lineno = frame.f_code.co_firstlineno
-        if 'self' in frame.f_locals:
-            try:
-                classinst = frame.f_locals['self']
-                classname = repr(classinst).split()[0].split('(')[0][1:]
-                funcname = '%s.%s' % (classname, funcname)
-            except:
-                pass
-        here = '%s:%s:%s()' % (filename, lineno, funcname)
-        _indent[0] += 1
-        tracefd.write('%4s %s%s\n' % (_indent[0], ' ' * _indent[0], here))
-        tracefd.flush()
-    elif event == 'return':
-        _indent[0] -= 1
-
-    return tracefunc
-
-
-
-
 #
 # Freevo main function
 #
@@ -354,66 +320,24 @@ if len(sys.argv) >= 2:
         os.system('xset -dpms s off')
         config.START_FULLSCREEN_X = 1
 
-    # activate a trace function
-    if sys.argv[1] == '-trace':
-        tracefd = open(os.path.join(config.LOGDIR, 'trace.txt'), 'w')
-        sys.settrace(tracefunc)
-        config.DEBUG = 2
-
-    # create api doc for Freevo and move it to Docs/api
-    if sys.argv[1] == '-doc':
-        import pydoc
-        import re
-        for file in util.match_files_recursively('src/', ['py' ]):
-            # doesn't work for everything :-(
-            if file not in ( 'src/tv/record_server.py', ) and \
-                   file.find('src/www') == -1 and \
-                   file.find('src/helpers') == -1:
-                file = re.sub('/', '.', file)
-                try:
-                    pydoc.writedoc(file[4:-3])
-                except:
-                    pass
-        try:
-            os.mkdir('Docs/api')
-        except:
-            pass
-        for file in util.match_files('.', ['html', ]):
-            print 'moving %s' % file
-            os.rename(file, 'Docs/api/%s' % file)
-        print
-        print 'wrote api doc to \'Docs/api\''
-        shutdown(exit=True)
-
-
-
 try:
     # signal handler
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
-    # load the fxditem to make sure it's the first in the
-    # mimetypes list
-    import fxditem
-
-    # load all plugins
-    import plugin
-    import gui
-    
     # prepare the skin
     gui.get_theme().prepare()
 
     # Fire up splashscreen and load the plugins
-    splash = Splashscreen(_('Starting Freevo, please wait ...'))
+    splash = Splashscreen(_('Starting Freevo, please wait ...'),
+                          plugin.get_number()-1)
     plugin.init(splash.progress)
 
     # Fire up splashscreen and load the cache
     if config.MEDIAINFO_USE_MEMORY == 2:
         # delete previous splash screen object
         splash.destroy()
-        import util.mediainfo
-
-        splash = Splashscreen(_('Reading cache, please wait ...'))
+        splash = Splashscreen(_('Reading cache, please wait ...'), 1)
 
         cachefiles = []
         for type in ('video', 'audio', 'image', 'games'):
@@ -425,12 +349,11 @@ try:
                         cachefiles += [ item[1] ] + \
                                       util.get_subdirs_recursively(item[1])
 
-
         cachefiles = util.unique(cachefiles)
-
+        splash.bar.set_max_value(len(cachefiles))
+        
         for f in cachefiles:
-            splash.progress(int((float((cachefiles.index(f)+1)) / \
-                                 len(cachefiles)) * 100))
+            splash.progress()
             util.mediainfo.load_cache(f)
 
     # fade out the splash screen
@@ -450,14 +373,8 @@ try:
     splash.destroy()
     del splash
     
-    # Kick off the main menu loop
-    _debug_('Main loop starting...',2)
-
-    # FIXME
-    import eventhandler
+    # kick off the main menu loop
     notifier.addDispatcher( eventhandler.get_singleton().handle )
-
-    import childapp
     notifier.addDispatcher( childapp.watcher.step )
 
     # start main loop
@@ -466,7 +383,7 @@ try:
     
 except KeyboardInterrupt:
     print 'Shutdown by keyboard interrupt'
-    # Shutdown the application
+    # Shutdown Freevo
     shutdown()
 
 except SystemExit:
@@ -499,52 +416,5 @@ except:
         pass
     traceback.print_exc()
 
-    # Shutdown the application, but not the system even if that is
-    # enabled
+    # Shutdown freevo
     shutdown()
-
-
-# -----------------------------------------------------------------------------
-# $Log$
-# Revision 1.147  2004/10/06 19:24:00  dischi
-# switch from rc.py to pyNotifier
-#
-# Revision 1.146  2004/10/03 16:09:27  dischi
-# changes to a new header (proposal)
-#
-# Revision 1.145  2004/09/28 18:31:06  dischi
-# check system auto detect
-#
-# Revision 1.144  2004/09/07 18:56:12  dischi
-# internal colors are now lists, not int
-#
-# Revision 1.143  2004/09/02 00:12:46  rshortt
-# Only import pygame is config.OSD_DISPLAY is 'SDL'.
-#
-# Revision 1.142  2004/08/24 19:23:36  dischi
-# more theme updates and design cleanups
-#
-# Revision 1.141  2004/08/24 16:42:39  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.140  2004/08/23 20:37:52  dischi
-# fading support in splash screen
-#
-# Revision 1.139  2004/08/22 20:16:22  dischi
-# move splashscreen to new mevas based gui code
-#
-# Revision 1.138  2004/08/14 15:09:54  dischi
-# use new AreaHandler
-#
-# Revision 1.137  2004/08/05 17:37:55  dischi
-# remove a bad skin hack
-#
-# Revision 1.136  2004/08/01 10:57:59  dischi
-# show menu application on startup
-#
-# Revision 1.135  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-# -----------------------------------------------------------------------------
