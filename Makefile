@@ -35,6 +35,6 @@ clean:
 install: all
 	-mv /usr/local/freevo /usr/local/freevo_old_`date +%Y%m%d_%H%M%S`
 	-rm -rf /usr/local/freevo
-	mkdir /usr/local/freevo
-	mkdir /var/log/freevo
+	-mkdir /usr/local/freevo
+	-mkdir /var/log/freevo
 	cp -r * /usr/local/freevo
