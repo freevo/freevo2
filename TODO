@@ -42,6 +42,10 @@ o Add version info to freevo_config.py and refuse to start if the
 o Add rcs id to all files!
   o Use the new Docs/fileheader after it has been approved by all
     authors
+o Movie configuration
+  o turn subtitles on/off
+  o select audio/subtitle language
+  o chapter support for AVIs
 o Use btaudio for audio recording from the video card
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
 o clean up Docs/Notes
