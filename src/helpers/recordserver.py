@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/05/30 18:27:53  dischi
+# More event / main loop cleanup. rc.py has a changed interface now
+#
 # Revision 1.38  2004/04/18 14:39:19  mikeruelle
 # fix missing self, priorities still really don't do anything but at least it looks like its doing something.
 #
@@ -921,7 +924,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def handleEvents(self):
         print 'RECORDSERVER HANDLING EVENT'
 
-        event = rc_object.poll()
+        event = rc_object.get_event()
 
         if event:
             if event == OS_EVENT_POPEN2:

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.123  2004/05/30 18:27:53  dischi
+# More event / main loop cleanup. rc.py has a changed interface now
+#
 # Revision 1.122  2004/05/29 19:06:26  dischi
 # move some code from main to rc, create main class
 #
@@ -115,9 +118,6 @@ from item import Item
 from event import *
 from plugins.shutdown import shutdown
 
-
-# Create the remote control object
-rc_object = rc.get_singleton()
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -280,8 +280,8 @@ class MainTread:
             event.handler(event=event)
 
         # Send events to either the current app or the menu handler
-        elif rc_object.app:
-            if not rc_object.app(event):
+        elif rc.app():
+            if not rc.app()(event):
                 for p in self.eventhandler_plugins:
                     if p.eventhandler(event=event):
                         break
@@ -325,11 +325,7 @@ class MainTread:
         the real main loop
         """
         while 1:
-            event = rc_object.poll()
-            if event:
-                self.eventhandler(event)
-            else:
-                osd.sleep(0.01)
+            self.eventhandler(rc.get_event(True))
 
 
 

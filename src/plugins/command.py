@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/05/30 18:28:15  dischi
+# More event / main loop cleanup. rc.py has a changed interface now
+#
 # Revision 1.10  2004/02/18 23:52:20  mikeruelle
 # reflect dischi's changes
 #
@@ -71,6 +74,7 @@ import util
 import childapp
 import osd
 import fxditem
+import rc
 
 from event import *
 from item import Item
@@ -208,7 +212,11 @@ class CommandOptions(PopupBox):
             return self.parent.eventhandler(event)
                                                                                 
 
+class CommandChild(childapp.ChildApp2):
+    def poll(self):
+        pass
 
+    
 class CommandItem(Item):
     """
     This is the class that actually runs the commands. Eventually
@@ -248,11 +256,11 @@ class CommandItem(Item):
             pop = PopupBox(text=popup_string)
             pop.show()
 
-	workapp = childapp.ChildApp2(self.cmd, 'command', 1, self.stoposd)
+	workapp = CommandChild(self.cmd, 'command', 1, self.stoposd)
 	while workapp.isAlive():
-	    for child in childapp.running_children:
-	        if child != workapp:
-	            child.poll()
+            # make sure all callbacks in rc are running
+            rc.poll()
+            # wait some time
 	    time.sleep(0.5)
 
         if self.stoposd:

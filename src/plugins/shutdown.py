@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/05/30 18:28:15  dischi
+# More event / main loop cleanup. rc.py has a changed interface now
+#
 # Revision 1.3  2004/03/14 11:50:02  dischi
 # added restart
 #
@@ -64,7 +67,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     """
     import osd
     import plugin
-    import childapp
+    import rc
     import util.mediainfo
     
     osd = osd.get_singleton()
@@ -94,7 +97,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
             time.sleep(1)
 
         plugin.shutdown()
-        childapp.shutdown()
+        rc.shutdown()
         osd.shutdown()
 
         if argshutdown and not argrestart:
@@ -114,7 +117,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     plugin.shutdown()
 
     # Shutdown all children still running
-    childapp.shutdown()
+    rc.shutdown()
 
     # SDL must be shutdown to restore video modes etc
     osd.clearscreen(color=osd.COL_BLACK)

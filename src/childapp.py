@@ -9,21 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/05/30 18:27:53  dischi
+# More event / main loop cleanup. rc.py has a changed interface now
+#
 # Revision 1.53  2004/05/29 19:06:46  dischi
 # register poll function to rc
 #
 # Revision 1.52  2004/05/09 14:16:16  dischi
 # let the child stdout handled by main
-#
-# Revision 1.51  2004/03/14 11:43:08  dischi
-# prevent crash
-#
-# Revision 1.50  2004/02/19 04:43:47  gsbarbieri
-# Fix string problems and add a work around to avoid isAlive() being called
-# during __init__()
-#
-# Revision 1.49  2004/01/12 19:52:46  dischi
-# store return value for ChildApp2
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +46,6 @@ import os
 import util.popen3
 import threading, thread
 import signal
-import traceback
 import copy
 
 import config
@@ -62,37 +54,8 @@ import rc
 import util
 
 from event import *
-import rc
-
-# list of all ChildApp (internal use)
-__all_childapps__ = []
-
-# list of all running ChildApp2 children
-running_children = []
 
 
-def shutdown():
-    """
-    shutdown all running childapps
-    """
-    global __all_childapps__
-    global running_children
-    
-    if not len(__all_childapps__):
-        return
-        
-    print '%d child(s) still running, terminate them' % len(__all_childapps__)
-
-    while running_children:
-        print 'shutting down %s' % running_children[0].binary
-        running_children[0].stop()
-    while __all_childapps__:
-        print 'shutting down %s' % __all_childapps__[0].binary
-        __all_childapps__[0].kill()
-
-
-
-        
 class ChildApp:
     """
     Base class for started child processes
@@ -100,14 +63,7 @@ class ChildApp:
     ready = False
 
     def __init__(self, app, debugname=None, doeslogging=0):
-        global __all_childapps__
-        __all_childapps__.append(self)
-
         self.lock = thread.allocate_lock()
-
-        if config.DEBUG > 1:
-            _debug_('starting new child: %s', app)
-            traceback.print_stack()
 
         prio = 0
 
@@ -225,14 +181,6 @@ class ChildApp:
 
         
     def kill(self, signal=15):
-        global __all_childapps__
-
-        if self in __all_childapps__:
-            __all_childapps__.remove(self)
-            
-        if config.DEBUG > 1:
-            _debug_('killing my child')
-            traceback.print_stack()
 
         # killed already
         if hasattr(self,'child'):
@@ -373,7 +321,7 @@ class Read_Thread(threading.Thread):
                     # Combine saved data and first line, send to app
                     if self.logger:
                         self.logger.write(saved + lines[0]+'\n')
-                    rc.callback(self.callback, saved + lines[0])
+                    rc.register(self.callback, saved + lines[0])
                     saved = ''
 
                     # There's one or more lines + possibly a partial line
@@ -385,13 +333,13 @@ class Read_Thread(threading.Thread):
                         for line in lines[1:-1]:
                             if self.logger:
                                 self.logger.write(line+'\n')
-                            rc.callback(self.callback, line)
+                            rc.register(self.callback, line)
                     else:
                         # Send all lines to the app
                         for line in lines[1:]:
                             if self.logger:
                                 self.logger.write(line+'\n')
-                            rc.callback(self.callback, line)
+                            rc.register(self.callback, line)
                         
 
 
@@ -401,8 +349,6 @@ class ChildApp2(ChildApp):
     Enhanced version of ChildApp handling most playing stuff
     """
     def __init__(self, app, debugname=None, doeslogging=0, stop_osd=2):
-        global running_children
-        running_children.append(self)
         rc.register(self)
         
         self.is_video = 0                       # Be more explicit
@@ -452,12 +398,6 @@ class ChildApp2(ChildApp):
         """
         stop the child
         """
-        try:
-            global running_children
-            running_children.remove(self)
-        except ValueError:
-            return
-        
         rc.unregister(self)
 
         if cmd and self.isAlive():

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/05/30 18:27:53  dischi
+# More event / main loop cleanup. rc.py has a changed interface now
+#
 # Revision 1.33  2004/05/29 19:06:26  dischi
 # move some code from main to rc, create main class
 #
@@ -17,22 +20,6 @@
 #
 # Revision 1.31  2004/05/09 14:16:16  dischi
 # let the child stdout handled by main
-#
-# Revision 1.30  2004/02/28 17:30:59  dischi
-# fix crash for helper
-#
-# Revision 1.29  2004/02/27 20:12:16  dischi
-# reworked rc.py to make several classes
-#
-# Revision 1.28  2003/12/14 17:24:59  dischi
-# cleanup
-#
-# Revision 1.27  2003/11/02 10:50:15  dischi
-# better error handling
-#
-# Revision 1.26  2003/10/26 17:04:26  dischi
-# Patch from Soenke Schwardt to use the time to fix repeat problems with
-# some remote receiver.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,13 +46,16 @@
 import os
 import copy
 import time
+import thread
+import types
 
 import config
-import util
+
 from event import Event, BUTTON
 
 PYLIRC     = False
 _singleton = None
+
 
 def get_singleton(**kwargs):
     """
@@ -75,7 +65,7 @@ def get_singleton(**kwargs):
 
     # One-time init
     if _singleton == None:
-        _singleton = util.SynchronizedObject(RemoteControl(**kwargs))
+        _singleton = EventHandler(**kwargs)
         
     return _singleton
 
@@ -106,25 +96,43 @@ def set_context(context):
     """
     set the context (map with button->event transformation
     """
-    get_singleton().set_context(context)
+    return get_singleton().set_context(context)
 
 
-def callback(function, *arg):
-    get_singleton().one_time_callbacks.append((function, arg))
-
-
-def register(object):
+def register(object, *arg):
     """
     register an object to the main loop
     """
-    get_singleton().register(object)
+    return get_singleton().register(object, *arg)
 
 
 def unregister(object):
     """
     unregister an object from the main loop
     """
-    get_singleton().unregister(object)
+    return get_singleton().unregister(object)
+
+
+def shutdown():
+    """
+    shutdown the rc
+    """
+    return get_singleton().shutdown()
+
+
+def poll():
+    """
+    poll all registered callbacks
+    """
+    return get_singleton().poll()
+
+
+def get_event(blocking=False):
+    """
+    get next event. If blocking is True, this function will block until
+    there is a new event (also call all registered callbacks while waiting)
+    """
+    return get_singleton().get_event(blocking)
 
 
 # --------------------------------------------------------------------------------
@@ -294,7 +302,7 @@ class Network:
 
 # --------------------------------------------------------------------------------
     
-class RemoteControl:
+class EventHandler:
     """
     Class to transform input keys or buttons into events. This class
     also handles the complete event queue (post_event)
@@ -317,37 +325,57 @@ class RemoteControl:
                config.REMOTE_CONTROL_PORT:
             self.inputs.append(Network())
 
-        self.app                      = None
-        self.context                  = 'menu'
-        self.queue                    = []
-        self.event_callback           = None
-        self.one_time_callbacks       = []
-        self.poll_objects             = []
+        self.app                = None
+        self.context            = 'menu'
+        self.queue              = []
+        self.event_callback     = None
+        self.one_time_callbacks = []
+        self.poll_objects       = []
+        # lock all critical parts
+        self.lock               = thread.allocate_lock()
+
 
     def set_app(self, app, context):
+        """
+        set default eventhandler and context
+        """
         self.app     = app
         self.context = context
 
 
     def get_app(self):
+        """
+        get current eventhandler (app)
+        """
         return self.app
 
 
     def set_context(self, context):
+        """
+        set context for key mapping
+        """
         self.context = context
         
 
     def post_event(self, e):
+        """
+        add event to the queue
+        """
+        self.lock.acquire()
         if not isinstance(e, Event):
             self.queue += [ Event(e, context=self.context) ]
         else:
             self.queue += [ e ]
+        self.lock.release()
 
         if self.event_callback:
             self.event_callback()
 
 
     def key_event_mapper(self, key):
+        """
+        map key to event based on current context
+        """
         if not key:
             return None
 
@@ -365,34 +393,51 @@ class RemoteControl:
         return Event(BUTTON, arg=key)
 
 
-    def register(self, object):
+    def register(self, object, *arg):
         """
         register an object to the main loop
         """
-        if not object in self.poll_objects:
+        self.lock.acquire()
+        if type(object) in [ types.FunctionType, types.MethodType ]:
+            self.one_time_callbacks.append((object, arg))
+        elif not object in self.poll_objects:
             self.poll_objects.append(object)
+        self.lock.release()
 
         
     def unregister(self, object):
         """
         unregister an object from the main loop
         """
+        self.lock.acquire()
         if object in self.poll_objects:
             self.poll_objects.remove(object)
+        self.lock.release()
 
         
+    def shutdown(self):
+        """
+        shutdown the rc
+        """
+        for p in copy.copy(self.poll_objects):
+            if hasattr(p, 'stop'):
+                p.stop()
+
+
     def poll(self):
         """
-        main loop
+        poll all registered functions
         """
         # run all registered callbacks
         while len(self.one_time_callbacks) > 0:
+            self.lock.acquire()
             callback, arg = self.one_time_callbacks.pop(0)
+            self.lock.release()
             callback(*arg)
 
         # run all registered objects having a poll() function
         # using poll_counter and poll_interval (if given)
-        for p in self.poll_objects:
+        for p in copy.copy(self.poll_objects):
             if hasattr(p, 'poll_counter'):
                 if not (self.app and p.poll_menu_only):
                     p.poll_counter += 1
@@ -402,10 +447,30 @@ class RemoteControl:
             else:
                 p.poll()
 
+
+
+    def get_event(self, blocking=False):
+        """
+        get next event. If blocking is True, this function will block until
+        there is a new event (also call all registered callbacks while waiting)
+        """
+        if blocking:
+            while 1:
+                # get non blocking event
+                event = self.get_event(False)
+                if event:
+                    return event
+                # poll everything
+                self.poll()
+                # wait some time
+                time.sleep(0.01)
+
         # search for events in the queue
         if len(self.queue):
+            self.lock.acquire()
             ret = self.queue[0]
             del self.queue[0]
+            self.lock.release()
             return ret
 
         # search all input objects for new events
@@ -417,8 +482,11 @@ class RemoteControl:
         return None
 
 
+
     def subscribe(self, event_callback=None):
-        # Only one thing can call poll() so we only handle one subscriber.
+        """
+        subscribe to 'post_event'
+        """
         if not event_callback:
             return
 
