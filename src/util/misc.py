@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/01/11 17:04:15  outlyer
+# Until \t is fixed, this '-' at least provides some indentation to make it
+# easier to read the list. (I used this in the screenshot I took last night)
+#
 # Revision 1.17  2004/01/11 10:56:52  dischi
 # Fixes in comingup:
 # o do not crash when the recordserver is down
@@ -428,7 +432,7 @@ def comingup(items=None):
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + " " + str(m.title) + str(sub_title) + " at " + \
+            result = result + "- " + str(m.title) + str(sub_title) + " at " + \
                 str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
 
     if len(tomorrow) > 0:
@@ -437,7 +441,7 @@ def comingup(items=None):
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + " " + str(m.title) + str(sub_title) + " at " + \
+            result = result + "- " + str(m.title) + str(sub_title) + " at " + \
                 str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
            
     if len(later) > 0:
@@ -445,7 +449,7 @@ def comingup(items=None):
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + " " + str(m.title) + str(sub_title) + " at " + \
+            result = result + "- " + str(m.title) + str(sub_title) + " at " + \
                 str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
 
     if not result:
