@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/05/31 10:42:50  dischi
+# change poll intervall
+#
 # Revision 1.6  2004/02/28 11:28:56  dischi
 # add hotplugging
 #
@@ -73,7 +76,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.devices = util.list_usb_devices()
-        self.poll_interval = 10
+        self.poll_interval = 100
 
 
     def config(self):
