@@ -1,3 +1,5 @@
+__all__ = [ 'CanvasObject' ]
+
 import types, time, math
 from util import *
 

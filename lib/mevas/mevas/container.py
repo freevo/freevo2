@@ -1,3 +1,5 @@
+__all__ = [ 'CanvasContainer' ]
+
 import types, time, math, random
 
 from util import *
