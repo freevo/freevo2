@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/10/12 11:05:48  dischi
+# respect config.CONTROL_ALL_AUDIO
+#
 # Revision 1.5  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -200,20 +203,25 @@ class PluginInterface(plugin.DaemonPlugin):
         self._setVolume( ossaudiodev.SOUND_MIXER_PCM, self.pcmVolume )
     
     def setLineinVolume(self, volume):
-        self.lineinVolume = volume
-        self._setVolume(ossaudiodev.SOUND_MIXER_LINE, volume)
+        if config.CONTROL_ALL_AUDIO:
+            self.lineinVolume = volume
+            self._setVolume(ossaudiodev.SOUND_MIXER_LINE, volume)
 
     def getLineinVolume(self):
         return self.lineinVolume
        
     def setMicVolume(self, volume):
-        self.micVolume = volume
-        self._setVolume(ossaudiodev.SOUND_MIXER_MIC, volume)
+        if config.CONTROL_ALL_AUDIO:
+            self.micVolume = volume
+            self._setVolume(ossaudiodev.SOUND_MIXER_MIC, volume)
 
     def setIgainVolume(self, volume):
-        if volume > 100: volume = 100 
-        elif volume < 0: volume = 0
-        self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
+        if config.CONTROL_ALL_AUDIO:
+            if volume > 100:
+                volume = 100 
+            elif volume < 0:
+                volume = 0
+            self._setVolume(ossaudiodev.SOUND_MIXER_IGAIN, volume)
 
     def getIgainVolume(self):
         return self.igainVolume

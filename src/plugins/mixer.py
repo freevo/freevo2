@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/12 11:05:48  dischi
+# respect config.CONTROL_ALL_AUDIO
+#
 # Revision 1.8  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -199,22 +202,27 @@ class PluginInterface(plugin.DaemonPlugin):
         self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
     
     def setLineinVolume(self, volume):
-        self.lineinVolume = volume
-        self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
+        if config.CONTROL_ALL_AUDIO:
+            self.lineinVolume = volume
+            self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
 
     def getLineinVolume(self):
         return self.lineinVolume
        
     def setMicVolume(self, volume):
-        self.micVolume = volume
-        self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
+        if config.CONTROL_ALL_AUDIO:
+            self.micVolume = volume
+            self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
 
     def setIgainVolume(self, volume):
         """For Igain (input from TV etc) on emu10k cards"""
-        if volume > 100: volume = 100 
-        elif volume < 0: volume = 0
-        self.igainVolume = volume
-        os.system('aumix -i%s > /dev/null 2>&1 &' % volume)
+        if config.CONTROL_ALL_AUDIO:
+            if volume > 100:
+                volume = 100 
+            elif volume < 0:
+                volume = 0
+            self.igainVolume = volume
+            os.system('aumix -i%s > /dev/null 2>&1 &' % volume)
 
     def getIgainVolume(self):
         return self.igainVolume
