@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/07/18 19:46:54  dischi
+# better error handling
+#
 # Revision 1.53  2003/07/12 10:05:04  dischi
 # Load skin singleton only when needed and make events global
 #
@@ -132,7 +135,12 @@ class Menu:
 
 
     def delete_item(self, item):
-        pos = self.choices.index(item)
+        try:
+            pos = self.choices.index(item)
+        except ValueError:
+            # item not in list
+            return
+        
         self.choices.remove(item)
 
         if self.selected == item:
