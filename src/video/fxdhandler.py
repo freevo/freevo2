@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/14 12:59:26  dischi
+# make sure url is a string
+#
 # Revision 1.17  2004/02/08 05:33:30  outlyer
 # Removed some debug print.
 #
@@ -83,7 +86,7 @@ def parse_movie(fxd, node):
         """
         parse a subitem from <video>
         """
-        filename   = fxd.gettext(node)
+        filename   = String(fxd.gettext(node))
         media_id   = fxd.getattr(node, 'media-id')
         mode       = node.name
         id         = fxd.getattr(node, 'id')
@@ -101,13 +104,12 @@ def parse_movie(fxd, node):
                 files.append(filename)
         if mode == 'url':
             return id, filename, media_id, options, player, playlist
-        return id, '%s://%s' % (mode, filename), media_id, options, player, playlist
+        return id, String('%s://%s' % (mode, filename)), media_id, options, player, playlist
     
 
     item = VideoItem('', fxd.getattr(None, 'parent', None), parse=False)
 
     dirname  = os.path.dirname(fxd.filename)
-
     image      = ''
     title      = fxd.getattr(node, 'title')
     item.name  = title
