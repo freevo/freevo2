@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/15 19:24:24  dischi
+# smaller width for Vera font
+#
 # Revision 1.25  2003/07/02 20:10:28  dischi
 # added to mmpython support, removed old stuff
 #
@@ -393,9 +396,9 @@ class ImageViewer(GUIObject):
 	# Now sort the text into lines of length line_length
         line = 0
 	if config.OVERSCAN_X:
-	    line_length = 55
+	    line_length = 35
 	else:
-	    line_length = 80
+	    line_length = 60
         prt_line = ['']
 
         for textstr in osdstring:
