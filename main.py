@@ -18,6 +18,9 @@ import util
 # The menu widget class
 import menu
 
+# The skin class
+import skin
+
 # The mixer class, controls the volumes for playback and recording
 import mixer
 
@@ -58,6 +61,9 @@ rc = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
+# Create the skin object
+skin = skin.get_singleton()
+
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
 
@@ -89,7 +95,7 @@ def getcmd():
             else:
                 break
 
-        # Handle volume control
+        # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
             mixer.incMainVolume()
         elif event == rc.VOLDOWN:

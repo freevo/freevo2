@@ -23,6 +23,9 @@ import childapp
 # The menu widget class
 import menu
 
+# The skin class
+import skin
+
 # The OSD class, used to communicate with the OSD daemon
 import osd
 
@@ -46,9 +49,14 @@ FALSE = 0
 # Create the OSD object
 osd = osd.get_singleton()
 
+# Create the skin object
+skin = skin.get_singleton()
+
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
 
+# Info about currently playing song
+mp3info = None
 
 # Module variable that contains an initialized MPG123() object
 _singleton = None
@@ -63,15 +71,30 @@ def get_singleton():
     return _singleton
 
 
+class MP3Info:
+
+    def __init__(self):
+        self.filename = ''
+        self.id3 = None
+        self.length = 0
+        self.elapsed = 0
+        self.remain = 0
+        self.done = 0.0
+        self.image = ''
+    
+
 class MPG123:
 
     def __init__(self):
         self.thread = MPG123_Thread()
         self.thread.start()
-
+        
 
     def play(self, filename, playlist, repeat=0):
 
+        global mp3info
+        mp3info = MP3Info()
+        
         # Repeat playlist setting
         self.repeat = repeat
         
@@ -84,37 +107,27 @@ class MPG123:
             time.sleep(2.0)
             menuwidget.refresh()
         else:
-            osd.clearscreen()
-            osd.drawstring('mpg123 "%s"' % filename, 30, 490)
-            self.thread.mode = 'play'
-            self.thread.filename = filename
-            self.thread.mode_flag.set()
-            rc.app = self.eventhandler
-
-            id = ID3(filename)
 
 	    # Get cover.png from current directory
 	    cover_logo = os.path.dirname(filename)
 	    cover_logo += '/cover.png'
-	    # Check size to adjust placemen
-	    (w,h) = util.pngsize(cover_logo)
-	    # Calculate best placement
-	    logox = int(osd.width) - int(w) - 55
+
 	    # Only draw the cover if the file exists. We'll
 	    # use the standard imghdr function to check if
 	    # it's a real png, and not a lying one :)
 	    if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
-	    	# Draw border for image
-		osd.drawbox(int(logox),80,(int(logox) + int(w)),80 + int(h),width=6,color=0x000000)
-	    	osd.drawbitmap(cover_logo,logox,80)
+                mp3info.image = cover_logo
+                
+            mp3info.filename = filename
+            mp3info.id3 = ID3(filename)
+            if mp3info.id3.track == None:
+                mp3info.id3.track = ''    # Looks better
+            skin.DrawMP3(mp3info)
 
-            osd.drawstring('Title: %s' % id.title, 30, 80)
-            osd.drawstring('Artist: %s' % id.artist, 30, 110)
-            osd.drawstring('Album: %s' % id.album, 30, 140)
-            osd.drawstring('Year: %s' % id.year, 30, 170)
-	    osd.drawstring('Track: %s' % id.track, 30, 200)
-
-        osd.update()
+            self.thread.mode = 'play'
+            self.thread.filename = filename
+            self.thread.mode_flag.set()
+            rc.app = self.eventhandler
         
         
     def stop(self):
@@ -216,9 +229,9 @@ class MPG123_Thread(threading.Thread):
 #
 lastupdate = 0.0
 def mpg123_eof(out):
+    global lastupdate, mp3info
+    
     last_line = out
-
-    #print 'Got last line (%d, %d) = "%s"' % (eol1, eol2, last_line)
 
     if last_line == '@P 0':
         retval = 1
@@ -227,35 +240,20 @@ def mpg123_eof(out):
         elapsed = elems[3]
         remain = elems[4]
         total = float(elapsed) + float(remain)
-        done = int(round((float(elapsed) / total) * 1000))
-        global lastupdate
+        done = round((float(elapsed) / total) * 100.0)
         
         if time.time() > (lastupdate + 0.5):
+
             lastupdate = time.time()
             el = int(round((float(elapsed))))
-	    el_min = int(round(el/60))
-	    el_sec = int(round(el%60))
             rem = int(round((float(remain))))
-	    rem_min = int(round(rem/60))
-	    rem_sec = int(round(rem%60))
 
-            # Clear the background
-            osd.drawbox(3, 230, 300, 355, width = -1,
-                        color = osd.default_bg_color)
-            osd.drawstring('Elapsed: %s:%02d   ' % (el_min,el_sec), 30, 250,
-                           osd.default_fg_color)
-            osd.drawstring('Remain: %s:%02d   ' % (rem_min,rem_sec), 30, 290,
-                           osd.default_fg_color)
-            osd.drawstring('Done: %5.1f%%   ' % (done / 10.0), 30, 330,
-                           osd.default_fg_color)
-
-            # Draw the progress bar
-            osd.drawbox(33, 370, 635, 390, width = 3)
-            osd.drawbox(34, 371, 634, 389, width = -1, color = osd.default_bg_color)
-            pixels = int(round((done / 10.0) * 6.0))
-            osd.drawbox(34, 371, 34 + pixels, 389, width = -1, color = 0x038D11)
+            mp3info.elapsed = el
+            mp3info.remain = rem
+            mp3info.done = done
             
-            osd.update()
+            skin.DrawMP3(mp3info)
+
         retval = 0
     else:
         retval = 0

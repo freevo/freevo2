@@ -73,27 +73,22 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
 			 '/*.[rR][mM]' ]
 
 #
+# Skin dir. It must contain a file 'freevo_skin.py' that contains the
+# actual skin code.
+#
+OSD_SKIN_DIR = 'skins/test1'
+
+# OSD default font. It is only used for debug/error stuff, not regular
+# skinning.
+OSD_DEFAULT_FONTNAME = 'skins/fonts/Cultstup.ttf'
+OSD_DEFAULT_FONTSIZE = 14
+
+#
 # OSD server, standalone application in osd_server/
 #
 OSD_HOST = '127.0.0.1'      # The remote host
 OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
                             # to be changed manually!
-
-# OSD background bitmap. Must be PNG.
-# Format: (filename, x, y)  x=y=-1 means integer tiling
-
-#OSD_BGBITMAP = ('skins/test1/mainbg.png', 128, 48)
-OSD_BGBITMAP = ('skins/test1/mainbg2.png', -1, -1)
-
-# OSD fonts
-OSD_FONTNAME = 'skins/fonts/Cultstup.ttf'
-OSD_FONTSIZE = 14
-OSD_FONTNAME_HDR = 'skins/fonts/Cultstup.ttf'
-OSD_FONTSIZE_HDR = 22
-OSD_FONTNAME_ITEMS = 'skins/fonts/SF Arborcrest Medium.ttf'
-OSD_FONTSIZE_ITEMS = 15
-OSD_FONTNAME_BTNS = 'skins/fonts/RUBTTS__.TTF'
-OSD_FONTSIZE_BTNS = 18
 
 #
 # Remote control daemon. The server is in the Freevo main application,
@@ -122,7 +117,7 @@ SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 #
 # Watching TV
 #
-# You must change this to fit your local conditions! Check out the
+# XXX You must change this to fit your local conditions! Check out the
 # file matrox_g400/frequencies.[ch] for possible choices.
 #
 TV_SETTINGS = 'ntsc television us-cable'
@@ -153,7 +148,6 @@ DIR_MOVIES = [ ('Test Movies', './testfiles/Movies') ]
 # This is where recorded video is written.
 #
 DIR_RECORD = './testfiles/Movies/Recorded'
-
 
 
 #

@@ -126,8 +126,8 @@ class OSD:
         if bgcolor == None:
             bgcolor = 0xff000000   # Transparent background
         if font == None:
-            font = config.OSD_FONTNAME
-            ptsize = config.OSD_FONTSIZE
+            font = config.OSD_DEFAULT_FONTNAME
+            ptsize = config.OSD_DEFAULT_FONTSIZE
         # Args: fontfilename;pointsize;string;x;y;fgcol
         args1 = font + ';' + str(ptsize) + ';' + string + ';'
         args2 = str(x) + ';' + str(y) + ';' + str(fgcolor)
