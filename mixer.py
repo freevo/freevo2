@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/08/11 09:12:57  krister
+# Added a check that the mixer device could be opened, continue anyway if it cannot.
+#
 # Revision 1.6  2002/08/03 20:18:15  krister
 # Changed popen() to system() since the app can hang if there it tries to use stdin/stdout. Changed parenthesis whitespace. XXX the external app aumix is hardcoded, and it does not exist on SuSE!
 #
@@ -75,7 +78,13 @@ class Mixer:
     SOUND_MASK_LINE = 64
     
     def __init__(self):
-        self.mixfd        = open(config.DEV_MIXER, 'r')   
+        try:
+            self.mixfd        = open(config.DEV_MIXER, 'r')
+        except IOError:
+            print 'Couldnt open mixer %s!' % config.DEV_MIXER
+            self.mixfd = None
+            return
+        
         self.mainVolume   = 0
         self.pcmVolume    = 0
         self.lineinVolume = 0
@@ -83,32 +92,30 @@ class Mixer:
         self.igainVolume  = 0 # XXX Used on SB Live
         self.ogainVolume  = 0 # XXX Ditto
         
-        self.setMainVolume( self.mainVolume )
-        self.setPcmVolume( self.pcmVolume )
-        self.setLineinVolume( self.lineinVolume )
-        self.setMicVolume( self.micVolume )
+        self.setMainVolume(self.mainVolume)
+        self.setPcmVolume(self.pcmVolume)
+        self.setLineinVolume(self.lineinVolume)
+        self.setMicVolume(self.micVolume)
 
-        data = struct.pack( 'L', self.SOUND_MASK_LINE )
-        fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
-        
+        if self.mixfd:
+            data = struct.pack( 'L', self.SOUND_MASK_LINE )
+            fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
         
     def _setVolume(self, device, volume):
-        if DEBUG: print 'Volume = %d' % volume
-        if volume < 0: volume = 0
-        if volume > 100: volume = 100
-        vol = (volume << 8) | (volume)
-        data = struct.pack('L', vol)
-        fcntl.ioctl(self.mixfd.fileno(), device, data)
+        if self.mixfd:
+            if DEBUG: print 'Volume = %d' % volume
+            if volume < 0: volume = 0
+            if volume > 100: volume = 100
+            vol = (volume << 8) | (volume)
+            data = struct.pack('L', vol)
+            fcntl.ioctl(self.mixfd.fileno(), device, data)
 
-        
     def getMainVolume(self):
         return(self.mainVolume)
         
-
     def setMainVolume(self, volume):
         self.mainVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
-
         
     def incMainVolume(self):
         self.mainVolume += 5
