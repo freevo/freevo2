@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/17 06:03:58  krister
+# Disable CDDB is the runtime is used, there's some problem with that right now.
+#
 # Revision 1.14  2003/02/17 03:27:10  outlyer
 # Added Thomas' CDDB support patch. I don't have a CD-rom drive in my machine,
 # so I can't verify it works; code looks good though.
@@ -99,11 +102,14 @@ import copy
 from audio.audiodiskitem import AudioDiskItem
 
 # CDDB Stuff
-try:
-    import DiscID, CDDB
-except:
-    print "CDDB not installed."
-    pass
+# XXX CDDB does not work with the runtime, the network stuff makes it segfault!
+# Trying to figure out why. /Krister
+if not os.path.isfile('./runtime/dll/freevo_loader'):
+    try:
+        import DiscID, CDDB
+    except:
+        print "CDDB not installed."
+        pass
 
 from video import xml_parser, videoitem
 from mediamenu import DirItem

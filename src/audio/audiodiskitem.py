@@ -47,12 +47,15 @@ import games.interface
 # XML support
 from xml.utils import qp_xml
 
-try:
-    import CDDB, DiscID
-except:
-    print 'CDDB not installed'
-    pass
-    
+# CDDB Stuff
+# XXX CDDB does not work with the runtime, the network stuff makes it segfault!
+# Trying to figure out why. /Krister
+if not os.path.isfile('./runtime/dll/freevo_loader'):
+    try:
+        import DiscID, CDDB
+    except:
+        print "CDDB not installed."
+        pass
 
             
 class AudioDiskItem(Playlist):
