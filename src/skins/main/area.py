@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/01 17:03:57  dischi
+# speedup
+#
 # Revision 1.27  2004/01/17 12:35:59  dischi
 # make eval saver
 #
@@ -355,18 +358,14 @@ class Skin_Area:
         for i in menu.choices:
             if i.image:
                 menu.skin_default_no_images = True
-            if i.description:
+            if i['description'] or i.type:
+                # have have a description if description is an attribute
+                # or when the item has a type (special skin handling here)
                 menu.skin_default_has_description = True
-            try:
-                if i.info['description']:
-                    menu.skin_default_has_description = True
-            except KeyError:
-                pass
-            
             if menu.skin_default_no_images and menu.skin_default_has_description:
                 break
             
-        self.use_images = menu.skin_default_no_images
+        self.use_images      = menu.skin_default_no_images
         self.use_description = menu.skin_default_has_description
 
         if len(menu.choices) < 6:
@@ -387,12 +386,12 @@ class Skin_Area:
                     
                 if image and i.image != image:
                     menu.skin_force_text_view = False
-                    self.use_text_view = False
+                    self.use_text_view        = False
                     return
                 image = i.image
 
             menu.skin_force_text_view = True
-            self.use_text_view = True
+            self.use_text_view        = True
             return
 
         for i in menu.choices:
@@ -405,11 +404,12 @@ class Skin_Area:
                     
             if image and i.image != image:
                 menu.skin_force_text_view = False
-                self.use_text_view = False
+                self.use_text_view        = False
                 return
             image = i.image
+            
         menu.skin_force_text_view = True
-        self.use_text_view = True
+        self.use_text_view        = True
 
     
     def calc_geometry(self, object, copy_object=0):

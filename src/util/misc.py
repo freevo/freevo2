@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/01 17:06:12  dischi
+# speedup
+#
 # Revision 1.20  2004/01/24 19:00:40  dischi
 # usb storage device support
 #
@@ -208,18 +211,15 @@ def getname(file):
     """
     make a nicer display name from file
     """
-    if not os.path.exists(file):
-        return file
-    
-    name = os.path.basename(file)
-    name = name[:name.rfind('.')]
+    # basename without ext
+    name = file[file.rfind('/')+1:file.rfind('.')]
     name = name[0].upper() + name[1:]
     
-    while FILENAME_REGEXP.match(name):
+    while file.find('_') > 0 and FILENAME_REGEXP.match(name):
         m = FILENAME_REGEXP.match(name)
         if m:
             name = m.group(1) + ' ' + m.group(2).upper() + m.group(3)
-    if name[-1] == '_':
+    if name.endswith('_'):
         name = name[:-1]
     return name
 

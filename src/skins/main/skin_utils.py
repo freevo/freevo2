@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/01 17:03:58  dischi
+# speedup
+#
 # Revision 1.14  2004/01/31 16:35:26  dischi
 # moved shadow code to listing area, it is much faster now
 #
@@ -20,38 +23,6 @@
 #
 # Revision 1.11  2004/01/17 12:36:29  dischi
 # add shadow support for image listing
-#
-# Revision 1.10  2004/01/01 17:41:05  dischi
-# add border support for Font
-#
-# Revision 1.9  2003/11/29 11:27:41  dischi
-# move objectcache to util
-#
-# Revision 1.8  2003/10/22 18:45:12  dischi
-# scan for the images without fxd info
-#
-# Revision 1.7  2003/10/22 18:26:10  dischi
-# Changes in the table code of menu items:
-# o use percentage again, pixel sizes are bad because they don't scale
-# o add special handling to avoid hardcoding texts in the skin file
-# o new function for the skin: text_or_icon for this handling
-#
-# Format for this texts inside a table:
-# ICON_<ORIENTATION>_<IMAGE_NAME>_<TEXT IF NO IMAGE IS THERE>
-#
-# Revision 1.6  2003/09/03 21:13:48  dischi
-# fix aspect calc to check if correction is needed
-#
-# Revision 1.5  2003/08/24 05:57:50  gsbarbieri
-# Try to use playlist icon based on parent directory display_type, so in a
-# music dir, you got playlist_audio.
-#
-# Revision 1.4  2003/08/23 19:25:46  dischi
-# some scaling fixes
-#
-# Revision 1.3  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -101,6 +72,7 @@ def format_image(settings, item, width, height, force=0):
 
     cname = '%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
                                       item.type, width, height, force)
+
     if item.media and item.media.item == item:
         cname = '%s-%s' % (cname, item.media)
         
@@ -109,7 +81,7 @@ def format_image(settings, item, width, height, force=0):
     if cimage:
         return cimage
 
-    image = None
+    image     = None
     imagefile = None
     
     if item.image:
@@ -173,8 +145,7 @@ def format_image(settings, item, width, height, force=0):
         type = type[:5]
         
     i_w, i_h = image.get_size()
-    aspect = float(i_h)/i_w
-    keep_geo = 0
+    aspect   = float(i_h)/i_w
 
     if type == 'audio' and aspect < 1.3 and aspect > 0.8:
         # this is an audio cover

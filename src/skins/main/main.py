@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/02/01 17:03:58  dischi
+# speedup
+#
 # Revision 1.35  2004/01/18 16:45:32  dischi
 # store last skin information
 #
@@ -221,6 +224,7 @@ class Skin:
         delete informations about a special skin type
         """
         exec('del self.%s_areas' % type)
+        self.last_draw = None, None, None
 
 
     def set_base_fxd(self, name):
@@ -530,7 +534,6 @@ class Skin:
         self.screen.clear()
         for a in self.all_areas:
             a.draw(settings, object, menu, style, type, self.force_redraw)
-        self.screen.show(self.force_redraw)
 
-        osd.update()
+        osd.update([self.screen.show(self.force_redraw)])
         self.force_redraw = False

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/01 17:03:58  dischi
+# speedup
+#
 # Revision 1.8  2004/01/11 20:23:31  dischi
 # move skin font handling to osd to avoid duplicate code
 #
@@ -14,22 +17,6 @@
 #
 # Revision 1.6  2004/01/01 15:53:18  dischi
 # move the shadow code into osd.py
-#
-# Revision 1.5  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.4  2003/12/14 17:05:23  dischi
-# speed up drawing when drawing over images (splashscreen is 120% faster)
-#
-# Revision 1.3  2003/12/09 20:34:36  dischi
-# this code will never used for helpers
-#
-# Revision 1.2  2003/12/06 16:45:13  dischi
-# do not create a screen for helpers
-#
-# Revision 1.1  2003/12/06 16:41:45  dischi
-# move some classes into extra files
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -216,8 +203,17 @@ class Screen:
                                          align_v = align_v, mode=mode,
                                          ellipses=ellipses, layer=layer)
 
-        for x0, y0, x1, y1 in update_area:
-            osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
+        if not update_area:
+            return None
+        
+        rect = (osd.width, osd.height, 0, 0)
+        for u in update_area:
+            osd.screen.blit(layer, (u[0], u[1]), (u[0], u[1], u[2] - u[0], u[3] - u[1]))
+            rect = ( min(u[0], rect[0]), min(u[1], rect[1]),
+                     max(u[2], rect[2]), max(u[3], rect[3]))
+        rect = (rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1])
 
         if osd.must_lock:
             self.s_alpha.unlock()
+
+        return rect

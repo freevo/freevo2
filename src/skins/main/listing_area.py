@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/02/01 17:03:58  dischi
+# speedup
+#
 # Revision 1.21  2004/01/31 16:35:26  dischi
 # moved shadow code to listing area, it is much faster now
 #
@@ -131,19 +134,19 @@ class Listing_Area(Skin_Area):
         hskip = 0
         vskip = 0
         for i in menu.choices:
-            if hasattr(i, 'display_type') and i.display_type and \
-               content.types.has_key(i.display_type):
-                possible_types[i.display_type] = content.types[i.display_type]
-            else:
-                possible_types['default'] = content.types['default']
+            if hasattr(i, 'display_type') and i.display_type:
+                x = i.display_type
+                if content.types.has_key(x) and not possible_types.has_key(x):
+                    possible_types[x] = content.types[x]
+                x = '%s selected' % i.display_type
+                if content.types.has_key(x) and not possible_types.has_key(x):
+                    possible_types[x] = content.types[x]
 
-            if hasattr(i, 'display_type') and i.display_type and \
-               content.types.has_key('%s selected' % i.display_type):
-                possible_types['%s selected' % i.display_type] = \
-                                   content.types['%s selected' % i.display_type]
-            else:
-                possible_types['selected'] = content.types['selected']
-                
+        if content.types.has_key('default'):
+            possible_types['default'] = content.types['default']
+        if content.types.has_key('selected'):
+            possible_types['selected'] = content.types['selected']
+
         # get the max height of a text item
         if content.type == 'text':
             for t in possible_types:
