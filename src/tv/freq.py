@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/11/19 04:10:32  rshortt
+# Add get_frequency_khz() and get_frequency(), also some cleanup.  The
+# frequency getting code in v4l2.py will be changed / removed in favour of this.
+#
 # Revision 1.2  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -36,6 +40,46 @@
 #
 # ----------------------------------------------------------------------- */
  
+import config
+
+def get_frequency(tuner_id, chanlist=None):
+    """
+    Returns the frequency of a channel in MHz
+    """
+    tuner_id = str(tuner_id)
+    freq = config.FREQUENCY_TABLE.get(tuner_id) 	 
+
+    if freq: 	 
+        _debug_('USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % (tuner_id, freq))
+    else: 	 
+        if not chanlist:
+            chanlist = config.CONF.chanlist
+
+        freq_table = CHANLIST.get(chanlist) 	 
+        if freq_table: 	 
+            freq = freq_table.get(tuner_id) 	 
+            if not freq: 	 
+                print String(_('ERROR')+': ' + \
+                      (_('Unable to get frequency for %s from %s.') % \
+                      (tuner_id, chanlist))) 	 
+                return 0 	 
+        else: 	 
+            print String(_('ERROR')+': ' + \
+                 (_('Unable to get frequency table for %s.') % chanlist)) 	 
+            return 0 	 
+
+        _debug_('USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
+                (tuner_id, freq)) 	 
+
+    return freq
+
+
+def get_frequency_khz(tuner_id, chanlist=None):
+    """
+    Returns the frequency of a channel in KHz
+    """
+    return float(get_frequency(tuner_id, chanlist))/1000.00
+
 
 NTSC_BCAST = [
      ("2",	 55250),
@@ -106,7 +150,6 @@ NTSC_BCAST = [
      ("67",	789250),
      ("68",	795250),
      ("69",	801250),
-
      ("70",	807250),
      ("71",	813250),
      ("72",	819250),
@@ -136,7 +179,6 @@ NTSC_CABLE = [
      ("10",	193250),
      ("11",	199250),
      ("12",	205250),
-
      ("13",	211250),
      ("14",	121250),
      ("15",	127250),
@@ -145,7 +187,6 @@ NTSC_CABLE = [
      ("18",	145250),
      ("19",	151250),
      ("20",	157250),
-
      ("21",	163250),
      ("22",	169250),
      ("23",	217250),
@@ -195,7 +236,6 @@ NTSC_CABLE = [
      ("67",	481250),
      ("68",	487250),
      ("69",	493250),
-
      ("70",	499250),
      ("71",	505250),
      ("72",	511250),
@@ -252,7 +292,6 @@ NTSC_CABLE = [
      ("123",	787250),
      ("124",	793250),
      ("125",	799250),
-
      ("T7", 	  8250),
      ("T8",	 14250),
      ("T9",	 20250),
@@ -412,7 +451,6 @@ NTSC_BCAST_JP = [
      ("10", 205250),
      ("11", 211250),
      ("12", 217250),
-
      ("13", 471250),
      ("14", 477250),
      ("15", 483250),
@@ -531,7 +569,6 @@ NTSC_CABLE_CAN = [
     ( "10",	199750 ),
     ( "11",	205750 ),
     ( "12",	211750 ),
-
     ( "13",	217750 ),
     ( "14",	127750 ),
     ( "15",	133750 ),
@@ -540,7 +577,6 @@ NTSC_CABLE_CAN = [
     ( "18",	151750 ),
     ( "19",	157750 ),
     ( "20",	163750 ),
- 
     ( "21",	169750 ),
     ( "22",	175750 ),
     ( "23",	223750 ),
@@ -706,11 +742,9 @@ FREQ_CCIR_I_III = [
      ("E2",	  48250),
      ("E3",	  55250),
      ("E4",	  62250),
-				
      ("S01",	  69250),
      ("S02",	  76250),
      ("S03",	  83250),
-				
      ("E5",	 175250),
      ("E6",	 182250),
      ("E7",	 189250),
@@ -732,7 +766,6 @@ FREQ_CCIR_SL_SH = [
      ("SE8",	 154250),
      ("SE9",	 161250),
      ("SE10",    168250),
-				
      ("SE11",    231250),
      ("SE12",    238250),
      ("SE13",    245250),
@@ -772,11 +805,9 @@ FREQ_CCIR_H = [
 FREQ_OIRT_I_III = [
      ("R1",       49750),
      ("R2",       59250),
-				
      ("R3",       77250),
      ("R4",       84250),
      ("R5",       93250),
-				
      ("R6",	 175250),
      ("R7",	 183250),
      ("R8",	 191250),
@@ -795,7 +826,6 @@ FREQ_OIRT_SL_SH = [
      ("SR6",	 151250),
      ("SR7",	 159250),
      ("SR8",	 167250),
-				
      ("SR11",    231250),
      ("SR12",    239250),
      ("SR13",    247250),
