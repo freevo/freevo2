@@ -4,11 +4,43 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
+# This file contains the parser for the <movie> and <disc-set> tags
+#
+# <?xml version="1.0" ?>
+# <freevo>
+#     <movie title="">
+#         <cover-img>file</cover-img>
+#         <video>
+#             <dvd|vcd|file id name media_id mplayer_options>file</>+
+#         <variants>
+#             <variant>
+#                 <part ref mplayer_options>
+#                     <subtitle media_id>file</subtitle>
+#                     <audio media_id>file</audio>
+#                 </part>+
+#             </variant>+
+#         </variants>  
+#         <info/>
+#     </movie>
+# 
+# <?xml version="1.0" ?>
+# <freevo>
+#     <disc-set title="">
+#         <disc media-id="id"/>
+#         <cover-img source="url">file</cover-img>
+#         <info/>
+#     </disc-set>
+# </freevo>
+#
+#
 # Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/09/14 20:06:40  dischi
+# add doc
+#
 # Revision 1.23  2004/07/11 11:47:02  dischi
 # fix image file lookup
 #
@@ -45,31 +77,20 @@
 #
 # ----------------------------------------------------------------------- */
 
+__all__ = [ 'parse_movie', 'parse_disc_set' ]
 
+# python imports
+import os
+
+# freevo imports
 from videoitem import VideoItem
 from item import FileInformation
-import os
+
 
 def parse_movie(fxd, node):
     """
     Callback for VideoItem <movie>
-
-    <movie title>
-        <cover-img>file</cover-img>
-        <video>
-            <dvd|vcd|file id name media_id mplayer_options>file</>+
-        <variants>
-            <variant>
-                <part ref mplayer_options>
-                    <subtitle media_id>file</subtitle>
-                    <audio media_id>file</audio>
-                </part>+
-            </variant>+
-        </variants>  
-        <info/>
-    </movie>
     """
-
     files = []
     
     def parse_video_child(fxd, node, dirname):
