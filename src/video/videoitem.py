@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/12/30 15:56:11  dischi
+# store label in the videoitem
+#
 # Revision 1.8  2002/12/22 12:59:34  dischi
 # Added function sort() to (audio|video|games|image) item to set the sort
 # mode. Default is alphabetical based on the name. For mp3s and images
@@ -136,6 +139,8 @@ class VideoItem(Item):
         self.video_player = mplayer.get_singleton()
 
         # variables only for VideoItem
+        self.label = ''
+        
         self.available_audio_tracks = []
         self.available_subtitles    = []
         self.available_chapters     = 0
@@ -144,7 +149,7 @@ class VideoItem(Item):
         self.selected_audio    = None
         self.num_titles        = 0
         self.deinterlace       = 0
-
+        
 
     def copy(self, obj):
         """
@@ -159,7 +164,7 @@ class VideoItem(Item):
             self.selected_subtitle = obj.selected_subtitle
             self.selected_audio    = obj.selected_audio
             self.num_titles        = obj.num_titles
-
+            self.label             = obj.label
 
     def sort(self, mode=None):
         """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/30 15:56:11  dischi
+# store label in the videoitem
+#
 # Revision 1.3  2002/12/07 13:28:19  dischi
 # rescan disc after database change
 #
@@ -174,6 +177,7 @@ class Identify_Thread(threading.Thread):
                 else:
                     media.info = videoitem.VideoItem(None, None)
 
+                media.info.label = label
                 media.info.name = title
                 media.info.mode = mediatype[2]
                 media.info.media = media
