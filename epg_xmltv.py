@@ -44,7 +44,7 @@ def myversion():
 def get_guide():
 
     if os.path.isfile(config.XMLTV_FILE):
-    	rawlines = programs = xmltv.read_programmes(open(config.XMLTV_FILE))
+    	rawlines = xmltv.read_programmes(open(config.XMLTV_FILE))
     
     	nowtime = time.localtime()
 
@@ -54,7 +54,7 @@ def get_guide():
        		   (nowtime <= (strptime.strptime(i['stop'], xmltv.date_format))) :
 			c = string.split(i['channel'])
 			t = i['title'][0][0].encode('Latin-1')
-			d = calendar.timegm(strptime.strptime(i['start'],xmltv.date_format))
+			d = time.mktime(strptime.strptime(i['start'],xmltv.date_format))
 			program = (int(c[0]),c[1],t,d)
 			channel = program
 		 	lines.append([channel])
