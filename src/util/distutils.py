@@ -38,9 +38,9 @@
 #  |   import freevo.util.distutils
 #  |   
 #  |   # now start the python magic
-#  |   setup (name = "My first plugin",
+#  |   setup (name = "nice_plugin",
 #  |          version = 0.1,
-#  |          description = "Yes, my first plugin",
+#  |          description = "My first plugin",
 #  |          author = "me",
 #  |          author_email = "my@mail.address",
 #  |          url = "http://i-also-have-web.address",
@@ -51,6 +51,14 @@
 #  |          )
 #
 #
+#  To auto-build distribution packages, a MANIFEST.in is helpfull. You should
+#  create one, e.g.
+#
+#  |   recursive-include src *.py
+#  |   recursive-include share *
+#  |   include *
+#
+#
 #  If you need help, please join the freevo developer mailing list
 #
 #
@@ -58,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/18 13:32:05  dischi
+# Update example
+#
 # Revision 1.1  2003/10/18 13:04:42  dischi
 # add distutils
 #
