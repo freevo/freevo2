@@ -30,7 +30,8 @@ case "$1" in
         killall freevo_python &> /dev/null
         killall freevo_xwin &> /dev/null
         killall mplayer &> /dev/null
-        kill `pgrep -f "python main.py" -d" "` &> /dev/null
+        kill `pgrep -f "python src/main.py" -d" "` &> /dev/null
+	kill `pgrep -f "python main.py" -d" "` &> /dev/null
         kill `pgrep -f "python rc_client" -d" "` &> /dev/null
 	echo "$NAME."
 	echo -n "Releasing the VT: "
