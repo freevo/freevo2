@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.116  2004/08/15 14:53:27  dischi
+# add mevas and pyimlib2 to python path
+#
 # Revision 1.115  2004/08/11 20:52:30  rshortt
 # Bugfix.  Freevo was giving an invalid sys.argv[1] (from the helper's point of
 # view) when there were only two args when running a helper (freevo script and
@@ -353,8 +356,10 @@ if os.environ.has_key('PYTHONPATH'):
 else:
     os.environ['PYTHONPATH'] = freevo_python
 
-# FIXME: add lib path
+# FIXME: add lib, mevas imlib2 path (FIXME)
 os.environ['PYTHONPATH'] = '%s/../lib:%s' % (freevo_python, os.environ['PYTHONPATH'])
+os.environ['PYTHONPATH'] = '%s/../lib/mevas:%s' % (freevo_python, os.environ['PYTHONPATH'])
+os.environ['PYTHONPATH'] = '%s/../lib/pyimlib2:%s' % (freevo_python, os.environ['PYTHONPATH'])
 
 # extend PATH to make sure the basics are there
 os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \
