@@ -12,6 +12,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2002/10/14 21:37:04  gsbarbieri
+# Now osd.drawstringframed() has one more parameter: mode. It define the way
+# we break lines/truncate. Valid values can be: 'hard' and 'soft'. Soft is
+# the old waym that tries to break based on words (it is slow). Hard is the
+# new way, simple breaks based on char, that is, if that char fits, it will be
+# printed(fast, and should be used in places where 'soft' throws away too many
+# chars, like in TV Guide)
+#
+# Basically: use the default, that is, use the hard way, unless the frame are
+# big enough.
+#
 # Revision 1.35  2002/10/13 14:15:22  dischi
 # o drawstringframed now returns a list. (rest_words, rectangle), where
 #   rectangle are positions x0,y0.x1,y1 between the text was drawn
@@ -505,7 +516,44 @@ class OSD:
     # Gustavo:
     # drawstringframed: draws a string (text) in a frame. This tries to fit the
     #                   string in lines, if it can't, it truncates the text,
-    #                   draw the part that fit and returns the other that doesn't
+    #                   draw the part that fit and returns the other that doesn't.
+    #                   This is a wrapper to drawstringframedsoft() and -hard()
+    #                       
+    # Parameters:
+    #  - string: the string to be drawn. Supports '\n' and '\t' too.
+    #  - x,y: the posistion
+    #  - width, height: the frame dimensions (See TIPS above)
+    #  - fgcolor, bgcolor: the color for the foreground and background
+    #       respectively. (Supports the alpha channel: 0xAARRGGBB)
+    #  - font, ptsize: font and font point size
+    #  - align_h: horizontal align. Can be left, center, right, justified
+    #  - align_v: vertical align. Can be top, bottom, center or middle
+    #  - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
+    #       or 'soft' (based on words)
+    #
+    # TIPS:
+    #  - height = -1 defaults to the font height size
+    #
+    # TODO:
+    #  - Test it
+    #  - Debug it
+    #  - Improve it
+    def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                         font=None, ptsize=0, align_h='left', align_v='top', mode='hard'):
+        if mode == 'hard':
+            self.drawstringframedhard(string,x,y,width, height, fgcolor, bgcolor, font, ptsize,
+                                      align_h, align_v)
+        elif mode == 'soft':
+            self.drawstringframedsoft(string,x,y,width, height, fgcolor, bgcolor, font, ptsize,
+                                      align_h, align_v)
+
+    # Gustavo:
+    # drawstringframedsoft: draws a string (text) in a frame. This tries to fit the
+    #                       string in lines, if it can't, it truncates the text,
+    #                       draw the part that fit and returns the other that doesn't.
+    #                       Different from drawstringframedhard from the way it truncates
+    #                       the line. This one breaks based on words, not chars.
+    #                       
     # Parameters:
     #  - string: the string to be drawn. Supports '\n' and '\t' too.
     #  - x,y: the posistion
@@ -793,6 +841,122 @@ class OSD:
         #self.drawbox(return_x0,return_y0, return_x1, return_y1, width=3)
 
         return (rest_words, (return_x0,return_y0, return_x1, return_y1))
+
+
+
+    # Gustavo:
+    # drawstringframedhard: draws a string (text) in a frame. This tries to fit the
+    #                       string in lines, if it can't, it truncates the text,
+    #                       draw the part that fit and returns the other that doesn't.
+    #                       Different from drawstringframedsoft from the way it truncates
+    #                       the line. This one breaks based on chars, not words.
+    # Parameters:
+    #  - string: the string to be drawn. Supports '\n' and '\t' too.
+    #  - x,y: the posistion
+    #  - width, height: the frame dimensions (See TIPS above)
+    #  - fgcolor, bgcolor: the color for the foreground and background
+    #       respectively. (Supports the alpha channel: 0xAARRGGBB)
+    #  - font, ptsize: font and font point size
+    #  - align_h: horizontal align. Can be left, center, right
+    #  - align_v: vertical align. Can be top, bottom, center or middle
+    #
+    # TIPS:
+    #  - height = -1 defaults to the font height size
+    #
+    # TODO:
+    #  - Test it
+    #  - Debug it
+    #  - Improve it
+    def drawstringframedhard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                             font=None, ptsize=0, align_h='left', align_v='top'):
+
+        if not pygame.display.get_init():
+            return string
+
+        return_x0 = 0
+        return_y0 = 0
+        return_x1 = 0
+        return_y1 = 0
+
+        if DEBUG: print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, w, h, s)
+        
+        if fgcolor == None:
+            fgcolor = self.default_fg_color
+        if font == None:
+            font = config.OSD_DEFAULT_FONTNAME
+
+        if not ptsize:
+            ptsize = config.OSD_DEFAULT_FONTSIZE
+
+
+        if DEBUG: print 'FONT: %s %s' % (font, ptsize)        
+
+        occupied_size = 0
+        occupied_height = 0
+        # First case: height is fewer than the necessary        
+        word_size, word_height = self.stringsize('Agj',font,ptsize)
+        line_height = word_height
+        occupied_height = line_height
+        if height == -1:
+            height = line_height
+        if line_height > height:
+            return string
+        
+        # Fit chars in lines
+        lines = [ '' ]
+        line_number = 0
+        for i in range(len(string)):
+            char_size, char_height = self.charsize(string[i], font, ptsize)
+            if occupied_size + char_size <= width and string[i] != '\n':
+                occupied_size += char_size
+                if string[i] == '\t':
+                    lines[line_number] += '   '
+                else:
+                    lines[line_number] += string[i] 
+            else:
+                if occupied_height + char_height <= height:
+                    occupied_height += word_height
+                    line_number += 1
+                    lines += [ '' ]
+                    if string[i] != '\n':
+                        occupied_size = char_size
+                        lines[line_number] = string[i]
+                else:
+                    tmp_size, tmp_height = self.stringsize('...', font, ptsize)
+                    j = 1
+                    len_line = len(lines[line_number])
+                    for j in range(len_line):
+                        if occupied_size + tmp_size <= width: break
+                        char_size, char_height = self.charsize(lines[line_number][len_line-j-1], font, ptsize)
+                        occupied_size -= char_size
+                    lines[line_number] = lines[line_number][0:len_line-j]+'...'                        
+                    break
+        rest_words = string[i:len(string)]
+
+        if bgcolor != None:
+            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor)
+
+        y0 = y
+        if align_v == 'center' or align_v == 'middle':
+            y0 = y + (height - (line_number+1) * word_height)/ 2
+        elif align_v == 'bottom':
+            y0 = y + (height - (line_number+1) * word_height)
+        
+        for line in lines:
+            if align_h == 'left':
+                x0 = x
+            elif align_h == 'center' or align_h == 'justified':
+                line_size, line_heigt = self.stringsize(line, font, ptsize)
+                x0 = x + (width - line_size) / 2
+            elif align_h == 'right':
+                line_size, line_heigt = self.stringsize(line, font, ptsize)
+                x0 = x + (width - line_size)
+            self.drawstring(line, x0, y0, fgcolor, None, font, ptsize)
+            y0 += word_height
+
+        return (rest_words, (return_x0,return_y0, return_x1, return_y1))
+
+
 
                     
 
