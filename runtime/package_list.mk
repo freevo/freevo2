@@ -121,3 +121,6 @@ PYFCHKSUM_GET=http://www.azstarnet.com/~donut/programs/fchksum/$(PYFCHKSUM).tar.
 
 MP1E=mp1e-20030419-freevo
 MP1E_GET=http://ettin.danicar.net/$(MP1E).tar.gz
+
+DXR3=em8300-0.13.0
+DXR3_GET=http://dxr3.sourceforge.net/download/$(DXR3).tar.gz

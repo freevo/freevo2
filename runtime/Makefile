@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/04/20 13:06:36  rshortt
+# Added a DXR3 build. (build_dxr3)
+#
 # Revision 1.13  2003/04/19 20:08:30  rshortt
 # Better COPY_BASE
 #
@@ -189,8 +192,7 @@ mplayer_copy:
 mplayer_fonts_copy:
 	@echo Copying mplayer fonts
 	-mkdir -p apps/mplayer/font
-	# cp $(COPY_BASE)/MPlayer/mplayer_fonts/font-arial-18-iso-8859-1/* apps/mplayer/font
-	# rm apps/mplayer/font/runme
+	cp $(COPY_BASE)/MPlayer/fonts/* apps/mplayer/font
 
 
 ################################################################################
@@ -223,7 +225,7 @@ jpegtran_copy:
 	cp -a $(COPY_BASE)/bin/jpegtran apps/
 
 
-build_all_pkg: get_packageconfig build_libusb build_python build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_jpeg build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_png build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_zlib build_mp1e
+build_all_pkg: get_packageconfig build_libusb build_python build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_jpeg build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_png build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_zlib build_mp1e build_dxr3
 
 
 
@@ -703,6 +705,19 @@ build_vorbistools: TAR=$(TAR1)
 build_vorbistools: BUILDCMDS=
 build_vorbistools: CFG=$(CFGFLAGS)
 build_vorbistools:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_dxr3: PACKAGE=$(DXR3)
+build_dxr3: PACKAGE_GET=$(DXR3_GET)
+build_dxr3: EXT=tar.gz
+build_dxr3: TAR=$(TAR1)
+build_dxr3: BUILDCMDS=
+build_dxr3: CFG="$(CFGFLAGS)"
+build_dxr3:
 	@ . build_functions ;\
 	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
 	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
