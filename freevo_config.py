@@ -560,14 +560,11 @@ LIRCRC = '/etc/freevo/lircrc'
 RC_MPLAYER_CMDS       = {}
 RC_MPLAYER_AUDIO_CMDS = {}
 
-# XXX This is experimental, please send in testreports!
-# XXX If you want to use it you need to uncomment a line
-# XXX in the "freevo" start-script!
-# 
 #
 # Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
 # Supports as many buttons as your controller has,
-# but make sure there is a corresponding entry in your config
+# but make sure there is a corresponding entry in JOY_CMDS.
+# You will also need to plugin.activate('joy').
 # FYI: new kernels use /dev/input/jsX, but joy.py will fall back on /dev/jsX
 #
 JOY_DEV = 0
