@@ -316,7 +316,7 @@ RC_CMDS = {
     'pip_onoff'   : 'PIP_ONOFF',
     'pip_swap'    : 'PIP_SWAP',
     'pip_move'    : 'PIP_MOVE',
-    'tv_vcr'      : 'TV_VCR',
+    'tv_vcr'      : 'EJECT',
     'rew'         : 'REW',
     'play'        : 'PLAY',
     'ff'          : 'FFWD',
