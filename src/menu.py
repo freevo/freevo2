@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/03/23 21:39:03  dischi
+# Added better up/down handling for text menus in the new skin
+#
 # Revision 1.22  2003/03/18 09:37:00  dischi
 # Added viewitem and infoitem to the menu to set an item which image/info
 # to take (only for the new skin)
@@ -335,9 +338,13 @@ class MenuWidget(GUIObject):
         items_per_page = self.rows*self.cols
 
         if self.cols == 1:
-            if menu.page_start + items_per_page < len(menu.choices):
+            down_items = items_per_page
+            if config.NEW_SKIN:
+                down_items -= 1
+                
+            if menu.page_start + down_items < len(menu.choices):
                 menu.previous_page_start.append(menu.page_start)
-                menu.page_start += items_per_page
+                menu.page_start += down_items
                 self.init_page()
                 menu.selected = self.menu_items[-1]
         else:
@@ -393,10 +400,14 @@ class MenuWidget(GUIObject):
 
         if event == rc.UP:
             curr_selected = self.all_items.index(menu.selected)
-            if curr_selected-self.cols < 0 and self.cols > 1:
+            if curr_selected-self.cols < 0 and \
+               (self.cols > 1 or config.NEW_SKIN):
                 self.goto_prev_page(arg='no_refresh')
                 try:
-                    curr_selected = self.all_items.index(menu.selected)
+                    if self.cols == 1:
+                        curr_selected = self.rows - 1
+                    else:
+                        curr_selected = self.all_items.index(menu.selected)
                 except ValueError:
                     curr_selected += self.cols
             curr_selected = max(curr_selected-self.cols, 0)
@@ -405,10 +416,14 @@ class MenuWidget(GUIObject):
 
         elif event == rc.DOWN:
             curr_selected = self.all_items.index(menu.selected)
-            if curr_selected+self.cols > len(self.all_items)-1 and self.cols > 1:
+            if curr_selected+self.cols > len(self.all_items)-1 and \
+               (self.cols > 1 or config.NEW_SKIN):
                 self.goto_next_page(arg='no_refresh')
                 try:
-                    curr_selected = self.all_items.index(menu.selected)
+                    if self.cols == 1:
+                        curr_selected = 0
+                    else:
+                        curr_selected = self.all_items.index(menu.selected)
                 except ValueError:
                     curr_selected -= self.cols
             curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
