@@ -198,7 +198,7 @@
             <text font="info value" expression="album" mode="soft" />
             <newline/>
           </if>
-          <if expression="not album and not artist">
+          <if expression="not type == 'playlist' and not album and not artist">
             <text font="info tagline" expression="name" mode="soft" />
             <newline/>
 	  </if>	  
