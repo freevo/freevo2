@@ -16,7 +16,7 @@ configure-stamp:
 build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
-	python2.3 setup.py build
+	#python2.3 setup.py build
 	touch build-stamp
 
 clean:
@@ -28,6 +28,9 @@ clean:
 	rm -f `find . | grep freevo.mo`
 	rm -rf `pwd`/Docs/howto 
 	rm -rf src/www/htdocs/help/wiki
+	rm -f `pwd`/src/util/distutils.pyc
+	rm -f `pwd`/src/util/__init__.pyc
+	rm -f `pwd`/src/version.pyc
 	rm -f *.pyc
 	rm -fr build
 	rm -f Setup
