@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/02/22 22:32:27  krister
+# Removed debug code, cleanup
+#
 # Revision 1.22  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
 #
@@ -339,21 +342,20 @@ def getcmd():
     else:
         m = None
     m and m.refresh()
-    #sleep_ctr = 0
     while 1:
         
         # Get next command
         while 1:
 
             event = osd._cb()
-            if event: break
+            if event:
+                break
             event = rc.poll()
-            if event: break
-            if not rc.app: m and m.poll()
-            #print '*' * 50, 'sleeping.... (%s)' % sleep_ctr
-            #sleep_ctr += 1
+            if event:
+                break
+            if not rc.app:
+                m and m.poll()
             time.sleep(0.1)
-
 
         m and m.refresh()
         # Handle volume control   XXX move to the skin
@@ -546,6 +548,32 @@ def main_func():
 # Main function
 #
 if __name__ == "__main__":
+    def tracefunc(frame, event, arg, _indent=[0]):
+        if event == 'call':
+            filename = frame.f_code.co_filename
+            funcname = frame.f_code.co_name
+            lineno = frame.f_code.co_firstlineno
+            if 'self' in frame.f_locals:
+                try:
+                    classinst = frame.f_locals['self']
+                    classname = repr(classinst).split()[0].split('(')[0][1:]
+                    funcname = '%s.%s' % (classname, funcname)
+                except:
+                    pass
+            here = '%s:%s:%s()' % (filename, lineno, funcname)
+            _indent[0] += 1
+            tracefd.write('%s%s\n' % (' ' * _indent[0], here))
+            tracefd.flush()
+        elif event == 'return':
+            _indent[0] -= 1
+
+        return tracefunc
+
+    if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
+        tracefd = open(os.path.join(os.environ['FREEVO_STARTDIR'],
+                                    'trace.txt'), 'w')
+        sys.settrace(tracefunc)
+    
     try:
         main_func()
     except KeyboardInterrupt:
