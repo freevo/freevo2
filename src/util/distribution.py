@@ -62,6 +62,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/06/10 11:06:40  dischi
+# make it possible to give a cmdclass to setup
+#
 # Revision 1.8  2004/06/03 18:20:27  dischi
 # add freevo_config.py to translation list, cleanup
 #
@@ -357,7 +360,10 @@ def setup(**attrs):
         if not attrs.has_key(i):
             attrs[i] = []
 
-    cmdclass = {}
+    if attrs.has_key('cmdclass'):
+        cmdclass = attrs['cmdclass']
+    else:
+        cmdclass = {}
 
     if not attrs.has_key('i18n') or attrs['i18n'] != 'freevo':
         # this is a plugin, replace the cmdclass install_lib
