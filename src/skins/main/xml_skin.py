@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/12 03:32:41  outlyer
+# Fixes for OSD_EXTRA_FONT:
+#
+# o Filesystems are case sensitive; we can't arbitrarily set them to lower.
+# o If we're using the extra font path for osd.py, we need to use it in xml_skin
+#
 # Revision 1.30  2004/02/08 18:45:49  dischi
 # font shadow fixes
 #
@@ -189,11 +195,18 @@ def attr_font(node, attr, default):
                                 node.attrs[('', attr)]).encode(config.LOCALE)
         else:
             # '.ttf' is the default extension
-            font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
-                                '.ttf').encode(config.LOCALE)
-            if not os.path.isfile(font):
-                font = os.path.join(config.FONT_DIR, node.attrs[('', attr)] +
-                                    '.TTF').encode(config.LOCALE)
+
+            fontpath = config.OSD_EXTRA_FONT_PATH
+            fontpath.append(config.FONT_DIR)
+
+            for path in fontpath:
+                font = os.path.join(path, node.attrs[('', attr)] +
+                                    '.ttf').encode(config.LOCALE)
+                if font: break
+                font = os.path.join(path, node.attrs[('', attr)] +
+                                        '.TTF').encode(config.LOCALE)
+                if font: break
+
         if not font:
             print "skin error: can find font >%s<" % font
             font = config.OSD_DEFAULT_FONTNAME

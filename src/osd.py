@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.138  2004/02/12 03:32:41  outlyer
+# Fixes for OSD_EXTRA_FONT:
+#
+# o Filesystems are case sensitive; we can't arbitrarily set them to lower.
+# o If we're using the extra font path for osd.py, we need to use it in xml_skin
+#
 # Revision 1.137  2004/02/11 21:21:56  dischi
 # deactivate arialbd fix, font is broken
 #
@@ -311,7 +317,7 @@ class OSDFont:
         if not font:
             
             # search OSD_EXTRA_FONT_PATH for this font
-            fontname = os.path.basename(filename).lower()
+            fontname = os.path.basename(filename)
             for path in config.OSD_EXTRA_FONT_PATH:
                 fname = os.path.join(path, fontname)
                 font  = self.__loadfont__(fname, ptsize)
