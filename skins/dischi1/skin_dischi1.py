@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/03/30 18:05:25  dischi
+# give correct skin information to the gui object
+#
 # Revision 1.45  2003/03/30 17:42:03  dischi
 # image.fxd is no real skin
 #
@@ -414,7 +417,14 @@ class Skin:
         return self.display_style
 
 
-    def GetPopupBoxStyle(self, menu=None):
+    def FindCurrentMenu(self, widget):
+        if not widget:
+            return None
+        if not hasattr(widget, 'menustack'):
+            return self.FindCurrentMenu(widget.parent)
+        return widget.menustack[-1]
+        
+    def GetPopupBoxStyle(self, widget=None):
         """
         This function returns style information for drawing a popup box.
 
@@ -434,6 +444,8 @@ class Skin:
         attributes: name, size, color, shadow
         shadow attributes: visible, color, x, y
         """
+
+        menu = self.FindCurrentMenu(widget)
 
         if menu and menu.skin_settings:
             settings = menu.skin_settings
