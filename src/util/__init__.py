@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/23 19:39:59  dischi
+# fix vfs problem in mediainfo
+#
 # Revision 1.11  2004/02/23 19:27:07  dischi
 # fix mmpython init
 #
@@ -80,8 +83,9 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
     import fxdparser
     import objectcache
     import popen3
-    import mediainfo
     
     __builtin__.__dict__['vfs']     = vfs
     __builtin__.__dict__['Unicode'] = Unicode
     __builtin__.__dict__['String']  = String
+
+    import mediainfo
