@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/08 19:55:52  dischi
+# bugfix
+#
 # Revision 1.20  2004/02/08 17:37:58  dischi
 # also check freevo cache version
 #
@@ -247,7 +250,7 @@ class Cache:
                 if callback:
                     callback()
             except (IOError, OSError):
-                pass
+                info = {}
             
             objects[key] = (info, timestamp)
 
