@@ -52,6 +52,7 @@ log = logging.getLogger('gui')
 # freevo imports
 import config
 import util.cache
+from util.weakref import weakref
 
 # gui imports
 import gui.animation as animation 
@@ -100,7 +101,9 @@ class AreaHandler:
                 self.areas.append(a)
 
         for a in self.areas:
-            a.set_screen(self, self.layer[0], self.layer[1])
+            # Set the screen of the areas to this area handler.
+            # Use a weakref to avoid memory problems.
+            a.set_screen(weakref(self))
             
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR,
                                          'skin-%s' % os.getuid())
@@ -115,7 +118,7 @@ class AreaHandler:
 
     def __del__(self):
         """
-        delete an area handler
+        Delete an area handler
         """
         _mem_debug_('AreaHandler', self.type)
         while self.areas:
@@ -123,6 +126,7 @@ class AreaHandler:
             del self.areas[0]
         for l in self.layer:
             l.unparent()
+        self.layer = []
         self.container = None
 
         

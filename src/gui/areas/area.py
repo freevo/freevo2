@@ -84,7 +84,7 @@ class Area:
         self.settings     = None
 
         
-    def set_screen(self, screen, bg_layer, content_layer):
+    def set_screen(self, screen):
         """
         Move this area to a new screen object.
         """
@@ -92,8 +92,6 @@ class Area:
             self.clear_all()
         self.screen   = screen
         self.imagelib = screen.imagelib
-        self.bg_layer = bg_layer
-        self.content_layer = content_layer
 
 
     def update(self):
@@ -114,10 +112,6 @@ class Area:
         """
         Clear the complete area. This clears the content and the background.
         """
-        if not self.screen:
-            log.info('ERROR in area %s: no screen defined' % self.area_name)
-            return
-
         for b in self.__background:
             b.unparent()
         self.__background = []
@@ -182,11 +176,11 @@ class Area:
             return
 
         # set layer to background
-        self.layer = self.bg_layer
+        self.layer = self.screen.layer[0]
         # draw background
         self.__draw_background()
         # set layer to content
-        self.layer = self.content_layer
+        self.layer = self.screen.layer[1]
         # draw content
         self.update()
 
