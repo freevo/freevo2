@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/02/27 20:27:18  dischi
+# add number of files to rom drives
+#
 # Revision 1.32  2004/02/27 20:15:03  dischi
 # more unicode fixes
 #
@@ -599,6 +602,15 @@ def disc_info(media):
         metainfo = util.read_pickle(cachefile)
     else:
         metainfo = {}
+
+        if mmdata.mime == 'unknown/unknown':
+            media.mount()
+            for type in ('video', 'audio', 'image'):
+                items = getattr(config, '%s_SUFFIX' % type.upper())
+                files = util.match_files_recursively(media.mountdir, items)
+                metainfo['disc_num_%s' % type] = len(files)
+            media.umount()
+        
     info = Info(cachefile, mmdata, metainfo)
     info.disc = True
     return info
@@ -686,9 +698,9 @@ if __freevo_app__ == 'main':
             else:
                 mmchanged, freevo_changed, part_update, complete_update = info
             # let's warn about some updates
-            if freevo_changed < 2:
+            if freevo_changed < 3:
                 print
-                print 'Warning: Freevo cache helper updated.'
+                print 'Warning: Freevo cache helper/informations updated.'
                 print 'Please rerun \'freevo cache\' to speed up Freevo'
                 print
     except:
