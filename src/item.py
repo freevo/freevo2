@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/01/14 01:18:45  outlyer
+# Workaround some weirdness... for some reason these should be of type None, but
+# are instead the string "None" which doesn't help, since the string "None" is
+# a valid string and hence not actually type None
+#
+# I don't think anyone who doesn't know python understands what the heck I
+# just said.
+#
 # Revision 1.49  2004/01/11 10:57:28  dischi
 # remove coming up here, it is no item attr
 #
@@ -387,7 +395,15 @@ class Item:
         """
         if attr == 'runtime':
             length = None
-            if self.info and hasattr(self.info, 'runtime'):
+
+            if hasattr(self.info,'length') and self.info['length'] == 'None':
+                self.info['length'] = None
+            if hasattr(self.info,'runtime') and self.info['runtime'] == 'None':
+                # For some reason it's the string None, instead of the
+                # NoneType
+                self.info['runtime'] = None
+
+            if self.info and hasattr(self.info, 'runtime') and self.info['runtime']:
                 length = self.info['runtime']
             if not length and self.info and hasattr(self.info, 'length'):
                 length = self.info['length']
@@ -400,7 +416,7 @@ class Item:
                 return ''
             if isinstance(length, int) or isinstance(length, float) or \
                    isinstance(length, long):
-                length = str(int(length) / 60)
+                length = str(int(round(length) / 60))
             if length.find('min') == -1:
                 length = '%s min' % length
             if length.find('/') > 0:
