@@ -14,21 +14,6 @@
 #   Freevo will look in those folders first for this file.
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.4  2003/02/25 04:37:29  krister
-# Updated local_conf version to 2.0 to make it clear that the remote control stuff changed. Added automatic information about what has changed in the config files since the user's version.
-#
-# Revision 1.3  2003/02/17 05:58:43  krister
-# Updated mplayer video settings.
-#
-# Revision 1.2  2003/02/16 22:00:56  krister
-# Updated TV guide instructions.
-#
-# Revision 1.1  2003/02/11 04:37:28  krister
-# Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
-#
-#
-# -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2003 Krister Lagerstrom, et al. 
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
@@ -42,7 +27,7 @@
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-CONFIG_VERSION = 2.0
+CONFIG_VERSION = 3.0
 
 # How Freevo finds the config files (freevo.conf, local_conf.py, local_skin.xml)
 # ==============================================================================
@@ -100,12 +85,27 @@ CONFIG_VERSION = 2.0
 #
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
+# Should be autodetected.
 #
 # Format [ ('mountdir1', 'devicename1', 'displayed name1'),
 #          ('mountdir2', 'devicename2', 'displayed name2'), ...]
 #
 
 #ROM_DRIVES = []
+
+#ROM_SPEED = 8
+
+# ======================================================================
+# Freevo skin settings:
+# ======================================================================
+
+# Adjust overscan for tv out
+#OVERSCAN_X = 0
+#OVERSCAN_Y = 0
+
+# XML skin to use. Press DISPLAY in the main menu to preview all skins
+#SKIN_XML_FILE = 'blue_round2'
+
 
 # ======================================================================
 # Freevo movie settings:
