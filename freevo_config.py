@@ -428,14 +428,14 @@ DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
 MPLAYER_NICE         = -20             
 
 if CONF.display == 'dfbmga':
-    MPLAYER_ARGS_DEF     = '-ac mad, -nobps -nolirc -autoq 100 -fs -vsync -double'
+    MPLAYER_ARGS_DEF     = '-ac mad, -autosync 100 -nolirc -autoq 100 -fs -vsync -double'
 else:
-    MPLAYER_ARGS_DEF     = (('-ac mad, -nobps -nolirc -autoq 100 -screenw %s '
+    MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
 
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
-MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
+MPLAYER_ARGS_MPG     = '-cache 5000 '
 MPLAYER_ARGS_TVVIEW  = '-nocache'
 MPLAYER_ARGS_DVDNAV  = '-dvdnav'
 MPLAYER_USE_WID      = 1
