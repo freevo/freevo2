@@ -5,37 +5,74 @@
 # $Id$
 #
 
+# Required runtime version
+RUNTIME_VERSION=1
+
+# The runtime is stored in a directory one level up
+RT_DIR=../freevo_runtime$RUNTIME_VERSION
+
+
 # Is runapp present? If not it needs to be compiled
 if ! test -a runapp ; then
-    echo ./runapp not found! You must compile freevo, see INSTALL.
+    echo ./runapp not found! You must compile freevo, see the INSTALL file.
     exit
 fi
 
 # First check if the runtime is installed
-if test -a ../runtime/freevo_rt ; then
+if test -a $RT_DIR/freevo_rt ; then
+    
+    # Double-check that we have the correct runtime version
+    rt_ver=`cat $RT_DIR/VERSION`
+    if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
+        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
+        echo Please install the required version in $RT_DIR/
+        exit
+    fi
 
     # Prevent the linker from using other libraries than the ones
     # in freevo_rt
-    export LD_PRELOAD=`cat ../runtime/preloads`
+    export LD_PRELOAD=`cat $RT_DIR/preloads`
 
     # Execute using the runtime:
-    echo "Using the Freevo runtime (../runtime)"
+    echo "Using the Freevo runtime ($RT_DIR)"
     
     # Start the lirc remote control app if the device is present
     if test -S /dev/lircd ; then
         echo Found a lirc device, starting the remote control daemon
-        ../runtime/freevo_rt rc_client/remote.py --remote=lirc /dev/null 2> /dev/null &
+        $RT_DIR/freevo_rt rc_client/remote.py --remote=lirc &> /dev/null &
     fi
     
     # Start the main freevo application
-    ../runtime/freevo_rt main.py $*
+    $RT_DIR/freevo_rt main.py $*
 
     # Freevo exited, make sure all children are killed
     sleep 1
-    killall -9 freevo_rt 2&> /dev/null
+    killall -9 freevo_rt &> /dev/null
     exit
+
 fi
 
-echo Runtime not found, starting using Python and the startup control task.
+echo
+echo
+echo
+echo Runtime not found!
+echo 
+echo If Freevo does not work for you, download the runtime from 
+echo the website, http://freevo.sourceforge.net
+echo
+echo Starting using the regular environment.
+echo
+echo
 
-python startup.py $*
+# Start the lirc remote control app if the device is present
+if test -S /dev/lircd ; then
+    echo Found a lirc device, starting the remote control daemon
+    python rc_client/remote.py --remote=lirc &> /dev/null &
+fi
+
+# Start the main freevo application
+python main.py $*
+
+# Freevo exited, make sure all children are killed
+sleep 1
+kill -9 `pgrep -f "python main.py" -d" "` &> /dev/null
