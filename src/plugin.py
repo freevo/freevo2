@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/11/21 17:55:47  dischi
+# support a list of named plugins
+#
 # Revision 1.49  2003/11/21 11:43:00  dischi
 # don't try to 'load' plugins that are already a python object
 #
@@ -187,8 +190,6 @@ class DaemonPlugin(Plugin):
 AUDIO_PLAYER   = 'AUDIO_PLAYER'
 AUDIOCD_PLAYER = 'AUDIOCD_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
-DVD_PLAYER     = 'DVD_PLAYER'
-VCD_PLAYER     = 'VCD_PLAYER'
 TV             = 'TV'
 RADIO_PLAYER   = 'RADIO_PLAYER'
 
@@ -343,22 +344,29 @@ def get(type):
     return __plugin_type_list__[type]
 
 
-def getbyname(name):
+def getbyname(name, multiple_choises=0):
     """
     get a plugin by it's name
     """
     global __named_plugins__
     if __named_plugins__.has_key(name):
         return __named_plugins__[name]
+    if multiple_choises:
+        return []
     return None
 
 
-def register(plugin, name):
+def register(plugin, name, multiple_choises=0):
     """
     register an object as a named plugin
     """
     global __named_plugins__
-    __named_plugins__[name] = plugin
+    if multiple_choises:
+        if not __named_plugins__.has_key(name):
+            __named_plugins__[name] = []
+        __named_plugins__[name].append(plugin)
+    else:
+        __named_plugins__[name] = plugin
 
     
 def event(name):
