@@ -189,6 +189,7 @@ class ConfirmBox(WaitBox):
     the box like pressing No.
     """
     def __init__(self, text, handler=None, handler_message=None,
+                 button0_text = _('Yes'), button1_text = _('No'),
                  default_choice=0):
         WaitBox.__init__(self, text)
         self.handler = handler
@@ -196,9 +197,9 @@ class ConfirmBox(WaitBox):
         spacing = self.content_spacing
         w = int((self.get_content_size()[0] - spacing) / 2)
         x, y = self.get_content_pos()
-        self.b0 = Button(_('Yes'), (x,y), w, self.button_normal)
+        self.b0 = Button(button0_text, (x,y), w, self.button_normal)
         x += w + spacing
-        self.b1 = Button(_('No'), (x, y), w, self.button_normal)
+        self.b1 = Button(button1_text, (x, y), w, self.button_normal)
 
         y = self.add_row(self.b0.get_size()[1])
 
