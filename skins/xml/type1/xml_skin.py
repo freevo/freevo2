@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/02/19 14:38:44  dischi
+# Some small cleanups. The extended menu for images and video is no table
+# and the icon names are gone. We know have iconset to define an icon
+# dir to search for items.
+#
 # Revision 1.25  2003/02/18 09:55:20  dischi
 # Bugfix for folder xml files
 #
@@ -591,8 +596,9 @@ class XML_listingmenuitem(XML_menuitem):
         self.preview_height = 100
         self.preview_width  = 100
 
-    def parse_content(self, node, scale):
-        self.parse(node, scale)
+    def parse_content(self, node, scale, parse_self = 1):
+        if parse_self:
+            self.parse(node, scale)
         for subnode in node.children:
             if subnode.name == u'indicator':
                 type = attr_str(subnode, 'type', 'None')
@@ -610,6 +616,7 @@ class XML_listingmenuitem(XML_menuitem):
 
     def parse(self, node, scale, c_dir=''):
         XML_menuitem.parse(self, node, scale, c_dir)
+        type = attr_str(node, "type", "")
         for subnode in node.children:
             if subnode.name == u'expand':
                 self.expand.parse(subnode, scale)
@@ -628,6 +635,12 @@ class XML_listingmenuitem(XML_menuitem):
                     elif subsubnode.name == u'content':
                         self.parse_content(subsubnode, scale)
 
+        if type == 'table':
+            print 'no'
+        else:
+            print 'do it'
+            self.parse_content(node, scale, 0)
+        
 
 # ======================================================================
 
@@ -677,7 +690,8 @@ class XMLSkin:
 
         self.mainmenu = XML_mainmenu()
         self.e_menu = { }
-
+        self.icon_dir = ""
+        
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
@@ -704,6 +718,9 @@ class XMLSkin:
 
             if node.name == u'main':
                 self.mainmenu.parse(node, scale, c_dir)
+
+            if node.name == u'iconset':
+                self.icon_dir = attr_str(node, 'dir', self.icon_dir)
 
             if node.name == u'extendedmenu':
                 emn = attr_str(node, "type", None)
