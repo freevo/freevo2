@@ -71,7 +71,7 @@
     </layout>
 
     <menuset label="tv menu">
-      <subtitle layout="subtitle" x="10" y="90" width="780" height="30"/>
+      <subtitle layout="subtitle" x="10" y="90" width="780" height="40"/>
       <listing y="140">
 	<image y="140" label="uparrow"/>
       </listing>
