@@ -428,8 +428,22 @@ else:
 
 FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
 if not os.path.isdir(FREEVO_CACHEDIR):
-    os.makedirs(FREEVO_CACHEDIR)
-
+    try:
+        os.makedirs(FREEVO_CACHEDIR)
+        
+    except OSError:
+        OS_CACHEDIR = '/tmp'        
+        FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
+        
+        if not os.path.isdir( FREEVO_CACHEDIR ):
+            try:
+                os.makedirs( FREEVO_CACHEDIR )
+            except OSError:
+                OS_CACHEDIR = '/tmp/'
+                FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo-' + os.getuid()
+                if not os.path.isdir( FREEVO_CACHEDIR ):
+                    os.makedirs( FREEVO_CACHEDIR )
+                
 
 # ======================================================================
 # Freevo movie settings:
