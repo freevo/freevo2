@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/04/28 21:19:19  rshortt
+# String / Unicode fix.
+#
 # Revision 1.1  2003/10/11 17:57:39  rshortt
 # Sorry, there was a namespace issue with having a tv.py module here.  For
 # example the save_pickle function was bombing because it was looking in this
@@ -86,8 +89,8 @@ def getProgFilename(prog=None):
         return 'ERROR: no prog'
     
     mask = config.TV_RECORDFILE_MASK   # '%%m-%%d %%H:%%M %(progname)s - %(title)s'
-    filename_array = { 'progname': prog.title,
-                       'title'   : prog.sub_title }
+    filename_array = { 'progname': String(prog.title),
+                       'title'   : String(prog.sub_title) }
 
     filemask = mask % filename_array
     filemask = time.strftime(filemask, time.localtime(prog.start))
