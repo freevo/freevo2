@@ -209,19 +209,19 @@
 
 	  <goto_pos y="10" mode="relative"/>
 	  <if expression="year">
-	    <text width="120" align="right" font="info value">Year:</text>
+	    <text width="130" align="right" font="info value">Year:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="year"/>
 	    <newline/>
 	  </if>
 	  <if expression="genre">
-	    <text width="120" align="right" font="info value">Genre:</text>
+	    <text width="130" align="right" font="info value">Genre:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="genre"/>
 	    <newline/>
 	  </if>
 	  <if expression="rating">
-	    <text width="120" align="right" font="info value">Rating:</text>
+	    <text width="130" align="right" font="info value">Rating:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="rating"/>
 	    <newline/>
@@ -229,19 +229,19 @@
 
 	  <goto_pos y="10" mode="relative"/>
 	  <if expression="length">
-	    <text width="120" align="right" font="info value">Runtime:</text>
+	    <text width="130" align="right" font="info value">Runtime:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="length"/>
 	    <newline/>
 	  </if>
 
-	  <text width="120" align="right" font="info value">Type:</text>
+	  <text width="130" align="right" font="info value">Type:</text>
 	  <goto_pos x="10" mode="relative"/>
 	  <text font="info value" expression="type"/>
 	  <newline/>
 
 	  <if expression="geometry">
-	    <text width="120" align="right" font="info value">Resolution:</text>
+	    <text width="130" align="right" font="info value">Resolution:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="geometry"/>
 	    <if expression="aspect">
@@ -253,7 +253,7 @@
 	  </if>
 
 	  <if expression="copyright">
-	    <text width="120" align="right" font="info value">Copyright:</text>
+	    <text width="130" align="right" font="info value">Copyright:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="copyright"/>
 	    <newline/>
