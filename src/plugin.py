@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/09/20 09:42:12  dischi
+# do not eval the args
+#
 # Revision 1.42  2003/09/19 18:57:43  dischi
 # fixed TRUE/FALSE problems
 #
@@ -380,10 +383,15 @@ def __load_plugin__(name, type, level, args, number):
             print 'loading %s as plugin %s' % (module, name)
             
         exec('import %s' % module)
-        if args:
-            p = eval('%s%s' % (object, str(args)))
+        if not args:
+            p = eval(object)()
+        elif isinstance(args, list) or isinstance(args, tuple):
+            paramlist = 'args[0]'
+            for i in range(1, len(args)):
+                paramlist += ',args[%s]' % i
+            p = eval('%s(%s)' % (object, paramlist))
         else:
-            p = eval('%s()' % object)
+            p = eval(object)(args)
 
         if not hasattr(p, '_type'):
             if hasattr(p, 'reason'):
