@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/07/11 10:05:14  dischi
+# fix crash for bad discs
+#
 # Revision 1.54  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -610,6 +613,7 @@ def disc_info(media):
             print 'Error detecting the disc'
             print 'Please contact the developers'
             print '*****************************************'
+            return {}
         else:
             util.save_pickle(mmdata, cachefile)
 
