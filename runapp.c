@@ -116,30 +116,6 @@ main (int ac, char *av[])
    * Build the new command string (newav)
    */
 
-  /* lets see is this app is staticly linked */
-  /* this check is taken from lddlibc4.c of glibc-2.2.5 */
-
-  /* First see whether this is really an a.out binary.  */
-  fp = fopen (av[1], "rb");
-  if (fp == NULL) {
-    LOG ("cannot open `%s'", av[1]);
-    exit (1);
-  }
-
-  /* Read the program header.  */
-  if (fread (&exec, sizeof exec, 1, fp) < 1) {
-    LOG ("cannot read header from `%s'", av[1]);
-  }
-  /* Test for the magic numbers.  */
-  else if (N_MAGIC (exec) != ZMAGIC && N_MAGIC (exec) != QMAGIC
-     && N_MAGIC (exec) != OMAGIC) {
-    LOG ("Looks like a staticly linked executable");
-    static_linked = 1;
-  }
-
-  /* We don't need the file open anymore.  */
-  fclose (fp);
-
 
   /* Make sure LD_PRELOAD is not set unless necessary */
   unsetenv ("LD_PRELOAD");
@@ -174,14 +150,43 @@ main (int ac, char *av[])
   } else {
 
     /* No, it is a regular app. Check if it is in the runtime */
-    if (strstr (av[ac_idx], "runtime/apps/") != (char *) NULL &&
-        !static_linked) {
+    if (strstr (av[ac_idx], "runtime/apps/") != (char *) NULL) {
 
-      /* Yes, so the executable to start is the freevo_loader. */
-      newav[newac++] = "./runtime/dll/freevo_loader";
-      use_preloads = 1;
+      /* lets see is this app is staticly linked */
+      /* this check is taken from lddlibc4.c of glibc-2.2.5 */
 
-      LOG ("Runtime app, must use preloads"); 
+      /* First see whether this is really an a.out binary.  */
+      fp = fopen (av[ac_idx], "rb");
+      if (fp == NULL) {
+        LOG ("cannot open `%s'", av[1]);
+        exit (1);
+      }
+
+      /* Read the program header.  */
+      if (fread (&exec, sizeof exec, 1, fp) < 1) {
+        LOG ("cannot read header from `%s'", av[1]);
+      }
+      /* Test for the magic numbers.  */
+      else if (N_MAGIC (exec) != ZMAGIC && N_MAGIC (exec) != QMAGIC
+         && N_MAGIC (exec) != OMAGIC) {
+        LOG ("Looks like a staticly linked executable");
+        static_linked = 1;
+      }
+
+      /* We don't need the file open anymore.  */
+      fclose (fp);
+
+      if(!static_linked) {
+        /* Yes, so the executable to start is the freevo_loader. */
+        newav[newac++] = "./runtime/dll/freevo_loader";
+        use_preloads = 1;
+
+        LOG ("Runtime app, must use preloads"); 
+      }
+      else {
+        /* Just a plain old app. It will be copied to newav[] below */
+        LOG ("Static app, no preloads"); 
+      }
     } else {
       /* Just a plain old app. It will be copied to newav[] below */
       LOG ("Regular app, no preloads"); 
