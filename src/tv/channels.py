@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/08/14 01:19:04  rshortt
+# Add a simple but effective memory cache.
+#
 # Revision 1.23  2004/08/13 02:08:25  rshortt
 # Add reference to config.TV_DEFAULT_SETTINGS and settings() to Channel class.
 # TODO: add logic to include something like TV_SETTINGS_ALTERNATES = { 'tv0' : 'tv1' }
@@ -77,6 +80,29 @@ import plugin
 # The Electronic Program Guide
 import pyepg
 
+
+_channels_cache = None
+
+def get_channels():
+    global _channels_cache
+    pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
+
+    if not _channels_cache:
+        _debug_('no epg in memory, caching')
+        _channels_cache = ChannelList()
+
+    elif not os.path.isfile(pickle):
+        _debug_('no epg "%s", will try to rebuild' % pickle)
+        _channels_cache = ChannelList()
+
+    elif os.stat(pickle)[stat.ST_MTIME] > _channels_cache.load_time:
+        _debug_('epg newer than memory cache, reloading')
+        _channels_cache = ChannelList()
+
+    return _channels_cache
+
+
+
 class Channel:
     """
     information about one specific channel, also containing
@@ -136,9 +162,6 @@ class Channel:
             settings[type] = config.TV_SETTINGS.get(type)
 
         return settings
-
-
-
                     
 
 
@@ -152,6 +175,7 @@ class ChannelList:
         pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
 
         epg = pyepg.load(source, pickle)
+        self.load_time = time.time()
 
         for c in config.TV_CHANNELS:
             self.channels.append(Channel(c[1], c[2], epg.get(c[0])))
