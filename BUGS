@@ -1,0 +1,4 @@
+Known bugs for the Freevo project
+---------------------------------
+
+o The osd_x11 server doesn't redraw automatically when moving other windows over it.

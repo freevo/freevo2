@@ -1,0 +1,75 @@
+Freevo
+------
+
+Freevo is a Linux application that turns a PC with a TV capture card
+and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
+other applications such as mplayer, mpg123 and NVRec to play and
+record video and audio.
+
+
+Overview
+--------
+
+Sub-directories:
+
+osd_server/             Contains the Linux framebuffer OSD server,
+                        and the simulated OSD server
+rc_server/              Contains the lirc remote control client,
+                        and the simulated remote control client
+../apps/                Contains MPlayer, NVrec, XviD and Lirc
+matrox_g400/            Contains things that are specific to the 
+                        Matrox G400 graphics card. Might work for 
+                        other cards such as G450, but that is 
+                        untested.
+boot/                   Contains files that are unique for the
+                        user's machine, e.g. start scripts.
+
+
+Files:
+
+config.py               Configuration constants, i.e. where the 
+                        movie and MP3 files are located, UDP port
+                        numbers to use, etc
+                        You probably need to change stuff in here!
+freevo                  Shell script to start the entire system
+                        Modules etc must be initialized before
+                        this.
+startup.py              Background task that keeps the three
+                        sub applications running and respawns
+                        them if they should die.
+                        The three apps are:
+                          o main.py - main application
+                          o osd_server - handles OSD requests from main
+                          o rc_client - sends remote control cmds to main
+main.py                 Main Freevo application
+                          o Uses matrox_g400/v4l1_to_mga for watching TV
+                          o Uses matrox_g400/mga_bes_off to turn off the BES
+                          o Errors are logged in log_main_err
+                          o Debug output is logged in log_main_out
+                          o Uses the rc, osd, mixer and util modules
+rc.py                   Server for the remote control clients
+osd.py                  Client for the OSD servers
+mixer.py                Class for controlling the audio mixer
+util.py                 Various utility functions
+
+
+Coding
+------
+
+o Things that should be fixed are marked "XXX"
+
+
+
+Terminology
+-----------
+
+BES             Matrox G400 back-end scaler, HW accelerated viewing of 
+                video
+OSD             On screen display, i.e. text/simple graphics on the TV
+DivX            Compression format. Is really MPEG-1 Layer III audio and 
+                MPEG-4 video in an AVI file.
+AVI             File format for multimedia (audio, video). Can contain 
+                compressed data in pretty much any format.
+MPEG            Compressed data according to a number of ISO standards.
+                Defines audio and video compression, as well as the 
+                file formats.

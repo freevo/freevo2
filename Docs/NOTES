@@ -1,0 +1,52 @@
+Mixed stuff:
+
+o Openmovie is a very similar project
+
+----------------------------------------------------------------------
+
+libdvdread, libdvdcss from dtek
+
+css:
+./configure --disable-gtk   --disable-x11   --disable-xvideo   
+
+
+----------------------------------------------------------------------
+XviD:
+
+libcore.a needs to be copied manually to /usr/local/lib
+
+----------------------------------------------------------------------
+MPlayer:
+
+cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co main
+
+cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
+cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
+
+rm -rf main/libavcodec   
+mv ffmpeg/libavcodec main
+
+cp /usr/local/include/dvdnav/* /usr/local/include
+
+Latest config (20020505)
+./configure --enable-largefiles --with-csslibdir=/usr/local/lib --with-cssincdir=/usr/local/include --with-extraincdir=/usr/local/include --with-extralibdir=/usr/local/lib
+
+mga_vid driver:
+mknod /dev/mga_vid c 178 0
+
+To make it load/unload automatically when needed, insert the following line at the end of /etc/modules.conf:
+    alias char-major-178 mga_vid
+Then run
+    depmod -a
+
+
+----------------------------------------------------------------------
+
+NVREC:
+
+cd ..
+./bootstrap
+./configure --without-avifile --without-rte --with-divx4linux --without-quicktime  --without-sdl --without-mad
+make
+

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# XXX What is the notation for "all args"? Didn't have time to read the man-page...
+/usr/bin/env python startup.py $1 $2 $3 $4 $5 $6 $7

@@ -1,0 +1,141 @@
+#
+# osd.py
+#
+# This is the class for using the OSD server. It sends simple text commands
+# over UDP/IP to the OSD server.
+#
+
+import socket, time, sys
+
+# Configuration file. Determines where to look for AVI/MP3 files, etc
+import config
+
+# Set to 1 for debug output
+DEBUG = 0
+
+
+# Module variable that contains an initialized OSD() object
+_singleton = None
+
+def get_singleton():
+    global _singleton
+
+    # One-time init
+    if _singleton == None:
+        _singleton = OSD()
+        
+    return _singleton
+
+
+class OSD:
+
+    # The colors
+    # XXX Add more
+    COL_RED = 0xff0000
+    COL_GREEN = 0x00ff00
+    COL_BLUE = 0x0000ff
+    COL_BLACK = 0x000000
+    COL_WHITE = 0xffffff
+    COL_SOFT_WHITE = 0xEDEDED
+    COL_MEDIUM_YELLOW = 0xFFDF3E
+    COL_SKY_BLUE = 0x6D9BFF
+    COL_DARK_BLUE = 0x0342A0
+    COL_ORANGE = 0xFF9028
+    COL_MEDIUM_GREEN = 0x54D35D
+    COL_DARK_GREEN = 0x038D11
+
+    
+    def __init__(self, host='127.0.0.1', port=config.OSD_PORT):
+        self.host = host
+        self.port = port
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._send('clearscreen;' + str(self.COL_BLACK))
+        self.default_fg_color = self.COL_BLACK
+        self.default_bg_color = self.COL_SKY_BLUE
+        self.width = 768                # XXX hardcoded, fix
+        self.height = 576               # XXX hardcoded, fix
+
+
+    def _send(self, str):
+        while 1:
+            try:
+                self.s.sendto(str, (self.host, self.port))
+                break # out of the while 1 loop
+            except:
+                if DEBUG: print 'OSD server (%s:%s) gone, '
+                'trying again in a second...' % (self.host, self.port),
+                #print 'Reason %s' % sys.exc_info()
+                print sys.exc_info()[0]
+                time.sleep(1)
+                
+        
+    def shutdown(self):
+        self._send('quit')
+
+
+    def clearscreen(self, color=None):
+        if color == None:
+            color = self.default_bg_color
+        args = str(color)
+        self._send('clearscreen;' + args)
+
+
+    def setpixel(self, x, y, color):
+        args = str(x) + ';' + str(y) + ';' + str(color)
+        self._send('setpixel;' + args)
+
+        
+    def drawline(self, x0, y0, x1, y1, width=None, color=None):
+        if width == None:
+            width = 1
+
+        if color == None:
+            color = self.default_fg_color
+
+        args1 = str(x0) + ';' + str(y0) + ';'
+        args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';' + str(color)
+        self._send('drawline;' + args1 + args2)
+
+        
+    def drawbox(self, x0, y0, x1, y1, width=None, color=None):
+        if width == None:
+            width = 1
+
+        if color == None:
+            color = self.default_fg_color
+            
+        args1 = str(x0) + ';' + str(y0) + ';'
+        args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';' + str(color)
+        self._send('drawbox;' + args1 + args2)
+
+        
+    def drawstring(self, font, string, x, y, fgcolor=None, bgcolor=None):
+        if fgcolor == None:
+            fgcolor = self.default_fg_color
+        if bgcolor == None:
+            bgcolor = self.default_bg_color
+        args1 = '0;' + string + ';' + str(x) + ';' + str(y) + ';'
+        args2 = str(fgcolor) + ';' + str(bgcolor)
+        self._send('drawstring;' + args1 + args2)
+
+
+    def drawmenu(self, items, selected, spacing=1.0):
+        line_spacing = int(spacing * 30)
+        for i in range(len(items)):
+            fgcol = self.default_fg_color
+            bgcol = self.default_bg_color
+            x0 = 50
+            y0 = i * line_spacing + 100
+            self.drawstring('xxx', items[i], x0, y0, fgcol, bgcol)
+            if i == selected:
+                self.drawbox(x0 - 4, y0 - 3, 730, y0 + 24, width=3,
+                             color=self.COL_ORANGE)
+
+
+#
+# Simple test...
+#
+if __name__ == '__main__':
+    osd = OSD()
+    osd.clearscreen()
+

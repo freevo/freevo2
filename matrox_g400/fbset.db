@@ -1,0 +1,66 @@
+
+# FBset mode database
+
+mode "mon-640x480-60"
+    # D: 25.176 MHz, H: 31.469 kHz, V: 59.942 Hz
+    geometry 640 480 640 480 16
+    timings 39721 48 16 33 10 96 2
+    hsync high
+    accel true
+#    rgba 5/11,6/5,5/0,0/0
+endmode
+
+mode "vga70"
+    # H: 31.113 kHz, V: 69.294 Hz
+    geometry 640 400 640 400 4
+    timings 35242 64 96 35 12 112 2
+#    vsync high
+#    csync high
+endmode
+
+####################################################################
+
+# <pixclock>  <left>  <right>   <upper> <lower>  <hslen>  <vslen>
+
+mode "ntsc-768x576"
+   geometry 768 576 768 576 32
+   timings 35000 36 6 39 10 46 4
+   laced false
+   double false 
+   bcast false
+   accel true
+endmode
+
+mode "ntsc-800x600"
+    # D: 25.176 MHz, H: 27.605 kHz, V: 38.662 Hz
+    geometry 800 600 800 600 16
+    timings 39721 48 24 80 32 40 2
+    laced false
+    double false
+    bcast false
+    hsync high
+    accel true
+#    rgba 5/11,6/5,5/0,0/0
+endmode
+
+mode "ntsc-640x480_60a"
+    # D: 25.176 MHz, H: 31.469 kHz, V: 59.942 Hz
+    geometry 640 480 640 480 16
+    timings 39721 48 16 33 10 96 2
+    laced false
+    double false 
+    bcast false
+    hsync high
+    accel true
+#    rgba 5/11,6/5,5/0,0/0
+endmode
+
+mode "ntsc-640x480_60b"
+    geometry 640 480 640 480 32
+    timings 41562 37 64 29 13 24 2
+    double false 
+    accel true
+    laced false
+    bcast true
+endmode
+

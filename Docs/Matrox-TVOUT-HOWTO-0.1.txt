@@ -1,0 +1,491 @@
+  The Matrox Millenium G400 TV/OUT Mini-HOWTO
+  By Thomas Vander Stichele, thomas@apestaart.org
+  v0.1, August 15th, 2001
+
+  This document describes how to get TV/OUT working on this card.
+  ______________________________________________________________________
+
+  Table of Contents
+
+
+  1. Introduction
+
+     1.1 Copyright of this document
+     1.2 Where to get this document
+     1.3 Acknowledgments
+     1.4 Disclaimer
+
+  2. Overview
+     2.1 What are your options ?
+  
+  3. Hardware
+
+     3.1 Hardware Requirements
+     3.2 Hardware Installation
+
+  4. Framebuffer and mga driver combination
+
+     4.1 Software Requirements
+     4.2 Kernel Configuration
+     4.3 Console Stuff
+     4.4 X Configuration
+     4.5 Fine-tuning
+     4.6 Automating the process
+
+  5. Matrox drivers
+
+     5.1 Software Requirements
+     5.2 Kernel Configuration
+     5.3 X Configuration
+
+  6. Applications
+
+
+  1. Introduction
+
+There aren't that many consumer cards that handle TV output well.  One of
+the best is the Matrox Millenium G400, which regretfully seems to be
+discontinued in favour of the newer modules which do not work yet under
+Linux.
+
+     1.1 Copyright of this document
+
+This HOWTO is copyrighted 2001 Thomas Vander Stichele.
+It hasn't been registered with the LDP yet.
+
+     1.2 Where to get this document
+
+The latest version of this HOWTO can be retrieved from
+http://davedina.apestaart.org/download/doc/HOWTO
+
+     1.3 Acknowledgments
+
+* Geert Uytterhoeven, for writing the framebuffer drivers
+* Petr Vandrovec, for writing the matroxfb driver and for explaining some of
+  the issues to me
+* the xine and vlc team, for making a pretty good open-source DVD app
+
+     1.4 Disclaimer
+
+Use the information in this document at your own risk. I disavow any
+potential liability for the contents of this document. Use of the
+concepts, examples, and/or other content of this document is entirely
+at your own risk.
+
+All copyrights are owned by their owners, unless specifically noted
+otherwise.  Use of a term in this document should not be regarded as
+affecting the validity of any trademark or service mark.
+
+Naming of particular products or brands should not be seen as
+endorsements.  You are strongly recommended to take a backup of your
+system before major installation and backups at regular intervals.
+
+  2. Overview
+
+The TV/Out capabilities of the card do not work out of the box.  You have
+to do some amount of tweaking to get them to work.
+
+Here are some basic things you should know before we begin :
+  - TV/Out only works on the SECOND head of your dualhead card.  Figure out
+    which is which.  That should be easy : connect a monitor to one of the
+    heads and start your computer.  If you get output, that's the first head.
+    The second head doesn't have output unless you turn it on in software.
+
+  - The Matrox card is capable of doing either PAL, NTSC, or monitor.
+
+  - Messing with modelines and fbset tunings might damage your monitor and/or
+    your tv screen.  Monitors these days should have improved to the point
+    where it's really hard to actually wreck them, but I cannot guarantee
+    you'll be safe.  I've never heard of anyone actually blowing up a TV this
+    way, but still... You have been warned.
+
+     2.1 What are your options ?
+  
+Basically, you have two options to get TV/out working.  Both require at least
+XFree 3.3 (FIXME: check this) and I recommend you get one of the newer
+versions (we used XFree 4.0.3).
+
+     2.2 Using the matrox drivers
+
+The first option is to get the mga.o and mga_hal.o drivers from the matrox
+website (http://mga.matrox.com).  This will allow you to configure XFree in
+either dualhead, xinerama, or clone mode.  This will only work under X as it
+is the X driver that is responsible for setting up the second head.
+
+Furthermore, you are limited to a resolution of 640x480 (which is hardcoded in
+the closed-source mga_hal.o driver, according to a Matrox representative).
+The card will also output in MacroVision mode (a copy protection
+scrambling (FIXME: check right term and explanation) which prohibits you
+from recording the output to VCR).  When you hook up your PC through a
+VCR, the VCR will cause the TV to lose sync on a regular basis.  So you'll
+need to connect straight to the TV.
+
+The biggest drawback is that you will have overlaying and XVideo working, but
+ONLY on the first head.  The second head doesn't do acceleration.  (Actually,
+it's the second CRT, which is internal to the card, and routed by default to
+the second head, that doesn't do any acceleration).  It also does not seem to
+do overlaying.  Basically, this means that when you're watching TV with
+programs like XawTV, or when you want to watch DVD's, you will see what you
+want to be seeing on the first head, and a black area where the video should
+be on the TV.
+
+The advantage is that Matrox released a nice tool, called mgapdesk, which
+will set up your X Config file for you.
+
+     2.3 Using the framebuffer device
+
+Framebuffer devices are an abstraction of your video hardware.
+From /usr/src/linux/Documentation/fb/framebuffer.txt :
+
+"The frame buffer device provides an abstraction for the graphics
+hardware. It represents the frame buffer of some video hardware and allows
+application software to access the graphics hardware through a
+well-defined interface, so the software doesn't need to know anything
+about the low-level (hardware register) stuff.
+
+The device is accessed through special device nodes, usually located in
+the /dev directory, i.e. /dev/fb*."
+
+Check this file for more information on the concept.
+
+  3. Hardware
+
+This is pretty simple : you need one of the "working" Matrox cards, and a
+TV or like device to hook it up to.
+
+     3.1 Hardware Requirements
+
+Video card :
+	At the moment, this HOWTO is applicable for the Matrox Millenium
+	G400 Dualhead ONLY.  It might work on other (older) cards, but at
+	the moment it will NOT work on the G450 (it has another chipset).
+
+Connection :
+	To connect the card to a TV, you need the extra cable that should
+	have come with the G400.  It has both an RCA output and an
+	S-Video type output with 7 pins.  (FIXME: check S-Video types)
+	Both of these you can connect to your TV or VCR either directly or
+	through a SCART cable.
+
+TV/VCR :
+	Any relatively new TV or VCR will do.  You can hook up through
+	either an RCA jack, an S-Video jack, or through a SCART cable.
+	The card should be able to do both PAL and NTSC.
+
+Monitor :
+	We still keep a computer monitor connected to the first head of
+	the card, for testing and debugging.  Basically, it's still a lot
+	easier to read text from the screen than from the TV.  Make sure
+	you have a monitor that can withstand some of the frequency and
+	mode changes we'll be doing later on.  Also, if you have a PAL tv,
+	a monitor that can drop to as low as 50 Hz is nice.
+
+     3.2 Hardware Installation
+
+Put the card in your computer.  You have a manual to help you if you don't
+know how to do this.  Put the matrox cable on the SECOND head.
+We used a SCART cable with six RCA jacks (2 audio in, 2 audio out, 1 video
+in, 1 video out) and connected the video out jack to the RCA jack on the
+cable.  Our VCR is hooked up to the TV using the coaxial output from the
+VCR.  
+
+Better quality can be had by either connecting directly with the RCA
+jack to the TV, using an RCA output jack from the VCR to go to the TV, or
+use S-Video connections all the way.
+
+  4. Framebuffer and mga driver combination
+
+We recommend using the framebuffer method.  It might be a little slower
+(though we haven't actually noticed that), but you'll get the best result
+in outputting to your TV and stuff will work the way you want it to.
+
+     4.1 Software Requirements
+
+You need the following things :
+
+* fbset
+	a program to manipulate framebuffer devices.  RPM's are available
+	in the standard distributions.  The homepage is at
+	http://home.tvd.be/cr26864/Linux/fbdev/
+	The latest version at the time of writing is 2.1; this is the
+	version we used.
+
+* matroxset
+	matroxset is a program to manipulate the matrox card directly.
+	It allows you to re-connect internal CRT devices to external
+	heads, and set the output type of the CRT's. Homepage is 
+	http://knihovny.cvut.cz/~vana/matroxfb.html
+	The latest version is 0.3
+
+* kernel sources
+	You can get these from linux.kernel.org
+	If you don't know how to configure/compile/install new kernels,
+	you might want to read the Kernel-HOWTO.
+
+     4.2 Kernel Configuration
+
+An overview of what should be done can be found in the kernel
+documentation (/usr/src/linux/Documentation/fb), but it's not all that
+clear.
+
+I also found a mail from Mike Hicks, outlining some of the kernel options :
+
+"Go to the Character Devices section and enable I2C support.  This can
+be a module if you want.  Also, be sure to enable I2C bit-banger(?!)
+support, as that is the type of interface that the I2C bus on the video
+card uses.  Next, enable the Matrox stuff in the Framebuffer seection
+under Console Drivers.  Now, cross your fingers and hope everything
+compiles ;-)"
+
+Here's a list of what should be enabled in a 2.4 kernel (These are tested
+on 2.4.5) :
+
+Code maturity level options > Prompt for development...
+
+Processor type and features > MTRR support
+	(This speeds up image writing to your video card)
+
+Character Devices > I2C support > I2C support
+Character Devices > I2C support > I2C bit-banging interfaces
+	(This will make sure you can select a few more options in Console
+	drivers)
+
+Character Devices > I2C support > I2C device interface
+
+Character Devices > Matrox g200/g400
+	(This will make the mga.o driver)
+
+Console drivers > Frame-buffer support > Support for frame buffer devices
+Console drivers > Frame-buffer support > Matrox acceleration
+Console drivers > Frame-buffer support > G100/G200/G400/G450 support
+Console drivers > Frame-buffer support > Matrox I2C support
+Console drivers > Frame-buffer support > G400 second head support
+
+	(You do NOT need Multihead support, this badly-named option is for
+	 when you have multiple matrox cards in the machine)
+
+After this, you should exit, save, and run all of the standard commands to
+get you a new kernel.  Copy it to /boot, add a few lines to lilo.conf (if
+you use LILO), execute lilo and reboot with the new kernel.  You should
+get a penguin in the top left corner if the framebuffer is activated.
+
+     4.3 Console Stuff
+
+If the previous step was successful, you can now configure the
+framebuffers using fbset and matroxset.  After booting up, the first head
+is connected to the first internal CRT, which is connected to the first
+framebuffer device (usually /dev/fb0).  The second framebuffer device is
+not connected at all.
+
+The matroxset program can re-route framebuffers to different outputs.
+Run matroxset -h to get a list of the possible options.
+To get TV/OUT working (for PAL), do this :
+	matroxset -f /dev/fb0 -m 0 # this disconnects fb0 from outputs
+	matroxset -f /dev/fb0 -m 3 # this connects fb0 to both outputs
+	matroxset -f /dev/fb0 -o 1 1 # this sets fb0 to PAL output
+If you want NTSC, change the last 1 to 2.
+
+After this, you should get your console both on the TV and your monitor.
+
+You can also changing your resolution by using fbset.  You can use either
+the old interface (specifying options manually) or use the new interface
+(with fbset modes from /etc/fb.modes).
+
+I use the manual method and run
+	fbset -fb /dev/fb0 -xres 800 -yres 600
+
+     4.4 X Configuration
+
+Configuring X is a little trickier, but not by much.  I recommend getting
+the XFree 4.x series.  This series no longer uses different servers for
+different types of card, but has one server using driver plugins.
+
+Edit your /etc/X11/XF86Config-4 file.
+Make sure you have the following line in Section "Module" :
+        Load  "v4l"             # Video4Linux
+
+In Section "Monitor", verify that your VertRefresh includes 50 (for
+PAL) or 60 (for NTSC).
+
+in Section "Device", you need to have the following lines :
+
+        Driver      "mga"
+        Option      "hw cursor" "off"
+        Option "UseFBDev" "on"
+
+This will make sure you use the mga driver, but the mga driver will use
+the framebuffer device to actually display, so that you'll get X on both
+heads at the same time.  Turning the hardware cursor off will also help
+not mess up the display for some programs.
+
+In Section "Screen", make sure you use the right Device and Monitor.
+I chose an 800x600 mode in 16 bit color, so I have :
+
+        DefaultDepth     16     
+        DefaultFbBPP     16
+        SubSection "Display"  
+                Depth     16   
+                Modes    "800x600"
+        EndSubSection
+
+You can of course change this to your liking.
+
+Now try to start X by running startx.
+Hopefully, you'll get the desktop on both your monitor and the TV screen.
+If not, you should check the output of X to see what has gone wrong.
+
+Possible causes of error are :
+* You do not have the mga module.  Get the latest X and make sure you have
+  compiled the module as per the instructions in the kernel section.
+* Your monitor cannot handle the vertical refresh rate your framebuffer is
+  set at.  Either change the vertical refresh (see below in
+  Fine-tuning) or increase the limits in the Monitor section to include
+  the refresh rate X wants to use.
+
+In X, you should know be able to have hardware overlaying and XVideo
+extensions working.
+
+     4.5 Fine-tuning
+
+*WARNING* : this section indicates what worked for me.  Messing around
+with fbset too much might damage your monitor or TV screen and you do so
+at your own risk !
+
+You know should have X running on your TV.  You might notice that the
+desktop probably isn't centered and doesn't fill the screen properly.
+Normally, you would use xvidtune to fine-tune the modeline used.  In this
+case, that won't work, because by using the framebuffer device xvidtune
+doesn't like the modelines it's working with.
+
+You can run fbset and adjust all of the parameters until the display is
+centered nicely.  I had a black border on the left and right of the TV
+screen, and my desktop bleeded over the top edge of the TV as well.
+
+The easiest way to get the right fb settings is to start with one of the
+edges.  Start with fbset -left 10.  This will set the left border at ten
+pixels (internally), and will change the output on your TV.
+
+Now, a number of side effects might occur, due to sync issues on both the
+TV and the monitor.  Changing these settings could :
+* cause your monitor to loose sync slightly (for example, the top edge is
+skewed to the left or right, or parts of the display are shifted somewhat
+to the side) or totally.
+* cause your TV to loose sync slightly (in roughly the same ways).
+
+The important thing is that the monitor and TV seem to behave
+independently from each other in this regard, and increasing the value of
+the parameter by just one will change the situation totally.  So you could
+have a good view on both screens using 10, a bad monitor using 11, a bad
+TV using 12 while the monitor is OK, and so on.  So first take a value
+that aligns the border roughly to the border of your TV screen, and then
+increment or decrement that in small steps until both screen outputs are
+OK.  This is the setting you should use for that parameter.
+
+Once the left edge is ok, work on the right edge in the same way.
+
+If the top of your desktop bleeds over as well, you can adjust this by
+playing with the hslen parameter.  Work all of the edges until everything
+is ok.
+
+I use
+	fbset -fb /dev/fb0 -left 54 -right 26 -lower 32 -upper 80 -hslen 40
+
+From fbset, you should also be able to get a modeline (using fbset -x)
+for X and use that in your X Config file, but I haven't put enough time
+into that yet.
+
+     4.6 Automating the process
+
+Doing all of this manually is time consuming.  The process is more
+difficult since at times you'll have to type blind, because you just
+changed the framebuffer settings to something unusable.
+
+So I created a few simple scripts which you're welcome to use as well.
+mon is the first; it re-sets the framebuffer stuff to where it was after
+booting :
+
+matroxset -f /dev/fb0 -m 0
+matroxset -f /dev/fb1 -m 0
+matroxset -f /dev/fb0 -m 1
+matroxset -f /dev/fb0 -o 0 128
+fbset -fb /dev/fb0 640x480-60
+
+Put this somewhere convenient and learn to execute it by typing blindly ;)
+
+As for turning on tv/out and centering the display, I made a script called
+tvout and another called tvcenter.  tvout contains the steps outlined in 4.3,
+while tvcenter contains the stuff from 4.4
+
+You can also get (slightly more advanced versions of) these scripts from a
+.tar.gz of a project where I use all of this.  This .tar.gz also contains a
+kernel image I built, a RedHat "service" for starting the tv out at boot time,
+and some documentation.  It also triggers Gnome to run tvcenter when starting
+up gnome (as root), so that the display will end up centered.
+
+Download the tar.gz from 
+http://davedina.apestaart.org/download/DD-DD-VO/G400TVO/
+The latest version as of writing this is 0.3.0
+
+You can change the scripts to your liking.  Let me know if you've
+changed something useful for others as well.
+
+  5. Matrox drivers
+
+Installing the matrox drivers is pretty simple.  Basically, you download the
+drivers from the matrox site, install them, get mgapdesk as well, and run that
+(from X).
+
+     5.1 Software Requirements
+
+* mga.o and mga_hal.o
+	Get either binaries or source code, along with XFree source code,
+	from the matrox site
+
+* mgapdesk
+	This tool can also be gotten from the matrox site.  It's a handy
+	program (which is run from X, so you have to get X running on your
+	monitor first, but that's not a problem) which allows you to 
+	configure your matrox card.
+
+     5.2 Kernel Configuration
+
+No special changes should be made to the kernel.
+
+     5.3 X Configuration
+
+Get the two drivers for your version of X from the Matrox site
+(http://hal.matrox.com).  
+
+Install them in your X drivers directory 
+(make a backup copy of your existing mga.o).  In my setup, this is in
+/usr/X11R6/lib/modules/drivers.
+
+Start up X.  Then run mgapdesk.  Now you can choose the output type of your
+second head, and choose if you want to run in xinerama or clone mode.  I
+suggest clone mode; xinerama makes your X act like it has one big screen,
+consisting of your monitor on the left and your TV on the right.  This
+probably isn't what you want.  You can also set resolution, frequency, and
+other stuff.  The application speaks for itself, really.
+
+The only drawback here is that you have to restart X for the new settings to
+be used, and this can also be a time-consuming process.
+
+  6. Applications
+
+You can use pretty much all of the applications you'd use on your regular
+desktop.  A few suggestions to try are :
+
+* DVD players :
+	xine, xine.sourceforge.net
+	vlc,  www.videolan.org
+
+* emulators
+* TV programs
+
+For a more general application, see my personal project at
+http://davedina.apestaart.org/
+We use the Matrox G400 and try to integrate as much multimedia projects as
+we can into a home-made entertainment centre.
+
+I'll be happy to list other applications here as well.
+

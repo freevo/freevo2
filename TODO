@@ -1,0 +1,63 @@
+Todo list for Freevo
+====================
+
+Short-term
+----------
+o Channel guide layout
+o Installation instructions, clean up config stuff
+o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
+o clean up Notes
+o Add DVD rip
+  o mencoder works fine with XviD/FFMPEG, but it cannot be started from Freevo yet
+o package for alpha release (tgz, no CVS or RPM)
+o Add a digital filter to remove 50/60 Hz line-noise from audio line input
+  o Is only a problem for connecting line in to a VCR?
+o Finish LICENSE
+  o Add a copyright string to all files
+o Website:
+  o Add an animated GIF of the system being used instead of the 13MB DivX?
+  o Add links to the mailing list
+  o Make a sidebar with quick links
+ 
+
+Mid-term
+--------
+o Setup CVS support
+o Adjustment of saturation, contrast, etc for both TV-in and
+  TV-out.
+  o Have a menu choice to save the settings to a config file
+o Website:
+  o Logo
+  o Design, graphics. Can copy some stuff from winehq
+o Picture-In-Picture, channelscan
+  o Both using one or two WinTV boards
+  o Rewrite the TV app to use framegrabbing instead of overlay
+o Change channel during recording
+o Display error messages from mplayer when a movie/dvd cannot be played  
+o View photo galleries
+o Add support for mjpeg recording of video for off-line compression
+  o Could also be used to watch the recorded piece in real-time as it 
+    is being recorded
+o Use getop for python argument parsing
+
+
+Long-term
+---------
+o Radio in, record to MP3
+o email and ICQ notifs
+o ir out to control a cable box, satellite receiver, etc
+o recording schedule
+o text-to-speech for menus, notifications
+o MAME, other emulators
+o Mate blursk with FB and mpg123
+o Rate shows and get recommendations on other shows
+
+
+Ideas
+-----
+o Voice recognition -> sub-titles, at least phonetic text
+o Chat with others watching the same show
+
+
+Recently done
+-------------

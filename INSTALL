@@ -1,0 +1,41 @@
+Installation instructions for Freevo
+------------------------------------
+
+o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
+  are compiled in statically. If they're compiled as modules instead you
+  have to make sure that they're loaded before Freevo.
+
+o Test the video4linux driver using xawtv
+  o Freevo uses its' own tables for channels
+
+o Compile and install all the programs in apps/
+  o Install XviD
+  o Install MPlayer
+    o Test with the MGA graphics driver
+  o Install NVrec
+    o Test recording to a file
+  o Install lirc
+    o Test:
+      o Insert the serial driver module
+      o Start the daemon
+
+o Compile Freevo
+  o Requires Python >= version 2.1 (1.5 OK?)
+  o Test the remote using the lirc application irw, and using the 
+    remote_control_lirc.py Freevo application
+  o Test the text OSD test driver
+  o Test the MGA G400 OSD framebuffer driver
+
+o Update the settings in config.py!
+
+o Test Freevo using the simulated OSD and remote, just start "freevo"
+  in the main directory
+
+o Run Freevo using the real OSD framebuffer driver and the lirc remote
+
+o Create a boot-script that will start Freevo when Linux is booting.
+  boot/boot_freevo1 is a good start, it boots up my computer that
+  has a Matrox G400 dual-head graphics adapter and a lirc-compatible 
+  IR receiver on /dev/ttyS0.
+  o Make sure that X11 doesn't start up by changing the default 
+    runlevel in /etc/inittab to 3
