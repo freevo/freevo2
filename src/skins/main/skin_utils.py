@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/03 21:13:48  dischi
+# fix aspect calc to check if correction is needed
+#
 # Revision 1.5  2003/08/24 05:57:50  gsbarbieri
 # Try to use playlist icon based on parent directory display_type, so in a
 # music dir, you got playlist_audio.
@@ -140,16 +143,16 @@ def format_image(settings, item, width, height, force=0):
         type = type[:5]
         
     i_w, i_h = image.get_size()
-    aspect = max(float(i_h)/i_w, float(i_w)/i_h)
+    aspect = float(i_h)/i_w
     keep_geo = 0
 
-    if type == 'audio' and aspect < 1.3:
+    if type == 'audio' and aspect < 1.3 and aspect > 0.8:
         # this is an audio cover
         m = min(height, width)
         i_w = m
         i_h = m
         
-    elif type == 'video' and aspect > 1.3:
+    elif type == 'video' and aspect > 1.3 and aspect < 1.6:
         # video cover, set aspect 7:5
         i_w = 5
         i_h = 7
