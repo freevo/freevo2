@@ -1,29 +1,28 @@
 Python Library Documentation: module pymetar
 
 NAME
-    pymetar - Pymetar v0.3 (c) 2002 Tobias Klausman
+    pymetar - Pymetar v0.4 (c) 2002 Tobias Klausman
 
 FILE
-    /home/klausman/pymetar-0.3/pymetar.py
+    /home/klausman/pymetar-0.4/pymetar.py
 
 DESCRIPTION
     Pymetar is a python module and command line tool designed to fetch Metar
-    reports from the NOAA (http://www.noaa.gov) and allow access to the
-    included weather information.
+    reports from the NOAA (http://www.noaa.gov) and allow access to the included
+    weather information.
     
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+    This program is free software; you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any later
+    version.
     
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+    PARTICULAR PURPOSE.  See the GNU General Public License for more details.
     
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+    You should have received a copy of the GNU General Public License along with
+    this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+    Place, Suite 330, Boston, MA 02111-1307, USA.
     
     Please e-mail bugs to: klausman-usenet@tuts.net
 
@@ -31,24 +30,20 @@ CLASSES
     MetarReport
     
     class MetarReport
-     |  This class provides a means to download and parse
-     |  the decoded METAR reports from http://weather.noaa.gov
+     |  This class provides a means to download and parse the decoded METAR reports
+     |  from http://weather.noaa.gov/
      |  
-     |  In order to find the report relevant for you, find
-     |  the closest station at
-     |  http://www.nws.noaa.gov/oso/siteloc.shtml and feed
-     |  its 4-letter station code to fetchMetarReport(), 
-     |  case does not matter.
+     |  In order to find the report relevant for you, find the closest station at
+     |  http://www.nws.noaa.gov/oso/siteloc.shtml and feed its 4-letter station
+     |  code to fetchMetarReport(), case does not matter.
      |  
-     |  All methods return metric values, no matter what the
-     |  station provides. The conversion factors were taken
-     |  from the excellent "units" program.
+     |  All methods return metric values, no matter what the station provides. The
+     |  conversion factors were taken from the excellent "units" program.
      |  
-     |  If None is returned that means the information wasn't
-     |  available or could not be parsed. If you have the suspicion
-     |  that failure to parse an information was this libs fault,
-     |  please save the report generating the error send it to
-     |  me with a few lines detailing the problem. Thanks!
+     |  If None is returned that means the information wasn't available or could
+     |  not be parsed. If you have the suspicion that failure to parse an
+     |  information was this libs fault, please save the report generating the
+     |  error send it to me with a few lines detailing the problem. Thanks!
      |  
      |  Methods defined here:
      |  
@@ -60,28 +55,25 @@ CLASSES
      |      otherwise initialize fields.
      |  
      |  extractCloudInformation(self)
-     |      Extracts cloud information.  returns None or a tuple 
-     |      (sky type as a string of text and suggested pixmap name)
+     |      Extracts cloud information.  returns None or a tuple (sky type as a
+     |      string of text and suggested pixmap name)
      |  
      |  extractSkyConditions(self)
-     |      Extracts sky condition information from the encoded report.
-     |      Returns a tuple containing the description of the sky conditions as
-     |      a string and a suggested pixmap name for an icon representing said
-     |      sky condition.
+     |      Extracts sky condition information from the encoded report.  Returns a
+     |      tuple containing the description of the sky conditions as a string and
+     |      a suggested pixmap name for an icon representing said sky condition.
      |  
      |  fetchMetarReport(self, station, baseurl='http://weather.noaa.gov/pub/data/observations/metar/decoded/')
-     |      Retrieve the decoded METAR report from the given base URL and parse
-     |      it.
-     |      Fill the data properties in the class instance with the values
-     |      found in the report, converting them to metric values where
-     |      necessary.
+     |      Retrieve the decoded METAR report from the given base URL and parse it.
+     |      Fill the data properties in the class instance with the values found in
+     |      the report, converting them to metric values where necessary.
      |  
      |  getCycle(self)
      |      Return cycle value.
-     |      The cycle value is not the frequency or delay between observations
-     |      but the "time slot" in which the observation was made. There are 24
-     |      cycle slots every day which usually last from N:45 to N+1:45. The
-     |      cycle from 23:45 to 0:45 is cycle 0.
+     |      The cycle value is not the frequency or delay between observations but
+     |      the "time slot" in which the observation was made. There are 24 cycle
+     |      slots every day which usually last from N:45 to N+1:45. The cycle from
+     |      23:45 to 0:45 is cycle 0.
      |  
      |  getDewPointCelsius(self)
      |      Return dewpoint in degrees Celsius.
@@ -96,13 +88,12 @@ CLASSES
      |      Return relative humidity in percent.
      |  
      |  getISOTime(self)
-     |      Return the time when the observation was made
-     |      in ISO 8601 format
+     |      Return the time when the observation was made in ISO 8601 format
      |      (e.g. 2002-07-25 15:12:00Z)
      |  
      |  getPixmap(self)
-     |      Return a suggested pixmap name, without extension, depending on
-     |      current weather.
+     |      Return a suggested pixmap name, without extension, depending on current
+     |      weather.
      |  
      |  getPressure(self)
      |      Return pressure in hPa.
@@ -116,31 +107,31 @@ CLASSES
      |  getSkyConditions(self)
      |      Return sky conditions
      |  
+     |  getStationAltitude(self)
+     |      Return the station's altitude above the sea in meters.
+     |  
      |  getStationCity(self)
      |      Return city-part of station name
      |  
      |  getStationCountry(self)
      |      Return country-part of station name
      |  
-     |  getStationHeight(self)
-     |      Return the station's height above the sea in meters.
-     |  
      |  getStationLatitude(self)
      |      Return the station's latitude in dd-mm[-ss]D format :
-     |             dd : degrees
-     |             mm : minutes
-     |             ss : seconds
-     |             D : direction (N, S, E, W)
+     |      dd : degrees
+     |      mm : minutes
+     |      ss : seconds
+     |      D : direction (N, S, E, W)
      |  
      |  getStationLatitudeFloat(self)
      |      Return latitude as a float
      |  
      |  getStationLongitude(self)
      |      Return the station's longitude in dd-mm[-ss]D format :
-     |             dd : degrees
-     |             mm : minutes
-     |             ss : seconds
-     |             D : direction (N, S, E, W)
+     |      dd : degrees
+     |      mm : minutes
+     |      ss : seconds
+     |      D : direction (N, S, E, W)
      |  
      |  getStationLongitudeFloat(self)
      |      Return Longitude as a float
@@ -149,15 +140,15 @@ CLASSES
      |      Return full station name
      |  
      |  getStationPosition(self)
-     |      Return latitude, longitude and height above sea level of station as
-     |      a tuple. Some stations don't deliver height, for those, None is
-     |      returned as height.  The lat/longs are expressed as follows:
+     |      Return latitude, longitude and altitude above sea level of station as a
+     |      tuple. Some stations don't deliver altitude, for those, None is
+     |      returned as altitude.  The lat/longs are expressed as follows:
      |      xx-yyd
      |      where xx is degrees, yy minutes and d the direction.
-     |      Thus 51-14N means 51 degrees, 14 minutes north.  d may take the
-     |      values N, S for latitues and W, E for longitudes. Latitude and
-     |      Longitude may include seconds.  Height is always given as meters
-     |      above sea level, including a trailing M.
+     |      Thus 51-14N means 51 degrees, 14 minutes north.  d may take the values
+     |      N, S for latitues and W, E for longitudes. Latitude and Longitude may
+     |      include seconds.  Altitude is always given as meters above sea level,
+     |      including a trailing M.
      |      Schipohl Int. Airport Amsterdam has, for example:
      |      ('52-18N', '004-46E', '-2M')
      |      Moenchengladbach (where I live):
@@ -166,7 +157,7 @@ CLASSES
      |      getStationPositionFloat() instead
      |  
      |  getStationPositionFloat(self)
-     |      Return latitude and longitude as float values in a tuple (lat,long)
+     |      Return latitude and longitude as float values in a tuple (lat,long,alt)
      |  
      |  getTemperatureCelsius(self)
      |      Return the temperature in degrees Celsius.
@@ -175,10 +166,9 @@ CLASSES
      |      Return the temperature in degrees Fahrenheit.
      |  
      |  getTime(self)
-     |      Return the time when the observation was made.
-     |      Note that this is *not* the time when the report
-     |      was fetched by us
-     |      Format:         YYYY.MM.DD HHMM UTC
+     |      Return the time when the observation was made.  Note that this is *not*
+     |      the time when the report was fetched by us
+     |      Format:  YYYY.MM.DD HHMM UTC
      |      Example: 2002.04.01 1020 UTC
      |  
      |  getVisibilityKilometers(self)
@@ -202,21 +192,17 @@ CLASSES
      |  
      |  match_WeatherPart(self, regexp)
      |      Returns the matching part of the encoded Metar report.  
-     |      regexp :
-     |      the regexp needed to extract this part.  
+     |      regexp: the regexp needed to extract this part.  
      |      Returns the first matching string or None.  
-     |      WARNING : Some Metar reports may contain several matching 
-     |      strings, only the first one is taken into account, e.g.
-     |      ... FEW020 SCT075 BKN053 ...
+     |      WARNING: Some Metar reports may contain several matching strings, only
+     |      the first one is taken into account, e.g. FEW020 SCT075 BKN053
      |  
      |  metar_to_iso8601(self, metardate)
      |      Converts a metar date to an ISO8601 date.
      |  
-     |  parseLatLong(self, str)
-     |      Parse Lat or Long in METAR notation into
-     |      float values. N and E are +, S and W are -.
-     |      Expects one positional string and returns 
-     |      one float value.
+     |  parseLatLong(self, latlong)
+     |      Parse Lat or Long in METAR notation into float values. N and E are +, S
+     |      and W are -. Expects one positional string and returns one float value.
      |  
      |  strreverse(self, str)
      |      Reverses a string
@@ -224,21 +210,13 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data and non-method functions defined here:
      |  
-     |  __doc__ = '\n    This class provides a means to download and...h a few...
-     |      str(object) -> string
-     |      
-     |      Return a nice string representation of the object.
-     |      If the argument is a string, the return value is the same object.
+     |  __doc__ = '\n    This class provides a means to download a...a few lin...
      |  
      |  __module__ = 'pymetar'
-     |      str(object) -> string
-     |      
-     |      Return a nice string representation of the object.
-     |      If the argument is a string, the return value is the same object.
 
 DATA
     CLOUD_RE_STR = '^(CLR|SKC|BKN|SCT|FEW|OVC)([0-9]{3})?$'
-    COND_RE_STR = r'^(-|\\+)?(VC|MI|BC|PR|TS|BL|SH|DR|FZ)?(DZ|RA|SN|...S|U...
+    COND_RE_STR = '^(-|\\\\+)?(VC|MI|BC|PR|TS|BL|SH|DR|FZ)?(DZ|RA|...P|BR|...
     PRES_RE_STR = '^(A|Q)([0-9]{4})$'
     TEMP_RE_STR = '^(M?[0-9][0-9])/(M?[0-9][0-9])$'
     TIME_RE_STR = '^([0-9]{6})Z$'
@@ -248,10 +226,10 @@ DATA
     __author__ = 'klausman-usenet@tuts.net'
     __file__ = './pymetar.pyc'
     __name__ = 'pymetar'
-    __version__ = '0.3'
+    __version__ = '0.4'
 
 VERSION
-    0.3
+    0.4
 
 AUTHOR
     klausman-usenet@tuts.net
