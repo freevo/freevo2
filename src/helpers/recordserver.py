@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/03/13 22:36:44  dischi
+# fix crashes on debug (unicode again)
+#
 # Revision 1.35  2004/03/13 03:28:32  outlyer
 # Someone must have fixed the str2XML part internal to the FxdIMDB code, since
 # I was getting
@@ -204,9 +207,12 @@ from event import *
 # We won't be needing LD_PRELOAD.
 os.environ['LD_PRELOAD'] = ''
 
-DEBUG = config.DEBUG
+def _debug_(text):
+    if config.DEBUG:
+        log.debug(String(text))
+        
 
-if DEBUG: print 'PLUGIN_RECORD: %s' % config.plugin_record
+_debug_('PLUGIN_RECORD: %s' % config.plugin_record)
 
 appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 logfile = '%s/%s-%s.log' % (config.LOGDIR, appname, os.getuid())
@@ -223,8 +229,7 @@ class RecordServer(xmlrpc.XMLRPC):
         scheduledRecordings = None
 
         if os.path.isfile(config.TV_RECORD_SCHEDULE):
-            if DEBUG:
-                log.debug('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
+            _debug_('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
             f = open(config.TV_RECORD_SCHEDULE, 'r')
             scheduledRecordings = unjellyFromXML(f)
             f.close()
@@ -232,24 +237,22 @@ class RecordServer(xmlrpc.XMLRPC):
             try:
                 file_ver = scheduledRecordings.TYPES_VERSION
             except AttributeError:
-                log.debug('The cache does not have a version and must be recreated.')
+                _debug_('The cache does not have a version and must be recreated.')
     
             if file_ver != TYPES_VERSION:
-                log.debug(('ScheduledRecordings version number %s is stale (new is %s), must ' +
+                _debug_(('ScheduledRecordings version number %s is stale (new is %s), must ' +
                         'be reloaded') % (file_ver, TYPES_VERSION))
                 scheduledRecordings = None
             else:
-                if DEBUG:
-                    log.debug('Got ScheduledRecordings (version %s).' % file_ver)
+                _debug_('Got ScheduledRecordings (version %s).' % file_ver)
     
         if not scheduledRecordings:
-            if DEBUG: log.debug('GET: making a new ScheduledRecordings')
+            _debug_('GET: making a new ScheduledRecordings')
             scheduledRecordings = ScheduledRecordings()
             self.saveScheduledRecordings(scheduledRecordings)
     
-        if DEBUG:
-            log.debug('ScheduledRecordings has %s items.' % \
-                      len(scheduledRecordings.programList))
+        _debug_('ScheduledRecordings has %s items.' % \
+                len(scheduledRecordings.programList))
     
         return scheduledRecordings
     
@@ -260,14 +263,12 @@ class RecordServer(xmlrpc.XMLRPC):
     def saveScheduledRecordings(self, scheduledRecordings=None):
     
         if not scheduledRecordings:
-            if DEBUG: print 'SAVE: making a new ScheduledRecordings'
+            _debug_('SAVE: making a new ScheduledRecordings')
             scheduledRecordings = ScheduledRecordings()
     
-        if DEBUG:
-            log.debug('SAVE: saving cached file (%s)' % config.TV_RECORD_SCHEDULE)
-        if DEBUG:
-            log.debug("SAVE: ScheduledRecordings has %s items." % \
-                      len(scheduledRecordings.programList))
+        _debug_('SAVE: saving cached file (%s)' % config.TV_RECORD_SCHEDULE)
+        _debug_("SAVE: ScheduledRecordings has %s items." % \
+                len(scheduledRecordings.programList))
         f = open(config.TV_RECORD_SCHEDULE, 'w')
         jellyToXML(scheduledRecordings, f)
         f.close()
@@ -287,7 +288,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
         for chan in guide.chan_list:
             if prog.channel_id == chan.id:
-                if DEBUG: log.debug('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid))
+                _debug_('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid))
                 prog.tunerid = chan.tunerid
     
         scheduledRecordings = self.getScheduledRecordings()
@@ -335,7 +336,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def findProg(self, chan=None, start=None):
         global guide
 
-        if DEBUG: log.debug('findProg: %s, %s' % (chan, start))
+        _debug_('findProg: %s, %s' % (chan, start))
 
         if not chan or not start:
             return (FALSE, 'no chan or no start')
@@ -344,10 +345,10 @@ class RecordServer(xmlrpc.XMLRPC):
 
         for ch in guide.chan_list:
             if chan == ch.id:
-                if DEBUG: log.debug('CHANNEL MATCH')
+                _debug_('CHANNEL MATCH')
                 for prog in ch.programs:
                     if start == '%s' % prog.start:
-                        if DEBUG: log.debug('PROGRAM MATCH')
+                        _debug_('PROGRAM MATCH')
                         return (TRUE, prog.decode())
 
         return (FALSE, 'prog not found')
@@ -356,12 +357,12 @@ class RecordServer(xmlrpc.XMLRPC):
     def findMatches(self, find=None, movies_only=None):
         global guide
 
-        if DEBUG: log.debug('findMatches: %s' % find)
+        _debug_('findMatches: %s' % find)
     
         matches = []
 
         if not find and not movies_only:
-            if DEBUG: log.debug('nothing to find')
+            _debug_('nothing to find')
             return (FALSE, 'no search string')
 
         self.updateGuide()
@@ -376,8 +377,7 @@ class RecordServer(xmlrpc.XMLRPC):
                     continue
                 if not find or regex.match(prog.title) or regex.match(prog.desc) \
                    or regex.match(prog.sub_title):
-                    if DEBUG:
-                        log.debug('PROGRAM MATCH: %s' % prog.decode())
+                    _debug_('PROGRAM MATCH: %s' % prog.decode())
                     if movies_only:
                         if hasattr(prog, 'date') and prog.date:
                             matches.append(prog.decode())
@@ -386,8 +386,7 @@ class RecordServer(xmlrpc.XMLRPC):
                         # movies_only.
                         matches.append(prog.decode())
 
-        if DEBUG:
-            log.debug('return: %s' % str(matches))
+        _debug_('return: %s' % str(matches))
 
         if matches:
             return (TRUE, matches)
@@ -403,7 +402,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         
     def checkToRecord(self):
-        if DEBUG: log.debug('in checkToRecord')
+        _debug_('in checkToRecord')
         rec_cmd = None
         rec_prog = None
         cleaned = None
@@ -425,7 +424,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         now = time.time()
         for prog in progs.values():
-            if DEBUG: log.debug('checkToRecord: progloop = %s' % prog)
+            _debug_('checkToRecord: progloop = %s' % String(prog))
 
             try:
                 recording = prog.isRecording
@@ -452,7 +451,7 @@ class RecordServer(xmlrpc.XMLRPC):
                                          tv_util.getKey(currently_recording))
                         plugin.getbyname('RECORD').Stop()
                         time.sleep(5)
-                        log.debug('CALLED RECORD STOP 1')
+                        _debug_('CALLED RECORD STOP 1')
                     else:
                         # at this moment we must be in the pre-record padding
                         if currently_recording.stop - 10 <= now:
@@ -468,7 +467,7 @@ class RecordServer(xmlrpc.XMLRPC):
                                                  tv_util.getKey(currently_recording))
                                 plugin.getbyname('RECORD').Stop()
                                 time.sleep(5)
-                                log.debug('CALLED RECORD STOP 2')
+                                _debug_('CALLED RECORD STOP 2')
                             else: 
                                 delay_recording = TRUE
                         else: 
@@ -476,9 +475,9 @@ class RecordServer(xmlrpc.XMLRPC):
                              
                         
                 if delay_recording:
-                    if DEBUG: log.debug('delaying: %s' % prog)
+                    _debug_('delaying: %s' % prog)
                 else:
-                    if DEBUG: log.debug('going to record: %s' % prog)
+                    _debug_('going to record: %s' % prog)
                     prog.isRecording = TRUE
                     prog.rec_duration = duration
                     prog.filename = tv_util.getProgFilename(prog)
@@ -488,7 +487,7 @@ class RecordServer(xmlrpc.XMLRPC):
         for prog in progs.values():
             # If the program is over remove the entry.
             if ( prog.stop + config.TV_RECORD_PADDING) < now:
-                if DEBUG: log.debug('found a program to clean')
+                _debug_('found a program to clean')
                 cleaned = TRUE
                 del progs[tv_util.getKey(prog)]
 
@@ -576,7 +575,7 @@ class RecordServer(xmlrpc.XMLRPC):
         oldprio = int(me.priority)
         newprio = oldprio + mod
     
-        if DEBUG: log.debug('ap: mod=%s\n' % mod)
+        _debug_('ap: mod=%s\n' % mod)
        
         sr = self.getScheduledRecordings()
         favs = sr.getFavorites().values()
@@ -586,25 +585,24 @@ class RecordServer(xmlrpc.XMLRPC):
             fav.priority = int(fav.priority)
     
             if fav.name == me.name:
-                if DEBUG: log.debug('MATCH')
+                _debug_('MATCH')
                 fav.priority = newprio
-                log.debug('moved prio of %s: %s => %s\n' % (fav.name, oldprio, newprio))
+                _debug_('moved prio of %s: %s => %s\n' % (fav.name, oldprio, newprio))
                 continue
             if mod < 0:
                 if fav.priority < newprio or fav.priority > oldprio:
-                    if DEBUG:
-                        log.debug('fp: %s, old: %s, new: %s\n' % (fav.priority, oldprio, newprio))
-                        log.debug('skipping: %s\n' % fav.name)
+                    _debug_('fp: %s, old: %s, new: %s\n' % (fav.priority, oldprio, newprio))
+                    _debug_('skipping: %s\n' % fav.name)
                     continue
                 fav.priority = fav.priority + 1
-                if DEBUG: log.debug('moved prio of %s: %s => %s\n' % (fav.name, fav.priority-1, fav.priority))
+                _debug_('moved prio of %s: %s => %s\n' % (fav.name, fav.priority-1, fav.priority))
                 
             if mod > 0:
                 if fav.priority > newprio or fav.priority < oldprio:
-                    if DEBUG: log.debug('skipping: %s\n' % fav.name)
+                    _debug_('skipping: %s\n' % fav.name)
                     continue
                 fav.priority = fav.priority - 1
-                if DEBUG: log.debug('moved prio of %s: %s => %s\n' % (fav.name, fav.priority+1, fav.priority))
+                _debug_('moved prio of %s: %s => %s\n' % (fav.name, fav.priority+1, fav.priority))
     
         sr.setFavoritesList(favs)
         self.saveScheduledRecordings(sr)
@@ -893,7 +891,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
     def startMinuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
-        if DEBUG: log.debug('top of the minute in %s seconds' % next_minute)
+        _debug_('top of the minute in %s seconds' % next_minute)
         reactor.callLater(next_minute, self.minuteCheck)
 
 
