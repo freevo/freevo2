@@ -21,6 +21,7 @@
 #include <netdb.h>
 #include <errno.h>
 #include <signal.h>
+#include <sys/poll.h>
 
 #include "portable.h"
 #include "readpng.h"
@@ -180,7 +181,9 @@ udpserver (int port)
   int argc;
   char command[1000];
   int tmp;
-
+  int on = 1;
+  struct pollfd fds[1];
+  
   
   if ((rcv_fd = socket (AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror ("could not create socket");
@@ -197,7 +200,9 @@ udpserver (int port)
     perror ("*** bind error");
     exit (1);
   }
-
+  
+  ioctl (rcv_fd, FIONBIO, &on);
+     
   osd_clearscreen (0x006d9bff);
   osd_drawstring ("skins/fonts/RUBTTS__.TTF", 64,
                   "Waiting for client...",
@@ -206,16 +211,26 @@ udpserver (int port)
   osd_update ();
   
   while (1) {
-    printf ("Waiting for data...\n");
-    
-    if ((rlen = recvfrom (rcv_fd, buf, sizeof (buf), 0,
-                          (struct sockaddr *) &rx_addr, &rx_addr_len)) > 0) {
-      buf[rlen] = 0;
-      printf ("Got command from client: '%s'\n", buf);
-      parsecommand (buf, command, args, &argc);
-      executecommand (command, args, argc);
-      fflush (stdout);
+     
+    fds[0].fd = rcv_fd;
+    fds[0].events = POLLIN;
+
+    if (poll (fds, 1, 50)) {
+      
+      if ((rlen = recvfrom (rcv_fd, buf, sizeof (buf), 0,
+                            (struct sockaddr *) &rx_addr, &rx_addr_len)) > 0) {
+        buf[rlen] = 0;
+        printf ("Got command from client: '%s'\n", buf);
+        parsecommand (buf, command, args, &argc);
+        executecommand (command, args, argc);
+        fflush (stdout);
+      }
     }
+    
+#ifdef OSD_X11
+    x11_pollevents ();
+#endif
+
   }
   
       

@@ -7,9 +7,6 @@
 
 #include "x11.h"
 
-#define X_OFFSET  4
-#define Y_OFFSET  5
-
 static Display *dpy;
 static Window w;
 static GC gc;
@@ -58,7 +55,8 @@ x11_open (int width, int height)
                       CWBackingStore | CWBackPixel,
                       &attr);
 
-   XSelectInput (dpy, w, StructureNotifyMask);
+   XSelectInput (dpy, w, StructureNotifyMask | KeyPressMask |
+                 ExposureMask);
 
    XMapWindow (dpy, w);
 
@@ -125,12 +123,38 @@ x11_update (uint8 *pFB)
       }
    }
 
-   XPutImage (dpy, w, gc, pImage, 0, 0,
-              X_OFFSET, Y_OFFSET, xres, yres);
+   XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, xres, yres);
    
    XFlush (dpy);
 }
 
+
+/* Check for and handle all events */
+void
+x11_pollevents (void)
+{
+   XEvent e;
+
+      
+   while (XCheckWindowEvent (dpy, w, 0xffffffff, &e)) {
+
+      if (e.type == Expose) {
+        
+        printf ("Got expose: %dx%d at %d;%d\n",
+                e.xexpose.width, e.xexpose.height,
+                e.xexpose.x, e.xexpose.y);
+
+        XPutImage (dpy, w, gc, pImage, e.xexpose.x, e.xexpose.y,
+                   e.xexpose.x, e.xexpose.y,
+                   e.xexpose.width, e.xexpose.height);
+        XFlush (dpy);
+      } else if (e.type == KeyPress) {
+        printf ("Got keypress, key = %d\n", e.xkey.keycode);
+      }
+
+   }
+
+}
 
 
 void
@@ -139,7 +163,6 @@ x11_close (void)
    /* XXX */
    return;
 }
-
 
 
 #ifdef TEST
