@@ -85,6 +85,9 @@ SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 #
 # Watching TV
 #
+# You must change this to fit your local conditions! Check out the
+# file matrox_g400/frequencies.[ch] for possible choices.
+#
 WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 TV_SETTINGS = 'ntsc television us-cable'
 VCR_SETTINGS = 'ntsc composite1 us-cable'
