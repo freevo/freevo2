@@ -41,7 +41,7 @@ class ScheduleItem:
         if type(start_time) == type(''):
             t = time.strptime(start_time, '%Y-%m-%d %H:%M:%S')
             self.start_time = time.mktime(t)
-            if (time.localtime()[8]==1):
+            if (time.localtime()[8]==1) and (float(sys.version[0:3]) < 2.3):
                 self.start_time = self.start_time - 3600
         else:
             self.start_time = int(start_time)
