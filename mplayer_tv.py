@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/10/17 04:21:03  krister
+# Changed the way mplayer is stopped to prevent hangups. Added the priority setting.
+#
 # Revision 1.7  2002/10/06 14:41:22  dischi
 # Only use -wid when config.MPLAYER_USE_WID is true
 #
@@ -172,9 +175,12 @@ class MPlayer:
                      '%s:width=%s:height=%s:%s' %
                      (input, norm, tuner_channel, chanlist, w, h, outfmt))
             
-            mpl = ('%s -vo %s -fs %s %s' %
-                   (config.MPLAYER_CMD, config.MPLAYER_VO_DEV, tvcmd,
-                    config.MPLAYER_ARGS_TVVIEW))
+            # Build the MPlayer command
+            mpl = '--prio=%s %s -vo %s -fs %s %s' % (config.MPLAYER_NICE,
+                                                     config.MPLAYER_CMD,
+                                                     config.MPLAYER_VO_DEV,
+                                                     tvcmd,
+                                                     config.MPLAYER_ARGS_TVVIEW)
 
         elif mode == 'vcr':
             cf_norm, cf_input, tmp = config.VCR_SETTINGS.split()
@@ -348,8 +354,13 @@ class MPlayer:
 class MPlayerApp(childapp.ChildApp):
         
     def kill(self):
-        childapp.ChildApp.kill(self, signal.SIGINT)
-        # XXX Krister testcode for proper X11 video
+        # This seems to be the only way mplayer is sure to have released
+        # /dev/video by the time it returns, and not a second
+        # later which interferes with starting mplayer again for a different
+        # channel.
+        self.write(mplayerKey('STOP'))
+        childapp.ChildApp.kill(self, 0)
+
         if DEBUG: print 'Killing mplayer'
 
     # def stdout_cb
@@ -381,7 +392,6 @@ class MPlayer_Thread(threading.Thread):
                 self.app = MPlayerApp(self.command)
                 
                 while self.mode == 'play' and self.app.isAlive():
-                    # if DEBUG: print "Still running..."
                     if self.audioinfo: 
                         if not self.audioinfo.pause:
                             self.audioinfo.draw()        
@@ -390,6 +400,7 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 if self.mode == 'play':
+                    if DEBUG: print 'posting play_end'
                     rc.post_event(rc.PLAY_END)
 
                 self.mode = 'idle'
@@ -441,7 +452,6 @@ def mplayerKey(rcCommand):
         'LEFT'           : '\x1bOD',
         'NONE'           : '',
         'NEXT'           : '>',
-        'OK'             : 'q',
         'PAGEUP'         : '\x1b[5~',
         'PAGEDOWN'       : '\x1b[6~',
         'PAUSE'          : ' ',
