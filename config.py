@@ -109,6 +109,7 @@ class Struct:
 # Default settings
 CONF = Struct()
 CONF.geometry = '800x600'
+CONF.width, CONF.height = 800, 600
 CONF.display = 'x11'
 CONF.tv = 'ntsc'
 CONF.chanlist = 'us-cable'
