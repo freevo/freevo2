@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/30 16:50:20  dischi
+# pass xml_file definition to submenus
+#
 # Revision 1.11  2003/03/24 19:42:23  dischi
 # fixed cd id search
 #
@@ -448,6 +451,7 @@ def parseMovieFile(file, parent, duplicate_check):
                 dsitem.name = disc_set['title']
                 dsitem.image = disc_set['cover']
                 dsitem.info = disc_set['info']
+                dsitem.xml_file = file
                 if disc['l_re']:
                     dsitem.rom_label += [ disc['l_re'] ]
                 for disc in disc_set['disc']:

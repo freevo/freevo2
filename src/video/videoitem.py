@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/30 16:50:20  dischi
+# pass xml_file definition to submenus
+#
 # Revision 1.25  2003/03/23 20:00:26  dischi
 # Added patch from Matthieu Weber for better mplayer_options and subitem
 # handling
@@ -218,7 +221,9 @@ class VideoItem(Item):
         # XML file infos
         # possible values are: genre, runtime, tagline, plot, year, rating
         self.info = {}
+        self.xml_file = None
 
+        
     def copy(self, obj):
         """
         Special copy value VideoItems
@@ -291,7 +296,7 @@ class VideoItem(Item):
 
 
     def show_variants(self, arg=None, menuw=None):
-        m = menu.Menu(self.name, self.variants, reload_func=None)
+        m = menu.Menu(self.name, self.variants, reload_func=None, xml_file=self.xml_file)
         menuw.pushmenu(m)
 
     def play(self, arg=None, menuw=None):
@@ -444,7 +449,7 @@ class VideoItem(Item):
             file.mplayer_options += " -ss %s" % (time)
             items += [file]
         
-        moviemenu = menu.Menu(self.name, items)
+        moviemenu = menu.Menu(self.name, items, xml_file=self.xml_file)
         menuw.pushmenu(moviemenu)
 
         return
@@ -557,7 +562,7 @@ class VideoItem(Item):
             file.name = 'Play Title %s' % title
             items += [file]
 
-        moviemenu = menu.Menu(self.name, items, umount_all = 1)
+        moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
         menuw.pushmenu(moviemenu)
 
         return
@@ -615,7 +620,7 @@ class VideoItem(Item):
                 pop.destroy()
 
             
-        configure.main_menu(self, menuw)
+        configure.main_menu(self, menuw, self.xml_file)
         
 
     def eventhandler(self, event, menuw=None):

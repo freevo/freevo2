@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/30 16:50:20  dischi
+# pass xml_file definition to submenus
+#
 # Revision 1.6  2003/03/02 14:58:23  dischi
 # Removed osd.clearscreen and if we have the NEW_SKIN deactivate
 # skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
@@ -61,6 +64,8 @@ import menu
 import re
 
 
+current_xml_file = None
+
 #
 # Dummy for playing the movie
 #
@@ -80,10 +85,11 @@ def audio_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 def audio_selection_menu(arg=None, menuw=None):
+    global current_xml_file
     items = []
     for a in arg.available_audio_tracks:
         items += [ menu.MenuItem(a[1], audio_selection, (arg, a[0])) ]
-    moviemenu = menu.Menu('AUDIO MENU', items)
+    moviemenu = menu.Menu('AUDIO MENU', items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
         
 
@@ -96,12 +102,13 @@ def subtitle_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 def subtitle_selection_menu(arg=None, menuw=None):
+    global current_xml_file
     items = []
 
     items += [ menu.MenuItem("no subtitles", subtitle_selection, (arg, None)) ]
     for s in arg.available_subtitles:
         items += [ menu.MenuItem(s[1], subtitle_selection, (arg, s[0])) ]
-    moviemenu = menu.Menu('SUBTITLE MENU', items)
+    moviemenu = menu.Menu('SUBTITLE MENU', items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
 
         
@@ -114,11 +121,12 @@ def chapter_selection(menuw=None, arg=None):
     play_movie(menuw=menuw, arg=arg)
     
 def chapter_selection_menu(arg=None, menuw=None):
+    global current_xml_file
     items = []
     for c in range(1, arg.available_chapters+1):
         items += [ menu.MenuItem("play chapter %s" % c, chapter_selection,
                                  (arg, ' -chapter %s' % c)) ]
-    moviemenu = menu.Menu('CHAPTER MENU', items)
+    moviemenu = menu.Menu('CHAPTER MENU', items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
 
 
@@ -167,8 +175,10 @@ def main_menu_generate(item):
     return items
 
         
-def main_menu(item, menuw):
-    moviemenu = menu.Menu('CONFIG MENU', main_menu_generate(item))
+def main_menu(item, menuw, xml_file):
+    global current_xml_file
+    current_xml_file = xml_file
+    moviemenu = menu.Menu('CONFIG MENU', main_menu_generate(item), xml_file=xml_file)
     menuw.pushmenu(moviemenu)
     
 

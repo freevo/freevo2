@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/30 16:50:19  dischi
+# pass xml_file definition to submenus
+#
 # Revision 1.25  2003/03/30 14:17:06  dischi
 # added force_skin_layout for the new skin
 #
@@ -209,6 +212,7 @@ class Menu:
         self.umount_all = umount_all    # umount all ROM drives on display?
         self.surface = None
         if xml_file:
+            print 'has'
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
@@ -398,7 +402,12 @@ class MenuWidget(GUIObject):
         items = []
         for function, title in actions:
             items += [ MenuItem(title, function, item) ]
-        s = Menu(menu_name, items)
+        xml_file = None
+        if hasattr(item, 'xml_file'):
+            print item.xml_file
+            xml_file = item.xml_file
+
+        s = Menu(menu_name, items, xml_file=xml_file)
         self.pushmenu(s)
             
         
