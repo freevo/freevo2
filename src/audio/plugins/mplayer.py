@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/29 02:36:01  rshortt
+# Now works with mplayer's new audio (string) format.  The way I did this
+# seems a bit repetitive so feel free to make it better.
+#
 # Revision 1.9  2003/06/06 14:13:00  outlyer
 # Patch for audiofiles with length > 1000sec from Urmet... I made a similar
 # fix for video awhile back, don't know why I forgot audio.
@@ -258,6 +262,7 @@ class MPlayerApp(childapp.ChildApp):
         self.elapsed = 0
         childapp.ChildApp.__init__(self, app)
         self.RE_TIME = re.compile("^A: *([0-9]+)").match
+	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
               
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -276,12 +281,36 @@ class MPlayerApp(childapp.ChildApp):
                 pass # File closed
                      
         if line.startswith("A:"):         # get current time
-            m = self.RE_TIME(line) # Convert decimal 
+            m = self.RE_TIME_NEW(line)
             if m:
-                self.item.elapsed = int(m.group(1))
-                if self.item.elapsed != self.elapsed:
-                    mplayer.refresh()
-                self.elapsed = self.item.elapsed
+		timestrs = string.split(m.group(),":")
+		if len(timestrs) == 5:
+		    # playing for days!
+                    self.item.elapsed = 86400*int(timestrs[1]) + \
+		                        3600*int(timestrs[2]) + \
+		                        60*int(timestrs[3]) + \
+					int(timestrs[4])
+                elif len(timestrs) == 4:
+		    # playing for hours
+                    self.item.elapsed = 3600*int(timestrs[1]) + \
+		                        60*int(timestrs[2]) + \
+					int(timestrs[3])
+                elif len(timestrs) == 3:
+		    # playing for minutes
+                    self.item.elapsed = 60*int(timestrs[1]) + int(timestrs[2])
+                elif len(timestrs) == 2:
+		    # playing for only seconds
+                    self.item.elapsed = int(timestrs[1])
+            else:
+                m = self.RE_TIME(line) # Convert decimal 
+                if m:
+                    self.item.elapsed = int(m.group(1))
+
+            if self.item.elapsed != self.elapsed:
+                mplayer.refresh()
+            self.elapsed = self.item.elapsed
+
+
 
     def stderr_cb(self, line):
         if config.MPLAYER_DEBUG:
