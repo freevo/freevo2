@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/28 16:02:36  dischi
+# add episode
+#
 # Revision 1.4  2004/11/27 02:19:12  rshortt
 # -Only say we're adding data for those channels we've just found, not
 #  every channel in the database.
@@ -173,6 +176,7 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         try:
             channel_id = p['channel']
             title = Unicode(p['title'][0][0])
+            episode = ''
             sub_title = ''
             desc = ''
             start = 0
@@ -194,6 +198,8 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
                     ratings[String(r.get('system'))] = String(r.get('value'))
             if p.has_key('desc'):
                 desc = Unicode(format_text(p['desc'][0][0]))
+            if p.has_key('episode-num'):
+                episode = p['episode-num'][0][0]
             if p.has_key('sub-title'):
                 sub_title = p['sub-title'][0][0]
             try:
@@ -221,7 +227,8 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
                         print e
 
             guide.add_program(channel_id, title, start, stop, 
-                              subtitle=sub_title, description=desc)
+                              subtitle=sub_title, description=desc,
+                              episode=episode)
 
         except:
             traceback.print_exc()
