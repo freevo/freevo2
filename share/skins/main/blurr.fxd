@@ -235,6 +235,24 @@
             </content>
         </layout>
         
+
+	<menuset label="full video screen">
+	    <screen layout="video running screen"/>
+	</menuset>
+
+	<menuset label="small video screen">
+	    <screen layout="video running screen"/>
+	</menuset>
+
+        <layout label="video running screen">
+            <background>
+                <image image="background" x="0" y="0" label="background" alpha="200"/>
+                <image filename="gant/movie.png" x="435" y="0" width="370"
+		    height="380" alpha="200"/>
+            </background>
+        </layout>
+        
+
         <!-- 
 	*******************************************************
 	** AUDIO MENU

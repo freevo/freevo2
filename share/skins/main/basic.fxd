@@ -236,7 +236,7 @@
 	<font label="bmovl title" name="Vera" size="18" color="0xffffff"/>
 	<font label="bmovl text" name="Vera" size="14" color="0xffffff"/>
 	<font label="bmovl timer" name="VeraMono" size="12" color="0xffffff"/>
-	<font label="bmovl clock" name="Vera" size="14" color="0xffffff"/>
+	<font label="bmovl clock" name="Vera" size="16" color="0xffffff"/>
 
 
 
@@ -687,20 +687,20 @@
 	</video>
 
 	<menuset label="full video screen">
-	    <screen layout="screen" x="0" y="450" width="800" height="150"/>
-	    <view layout="view" x="10" y="460" width="180" height="130"/>
-	    <info layout="running video info" x="210" y="490" width="580"
+	    <screen layout="screen" x="0" y="480" width="800" height="120"/>
+	    <view visible="no"/>
+	    <info layout="running video info" x="10" y="490" width="780"
 		height="100"/>
-	    <progress layout="progressbar" x="210" y="460" width="580"
+	    <progress layout="progressbar" x="10" y="490" width="540"
 		height="20"/>
 	</menuset>
 
 	<menuset label="small video screen">
 	    <screen layout="screen" x="0" y="550" width="800" height="50"/>
 	    <view visible="no"/>
-	    <info layout="running video info" x="10" y="560" width="190"
+	    <info layout="running video info" x="10" y="560" width="780"
 		height="30"/>
-	    <progress layout="progressbar" x="210" y="560" width="580"
+	    <progress layout="progressbar" x="10" y="560" width="540"
 		height="20"/>
 	</menuset>
 
@@ -714,28 +714,39 @@
 	<layout label="running video info">
 	    <content x="0" y="0" type="text" spacing="20" font="default">
 		<item type="video">
+		    <goto_pos x="550" mode="relative"/>
+		    <text font="bmovl clock" expression="elapsed"/>
+                    <if expression="length">
+			<text font="bmovl clock"> of </text>
+			<text font="bmovl clock" expression="length"/>
+		    </if>
+		    <newline/>
+		    <goto_pos y="10" mode="relative"/>
                     <if expression="tv_show_name">
-                        <text font="info tagline" expression="tv_show_name"/>
+                        <text font="bmovl title" expression="tv_show_name"/>
                         <newline/>
                         <if expression="tv_show_ep">
-                            <text font="info tagline" expression="tv_show_ep"/>
+                            <text font="bmovl text" expression="tv_show_ep"/>
                             <newline/>
                         </if>
                     </if>
                     <if expression="not tv_show_name">
-                        <text font="info tagline" width="max" expression="name"/>
+                        <text font="bmovl title" width="max" expression="name"/>
                         <newline/>
                     </if>
                     <if expression="tagline">
-                        <text font="info tagline">"</text>
-                        <text font="info tagline" expression="tagline" 
+                        <text font="bmovl text">"</text>
+                        <text font="bmovl text" expression="tagline" 
 			    dim="no"/>
-                        <text font="info tagline">"</text>
+                        <text font="bmovl text">"</text>
                         <newline/>
                     </if>
+		    <goto_pos y="80" x="0" mode="absolute"/>
+                    <text font="bmovl clock" width="max" height="max" align="right"
+			expression="function:time" mode="soft"/>
 		</item>
 	    </content>
-	</layout>	    
+	</layout>
     </skin>
 </freevo>
 <!-- Keep this comment at the end of the file
