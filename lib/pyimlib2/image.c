@@ -16,6 +16,11 @@
 
 #include <sys/mman.h>
 #include <fcntl.h>
+#include "config.h"
+
+#ifdef USE_PYGAME
+#include <pygame.h>
+#endif
 
 static int _shm_ctr = 0;
 
@@ -405,6 +410,28 @@ PyObject *Image_PyObject__get_bytes(PyObject *self, PyObject *args)
 	return Py_BuildValue("(Oli)", ret, buffer, 1); //strcmp(format, "BGRA") == 1);
 }
 
+PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
+{
+#ifdef USE_PYGAME
+	PySurfaceObject *pysurf;
+        static int init = 0;
+
+	if (init == 0) {
+	    import_pygame_surface();
+	    init = 1;
+	}
+
+	if (!PyArg_ParseTuple(args, "O!", &PySurface_Type, &pysurf))
+		return NULL;
+	
+	imlib_context_set_image(((Image_PyObject *)self)->image);
+	get_raw_bytes("BGRA", pysurf->surf->pixels);
+	return Py_None;
+#else
+	PyErr_SetString(PyExc_ValueError, "pygame support missing"), (PyObject*)NULL;
+#endif
+}
+
 ////////////////////////////////////////////////////////////////////////////
 
 
@@ -436,6 +463,7 @@ PyMethodDef Image_PyObject_methods[] = {
 	{ "blend", Image_PyObject__blend, METH_VARARGS },
 	{ "move_to_shmem", Image_PyObject__move_to_shmem, METH_VARARGS },
 	{ "get_bytes", Image_PyObject__get_bytes, METH_VARARGS },
+	{ "to_sdl_surface", Image_PyObject__to_sdl_surface, METH_VARARGS },
 	{ "save", Image_PyObject__save, METH_VARARGS },
 	{ NULL, NULL }
 };
