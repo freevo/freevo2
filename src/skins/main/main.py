@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/02/18 21:54:03  dischi
+# small update needed for the new gui code
+#
 # Revision 1.39  2004/02/14 13:00:39  dischi
 # function to return the settings
 #
@@ -399,40 +402,24 @@ class Skin:
         attributes: name, size, color, shadow
         shadow attributes: visible, color, x, y
         """
-
         menu = self.__find_current_menu__(widget)
 
-        if menu and menu.skin_settings:
+        if menu and hasattr(menu, 'skin_settings') and menu.skin_settings:
             settings = menu.skin_settings
         else:
             settings = self.settings
 
         layout = settings.popup
 
-        background = None
-
+        background = []
         for bg in layout.background:
             if isinstance(bg, xml_skin.Image):
-                background = ( 'image', bg)
+                background.append(( 'image', bg))
             elif isinstance(bg, xml_skin.Rectangle):
-                background = ( 'rectangle', bg)
+                background.append(( 'rectangle', bg))
 
-        button_default  = None
-        button_selected = None
+        return layout.content, background
 
-        spacing = layout.content.spacing
-        color   = layout.content.color
-
-        if layout.content.types.has_key('default'):
-            button_default = layout.content.types['default']
-
-        if layout.content.types.has_key('selected'):
-            button_selected = layout.content.types['selected']
-
-        return (background, spacing, color, layout.content.font,
-                button_default, button_selected)
-
-        
 
     def get_font(self, name):
         """
