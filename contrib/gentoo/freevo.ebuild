@@ -1,6 +1,7 @@
 DESCRIPTION="Digital video jukebox (PVR, DVR)."
 HOMEPAGE="http://www.freevo.org/"
 
+P=`echo ${P} | sed 's/_/-/'`
 SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
 
 LICENSE="GPL-2"
@@ -44,8 +45,7 @@ src_compile() {
         sed -e "s:/etc/freevo/freevo.conf:${T}/freevo.conf:" \
                 -i "${S}/src/setup_freevo.py" || die "sed failed"
 
-        "${S}/freevo" setup ${myconf} || die "configure problem"
-
+        python "${S}/src/setup_freevo.py" ${myconf} || die "configure problem"
         sed -e "s:${T}/freevo.conf:/etc/freevo/freevo.conf:" \
                 -i "${S}/src/setup_freevo.py" || die "sed failed"
 }
@@ -55,6 +55,7 @@ src_install() {
 
  	install -d ${D}/etc/freevo
  	install -m 644 local_conf.py.example ${D}/etc/freevo
+ 	install -m 644 ${T}/freevo.conf ${D}/etc/freevo
 
  	# install boot scripts
  	install -d ${D}/etc/init.d

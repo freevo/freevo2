@@ -42,7 +42,7 @@ function pack {
     find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
     find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
 
-    sudo chown -R root.root /tmp/freevo-$version
+    sudo chown -R root:root /tmp/freevo-$version
 
     sudo python setup.py sdist
     sudo mv dist/* /usr/portage/distfiles
@@ -56,7 +56,7 @@ function ebuild {
 	/usr/local/portage/media-tv/freevo/freevo-$ebuild_version.ebuild
     cd /usr/local/portage/media-tv/freevo
     sudo rm -f files/digest-freevo-$version
-    sudo chown -R root.root .
+    sudo chown -R root:root .
     sudo ebuild freevo-$ebuild_version.ebuild digest 
 }
 
