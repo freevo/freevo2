@@ -136,9 +136,9 @@ cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo commit -m 
   make sure to commit them separately so that the change comment is correct for
   each file.
 
-o Test CVS latest version using anonymous checkout
+o Test CVS latest version using anonymous export
 cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
-cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo co freevo
+cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -r HEAD freevo
 cd freevo
 make
 ./freevo
@@ -146,9 +146,9 @@ make
 o Tag a release/checkpoint:
 cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag -r REL-1_2_0
 
-o Make a .tar.gz file from the tagged version using anonymous checkout
-cvs -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo login
-cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo co -r REL-1_2_0 freevo
+o Make a .tar.gz file from the tagged version using anonymous export
+cvs -d:pserver:anonymous:dummy@cvs.freevo.sourceforge.net:/cvsroot/freevo login
+cvs -z3 -d:pserver:anonymous@cvs.freevo.sourceforge.net:/cvsroot/freevo export -r REL-1_2_0 freevo
 mv freevo freevo-1.2.0
 tar cvzf freevo-1.2.0.tar.gz freevo-1.2.0
 
