@@ -331,7 +331,8 @@ def _node_to_programme(node):
         # Sigh. Make show zero-length. This will allow the show to appear in
         # searches, but it won't be seen in a grid, if the grid is drawn to
         # scale
-        programme[u'stop'.encode(locale)] = node.attrs[(u'', u'start')]
+        #programme[u'stop'.encode(locale)] = node.attrs[(u'', u'start')]
+        pass
     return programme
 
 def _node_to_channel(node):
