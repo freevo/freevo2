@@ -21,7 +21,6 @@ import config
 # XML support
 import movie_xml
 
-
 #
 # Get all subdirectories in the given directory
 #
@@ -221,11 +220,42 @@ def identifymedia(dir):
     image_files = match_files(dir, config.SUFFIX_AUDIO_FILES)
     
     if mplayer_files and not mp3_files:
+
+        # return the title and action is play
+        if title and len(mplayer_files) == 1:
+            # XXX add mplayer_options, too
+            return 'DIVX', title, image, ('video', mplayer_files[0], [])
+
+        # return the title
         if title:
-            if len(mplayer_files) == 1:
-                # XXX add mplayer_options, too
-                return 'DIVX', title, image, ('video', mplayer_files[0], [])
             return 'DIVX', title, image, None
+
+        # only one movie on DVD/CD, title is movie name and action is play
+        if len(mplayer_files) == 1:
+            title = string.capitalize(os.path.splitext(os.path.basename(mplayer_files[0]))[0])
+            return 'DIVX', title, image, ('video', mplayer_files[0], [])
+
+        # try to find out if it is a series cd
+        show_name = ""
+        the_same  = 1
+        volumes   = ''
+        for movie in mplayer_files:
+            if config.TV_SHOW_REGEXP_MATCH(movie):
+                show = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(movie))
+
+                if show_name and show_name != show[0]: the_same = 0
+                if not show_name: show_name = show[0]
+                if volumes: volumes += ', '
+                volumes += show[1] + "x" + show[2]
+
+        if show_name and the_same:
+            if os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".png").lower()):
+                image = (config.TV_SHOW_IMAGES + show_name + ".png").lower()
+            elif os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".jpg").lower()):
+                image = (config.TV_SHOW_IMAGES + show_name + ".jpg").lower()
+            return "DIVX", show_name + ' ('+ volumes + ')', image, None
+
+        # nothing found, return the label
         return "DIVX", 'CD [%s]' % label, None, None
 
     if not mplayer_files and mp3_files:
