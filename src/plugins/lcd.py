@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/22 21:21:54  gsbarbieri
+# Better doc and handling for lack of pylcd module.
+#
 # Revision 1.11  2003/09/22 20:21:20  gsbarbieri
 # Added __doc__ string, so plugins helper will be happy, right Dischi? :)
 #
@@ -76,11 +79,15 @@
 #endif
 
 import copy
-import pylcd
 import time
 import plugin
 from event import *
 import config
+try:
+    import pylcd
+except:
+    print "ERROR: you need pylcd to run \"lcd\" plugin."
+
 
 # Configuration: (Should move to freevo_conf.py?)
 sep_str = " | " # use as separator between two strings. Like: "Length: 123<sep_str>Plot: ..."
@@ -661,8 +668,34 @@ def get_info( item, list ):
 class PluginInterface( plugin.DaemonPlugin ):
     """
     Display context info in LCD using lcdproc daemon.
-    """
 
+    Requirements:
+       * lcdproc: installed and LCDd running. (http://lcdproc.sourceforge.net/)
+       * pylcd: installed (http://www.schwarzvogel.de/software-pylcd.shtml)
+
+       Also, your LCD dimensions must be supported. Right now it support: 4x20,
+    4x40, 2x16, 2x20, 2x40. If you have one with different dimension, it will
+    try to fit a smaller one, if none was find, then it will be disabled.
+       To support a new dimension is just a matter of creating "screens" to
+    that dimension, which is really easy, since a "screen" is just a set of
+    python dicts telling how to display information on the LCD. You can try it
+    yourself, just take a look in src/plugins/lcd.py, the variable is
+    "layouts". If you add support for your dimensions, please send a patch to
+    the list freevo-devel@lists.sourceforge.net, or if you weren't able, just
+    ask for it there.    
+    
+       To activate this plugin, just put the following line at the end of your
+    local_conf.py file:
+
+    plugin.activate( 'lcd' )
+       
+    """
+    __author__           = 'Gustavo Sverzut Barbieri'
+    __author_email__     = 'gustavo@linuxdicas.com.br'
+    __maintainer__       = __author__
+    __maintainer_email__ = __author_email__
+    __version__          = '$Revision$'
+    
     def __init__( self ):
         """
         init the lcd
