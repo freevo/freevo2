@@ -9,19 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.13  2003/08/26 20:10:50  outlyer
-# More warnings fixed by using explicit types
+# Revision 1.14  2003/09/05 02:59:09  rshortt
+# Merging in the changes from the new_record branch.  The tvguide now uses
+# record_client.py to talk to record_server and no longer uses freevo_record.lst
+# and record_daemon.py.  I will attic unused files at a later date.
 #
-# Revision 1.12  2003/08/25 18:44:32  dischi
-# Moved HOURS_PER_PAGE into the skin fxd file, default=2
+# Revision 1.8.2.4  2003/09/05 02:04:26  rshortt
+# Some fixes from the head and add the tv namespace.
 #
-# Revision 1.11  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.10  2003/08/22 05:59:35  gsbarbieri
-# Fixed some mistakes.
-# Now it's possible to have more than one line for program/label, just make
-# the height fit the number of wanted lines.
+# Revision 1.8.2.3  2003/08/11 19:45:00  rshortt
+# Adding changes form the main branch, perparing to merge.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,20 +42,20 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import os
 
 import gui.GUIObject
-import skin
-import event as em
-import config
-
-
-# The Electronic Program Guide
-import epg_xmltv as epg, epg_types
-
-import record_video
 
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
+
+import config, skin
+import event as em
+
+# The Electronic Program Guide
+import tv.epg_xmltv, tv.epg_types
+
+import tv.program_display
 
 skin = skin.get_singleton() # Create the Skin object
 
@@ -66,6 +63,7 @@ skin = skin.get_singleton() # Create the Skin object
 TRUE = 1
 FALSE = 0
 
+DEBUG = config.DEBUG
 
 CHAN_NO_DATA = 'This channel has no data loaded'
 
@@ -77,7 +75,7 @@ class TVGuide(gui.GUIObject):
         self.n_items, hours_per_page = skin.items_per_page(('tv', self))
         stop_time = start_time + hours_per_page * 60 * 60
 
-        guide = epg.get_guide(PopupBox(text='Preparing the program guide'))
+        guide = tv.epg_xmltv.get_guide(PopupBox(text='Preparing the program guide'))
         channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
 
         if not channels:
@@ -102,11 +100,9 @@ class TVGuide(gui.GUIObject):
 
 
     def eventhandler(self, event):
-        if hasattr(self, 'event_%s' % event):
-            eval('self.event_%s()' % event)
-            self.menuw.refresh()
-            
-        elif event == em.MENU_UP:
+        if DEBUG: print 'TVGUIDE EVENT is %s' % event
+
+        if event == em.MENU_UP:
             self.event_UP()
             self.menuw.refresh()
 
@@ -130,10 +126,20 @@ class TVGuide(gui.GUIObject):
             self.event_PageDown()
             self.menuw.refresh()
 
-        elif event == em.TV_START_RECORDING:
-            record_video.main_menu(self.selected)
-
+        elif event == em.MENU_SUBMENU or event == em.TV_START_RECORDING:
+            tv.program_display.ProgramDisplay(prog=self.selected).show()
+ 
         elif event == em.MENU_SELECT or event == em.PLAY:
+            tvlockfile = config.FREEVO_CACHEDIR + '/record'
+
+            if os.path.exists(tvlockfile):
+                # XXX: In the future add the options to watch what we are
+                #      recording or cencel it and watch TV.
+                AlertBox(text='Sorry, you cannot watch TV while recording. '+ \
+                              'If this is not true then remove ' + \
+                              tvlockfile + '.', height=200).show()
+                return TRUE
+
             self.hide()
             self.player('tv', self.selected.channel_id)
         
@@ -164,7 +170,7 @@ class TVGuide(gui.GUIObject):
 
     def rebuild(self, start_time, stop_time, start_channel, selected):
 
-        self.guide = epg.get_guide()
+        self.guide = tv.epg_xmltv.get_guide()
         channels = self.guide.GetPrograms(start=start_time+1, stop=stop_time-1)
 
         table = [ ]
@@ -205,7 +211,7 @@ class TVGuide(gui.GUIObject):
                 
             if found_1stchannel:
                 if not chan.programs:
-                    prg = epg_types.TvProgram()
+                    prg = tv.epg_types.TvProgram()
                     prg.channel_id = chan.id
                     prg.start = 0
                     prg.stop = 2147483647   # Year 2038
@@ -273,7 +279,7 @@ class TVGuide(gui.GUIObject):
                 procdesc = prg.desc
             to_info = (prg.title, procdesc)
         else:
-            prg = epg_types.TvProgram()
+            prg = tv.epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -317,7 +323,7 @@ class TVGuide(gui.GUIObject):
                 procdesc = prg.desc
             to_info = (prg.title, procdesc)
         else:
-            prg = epg_types.TvProgram()
+            prg = tv.epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -344,8 +350,7 @@ class TVGuide(gui.GUIObject):
             if flag_start_channel == 1:
                 n += 1
 
-        if n >= self.n_items and (i-self.n_items+2) < len(self.guide.chan_list) and \
-               (i-self.n_items+1 + self.n_items) < len( self.guide.chan_list ):
+        if n >= self.n_items and (i-self.n_items+2) < len(self.guide.chan_list):
             start_channel = self.guide.chan_list[i-self.n_items+2].id
         else:
             channel = self.guide.chan_list[i]
@@ -376,7 +381,7 @@ class TVGuide(gui.GUIObject):
             
             to_info = (prg.title, procdesc)
         else:
-            prg = epg_types.TvProgram()
+            prg = tv.epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -397,7 +402,7 @@ class TVGuide(gui.GUIObject):
         last_prg      = self.selected
 
         if last_prg == None:
-            last_prg = epg_types.TvProgram()
+            last_prg = tv.epg_types.TvProgram()
 
         n = 0
         flag_start_channel = 0
@@ -436,7 +441,7 @@ class TVGuide(gui.GUIObject):
             
             to_info = (prg.title, procdesc)
         else:
-            prg = epg_types.TvProgram()
+            prg = tv.epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -487,7 +492,7 @@ class TVGuide(gui.GUIObject):
             
             to_info = (prg.title, procdesc)
         else:
-            prg = epg_types.TvProgram()
+            prg = tv.epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
@@ -544,7 +549,7 @@ class TVGuide(gui.GUIObject):
             to_info = (prg.title, procdesc)
 
         else:
-            prg = epg_types.TvProgram()
+            prg = tv.epg_types.TvProgram()
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
