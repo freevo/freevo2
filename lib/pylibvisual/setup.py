@@ -30,20 +30,31 @@
 #
 # ----------------------------------------------------------------------- */
 
-import glob, os
+import glob, os, sys
 from distutils.core import setup, Extension
 
 # sources
 sources = [ 'libvisual.c' ]
 
 # includes
-includes = [ '/usr/include/libvisual/',
-             '/usr/include/',
-           ]
-CFLAGS = ['-O2','-Wall']
+includes = [ '/usr/include/' ]
 
 # libraries
-library_dirs=['/usr/lib/','/usr/lib/libvisual']
+library_dirs=['/usr/lib/']
+
+for i in ('/usr', '/usr/local'):
+    if os.path.isdir(os.path.join(i, 'include/libvisual')) and \
+           os.path.isdir(os.path.join(i, 'lib/libvisual')):
+        print 'found libvisual with prefix', i
+        includes.append(os.path.join(i, 'include/libvisual'))
+        library_dirs.append(os.path.join(i, 'lib'))
+        library_dirs.append(os.path.join(i, 'lib/libvisual'))
+        break
+else:
+    print 'libvisual not found, unable to build pylibvisual'
+    sys.exit(1)
+    
+CFLAGS = ['-O2','-Wall']
 
 include_dirs = []
 library_dirs = []
