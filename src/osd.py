@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.144  2004/03/10 20:13:52  dischi
+# set keyboard repeat
+#
 # Revision 1.143  2004/02/27 20:12:16  dischi
 # reworked rc.py to make several classes
 #
@@ -526,6 +529,7 @@ class OSD:
         _debug_('SDL Driver: %s' % (str(self.sdl_driver)),2)
 
         pygame.mouse.set_visible(0)
+        pygame.key.set_repeat(500, 30)
         self.mousehidetime = time.time()
         
         self._help = 0  # Is the helpscreen displayed or not
