@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/30 16:27:05  dischi
+# fixed a bug when changing skin at runtime
+#
 # Revision 1.3  2003/03/29 21:49:54  dischi
 # Added new tv main menu for the new skin. This includes the tv guide
 # (file is now called tvguide and not tvmenu) and DIR_RECORD. This
@@ -241,5 +244,5 @@ def start_tvguide(arg, menuw):
         tvguide.eventhandler(rc.UP)
         tvguide.refresh()
     else:
-        tvguide.rebuild(start_time, stop_time, guide.chan_list[0].id, prg)
+        tvguide.start(start_time, stop_time, guide.chan_list[0].id, prg)
         tvguide.refresh()

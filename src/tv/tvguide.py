@@ -40,8 +40,11 @@ class TVGuide:
         self.n_cols  = 4
         self.col_time = 30 # each col represents 30 minutes 
         self.all_channels = epg.get_guide().chan_list
-        self.n_items = skin.DrawTVGuide_ItemsPerPage(self)
 
+    def start(self, start_time, stop_time, start_channel, selected):
+        self.n_items = skin.DrawTVGuide_ItemsPerPage(self)
+        self.rebuild(start_time, stop_time, start_channel, selected)
+        
 
     def eventhandler(self, event):
         if hasattr(self, 'event_%s' % event):
