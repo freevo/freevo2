@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/08/11 20:47:17  rshortt
+# Start adding some try/except.
+#
 # Revision 1.15  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -162,9 +165,13 @@ class Videodev:
 
     def getfreq(self):
         val = struct.pack( FREQUENCY_ST, 0,0,0 )
-        r = fcntl.ioctl(self.device, long(GETFREQ_NO), val)
-        (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
-        return freq
+        try:
+            r = fcntl.ioctl(self.device, long(GETFREQ_NO), val)
+            (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
+            return freq
+        except IOError:
+            print "Failed to get frequency, not supported by device?" 
+            return -1
 
 
     def setchannel(self, channel):
@@ -244,8 +251,12 @@ class Videodev:
 
     def getfmt(self):  
         val = struct.pack( FMT_ST, 0,0,0,0,0,0,0,0)
-        r = fcntl.ioctl(self.device,GET_FMT_NO,val)
-        return struct.unpack( FMT_ST, r )
+        try:
+            r = fcntl.ioctl(self.device,GET_FMT_NO,val)
+            return struct.unpack( FMT_ST, r )
+        except IOError:
+            print "Failed to get format, not supported by device?" 
+            return (-1, -1, -1, -1, -1, -1, -1, -1)
 
 
     def setfmt(self, width, height):
