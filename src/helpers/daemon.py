@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/02/28 18:02:19  dischi
+# do not eat the cpu
+#
 # Revision 1.1  2003/08/31 09:45:48  dischi
 # small starter script
 #
@@ -42,7 +45,7 @@ import os
 import sys
 import config
 import pylirc
-
+import time
 
 def start():
     try:
@@ -73,6 +76,7 @@ if __name__ == "__main__":
         
 start()
 while 1:
+    time.sleep(1)
     code = pylirc.nextcode();
     if code and code[0] in ( 'EXIT', 'POWER' ):
         stop()
