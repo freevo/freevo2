@@ -34,6 +34,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/09/01 21:32:00  outlyer
+# PopupBox expects "StringType" which for some reason, doesn't include
+# UnicodeType, so it crashes when you shcedule a recording. Ideally, we'd
+# "extend" StringType to also include UnicodeType, but I don't know how yet,
+# so consider this a short term crash fix.
+#
 # Revision 1.26  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -299,7 +305,7 @@ def set_schedule(arg=None, menuw=None):
 
 
     s = 'Scheduled recording:\n'
-    s += 'Channel %s\n' % tunername
+    s += 'Channel %s\n' % tunername.encode('Latin-1')
     s += '%s %s %s min' % (recinfo.start_date.selected, recinfo.start_time.selected,
                            recinfo.length.selected)
 
