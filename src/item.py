@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/02/03 20:46:57  dischi
+# fix debug warning
+#
 # Revision 1.59  2004/02/01 19:47:13  dischi
 # some fixes by using new mmpython data
 #
@@ -297,8 +300,8 @@ class Item:
                 if val == value:
                     if not self.delete_info(key):
                         _debug_('unable to store info for \'%s\'' % self.name, 0)
-                elif not self.store_info(key, value):
-                    _debug_('unable to store info for \'%s\'' % self.name, 0)
+                else:
+                    self.store_info(key, value)
                 return
         self.info[key] = value
 
@@ -319,7 +322,7 @@ class Item:
         delete entry for metadata
         """
         if isinstance(self.info, util.mediainfo.Info):
-            self.info.delete(key)
+            return self.info.delete(key)
         else:
             print 'unable to delete info for that kind of item'
 
