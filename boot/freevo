@@ -24,7 +24,7 @@ case "$1" in
 	export SDL_NOKEYBOARD=true
         export SDL_NOMOUSE=true
 	export SDL_VIDEODRIVER=fbcon
-	(cd /tmp && $DAEMON >> $FREEVO_LOG 2>&1 &)
+	(cd $FREEVO_STARTDIR && $DAEMON >> $FREEVO_LOG 2>&1 &)
 	echo "$NAME."
 	;;
   stop)
