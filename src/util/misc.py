@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/07/04 08:10:50  dischi
+# make sure upsoon is written
+#
 # Revision 1.39  2004/06/23 20:29:42  dischi
 # fix typo in hasattr
 #
@@ -499,6 +502,8 @@ def comingup(items=None):
     if not result:
         result = _('No recordings are scheduled')
         
+    if os.path.isfile(cachefile):
+        os.unlink(cachefile)
     cache = codecs.open(cachefile,'w', config.encoding)
     cache.write(result)
     cache.close()
