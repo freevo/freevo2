@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/06/07 14:24:12  dischi
+# Sometimes cPickle crashes (with a strange cause). Try to use the
+# normal pickle (== slower but works) when it failed.
+#
 # Revision 1.19  2003/06/04 22:33:11  rshortt
 # Adding 1 to the pickle.dump uses a binary format that seems WAY quicker to
 # both create and load the pickle file.  You must remove your TV.xml-x.pickled
@@ -214,8 +218,12 @@ def get_guide(popup=None):
                 traceback.print_exc()
             else:
                 # Dump a pickled version for later reads
-                pickle.dump(cached_guide, open(pname, 'w'), 1)
-
+                try:
+                    pickle.dump(cached_guide, open(pname, 'w'), 1)
+                except:
+                    print 'strange cPickle error...try pickle'
+                    import pickle as pypickle
+                    pypickle.dump(cached_guide, open(pname, 'w'), 1)
 
     if not cached_guide:
         # An error occurred, return an empty guide
@@ -277,7 +285,6 @@ def load_guide():
             if len(data) > 3:
                 for (days, start_time, stop_time) in data[3:]:
                     c.times.append((days, int(start_time), int(stop_time)))
-                    
             guide.AddChannel(c)
     else: # Add all channels in the XMLTV file
         if DEBUG: print 'epg_xmltv.py: Adding all channels'
