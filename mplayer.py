@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2002/11/14 13:34:31  krister
+# Adjust the SDL/DXR3 patch.
+#
 # Revision 1.48  2002/11/14 03:47:49  krister
 # Added Thomas Shueppel's SDL/DXR3 patch.
 #
@@ -596,7 +599,7 @@ class MPlayer_Thread(threading.Thread):
 
                 # The DXR3 device cannot be shared between our SDL session
                 # and MPlayer.
-                if (osd.sdl_driver == 'dxr3' and self.play_mode == 'video'):
+                if (osd.sdl_driver == 'dxr3' and self.play_mode != 'audio'):
                     if DEBUG:
 		        print "Stopping Display for Video Playback on DXR3"
                     osd.stopdisplay()
@@ -620,7 +623,7 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3' and self.play_mode == 'video':
+                if osd.sdl_driver == 'dxr3' and self.play_mode != 'audio':
                     osd.restartdisplay()
 		    osd.update()
 		    print "Display back online"
