@@ -41,38 +41,6 @@ def match_files(dir, suffix_list):
     files.sort(lambda l, o: cmp(l.upper(), o.upper()))
     return files
     
-def makeNonBlocking(fd):
-
-    # XXX Ugly hack to work around Python <2.2 which doesn't
-    # XXX have these constants, but I don't want to require
-    # XXX people to upgrade Python in addition to everything
-    # XXX else
-    f_setfl = 4
-    f_getfl = 3
-    fndelay = 04000
-    #fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fl = fcntl.fcntl(fd, f_getfl)
-    try:
-	#fcntl.fcntl(fd, fcntl.F_SETFL, fl | 04000)
-	fcntl.fcntl(fd, f_setfl, fl | 04000)
-    except AttributeError:
-	#fcntl.fcntl(fd, fcntl.F_SETFL, fl | FCNTL.FNDELAY)
-	fcntl.fcntl(fd, f_setfl, fl | fndelay)
-
-
-# Why were we doing this?
-#try:
-#	fp = open('log.txt', 'a', 0)
-#except IOError:
-#	fp = open('/dev/null','a')
-
-write_lock = threading.Lock()
-
-#def log(str):
-#    global write_lock, fp
-#    write_lock.acquire()
-#    fp.write(str + '\n')
-#    write_lock.release()
 
 # Helper function for the md5 routine; we don't want to
 # write filenames that aren't in lower ascii so we uhm,
@@ -85,6 +53,7 @@ def hexify(str):
 		r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
 	return r
 
+
 # Python's bundled MD5 class only acts on strings, so
 # we have to calculate it in this loop
 def md5file(file):
@@ -95,6 +64,7 @@ def md5file(file):
 	f.close()
 	return hexify(m.digest())
     
+
 # Simple Python Imaging routine to return image size
 # and return a default if the Imaging library is not
 # installed.
@@ -106,7 +76,8 @@ def pngsize(file):
     width, height = image.size
     return width,height
 
-def resize(file,x0=25,y0=25):
+
+def resize(file, x0=25, y0=25):
 	import Image
 	# Since the filenames are not unique we need
 	# to cache them by content, not name.
