@@ -4,59 +4,27 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:    This file contains the freevo settings. To change the settings
-#           you can edit this file, or better, put a file named
-#           local_conf.py in the same directory and add your changes there.
-#           E.g.: when you want a alsa as mplayer audio out, just put
-#           "MPLAYER_AO_DEV = 'alsa9'" in local_conf.py
+# Notes:
+#    This file contains the freevo settings. To change the settings
+#    you can edit this file, or better, put a file named local_conf.py
+#    # in the same directory and add your changes there.  E.g.: when
+#    you # want a alsa as mplayer audio out, just put
+#    "MPLAYER_AO_DEV = # 'alsa9'" in local_conf.py
 #
-# Todo:     o a nice configure or install script to ask these things
-#           o different settings for MPG, AVI, VOB, etc
+# Developer Notes:
+#    The CVS log isn't used here. Write changes directly in this file
+#    to make it easier for the user
+#
+# Todo:
+#    o a nice configure or install script to ask these things
+#    o different settings for MPG, AVI, VOB, etc
 #
 # -----------------------------------------------------------------------
-# $Log$
-# Revision 1.114  2003/02/06 09:54:47  krister
-# Disabled decss by default for the runtime mplayer.
 #
-# Revision 1.113  2003/02/04 13:10:16  dischi
-# o removed MPLAYER_AO_HWAC3_DEV (mplayer is good enough to find that out)
-#   and ENABLE_SHUTDOWN (it's not used anymore)
-# o added DIRECTORY_SORT_BY_DATE and DIRECTORY_AUTOPLAY_SINGLE_ITEM
-#   This variables can be set in skin.xml
-# o reformat to 80 chars/line
+# Changes:
+#    o Added FREEVO_CONF_VERSION and LOCAL_CONF_VERSION to keep the three
+#      different files on sync
 #
-# Revision 1.112  2003/01/31 02:08:59  krister
-# Changed the X11 display option to automatically select between xv,x11,etc.
-#
-# Revision 1.111  2003/01/30 02:49:28  krister
-# Moved VCR settings to freevo_config
-#
-# Revision 1.110  2003/01/29 19:19:22  outlyer
-# Added LIRCRC directive, unused in mainline code for now, but can be used by
-# the rc.py and main.py in WIP/Aubin
-#
-# Revision 1.109  2003/01/28 03:45:18  krister
-# Changed for new runtime
-#
-# Revision 1.108  2003/01/19 15:56:30  dischi
-# New option ROM_SPEED to set the drive speed. Default is 0 (don't set
-# speed), a good value seems to be 8.
-#
-# Revision 1.107  2003/01/12 17:57:52  dischi
-# Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
-# audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
-# SUFFIX_VIDEO_DEF_FILES because we use this for movie xml files.
-#
-# Revision 1.106  2003/01/10 05:32:35  krister
-# Ooops, autosync for mplayer isn't supported until recently. Wait until it is
-# in freevo_apps.
-#
-# Revision 1.105  2003/01/09 05:04:05  krister
-# Added an option to play all movies in a dir, and generate random playlists
-# for them.
-#
-# Revision 1.104  2003/01/07 07:18:56  krister
-# Added autosync as a default option for MPlayer.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -85,6 +53,13 @@
 # If you want to change some things for your personal setup, please
 # write this in a file called local_conf.py in the same directory.
 ########################################################################
+
+# Version informations for the two config files. When the major version
+# of the config file doesn't match, Freevo won't start. If the minor version
+# is different, there will be only a warning
+
+FREEVO_CONF_VERSION = 1.0
+LOCAL_CONF_VERSION  = 1.0
 
 # ======================================================================
 # General freevo settings:
