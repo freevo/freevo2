@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/19 11:45:11  dischi
+# moved mmpython parsing to VideoItem
+#
 # Revision 1.6  2003/07/18 19:48:24  dischi
 # support for datadir
 #
@@ -49,7 +52,6 @@
 #endif
 
 
-import mmpython
 import config
 import util
 import xml_parser
@@ -76,7 +78,7 @@ def cwd(parent, files):
                                      file[len(parent.media.mountdir)+1:])
         else:
             url = file
-        x = VideoItem(file, parent, mmpython.parse(url))
+        x = VideoItem(file, parent)
         if parent.media:
             file_id = parent.media.id + file[len(os.path.join(parent.media.mountdir,"")):]
             try:

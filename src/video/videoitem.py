@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2003/07/19 11:45:11  dischi
+# moved mmpython parsing to VideoItem
+#
 # Revision 1.63  2003/07/13 13:11:17  dischi
 # show xml info on variants, too
 #
@@ -179,6 +182,7 @@ import event as em
 import menu
 import time
 import copy
+import mmpython
 
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
@@ -191,7 +195,13 @@ import plugin
 
 class VideoItem(Item):
     def __init__(self, filename, parent, info=None):
-        Item.__init__(self, parent, info)
+        if parent and parent.media:
+            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                     file[len(parent.media.mountdir)+1:])
+        else:
+            url = filename
+
+        Item.__init__(self, parent, mmpython.parse(url))
 
         # fix values
         self.type  = 'video'
