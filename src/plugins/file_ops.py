@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/07 19:46:07  outlyer
+# Make it possible to delete playlists. I can't see how this change could
+# ever break anything, but as with the plugin, it's optional if this change
+# should be in the next release.
+#
+# Not being able to delete a playlist seems like a bug to me.
+#
 # Revision 1.7  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -71,7 +78,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         items = []
         if ((item.type == 'video' and item.mode == 'file') or \
-            item.type in ( 'audio', 'image' )) and not item.media:
+            item.type in ( 'audio', 'image','playlist' )) and not item.media:
             self.item = item
             items.append((self.confirm_delete, _('Delete file'), 'delete'))
             if item.type == 'video' and hasattr(item, 'fxd_file'):
