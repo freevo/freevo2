@@ -107,7 +107,7 @@ def main_menu(arg, menuw):
             menu_str += 'NO DATA'
             
         items += [menu.MenuItem(menu_str, start_tv,
-                                ('tv', channel.tunerid), channel_logo)]
+                                ('tv', channel.tunerid), None, None, channel_logo)]
     
     hh = time.localtime(time.time())[3]
     mm = time.localtime(time.time())[4]
