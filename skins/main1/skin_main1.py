@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/01/29 16:41:26  outlyer
+# Removed a stray 'print sys.path' line.
+#
 # Revision 1.71  2002/12/21 17:26:52  dischi
 # Added dfbmga support. This includes configure option, some special
 # settings for mplayer and extra overscan variables
@@ -64,8 +67,6 @@
 import config
 
 import sys, socket, random, time, os, copy, re
-
-print sys.path
 
 # Various utilities
 import util
