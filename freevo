@@ -5,6 +5,11 @@
 # $Id$
 #
 
+# cd to the freevo directory if necessary
+if ! test -a src/identifymedia.py ; then
+    cd `dirname $0`
+fi
+
 # Is runapp present? If not it needs to be compiled
 if ! test -a runapp ; then
     echo ./runapp not found! You must compile freevo, see the INSTALL file.
@@ -42,6 +47,7 @@ if test -a runtime/apps/freevo_python ; then
     # Execute using the runtime:
     echo "Using the Freevo runtime (./runtime)"
     PYTHON=runtime/apps/freevo_python
+
 elif test -a $RT_DIR/freevo_python ; then
     
     # Double-check that we have the correct runtime version
@@ -62,6 +68,16 @@ elif test -a $RT_DIR/freevo_python ; then
     # Execute using the runtime:
     echo "Using the Freevo runtime ($RT_DIR)"
     PYTHON=$RT_DIR/freevo_python
+
+elif test -e runtime/preloads; then
+    # Gentoo has some preloads in runtime, but no complete environment
+    # We don't need to check the version, gentoo emerge will do this for us
+
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_runtime. Only use this for freevo itself, there are some
+    # problems with the rc_client and the preloads
+    export FREEVO_LD_PRELOAD=`cat runtime/preloads`
+
 else
     echo
     echo
@@ -102,6 +118,11 @@ fi
 # XXX It has not been tested! Please send in testreports!
 # If JOY_DEV is 0 then joy.py just exits.
 # python rc_client/joy.py &> /dev/null &
+
+# now set the LD_PRELOAD for Gentoo Linux
+if [[ "$FREEVO_LD_PRELOAD" != "" ]]; then
+    export LD_PRELOAD=$FREEVO_LD_PRELOAD
+fi
 
 # Start the main freevo application
 $PYTHON src/main.py $*
