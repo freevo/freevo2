@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/04/24 19:22:10  dischi
+# xml_file fix again
+#
 # Revision 1.43  2003/04/24 19:14:50  dischi
 # pass xml_file to directory and videoitems
 #
@@ -203,6 +206,7 @@ class VideoItem(Item):
         self.name    = util.getname(filename)
         self.tv_show = FALSE
         self.mplayer_options = ''
+        self.xml_file = None
         
         # XML file infos
         # possible values are: genre, runtime, tagline, plot, year, rating
@@ -224,6 +228,8 @@ class VideoItem(Item):
                 self.info = tvinfo[1]
                 if not self.image:
                     self.image = tvinfo[0]
+                if not self.xml_file:
+                    self.xml_file = tvinfo[3]
                 self.mplayer_options = tvinfo[2]
                 
             self.tv_show = TRUE
@@ -257,8 +263,7 @@ class VideoItem(Item):
         self.num_titles        = 0
         self.deinterlace       = 0
 
-        self.xml_file = None
-        if parent and hasattr(self.parent, 'xml_file'):
+        if parent and hasattr(self.parent, 'xml_file') and not self.xml_file:
             self.xml_file = self.parent.xml_file
             
         
