@@ -294,3 +294,10 @@ def datafile(name):
     Return a datafile based on the name. The result is an absolute path.
     """
     return os.path.join(CONF.datadir, name)
+
+
+def logfile(name):
+    """
+    Return a datafile based on the name. The result is an absolute path.
+    """
+    return os.path.join(CONF.logdir, name)
