@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/12/10 19:56:22  dischi
+# changes to new pyepg
+#
 # Revision 1.14  2004/12/04 01:25:28  rshortt
 # Add --query-exclude for help generating TV_CHANNELS_EXCLUDE.  Update location
 # of EPGDB.
@@ -77,7 +80,8 @@ import sysconfig
 import mcomm
 
 import pyepg
-epg = pyepg.get_epg(sysconfig.datafile('epgdb'))
+pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
+pyepg.load()
 
 
 def usage():
@@ -118,7 +122,8 @@ def grab():
         print 'Loading data into epgdb, this may take a while'
 
         shutil.move(xmltvtmp, config.XMLTV_FILE)
-        epg.add_data_xmltv(config.XMLTV_FILE, config.TV_CHANNELS_EXCLUDE)
+        pyepg.guide.add_data('xmltv', config.XMLTV_FILE,
+                             config.TV_CHANNELS_EXCLUDE)
 
 
 if __name__ == '__main__':
@@ -127,7 +132,7 @@ if __name__ == '__main__':
         usage()
     
     if len(sys.argv)>1 and sys.argv[1] == '--query':
-        chanlist = epg.get_channels()
+        chanlist = pyepg.guide.sql_get_channels()
 
         print
         print 'Possible list of tv channels. If you want to change the name or '
@@ -142,7 +147,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     if len(sys.argv)>1 and sys.argv[1] == '--query-exclude':
-        chanlist = epg.get_channels()
+        chanlist = pyepg.guide.sql_get_channels()
 
         print
         print 'Possible list of tv channels to exclude from Freevo.  Any '

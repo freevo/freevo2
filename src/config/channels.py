@@ -78,7 +78,7 @@ def add_uri(channel, uri):
 def refresh():
     log.info('Detecting TV channels.')
 
-    pyepg.connect(sysconfig.datafile('epgdb'))
+    pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
     pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
     
     for c in pyepg.channels:
