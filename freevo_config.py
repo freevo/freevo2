@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2003/01/30 02:49:28  krister
+# Moved VCR settings to freevo_config
+#
 # Revision 1.110  2003/01/29 19:19:22  outlyer
 # Added LIRCRC directive, unused in mainline code for now, but can be used by
 # the rc.py and main.py in WIP/Aubin
@@ -328,7 +331,7 @@ if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
 
 
 # ======================================================================
-# remote control section
+# Remote control section
 # ======================================================================
 
 
@@ -474,11 +477,45 @@ XMMS_CMD             = 'xmms'   # Priority of the XMMS process. 0 is unchanged,
 # boards.
 #
 TV_SETTINGS = '%s television %s /dev/video' % (CONF.tv, CONF.chanlist)
+
+#
+# XXX Recording is still work in progress. You need to change
+# XXX the entire string below to fit your local settings.
+# XXX Eventually TV norm (PAL/NTSC) etc will be taken from the
+# XXX other flags. VCR_xxx and TV_REC_xxx is not used yet!
+# XXX You also need to have the recording daemon running, see
+# XXX the website docs or the mailing lists if that fails.
+#
+# XXX Please see the mencoder docs for more info about the settings
+# XXX below. Some stuff must be changed (adevice), others probably
+# XXX should be ("Change"), or could be in some cases ("change?")
+VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
+           '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
+           ':norm=NTSC' +                  # Change
+           ':channel=%s' +                 # Filled in by Freevo
+           ':chanlist=us-cable' +          # Change
+           ':width=320:height=240' +       # Change if needed
+           ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
+           ':adevice=/dev/dsp4' +          # CHANGE!
+           ':audiorate=32000' +            # 44100 for better sound
+           ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver
+           'buffersize=64' +               # 64 Megabyte capture buffer, change?
+           ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
+           'vcodec=mpeg4' +                # lavcodec mpeg-4
+           ':vbitrate=1200:' +             # Change lower/higher, bitrate
+           'keyint=30 ' +                  # Keyframe every 10 secs, change?
+           '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
+           'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
+           '-ffourcc divx '                # Force 'divx' ident, better compat.
+           '-o %s.avi ')                   # Filled in by Freevo
+
+# XXX Not used yet
 VCR_SETTINGS = '%s composite1 %s /dev/video' % (CONF.tv, CONF.chanlist)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
 TV_VIEW_SIZE = (640, 480)
+# XXX Not used yet
 TV_REC_SIZE = (320, 240)   # Default for slower computers
 
 # Input formats for viewing and recording. The format affect viewing
@@ -486,6 +523,7 @@ TV_REC_SIZE = (320, 240)   # Default for slower computers
 # the MPlayer docs and experiment with mplayer to see which one fits
 # your computer best.
 TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
+# XXX Not used yet
 TV_REC_OUTFMT = 'yuy2'
 
 #
@@ -615,23 +653,6 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
 # Internal stuff, you shouldn't change anything here unless you know
 # what you are doing
 # ======================================================================
-
-VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
-                '-input Television -m -r 22050 -w 320 -h 240 ' +
-                '-ab 80 -vg 100 -vb 800 -H 50 -o %s')
-
-# Under development
-VIDREC_MQ_VCR = ('DIVX4rec -F 300000 -norm NTSC ' +
-                 '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
-                 ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s')
-
-# Under development
-VIDREC_MQ_NUVTV = ('-F 10000 -norm NTSC -input Television -m ' +
-                   '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
-                   '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s')
-
-VIDREC_MQ = VIDREC_MQ_TV
-VIDREC_HQ = ''
 
 #
 # Config for xml support in the movie browser
