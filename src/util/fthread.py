@@ -78,6 +78,6 @@ def call(function, *args, **kargs):
         # return.
         # FIXME: maybe add a max timer to pyNotifier to be sure that the step
         # function will return at some point.
-        notifier.step(True, False)
+        notifier.step()
     thread.join()
     return thread.result
