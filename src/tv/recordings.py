@@ -116,6 +116,8 @@ def record_list_callback(result):
         print status
         return
 
+    # FIXME: this takes too much time!!!!
+    # Request an item after one is returned.
     for l in listing:
         server.recording_describe(l[0], callback=record_describe_callback)
 
