@@ -22,9 +22,8 @@
 #include <sys/resource.h>
 #include <sched.h>
 #include <time.h>
+#include <errno.h>
 
-
-extern int errno;
 
 #define LOG(str, args...) {                                             \
   static char tmp1[1000];                                               \
