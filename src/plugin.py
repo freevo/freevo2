@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/09/20 15:07:45  dischi
+# add a function to search if a plugin is active
+#
 # Revision 1.43  2003/09/20 09:42:12  dischi
 # do not eval the args
 #
@@ -213,7 +216,29 @@ def remove(id):
         __all_plugins__.remove(p)
 
 
-
+def is_active(name, arg=None):
+    """
+    search the list if the given plugin is active. If arg is set,
+    check arg, too.
+    """
+    global __all_plugins__
+    for p in __all_plugins__:
+        if p[0] == name:
+            if not arg:
+                return True
+            if isinstance(arg, list) or isinstance(arg, tuple):
+                try:
+                    for i in range(len(arg)):
+                        if arg[i] != p[3][i]:
+                            break
+                    else:
+                        return True
+                except:
+                    pass
+            if arg == p[3]:
+                return True
+    return False
+                
     
 def init(callback = None):
     """
