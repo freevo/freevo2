@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2002/11/14 05:23:41  krister
+# Added Bob Pauwe's image bugfix patch.
+#
 # Revision 1.18  2002/11/14 04:38:47  krister
 # Added Bob Pauwe's image slideshow patches.
 #
@@ -224,7 +227,7 @@ class ImageViewer:
 
         # This is where we add a caption.  Only if playist is ! empty
         # May need to check the caption too?
-        if self.mode > 0:
+        if self.mode > 0 and self.playlist[self.number][1]:
             osd.drawstring(self.playlist[self.number][1], 10, 
                        osd.height - 25, fgcolor=osd.COL_ORANGE, 
                        bgcolor=osd.COL_BLACK)
