@@ -243,7 +243,7 @@
 	<shadow visible="no" color="0x000000" x="1" y="1"/>
       </info>
       
-      <view spacing="5">
+      <view spacing="5" visible="no">
         <geometry x="560" y="300" width="210" height="290" />
 	<background color="0x000000"/>
 	<font name="Arial_Bold" size="20" color="0xffffff" align="center" valign="center"/>
@@ -254,7 +254,11 @@
       </view>
       
       <listing type="table">
-        <geometry x="30" y="310" width="532" height="270"/>
+<!--
+        This geometry fits View+Listing:
+        <geometry x="30" y="310" width="532" height="270"/> 
+-->
+        <geometry x="20" y="310" width="760" height="270"/>
 	<background color="0xbb58677c"/>
 	
 	<expand>
@@ -265,7 +269,7 @@
 	<table border_color="0xaa000000" border_size="2" spacing="5">
 
 	  <content>
-	    <preview width="71" height="100"/>
+	    <preview width="142" height="200"/>
 	  
 	    <font name="Arial_Bold" size="15" color="0xffffff" align="center"/>
 	    <shadow visible="no"/>
