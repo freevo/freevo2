@@ -1121,6 +1121,8 @@ XINE_AO_DEV = 'oss'                     # alsa or oss
 
 if XINE_COMMAND:
     plugin.activate('video.xine')
+if CONF.fbxine:
+    plugin.activate('audio.xine')
 
 
 # ======================================================================
