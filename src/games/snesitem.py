@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/06/06 16:53:39  mikeruelle
+# use list version of command for better options parsing regarding things with spaces in there names
+#
 # Revision 1.18  2004/02/24 17:04:39  mikeruelle
 # Add some info to the info area where we have it
 #
@@ -303,13 +306,9 @@ class SnesItem(Item):
         elif os.path.isfile(os.path.splitext(file)[0] + ".png"):
             self.image = os.path.splitext(file)[0] + ".png"
 
-        command = '--prio=%s %s %s' % (config.GAMES_NICE,
-                                       cmd,
-                                       args)
-
-        romname = os.path.basename(file)
-        romdir = os.path.dirname(file)
-        command = '%s "%s"' % (command, file)
+        command = ['--prio=%s' % config.GAMES_NICE, cmd]
+	command.extend(args.split())
+	command.append(file)
 
         self.command = command
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/06/06 16:53:39  mikeruelle
+# use list version of command for better options parsing regarding things with spaces in there names
+#
 # Revision 1.19  2004/02/24 18:05:19  mikeruelle
 # make the info retreival a lot better
 #
@@ -100,9 +103,8 @@ class MameItem(Item):
             elif os.path.isfile(os.path.splitext(file)[0] + ".png"):
                 self.image = os.path.splitext(file)[0] + ".png"
 
-        command = '--prio=%s %s %s' % (config.GAMES_NICE,
-                                       cmd,
-                                       args)
+        command = ['--prio=%s' % config.GAMES_NICE, cmd]
+        command.extend(args.split())
 
         # Some files needs special arguments to mame, they can be
         # put in a <file>.mame options file. The <file>
@@ -110,15 +112,13 @@ class MameItem(Item):
         # The arguments in the options file are added at the end of the
         # regular mame arguments.
         if os.path.isfile(file + '.mame'):
-            command += (' ' + open(filename + '.mame').read().strip())
-            if DEBUG: print 'Read options, command = "%s"' % command
+	    addargs = open(filename + '.mame').read().strip()
+            command.extend(addargs.split())
+            if DEBUG: print 'Read additional options = "%s"' % addargs
 
-        romname = os.path.basename(file)
-        romdir = os.path.dirname(file)
-        command = '%s %s' % (command, file)
+        command.append(file)
 
         self.command = command
-	print "Command for MAME : %s" % self.command
 
         self.game_player = game.get_singleton()
 	if info:
