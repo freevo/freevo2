@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/12/10 19:47:49  dischi
+# make it possible to bypass version checking
+#
 # Revision 1.49  2003/12/10 19:06:06  dischi
 # move to new ChildApp2 and remove the internal thread
 #
@@ -97,25 +100,25 @@ class PluginInterface(plugin.Plugin):
         # create the mplayer object
         plugin.Plugin.__init__(self)
 
-        child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100)
-        data = child.fromchild.readline() # Just need the first line
-        if data:
-            data = re.search( "^MPlayer (?P<version>\S+)", data )
-            if data:                
-                _debug_("MPlayer version is: %s" % data.group( "version" ))
-                data = data.group( "version" )
-                if data[ 0 ] == "1":
-                    mplayer_version = 1.0
-                elif data[ 0 ] == "0":
-                    mplayer_version = 0.9
-                elif data[ 0 : 7 ] == "dev-CVS":
-                    mplayer_version = 9999
-                _debug_("MPlayer version set to: %s" % mplayer_version)
-                    
-        child.wait()
+        if not hasattr(config, 'MPLAYER_VERSION'):
+            child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100)
+            data = child.fromchild.readline() # Just need the first line
+            if data:
+                data = re.search( "^MPlayer (?P<version>\S+)", data )
+                if data:                
+                    _debug_("MPlayer version is: %s" % data.group( "version" ))
+                    data = data.group( "version" )
+                    if data[ 0 ] == "1":
+                        config.MPLAYER_VERSION = 1.0
+                    elif data[ 0 ] == "0":
+                        config.MPLAYER_VERSION = 0.9
+                    elif data[ 0 : 7 ] == "dev-CVS":
+                        config.MPLAYER_VERSION = 9999
+                    _debug_("MPlayer version set to: %s" % config.MPLAYER_VERSION)
+            child.wait()
 
         # register mplayer as the object to play video
-        plugin.register(MPlayer(mplayer_version), plugin.VIDEO_PLAYER, True)
+        plugin.register(MPlayer(config.MPLAYER_VERSION), plugin.VIDEO_PLAYER, True)
 
 
 class MPlayer:

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/10 19:47:49  dischi
+# make it possible to bypass version checking
+#
 # Revision 1.10  2003/12/10 19:02:38  dischi
 # move to new ChildApp2 and remove the internal thread
 #
@@ -47,12 +50,12 @@
 #endif
 
 
-import popen2, re
+import re
 
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
-
+import util.popen3
 from event import *
 import plugin
 
@@ -71,34 +74,28 @@ class PluginInterface(plugin.Plugin):
                   _( "'fbxine' not found, plugin 'xine' deactivated" )
             return
 
-        xine_version = 0
-        xine_cvs     = 0
+        if not hasattr(config, 'FBXINE_VERSION'):
+            config.FBXINE_VERSION = 0
+            for data in util.popen3.stdout('%s --version' % config.CONF.fbxine):
+                m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
+                if m:
+                    config.FBXINE_VERSION = int('%02d%02d%02d' % (int(m.group(1)),
+                                                                  int(m.group(2)),
+                                                                  int(m.group(3))))
+                    if data.find('cvs') >= 0:
+                        config.FBXINE_VERSION += 1
+
+            _debug_('detect fbxine version %s' % config.FBXINE_VERSION)
+
         
-        child = popen2.Popen3('%s --version' % config.CONF.fbxine, 1, 100)
-        while(1):
-            data = child.fromchild.readline()
-            if not data:
-                break
-            m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
-            if m:
-                if data.find('cvs') >= 0:
-                    xine_cvs = 1
-                xine_version =int('%02d%02d%02d' % (int(m.group(1)), int(m.group(2)),
-                                                    int(m.group(3))))
-
-        child.wait()
-
-        if xine_cvs:
-            xine_version += 1
-            
-        if xine_version < 923:
+        if config.FBXINE_VERSION < 923:
             print _( 'ERROR' ) + ': ' + \
                   _( "'fbxine' version too old, plugin 'xine' deactivated" )
             print _( 'You need software %s' ) % 'xine-ui > 0.9.22'
             return
             
         # register xine as the object to play
-        plugin.register(Xine(xine_version), plugin.AUDIO_PLAYER, True)
+        plugin.register(Xine(), plugin.AUDIO_PLAYER, True)
 
 
 # ======================================================================
@@ -108,9 +105,8 @@ class Xine:
     the main class to control xine
     """
     
-    def __init__(self, version):
+    def __init__(self):
         self.name         = 'xine'
-        self.xine_version = version
         self.app_mode     = 'audio'
         self.app          = None
         self.command = '%s -V none -A %s --stdctl' % (config.CONF.fbxine, config.XINE_AO_DEV)

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/12/10 19:47:49  dischi
+# make it possible to bypass version checking
+#
 # Revision 1.31  2003/12/10 19:06:06  dischi
 # move to new ChildApp2 and remove the internal thread
 #
@@ -77,13 +80,13 @@
 #endif
 
 
-import time, os
-import popen2, re
+import time, os, re
 import copy
 
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
+import util.popen3
 
 from event import *
 import plugin
@@ -109,27 +112,20 @@ class PluginInterface(plugin.Plugin):
         else:
             type = 'X'
 
-        xine_version = 0
-        xine_cvs     = 0
-        
-        child = popen2.Popen3('%s --version' % config.XINE_COMMAND, 1, 100)
-        while(1):
-            data = child.fromchild.readline()
-            if not data:
-                break
-            m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
-            if m:
-                if data.find('cvs') >= 0:
-                    xine_cvs = 1
-                xine_version =int('%02d%02d%02d' % (int(m.group(1)), int(m.group(2)),
-                                                    int(m.group(3))))
+        if not hasattr(config, 'XINE_VERSION'):
+            config.XINE_VERSION = 0
+            for data in util.popen3.stdout('%s --version' % config.XINE_COMMAND):
+                m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
+                if m:
+                    config.XINE_VERSION = int('%02d%02d%02d' % (int(m.group(1)),
+                                                                  int(m.group(2)),
+                                                                  int(m.group(3))))
+                    if data.find('cvs') >= 0:
+                        config.XINE_VERSION += 1
 
-        child.wait()
-
-        if xine_cvs:
-            xine_version += 1
+            _debug_('detect xine version %s' % config.XINE_VERSION)
             
-        if xine_version < 922:
+        if config.XINE_VERSION < 922:
             if type == 'fb':
                 print _( 'ERROR' ) + ': ' + \
                       _( "'fbxine' version too old, plugin 'xine' deactivated" )
@@ -141,7 +137,7 @@ class PluginInterface(plugin.Plugin):
                   ( 'xine-ui > 0.9.21', 'xine' )
             
         # register xine as the object to play
-        plugin.register(Xine(type, xine_version), plugin.VIDEO_PLAYER, True)
+        plugin.register(Xine(type, config.XINE_VERSION), plugin.VIDEO_PLAYER, True)
 
 
 class Xine:
