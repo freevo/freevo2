@@ -144,8 +144,6 @@ def main_menu(arg, menuw):
         start_tv(None, ('record', None))
         return
 
-    #rc.app = eventhandler
-
     skin.PopupBox('Preparing the program guide') 
 
     guide = epg.get_guide()
@@ -161,6 +159,8 @@ def main_menu(arg, menuw):
 	time.sleep(3.0)
 	menuwidget.refresh()
 	return
+
+    rc.app = eventhandler
 
     prg = None
     for chan in channels:
