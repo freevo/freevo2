@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/31 13:20:38  dischi
+# maybe there is no config string, do not crash on that
+#
 # Revision 1.8  2003/11/21 11:48:49  dischi
 # Show config(), too
 #
@@ -162,18 +165,19 @@ def print_info(plugin_name, all_plugins):
             print desc
             print
 
-            exec(config_string)
-            config_list = return_config()
+            if config_string.find('config') > 0:
+                exec(config_string)
+                config_list = return_config()
 
-            if config_list:
-                print
-                print 'Plugin configuration variables:'
-                print '-------------------------------'
-                for v in config_list:
-                    print '%s: %s' % (v[0], v[2])
-                    print 'Default: %s' % v[1]
+                if config_list:
                     print
-                print
+                    print 'Plugin configuration variables:'
+                    print '-------------------------------'
+                    for v in config_list:
+                        print '%s: %s' % (v[0], v[2])
+                        print 'Default: %s' % v[1]
+                        print
+                    print
             if status == 'active':
                 print 'The plugin is loaded with the following settings:'
                 for p in plugin.__all_plugins__:
