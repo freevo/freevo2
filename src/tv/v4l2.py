@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/11/19 04:25:35  rshortt
+# Removed setchanlist function and use frequency code from tv.freq.
+#
 # Revision 1.23  2004/11/15 22:54:29  rshortt
 # Use util.ioctl for everything we can.
 #
@@ -63,7 +66,7 @@
 
 
 import string
-import freq
+from freq import get_frequency
 import os
 import struct
 import sys
@@ -157,10 +160,6 @@ class Videodev:
         os.close(self.devfd)
 
 
-    def setchanlist(self, chanlist):
-        self.chanlist = freq.CHANLIST[chanlist]
-
-
     def getfreq(self):
         val = struct.pack( FREQUENCY_ST, 0,0,0 )
         try:
@@ -173,20 +172,12 @@ class Videodev:
 
 
     def setchannel(self, channel):
-        channel = str(channel)
-
-        freq = config.FREQUENCY_TABLE.get(channel)
-        if freq:
-            if DEBUG: 
-                print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
-                      (channel, freq)
+        if self.settings:
+            frequency = get_frequency(channel, self.settings.chanlist)
         else:
-            freq = self.chanlist.get(channel)
-            if DEBUG: 
-                print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
-                      (channel, freq)
+            frequency = get_frequency(channel)
 
-        if not freq:
+        if not frequency:
             print 'ERROR: unable to get frequency for %s' % channel
             return
 
@@ -296,10 +287,7 @@ class Videodev:
             return
 
         self.basic_info(self.settings.vdev)
-
         self.setstd(NORMS.get(self.settings.norm))
-        self.setchanlist(self.settings.chanlist)
-
         self.setinput(self.settings.input)
 
         # XXX TODO: make a good way of setting the capture resolution
