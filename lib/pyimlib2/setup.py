@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 import os
 import sys
 
-files = ["imlib2.c", "image.c", "font.c", "rawformats.c"]
+files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "epeg.c" ]
 
 include_dirs = []
 library_dirs = []
@@ -63,7 +63,14 @@ if 'X11' in libraries:
     config_h.write('#define USE_IMLIB2_DISPLAY\n')
 else:
     print 'Imlib2 compiled without X11, deactivation imlib2 display'
+
+if check_config('epeg', '0.9'):
+    print 'epeg extention enabled'
+    config_h.write('#define USE_EPEG\n')
+else:
+    print 'epeg extention disabled'
     
+
 config_h.close()
 
 setup(name="_Imlib2", version="0.0.7", 

@@ -731,4 +731,22 @@ def clean_stale_shmem():
         _Imlib2._shm_unlink(file)
 
 
+def thumbnail(src, dst, size):
+    """
+    Create a thumbnail from file src to dst with the given size. If the
+    image is smaller, do not scale the image.
+    """
+    if src.endswith('jpg'):
+        try:
+            _Imlib2.epeg_thumbnail(src, dst, size)
+            return open(dst)
+        except Exception, e:
+            pass
+    image = open(src)
+    if image.width > size[0] or image.height > size[1]:
+        image = image.scale_preserve_aspect(size)
+    image.save(dst)
+    return image
+
+
 clean_stale_shmem()

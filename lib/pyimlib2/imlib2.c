@@ -12,6 +12,7 @@
 #include "image.h"
 #include "rawformats.h"
 #include "font.h"
+#include "epeg.h"
 #include "config.h"
 
 #ifdef USE_IMLIB2_DISPLAY
@@ -144,6 +145,7 @@ PyMethodDef Imlib2_methods[] = {
     { "load_font", imlib2_load_font, METH_VARARGS }, 
     { "create", imlib2_create, METH_VARARGS }, 
     { "open", imlib2_open, METH_VARARGS }, 
+    { "epeg_thumbnail", epeg_thumbnail, METH_VARARGS }, 
     { "_shm_unlink", imlib2__shm_unlink, METH_VARARGS }, 
     { NULL }
 };
