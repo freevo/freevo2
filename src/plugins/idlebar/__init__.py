@@ -15,38 +15,12 @@
 #       idlebar.tv
 #       idlebar.weather
 #       idlebar.holidays
-#       idlebar.procstats
-#       idlebar.sensors
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.47  2003/10/23 21:55:30  outlyer
-# If we run into HTTP problems, don't keep slamming the METAR server, wait
-# for the next update.
+# Revision 1.1  2003/10/27 20:11:12  dischi
+# move idlebar.py to a directory
 #
-# Revision 1.46  2003/10/20 20:48:21  dischi
-# wrong exception handled
-#
-# Revision 1.45  2003/10/20 01:41:55  rshortt
-# Moving tv_util from src/tv/ to src/util/.
-#
-# Revision 1.44  2003/10/18 11:16:37  dischi
-# patch from Cyril Lacoux to support locale for the clock
-#
-# Revision 1.43  2003/10/14 18:11:22  dischi
-# patches from Magus Schmidt
-#
-# Revision 1.42  2003/10/01 19:02:09  dischi
-# add cpu usage patch from Viggo Fredriksen
-#
-# Revision 1.41  2003/09/21 13:19:00  dischi
-# adjust poll intervall
-#
-# Revision 1.40  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.39  2003/09/12 20:32:49  dischi
-# move holiday settings into the plugin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -73,21 +47,19 @@
 
 import time
 import os
-import config
 import sys
 import string
 import types
 import mailbox
+import re
+import locale
+
+import config
+import plugin
 import skin
 import util.tv_util as tv_util
+import util.pymetar as pymetar
 
-import plugin
-
-import pymetar
-
-import re
-
-import locale
 
 class PluginInterface(plugin.DaemonPlugin):
     """
@@ -447,275 +419,3 @@ class holidays(IdleBarPlugin):
             return osd.draw_image(icon, (x, osd.y + 10, -1, -1))[0]
             
             
-#----------------------------------- PROCSTATS ----------------------------
-class procstats(IdleBarPlugin):
-    """
-    Retrieves information from /proc/stat and shows them in the idlebar.
-    This plugin can show semi-accurate cpu usage stats and free memory
-    in megabytes (calculated approx. as MemFree+Cached?)
-
-    Activate with 
-       plugin.activate('idlebar.procstats',level=20) for defaults or
-       plugin.activate('idlebar.procstats',level=20,args=(Mem,Cpu,Prec))
-      where
-       Mem:  Draw memfree  (default=1, -1 to disable)
-       Cpu:  Draw cpuusage (default=1, -1 to disable)
-       Prec: Precision used when drawing cpu usage (default=1)
-    """
-    def __init__(self,Mem=1,Cpu=1,Prec=1):
-        IdleBarPlugin.__init__(self)
-        self.drawCpu = Cpu
-        self.drawMem = Mem
-        self.precision = Prec
-        self.time = 0
-        self.lastused = 0
-        self.lastuptime = 0
-
-    def getStats(self):
-        """
-        Don't get the stats for each update
-        as it gets annoying while navigating
-        Update maximum every 10 seconds
-        """
-        if (time.time()-self.time)>10:
-            self.time = time.time()
-
-            if self.drawMem == 1:
-                self.getMemUsage()
-
-            if self.drawCpu == 1:
-                self.getCpuUsage()
-
-    def getMemUsage(self):
-        """
-        May not be correct, but i like to see
-        total free mem as freemem+cached
-        """
-        free = 0
-        f = open('/proc/meminfo')
-
-        if f:
-            meminfo = f.read()
-            free = int(string.split(string.split(meminfo,'\n')[1])[3])
-
-        f.close()
-        self.currentMem = _('%iM') % (((free)/1024)/1024)
-
-    def getCpuUsage(self):
-        """
-        This could/should maybe be an even more
-        advanced algorithm, but it will suffice 
-        for normal use.
-
-        Note:
-        cpu defined as 'cpu <user> <nice> <system> <idle>'
-        at first line in /proc/stat
-        """
-        uptime = 0
-        used = 0
-        f = open('/proc/stat')
-
-        if f:
-            stat = string.split(f.readline())
-            used = long(stat[1])+long(stat[2])+long(stat[3])
-            uptime = used + long(stat[4])
-
-        f.close()
-        usage = (float(used-self.lastused)/float(uptime-self.lastuptime))*100
-        self.lastuptime = uptime
-        self.lastused = used
-        self.currentCpu = _('%s%%') % round(usage,self.precision)
- 
-    def draw(self, (type, object), x, osd):
-        font = osd.get_font('weather')
-        self.getStats()
-        widthmem = 0
-        widthcpu = 0
-
-        if self.drawCpu == 1:
-            widthcpu = font.font.stringsize(self.currentCpu)
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
-                          (x, osd.y + 7, -1, -1))    
-            osd.write_text(self.currentCpu, font, None, x + 15, osd.y + 55 - font.h,
-                           widthcpu, font.h, 'left', 'top')
-
-        if self.drawMem == 1:
-            widthmem = font.font.stringsize(self.currentMem)
-
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
-                          (x + 15 + widthcpu, osd.y + 7, -1, -1))
-            osd.write_text(self.currentMem, font, None, x + 40 + widthcpu, 
-                           osd.y + 55 - font.h, widthmem, font.h, 'left', 'top')
-
-        return widthmem + widthcpu + 15
-
-
-#----------------------------------- SENSOR --------------------------------
-
-class sensors(IdleBarPlugin):
-    """
-    Displays sensor temperature information (cpu,case) and memory-stats.
-
-    Activate with:
-       plugin.activate('idlebar.sensors', level=40, args=('cpusensor', 'casesensor', 'meminfo'))
-       plugin.activate('idlebar.sensors', level=40, args=(('cpusensor','compute expression'), 
-                                                          ('casesensor','compute_expression'),
-                                                          'meminfo'))
-    cpu and case sensor are the corresponding lm_sensors : this should be
-    temp1, temp2 or temp3. defaults to temp3 for cpu and temp2 for case
-    meminfo is the memory info u want, types ar the same as in /proc/meminfo :
-    MemTotal -> SwapFree.
-    casesensor and meminfo can be set to None if u don't want them
-    This requires a properly configure lm_sensors! If the standard sensors frontend
-    delivered with lm_sensors works your OK.
-    Some sensors return raw-values, which have to be computed in order 
-    to get correct values. This is normally stored in your /etc/sensors.conf.
-    Search in the corresponding section for your chipset, and search the 
-    compute statement, e.g. "compute temp3 @*2, @/2". Only the third
-    argument is of interest. Insert this into the plugin activation line, e.g.: 
-    "[...] args=(('temp3','@*2'),[...]". The @ stands for the raw value.
-    The compute expression  works for the cpu- and casesensor.
-    """
-    class sensor:
-        """
-        small class defining a temperature sensor
-        """
-        def __init__(self, sensor, compute_expression, hotstack):
-            self.initpath = "/proc/sys/dev/sensors/"
-            self.senspath = self.getSensorPath()
-            self.sensor = sensor
-            self.compute_expression = compute_expression
-            self.hotstack = hotstack
-            self.washot = False
-            
-        def temp(self):
-            def temp_compute (rawvalue):
-                try:
-                    temperature = eval(self.compute_expression.replace ("@",str(rawvalue)))
-                except:
-                    print "ERROR in idlebar.sensors: Compute expression does not evaluate"
-                    temperature = rawvalue
-                return int(temperature)
-
-            if self.senspath == -1 or not self.senspath:
-                return "?"        
-            
-            file = os.path.join( self.senspath, self.sensor )
-            f = open(file)
-            data = f.read()
-            f.close()
-            
-            temp = int(temp_compute (float(string.split(data)[2])))
-            hot = int(temp_compute (float(string.split(data)[0])))
-            if temp > hot:
-                if self.washot == False:
-                    self.hotstack = self.hotstack + 1
-                    self.washot == True
-            else:
-                if self.washot == True:
-                    self.hotstack = self.hotstack - 1
-                    self.washot = False
-                
-            return "%s°" % temp
-            
-        def getSensorPath(self):
-            if not os.path.exists(self.initpath):
-                print "LM_Sensors proc data not available? Did you load i2c-proc"
-                print "and configured lm_sensors?"
-                print "temperatures will be bogus"
-                return -1 #failure
-                
-            for senspath in os.listdir(self.initpath):
-                testpath = os.path.join(self.initpath , senspath)
-                if os.path.isdir(testpath): 
-                    return testpath
-                    
-    
-    
-    def __init__(self, cpu='temp3', case='temp2' , ram='MemTotal'):
-        IdleBarPlugin.__init__(self)
-        
-        import re
-        
-        self.hotstack = 0
-        self.case = None
-    
-        if isinstance (cpu,types.StringType):
-            self.cpu = self.sensor(cpu, '@', self.hotstack)
-        else:
-            self.cpu = self.sensor(cpu[0], cpu[1], self.hotstack)
-    
-        if case: 
-            if isinstance (case,types.StringType):
-                self.cpu = self.sensor(case, '@', self.hotstack)
-            else:
-                self.cpu = self.sensor(case[0], case[1], self.hotstack)
-
-
-        self.ram = ram
-        self.retwidth = 0
-
-        
-    def getRamStat(self):
-
-        f = open('/proc/meminfo')
-        data = f.read()
-        f.close()
-        rxp_ram = re.compile('^%s' % self.ram)
-        
-        for line in data.split("\n"):
-            m = rxp_ram.match(line)
-            if m :
-                return "%sM" % (int(string.split(line)[1])/1024)
-        
-    
-    def draw(self, (type, object), x, osd):
-        casetemp = None
-        widthcase = 0
-        widthram  = 0
-
-        font  = osd.get_font('weather')
-        if self.hotstack != 0:
-            font.color = 0xff0000
-        elif font.color == 0xff0000 and self.hotstack == 0:
-            font.color = 0xffffff
-        
-        cputemp = self.cpu.temp()        
-        widthcpu = font.font.stringsize(cputemp)
-        osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
-                       (x, osd.y + 8, -1, -1))    
-        osd.write_text(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
-                       'left', 'top')
-        widthcpu = max(widthcpu, 32) + 10
-        
-        if self.case:
-            casetemp = self.case.temp()
-            
-            widthcase = font.font.stringsize(casetemp)
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/case.png'),
-                                        (x + 15 + widthcpu, osd.y + 7, -1, -1))
-            osd.write_text(casetemp, font, None, x + 40 + widthcpu,
-                           osd.y + 55 - font.h, widthcase, font.h,
-                           'left', 'top')
-            widthcase = max(widthcase, 32) + 10
-            
-        if self.ram:
-            text = self.getRamStat()
-            widthram = font.font.stringsize(text)
-            if casetemp:
-                img_width = x + 15 + widthcpu + widthcase + 15
-            else:
-                img_width = x + 15 + widthcpu
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
-                           (img_width, osd.y + 7, -1, -1))
-            osd.write_text(text, font, None, img_width + 15, osd.y + 55 - font.h,
-                           widthram, font.h, 'left', 'top')
-                       
-        if self.retwidth == 0:
-            self.retwidth = widthcpu + 15
-            if self.case: 
-                self.retwidth = self.retwidth + widthcase + 12
-            if self.ram:
-                self.retwidth = self.retwidth + 15 + widthram
-                
-        return self.retwidth
