@@ -489,15 +489,15 @@ plugin.activate('tiny_osd')
 # For recording tv
 #
 # generic_record plugin needs VCR_CMD to be set correctly
-plugin_record = plugin.activate('tv.generic_record')
+plugin_record = plugin.activate('record.generic_record')
 
 #
 # Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
 # and want freevo to do everthing for you. TV_SETTINGS must be set 
 # correctly. To use you need to set the following two lines:
 #
-# plugin.remove('tv.generic_record')
-# plugin_record = plugin.activate('tv.ivtv_record')
+# plugin.remove('record.generic_record')
+# plugin_record = plugin.activate('record.ivtv_record')
 
 # TV menu plugin to view scheduled recordings
 plugin.activate('tv.scheduled_recordings')
@@ -1222,7 +1222,7 @@ TV_RECORDFILE_SUFFIX = '.avi'
 TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
 TV_RECORD_SERVER_IP = 'localhost'
-TV_RECORD_SERVER_PORT = 18001
+TV_RECORD_SERVER_PORT = 18002
 
 # If the recordserver runs as root, set the uid to the given one
 # after startup. The gui must also match one of the users group ids
