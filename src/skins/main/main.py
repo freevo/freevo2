@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/05 18:24:40  dischi
+# o create a BlankScreen only with the current background
+# o rewrite Splashscreen which now inherits from BlankScreen and uses
+#   an alpha layer image from William Holt
+#
 # Revision 1.6  2003/09/03 19:50:36  dischi
 # make the progressbar look nicer and add some text
 #
@@ -213,6 +218,95 @@ class Plugin_Area(Skin_Area):
 
 ###############################################################################
 
+skin_engine = None
+
+class BlankScreen:
+    """
+    An area only with the background. This can be used by plugins to
+    draw some objects with the osd to the screen with bypassing every
+    skin setting except the background.
+    """
+    def __init__(self):
+        """
+        init the screen
+        """
+        global skin_engine
+        osd.clearscreen(color=osd.COL_BLACK)
+        if not skin_engine.settings.prepared:
+            skin_engine.settings.prepare()
+
+        if skin_engine.settings.images.has_key('background'):
+            image = osd.loadbitmap(skin_engine.settings.images['background'])
+            image = pygame.transform.scale(image, (osd.width, osd.height))
+            osd.drawbitmap(image, 0, 0)
+
+        self.user_area_initialized = TRUE
+        self.bg = osd.screen.convert()
+
+
+    def draw(self, x0, y0, x1, y1):
+        """
+        there is no content in this area
+        """
+
+    def refresh(self):
+        """
+        Refresh the screen. The background will be drawn and saved as
+        self.bg. The class inheriting from this may override self.bg
+        later to add something to it.
+        """
+        osd.screen.blit(self.bg, (0, 0))
+        self.draw(config.OVERSCAN_X, config.OVERSCAN_Y, osd.width - config.OVERSCAN_X,
+                  osd.height - config.OVERSCAN_Y)
+        osd.update()
+
+        
+
+class Splashscreen(BlankScreen):
+    """
+    A simple splash screen for osd startup
+    """
+    def __init__(self):
+        BlankScreen.__init__(self)
+        self.initialized = FALSE
+        self.pos = 0
+
+
+    def draw(self, x0, y0, x1, y1):
+        """
+        draw the current position
+        """
+        x0 += 20
+        x1 -= 20
+
+        if not self.initialized:
+            image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.png'))
+            if image:
+                image = pygame.transform.scale(image, (x1-x0, y1-y0))
+                osd.drawbitmap(image, x0, y0)
+
+            osd.drawstringframed('Starting Freevo, please wait ...',
+                                 x0, y1-180, x1-x0, 40,
+                                 osd.getfont(config.OSD_DEFAULT_FONTNAME, 20),
+                                 fgcolor=0xffffff, align_h='center',
+                                 align_v='bottom')
+            self.bg = osd.screen.convert()
+            self.initialized = TRUE
+
+        pos = 0
+        if self.pos:
+            pos = round(float((x1 - x0 - 2)) / (float(100) / self.pos))
+        osd.drawbox(x0, y1-130, x0 + pos, y1-110, color=0xa0000000, fill=TRUE)
+        osd.drawbox(x0, y1-130, x1, y1-110, 2)
+
+
+    def progress(self, pos):
+        """
+        set the progress position and refresh the screen
+        """
+        self.pos = pos
+        self.refresh()
+
 
 ###############################################################################
 # Skin main functions
@@ -223,43 +317,16 @@ class Skin:
     main skin class
     """
     
-    class Splashscreen:
-        """
-        Splashscreen on startup
-        TODO: move image filename, colors and positions into the xml file
-        """
-        def __init__(self):
-            self.x0 = config.OVERSCAN_X + 20
-            self.x1 = osd.width - 2 * (config.OVERSCAN_X + 20)
-            self.y0 = osd.height - 130 - config.OVERSCAN_Y
-            self.y1 = self.y0 + 30
+    class BlankScreen(BlankScreen):
+        pass
 
-            osd.clearscreen(color=osd.COL_BLACK)
-            image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.jpg'))
-            image = pygame.transform.scale(image, (osd.width, osd.height))
-            osd.drawbitmap(image, 0, 0)
-            osd.drawstringframed('Starting Freevo, please wait ...',
-                                 self.x0, self.y0-50, self.x1-self.x0, 40,
-                                 osd.getfont(config.OSD_DEFAULT_FONTNAME, 20),
-                                 fgcolor=0xffffff, align_h='center',
-                                 align_v='bottom')
-            osd.update()
-            self.bg = pygame.Surface((self.x1 - self.x0, self.y1 - self.y0))
-            self.bg.blit(osd.screen, (0, 0), (self.x0, self.y0, self.x1 - self.x0,
-                                              self.y1 - self.y0))
-
-
-        def progress(self, pos):
-            pos = round(float((self.x1 - self.x0 - 2)) / (float(100) / pos))
-            osd.screen.blit(self.bg, (self.x0, self.y0))
-            osd.drawbox(self.x0, self.y0, self.x0 + pos, self.y1,
-                        color=0xa0000000, fill=TRUE)
-            osd.drawbox(self.x0, self.y0, self.x1, self.y1, 2)
-            osd.update()
-
-
-
+    class Splashscreen(Splashscreen):
+        pass
+    
     def __init__(self):
+        global skin_engine
+        skin_engine = self
+        
         self.display_style = config.SKIN_START_LAYOUT
         self.force_redraw = TRUE
         self.last_draw = None, None
