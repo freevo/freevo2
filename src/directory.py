@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.52  2003/10/20 18:28:23  outlyer
 # Also move print into _debug_
 #
@@ -125,14 +128,14 @@ all_variables = [('MOVIE_PLAYLISTS', _('Movie Playlists'),
                   _('Sort directory by date and not by name.')),
                  
                  ('DIRECTORY_AUTOPLAY_SINGLE_ITEM', _('Directory Autoplay Single Item'),
-                  _('Don\'t show directory if only one item exists and auto-select ' +
+                  _('Don\'t show directory if only one item exists and auto-select ' \
                     'the item.')),
 
                  ('AUDIO_RANDOM_PLAYLIST', _('Audio Random Playlist'),
                   _('Show radom playlist item for audio menus.')),
 
                  ('FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
-                  _('Force skin to a specific layout. This option doesn\'t work with '+
+                  _('Force skin to a specific layout. This option doesn\'t work with ' \
                     'all skins and the result may differ based on the skin.')),
 
                  ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),

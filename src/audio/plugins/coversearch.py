@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.20  2003/10/20 14:23:08  outlyer
 # Tolerate 404 errors from Amazon without crashing. Sorry this is so ugly,
 # this whole algorithm needs to be cleaned up.
@@ -137,8 +140,8 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             amazon.getLicense()
         except amazon.NoLicenseKey:
-            print 'To search for covers you need an Amazon.com Web Services'
-            print 'license key. You can get yours from:'
+            print _( 'To search for covers you need an Amazon.com Web Services\n' \
+                     'license key. You can get yours from:\n' )
             print 'https://associates.amazon.com/exec/panama/associates/join/'\
                   'developer/application.html'
             self.reason = 'no amazon key'
@@ -163,27 +166,27 @@ class PluginInterface(plugin.ItemPlugin):
                 if self.item.getattr('artist') and \
                    ((self.item.getattr('album') and item.type == 'audio') or \
                     (self.item.getattr('title') and item.type == 'audiocd')):
-                    return [ ( self.cover_search_file, 'Find a cover for this music',
+                    return [ ( self.cover_search_file, _( 'Find a cover for this music' ),
                                'imdb_search_or_cover_search') ]
                 else:
                     if config.DEBUG:
-                        print "WARNING: coversearch disabled for this item! " + \
-                              "coversearch needs an item with " + \
-                              "Artist and Album (if it's a mp3 or ogg) or " + \
-                              "Title (if it's a cd track) to be able to search. " + \
-                              "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
-                              "Maybe you must fix this file (%s) tag?" % item.filename 
+                        print _( "WARNING" ) + ": "+ _( "Plugin 'coversearch' was disabled for this item! " \
+                                                        "'coversearch' needs an item with " \
+                                                        "Artist and Album (if it's a mp3 or ogg) or " \
+                                                        "Title (if it's a cd track) to be able to search. "  \
+                                                        "So you need a file with a ID3 tag (mp3) or an Ogg Info. "  \
+                                                        "Maybe you must fix this file (%s) tag?" ) % item.filename 
             except KeyError:
                 if config.DEBUG:
-                    print "WARNING: coversearch disabled for this item! " + \
-                          "coversearch needs an item with " + \
-                          "Artist and Album (if it's a mp3 or ogg) or " + \
-                          "Title (if it's a cd track) to be able to search. " + \
-                          "So you need a file with a ID3 tag (mp3) or an Ogg Info. " + \
-                          "Maybe you must fix this file (%s) tag?" % item.filename
+                    print _( "WARNING" ) + ": " + _( "Plugin 'coversearch' was disabled for this item! " \
+                                                     "'coversearch' needs an item with " \
+                                                     "Artist and Album (if it's a mp3 or ogg) or " \
+                                                     "Title (if it's a cd track) to be able to search. " \
+                                                     "So you need a file with a ID3 tag (mp3) or an Ogg Info. " \
+                                                     "Maybe you must fix this file (%s) tag?" ) % item.filename
             except AttributeError:
                 if config.DEBUG:
-                    print "WARNING: Unknown CD, cover searching is disabled"
+                    print _( "WARNING" ) + ": " + _( "Unknown CD, cover searching is disabled" )
         return []
 
 
@@ -191,7 +194,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         search imdb for this item
         """
-        box = PopupBox(text='searching Amazon...')
+        box = PopupBox(text=_( 'searching Amazon...' ) )
         box.show()
 
         if self.item.type == 'audio':
@@ -206,8 +209,9 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             cover = amazon.searchByKeyword(search_string , product_line="music")
         except amazon.AmazonError:
-            box.destroy() 
-            box = PopupBox(text='No matches for %s - %s' % (str(artist),str(album)))
+            box.destroy()
+            dict_tmp = { "artist": str(artist), "album": str(album) }
+            box = PopupBox(text=_( 'No matches for %(artist)s - %(album)s' ) % dict_tmp )
             box.show()
             time.sleep(2)
             box.destroy()
@@ -215,7 +219,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         except amazon.ParseError:
             box.destroy()
-            box = PopupBox(text='The cover provider returned bad information.')
+            box = PopupBox(text=_( 'The cover provider returned bad information.' ) )
             box.show()
             time.sleep(2)
             box.destroy()
@@ -252,7 +256,7 @@ class PluginInterface(plugin.ItemPlugin):
                     MissingFile = True
                 if not MissingFile and not (n.info()['Content-Length'] == '807'):
                     image = Image.open(cStringIO.StringIO(n.read()))
-                    items += [ menu.MenuItem('%s [small]' % cover[i].ProductName,
+                    items += [ menu.MenuItem( ('%s [' + _( 'small' ) + ']') % cover[i].ProductName,
                                     self.cover_create, cover[i].ImageUrlMedium) ]
                     n.close()
                 else:
@@ -262,7 +266,7 @@ class PluginInterface(plugin.ItemPlugin):
                     n = urllib2.urlopen(cover[i].ImageUrlLarge)
                     if not (n.info()['Content-Length'] == '807'):
                         image = Image.open(cStringIO.StringIO(n.read()))
-                        items += [ menu.MenuItem('%s [small]' % cover[i].ProductName,
+                        items += [ menu.MenuItem( ('%s [' + _( 'small' ) + ']' ) % cover[i].ProductName,
                                                  self.cover_create, cover[i].ImageUrlLarge) ]
                     n.close()
 
@@ -271,11 +275,11 @@ class PluginInterface(plugin.ItemPlugin):
             self.cover_create(arg=items[0].arg, menuw=menuw)
             return
         if items: 
-            moviemenu = menu.Menu('Cover Results', items)
+            moviemenu = menu.Menu( _( 'Cover Search Results' ), items)
             menuw.pushmenu(moviemenu)
             return
 
-        box = PopupBox(text='No covers available from Amazon')
+        box = PopupBox(text= _( 'No covers available from Amazon' ) )
         box.show()
         time.sleep(2)
         box.destroy()
@@ -289,7 +293,7 @@ class PluginInterface(plugin.ItemPlugin):
         import amazon
         import directory
         
-        box = PopupBox(text='getting data...')
+        box = PopupBox(text= _( 'getting data...' ) )
         box.show()
         
         #filename = os.path.splitext(self.item.filename)[0]

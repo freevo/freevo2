@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.30  2003/10/18 17:56:28  dischi
 # ignore next/prev track request on OSError
 #
@@ -112,7 +115,7 @@ class Playlist(Item):
         try:
             lines = util.readfile(plsname)
         except IOError:
-            print 'Cannot open file "%s"' % list
+            print _('Cannot open file "%s"') % list
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -154,7 +157,7 @@ class Playlist(Item):
         try:
             lines = util.readfile(ssrname)
         except IOError:
-            print 'Cannot open file "%s"' % list
+            print _('Cannot open file "%s"') % list
             return 0
 
         playlist_lines_dos = map(lambda l: l.strip(), lines)
@@ -265,7 +268,7 @@ class Playlist(Item):
             self.menuw = menuw
 
         if not self.playlist:
-            print 'empty playlist'
+            print _('empty playlist')
             return False
         
         if not arg or arg != 'next':

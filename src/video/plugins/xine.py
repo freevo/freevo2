@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/10/21 21:17:42  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.17  2003/09/19 22:09:16  dischi
 # use new childapp thread function
 #
@@ -94,8 +97,8 @@ class PluginInterface(plugin.Plugin):
         try:
             config.XINE_COMMAND
         except:
-            print '\nERROR:\nXINE_COMMAND not defined, plugin deactivated'
-            print 'please check the xine section in freevo_config.py\n'
+            print _( 'ERROR' ) + ': ' + _("'XINE_COMMAND' not defined, plugin 'xine' deactivated")
+            print _( 'please check the xine section in freevo_config.py' )
             return
 
         if config.XINE_COMMAND.find('fbxine') >= 0:
@@ -125,11 +128,11 @@ class PluginInterface(plugin.Plugin):
             
         if xine_version < 922:
             if type == 'fb':
-                print '\nERROR:\nfbxine version to old, plugin deactivated'
-                print 'You need xine-ui > 0.9.21\n'
+                print _( 'ERROR' ) + ': ' + _( "'fbxine' version too old, plugin 'xine' deactivated" )
+                print _( 'You need software %s' ) % 'xine-ui > 0.9.21'
                 return
-            print '\nWARNING:\nxine version to old, plugin in fallback mode'
-            print 'You need xine-ui > 0.9.21 to use all features of the xine plugin\n'
+            print _( 'WARNING' ) + ': ' + _( "'xine' version too old, plugin in fallback mode" )
+            print _( "You need %s to use all features of the '%s' plugin" ) % ( 'xine-ui > 0.9.21', 'xine' )
             
         # create the xine object
         xine = util.SynchronizedObject(Xine(type, xine_version))

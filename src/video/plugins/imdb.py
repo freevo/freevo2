@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/10/21 21:17:42  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.26  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -175,7 +178,7 @@ class PluginInterface(plugin.ItemPlugin):
             return
 
         if items: 
-            moviemenu = menu.Menu('IMDB Query', items)
+            moviemenu = menu.Menu(_('IMDB Query'), items)
             menuw.pushmenu(moviemenu)
             return
 

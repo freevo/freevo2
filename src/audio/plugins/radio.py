@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.3  2003/09/22 20:36:17  mikeruelle
 # more web interface help descriptions
 #
@@ -67,7 +70,7 @@ class RadioItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.play , 'Listen to Station' ) ]
+        items = [ ( self.play , _( 'Listen to Radio Station' ) ) ]
         return items
 
     def play(self, arg=None, menuw=None):
@@ -117,8 +120,8 @@ class RadioMainMenuItem(Item):
             radio_item.elapsed = 0
             station_items += [ radio_item ]
         if (len(station_items) == 0):
-            station_items += [menu.MenuItem('No Stations found', menwu.goto_prev_page, 0)]
-        station_menu = menu.Menu('Stations', station_items)
+            station_items += [menu.MenuItem( _( 'No Radio Stations found' ), menwu.goto_prev_page, 0)]
+        station_menu = menu.Menu( _( 'Radio Stations' ), station_items)
         rc.app(None)
         menuw.pushmenu(station_menu)
         menuw.refresh()
@@ -148,7 +151,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         menu_items = skin.get_singleton().settings.mainmenu.items
 
         item = RadioMainMenuItem()
-        item.name = 'Radio'
+        item.name = _( 'Radio' )
         if menu_items.has_key('radio') and menu_items['radio'].icon:
             item.icon = os.path.join(skin.get_singleton().settings.icon_dir,
                                      menu_items['radio'].icon)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/21 21:17:42  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.8  2003/10/07 19:46:07  outlyer
 # Make it possible to delete playlists. I can't see how this change could
 # ever break anything, but as with the plugin, it's optional if this change
@@ -88,6 +91,7 @@ class PluginInterface(plugin.ItemPlugin):
 
     def confirm_delete(self, arg=None, menuw=None):
         self.menuw = menuw
+        print "self.item.name=%s" % self.item.name
         ConfirmBox(text=_('Do you wish to delete\n \'%s\'?') % self.item.name,
                    handler=self.delete_file, default_choice=1).show()
         

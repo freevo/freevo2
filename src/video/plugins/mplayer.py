@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/10/21 21:17:42  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.35  2003/10/20 13:36:42  outlyer
 # Remove double-quit
 #
@@ -577,11 +580,12 @@ class MPlayerApp(childapp.ChildApp):
             try:
                 self.log_stdout = open(fname_out, 'w')
                 self.log_stderr = open(fname_err, 'w')
-                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
+                print _( 'MPlayer logging to "%s" and "%s"' ) % (fname_out, fname_err)
             except IOError:
                 print
-                print (('ERROR: Cannot open "%s" and "%s" for ' +
-                        'MPlayer logging!') % (fname_out, fname_err))
+                print ( _('ERROR') + ': ' + _('Cannot open "%s" and "%s" for ' \
+                                              'MPlayer logging!')
+                        ) % (fname_out, fname_err)
                 config.MPLAYER_DEBUG = 0
                 
         # DVD items also store mplayer_audio_broken to check if you can
@@ -633,7 +637,7 @@ class MPlayerApp(childapp.ChildApp):
         elif self.exit_type == "Quit":
             rc.post_event(USER_END)
         else:
-            print 'error while playing file'
+            print _( 'ERROR' ) + ': ' + _( 'unknow error while playing file' )
             rc.post_event(PLAY_END)
                         
 

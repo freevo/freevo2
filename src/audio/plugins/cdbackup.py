@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.22  2003/10/20 18:26:01  outlyer
 # No CDDB data is a warning at best; sometimes a CD is just not listed there.
 # Convert the rest of the 'print' into _debug_ with errors getting 0
@@ -210,7 +213,7 @@ class PluginInterface(plugin.ItemPlugin):
         try:
             if (self.item.type == 'audiocd'):
                 if self.rip_thread:
-                    return [ ( self.show_status, 'Show CD ripping status') ]
+                    return [ ( self.show_status, _( 'Show CD ripping status' ) ) ]
                 else:
                     self.device = self.item.devicename
                     _debug_('devicename = %s' %self.device)
@@ -218,14 +221,14 @@ class PluginInterface(plugin.ItemPlugin):
                                _('Rip the CD to the hard drive'),
                                _('Get CDs available for ripping')) ]
         except:
-            _debug_('[Error] - Item is not an AudioCD')
+            _debug_( _( 'ERROR' ) + ': ' + _( 'Item is not an Audio CD' ) )
         return []
 
 
     def show_status(self, arg=None, menuw=None):
         t = self.rip_thread
         if t:
-            pop = AlertBox(text='Ripping in progress\nTrack %s of %s' % \
+            pop = AlertBox(text=_( 'Ripping in progress\nTrack %d of %d' ) % \
                            (t.current_track, t.max_track))
             pop.show()
             
@@ -259,7 +262,7 @@ class PluginInterface(plugin.ItemPlugin):
         device, type = arg
         self.rip_thread = main_backup_thread(device=device, rip_format=type)        
         self.rip_thread.start()
-        AlertBox(text='Ripping started').show()
+        AlertBox(text=_( 'Ripping started' ) ).show()
         menuw.delete_menu()
         menuw.back_one_menu()
 
@@ -326,7 +329,7 @@ class main_backup_thread(threading.Thread):
         try: 
             os.makedirs(pathname, 0777)
         except:
-            _debug_('Directory %s already exists' % pathname)
+            _debug_(_( 'Directory %s already exists' ) % pathname)
 
         self.output_directory = pathname
         cdparanoia_command = []
@@ -452,16 +455,15 @@ class main_backup_thread(threading.Thread):
         # So that subsequent CDs with no CDDB data found don't overwrite each other.
         if ((cd_info.title == None) and (cd_info.artist == None)):
 
-            _debug_('[Warning] - No CDDB data available to mmpython',2)
+            _debug_( _( 'WARNING' ) + ': ' + _( 'No CDDB data available to mmpython' ) ,2)
             current_time = time.strftime('%d-%b-%y-%I:%M%P')
             
-            artist ='Unknown Artist ' + current_time + ' - RENAME'
-            album ='Unknown CD Album ' + current_time +  ' - RENAME'
-            genre ='Other'
+            artist = _( 'Unknown Artist' ) + ' ' + current_time + ' - ' + _( 'RENAME' )
+            album = _( 'Unknown CD Album' ) + ' ' + current_time +  ' - ' + _( 'RENAME' )
+            genre = _( 'Other' )
            
            # Flash a popup window indicating copying is done
-            popup_string="CD info not found!\nMust manually rename files\n"\
-                          "when finished ripping"
+            popup_string=_( "CD info not found!\nMust manually rename files\nwhen finished ripping" )
 
             pop = AlertBox(text=popup_string)
             time.sleep(7)
@@ -522,5 +524,5 @@ class main_backup_thread(threading.Thread):
                 else:
                     (new_string, num) = re.subn(pattern, repl, new_string, count=0)
             except:
-                _debug_('[Error] -  Problem trying to call re.subn')
+                _debug_( _( 'ERROR' ) + ': ' + _( 'Problem trying to call:' ) + ' re.subn' )
         return new_string

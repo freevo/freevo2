@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.5  2003/09/19 22:09:16  dischi
 # use new childapp thread function
 #
@@ -71,7 +74,7 @@ class PluginInterface(plugin.Plugin):
         try:
             config.CONF.fbxine
         except:
-            print '\nERROR:\nfbxine not found, plugin deactivated'
+            print  _( 'ERROR' ) + ': ' + _( "'fbxine' not found, plugin 'xine' deactivated" )
             return
 
         xine_version = 0
@@ -95,8 +98,8 @@ class PluginInterface(plugin.Plugin):
             xine_version += 1
             
         if xine_version < 923:
-            print '\nERROR:\nfbxine version to old, plugin deactivated'
-            print 'You need xine-ui > 0.9.22\n'
+            print _( 'ERROR' ) + ': ' + _( "'fbxine' version too old, plugin 'xine' deactivated" )
+            print _( 'You need software %s' ) % 'xine-ui > 0.9.22'
             return
             
         # create the xine object

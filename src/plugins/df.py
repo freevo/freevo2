@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.7  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -67,7 +70,7 @@ class PluginInterface(plugin.ItemPlugin):
 
     def actions(self, item): 
         if item.type == 'dir':
-            diskfree = _('%i of %i Mb free')  % \
+            diskfree = _('%i free of %i Mb total')  % \
                        ( (( util.freespace(item.dir) / 1024) / 1024),
                          ((util.totalspace(item.dir) /1024) /1024))
             return  [ ( self.dud, diskfree) ]

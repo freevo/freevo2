@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.22  2003/10/20 13:36:07  outlyer
 # Remove the double-quit
 #
@@ -231,13 +234,14 @@ class MPlayerApp(childapp.ChildApp):
                 self.log_stderr = open(fname_err, 'a')
             except IOError:
                 print
-                print (('ERROR: Cannot open "%s" and "%s" for ' +
-                        'MPlayer logging!') % (fname_out, fname_err))
-                print 'Please set MPLAYER_DEBUG=0 in local_conf.py, or '
-                print 'start Freevo from a directory that is writeable!'
+                print ( _('ERROR') + ': ' + _( 'Cannot open "%s" and "%s" for ' \
+                                               'MPlayer logging!')
+                        ) % (fname_out, fname_err)
+                print _( 'Please set MPLAYER_DEBUG=0 in local_conf.py, or ' \
+                         'start Freevo from a directory that is writeable!' )
                 print
             else:
-                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
+                print _( 'MPlayer logging to "%s" and "%s"' ) % (fname_out, fname_err)
 
         self.item = item
         self.elapsed = 0

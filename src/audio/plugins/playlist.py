@@ -80,16 +80,16 @@ class PluginInterface(plugin.ItemPlugin):
 
         self.naming = naming
 
-        config.DIR_AUDIO.append(('Playlists',self.playlist_folder))
+        config.DIR_AUDIO.append( ('Playlists',self.playlist_folder))
         self.playlist_handle = None
         plugin.ItemPlugin.__init__(self)
 
 
     def actions(self, item):
         self.item = item
-        return [ ( self.queue_file, 'Queue a Track',
+        return [ ( self.queue_file, _( 'Enqueue this Music in Playlist' ),
                                'queue_a_track'),
-                 ( self.new_playlist, 'Make a New Playlist',
+                 ( self.new_playlist, _( 'Make a new Audio Playlist' ),
                                'close_playlist')]
 
     def queue_file(self,arg=None, menuw=None):

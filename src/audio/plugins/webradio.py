@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/21 21:17:41  gsbarbieri
+# Some more i18n improvements.
+#
 # Revision 1.3  2003/09/20 09:42:32  dischi
 # cleanup
 #
@@ -62,7 +65,7 @@ class EntryList(Item):
         self.mediamarks = mediamarks.children
         
     def actions(self):
-        return [ ( self.cwd, 'Browse entries' ) ]
+        return [ ( self.cwd, _('Browse entries') ) ]
 
     def cwd(self, arg=None, menuw=None):
         items = []
@@ -82,12 +85,12 @@ class EntryList(Item):
 class GenreList(Item):
     def __init__(self, mediamarks, parent):
         Item.__init__(self, parent)
-        self.name = 'Webradio'
+        self.name = _('Webradio')
         self.type = 'webradio'
         self.mediamarks = mediamarks
         
     def actions(self):
-        return [ ( self.cwd, 'Browse genre list' ) ]
+        return [ ( self.cwd, _('Browse genre list') ) ]
 
     def cwd(self, arg=None, menuw=None):
         items = []
@@ -96,7 +99,7 @@ class GenreList(Item):
                 items.append(EntryList(child, self))
             except KeyError:
                 pass
-        menuw.pushmenu(menu.Menu('Webradio Genre List', items))
+        menuw.pushmenu(menu.Menu(_('Webradio Genre List'), items))
 
 
 class PluginInterface(plugin.MainMenuPlugin):
