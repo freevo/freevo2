@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.107  2004/01/18 16:49:39  dischi
 # check cache on startup
 #
@@ -24,37 +27,6 @@
 #
 # Revision 1.103  2004/01/07 18:15:41  dischi
 # add mmpython warning
-#
-# Revision 1.102  2004/01/03 17:43:14  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.101  2004/01/01 12:27:38  dischi
-# bugfix and add config.TIME_DEBUG to trace the needed time
-#
-# Revision 1.100  2003/12/30 15:34:02  dischi
-# o move the shutdown function to plugins/shutdown
-# o merge the two parts of the main function
-#
-# Revision 1.99  2003/12/10 19:01:29  dischi
-# changes to the new Event.handler and Childapp2
-#
-# Revision 1.98  2003/12/07 19:40:30  dischi
-# convert OVERSCAN variable names
-#
-# Revision 1.97  2003/12/07 15:42:20  dischi
-# cleanup
-#
-# Revision 1.96  2003/12/06 13:46:11  dischi
-# changes to the new draw function in skin
-#
-# Revision 1.95  2003/12/04 21:50:20  dischi
-# include Splashscreen here
-#
-# Revision 1.94  2003/12/03 21:52:07  dischi
-# rename some skin function calls
-#
-# Revision 1.93  2003/11/30 14:39:54  dischi
-# load the fxditem
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -419,7 +391,6 @@ try:
     from childapp import running_children
 
     while 1:
-
         # Get next command
         while 1:
 

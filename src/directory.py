@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.98  2004/01/18 21:10:51  dischi
 # first load fxd file, than call plugins
 #
@@ -271,25 +274,25 @@ class DirItem(Playlist):
             fxd.add(fxd.XMLnode('setvar', (('name', v.lower()), ('val', val))), node, 0)
 
 
-    def getattr(self, attr):
+    def __getitem__(self, key):
         """
-        return the specific attribute as string or an empty string
+        return the specific attribute
         """
-        if attr == 'type':
+        if key == 'type':
             if self.media:
                 return _('Directory on disc [%s]') % self.media.label
             return _('Directory')
 
-        if attr in ( 'freespace', 'totalspace' ):
+        if key in ( 'freespace', 'totalspace' ):
             if self.media:
                 return None
             
-            space = eval('util.%s(self.dir)' % attr) / 1000000
+            space = eval('util.%s(self.dir)' % key) / 1000000
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
       
-        return Item.getattr(self, attr)
+        return Item.__getitem__(self, key)
 
 
     # eventhandler for this item
@@ -347,7 +350,6 @@ class DirItem(Playlist):
         if num_timestamp == timestamp:
             num_subdirs   = self.info['num_subdirs']
             num_files     = self.info['num_files']
-            
         else:
             num_subdirs = 0
             num_files   = 0

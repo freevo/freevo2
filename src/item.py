@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.52  2004/01/18 16:50:10  dischi
 # (re)move unneeded variables
 #
@@ -430,29 +433,22 @@ class Item:
 
     def __getitem__(self, attr):
         """
-        return the specific attribute as string or an empty string
+        return the specific attribute
         """
         if attr == 'runtime':
             length = None
 
-            if hasattr(self.info,'length') and self.info['length'] == 'None':
-                self.info['length'] = None
-            if hasattr(self.info,'runtime') and self.info['runtime'] == 'None':
-                # For some reason it's the string None, instead of the
-                # NoneType
-                self.info['runtime'] = None
-
-            if self.info and hasattr(self.info, 'runtime') and self.info['runtime']:
+            if self.info['runtime'] and self.info['runtime'] != 'None':
                 length = self.info['runtime']
-            if not length and self.info and hasattr(self.info, 'length'):
+            elif self.info['length'] and self.info['length'] != 'None':
                 length = self.info['length']
-            if not length and self.info and hasattr(self.info, 'video') and \
-                   self.info['video']:
+            elif hasattr(self.info.mmdata, 'video') and self.info.mmdata.video:
                 length = self.info['video'][0]['length']
             if not length and hasattr(self, 'length'):
                 length = self.length
             if not length:
                 return ''
+
             if isinstance(length, int) or isinstance(length, float) or \
                    isinstance(length, long):
                 length = str(int(round(length) / 60))
@@ -487,12 +483,11 @@ class Item:
 
         if attr[:4] == 'len(' and attr[-1] == ')':
             r = None
-            if self.info and self.info.has_key(attr[4:-1]):
+            if self.info.has_key(attr[4:-1]):
                 r = self.info[attr[4:-1]]
 
-            if not r and hasattr(self, attr[4:-1]):
+            if (r == None or r == '') and hasattr(self, attr[4:-1]):
                 r = getattr(self,attr[4:-1])
-                
             if r != None:
                 return len(r)
             return 0
@@ -501,9 +496,8 @@ class Item:
             r = None
             if self.info.has_key(attr):
                 r = self.info[attr]
-            if not r:
-                if hasattr(self, attr):
-                    r = getattr(self,attr)
+            if (r == None or r == '') and hasattr(self, attr):
+                r = getattr(self,attr)
             if r != None:
                 return r
         return ''
@@ -511,7 +505,8 @@ class Item:
 
     def getattr(self, attr):
         """
-        wrapper for __getitem__
+        wrapper for __getitem__ to return the attribute as string or
+        an empty string if the value is 'None'
         """
         if attr[:4] == 'len(' and attr[-1] == ')':
             return self.__getitem__(attr)

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.6  2004/01/13 19:12:12  dischi
 # small fix
 #
@@ -67,7 +70,7 @@ class Screen_Area(Skin_Area):
     this area is the screen or background of the skin
     """
     def __init__(self):
-        Skin_Area.__init__(self, 'screen')
+        Skin_Area.__init__(self, 'screen', imagecachesize=3)
 
     def update_content_needed(self):
         """

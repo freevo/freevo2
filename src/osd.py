@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.127  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.126  2004/01/18 16:49:22  dischi
 # more verbose
 #
@@ -370,7 +373,7 @@ class OSD:
         self.fullscreen = 0 # Keep track of fullscreen state
         self.app_list = []
 
-        self.bitmapcache = util.objectcache.ObjectCache(10, desc='bitmap')
+        self.bitmapcache = util.objectcache.ObjectCache(5, desc='bitmap')
         self.font_info_cache = {}
         
         self.default_fg_color = self.COL_BLACK

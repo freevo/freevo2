@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.58  2004/01/15 21:15:28  outlyer
 # Fixed to use proper audio context buttons.
 #
@@ -470,11 +473,13 @@ class Playlist(Item):
         Handle playlist specific events
         """
 
+        # That doesn't belong here! It should be part of the player!!!
         if event == PLAY_END:
             if (self.current_item.type == 'audio'):
                 rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
 
-        if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and event.arg and hasattr(self.current_item,'type'):
+        if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
+               event.arg and hasattr(self.current_item,'type'):
             if (self.current_item.type == 'audio'):
                 rc.post_event(Event(RATING,(event.arg,self.current_item.filename)))
 
@@ -489,11 +494,7 @@ class Playlist(Item):
 
             if pos or self.repeat:
                 if hasattr(self.current_item, 'stop'):
-                    try:
-                        self.current_item.stop()
-                    except OSError:
-                        _debug_('ignore playlist event', 1)
-                        return True
+                    self.current_item.stop()
                 self.current_item = self.playlist[pos]
                 self.play(menuw=menuw, arg='next')
                 return True

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/01/19 20:29:11  dischi
+# cleanup, reduce cache size
+#
 # Revision 1.19  2004/01/17 12:36:29  dischi
 # add shadow support for image listing
 #
@@ -75,7 +78,7 @@ from skin_utils import *
 import config
 
 class Listing_Area(Skin_Area):
-    """88
+    """
     this call defines the listing area
     """
 
