@@ -59,14 +59,15 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
 	char *file;
 	Imlib_Image *image;
 	Image_PyObject *o;
+	Imlib_Load_Error *error_return;
 
 	if (!PyArg_ParseTuple(args, "s", &file))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 		
-	// FIXME: use imlib_load_image_with_error_return instead.
-	image = imlib_load_image(file);
+	// FIXME: Do better error reporting for error_return.
+	image = imlib_load_image_with_error_return(file, error_return);
 	if (!image) {
-		PyErr_Format(PyExc_IOError, "Could not open %s", file);
+		PyErr_Format(PyExc_IOError, "Could not open %s: %d", file, *error_return);
 		return NULL;
 	}
 	imlib_context_set_image(image);
