@@ -1,0 +1,282 @@
+#if 0 /*
+# -----------------------------------------------------------------------
+# fxdparser.py - Parser for fxd files
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.1  2003/11/23 16:56:28  dischi
+# a fxd parser for all kinds of fxd files using callbacks
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
+
+# XML support
+from xml.utils import qp_xml
+
+import config
+import util
+
+
+
+class XMLnode:
+    """
+    One node for the FXDtree
+    """
+    def __init__(self, name, attr = [], first_cdata=None, following_cdata=None):
+        self.name = name
+        self.attr_list = []
+        for name, val in attr:
+            self.attr_list.append(((None, name), val))
+        self.attrs = self
+        self.children = []
+        self.first_cdata = first_cdata
+        self.following_cdata = following_cdata
+        
+    def items(self):
+        return self.attr_list
+
+
+class FXDtree(qp_xml.Parser):
+    """
+    class to parse and write fxd files
+    """
+    def __init__(self, filename):
+        """
+        Load the file and parse it. If the file does not exists, create
+        an empty <freevo> node.
+        """
+        qp_xml.Parser.__init__(self)
+        self.filename = filename
+        if not vfs.isfile(filename):
+            self.tree = XMLnode('freevo')
+        else:
+            f = vfs.open(filename)
+            self.tree = self.parse(f)
+            f.close()
+
+
+    def add(self, node, parent=None, pos=None):
+        """
+        add a node to the parent at position pos. If parent is None, the
+        <freevo> node fil be taken, if pos is None, the node will be inserted
+        at the end of the children list.
+        """
+        if not parent:
+            parent = self.tree
+        if pos == None:
+            parent.children.append(node)
+        else:
+            parent.children.insert(pos, node)
+
+
+    def save(self, filename=None):
+        """
+        Save the tree
+        """
+        if not filename:
+            filename = self.filename
+        if vfs.isfile(filename):
+            vfs.unlink(filename)
+        f = vfs.codecs_open(filename, 'w', encoding='utf-8')
+        f.write('<?xml version="1.0" ?>\n')
+        self._dump_recurse(f, self.tree)
+        f.write('\n')
+        f.close()
+
+        
+    def _dump_recurse(self, f, elem, depth=0):
+        """
+        Help function to dump all elements
+        """
+        f.write('<' + elem.name)
+        for (ns, name), value in elem.attrs.items():
+            f.write(' %s="%s"' % (name, value))
+        if elem.children or elem.first_cdata:
+            if elem.first_cdata == None:
+                f.write('>\n  ')
+                for i in range(depth):
+                    f.write('  ')
+            else:
+                f.write('>' + elem.first_cdata)
+
+            for child in elem.children:
+                self._dump_recurse(f, child, depth=depth+1)
+                if child.following_cdata == None:
+                    if child == elem.children[-1]:
+                        f.write('\n')
+                    else:
+                        f.write('\n  ')
+                    for i in range(depth):
+                        f.write('  ')
+                else:
+                    f.write(child.following_cdata)
+            f.write('</%s>' % elem.name)
+        else:
+            f.write('/>')
+
+
+class FXD:
+    """
+    class to help parsing fxd files
+    """
+    
+    class XMLnode(XMLnode):
+        """
+        a new node
+        """
+        pass
+    
+    def __init__(self, filename):
+        self.tree = FXDtree(filename)
+        self.read_callback  = {}
+        self.write_callback = {}
+
+        
+    def set_handler(self, name, callback, mode='r', force=False):
+        """
+        create callbacks for a node named 'name'. Mode can be 'r' when
+        reading the node (parse), or 'w' for writing (save). The reading
+        callback can return a special callback used for writing this node
+        again. If force is true and an element for a write handler doesn't
+        exists, it will be created.
+        """
+        if mode == 'r':
+            self.read_callback[name]  = callback
+        elif mode == 'w':
+            self.write_callback[name] = [ callback, force ]
+        else:
+            debug('unknown mode %s for fxd handler' % mode, 0)
+
+            
+    def parse(self):
+        """
+        parse the tree and call all the callbacks
+        """
+        if self.tree.tree.name != 'freevo':
+            _debug_('first node not <freevo>')
+            return
+        for node in self.tree.tree.children:
+            if node.name in self.read_callback:
+                callback = self.read_callback[node.name](self, node)
+                if callback:
+                    node.callback = callback
+
+
+    def save(self):
+        """
+        save the tree and call all write callbacks before
+        """
+        # create missing but forces elements
+        for name in self.write_callback:
+            callback, force = self.write_callback[name]
+            if force:
+                for node in self.tree.tree.children:
+                    if node.name == name:
+                        break
+                else:
+                    # forced and missing
+                    self.add(XMLnode(name), pos=0)
+
+        # now run all callbacks
+        for node in self.tree.tree.children:
+            if hasattr(node, 'callback'):
+                node.callback(self, node)
+            elif node.name in self.write_callback:
+                self.write_callback[node.name][0](self, node)
+
+        # and save
+        self.tree.save()
+        
+        
+    def get_children(self, node, name, deep=1):
+        """
+        deep = 0, every deep, 1 = children, 2 = childrens children, etc.
+        """
+        ret = []
+        for child in node.children:
+            if deep < 2 and child.name == name:
+                ret.append(child)
+            elif deep == 0:
+                ret += self.get_children(child, name, 0)
+            elif deep > 1:
+                ret += self.get_children(child, name, deep-1)
+        return ret
+
+
+    def childcontent(self, node, name):
+        """
+        return the content of the child node with the given name
+        """
+        for child in node.children:
+            if child.name == name:
+                return util.format_text(child.textof().encode(config.LOCALE))
+        return ''
+
+
+    def getattr(self, node, name, default=''):
+        """
+        return the attribute are the default
+        """
+        if node.attrs.has_key(('',name)):
+            return node.attrs[('',name)].encode(config.LOCALE)
+        return default
+
+
+    def gettext(self, node):
+        """
+        rerurn the text of the node
+        """
+        return util.format_text(node.textof().encode(config.LOCALE))
+
+
+    def parse_info(self, nodes, object, map={}):
+        """
+        map is a hash, the keys are the names in the fxd file,
+        the content the variable names, e.g. {'content': 'description, }
+        All tags not in the map are stored with the same name in info.
+        """
+        if not nodes:
+            return
+
+        for node in nodes:
+            for child in node.children:
+                txt = child.textof().encode(config.LOCALE)
+                if not txt:
+                    continue
+                if child.name in map:
+                    object.info[map[child.name]] = util.format_text(txt)
+                else:
+                    object.info[child.name] = util.format_text(txt)
+                    
+
+    def add(self, node, parent=None, pos=None):
+        """
+        add an element to the tree
+        """
+        self.tree.add(node, parent, pos)
