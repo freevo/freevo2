@@ -1,3 +1,27 @@
+freevo (1.5.0-0rc4) unstable; urgency=low
+
+  * New upstream release
+
+ -- Aubin Paul <debian@outlyer.org>  Tue, 29 Jun 2004 20:10:34 -0400
+
+freevo (1.5.0-0rc3) unstable; urgency=low
+
+  * New upstream release
+
+ -- Aubin Paul <debian@outlyer.org>  Sun,  6 Jun 2004 22:57:48 -0400
+
+freevo (1.5.0-0rc2-cvs20040517) unstable; urgency=low
+
+  * New snapshot
+
+ -- Aubin Paul <debian@outlyer.org>  Mon, 17 May 2004 00:22:47 -0400
+
+freevo (1.5.0-0rc2) unstable; urgency=low
+
+  * New upstream release
+
+ -- Aubin Paul <debian@outlyer.org>  Tue, 11 May 2004 16:46:06 -0400
+
 freevo (1.5.0-0rc1) unstable; urgency=low
 
   * New upstream release
