@@ -8,8 +8,8 @@ insert into admin (version) values ("0.1.0");
 drop table channels;
 create table channels (
     id unicode primary key,
-    call_sign unicode not null,
-    tuner_id unicode not null
+    display_name unicode not null,
+    access_id unicode not null
 );
 
 drop table channel_types;
@@ -36,7 +36,12 @@ create table programs (
     original_airdate int,
     stars int
 );
+create index programs_channel on programs (channel_id);
 create unique index programs_channel_start on programs (channel_id, start);
+create unique index programs_channel_start_stop on programs (channel_id, start, stop);
+create index programs_start_stop on programs (start, stop);
+create index programs_start on programs (start);
+create index programs_stop on programs (stop);
 
 drop table categories;
 create table categories (
