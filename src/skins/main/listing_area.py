@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/04 18:17:24  dischi
+# fix tv show listing
+#
 # Revision 1.16  2004/01/01 17:41:05  dischi
 # add border support for Font
 #
@@ -257,9 +260,9 @@ class Listing_Area(Skin_Area):
             width  = hspace - content.spacing
             height = vspace - content.spacing
             
-        last_tvs = ('', 0)
-        all_tvs  = True
-
+        last_tvs      = ('', 0)
+        all_tvs       = True
+        tvs_shortname = True
                 
         for choice in menuw.menu_items:
             if content.types.has_key( '%s selected' % choice.type ):
@@ -358,17 +361,22 @@ class Listing_Area(Skin_Area):
                     else:
                         season  = 0
                         episode = 0
-                        for c in menuw.menu_items:
+                        for c in menu.choices:
                             if c.type == 'video' and hasattr(c,'tv_show') and \
                                c.tv_show and c.show_name[0] == sn[0]:
                                 season  = max(season,
                                               val.font.stringsize(c.show_name[1]))
                                 episode = max(episode,
                                               val.font.stringsize(c.show_name[2]))
+                                if tvs_shortname and not c.image:
+                                    tvs_shortname = False
                             else:
                                 all_tvs = False
 
-                        if all_tvs and choice.image:
+                        if all_tvs and not tvs_shortname and len(menu.choices) > 5:
+                            tvs_shortname = True
+                            
+                        if all_tvs and tvs_shortname:
                             tvs_w = val.font.stringsize('x') + season + episode
                         else:
                             tvs_w = val.font.stringsize('%s x' % sn[0]) + season + episode
@@ -382,7 +390,7 @@ class Listing_Area(Skin_Area):
                                     x=x0 + hskip + icon_x + tvs_w - 100,
                                     y=y0 + vskip, width=100, height=-1,
                                     align_h='right', mode='hard')
-                    if all_tvs and choice.image:
+                    if all_tvs and tvs_shortname:
                         text = '%sx' % sn[1]
                     else:
                         text = '%s %sx' % (sn[0], sn[1])
