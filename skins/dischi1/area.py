@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/03/14 03:08:58  outlyer
+# A fix for a crash problem I had with Dischi's version of my skin.
+#
 # Revision 1.21  2003/03/13 21:02:03  dischi
 # misc cleanups
 #
@@ -536,7 +539,8 @@ class Skin_Area:
 
         if hasattr(self, 'watermark') and self.watermark:
             last_watermark = self.watermark[4]
-            if self.menu.selected.image != self.watermark[4]:
+            #if self.menu.selected.image != self.watermark[4]:
+	    if hasattr(self.menu.selected,'image') and self.menu.selected.image != self.watermark[4]:
                 self.watermark = None
                 redraw_watermark = TRUE
             
