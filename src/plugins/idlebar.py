@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/24 22:48:50  outlyer
+# Not sure why this was in /plugins... should be here, in src/plugins
+#
 # Revision 1.11  2003/06/22 16:53:32  rshortt
 # A fix for trying to read the cache when it hasn't been created yet.
 #
@@ -88,7 +91,6 @@ import mailbox
 
 import plugin
 
-sys.path.append('plugins/weather')
 import pymetar
 
 import osd
