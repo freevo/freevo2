@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/03/22 11:04:51  dischi
+# improve caching
+#
 # Revision 1.34  2004/02/28 21:04:17  dischi
 # unicode fixes
 #
@@ -346,7 +349,7 @@ def remove_start_string(string, start):
             
     return string[0].upper() + string[1:]
 
-    
+
 def tagmp3 (filename, title=None, artist=None, album=None, track=None,
             tracktotal=None, year=None):
     """

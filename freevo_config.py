@@ -706,6 +706,9 @@ IMAGEVIEWER_BLEND_STEPS = 10
 # Total time in seconds for blending from one image to the next
 IMAGEVIEWER_BLEND_TIME  = 0.75
 
+# use exif thumbnail your thumbnail review. The quality is lower but
+# it's much faster
+IMAGE_USE_EXIF_THUMBNAIL = 1
 
 # ======================================================================
 # Freevo games settings:

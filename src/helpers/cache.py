@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/03/22 11:04:51  dischi
+# improve caching
+#
 # Revision 1.30  2004/03/21 09:39:54  dischi
 # check for updated mmpython
 #
@@ -185,7 +188,6 @@ def cache_thumbnails():
     """
     import cStringIO
     import stat
-    import Image
     
     print 'checking thumbnails...................................',
     sys.__stdout__.flush()
@@ -211,6 +213,13 @@ def cache_thumbnails():
         except OSError:
             pass
 
+        for bad_dir in ('.xvpics', '.thumbnails', '.pics'):
+            if filename.find('/' + bad_dir + '/') > 0:
+                try:
+                    files.remove(filename)
+                except:
+                    pass
+                
     print '%s file(s)' % len(files)
         
     for filename in files:
@@ -219,34 +228,8 @@ def cache_thumbnails():
             fname = fname[:20] + ' [...] ' + fname[-40:]
         print '  %4d/%-4d %s' % (files.index(filename)+1, len(files), fname)
 
-        sinfo = os.stat(filename)
-        thumb = vfs.getoverlay(filename + '.raw')
-        try:
-            if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-                continue
-        except OSError:
-            pass
+        util.cache_image(filename)
 
-        try:
-            image = Image.open(filename)
-        except:
-            continue
-
-        if not image:
-            continue
-
-        try:
-            if image.size[0] > 300 and image.size[1] > 300:
-                image.thumbnail((300,300), Image.ANTIALIAS)
-
-            if image.mode == 'P':
-                image = image.convert('RGB')
-
-            # save for future use
-            data = (image.tostring(), image.size, image.mode)
-            util.save_pickle(data, thumb)
-        except:
-            print 'error caching image %s' % filename
     if files:
         print
 
@@ -468,6 +451,9 @@ if __name__ == "__main__":
     delete_old_files_1()
     delete_old_files_2()
 
+    # we have time here, don't use exif thumbnails
+    config.IMAGE_USE_EXIF_THUMBNAIL = 0
+    
     cache_directories(rebuild)
     cache_thumbnails()
     create_metadata()

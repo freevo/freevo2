@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/03/22 11:04:51  dischi
+# improve caching
+#
 # Revision 1.16  2004/02/27 20:07:28  dischi
 # add function to check if a media is mounted
 #
@@ -52,12 +55,15 @@
 
 import os
 import sys
+import stat
 import statvfs
 import string
 import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
 import traceback
+import Image
+import cStringIO
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
@@ -451,3 +457,46 @@ def save_pickle(data, file):
         print 'unable to save to cachefile %s' % file
 
 
+#
+# cache utils
+#
+
+def cache_image(filename, thumbnail=None):
+    """
+    cache image for faster access
+    """
+    sinfo = os.stat(filename)
+    thumb = vfs.getoverlay(filename + '.raw')
+    try:
+        if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+            return
+    except OSError:
+        pass
+
+    if thumbnail:
+        image = Image.open(cStringIO.StringIO(thumbnail))
+    else:
+        try:
+            image = Image.open(filename)
+        except:
+            return
+
+    if not image:
+        return
+
+    try:
+        if image.size[0] > 300 and image.size[1] > 300:
+            image.thumbnail((300,300), Image.ANTIALIAS)
+
+        if image.mode == 'P':
+            image = image.convert('RGB')
+
+        # save for future use
+        data = (image.tostring(), image.size, image.mode)
+        save_pickle(data, thumb)
+    except Exception, e:
+        print 'error caching image %s' % filename
+        if config.DEBUG:
+            print e
+        
+    

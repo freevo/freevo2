@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/03/22 11:04:51  dischi
+# improve caching
+#
 # Revision 1.37  2004/03/21 09:39:54  dischi
 # check for updated mmpython
 #
@@ -70,6 +73,7 @@
 
 
 import os, stat
+import sys
 import copy
 
 import mmpython
@@ -344,6 +348,10 @@ class MMCache(Cache):
         """
         info = mmpython.Factory().create(filename)
         if info:
+            thumbnail = None
+            if info.has_key('thumbnail'):
+                thumbnail = info.thumbnail
+                
             info = self.simplify(info)
             name = util.getname(filename)
             if name == name.upper() and info.has_key('type') and \
@@ -357,6 +365,13 @@ class MMCache(Cache):
                         if video.has_key(variable) and not \
                            (info.has_key(variable) and info[variable]):
                             info[variable] = video[variable]
+
+            if thumbnail and config.IMAGE_USE_EXIF_THUMBNAIL:
+                util.cache_image(filename, thumbnail)
+            else:
+                if info.has_key('mime') and info['mime'] and \
+                   info['mime'].startswith('image'):
+                    util.cache_image(filename)
 
             return info
         return {}
@@ -550,6 +565,19 @@ def cache_dir(dirname, callback=None):
     mmpython_cache.cache_dir(dirname, callback)
 
 
+class CacheStatus:
+    def __init__(self, num_changes, txt):
+        self.num_changes = num_changes
+        self.txt         = txt
+        self.pos         = 0
+        self.callback()
+        
+    def callback(self):
+        print '\r%-70s %3d%%' % (self.txt, (self.pos * 100 / self.num_changes)),
+        sys.__stdout__.flush()
+        self.pos += 1
+
+
 def cache_recursive(dirlist, verbose=False):
     """
     cache a list of directories recursive
@@ -577,10 +605,14 @@ def cache_recursive(dirlist, verbose=False):
     for d in all_dirs:
         if verbose:
             dname = d
-            if len(dname) > 65:
-                dname = dname[:20] + ' [...] ' + dname[-40:]
-            print '  %4d/%-4d %s' % (all_dirs.index(d)+1, len(all_dirs), dname)
-        cache_dir(d)
+            if len(dname) > 55:
+                dname = dname[:15] + ' [...] ' + dname[-35:]
+            cache_status = CacheStatus(check_cache(d), '  %4d/%-4d %s' % \
+                                       (all_dirs.index(d)+1, len(all_dirs), dname))
+            cache_dir(d, cache_status.callback)
+            print
+        else:
+            cache_dir(d)
     if all_dirs:
         print
 
