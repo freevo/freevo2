@@ -158,8 +158,14 @@ v4l1_init (void)
   int fd;
 
   
-  fd = open ("/dev/video0", O_RDWR);
+  fd = open ("/dev/video", O_RDWR);
 
+  if (!fd) {
+    fprintf (stderr, "v4l12_to_mga: Couldn't open /dev/video! errno=%d\n",
+             errno);
+    exit (1);
+  }
+    
   ioctl (fd, VIDIOCGCAP, &vidcap);
 
   printf ("Vidcap:\n");
