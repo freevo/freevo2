@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/02/12 12:20:55  dischi
+# some media info fixes for directory
+#
 # Revision 1.55  2004/02/07 19:03:01  dischi
 # handle bad disc like blank once
 #
@@ -237,6 +240,7 @@ class rom_items(plugin.MainMenuPlugin):
                 else:
                     if media.item.type == 'dir':
                         media.item.display_type = parent.display_type
+                        media.item.create_metainfo()
                     m = media.item
 
             else:
@@ -558,7 +562,7 @@ class Identify_Thread(threading.Thread):
         _debug_('identifymedia: mp3="%s"' % mp3_files, level = 2)
         _debug_('identifymedia: image="%s"' % image_files, level = 2)
             
-        media.item = DirItem(media.mountdir, None)
+        media.item = DirItem(media.mountdir, None, create_metainfo=False)
         media.item.info = disc_info
         util.umount(media.mountdir)
         
