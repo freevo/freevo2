@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/06/06 07:23:16  dischi
+# do not import tv.xxx, use xxx, we are in tv
+#
 # Revision 1.11  2004/02/23 21:41:10  dischi
 # start some unicode fixes, still not working every time
 #
@@ -64,14 +67,13 @@
 
 from time import gmtime, strftime
 
-import config, tv.epg_xmltv, tv.view_favorites
-import tv.record_client as record_client
+import config, epg_xmltv
+import record_client
 import event as em
 
-from tv.record_types import Favorite
-import tv.record_types
-from tv.epg_types import TvProgram
-from tv.view_favorites  import ViewFavorites
+from record_types import Favorite
+from epg_types import TvProgram
+from view_favorites import ViewFavorites
 
 from gui.GUIObject      import *
 from gui.Border         import *
@@ -132,7 +134,7 @@ class EditFavorite(PopupBox):
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
-        guide = tv.epg_xmltv.get_guide()
+        guide = epg_xmltv.get_guide()
 
         name = Label(_('Name')+':', self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)
