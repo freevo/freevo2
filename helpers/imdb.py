@@ -10,6 +10,7 @@ import os
 
 freevo_version = '1.3.2'
 
+imdb_title_list = '/tmp/imdb-movies.list'
 
 def getCDID(drive):
     """
@@ -439,6 +440,77 @@ def add(fxd_file, files):
 
 
 
+def point_maker(matching):
+    return '%s.%s' % (matching.groups()[0], matching.groups()[1])
+
+def load_imdb_titles():
+    movie_data = re.compile('^.*[12][0-9][0-9][0-9]$', re.I)
+    data = []
+    try:
+        for line in open(imdb_title_list).readlines():
+            if movie_data.match(line):
+                data.append(' %s ' % line[:-1])
+    except IOError:
+        return None
+    return data
+    
+def local_search(name):
+    name  = os.path.basename(os.path.splitext(name)[0])
+    name  = re.sub('([a-z])([A-Z])', point_maker, name)
+    name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
+    name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
+    parts = re.split('[\._ -]', name)
+
+    matches = load_imdb_titles()
+
+    if matches == None:
+        return None
+    
+    title = ''
+    
+    for p in parts:
+        if p and p != 'and':
+            new_match = []
+            if p[0] == '(' and p[-1] == ')':
+                r = re.compile('^.*%s' % p[1:-1], re.I)
+            else:
+                r = re.compile('^.*[ :",-]%s[ :",-].*[12][0-9][0-9][0-9]' % p +
+                               '.*[12][0-9][0-9][0-9]', re.I)
+
+            for line in matches:
+                if r.match(line):
+                    new_match.append(line)
+
+            if new_match:
+                title = '%s %s' % (title, p)
+                matches = new_match
+
+    return title
+
+
+def find_best_match(title, matches):
+    best  = ''
+    count = 10000
+    for line in matches:
+        val = 0
+        for part in re.split(' ', title):
+            if part and part[0] == '(' and part[-1] == ')':
+                part = part[1:-1]
+                
+            if not re.search(part, line, re.I):
+                val += 2
+                
+        val += len(re.split(' ', re.split('\(', line)[0]))
+
+        if re.search('\(.*Movie.*\)', line):
+            val -= 2
+            
+        if  val < count:
+            count = val
+            best = line
+
+    return best
+
 
 def usage():
     print 'imdb.py -s string:   search imdb for string'
@@ -467,7 +539,7 @@ if __name__ == "__main__":
     search_arg = ''
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'as:', ('rom-drive=',))
+        opts, args = getopt.getopt(sys.argv[1:], 'as:g:', ('rom-drive=',))
     except getopt.GetoptError:
         usage()
         pass
@@ -477,12 +549,19 @@ if __name__ == "__main__":
             if task:
                 usage()
             task = 'add'
+
         if o == '-s':
             if task:
                 usage()
             task = 'search'
             search_arg = a
-            
+
+        if o == '-g':
+            if task:
+                usage()
+            task = 'guess'
+            search_arg = a
+
         if o == '--rom-drive':
             drive=a
 
@@ -505,7 +584,32 @@ if __name__ == "__main__":
                 print '%s   %s (%s)' % (result[0], result[1], result[2])
         sys.exit(0)
 
+    if task == 'guess':
+        if len(args) != 0:
+            usage()
 
+        filename = search_arg
+        print "searching " + filename
+        keys = local_search(filename)
+        if keys == None:
+            print 'Local database not found. Please download movies.list.gz' % imdb_title_list
+            print 'from the imdb interface website, unpack it and move it to'
+            print '%s.' % imdb_title_list
+            print 'To get the file go to http://www.imdb.com/interfaces'
+            sys.exit(1)
+
+        print 'keywords: %s' % keys
+        data = []
+        for result in search(keys):
+            data.append('%s   %s (%s)' % (result[0], result[1], result[2]))
+        match = find_best_match(filename, data)
+        print 'best match: %s' % match
+        imdb_number = match[:7]
+        files = [ filename ]
+        filename = os.path.splitext(filename)[0]
+        get_data_and_write_fxd(imdb_number, filename, drive, type, files, '')
+        sys.exit(0)
+        
     # normal usage
     if len(args) < 2:
         usage()
