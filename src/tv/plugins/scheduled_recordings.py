@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/03/13 17:12:49  rshortt
+# Refresh the list of scheduled recordings when we reload the menu.
+#
 # Revision 1.2  2004/02/23 08:22:10  gsbarbieri
 # i18n: help translators job.
 #
@@ -48,6 +51,7 @@ import os
 import config, plugin, menu, rc
 import tv.record_client as record_client
 
+from gui.AlertBox import AlertBox
 from item import Item
 from tv.program_display import ProgramItem
 
@@ -56,6 +60,7 @@ class ScheduledRecordingsItem(Item):
     def __init__(self, parent):
         Item.__init__(self, parent, skin_type='tv')
         self.name = _('Scheduled Recordings')
+        self.menuw = None
 
 
     def actions(self):
@@ -63,13 +68,45 @@ class ScheduledRecordingsItem(Item):
 
 
     def display_schedule(self, arg=None, menuw=None):
+        items = self.get_items()
+        if not len(items):
+            AlertBox(_('Nothing scheduled.')).show()
+            return
+
+        schedule_menu = menu.Menu(_( 'Scheduled Recordings'), items,
+                                  reload_func = self.reload,
+                                  item_types = 'tv program menu')
+        self.menuw = menuw
+        rc.app(None)
+        menuw.pushmenu(schedule_menu)
+        menuw.refresh()
+
+
+    def reload(self):
+        menuw = self.menuw
+
+        menu = menuw.menustack[1]
+
+        sel = menu.choices.index(menu.selected)
+        new_choices = self.get_items()
+        if not menu.selected in new_choices:
+            if len(new_choices) <= sel:
+                menu.selected = new_choices[-1]
+            else:
+                menu.selected = new_choices[sel]
+
+        menu.choices = new_choices
+
+        return menu
+
+
+    def get_items(self):
         items = []
 
         (server_available, msg) = record_client.connectionTest()
         if not server_available:
-            AlertBox(_('Recording server is unavailable.')+(': %s' % msg),
-                     self, Align.CENTER).show()
-            return
+            AlertBox(_('Recording server is unavailable.')+(': %s' % msg)).show()
+            return None
 
         (result, recordings) = record_client.getScheduledRecordings()
         if result:
@@ -81,15 +118,10 @@ class ScheduledRecordingsItem(Item):
             for prog in progs:
                 items.append(ProgramItem(self, prog, context='schedule'))
         else:
-            AlertBox(_('Get recordings failed')+(': %s' % recordings),
-                     self, Align.CENTER).show()
-            return
+            AlertBox(_('Get recordings failed')+(': %s' % recordings)).show()
+            return None
 
-        schedule_menu = menu.Menu(_( 'Scheduled Recordings'), items,
-                                  item_types = 'tv program menu')
-        rc.app(None)
-        menuw.pushmenu(schedule_menu)
-        menuw.refresh()
+        return items
 
 
 class PluginInterface(plugin.MainMenuPlugin):
