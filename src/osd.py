@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/07 07:17:07  krister
+# Added Thomas Schüppels objectcache layer for the OSD objects.
+#
 # Revision 1.4  2002/12/21 17:26:52  dischi
 # Added dfbmga support. This includes configure option, some special
 # settings for mplayer and extra overscan variables
@@ -53,6 +56,9 @@ import os
 import re
 import traceback
 from types import *
+import urllib
+import urlparse
+import objectcache
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -214,9 +220,9 @@ class OSD:
 
     def __init__(self):
 
-        self.fontcache = []
-        self.stringcache = []
-        self.bitmapcache = []
+        self.fontcache = objectcache.ObjectCache(300, desc='font')
+        self.stringcache = objectcache.ObjectCache(100, desc='string')
+        self.bitmapcache = objectcache.ObjectCache(30, desc='bitmap')
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
@@ -687,10 +693,10 @@ class OSD:
                                     # save the text that does not fit.
                                 for tmp in range(word_number, len(pieces)):
                                     try:
-				    	rest_words += words[tmp]
-                                    	if tmp < len_words: rest_words += ' '
-				    except IndexError:
-				        continue
+                                        rest_words += words[tmp]
+                                        if tmp < len_words: rest_words += ' '
+                                    except IndexError:
+                                        continue
                                     # quit the loop
                                 break
                         occupied_size = lines_size[line_number]
@@ -998,15 +1004,17 @@ class OSD:
         if not f:
             print 'Couldnt get font: "%s", size: %s' % (font, ptsize)
             return
-        
-        for i in range(len(self.stringcache)):
-            csurf, cstring, cfont, cfgcolor, cbgcolor = self.stringcache[i]
-            if (f == cfont and string == cstring and fgcolor == cfgcolor
-                and bgcolor == cbgcolor):
-                # Move to front of FIFO
-                del self.stringcache[i]
-                self.stringcache.append((csurf, cstring, cfont, cfgcolor, cbgcolor))
-                return csurf
+
+        # Encode all the strings data into an url so we can enter it
+        # nicely into our string-container
+        # Format: 
+        #  file://path/to/font.ttf?ptsize=55&fgcolor=123536&bgcolor=23142134&string=sometext
+        parameters = urllib.urlencode( [('ptsize',ptsize),('fgcolor',fgcolor),
+                                 ('bgcolor',bgcolor),('string',string)] )
+        url = urlparse.urlunparse( ( 'file', '', font, '', parameters,  '' ) ) 
+        surf = self.stringcache[url]
+        if surf:
+            return surf
 
         # Render string with anti-aliasing
         if bgcolor == None:
@@ -1018,11 +1026,9 @@ class OSD:
         else:
             surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
 
-        # Store the surface in the FIFO
-        self.stringcache.append((surf, string, f, fgcolor, bgcolor))
-        if len(self.stringcache) > 100:
-            del self.stringcache[0]
-
+        # Store the surface in the FIFO, Even if it's None?
+        self.stringcache[url] = surf
+        
         return surf
 
     # Return a (width, height) tuple for the given char, font, size. Use CACHE to speed up things
@@ -1207,9 +1213,10 @@ class OSD:
         if not pygame.display.get_init():
             return None
 
-        for font in self.fontcache:
-            if font.filename == filename and font.ptsize == ptsize:
-                return font.font
+        url = 'file://%s?%s' % ( filename, urllib.urlencode([('ptsize',ptsize)]) )
+        f = self.fontcache[url]
+        if f:
+            return f.font
 
         if DEBUG >= 3:
             print 'OSD: Loading font "%s"' % filename
@@ -1244,7 +1251,7 @@ class OSD:
         f.ptsize = ptsize
         f.font = font
         
-        self.fontcache.append(f)
+        self.fontcache[url] = f
 
         return f.font
 
@@ -1252,42 +1259,31 @@ class OSD:
     def _getbitmap(self, filename):
         if not pygame.display.get_init():
             return None
-
+                    
         if not os.path.isfile(filename):
             print 'Bitmap file "%s" doesnt exist!' % filename
             return None
-
-        for i in range(len(self.bitmapcache)):
-            fname, image = self.bitmapcache[i]
-            if stringproxy(fname) == stringproxy(filename):
-                # Move to front of FIFO
-                del self.bitmapcache[i]
-                self.bitmapcache.append((fname, image))
-                return image
-
+            
+        image = self.bitmapcache[filename]
+        if image:
+            return image
+        
         try:
             if DEBUG >= 3:
                 print 'Trying to load file "%s"' % filename
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
             image = tmp.convert_alpha()  # XXX Cannot load everything
+        except pygame.error, e:
+            print 'SDL image load problem: %s' % e
+            return None
         except:
-            print 'SDL image load problem!'
+            print 'Unknown Problem while loading image'
             return None
 
-        # FIFO for images
-        self.bitmapcache.append((filename, image))
-        if len(self.bitmapcache) > 30:
-            del self.bitmapcache[0]
+        # Update cache
+        self.bitmapcache[filename] = image
 
         return image
-
-
-    def _deletefromcache(self, filename):
-        for i in range(len(self.bitmapcache)):
-            fname, image = self.bitmapcache[i]
-            if stringproxy(fname) == stringproxy(filename):
-                del self.bitmapcache[i]
-
         
     def _helpscreen(self):
         if not pygame.display.get_init():
