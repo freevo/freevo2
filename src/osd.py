@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2003/07/06 19:26:24  dischi
+# small bugfix
+#
 # Revision 1.60  2003/07/05 15:45:57  dischi
 # Doh
 #
@@ -665,7 +668,7 @@ class OSD:
             width -= last_word_size
 
         # calc the matching and rest string and return all this
-        return (width, string[:c]+ellipses, string[c:])
+        return (width+ellipses_size, string[:c]+ellipses, string[c:])
 
             
 
@@ -777,7 +780,7 @@ class OSD:
                 max_x = x0 + w
             y0 += line_height
 
-        return r, (min_x, y, max_x, y+height_needed)
+        return r, (min_x, y, max_x, int(y+height_needed))
     
 
 
