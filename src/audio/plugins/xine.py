@@ -12,9 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/08/01 10:42:23  dischi
+# update to new application/eventhandler code
+#
 # Revision 1.16  2004/07/10 12:33:38  dischi
 # header cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -119,29 +121,21 @@ class Xine:
         play an audio file with xine
         """
 
-        self.item      = item
-        self.playerGUI = playerGUI
-        add_args       = []
+        self.item = item
+        add_args  = []
         
-        if plugin.getbyname('MIXER'):
-            plugin.getbyname('MIXER').reset()
-
         url = item.url
         if url.startswith('cdda://'):
             url = url.replace('//', '/')
             add_args.append('cfg:/input.cdda_device:%s' % item.media.devicename)
             
-        command = self.command.split(' ') + add_args + [ url ]
-        self.app = XineApp(command, self)
+        command  = self.command.split(' ') + add_args + [ url ]
+        self.app = XineApp(command, playerGUI)
     
 
     def is_playing(self):
         return self.app.isAlive()
 
-
-    def refresh(self):
-        self.playerGUI.refresh()
-        
 
     def stop(self):
         """
@@ -155,22 +149,9 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
-        if event == PLAY_END and event.arg:
-            self.stop()
-            if self.playerGUI.try_next_player():
-                return True
-
-        if event in ( PLAY_END, USER_END ):
-            self.playerGUI.stop()
-            return self.item.eventhandler(event)
-
         if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
             return True
-
-        if event == STOP:
-            self.playerGUI.stop()
-            return self.item.eventhandler(event)
 
         if event == SEEK:
             pos = int(event.arg)
@@ -188,8 +169,7 @@ class Xine:
             self.app.write('%s%s\n' % (action, pos))
             return True
 
-        # nothing found? Try the eventhandler of the object who called us
-        return self.item.eventhandler(event)
+        return False
 
         
 

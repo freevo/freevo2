@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/08/01 10:42:23  dischi
+# update to new application/eventhandler code
+#
 # Revision 1.18  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
 #
@@ -61,54 +64,38 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def detach(self):
-        gui  = audio.player.get()
+        gui = audio.player.get_singleton()
 
         # hide the player and show the menu
-        mpav = plugin.getbyname( 'audio.mpav' )
-        if mpav:
-            mpav.stop_mpav()
-
-        mplvis = plugin.getbyname( 'audio.mplayervis' )
-        if mplvis:
-            mplvis.stop_visual()
+        # mpav = plugin.getbyname( 'audio.mpav' )
+        # if mpav:
+        #     mpav.stop_mpav()
+        # 
+        # mplvis = plugin.getbyname( 'audio.mplayervis' )
+        # if mplvis:
+        #     mplvis.stop_visual()
 
         gui.hide()
-        gui.menuw.show()
-
-        # set all menuw's to None to prevent the next title to be
-        # visible again
-        gui.menuw = None
-        gui.item.menuw = None
-        if gui.item.parent:
-            gui.item.parent.menuw = None
         eventhandler.post(plugin.event('DETACH'))
         
 
     def items(self, parent):
-        gui = audio.player.get()
-        if gui and gui.player.is_playing():
+        gui = audio.player.get_singleton()
+        if gui.player and gui.player.is_playing():
             self.show_item.parent = parent
             return [ self.show_item ]
         return []
 
 
     def show(self, arg=None, menuw=None):
-        gui = audio.player.get()
-
-        # restore the menuw's
-        gui.menuw = menuw
-        gui.item.menuw = menuw
-        if gui.item.parent:
-            gui.item.parent.menuw = menuw
-
-        # hide the menu and show the player
-        menuw.hide()
+        gui = audio.player.get_singleton()
         gui.show()
-        mpav = plugin.getbyname( 'audio.mpav' )
-        if mpav:
-            mpav.start_mpav()
 
-        mplvis = plugin.getbyname( 'audio.mplayervis' )
-        if mplvis:
-            mplvis.stop_visual()
-            mplvis.start_visual()
+        # mpav = plugin.getbyname( 'audio.mpav' )
+        # if mpav:
+        #     mpav.start_mpav()
+        # 
+        # mplvis = plugin.getbyname( 'audio.mplayervis' )
+        # if mplvis:
+        #     mplvis.stop_visual()
+        #     mplvis.start_visual()

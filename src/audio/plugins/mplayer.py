@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/08/01 10:42:23  dischi
+# update to new application/eventhandler code
+#
 # Revision 1.39  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
 #
@@ -57,8 +60,7 @@ from event import *
 
 class PluginInterface(plugin.Plugin):
     """
-    Mplayer plugin for the audio player. Use mplayer to play all audio
-    files.
+    Mplayer plugin for the audio player.
     """
     def __init__(self):
         # create the mplayer object
@@ -74,9 +76,8 @@ class MPlayer:
     """
     
     def __init__(self):
-        self.name     = 'mplayer'
-        self.app_mode = 'audio'
-        self.app      = None
+        self.name = 'mplayer'
+        self.app  = None
 
 
     def rate(self, item):
@@ -94,6 +95,9 @@ class MPlayer:
 
         
     def get_demuxer(self, filename):
+        """
+        get the correct demuxer for mp3 or ogg
+        """
         DEMUXER_MP3 = 17
         DEMUXER_OGG = 18
         rest, extension     = os.path.splitext(filename)
@@ -109,7 +113,6 @@ class MPlayer:
         """
         play a audioitem with mplayer
         """
-        self.playerGUI = playerGUI
         filename       = item.filename
 
         if filename and not os.path.isfile(filename):
@@ -135,7 +138,8 @@ class MPlayer:
         if hasattr(item, 'is_playlist') and item.is_playlist:
             is_playlist = True
         
-        if item.network_play and ( str(filename).endswith('m3u') or str(filename).endswith('pls')):
+        if item.network_play and ( str(filename).endswith('m3u') or \
+                                   str(filename).endswith('pls')):
             is_playlist = True
 
         if item.network_play:
@@ -143,33 +147,24 @@ class MPlayer:
 
         if hasattr(item, 'reconnect') and item.reconnect:
             extra_opts += ' -loop 0'
-            
-        command = '%s -vo null -ao %s %s %s' % (mpl, config.MPLAYER_AO_DEV, demux,
-                                                extra_opts)
 
+        # build the mplayer command
+        command = '%s -vo null -ao %s %s %s' % \
+                  (mpl, config.MPLAYER_AO_DEV, demux, extra_opts)
         if command.find('-playlist') > 0:
             command = command.replace('-playlist', '')
-            
         command = command.replace('\n', '').split(' ')
 
         if is_playlist:
             command.append('-playlist')
-            
         command.append(filename)
 
-        self.plugins = plugin.get('mplayer_audio')
-        for p in self.plugins:
+        for p in plugin.get('mplayer_audio'):
             command = p.play(command, self)
             
-        if plugin.getbyname('MIXER'):
-            plugin.getbyname('MIXER').reset()
-
         self.item = item
+        self.app  = MPlayerApp(command, playerGUI)
 
-        _debug_('MPlayer.play(): Starting cmd=%s' % command)
-            
-        self.app = MPlayerApp(command, self)
-        return None
     
 
     def stop(self):
@@ -178,7 +173,7 @@ class MPlayer:
         """
         self.app.stop('quit\n')
 
-        for p in self.plugins:
+        for p in plugin.get('mplayer_audio'):
             command = p.stop()
 
 
@@ -186,9 +181,6 @@ class MPlayer:
         return self.app.isAlive()
 
 
-    def refresh(self):
-        self.playerGUI.refresh()
-        
 
     def eventhandler(self, event, menuw=None):
         """
@@ -196,34 +188,23 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
 
-        for p in self.plugins:
+        for p in plugin.get('mplayer_audio'):
             if p.eventhandler(event):
                 return True
 
-        if event == PLAY_END and event.arg:
-            self.stop()
-            if self.playerGUI.try_next_player():
-                return True
-            
         if event == AUDIO_SEND_MPLAYER_CMD:
             self.app.write('%s\n' % event.arg)
             return True
 
-        if event in ( STOP, PLAY_END, USER_END ):
-            self.playerGUI.stop()
-            return self.item.eventhandler(event)
-
-        elif event == PAUSE or event == PLAY:
+        if event == PAUSE or event == PLAY:
             self.app.write('pause\n')
             return True
 
-        elif event == SEEK:
+        if event == SEEK:
             self.app.write('seek %s\n' % event.arg)
             return True
 
-        else:
-            # everything else: give event to the items eventhandler
-            return self.item.eventhandler(event)
+        return False
             
             
 # ======================================================================
@@ -236,7 +217,7 @@ class MPlayerApp(childapp.ChildApp2):
         self.item        = player.item
         self.player      = player
         self.elapsed     = 0
-        self.stop_reason = 0 # 0 = ok, 1 = error
+        self.stop_reason = ''
         self.RE_TIME     = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
 
@@ -259,7 +240,7 @@ class MPlayerApp(childapp.ChildApp2):
         if line.startswith("A:"):         # get current time
             m = self.RE_TIME_NEW(line)
             if m:
-                self.stop_reason = 0
+                self.stop_reason = ''
 		timestrs = m.group().split(":")
 		if len(timestrs) == 5:
 		    # playing for days!
@@ -281,6 +262,7 @@ class MPlayerApp(childapp.ChildApp2):
             else:
                 m = self.RE_TIME(line) # Convert decimal 
                 if m:
+                    self.stop_reason  = ''
                     self.item.elapsed = int(m.group(1))
 
             if self.item.elapsed != self.elapsed:
@@ -299,6 +281,6 @@ class MPlayerApp(childapp.ChildApp2):
 
     def stderr_cb(self, line):
         if line.startswith('Failed to open'):
-            self.stop_reason = 1
+            self.stop_reason = line
         for p in self.stdout_plugins:
             p.stdout(line)
