@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/12/04 01:46:46  rshortt
+# Use TV_ALL_CHANNELS from config.
+#
 # Revision 1.61  2004/11/20 18:23:04  dischi
 # use python logger module for debug
 #
@@ -120,9 +123,6 @@ import menu
 
 from event import *
 from application import MenuApplication
-
-from channels import get_channels
-
 from item import Item
 
 import logging
@@ -161,23 +161,19 @@ class TVGuide(MenuApplication):
         box = gui.PopupBox(text=_('Preparing the program guide'))
         box.show()
 
-        try:
-            channels = get_channels()
-        except Exception, e:
+        if not config.TV_ALL_CHANNELS:
             box.destroy()
             gui.AlertBox(text=_('TV Guide is corrupt!')).show()
-            print e
-            traceback.print_exc()
             return False
 
         self.current_time = int(time.time())
-        stop_time = self.current_time + 3*3600
-        channels.import_programs(self.current_time-3*3600, stop_time)
+        start_time = self.current_time - 1800
+        stop_time  = self.current_time + 3*3600
+        config.TV_ALL_CHANNELS.import_programs(start_time, stop_time)
 
-        self.channel      = channels.get()
-        self.selected     = self.channel.get(self.current_time)[0]
+        self.channel  = config.TV_ALL_CHANNELS.get()
+        self.selected = self.channel.get(self.current_time)[0]
 
-        self.channel_list = channels
         box.destroy()
         return True
     
@@ -220,8 +216,8 @@ class TVGuide(MenuApplication):
             pass
             
         if event == MENU_UP:
-            self.channel_list.up()
-            self.channel  = self.channel_list.get()
+            config.TV_ALL_CHANNELS.up()
+            self.channel  = config.TV_ALL_CHANNELS.get()
             try:
                 self.selected = self.channel.get(self.current_time)[0]
             except Exception, e:
@@ -230,8 +226,8 @@ class TVGuide(MenuApplication):
             self.refresh()
 
         elif event == MENU_DOWN:
-            self.channel_list.down()
-            self.channel  = self.channel_list.get()
+            config.TV_ALL_CHANNELS.down()
+            self.channel  = config.TV_ALL_CHANNELS.get()
             try:
                 self.selected = self.channel.get(self.current_time)[0]
             except Exception, e:
@@ -263,8 +259,9 @@ class TVGuide(MenuApplication):
 
         elif event == TV_SHOW_CHANNEL:
             items = []
-            channel = channels.get_settings_by_id(self.chan_id)
-            for prog in channel.get(time.time(), -1):
+            # channel = config.TV_ALL_CHANNELS.get_settings_by_id(self.chan_id)
+            # for prog in channel.get(time.time(), -1):
+            for prog in self.selected.get(time.time(), -1):
                 items.append(prog)
             cmenu = menu.Menu(self.channel.name, items)
             # FIXME: the percent values need to be calculated
@@ -313,8 +310,8 @@ class TVGuide(MenuApplication):
         """
         p = self.channel.player()
         if p:
-            app, device, freq = p
-            app.play(self.channel, device, freq)
+            app, device, uri = p
+            app.play(self.channel, device, uri)
 
 
     def show_item_menu(self):
