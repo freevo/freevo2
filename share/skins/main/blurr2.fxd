@@ -91,6 +91,9 @@
       
     <menuset label="image" inherits="normal text style">
       <screen layout="image screen"/>
+      <listing y="100" x="60" height="400" width="700" layout="image list"/>
+      <info layout="image info" x="70" y="525" width="750" height="75"/>
+      <view visible="no"/>
     </menuset>
       
     <menuset label="tv" inherits="normal text style"> 
@@ -163,6 +166,8 @@
 	<image image="background" x="0" y="0" label="background"/>
 	<image filename="watermarks/image.png" x="435" y="230" width="370"
 	  height="380"/>
+        <rectangle size="0" x="19" y="510" width="759" height="100"
+            radius="10" bgcolor="0xaa000000"/>
       </background>
     </layout>
 
@@ -306,6 +311,24 @@
         </content>
     </layout>
 
+
+    <!-- listing area for image with images (preview) -->
+    <layout label="image list">
+      <content type="image" spacing="5">
+        <item type="default" width="140" height="115" align="left"
+          valign="left">
+          <rectangle bgcolor="0xaa333333" size="0" x="+5" y="+5"/>
+        </item>
+        <item type="selected" width="140" height="115"
+          align="left" valign="left">
+          <rectangle bgcolor="0xaa333333" size="0" x="+5" y="+5" width="max"
+                    height="max"/>
+          <rectangle color="0x00ffffff" bgcolor="0xffffffffff" size="2" x="-6" y="-6" width="max+12"
+                       height="max+12"/>
+        </item>
+      </content>
+    </layout>
+
     <!-- main menu listing area -->
     <layout label="list_main">
       <content align="center" type="text" spacing="10">
@@ -317,7 +340,45 @@
       </content>
     </layout>
 
-
+    <layout label="image info">
+      <content x="0" y="0" type="text" spacing="20" font="default">
+        <item type="dir">
+        <!-- DES -->
+            <text font="info tagline" width="max" expression="name"/>
+            <text font="info tagline" width="max" expression="description"/>
+            <if expression="plot">
+              <text font="info plot" height="max" mode="soft" 
+                align="justified" expression="plot"/>
+              <newline/>
+            </if>
+            <if expression="content and not plot">
+              <text font="info plot" height="max" mode="soft" 
+                align="justified" expression="content"/>
+              <newline/>
+            </if>
+        </item> 
+        <item type="image">
+          <if expression="name">
+            <text font="info value" expression="name"/>
+          </if>
+          <goto_pos x="100" mode="relative"/>
+          <if expression="width and height">
+            <text font="info value" expression="width"/>
+            <text font="info value">x</text>
+            <text font="info value" expression="height"/>
+          </if>
+          <goto_pos x="100" mode="relative"/>
+          <if expression="date">
+            <text font="info value" expression="date"/>
+            <newline/>
+          </if>
+          <if expression="description">
+            <text font="info plot" height="max" mode="soft" expression="description"/>
+            <newline/>
+          </if>
+        </item>
+      </content>
+    </layout>
 
     <!-- default view area -->
     <layout label="view">
