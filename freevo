@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 #if 0 /*
 # -----------------------------------------------------------------------
@@ -11,6 +11,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2004/02/10 00:17:52  rshortt
+# Use env from /usr/bin rather than /bin.  I beleive it is standard in /usr/bin,
+# looking in /bin breaks Debian and others while it is available in both places
+# (so I have been told) in RedHat and Gentoo.
+#
+# Also standardize the naming of pid files.
+#
 # Revision 1.109  2004/02/06 18:01:21  dischi
 # fix bug with helper softlinks
 #
@@ -167,7 +174,8 @@ def getpid(name, arg):
     """
     get pid of running 'name'
     """
-    for fname in ('/var/run/' + name, '/tmp/' + name + '%s-.pid' % os.getuid()):
+    for fname in ('/var/run/' + name  + '-%s.pid' % os.getuid(), 
+                  '/tmp/' + name + '-%s.pid' % os.getuid()):
         if os.path.isfile(fname):
             f = open(fname)
             uid = int(f.readline()[:-1])
@@ -231,9 +239,9 @@ def start(name, arg, bg, store=1):
     if uid:
         if store:
             try:
-                f = open('/var/run/' + name, 'w')
+                f = open('/var/run/' + name + '-%s.pid' % os.getuid(), 'w')
             except (OSError, IOError):
-                f = open('/tmp/' + name + '%s-.pid' % os.getuid(), 'w')
+                f = open('/tmp/' + name + '-%s.pid' % os.getuid(), 'w')
 
             f.write(str(uid)+'\n')
             f.close()
