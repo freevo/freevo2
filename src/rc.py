@@ -4,11 +4,15 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
+# Notes: This is the only class to be thread safe!
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/05/31 10:39:55  dischi
+# Again some interface changes. There is now only one function
+# handling all callbacks, including repeating calls with timer
+#
 # Revision 1.34  2004/05/30 18:27:53  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
 #
@@ -52,6 +56,8 @@ import types
 import config
 
 from event import Event, BUTTON
+
+SHUTDOWN = -1
 
 PYLIRC     = False
 _singleton = None
@@ -99,11 +105,13 @@ def set_context(context):
     return get_singleton().set_context(context)
 
 
-def register(object, *arg):
+def register(function, repeat, timer, *arg):
     """
-    register an object to the main loop
+    register an function to be called
+    repeat: if true, call the function later again
+    timer:  timer * 0.01 seconds when to call the function
     """
-    return get_singleton().register(object, *arg)
+    return get_singleton().register(function, repeat, timer, *arg)
 
 
 def unregister(object):
@@ -329,11 +337,14 @@ class EventHandler:
         self.context            = 'menu'
         self.queue              = []
         self.event_callback     = None
-        self.one_time_callbacks = []
+        self.callbacks          = []
+        self.shutdown_callbacks = []
         self.poll_objects       = []
         # lock all critical parts
         self.lock               = thread.allocate_lock()
-
+        # last time we stopped sleeping
+        self.sleep_timer        = 0
+        
 
     def set_app(self, app, context):
         """
@@ -393,25 +404,36 @@ class EventHandler:
         return Event(BUTTON, arg=key)
 
 
-    def register(self, object, *arg):
+    def register(self, function, repeat, timer, *arg):
         """
-        register an object to the main loop
+        register an function to be called
+        repeat: if true, call the function later again
+        timer:  timer * 0.01 seconds when to call the function
         """
         self.lock.acquire()
-        if type(object) in [ types.FunctionType, types.MethodType ]:
-            self.one_time_callbacks.append((object, arg))
-        elif not object in self.poll_objects:
-            self.poll_objects.append(object)
+        if timer == SHUTDOWN:
+            _debug_('register shutdown callback: %s' % function, 2)
+            self.shutdown_callbacks.append([ function, arg ])
+        else:
+            if repeat:
+                _debug_('register callback: %s' % function, 2)
+            self.callbacks.append([ function, repeat, timer, 0, arg ])
         self.lock.release()
 
         
-    def unregister(self, object):
+    def unregister(self, function):
         """
         unregister an object from the main loop
         """
         self.lock.acquire()
-        if object in self.poll_objects:
-            self.poll_objects.remove(object)
+        for c in copy.copy(self.callbacks):
+            if c[0] == function:
+                _debug_('unregister callback: %s' % function, 2)
+                self.callbacks.remove(c)
+        for c in copy.copy(self.shutdown_callbacks):
+            if c[0] == function:
+                _debug_('unregister shutdown callback: %s' % function, 2)
+                self.shutdown_callbacks.remove(c)
         self.lock.release()
 
         
@@ -419,9 +441,9 @@ class EventHandler:
         """
         shutdown the rc
         """
-        for p in copy.copy(self.poll_objects):
-            if hasattr(p, 'stop'):
-                p.stop()
+        for c in copy.copy(self.shutdown_callbacks):
+            _debug_('shutting down %s' % c[0], 2)
+            c[0](*c[1])
 
 
     def poll(self):
@@ -429,24 +451,20 @@ class EventHandler:
         poll all registered functions
         """
         # run all registered callbacks
-        while len(self.one_time_callbacks) > 0:
-            self.lock.acquire()
-            callback, arg = self.one_time_callbacks.pop(0)
-            self.lock.release()
-            callback(*arg)
-
-        # run all registered objects having a poll() function
-        # using poll_counter and poll_interval (if given)
-        for p in copy.copy(self.poll_objects):
-            if hasattr(p, 'poll_counter'):
-                if not (self.app and p.poll_menu_only):
-                    p.poll_counter += 1
-                    if p.poll_counter == p.poll_interval:
-                        p.poll_counter = 0
-                        p.poll()
+        for c in copy.copy(self.callbacks):
+            if c[2] == c[3]:
+                # time is up, call it:
+                c[0](*c[4])
+                if not c[1]:
+                    # remove if it is no repeat callback:
+                    self.lock.acquire()
+                    self.callbacks.remove(c)
+                    self.lock.release()
+                else:
+                    # reset counter for next run
+                    c[3] = 0
             else:
-                p.poll()
-
+                c[3] += 1
 
 
     def get_event(self, blocking=False):
@@ -462,9 +480,14 @@ class EventHandler:
                     return event
                 # poll everything
                 self.poll()
-                # wait some time
-                time.sleep(0.01)
 
+                # wait some time
+                duration = 0.01 - (time.time() - self.sleep_timer)
+                if duration > 0:
+                    time.sleep(duration)
+                self.sleep_timer = time.time()
+
+                
         # search for events in the queue
         if len(self.queue):
             self.lock.acquire()
