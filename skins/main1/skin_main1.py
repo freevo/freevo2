@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2002/09/20 19:18:59  dischi
+# o added ItemsPerMenuPage and adapted some stuff that it works
+# o integrated the tv show alignment from dischi1 (testfiles needed to show
+#   that feature)
+#
 # Revision 1.21  2002/09/15 12:32:02  dischi
 # The DVD/VCD/SCVD/CD description file for the automounter can now also
 # contain skin informations. An announcement will follow. For this the
@@ -23,27 +28,14 @@
 # style. Please don't abuse the eventhandler_args for something that has
 # nothing to do with the eventhandler.
 #
-# Revision 1.18  2002/09/01 04:31:35  krister
-# Removed the 'text' on an empty line, looks like Dischis cat walked over the clicked the paste-button on his mouse...
-#
 # Revision 1.17  2002/08/31 17:33:49  dischi
 # The selection will be shorten if there is a image for an item to avoid
 # overlapping. If the item name is too long it will be shorten, too and "..."
 # will be added at the end.
 #
 # Revision 1.16  2002/08/19 05:52:08  krister
-# Changed to Gustavos new XML code for more settings in the skin. Uses columns for the TV guide.
-#
-# Revision 1.2  2002/08/18 06:12:30  krister
-# Converted tabs to spaces. Please use tabnanny in the future!
-#
-# Revision 1.1  2002/08/17 02:55:45  krister
-# Submitted by Gustavo Barbieri.
-#
-# Revision 1.12  2002/08/11 08:11:03  dischi
-# moved the XML parsing to an extra file and the file 768x576.xml
-# to the directory skins/xml
-#
+# Changed to Gustavos new XML code for more settings in the skin. Uses columns
+# for the TV guide.
 #
 #
 # -----------------------------------------------------------------------
@@ -100,6 +92,9 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+
+PADDING=5   # Padding/spacing between items
+
 ###############################################################################
 
 # Set up the mixer
@@ -122,8 +117,6 @@ class Skin:
     
     settings = xml_skin.XMLSkin()
     settings.load(config.SKIN_XML_FILE)
-
-    items_per_page = 12
 
     hold = 0
 
@@ -156,6 +149,62 @@ class Skin:
             settings.load(dir, 1)
             return settings
         return None
+
+
+    def ItemsPerMenuPage(self, menu):
+        
+        if not menu:
+            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            return
+
+        # hack for the main menu to fit all in one screen
+        if not menu.packrows:
+            return 5
+        
+        # get the settings
+        if menu.skin_settings:
+            val = menu.skin_settings.menu
+        else:
+            val = self.settings.menu
+
+        used_height = 0
+        n_items     = 0
+
+        for item in menu.choices[menu.page_start : len(menu.choices)]:
+            if item.type:
+                if item.type == 'dir':
+                    pref_item = val.item_dir
+                elif item.type == 'list':
+                    pref_item = val.item_pl
+                elif item.type == 'main':
+                    pref_item = val.item_main
+                else:
+                    pref_item = val.items;
+            else:
+                pref_item = val.items;
+
+            # Size of the non-selected item
+            ns_str_w, ns_str_h = osd.stringsize('Ajg', font=pref_item.font,
+                                                ptsize=pref_item.size)            
+            # Size of the selected item
+            s_str_w, s_str_h = osd.stringsize('Ajg', font=pref_item.font,
+                                              ptsize=pref_item.selection.size)
+
+            item_icon_size_x = item_icon_size_y = 0
+            if item.icon != None:
+                item_icon_size_x, item_icon_size_y = osd.bitmapsize(item.icon)
+            
+            # add the size used
+            used_height += max(ns_str_h, s_str_h, item_icon_size_y) + PADDING + \
+                           max(pref_item.shadow_pad_y, pref_item.selection.shadow_pad_y)
+        
+            if used_height < val.items.height:
+                n_items+=1
+            else:
+                return n_items
+
+        return n_items
+        
 
 
     def DrawText(self, text, x, y, color, shadow_color = 0x000000,
@@ -230,7 +279,7 @@ class Skin:
         selection_height = val.items.height
 
         if menu.packrows:
-            spacing = selection_height / menuw.items_per_page
+            spacing = 0                 # calculate this later
             icon_size = 28
         else:
             spacing = selection_height / max(len(menuw.menu_items),1)
@@ -333,22 +382,85 @@ class Skin:
             text = choice.name
 
             font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
+            if not spacing:
+                spacing = font_h + PADDING
+            
             if font_w + 26 > selection_length:
                 text = text + "..."
                     
             while font_w + 26 > selection_length:
                 text = text[0:-4] + "..."
                 font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
+
+            show_name = (None, None, None, None)
+            if config.TV_SHOW_REGEXP_MATCH(text):
+                show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(text))
+                if show_name[0][-1] == '(':
+                    show_name[0] = None
+
+            # TV show, align the text with all files from the same show
+            if show_name[0]:
+                x = item.x
+                self.DrawText(show_name[0], x, top,
+                              obj.color, 
+                              obj.shadow_color, None,
+                              obj.font,
+                              obj.size,
+                              obj.shadow_visible,
+                              obj.shadow_mode,
+                              obj.shadow_pad_x,
+                              obj.shadow_pad_y)
+
+                season_w = 0
+                volume_w = 0
                 
-            self.DrawText(text, item.x, top,
-                          obj.color, 
-                          obj.shadow_color, None,
-                          obj.font,
-                          obj.size,
-                          obj.shadow_visible,
-                          obj.shadow_mode,
-                          obj.shadow_pad_x,
-                          obj.shadow_pad_y)
+                for i in menuw.menu_items:
+                    if config.TV_SHOW_REGEXP_MATCH(i.name):
+                        s = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(i.name))
+                        if s[0] == show_name[0]:
+                            season_w = max(osd.stringsize(s[1], font=obj.font, \
+                                                          ptsize=obj.size)[0], season_w)
+                            volume_w = max(osd.stringsize(s[2], font=obj.font, \
+                                                          ptsize=obj.size)[0], volume_w)
+
+                x = x + \
+                    osd.stringsize('%s  ' % show_name[0], font=obj.font, \
+                                   ptsize=obj.size)[0] - season_w + \
+                    osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
+                
+                self.DrawText('%sx%s' % (show_name[1], show_name[2]), x, top,
+                              obj.color, 
+                              obj.shadow_color, None,
+                              obj.font,
+                              obj.size,
+                              obj.shadow_visible,
+                              obj.shadow_mode,
+                              obj.shadow_pad_x,
+                              obj.shadow_pad_y)
+
+                x = x + season_w + volume_w + \
+                    osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
+
+                self.DrawText('-  %s' % show_name[3], x, top,
+                              obj.color, 
+                              obj.shadow_color, None,
+                              obj.font,
+                              obj.size,
+                              obj.shadow_visible,
+                              obj.shadow_mode,
+                              obj.shadow_pad_x,
+                              obj.shadow_pad_y)
+                
+            else:
+                self.DrawText(text, item.x, top,
+                              obj.color, 
+                              obj.shadow_color, None,
+                              obj.font,
+                              obj.size,
+                              obj.shadow_visible,
+                              obj.shadow_mode,
+                              obj.shadow_pad_x,
+                              obj.shadow_pad_y)
 
             if choice.icon != None:
                 icon_x = item.x - icon_size - 15
@@ -401,6 +513,8 @@ class Skin:
             print 'skin.drawmenu() hold!'
             return
 
+        if DEBUG: print 'Skin.drawmenu()'
+        
         osd.clearscreen(osd.COL_WHITE)
 
         menu = menuw.menustack[-1]
@@ -434,7 +548,7 @@ class Skin:
         selection_height = val.items.height
 
         if menu.packrows:
-            spacing = selection_height / menuw.items_per_page
+            spacing = selection_height / self.ItemsPerPage(menu)
         else:
             spacing = selection_height / max(len(menuw.menu_items),1)
 
