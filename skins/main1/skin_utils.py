@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/19 19:13:47  dischi
+# support for item.image that is no filename but a Imaging object
+#
 # Revision 1.9  2003/07/13 13:44:06  dischi
 # small bugfix
 #
@@ -61,6 +64,7 @@
 
 import pygame
 from pygame.locals import *
+import ImageFile
 
 import osd
 import os
@@ -94,10 +98,13 @@ def format_image(settings, item, width, height, force=0):
     imagefile = None
     
     if item.image:
-        image = load_imagecache['thumb://%s' % item.image]
-        if not image:
-            image = osd.loadbitmap('thumb://%s' % item.image)
-            load_imagecache['thumb://%s' % item.image] = image
+        if isinstance(item.image, ImageFile.ImageFile):
+            image = osd.loadbitmap(item.image)
+        else:
+            image = load_imagecache['thumb://%s' % item.image]
+            if not image:
+                image = osd.loadbitmap('thumb://%s' % item.image)
+                load_imagecache['thumb://%s' % item.image] = image
             
     if not image:
         if not force:
