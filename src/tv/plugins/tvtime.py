@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/12/03 20:40:34  mikeruelle
+# a hack for those who do not use freevo -fs
+#
 # Revision 1.22  2003/11/16 17:04:13  mikeruelle
 # remove stupid found it message
 #
@@ -591,13 +594,49 @@ class TVTimeApp(childapp.ChildApp):
 
 
     def stdout_cb(self, line):
+        # XXX Needed because tvtime grabs focus unless used with freevo -fs
+        events = { 'n' : em.MIXER_VOLDOWN,
+                   'm' : em.MIXER_VOLUP,
+                   'c' : em.TV_CHANNEL_UP,
+                   'v' : em.TV_CHANNEL_DOWN,
+                   'Escape' : em.STOP,
+                   'd' : em.TOGGLE_OSD,
+                   '_' : em.Event(em.BUTTON, arg='PREV_CHAN'),
+                   '0' : em.Event(em.BUTTON, arg='0'),
+                   '1' : em.Event(em.BUTTON, arg='1'),
+                   '2' : em.Event(em.BUTTON, arg='2'),
+                   '3' : em.Event(em.BUTTON, arg='3'),
+                   '4' : em.Event(em.BUTTON, arg='4'),
+                   '5' : em.Event(em.BUTTON, arg='5'),
+                   '6' : em.Event(em.BUTTON, arg='6'),
+                   '7' : em.Event(em.BUTTON, arg='7'),
+                   '8' : em.Event(em.BUTTON, arg='8'),
+                   '9' : em.Event(em.BUTTON, arg='9'),
+                   'F3' : em.MIXER_MUTE,
+                   's' : em.STOP }
+        
+        if DEBUG: print 'TVTIME 1 KEY EVENT: "%s"' % str(list(line))
+        if line == 'F10':
+            if DEBUG: print 'TVTIME screenshot!'
+            self.write('screenshot\n')
+        elif line == 'z':
+            if DEBUG: print 'TVTIME fullscreen toggle!'
+            self.write('toggle_fullscreen\n')
+            osd.toggle_fullscreen()
+        else:
+            event = events.get(line, None)
+            if event is not None:
+                rc.post_event(event)
+                if DEBUG: print 'posted translated tvtime event "%s"' % event
+            else:
+                if DEBUG: print 'tvtime cmd "%s" not found!' % line
+        
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stdout.write(line + '\n')
             except ValueError:
                 pass # File closed
-                     
-
+   
     def stderr_cb(self, line):
         if config.MPLAYER_DEBUG:
             try:
