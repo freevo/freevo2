@@ -5,11 +5,11 @@
 %define runtimever 4
 Summary:	Freevo
 Name:		freevo
-Version:	1.3.1
-Release:	2
+Version:	1.3.2
+Release:	pre1
 License:	GPL
 Group:		Applications/Multimedia
-Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
+Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
 Patch0:		%{name}-%{version}-runtime.patch
 Patch1:		%{name}-%{version}-Makefile.patch
 URL:		http://freevo.sourceforge.net/
@@ -31,7 +31,7 @@ and audio.
 
 %prep
 #%setup  -n %{name}
-%setup  -n %{name}-%{version}
+%setup  -n %{name}-%{version}-%{release}
 %patch0 -p0
 %patch1 -p0
 
@@ -39,14 +39,11 @@ and audio.
 %build
 find . -name CVS | xargs rm -rf
 make clean; make
-pushd plugins/cddb
-	make
-popd
 pushd src/games/rominfo
 	make
 popd
 
-./configure --geometry=%{geometry} --display=%{display} \
+./freevo setup --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
 
 %package runtime
@@ -108,7 +105,7 @@ mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
 mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
 mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
 mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins,www/bin,www/htdocs/images,www/htdocs/scripts,www/htdocs/styles}
-mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
+mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
 mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml/type1}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
 mkdir -p %{buildroot}%{_prefix}/skins/icons/{AquaFusion,gnome,misc,old}
@@ -117,14 +114,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
 
 install -m 755 freevo freevo_xwin runapp %{buildroot}%{_prefix}
-install -m 644 freevo_config.py setup_build.py %{buildroot}%{_prefix}
+install -m 644 freevo_config.py setup_freevo.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 install -m 755 helpers/blanking %{buildroot}%{_prefix}/helpers
 install -m 755 helpers/*.pl %{buildroot}%{_prefix}/helpers
 install -m 755 helpers/*.py %{buildroot}%{_prefix}/helpers
-install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/*.png %{buildroot}%{_prefix}/plugins/weather/icons
 install -m 644 rc_client/*.py %{buildroot}%{_prefix}/rc_client
@@ -181,12 +177,13 @@ install -m 644 testfiles/Mame/* %{buildroot}%{_cachedir}/freevo/testfiles/Mame
 install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
 install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/Music
+install -m 644 testfiles/Music/*.png %{buildroot}%{_cachedir}/freevo/testfiles/Music
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %post
-cd %{_prefix}; ./runapp python setup_build.py --compile=%{_optimize},%{_prefix}
+cd %{_prefix}; ./freevo setup --compile=%{_optimize},%{_prefix}
 mkdir -p %{_cachedir}/freevo
 mkdir -p %{_cachedir}/xmltv/logos
 mkdir -p %{_logdir}/freevo
