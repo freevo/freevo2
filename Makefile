@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/04/06 21:16:28  dischi
+# add cache directories
+#
 # Revision 1.29  2003/02/27 05:53:20  krister
 # Avoid merge problems for CVS updates, couldn't do some straight updates!
 #
@@ -149,6 +152,12 @@ install: all python_compile
 
 	-mkdir -p $(CACHEDIR)
 	chmod ugo+rwx $(CACHEDIR)
+
+	-mkdir -p $(CACHEDIR)/thumbnails
+	chmod ugo+rwx $(CACHEDIR)/thumbnails
+
+	-mkdir -p $(CACHEDIR)/audio
+	chmod ugo+rwx $(CACHEDIR)/audio
 
 	-mkdir -p $(CACHEDIR)/xmltv/logos
 	chmod -R ugo+rwx $(CACHEDIR)/xmltv
