@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.159  2004/06/06 16:13:27  dischi
+# handle missing surfarray (Python Numeric)
+#
 # Revision 1.158  2004/06/06 06:32:33  dischi
 # check osd init before drawstringframed
 #
@@ -837,20 +840,21 @@ class OSD:
         Helper for drawing a transparency gradient end for strings
         which don't fit it's content area.
         """
-        #n = time.time()
-        opaque_mod = float(1)
-        opaque_stp = opaque_mod/float(pixels)
-        w, h       = surface.get_size()
-        alpha      = pygame.surfarray.pixels_alpha(surface)
+        try:
+            opaque_mod = float(1)
+            opaque_stp = opaque_mod/float(pixels)
+            w, h       = surface.get_size()
+            alpha      = pygame.surfarray.pixels_alpha(surface)
 
-        # transform all the alpha values in x,y range
-        # any speedup could help alot
-        for x in range(max(w-pixels, 1), w):
-            for y in range(1, h):
-                if alpha[x,y][0] != 0:
-                    alpha[x,y] = int(alpha[x,y][0]*opaque_mod)
-            opaque_mod -= opaque_stp
-
+            # transform all the alpha values in x,y range
+            # any speedup could help alot
+            for x in range(max(w-pixels, 1), w):
+                for y in range(1, h):
+                    if alpha[x,y][0] != 0:
+                        alpha[x,y] = int(alpha[x,y][0]*opaque_mod)
+                opaque_mod -= opaque_stp
+        except Exception, e:
+            print e
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
