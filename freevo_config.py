@@ -515,6 +515,8 @@ DIRECTORY_AUTOPLAY_ITEMS       = [ ]
 
 #
 # Where the movie files can be found.
+# This is a list of items (e.g. directories, fxd files). The items itself
+# can also be a list of (title, file)
 #
 VIDEO_ITEMS = None
 
@@ -562,6 +564,10 @@ VIDEO_ONLY_SCAN_DATADIR = 1
 
 #
 # Where the Audio (mp3, ogg) files can be found.
+# This is a list of items (e.g. directories, fxd files). The items itself
+# can also be a list of (title, file)
+#
+# To add webradio support, add fxd/webradio.fxd to this list
 #
 AUDIO_ITEMS = None
 
@@ -594,6 +600,8 @@ AUDIO_SHOW_VIDEOFILES = False
 
 #
 # Where the image files can be found.
+# This is a list of items (e.g. directories, fxd files). The items itself
+# can also be a list of (title, file)
 #
 IMAGE_ITEMS = None
 
