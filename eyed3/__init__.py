@@ -444,7 +444,7 @@ class Tag:
             if year and int(year):
                self.setYear(year);
 
-            comment = re.sub("\x00+$", "", id3tag[97:127].strip())
+	    comment = id3tag[97:127] 
 	    
 	    if ord(comment[-2]) == 0 and ord(comment[-1]) != 0:
 	        # Parse track number (added to ID3v1.1) if present
