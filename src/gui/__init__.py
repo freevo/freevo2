@@ -19,6 +19,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 13:40:53  rshortt
+# Reviving the src/gui code, allso adding some new GUI objects.  Event
+# handling will not work untill I make some minor modifications to main.py,
+# osd.py, and menu.py.
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
@@ -88,25 +93,29 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
+DEBUG = 0
+
 import sys
 import os.path
+    
+from gui.Border         import *
+from gui.Color          import *
+from gui.GUIObject      import *
+from gui.PopupBox       import *
+from gui.AlertBox       import *
+from gui.ConfirmBox     import *
+from gui.Label          import *
+from gui.Button         import *
+from gui.LetterBox      import *
+from gui.LetterBoxGroup import *
+from gui.RegionScroller import *
+from gui.Scrollbar      import *
+from gui.InputBox       import *
+from gui.exceptions     import *
 
-import gui.ZIndexRenderer
 
-from gui.Border     import *
-from gui.Color      import *
-from gui.GUIObject  import *
-from gui.PopupBox   import *
-from gui.Label      import *
-from gui.exceptions import *
-
-DEBUG = 0
 if DEBUG:
     from gui.debug import *
     
-import osd
-    
-osd = osd.get_singleton()
-zir = gui.ZIndexRenderer.get_singleton()
 
 

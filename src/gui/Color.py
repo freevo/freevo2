@@ -5,6 +5,11 @@
 # $Id$
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 13:40:52  rshortt
+# Reviving the src/gui code, allso adding some new GUI objects.  Event
+# handling will not work untill I make some minor modifications to main.py,
+# osd.py, and menu.py.
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
@@ -53,7 +58,6 @@ import osd
 from types      import *
 from exceptions import *
 
-osd = osd.get_singleton()
 
 class Color:
     """
@@ -71,6 +75,8 @@ class Color:
         self.green = 0
         self.blue  = 0
         self.alpha = 0
+
+        self.osd = osd.get_singleton()
 
         if in_color: self.set_color(in_color)
 
@@ -185,7 +191,7 @@ class Color:
         if not type(color) == IntType:
             raise BadColorException, type(color)
         
-        return osd._sdlcol(color)
+        return self.osd._sdlcol(color)
 
     def sdl_to_trgb(self, color):
         """

@@ -10,6 +10,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 13:40:53  rshortt
+# Reviving the src/gui code, allso adding some new GUI objects.  Event
+# handling will not work untill I make some minor modifications to main.py,
+# osd.py, and menu.py.
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
@@ -60,10 +65,7 @@ __date__    = "$Date$"
 __version__ = "$Revision$" 
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
-import osd
 import config
-
-osd = osd.get_singleton()
 
 from GUIObject import *
 from Color     import *
@@ -72,7 +74,7 @@ from Label     import *
 from types     import *
 
 DEBUG = 1
-# from debug import *
+
 
 
 class PopupBox(GUIObject):
@@ -93,28 +95,30 @@ class PopupBox(GUIObject):
     """
     
     def __init__(self, left=None, top=None, width=None, height=None,
-                 text=None, bg_color=None, fg_color=None, icon=None,
+                 text=" ", bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
         """
         Create a PopupBox object.
         """
+
+        GUIObject.__init__(self)
+
         self.text     = None
         self.icon     = None
         self.border   = None
-        self.label    = None
         self.h_margin = 10
         self.v_margin = 10
-        self.bd_color = Color(osd.default_fg_color) # Border color
+        self.bd_color = Color(self.osd.default_fg_color) 
 
-        GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
-        
+        self.duration = 0
+
         # If some of these are still not set we set them to "our default.
-        if not self.left:     self.left   = osd.width/2 - 180
-        if not self.top:      self.top    = osd.height/2 - 10
+        if not self.left:     self.left   = self.osd.width/2 - 180
+        if not self.top:      self.top    = self.osd.height/2 - 10
         if not self.width:    self.width  = 360
         if not self.height:   self.height = 60
-        if not self.bg_color: Color(osd.default_bg_color)
-        if not self.fg_color: Color(osd.default_fg_color)
+        if not self.bg_color: Color(self.osd.default_bg_color)
+        if not self.fg_color: Color(self.osd.default_fg_color)
         
         if type(text) is StringType:
             if text: self.set_text(text)
@@ -140,6 +144,8 @@ class PopupBox(GUIObject):
             else:
                 self.border = Border(self, border, bd_color, bd_width)
                 
+        self.label.set_h_align(Align.CENTER)
+        self.label.set_v_align(Align.TOP)
                 
     def get_text(self):
         """
@@ -149,6 +155,7 @@ class PopupBox(GUIObject):
           Returns: text
         """
         return self.text
+
 
     def set_text(self, text):
         """
@@ -180,37 +187,7 @@ class PopupBox(GUIObject):
         else:
             self.label.set_text(text)
 
-
-    def set_h_align(self, align=None):
-        """
-        Sets the h_align of text.
-
-        This value is stored in Label class.
-        """
-        if self.label: self.label.set_h_align(align)
-
-
-    def get_h_align(self):
-        """
-        Returns the h_align of text.
-
-        This value is stored in the Label class.
-        """
-        if self.label: return self.label.get_h_align()
-
-
-    def get_v_align(self):
-        """
-        Returns the alignment of the text.
-        """
-        if self.label: return self.label.get_v_align()
-
-        
-    def set_v_align(self, align=None):
-        """
-        Sets the alignment of the text.
-        """
-        if self.label: return self.label.set_v_align()
+        self.label.set_h_align(Align.CENTER)
 
 
     def get_font(self):
@@ -265,6 +242,7 @@ class PopupBox(GUIObject):
         
         self.icon = pygame.transform.scale(self.icon, (ix, iy))
 
+
     def set_border(self, bs):
         """
         bs  Border style to create.
@@ -281,6 +259,7 @@ class PopupBox(GUIObject):
         else:
             self.border = Border(self, bs)
             
+
     def set_position(self, left, top):
         """
         Overrides the original in GUIBorder to update the border as well.
@@ -290,6 +269,7 @@ class PopupBox(GUIObject):
             if DEBUG: print "updating borders set_postion as well"
             self.border.set_position(left, top)
         
+
     def _draw(self):
         """
         The actual internal draw function.
@@ -304,15 +284,20 @@ class PopupBox(GUIObject):
         box.fill(c)
         box.set_alpha(a)
 
-        osd.screen.blit(box, self.get_position())
+        self.osd.screen.blit(box, self.get_position())
         
         if self.icon:
             ix,iy = self.get_position()
-            osd.screen.blit(self.icon, (ix+self.h_margin,iy+self.v_margin)) 
+            self.osd.screen.blit(self.icon, (ix+self.h_margin,iy+self.v_margin)) 
+
         if self.label:  self.label._draw()
         if self.border: self.border._draw()
-    
 
+        if self.children:
+            for child in self.children:
+                child._draw()
+
+    
     def _erase(self):
         """
         Erasing us from the canvas without deleting the object.
@@ -320,7 +305,7 @@ class PopupBox(GUIObject):
 
         if DEBUG: print "  Inside PopupBox._erase..."
         # Only update the part of screen we're at.
-        osd.screen.blit(self.bg_image, self.get_position(),
+        self.osd.screen.blit(self.bg_image, self.get_position(),
                         self.get_rect())
         
         if self.border:
@@ -328,4 +313,12 @@ class PopupBox(GUIObject):
             self.border._erase()
 
         if DEBUG: print "    ...", self
+
+
+    def eventhandler(self, event):
+        if DEBUG: print 'PopupBox: event = %s' % event
+        if event == rc.UP:
+            print 'GOT EVENT rc.UP'
+        else:
+            return self.parent.eventhandler(event)
 

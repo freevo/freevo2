@@ -6,6 +6,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 13:40:53  rshortt
+# Reviving the src/gui code, allso adding some new GUI objects.  Event
+# handling will not work untill I make some minor modifications to main.py,
+# osd.py, and menu.py.
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
@@ -163,6 +168,7 @@ class ZIndexRenderer:
         Notify objects above the calling object to do a redraw.
         Does anyone have a better idea for a name for this function?
         """
+
         oi = self.zindex.index(object) 
         ol = self.zindex[(oi):]
 

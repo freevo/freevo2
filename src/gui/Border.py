@@ -7,6 +7,11 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 13:40:52  rshortt
+# Reviving the src/gui code, allso adding some new GUI objects.  Event
+# handling will not work untill I make some minor modifications to main.py,
+# osd.py, and menu.py.
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
@@ -91,7 +96,7 @@ class Border(GUIObject):
             raise TypeError, 'You need to set the parent correctly'
 
         self.bd_types = [self.BORDER_FLAT, self.BORDER_SHADOW,
-                      self.BORDER_RAISED, self.BORDER_SUNKEN]
+                         self.BORDER_RAISED, self.BORDER_SUNKEN]
 
         if width and type(width) is IntType:
             self.thickness = width
@@ -99,7 +104,6 @@ class Border(GUIObject):
             self.thickness = 1
             
         self.parent    = parent
-        self.color     = Color(osd.default_fg_color)
         self.style     = self.BORDER_FLAT
         self.rect      = None
         self.shadow_ho = 6          # Horisontal offset for dropshadow
@@ -108,7 +112,9 @@ class Border(GUIObject):
         if style and style in self.bd_types: self.style = style
 
         GUIObject.__init__(self, parent.left, parent.top, parent.width,
-                           parent.height, color)
+                           parent.height)
+
+        self.color     = Color(self.osd.default_fg_color)
 
     def get_erase_rect(self):
         """
@@ -129,11 +135,13 @@ class Border(GUIObject):
         h = self.height+self.thickness*2
         return (x,y,w,h)
 
+ 
     def get_style(self):
         """
         Return the style of the border.
         """
         return self.style
+
 
     def set_style(self, style):
         """
@@ -155,21 +163,22 @@ class Border(GUIObject):
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
             c = self.color.get_color_sdl()
-            self.rect = pygame.draw.rect(osd.screen, c, self.get_rect(),
+            self.rect = pygame.draw.rect(self.osd.screen, c, self.get_rect(),
                                          self.thickness)
 
         # if self.style == self.BORDER_SHADOW:
-        #    self.rect = pygame.draw.rect(osd.screen, color, rect,
+        #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,
         #                               self.thickness)
         #    
         #if self.style == self.BORDER_RAISED:
-        #    self.rect = pygame.draw.rect(osd.screen, color, rect,
+        #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,
         #                               self.thickness)
         #
         #if self.style == self.BORDER_SUNKEN:
-        #    self.rect = pygame.draw.rect(osd.screen, color, rect,
+        #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,
         #                               self.thickness)
         #
+
 
     def _erase(self):
         """
@@ -183,9 +192,9 @@ class Border(GUIObject):
         
         if DEBUG: print " Thick: ", self.thickness
         if DEBUG: print " Width: ", w
-        osd.screen.blit(self.parent.bg_image, (x,y), (x,y,w,h))
+        self.osd.screen.blit(self.parent.bg_image, (x,y), (x,y,w,h))
         if DEBUG: save_image(self)
         if DEBUG: print "    Waiting at bottom of border erase"
-        if DEBUG: osd.update()
+        if DEBUG: self.osd.update()
         if DEBUG: wait_loop()
 

@@ -7,6 +7,11 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/18 13:40:52  rshortt
+# Reviving the src/gui code, allso adding some new GUI objects.  Event
+# handling will not work untill I make some minor modifications to main.py,
+# osd.py, and menu.py.
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
@@ -67,19 +72,22 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
+import rc
+import osd
+import skin
 import ZIndexRenderer
 
 from Color import *
 
 DEBUG = 0
 
-zir = ZIndexRenderer.get_singleton()
 
 class GUIObject:
     """
     Common parent class of all GUI objects. You can override this to make
     new Widgets.
     """
+
 
     def __init__(self, left=None, top=None, width=None, height=None,
                  bg_color=None, fg_color=None):
@@ -88,26 +96,40 @@ class GUIObject:
 
         Todo: I should off course check if input values are valid.
         """
+
+        self.rc   = rc.get_singleton()
+        self.osd  = osd.get_singleton()
+        self.skin = skin.get_singleton()
+        self.zir  = ZIndexRenderer.get_singleton()
+
         self.left     = 0
         self.top      = 0
         self.width    = 0
         self.height   = 0
         self.visible  = 0
-        self.bg_color = Color( osd.default_bg_color )
-        self.fg_color = Color( osd.default_fg_color )
+        self.bg_color = Color( self.osd.default_bg_color )
+        self.fg_color = Color( self.osd.default_fg_color )
         self.bg_image = None
+        self.parent   = None
+        self.children = []
+        self.enabled  = 1
+        self.selected = 0
+        self.label    = None
         
         if DEBUG: print "inside GUIOBJECT INIT"
 
         # XXX At the moment we know about this since I hardcoded it, but
         # XXX maybe it's a good idea to supply zindex object at construction
         # XXX maybe get_zindex_handler and set_zindex_handler function.s
-        self.zindex_pos = zir.add_object(self)
+        self.zindex_pos = self.zir.add_object(self)
         
         if left:   self.left   = left
         if top:    self.top    = top
         if width:  self.width  = width
         if height: self.height = height
+
+        self.set_v_align(Align.NONE)
+        self.set_h_align(Align.NONE)
 
         if bg_color:
             if isinstance(bg_color, Color):
@@ -129,19 +151,22 @@ class GUIObject:
         Returns: left,top,width,height
         """
         return (self.left, self.top, self.width, self.height)
+        # return [self.left, self.top, self.width, self.height]
+ 
 
     def get_position(self):
         """
-        Gets the coordinates of PopupBox
+        Gets the coordinates of the GUIObject
 
         Arguments: None
         Returns:   (x, y) - The coordinates of top left coner as list.
         """
         return (self.left, self.top)
 
+
     def set_position(self, left, top=None):
         """
-        Set the position of PopupBox
+        Set the position of the GUIObject
         """
         # XXX Please tell if you know of a better way to accept both
         # XXX tuples and lists.
@@ -179,6 +204,7 @@ class GUIObject:
         """
         return self.fg_color
     
+
     def set_foreground_color(self, color):
         """
         Sets the foreground color of object.
@@ -188,12 +214,14 @@ class GUIObject:
         else:
             raise BadColorException, type(color)
            
+
     def get_background_color(self):
         """
         Returns the background color of object.
         """
         return self.bg_color
     
+
     def set_background_color(self, color):
         """
         Sets the background color of object.
@@ -207,14 +235,16 @@ class GUIObject:
         else:
             raise BadColorException, type(color)
 
+
     def show(self):
         """
         Shows the object.
 
         This is really handled by the render object.
         """
-        zir.update_show(self)
+        self.zir.update_show(self)
         self.visible = 1    
+
 
     def hide(self):
         """
@@ -227,7 +257,8 @@ class GUIObject:
         if DEBUG: wait_loop()
         self._erase()
         self.visible = 0
-        zir.update_hide(self)
+        self.zir.update_hide(self)
+
 
     def move(self, x, y):
         """
@@ -240,12 +271,13 @@ class GUIObject:
               moving, or we do it for him. Not decided yet.
         """
         self._erase()
-        zir.update_hide(self)
+        self.zir.update_hide(self)
         self.visible = 0
         self.set_position( self.left+x, self.top+y )
         self._draw()
-        zir.update_show(self)
+        self.zir.update_show(self)
         self.visible = 1
+
         
     def is_visible(self):
         """
@@ -254,7 +286,24 @@ class GUIObject:
         Returns: 0 or 1 
         """
         return self.visible
+
     
+    def enable(self):
+        self.enabled = 1
+
+
+    def disable(self):
+        self.enabled = 0
+
+
+    def toggle_selected(self):
+        if self.selected:
+            self.selected = 0
+        else:
+            self.selected = 1
+        self._draw()
+
+
     def redraw(self):
         """
         Does a redraw of the object.
@@ -262,4 +311,177 @@ class GUIObject:
         At the moment not implemented.
         """
         pass
+
+
+    def _draw(self):
+        """
+        This function should be overriden by those
+        objects that inherit this.
+        """
+        pass
+
+
+    def set_parent(self, parent):
+        """Set the parent of this widget
+        """
+        self.parent = parent
+
+
+    def get_parent(self):
+        return self.parent
+
+
+    def add_child(self, child):
+        """Add a child widget.
+        """
+        self.children.append(child)
+        child.set_parent(self)
+        child._draw()
+
+
+    def get_children(self):
+        return children
+
+
+    def eventhandler(self, event):
+        return self.parent.eventhandler(event)
+
+
+    def destroy(self):
+        if self.children:
+            for child in self.children:
+                child.destroy()
+            self.children = []
+        if self.parent:
+            if self.osd.focused_app == self:
+                self.osd.focused_app = self.parent
+        self.set_parent(None)
+
+
+    def get_h_align(self):
+        """
+        Returns horisontal align of text.
+        """
+        return self.h_align
+
+
+    def get_v_align(self):
+        """
+        returns vertical alignment of text
+        """
+        return self.v_align
+
+    
+    def set_h_align(self, align):
+        """
+        Sets horizontal alignment of text.
+        """
+        if type(align) is IntType and align >= 1000 and align < 1004:
+                self.h_align = align
+        else:
+            raise TypeError, align
+
+
+    def set_v_align(self, align):
+        """
+        Sets vertical alignment of text.
+        """
+        if type(align) is IntType and (align == 1000 or (align > 1003 and align < 1007)):
+            self.v_align = align
+        else:
+            raise TypeError, align
+
+
+    def get_v_margin(self):
+        """
+        Returns the margin for objects drawing directly on the osd.
+        """
+        return self.v_margin
+
+
+    def get_h_margin(self):
+        """
+        Returns the margin for objects drawing directly on the osd.
+
+        This is not optimal and I'll probably remove this function soon.
+        """
+        return self.h_margin
+
+
+    def set_v_margin(self, marg):
+        """
+        Sets the vertical margin.
+        """
+        self.v_margin = marg
+
+
+    def set_h_margin(self, marg):
+        """
+        Sets the horisontal margin
+        """
+        self.h_margin = marg
+
+
+    def calc_position(self):
+        """
+        Private function to calculate correct positon of a widget.
+        """
+        if not self.parent: raise ParentException
+        if not self.font:   raise TypeError, 'No font'
+
+        # Render the surface if we don't have it to get correct size.
+        if not self.surface: self.render()
+        
+        lx          = 0
+        ly          = 0
+        bx,by,bw,bh = self.parent.get_rect()
+        lw,lh       = self.get_size()
+        va          = self.v_align
+        ha          = self.h_align
+        hm          = self.h_margin
+        vm          = self.v_margin
+        
+        if ha == Align.LEFT:
+            if self.parent.icon:
+                iw = self.parent.icon.get_width()
+                pm = hm
+                lx = bx+iw+(pm*2)
+            else:
+                lx = bx+hm
+        elif ha == Align.CENTER:
+            lx = bx+((bw-lw)/2)
+        elif ha == Align.RIGHT:
+            lx = bx+bw-lw-hm
+        elif ha == Align.NONE:
+            lx = self.left
+        else:
+            raise TypeError, 'Wrong h_align'
+
+        if va == Align.TOP:
+            ly = by+vm
+        elif va == Align.BOTTOM:
+            ly = by+bh-lh-vm
+        elif va == Align.MIDDLE:
+            ly = by+((bh-lh)/2)
+        elif va == Align.NONE:
+            ly = self.top
+        else:
+            raise TypeError, 'Wrong v_align'
+            
+        # for child in self.children:
+        #     child.calc_position()
+
+        return (lx,ly)
+
+
+class Align:
+
+    NONE   = 1000 
+    CENTER = 1001
+    LEFT   = 1002
+    RIGHT  = 1003
+    TOP    = 1004
+    BOTTOM = 1005
+    MIDDLE = 1006
+
 
