@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/12/04 01:32:18  rshortt
+# -load_guide(): check which channels to exclude
+#
 # Revision 1.5  2004/11/28 16:02:36  dischi
 # add episode
 #
@@ -75,7 +78,7 @@ def format_text(text):
     return text
 
 
-def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
+def load_guide(guide, XMLTV_FILE, exclude_channels=None, verbose=True):
     """
     Load guide data from a raw XMLTV file into the database, parsing using 
     the XMLTV using the xmltv.py support lib.
@@ -94,63 +97,46 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
 
     new_channels = []
 
-    #
-    # Add the channels that are in the config list, or all if the
-    # list is empty
-    # XXX: I would like to change TV_CHANNELS here to another 'include list'
-    #      like XMLTV_INCLUDE_ONLY so we can easily have a few user defined
-    #      channels in our config.TV_CHANNELS and add them to the database
-    #      elsewhere.  - Rob
-    #
-    if TV_CHANNELS:
-        if verbose:
-            print 'xmltv.py: Only adding channels in list'
 
-        for data in TV_CHANNELS:
-            (id, displayname, tunerid) = data[:3]
- 
-            # XXX: FIXME
-            # Handle the optional time-dependent station info
-            # c.times = []
-            # if len(data) > 3 and len(data[3:4]) == 3:
-            #     for (days, start_time, stop_time) in data[3:4]:
-            #         c.times.append((days, int(start_time), int(stop_time)))
-
-            guide.add_channel(id, displayname, tunerid)
+    if not (isinstance(exclude_channels, list) or \
+            isinstance(exclude_channels, tuple)):
+        exclude_channels = []
 
 
-    else: # Add all channels in the XMLTV file
-        if verbose:
-            print 'xmltv.py: Adding all channels'
-        xmltv_channels = None
-        if gotfile:
-            f = open(XMLTV_FILE)
-            xmltv_channels = xmltv.read_channels(f)
-            f.close()
-        
-        # Was the guide read successfully?
-        if not xmltv_channels:
-            return -1   # No
-        
-        for chan in xmltv_channels:
-            id   = chan['id'].encode('latin-1', 'ignore')
-            new_channels.append(id)
-            displayname = ''
-            tunerid = ''
+    if verbose:
+        print 'xmltv.py: excluding channels: %s' % exclude_channels
 
-            if ' ' in id:
-                # Assume the format is "TUNERID CHANNELNAME"
-                tunerid     = id.split()[0]   # XXX Educated guess
-                displayname = id.split()[1]   # XXX Educated guess
+    xmltv_channels = None
+    if gotfile:
+        f = open(XMLTV_FILE)
+        xmltv_channels = xmltv.read_channels(f)
+        f.close()
+    
+    # Was the guide read successfully?
+    if not xmltv_channels:
+        return -1   # No
+    
+    for chan in xmltv_channels:
+        id   = chan['id'].encode('latin-1', 'ignore')
+        if id in exclude_channels:  continue
+
+        new_channels.append(id)
+        displayname = ''
+        tunerid = ''
+
+        if ' ' in id:
+            # Assume the format is "TUNERID CHANNELNAME"
+            tunerid     = id.split()[0]   # XXX Educated guess
+            displayname = id.split()[1]   # XXX Educated guess
+        else:
+            displayname = chan['display-name'][0][0]
+            if ' ' in displayname:
+                tunerid     = displayname.split()[0]
+                displayname = displayname.split()[1]
             else:
-                displayname = chan['display-name'][0][0]
-                if ' ' in displayname:
-                    tunerid     = displayname.split()[0]
-                    displayname = displayname.split()[1]
-                else:
-                    tunerid = _('REPLACE WITH TUNERID FOR %s') % displayname
+                tunerid = _('REPLACE WITH TUNERID FOR %s') % displayname
 
-            guide.add_channel(id, displayname, tunerid)
+        guide.add_channel(id, displayname, tunerid)
 
     xmltv_programs = None
     if gotfile:
@@ -171,7 +157,7 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         print 'creating guide for %s' % new_channels
 
     for p in xmltv_programs:
-        if not p['channel'] in known_ids:
+        if not p['channel'] in known_ids or p['channel'] in exclude_channels:
             continue
         try:
             channel_id = p['channel']
