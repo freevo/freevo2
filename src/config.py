@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/05/11 17:33:22  dischi
+# small bugfix
+#
 # Revision 1.26  2003/04/24 19:55:44  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -349,8 +352,7 @@ if CONF.mplayer.find('runtime/apps/mplayer') != -1 and MPLAYER_DVD_PROTECTION:
     print 'WARNING: DVD protection override disabled! You will not be able to play',
     print 'protected DVDs!'
     print
-    MPLAYER_ARGS_DVD += ' -nodvdprotection-override'
-    
+    MPLAYER_ARGS['dvd'] += ' -nodvdprotection-override'
 
 #
 # List of objects representing removable media, e.g. CD-ROMs,
