@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/21 00:04:26  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.7  2003/05/15 02:21:54  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -93,7 +96,7 @@ class OptionBox(Button):
     """
 
     
-    def __init__(self, text=' ', left=None, top=None, width=75, height=25, 
+    def __init__(self, text=' ', left=None, top=None, width=100, height=25, 
                  bg_color=None, fg_color=None, selected_bg_color=None,
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None):
@@ -110,8 +113,8 @@ class OptionBox(Button):
         self.v_margin    = 2
 
 
-        # self.list = ListBox(left=self.left, top=self.top+self.height, 
-        #                    width=self.width, height=self.height*self.max_visible)
+        self.label.h_align = Align.LEFT
+
         self.list = ListBox(width=self.width, height=self.height*self.max_visible)
         self.add_child(self.list)
         self.list.visible = 0
@@ -126,7 +129,7 @@ class OptionBox(Button):
         
 
     def add_item(self, text, value=None):
-        self.list.add_item(None, text, value)
+        self.list.add_item(None, text, value, h_margin=10)
 
 
     def toggle_selected_index(self, i):

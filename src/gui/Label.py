@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/21 00:04:25  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.9  2003/05/16 02:11:50  rshortt
 # Fixed a nasty label alingment-bouncing bug.  There are lots of leftover
 # comments and DEBUG statements but I will continue to make use of them
@@ -90,15 +93,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
-"""
-A class for text labels
-
-Label can only be used as part of containers.
-"""
-__date__    = "$Date$"
-__version__ = "$Revision$" 
-__author__  = """Thomas Malt <thomas@malt.no>"""
-
 
 import pygame
 
@@ -126,6 +120,8 @@ class Label(GUIObject):
     def __init__(self, text=None, parent=None, h_align=None, v_align=None, 
                  width=-1, height=-1):
 
+        GUIObject.__init__(self, width=width, height=height)
+
         if h_align:
             self.h_align  = h_align
         else:
@@ -145,8 +141,6 @@ class Label(GUIObject):
         self.v_margin = 0
         self.h_margin = 0
         self.set_background_color(None)
-
-        GUIObject.__init__(self, width=width, height=height)
 
         if parent:
             (state, filename, size, color) = parent.get_font()

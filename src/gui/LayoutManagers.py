@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/21 00:04:25  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.6  2003/05/16 02:11:50  rshortt
 # Fixed a nasty label alingment-bouncing bug.  There are lots of leftover
 # comments and DEBUG statements but I will continue to make use of them
@@ -155,7 +158,8 @@ class FlowLayout(LayoutManager):
             if DEBUG: print '            child h_align is %s' % child.h_align
 
             if end > self.container.width or \
-               (len(self.table[row]) and child.h_align == Align.LEFT):
+               (len(self.table[row]) and (child.h_align == Align.LEFT or \
+                                          child.h_align == Align.CENTER)):
                 if DEBUG: print '            new row'
                 row += 1
                 self.table.append([])
@@ -210,6 +214,10 @@ class FlowLayout(LayoutManager):
                     child.top += y_offset 
                     if DEBUG: print '            moved down by %s' % y_offset
 
+                # If there is really just one visible child inside this
+                # container then we are done.
+                return
+
 
         for row in self.table:
             if not len(row): continue
@@ -226,6 +234,12 @@ class FlowLayout(LayoutManager):
                 for child in row:
                     child.left += x_offset 
                     if DEBUG: print '            moved right by %s' % x_offset
+
+            elif len(row) == 1 and row[0].h_align == Align.CENTER:
+                x_offset = self.container.width / 2 - \
+                           (row[0].left + row[0].width / 2)
+                row[0].left += x_offset
+                if DEBUG: print '            moved right by %s' % x_offset
 
 
 class GridLayout(LayoutManager):

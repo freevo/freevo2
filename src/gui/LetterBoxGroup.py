@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/05/21 00:04:26  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.10  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -112,9 +115,6 @@ class LetterBoxGroup(Container):
         self.h_spacing = 0
         self.v_spacing = 0
 
-
-
-        # XXX: text not supported yet
         self.text     = text
         self.type     = type
         self.numboxes = numboxes
@@ -129,6 +129,9 @@ class LetterBoxGroup(Container):
                 lb = PasswordLetterBox()
             else:
                 lb = LetterBox()
+                if self.text and len(self.text) > i:
+                    lb.set_text(self.text[i])
+
             l = l + lb.width
             if lb.height > h:  h = lb.height
             if i == 0:

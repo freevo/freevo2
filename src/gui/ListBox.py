@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/05/21 00:04:26  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.13  2003/05/15 02:21:54  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -217,7 +220,7 @@ class ListBox(RegionScroller):
             y = y + item.height
 
 
-    def add_item(self, item=None, text=None, value=None):
+    def add_item(self, item=None, text=None, value=None, h_margin=20):
         if not item:
             if not text:
                 text = ' '
@@ -226,7 +229,8 @@ class ListBox(RegionScroller):
 
             item = ListItem(text, value, self.width, self.items_height, 
                             self.bg_color, self.fg_color, 
-                            self.selected_bg_color, self.selected_fg_color)
+                            self.selected_bg_color, self.selected_fg_color, 
+                            h_margin=h_margin)
 
         self.items.append(item)
         self.add_child(item)

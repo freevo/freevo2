@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/05/21 00:04:25  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.10  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -73,7 +76,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
+import pygame, string
 import config
 
 from GUIObject import Align
@@ -137,6 +140,7 @@ class LetterBox(Button):
 
 
     def set_text(self, text):
+        text = string.upper(text)
         Button.set_text(self, text)
         self.label.width = self.width
         self.label.height = self.height
@@ -151,6 +155,9 @@ class LetterBox(Button):
 
         self.set_text(self.ourChars[charNext])
 
+        # XXX: should not have to draw here but it fixes an align problem.
+        self.draw()
+
 
     def charDown(self):
         charNow = self.ourChars.index(self.text)
@@ -160,6 +167,9 @@ class LetterBox(Button):
             charNext = len(self.ourChars)-1
 
         self.set_text(self.ourChars[charNext])
+
+        # XXX: should not have to draw here but it fixes an align problem.
+        self.draw()
 
 
     def cycle_phone_char(self, command):
@@ -179,5 +189,8 @@ class LetterBox(Button):
             else:
                 i = 0
             self.set_text(letters[i])
+
+        # XXX: should not have to draw here but it fixes an align problem.
+        self.draw()
 
 

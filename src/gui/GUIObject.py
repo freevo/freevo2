@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/05/21 00:04:25  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.21  2003/05/15 02:21:53  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -317,6 +320,19 @@ class GUIObject:
             self.selected = 1
 
         self.surface_changed = 1
+
+
+    def get_selected_child(self):
+        if DEBUG: print 'GSC: %s' % self
+        for child in self.children:
+            if not child.is_visible(): continue
+            if DEBUG: print '     child: %s' % child
+            if child.selected == 1:
+                if DEBUG: print '     selected'
+                return child
+            else:
+                selected = child.get_selected_child()
+                if selected: return child
 
 
     def redraw(self):

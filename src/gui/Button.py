@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/21 00:04:25  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.9  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -88,9 +91,14 @@ class Button(Container):
 
     
     def __init__(self, text=' ', handler=None, left=None, top=None, 
-                 width=70, height=25, bg_color=None, fg_color=None, 
+                 width=70, height=None, bg_color=None, fg_color=None, 
                  selected_bg_color=None, selected_fg_color=None,
                  border=None, bd_color=None, bd_width=None):
+
+        default_button_height = 25
+
+        if not height:
+            height = default_button_height
 
         Container.__init__(self, 'widget', left, top, width, height, bg_color,
                            fg_color, selected_bg_color, selected_fg_color,
@@ -108,19 +116,26 @@ class Button(Container):
         else:
             raise TypeError, text
 
+
         if self.skin_info_widget.font:       
+            font_size_setting = self.skin_info_widget.font.size
+            font_percent = font_size_setting * 100 / default_button_height 
+            font_size = int(font_percent * self.height / 120) # cheat smaller
             self.set_font(self.label, 'normal',
                           self.skin_info_widget.font.name, 
-                          self.skin_info_widget.font.size, 
+                          font_size, 
                           self.fg_color)
         else:
             self.set_font(config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
 
         if self.skin_info_widget_selected.font:       
+            font_size_setting = self.skin_info_widget.font.size
+            font_percent = font_size_setting * 100 / default_button_height 
+            font_size = int(font_percent * self.height / 120) # cheat smaller
             self.set_font(self.label, 'selected',
                           self.skin_info_widget_selected.font.name, 
-                          self.skin_info_widget_selected.font.size, 
+                          font_size, 
                           self.selected_fg_color)
         else:
             self.set_font(self.selected_label,

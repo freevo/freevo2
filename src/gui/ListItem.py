@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/21 00:04:26  rshortt
+# General improvements to layout and drawing.
+#
 # Revision 1.9  2003/05/15 02:21:54  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -97,7 +100,7 @@ class ListItem(Button):
     def __init__(self, text=' ', value=None, width=75, height=25, 
                  bg_color=None, fg_color=None, selected_bg_color=None,
                  selected_fg_color=None, border=None, bd_color=None, 
-                 bd_width=None):
+                 bd_width=None, h_margin=None):
 
         handler = None
         left = 0
@@ -107,47 +110,18 @@ class ListItem(Button):
                         fg_color, selected_bg_color, selected_fg_color,
                         border, bd_color, bd_width)
 
-        self.value             = value
-        self.h_margin          = 20
-        self.v_margin          = 2
+        self.value = value
+        if h_margin:
+            self.h_margin = h_margin
+        else:
+            self.h_margin = 20
+
+        self.v_margin = 2
         self.label.set_v_align(Align.CENTER)
         self.label.set_h_align(Align.LEFT)
 
 
     def _draw(self, surface=None):
-#        """
-#        The actual internal draw function.
-#
-#        """
-#        if not self.width or not self.height or not self.text:
-#            raise TypeError, 'Not all needed variables set.'
-#
-#        if not surface:
-#            surface = self.parent.surface
-#
-#        if self.selected:
-#            c = self.selected_bg_color.get_color_sdl()
-#            a = self.selected_bg_color.get_alpha()
-#        else:
-#            c = self.bg_color.get_color_sdl()
-#            a = self.bg_color.get_alpha()
-#
-#        box = pygame.Surface(self.get_size(), 0, 32)
-#        box.fill(c)
-#        box.set_alpha(a)
-#
-#        if surface:
-#            surface.blit(box, self.get_position())
-#        else:
-#            self.osd.screen.blit(box, self.get_position())
-#
-#        if self.selected:
-#            self.selected_label.draw(surface)
-#        else:
-#            self.label.draw(surface)
-#
-#        if self.border: self.border.draw(surface)
-
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
 
