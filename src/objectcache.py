@@ -1,4 +1,5 @@
 #if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # objectcache.py - A cache for objects identified by a string
 # -----------------------------------------------------------------------
@@ -9,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/26 20:07:50  outlyer
+# Declare encoding, remove another warning.
+#
 # Revision 1.3  2003/08/22 19:22:50  dischi
 # small check to prevent crashes
 #
