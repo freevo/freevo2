@@ -9,14 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.65  2002/11/25 04:55:29  outlyer
-# Two small changes:
-#  o Removed some 'print sys.path' lines I left in my last commit
-#  o Re-enabled the skin.format_track() function so the display style of MP3
-#    titles can be customized.
-#
-# Revision 1.64  2002/11/25 03:01:22  krister
-# Removed the old source tree, Dischis new tree seems to work good enough now.
+# Revision 1.66  2002/11/28 03:45:42  gsbarbieri
+# Changed DrawMenu_Selection to fix a bug and add icon support to items via xml image filed.
 #
 # Revision 1.4  2002/11/24 14:06:57  dischi
 # code cleanup
@@ -51,6 +45,8 @@
 import config
 
 import sys, socket, random, time, os, copy, re
+
+print sys.path
 
 # Various utilities
 import util
@@ -401,23 +397,21 @@ class Skin:
 
 
         for choice in menuw.menu_items:
-
+            
             if menu.selected == choice:
                 image = choice.image
 
             # Pick the settings for this kind of item
             valign = 0 # Vertical aligment to the icon
             if choice.type:
-
                 if choice.type == 'dir':
                     item = val.items.dir
-                elif choice.type == 'list':
+                elif choice.type == 'playlist':
                     item = val.items.pl
                 else:
                     item = val.items.default
             else:
                 item = val.items.default
-
 
             # And then pick the selected or non-selected settings for
             # that object
@@ -432,18 +426,7 @@ class Skin:
             font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
             if not spacing:
-                spacing = font_h + PADDING
-            
-            # Draw the menu item text, shorten the text before to fit
-            # the selection length
-
-            if font_w + 26 > width:
-                text = text + "..."
-                    
-            while font_w + 26 > width:
-                text = text[0:-4] + "..."
-                font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
-
+                spacing = font_h + PADDING        
 
             # Try and center the text to the middle of the icon
             if valign:
@@ -460,6 +443,20 @@ class Skin:
             if not text:
                 print "no text to display ... strange. Use default"
                 text = "unknown"
+
+            # draw icon
+            if choice.icon != None:
+                icon = choice.icon
+            else:
+                icon = item.image
+            icon_present = 0
+            if icon != None and icon != '':
+                icon_present = 1
+                icon_x = x0
+                icon_y = y0 - (icon_size - font_h) / 2
+                osd.drawbitmap(util.resize(icon, icon_size, icon_size), icon_x,
+                               icon_y)
+
 
             show_name = (None, None, None, None)
             if config.TV_SHOW_REGEXP_MATCH(text):
@@ -497,14 +494,9 @@ class Skin:
 
             # normal items
             else:
-                DrawText(text, obj, x=x0, y=top)
+                DrawTextFramed(text, obj, x=x0+ icon_present*icon_size*1.2, y=top,
+                               width=width,height=font_h, mode='hard')
 
-            # draw icon
-            if choice.icon != None:
-                icon_x = x0 - icon_size - 15
-                icon_y = y0 - (icon_size - font_h) / 2
-                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x,
-                               icon_y)
 
             y0 += spacing
         
