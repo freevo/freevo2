@@ -72,6 +72,7 @@ Requires:	%{name}-apps
 %if %{includeruntime}
 Patch0:		%{name}-%{version}-runtime.patch
 Patch1:		%{name}-%{version}-Makefile.patch
+Patch2:		%{name}-%{version}-mplayer_files.patch
 %else
 BuildRequires:	%{name}-runtime >= %{runtimever}
 %endif
@@ -102,6 +103,7 @@ and audio.
 %if %{includeruntime}
 %patch0 -p0
 %patch1 -p0
+%patch2 -p0
 %else
 mv runtime runtime-src
 ln -s %{_prefix}/runtime .
