@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/10/19 09:51:10  dischi
+# better debug
+#
 # Revision 1.32  2003/10/19 09:07:33  dischi
 # support for a list and no string as app to start
 #
@@ -155,6 +158,8 @@ class ChildApp:
             print 'self.t1.isAlive()=%s, self.t2.isAlive()=%s' % (self.t1.isAlive(),
                                                                   self.t2.isAlive())
             time.sleep(0.1)
+            if not isinstance(start_str, str):
+                start_str = str(' ').join(start_str)
             print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % \
                   (self.child.pid, start_str, self.child.poll())
             
