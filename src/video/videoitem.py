@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2004/01/01 19:36:46  dischi
+# do not inherit players to child
+#
 # Revision 1.107  2004/01/01 16:41:30  mikeruelle
 # fix dvd crash
 #
@@ -488,6 +491,7 @@ class VideoItem(Item):
         # only one track, play it
         if self.num_titles == 1:
             i=copy.copy(self)
+            i.possible_player = []
             i.set_url(self.url + '1', False)
             i.play(menuw = self.menuw)
             return
@@ -496,6 +500,7 @@ class VideoItem(Item):
         items = []
         for title in range(1,self.num_titles+1):
             i = copy.copy(self)
+            i.possible_player = []
             # copy the attributes from mmpython about this track
             if self.info.has_key('tracks'):
                 i.info = self.info.tracks[title-1]
