@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/09/21 16:46:27  dischi
+# typo
+#
 # Revision 1.44  2003/09/20 15:07:45  dischi
 # add a function to search if a plugin is active
 #
@@ -422,7 +425,7 @@ def __load_plugin__(name, type, level, args, number):
             if hasattr(p, 'reason'):
                 reason = p.reason
             else:
-                reason = 'unknown\nThe plugin neither called __init__ nor set a'\
+                reason = 'unknown\nThe plugin neither called __init__ nor set a '\
                          'reason why\nPlease contact the plugin author or the freevo list'
             print 'plugin %s deactivated, reason: %s' % (name, reason)
             return
