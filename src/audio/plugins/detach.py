@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/12/09 20:32:29  dischi
+# fix plugin to match the new player structure
+#
 # Revision 1.8  2003/09/20 09:42:32  dischi
 # cleanup
 #
@@ -48,6 +51,8 @@
 import config
 import plugin
 import menu
+import rc
+import audio.player
 
 from event import *
 
@@ -59,11 +64,11 @@ class PluginInterface(plugin.MainMenuPlugin):
     def __init__(self):
         plugin.MainMenuPlugin.__init__(self)
         config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL, arg=self.detach)
-        self.player = None
         self.show_item = menu.MenuItem(_('Show player'), action=self.show)
-        
+
+
     def detach(self):
-        gui   = plugin.getbyname(plugin.AUDIO_PLAYER).playerGUI
+        gui  = audio.player.get()
 
         # hide the player and show the menu
         gui.hide()
@@ -75,18 +80,18 @@ class PluginInterface(plugin.MainMenuPlugin):
         gui.item.menuw = None
         if gui.item.parent:
             gui.item.parent.menuw = None
-        self.player = gui.player
         
 
     def items(self, parent):
-        if self.player and self.player.is_playing():
+        gui = audio.player.get()
+        if gui and gui.player.is_playing():
             self.show_item.parent = parent
             return [ self.show_item ]
-        return ()
+        return []
 
 
     def show(self, arg=None, menuw=None):
-        gui = self.player.playerGUI
+        gui = audio.player.get()
 
         # restore the menuw's
         gui.menuw = menuw
@@ -100,7 +105,8 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def eventhandler(self, event, menuw=None):
-        if self.player and event == AUDIO_PLAY_END:
+        gui = audio.player.get()
+        if gui and gui.player.is_playing() and event == AUDIO_PLAY_END:
             self.player.eventhandler(event=event)
             return True
         return False
