@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/09 14:45:16  dischi
+# add support for DVD/VCD
+#
 # Revision 1.7  2003/06/07 11:32:48  dischi
 # reactivated the plugin
 #
@@ -44,6 +47,7 @@
 import os
 
 import menu
+import config
 import plugin
 import re
 
@@ -57,16 +61,98 @@ def point_maker(matching):
     return '%s.%s' % (matching.groups()[0], matching.groups()[1])
 
 
+remove_from_label = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+')
 
 class PluginInterface(plugin.ItemPlugin):
+    def imdb_get_disc_searchstring(self, item):
+        name = self.item.filename
+        
+        name  = item.label
+        name  = re.sub('([a-z])([A-Z])', point_maker, name)
+        name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
+        name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
+
+        for r in remove_from_label:
+            name  = re.sub(r, '', name)
+
+        parts = re.split('[\._ -]', name)
+        
+        name = ''
+        for p in parts:
+            if p:
+                name += '%s ' % p
+        if name:
+            return name[:-1]
+        else:
+            return ''
+
+        
     def actions(self, item):
         self.item = item
 
-        if item.type == 'video' and item.mode == 'file' and not item.info:
-            return [ ( self.imdb_search_file, 'Search IMDB for this file', 'imdb_search') ]
+        if item.type == 'video'  and not item.info:
+            if item.mode == 'file':
+                return [ ( self.imdb_search_file, 'Search IMDB for this file',
+                           'imdb_search') ]
+            if item.mode in ('dvd', 'vcd'):
+                s = self.imdb_get_disc_searchstring(self.item)
+                if s:
+                    return [ ( self.imdb_search_disc, 'Search IMDB for [%s]' % s,
+                               'imdb_search') ]
         return []
 
 
+    def imdb_search_disc(self, arg=None, menuw=None):
+        """
+        search imdb for this disc item
+        """
+        import helpers.imdb
+
+        box = PopupBox(text='searching IMDB...')
+        box.show()
+        
+        name = self.imdb_get_disc_searchstring(self.item)
+        items = []
+        for id,name,year,type in helpers.imdb.search(name):
+            items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                                     self.imdb_create_fxd_disc, (id, year)) ]
+        moviemenu = menu.Menu('IMDB QUERY', items)
+
+        box.destroy()
+        menuw.pushmenu(moviemenu)
+
+
+    def imdb_create_fxd_disc(self, arg=None, menuw=None):
+        """
+        create fxd file for the disc item
+        """
+        import helpers.imdb
+        
+        box = PopupBox(text='getting data...')
+        box.show()
+        
+        filename = os.path.join(config.MOVIE_DATA_DIR, self.item.media.id)
+
+        # bad hack to set the drive, helpers/imdb.py really needs
+        # a bigger update
+        helpers.imdb.drive = self.item.media.devicename
+        helpers.imdb.get_data_and_write_fxd(arg[0], filename,
+                                            self.item.media.devicename,
+                                            None, (self.item.mode, ), None)
+
+        # check if we have to go one menu back (called directly) or
+        # two (called from the item menu)
+        back = 1
+        if menuw.menustack[-2].selected != self.item:
+            back = 2
+            
+        # go back in menustack
+        for i in range(back):
+            menuw.delete_menu()
+        
+        box.destroy()
+
+            
     def imdb_search_file(self, arg=None, menuw=None):
         """
         search imdb for this item
