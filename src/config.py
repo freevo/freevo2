@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.119  2004/08/23 01:27:04  rshortt
+# -Add input_name (TODO: autodetect that) and passthrough for TVCard.
+#
 # Revision 1.118  2004/08/13 16:17:33  rshortt
 # More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
 #
@@ -319,7 +322,14 @@ class TVCard:
         self.norm = string.upper(CONF.tv)
         self.chanlist = CONF.chanlist
         self.input = 0
+        # TODO: autodetect input_name
+        self.input_name = 'tuner'
         self.driver = 'unknown'
+
+        # If passthrough is set then we'll use that channel on the input to get
+        # our signal.  For example someone may have an external cable box
+        # connected and have to set the local tuner to channel 4 to get it.
+        self.passthrough = None
 
         
 class IVTVCard(TVCard):
