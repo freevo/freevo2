@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/20 19:03:42  dischi
+# Removed REMOTE because we use lirc now
+#
 # Revision 1.15  2003/02/12 19:45:39  krister
 # Fixed more stupid bugs in rom-drives autodetect for automounted drives.
 #
@@ -357,21 +360,6 @@ if CONF.mplayer.find('runtime/apps/mplayer') != -1 and MPLAYER_DVD_PROTECTION:
     print
     MPLAYER_ARGS_DVD += ' -nodvdprotection-override'
     
-
-# Search for the remote
-if REMOTE:
-    for dirname in cfgfilepath:
-        if os.path.isfile('%s/%s.py' % (dirname, REMOTE)):
-            print 'load REMOTE file %s/%s.py' % (dirname, REMOTE)
-            execfile('%s/%s.py' % (dir, REMOTE), globals(), locals())
-            break
-        if os.path.isfile('%s/rc_client/%s.py' % (dirname, REMOTE)):
-            print 'load REMOTE file %s/%s.py' % (dirname, REMOTE)
-            execfile('%s/rc_client/%s.py' % (dirname, REMOTE), globals(), locals())
-            break
-    else:
-        print 'No remote config found'
-
 
 #
 # List of objects representing removable media, e.g. CD-ROMs,
