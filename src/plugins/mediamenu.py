@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/08/28 20:52:23  dischi
+# small fix when you want to see all roms
+#
 # Revision 1.17  2003/08/24 06:58:18  gsbarbieri
 # Partial support for "out" icons in main menu.
 # The missing part is in listing_area, which have other changes to
@@ -142,7 +145,7 @@ class MediaMenu(Item):
             dir_types = {}
             for type in ('audio', 'video', 'image', 'games'):
                 dir_types[type] = [ 'dir', 'audiocd', 'audio', 'video',
-                                    'vcd', 'dvd', None ]
+                                    'vcd', 'dvd', 'empty_cdrom' ]
                 
         if self.display_type:
             plugins_list = plugin.get('mainmenu_%s' % self.display_type)
