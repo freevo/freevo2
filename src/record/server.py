@@ -210,7 +210,10 @@ class RecordServer(RPCServer):
                 r.status   = CONFLICT
                 log.error('no recorder for recording:\n  %s', str(r))
 
+        # resolve conflicts (and get the time it took for debug)
+        t1 = time.time()
         conflict.resolve(next_recordings)
+        t2 = time.time()
 
         info = 'recordings:\n'
         for r in self.recordings:
@@ -231,8 +234,7 @@ class RecordServer(RPCServer):
             p.schedule(filter(lambda x: x.recorder[0] == p, next_recordings),
                        self)
 
-        log.info('checking took %s seconds' % \
-                 (float(int((time.time() - ctime) * 100)) / 100))
+        log.info('checking took %2.2f seconds' % (t2 - t1))
 
         # send update
         self.send_update()
