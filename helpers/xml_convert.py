@@ -11,6 +11,9 @@
 #
 #-------------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/19 08:03:38  krister
+# Changed the program to accept a list of XML-filenames to convert.
+#
 # Revision 1.1  2003/02/12 10:30:57  dischi
 # Script to convert old xml files to the new fxd format
 #
@@ -50,8 +53,6 @@ import sys
 import re
 import codecs
 
-tree = {}
-tree['movie'] = []
 
 skin = ''
 
@@ -96,7 +97,7 @@ def xml_parseInfo(info_node, i):
 
 
 
-def parse_file(file):
+def parse_file(file, tree):
     try:
         parser = qp_xml.Parser()
         # Let's name node variables after their XML names
@@ -207,19 +208,28 @@ def print_tree(filename, t):
 
 
 
-if len(sys.argv) > 1:
-    file = sys.argv[1]
-    parse_file(file)
 
-    in_skin = 0
-    for line in open(file).readlines():
-        if re.compile('^[ \t]+<skin', re.I).match(line):
-            in_skin = 1
-        if in_skin:
-            skin += line
-        if re.compile('^[ \t]+</skin', re.I).match(line):
-            in_skin = 0
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        print "Syntax: xml_convert.py file.xml..."
+        sys.exit(1)
 
-    print_tree(str(sys.argv[1])[:-3]+'fxd', tree)
-else:
-    print "Syntax: xml_convert.py file.xml"
+    filenames = sys.argv[1:]
+
+    for filename in filenames:
+
+        tree = {}
+        tree['movie'] = []
+        
+        parse_file(filename, tree)
+
+        in_skin = 0
+        for line in open(filename).readlines():
+            if re.compile('^[ \t]+<skin', re.I).match(line):
+                in_skin = 1
+            if in_skin:
+                skin += line
+            if re.compile('^[ \t]+</skin', re.I).match(line):
+                in_skin = 0
+
+        print_tree(filename[:-3]+'fxd', tree)
