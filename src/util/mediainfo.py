@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/08 17:37:58  dischi
+# also check freevo cache version
+#
 # Revision 1.19  2004/02/07 19:03:01  dischi
 # handle bad disc like blank once
 #
@@ -547,6 +550,8 @@ def cache_recursive(dirlist, verbose=False):
             if not check_cache(d):
                 all_dirs.remove(d)
 
+    print '%s changes' % len(all_dirs)
+
     # cache all dirs
     for d in all_dirs:
         if verbose:
@@ -555,6 +560,8 @@ def cache_recursive(dirlist, verbose=False):
                 dname = dname[:20] + ' [...] ' + dname[-40:]
             print '  %4d/%-4d %s' % (all_dirs.index(d)+1, len(all_dirs), dname)
         cache_dir(d)
+    if all_dirs:
+        print
 
         
 def disc_info(media):
@@ -645,8 +652,17 @@ if __freevo_app__ == 'main':
             print 'Please run \'freevo cache\''
             print
         else:
-            mmchanged, part_update, complete_update = info
-            # future checks here
+            if len(info) == 3:
+                mmchanged, part_update, complete_update = info
+                freevo_changed = 0
+            else:
+                mmchanged, freevo_changed, part_update, complete_update = info
+            # let's warn about some updates
+            if freevo_changed < 1:
+                print
+                print 'Warning: Freevo cache helper updated.'
+                print 'Please rerun \'freevo cache\' to speed up Freevo'
+                print
     except:
         print
         print 'Error: unable to read mmpython version information'
