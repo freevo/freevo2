@@ -11,33 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/06/10 11:03:23  dischi
+# remove runtime installing support
+#
 # Revision 1.8  2004/06/06 10:32:02  dischi
 # protect freevo files
-#
-# Revision 1.7  2003/12/01 20:07:27  dischi
-# fix missing vfs for plugin installation
-#
-# Revision 1.6  2003/11/10 01:14:09  rshortt
-# Only remove the parts of the runtime that we ship so we don't overwrite any
-# files that are part of any particular release.
-#
-# Revision 1.5  2003/11/09 22:42:34  rshortt
-# Fix for when the user has older than python 2.3 and no runtime since we
-# could be installing it.
-#
-# Revision 1.4  2003/11/02 11:02:50  dischi
-# make needed dirs
-#
-# Revision 1.3  2003/11/02 10:51:14  dischi
-# change runtime name
-#
-# Revision 1.2  2003/11/02 09:24:34  dischi
-# Check for libs and make it possible to install runtime from within
-# freevo
-#
-# Revision 1.1  2003/10/28 21:26:10  dischi
-# make install a helper to make it also work for non installed versions
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -75,8 +53,6 @@ if float(sys.version[0:3]) < 2.3:
 # code gets LD_PRELOADed
 os.environ['LD_PRELOAD'] = ''
 
-import util.fileops
-
 def mkalldir(d):
     cd = ''
     for p in d.split('/'):
@@ -97,23 +73,15 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
         os.chdir(os.path.join(os.environ['FREEVO_PYTHON'], '..'))
 
     if os.path.basename(tgz).startswith('freevo-runtime-'):
-        if not is_local:
-            print 'impossible to install a runtime in an installed version'
-            print 'of freevo.'
-        else:
-            print 'installing new runtime'
-            util.fileops.rmrf('runtime/dll')
-            util.fileops.rmrf('runtime/lib')
-            util.fileops.rmrf('runtime/apps')
-            util.fileops.rmrf('runtime/preloads')
-            util.fileops.rmrf('runtime/runapp')
-            os.system('tar -zxf %s' % tgz)
+        print 'please use \'python setup.py runtime\' to install a runtime'
         sys.exit(0)
 
 
     # when we have a runtime, we can include the vfs
     from util import vfs
     import __builtin__
+    import util.fileops
+
     __builtin__.__dict__['vfs'] = vfs
 
     # create tmp directory
