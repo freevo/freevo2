@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/02/21 05:26:59  krister
+# Enable the IdleTool if Aubins skin is used.
+#
 # Revision 1.17  2003/02/20 20:14:44  dischi
 # needed for a new gentoo runtime with pylirc
 #
@@ -311,9 +314,14 @@ def getcmd():
 
     muted = 0
     mainVolume = 0 # XXX We are using this for PcmVolume as well.
-    
-    #m = idle.IdleTool()
-    #m.refresh()
+
+    # XXX TEST CODE
+    if config.SKIN_XML_FILE.find('aubin_round') != -1:
+        print 'Enablind the IdleTool'
+        m = idle.IdleTool()
+    else:
+        m = None
+    m and m.refresh()
     while 1:
         
         # Get next command
@@ -323,11 +331,11 @@ def getcmd():
             if event: break
             event = rc.poll()
             if event: break
-            #if not rc.app: m.poll()
+            if not rc.app: m and m.poll()
             time.sleep(0.1)
 
 
-        #m.refresh()
+        m and m.refresh()
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
             print "Got VOLUP in main!"
