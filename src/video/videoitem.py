@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/17 18:32:24  dischi
+# Added the infos from the xml file to VideoItem
+#
 # Revision 1.14  2003/02/15 04:03:03  krister
 # Joakim Berglunds patch for finding music/movie cover pics.
 #
@@ -177,7 +180,10 @@ class VideoItem(Item):
         self.selected_audio    = None
         self.num_titles        = 0
         self.deinterlace       = 0
-        
+
+        # XML file infos
+        # possible values are: genre, runtime, tagline, plot, year, rating
+        self.info = {}
 
     def copy(self, obj):
         """

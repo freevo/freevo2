@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/17 18:32:24  dischi
+# Added the infos from the xml file to VideoItem
+#
 # Revision 1.7  2003/02/15 19:56:51  dischi
 # Removed some debug
 #
@@ -364,6 +367,8 @@ def parseMovieFile(file, parent, duplicate_check):
             disc_set['disc'] = []
             disc_set['cover'] = None
             disc_set['title'] = None
+            disc_set['info'] = {}
+            
             try:
                 disc_set['title'] = freevo_child.attrs[('', "title")]
             except KeyError:
@@ -406,6 +411,7 @@ def parseMovieFile(file, parent, duplicate_check):
                 dsitem.parent = parent
                 dsitem.name = disc_set['title']
                 dsitem.image = disc_set['cover']
+                dsitem.info = disc_set['info']
                 if disc['l_re']:
                     dsitem.rom_label += [ disc['l_re'] ]
                 for disc in disc_set['disc']:
@@ -463,6 +469,8 @@ def parseMovieFile(file, parent, duplicate_check):
             mitem.name = title
             mitem.image = image
             mitem.xml_file = file
+            mitem.info = info
+            
             for subitem in mitem.subitems:
                 subitem.xml_file = file
             # Be careful: singular and plural names are used
