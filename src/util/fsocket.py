@@ -27,7 +27,7 @@ class Socket:
             return
         if not self.__write_nf:
             notifier.addSocket(self.socket, self.__write_socket,
-                               notifier.IO_OUT)
+                               notifier.IO_WRITE)
             self.__write_nf = True
         pos = self.out_buffer.tell()
         self.out_buffer.seek(0, 2)
@@ -52,7 +52,7 @@ class Socket:
         self.out_fd = fd
         if not self.__write_nf:
             notifier.addSocket(self.socket, self.__write_socket,
-                               notifier.IO_OUT)
+                               notifier.IO_WRITE)
             self.__write_nf = True
         
 
@@ -112,8 +112,7 @@ class Socket:
             self.__read_nf = False
             notifier.removeSocket(self.socket)
             self.__callback(self)
-            # FIXME: True? It's a notifier bug here!
-            return True
+            return False
         return True
 
 
