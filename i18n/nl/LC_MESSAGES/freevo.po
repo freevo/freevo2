@@ -1144,12 +1144,12 @@ msgstr "Station %s (geen schijf)"
 #: plugins/rom_drives.py:345
 #, python-format
 msgid "Ejecting disc in drive %s"
-msgstr "Schijf in %s wordt uitworpen "
+msgstr "Schijf in %s wordt uitgeworpen "
 
 #: plugins/rom_drives.py:378
 #, python-format
 msgid "Reading disc in drive %s"
-msgstr "Bezig met de shijf in lezer %s te analyseren"
+msgstr "Bezig met de schijf in lezer %s te analyseren"
 
 #: plugins/shoppingcart.py:84
 msgid "Moving files..."
