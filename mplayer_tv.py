@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/11/23 19:35:53  dischi
+# This should not be necessary
+#
 # Revision 1.11  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -83,11 +86,7 @@ import skin    # The skin class
 import mixer   # The mixer class
 import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
-import music   # The Music module
-import movie   # The Movie module
 import tv      # The TV module
-import imenu   # The Image viewer module
-import mplayer
 import childapp # Handle child applications
 
 # Create the remote control object
