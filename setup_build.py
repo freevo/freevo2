@@ -68,10 +68,18 @@ def create_makefile(buildops):
 
     print 'done'
 
+
+def create_config(settings):
+    os.system('rm -f configure_conf.py')
+    print "Creating configure_conf.py"
+    # XXX add more than OUTPUT=...
+    os.system('echo "%s" > configure_conf.py' % settings)
+    
     
 def print_usage():
     print 'Usage: ./configure [--osd=fb | --osd=x11 | --osd=sdl | --osd=dxr3]'
-
+    print '       or to use the Python SDL interface:'
+    print '       ./configure [--output=x11_800x600 | --output=mga_pal | --output=mga_ntcs]'
     
 if __name__ == '__main__':
 
@@ -88,11 +96,24 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == '--osd=x11':
             buildops = 'x11'
+            settings = ''
         elif sys.argv[1] == '--osd=sdl':
             buildops = 'sdl'
+            settings = ''
         elif sys.argv[1] == '--osd=dxr3':
             buildops = 'dxr3'
+            settings = ''
         elif sys.argv[1] == '--osd=fb':
+            buildops = ''
+            settings = ''
+        elif sys.argv[1] == '--output=x11_800x600':
+            settings = 'OUTPUT=\'sdl_800x600\''
+            buildops = ''
+        elif sys.argv[1] == '--output=mga_pal':
+            settings = 'OUTPUT=\'mga_768x576_pal\''
+            buildops = ''
+        elif sys.argv[1] == '--output=mga_ntcs':
+            settings = 'OUTPUT=\'mga_768x576_ntsc\''
             buildops = ''
         else:
             print_usage()
@@ -101,8 +122,10 @@ if __name__ == '__main__':
         print
         print 'Defaulting build to "--osd=fb"'
         buildops = ''
+        settings = ''
 
-    create_makefile(buildops)
+    #create_makefile(buildops)
+    create_config(settings)
     
     print
     print 'Now you can type "make" to build and "make install" as root'

@@ -16,6 +16,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2002/08/13 09:56:18  dischi
+# configure has three new parameters for the new OSD_SDL:
+# --output=x11_800x600 | --output=mga_pal | --output=mga_ntcs
+#
+# If you choose one of them and no osd=... configure will write a file called
+# configure_conf.py (I couldn't think of a better name). This file
+# may contain the OUTPUT variable and freevo_config.py will set some
+# things based on this variable.
+#
 # Revision 1.47  2002/08/13 09:22:51  dischi
 # Added a variable OUTPUT to set some values automaticly. This variable
 # should be set by configure
@@ -68,11 +77,8 @@
 
 
 
-# Helper variable to set some settings based on your system.
-# This is the only variable you _must_ set the variable in this file, if
-# you set it in local_conf.py it has no effect.
-#
-# Possible values are:
+# configure will write a helper variable OUTPUT to set same values based
+# on the output. Possible values for OUTPUT are:
 #
 # default:          default OSD server, resolution is fixed at 768x576
 # sdl_800x600       use the Python SDL osd (requires pyGame) with 800x600
@@ -84,7 +90,6 @@
 #                   resolution and tc out for a matrox card with framebuffer
 #                   and a PAL tv set.
 
-OUTPUT = 'default'
 
 # ======================================================================
 # General freevo settings:
