@@ -214,15 +214,19 @@ def identifymedia(dir):
                 # XXX add mplayer_options, too
                 return 'DIVX', title, image, ('video', mplayer_files[0], [])
             return 'DIVX', title, image, None
-        return "DIVX", label, None, None
+        return "DIVX", 'CD [%s]' % label, None, None
+
     if not mplayer_files and mp3_files:
-        return "MP3" , label, None, None
+        return "MP3" , 'CD [%s]' % label, None, None
+
     if not mplayer_files and not mp3_files and image_files:
-        return "IMAGE", label, None, None
+        return "IMAGE", 'CD [%s]' % label, None, None
     
     if mplayer_files or image_files or mp3_files:
-        return "DATA", label, None, None
+        if title:
+            return 'DATA', title, image, None
+        return "DATA", 'CD [%s]' % label, None, None
 
-    return "AUDIO", label, None, None
+    return "AUDIO", 'CD [%s]' % label, None, None
 
 

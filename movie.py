@@ -109,7 +109,7 @@ def eventhandler(event = None, menuw=None, arg=None):
                 item.action = play_movie
                 item.arg = play_options
             elif type != None:
-                item.name = 'CD [%s]' % label
+                item.name = label
                 item.action = cwd
                 item.arg = rom
             else:
@@ -145,7 +145,7 @@ def main_menu(arg=None, menuw=None):
             if play_options:
                 m = menu.MenuItem(label, play_movie, play_options, eventhandler, (dir,))
             elif type != None:
-                m = menu.MenuItem('CD [%s]' % label, cwd, dir, eventhandler, (dir,))
+                m = menu.MenuItem(label, cwd, dir, eventhandler, (dir,))
             else:
                 m = menu.MenuItem('%s (no disc)' % name, None, None, eventhandler, (dir,))
             m.setImage(('movie', image))
