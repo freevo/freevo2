@@ -48,8 +48,18 @@ fi
 # If JOY_DEV is 0 then joy.py just exits.
 # ./startprog python rc_client/joy.py > /dev/null 2>&1 &
 
+if [ -e ./runtime/preloads ] ; then
+    # Gentoo has some preloads in runtime, but no complete environment
+    # We don't need to check the version, gentoo emerge will do this for us
+    export LD_PRELOAD=`cat runtime/preloads`
+fi
+
 # Start the main freevo application
 ./startprog python src/main.py $@
+
+# unset LD_PRELOAD if set
+unset LD_PRELOAD
+
 
 # Freevo exited, make sure all children are killed
 sleep 1
