@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/12/02 21:41:17  dischi
+# Small fix
+#
 # Revision 1.7  2002/10/28 19:34:55  dischi
 # The tv info area now shows info and description with the extra words info
 # and description. The title will be writen in a larger font than the
@@ -91,12 +94,12 @@ def DrawText(text, settings, x=-1, y=-1, align=''):
 
 
 # Draws a text inside a frame based on the settings in the XML file
-def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, size=0, mode='hard'):
+def DrawTextFramed(text, settings, x=-1, y=-1, width=None, height=None, size=0, mode='hard'):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
 
-    if width  == -1: width  = settings.width
-    if height == -1: height = settings.height
+    if width == None: width  = settings.width
+    if height == None: height = settings.height
 
     if size == 0: size = settings.size
 
