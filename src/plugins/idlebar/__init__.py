@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/08/23 20:41:47  dischi
+# fade support
+#
 # Revision 1.25  2004/08/23 15:53:41  dischi
 # do not remove from display, only hide
 #
@@ -178,20 +181,20 @@ class PluginInterface(plugin.DaemonPlugin):
         return changed
             
 
-    def show(self, update=True):
+    def show(self, update=True, fade=0):
         if self.visible:
             return
-        self.container.show()
+        gui.animation.Fade([self.container], fade, 0, 255).start()
         self.visible = True
         self.update()
         if update:
             gui.get_display().update()
 
 
-    def hide(self, update=True):
+    def hide(self, update=True, fade=0):
         if not self.visible:
             return
-        self.container.hide()
+        gui.animation.Fade([self.container], fade, 255, 0).start()
         self.visible = False
         if update:
             gui.get_display().update()
@@ -233,7 +236,11 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == SCREEN_CONTENT_CHANGE:
             # react on toggle fullscreen, hide or show the bar, but not update
             # the screen itself, this is done by the app later
-            app, fullscreen = event.arg
+            app, fullscreen, fade = event.arg
+            if fade:
+                fade = config.OSD_FADE_STEPS
+            else:
+                fade = 0
             if fullscreen:
                 # add the background behind the bar
                 self.add_background()
@@ -244,9 +251,9 @@ class PluginInterface(plugin.DaemonPlugin):
             if fullscreen == self.visible:
                 _debug_('set visible %s' % (not fullscreen))
                 if not self.visible:
-                    self.show(False)
+                    self.show(False, fade=fade)
                 else:
-                    self.hide(False)
+                    self.hide(False, fade=fade)
                 self.update()
             return
         
