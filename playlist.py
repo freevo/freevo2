@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/11/23 19:32:06  dischi
+# Some stuff needed by the code cleanup, shouldn't break anything
+#
 # Revision 1.3  2002/11/15 02:11:38  krister
 # Applied Bob Pauwes latest image slideshow patches.
 #
@@ -202,3 +205,167 @@ def read_playlist(playlist_file, start_playing=0):
                       os.path.join(os.path.abspath(dirname), filename)
 
     return playlist_lines
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from item import Item
+import rc
+rc = rc.get_singleton()
+
+TRUE  = 1
+FALSE = 0
+
+
+
+class Playlist(Item):
+    def read_ssr(self, ssrname):
+        """
+        This is the (ssr) slideshow reading function.
+
+        Arguments: ssrname - the slideshow filename
+        Returns:   The list of interesting lines in the slideshow
+
+        File line format:
+
+            FileName: "image file name"; Caption: "caption text"; Delay: "sec"
+
+        The caption and delay are optional.
+        """
+
+        (curdir, playlistname) = os.path.split(ssrname)
+        out_lines = []
+        try:
+            lines = open(ssrname).readlines()
+        except IOError:
+            print 'Cannot open file "%s"' % list
+            return 0
+
+        playlist_lines_dos = map(lambda l: l.strip(), lines)
+        playlist_lines     = filter(lambda l: l[0] != '#', lines)
+
+
+        """
+        Here's where we parse the line.  See the format above.  
+        TODO:  Make the search case insensitive
+        """
+        for line in playlist_lines:
+            tmp_list = []
+            ss_name = re.findall('FileName: \"(.*?)\"', line)
+            ss_caption = re.findall('Caption: \"(.*?)\"', line)
+            ss_delay = re.findall('Delay: \"(.*?)\"', line)
+
+            if ss_name != []:
+                if ss_caption == []:
+                    ss_caption += [""]
+                if ss_delay == []:
+                    ss_delay += [5]
+
+                self.playlist += [ ImageItem(os.path.join(curdir, ss_name[0]), self,
+                                             ss_caption[0], int(ss_delay[0])) ]
+
+
+
+    def __init__(self, file, parent):
+        Item.__init__(self)
+        self.type     = 'playlist'
+        self.current_item = None
+        self.parent = parent
+
+        self.name    = os.path.splitext(os.path.basename(file))[0]
+        self.playlist = []
+        self.autoplay = FALSE
+        
+        (curdir, playlistname) = os.path.split(file)
+
+        f=open(file, "r")
+        line = f.readline()
+        f.close
+        if line.find("[playlist]") > -1:
+            pass
+        elif line.find("[Slides]") > -1:
+            self.read_ssr(file)
+
+
+    def actions(self):
+        if self.autoplay:
+            return [ ( self.play, 'Play' ),
+                     ( self.browse, 'Browse Playlist' ) ]
+
+        return [ ( self.browse, 'Browse Playlist' ),
+                 ( self.play, 'Play' ) ]
+
+
+    def browse(self, menuw=None):
+        moviemenu = menu.Menu(self.name, self.playlist)
+        menuw.pushmenu(moviemenu)
+        
+        
+    def play(self, menuw=None):
+        if not self.playlist:
+            print 'empty playlist'
+
+        if not self.current_item:
+            self.current_item = self.playlist[0]
+            
+        if not self.current_item.actions():
+            # skip item
+            pos = self.playlist.index(self.current_item)
+            pos = (pos+1) % len(self.playlist)
+
+            if pos:
+                self.current_item = self.playlist[pos]
+                self.play(menuw)
+            else:
+                # no repeat
+                self.current_item = None
+            return TRUE
+
+        self.current_item.actions()[0][0](menuw)
+        
+
+    def cache_next(self):
+        pos = self.playlist.index(self.current_item)
+        pos = (pos+1) % len(self.playlist)
+        if pos and hasattr(self.playlist[pos], 'cache'):
+            self.playlist[pos].cache()
+
+
+    def eventhandler(self, event, menuw=None):
+        if (event == rc.DOWN or event == rc.PLAY_END) and self.current_item \
+           and self.playlist:
+            pos = self.playlist.index(self.current_item)
+            pos = (pos+1) % len(self.playlist)
+
+            if pos:
+                if hasattr(self.current_item, 'stop'):
+                    self.current_item.stop()
+                self.current_item = self.playlist[pos]
+                self.play(menuw)
+            return TRUE
+
+        if event == rc.UP and self.current_item and self.playlist:
+            pos = self.playlist.index(self.current_item)
+            if pos:
+                if hasattr(self.current_item, 'stop'):
+                    self.current_item.stop()
+                pos = (pos-1) % len(self.playlist)
+                self.current_item = self.playlist[pos]
+                self.play(menuw)
+            return TRUE
+
+        # give the event to the next eventhandler in the list
+        return Item.eventhandler(self, event, menuw)

@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2002/11/23 19:32:05  dischi
+# Some stuff needed by the code cleanup, shouldn't break anything
+#
 # Revision 1.77  2002/11/19 22:04:12  dischi
 # Some changes I had to made to integrate a first version of my code
 # cleanup. This shouldn't break anything and it should work as before.
@@ -86,23 +89,21 @@ import menu    # The menu widget class
 import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
-import music   # The Music module
-import movie   # The Movie module
 import tv      # The TV module
-import imenu   # The Image viewer module
-import mplayer
-import videogame      # The VideoGame Module
-import mame           # The Mame Module
 
 import identifymedia
 import signal
 
-# Some datatypes we need
-from datatypes import *
-
 # new stuff from code cleanup
 from mediamenu import MediaMenu
 
+# old stuff
+import imenu
+import movie
+import music
+import mplayer
+import videogame
+import mame
 
 DEBUG = config.DEBUG
 
@@ -445,7 +446,7 @@ if __name__ == "__main__":
             tb = sys.exc_info()[2]
             fname, lineno, funcname, text = traceback.extract_tb(tb)[-1]
             
-            for i in range(5, 0, -1):
+            for i in range(1, 0, -1):
                 osd.clearscreen(color=osd.COL_BLACK)
                 osd.drawstring('Freevo crashed!', 70, 70,
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)

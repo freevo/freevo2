@@ -72,29 +72,6 @@ class MenuItem:
 
 
 
-#
-# Info class. Inherits from MenuItem and is a template for other info classes
-# like videoinfo
-#
-class Info(MenuItem):
-    def __init__(self):
-        self.name = "UNKNOWN"
-        self.type  = None
-        self.image = None
-        self.icon  = None
-        self.action = None
-        self.action_arg = None
-        self.calling_info = None
-        
-    def eventhandler(self, event, menuw=None):
-        # give the event to the next eventhandler in the list
-        if self.calling_info:
-            return self.calling_info.eventhandler(event, menuw)
-
-        print "no eventhandler for event %s menuw %s" % (event, menuw)
-        return FALSE
-
-        
 class Menu:
 
     def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0):
@@ -230,25 +207,29 @@ class MenuWidget:
             self.back_one_menu()
 
         elif event == rc.SELECT or event == rc.PLAY:
-            action = menu.selected.action
+            try:
+                action = menu.selected.action
+            except AttributeError:
+                if menu.selected.actions():
+                    action = menu.selected.actions()[0][0]
+                else:
+                    action = None
+                    
             if action == None:
                 print 'No action.. '
                 self.refresh()
             else:
-                #action_str = str(action)
-                #arg_str = str(menu.selected.action_arg)[0:40]
-                #osd.clearscreen()
-                #osd.drawstring('Action: %s' % action_str, 50, 240)
-                #osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
-                action( arg=menu.selected.action_arg, menuw=self )
+                if hasattr(menu.selected, 'action_arg'):
+                    action( arg=menu.selected.action_arg, menuw=self )
+                else:
+                    action( menuw=self )
+
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
         else:
             action = menu.selected.eventhandler
             if action:
-                #action_str = str(action)
-                #arg_str = str(menu.selected.eventhandler_args)[0:40]
                 print 'Calling action "%s"' % str(action)
                 if hasattr(menu.selected, 'eventhandler_args'):
                     action(event = event, arg=menu.selected.eventhandler_args,
