@@ -2,18 +2,13 @@ PYMBUS=pyMbus-0.8.4
 PYNOTIFIER=pyNotifier-0.3.2
 URL=ftp://ftp.mbus.org/tzi/dmn/mbus/python/
 
-all: optional_packages links
-
-links: lib/pyimlib2/_Imlib2module.so lib/$(PYMBUS) lib/$(PYNOTIFIER)
+all: extra_packages lib/$(PYMBUS) lib/$(PYNOTIFIER)
 	test -e site-packages || mkdir site-packages
 	@echo creating links in site-packages
 	@ln -sf ../lib/pyimlib2/_Imlib2module.so site-packages/_Imlib2module.so
 	@ln -sf ../lib/pyimlib2/Imlib2.py site-packages/Imlib2.py
 	@test -e site-packages || mkdir site-packages
-	@- rm -f site-packages/mmpython site-packages/epeg.so 2>/dev/null
 	@-(test -e lib/mmpython && ln -sf ../lib/mmpython site-packages)
-	@-(test -e lib/pyepeg/epeg.so && \
-		ln -sf ../lib/pyepeg/epeg.so site-packages)
 	@-(test -e lib/pylibvisual/libvisual.so && \
 		ln -sf ../lib/pylibvisual/libvisual.so site-packages)
 	@ln -sf ../lib/mevas/mevas ../lib/pyepg site-packages
@@ -23,19 +18,15 @@ links: lib/pyimlib2/_Imlib2module.so lib/$(PYMBUS) lib/$(PYNOTIFIER)
 	@echo make successfull
 
 
-optional_packages:
-	-(cd lib/pyepeg ; make )
-	-(cd lib/pylibvisual ; make )
+extra_packages:
+	(cd lib/pyimlib2 ; make)
+	-(cd lib/pylibvisual ; make)
 
 
 clean:
 	(cd lib/pyimlib2 ; make clean)
-	(cd lib/pyepeg ; make clean)
-	rm -f site-packages/*
-
-
-lib/pyimlib2/_Imlib2module.so:
-	(cd lib/pyimlib2 ; make )
+	-(cd lib/pylibvisual ; make clean )
+	rm -rf site-packages
 
 
 lib/$(PYMBUS):
@@ -51,6 +42,11 @@ lib/$(PYNOTIFIER):
 
 install:
 	for package in $(PYNOTIFIER) $(PYMBUS) pyepg pyimlib2 mevas; do \
-		(cd lib/$$package; rm -rf build ; python setup.py install); done
+		(cd lib/$$package; \
+		 rm -rf build ; \
+		 python setup.py install; \
+		 rm -rf build ); done
+
 	rm -rf build
 	python setup.py install
+	rm -rf build

@@ -23,12 +23,10 @@ check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
             ('mbus', 'http://www.mbus.org/')))
 
 
-print 'WARNING, CVS is unstable right now, press C-c to quit'
+print 'WARNING, CVS is unstable right now'
 print 'If you really want to install freevo, make sure you also install'
-print 'the libs in the lib dir'
+print 'the libs in the lib dir (use make install)'
 print
-print 'Waiting 5 seconds'
-time.sleep(5)
 
 class Runtime(core.Command):
 
