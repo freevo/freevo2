@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/28 09:10:00  dischi
+# bugfix
+#
 # Revision 1.6  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -210,7 +213,7 @@ class MediaMenu(Item):
                 menuw.refresh()
             return TRUE
 
-        if event in (em.PLAY_END, em.USER_END, em.STOP) and em.context != 'menu':
+        if event in (em.PLAY_END, em.USER_END, em.STOP) and event.context != 'menu':
             menuw.show()
             return TRUE
 
