@@ -9,50 +9,41 @@
 
 # get information about freevo dir and the name we called with
 if stat $0 | head -n 1 | grep "' -> \`" > /dev/null ; then
-    script=`stat $0 | head -n 1 | sed "s/.*' -> .\\(.*\\)./\\1/"`
+    export FREEVO_SCRIPT=`stat $0 | head -n 1 | sed "s/.*' -> .\\(.*\\)./\\1/"`
 else
-    script=`echo $0`
+    export FREEVO_SCRIPT=`echo $0`
 fi
 
-call=`basename $0`
-export FREEVO_HOME=`dirname $script`
-export FREEVO_SCRIPT=$script
+export RUNAPP=""
 
-# Keep track of where we started. This env var is used inside Freevo.
-export FREEVO_STARTDIR=$PWD
+# Check the environment we started in. There are three choices:
+# o installed into the system
+# o everything in one directory without the runtime
+# o everything in one directory using the runtime
 
-# Is runapp present? If not it needs to be compiled
-if [ ! -e "$FREEVO_HOME/runapp" ]; then
-    echo
-    echo "*************************************************************"
-    echo "* Please note that there is a standalone binary release     *"
-    echo "* of Freevo with all dependencies included. Use that unless *"
-    echo "* you are really capable of installing Freevo from source   *"
-    echo "* without assistance from the mailing lists or irc!         *"
-    echo "*************************************************************"
-    echo
-    echo "Freevo not compiled (runapp executable not found)"
-    echo
-    exit 1
-fi
-
-# find out where all the needed files are
-if [ -e "$FREEVO_HOME/src/plugins" ]; then
+if [ -e "`dirname $FREEVO_SCRIPT`/src/plugins" ]; then
     # starting from src
-    helpers=src/helpers
-    FREEVO_PYTHON=$FREEVO_HOME/src
-    export FREEVO_SHARE=share
+    export FREEVO_PYTHON=`dirname $FREEVO_SCRIPT`/src
+    FREEVO_HELPERS=`dirname $FREEVO_SCRIPT`/src/helpers
+    export FREEVO_SHARE=`dirname $FREEVO_SCRIPT`/share
+    export FREEVO_CONTRIB=`dirname $FREEVO_SCRIPT`/contrib
+    export FREEVO_CONFIG=`dirname $FREEVO_SCRIPT`/freevo_config.py
 
-elif [ -e "$FREEVO_HOME/../share/freevo" ]; then
-    export FREEVO_HOME=$FREEVO_HOME/../share/freevo
+    if [ -e "`dirname $FREEVO_SCRIPT`/runtime/runapp" ]; then
+	# we also have a runtime
+	export RUNAPP="`dirname $FREEVO_SCRIPT`/runtime/runapp"
+    fi
 
+elif [ -e "`dirname $FREEVO_SCRIPT`/../share/freevo" ]; then
+    # we have an installed version
     # find the freevo libs
     python -c 'import freevo' || exit 1
     export FREEVO_PYTHON=`python -c 'import freevo; print freevo.__path__' | \
                    sed 's/..\(.*\)../\1/'`
-    # installed version
-    helpers=$FREEVO_PYTHON/helpers
-    export FREEVO_SHARE=$FREEVO_HOME
+    FREEVO_HELPERS=$FREEVO_PYTHON/helpers
+    export FREEVO_SHARE=`dirname $FREEVO_SCRIPT`/../share/freevo
+    export FREEVO_CONTRIB=$FREEVO_SHARE/contrib
+    export FREEVO_CONFIG=$FREEVO_SHARE/freevo_config.py
 
 else
     echo "can't find freevo data files"
@@ -60,59 +51,51 @@ else
 fi
 
 # Set this globaly, everything here should have access to these modules.
-export PYTHONPATH=$FREEVO_HOME:$FREEVO_PYTHON:$FREEVO_PYTHON/www:$FREEVO_PYTHON/tv
+export PYTHONPATH=$FREEVO_PYTHON:$FREEVO_PYTHON/www:$FREEVO_PYTHON/tv:$PYTHONPATH
 
-# call new x session if needed
-if [ "$call" = "freevo" -a "$1" = "-fs" ]; then
+# expand PATH to stuff that should be in it
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin
+
+# option -fs
+# This will start a new X session and start Freevo as windowmanager
+# to work around all the fullscreen bugs of the different wm
+if [ `basename $0` = "freevo" -a "$1" = "-fs" ]; then
     servernum=0
-
     while true; do
 	test -e /tmp/.X11-unix/X$servernum || break
 	let servernum+=1
     done
-
     exec xinit $0 --force-fs -- :$servernum
 fi
 
 
-# call helper if the script is called as wrapper
-if [ "$call" = "freevo" ]; then
-    script="$FREEVO_HOME/$helpers/$1.py"
+# option to call a helper script
+# Either this script is called with the name of the helper (as $0) or
+# the first parameter is the helper name. In both cases start the helper
+# (with runapp if present)
+if [ `basename $0` = "freevo" ]; then
+    script="`dirname $FREEVO_SCRIPT`/$helpers/$1.py"
     if [ -e "$script" ]; then
 	shift
     fi
 else
-    script="$FREEVO_HOME/$helpers/$call.py"
+    script="`dirname $FREEVO_SCRIPT`/$helpers/`basename $0`.py"
 fi
 
 if [ -e "$script" ]; then
-    "$FREEVO_HOME/runapp" python "$script" "$@"
+    $RUNAPP python "$FREEVO_SCRIPT" "$@"
     exit 0
 fi
 
 
+
+# get the directory name where to store the pid of the running
+# Freevo process
 if [ -w /var/run ] ; then
     PID_DIR=/var/run
 else
     PID_DIR=/tmp
 fi
-
-
-if [ "$1" = "update" ] ; then
-    if [ "$2" = "" ]; then
-	echo "usage: freevo update path-of-freevo-binary-release"
-	echo
-	echo "warning: the update will delete all files in the src and"
-	echo "and the skin directory except the personal plugins."
-	exit 1
-    fi
-    echo "updating freevo binary release in $2"
-    find $2/src | grep -v /plugins/ | xargs rm -rf
-    rm -rf $2/src/skins $2/WIP
-    cp -r * $2
-    exit 0
-fi
-
 
 # Help
 if [ "$1" = "--help" -o "$1" = "-" ] ; then
@@ -144,27 +127,15 @@ if [ "$1" = "--help" -o "$1" = "-" ] ; then
     exit 0
 fi
 
-# Create the config file.
+# option setup. 
+# This is more a helper script to create the config file.
 if [ "$1" = "setup" ] ; then
     shift 1
-    ./runapp python $FREEVO_PYTHON/setup_freevo.py $@
+    $RUNAPP python $FREEVO_PYTHON/setup_freevo.py $@
     exit 0
 fi
 
-# Is freevo.conf present? If not, ./configure is needed
-# Check the possible locations in prio order
-if [ ! -e $FREEVO_STARTDIR/freevo.conf ]; then
-    if [ ! -e $HOME/.freevo/freevo.conf ]; then
-        if [ ! -e /etc/freevo/freevo.conf ]; then
-            if [ ! -e ./freevo.conf ]; then
-                echo "Please run 'freevo setup' first (freevo.conf not found)"
-                exit 1
-            fi
-        fi
-    fi
-fi
-
-# Support starting something with runapp
+# Support starting something with runapp (or not if not available)
 if [ "$1" = "runapp" ] ; then
     shift
     if [ -e "runtime/apps/$1" ]; then
@@ -183,13 +154,13 @@ if [ "$1" = "runapp" ] ; then
 	fi
     fi
     shift
-    ./runapp "$app" "$@"
+    $RUNAPP "$app" "$@"
     exit 0
 fi
     
 # Support for using just Python
 if [ "$1" = "prompt" ] ; then
-    ./runapp python
+    $RUNAPP python
     exit 0
 fi
     
@@ -211,7 +182,7 @@ if [ "$1" = "execute" ] ; then
     fi
 
     trap './freevo stop $APP' 1 2 15
-    ./runapp python $@ &
+    $RUNAPP python $@ &
     echo PID is $!
     echo $! > $PID_FILE
     wait `cat $PID_FILE`
@@ -228,8 +199,10 @@ if [ "$1" = "stop" ] ; then
     else
         PID_FILE=$PID_DIR/freevo-`basename $1`.pid
     fi
-    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
-    rm $PID_FILE > /dev/null 2>&1
+    if [ -e $PID_FILE ]; then
+	kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+	rm $PID_FILE > /dev/null 2>&1
+    fi
     exit 0
 fi
 
@@ -247,16 +220,20 @@ fi
 trap './freevo stop' 1 2 15
 
 # Start the main freevo application
-./runapp python -OO $FREEVO_PYTHON/main.py $@ &
+$RUNAPP python -OO $FREEVO_PYTHON/main.py $@ &
 
 echo $! > $PID_FILE
-wait `cat $PID_FILE`
+PID=`cat $PID_FILE`
+wait `cat $PID_FILE` >/dev/null 2>/dev/null
+
+# they may be problem with the signal handler when pressing C-c
+RUNNING=`ps -ef | grep " $PID " | grep main`
+if [ ! "$RUNNING" = "" ] ; then
+    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+fi
 
 # Freevo exited, make sure all children are killed
 sleep 1
-
-# For now I think we still need the kludge for freevo_xwin
-killall -9 freevo_xwin > /dev/null 2>&1
 
 rm $PID_FILE > /dev/null 2>&1
 
