@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/07/20 18:22:35  dischi
+# added patch for different temp units from Michael Ruelle
+#
 # Revision 1.23  2003/07/18 03:47:34  outlyer
 # Nasty bug that would cause a crash if you hit any remote button not used
 # by the plugin you were in. It expected menuw to be defined, else it crashed
@@ -266,8 +269,9 @@ class weather(IdleBarPlugin):
     """
     show the current weather
     """
-    def __init__(self, zone='CYYZ'):
+    def __init__(self, zone='CYYZ', units='C'):
         IdleBarPlugin.__init__(self)
+        self.TEMPUNITS = units
         self.METARCODE = zone
         self.WEATHERCACHE = config.FREEVO_CACHEDIR + '/weather'
         self.CLOCKFONT = 'skins/fonts/Trebuchet_MS.ttf'
@@ -287,7 +291,15 @@ class weather(IdleBarPlugin):
             try:
                 weather.fetchMetarReport(self.METARCODE)
                 if (weather.getTemperatureCelsius()):
-                    temperature = '%2d' % weather.getTemperatureCelsius()
+                    if self.TEMPUNITS == 'F':
+                        ctemp = weather.getTemperatureCelsius()
+                        ftemp = ((ctemp + 40) * 9 / 5) - 40
+                        temperature = '%2d' % ftemp
+                    elif self.TEMPUNITS == 'K':
+                        ktemp = weather.getTemperatureCelsius() + 273
+                        temperature = '%3d' % ktemp
+                    else:
+                        temperature = '%2d' % weather.getTemperatureCelsius()
                 else:
                     temperature = '0'  # Make it a string to match above.
                 if weather.getPixmap():
