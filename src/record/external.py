@@ -90,7 +90,10 @@ class Recorder(Plugin):
         self.entity  = entity
         self.devices = []
         self.recordings = []
+        # FIXME: use pyepg for this during runtime
         self.channels = {}
+        for channel in pyepg.channels:
+            self.channels[channel.id] = channel.access_id
         self.suffix = '.mpg'
         self.entity.call('devices.list', self.__devices_list)
 
@@ -123,7 +126,6 @@ class Recorder(Plugin):
                 for channel in pyepg.channels:
                     if channel.access_id == dvb_name:
                         bouquet.append(channel.id)
-                        self.channels[channel.id] = dvb_name
                         break
             listing.append(bouquet)
         self.devices.append(result.arguments[:2] + [listing])
