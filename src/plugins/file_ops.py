@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/31 17:18:33  dischi
+# exception handling
+#
 # Revision 1.1  2003/08/31 17:14:21  dischi
 # Move delete file from VideoItem into a global plugin. Now it's also
 # possible to remove audio and image files.
@@ -66,6 +69,12 @@ class PluginInterface(plugin.ItemPlugin):
         ConfirmBox(text='Do you wish to delete\n %s?' % self.item.name,
                    handler=self.delete_file, default_choice=1).show()
 
+    def save_unlink(self, filename):
+        try:
+            os.unlink(filename)
+        except:
+            print 'can\'t delete %s' % filename
+        
     def delete_file(self):
         if config.DEBUG:
             print 'Deleting %s' % self.filename
@@ -73,19 +82,18 @@ class PluginInterface(plugin.ItemPlugin):
         if self.item.type in ('video', 'audio'):
             base = os.path.splitext(self.item.filename)[0] + '.'
             if os.path.isfile(base + 'jpg'):
-                os.remove(base + 'jpg')
+                self.save_unlink(base + 'jpg')
             if os.path.isfile(base + 'png'):
-                os.remove(base + 'png')
+                self.save_unlink(base + 'png')
 
         if os.path.isfile(self.item.filename):
-            os.unlink(self.item.filename)
+            self.save_unlink(self.item.filename)
 
         if self.item.type == 'video' and hasattr(self, 'fxd_file') and \
                os.path.isfile(self.item.fxd_file) and \
                self.item.fxd_file.find(config.MOVIE_DATA_DIR) == -1 and \
                self.item.fxd_file.find(config.TV_SHOW_DATA_DIR) == -1 and \
                self.item.fxd_file.find(config.TV_SHOW_IMAGE_DIR) == -1:
-            os.unlink(self.item.fxd_file)
-
+                self.save_unlink(self.item.fxd_file)
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
