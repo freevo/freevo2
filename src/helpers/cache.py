@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/12 12:22:03  dischi
+# update cache to new directory metainfo
+#
 # Revision 1.22  2004/02/09 20:14:40  dischi
 # add xmltv
 #
@@ -95,7 +98,7 @@ import fxditem
 
 # use this number to keep track of changes in
 # this helper. Check this against util/mediainfo
-VERSION =1
+VERSION = 2
 
 def delete_old_files_1():
     """
@@ -361,10 +364,7 @@ def create_metadata():
         d.create_metainfo()
         for type in activate_plugins:
             if subdirs.has_key(type) and s in subdirs[type]:
-                # reset num_timestamp and set the display_type
-                d['num_timestamp'] = 0
                 d.display_type = type
-                d.autovars.append(('num_%s_items' % type, 0))
                 # scan again with display_type
                 d.create_metainfo()
 
