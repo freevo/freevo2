@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/24 15:15:31  dischi
+# skin.xml support re-added
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -101,6 +104,7 @@ class Item(MenuItem):
         if not self.name:
             self.name = obj.name
             
+        self.xml_file = obj.xml_file
         self.handle_type = obj.handle_type
         self.mplayer_options = obj.mplayer_options
 

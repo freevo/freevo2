@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/24 15:15:31  dischi
+# skin.xml support re-added
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -43,6 +46,7 @@ import menu
 import copy
 import rc
 import string
+import skin
 
 from video import xml_parser
 
@@ -56,8 +60,8 @@ from playlist import Playlist
 TRUE  = 1
 FALSE = 0
 
-# Create the remote control object
 rc = rc.get_singleton()
+skin = skin.get_singleton()
 
 class MediaMenu(Item):
     """
@@ -131,9 +135,9 @@ class MediaMenu(Item):
             title = 'IMAGE'
         else:
             title = 'MEDIA'
-        moviemenu = menu.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
+        item_menu = menu.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
                               umount_all=1)
-        menuw.pushmenu(moviemenu)
+        menuw.pushmenu(item_menu)
 
 
 
@@ -189,6 +193,9 @@ class DirItem(Playlist):
             if self.display_type:
                 self.handle_type = self.display_type
             
+        if os.path.isfile(dir+'/skin.xml'): 
+            self.xml_file = dir+'/skin.xml'
+
         # playlist stuff
         self.current_item = 0
         self.playlist = []
@@ -272,6 +279,9 @@ class DirItem(Playlist):
         if len(items) == 1 and items[0].actions():
             items[0].actions()[0][0](menuw=menuw)
         else:
-            moviemenu = menu.Menu(title, items)
-            menuw.pushmenu(moviemenu)
+            item_menu = menu.Menu(title, items)
+            if self.xml_file:
+                item_menu.skin_settings = skin.LoadSettings(self.xml_file)
+
+            menuw.pushmenu(item_menu)
             
