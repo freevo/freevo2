@@ -19,7 +19,7 @@ class Imlib2Canvas(BitmapCanvas):
 			self._display.render(img._image, pos, pos, size)
 		else:
 			if img.size != size:
-				img = img.crop(pos, size)
+				img = imagelib.crop(img, pos, size)
                                                                                                                                    
 			data = img.get_raw_data("RGB")
 			img = Imlib2.new( size, data, "RGB" )

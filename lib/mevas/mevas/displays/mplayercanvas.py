@@ -13,7 +13,7 @@ class MPlayerCanvas(Canvas):
 	# Counter for bmovl2 image ids.
 	_img_id_counter = 0
 
-	def __init__(self, size, overlay = None):
+	def __init__(self, size, overlay = None, x_adjust = 1.0):
 		"""
 		Initialize canvas.  'overlay' is an mplayer.Overlay object and
 		size is a tuple holding the width and height of the canvas.
@@ -28,6 +28,7 @@ class MPlayerCanvas(Canvas):
 		# Keep track of canvas objects' attributes (like alpha, zindex, etc.)
 		# so we only need to update the ones that have changed.
 		self._cached_values = {}
+		self._x_adjust = x_adjust
 		self.atom = 0
 
 

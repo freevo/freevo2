@@ -12,10 +12,6 @@ class Canvas(CanvasContainer):
 		self.set_size(size)
 		self.canvas = make_weakref(self)
 
-	def get_size(self):
-		return self.width, self.height
-
-
 	def freeze(self):
 		pass
 

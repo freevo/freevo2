@@ -132,6 +132,10 @@ class CanvasContainer(CanvasObject):
 		"""
 		Compute the size of the container based on all of its children.
 		"""
+		width, height = self.width, self.height
+		if width != None and height != None:
+			return width, height
+
 		left = top = bottom = right = 0
 		for child in self.children:
 			child_w, child_h = child.get_size()
@@ -142,7 +146,9 @@ class CanvasContainer(CanvasObject):
 			top = min(top, child_y)
 			bottom = max(bottom, child_y + child_h)
 	
-		return right-left, bottom-top	
+		if width == None: width = right - left
+		if height == None: height = bottom - top
+		return width, height
 
 			
 	def queue_paint(self, child = None):
@@ -194,6 +200,11 @@ class CanvasContainer(CanvasObject):
 
 
 	def _get_child_min_pos(self, recursed = False):
+		# For containers with fixed sizes, negative coordinates in children
+		# are ignored -- they are merely clipped.
+		if self.width != None or self.height != None:
+			return 0, 0
+
 		if recursed:
 			left, top = self.get_pos()
 		else:
@@ -402,13 +413,10 @@ class CanvasContainer(CanvasObject):
 				# need to translate child containers with children with
 				# negative coordinates.
 
-				if bsi["pos"] != (child_x, child_y): print "OBJECT MOVE", child
-				if bsi["size"] != (child_w, child_h): print "OBJECT RESIZE", child
 				# Old rectangle.
 				dirty_rects += ( (bsi["pos"][0] + child_offset_x, bsi["pos"][1] + child_offset_y), bsi["size"]),
 				# New rectangle.
 				dirty_rects += ( (child_x + child_offset_x, child_y + child_offset_y), (child_w, child_h) ),
-				print dirty_rects
 
 			# If visibility or zindex has changed, entire child region gets invalidated.
 			elif ("visible" in bsi and bsi["visible"] != child.visible) or \
@@ -508,6 +516,8 @@ class CanvasContainer(CanvasObject):
 					self._backing_store.clear( (r[0][0] - offset_x, r[0][1] - offset_y), r[1] )
 				else:
 					self._backing_store.draw_rectangle((r[0][0] - offset_x, r[0][1] - offset_y), r[1] , (0, 0, 0, 255), fill=True)
+				#c = map(lambda x: int(random.random()*127)+127, range(3))
+				#self._backing_store.draw_rectangle( (r[0][0] - offset_x, r[0][1] - offset_y), r[1], c+[200], fill=True)
 
 		self._backing_store_info["offset"] = (offset_x, offset_y)
 		self._backing_store_info["size"] = (width, height)

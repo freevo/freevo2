@@ -107,6 +107,9 @@ class CanvasImage(CanvasObject):
 		self._image_changed()
 
 
+	def get_image(self, image):
+		return self.image
+
 	def set_image(self, image):
 		"""
 		Sets the image for this object to 'image'

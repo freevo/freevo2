@@ -16,9 +16,11 @@ class BitmapCanvas(Canvas):
 	_update_end() to flip the buffered page.
 	"""
 
-	def __init__(self, size, preserve_alpha = False):
+	def __init__(self, size, preserve_alpha = False, blit_once = True, slices = False):
 		super(BitmapCanvas, self).__init__(size)
 		self._preserve_alpha = preserve_alpha
+		self._blit_once = blit_once
+		self._slices = slices
 		self._blit_rects = []
 		self._canvas_frozen = 0
 		self._backing_store_with_alpha = mevas.imagelib.new(size)
@@ -47,7 +49,6 @@ class BitmapCanvas(Canvas):
 				self._blit_rects = []
 
 
-
 	def child_paint(self, child, force_children = False):
 		img, dirty_rects = self._get_backing_store(update = True, update_object = child, clip = True,
 		                                           preserve_alpha = self._preserve_alpha)
@@ -61,6 +62,19 @@ class BitmapCanvas(Canvas):
 
 
 	def _blit_regions(self, img, regions):
+		# Merge the regions into one big union of blit_once is True
+		if self._slices:
+			new_regions = []
+			for ((x, y), (w, h)) in regions:
+				new_regions.append( ((0, y), (img.width, h)), )
+			regions = new_regions
+			
+		if self._blit_once:
+			region = regions.pop()
+			while regions:
+				region = rect.union(region, regions.pop())
+			regions = [region]
+			
 		# It's the container's responsibility to apply children's alpha
 		# values.  But there is no parent of the canvas to do that, so we
 		# do that here if it's necessary.
@@ -89,11 +103,6 @@ class BitmapCanvas(Canvas):
 	def rebuild(self):
 		self.queue_paint()
 		self.update()
-
-	def _get_child_min_pos(self):
-		# Returning (0, 0) here causes the backing store for the canvas to
-		# never grow, even if coordinates of children are negative.
-		return (0, 0)
 
 	def child_deleted(self, child):
 		# If we have rendered this child to the backing store, we need to

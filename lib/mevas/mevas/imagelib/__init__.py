@@ -25,3 +25,12 @@ except ImportError:
 if _backend == None:
 	raise "No supported image library could be found."
 
+
+def convert(image, target = None):
+	if target == None:
+		target = get_current_backend()
+
+	target_backend = get_backend(target)
+	if isinstance(image, target_backend.Image):
+		return image
+

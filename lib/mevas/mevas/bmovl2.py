@@ -4,7 +4,7 @@ import imagelib
 # This class speaks bmovl2 over a fifo.  How MPlayer is launched is not the
 # responsibility of mevas.  
 
-DEBUG = 0
+DEBUG = 2
 
 class MPlayerOverlay:
 
@@ -155,7 +155,6 @@ class MPlayerOverlay:
 		if not shmem_name:
 			shmem_name = "0"
 			
-
 		self.write_buffer("RAWIMG %s %s %d %d %d %s 0\n" % (id, format, image.width, image.height, reset, shmem_name))
 		# If shmem failed, or we don't support shmem, we need to send the image via the fifo
 		if shmem_name == "0":

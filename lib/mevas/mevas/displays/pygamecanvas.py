@@ -10,7 +10,7 @@ class PygameCanvas(BitmapCanvas):
 	def __init__(self, size):
 		super(PygameCanvas, self).__init__(size, preserve_alpha = False)
 		pygame.init()
-		self._screen = pygame.display.set_mode(size, DOUBLEBUF)
+		self._screen = pygame.display.set_mode(size)
 
 	def _blit(self, img, r):
 		pos, size = r
