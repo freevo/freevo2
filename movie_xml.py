@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/11/01 16:51:19  dischi
+# Add support for urls in <filename>
+#
 # Revision 1.13  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -109,7 +112,12 @@ def parseVideo(dir, mplayer_files, video_node):
                 try: mplayer_files.remove(os.path.join(add_to_path,file_nodes.textof()))
                 except ValueError: pass
                 # XXX add mplayer_options for specific files, too
-                file = FileInformation(file=os.path.join(add_to_path, file_nodes.textof()))
+                filename = file_nodes.textof()
+                if filename.find('://') != -1:
+                    file = FileInformation(file=filename)
+                else:
+                    file = FileInformation(file=os.path.join(add_to_path, filename))
+                    
                 playlist += [file]
 
         if node.name == u'crop':
