@@ -1,2 +1,2 @@
 patch -p1 $1 < WIP/Dischi/movie_xml.patch
-patch -p1 $1 < WIP/Dischi/extendedmenu_image.patch
+patch -p1 $1 < WIP/Dischi/extendedmenu_image2.patch
