@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.131  2004/02/04 17:32:35  dischi
+# fix crash for deactivated osd and fix busy icon redraw
+#
 # Revision 1.130  2004/02/01 17:11:31  dischi
 # cosmetic changes
 #
@@ -314,7 +317,8 @@ class BusyIcon(threading.Thread):
         self.active = False
         self.icon   = os.path.join(config.SHARE_DIR, 'icons/popup/popup_wait.png')
         self.lock   = thread.allocate_lock()
-
+        self.rect   = None
+        
     def wait(self, timer):
         self.lock.acquire()
         self.active = True
@@ -343,13 +347,13 @@ class BusyIcon(threading.Thread):
                 x = osd.width  - config.OSD_OVERSCAN_X - 20 - width
                 y = osd.height - config.OSD_OVERSCAN_Y - 20 - height
 
+                self.rect = (x,y,width,height)
                 # backup the screen
                 screen = pygame.Surface((width,height))
-                screen.blit(osd.screen, (0,0), (x,y,width,height))
-
+                screen.blit(osd.screen, (0,0), self.rect)
                 # draw the icon
                 osd.drawbitmap(image, x, y)
-                osd.update(stop_busyicon=False)
+                osd.update(rect=self.rect, stop_busyicon=False)
 
                 # restore the screen
                 osd.screen.blit(screen, (x,y))
@@ -503,6 +507,9 @@ class OSD:
         """
         callback for SDL event (not Freevo events)
         """
+        if not pygame.display.get_init():
+            return None
+
         # Check if mouse should be visible or hidden
         mouserel = pygame.mouse.get_rel()
         mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
@@ -1223,17 +1230,19 @@ class OSD:
                     if t_rem > 0.0:
                         time.sleep(t_rem)
             return
-            
-        if rect:
+
+        if rect and not (stop_busyicon and self.busyicon.rect):
             try:
                 pygame.display.update(rect)
             except:
-                _debug_('osd.update(rect) failed, bad rect? - %s' % rect, 1)
+                _debug_('osd.update(rect) failed, bad rect? - %s' % str(rect), 1)
                 _debug_('updating whole screen')
                 pygame.display.flip()
         else:
             pygame.display.flip()
-
+        if stop_busyicon:
+            self.busyicon.rect = None
+        
 
     def _getbitmap(self, url):
         """
