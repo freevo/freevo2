@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/06/20 13:06:20  dischi
+# move freevo-rebuild-database to cache dir
+#
 # Revision 1.5  2004/02/28 21:11:20  dischi
 # more unicode fixes
 #
@@ -488,7 +491,7 @@ class FxdImdb:
         i.write("  </disc-set>\n")    
         i.write("</freevo>\n")
     
-        util.touch('/tmp/freevo-rebuild-database')
+        util.touch(os.path.join(config.FREEVO_CACHEDIR, 'freevo-rebuild-database'))
 
         
     def write_movie(self):
@@ -534,7 +537,7 @@ class FxdImdb:
         i.write('  </movie>\n')
         i.write('</freevo>\n')     
         
-        util.touch('/tmp/freevo-rebuild-database')
+        util.touch(os.path.join(config.FREEVO_CACHEDIR, 'freevo-rebuild-database'))
 
 
         
@@ -585,7 +588,7 @@ class FxdImdb:
             else: file.write(line + '\n')
             
         file.close()
-        util.touch('/tmp/freevo-rebuild-database')
+        util.touch(os.path.join(config.FREEVO_CACHEDIR, 'freevo-rebuild-database'))
 
 
         
@@ -636,7 +639,7 @@ class FxdImdb:
             else: file.write(line + '\n')
             
         file.close()
-        util.touch('/tmp/freevo-rebuild-database')
+        util.touch(os.path.join(config.FREEVO_CACHEDIR, 'freevo-rebuild-database'))
 
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/06/20 13:06:19  dischi
+# move freevo-rebuild-database to cache dir
+#
 # Revision 1.61  2004/05/25 17:35:29  dischi
 # make nicer title for discs
 #
@@ -763,7 +766,7 @@ class Identify_Thread(threading.Thread):
         """
         thread main function
         """
-        rebuild_file = '/tmp/freevo-rebuild-database'
+        rebuild_file = os.path.join(config.FREEVO_CACHEDIR, 'freevo-rebuild-database')
         # Make sure the movie database is rebuilt at startup
         util.touch(rebuild_file)
         while 1:

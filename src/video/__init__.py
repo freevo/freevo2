@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/06/20 13:06:19  dischi
+# move freevo-rebuild-database to cache dir
+#
 # Revision 1.31  2004/06/02 21:36:49  dischi
 # auto detect movies with more than one file
 #
@@ -242,15 +245,16 @@ def hash_fxd_movie_database():
     fxd_database['label'] = []
     discset_informations  = {}
     tv_show_informations  = {}
-    
-    if vfs.exists("/tmp/freevo-rebuild-database"):
+
+    rebuild_file = os.path.join(config.FREEVO_CACHEDIR, 'freevo-rebuild-database')
+    if vfs.exists(rebuild_file):
         try:
-            os.remove('/tmp/freevo-rebuild-database')
+            os.remove(rebuild_file)
         except OSError:
             print '*********************************************************'
             print
             print '*********************************************************'
-            print 'ERROR: unable to remove /tmp/freevo-rebuild-database'
+            print 'ERROR: unable to remove %s' % rebuild_file
             print 'please fix permissions'
             print '*********************************************************'
             print
