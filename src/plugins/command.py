@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/14 15:44:21  dischi
+# add more doc and add <stdout> to supress showing the stdout
+#
 # Revision 1.5  2004/02/14 15:05:49  dischi
 # make it possible to put command fxd files in every menu
 #
@@ -208,6 +211,7 @@ class CommandItem(Item):
 	self.use_wm  = None
 	self.spawnwm = config.COMMAND_SPAWN_WM
 	self.killwm  = config.COMMAND_KILL_WM
+        self.stdout  = True
 	if command and directory:
             self.name = command
             self.cmd  = os.path.join(directory, command)
@@ -253,38 +257,29 @@ class CommandItem(Item):
         else:
             message = _('Command Completed')
 
-        if not self.stoposd:
+        if not self.stoposd and self.stdout:
             CommandOptions(text=message).show()
         
 
 def fxdparser(fxd, node):
-    '''
+    """
     parse commands out of a fxd file
-                                                                                
-    <?xml version="1.0" ?>
-    <freevo>
-      <command title="Mozilla">
-        <cmd>/usr/local/bin/mozilla</cmd>
-        <stoposd>1</stoposd>
-        <spawnwm>1</spawnwm>
-        <info>
-          <description>Unleash mozilla on the www</description>
-        </info>
-      </command>
-    </freevo>
-    '''
+    """
     item = CommandItem()
     item.name    = fxd.getattr(node, 'title')
     item.cmd     = fxd.childcontent(node, 'cmd')
     item.image   = util.getimage(item.cmd)
     item.stoposd = fxd.childcontent(node, 'stoposd')
     item.use_wm  = fxd.childcontent(node, 'spawnwm')
+    try:
+        if fxd.childcontent(node, 'stdout'):
+            item.stdout = int(fxd.childcontent(node, 'stdout'))
+    except Exception, e:
+        print e
     
     # parse <info> tag
     fxd.parse_info(fxd.get_children(node, 'info', 1), item)
     fxd.getattr(None, 'items', []).append(item)
-    if fxd.getattr(None, 'parent'):
-        item.name = Unicode(_('Execute command: ')) + item.name
     
 
 class CommandMainMenuItem(Item):
@@ -353,6 +348,9 @@ class PluginInterface(plugin.MainMenuPlugin):
     The level argument is used to influence the placement in the Main Menu. consult
     freevo_config.py for the level of the other Menu Items if you wish to place it
     in a particular location.
+
+    This plugin also activates <command> tag support in all menus, see information
+    from command.fxdhandler for details.
     """
     def __init__(self):
         # register command to normal fxd item parser
@@ -383,13 +381,17 @@ class fxdhandler(plugin.Plugin):
     <freevo>
       <command title="Mozilla">
         <cmd>/usr/local/bin/mozilla</cmd>
-        <stoposd>1</stoposd>
-        <spawnwm>1</spawnwm>
+        <stoposd>1</stoposd> <!-- stop osd before starting -->
+        <spawnwm>1</spawnwm> <!-- start windowmanager -->
+        <stdout>0</stdout>   <!-- do not show stdout on exit -->
         <info>
           <description>Unleash mozilla on the www</description>
         </info>
       </command>
     </freevo>
+
+    Putting a <command> in a folder.fxd will add this command to the list of
+    item actions for that directory.
     """
     def __init__(self):
         # register command to normal fxd item parser
