@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/02 10:26:07  dischi
+# add border support
+#
 # Revision 1.6  2004/01/01 17:41:42  dischi
 # call correct stringsize function
 #
@@ -109,18 +112,22 @@ class PluginInterface(plugin.DaemonPlugin):
             x = config.OSD_OVERSCAN_X
             y = config.OSD_OVERSCAN_Y
 
+            border = None
+            if font.shadow.visible and font.shadow.border:
+                border = font.shadow.color
+                
             renderer.drawstringframed(self.message, config.OSD_OVERSCAN_X,
                                       config.OSD_OVERSCAN_Y + 10,
-                                      renderer.width - 2 * config.OSD_OVERSCAN_X, -1,
-                                      font.font, fgcolor=0xffffff, bgcolor=0xa0000000,
-                                      align_h='right', mode='hard')
+                                      renderer.width - 10 - 2 * config.OSD_OVERSCAN_X, -1,
+                                      font.font, fgcolor=font.color,
+                                      align_h='right', mode='hard', border_color=border)
 
         else:
             y = renderer.y + 10
             if self.idlebar_visible:
                 y += 60
 
-            renderer.write_text(self.message, font, None,
+            renderer.drawstring(self.message, font, None,
                                 (renderer.x + renderer.width-w - 10), y,
                                 w, -1, 'right', 'center')
 
