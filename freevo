@@ -19,6 +19,9 @@ if test -a freevo_rt/freevo_rt ; then
     export LD_PRELOAD=`cat freevo_rt/preloads`
     # Execute using the runtime
     freevo_rt/ld-linux.so.2 freevo_rt/freevo_rt main.py $*
+    exit
 fi
+
+echo Runtime not found, starting using Python.
 
 python startup.py $*
