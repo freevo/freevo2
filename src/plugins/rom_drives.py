@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/11/09 13:05:04  dischi
+# support for disc images without fxd file
+#
 # Revision 1.38  2003/11/08 12:57:54  dischi
 # also set speed for audio discs
 #
@@ -536,6 +539,9 @@ class Identify_Thread(threading.Thread):
                 media.info = copy.copy(movie_info)
             else:
                 media.info = videoitem.VideoItem('0', None)
+                if config.MOVIE_DATA_DIR:
+                    media.info.image = util.getimage(os.path.join(config.MOVIE_DATA_DIR,
+                                                                  'disc-set', media.id))
 
             media.info.name = title
             media.info.mode = data.mime[6:]
