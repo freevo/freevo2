@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#
+# changelog 1.31 - tvsite.be word teveblad.be -- den_RDC
+# universal timezone generator included for tz generation
+
+# changelog 1.3 (same as cvs version tag in freevo-cvs)
 # middernachtprogrammas toegevoegd
 # volgens de dtd is de tag desc en niet description
 
@@ -9,12 +14,14 @@ from string import replace
 from time import time
 from time import localtime
 from time import strftime
+from time import altzone
 
+version = '1.31'
 locale = 'Latin-1'
 
 def usage():
+     print "xml_tv_be.py version " + version
      print "xml_tv_be.py --days=3 (default=2)"
-     
 
 def inttochar( match ):
      """Return the hex string for a decimal number"""
@@ -24,13 +31,33 @@ def inttochar( match ):
 
 
 def escape(s):
-    """Replace special HTML chars""" 
-    s = replace(s,'&#146;','\x27') 
+    """Replace special HTML chars"""
+    s = replace(s,'&#146;','\x27')
     p = re.compile(r'&#(\d+);')
     s = p.sub(inttochar,s)
     s = replace(s,' & ',' &#38; ')
     return s
 
+def localtz():
+    # returns timezone in "+xxxx" or "-xxxx"' format, daylight savings time aware
+    # will work everywhere, minute precision
+    # check if timezone is gmt + or gmt -
+    # will not work if system time is not local i think
+    if altzone <= 0:
+        tz = "+"
+    else:
+        tz = "-"
+    # insert first 2 digits of timezone (hour)
+    if abs(altzone / 3600) < 10:
+        tz = tz + "0" + str(abs(altzone / 3600))
+    else:
+        tz = tz + str(abs(altzone / 3600))
+    #insert last 2 digits of timezone (minutes)
+    if abs(altzone % 3600) < 10:
+        tz = tz + "0" + str(abs(altzone % 3600))
+    else:
+        tz = tz + str(abs(altzone % 3600))
+    return tz
 
 class cEvent:
     start=''
@@ -39,7 +66,7 @@ class cEvent:
     subtitle=''
     description=[]
     images=[]
-    
+
     def __init__(self,block,line,today,tomorrow):
         self.start_h='00'
         self.start_m='00'
@@ -86,16 +113,16 @@ class cEvent:
 
 
     def xml(self,channel_id):
-        if self.title != '': 
+        if self.title != '':
           #veranderd terug nr zes, sommig proggies op ketnet beginne om 7u
           if self.start_h < '06':
-              print "  <programme start=\"%s%s%s +0000\" stop=\"%s%s%s +0000\" channel=\"%s\">" % (self.tomorrow, self.start_h, self.start_m, self.tomorrow, self.end_h, self.end_m, channel_id)
+              print "  <programme start=\"%s%s%s %s\" stop=\"%s%s%s %s\" channel=\"%s\">" % (self.tomorrow, self.start_h, self.start_m, localtz(), self.tomorrow, self.end_h, self.end_m, localtz(), channel_id)
           else:
-            #programmas die vandaag beginnen mr morgen eindigen, aka hun einduur is kleiner dan het startuur 
-            if self.end_h < self.start_h:              
-                print "  <programme start=\"%s%s%s +0000\" stop=\"%s%s%s +0000\" channel=\"%s\">" % (self.today, self.start_h, self.start_m, self.tomorrow, self.end_h, self.end_m, channel_id)
+            #programmas die vandaag beginnen mr morgen eindigen, aka hun einduur is kleiner dan het startuur
+            if self.end_h < self.start_h:
+                print "  <programme start=\"%s%s%s %s\" stop=\"%s%s%s %s\" channel=\"%s\">" % (self.today, self.start_h, self.start_m, localtz(), self.tomorrow, self.end_h, self.end_m, localtz(), channel_id)
             else:
-                print "  <programme start=\"%s%s%s +0000\" stop=\"%s%s%s +0000\" channel=\"%s\">" % (self.today, self.start_h, self.start_m, self.today, self.end_h, self.end_m, channel_id)
+                print "  <programme start=\"%s%s%s %s\" stop=\"%s%s%s %s\" channel=\"%s\">" % (self.today, self.start_h, self.start_m, localtz(), self.today, self.end_h, self.end_m, localtz(), channel_id)
           print "    <title lang=\"nl\">%s</title>" % self.title
           if self.category != '':
             print "    <category lang=\"nl\">%s</category>" % self.category
@@ -107,7 +134,7 @@ class cEvent:
 class cChannel:
     title = ''
     events = []
-    
+
     def __init__(self,id,title,days):
         self.id=id
         self.title=title
@@ -120,7 +147,7 @@ class cChannel:
           date = strftime("%m/%d/%Y",localtime(time()+(x*86400)))
           today = strftime("%Y%m%d",localtime(time()+(x*86400)))
           tomorrow = strftime("%Y%m%d",localtime(time()+(x*86400)+86400))
-          f=urllib.urlopen("http://www.tvsite.be/ndl/zender.asp?move=full&channel=%s&dag=%s"%(title,date))
+          f=urllib.urlopen("http://www.teveblad.be/ndl/zender.asp?move=full&channel=%s&dag=%s"%(title,date))
           for l in f.read().splitlines():
             if state==0:        # looking for first <starttime>
                 r = re.search("<td class='tvnucontent' valign='top'>.+</td>",l)
@@ -146,7 +173,7 @@ class cChannel:
 
         print "  <channel id=\"%s\">" % self.id
         print "    <display-name lang=\"nl\">%s</display-name>" % self.title
-        print "    <icon>http://www.tvsite.be/gfx/logos/%s.gif</icon>" % self.title
+        print "    <icon>http://www.teveblad.be/gfx/logos/%s.gif</icon>" % self.title
         print "  </channel>"
         for event in self.events:
             event.xml(self.id)
@@ -169,7 +196,7 @@ def main():
     if o in ("-d", "--days"):
        dagen = int(a)
   print "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
-  print "<tv generator-info-name=\"Script by Bart Heremans, fixes,testing and debuging by den_RDC\">"
+  print "<tv generator-info-name=\"Script by Bart Heremans and den_RDC\">"
 
   cChannel(1,'TV1',dagen).xml()
   cChannel(2,'Ketnet',dagen).xml()
@@ -184,7 +211,7 @@ def main():
   cChannel(11,'Ned1',dagen).xml()
   cChannel(12,'Ned2',dagen).xml()
   cChannel(13,'Ned3',dagen).xml()
-  cChannel(14,'Eurosport',dagen).xml()
+  #Channel(14,'Eurosport',dagen).xml()
   #cChannel(15,'Canal+',dagen).xml()
   #cChannel(16,'Canal+Blauw',dagen).xml()
   cChannel(17,'RTBF1',dagen).xml()
@@ -194,3 +221,4 @@ def main():
 
 if __name__ == "__main__":
   main()
+
