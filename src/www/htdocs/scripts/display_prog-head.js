@@ -17,7 +17,7 @@ function unfocusPop(pop) {
 
 function showPop(pop, cell) {
   pop = document.getElementById(pop);
-  pop.style.top = popY-100;
+  pop.style.top = (popY-100) + "px";
   pop.style.visibility = 'visible';
 }
 
