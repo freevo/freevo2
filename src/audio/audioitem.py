@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/08/22 13:19:46  outlyer
+# Patch to allow mplayer-options in Web "Radio" FXD files.
+#
 # Revision 1.32  2003/08/02 19:04:59  dischi
 # webradio fix
 #
@@ -273,6 +276,9 @@ class AudioItem(Item):
                 if glob_name == 'url':
                     self.url = data
                     print "URL:", self.url
+                    glob_name = 0
+                if glob_name == 'mplayer_options':
+                    self.mplayer_options = data
                     glob_name = 0
         prs = xml.parsers.expat.ParserCreate()
         prs.StartElementHandler = s_el
