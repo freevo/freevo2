@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/03/04 05:10:54  rshortt
+# Make it work with rc.py changes.
+#
 # Revision 1.31  2004/02/23 21:46:22  dischi
 # start some unicode fixes, still not working every time
 #
@@ -892,7 +895,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def handleEvents(self):
         print 'RECORDSERVER HANDLING EVENT'
 
-        event, event_repeat_count = rc_object.poll()
+        event = rc_object.poll()
 
         if event:
             if event == OS_EVENT_POPEN2:
