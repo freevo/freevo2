@@ -9,7 +9,8 @@ list archive.
 http://freevo.sourceforge.net/cgi-bin/moin.cgi/FrontPage
 http://sourceforge.net/mailarchive/forum.php?forum_id=9234
 
-To download the important stuff from the WiKi use httrack:
+If you use a release of Freevo, a offline version of the WiKi is in 
+Docs/html. To download the important stuff from the WiKi use httrack:
 
 httrack -O wiki http://freevo.sourceforge.net/cgi-bin/moin.cgi/ \
 	"-*action=*" "-*UserPref*" "-*FindPage*" "-*HelpContents*" \
