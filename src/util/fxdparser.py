@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/25 19:00:14  dischi
+# add support for user data
+#
 # Revision 1.1  2003/11/23 16:56:28  dischi
 # a fxd parser for all kinds of fxd files using callbacks
 #
@@ -156,7 +159,8 @@ class FXD:
         self.tree = FXDtree(filename)
         self.read_callback  = {}
         self.write_callback = {}
-
+        self.user_data      = {}
+        
         
     def set_handler(self, name, callback, mode='r', force=False):
         """
@@ -241,11 +245,26 @@ class FXD:
 
     def getattr(self, node, name, default=''):
         """
-        return the attribute are the default
+        return the attribute of the node or the 'default' if the atrribute is not
+        set. If 'node' is 'None', it return the user defined data in the fxd
+        object.
         """
-        if node.attrs.has_key(('',name)):
+        if node and node.attrs.has_key(('',name)):
             return node.attrs[('',name)].encode(config.LOCALE)
+        if not node and self.user_data.has_key(name):
+            return self.user_data[name]
         return default
+
+
+    def setattr(self, node, name, value):
+        """
+        sets the attribute of the node or if node is 'None', set user defined data
+        for the fxd parser.
+        """
+        if node:
+            node.attrs[('',name)] = value
+        else:
+            self.user_data[name] = value
 
 
     def gettext(self, node):
