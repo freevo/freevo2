@@ -65,3 +65,9 @@ class Program:
                    Unicode(self.channel) != Unicode(other.channel)
         except AttributeError:
             return 1
+
+
+    def __str__(self):
+        return '%8d %s (%s): %s-%s' % (self.id, self.title, self.channel.id,
+                                       self.start, self.stop)
+    

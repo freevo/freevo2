@@ -236,3 +236,7 @@ class Channel:
                           (x.start < stop and x.stop >= stop),
                           self.programs)
         raise Exception('bad request: %s-%s' % (start, stop))
+
+
+    def __str__(self):
+        return '%s: %s' % (self.id, self.name)
