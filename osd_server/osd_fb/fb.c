@@ -37,27 +37,13 @@ static void tty_disable (void);
 static void tty_enable (void);
 
 
+/* Copy from the supplied 32-bit ARGB to the same-structure framebuffer */
 void
-fb_setpixel (uint16 x, uint16 y, uint32 color)
+fb_update (uint8 *pFB)
 {
-
-  *((uint32 *) &(fbinfo.pfb[y*fbinfo.linelen+x*4])) = color;
-  
-}
-
-
-void
-fb_clearscreen (uint32 color)
-{
-   int i;
-   uint32 *p;
    
+   memcpy (fbinfo.pfb, pFB, fbinfo.xres*fbinfo.yres*4);
 
-   for (i = 0; i < (fbinfo.fbsize / 4); i++) {
-      p = (uint32 *) fbinfo.pfb;
-      p[i] = color;
-   }
-  
 }
 
 
@@ -119,8 +105,6 @@ fb_open (void)
     perror ("mmap");
     exit (1);
   }
-
-  fb_clearscreen (0);
   
   return (0);
 

@@ -5,7 +5,6 @@
 
 extern int fb_open (void);
 extern int fb_close (void);
-extern void fb_clearscreen (uint32 color);
-extern void fb_setpixel (uint16 x, uint16 y, uint32 color);
+extern void fb_update (uint8 *pFB);
 
 #endif /* _FREEVO_FB_H_ */

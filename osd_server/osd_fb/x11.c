@@ -6,67 +6,14 @@
 #include <assert.h>
 
 #include "x11.h"
-#include "readpng.h"
 
 static Display *dpy;
 static Window w;
 static GC gc;
 static XVisualInfo visinf;
 static int xres, yres;
-
-
-#ifdef TEST
-int
-main (int ac, char *av[])
-{
-   uint8 *pBitmap;
-   uint16 w, h;
-   int i;
-   
-   
-   printf ("open()\n");
-   x11_open (768, 576);
-   x11_clearscreen (0);
-
-#if 0
-   printf ("clearscreen()\n");
-   x11_clearscreen (0);
-   sleep (1);
-   x11_clearscreen (0xffffff);
-   sleep (1);
-
-   printf ("setpixel()\n");
-   x11_setpixel (10, 10, 0xff0000);
-   sleep (1);
-   x11_setpixel (xres - 10, 10, 0xff0000);
-   sleep (1);
-   x11_setpixel (xres - 10, yres - 10, 0xff0000);
-   sleep (1);
-   x11_setpixel (10, yres - 10, 0xff0000);
-   sleep (1);
-#endif
-
-   for (i = 1; i < ac; i++) {
-      printf ("read png %s\n", av[i]);
-      read_png (av[i], &pBitmap, &w, &h);
-
-      x11_drawbitmap (10, 10, w, h, pBitmap);
-
-      x11_flush ();
-
-      free (pBitmap);
-   }
-   
-   printf ("\nPress a <CR> to exit!\n");
-   
-   getchar ();
-   
-   x11_close ();
-
-   return (0);
-   
-}
-#endif /* TEST */
+static XImage *pImage;
+static uint8 *pFrameBuffer;
 
 
 int
@@ -123,104 +70,107 @@ x11_open (int width, int height)
          break;
    }
 
-#if 0
-{
-   srand (0);
-   for (i = 0; i < 50000; i++) {
-      x0 = rand() % xres;
-      y0 = rand() % yres;
-      x1 = rand() % xres;
-      y1 = rand() % yres;
-      XSetForeground (dpy, gc, rand() & 0xffffff);
-      XDrawLine (dpy, w, gc, x0, y0, x1, y1);
-      XFlush (dpy);
-   }
-}
-#endif
+   /* X11 emulated framebuffer memory */
+   pFrameBuffer = (uint8 *) malloc (width * height * 4);
+
+   memset (pFrameBuffer, 0x80, width * height * 4);
+   
+   pImage = XCreateImage (dpy, visinf.visual, 24, ZPixmap, 0,
+                          pFrameBuffer, width, height, 8, width*4);
+
+   printf ("XImage: bitmap_bit_order=%d, depth=%d, bitmap_pad=%d, "
+           "bits_per_pixel=%d, (%08lx, %08lx, %08lx)\n",
+           pImage->bitmap_bit_order, pImage->depth, pImage->bitmap_pad,
+           pImage->bits_per_pixel,
+           pImage->red_mask, pImage->green_mask, pImage->blue_mask);
+   
+   XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, width, height);
+
+   XFlush (dpy);
 
    /* Done */
    return (0);
-   
-}
 
-
-
-int
-x11_close (void)
-{
-   /* XXX */
-   return (0);
-}
-
-
-
-void
-x11_setpixel (int x, int y, uint32 color)
-{
-   XSetForeground (dpy, gc, color);
-   XDrawPoint (dpy, w, gc, x, y);
-}
-
-
-#define APPLY_ALPHA(c, a) (c = ((int) (((float) c) * a)) & 0xff)
-
-void
-x11_drawbitmap (int x, int y, int width, int height, uint8 *pBitmap)
-{
-   int i, j;
-   uint32 color;
-   uint8 r, g, b, a;
-   
-   
-   for (i = 0; i < height; i++) {
-      for (j = 0; j < width; j++) {
-         a = pBitmap[i*width*4+j*4+0];
-         r = pBitmap[i*width*4+j*4+1];
-         g = pBitmap[i*width*4+j*4+2];
-         b = pBitmap[i*width*4+j*4+3];
-
-         /*  printf ("%3d %3d   %3d   %3d   %3d     %3d", i, j, r, g, b, a);  */
-         
-         if (a) {
-            float alpha = (float) (((float) a) / 255.0);
-
-            APPLY_ALPHA(r, alpha);
-            APPLY_ALPHA(g, alpha);
-            APPLY_ALPHA(b, alpha);
-            color = (r << 16) | (g << 8) | (b & 0xff);
-#if 0
-            printf ("0x%08x", color);
-#endif
-            XSetForeground (dpy, gc, color);
-            XDrawPoint (dpy, w, gc, x+j, y+i);
-         }
-         /*  printf ("\n");  */
-      }
-
-      /*  printf ("\n\n");  */
-      
-   }
-   
 }
 
 
 void
-x11_flush (void)
+x11_update (uint8 *pFB)
 {
+   
+   memcpy (pFrameBuffer, pFB, xres*yres*4);
+
+   XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, xres, yres);
+   
    XFlush (dpy);
 }
 
 
+
 void
-x11_clearscreen (uint32 color)
+x11_close (void)
 {
-   int i;
-
-
-   XSetForeground (dpy, gc, color);
-
-   for (i = 0; i < yres; i++) {
-      XDrawLine (dpy, w, gc, 0, i, xres-1, i);
-   }
-
+   /* XXX */
+   return;
 }
+
+
+
+#ifdef TEST
+int
+main (int ac, char *av[])
+{
+   
+   
+   printf ("open()\n");
+   x11_open (768, 576);
+
+#if 0
+   printf ("clearscreen()\n");
+   x11_clearscreen (0);
+   sleep (1);
+   x11_clearscreen (0xffffff);
+   sleep (1);
+
+   printf ("setpixel()\n");
+   x11_setpixel (10, 10, 0xff0000);
+   sleep (1);
+   x11_setpixel (xres - 10, 10, 0xff0000);
+   sleep (1);
+   x11_setpixel (xres - 10, yres - 10, 0xff0000);
+   sleep (1);
+   x11_setpixel (10, yres - 10, 0xff0000);
+   sleep (1);
+
+   for (i = 0; i < width*height; i++) {
+      pData[i*3+0] = i % 17;
+      pData[i*3+1] = i % 53;
+      pData[i*3+2] = i % 256;
+   }
+   
+
+   for (i = 1; i < ac; i++) {
+      printf ("read png %s\n", av[i]);
+      read_png (av[i], &pBitmap, &w, &h);
+
+      x11_drawbitmap (10, 10, w, h, pBitmap);
+
+      x11_flush ();
+
+      free (pBitmap);
+   }
+   
+#endif
+   
+   printf ("\nPress a <CR> to exit!\n");
+   
+   getchar ();
+   
+   x11_close ();
+
+   return (0);
+   
+}
+#endif /* TEST */
+
+
