@@ -96,6 +96,9 @@
     </menuset>
 
     <menuset label="plain text style with info" inherits="plain text style">
+      <listing height="330">
+	<image y="max-32" label="downarrow"/>
+      </listing>
       <info visible="yes" layout="info" x="40" y="460" width="750" height="120"/>
     </menuset>
 
