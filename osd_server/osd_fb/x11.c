@@ -14,6 +14,7 @@ static XVisualInfo visinf;
 static int xres, yres;
 static XImage *pImage;
 static uint8 *pFrameBuffer;
+static int swap = 0;            /* RGB => BGR */
 
 
 int
@@ -83,6 +84,10 @@ x11_open (int width, int height)
            pImage->bitmap_bit_order, pImage->depth, pImage->bitmap_pad,
            pImage->bits_per_pixel,
            pImage->red_mask, pImage->green_mask, pImage->blue_mask);
+
+   if (pImage->red_mask == 0xff) {
+      swap = 1;
+   }
    
    XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, width, height);
 
@@ -97,8 +102,25 @@ x11_open (int width, int height)
 void
 x11_update (uint8 *pFB)
 {
-   
-   memcpy (pFrameBuffer, pFB, xres*yres*4);
+   int i;
+   uint8 *pRedSrc = (uint8 *) (&pFB[2]);
+   uint8 *pGreenSrc = (uint8 *) (&pFB[1]);
+   uint8 *pBlueSrc = (uint8 *) (&pFB[0]);
+   uint8 *pRedDst = (uint8 *) (&pFrameBuffer[0]);
+   uint8 *pGreenDst = (uint8 *) (&pFrameBuffer[1]);
+   uint8 *pBlueDst = (uint8 *) (&pFrameBuffer[2]);
+
+
+   if (!swap) {
+      memcpy (pFrameBuffer, pFB, xres*yres*4);
+   } else {
+      /* RGB => BGR conversion needed */
+      for (i = 0; i < xres*yres*4; i += 4) {
+         pRedDst[i] = pRedSrc[i];
+         pGreenDst[i] = pGreenSrc[i];
+         pBlueDst[i] = pBlueSrc[i];
+      }
+   }
 
    XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, xres, yres);
    
