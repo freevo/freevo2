@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/01 19:06:41  dischi
+# fix unicode crash in debug
+#
 # Revision 1.12  2004/06/21 22:41:44  rshortt
 # Small cleanup, use config.DEBUG.
 #
@@ -20,26 +23,6 @@
 # Was that \x0 supposed to be there? If so, sorry. I didn't think it was
 # supposed to be there and it was causing warnings in the recordserver
 # and the OSD interface.
-#
-# Revision 1.9  2004/01/09 19:39:31  outlyer
-# Oops, we don't use config here.
-#
-# Revision 1.8  2004/01/09 19:35:49  outlyer
-# Inherit DEBUG parameter from config, move some prints into DEBUG
-#
-# Revision 1.7  2004/01/09 02:10:00  rshortt
-# Patch from Matthieu Weber to revive add/edit favorites support from the
-# TV interface.
-#
-# Revision 1.6  2003/10/20 01:41:55  rshortt
-# Moving tv_util from src/tv/ to src/util/.
-#
-# Revision 1.5  2003/09/05 02:48:12  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.4  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -85,13 +68,17 @@ class ScheduledRecordings:
             # key = rec_interface.getKey(prog)
             pass
 
-        if config.DEBUG: print 'addProgram: key is "%s"' % key
+        if config.DEBUG:
+            print 'addProgram: key is "%s"' % String(key)
         if not self.programList.has_key(key):
-            if config.DEBUG: print 'addProgram: actually adding "%s"' % prog
+            if config.DEBUG:
+                print 'addProgram: actually adding "%s"' % String(prog)
             self.programList[key] = prog
         else:
-            if config.DEBUG: print 'We already know about this recording.'
-        if config.DEBUG: print 'addProgram: len is "%s"' % len(self.programList)
+            if config.DEBUG:
+                print 'We already know about this recording.'
+        if config.DEBUG:
+            print 'addProgram: len is "%s"' % len(self.programList)
 
 
     def removeProgram(self, prog, key=None):
@@ -101,9 +88,11 @@ class ScheduledRecordings:
 
         if self.programList.has_key(key):
             del self.programList[key]
-            if config.DEBUG: print 'removed recording: %s' % prog
+            if config.DEBUG:
+                print 'removed recording: %s' % String(prog)
         else:
-            if config.DEBUG: print 'We do not know about this recording.'
+            if config.DEBUG:
+                print 'We do not know about this recording.'
 
 
     def getProgramList(self):
@@ -116,18 +105,22 @@ class ScheduledRecordings:
 
     def addFavorite(self, fav):
         if not self.favorites.has_key(fav.name):
-            if config.DEBUG: print 'addFavorites: actually adding "%s"' % fav.name
+            if config.DEBUG:
+                print 'addFavorites: actually adding "%s"' % String(fav.name)
             self.favorites[fav.name] = fav
         else:
-            if config.DEBUG: print 'We already have a favorite called "%s".' % fav.name
+            if config.DEBUG:
+                print 'We already have a favorite called "%s".' % String(fav.name)
 
 
     def removeFavorite(self, name):
         if self.favorites.has_key(name):
             del self.favorites[name]
-            if config.DEBUG: print 'removed favorite: %s' % name
+            if config.DEBUG:
+                print 'removed favorite: %s' % String(name)
         else:
-            if config.DEBUG: print 'We do not have a favorite called "%s".' % name
+            if config.DEBUG:
+                print 'We do not have a favorite called "%s".' % String(name)
 
 
     def getFavorites(self):
