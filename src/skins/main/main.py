@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/01/13 17:20:54  dischi
+# fixed display toggle
+#
 # Revision 1.32  2004/01/13 15:46:19  outlyer
 # Temporary fix for a crash.... probably not the ideal solution, but I don't
 # have the time right now to investigate fully.
@@ -316,17 +319,14 @@ class Skin:
         else:
             settings = self.settings
 
+        if settings.special_menu.has_key(menu.item_types):
+            area = settings.special_menu[menu.item_types]
+        else:
+            area = settings.default_menu['default']
 
-        if hasattr(settings,'menu'):
-            # XXX FIXME
-            if settings.menu.has_key(menu.item_types):
-                area = settings.menu[menu.item_types]
-            else:
-                area = settings.menu['default']
-
-            if self.display_style['menu'] >=  len(area.style):
-                self.display_style['menu'] = 0
-            self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
+        if self.display_style['menu'] >=  len(area.style):
+            self.display_style['menu'] = 0
+        self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
         return 1
 
 
