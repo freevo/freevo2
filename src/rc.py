@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/24 12:22:37  dischi
+# move focus handling to rc for now
+#
 # Revision 1.36  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -147,6 +150,47 @@ def get_event(blocking=False):
 
 
 # --------------------------------------------------------------------------------
+# focus handling
+# FIXME: move somewere else
+# --------------------------------------------------------------------------------
+
+app_list = []
+
+def focused_app():
+    """
+    get current app
+    """
+    global app_list
+    if len(app_list):
+        return app_list[-1]
+    else:
+        return None
+
+def add_app(app):
+    """
+    set focus to app
+    """
+    global app_list
+    app_list.append(app)
+
+
+def remove_app(app):
+    """
+    remove app from list
+    """
+    global app_list
+    _times = app_list.count(app)
+    for _time in range(_times):
+        app_list.remove(app)
+    if _times and hasattr(focused_app(), 'event_context'):
+            _debug_('app is %s' % focused_app(),2)
+            _debug_('Setting context to %s' % focused_app().get_event_context(),2)
+            import rc
+            rc.set_context(focused_app().get_event_context())
+
+
+
+# --------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------
 # internal classes of this module
@@ -271,8 +315,8 @@ class Keyboard:
         """
         init the keyboard event handler
         """
-        import osd
-        self.callback = osd.get_singleton()._cb
+        import gui
+        self.callback = gui.get_keyboard().poll
 
 
     def poll(self, rc):
@@ -329,8 +373,8 @@ class EventHandler:
 
         try:
             self.inputs.append(Keyboard())
-        except:
-            pass
+        except Exception, e:
+            print e
 
         if use_netremote and config.ENABLE_NETWORK_REMOTE and \
                config.REMOTE_CONTROL_PORT:
