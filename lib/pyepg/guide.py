@@ -222,20 +222,20 @@ class Guide:
             if Unicode(old_prog['title']) == Unicode(title):
                 # program timeslot is unchanged, see if there's anything
                 # that we should update
-                if old_prog['subtitle'] != subtitle:
+                if Unicode(old_prog['subtitle']) != Unicode(subtitle):
                     log.debug('different subtitles: %s - %s' % \
                              (String(old_prog['subtitle']), String(subtitle)))
                     query = 'update programs set subtitle="%s" where id=%d'
                     self.sql_execute(query % (subtitle, old_prog.id))
                     self.sql_commit()
-                if old_prog['description'] != description:
+                if Unicode(old_prog['description']) != Unicode(description):
                     log.debug('different descs: %s - %s' % \
                              (String(old_prog['description']),
                               String(description)))
                     query = 'update programs set description="%s" where id=%d'
                     self.sql_execute(query % (description, old_prog.id))
                     self.sql_commit()
-                if old_prog['episode'] != episode:
+                if Unicode(old_prog['episode']) != Unicode(episode):
                     log.info('different episodes: %s - %s' % \
                              (String(old_prog['episode']), String(episode)))
                     query = 'update programs set episode="%s" where id=%d'
