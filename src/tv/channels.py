@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/23 05:40:35  gsbarbieri
+# BUGFIX: fix bug printing strings with 'chan', a unicode object.
+# i18n: Help translators job.
+#
 # Revision 1.15  2004/02/22 21:22:01  rshortt
 # Make sure chan is a string and add better error handling for clist and freq.
 #
@@ -139,7 +143,8 @@ class FreevoChannels:
                 self.chan_index = pos
 
         if not new_chan:
-            print String(_('ERROR: Cannot find tuner channel "%s" in the TV channel listing')) % chan
+            print String(_('ERROR')+': '+\
+                         (_('Cannot find tuner channel "%s" in the TV channel listing') % chan))
             return
 
         vg = self.getVideoGroup(new_chan)
@@ -167,21 +172,21 @@ class FreevoChannels:
         freq = config.FREQUENCY_TABLE.get(chan)
         if freq:
             if DEBUG:
-                print 'USING CUSTOM FREQUENCY: chan="%s", freq="%s"' % \
-                      (chan, freq)
+                print String('USING CUSTOM FREQUENCY: chan="%s", freq="%s"'% \
+                      (chan, freq))
         else:
             clist = tv.freq.CHANLIST.get(vg.tuner_chanlist)
             if clist:
                 freq = clist.get(chan)
             else:
-                print _('ERROR: Unable to get chanlist for %s') % vg.tuner_chanlist
+                print String(_('ERROR')+': '+(_('Unable to get channel list for %s.') % vg.tuner_chanlist))
                 return 0
             if not freq:
-                print _('ERROR: Unable to get frequency for %s') % chan
+                print String(_('ERROR')+': '+(_('Unable to get frequency for channel %s.') % chan))
                 return 0
             if DEBUG:
-                print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
-                      (chan, freq)
+                print String('USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
+                      (chan, freq))
 
         if app:
             if app_cmd:
@@ -207,7 +212,7 @@ class FreevoChannels:
                     vd.setfreq_old(freq)
                 vd.close()
             except:
-                print String(_('Failed to set freq for channel %s')) % chan
+                print String(_('Failed to set freq for channel %s.') % chan)
 
         return 0
 
