@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2002/09/25 18:43:07  dischi
+# Oops, I broke it
+#
 # Revision 1.68  2002/09/24 08:08:22  dischi
 # Removed last osd server stuff and some other cleanups
 #
@@ -246,6 +249,7 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxe
 OSD_DEFAULT_FONTNAME = 'skins/fonts/bluehigh.ttf'
 OSD_DEFAULT_FONTSIZE = 18
 
+OSD_SDL_EXEC_AFTER_STARTUP = ""
 
 # Exec a script after the osd startup. Matrox G400 users who wants to
 # use the framebuffer and have a PAL tv may set this to
