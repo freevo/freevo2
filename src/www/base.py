@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/01/13 18:40:47  rshortt
+# Add support for encrypted passwords, which is actually now required, you may
+# use the passwd helper to generate crypted passwords for local_conf.py.
+#
 # Revision 1.4  2005/01/13 17:02:16  rshortt
 # Reactivate authentication.
 # TODO:
@@ -59,9 +63,13 @@
 #
 # ----------------------------------------------------------------------- */
 
-import config
 import base64
-import os, sys, time
+import os
+import sys
+import time
+import crypt
+
+import config
 
 class Resource:
     def render(self, request):
@@ -103,9 +111,14 @@ class FreevoResource(Resource):
 
     
     def __auth_user(self, auth):
-        for username, password in config.WWW_USERS.items():
-            if '%s:%s' % (username, password) == auth:
-                return True
+        if not auth: return False
+
+        (username, password) = auth.split(':', 1)
+        cryptedpassword = config.WWW_USERS.get(username)
+
+        if cryptedpassword:
+            return crypt.crypt(password, cryptedpassword[:2]) == cryptedpassword
+
         return False
 
 
