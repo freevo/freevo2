@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/04/22 19:33:35  dischi
+# o Added TV has plugin name
+# o support for remove by name
+#
 # Revision 1.13  2003/04/21 18:39:43  dischi
 # cleanup
 #
@@ -141,7 +145,7 @@ class DaemonPlugin(Plugin):
 AUDIO_PLAYER = 'AUDIO_PLAYER'
 VIDEO_PLAYER = 'VIDEO_PLAYER'
 DVD_PLAYER   = 'DVD_PLAYER'
-
+TV           = 'TV'
 
 
 
@@ -166,7 +170,7 @@ def activate(name, type=None, level=0, args=None):
     return plugin_number
 
 
-def remove(number):
+def remove(id):
     """
     remove a plugin from the list
     """
@@ -176,11 +180,24 @@ def remove(number):
     if initialized:
         return
 
+    # remove by plugin id
+    if isinstance(id, int):
+        for p in all_plugins:
+            if p[4] == id:
+                all_plugins.remove(p)
+                return
+
+    # remove by name
+    r = [] 
     for p in all_plugins:
-        if p[4] == number:
-            all_plugins.remove(p)
-            return
-        
+        if p[0] == id:
+            r.append(p)
+
+    for p in r:
+        all_plugins.remove(p)
+
+    
+    
 def init():
     """
     load and init all the plugins
