@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/29 14:45:40  dischi
+# stat may also crash when file is a broken link
+#
 # Revision 1.8  2004/01/25 20:20:13  dischi
 # save on scan (stupid bug!)
 #
@@ -186,11 +189,11 @@ class Cache:
         
         objects = {}
         for filename in os.listdir(directory):
-            fullname  = os.path.join(directory, filename)
-            timestamp = os.stat(fullname)[stat.ST_MTIME]
-            key       = filename
-
             try:
+                fullname  = os.path.join(directory, filename)
+                timestamp = os.stat(fullname)[stat.ST_MTIME]
+                key       = filename
+
                 info = self.find(filename, directory, fullname)
             except FileNotFoundException:
                 info = self.create(fullname)
