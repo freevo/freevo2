@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/07/03 23:08:24  dischi
+# force refresh
+#
 # Revision 1.11  2003/07/03 21:58:40  dischi
 # fixed audiocd handling
 #
@@ -269,4 +272,7 @@ class PluginInterface(plugin.ItemPlugin):
         # go back in menustack
         for i in range(back):
             menuw.delete_menu()
+
+        if back == 0:
+            menuw.refresh()
         box.destroy()
