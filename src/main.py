@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2004/02/01 17:11:51  dischi
+# make it possible to load cachefiles on startup
+#
 # Revision 1.110  2004/01/25 14:54:31  dischi
 # save parent after skin change
 #
@@ -198,13 +201,13 @@ class Splashscreen(skin.Area):
     """
     A simple splash screen for osd startup
     """
-    def __init__(self):
+    def __init__(self, text):
         skin.Area.__init__(self, 'content')
 
         self.pos          = 0
         self.bar_border   = skin.Rectange(bgcolor=0xff000000L, size=2)
         self.bar_position = skin.Rectange(bgcolor=0xa0000000L)
-
+        self.text         = text
 
     def update_content(self):
         """
@@ -214,8 +217,7 @@ class Splashscreen(skin.Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=True)
 
-        self.write_text(_('Starting Freevo, please wait ...'),
-                        content.font, content, height=-1, align_h='center')
+        self.write_text(self.text, content.font, content, height=-1, align_h='center')
 
         pos = 0
         x0, x1 = content.x, content.x + content.width
@@ -372,10 +374,32 @@ try:
     skin.prepare()
 
     # Fire up splashscreen and load the plugins
-    splash = Splashscreen()
+    splash = Splashscreen(_('Starting Freevo, please wait ...'))
     skin.register('splashscreen', ('screen', splash))
     plugin.init(splash.progress)
     skin.delete('splashscreen')
+
+    # Fire up splashscreen and load the cache
+    if config.MEDIAINFO_USE_MEMORY == 2:
+        import util.mediainfo
+        cachefiles = []
+        for type in ('video', 'audio', 'image', 'games'):
+            if plugin.is_active(type):
+                n = 'config.%s_ITEMS' % type.upper()
+                x = eval(n)
+                for item in x:
+                    if os.path.isdir(item[1]):
+                        cachefiles += [ item[1] ] + util.get_subdirs_recursively(item[1])
+
+
+        cachefiles = util.unique(cachefiles)
+
+        splash = Splashscreen(_('Reading cache, please wait ...'))
+        skin.register('splashscreen', ('screen', splash))
+        for f in cachefiles:
+            splash.progress(int((float((cachefiles.index(f)+1)) / len(cachefiles)) * 100))
+            util.mediainfo.load_cache(f)
+        skin.delete('splashscreen')
 
     # prepare again, now that all plugins are loaded
     skin.prepare()
