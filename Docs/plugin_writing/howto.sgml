@@ -13,6 +13,7 @@
 <!ENTITY menuex1 SYSTEM "code/menu_Menu.py" CDATA linespecific>
 <!ENTITY menuex2 SYSTEM "code/menu_Item.py" CDATA linespecific>
 <!ENTITY menuex3 SYSTEM "code/menu_MenuItem.py" CDATA linespecific>
+<!ENTITY menuex4 SYSTEM "code/menu_fullexample.py" CDATA linespecific>
 ]>
 
 <book>
@@ -199,7 +200,11 @@
         <para>pushmenu -- used after constructing a menu, then typically a call to refresh to display the menu.</para>
         <para>refresh -- redraw the top item on the menu stack. It is usually called after a pushmenu call.</para>
         <para>delete_menu -- remove the currently displayed menu.</para>
-        <para><emphasis>Code Sample not written yet</emphasis></para>
+      </sect2>
+      <sect2>
+	<title>A full example to bring it all together</title>
+        <programlisting><inlinegraphic entityref="menuex4"></inlinegraphic>
+        </programlisting>
       </sect2>
     </sect1>
 
