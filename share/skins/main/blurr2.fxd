@@ -87,6 +87,10 @@
             <style text="text with tv info style (main)"/>
         </menu>
         
+        <menu type="tv program menu">
+          <style text="text with program info style"/>
+        </menu>
+
         <menuset label="video" inherits="normal text style">
             <screen layout="video screen"/>
         </menuset>
@@ -134,6 +138,12 @@
             <view visible="no"/>
         </menuset>
         
+        <menuset label="text with program info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv program info" x="50" y="100" width="700" height="230"/>
+            <view visible="no"/>
+        </menuset>
+
         
         <!-- ********************************************** -->
         <!-- LAYOUT DEFINITIONS -->
@@ -389,6 +399,53 @@
             </content>
         </layout>
         
+        <layout label="tv program info">
+            <content x="0" y="0" type="text" spacing="20" font="default">
+                <item type="default">
+                    <if expression="title">
+	                <text font="info value" mode="soft">Title: </text>
+                        <text font="info value" expression="title" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="sub_title">
+	                <text font="info value" mode="soft">Sub-Title: </text>
+                        <text font="info value" expression="sub_title" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="channel">
+	                <text font="info value" mode="soft">Channel: </text>
+                        <text font="info value" expression="channel" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="start">
+	                <text font="info value" mode="soft">Start: </text>
+                        <text font="info value" expression="start" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="stop">
+	                <text font="info value" mode="soft">Stop: </text>
+                        <text font="info value" expression="stop" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="desc">
+	                <text font="info value" mode="soft">Description: </text>
+                        <text font="info value" expression="desc" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="categories">
+	                <text font="info value" mode="soft">Categories: </text>
+                        <text font="info value" expression="categories" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="ratings">
+	                <text font="info value" mode="soft">Ratings: </text>
+                        <text font="info value" expression="ratings" mode="soft" />
+                        <newline/>
+                    </if>
+                </item>
+            </content>
+        </layout>
+
         
         <!-- listing area for image with images (preview) -->
         <layout label="image list">
