@@ -161,6 +161,7 @@ class OSD:
     def __init__(self, width=768, height=576):
 
         self.fontcache = []
+        self.stringcache = []
         self.bitmapcache = []
         
         self.default_fg_color = self.COL_BLACK
@@ -333,15 +334,8 @@ class OSD:
 
         if DEBUG: print 'FONT: %s %s' % (font, ptsize)
         
-        f = self._getfont(font, ptsize)
-
-        # Render string with anti-aliasing
-        #string = string[:50] # XXX TEST
-        if bgcolor == None:
-            ren = f.render(s, 1, self._sdlcol(fgcolor))
-        else:
-            ren = f.render(s, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
-
+        ren = self._renderstring(s, font, ptsize, fgcolor, bgcolor)
+        
         # Handle horizontal alignment
         w, h = ren.get_size()
         tx = x # Left align is default
@@ -353,6 +347,37 @@ class OSD:
         self.screen.blit(ren, (tx, y))
 
 
+    # Render a string to an SDL surface. Uses a cache for speedup.
+    def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
+
+        f = self._getfont(font, ptsize)
+
+        for i in range(len(self.stringcache)):
+            csurf, cstring, cfont, cfgcolor, cbgcolor = self.stringcache[i]
+            if (f == cfont and string == cstring and fgcolor == cfgcolor
+                and bgcolor == cbgcolor):
+                # Move to front of FIFO
+                del self.stringcache[i]
+                self.stringcache.append((csurf, cstring, cfont, cfgcolor, cbgcolor))
+                print 'STRING: Found "%s"' % string
+                return csurf
+
+        # Render string with anti-aliasing
+        if bgcolor == None:
+            surf = f.render(string, 1, self._sdlcol(fgcolor))
+        else:
+            surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
+
+        print 'STRING: missing "%s"' % string
+        
+        # Store the surface in the FIFO
+        self.stringcache.append((surf, string, f, fgcolor, bgcolor))
+        if len(self.stringcache) > 100:
+            del self.stringcache[0]
+
+        return surf
+
+        
     def popup_box(self, text):
         """
         Trying to make a standard popup/dialog box for various usages.
@@ -361,7 +386,7 @@ class OSD:
         Arguments: Text, the text to print.
         Returns:   None
         Todo:      Should be able to calculate size of box to draw.
-                   Maybe be able to set size manually aswell.
+                   Maybe be able to set size manually as well.
                    It'd look nice to have an icon drawn for some events
                    such as ejects.
         """
