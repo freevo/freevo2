@@ -177,13 +177,20 @@ def Unicode(string, encoding=None):
         try:
             return unicode(string, encoding)
         except UnicodeDecodeError:
-            try:
-                return unicode(string, CONF.default_encoding)
-            except UnicodeDecodeError:
-                return unicode(string, 'UTF-8')
-    elif string.__class__ != unicode:
-        return unicode(str(string), encoding)
-    return string
+            pass
+        try:
+            return unicode(string, CONF.default_encoding)
+        except UnicodeDecodeError:
+            pass
+        try:
+            return unicode(string, 'UTF-8')
+        except UnicodeDecodeError:
+            pass
+        return unicode(string, encoding, 'replace')
+
+    if string.__class__ == unicode:
+        return string
+    return Unicode(str(string), encoding)
 
 
 def String(string, encoding=None):
@@ -195,12 +202,12 @@ def String(string, encoding=None):
         encoding = CONF.encoding
     if string.__class__ == unicode:
         return string.encode(encoding, 'replace')
-    if string.__class__ != str:
-        try:
-            return str(string)
-        except:
-            return unicode(string).encode(encoding, 'replace')
-    return string
+    if string.__class__ == str:
+        return Unicode(string, encoding).encode(encoding, 'replace')
+    try:
+        return str(string)
+    except:
+        return unicode(string).encode(encoding, 'replace')
 
 
 # add Unicode and String to the global scope
