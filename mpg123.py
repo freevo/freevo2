@@ -113,9 +113,9 @@ class MPG123:
             rc.app = None
             menuwidget.refresh()
         elif event == rc.FFWD:
-            self.thread.app.write('JUMP +100')
+            self.thread.app.write('JUMP +200')
         elif event == rc.REW:
-            self.thread.app.write('JUMP -100')
+            self.thread.app.write('JUMP -200')
         elif event == rc.LEFT:
             self.stop()
             # Go to the previous song in the list
@@ -194,7 +194,7 @@ class MPG123_Thread(threading.Thread):
 # Interpret the text output from mpg123 to determine whether it has reached the
 # end of the file.
 #
-old_done = 0
+lastupdate = 0.0
 def mpg123_eof(out):
     last_line = out
 
@@ -208,16 +208,15 @@ def mpg123_eof(out):
         remain = elems[4]
         total = float(elapsed) + float(remain)
         done = int(round((float(elapsed) / total) * 1000))
-        global old_done
-        if done != old_done:
-            old_done = done
+        global lastupdate
+        
+        if time.time() > (lastupdate + 0.5):
+            lastupdate = time.time()
             el = int(round((float(elapsed))))
             rem = int(round((float(remain))))
-            osd.drawbox(33, 240, 250, 241, width = 30,
-                        color = osd.default_bg_color)
-            osd.drawbox(33, 280, 250, 281, width = 30,
-                        color = osd.default_bg_color)
-            osd.drawbox(33, 320, 250, 321, width = 30,
+
+            # Clear the background
+            osd.drawbox(3, 230, 300, 355, width = -1,
                         color = osd.default_bg_color)
             osd.drawstring('Elapsed: %s   ' % el, 30, 250,
                            osd.default_fg_color)
@@ -225,12 +224,13 @@ def mpg123_eof(out):
                            osd.default_fg_color)
             osd.drawstring('Done: %5.1f%%   ' % (done / 10.0), 30, 330,
                            osd.default_fg_color)
+
+            # Draw the progress bar
             osd.drawbox(33, 370, 635, 390, width = 3)
-            osd.drawbox(43, 380, 625, 380, width = 9, color = osd.default_bg_color)
+            osd.drawbox(34, 371, 634, 389, width = -1, color = osd.default_bg_color)
             pixels = int(round((done / 10.0) * 6.0))
-            for i in range(19):
-                y = 371 + i
-                osd.drawline(34, y, 34 + pixels, y, color = 0x038D11)
+            osd.drawbox(34, 371, 34 + pixels, 389, width = -1, color = 0x038D11)
+            
             osd.update()
         retval = 0
     else:
