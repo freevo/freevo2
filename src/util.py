@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/08/23 18:33:29  dischi
+# add default parameter to getimage
+#
 # Revision 1.44  2003/08/23 15:15:21  dischi
 # add cover searcher
 #
@@ -341,12 +344,12 @@ def gzopen(file):
 
 FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
 
-def getimage(base):
+def getimage(base, default=None):
     if os.path.isfile(base+'.png'):
         return base+'.png'
     if os.path.isfile(base+'.jpg'):
         return base+'.jpg'
-    return None
+    return default
 
 
 def getname(file):
