@@ -72,8 +72,9 @@ class InfoArea(Area):
         Update the information area.
         """
         if not self.settings.changed and self.infoitem == self.last_item:
+            self.canvas.rebuild()
             return
-
+        
         # get key of the items based on item attributes
         key = 'default'
         if hasattr( self.infoitem, 'info_type'):
