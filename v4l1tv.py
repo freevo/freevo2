@@ -91,11 +91,11 @@ class V4L1TV:
 
 
     def TunerNextChannel(self):
-        self.tuner_chidx = (self.tuner_chidx+1) % len(config.ch_idx)
+        self.tuner_chidx = (self.tuner_chidx+1) % len(config.TV_CHANNELS)
 
 
     def TunerPrevChannel(self):
-        self.tuner_chidx = (self.tuner_chidx-1) % len(config.ch_idx)
+        self.tuner_chidx = (self.tuner_chidx-1) % len(config.TV_CHANNELS)
 
         
     def Play(self, mode, tuner_channel=None):
