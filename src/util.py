@@ -10,6 +10,31 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/09/01 14:01:20  outlyer
+# Added automatic XMLTV channel list code; the idea is that you can avoid
+# editing the TV_CHANNELS thing yourself, if your xmltv grabber outputs
+# properly formatted channel listings.
+#
+# If this doesn't work, you can always fall back to adding it manually.
+#
+# To use it, you need this in your local_conf.py
+# ---
+# from util import getXMLTVChannels
+# TV_CHANNELS = getXMLTVChannels(XMLTV_FILE)
+# ---
+#
+# instead of
+#
+# TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
+#                ...
+#               ]
+#
+#
+# I don't know if this will work for everyone, but it's working nicely for me,
+# and I know it's a constant setup difficulty, so please test it. If you don't
+# want to use it, don't do anything, it will not be used unless you add it
+# to your config.
+#
 # Revision 1.46  2003/08/28 18:09:39  dischi
 # use pickle.HIGHEST_PROTOCOL for python 2.3
 #
@@ -638,3 +663,52 @@ class SynchronizedObject:
             return self.__methods[name]
         except KeyError:
             return getattr(self.__obj, name)
+
+def sortchannels(list, key):
+    # This should be more generic, but I couldn't get it
+    # to sort properly without specifying the nested array
+    # index for the tunerid and forcing 'int'
+    nlist = map(lambda x, key=key: (int(x[key][1][0]), x), list)
+    nlist.sort()
+    return map(lambda (key, x): x, nlist)
+
+
+def getXMLTVChannels(file):
+    import xmltv
+    import sys,os
+    import cPickle as pickle
+
+
+    path = config.FREEVO_CACHEDIR
+    pfile = 'xmltv_channels.pickle'
+
+    pname = os.path.join(path,pfile)
+
+    if os.path.isfile(pname) and (os.path.getmtime(pname) >
+                                    os.path.getmtime(file)):
+        fd = open(pname,'r')
+        chanlist = pickle.load(fd)
+        return chanlist
+
+    xmltv_channels = xmltv.read_channels(open(file))
+    xmltv_channels = sortchannels(xmltv_channels,'display-name')
+
+
+    chanlist = []
+
+    for a in xmltv_channels:
+        if (a['display-name'][1][0][0].isdigit()):
+            display_name = a['display-name'][0][0]
+            tunerid = a['display-name'][1][0]
+        else:
+            display_name = a['display-name'][1][0]
+            tunerid = a['display-name'][0][0]
+        id = a['id']
+
+        chanlist += [(id,display_name,int(tunerid))]
+
+    pickle.dump(chanlist, open(pname,'w'),PICKLE_PROTOCOL)
+
+    return chanlist
+         
+
