@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/11/13 15:56:13  dischi
+# do not import mediainfo in util.__init__
+#
 # Revision 1.40  2004/09/07 18:57:10  dischi
 # use new thumbnail util
 #
@@ -66,7 +69,8 @@ import stat
 import time
 import copy
 
-from util import mediainfo, thumbnail
+import util.mediainfo as mediainfo
+import util.thumbnail as thumbnail
 
 import plugin
 import directory

@@ -143,6 +143,7 @@ import eventhandler
 import childapp
 import gui
 import util
+import util.mediainfo
 import menu
 import plugin
 

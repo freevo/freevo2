@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2004/11/13 15:56:12  dischi
+# do not import mediainfo in util.__init__
+#
 # Revision 1.83  2004/11/01 20:14:14  dischi
 # fix debug
 #
@@ -77,7 +80,8 @@ import util
 import gui
 
 from sysconfig import Unicode
-from util import mediainfo, vfs
+from util import vfs
+import util.mediainfo as mediainfo
 
 class FileInformation:
     """

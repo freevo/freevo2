@@ -38,8 +38,3 @@ from fileops import *
 from weakref import *
 import objectcache
 import fxdparser
-
-# FIXME: remove this bad hack
-import sys as _sys
-if _sys.argv[0].find('setup.py') == -1:
-    import mediainfo
