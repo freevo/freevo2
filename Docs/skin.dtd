@@ -1,0 +1,244 @@
+<!-- freevo -->
+<!ELEMENT freevo ( skin ) >
+
+<!-- skin -->
+<!ELEMENT skin ( color | font | iconset | image | layout | main | menu | menuset | player | popup | setvar | tv )* >
+<!ATTLIST skin 
+            geometry NMTOKEN #REQUIRED
+            include NMTOKEN #IMPLIED >
+
+<!-- color -->
+<!ELEMENT color EMPTY >
+<!ATTLIST color 
+            label CDATA #REQUIRED 
+            value NMTOKEN #REQUIRED >
+
+<!-- font -->
+<!ELEMENT font ( shadow? ) >
+<!ATTLIST font 
+            label CDATA #REQUIRED 
+            color CDATA #IMPLIED 
+            name NMTOKEN #IMPLIED 
+            size NMTOKEN #IMPLIED >
+
+<!-- shadow -->
+<!ELEMENT shadow EMPTY >
+<!ATTLIST shadow 
+                color CDATA #REQUIRED 
+                visible NMTOKEN #REQUIRED 
+                x NMTOKEN #REQUIRED 
+                y NMTOKEN #REQUIRED >
+
+<!-- iconset -->
+<!ELEMENT iconset EMPTY >
+<!ATTLIST iconset 
+            theme NMTOKEN #REQUIRED >
+
+<!-- image -->
+<!ELEMENT image EMPTY >
+<!ATTLIST image 
+            label NMTOKEN #IMPLIED 
+            image NMTOKEN #IMPLIED 
+            x CDATA #IMPLIED 
+            y CDATA #IMPLIED 
+            width NMTOKEN #IMPLIED 
+            height NMTOKEN #IMPLIED 
+            visible CDATA #IMPLIED 
+            filename CDATA #IMPLIED >
+
+<!-- layout -->
+<!ELEMENT layout ( background | content )* >
+<!ATTLIST layout 
+            label CDATA #REQUIRED >
+
+<!-- background -->
+<!ELEMENT background ( image | rectangle )* >
+
+<!-- image already defined -->
+
+<!-- rectangle -->
+<!ELEMENT rectangle EMPTY >
+<!ATTLIST rectangle 
+                bgcolor CDATA #IMPLIED
+                color CDATA #IMPLIED 
+                height CDATA #IMPLIED 
+                radius NMTOKEN #IMPLIED 
+                size NMTOKEN #IMPLIED
+                width CDATA #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+
+<!-- content -->
+<!ELEMENT content ( item* ) >
+<!ATTLIST content 
+                align NMTOKEN #IMPLIED
+                color CDATA #IMPLIED
+                font CDATA #IMPLIED 
+                height NMTOKEN #IMPLIED
+                hours_per_page NMTOKEN #IMPLIED
+                spacing NMTOKEN #IMPLIED 
+                type CDATA #IMPLIED 
+                valign NMTOKEN #IMPLIED 
+                width NMTOKEN #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+<!-- item -->
+<!ELEMENT item ( #PCDATA | goto_pos | if | newline | rectangle | text )* >
+<!ATTLIST item 
+                label NMTOKEN #IMPLIED 
+                align NMTOKEN #IMPLIED 
+                font CDATA #IMPLIED 
+                height NMTOKEN #IMPLIED 
+                icon CDATA #IMPLIED 
+                image CDATA #IMPLIED 
+                name CDATA #IMPLIED 
+                outicon CDATA #IMPLIED
+                type CDATA #IMPLIED
+                valign NMTOKEN #IMPLIED 
+                visible NMTOKEN #IMPLIED 
+                width NMTOKEN #IMPLIED >
+
+<!-- goto_pos -->
+<!ELEMENT goto_pos EMPTY >
+<!ATTLIST goto_pos 
+                mode NMTOKEN #REQUIRED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+<!-- if -->
+<!ELEMENT if ( goto_pos | if | newline | text )* >
+<!ATTLIST if 
+        expression CDATA #REQUIRED >
+
+<!-- goto_pos already defined -->
+<!-- if already defined -->
+
+<!-- newline -->
+<!ELEMENT newline EMPTY >
+
+<!-- text -->
+<!ELEMENT text ( #PCDATA ) >
+<!ATTLIST text 
+                align NMTOKEN #IMPLIED 
+                expression CDATA #IMPLIED 
+                font CDATA #REQUIRED 
+                height NMTOKEN #IMPLIED 
+                mode NMTOKEN #IMPLIED 
+                valign NMTOKEN #IMPLIED 
+                width NMTOKEN #IMPLIED >
+
+<!-- main -->
+<!ELEMENT main ( item+ ) >
+
+<!-- item already defined -->
+
+<!-- menu -->
+<!ELEMENT menu ( style+ ) >
+<!ATTLIST menu 
+                type CDATA #REQUIRED >
+
+<!-- style -->
+<!ELEMENT style EMPTY >
+<!ATTLIST style 
+                text CDATA #IMPLIED
+                image CDATA #IMPLIED >
+
+<!-- menuset -->
+<!ELEMENT menuset ( info | listing | screen | subtitle | title | view )* >
+<!ATTLIST menuset 
+                label CDATA #REQUIRED 
+                inherits CDATA #IMPLIED >
+
+<!-- info -->
+<!ELEMENT info EMPTY >
+<!ATTLIST info 
+                height NMTOKEN #IMPLIED 
+                layout CDATA #IMPLIED 
+                visible NMTOKEN #IMPLIED 
+                width NMTOKEN #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+
+<!-- listing -->
+<!ELEMENT listing ( image* | area ) >
+<!ATTLIST listing 
+                height NMTOKEN #IMPLIED 
+                layout CDATA #IMPLIED 
+                visible NMTOKEN #IMPLIED
+                width NMTOKEN #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+<!-- image already defined -->
+
+<!-- area -->
+<!ELEMENT area EMPTY >
+<!ATTLIST area
+                x NMTOKEN #REQUIRED
+                y NMTOKEN #REQUIRED
+                width NMTOKEN #REQUIRED
+                height NMTOKEN #REQUIRED >
+
+<!-- screen -->
+<!ELEMENT screen ( area? ) >
+<!ATTLIST screen 
+                height NMTOKEN #IMPLIED 
+                layout CDATA #REQUIRED 
+                visible NMTOKEN #IMPLIED
+                width NMTOKEN #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+<!-- area already defined -->
+                
+<!-- subtitle -->
+<!ELEMENT subtitle EMPTY >
+<!ATTLIST subtitle 
+                height NMTOKEN #REQUIRED 
+                layout NMTOKEN #REQUIRED 
+                width NMTOKEN #REQUIRED 
+                x NMTOKEN #REQUIRED 
+                y NMTOKEN #REQUIRED >
+
+<!-- title -->
+<!ELEMENT title EMPTY >
+<!ATTLIST title 
+                height NMTOKEN #IMPLIED 
+                layout CDATA #IMPLIED 
+                visible CDATA #IMPLIED
+                width NMTOKEN #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+<!-- view -->
+<!ELEMENT view EMPTY >
+<!ATTLIST view 
+                height NMTOKEN #IMPLIED 
+                layout CDATA #IMPLIED 
+                visible NMTOKEN #IMPLIED 
+                width NMTOKEN #IMPLIED 
+                x NMTOKEN #IMPLIED 
+                y NMTOKEN #IMPLIED >
+
+<!-- player -->
+<!ELEMENT player ( screen, view, info, title ) >
+
+<!-- popup -->
+<!ELEMENT popup EMPTY >
+<!ATTLIST popup 
+                layout NMTOKEN #REQUIRED
+                type NMTOKEN #REQUIRED >
+
+<!-- setvar -->
+<!ELEMENT setvar EMPTY >
+<!ATTLIST setvar 
+                name NMTOKEN #REQUIRED 
+                val NMTOKEN #REQUIRED >
+
+<!-- tv -->
+<!ELEMENT tv ( style+ ) >
+
+<!-- style already defined -->
