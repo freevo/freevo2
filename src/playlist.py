@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/01/04 10:20:05  dischi
+# fix missing DIRECTORY_USE_MEDIAID_TAG_NAMES for all kinds of parents
+#
 # Revision 1.51  2004/01/04 03:52:27  outlyer
 # Fix a crash; a playlist file (m3u/pls/etc.) doesn't have this property,
 # which appears to be assigned to directory items.
@@ -105,7 +108,6 @@ class Playlist(Item):
         self.type     = 'playlist'
         self.menuw    = None
         self.name     = name
-        self.DIRECTORY_USE_MEDIAID_TAG_NAMES = config.DIRECTORY_USE_MEDIAID_TAG_NAMES
 
         if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
             self.name = util.getname(playlist)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/01/04 10:20:05  dischi
+# fix missing DIRECTORY_USE_MEDIAID_TAG_NAMES for all kinds of parents
+#
 # Revision 1.41  2004/01/01 16:47:31  dischi
 # do not replace name with None
 #
@@ -159,7 +162,8 @@ class Item:
 
         self.eventhandler_plugins = []
 
-        if info and parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(self.info, 'title'):
+        if info and parent and hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
+               parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(self.info, 'title'):
             self.name = self.info['title']
         
         if parent:
@@ -263,9 +267,11 @@ class Item:
             info = mmpython.parse(mmpython_url)
             if info:
                 self.info = info
-                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(info, 'title'):
-                    if info['title']:
-                        self.name = info['title']
+                if self.parent and \
+                       hasattr(self.parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
+                       self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
+                       hasattr(info, 'title'):
+                    self.name = info['title']
         
         if not self.name:
             if self.filename:
