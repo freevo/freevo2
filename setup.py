@@ -8,6 +8,7 @@ __revision__ = "$Id$"
 # Python distutils stuff
 import os
 import sys
+import time
 
 # Freevo distutils stuff
 sys.path.append('./src')
@@ -19,13 +20,15 @@ from distutils import core
 check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
             ('pygame', 'http://www.pygame.org'),
             ('Image', 'http://www.pythonware.com/products/pil/'),
-            ('twisted', 'http://www.twistedmatrix.com/')))
+            ('mbus', 'http://www.mbus.org/')))
 
 
-print 'Sorry, the current version of Freevo is for testing only, you'
-print 'can\'t install it right now. Start Freevo from the source directory'
-print 'to test the current cvs snapshot.'
-sys.exit(0)
+print 'WARNING, CVS is unstable right now, press C-c to quit'
+print 'If you really want to install freevo, make sure you also install'
+print 'the libs in the lib dir'
+print
+print 'Waiting 5 seconds'
+time.sleep(5)
 
 class Runtime(core.Command):
 
