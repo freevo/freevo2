@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# main1_image.py - skin Image support functions
+# main1_video.py - skin Video support functions
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,21 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.5  2003/02/17 05:40:45  gsbarbieri
+# Revision 1.1  2003/02/17 05:40:45  gsbarbieri
 # main1_image: now the image_{width,height} are not hardcoded anymore
 #
 # main1_video, skin_main1: support Video Browser (extended menu)
-#
-# Revision 1.4  2003/02/15 20:46:49  dischi
-# getFormatedImage now returns height and width, too. Also removed
-# the rotate-by-guessing "feature", it's a bug.
-#
-# Revision 1.3  2003/02/12 10:38:51  dischi
-# Added a patch to make the current menu system work with the new
-# main1_image.py to have an extended menu for images
-#
-# Revision 1.2  2003/02/09 07:04:22  krister
-# Some fixes for broken pics, and pics that SDL cannot handle.
 #
 #
 # -----------------------------------------------------------------------
@@ -72,9 +61,9 @@ TRUE = 1
 FALSE = 0
 
 
-class Skin_Image:
+class Skin_Video:
 
-    imagebrowser_expand = 0
+    expand = 0
 
     def __call__(self, menuw, settings):
         menu = menuw.menustack[-1]
@@ -96,43 +85,33 @@ class Skin_Image:
         InitScreen(settings, (settings.background.mask, ))
 
         # Show title
-        DrawTextFramed('Image Browser', settings.header)
+        DrawTextFramed('Video Browser', settings.header)
 
-    def getFormatedImage(self, filename, w, h, i_orientation=None):
+    def getFormatedVideo(self, filename, w, h):
         image = osd.loadbitmap('thumb://%s' % filename)
 
         if not image:
-            return None, 0, 0
+            return None
         
         i_w, i_h = image.get_size()
 
         # rotate:
-        # if h > w:
-        #    orientation='vertical'
-        # else:
-        #    orientation='horizontal'
+        if h > w:
+            orientation='vertical'
+        else:
+            orientation='horizontal'
 
         rotation = 0
-        if i_orientation:
-            if i_orientation == 'right_top':
-                rotation=-90.0
-            elif i_orientation == 'right_bottom':
-                rotation=-180.0
-            elif i_orientation == 'left_top':
-                rotation=0
-            elif i_orientation == 'left_bottom':
-                rotation=-270.0
-        # else:
-        #     if i_h > i_w:
-        #         i_orientation='vertical'
-        #     else:
-        #         i_orientation='horizontal'
-        # 
-        #     if orientation != i_orientation:
-        #         rotation=90.0
+        if i_h > i_w:
+            i_orientation='vertical'
+        else:
+            i_orientation='horizontal'
+            
+        if orientation != i_orientation:
+            rotation=90.0
 
         if rotation != 0:
-            image = osd.zoomsurface(image,rotation=rotation)
+            video = osd.zoomsurface(image,rotation=rotation)
             i_w, i_h = image.get_size()
 
         # scale:
@@ -142,14 +121,15 @@ class Skin_Image:
         scale = min(scale_x, scale_y)
         
         image = osd.zoomsurface(image,scale)
-        return image, int(i_w*scale), int(i_h*scale)
+    
+        return image
 
 
     def getExpand(self, settings):
-        return self.imagebrowser_expand
+        return self.expand
 
     def setExpand(self, expand, settings):
-        self.imagebrowser_expand = expand
+        self.expand = expand
 
     def View(self, item, settings):
         val = settings.view
@@ -159,18 +139,18 @@ class Skin_Image:
 
         if item:
             orientation = None
-            if item.type == 'image':
-                filename = item.filename
-                if 'Orientation' in item.binsexif:
-                    orientation = item.binsexif['Orientation']
+            if item.type == 'video':
+                filename = item.image
+                if not filename:
+                    filename = val.img['default']
             elif item.type == 'dir':
                 filename = val.img['dir']
             elif item.type == 'playlist':
                 filename = val.img['playlist']
             
-            preview = self.getFormatedImage(filename, val.width - 2*val.spacing,
-                                            val.height - 2*val.spacing,
-                                            orientation)[0]
+            preview = self.getFormatedVideo(filename,
+                                            val.width - 2*val.spacing,
+                                            val.height - 2*val.spacing)
             if not preview:
                 return
             
@@ -194,16 +174,30 @@ class Skin_Image:
             w = val.width - val.spacing
             h = str_h
             
-            if item.type == 'image':
-                DrawTextFramed('Image: %s' %  item.name, val, x, y, w, h)
+            if item.type == 'video':
+                DrawTextFramed('Video: %s' % item.name, val, x, y, w, h)
                 y += str_h
-                if u'title' in item.binsdesc:
-                    DrawTextFramed('Title: %s' %  item.binsdesc['title'], val, x, y, w, h)
-                    y += str_h
-                if u'description' in item.binsdesc:
-                    DrawTextFramed('Description: %s' % item.binsdesc['description'],
-                                   val, x, y, w, h)
-                    y += str_h
+                DrawTextFramed('File: %s' % item.filename, val, x, y, w, h)
+                y += str_h
+                
+                if item.available_audio_tracks:
+                    text = 'Audio: '
+                    for audio in item.available_audio_tracks:
+                        if audio == item.selected_audio:
+                            audio = '[%s]' % audio
+                        text += audio
+                    DrawTextFramed(text, val, x, y, w, h)
+                    y+=str_h                
+
+                if item.available_subtitles:
+                    text = 'Subtitles: '
+                    for subtitle in item.available_subtitles:
+                        if subtitle == item.selected_subtitle:
+                            subtitle = '[%s]' % subtitle
+                        text += subtitle
+                    DrawTextFramed(text, val, x, y, w, h)
+                    y+=str_h                
+                    
                                 
             elif item.type == 'dir':
                 DrawTextFramed('Folder: %s' %  item.name[1:-1], val, x, y, w, h)
@@ -214,24 +208,24 @@ class Skin_Image:
             elif item.type == 'playlist':
                 DrawTextFramed('Slideshow: %s' %  item.name, val, x, y, w, h)
                 y += str_h
-                DrawTextFramed('There are %d images in this slideshow' %
+                DrawTextFramed('There are %d videos in this playlist' %
                                len(item.playlist), val, x, y, w, h)
                 
 
 
     def getCols(self, settings):
         val = settings.listing
-        image_height = val.preview_height
-        image_width = val.preview_width
-
-        items = math.floor(float(val.width - val.spacing) / ( image_width + val.spacing ))
+        video_width = val.preview_width
+        video_height = val.preview_height
+        
+        items = math.floor(float(val.width - val.spacing) / ( video_width + val.spacing ))
         return int(items)
 
 
     def getRows(self, settings):
         val = settings.listing
-        image_height = val.preview_height
-        image_width = val.preview_width
+        video_width = val.preview_width
+        video_height = val.preview_height
 
         str_w_selection, str_h_selection = \
                          osd.stringsize('Ajg', val.selection.font, val.selection.size)
@@ -241,7 +235,7 @@ class Skin_Image:
 
         
         items = math.floor(float(val.height - val.spacing) / \
-                           ( image_height + str_h + val.spacing ))
+                           ( video_height + str_h + val.spacing ))
         return int(items)
 
     def EmptyDir(self, settings):
@@ -277,13 +271,13 @@ class Skin_Image:
             conf_w = val.expand.width
             conf_h = val.expand.height
 
-        image_height = val.preview_height
-        image_width = val.preview_width
+        video_width = val.preview_width
+        video_height = val.preview_height
 
-        dir_preview = self.getFormatedImage(val.img['dir'],
-                                                      image_width, image_height)[0]
-        pl_preview = self.getFormatedImage(val.img['playlist'],
-                                                     image_width, image_height)[0]
+        dir_preview = self.getFormatedVideo(val.img['dir'],
+                                                      video_width, video_height)
+        pl_preview = self.getFormatedVideo(val.img['playlist'],
+                                                     video_width, video_height)
 
         str_w_selection, str_h_selection = \
                          osd.stringsize('Ajg', val.selection.font, val.selection.size)
@@ -295,8 +289,8 @@ class Skin_Image:
         n_cols = self.getCols(settings)
         n_rows = self.getRows(settings)
 
-        spacing_x = int((conf_w - ( image_width * n_cols )) / (n_cols+1))
-        spacing_y = int((conf_h - ( (image_height + str_h) * n_rows )) / (n_rows+1))
+        spacing_x = int((conf_w - ( video_width * n_cols )) / (n_cols+1))
+        spacing_y = int((conf_h - ( (video_height + str_h) * n_rows )) / (n_rows+1))
         x0 = conf_x + spacing_x
         y0 = conf_y + spacing_y
 
@@ -316,13 +310,11 @@ class Skin_Image:
                 preview = dir_preview
                 text = i.name
 
-            elif i.type == 'image':
-                orientation = None
-                if 'Orientation' in i.binsexif:
-                    orientation = i.binsexif['Orientation']
-                        
-                preview = self.getFormatedImage(i.filename, image_width,
-                                                image_height, orientation)[0]
+            elif i.type == 'video':
+                filename = i.image
+                if not filename:
+                    filename = val.img['default']
+                preview = self.getFormatedVideo(filename, video_width, video_height)
                 text = i.name
 
             elif i.type == 'playlist':
@@ -335,24 +327,24 @@ class Skin_Image:
                 cur_val = val.selection
                 pad = val.spacing
                 drawroundbox(x0 - pad, y0 - pad,
-                             x0 + image_width + pad, y0 + image_height + str_h + pad,
+                             x0 + video_width + pad, y0 + video_height + str_h + pad,
                              cur_val.bgcolor, 1, cur_val.border_color, radius=cur_val.radius)
                     
 
             if preview:
                 i_w, i_h = preview.get_size()
-                cx = x0 + (image_width - i_w) / 2
-                ch = y0 + (image_height - i_h) /2
+                cx = x0 + (video_width - i_w) / 2
+                ch = y0 + (video_height - i_h) /2
                 osd.drawsurface(preview, cx, ch)
             if text:
-                DrawTextFramed(text, cur_val, x0, y0 + image_height, image_width, str_h)
+                DrawTextFramed(text, cur_val, x0, y0 + video_height, video_width, str_h)
                     
-            x0 = x0 + image_width + spacing_x
+            x0 = x0 + video_width + spacing_x
 
             item_pos += 1
             if item_pos >= cols:
                 item_pos = 0
-                y0 = y0 + image_height + str_h + spacing_y
+                y0 = y0 + video_height + str_h + spacing_y
                 x0 = conf_x + spacing_x
 
 

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/02/17 05:40:45  gsbarbieri
+# main1_image: now the image_{width,height} are not hardcoded anymore
+#
+# main1_video, skin_main1: support Video Browser (extended menu)
+#
 # Revision 1.78  2003/02/15 20:47:50  dischi
 # Use getFormatedImage from main1_image to speed up the display for
 # image thumbnails
@@ -128,6 +133,9 @@ import main1_tv
 # Image browser support
 import main1_image
 
+# Video browser support
+import main1_video
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -176,6 +184,7 @@ class Skin:
     def __init__(self):
         self.tv = main1_tv.Skin_TV()
         self.image = main1_image.Skin_Image()
+        self.video = main1_video.Skin_Video()
         self.extended_menu = FALSE
         pass
 
