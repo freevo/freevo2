@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/08/23 18:34:38  dischi
+# do not use info[title] when parent has USE_MEDIAID_TAG_NAMES = 0
+#
 # Revision 1.23  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -62,13 +65,21 @@ class Item:
         else:
             self.info = info
 
-        # name in menu
+        use_info_title = 1
         try:
-            self.name = info['title']
+            use_info_title = parent.USE_MEDIAID_TAG_NAMES
+        except:
+            pass
+        
+        # name in menu
+        self.name = None                
+        try:
+            if use_info_title:
+                self.name = info['title']
             
         except (TypeError, AttributeError, KeyError):
-            self.name = None                
-            
+            pass
+        
         # possible variables for an item.
         # some or only needed for video or image or audio
         # these variables are copied by the copy function
