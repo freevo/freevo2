@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/02/23 08:13:54  gsbarbieri
+# i18n: Help translators job.
+#
 # Revision 1.41  2004/01/24 18:57:14  dischi
 # rotation is now stored in mediainfo
 #
@@ -384,8 +387,8 @@ class ImageViewer(GUIObject):
 
 	    # Here we set up the tags that we want to put in the display
 	    # Using the following fields
-            tags_check = [[_('Title: '),      'name'],
-                          [_('Description: '),'description']
+            tags_check = [[_('Title')+': ',      'name'],
+                          [_('Description')+': ','description']
                           ]
 
 
@@ -394,12 +397,12 @@ class ImageViewer(GUIObject):
            # This is where we add a caption.  Only if playlist is empty
 	   # create an array with Exif tags as above
 	   osdstring = []
-           tags_check = [ [_('Title: '),   'name'],
-                          [_('Date: ') ,   'date'],
+           tags_check = [ [_('Title')+': ',   'name'],
+                          [_('Date')+': ' ,   'date'],
 	                  ['W:',           'width'],
 			  ['H:',           'height'],
-			  [_('Model:'),    'hardware'],
-			  [_('Software:'), 'software']
+			  [_('Model')+': ',    'hardware'],
+			  [_('Software')+': ', 'software']
 			 ]
 
            # FIXME: add this informations to mmpython:
