@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/12/22 12:23:30  dischi
+# Added deinterlacing in the config menu
+#
 # Revision 1.8  2002/12/21 17:26:52  dischi
 # Added dfbmga support. This includes configure option, some special
 # settings for mplayer and extra overscan variables
@@ -339,6 +342,32 @@ class MPlayer:
             
 # ======================================================================
 
+class MPlayerParser:
+    """
+    class to parse the mplayer output and store some informations
+    in the videoitem
+    """
+    
+    def __init__(self, item):
+        self.item = item
+        self.RE_AUDIO = re.compile("^\[open\] audio stream: [0-9] audio format:"+\
+                                   "(.*)aid: ([0-9]*)").match
+        self.RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
+                                      "([a-z][a-z])").match
+        self.RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
+
+
+    def parse(self, str):
+        m = self.RE_AUDIO(str)
+        if m: self.item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
+
+        m = self.RE_SUBTITLE(str)
+        if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
+
+        m = self.RE_CHAPTER(str)
+        if m: self.item.available_chapters = int(m.group(1))
+
+        
 
 class MPlayerApp(childapp.ChildApp):
     """
@@ -347,11 +376,7 @@ class MPlayerApp(childapp.ChildApp):
 
     def __init__(self, app, item):
         self.item = item
-        self.RE_AUDIO = re.compile("^\[open\] audio stream: [0-9] audio format:"+\
-                                   "(.*)aid: ([0-9]*)").match
-        self.RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
-                                      "([a-z][a-z])").match
-        self.RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
+        self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)
 
 
@@ -368,20 +393,6 @@ class MPlayerApp(childapp.ChildApp):
 
 
 
-    def parse(self, str):
-        m = self.RE_AUDIO(str)
-        if m:
-            self.item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
-
-        m = self.RE_SUBTITLE(str)
-        if m:
-            self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
-
-        m = self.RE_CHAPTER(str)
-        if m:
-            self.item.available_chapters = int(m.group(1))
-        
-
     def stdout_cb(self, str):
 
         if config.MPLAYER_DEBUG:
@@ -394,7 +405,7 @@ class MPlayerApp(childapp.ChildApp):
 
         # this is the first start of the movie, parse infos
         elif not self.item.elapsed:
-            self.parse(str)
+            self.parser.parse(str)
 
 
     def stderr_cb(self, str):

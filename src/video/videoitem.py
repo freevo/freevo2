@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/12/22 12:23:30  dischi
+# Added deinterlacing in the config menu
+#
 # Revision 1.6  2002/12/12 11:45:02  dischi
 # Moved all icons to skins/icons
 #
@@ -134,7 +137,7 @@ class VideoItem(Item):
         self.selected_subtitle = None
         self.selected_audio    = None
         self.num_titles        = 0
-
+        self.deinterlace       = 0
 
     def copy(self, obj):
         """
@@ -160,7 +163,7 @@ class VideoItem(Item):
         """
         return a list of possible actions on this item.
         """
-        items = [ (self.play, 'Play') ]
+        items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
 
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
@@ -198,6 +201,9 @@ class VideoItem(Item):
         if arg:
             mplayer_options += ' %s' % arg
 
+        if self.deinterlace:
+            mplayer_options += ' -vop pp=fd'
+            
         self.video_player.play(self.current_file, mplayer_options, self)
 
 
@@ -327,6 +333,47 @@ class VideoItem(Item):
         return
 
 
+    def settings(self, arg=None, menuw=None):
+        if (self.mode == 'dvd' or self.mode == 'vcd') and not self.available_audio_tracks:
+            
+            # Use the uid to make a user-unique filename
+            uid = os.getuid()
+
+            skin.PopupBox('Scanning disc, be patient...',
+                          icon='skins/icons/misc/cdrom_mount.png')
+            osd.update()
+            os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
+
+            file = self.files[0]
+            if not file:
+                file = '1'
+
+            cmd = config.MPLAYER_CMD + ' -v -nocache -nolirc -vo null -frames 0 '
+            cmd += ' -cdrom-device %s -dvd-device %s' % \
+                   (self.media.devicename, self.media.devicename)
+            cmd += ' -%s %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % \
+                   (self.mode, file, uid)
+
+            os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
+
+            timeout = time.time() + 20.0
+            done = 0
+            while 1:
+                if time.time() >= timeout:
+                    print 'DVD/VCD disc read failed!'
+                    break
+
+                if os.path.isfile('/tmp/mplayer_dvd_done_%s' % uid):
+                    done = 1
+                    break
+
+            p = mplayer.MPlayerParser(self)
+            for line in open('/tmp/mplayer_dvd_%s.log' % uid).readlines():
+                p.parse(line)
+            
+        configure.main_menu(self)
+        
+
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for this item
@@ -347,7 +394,8 @@ class VideoItem(Item):
         # show configure menu
         if event == rc.MENU:
             self.video_player.stop()
-            configure.main_menu(self)
-            
+            self.settings()
+            return TRUE
+        
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)

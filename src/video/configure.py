@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/22 12:23:30  dischi
+# Added deinterlacing in the config menu
+#
 # Revision 1.3  2002/11/26 21:42:28  dischi
 # small bugfix to remove configure menu for chapters
 #
@@ -113,11 +116,34 @@ def chapter_selection_menu(arg=None, menuw=None):
     moviemenu = menu.Menu('CHAPTER MENU', items)
     menuw.pushmenu(moviemenu)
 
+
+#
+# De-interlacer
+#
+
+def toggle(arg=None, menuw=None):
+    setattr(arg[0], arg[1], not getattr(arg[0], arg[1]))
+
+    sel = menuw.all_items.index(menuw.menustack[-1].selected)
+
+    menuw.menustack[-1].choices = main_menu_generate(arg[0])
+    menuw.menustack[-1].selected = menuw.menustack[-1].choices[sel]
+
+    menuw.init_page()
+    menuw.refresh()
+
+
+def add_toogle(name, item, var):
+    if getattr(item, var):
+        return menu.MenuItem("Turn on %s" % name, toggle, (item, var))
+    return menu.MenuItem("Turn off %s" % name, toggle, (item, var))
+
+    
 #
 # config main menu
 #
 
-def main_menu(item):
+def main_menu_generate(item):
     next_start = 0
     items = []
 
@@ -130,8 +156,37 @@ def main_menu(item):
     if item.available_chapters > 1:
         items += [ menu.MenuItem("Chapter selection", chapter_selection_menu, item) ]
         
-    items += [ menu.MenuItem("play", play_movie, (item, '')) ]
+    items += [ add_toogle('deinterlacing', item, 'deinterlace') ]
+    items += [ menu.MenuItem("Play", play_movie, (item, '')) ]
+
+    return items
+
         
-    moviemenu = menu.Menu('CONFIG MENU', items)
+def main_menu(item):
+    moviemenu = menu.Menu('CONFIG MENU', main_menu_generate(item))
     menuw.pushmenu(moviemenu)
+    
+
+###########################
+
+
+
+RE_AUDIO = re.compile("^\[open\] audio stream: [0-9] audio format:(.*)aid: ([0-9]*)").match
+RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: ([a-z][a-z])").match
+RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
+
+
+#
+# parser
+#
+
+def parse(str, item):
+    m = self.RE_AUDIO(str)
+    if m: item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
+
+    m = self.RE_SUBTITLE(str)
+    if m: item.available_subtitles += [ (m.group(1), m.group(2)) ]
+
+    m = self.RE_CHAPTER(str)
+    if m: item.available_chapters = int(m.group(1))
     
