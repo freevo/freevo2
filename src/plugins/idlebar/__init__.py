@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/15 11:25:32  dischi
+# check for crash
+#
 # Revision 1.1  2003/10/27 20:11:12  dischi
 # move idlebar.py to a directory
 #
@@ -343,9 +346,13 @@ class weather(IdleBarPlugin):
                     cachefile.close()
                 except IOError:
                     print 'WEATHER: error reading cache. Using fake weather.'
-                    cachefile.write('0' + '\n')
-                    cachefile.write('sun.png' + '\n')
-                    cachefile.close()
+                    try:
+                        cachefile = open(self.WEATHERCACHE,'w+')
+                        cachefile.write('0' + '\n')
+                        cachefile.write('sun.png' + '\n')
+                        cachefile.close()
+                    except IOError:
+                        print 'You have no permission to write %s' % self.WEATHERCACHE
                     return '0', 'sun.png'
 
         else:
