@@ -31,19 +31,24 @@ from item import Item
 from audioitem import AudioItem
 from playlist import Playlist, RandomPlaylist
 
+# CDDB Stuff
+try:
+    import DiscID, CDDB
+except:
+    pass
+
             
 class AudioDiskItem(Playlist):
     """
     class for handling audio disks
     """
-    def __init__(self, disc_id, parent, name='Unknown CD Album', devicename = None, display_type = None):
+    def __init__(self, disc_id, parent, name = '', devicename = None, display_type = None):
 
         Item.__init__(self, parent)
-        self.type = 'audiocd'
+        self.type = 'dir'
         self.media = None
         self.disc_id = disc_id
         self.devicename = devicename
-        self.name = 'Unknown CD Album'
         
         # variables only for Playlist
         self.current_item = 0
@@ -51,6 +56,7 @@ class AudioDiskItem(Playlist):
         self.autoplay = 0
 
         # variables only for DirItem
+        self.dir          = dir
         self.display_type = display_type
 
         # set directory variables to default
@@ -59,13 +65,21 @@ class AudioDiskItem(Playlist):
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
+        (query_stat, query_info) = CDDB.query(self.disc_id)
+    
+        if query_stat == 200:
+            self.name = query_info['title']
+        elif query_stat == 210 or query_stat == 211:
+            self.name = query_info[0]['title']
+        else:
+            self.name = 'Unknown CD'
 
     def copy(self, obj):
         """
         Special copy value DirItem
         """
         Playlist.copy(self, obj)
-        if obj.type == 'audiocd':
+        if obj.type == 'dir':
             self.dir          = obj.dir
             self.display_type = obj.display_type
             
@@ -82,16 +96,44 @@ class AudioDiskItem(Playlist):
         """
         make a menu item for each file in the directory
         """
-        play_items = []
-        for i in range(0, len(self.info['tracks'])):
-            title=self.info['tracks'][i]['title']
-            item = AudioItem('cdda://%d' % (i+1), self, None, title)
+        # Problems with disc id:
+        # [2114541066, 10, 150, 17220, 36170, 54412, 68800, 91162, 112110, 129230,
+        #  141320, 165100, 2392]
+        # Returns multiple results
+        print self.disc_id
+        (query_stat, query_info) = CDDB.query(self.disc_id)
+        
+        if query_stat == 200:
+            print ("success!\nQuerying CDDB for track info of `%s'... " % \
+                   query_info['title']),
+            (read_stat, read_info) = CDDB.read(query_info['category'],
+                                               query_info['disc_id'])
+            if read_stat != 210:
+                print "failure getting track info, status: %i" % read_stat
+        elif query_stat == 210 or query_stat == 211:
+            print "multiple matches found! Matches are:"
+            for i in query_info:
+                 print "ID: %s Category: %s Title: %s" % \
+                       (i['disc_id'], i['category'], i['title'])
+            # We just pick the first one
+            query_info = query_info[0]
+            (read_stat, read_info) = CDDB.read(query_info['category'],
+                                               query_info['disc_id'])
+            query_stat = 200 # Good data, used below
+            if read_stat != 210:
+                print "failure getting track info, status: %i" % read_stat
+        else:
+            print "failure getting disc info, status %i" % query_stat
 
-            # XXX FIXME: set also all the other infos here if AudioInfo
-            # XXX will be based on mmpython
+        play_items = []
+        for i in range(0, self.disc_id[1]):
+            if query_stat == 200 and read_stat == 210:
+                title = read_info['TTITLE' + `i`]
+            else:
+                title = '(Track %s)' % (i+1)
+            item = AudioItem('cdda://%d' % (i+1), self, None, title)
             item.set_info('', self.name, title, i+1, self.disc_id[1], '')
-            item.info = self.info['tracks'][i]
-            item.length = item.info['length']
+
             if config.MPLAYER_ARGS.has_key('cd'):
                 item.mplayer_options += (' ' + config.MPLAYER_ARGS['cd'])
 
