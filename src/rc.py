@@ -9,26 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/12/14 17:24:59  dischi
+# cleanup
+#
 # Revision 1.27  2003/11/02 10:50:15  dischi
 # better error handling
 #
 # Revision 1.26  2003/10/26 17:04:26  dischi
 # Patch from Soenke Schwardt to use the time to fix repeat problems with
 # some remote receiver.
-#
-# Revision 1.25  2003/10/18 21:23:38  rshortt
-# Added a subscribe method so that you can get a callback when events are
-# posted.  Also rework __init__ sligntly.
-#
-# Revision 1.24  2003/10/14 17:40:11  mikeruelle
-# enable network remote to work.
-#
-# Revision 1.23  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.22  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -68,13 +57,14 @@ except ImportError:
     print 'WARNING: PyLirc not found, lirc remote control disabled!'
     PYLIRC = 0
 
-# Set to 1 for debug output
-DEBUG = config.DEBUG
 
 # Module variable that contains an initialized RemoteControl() object
 _singleton = None
 
 def get_singleton(**kwargs):
+    """
+    get the global rc object
+    """
     global _singleton
 
     # One-time init
@@ -85,10 +75,16 @@ def get_singleton(**kwargs):
 
 
 def post_event(event):
+    """
+    add an event to the event queue
+    """
     return get_singleton().post_event(event)
 
 
 def app(application=0):
+    """
+    set or get the current app/eventhandler
+    """
     if not application == 0:
         context = 'menu'
         if hasattr(application, 'app_mode'):
@@ -99,13 +95,20 @@ def app(application=0):
 
     return get_singleton().get_app()
 
+
 def set_context(context):
+    """
+    set the context (map with button->event transformation
+    """
     get_singleton().set_context(context)
 
 
     
 class RemoteControl:
-
+    """
+    Class to transform input keys or buttons into events. This class
+    also handles the complete event queue (post_event)
+    """
     def __init__(self, use_pylirc=1, use_netremote=1):
         self.osd = osd.get_singleton()
 
@@ -144,18 +147,19 @@ class RemoteControl:
             self.sock.setblocking(0)
             self.sock.bind(('', self.port))
 
-        self.app = None
-        self.context = 'menu'
-        self.queue = []
-        self.previous_returned_code = None
-        self.previous_code = None;
-        self.repeat_count = 0
-        self.event_callback = None
-        self.firstkeystroke = 0.0
-        self.lastkeystroke = 0.0
-        self.lastkeycode = ''
+        self.app                      = None
+        self.context                  = 'menu'
+        self.queue                    = []
+        self.previous_returned_code   = None
+        self.previous_code            = None;
+        self.repeat_count             = 0
+        self.event_callback           = None
+        self.firstkeystroke           = 0.0
+        self.lastkeystroke            = 0.0
+        self.lastkeycode              = ''
         self.default_keystroke_delay1 = 0.25  # Config
         self.default_keystroke_delay2 = 0.25  # Config
+
 
     def set_app(self, app, context):
         self.app     = app
@@ -169,6 +173,7 @@ class RemoteControl:
     def set_context(self, context):
         self.context = context
         
+
     def post_event(self, e):
         if not isinstance(e, Event):
             self.queue += [ Event(e, context=self.context) ]
@@ -177,6 +182,7 @@ class RemoteControl:
 
         if self.event_callback:
             self.event_callback()
+
 
     def key_event_mapper(self, key):
         if not key:
@@ -193,6 +199,7 @@ class RemoteControl:
         print 'no event mapping for key %s in context %s' % (key, self.context)
         print 'send button event BUTTON arg=%s' % key
         return Event(BUTTON, arg=key)
+
     
     def get_last_code(self):
         result = (None, None) # (Code, is_it_new?)
@@ -214,6 +221,7 @@ class RemoteControl:
             result = (list, 1)
         self.previous_code = list
         return result
+
         
     def poll(self):
         if len(self.queue):
@@ -231,7 +239,8 @@ class RemoteControl:
             if list == None:
                 nowtime = 0.0
                 nowtime = time.time()
-                if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime) and (self.firstkeystroke != 0.0):
+                if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime) and \
+                       (self.firstkeystroke != 0.0):
                     self.firstkeystroke = 0.0
                     self.lastkeystroke = 0.0
                     self.repeat_count = 0
@@ -280,9 +289,11 @@ class RemoteControl:
 
         return (None, None)
 
+
     def subscribe(self, event_callback=None):
         # Only one thing can call poll() so we only handle one subscriber.
-        if not event_callback:  return
+        if not event_callback:
+            return
 
         self.event_callback = event_callback
 

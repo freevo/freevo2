@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/12/14 17:27:19  dischi
+# cleanup
+#
 # Revision 1.33  2003/12/10 19:10:35  dischi
 # AUDIO_PLAY_END is not needed anymore
 #
@@ -34,34 +37,6 @@
 #
 # This patch allows the old behaviour (from when I first implemented code to
 # support Dischi's Xine patches) which works with more DVDs.
-#
-# Revision 1.27  2003/10/19 16:15:51  rshortt
-# Added OS_EVENT_KILL.  recordserver will now kill and wait.
-#
-# Revision 1.26  2003/10/19 14:19:44  rshortt
-# Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
-# can pick it up and wait on its own child.  Child processes from recordserver
-# now get signals and clean up properly.
-#
-# Revision 1.25  2003/10/18 10:44:11  dischi
-# renamed POPEN2 to OS_EVENT_POPEN2
-#
-# Revision 1.24  2003/10/18 09:44:44  dischi
-# add POPEN2 event
-#
-# Revision 1.23  2003/09/25 14:07:02  outlyer
-# My autocolor plugin which allows me to run a system command before plaaying
-# video. It doesn't have to be a color command, you can change mixer settings
-# or anything else you can do in a shell script.
-#
-# Revision 1.22  2003/09/21 13:17:20  dischi
-# add OSD_MESSAGE and DIRECTORY_CHANGE_DISPLAY_TYPE (not on any key)
-#
-# Revision 1.21  2003/09/19 22:07:14  dischi
-# TRUE/True/FALSE/False changes
-#
-# Revision 1.20  2003/09/10 19:05:05  dischi
-# move osd keybindings into the config file
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -492,52 +467,52 @@ GAMES_EVENTS = {
 
 
 
-from pygame.locals import *
+import pygame.locals as key
 
 DEFAULT_KEYMAP = {
-    K_F1          : 'SLEEP',
-    K_HOME        : 'MENU',
-    K_g           : 'GUIDE',
-    K_ESCAPE      : 'EXIT',
-    K_UP          : 'UP',
-    K_DOWN        : 'DOWN',
-    K_LEFT        : 'LEFT',
-    K_RIGHT       : 'RIGHT',
-    K_SPACE       : 'SELECT',
-    K_RETURN      : 'SELECT',
-    K_F2          : 'POWER',
-    K_F3          : 'MUTE',
-    K_KP_MINUS    : 'VOL-',
-    K_n           : 'VOL-',
-    K_KP_PLUS     : 'VOL+',
-    K_m           : 'VOL+',
-    K_c           : 'CH+',
-    K_v           : 'CH-',
-    K_1           : '1',
-    K_2           : '2',
-    K_3           : '3',
-    K_4           : '4',
-    K_5           : '5',
-    K_6           : '6',
-    K_7           : '7',
-    K_8           : '8',
-    K_9           : '9',
-    K_0           : '0',
-    K_d           : 'DISPLAY',
-    K_e           : 'ENTER',
-    K_UNDERSCORE  : 'PREV_CH',
-    K_o           : 'PIP_ONOFF',
-    K_w           : 'PIP_SWAP',
-    K_i           : 'PIP_MOVE',
-    K_F4          : 'TV_VCR',
-    K_r           : 'REW',
-    K_p           : 'PLAY',
-    K_f           : 'FFWD',
-    K_u           : 'PAUSE',
-    K_s           : 'STOP',
-    K_F6          : 'REC',
-    K_PERIOD      : 'EJECT',
-    K_l           : 'SUBTITLE'
+    key.K_F1          : 'SLEEP',
+    key.K_HOME        : 'MENU',
+    key.K_g           : 'GUIDE',
+    key.K_ESCAPE      : 'EXIT',
+    key.K_UP          : 'UP',
+    key.K_DOWN        : 'DOWN',
+    key.K_LEFT        : 'LEFT',
+    key.K_RIGHT       : 'RIGHT',
+    key.K_SPACE       : 'SELECT',
+    key.K_RETURN      : 'SELECT',
+    key.K_F2          : 'POWER',
+    key.K_F3          : 'MUTE',
+    key.K_KP_MINUS    : 'VOL-',
+    key.K_n           : 'VOL-',
+    key.K_KP_PLUS     : 'VOL+',
+    key.K_m           : 'VOL+',
+    key.K_c           : 'CH+',
+    key.K_v           : 'CH-',
+    key.K_1           : '1',
+    key.K_2           : '2',
+    key.K_3           : '3',
+    key.K_4           : '4',
+    key.K_5           : '5',
+    key.K_6           : '6',
+    key.K_7           : '7',
+    key.K_8           : '8',
+    key.K_9           : '9',
+    key.K_0           : '0',
+    key.K_d           : 'DISPLAY',
+    key.K_e           : 'ENTER',
+    key.K_UNDERSCORE  : 'PREV_CH',
+    key.K_o           : 'PIP_ONOFF',
+    key.K_w           : 'PIP_SWAP',
+    key.K_i           : 'PIP_MOVE',
+    key.K_F4          : 'TV_VCR',
+    key.K_r           : 'REW',
+    key.K_p           : 'PLAY',
+    key.K_f           : 'FFWD',
+    key.K_u           : 'PAUSE',
+    key.K_s           : 'STOP',
+    key.K_F6          : 'REC',
+    key.K_PERIOD      : 'EJECT',
+    key.K_l           : 'SUBTITLE'
     }
 
 
