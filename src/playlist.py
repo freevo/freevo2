@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/01/31 16:38:49  dischi
+# removed unneeded attr
+#
 # Revision 1.61  2004/01/31 13:18:35  dischi
 # fix string->object building
 #
@@ -543,7 +546,6 @@ class Mimetype(plugin.MimetypePlugin):
     """
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
-        self.files_only = False
 
         # register the callback
         plugin.register_callback('fxditem', [], 'playlist', self.fxdhandler)

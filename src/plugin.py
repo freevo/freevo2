@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/01/31 16:38:49  dischi
+# removed unneeded attr
+#
 # Revision 1.60  2004/01/10 16:49:04  dischi
 # make it possible to shut down all kinds of plugins
 #
@@ -203,7 +206,6 @@ class MimetypePlugin(Plugin):
     def __init__(self):
         Plugin.__init__(self)
         self.display_type = []
-        self.files_only   = True
 
 
     def suffix(self):

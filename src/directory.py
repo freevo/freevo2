@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2004/01/31 16:40:25  dischi
+# removed unneeded attr
+#
 # Revision 1.105  2004/01/27 19:17:48  dischi
 # fix crash when an item is added to an empty menu
 #
@@ -563,16 +566,13 @@ class DirItem(Playlist):
 
         # build play_items, pl_items and dir_items
         for p in plugin.mimetype(display_type):
-            if p.files_only:
-                self.play_items += p.get(self, files)
-            else:
-                for i in p.get(self, files):
-                    if i.type == 'playlist':
-                        self.pl_items.append(i)
-                    elif i.type == 'dir':
-                        self.dir_items.append(i)
-                    else:
-                        self.play_items.append(i)
+            for i in p.get(self, files):
+                if i.type == 'playlist':
+                    self.pl_items.append(i)
+                elif i.type == 'dir':
+                    self.dir_items.append(i)
+                else:
+                    self.play_items.append(i)
 
         # normal DirItems
         for filename in files:

@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/31 16:38:49  dischi
+# removed unneeded attr
+#
 # Revision 1.10  2004/01/10 13:19:23  dischi
 # use fxd.filename
 #
@@ -96,10 +99,6 @@ class Mimetype(plugin.MimetypePlugin):
     """
     class to handle fxd files in directories
     """
-    def __init__(self):
-        plugin.MimetypePlugin.__init__(self)
-        self.files_only = False
-
     def get(self, parent, files):
         """
         return a list of items based on the files
