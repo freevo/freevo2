@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/06/03 01:41:38  rshortt
+# More progress, still ots to do.
+#
 # Revision 1.1  2003/06/01 19:05:15  rshortt
 # Better to commit these before I mess something up.  Still event code to fix I think, among other things.
 #
@@ -54,19 +57,25 @@ DEBUG = 1
 class ProgramDisplay(PopupBox):
     """
     prog      the program to record
+    context   guide or recording
     left      x coordinate. Integer
     top       y coordinate. Integer
     width     Integer
     height    Integer
     """
     
-    def __init__(self, parent=None, prog=None, left=None, top=None, width=600,
-                 height=520):
+    def __init__(self, parent=None, prog=None, context=None, left=None, 
+                 top=None, width=600, height=440):
 
         self.left = left
         self.top = top
         self.prog = prog
         self.font = None
+
+        if context:
+            self.context = context
+        else:
+            self.context = 'guide'
 
         PopupBox.__init__(self, left=left, top=top, width=width, 
                           height=height)
@@ -86,23 +95,33 @@ class ProgramDisplay(PopupBox):
 
         desc = Label('Description:\t%s' % self.prog.desc, self, Align.LEFT)
 
-        start = Label('Start:\t%s on %s' % (time.strftime('%A %b %d %I:%M %p', 
-                                        time.localtime(self.prog.start)),
-                                        self.prog.channel_id), 
-                                        self, Align.LEFT)
+        chan = Label('Channel:\t%s' % self.prog.channel_id, self, Align.LEFT)
+
+        start = Label('Start:\t%s' % time.strftime('%A %b %d %I:%M %p', 
+                                      time.localtime(self.prog.start)),
+                                      self, Align.LEFT)
 
         stop = Label('Stop:\t%s' % time.strftime('%A %b %d %I:%M %p', 
                                      time.localtime(self.prog.stop)), 
                                      self, Align.LEFT)
+        items_height = 40
+
+        if self.context == 'guide':
+            num_items = 3
+        else:
+            num_items = 1
 
         self.options = ListBox(width=(self.width-2*self.h_margin), 
-                               height=200, show_v_scrollbar=0)
-        self.options.items_height = 40
-        self.options.add_item(text='Record this episode', value=1)
-        self.options.add_item(text='Search for more of this program', value=2)
-        self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
-        self.options.add_item(text='View favorites', value=4)
-        self.options.add_item(text='View scheduled recordings', value=5)
+                               height=items_height*num_items, 
+                               show_v_scrollbar=0)
+        self.options.items_height = items_height
+
+        if self.context == 'guide':
+            self.options.add_item(text='Record this episode', value=1)
+            self.options.add_item(text='Search for more of this program', value=2)
+            self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
+        else:
+            self.options.add_item(text='Remove from scheduled recordings', value=4)
 
         self.options.set_h_align(Align.CENTER)
         self.options.toggle_selected_index(0)
@@ -137,12 +156,116 @@ class ProgramDisplay(PopupBox):
                 edit_favorite.EditFavorite(parent=self, 
                                            subject=self.prog).show()
             elif self.options.get_selected_item().value == 4:
-                view_favorites.ViewFavorites(parent=self).show()
-            elif self.options.get_selected_item().value == 5:
-                view_recordings.ViewScheduledRecordings(parent=self).show()
+                (result, msg) = record_client.removeScheduledRecording(self.prog)
+                if result:
+                    AlertBox(parent=self, 
+                             text='%s has been removed' % \
+                              self.prog.title, handler=self.destroy).show()
+                else:
+                    AlertBox(parent=self, 
+                             text='Remove Failed: %s' % msg).show()
 
         elif event == em.INPUT_EXIT:
             self.destroy()
         else:
             return self.parent.eventhandler(event)
+
+
+
+class ScheduledRecordings(PopupBox):
+    """
+    left      x coordinate. Integer
+    top       y coordinate. Integer
+    width     Integer
+    height    Integer
+    text      String to print.
+    handler   Function to call after pressing ENTER.
+    bg_color  Background color (Color)
+    fg_color  Foreground color (Color)
+    icon      icon
+    border    Border
+    bd_color  Border color (Color)
+    bd_width  Border width Integer
+    """
+
+        
+    def __init__(self, parent='osd', text=None, handler=None, 
+                 left=None, top=None, width=600, height=520, bg_color=None, 
+                 fg_color=None, icon=None, border=None, bd_color=None, 
+                 bd_width=None):
+
+        if not text:
+            text = 'Scheduled Recordings'
+        
+        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
+                          bg_color, fg_color, icon, border, bd_color, bd_width)
+
+
+        (self.result, recordings) = record_client.getScheduledRecordings()
+        if self.result:
+            progs = recordings.getProgramList()
+        else:
+            errormsg = Label('Get recordings failed: %s' % recordings, 
+                             self, Align.CENTER)
+            return 
+
+        self.internal_h_align = Align.CENTER
+
+        items_height = 40
+        self.num_shown_items = 7
+        self.results = ListBox(width=(self.width-2*self.h_margin),
+                               height=self.num_shown_items*items_height,
+                               show_v_scrollbar=0)
+        self.results.y_scroll_interval = self.results.items_height = items_height
+        max_results = 10
+
+        self.results.set_h_align(Align.CENTER)
+        self.add_child(self.results)
+
+
+        if self.result:
+            i = 0
+            self.results.items = []
+
+            if len(progs) > self.num_shown_items:
+                self.results.show_v_scrollbar = 1
+            else:
+                self.results.show_v_scrollbar = 0
+
+            f = lambda a, b: cmp(a.start, b.start)
+            progs = progs.values()
+            progs.sort(f)
+            for prog in progs:
+                i += 1
+                self.results.add_item(text='%s %s: %s' % \
+                                        (time.strftime('%b %d %I:%M %p',
+                                           time.localtime(prog.start)),
+                                         prog.channel_id,
+                                         prog.title),
+                                      value=prog)
+
+            space_left = self.num_shown_items - i
+            if space_left > 0:
+                for i in range(space_left):
+                    self.results.add_item(text=' ', value=0)
+
+            self.results.toggle_selected_index(0)
+
+
+    def eventhandler(self, event):
+        if not self.result:
+            self.destroy()
+            return
+
+        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
+            return self.results.eventhandler(event)
+        elif event == em.INPUT_ENTER:
+            ProgramDisplay(prog=self.results.get_selected_item().value,
+                           context='recording', height=360).show()
+            return
+        elif event == em.INPUT_EXIT:
+            self.destroy()
+        else:
+            return self.parent.eventhandler(event)
+
 

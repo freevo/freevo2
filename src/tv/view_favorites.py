@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/06/03 01:41:39  rshortt
+# More progress, still ots to do.
+#
 # Revision 1.1  2003/06/01 19:05:15  rshortt
 # Better to commit these before I mess something up.  Still event code to fix I think, among other things.
 #
@@ -95,7 +98,7 @@ class ViewFavorites(PopupBox):
         self.results = ListBox(width=(self.width-2*self.h_margin),
                                height=self.num_shown_items*items_height,
                                show_v_scrollbar=0)
-        self.results.items_height = items_height
+        self.results.y_scroll_interval = self.results.items_height = items_height
         max_results = 10
 
         self.results.set_h_align(Align.CENTER)
@@ -133,6 +136,9 @@ class ViewFavorites(PopupBox):
 
 
     def eventhandler(self, event):
+        if not self.server_available:
+            self.destroy()
+            return
 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
             return self.results.eventhandler(event)

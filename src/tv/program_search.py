@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/06/03 01:41:38  rshortt
+# More progress, still ots to do.
+#
 # Revision 1.1  2003/06/01 19:05:15  rshortt
 # Better to commit these before I mess something up.  Still event code to fix I think, among other things.
 #
@@ -82,6 +85,11 @@ class ProgramSearch(PopupBox):
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
         (self.server_available, msg) = record_client.connectionTest()
+        if not self.server_available:
+            errormsg = Label('Record server unavailable: %s\n\nFeel free to impliment this function inside the main guide.' % msg, 
+                             self, Align.CENTER)
+            return 
+
 
         self.internal_h_align = Align.CENTER
 
@@ -93,7 +101,7 @@ class ProgramSearch(PopupBox):
         self.results = ListBox(width=(self.width-2*self.h_margin),
                                height=self.num_shown_items*items_height,
                                show_v_scrollbar=0)
-        self.results.items_height = items_height
+        self.results.y_scroll_interval = self.results.items_height = items_height
         max_results = 10
 
         self.results.set_h_align(Align.CENTER)
@@ -135,8 +143,10 @@ class ProgramSearch(PopupBox):
 
 
     def eventhandler(self, event):
+        if not self.server_available:
+            self.destroy()
+            return
 
-        print 'SELECTED CHILD: %s' % self.get_selected_child()
         if self.get_selected_child() == self.lbg:
             if event == em.INPUT_LEFT:
                 self.lbg.change_selected_box('left')
