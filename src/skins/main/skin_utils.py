@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/24 05:57:50  gsbarbieri
+# Try to use playlist icon based on parent directory display_type, so in a
+# music dir, you got playlist_audio.
+#
 # Revision 1.4  2003/08/23 19:25:46  dischi
 # some scaling fixes
 #
@@ -101,6 +105,14 @@ def format_image(settings, item, width, height, force=0):
             else:
                 imagefile = '%s/mimetypes/folder.png' % settings.icon_dir
     
+        elif item.type == 'playlist':
+            if item.parent and os.path.isfile('%s/mimetypes/playlist_%s.png' % \
+                                              (settings.icon_dir, item.parent.display_type)):
+                imagefile = '%s/mimetypes/playlist_%s.png' % \
+                            (settings.icon_dir, item.parent.display_type)
+            else:
+                imagefile = '%s/mimetypes/playlist.png' % settings.icon_dir
+
         elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, type)):
             imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, type)
 
