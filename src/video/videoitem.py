@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2003/11/21 17:56:50  dischi
+# Plugins now 'rate' if and how good they can play an item. Based on that
+# a good player will be choosen.
+#
 # Revision 1.91  2003/11/16 17:41:05  dischi
 # i18n patch from David Sagnol
 #
@@ -18,49 +22,6 @@
 #
 # Revision 1.89  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
-#
-# Revision 1.88  2003/09/20 17:31:00  dischi
-# add play with max cache for network streams
-#
-# Revision 1.87  2003/09/20 17:02:09  dischi
-# make it possible to deactivate mmpython for an item
-#
-# Revision 1.86  2003/09/20 15:08:26  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.85  2003/09/20 12:59:31  dischi
-# do not match urls as tv shows
-#
-# Revision 1.84  2003/09/20 09:50:07  dischi
-# cleanup
-#
-# Revision 1.83  2003/09/19 22:10:56  dischi
-# clear osd before playing with xine
-#
-# Revision 1.82  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.81  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.80  2003/08/31 17:14:20  dischi
-# Move delete file from VideoItem into a global plugin. Now it's also
-# possible to remove audio and image files.
-#
-# Revision 1.79  2003/08/30 17:05:41  dischi
-# remove bookmark support, add support for ItemPlugin eventhandler
-#
-# Revision 1.78  2003/08/30 12:21:13  dischi
-# small changes for the changed xml_parser
-#
-# Revision 1.77  2003/08/23 18:33:03  dischi
-# use util.getimage to get the cover image file
-#
-# Revision 1.76  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.75  2003/08/23 10:28:47  dischi
-# fixed some variants handling
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -180,14 +141,9 @@ class VideoItem(Item):
         # Then check for episode in TV_SHOW_DATA_DIR
         self.image = util.getimage(os.path.splitext(filename)[0], self.image)
 
-        self.video_player = plugin.getbyname(plugin.VIDEO_PLAYER)
-
         # variables only for VideoItem
         self.label = ''
         
-        self.available_audio_tracks = []
-        self.available_subtitles    = []
-        self.available_chapters     = 0
         self.video_width  = 0
         self.video_height = 0
 
@@ -200,6 +156,8 @@ class VideoItem(Item):
         if parent and hasattr(self.parent, 'xml_file') and not self.xml_file:
             self.xml_file = self.parent.xml_file
 
+        self.possible_player = []
+        self.scan(False)
         
         
     def copy(self, obj):
@@ -208,10 +166,6 @@ class VideoItem(Item):
         """
         Item.copy(self, obj)
         if obj.type == 'video':
-            self.available_audio_tracks = obj.available_audio_tracks
-            self.available_subtitles    = obj.available_subtitles
-            self.available_chapters     = obj.available_chapters
-
             self.selected_subtitle = obj.selected_subtitle
             self.selected_audio    = obj.selected_audio
             self.num_titles        = obj.num_titles
@@ -226,7 +180,6 @@ class VideoItem(Item):
             self.subtitle_file     = obj.subtitle_file
             self.audio_file        = obj.audio_file
             self.filename          = obj.filename
-
 
 
 
@@ -284,7 +237,65 @@ class VideoItem(Item):
             return self.name[4:]
         return self.name
 
-    
+
+    def scan(self, final=True):
+        """
+        Scan meta info to add some more varibales. This can't be done in
+        __init__ because sometomes filename and other variables are added
+        later.
+        """
+        if hasattr(self, '__final_seetings__'):
+           return
+
+        # don't know if we need this in the future
+        if self.mode in ('dvd', 'vcd'):
+            if not self.filename or self.filename == '0':
+                self.url = '%s://' % self.mode
+            else:
+                self.url = '%s://%s' % (self.mode, self.filename)
+        else:
+            if self.filename.find('://') == -1:
+                file = self.filename
+                if self.media_id:
+                    mountdir, file = util.resolve_media_mountdir(self.media_id,file)
+                    if mountdir:
+                        self.url = 'file://' + file
+                    else:
+                        self.url = 'file://' + self.filename
+                else:
+                    self.url = 'file://' + file
+            else:
+                self.url = self.filename
+
+        self.filetype     = self.mode
+        self.network_play = 0
+
+        if self.mode == 'file':
+            if not self.url.startswith('file://'):
+                self.network_play = 1
+            try:
+                self.mime_type = os.path.splitext(self.filename)[1][1:]
+            except:
+                self.mime_type = 'video'
+        else:
+            self.mime_type = self.mode
+
+        self.possible_player = []
+        for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
+            rating = p.rate(self) * 10
+            if config.PREFERED_VIDEO_PLAYER == p.name:
+                rating += 1
+            self.possible_player.append((rating, p))
+            
+        self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
+
+        self.player        = None
+        self.player_rating = 0
+
+        if final:
+            self.__final_seetings__ = True
+
+        
     # ------------------------------------------------------------------------
     # actions:
 
@@ -293,10 +304,18 @@ class VideoItem(Item):
         """
         return a list of possible actions on this item.
         """
+
+        self.scan()
+        
+        if not self.possible_player:
+            return []
+
+        self.player_rating, self.player = self.possible_player[0]
+
         items = [ (self.play, _('Play')), ]
         if not self.filename or self.filename == '0':
             if self.mode == 'dvd':
-                if plugin.getbyname(plugin.DVD_PLAYER):
+                if self.player_rating >= 20:
                     items = [ (self.play, _('Play DVD')),
                               ( self.dvd_vcd_title_menu, _('DVD title list') ) ]
                 else:
@@ -304,7 +323,7 @@ class VideoItem(Item):
                               (self.play, _('Play default track')) ]
                     
             elif self.mode == 'vcd':
-                if plugin.getbyname(plugin.VCD_PLAYER):
+                if self.player_rating >= 20:
                     items = [ (self.play, _('Play VCD')),
                               ( self.dvd_vcd_title_menu, _('VCD title list') ) ]
                 else:
@@ -332,33 +351,18 @@ class VideoItem(Item):
 
     def play_max_cache(self, arg=None, menuw=None):
         self.play(menuw=menuw, arg='-cache 65536')
-        
+
+    
     def play(self, arg=None, menuw=None):
         """
         play the item.
         """
+        self.scan()
+
         self.parent.current_item = self
 
         if not self.menuw:
             self.menuw = menuw
-
-        self.plugin_eventhandler(PLAY, menuw)
-
-        # dvd playback for whole dvd
-        if (not self.filename or self.filename == '0') and \
-               self.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER):
-            if self.menuw.visible:
-                self.menuw.hide()
-            plugin.getbyname(plugin.DVD_PLAYER).play(self)
-            return
-
-        # vcd playback for whole vcd
-        if (not self.filename or self.filename == '0') and \
-               self.mode == 'vcd' and plugin.getbyname(plugin.VCD_PLAYER):
-            if self.menuw.visible:
-                self.menuw.hide()
-            plugin.getbyname(plugin.VCD_PLAYER).play(self)
-            return
 
         # if we have variants, play the first one as default
         if self.variants:
@@ -382,50 +386,22 @@ class VideoItem(Item):
             # videoitem.
             # And besides, we don't need the menu between two subitems.
             self.menuw.hide()
-
             self.current_subitem.play(arg, self.menuw)
             return
 
 
         # normal plackback of one file
-        file = self.filename
         if self.mode == "file":
+            file = self.filename
+        
             if self.media_id:
                 mountdir, file = util.resolve_media_mountdir(self.media_id,file)
                 if mountdir:
                     util.mount(mountdir)
                 else:
-                    
-                    def do_tryagain():                        
-                        # TODO: force to identify media instead of wait
-                        box = PopupBox( text=_("Wait while detecting media...") )
-                        box.show()
-                        l=1
-                        for i in range( 10 ): # 10 times
-                            
-                            for media in config.REMOVABLE_MEDIA:
-                                # media has no id? maybe identifying... wait
-                                if not media.id:
-                                    time.sleep( 2 )
-                                if media.id == self.media_id:
-                                    # we found it! Stop looping
-                                    l=0
-                                    break
-                                
-                            if not l:
-                                break
-                        box.destroy()
-                                                    
-                        self.play( arg, menuw )
-                    # do_tryagain()
-                        
-                    
-                    ConfirmBox( text=(_('Media not found for file "%s".\n')+
-                                      _('Please insert the media.')) % file,
-                                handler=do_tryagain ).show()
-                    
-                    rc.post_event( PLAY_END )
-
+                    ConfirmBox(text=(_('Media not found for file "%s".\n')+
+                                     _('Please insert the media.')) % file,
+                               handler=self.play ).show()
                     return
 
             elif self.media:
@@ -437,58 +413,18 @@ class VideoItem(Item):
                 if media:
                     self.media = media
                 else:
-                    AlertBox(text=_('Media not found for %s track %s') % \
-                             (self.mode, file)).show()
-                    rc.post_event(PLAY_END)
+                    ConfirmBox(text=(_('Media not not found for "%s".\n')+
+                                     _('Please insert the media.')) % self.url,
+                               handler=self.play).show()
                     return
 
-        if not self.filename or self.filename == '0':
-            if self.mode == 'dvd':
-                file = '1'
-            elif self.mode == 'vcd':
-                # try to get the longest track:
-                try:
-                    import cdrom
-                    device = open(self.media.devicename)
-                    (first, last) = cdrom.toc_header(device)
-
-                    lmin = 0
-                    lsec = 0
-
-                    mainmovie = (0, 0)
-                    for i in range(first, last + 2):
-                        if i == last + 1:
-                            min, sec, frames = cdrom.leadout(device)
-                        else:
-                            min, sec, frames = cdrom.toc_entry(device, i)
-                        if (min-lmin) * 60 + (sec-lsec) > mainmovie[0]:
-                            mainmovie = (min-lmin) * 60 + (sec-lsec), i-1
-                        lmin, lsec = min, sec
-                    file = str(mainmovie[1])
-                    device.close()
-                except:
-                    file = '1'
-
+        if self.player_rating < 10:
+            AlertBox(text=_('No player for this item found')).show()
+            return
+        
         mplayer_options = self.mplayer_options
         if not mplayer_options:
             mplayer_options = ""
-
-        if self.media:
-            mplayer_options += ' -cdrom-device %s ' % \
-                               (self.media.devicename)
-
-        if self.mode == 'dvd':
-            mplayer_options += ' -dvd-device %s' % self.media.devicename
-
-        if self.selected_subtitle == -1:
-            mplayer_options += ' -noautosub'
-        elif self.selected_subtitle and self.mode == 'file':
-            mplayer_options += ' -vobsubid %s' % self.selected_subtitle
-        elif self.selected_subtitle:
-            mplayer_options += ' -sid %s' % self.selected_subtitle
-            
-        if self.selected_audio:
-            mplayer_options += ' -aid %s' % self.selected_audio
 
         if self.subtitle_file:
             d, f = util.resolve_media_mountdir(self.subtitle_file['media-id'],
@@ -507,20 +443,12 @@ class VideoItem(Item):
         if arg:
             mplayer_options += ' %s' % arg
 
-        if self.deinterlace:
-            mplayer_options += ' -vop pp=fd'
-
-
         if self.menuw.visible:
             self.menuw.hide()
 
-        if not self.video_player:            
-            self.video_player = plugin.getbyname(plugin.VIDEO_PLAYER)
-            
-        if self.video_player:
-            error = self.video_player.play(file, mplayer_options, self)
-        else:
-            error = _('No video player available!')
+        self.plugin_eventhandler(PLAY, menuw)
+
+        error = self.player.play(mplayer_options, self)
 
         if error:
             AlertBox(text=error).show()
@@ -531,7 +459,8 @@ class VideoItem(Item):
         """
         stop playing
         """
-        self.video_player.stop()
+        if self.player:
+            self.player.stop()
 
 
     def dvd_vcd_title_menu(self, arg=None, menuw=None):
@@ -602,7 +531,8 @@ class VideoItem(Item):
 
         # show configure menu
         if event == MENU:
-            self.video_player.stop()
+            if self.player:
+                self.player.stop()
             self.settings(menuw=menuw)
             menuw.show()
             return True

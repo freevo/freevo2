@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/11/21 17:56:50  dischi
+# Plugins now 'rate' if and how good they can play an item. Based on that
+# a good player will be choosen.
+#
 # Revision 1.17  2003/11/09 16:24:30  dischi
 # fix subtitle selection
 #
@@ -160,7 +164,7 @@ def get_items(item):
     items = []
 
     if not ((not item.filename or item.filename == '0') and \
-            item.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER)):
+            item.mode in ('dvd', 'vcd') and item.player_rating >= 20):
 
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
             items.append(menu.MenuItem(_('Audio selection'), audio_selection_menu, item))

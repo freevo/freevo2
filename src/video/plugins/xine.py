@@ -28,6 +28,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/11/21 17:56:50  dischi
+# Plugins now 'rate' if and how good they can play an item. Based on that
+# a good player will be choosen.
+#
 # Revision 1.20  2003/11/09 12:01:00  dischi
 # add subtitle selection and osd info support for xine (needs current xine-ui cvs
 #
@@ -103,7 +107,8 @@ class PluginInterface(plugin.Plugin):
         try:
             config.XINE_COMMAND
         except:
-            print _( 'ERROR' ) + ': ' + _("'XINE_COMMAND' not defined, plugin 'xine' deactivated")
+            print _( 'ERROR' ) + ': ' + \
+                  _("'XINE_COMMAND' not defined, plugin 'xine' deactivated")
             print _( 'please check the xine section in freevo_config.py' )
             return
 
@@ -134,19 +139,24 @@ class PluginInterface(plugin.Plugin):
             
         if xine_version < 922:
             if type == 'fb':
-                print _( 'ERROR' ) + ': ' + _( "'fbxine' version too old, plugin 'xine' deactivated" )
+                print _( 'ERROR' ) + ': ' + \
+                      _( "'fbxine' version too old, plugin 'xine' deactivated" )
                 print _( 'You need software %s' ) % 'xine-ui > 0.9.21'
                 return
-            print _( 'WARNING' ) + ': ' + _( "'xine' version too old, plugin in fallback mode" )
-            print _( "You need %s to use all features of the '%s' plugin" ) % ( 'xine-ui > 0.9.21', 'xine' )
+            print _( 'WARNING' ) + ': ' + \
+                  _( "'xine' version too old, plugin in fallback mode" )
+            print _( "You need %s to use all features of the '%s' plugin" ) % \
+                  ( 'xine-ui > 0.9.21', 'xine' )
             
         # create the xine object
         xine = util.SynchronizedObject(Xine(type, xine_version))
 
         # register it as the object to play
-        plugin.register(xine, plugin.DVD_PLAYER)
-        if config.XINE_USE_VCDNAV:
-            plugin.register(xine, plugin.VCD_PLAYER)
+        plugin.register(xine, plugin.VIDEO_PLAYER, True)
+
+        for i in config.SUFFIX_VIDEO_XINE_FILES:
+            if not i in config.SUFFIX_VIDEO_FILES:
+                config.SUFFIX_VIDEO_FILES.append(i)
 
 
 class Xine:
@@ -155,6 +165,8 @@ class Xine:
     """
     
     def __init__(self, type, version):
+        self.name = 'xine'
+
         # start the thread
         self.thread = childapp.ChildThread()
         self.thread.stop_osd = True
@@ -174,8 +186,30 @@ class Xine:
 
         self.command = '%s -V %s -A %s' % (command, config.XINE_VO_DEV, config.XINE_AO_DEV)
 
-        
-    def play(self, item):
+
+    def rate(self, item):
+        """
+        How good can this player play the file:
+        2 = good
+        1 = possible, but not good
+        0 = unplayable
+        """
+        if item.mode == 'dvd':
+            return 2
+        if item.mode == 'vcd':
+            if self.xine_version > 922:
+                if not item.filename or item.filename == '0':
+                    return 2
+                return 0
+            else:
+                return 0
+        if os.path.splitext(item.filename)[1][1:].lower() in \
+               config.SUFFIX_VIDEO_XINE_FILES:
+            return 2
+        return 0
+    
+    
+    def play(self, options, item):
         """
         play a dvd with xine
         """
@@ -196,6 +230,8 @@ class Xine:
             else:
                 command = '%s -D' % command
 
+        command = command.split(' ')
+
         self.max_audio = 0
         self.current_audio = -1
 
@@ -210,10 +246,23 @@ class Xine:
                 self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
 
         if item.mode == 'dvd':
-            command = '%s dvd://' % command
-        else:
-            command = '%s vcd://%s' % (command, item.media.devicename)
+            # dvd:///dev/dvd/2
+            if not item.filename or item.filename == '0':
+                track = ''
+            else:
+                track = item.filename
+            command.append('dvd://%s/%s' % (item.media.devicename, track))
 
+        elif item.mode == 'vcd':
+            # vcd:///dev/cdrom -- NO track support (?)
+            command.append('vcd://%s' % item.media.devicename)
+
+        elif item.mime_type == 'cue':
+            command.append('vcd://%s' % item.filename)
+
+        else:
+            command.append(item.url)
+            
         _debug_('Xine.play(): Starting thread, cmd=%s' % command)
 
         rc.app(self)

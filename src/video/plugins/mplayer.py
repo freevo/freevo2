@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/11/21 17:56:50  dischi
+# Plugins now 'rate' if and how good they can play an item. Based on that
+# a good player will be choosen.
+#
 # Revision 1.38  2003/11/04 17:53:23  dischi
 # Removed the unstable bmovl part from mplayer.py and made it a plugin.
 # Even if we are in a code freeze, this is a major cleanup to put the
@@ -90,7 +94,7 @@ class PluginInterface(plugin.Plugin):
     Mplayer plugin for the video player.
 
     With this plugin Freevo can play all video files defined in
-    SUFFIX_VIDEO_FILES. This is the default video player for Freevo.
+    SUFFIX_VIDEO_MPLAYER_FILES. This is the default video player for Freevo.
     """
     def __init__(self):
         mplayer_version = 0
@@ -116,7 +120,11 @@ class PluginInterface(plugin.Plugin):
         mplayer = util.SynchronizedObject(MPlayer(mplayer_version))
 
         # register it as the object to play audio
-        plugin.register(mplayer, plugin.VIDEO_PLAYER)
+        plugin.register(mplayer, plugin.VIDEO_PLAYER, True)
+
+        for i in config.SUFFIX_VIDEO_MPLAYER_FILES:
+            if not i in config.SUFFIX_VIDEO_FILES:
+                config.SUFFIX_VIDEO_FILES.append(i)
 
 
 class MPlayer:
@@ -125,43 +133,65 @@ class MPlayer:
     """
     
     def __init__(self, version):
+        self.name = 'mplayer'
         self.thread = childapp.ChildThread()
         self.thread.stop_osd = True
 
         self.mode = None
-        self.filename = None
         self.app_mode = 'video'
         self.version = version
         self.seek = 0
         self.seek_timer = threading.Timer(0, self.reset_seek)
 
-        
-    def play(self, filename, options, item, mode = None):
+
+    def rate(self, item):
+        """
+        How good can this player play the file:
+        2 = good
+        1 = possible, but not good
+        0 = unplayable
+        """
+        if item.mode == 'dvd' or item.mode == 'vcd':
+            if not item.filename or item.filename == '0':
+                return 1
+            return 2
+        if os.path.splitext(item.filename)[1][1:].lower() in \
+               config.SUFFIX_VIDEO_MPLAYER_FILES:
+            return 2
+        return 0
+    
+    
+    def play(self, options, item):
         """
         play a videoitem with mplayer
         """
 
-        self.parameter = (filename, options, item, mode)
+        self.parameter = (options, item)
         
-        if not mode:
-            mode = item.mode
+        mode         = item.mode
+        network_play = item.network_play
+        url          = item.url
+        self.item    = item
 
-        # Is the file streamed over the network?
-        if filename.find('://') != -1:
-            # Yes, trust the given mode
-            network_play = 1
-        else:
-            network_play = 0
-           
-        self.filename = filename
-        self.mode     = mode
+        if mode == 'file' and not network_play:
+            url = item.url[6:]
 
-        _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename))
-
-        if mode == 'file' and not os.path.isfile(filename) and not network_play:
+        if url == 'dvd://':
+            url += '1'
+            
+        if url == 'vcd://':
+            c_len = 0
+            for i in range(len(item.info.tracks)):
+                if item.info.tracks[i].length > c_len:
+                    c_len = item.info.tracks[i].length
+                    url = item.url + str(i+1)
+            
+        _debug_('MPlayer.play(): mode=%s, url=%s' % (mode, url))
+        print network_play
+        if mode == 'file' and not os.path.isfile(url) and not network_play:
             # This event allows the videoitem which contains subitems to
             # try to play the next subitem
-            return '%s\nnot found' % os.path.basename(filename)
+            return '%s\nnot found' % os.path.basename(url)
        
 
         # Build the MPlayer command
@@ -172,21 +202,7 @@ class MPlayer:
 
         additional_args = ''
 
-        if mode == 'file':
-            try:
-                mode = os.path.splitext(filename)[1]
-                mode = mode[1:]
-            except:
-                pass
-
-        elif mode == 'vcd':
-            # Filename is VCD title
-            filename = 'vcd://%s' % filename  
-
-        elif mode == 'dvd':
-            # Filename is DVD title
-            filename = 'dvd://%s' % filename  
-
+        if mode == 'dvd':
             if config.DVD_LANG_PREF:
                 # There are some bad mastered DVDs out there. E.g. the specials on
                 # the German Babylon 5 Season 2 disc claim they have more than one
@@ -202,13 +218,27 @@ class MPlayer:
                 # if defined
                 additional_args += ' -slang %s' % config.DVD_SUBTITLE_PREF
 
-        else:
-            print "Don't know what do play!"
-            print "What is:      " + str(filename)
-            print "What is mode: " + mode
-            print "What is:      " + mpl
-            return 'Unknown media: %s' % os.path.basename(filename)
+            additional_args += ' -dvd-device %s' % item.media.devicename
 
+        if item.media:
+            additional_args += ' -cdrom-device %s ' % item.media.devicename
+
+        if item.selected_subtitle == -1:
+            additional_args += ' -noautosub'
+
+        elif item.selected_subtitle and item.mode == 'file':
+            additional_args += ' -vobsubid %s' % item.selected_subtitle
+
+        elif item.selected_subtitle:
+            additional_args += ' -sid %s' % item.selected_subtitle
+            
+        if item.selected_audio:
+            additional_args += ' -aid %s' % item.selected_audio
+
+        if item.deinterlace:
+            additional_args += ' -vop pp=fd'
+
+        mode = item.mime_type
         if not config.MPLAYER_ARGS.has_key(mode):
             mode = 'default'
 
@@ -217,7 +247,7 @@ class MPlayer:
                 ' ' + config.MPLAYER_ARGS[mode])
 
         # make the options a list
-        mpl = mpl.split(' ') + [ filename ] + additional_args.split(' ')
+        mpl = mpl.split(' ') + [ url ] + additional_args.split(' ')
 
         if options:
             mpl += options.split(' ')
@@ -225,6 +255,7 @@ class MPlayer:
         # use software scaler?
         if '-nosws' in mpl:
             mpl.remove('-nosws')
+
         elif not '-framedrop' in mpl:
             mpl += config.MPLAYER_SOFTWARE_SCALER.split(' ')
 
@@ -262,9 +293,6 @@ class MPlayer:
                 command = command + [ '-vop' , 'crop=%s:%s:%s:%s' % (x2-x1, y2-y1, x1, y1) ]
             
             child.wait()
-
-        self.file        = item
-        self.item        = item
 
         self.plugins = plugin.get('mplayer_video')
 
@@ -337,8 +365,7 @@ class MPlayer:
 
         if event == 'AUDIO_ERROR_START_AGAIN':
             self.stop()
-            self.play(self.parameter[0], self.parameter[1], self.parameter[2],
-                      self.parameter[3])
+            self.play(self.parameter[0], self.parameter[1])
             return True
         
         if event in ( PLAY_END, USER_END ):
