@@ -13,6 +13,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/06/10 13:13:55  outlyer
+# Initial revision is complete, current main problem is that it only
+# writes 'cover.jpg' someone could add a submenu to choose between
+# per-file or per-directory images, but I have to go to class now.
+#
+# I've tested this, but please let me know if you find problems.
+#
 # Revision 1.1  2003/06/07 18:43:26  outlyer
 # The beginnings of a cover search plugin to complement Dischi's IMDB plugin
 # for video. Currently, it uses the ID3 tag to find the album cover from
@@ -91,49 +98,41 @@ class PluginInterface(plugin.ItemPlugin):
 
         amazon.setLicense('...') # must get your own key!
         cover = amazon.searchByKeyword('%s %s' % (artist,album) , product_line="music")
-        print cover[0].ImageUrlLarge
-
-        #name  = os.path.basename(os.path.splitext(name)[0])
-        #name  = re.sub('([a-z])([A-Z])', point_maker, name)
-        #name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
-        #name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
-        #parts = re.split('[\._ -]', name)
-        
-        #name = ''
-        #for p in parts:
-        #    name += '%s ' % p
-        
-        #items = []
-        #for id,name,year,type in helpers.imdb.search(name):
-        #    items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
-                                     #self.imdb_create_fxd, (id, year)) ]
-        #moviemenu = menu.Menu('IMDB QUERY', items)
+        items = []
+        for i in range(len(cover)):
+            items += [ menu.MenuItem('%s' % cover[i].ProductName,
+                                     self.cover_create, cover[i].ImageUrlLarge) ]
+        moviemenu = menu.Menu('Cover Results', items)
 
         box.destroy()
-        #menuw.pushmenu(moviemenu)
-        print album
-        print artist
-        box = PopupBox(text='Artist: %s\nAlbum: %s\nURL: %s\n' % (str(artist), str(album),str(cover[0].ImageUrlLarge)))
-        box.show()
-        import time
-        time.sleep(2)
-        box.destroy()
+        menuw.pushmenu(moviemenu)
         return
 
 
-    def imdb_create_fxd(self, arg=None, menuw=None):
+    def cover_create(self, arg=None, menuw=None):
         """
-        create fxd file for the item
+        create cover file for the item
         """
-        import helpers.imdb
+        import amazon
         import directory
+        import urllib2 
+        # image Image, cStringIO  # Required if you want to convert the file into something, Amazon
+                                 # only has JPEGs so it's a wasted step.
         
         box = PopupBox(text='getting data...')
         box.show()
         
-        filename = os.path.splitext(self.item.filename)[0]
-        helpers.imdb.get_data_and_write_fxd(arg[0], filename, None, None,
-                                            (self.item.filename, ), None)
+        #filename = os.path.splitext(self.item.filename)[0]
+        filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
+
+        fp = urllib2.urlopen(str(arg))
+        m = open(filename,'wb')
+        m.write(fp.read())
+        m.close()
+        fp.close()
+        #img = cStringIO.StringIO(fp.read())
+        #Image.open(img).save(filename)
+
 
         # check if we have to go one menu back (called directly) or
         # two (called from the item menu)
