@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/21 10:06:47  dischi
+# Make it work again, the last change was when we used osd_sdl.py
+#
 # Revision 1.2  2002/08/18 21:57:00  tfmalt
 # o Added margin handling.
 # o Added support for Icons in popupboxes.
@@ -54,8 +57,10 @@ __date__    = "$Date$"
 __version__ = "$Revision$" 
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
-import osd_sdl
+import osd
 import config
+
+osd = osd.get_singleton()
 
 from GUIObject import *
 from Color     import *
@@ -66,7 +71,6 @@ from types     import *
 DEBUG = 1
 # from debug import *
 
-osd = osd_sdl.get_singleton()
 
 class PopupBox(GUIObject):
     """

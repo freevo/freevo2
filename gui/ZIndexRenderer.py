@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/09/21 10:06:47  dischi
+# Make it work again, the last change was when we used osd_sdl.py
+#
 # Revision 1.1  2002/08/15 22:45:42  tfmalt
 # o Inital commit of Freevo GUI library. Files are put in directory 'gui'
 #   under Freevo.
@@ -45,9 +48,9 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
-import osd_sdl
+import osd
 
-osd = osd_sdl.get_singleton()
+osd = osd.get_singleton()
 
 _singleton = None
 

@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/21 10:06:47  dischi
+# Make it work again, the last change was when we used osd_sdl.py
+#
 # Revision 1.2  2002/08/18 22:15:20  tfmalt
 # o Moved debug and test code to its own file.
 #
@@ -94,7 +97,9 @@ DEBUG = 0
 if DEBUG:
     from gui.debug import *
 
-osd = osd_sdl.get_singleton()
+import osd
+
+osd = osd.get_singleton()
 zir = gui.ZIndexRenderer.get_singleton()
 
 

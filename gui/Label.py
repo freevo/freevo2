@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/21 10:06:47  dischi
+# Make it work again, the last change was when we used osd_sdl.py
+#
 # Revision 1.2  2002/08/18 21:54:12  tfmalt
 # o Added support for vertical and horizontal alignment of text.
 # o Added handling of vertical and horizontal margins to parent object.
@@ -58,6 +61,7 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 import pygame
 
 from GUIObject import *
+from osd import Font
 
 DEBUG = 0
 
@@ -281,7 +285,7 @@ class Label(GUIObject):
                 return f
 
         font       = pygame.font.Font(filename, size)
-        f          = osd_sdl.Font()
+        f          = Font()
         f.filename = filename
         f.ptsize   = size
         f.font     = font

@@ -76,27 +76,27 @@ if __name__ == '__main__':
     
     osd.update()
 
-    pb  = osd_sdl.SynchronizedObject( PopupBox(100, 100, 300, 150,
+    pb  = osd.SynchronizedObject( PopupBox(100, 100, 300, 150,
                                                'Hello again sailor',
                                                bg_color=Color((255,0,0,128)),
                                                border=Border.BORDER_FLAT,
                                                bd_width=1)
                                       )
 
-    pb2 = osd_sdl.SynchronizedObject( PopupBox(200, 150, 300, 150,
+    pb2 = osd.SynchronizedObject( PopupBox(200, 150, 300, 150,
                                                'Hello twice sailor',
                                                bg_color=Color((0,255,0,128)),
                                                border=Border.BORDER_FLAT,
                                                bd_width=2)
                                       )
                                       
-    pb3 = osd_sdl.SynchronizedObject( PopupBox(300, 200, 300, 150,
+    pb3 = osd.SynchronizedObject( PopupBox(300, 200, 300, 150,
                                                'Hello trice sailor',
                                                bg_color=Color((0,0,192,128)),
                                                border=Border.BORDER_FLAT,
                                                bd_width=3) )
     
-    pb4 = osd_sdl.SynchronizedObject( PopupBox(200, 200, 300, 150,
+    pb4 = osd.SynchronizedObject( PopupBox(200, 200, 300, 150,
                                                'Hello trice sailor',
                                                bg_color=Color((255,128,0,128)),
                                                border=Border.BORDER_FLAT) )
