@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/02/22 20:53:12  dischi
+# add bugreport text
+#
 # Revision 1.32  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -306,13 +309,22 @@ class GUIObject:
             p = self.osd.screen
 
         if self.surface != self.surface.get_abs_parent():
+            print '******************************************************************'
             print 'Error, surface is a subsurface (%s)' % self
+            print 'Please report the following lines to the freevo mailing list'
+            print 'or with the subject \'[Freevo-Bugreport\] GUI\' to'
+            print 'freevo@dischi-home.de.'
+            print
+            print 'Error, surface is a subsurface (%s)' % self
+            print traceback.print_exc()
+            print
             print 'GUIObject stack:'
             c = self
             while c:
                 print '  %s' % c
                 c = c.parent
             print
+            print '******************************************************************'
             return
         
         if not self.bg_surface:
@@ -333,8 +345,15 @@ class GUIObject:
         try:
             return self.parent.surface.subsurface(self.get_rect())
         except Exception, e:
+            print '******************************************************************'
             print 'Exception: %s' % e
+            print 'Please report the following lines to the freevo mailing list'
+            print 'or with the subject \'[Freevo-Bugreport\] GUI\' to'
+            print 'freevo@dischi-home.de.'
+            print
             print 'wanted %s for %s' % (self.get_rect(), self.parent.surface)
+            print traceback.print_exc()
+            print
             print 'GUIObject stack:'
             c = self
             while c:
