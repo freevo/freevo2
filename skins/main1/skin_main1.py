@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2002/12/02 22:09:41  dischi
+# DrawStringFramed should now work for the title and the items
+#
 # Revision 1.68  2002/11/28 22:06:25  outlyer
 # Reverting the switch to "DrawTextFramed" to "DrawText" since it was
 # making a bunch of text disappear. DrawTextFramed is the better way to do it,
@@ -456,9 +459,10 @@ class Skin:
 
             # Draw the selection bar for selected items
             if menu.selected == choice and obj.visible:
-                drawroundbox(x0 - obj.spacing + icon_present * icon_size * 1.2, top - 2, x0 + obj.spacing + width,
-                                 top + font_h + 2, color = obj.bgcolor,
-                                 radius=obj.radius)
+                drawroundbox(x0 - obj.spacing + icon_present * icon_size * 1.2,
+                             top - 2, x0 + obj.spacing + width,
+                             top + font_h + 2, color = obj.bgcolor,
+                             radius=obj.radius)
 
             if not text:
                 print "no text to display ... strange. Use default"
@@ -503,12 +507,15 @@ class Skin:
 
                 x = x + season_w + volume_w + \
                     osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
-                DrawText('-  %s' % show_name[3], obj, x=x, y=top)
+                DrawTextFramed('-  %s' % show_name[3], obj, x=x, y=top,
+                               width=width-(x-x0), height=-1, mode='hard')
                 
 
             # normal items
             else:
-		DrawText(text, obj, x=x0+icon_present*icon_size*1.2, y=top)
+		DrawTextFramed(text, obj, x=x0+icon_present*icon_size*1.2, y=top,
+                               width=width - icon_present*icon_size*1.2,
+                               mode='hard', height=-1)
 
 
             y0 += spacing
@@ -556,17 +563,8 @@ class Skin:
             width = osd.width
             if val.title.width:
                 width = val.title.width
-                
-            font_w, font_h = osd.stringsize(text, val.title.font, val.title.size)
 
-            if font_w + 40 > width:     # tv overscan
-                text = text + "..."
-                    
-            while font_w + 40 > width:
-                text = text[0:-4] + "..."
-                font_w, font_h = osd.stringsize(text, val.title.font, val.title.size)
-
-            DrawText(text, val.title)
+            DrawTextFramed(text, val.title, x=val.title.x-width/2, width=width, height=-1)
 
         if val.logo.image and val.logo.visible:
             if val.logo.width and val.logo.height:
