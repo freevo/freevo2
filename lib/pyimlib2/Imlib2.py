@@ -403,6 +403,14 @@ class Image:
 			color = tuple(color) + (255,)
 		return self._image.draw_ellipse(int(xc), int(yc), int(a), int(b), color, fill)
 
+
+	def get_pixel(self, (x, y)):
+		"""
+		Read the color for the pixel at x,y
+		"""
+		return self._image.get_pixel((x,y))
+
+	
 	def move_to_shmem(self, format = "BGRA", id = None):
 		"""
 		Creates a POSIX shared memory object and copy the image's raw data.  
