@@ -1,4 +1,5 @@
 #if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util.py - Some Utilities
 # -----------------------------------------------------------------------
@@ -9,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/07/30 15:13:01  outlyer
+# Add encoding to remove some warnings from Python 2.3. Has no effect on
+# Python < 2.3
+#
 # Revision 1.38  2003/07/18 19:46:36  dischi
 # function to get the datadir of a given directory
 #

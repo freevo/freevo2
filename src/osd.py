@@ -1,4 +1,5 @@
 #if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # osd.py - Low level graphics routines
 # -----------------------------------------------------------------------
@@ -9,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/07/30 15:13:01  outlyer
+# Add encoding to remove some warnings from Python 2.3. Has no effect on
+# Python < 2.3
+#
 # Revision 1.73  2003/07/19 19:16:05  dischi
 # support for loading an image which is already an Imaging object
 #

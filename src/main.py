@@ -1,4 +1,5 @@
 #if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # main.py - This is the Freevo main application code
 # -----------------------------------------------------------------------
@@ -9,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/07/30 15:13:00  outlyer
+# Add encoding to remove some warnings from Python 2.3. Has no effect on
+# Python < 2.3
+#
 # Revision 1.53  2003/07/13 19:35:44  rshortt
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
