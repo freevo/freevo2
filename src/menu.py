@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2003/12/01 19:09:10  dischi
+# accept all items in submenus
+#
 # Revision 1.68  2003/11/30 14:35:02  dischi
 # but the skin parsing (e.g. outicon) in Item to avoid duplicate code
 #
@@ -320,7 +323,7 @@ class MenuWidget(GUIObject):
     def make_submenu(self, menu_name, actions, item):
         items = []
         for a in actions:
-            if isinstance(a, MenuItem):
+            if isinstance(a, Item):
                 items.append(a)
             else:
                 items.append(MenuItem(a[1], a[0]))
