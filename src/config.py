@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2004/08/01 10:57:12  dischi
+# add messages for deactivated plugins
+#
 # Revision 1.110  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -289,7 +292,11 @@ def _debug_function_(s, level=1):
     where =  traceback.extract_stack(limit = 2)[0]
     if isinstance( s, unicode ):
         s = s.encode(encoding, 'replace')
-    s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
+    module = where[0][where[0].rfind('/')+1:]
+    if module == '__init__.py':
+        module = where[0][:where[0].rfind('/')]
+        module = module[module.rfind('/')+1:] + '/__init__.py'
+    s = '%s (%s): %s' % (module, where[1], s)
     # print debug message
     print s
 
@@ -897,3 +904,8 @@ if not HELPER:
 # make sure USER and HOME are set
 os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
 os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
+
+
+REDESIGN_BROKEN  = 'not working while gui redesign'
+REDESIGN_FIXME   = 'not working since gui redesign, feel free to fix this'
+REDESIGN_UNKNOWN = 'plugin may be broken after gui redesign, please check'
