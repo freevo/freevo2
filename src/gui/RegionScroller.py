@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/08/26 20:06:14  outlyer
+# Another Python warning down.
+#
 # Revision 1.15  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -231,8 +234,8 @@ class RegionScroller(Container):
     def set_surface(self, surface):
         self.region_surface = surface
 
-        (None, None, self.s_w, self.s_h) = self.region_surface_rect \
-                                         = self.region_surface.get_rect()
+        (self.s_w, self.s_h) = self.region_surface_rect \
+                                         = self.region_surface.get_rect()[2:3]
 
         self.v_x = 0
         self.v_y = 0
