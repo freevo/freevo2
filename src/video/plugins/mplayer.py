@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/27 17:12:37  dischi
+# exception handling
+#
 # Revision 1.5  2003/07/11 19:47:08  dischi
 # close file after parsing
 #
@@ -169,6 +172,7 @@
 
 import time, os
 import threading, signal
+import traceback
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -455,49 +459,31 @@ class MPlayer:
             self.stop()
             return self.item.eventhandler(event)
 
-        if event == VIDEO_SEND_MPLAYER_CMD:
-            self.thread.app.write('%s\n' % event.arg)
-            return TRUE
-
-        if event == MENU:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('dvdnav 5\n')
+        try:
+            if event == VIDEO_SEND_MPLAYER_CMD:
+                self.thread.app.write('%s\n' % event.arg)
                 return TRUE
 
-        if event == TOGGLE_OSD:
-            self.thread.app.write('osd\n')
+            if event == MENU:
+                if self.mode == 'dvdnav':
+                    self.thread.app.write('dvdnav 5\n')
+                    return TRUE
+
+            if event == TOGGLE_OSD:
+                self.thread.app.write('osd\n')
+                return TRUE
+
+            if event == PAUSE or event == PLAY:
+                self.thread.app.write('pause\n')
+                return TRUE
+
+            if event == SEEK:
+                self.thread.app.write('seek %s\n' % event.arg)
+                return TRUE
+        except:
+            print 'Exception while sending command to mplayer:'
+            traceback.print_exc()
             return TRUE
-
-        if event == PAUSE or event == PLAY:
-            self.thread.app.write('pause\n')
-            return TRUE
-
-        if event == SEEK:
-            self.thread.app.write('seek %s\n' % event.arg)
-            return TRUE
-
-        #if event == rc.UP and self.mode == 'dvdnav':
-        #    self.thread.app.write('dvdnav 1\n')
-        #    return TRUE
-
-        #if event == rc.DOWN:
-        #    if self.mode == 'dvdnav':
-        #        self.thread.app.write('dvdnav 2\n')
-        #        return TRUE
-
-        #if event == rc.LEFT:
-        #    if self.mode == 'dvdnav':
-        #        self.thread.app.write('dvdnav 3\n')
-        #    else:
-        #        self.thread.app.write('seek -60\n')
-        #    return TRUE
-
-        #if event == rc.RIGHT:
-        #    if self.mode == 'dvdnav':
-        #        self.thread.app.write('dvdnav 4\n')
-        #    else:
-        #        self.thread.app.write('seek 60\n')
-        #    return TRUE
         
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
