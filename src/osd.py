@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/04/03 10:23:16  dischi
+# dxr3 fix
+#
 # Revision 1.30  2003/04/03 09:13:21  dischi
 # oops
 #
@@ -347,6 +350,9 @@ class OSD:
         self.depth = pygame.display.mode_ok((self.width, self.height), 1)
         self.hw    = pygame.display.Info().hw
 
+        if config.CONF.display == 'dxr3':
+            self.depth = 32
+            
         self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
                                               self.depth)
 
