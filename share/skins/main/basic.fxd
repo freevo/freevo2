@@ -728,7 +728,7 @@
                     </if>
                     <if expression="tagline">
                         <text font="info tagline">"</text>
-                        <text font="info tagline" width="max" expression="tagline"
+                        <text font="info tagline" expression="tagline" 
 			    dim="no"/>
                         <text font="info tagline">"</text>
                         <newline/>
