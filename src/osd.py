@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/07/03 21:27:21  dischi
+# Created a new drawstringframed. Please test it. The old code is still there
+# if there are major problems, but I tested it good, and it worked
+#
 # Revision 1.52  2003/07/02 20:02:54  dischi
 # Speed improvements:
 # o thumbanils are now stored as pickled raw bitmaps to improve loading
@@ -81,6 +85,9 @@ import cStringIO
 DEBUG = config.DEBUG
 TRUE  = 1
 FALSE = 0
+
+USE_NEW_DSF = TRUE
+
 
 
 help_text = """\
@@ -210,6 +217,28 @@ class Font:
         self.font     = font
 
 
+class FontInfo:
+    def __init__(self, font):
+        self.font   = font
+        self.height = max(self.font.size('A')[1], self.font.size('j')[1])
+        self.chars  = {}
+
+    def charsize(self, c):
+        try:
+            return self.chars[c]
+        except:
+            w = self.font.size(c)[0]
+            self.chars[c] = w
+            return w
+
+    def stringsize(self, s):
+        w = 0
+        for c in s:
+            w += self.charsize(c)
+        return w
+
+    
+
 class OSD:
 
     # Some default colors
@@ -237,13 +266,13 @@ class OSD:
         self.stringcache = objectcache.ObjectCache(100, desc='string')
         self.bitmapcache = objectcache.ObjectCache(10, desc='bitmap')
         self.stringsize_cache = {}
+        self.font_info_cache = {}
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
 
         self.width = config.CONF.width
         self.height = config.CONF.height
-
         if config.CONF.display== 'dxr3':
             os.environ['SDL_VIDEODRIVER'] = 'dxr3'
 
@@ -556,9 +585,16 @@ class OSD:
         - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
           or 'soft' (based on words)
         """
+
+        if USE_NEW_DSF:
+            return self.new_dsf_calc(string, x, y, width, height, fgcolor, bgcolor,
+                                     font, ptsize, align_h, align_v, mode, ellipses,
+                                     layer)[1:]
+
         data = self.dsf_calc(string,x,y,width, height, fgcolor, bgcolor,
                              font, ptsize, align_h, align_v, mode, ellipses)
-        self.dsf_draw(data[0], layer)
+        if layer != '':
+            self.dsf_draw(data[0], layer)
         return data[1:]
 
 
@@ -570,6 +606,10 @@ class OSD:
         list (objects to draw, words not drawn, geometry of the text).
         The objects to draw can be given to dsf_draw to do the drawing
         """
+        if USE_NEW_DSF:
+            return self.new_dsf_calc(string, x, y, width, height, fgcolor, bgcolor,
+                                     font, ptsize, align_h, align_v, mode, ellipses,
+                                     '')
         if mode == 'hard':
             return self._dsf_hard(string,x,y,width, height, fgcolor, bgcolor,
                                   font, ptsize, align_h, align_v, ellipses)
@@ -610,7 +650,7 @@ class OSD:
             print 'FONT: %s %s' % (font, ptsize)
 
         try:        
-            ren = self._renderstring(string, font, ptsize, fgcolor, bgcolor)
+            ren = self._renderstring(stringproxy(string), font, ptsize, fgcolor, bgcolor)
         except:
             print "Render failed, skipping..."    
             return None
@@ -1055,21 +1095,25 @@ class OSD:
 
         def draw(self, layer=None):
             osd = get_singleton()
-            try:        
-                ren = osd._renderstring(self.string, self.font, self.ptsize,
+            try:
+                ren = osd._renderstring(stringproxy(self.string),
+                                        self.font, self.ptsize,
                                         self.fgcolor, self.bgcolor)
             except:
                 print "Render failed, skipping..."    
                 return None
         
             # Handle horizontal alignment
-            w, h = ren.get_size()
-            tx = self.x
-            if self.align == 'center':
-                tx = self.x - w/2
-            elif self.align == 'right':
-                tx = self.x - w
-            
+            if 0:
+                w, h = ren.get_size()
+                tx = self.x
+                if self.align == 'center':
+                    tx = self.x - w/2
+                elif self.align == 'right':
+                    tx = self.x - w
+            else:
+                tx = self.x
+                
             if layer:
                 layer.blit(ren, (tx, self.y))
             else:
@@ -1559,3 +1603,187 @@ class OSD:
         return (drawing_objects, rest_words, (return_x0,return_y0, return_x1, return_y1))
 
 
+
+
+
+
+    # NEW drawstringframed stuff
+
+
+    def getFontInfo(self, font, ptsize):
+        """
+        return cached font info
+        """
+        key = (font, ptsize)
+        try:
+            return self.font_info_cache[key]
+        except:
+            fi = FontInfo(self._getfont(font, ptsize))
+            self.font_info_cache[key] = fi
+            return fi
+
+
+        
+    def dsf_calc_line(self, string, max_width, font, hard, ellipses, word_splitter):
+        """
+        calculate _one_ line for drawstringframed
+        """
+        string = string.strip()
+        c = 0                           # num of chars fitting
+        width = 0                       # width needed
+        ls = len(string)
+        space = 0                       # position of last space
+        last_char_size = 0              # width of the last char
+        last_word_size = 0              # width of the last word
+
+        if ellipses:
+            # check the width of the ellipses
+            ellipses_size = font.stringsize(ellipses)
+            if ellipses_size > max_width:
+                # if not even the ellipses fit, we have not enough space
+                # for the text, try to shorten the ellipses until they fit
+                while(ellipses_size > max_width):
+                    ellipses = ellipses[:-1]
+                    ellipses_size = font.stringsize(ellipses)
+                return (ellipses_size, ellipses, string)
+        else:
+            ellipses_size = 0
+
+        data = None
+        while(TRUE):
+            if width > max_width - ellipses_size and not data:
+                # save this, we will need it when we have not enough space
+                # but first try to fit the text without ellipses
+                data = c, space, width, last_char_size, last_word_size
+            if width > max_width:
+                # ok, that's it. We don't have any space left
+                break
+            if ls == c:
+                # everything fits
+                return (width, string, '')
+            if string[c] == '\n':
+                # linebreak, we have to stop
+                return (width, string[:c], string[c+1:])
+            if not hard and string[c] in word_splitter:
+                # rememeber the last space for mode == 'soft' (not hard)
+                space = c
+                last_word_size = 0
+
+            # add a char
+            last_char_size = font.charsize(string[c])
+            width += last_char_size
+            last_word_size += last_char_size
+            c += 1
+
+        # restore to the pos when the width was one char to big and
+        # incl. ellipses_size
+        c, space, width, last_char_size, last_word_size = data
+
+        if hard:
+            # remove the last char, than it fits
+            c -= 1
+            width -= last_char_size
+
+        else:
+            # go one word back, than it fits
+            c = space
+            width -= last_word_size
+
+        # calc the matching and rest string and return all this
+        return (width, string[:c]+ellipses, string[c:])
+
+            
+
+    def new_dsf_calc(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                     font=None, ptsize=0, align_h='left', align_v='top',
+                     mode='hard', ellipses='...', layer=None):
+        """
+        the new drawstringframed
+        """
+        if not string:
+            return [], '', (0,0,0,0)
+
+        if font == None:
+            font = config.OSD_DEFAULT_FONTNAME
+        if not ptsize:
+            ptsize = config.OSD_DEFAULT_FONTSIZE
+
+        font = self.getFontInfo(font, ptsize)
+        line_height = font.height * 1.1
+
+        if height == -1:
+            height = line_height
+
+        if width <= 0 or height < line_height:
+            return [], string, (0,0,0,0)
+            
+        num_lines_left = int(height / line_height)
+        lines = []
+        current_ellipses = ''
+        hard = mode == 'hard'
+        
+        while(num_lines_left):
+            # calc each line and put the rest into the next
+            if num_lines_left == 1:
+                current_ellipses = ellipses
+            (w, s, r) = self.dsf_calc_line(string, width, font, hard,
+                                           current_ellipses, ' ')
+            if s == '' and not hard:
+                # nothing fits? Try to break words at ' -_'
+                (w, s, r) = self.dsf_calc_line(string, width, font, hard,
+                                               ellipses, ' -_')
+                if s == '':
+                    # still nothing? Use the 'hard' way
+                    (w, s, r) = self.dsf_calc_line(string, width, font, 'hard',
+                                                   ellipses, ' ')
+            string = r
+            lines.append((w, s))
+            num_lines_left -= 1
+            if not r:
+                # finished, everything fits
+                break
+
+        # calc the height we want to draw (based on different align_v)
+        height_needed = (int(height / line_height) - num_lines_left) * line_height
+        if align_v == 'bottom':
+            y += (height - height_needed)
+        elif align_v == 'center':
+            y += int((height - height_needed)/2)
+
+        y0 = y
+        min_x = 10000
+        max_x = 0
+
+        if not layer and layer != '':
+            layer = self.screen
+
+        for w, l in lines:
+            if align_h == 'left' or align_h == 'justified':
+                x0 = x
+            elif align_h == 'right':
+                x0 = x + (width - w)
+            elif align_h == 'center':
+                x0 = x + int((width-w)/2)
+            else:
+                print 'what align_h is that: %s' % align_h
+                x0 = x
+
+            if layer != '':
+                try:
+                    # render the string. Ignore all the helper functions for that
+                    # in here, it's faster because he have more information
+                    # in here. But we don't use the cache, but since the skin only
+                    # redraws changed areas, it doesn't matter and saves the time
+                    # when searching the cache
+                    layer.blit(font.font.render(l, 1, self._sdlcol(fgcolor)), (x0, y0))
+                except:
+                    print "Render failed, skipping..."    
+
+            if x0 < min_x:
+                min_x = x0
+            if x0 + w > max_x:
+                max_x = x0 + w
+            y0 += line_height
+
+        return [], r, (min_x, y, max_x, y+height_needed)
+    
