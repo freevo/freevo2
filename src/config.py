@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2003/11/09 22:34:17  rshortt
+# We need True/False defs a bit higher up.
+#
 # Revision 1.67  2003/11/09 17:08:24  dischi
 # add /usr/local/etc/freevo as search path
 #
@@ -106,6 +109,17 @@ try:
 except: # unavailable, define '_' for all modules
     import __builtin__
     __builtin__.__dict__['_']= lambda m: m
+
+
+# add True and False to __builtin__ for older python versions
+if float(sys.version[0:3]) < 2.3:
+    __builtin__.__dict__['True']  = 1
+    __builtin__.__dict__['False'] = 0
+
+# temp solution until this is fixed to True and False
+# in all freevo modules
+__builtin__.__dict__['TRUE']  = 1
+__builtin__.__dict__['FALSE'] = 0
 
 
 class Logger:
@@ -265,16 +279,6 @@ DEBUG_STDOUT = 1
 # A higher number will generate more detailed output from some modules.
 #
 DEBUG = 0
-
-# add True and False to __builtin__ for older python versions
-if float(sys.version[0:3]) < 2.3:
-    __builtin__.__dict__['True']  = 1
-    __builtin__.__dict__['False'] = 0
-
-# temp solution until this is fixed to True and False
-# in all freevo modules
-__builtin__.__dict__['TRUE']  = 1
-__builtin__.__dict__['FALSE'] = 0
 
 #
 # find the log directory
