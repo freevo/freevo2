@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/12/18 18:21:33  outlyer
+# I'm assuming these were supposed to be debug messages.
+#
 # Revision 1.3  2003/12/07 11:06:45  dischi
 # small bugfix
 #
@@ -228,7 +231,7 @@ isdir    = os.path.isdir
 islink   = os.path.islink
 
 if not config.OVERLAY_DIR:
-    print 'OVERLAY_DIR not set, virtual filesystem won\'t work'
+    _debug_('OVERLAY_DIR not set, virtual filesystem won\'t work',1)
 else:
-    print 'Virtual filesystem activated'
+    _debug_('Virtual filesystem activated',1)
     
