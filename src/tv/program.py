@@ -140,9 +140,11 @@ class ProgramItem(Item):
         show a submenu for this item
         """
         items = []
-        if self.scheduled:
+        if self.scheduled and not self.scheduled.status in \
+           ('deleted', 'missed'):
+            print self.scheduled.status
             if self.start < time.time() + 10 and \
-                   self.scheduled[5] in ('recording', 'saved'):
+                   self.scheduled.status in ('recording', 'saved'):
                 items.append(menu.MenuItem(_('Watch recording'), \
                                            self.watch_recording))
             if self.stop > time.time():
