@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/17 06:38:26  krister
+# Cleaned up, need a better background for the image not loadable warning.
+#
 # Revision 1.14  2003/02/17 06:19:32  outlyer
 # Replaced orange on black screen error message with skin.Popup to match
 # behaviour elsewhere.
@@ -168,12 +171,9 @@ class ImageViewer:
             image = item.loadimage( )
 
         if not image:
-            #osd.clearscreen(color=osd.COL_BLACK)
-            #osd.drawstring('Image error on "%s"' % filename, osd.width/2, osd.height/2,
-            #               fgcolor=osd.COL_ORANGE, align='center')
-            # update the OSD
+            osd.clearscreen(color=osd.COL_BLACK)
             osd.update()
-            skin.PopupBox('Can\'t Open Image\n"%s"' % (filename))
+            skin.PopupBox("Can't Open Image\n'%s'" % (filename))
             return
         
 	width, height = image.get_size()
