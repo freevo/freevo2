@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2003/02/21 18:31:22  dischi
+# Small fix for Aubin
+#
 # Revision 1.82  2003/02/20 02:54:20  krister
 # Made an except statement specific for the error it handles.
 #
@@ -692,7 +695,8 @@ class Skin:
         # if there is an image and the selection will be cover the image
         # shorten the selection
 
-        if image_x and val.items.x + val.items.width > image_x:
+        if image_x and val.items.x + val.items.width > image_x and \
+           val.items.x < image_x:
             selection_length = image_x - val.items.x
 
         self.DrawMenu_Selection(menuw, val, val.items.x, val.items.y, selection_length, \
