@@ -16,10 +16,6 @@
 # route for the given address. If the default route is used, make sure the
 # mbus messages are not eaten by an iptable rule.
 #
-# Note: this is a test only right now. To test some basic stuff, call
-#       './freevo recordserver' and
-#       './freevo execute src/tv/recordings.py' in two different shells.
-#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -390,6 +386,8 @@ class Instance(mbus.Guides):
         attribute 'present' of this entity can be used to check if the entity
         joined the bus (present = True) or is gone now (present = False).
         """
+        for e in self.__entities:
+            func(e)
         self.__notification_callbacks.append(func)
 
 
