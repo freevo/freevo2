@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/06/29 20:45:14  dischi
+# mmpython support
+#
 # Revision 1.15  2003/06/14 00:09:40  outlyer
 # The "Smartsort" code. You can enable it in local_conf, it's disabled
 # by default. I fixed the smartsort cmpfunc to work a little more
@@ -105,6 +108,7 @@ import video
 import audio
 import image
 import games
+import mmpython
 
 import event as em
 
@@ -112,6 +116,7 @@ from item import Item
 
 import gui.PasswordInputBox as PasswordInputBox
 import gui.AlertBox as AlertBox
+from gui.PopupBox import PopupBox
 
 # XML support
 from xml.utils import qp_xml
@@ -289,16 +294,6 @@ class DirItem(Playlist):
         return items
     
 
-    def getattr(self, attr):
-        """
-        return the specific attribute as string or an empty string
-        """
-        a = Item.getattr(self, attr)
-        if not a and self.info and self.info.has_key(attr):
-            a = str(self.info[attr])
-        return a
-
-
     def cwd(self, arg=None, menuw=None):
         """
         make a menu item for each file in the directory
@@ -362,6 +357,29 @@ class DirItem(Playlist):
         # the interface functions must remove the files they cover, they
         # can also remove directories
 
+        mmpython_dir = self.dir
+        if self.media:
+            if self.dir != self.media.mountdir:
+                mmpython_dir = None
+                num_changes = 0
+            else:
+                mmpython_dir = 'cd://%s:%s:' % (self.media.devicename, self.media.mountdir)
+
+        if mmpython_dir:
+            num_changes = mmpython.check_cache(mmpython_dir)
+            
+        pop = None
+
+        if num_changes > 10:
+            if self.media:
+                pop = PopupBox(text='Scanning disc, be patient...')
+            else:
+                pop = PopupBox(text='Scanning directory, be patient...')
+            pop.show()
+
+        if num_changes > 0:
+            mmpython.cache_dir(mmpython_dir)
+            
         play_items = []
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
@@ -440,6 +458,13 @@ class DirItem(Playlist):
 
         title = self.name
 
+        if pop:
+            pop.destroy()
+            # closing the poup will rebuild the menu which may umount
+            # the drive
+            if self.media:
+                self.media.mount()
+
         # autoplay
         if len(items) == 1 and items[0].actions() and \
            self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
@@ -461,10 +486,15 @@ class DirItem(Playlist):
                 dirwatcher_thread.setDaemon(1)
                 dirwatcher_thread.start()
 
-            dirwatcher_thread.cwd(self, item_menu, self.dir, self.all_files)
+            if self.media:
+                # don't watch rom drives
+                dirwatcher_thread.cwd(self, item_menu, None, self.all_files)
+            else:
+                dirwatcher_thread.cwd(self, item_menu, self.dir, self.all_files)
             self.menu = item_menu
 
         return items
+
 
     def reload(self):
         """
@@ -605,6 +635,7 @@ class DirItem(Playlist):
                     
         # reload the menu, use an event to avoid problems because this function
         # was called by a thread
+        del self.menu.skin_force_text_view
         rc.post_event('MENU_REBUILD')
 
 
@@ -637,6 +668,9 @@ class DirwatcherThread(threading.Thread):
         self.lock.release()
 
     def scan(self):
+        if not self.dir:
+            return
+        
         self.lock.acquire()
 
         try:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/06/29 20:45:14  dischi
+# mmpython support
+#
 # Revision 1.48  2003/06/20 17:38:11  dischi
 # setup mmpython if it is installed
 #
@@ -380,14 +383,12 @@ if __name__ == "__main__":
             os.rename(file, 'Docs/api/%s' % file)
         shutdown(allow_sys_shutdown=0)
 
-    try:
-        import mmpython
-        mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
-        if not os.path.isdir(mmcache):
-            os.mkdir(mmcache)
-        mmpython.use_cache(mmcache)
-    except:
-        pass
+    import mmpython
+    mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
+    if not os.path.isdir(mmcache):
+        os.mkdir(mmcache)
+    mmpython.use_cache(mmcache)
+    mmpython.mediainfo.DEBUG = 0
     
     try:
         main_func()

@@ -9,43 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.10  2003/06/07 04:59:10  outlyer
-# Treat Mixed (CD Audio + Data Track) as CD Audio too since the ioctl
-# returns a different value.
+# Revision 1.11  2003/06/29 20:44:21  dischi
+# mmpython support
 #
-# It would be nice to have the data track mounted as well. Looking into it now.
-#
-# Revision 1.9  2003/05/29 09:06:18  dischi
-# small fix again
-#
-# Revision 1.8  2003/05/28 15:11:43  dischi
-# small bugfix
-#
-# Revision 1.7  2003/05/27 17:53:35  dischi
-# Added new event handler module
-#
-# Revision 1.6  2003/04/26 15:09:19  dischi
-# changes for the new mount/umount
-#
-# Revision 1.5  2003/04/24 19:56:38  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.4  2003/04/24 19:14:50  dischi
-# pass xml_file to directory and videoitems
-#
-# Revision 1.3  2003/04/20 17:36:49  dischi
-# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
-# images like before, but also fxd files for the tv show with global
-# informations (plot/tagline/etc) and mplayer options.
-#
-# Revision 1.2  2003/04/20 12:43:33  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.1  2003/04/20 10:53:23  dischi
-# moved identifymedia and mediamenu to plugins
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -89,12 +55,8 @@ from item import Item
 TRUE  = 1
 FALSE = 0
 
-# CDDB Stuff
-try:
-    import DiscID, CDDB
-except:
-    print "CDDB not installed."
-    pass
+import mmpython
+
 
 from video import xml_parser, videoitem
 from directory import DirItem
@@ -370,34 +332,18 @@ class Identify_Thread(threading.Thread):
             os.close(fd)
             return
 
-        # Check media type (data, audio)
-        s = ioctl(fd, CDROM_DISC_STATUS)
-        if s == CDS_AUDIO or s == CDS_MIXED:
-            # XXX We should mount the data portion too if the CD is mixed
+        data = mmpython.parse(media.devicename)
+
+        if data and data.mime == 'audio/cd':
             os.close(fd)
-            media.type  = 'audiocd'
-            try:
-                cdrom = DiscID.open(media.devicename)
-                disc_id = DiscID.disc_id(cdrom)
-                media.info = AudioDiskItem(disc_id, parent=None, name='',
-                                           devicename=media.devicename,
-                                           display_type='audio')
-                (query_stat, query_info) = CDDB.query(disc_id)
-
-                media.info.handle_type = 'audio'
-                if query_stat == 200:
-                    media.info.title = query_info['title']
-
-                elif query_stat == 210 or query_stat == 211:
-                    print "multiple matches found! Matches are:"
-                    for i in query_info:
-                        print "ID: %s Category: %s Title: %s" % \
-                              (i['disc_id'], i['category'], i['title'])
-                else:
-                    print "failure getting disc info, status %i" % query_stat
-                    media.info.title = 'Unknown CD Album'
-            except:
-                pass
+            disc_id = data.id
+            media.info = AudioDiskItem(disc_id, parent=None,
+                                       devicename=media.devicename,
+                                       display_type='audio')
+            media.info.handle_type = 'audio'
+            if data.title:
+                media.info.name = data.title
+            media.info.info = data
             return
 
         # try to set the speed
@@ -406,48 +352,34 @@ class Identify_Thread(threading.Thread):
                 ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
             except:
                 pass
+            os.close(fd)
             
-        mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
-                      ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd'),
-		      ('DVD','/VIDEO_TS/','dvd')]
-
         image = title = movie_info = more_info = xml_file = None
 
-        # Read the volume label directly from the ISO9660 file system
-        
-        os.close(fd)
-        try:
-            img = open(media.devicename)
-            img.seek(0x0000832d)
-            id = img.read(16)
-            img.seek(32808, 0)
-            label = img.read(32)
-            m = LABEL_REGEXP(label)
-            if m:
-                label = m.group(1)
-            img.close()
-        except IOError:
-            print 'I/O error on disc %s' % media.devicename
+        if not data:
+            # this should never happen
             return
-
-        media.id    = id+label
-        media.label = ''
+        
+        media.id    = data.id
+        media.label = data.label
         media.type  = 'cdrom'
+
+        label = data.label
         
         # is the id in the database?
-        if id+label in config.MOVIE_INFORMATIONS_ID:
-            movie_info = config.MOVIE_INFORMATIONS_ID[id+label]
+        if media.id in config.MOVIE_INFORMATIONS_ID:
+            movie_info = config.MOVIE_INFORMATIONS_ID[media.id]
             if movie_info:
                 title = movie_info.name
             
         # no? Maybe we can find a label regexp match
         else:
             for (re_label, movie_info_t) in config.MOVIE_INFORMATIONS_LABEL:
-                if re_label.match(label):
+                if re_label.match(media.label):
                     movie_info = movie_info_t
                     if movie_info_t.name:
                         title = movie_info.name
-                        m = re_label.match(label).groups()
+                        m = re_label.match(media.label).groups()
                         re_count = 1
 
                         # found, now change the title with the regexp. E.g.:
@@ -462,41 +394,75 @@ class Identify_Thread(threading.Thread):
         if movie_info:
             image = movie_info.image
                         
-        # Disc is data of some sort. Mount it to get the file info
-        util.mount(media.mountdir, force=TRUE)
 
-        # Check for DVD/VCD/SVCD
-        for mediatype in mediatypes:
-            if os.path.exists(media.mountdir + mediatype[1]):
-                util.umount(media.mountdir)
+        # DVD/VCD/SVCD:
+        # There is data from mmpython for these three types
+        if data.mime in ('video/cd', 'video/dvd'):
+            if not title:
+                title = '%s [%s]' % (data.mime[6:].upper(), media.label)
 
-                if not title:
-                    title = '%s [%s]' % (mediatype[0], label)
+            if movie_info:
+                media.info = copy.copy(movie_info)
+            else:
+                media.info = videoitem.VideoItem('0', None)
 
-                if movie_info:
-                    media.info = copy.copy(movie_info)
-                else:
-                    media.info = videoitem.VideoItem('0', None)
+            media.info.name = title
+            media.info.mode = data.mime[6:]
+            media.info.media = media
 
-                media.info.label = label
-                media.info.name = title
-                media.info.mode = mediatype[2]
-                media.info.media = media
+            media.type  = data.mime[6:]
 
-                media.type  = mediatype[2]
+            if media.info.info:
+                for i in media.info.info:
+                    if media.info.info[i]:
+                        data[i] = media.info.info[i]
+            media.info.info = data
 
-                if os.path.isfile(config.COVER_DIR+label+'.jpg'):
-                    media.info.image = config.COVER_DIR+label+'.jpg'
-                return
-        
-        # Check for movies/audio/images on the disc
-        mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)
-        mp3_files = util.match_files(media.mountdir, config.SUFFIX_AUDIO_FILES)
-        image_files = util.match_files(media.mountdir, config.SUFFIX_IMAGE_FILES)
+            # copy configure options from track[0] to main item
+            # for playback
+            for k in ('audio', 'subtitles', 'chapters' ):
+                if media.info.info.tracks[0].has_key(k):
+                    if not media.info.info.has_key(k):
+                        media.info.info.keys.append(k)
+                        media.info.info[k] = media.info.info.tracks[0][k]
 
-        util.umount(media.mountdir)
+            if os.path.isfile(config.COVER_DIR+label+'.jpg'):
+                media.info.image = config.COVER_DIR+label+'.jpg'
 
-        if DEBUG:
+            media.info.num_titles = len(data.tracks)
+            # Hack to avoid rescan, remove this when mmpython is used
+            # everytime
+            media.info.scanned = TRUE
+            return
+
+        if data.tracks:
+            mplayer_files = []
+            mp3_files     = []
+            image_files   = []
+            for t in data.tracks:
+                if t and t['url']:
+                    file = t['url'][len(media.devicename)+6:].replace(':', '/')
+                    if util.match_suffix(file, config.SUFFIX_VIDEO_FILES):
+                        mplayer_files.append(file)
+                    if util.match_suffix(file, config.SUFFIX_AUDIO_FILES):
+                        mp3_files.append(file)
+                    if util.match_suffix(file, config.SUFFIX_IMAGE_FILES):
+                        image_files.append(file)
+                    
+                
+        else:
+            # Disc is data of some sort. Mount it to get the file info
+            util.mount(media.mountdir, force=TRUE)
+
+            # Check for movies/audio/images on the disc
+            mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)
+            mp3_files = util.match_files(media.mountdir, config.SUFFIX_AUDIO_FILES)
+            image_files = util.match_files(media.mountdir, config.SUFFIX_IMAGE_FILES)
+
+            util.umount(media.mountdir)
+
+
+        if DEBUG > 2:
             print 'identifymedia: mplayer = "%s"' % mplayer_files
             print 'identifymedia: mp3="%s"' % mp3_files
             print 'identifymedia: image="%s"' % image_files

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/06/29 20:45:14  dischi
+# mmpython support
+#
 # Revision 1.18  2003/06/22 20:48:45  dischi
 # special len() support for new info_area
 #
@@ -81,8 +84,7 @@ FALSE = 0
 # like VideoItem, AudioItem and ImageItem
 #
 class Item:
-    def __init__(self, parent = None):
-        self.name = None                # name in menu
+    def __init__(self, parent = None, info = None):
         self.image = None               # imagefile
         
         self.type   = None              # type: e.g. video, audio, dir, playlist
@@ -91,6 +93,19 @@ class Item:
         self.xml_file = None            # skin informationes etc.
         self.menuw    = None
         self.eventhandler_plugins = []
+
+        if not info:
+            self.info = {}
+        else:
+            self.info = info
+
+        # name in menu
+        try:
+            self.name = info['title']
+            
+        except (TypeError, AttributeError, KeyError):
+            self.name = None                
+            
         # possible variables for an item.
         # some or only needed for video or image or audio
         # these variables are copied by the copy function
@@ -100,14 +115,6 @@ class Item:
                                         # directories of a cdrom
 
         self.mplayer_options = ''
-
-        self.url     = ''
-        self.genre   = ''
-        self.tagline = ''
-        self.plot    = ''
-        self.runtime = ''
-        self.year    = ''
-        self.rating  = ''
 
         self.rom_id    = []
         self.rom_label = []
@@ -132,19 +139,12 @@ class Item:
         self.handle_type = obj.handle_type
         self.mplayer_options = obj.mplayer_options
 
-        self.url     = obj.url
-        self.genre   = obj.genre
-        self.tagline = obj.tagline
-        self.plot    = obj.plot
-        self.runtime = obj.runtime
-        self.year    = obj.year
-        self.rating  = obj.rating
-
         self.rom_id    = obj.rom_id
         self.rom_label = obj.rom_label
         self.media     = obj.media
 
         self.elapsed = obj.elapsed
+        self.info     = obj.info
         
 
     # returns a list of possible actions on this item. The first
@@ -184,17 +184,43 @@ class Item:
         """
         return the specific attribute as string or an empty string
         """
-        if hasattr(self, attr) and str(getattr(self,attr)):
-            return str(getattr(self,attr))
-        if attr[:4] == 'len(' and attr[-1] == ')' and hasattr(self, attr[4:-1]):
-            return str(len(getattr(self, attr[4:-1])))
-        if hasattr(self, 'info') and self.info:
-            if self.info.has_key(attr):
-                return str(self.info[attr])
-            # XXX old info area, delete next two lines
-            if attr[:4] == 'len_' and self.info.has_key(attr[4:]):
-                return str(len(self.info[attr[4:]]))
-            # new info area
-            if attr[:4] == 'len(' and attr[-1] == ')' and self.info.has_key(attr[4:-1]):
-                return str(len(self.info[attr[4:-1]]))
+        if attr == 'length':
+            try:
+                length = int(self.info['length'])
+            except ValueError:
+                return self.info['length']
+            except:
+                try:
+                    length = int(self.length)
+                except:
+                    return ''
+            if length / 3600:
+                return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
+            else:
+                return '%d:%02d' % (length / 60, length % 60)
+
+        if attr[:4] == 'len(' and attr[-1] == ')':
+            try:
+                r = self.info[attr[4:-1]]
+            except:
+                try:
+                    r = getattr(self,attr[4:-1])
+                except:
+                    return ''
+                
+            if r != None:
+                return str(len(r))
+
+        else:
+            try:
+                r = self.info[attr]
+            except:
+                try:
+                    r = getattr(self,attr)
+                except:
+                    return ''
+                
+            if r != None and str(r):
+                return str(r)
+
         return ''
