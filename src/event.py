@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/07/21 11:32:31  dischi
+# fix dvd events for language settings
+#
 # Revision 1.47  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -374,6 +377,9 @@ DVD_EVENTS = {
     'FFWD'      : Event(SEEK, arg=10),
     'GUIDE'     : DVDNAV_TITLEMENU,
     'MENU'      : DVDNAV_MENU,
+    'LANG'      : VIDEO_NEXT_AUDIOLANG,
+    'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
+    'ANGLE'     : VIDEO_NEXT_ANGLE,
     'CH+'       : NEXT,
     'CH-'       : PREV
     }
@@ -537,7 +543,8 @@ DEFAULT_KEYMAP = {
     key.K_s           : 'STOP',
     key.K_F6          : 'REC',
     key.K_PERIOD      : 'EJECT',
-    key.K_l           : 'SUBTITLE'
+    key.K_l           : 'SUBTITLE',
+    key.K_a           : 'LANG'
     }
 
 
