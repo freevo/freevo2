@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/10 07:11:23  outlyer
+# Just some fixes to prevent the idle bar from appearing on top of widescreen
+# video.
+#
 # Revision 1.26  2003/03/02 22:09:19  dischi
 # Reload main menu on skin change, too
 #
@@ -517,11 +521,12 @@ def main_func():
             event = rc.poll()
             if event:
                 break
-            if not rc.app:
+            if not rc.func:
                 m and m.poll()
             time.sleep(0.1)
 
-        m and m.refresh()
+        if not rc.func:
+            m and m.refresh()
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
             print "Got VOLUP in main!"
