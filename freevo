@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.118  2004/09/15 21:07:02  dischi
+# better build handling
+#
 # Revision 1.117  2004/08/29 18:37:05  dischi
 # epeg support for fast jpg thumbnailing
 #
@@ -293,12 +296,18 @@ if os.path.isdir(os.path.join(os.path.dirname(freevo_script), 'src/plugins')):
     # we start freevo from a directory
     #
     dname = os.path.dirname(freevo_script)
-    freevo_python  = os.path.join(dname, 'src')
-    freevo_helpers = os.path.join(dname, 'src/helpers')
+    freevo_python  = os.path.join(dname, 'site-packages/freevo')
+    freevo_helpers = os.path.join(dname, 'site-packages/freevo/helpers')
     freevo_locale  = os.path.join(dname, 'i18n')
     freevo_share   = os.path.join(dname, 'share')
     freevo_contrib = os.path.join(dname, 'contrib')
     freevo_config  = os.path.join(dname, 'freevo_config.py')
+
+    # extend PYTHONPATH to internal site-packages
+    if os.environ.has_key('PYTHONPATH'):
+        os.environ['PYTHONPATH'] = '%s/site-packages:%s' % (dname, os.environ['PYTHONPATH'])
+    else:
+        os.environ['PYTHONPATH'] = freevo_python
 
     if os.path.isfile(os.path.join(dname, 'runtime/runapp')):
         #
@@ -347,23 +356,17 @@ else:
     python = [ python ]
 
 
-
-# add the variables from above into environ so Freevo can use them, too
-for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_locale',
-            'freevo_share', 'freevo_contrib', 'freevo_config', 'freevo_helpers'):
-    os.environ[var.upper()] = eval(var)
-
 # extend PYTHONPATH to freevo
 if os.environ.has_key('PYTHONPATH'):
     os.environ['PYTHONPATH'] = '%s:%s' % (freevo_python, os.environ['PYTHONPATH'])
 else:
     os.environ['PYTHONPATH'] = freevo_python
 
-# FIXME: add lib, mevas imlib2 path (FIXME)
-os.environ['PYTHONPATH'] = '%s/../lib:%s' % (freevo_python, os.environ['PYTHONPATH'])
-os.environ['PYTHONPATH'] = '%s/../lib/mevas:%s' % (freevo_python, os.environ['PYTHONPATH'])
-os.environ['PYTHONPATH'] = '%s/../lib/pyimlib2:%s' % (freevo_python, os.environ['PYTHONPATH'])
-os.environ['PYTHONPATH'] = '%s/../lib/pyepeg:%s' % (freevo_python, os.environ['PYTHONPATH'])
+
+# add the variables from above into environ so Freevo can use them, too
+for var in ('freevo_script', 'runapp', 'freevo_python', 'freevo_locale',
+            'freevo_share', 'freevo_contrib', 'freevo_config', 'freevo_helpers'):
+    os.environ[var.upper()] = eval(var)
 
 # extend PATH to make sure the basics are there
 os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \
