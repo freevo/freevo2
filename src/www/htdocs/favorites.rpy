@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 11:21:51  rshortt
+# bugfixes
+#
 # Revision 1.1  2003/05/11 22:48:21  rshortt
 # Replacements for the cgi files to be used with the new webserver.  These
 # already use record_client / record_server.
@@ -68,10 +71,8 @@ class FavoritesResource(Resource):
 
         if action == 'remove':
             ri.removeFavorite(name)
-            pass
         elif action == 'add':
             ri.addEditedFavorite(name, title, chan, dow, mod, priority)
-            pass
         elif action == 'edit':
             ri.removeFavorite(oldname)
             ri.addEditedFavorite(name, title, chan, dow, mod, priority)

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 11:21:51  rshortt
+# bugfixes
+#
 # Revision 1.1  2003/05/12 02:09:06  rshortt
 # A new recording backend which is intended to run outside of the main freevo process.
 #
@@ -227,11 +230,15 @@ class RecordServer(xmlrpc.XMLRPC):
             for prog in ch.programs:
                 if prog.stop < now:
                     continue
+                # XXX TODO: use regular expresions instead.
                 if string.find(prog.title, find) != -1 or string.find(prog.desc, find) != -1:
                     log.debug('PROGRAM MATCH: %s' % prog)
                     matches.append(prog)
 
-        return matches
+        if matches:
+            return (TRUE, matches)
+        else:
+            return (FALSE, 'no matches')
 
 
     def updateGuide(self):
@@ -344,7 +351,7 @@ class RecordServer(xmlrpc.XMLRPC):
         if not name:
             return (FALSE, 'no name')
        
-        removeFavoriteFromSchedule(getFavorite(name))
+        self.removeFavoriteFromSchedule(self.getFavorite(name))
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.removeFavorite(name)
         self.saveScheduledRecordings(scheduledRecordings)
@@ -579,6 +586,15 @@ class RecordServer(xmlrpc.XMLRPC):
             return (status, 'RecordServer::findProg: %s' % response)
 
 
+    def xmlrpc_findMatches(self, find):
+        (status, response) = self.findMatches(find)
+
+        if status:
+            return (status, marmalade.jellyToXML(response))
+        else:
+            return (status, 'RecordServer::findMatches: %s' % response)
+
+
     def xmlrpc_echotest(self, blah):
         return 'RecordServer::echotest: %s' % blah
 
@@ -597,6 +613,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def xmlrpc_removeFavorite(self, name=None):
+        print 'REMOVE FAVORITE %s' % name
         (status, response) = self.removeFavorite(name)
 
         return (status, 'RecordServer::removeFavorite: %s' % response)

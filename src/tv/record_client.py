@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 11:21:51  rshortt
+# bugfixes
+#
 # Revision 1.1  2003/05/11 22:41:22  rshortt
 # The client interface to the recording server.
 #
@@ -152,6 +155,7 @@ def addEditedFavorite(name, title, chan, dow, mod, priority):
 
 
 def removeFavorite(name):
+    print 'CLIENT REMOVE FAVORITE: %s' % name
     (status, message) = server.removeFavorite(name)
     return (status, message) 
 

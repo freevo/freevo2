@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 11:21:51  rshortt
+# bugfixes
+#
 # Revision 1.1  2003/05/11 22:48:21  rshortt
 # Replacements for the cgi files to be used with the new webserver.  These
 # already use record_client / record_server.
@@ -98,7 +101,7 @@ class SearchResource(Resource):
                     except:
                         sys.stderr.write('isRecording not set')
 
-            if rf.isProgAFavorite(prog, favs):
+            if ri.isProgAFavorite(prog, favs):
                 status = 'favorite'
 
             fv.tableRowOpen('class="chanrow"')
