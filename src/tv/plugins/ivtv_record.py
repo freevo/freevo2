@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/14 11:44:42  rshortt
+# Add some init and print methods to Videodev and IVTV.
+#
 # Revision 1.7  2003/07/11 02:16:51  rshortt
 # Removing audio problem workaround because it is no longer needed.
 #
@@ -71,10 +74,6 @@ DEBUG = 1
 
 TRUE = 1
 FALSE = 0
-
-NORMS = { 'NTSC'  : 0,
-          'PAL  ' : 1,
-          'SECAM' : 2  }
 
 CHUNKSIZE = 65536
 
@@ -139,72 +138,15 @@ class Record_Thread(threading.Thread):
                                                             ' ', '_'))
                 
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
-                v_norm = string.upper(v_norm)
 
                 v = ivtv.IVTV(v_dev)
 
-                print 'Setting chanlist to %s' % v_clist
-                v.setchanlist(v_clist)
+                v.init_settings()
 
                 print 'Setting Channel to %s' % self.prog.tunerid
                 v.setchannel(self.prog.tunerid)
 
-                print "Enumerating supported Standards."
-                try: 
-                    for i in range(0,255):
-                        (index,id,name,junk,junk,junk) = v.enumstd(i)
-                        print "  %i: 0x%x %s" % (index, id, name)
-                except:
-                    pass
-                print 'Setting Standard to %s' % v_norm
-                v.setinput(NORMS.get(v_norm))
-                print "Current Standard is: 0x%x" % v.getstd()
-
-                print "Enumerating supported Inputs."
-                try:
-                    for i in range(0,255):
-                        (index,name,type,audioset,tuner,std,status) = v.enuminput(i)
-                        print "  %i: %s" % (index, name)
-                except:
-                    pass
-                print "Input: %i" % v.getinput()
-                print "Setting Input to 4"
-                v.setinput(4)
-
-                (driver,card,bus_info,version,capabilities) = v.querycap()
-                print "Driver: %s, Card: %s, Ver: %i, Cap: 0x%x" % (driver,card,version,capabilities)
-                v.setfmt(720,480)
-                (buf_type,width,height,pixelformat,field,bytesperline,sizeimage,colorspace) = v.getfmt()
-                print "Width: %i, Height: %i" % (width,height)
-                print "Read Frequency: %i" % v.getfreq()
-
-                codec = v.getCodecInfo()
-
-                codec.bitrate_mode = 1
-                codec.bitrate = config.IVTV_BITRATE
-                codec.bitrate_peak = config.IVTV_BITRATE
-                codec.stream_type = config.IVTV_STREAM_TYPE
-                codec.gop_closure = 1
-
-                v.setCodecInfo(codec)
-                codec = v.getCodecInfo()
-
-                print 'CODEC::aspect: %s' % codec.aspect
-                print 'CODEC::audio_bitmask: %s' % codec.audio_bitmask
-                print 'CODEC::bfrmes: %s' % codec.bframes
-                print 'CODEC::bitrate_mode: %s' % codec.bitrate_mode
-                print 'CODEC::bitrate: %s' % codec.bitrate
-                print 'CODEC::bitrate_peak: %s' % codec.bitrate_peak
-                print 'CODEC::dnr_mode: %s' % codec.dnr_mode
-                print 'CODEC::dnr_spatial: %s' % codec.dnr_spatial
-                print 'CODEC::dnr_temporal: %s' % codec.dnr_temporal
-                print 'CODEC::dnr_type: %s' % codec.dnr_type   
-                print 'CODEC::framerate: %s' % codec.framerate 
-                print 'CODEC::framespergop: %s' % codec.framespergop 
-                print 'CODEC::gop_closure: %s' % codec.gop_closure  
-                print 'CODEC::pulldown: %s' % codec.pulldown     
-                print 'CODEC::stream_type: %s' % codec.stream_type  
-
+                v.print_settings()
 
                 now = time.time()
                 stop = now + self.prog.rec_duration

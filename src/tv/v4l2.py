@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/14 11:44:42  rshortt
+# Add some init and print methods to Videodev and IVTV.
+#
 # Revision 1.2  2003/05/29 12:08:45  rshortt
 # Make sure we close the device when done.
 #
@@ -39,10 +42,13 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import string
 import freq
 import os
 import struct
 import fcntl
+
+import config
 
 _IOC_NRBITS = 8
 _IOC_TYPEBITS = 8
@@ -116,104 +122,169 @@ AUDIO_ST = "L32sLL8x"
 GET_AUDIO_NO = _IOWR ('V', 33, AUDIO_ST)
 SET_AUDIO_NO = _IOW  ('V', 34, AUDIO_ST)
 
+
+NORMS = { 'NTSC'  : 0,
+          'PAL  ' : 1,
+          'SECAM' : 2  }
+
+
 class Videodev:
-  def __init__(self, device):
-      self.chanlist = None
-      self.chanlistName = ""
-      self.device = os.open (device, os.O_TRUNC)
-      if self.device < 0:
-          sys.exit("Error: %d\n" %self.device)
-      else:
-          print "Video Opened at %s" % device
+    def __init__(self, device):
+        self.chanlist = None
+        self.chanlistName = ""
+        self.device = os.open (device, os.O_TRUNC)
+        if self.device < 0:
+            sys.exit("Error: %d\n" %self.device)
+        else:
+            print "Video Opened at %s" % device
 
 
-  def close(self):
-      os.close(self.device)
+    def close(self):
+        os.close(self.device)
 
 
-  def setchanlist(self, chanlist):
-      self.chanlistName = chanlist
-      self.chanlist = freq.CHANLIST[chanlist]
+    def setchanlist(self, chanlist):
+        self.chanlistName = chanlist
+        self.chanlist = freq.CHANLIST[chanlist]
 
-  def getfreq(self):
-      val = struct.pack( FREQUENCY_ST, 0,0,0 )
-      r = fcntl.ioctl(self.device, long(GETFREQ_NO), val)
-      (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
-      return freq
 
-  def setchannel(self, channel):
-      freq = (self.chanlist[channel]*16)/1000
-      try:
-          self.setfreq(freq)
-      except:
-          self.setfreq_old(freq)
+    def getfreq(self):
+        val = struct.pack( FREQUENCY_ST, 0,0,0 )
+        r = fcntl.ioctl(self.device, long(GETFREQ_NO), val)
+        (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
+        return freq
+
+
+    def setchannel(self, channel):
+        freq = (self.chanlist[channel]*16)/1000
+        try:
+            self.setfreq(freq)
+        except:
+            self.setfreq_old(freq)
       
-  def setfreq_old(self, freq):
-      val = struct.pack( "L", freq)
-      r = fcntl.ioctl(self.device, long(SETFREQ_NO_V4L), val)        
 
-  def setfreq(self, freq):
-      val = struct.pack( FREQUENCY_ST, long(0), long(0), freq)
-      r = fcntl.ioctl(self.device, long(SETFREQ_NO), val)
+    def setfreq_old(self, freq):
+        val = struct.pack( "L", freq)
+        r = fcntl.ioctl(self.device, long(SETFREQ_NO_V4L), val)        
 
-  def getinput(self):
-      r = fcntl.ioctl(self.device, GETINPUT_NO, struct.pack(INPUT_ST,0))
-      return struct.unpack(INPUT_ST,r)[0]
+
+    def setfreq(self, freq):
+        val = struct.pack( FREQUENCY_ST, long(0), long(0), freq)
+        r = fcntl.ioctl(self.device, long(SETFREQ_NO), val)
+
+
+    def getinput(self):
+        r = fcntl.ioctl(self.device, GETINPUT_NO, struct.pack(INPUT_ST,0))
+        return struct.unpack(INPUT_ST,r)[0]
   
-  def setinput(self,value):
-      r = fcntl.ioctl(self.device, SETINPUT_NO, struct.pack(INPUT_ST,value))
+
+    def setinput(self,value):
+        r = fcntl.ioctl(self.device, SETINPUT_NO, struct.pack(INPUT_ST,value))
 
 
-  def querycap(self):
-      val = struct.pack( QUERYCAP_ST, "", "", "", 0, 0 )
-      r = fcntl.ioctl(self.device, long(QUERYCAP_NO), val)
-      return struct.unpack( QUERYCAP_ST, r )
+    def querycap(self):
+        val = struct.pack( QUERYCAP_ST, "", "", "", 0, 0 )
+        r = fcntl.ioctl(self.device, long(QUERYCAP_NO), val)
+        return struct.unpack( QUERYCAP_ST, r )
 
-  def enumstd(self, no):
-      val = struct.pack( ENUMSTD_ST, no, 0, "", 0, 0, 0)
-      r = fcntl.ioctl(self.device,ENUMSTD_NO,val)
-      return struct.unpack( ENUMSTD_ST, r )
 
-  def getstd(self):
-      val = struct.pack( STANDARD_ST, 0 )
-      r = fcntl.ioctl(self.device,GETSTD_NO, val)
-      return struct.unpack( STANDARD_ST, r )[0]
+    def enumstd(self, no):
+        val = struct.pack( ENUMSTD_ST, no, 0, "", 0, 0, 0)
+        r = fcntl.ioctl(self.device,ENUMSTD_NO,val)
+        return struct.unpack( ENUMSTD_ST, r )
 
-  def setstd(self, value):
-      val = struct.pack( STANDARD_ST, value )
-      r = fcntl.ioctl(self.device,SETSTD_NO, val)
 
-  def enuminput(self,index):
-      val = struct.pack( ENUMINPUT_ST, index, "", 0,0,0,0,0)
-      r = fcntl.ioctl(self.device,ENUMINPUT_NO,val)
-      return struct.unpack( ENUMINPUT_ST, r )
+    def getstd(self):
+        val = struct.pack( STANDARD_ST, 0 )
+        r = fcntl.ioctl(self.device,GETSTD_NO, val)
+        return struct.unpack( STANDARD_ST, r )[0]
 
-  def getfmt(self):  
-      val = struct.pack( FMT_ST, 0,0,0,0,0,0,0,0)
-      r = fcntl.ioctl(self.device,GET_FMT_NO,val)
-      return struct.unpack( FMT_ST, r )
 
-  def setfmt(self, width, height):
-      val = struct.pack( FMT_ST, 1L, width, height, 0L, 4L, 0L, 131072L, 0L)
-      r = fcntl.ioctl(self.device,SET_FMT_NO,val)
+    def setstd(self, value):
+        val = struct.pack( STANDARD_ST, value )
+        r = fcntl.ioctl(self.device,SETSTD_NO, val)
 
-  def gettuner(self,index):
-      val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,0,0,0)
-      r = fcntl.ioctl(self.device,GET_TUNER_NO,val)
-      return struct.unpack( TUNER_ST, r )
 
-  def settuner(self,index,audmode):
-      val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,audmode,0,0)
-      r = fcntl.ioctl(self.device,SET_TUNER_NO,val)
+    def enuminput(self,index):
+        val = struct.pack( ENUMINPUT_ST, index, "", 0,0,0,0,0)
+        r = fcntl.ioctl(self.device,ENUMINPUT_NO,val)
+        return struct.unpack( ENUMINPUT_ST, r )
 
-  def getaudio(self,index):
-      val = struct.pack( AUDIO_ST, index, "", 0,0)
-      r = fcntl.ioctl(self.device,GET_AUDIO_NO,val)
-      return struct.unpack( AUDIO_ST, r )
 
-  def setaudio(self,index,mode):
-      val = struct.pack( AUDIO_ST, index, "", mode, 0)
-      r = fcntl.ioctl(self.device,SET_AUDIO_NO,val)
+    def getfmt(self):  
+        val = struct.pack( FMT_ST, 0,0,0,0,0,0,0,0)
+        r = fcntl.ioctl(self.device,GET_FMT_NO,val)
+        return struct.unpack( FMT_ST, r )
 
+
+    def setfmt(self, width, height):
+        val = struct.pack( FMT_ST, 1L, width, height, 0L, 4L, 0L, 131072L, 0L)
+        r = fcntl.ioctl(self.device,SET_FMT_NO,val)
+
+
+    def gettuner(self,index):
+        val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,0,0,0)
+        r = fcntl.ioctl(self.device,GET_TUNER_NO,val)
+        return struct.unpack( TUNER_ST, r )
+
+
+    def settuner(self,index,audmode):
+        val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,audmode,0,0)
+        r = fcntl.ioctl(self.device,SET_TUNER_NO,val)
+
+
+    def getaudio(self,index):
+        val = struct.pack( AUDIO_ST, index, "", 0,0)
+        r = fcntl.ioctl(self.device,GET_AUDIO_NO,val)
+        return struct.unpack( AUDIO_ST, r )
+
+
+    def setaudio(self,index,mode):
+        val = struct.pack( AUDIO_ST, index, "", mode, 0)
+        r = fcntl.ioctl(self.device,SET_AUDIO_NO,val)
+
+
+    def init_settings(self):
+        (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
+        v_norm = string.upper(v_norm)
+        self.setinput(NORMS.get(v_norm))
+
+        self.setchanlist(v_clist)
+
+        # XXX TODO: make a good way of setting the input
+        # self.setinput(....)
+
+        # XXX TODO: make a good way of setting the capture resolution
+        # self.setfmt(int(width), int(height))
+
+
+    def print_settings(self):
+        (driver,card,bus_info,version,capabilities) = self.querycap()
+        print "Driver: %s, Card: %s, Ver: %i, Cap: 0x%x" % \
+              (driver, card, version, capabilities)
+
+        print "Enumerating supported Standards."
+        try:
+            for i in range(0,255):
+                (index,id,name,junk,junk,junk) = self.enumstd(i)
+                print "  %i: 0x%x %s" % (index, id, name)
+        except:
+            pass
+        print "Current Standard is: 0x%x" % self.getstd()
+
+        print "Enumerating supported Inputs."
+        try:
+            for i in range(0,255):
+                (index,name,type,audioset,tuner,std,status) = self.enuminput(i)
+                print "  %i: %s" % (index, name)
+        except:
+            pass
+        print "Input: %i" % self.getinput()
+
+        (buf_type, width, height, pixelformat, field, bytesperline,
+         sizeimage, colorspace) = self.getfmt()
+        print "Width: %i, Height: %i" % (width,height)
+
+        print "Read Frequency: %i" % self.getfreq()
 
 

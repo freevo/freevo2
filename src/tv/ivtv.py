@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/14 11:44:42  rshortt
+# Add some init and print methods to Videodev and IVTV.
+#
 # Revision 1.3  2003/07/11 00:27:23  rshortt
 # Added a mspSetMatrix which is currently not used by anything.
 #
@@ -46,9 +49,9 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import struct, fcntl
+import string, struct, fcntl
 
-import v4l2
+import v4l2, config
 
 # ioctls
 IVTV_IOC_G_CODEC = 0xFFEE7703
@@ -67,6 +70,10 @@ IVTV_STREAM_DVD    = 10
 # structs
 CODEC_ST = '15I'
 MSP_MATRIX_ST = '2i'
+
+NORMS = { 'NTSC'  : 0,
+          'PAL  ' : 1, 
+          'SECAM' : 2  }
 
 
 class IVTV(v4l2.Videodev):
@@ -107,6 +114,60 @@ class IVTV(v4l2.Videodev):
 
         val = struct.pack(MSP_MATRIX_ST, input, output)
         r = fcntl.ioctl(self.device, MSP_SET_MATRIX, val)
+
+
+    def init_settings(self, opts=None):
+        if not opts:
+            opts = config.IVTV_OPTIONS
+
+        v4l2.Videodev.init_settings(self)
+
+        self.setinput(opts['input'])
+
+        (width, height) = string.split(opts['resolution'], 'x')
+        self.setfmt(int(width), int(height))
+
+        codec = self.getCodecInfo()
+
+        codec.aspect        = opts['aspect']
+        codec.audio_bitmask = opts['audio_bitmask']
+        codec.bframes       = opts['bframes']
+        codec.bitrate_mode  = opts['bitrate_mode']
+        codec.bitrate       = opts['bitrate']
+        codec.bitrate_peak  = opts['bitrate_peak']
+        codec.dnr_mode      = opts['dnr_mode']
+        codec.dnr_spatial   = opts['dnr_spatial']
+        codec.dnr_temporal  = opts['dnr_temporal']
+        codec.dnr_type      = opts['dnr_type']
+        codec.framerate     = opts['framerate']
+        codec.framespergop  = opts['framespergop']
+        codec.gop_closure   = opts['gop_closure']
+        codec.pulldown      = opts['pulldown']
+        codec.stream_type   = opts['stream_type']
+
+        self.setCodecInfo(codec)
+
+
+    def print_settings(self):
+        v4l2.Videodev.print_settings(self)
+
+        codec = self.getCodecInfo()
+
+        print 'CODEC::aspect: %s' % codec.aspect
+        print 'CODEC::audio_bitmask: %s' % codec.audio_bitmask
+        print 'CODEC::bfrmes: %s' % codec.bframes
+        print 'CODEC::bitrate_mode: %s' % codec.bitrate_mode
+        print 'CODEC::bitrate: %s' % codec.bitrate
+        print 'CODEC::bitrate_peak: %s' % codec.bitrate_peak
+        print 'CODEC::dnr_mode: %s' % codec.dnr_mode
+        print 'CODEC::dnr_spatial: %s' % codec.dnr_spatial
+        print 'CODEC::dnr_temporal: %s' % codec.dnr_temporal
+        print 'CODEC::dnr_type: %s' % codec.dnr_type
+        print 'CODEC::framerate: %s' % codec.framerate
+        print 'CODEC::framespergop: %s' % codec.framespergop
+        print 'CODEC::gop_closure: %s' % codec.gop_closure
+        print 'CODEC::pulldown: %s' % codec.pulldown
+        print 'CODEC::stream_type: %s' % codec.stream_type
 
 
 class IVTVCodec:
