@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2003/02/20 02:54:20  krister
+# Made an except statement specific for the error it handles.
+#
 # Revision 1.81  2003/02/17 19:41:11  dischi
 # make it possible to have special 'video', 'audio' ... sections in the
 # xml file.
@@ -925,7 +928,7 @@ class Skin:
         if array.track:
             try:
     	        mytrack = ('%0.2d' % int(array.track))
-            except:
+            except ValueError:
     	        mytrack = None
         else:
            mytrack = None
