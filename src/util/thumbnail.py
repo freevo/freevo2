@@ -126,7 +126,7 @@ def create(filename):
     try:
         return create_raw_thumbnail(filename, thumb)
     except Exception, e:
-        log.exception('thumbnail.create error')
+        log.error('thumbnail.create error:\n%s' % e)
         fileops.touch(thumb)
         return None
 
