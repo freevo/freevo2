@@ -131,8 +131,9 @@
       <!-- 4. listing area: the list of all items -->
       <screen layout="video screen" visible="yes"/>
       <view layout="view0" x="10" y="90" width="280" height="250" align="left"/>
-      <listing x="30" y="350" width="700" height="300">
-        <image y="max-32" label="downarrow"/>
+      <listing x="30" y="350" width="700" height="230">
+        <image filename="blurr-up.png" label="uparrow" x="730" y="350"/>
+        <image filename="blurr-down.png" label="downarrow" x="730" y="max-32"/>
       </listing>
       <info layout="video info" x="300" y="100" width="450" height="300"/>
     </menuset>
