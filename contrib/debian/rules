@@ -41,6 +41,9 @@ install: build
 	mv `pwd`/debian/freevo/usr/share/freevo/icons  `pwd`/debian/freevo-media/usr/share/freevo/
 	mv `pwd`/debian/freevo/usr/share/freevo/images `pwd`/debian/freevo-media/usr/share/freevo/
 	mv `pwd`/debian/freevo/usr/share/freevo/skins  `pwd`/debian/freevo-media/usr/share/freevo/
+	sudo mkdir -p `pwd`/debian/freevo/usr/share/freevo/init/ || true
+	cp `pwd`/boot/webserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
+	cp `pwd`/boot/recordserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
 
 # Build architecture-independent files here.
 binary-indep: build install
