@@ -100,8 +100,8 @@ class Skin(skin_test1.Skin):
 	    w = 0
 	    h = 0
 	    if choice.icon != None: 
- 		w,h = util.pngsize(choice.icon)
-		osd.drawbitmap(choice.icon, x0, y0)
+ 		w,h = util.pngsize(util.thumb(choice.icon))
+		osd.drawbitmap(util.thumb(choice.icon), x0, y0)
 		# Align the logo based on image size
 		
             osd.drawstring(choice.name, (x0+w+10), y0,
@@ -110,6 +110,15 @@ class Skin(skin_test1.Skin):
 	    if menu.selected == choice:
                 osd.drawbox(x0 - 8, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
                             color=((160 << 24) | osd.COL_BLUE))
+		if choice.icon != None:
+			(w, h) = util.pngsize(choice.icon)
+			# Calculate best image placement
+			logox = int(osd.width) - int(w) - 55
+			# Draw border for image
+			osd.drawbox(int(logox), 100, (int(logox) + int(w)), 100 + int(h),
+            			    width=6, color=0x000000)
+			osd.drawbitmap(choice.icon, logox, 100)
+
             y0 += spacing
 
         # Draw the menu choices for the meta selection
@@ -124,7 +133,7 @@ class Skin(skin_test1.Skin):
                 osd.drawbox(x0 - 4, y0 - 3, x0 + 150, y0 + fontsize*1.5,
                             width=-1,
                             color=((160 << 24) | osd.COL_BLUE))
-            x0 += 190
+	    x0 += 190
 
         osd.update()
         

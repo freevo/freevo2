@@ -71,11 +71,8 @@ def cwd(arg=None, menuw=None):
 
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
-	# This next line shows a copy of the cover from the directory
-	# Note, that it doesn't scale the image, hence it's disabled
-	# since it mangles the display
         if os.path.isfile(dirname+'/cover.png'): 
-        	items += [menu.MenuItem(title, cwd, dirname,util.thumb((dirname+'/cover.png')))]
+        	items += [menu.MenuItem(title, cwd, dirname,(dirname+'/cover.png'))]
 	else:
 		items += [menu.MenuItem(title, cwd, dirname)]
     
