@@ -82,24 +82,37 @@ class PluginInterface(plugin.ItemPlugin):
 
         self.naming = naming
 
-        config.AUDIO_ITEMS.append( ('Playlists',self.playlist_folder))
+        config.AUDIO_ITEMS.append((_('Playlists'), self.playlist_folder))
         self.playlist_handle = None
         plugin.ItemPlugin.__init__(self)
 
 
     def actions(self, item):
         self.item = item
+
+        if self.item.parent and self.item.parent.type != 'dir':
+            # only activate this for directory items
+            return []
+
+        if self.item.type == 'playlist':
+            # that could cause us much trouble
+            return []
+        
         return [ ( self.queue_file, _( 'Enqueue this Music in Playlist' ),
-                               'queue_a_track'),
+                   'queue_a_track'),
                  ( self.new_playlist, _( 'Make a new Audio Playlist' ),
-                               'close_playlist')]
+                   'close_playlist')]
 
     def queue_file(self,arg=None, menuw=None):
         if not self.playlist_handle:
             self.playlist_handle = open(('%s/%s.m3u' % (self.playlist_folder,
                                                         time.strftime(self.naming))),'w+')
         for f in self.item.files.get():
-            self.playlist_handle.write('%s\n' % f)
+            if os.path.isdir(f):
+                for file in os.listdir(f):
+                    self.playlist_handle.write('%s\n' % os.path.join(f, file))
+            else:
+                self.playlist_handle.write('%s\n' % f)
         self.playlist_handle.flush()
         rc.post_event(Event(OSD_MESSAGE, arg='Queued Track'))
         return
