@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/06 15:12:04  rshortt
+# recordserver's name changed.
+#
 # Revision 1.8  2003/09/05 14:28:01  rshortt
 # Oops.  We don't need tv_util here anymore.
 #
@@ -70,7 +73,7 @@ class Recorder:
 
     def __init__(self):
         # Disable this plugin if not loaded by record_server.
-        if string.find(sys.argv[0], 'record_server') == -1:
+        if string.find(sys.argv[0], 'recordserver') == -1:
             return
 
         if DEBUG: print 'ACTIVATING GENERIC RECORD PLUGIN'
