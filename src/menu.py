@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/04/20 11:44:45  dischi
+# add item plugins
+#
 # Revision 1.39  2003/04/20 10:55:40  dischi
 # mixer is now a plugin, too
 #
@@ -548,6 +551,18 @@ class MenuWidget(GUIObject):
 
         elif event == rc.ENTER:
             actions = menu.selected.actions()
+
+            if hasattr(menu.selected, 'display_type'):
+                if menu.selected.display_type:
+                    actions_plugins = '_%s' % menu.selected.display_type
+                else:
+                    actions_plugins = ''
+            else:
+                actions_plugins = '_%s' % menu.selected.type
+            
+            for p in plugin.get('item%s' % actions_plugins):
+                actions += p.actions(menu.selected)
+
             if len(actions) > 1:
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             

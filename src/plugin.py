@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/20 11:44:45  dischi
+# add item plugins
+#
 # Revision 1.7  2003/04/20 10:54:04  dischi
 # add getbyname and add some more load paths
 #
@@ -88,6 +91,22 @@ class MainMenuPlugin(Plugin):
         return []
 
 
+class ItemPlugin(Plugin):
+    """
+    Plugin class to add something to the item action list
+    """
+    def __init__(self):
+        Plugin.__init__(self)
+        self._type = 'item'
+
+    def actions(self, item):
+        """
+        return a list of actions to that item. Each actions is a tuple
+        (function, 'name-in-the-menu')
+        """
+        return []
+
+    
 class DaemonPlugin(Plugin):
     """
     Plugin class for daemon objects who will be activae in the
