@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/13 21:00:50  outlyer
+# OSDFont has 'name' as an attribute, while Font has 'filename' It was swapped
+# here, and was crashing.
+#
 # Revision 1.14  2003/09/11 14:10:20  outlyer
 # Fix a crash if you press up/down in certain 'record' screens.
 # Also, disable debug information by default; allow the global variable
@@ -119,25 +123,25 @@ class ProgramDisplay(PopupBox):
         desc = None
         if self.prog.desc:
             desc = Label(self.prog.desc, self, Align.LEFT)
-            desc.set_font(font=self.font.filename, size=self.font.size -2,
+            desc.set_font(font=self.font.name, size=self.font.size -2,
                           color=self.font.color)
 
         chan = Label('Channel:  %s' % \
                       tv.tv_util.get_chan_displayname(self.prog.channel_id), 
                                                    self, Align.LEFT)
-        chan.set_font(font=self.font.filename, size=self.font.size -2,
+        chan.set_font(font=self.font.name, size=self.font.size -2,
                       color=self.font.color)
 
         start = Label('Start:  %s' % time.strftime('%A %b %d %I:%M %p', 
                                       time.localtime(self.prog.start)),
                                       self, Align.LEFT)
-        start.set_font(font=self.font.filename, size=self.font.size -2,
+        start.set_font(font=self.font.name, size=self.font.size -2,
                        color=self.font.color)
 
         stop = Label('Stop:  %s' % time.strftime('%A %b %d %I:%M %p', 
                                      time.localtime(self.prog.stop)), 
                                      self, Align.LEFT)
-        stop.set_font(font=self.font.filename, size=self.font.size -2,
+        stop.set_font(font=self.font.name, size=self.font.size -2,
                       color=self.font.color)
 
         used_height += chan.font.height + start.font.height + stop.font.height + \
