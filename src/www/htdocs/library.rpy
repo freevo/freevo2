@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/01/26 19:16:13  mikeruelle
+# this does not seem to work anymore with twisted 1.1.0
+#
 # Revision 1.17  2003/11/28 20:08:59  dischi
 # renamed some config variables
 #
@@ -223,8 +226,8 @@ class LibraryResource(FreevoResource):
                 elif action == 'download':
                     sys.stderr.write('download %s' % file_loc)
                     sys.stderr.flush()
-                    static.File(file_loc).render(request)
-                    request.finish()
+                    return static.File(file_loc).render(request)
+                    #request.finish()
             else:
                 fv.res += '%s does not exist. no action taken.' % file_loc
         else:
