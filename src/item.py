@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/06/22 20:48:45  dischi
+# special len() support for new info_area
+#
 # Revision 1.17  2003/06/20 19:52:59  dischi
 # Oops
 #
@@ -183,9 +186,15 @@ class Item:
         """
         if hasattr(self, attr) and str(getattr(self,attr)):
             return str(getattr(self,attr))
+        if attr[:4] == 'len(' and attr[-1] == ')' and hasattr(self, attr[4:-1]):
+            return str(len(getattr(self, attr[4:-1])))
         if hasattr(self, 'info') and self.info:
             if self.info.has_key(attr):
                 return str(self.info[attr])
+            # XXX old info area, delete next two lines
             if attr[:4] == 'len_' and self.info.has_key(attr[4:]):
                 return str(len(self.info[attr[4:]]))
+            # new info area
+            if attr[:4] == 'len(' and attr[-1] == ')' and self.info.has_key(attr[4:-1]):
+                return str(len(self.info[attr[4:-1]]))
         return ''
