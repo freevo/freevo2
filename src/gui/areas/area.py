@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/23 12:36:09  dischi
+# crop bg image if the screen area is smaller than the screen
+#
 # Revision 1.8  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -251,6 +254,12 @@ class Area:
         if isinstance(object.height, str):
             object.height = int(eval(object.height, {'MAX':self.area_values.height}))
 
+        if isinstance(object.x, str):
+            object.x = int(eval(object.x, {'MAX':self.area_values.height}))
+
+        if isinstance(object.y, str):
+            object.y = int(eval(object.y, {'MAX':self.area_values.height}))
+
         object.x += self.area_values.x
         object.y += self.area_values.y
         
@@ -362,8 +371,6 @@ class Area:
         background_image = []
         background_rect  = []
         
-        if hasattr(config, 'BMOVL_OSD_VIDEO'):
-            return
         for bg in self.layout.background:
             bg = copy.copy(bg)
             if isinstance(bg, fxdparser.Image) and bg.visible:
@@ -377,7 +384,6 @@ class Area:
                     bg.y -= config.OSD_OVERSCAN_Y
                     bg.width  += 2 * config.OSD_OVERSCAN_X
                     bg.height += 2 * config.OSD_OVERSCAN_Y
-
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
                     redraw    = True    # bg changed
@@ -389,7 +395,8 @@ class Area:
                     bg.label = 'background'
 
                 if imagefile:
-                    background_image.append((imagefile, bg.x, bg.y, bg.width, bg.height))
+                    background_image.append((imagefile, bg.x, bg.y, bg.width,
+                                             bg.height))
 
             elif isinstance(bg, fxdparser.Rectangle):
                 self.calc_geometry(bg)
@@ -537,14 +544,25 @@ class Area:
 
         if isinstance(val, tuple):
             if len(val) == 2:
-                i = Image(image, (val[0], val[1]), (image.width, image.height))
+                x, y, w, h = val[0], val[1], image.width, image.height
             else:
-                i = Image(image, (val[0], val[1]), (val[2], val[3]))
+                x, y, w, h = val[0], val[1], val[2], val[3]
         else:
-            i = Image(image, (val.x, val.y), (val.width, val.height))
+            x, y, w, h = val.x, val.y, val.width, val.height
 
         if background:
+            if not (x == 0 and y == 0 and w == self.screen.width and \
+                    h == self.screen.height) and \
+                    self.area_values.x == x and self.area_values.y == y and \
+                    self.area_values.width == w and self.area_values.height == h:
+                _debug_('full screen crop: %s' % image)
+                i = Image(image, (0, 0), (self.screen.width, self.screen.height))
+                i.crop((x,y), (w,h))
+                i.set_pos((x,y))
+            else:
+                i = Image(image, (x, y), (w, h))
             self.screen.layer[0].add_child(i)
         else:
+            i = Image(image, (x, y), (w, h))
             self.screen.layer[2].add_child(i)
         return i
