@@ -276,7 +276,7 @@
       <view layout="tv view" visible="no" 
 	x="10" y="10" width="420" height="190"/> 
       <info layout="tv info" visible="yes" 
-	x="10" y="10" width="420" height="190"/> 
+	x="10" y="10" width="780" height="190"/> 
       <listing layout="tv listing" visible="yes" 
 	x="10" y="220" width="780" height="370"/> 
     </tv>
@@ -289,7 +289,7 @@
 
     <!-- tv listing area -->
     <layout label="tv listing">
-      <content x="10" type="text" spacing="0">
+      <content type="text" spacing="0">
 
 	<item type="label" font="white" width="100">
 	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
