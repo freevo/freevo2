@@ -8,7 +8,9 @@
 import sys
 import random
 import time, os
-import string, popen2, fcntl, select, struct
+import signal
+import string, popen2, fcntl, select, struct, fnmatch
+import re, sre
 import rc
 
 # Configuration file. Determines where to look for image files, etc
@@ -22,6 +24,8 @@ import osd
 
 # The menu widget class
 import menu
+
+from playlist import read_playlist
 
 # The Freevo image viewer
 import iview
@@ -40,6 +44,20 @@ rc    = rc.get_singleton()
 # remember the position of the selected item in the main menu
 main_menu_selected = -1
 
+# Slide show globals.
+playlist_lines = []
+
+#
+# signal handler
+#
+def view_handler(signum, frame):
+    global playlist_lines
+    iview.slide_num += 1
+    if iview.slide_num < iview.total_slides:
+        iview.view ( playlist_lines[iview.slide_num][0], iview.slide_num, playlist_lines, 1 )
+        signal.alarm ( playlist_lines[iview.slide_num][2] )
+
+
 #
 # view the image
 #
@@ -53,7 +71,8 @@ def view_image(arg=None, menuw=None):
     file = arg[0]
     number = arg[1]
     playlist = arg[2]
-    iview.view(file, number, playlist)
+    mode = arg[3]
+    iview.view(file, number, playlist, mode)
 
 
     
@@ -105,8 +124,14 @@ def eventhandler(event = None, menuw=None, arg=None):
 def main_menu_generate():
     items = []    
 
-    for (title, dir) in config.DIR_IMAGES:
-        items += [menu.MenuItem(title, cwd, dir, eventhandler, type = 'dir')]
+    for title, dirname in config.DIR_IMAGES:
+        matched = 0
+        if util.match_suffix(dirname, config.SUFFIX_IMAGE_SSHOW):
+            items += [menu.MenuItem(title, slideshow, dirname, eventhandler,
+                                    type = 'show')]
+        else:
+            items += [menu.MenuItem(title, cwd, dirname, eventhandler,
+                                    type = 'dir')]
 
     for media in config.REMOVABLE_MEDIA:
         if media.info:
@@ -182,7 +207,7 @@ def cwd(arg=None, menuw=None):
 
     for file in files:
         title = os.path.splitext(os.path.basename(file))[0]
-        m = menu.MenuItem(title, view_image, (file, number, files))
+        m = menu.MenuItem(title, view_image, (file, number, files, 0))
 
         m.setImage(('photo', file))
 
@@ -201,4 +226,22 @@ def cwd(arg=None, menuw=None):
     imagemenu = menu.Menu('IMAGE MENU', items, xml_file=skin_xml_file)
     menuw.pushmenu(imagemenu)
 
+#  How to run an image slide show. 
+#
+#  What if we make the slideshow have a "playlist" type file and 
+#  read the images and captions from that?
+
+def slideshow(arg=None, menuw=None):
+    playlist = arg
+
+    global playlist_lines
+
+    playlist_lines = read_playlist ( playlist, 0 )
+    iview.total_slides = len ( playlist_lines )
+
+    if iview.total_slides > 0:
+        iview.view ( playlist_lines[0][0], 0, playlist_lines, 1 )
+        # Need to check if the alarmm signal is already in use!!!
+        signal.signal ( signal.SIGALRM, view_handler )
+        signal.alarm ( playlist_lines[0][2] )
 

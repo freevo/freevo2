@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/11/14 04:38:47  krister
+# Added Bob Pauwe's image slideshow patches.
+#
 # Revision 1.17  2002/10/24 19:51:39  dischi
 # Integrated patch from Wan Tat Chee to reset zoom/rotation
 #
@@ -76,6 +79,7 @@
 
 import os.path
 import Image
+import signal, os, fcntl
 
 import config # Configuration file. 
 import menu   # The menu widget class
@@ -111,13 +115,18 @@ class ImageViewer:
     zoom_btns = { rc.K0:0, rc.K1:1, rc.K2:2, rc.K3:3, rc.K4:4,
                   rc.K5:5, rc.K6:6, rc.K7:7, rc.K8:8, rc.K9:9 }
 
+    # Slide Show variables
+    total_slides = 0	# Total slides in slide show
+    slide_num = 0	# Current slide being displayed
+
    
-    def view(self, filename, number, playlist, zoom=0, rotation=0):
+    def view(self, filename, number, playlist, mode, zoom=0, rotation=0):
 
         self.filename = filename
         self.playlist = playlist
         self.number = number
         self.rotation = rotation
+        self.mode = mode
 
         rc.app = self.eventhandler
 
@@ -213,6 +222,14 @@ class ImageViewer:
         osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh,
                        rotation = self.rotation)
 
+        # This is where we add a caption.  Only if playist is ! empty
+        # May need to check the caption too?
+        if self.mode > 0:
+            osd.drawstring(self.playlist[self.number][1], 10, 
+                       osd.height - 25, fgcolor=osd.COL_ORANGE, 
+                       bgcolor=osd.COL_BLACK)
+
+
         # update the OSD
         self.drawosd()
 
@@ -221,17 +238,26 @@ class ImageViewer:
         
         # cache the next image (most likely we need this)
         if self.playlist != []:
-            pos = self.playlist.index(self.filename)
-            pos = (pos+1) % len(self.playlist)
-            filename = self.playlist[pos]
+            pos = (self.number+1) % len(self.playlist)
+            if self.mode > 0:
+                filename = self.playlist[pos][0]
+            else:
+                filename = self.playlist[pos]
             
             width, height = osd.bitmapsize(filename)
             
 
     def eventhandler(self, event):
 
+        if event == rc.PAUSE:
+            signal.alarm(0)
+
+        if event == rc.PLAY:
+            signal.alarm(1)
+
         if event == rc.STOP or event == rc.EXIT or event == rc.MENU:
             rc.app = None
+            signal.alarm(0)
             menuwidget.refresh()
 
         if event == rc.UP:
@@ -242,10 +268,15 @@ class ImageViewer:
                 menuwidget.refresh()
             else:
                 # Go to the previous image in the list
-                pos = self.playlist.index(self.filename)
-                pos = (pos-1) % len(self.playlist)
-                filename = self.playlist[pos]
-                self.view(filename, pos, self.playlist, zoom=self.zoom, rotation=self.rotation)
+                signal.alarm(0)
+                pos = (self.number-1) % len(self.playlist)
+                self.slide_num = pos
+                if self.mode > 0:
+                    filename = self.playlist[pos][0]
+                else:
+                    filename = self.playlist[pos]
+                self.view(filename, pos, self.playlist, self.mode,
+                          zoom=self.zoom, rotation=self.rotation)
 
         if event == rc.DOWN:
 	    self.zoom = 0
@@ -255,10 +286,15 @@ class ImageViewer:
                 menuwidget.refresh()
             else:
                 # Go to the next image in the list
-                pos = self.playlist.index(self.filename)
-                pos = (pos+1) % len(self.playlist)
-                filename = self.playlist[pos]
-                self.view(filename, pos, self.playlist, zoom=self.zoom, rotation=self.rotation)
+                signal.alarm(0)
+                pos = (self.number+1) % len(self.playlist)
+                self.slide_num = pos
+                if self.mode > 0:
+                    filename = self.playlist[pos][0]
+                else:
+                    filename = self.playlist[pos]
+                self.view(filename, pos, self.playlist, self.mode,
+                          zoom=self.zoom, rotation=self.rotation)
 
         # rotate image
         if event == rc.LEFT or event == rc.RIGHT:
@@ -303,7 +339,7 @@ class ImageViewer:
                 osd.update()
             else:
                 # Redraw without the OSD
-                self.view(self.filename, self.playlist.index(self.filename),
+                self.view(self.filename, self.number, self.mode,
                           self.playlist, zoom=self.zoom, rotation = self.rotation)
 
         # zoom to one third of the image
@@ -314,13 +350,15 @@ class ImageViewer:
             if self.zoom:
                 # Zoom one third of the image, don't load the next
                 # image in the list
-                self.view(self.filename, self.playlist.index(self.filename),
-                          self.playlist, zoom=self.zoom, rotation = self.rotation)
+                self.view(self.filename, self.number,
+                          self.playlist, self.mode, zoom=self.zoom, 
+                          rotation = self.rotation)
             else:
                 # Display entire picture, don't load next image in case
                 # the user wants to zoom around some more.
-                self.view(self.filename, self.playlist.index(self.filename),
-                          self.playlist, zoom=0, rotation = self.rotation)
+                self.view(self.filename, self.number,
+                          self.playlist, self.mode, zoom=0, 
+                          rotation = self.rotation)
                 
         # save the image with the current rotation
         if event == rc.REC:

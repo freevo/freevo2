@@ -22,7 +22,10 @@ o Changed the default skin to the new blue_round1 skin.
 o The image viewer now supports browsing CD/DVDs.
 o Added support for choosing audio track, etc in DVDs.
 o Movies can be played from URLs (LAN or the Internet).
-o Music playlists can contain videos too now.	
+o Music playlists can contain videos and URLs too now. 
+  Both .m3u and .pls playlists are supported.	
+o Made the shell scripts sh-compatible.
+o Added Bob Pauwe's image slideshow patches.	
 	
 	
 Release 1.2.6 (2002-10-12):

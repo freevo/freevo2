@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/14 04:38:47  krister
+# Added Bob Pauwe's image slideshow patches.
+#
 # Revision 1.1  2002/10/31 21:11:02  dischi
 # playlist parser, returns a list of all files. There a separat functions
 # for the different types of playlists. Feel free to add more
@@ -40,6 +43,7 @@ import popen2
 import fcntl
 import select
 import struct
+import re
 
 
 def read_m3u(plsname):
@@ -86,6 +90,52 @@ def read_pls(plsname):
 
     return playlist_lines
 
+def read_ssr(ssrname):
+    """
+    This is the (ssr) slideshow reading function.
+
+    Arguments: ssrname - the slideshow filename
+    Returns:   The list of interesting lines in the slideshow
+
+    File line format:
+
+      FileName: "image file name"; Caption: "caption text"; Delay: "sec"
+
+    The caption and delay are optional.
+    """
+
+    out_lines = []
+    try:
+        lines = open(ssrname).readlines()
+    except IOError:
+        print 'Cannot open file "%s"' % list
+        return 0
+
+    playlist_lines_dos = map(lambda l: l.strip(), lines)
+    playlist_lines     = filter(lambda l: l[0] != '#', lines)
+
+    """
+    Here's where we parse the line.  See the format above.  
+    TODO:  Make the search case insensitive
+    """
+    for line in playlist_lines:
+        tmp_list = []
+        ss_name = re.findall('FileName: \"(.*?)\"', line)
+        ss_caption = re.findall('Caption: \"(.*?)\"', line)
+        ss_delay = re.findall('Delay: \"(.*?)\"', line)
+
+        if ss_name != []:
+            if ss_caption == []:
+                ss_caption += [""]
+            if ss_delay == []:
+                ss_delay += [5]
+            tmp_list.append(ss_name[0])
+            tmp_list.append(ss_caption[0])
+            tmp_list.append(ss_delay[0])
+            out_lines.append(tmp_list)
+
+    return out_lines
+
 
 def read_playlist(playlist_file, start_playing=0):
     """
@@ -101,8 +151,13 @@ def read_playlist(playlist_file, start_playing=0):
     f.close
     if line.find("[playlist]") > -1:
         playlist_lines = read_pls(playlist_file)
+        pl_type = 1
+    elif line.find("[Slides]") > -1:
+        playlist_lines = read_ssr(playlist_file)
+        pl_type = 3
     else:
         playlist_lines = read_m3u(playlist_file)
+        pl_type = 1
                 
     if start_playing and len(playlist_lines):
         play(arg=('audio', playlist_lines[0], playlist_lines))
@@ -110,16 +165,37 @@ def read_playlist(playlist_file, start_playing=0):
 
     items = []
     for line in playlist_lines:
-        if line.rfind("://") == -1:
+        # Standard playlist format, 1 filename per line
+        if pl_type == 1:
+            if line.rfind("://") == -1:
                 # it seems a file
                 (dirname, filename) = os.path.split(line)
 
                 # that doesn't have a path or is absolute
                 if not dirname: 
-                        dirname = curdir
+                    dirname = curdir
 
                 playlist_lines[playlist_lines.index(line)] = \
-                              os.path.join(os.path.abspath(dirname), filename) 
-        
+                      os.path.join(os.path.abspath(dirname), filename) 
+
+        # Enhanced playlist format, an array of items per line, the first
+        # is the filename.
+        elif pl_type == 3:
+            # is it a URL?
+            if line[0].rfind("://") == -1:
+                # it seems a file
+                (dirname, filename) = os.path.split(line[0])
+
+                # that doesn't have a path or is absolute
+                if not dirname: 
+                    dirname = curdir
+
+                # I think we need to prepend curdir to dirname if
+                # dirname isn't absolute!
+                if dirname[0] != '/':
+                    dirname = curdir + '/' + dirname
+
+                playlist_lines[playlist_lines.index(line)][0] = \
+                      os.path.join(os.path.abspath(dirname), filename)
 
     return playlist_lines

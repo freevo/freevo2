@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2002/11/14 04:38:47  krister
+# Added Bob Pauwe's image slideshow patches.
+#
 # Revision 1.90  2002/11/14 01:31:35  krister
 # Cleaned up default skin def and mga fbcon init.
 #
@@ -219,6 +222,22 @@ DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
 # are used for the image viewer.
 # 
 SUFFIX_IMAGE_FILES = [ 'jpg' ]
+
+# The viewer now supports a new type of menu entry, a slideshow file.
+# It also has the slideshow alarm signal handler for automated shows.
+# It uses a new configuration option:
+
+SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
+
+# This defines the file extensions of slideshow playlists. When DIR_IMAGES
+# is parsed, it will look for entries that match the SUFFIX_IMAGE_SSHOW
+# patterns. If it finds a match, then it will classify that entry as a
+# slideshow playlist instead of a directory of images. For example:
+
+# DIR_IMAGES = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
+#                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
+#                ('Pics',  '/video/SlideShows') ]
+
 
 # ======================================================================
 # Freevo mame settings:
