@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2004/02/08 19:53:14  dischi
+# create metadata dir
+#
 # Revision 1.95  2004/02/07 17:12:16  dischi
 # remove non ascii chars from log message
 #
@@ -834,6 +837,9 @@ if OVERLAY_DIR and OVERLAY_DIR.endswith('/'):
 
 if not os.path.isdir(OVERLAY_DIR + '/disc'):
     os.makedirs(OVERLAY_DIR + '/disc')
+    
+if not os.path.isdir(OVERLAY_DIR + '/disc/metadata'):
+    os.makedirs(OVERLAY_DIR + '/disc/metadata')
     
 if not os.path.isdir(OVERLAY_DIR + '/disc-set'):
     os.makedirs(OVERLAY_DIR + '/disc-set')
