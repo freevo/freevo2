@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2002/08/07 04:53:01  krister
+# Changed shutdown to just exit freevo. A new config variable can be set to shutdown the entire machine.
+#
 # Revision 1.40  2002/08/05 00:43:10  tfmalt
 # o Changed DIR_MP3 to DIR_AUDIO
 #
@@ -121,7 +124,8 @@ VIDREC_HQ = ''
 # from the parameters to it.
 #
 ENABLE_TV = 1            # Disable this if you don't have a tv card
-ENABLE_SHUTDOWN = 0      # Enable main menu choice for Linux shutdown (careful!)
+ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
+ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
 
 #
 # The list of filename suffixes that are used to match the files that

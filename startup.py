@@ -92,7 +92,7 @@ class task:
                 os.kill(self.pid, signal.SIGTERM)
             except OSError:
                 pass  # Task was already killed
-
+            
         if DEBUG: print 'Killed %s, pid %s' % (self.appname, self.pid)
 
 
@@ -207,6 +207,8 @@ def usage(progname):
 #
 if __name__ == "__main__":
 
+    os.system('rm -f /tmp/freevo-shutdown') # XXX kludge to signal startup.py to abort
+
     # Defaults
     freevo = freevo_main_xterm
     osd = osd_x11
@@ -255,3 +257,18 @@ if __name__ == "__main__":
             task.respawn()
             
         time.sleep(POLL_DELAY)
+
+        if os.path.isfile('/tmp/freevo-shutdown'): # XXX kludge to signal startup.py to abort
+            # Shutdown
+            print 'Freevo shutdown selected! Shutting down...'
+
+            # Kill off all subtasks
+            for task in tasks:
+                task.kill()
+
+                # XXX kludge for X11 OSD server, doesnt die properly otherwise
+            os.system('killall -9 osds_x11 2&> /dev/null')  
+            
+            # Done
+            sys.exit()
+            

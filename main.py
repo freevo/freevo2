@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2002/08/07 04:53:01  krister
+# Changed shutdown to just exit freevo. A new config variable can be set to shutdown the entire machine.
+#
 # Revision 1.40  2002/08/05 00:45:50  tfmalt
 # o Started work in a popup widget / dialog box type thing.
 #   Changed the "mouting /mnt/cdrom" entry on EJECT and put it in osd.py
@@ -99,9 +102,14 @@ def shutdown(menuw=None, arg=None):
     osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
     osd.update()
-    os.system("shutdown -h now")
 
-    
+    # XXX temporary kludge so it won't break on old config files
+    if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
+        if config.ENABLE_SHUTDOWN_SYS:
+            os.system("shutdown -h now")
+            
+    os.system('touch /tmp/freevo-shutdown') # XXX kludge to signal startup.py to abort
+
 
 def autostart():
     if config.ROM_DRIVES != None: 
