@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.55 2003/11/29	TC Wan (tcwan at cs dot usm dot my)
+Version 0.60 2004/01/30	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -98,6 +98,8 @@ jpegtran		libjpeg-6b (comes with RH 9)
 
 aumix-2.8		RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
 
+
+
 [Runtime - Recording]
 =====================
 
@@ -114,6 +116,13 @@ mp1e-1.9.3		http://zapping.sourceforge.net [mp1e-1.9.3 RPMs available from freev
 ffmpeg-0.4.7		Dag/Freshrpms				imlib2					Freshrpms
 													# imlib2-1.0.6-fr3.src.rpm
 													# imlib2-1.0.6-fr3.i386.rpm
+
+sqlite			http://www.hwaci.com/sw/sqlite/download.html
+			# sqlite-2.8.11-1.src.rpm
+			# sqlite-2.8.11-1.i386.rpm
+			# sqlite-devel-2.8.11-1.i386.rpm
+			
+pysqlite		http://sourceforge.net/projects/pysqlite/
 													# imlib2-devel-1.0.6-fr3.i386.rpm
 
 
