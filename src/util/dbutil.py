@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/18 19:06:00  outlyer
+# Add a "commit" function...call it to make sure the insert/updates are
+# written to disc.
+#
 # Revision 1.2  2004/01/16 14:40:33  outlyer
 # (Don't you love it when your neighbours make enough noise to wake you up
 # early on your day off)
@@ -122,6 +126,9 @@ class MetaDatabase:
     def close(self):
         self.db.commit()
         self.db.close()
+
+    def commit(self):
+        self.db.commit()
 
     def checkTable(self,table=None):
         if not table:
