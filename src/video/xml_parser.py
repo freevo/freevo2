@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/11/23 19:21:35  dischi
+# add doc
+#
 # Revision 1.45  2003/11/23 16:59:16  dischi
 # Complete rewrite to use the new fxdparser. I didn't wanted to do this,
 # it just happened :-)
@@ -88,6 +91,7 @@ class MovieParser:
             v.xml_file = self.filename
             self.items.append(v)
 
+
     def parse_video_child(self, fxd, node):
         """
         parse a subitem from <video>
@@ -100,10 +104,12 @@ class MovieParser:
         options  = fxd.getattr(node, 'mplayer_options')
 
         if mode == 'file':
+            # mark the files we include in the fxd in _fxd_covered_
             if not hasattr(self.item, '_fxd_covered_'):
                 self.item._fxd_covered_ = []
             if filename and not filename in self.item._fxd_covered_:
                 self.item._fxd_covered_.append(filename)
+            # remove them from the filelist (if given)
             if filename in self.duplicate_check:
                 self.duplicate_check.remove(filename)
             
