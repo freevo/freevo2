@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/04/21 17:35:12  dischi
+# also remove images on delete
+#
 # Revision 1.39  2003/04/20 17:36:50  dischi
 # Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
 # images like before, but also fxd files for the tv show with global
@@ -334,6 +337,11 @@ class VideoItem(Item):
 
     def delete_file(self):
         print 'Deleting %s' % self.filename
+        base = os.path.splitext(self.filename)[0] + '.'
+        if os.path.isfile(base + 'jpg'):
+            os.remove(base + 'jpg')
+        if os.path.isfile(base + 'png'):
+            os.remove(base + 'png')
         os.remove(self.filename)
         self.menuw.back_one_menu(arg='reload')
 
