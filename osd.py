@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2002/10/09 04:54:22  krister
+# Removed the workaround for the missing encodings modules in the old runtime.
+#
 # Revision 1.30  2002/10/08 22:04:28  krister
 # Added an error message for when a font cannot be loaded.
 #
@@ -197,10 +200,7 @@ def get_singleton():
 def stringproxy(str):
     result = str
     if type(str) == StringType:
-        try:
-            result = unicode(str, 'unicode-escape')
-        except:
-            pass
+        result = unicode(str, 'unicode-escape')
     return result
 
 
