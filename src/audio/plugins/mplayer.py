@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/15 20:06:42  dischi
+# cdda url handling repaired and only stop on playing player
+#
 # Revision 1.16  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -120,14 +123,15 @@ class MPlayer:
         self.playerGUI = playerGUI
         
         # Is the file streamed over the network?
-        if filename.find('://') != -1:
+        if filename.find('http://') == 0 or filename.find('https://') == 0 or \
+               filename.find('mms://') == 0 or filename.find('rtsp://') == 0:
             # Yes, trust the given mode
             network_play = 1
         else:
             network_play = 0
 
-        if not os.path.isfile(filename) and not network_play:
-            return _('%s\nnot found!') % os.path.basename(filename)
+        if not os.path.isfile(filename) and filename.find('://') == -1:
+            return _('%s\nnot found!') % filename
             
         # Build the MPlayer command
         mpl = '--prio=%s %s -slave %s' % (config.MPLAYER_NICE,
@@ -159,8 +163,7 @@ class MPlayer:
 
         self.thread.play_mode = self.mode
 
-        if DEBUG:
-            print 'MPlayer.play(): Starting thread, cmd=%s' % command
+        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
             
         self.thread.mode    = 'play'
         self.thread.command = command
@@ -172,12 +175,13 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
-        self.thread.app.write('quit\n')
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-        self.thread.item = None
-        while self.thread.mode == 'stop':
-            time.sleep(0.3)
+        if self.mode == 'play':
+            self.thread.app.write('quit\n')
+            self.thread.mode = 'stop'
+            self.thread.mode_flag.set()
+            self.thread.item = None
+            while self.thread.mode == 'stop':
+                time.sleep(0.3)
 
 
     def is_playing(self):
