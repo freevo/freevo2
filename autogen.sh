@@ -45,6 +45,9 @@ wiki() {
     wget http://freevo.sourceforge.net/cgi-bin/moin.cgi/FrequentlyAskedQuestions \
     -O $wiki/faq.html
 
+    wget http://freevo.sourceforge.net/cgi-bin/moin.cgi/RecordingInfo \
+    -O $wiki/recording.html
+
     exit 0
 }
 
