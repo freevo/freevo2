@@ -1,4 +1,4 @@
-# French strings in freevo 
+# French strings in freevo
 # Copyright (C) 2003
 # David Sagnol <david.sagnol@wanadoo.fr>, 2003
 # 
@@ -465,7 +465,7 @@ msgstr "Configurer"
 
 #: main.py:145
 msgid "shutting down..."
-msgstr "arrêt en cours..."
+msgstr "Arrêt en cours..."
 
 #: main.py:255
 msgid "Freevo Main Menu"
@@ -1002,6 +1002,38 @@ msgid ""
 msgstr ""
 "Effacer les informations sur\n"
 " '%s' ?"
+
+#: plugins/shoppingcart.py:78
+msgid "Moving files..."
+msgstr "Déplacement des fichiers en cours"
+
+#: plugins/shoppingcart.py:88
+msgid "Copying files..."
+msgstr "Copie des fichiers en cours..."
+
+#: plugins/shoppingcart.py:102
+msgid "Added to Cart"
+msgstr "Fichier ajouté au panier"
+
+#: plugins/shoppingcart.py:120
+msgid "Cart: Move Files Here"
+msgstr "Panier: Déplacer les fichiers ici"
+
+#: plugins/shoppingcart.py:121
+msgid "Cart: Copy Files Here"
+msgstr "Panier: Déplacer les fichiers ici"
+
+#: plugins/shoppingcart.py:124
+msgid "Add Directory to Cart"
+msgstr "Ajouter ce répertoire au panier"
+
+#: plugins/shoppingcart.py:128
+msgid "Add File to Cart"
+msgstr "Ajouter ce fichier au panier"
+
+#: plugins/shoppingcart.py:131
+msgid "Delete Cart"
+msgstr "Vider le panier"
 
 #: skins/main/listing_area.py:264
 msgid "This directory is empty"
