@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/07/01 20:44:52  dischi
+# added pickle wrapper
+#
 # Revision 1.34  2003/07/01 19:44:59  outlyer
 # A simple function to add tags to MP3s.
 #
@@ -119,6 +122,7 @@ import string, fnmatch, re
 import md5
 import Image # PIL
 import copy
+import cPickle, pickle # pickle because sometimes cPickle doesn't work
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -521,6 +525,22 @@ def format_text(text):
     while len(text) and text[-1] in (' ', '\t', '\n'):
         text = text[:-1]
     return text
+
+
+def read_pickle(file):
+    f = open(file, 'r')
+    try:
+        data = cPickle.load(f)
+    except:
+        data = pickle.load(f)
+    f.close()
+    return data
+
+
+def save_pickle(data, file):
+    f = open(file, 'w')
+    cPickle.dump(data, f, 1)
+    f.close()
 
 
 def readfile(filename):
