@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/25 16:30:05  rshortt
+# Fix crash if freevo.conf entries exist but aren't valid.  Maybe we should also print a warning?
+#
 # Revision 1.1  2004/09/28 18:30:24  dischi
 # add autodetect system settings module
 #
@@ -41,7 +44,7 @@ import stat
 import config
 
 def probe(cache):
-    if config.CONF.xine:
+    if config.CONF.xine and os.path.exists(config.CONF.xine):
         timestamp = os.stat(config.CONF.xine)[stat.ST_MTIME]
         if timestamp != cache['_XINE_TIMESTAMP']:
             cache['XINE_USE_LIRC'] = 0
@@ -59,7 +62,7 @@ def probe(cache):
             child.wait()
             cache['_XINE_TIMESTAMP'] = timestamp
             
-    if config.CONF.fbxine:
+    if config.CONF.fbxine and os.path.exists(config.CONF.fbxine):
         timestamp = os.stat(config.CONF.fbxine)[stat.ST_MTIME]
         if timestamp != cache['_FBXINE_TIMESTAMP']:
             cache['FBXINE_USE_LIRC'] = 0
