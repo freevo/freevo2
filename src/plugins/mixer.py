@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/20 19:36:04  dischi
+# ioctl may fail
+#
 # Revision 1.9  2003/10/12 11:05:48  dischi
 # respect config.CONTROL_ALL_AUDIO
 #
@@ -95,8 +98,11 @@ class PluginInterface(plugin.DaemonPlugin):
 
             if self.mixfd:
                 data = struct.pack( 'L', self.SOUND_MASK_LINE )
-                fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
-
+                try:
+                    fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
+                except:
+                    pass
+                
         if config.MAJOR_AUDIO_CTRL == 'VOL':
             self.setMainVolume(config.DEFAULT_VOLUME)
             if config.CONTROL_ALL_AUDIO:
@@ -157,8 +163,11 @@ class PluginInterface(plugin.DaemonPlugin):
             if volume > 100: volume = 100
             vol = (volume << 8) | (volume)
             data = struct.pack('L', vol)
-            fcntl.ioctl(self.mixfd.fileno(), device, data)
-
+            try:
+                fcntl.ioctl(self.mixfd.fileno(), device, data)
+            except:
+                pass
+            
     def getMuted(self):
         return(self.muted)
 
