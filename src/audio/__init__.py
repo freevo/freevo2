@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/01/29 16:57:20  outlyer
+# This logic doesn't work. Any directory that has even one subdirectory with
+# multiple artists will show the artist name for all the directories...
+#
 # Revision 1.21  2004/01/18 21:09:50  dischi
 # better title guessing
 #
@@ -146,9 +150,10 @@ class PluginInterface(plugin.MimetypePlugin):
                 # parent has same artist, but no album, but item has:
                 diritem.name = album
 
-            elif not p_artist and artist:
-                # item has artist, parent not
-                diritem.name = artist
+            # XXX FIXME
+            #elif not p_artist and artist:
+            #    # item has artist, parent not
+            #    diritem.name = artist
 
             elif not p_artist and not p_album and not artist and album:
                 # parent has no info, item no artist but album (== collection)
