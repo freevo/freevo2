@@ -495,6 +495,11 @@
 	    y="-5" width="max+10" height="max+10"/>
 	</item>
 	
+	<item type="scheduled" font="tv">
+	  <rectangle bgcolor="0x14ba05" size="1" color="0x000000" x="-5"
+	    y="-5" width="max+10" height="max+10"/>
+	</item>
+	
       </content>
     </layout>
 
