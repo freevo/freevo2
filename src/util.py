@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/08/21 02:45:49  outlyer
+# Another pure Python version of a system call. Soon all the os.system calls
+# (except the user-specified ones) will be gone, I hope.
+#
 # Revision 1.40  2003/08/20 21:50:12  outlyer
 # Just a simple pure python replacement for os.system('touch %s...')
 #
@@ -84,7 +88,7 @@ import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
+#import config
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
@@ -584,6 +588,17 @@ def touch(file):
     fd.close()
     return 0
 
+def rmrf(top=None):
+    """
+    Pure python version of 'rm -rf'
+    """
+    if not top == '/' and not top == '' and not top == ' ' and top:
+        for root, dirs, files in os.walk(top, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
+        os.rmdir(top)
 
 #
 # synchronized objects and methods.
