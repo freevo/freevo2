@@ -94,7 +94,7 @@
       <background>
 	<!-- an image with the label background will ignore OVERSCAN settings -->
 	<!-- in freevo to make sure the complete screen is filled -->
-	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
 	<image filename="logo.png" x="10" y="0" width="200" height="98"/>
       </background>
     </layout>
@@ -169,6 +169,15 @@
 
     <!--
     **********************************************
+    IMAGE DEFINITIONS 
+    **********************************************
+
+    -->
+
+    <image label="background" filename="aubin_bg2"/>
+
+    <!--
+    **********************************************
     POPUP DEFINITIONS 
     
     A popup definition is only a link to a specific layout, like menu areas
@@ -215,7 +224,7 @@
 
     <layout label="player screen">
       <background>
-	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
       </background>
     </layout>
 
@@ -274,7 +283,7 @@
 
     <layout label="tv screen">
       <background>
-	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
       </background>
     </layout>
 

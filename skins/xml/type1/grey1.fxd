@@ -10,11 +10,7 @@
       </listing>
     </menuset>
 
-    <layout label="screen0">
-      <background>
-	<image filename="../images/aubin_bg1" x="0" y="0" label="background"/>
-      </background>
-    </layout>
+    <image label="background" filename="aubin_bg1"/>
 
     <layout label="title0">
       <content x="0" type="menu" font="title" align="center"/>

@@ -91,23 +91,18 @@
     <!-- LAYOUT DEFINITIONS -->
 
 
-    <!-- background -->
-    <layout label="screen0">
-      <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
-      </background>
-    </layout>
-
+    <image label="background" filename="aubin/blurr.jpg"/>
+    
     <layout label="screen watermark">
       <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
 	<image x="435" y="230" width="370" height="380" label="watermark"/>
       </background>
     </layout>
 
     <layout label="video screen">
       <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
 	<image filename="movie_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -115,7 +110,7 @@
 
     <layout label="audio screen">
       <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
 	<image filename="music_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -123,7 +118,7 @@
 
     <layout label="image screen">
       <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
 	<image filename="image_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -131,7 +126,7 @@
 
     <layout label="tv menu screen">
       <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image image="background" x="0" y="0" label="background"/>
 	<image filename="tv_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -182,24 +177,6 @@
     <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
     <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
-
-    <!-- ********************************************** -->
-    <!-- AUDIO PLAYER DEFINITIONS -->
-
-    <layout label="player screen">
-      <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
-      </background>
-    </layout>
-
-    <!-- ********************************************** -->
-    <!-- TV DEFINITIONS -->
-
-    <layout label="tv screen">
-      <background>
-	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
-      </background>
-    </layout>
 
   </skin>
 </freevo>
