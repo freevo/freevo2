@@ -5,7 +5,7 @@
 #
 # Authors:     Krister Lagerstrom <krister@kmlager.com>
 #              Aubin Paul <aubin@punknews.org>
-#              Dirk Meyer <dischi@... >
+#              Dirk Meyer <dischi@tzi.de>
 #              Thomas Malt <thomas@malt.no>
 # Notes:
 # Todo:        * Add support for Ogg-Vorbis
@@ -13,6 +13,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/07/31 08:06:15  dischi
+# Fixed my mail address
+#
 # Revision 1.15  2002/07/29 18:13:13  outlyer
 # Fixed "deja vu" of audio progressbar when playing movies after playing mp3s.
 #
