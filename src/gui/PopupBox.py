@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/02/19 19:39:50  dischi
+# more gui cleanup
+#
 # Revision 1.37  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -149,26 +152,9 @@ class PopupBox(Window):
         Set the icon of the popupbox.
         Also scales the icon to fit the size of the box.
         
-        Can either be a string with filename or a pygame Surface object.
+        Not working right now
         """
-        if type(image) in StringTypes:
-            self.icon = pygame.image.load(image).convert_alpha()
-        else:
-            self.icon = image
-
-        bx,by = self.get_size()
-        ix,iy = self.icon.get_size()
-        
-        aspect = (ix/iy)
-
-        if(bx > by):
-            iy = by-(self.v_margin*2)
-            ix = iy*aspect
-        else:
-            ix = bx-(self.h_margin*2)
-            iy = ix/aspect
-        
-        self.icon = pygame.transform.scale(self.icon, (ix, iy))
+        pass
 
 
     def eventhandler(self, event):
