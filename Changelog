@@ -16,6 +16,7 @@ o Fixed a bug in runapp.c
 o Updated the boot-scripts
 o Swapped MPlayer next/prev keys
 o Removed osd_server/osd_fb, moved files to osd_server
+o Cleaned up Makefiles, made x11 optional
 o Added loading a local_conf.py file where directory 
   defs etc can be put so that it is easier to update
   freevo_config.py
