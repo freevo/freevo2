@@ -8,4 +8,6 @@ Currently, there are some things missing:
 and put stuff there.
 2. No init.d script, though the one in the boot/ directory works nicely
 on my system
-3. ???
+3. Split up the "data" and the code; most of the 2.5mb of the package is
+fonts and other stuff we can get elsewhere; skins and stuff should be
+seperate too since they are more "Static"
