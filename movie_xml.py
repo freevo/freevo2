@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/10/16 18:22:28  dischi
+# Added runtime information (a long time ago, I forgot to check in)
+#
 # Revision 1.11  2002/10/12 22:30:45  krister
 # Removed debug output.
 #
@@ -138,6 +141,8 @@ def parseInfo(info_node):
             info.url = node.textof().encode('latin-1')
         if node.name == u'genre':
             info.genre = node.textof().encode('latin-1')
+        if node.name == u'runtime':
+            info.runtime = node.textof().encode('latin-1')
         if node.name == u'tagline':
             info.tagline = node.textof().encode('latin-1')
         if node.name == u'plot':
