@@ -1,9 +1,9 @@
 import types, time, math, Imlib2
-from util import *
+from mevas.util import *
 
-from canvas import *
-from image import *
-from text import *
+from mevas.canvas import *
+from mevas.image import *
+from mevas.text import *
 
 class MPlayerCanvas(Canvas):
 	"""

@@ -1,9 +1,9 @@
 import time, mevas
 
-from util import *
-from canvas import *
-from image import *
-from text import *
+from mevas.util import *
+from mevas.canvas import *
+from mevas.image import *
+from mevas.text import *
 
 class BitmapCanvas(Canvas):
 	"""
@@ -16,7 +16,7 @@ class BitmapCanvas(Canvas):
 	_update_end() to flip the buffered page.
 	"""
 
-	def __init__(self, size, preserve_alpha = True):
+	def __init__(self, size, preserve_alpha = False):
 		super(BitmapCanvas, self).__init__(size)
 		self._preserve_alpha = preserve_alpha
 		self._blit_rects = []
@@ -51,6 +51,9 @@ class BitmapCanvas(Canvas):
 	def child_paint(self, child, force_children = False):
 		img, dirty_rects = self._get_backing_store(update = True, update_object = child, clip = True,
 		                                           preserve_alpha = self._preserve_alpha)
+		if len(dirty_rects) == 0:
+			return
+
 		if self._canvas_frozen > 0:
 			self._blit_rects = rect.reduce(self._blit_rects + dirty_rects)
 		else:
@@ -99,6 +102,7 @@ class BitmapCanvas(Canvas):
 		# backing store by remove_child(), so all we need to do is ensure it
 		# gets drawn on the next update.
 		if child.get_parent() and hasattr(child, "_backing_store_info"):
+			print "Child deleted", child
 			child.parent().queue_paint()
 
 

@@ -65,7 +65,7 @@ class Image(object):
 		pass
 
 
-	def scale(self, (w, h)):
+	def scale(self, (w, h), src_pos = (0, 0), src_size = (-1, -1)):
 		"""
 		Scale the image and return a new image.
 
@@ -135,8 +135,9 @@ class Image(object):
 		pass
 
 
-	def blend(self, srcimg, dst_pos = (0, 0), src_pos = (0, 0),
-	          src_size = (-1, -1), alpha = 255, merge_alpha = True):
+	def blend(self, srcimg, dst_pos = (0, 0), dst_size = (-1, -1),
+	          src_pos = (0, 0), src_size = (-1, -1),
+	          alpha = 255, merge_alpha = False):
 		"""
 		Blends one image onto another.  
 
@@ -149,6 +150,9 @@ class Image(object):
 		     src_size: a tuple holding the width and height of the source
 		               image to be blended.  A value of -1 for either one
 		               indicates the full dimension of the source image.
+		     dst_size: a tuple holding the width and height that the source
+		               image will be scaled to before blending onto the
+		               destination image.
 		        alpha: the "layer" alpha that is applied to all pixels of the
 		               image.  If an individual pixel has an alpha of 128 and
 		               this value is 128, the resulting pixel will have an
@@ -158,7 +162,7 @@ class Image(object):
 		               disabled.
 		  merge_alpha: if True, the alpha channel is also blended.  If False,
 		               the destination image's alpha channel is untouched and
-		               the RGB values are compensated
+		               the RGB values are compensated.
 
 		Returns: None.
 		"""

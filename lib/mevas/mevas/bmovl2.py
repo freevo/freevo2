@@ -2,7 +2,7 @@ import os, string, time
 import imagelib
 
 # This class speaks bmovl2 over a fifo.  How MPlayer is launched is not the
-# responsibility of the mevas.  
+# responsibility of mevas.  
 
 DEBUG = 0
 

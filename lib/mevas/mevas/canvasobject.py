@@ -40,12 +40,12 @@ class CanvasObject(object):
 			o = o.get_parent()
 		return False
 
-	def destroy(self):
+	def _destroy(self):
 		"""
 		Tells the canvas to delete the object.  This
 		gets called by the object's destructor (indirectly through unparent()), 
 		but if we need the image to disappear from the canvas right away, we 
-		can explicitly call destroy()
+		can explicitly call _destroy()
 		"""
 		if self.has_canvas():
 			self.canvas().child_deleted(self)
@@ -65,16 +65,6 @@ class CanvasObject(object):
 		self._properties_dirty = True
 
 
-
-	def unparent(self):
-		"""
-		Remove the object from the parent.
-		"""
-		parent = self.get_parent()
-		if parent:
-			parent.remove_child(self)
-
-        
 	def _unparent(self, destroy = True):
 		"""
 		Makes the object an orphan.  Tells the parent to disown it and then
@@ -85,12 +75,17 @@ class CanvasObject(object):
 		# to destroy us.  If destroy is False, it probably means we're being
 		# reparented within the same canvas, so there's no need to destroy.
 		if destroy:
-			self.destroy()
+			self._destroy()
 #		if check_weakref(self.parent) and self in self.parent().children:
 #			self.parent().children.remove(self)
 		self.unqueue_paint()
 		self.canvas = self.parent = None
 
+
+	def unparent(self):
+		parent = self.get_parent()
+		if parent:
+			parent.remove_child(self)
 
 	def _reparent(self, parent):
 		if not isinstance(parent, CanvasContainer):
@@ -196,9 +191,8 @@ class CanvasObject(object):
 		if not self._update_begin():
 			return False
 
-		# Ask the canvas to paint us.
-		self.canvas().child_paint(self, force)
-		# Unqueue the paint and finish up.
+		if check_weakref(self.canvas):
+			self.canvas().child_paint(self, force)
 		self.unqueue_paint()
 		return self._update_end()
 

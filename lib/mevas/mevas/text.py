@@ -30,7 +30,7 @@ class CanvasText(CanvasImage):
 			
 			# Rerender text in new color
 			if hasattr(self, "text"):
-				self.set_text(self.text)
+				self.set_text(self.text, force = True)
 
 
 	def set_font(self, font, size = 24):
@@ -41,7 +41,7 @@ class CanvasText(CanvasImage):
 				self.font = font
 			if hasattr(self, "text") and (font, size) != (self.fontname, self.size):
 				# Need to re-render text with new font and/or size.
-				self.set_text(self.text)
+				self.set_text(self.text, force = True)
 		except IOError:
 			print "Font %s/%d failed to load, so using default" % (font, size)
 			self.font = imagelib.load_font("arial", 24)

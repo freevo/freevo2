@@ -21,10 +21,10 @@ class CanvasContainer(CanvasObject):
 		self._backing_store_info = { "dirty-rects": [] }
 		self._backing_store_dirty = True
 
-	def destroy(self):
+	def _destroy(self):
 		for child in self.children[:]:
-			child.destroy()
-		CanvasObject.destroy(self)
+			child._destroy()
+		CanvasObject._destroy(self)
 
 
 	def reset(self):
@@ -73,15 +73,21 @@ class CanvasContainer(CanvasObject):
 		self.dirty = True
 
 
-	def draw_image(self, image, dst_pos = (0, 0), src_pos = (0, 0), src_size = (-1, -1), visible = True, alpha = 255, zindex = 0):
+	def draw_image(self, image, dst_pos = (0, 0), dst_size = (-1, -1), 
+	               src_pos = (0, 0), src_size = (-1, -1), 
+	               visible = True, alpha = 255, zindex = 0):
 		"""
 		Convenience function to add an image object to the container.
 		"""
 
 		o = CanvasImage(image)
-		if src_size[0] == -1: src_size = o.get_width(), src_size[1]
-		if src_size[1] == -1: src_size = src_size[0], o.get_height()
-		o.crop(src_pos, src_size)
+		src_w, src_h = src_size
+		dst_w, dst_h = dst_size
+		if src_w == -1: src_w = o.get_width()
+		if src_h == -1: src_h = o.get_height()
+		if dst_w == -1: dst_w = src_w
+		if dst_h == -1: dst_h = dst_h
+		o.scale((dst_w, dst_h), src_pos, (src_w, src_h))
 		o.set_all(dst_pos, visible, alpha, zindex)
 		self.add_child(o)
 		return o
@@ -314,7 +320,6 @@ class CanvasContainer(CanvasObject):
 				if update_object == self and update:
 					self.unqueue_paint()
 				return self._backing_store, dirty_rects
-			
 
 		if "pos" not in self._backing_store_info:
 			# First time _get_backing_store() is called on this container, so we
@@ -377,6 +382,13 @@ class CanvasContainer(CanvasObject):
 		
 			# 'bsi' for convenience.
 			bsi = child._backing_store_info
+
+			# If the child is invisible (either hidden or alpha of 0) then 
+			# we don't bother with this child.
+			if ("visible" in bsi and not child.visible and not bsi["visible"]) or \
+			   ("alpha" in bsi and child.alpha == 0 and bsi["alpha"] == 0):
+				continue
+
 			# If the child has either changed positions or changed sizes (or
 			# both), we add the child's old rectangle and the new one to the
 			# list of dirty rectangles.
@@ -482,6 +494,8 @@ class CanvasContainer(CanvasObject):
 						dirty_rects += [ ((0, height + move_y), (bs_width, bs_height-height)) ]
 
 			for r in dirty_rects:
+				# Clip rect to backing store image boundary.
+				r = rect.clip(r, ((offset_x, offset_y), self._backing_store.size) )
 				if preserve_alpha:
 					self._backing_store.clear( (r[0][0] - offset_x, r[0][1] - offset_y), r[1] )
 				else:
@@ -490,14 +504,14 @@ class CanvasContainer(CanvasObject):
 		self._backing_store_info["offset"] = (offset_x, offset_y)
 		self._backing_store_info["size"] = (width, height)
 
-
+		#dirty_rects += [((offset_x, offset_y), (width, height))]
 		# STEP 3
 		# ======
 		# Render the intersections between all children and all dirty
 		# rectangles.  Children are already sorted in order of z-index.
 		t3 = time.time()
 		for child in self.children:
-			if not child.visible or child.alpha <= 0or not dirty_rects:
+			if not child.visible or child.alpha <= 0 or not dirty_rects:
 				continue
 
 			if isinstance(child, CanvasContainer):
@@ -520,7 +534,7 @@ class CanvasContainer(CanvasObject):
 
 			# We must remove all intersections from the list because drawing
 			# over a rectangle multiple times with an image whose opacity is
-			# less than 255 will cause incorrect results.  (Jntersections are
+			# less than 255 will cause incorrect results.  (Intersections are
 			# collapsed into unions.)  remove_intersections() could be more
 			# intelligent: see rect.py for details.
 			draw_regions = rect.remove_intersections(intersects)
@@ -537,18 +551,18 @@ class CanvasContainer(CanvasObject):
 				img = child._get_backing_store(use_cached = True)[0]
 			else:
 				img = child.image
-
+			#scale_x=scale_y=1
 			for r in draw_regions:
 				rx, ry = r[0]
-				rel_x, rel_y = rx - offset_x, ry - offset_y
-
+				dst_x, dst_y = rx - offset_x, ry - offset_y
+				src_x, src_y = rx - child_offset_x - child_x, ry - child_offset_y - child_y
+				src_w, src_h = dst_w, dst_h = r[1]
 				# Draw random colored rectangles over updated regions: useful for debugging.
 				#c = map(lambda x: int(random.random()*127)+127, range(3))
-				#self._backing_store.draw_rectangle( ( rel_x, rel_y ), r[1], c+[200], fill=True)
-				self._backing_store.blend(img, ( rel_x, rel_y ), 
-					( rx - child_offset_x - child_x, ry - child_offset_y - child_y ), 
-					r[1], alpha = child.alpha, merge_alpha = preserve_alpha)
-				#print "PAINT", child, ( rel_x, rel_y ), ( rx - child_offset_x - child_x, ry - child_offset_y - child_y ), r[1], child.alpha, time.time()-tb
+				#self._backing_store.draw_rectangle( ( dst_x, dst_y ), r[1], c+[200], fill=True)
+				self._backing_store.blend(img, (dst_x, dst_y), (dst_w, dst_h),
+				    (src_x, src_y), (src_w, src_h), alpha = child.alpha, merge_alpha = preserve_alpha)
+				#print "PAINT", child, (dst_x, dst_y), (dst_w, dst_h), (src_x, src_y), (src_w, src_h), child.alpha
 
 		if not update_object or update_object == self:
 			self._backing_store_dirty = False

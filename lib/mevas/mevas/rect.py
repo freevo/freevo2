@@ -1,3 +1,4 @@
+import math
 empty = (0, 0), (0, 0)
 
 def union(r1, r2):
@@ -60,11 +61,12 @@ def contained_in_list(r, list):
 
 	return False
 
-def offset(r, pos):
-	(rx, ry), size = r
+def offset(r, pos, size = (0, 0)):
+	(rx, ry), (rw, rh)= r
 	offset_x, offset_y = pos
+	offset_w, offset_h = size
 
-	return (rx + offset_x, ry + offset_y), size
+	return (rx + offset_x, ry + offset_y), (rw + offset_w, rh + offset_h)
 
 
 def offset_list(list, pos):
@@ -73,12 +75,28 @@ def offset_list(list, pos):
 		new_list.append( offset(r, pos) )
 	return new_list
 
+def clip(r1, r2):
+	return intersect(r1, r2)
+
 def clip_list(list, rect):
 	new_list = []
 	for r in list:
 		i = intersect(r, rect)
 		if i != empty:
 			new_list.append(i)
+	return new_list
+
+def translate((pos, size), offset = (0, 0), scale = (1.0, 1.0), scale_pos = False, pixel_aspect = 1):
+	pos = pos[0] + offset[0], pos[1] + offset[1]
+	size = int(math.ceil(size[0] * scale[0])), int(math.ceil(size[1] * scale[1]))
+	if scale_pos:
+		pos = int(pos[0] * scale[0]), int(pos[1] * scale[1])
+	return pos, size
+
+def translate_list(list, offset = (0, 0), scale = (1.0, 1.0), scale_pos = False, pixel_aspect = 1):
+	new_list = []
+	for r in list:
+		new_list.append( translate(r, offset, scale, scale_pos, pixel_aspect) )
 	return new_list
 
 
@@ -180,11 +198,12 @@ if __name__ == "__main__":
 	r2 = (40, 20), (40, 70)
 	list = [((118, 443), (56, 22)), ((189, 448), (12, 19)), ((189, 448), (19, 19)), ((33, 398), (226, 199)), ((220, 410), (50, 50))]
 	list = [((0, 0), (800, 600)), ((608, 478), (4, 7)), ((0, 398), (800, 202))]
-
+	print list
+	print translate_list(list, offset = (0, 0), scale = ((720/800.0), (480/600.0)), scale_pos = True)
 #	print intersect( ((188, -27), (19, 19)), ((0, 0), (800, 125)) )
 #	print intersect( ((189, 448), (12, 19)), ((189, 448), (19, 19)) )
 #	print contained_in( ((189, 448), (12, 19)), ((189, 448), (19, 19)) )
-	print reduce(list)
+#	print reduce(list)
 	#print remove_intersections(list)
 #	print union(r1, r2)
 #	print intersect(r1, r2)

@@ -27,19 +27,18 @@ class CanvasImage(CanvasObject):
 			return self._needs_blitting
 		self._needs_blitting = blit
 
-	def scale(self, size):
+	def scale(self, dst_size, src_pos = (0,0), src_size = (-1, -1)):
 		"""
 		Scale the image to the given 'size', where 'size' is a tuple holding the
 		new width and height.
 		"""
-		w, h = size
-
 		# Clamp dimensions to multiples of two
 		# FIXME: we only really need to do this for MPlayerCanvas since it
 		# stores images in YV12.
+		#w, h = dst_size
 		#if w % 2: w = int(math.ceil(w / 2.0)) * 2
 		#if h % 2: h = int(math.ceil(h / 2.0)) * 2
-		self.image = self.image.scale((w, h))
+		self.image = self.image.scale(dst_size, src_pos, src_size)
 		self.set_size(self.image.size)
 		self.needs_blitting(True)
 		self.queue_paint()
@@ -83,7 +82,8 @@ class CanvasImage(CanvasObject):
 		self.queue_paint()
 
 
-	def draw_image(self, image, dst_pos = (0, 0), src_pos = (0, 0), src_size = (-1, -1), alpha = 255):
+	def draw_image(self, image, dst_pos = (0, 0), dst_size = (-1, -1), 
+	               src_pos = (0, 0), src_size = (-1, -1), alpha = 255):
 		"""
 		Draws (and blends) another image 'image' on top of the existing image,
 		at position 'pos', a tuple containing the left and top coordinates 
@@ -94,9 +94,12 @@ class CanvasImage(CanvasObject):
 		elif isinstance(image, CanvasImage):
 			image = image.image
 		if not self.image:
-			self.image = image
+			if dst_size != (-1, -1):
+				self.image = image.scale(dst_size)
+			else:
+				self.image = image
 		else:
-			self.image.blend(image, dst_pos, src_pos, src_size, alpha)
+			self.image.blend(image, dst_pos, dst_size, src_pos, src_size, alpha)
 		self.needs_blitting(True)
 		self.queue_paint()
 
@@ -110,7 +113,7 @@ class CanvasImage(CanvasObject):
 			image = imagelib.open(image)
 		elif isinstance(image, CanvasImage):
 			image = image.image
-
+			self.filanem = None
 		if self.image == image:
 			return
 		if image == None:
@@ -135,10 +138,11 @@ class CanvasImage(CanvasObject):
 		self.queue_paint()
 		return metrics
 
-	def draw_rectangle(self, pos, size, color = (255, 255, 255, 255), fill = False):
+	def draw_rectangle(self, pos, size, color = (255, 255, 255, 255), fill = True):
+		print "Draw rect", pos, size, color, fill
 		self.image.draw_rectangle(pos, size, color, fill)
 
-	def draw_ellipse(self, center_pos, amplitude, color = (255, 255, 255, 255), fill = False):
+	def draw_ellipse(self, center_pos, amplitude, color = (255, 255, 255, 255), fill = True):
 		self.image.draw_ellipse(center_pos, amplitude, color, fill)
 
 

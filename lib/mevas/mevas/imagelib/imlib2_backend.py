@@ -37,8 +37,8 @@ class Image(base.Image):
 	def get_raw_data(self, format = "BGRA"):
 		return self._image.get_bytes(format)
 
-	def scale(self, size):
-		return Image( self._image.scale(size) )
+	def scale(self, size, src_pos = (0, 0), src_size = (-1, -1)):
+		return Image( self._image.scale(size, src_pos, src_size) )
 
 	def crop(self, pos, size):
 		return Image( self._image.crop(pos, size) )
@@ -52,9 +52,10 @@ class Image(base.Image):
 	def copy_rect(self, src_pos, size, dst_pos):
 		return self._image.copy_rect( src_pos, size, dst_pos )
 
-	def blend(self, srcimg, dst_pos = (0, 0), src_pos = (0, 0), 
-	          src_size = (-1, -1), alpha = 255, merge_alpha = True):
-		return self._image.blend(srcimg._image, dst_pos, src_pos, src_size, alpha, merge_alpha)
+	def blend(self, srcimg, dst_pos = (0, 0), dst_size = (-1, -1), 
+	          src_pos = (0, 0), src_size = (-1, -1), 
+	          alpha = 255, merge_alpha = True):
+		return self._image.blend(srcimg._image, src_pos, src_size, dst_pos, dst_size, alpha, merge_alpha)
 
 	def clear(self, pos = (0, 0), size = (-1, -1)):
 		self._image.clear( pos, size )
