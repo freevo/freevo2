@@ -1,67 +1,19 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # item.py - Template for an item
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This file contains a basic item for the menu and a special one for items
+# based on media content. There is also a base class for actions to be
+# returned by the actions() function.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.88  2005/01/07 20:44:57  dischi
-# handle None returns as nothing for getattr
+# First edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
 #
-# Revision 1.87  2004/12/30 11:31:51  dischi
-# rename id to __id__
-#
-# Revision 1.86  2004/12/28 18:09:58  dischi
-# add extra Action class for item actions
-#
-# Revision 1.85  2004/11/20 18:22:59  dischi
-# use python logger module for debug
-#
-# Revision 1.84  2004/11/13 15:56:12  dischi
-# do not import mediainfo in util.__init__
-#
-# Revision 1.83  2004/11/01 20:14:14  dischi
-# fix debug
-#
-# Revision 1.82  2004/10/26 19:14:50  dischi
-# adjust to new sysconfig file
-#
-# Revision 1.81  2004/09/13 19:39:25  dischi
-# every meddiaitem has play/stop functions
-#
-# Revision 1.80  2004/08/27 14:25:03  dischi
-# create extra item type for media items
-#
-# Revision 1.79  2004/08/26 15:26:49  dischi
-# add code to do some memory debugging
-#
-# Revision 1.78  2004/08/24 19:23:36  dischi
-# more theme updates and design cleanups
-#
-# Revision 1.77  2004/08/24 16:42:39  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.76  2004/08/05 17:38:25  dischi
-# remove skin dep
-#
-# Revision 1.75  2004/08/01 10:56:00  dischi
-# do not hide/show the menu, it can do that itself
-#
-# Revision 1.74  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.73  2004/05/29 12:33:16  dischi
-# make it possible to access parent data
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -78,29 +30,32 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
+
+__all__ = [ 'FileInformation', 'Action', 'Item', 'MediaItem' ]
 
 
+# python imports
 import os
 import gettext
 import shutil
+import logging
 
-import config
-from event import *
+# freevo imports
 import plugin
 import util
-import gui
 
 from sysconfig import Unicode
 from util import vfs
 import util.mediainfo as mediainfo
 
-import logging
+# get logging object
 log = logging.getLogger()
+
 
 class FileInformation:
     """
-    file operations for an item
+    File operations for an item.
     """
     def __init__(self):
         self.files     = []
@@ -110,18 +65,30 @@ class FileInformation:
 
 
     def append(self, filename):
+        """
+        Append a file to the list.
+        """
         self.files.append(filename)
 
 
     def get(self):
+        """
+        Return all files.
+        """
         return self.files
 
 
     def copy_possible(self):
+        """
+        Return true if it is possible to copy the files.
+        """
         return self.files != []
 
-    
+
     def copy(self, destdir):
+        """
+        Copy all files to destdir.
+        """
         for f in self.files + [ self.fxd_file, self.image ]:
             if f:
                 if vfs.isoverlay(f):
@@ -134,10 +101,16 @@ class FileInformation:
 
 
     def move_possible(self):
+        """
+        Return true if it is possible to move the files.
+        """
         return self.files and not self.read_only
 
 
     def move(self, destdir):
+        """
+        Move all files to destdir.
+        """
         for f in self.files + [ self.fxd_file, self.image ]:
             if f:
                 if vfs.isoverlay(f):
@@ -150,10 +123,16 @@ class FileInformation:
 
 
     def delete_possible(self):
+        """
+        Return true if it is possible to delete the files.
+        """
         return self.files and not self.read_only
 
 
     def delete(self):
+        """
+        Delete all files.
+        """
         for f in self.files + [ self.fxd_file, self.image ]:
             if not f:
                 continue
@@ -164,7 +143,7 @@ class FileInformation:
                     os.unlink(f)
                 except:
                     log.error('can\'t delete %s' % f)
-        
+
 
 class Action:
     """
@@ -185,7 +164,7 @@ class Action:
         """
         if self.function:
             self.function(arg=self.arg, menuw=menuw)
-        
+
 
 class Item:
     """
@@ -193,7 +172,7 @@ class Item:
     It's a template for MenuItem and for other info items like
     VideoItem, AudioItem and ImageItem
     """
-    def __init__(self, parent=None, info=None, skin_type=None):
+    def __init__(self, parent=None, info=None):
         """
         Init the item. Sets all needed variables, if parent is given also
         inherit some settings from there. Set self.info to info if given.
@@ -216,44 +195,25 @@ class Item:
         if not hasattr(self, 'autovars'):
             self.autovars = []
 
-        if info and parent and \
-               hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
-               parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
-               self.info.has_key('title'):
-            self.name = self.info['title']
-        
         if parent:
+            if info and hasattr(parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') \
+                   and parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
+                   self.info.has_key('title'):
+                self.name = self.info['title']
+
             self.image = parent.image
             if hasattr(parent, 'is_mainmenu_item'):
                 self.image = None
             self.skin_fxd    = parent.skin_fxd
             self.media       = parent.media
-            if hasattr(parent, '_'):
-                self._ = parent._
         else:
             self.image        = None            # imagefile
             self.skin_fxd     = None            # skin informationes etc.
             self.media        = None
 
-                
         self.fxd_file = None
 
-        if skin_type:
-            theme     = gui.get_theme()
-            skin_info = theme.mainmenu.items
-            imagedir  = theme.mainmenu.imagedir
-            if skin_info.has_key(skin_type):
-                skin_info  = skin_info[skin_type]
-                self.name  = _(skin_info.name)
-                self.image = skin_info.image
-                if skin_info.icon:
-                    self.icon = os.path.join(theme.icon_dir, skin_info.icon)
-                if skin_info.outicon:
-                    self.outicon = os.path.join(theme.icon_dir,
-                                                skin_info.outicon)
-            if not self.image and imagedir:
-                self.image = util.getimage(os.path.join(imagedir, skin_type))
-        
+
 
     def __setitem__(self, key, value):
         """
@@ -270,7 +230,7 @@ class Item:
                 return
         self.info[key] = value
 
-        
+
     def store_info(self, key, value):
         """
         store the key/value in metadata
@@ -291,7 +251,7 @@ class Item:
         else:
             log.warning('unable to delete info for that kind of item')
 
-        
+
     def __id__(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -301,27 +261,12 @@ class Item:
             return self.url
         return self.name
 
-    
+
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
         """
         return u'0%s' % self.name
-
-    
-    def translation(self, application):
-        """
-        Loads the gettext translation for this item (and all it's children).
-        This can be used in plugins who are not inside the Freevo distribution.
-        After loading the translation, gettext can be used by self._() instead
-        of the global _().
-        """
-        try:
-            self._ = gettext.translation(application,
-                                         os.environ['FREEVO_LOCALE'],
-                                         fallback=1).gettext
-        except:
-            self._ = lambda m: m
 
 
     def actions(self):
@@ -338,20 +283,20 @@ class Item:
         """
         if self.actions():
             return self.actions()[0][0](arg=arg, menuw=menuw)
-        
+
 
     def eventhandler(self, event, menuw=None):
         """
         simple eventhandler for an item
         """
-        
+
         if not menuw:
             menuw = self.menuw
 
         for p in self.eventhandler_plugins:
             if p(event, self, menuw):
                 return True
-            
+
         # give the event to the next eventhandler in the list
         if self.parent:
             return self.parent.eventhandler(event, menuw)
@@ -372,7 +317,7 @@ class Item:
             if e(self, event, menuw):
                 return True
         return False
-    
+
 
     def __getitem__(self, attr):
         """
@@ -413,7 +358,7 @@ class Item:
 
         if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
             return self.parent[attr[7:-1]]
-            
+
         if attr[:4] == 'len(' and attr[-1] == ')':
             r = None
             if self.info.has_key(attr[4:-1]):
@@ -440,27 +385,13 @@ class Item:
         return ''
 
 
-    def getattr(self, attr):
-        """
-        wrapper for __getitem__ to return the attribute as string or
-        an empty string if the value is 'None'
-        """
-        if attr[:4] == 'len(' and attr[-1] == ')':
-            return self.__getitem__(attr)
-        else:
-            r = self.__getitem__(attr)
-            if r == None:
-                return ''
-            return Unicode(r)
-
-
     def delete(self):
         """
         callback when this item is deleted from the menu
         """
         self.parent = None
-        
-        
+
+
     def __del__(self):
         """
         delete function of memory debugging
@@ -478,7 +409,7 @@ class MediaItem(Item):
     def __init__(self, type, parent):
         self.type = type
         Item.__init__(self, parent)
-        
+
 
     def set_url(self, url, info=True, search_image=True):
         """
@@ -495,10 +426,10 @@ class MediaItem(Item):
             self.files        = None    # FileInformation
             self.mimetype     = ''      # extention or mode
             return
-        
+
         if url.find('://') == -1:
             self.url = 'file://' + url
-        
+
         self.files = FileInformation()
         if self.media:
             self.files.read_only = True
