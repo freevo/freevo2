@@ -1,83 +1,114 @@
-#
-# skin_krister1.py
-#
-# This is the Freevo krister skin no 1
-#
+# ----------------------------------------------------------------------
+# skin_malt1.py - This is the Freevo malt skin no 1
+# ----------------------------------------------------------------------
 # $Id$
+# ----------------------------------------------------------------------
+# $Log$
+# Revision 1.4  2002/08/18 09:52:08  tfmalt
+# o Small changes nothing major.
+#
+# ----------------------------------------------------------------------
+#
+# Freevo - A Home Theater PC framework
+#
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------
+"""
+"""
+__version__ = "$Revision$"
+__date__    = "$Date$"
+__author__  = "Thomas Malt <thomas@malt.no>"
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-# Logging is initialized here, so it should be imported first
+
 import config
+import sys
+import socket
+import random
+import time
+import os
 
-import sys, socket, random, time, os
+import util  # Various utilities
+import mixer # The mixer class.
+import osd   # The OSD class, used to communicate with the OSD daemon
+import rc    # The RemoteControl class
+import gui   # Gui library.
 
-# Various utilities
-import util
-
-# The mixer class, controls the volumes for playback and recording
-import mixer
-
-# The OSD class, used to communicate with the OSD daemon
-import osd
-
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
-
-# XML support
-from xml.utils import qp_xml
+from xml.utils import qp_xml # XML support
 
 # Set to 1 for debug output
 DEBUG = 1
 
-TRUE = 1
-FALSE = 0
 
 if not 'OSD_SDL' in dir(config): # XXX kludge
     raise 'SDL OSD Server required for this skin!'
 
-###############################################################################
+# ======================================================================
 
-# Set up the mixer
 mixer = mixer.get_singleton()
+rc    = rc.get_singleton()
+osd   = osd.get_singleton()
 
-# Create the remote control object
-rc = rc.get_singleton()
-
-# Create the OSD object
-osd = osd.get_singleton()
 # XXX Shouldn't this be moved to the config file?
-OSD_FONT_DIR = 'skins/fonts/'
+OSD_FONT_DIR     = 'skins/fonts/'
 OSD_DEFAULT_FONT = 'skins/fonts/SF Arborcrest Medium.ttf'
+
 #
 # data structures
 #
 
 class XML_data:
-    color = sel_color = 0
-    x = y = height = width = size = sel_length = 0
-    visible = 1
-    text = None
-    font = OSD_DEFAULT_FONT
+    """
+    """
+    color      = 0
+    sel_color  = 0
+    x          = 0
+    y          = 0
+    height     = 0
+    width      = 0
+    size       = 0
+    sel_length = 0
+    visible    = 1
+    text       = None
+    font       = OSD_DEFAULT_FONT
     
     
 class XML_menu:
-    bgbitmap = ''
-    title = XML_data()
-    items = XML_data()
+    """
+    """
+    bgbitmap    = ''
+    title       = XML_data()
+    items       = XML_data()
     cover_movie = XML_data()
     cover_music = XML_data()
     cover_image = XML_data()
-    submenu = XML_data()
+    submenu     = XML_data()
     
-class XML_mp3:
+class XML_audio:
+    """
+    """
     bgbitmap = ''
 
 class XMLSkin:
-
-
+    """
+    """
     menu = XML_menu()
-    mp3  = XML_mp3()
+    mp3  = XML_audio()
 
 
     #
@@ -106,9 +137,11 @@ class XMLSkin:
 
     def attr_font(self, node, attr, default):
         if node.attrs.has_key(('', attr)):
-            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.ttf').encode()
+            font = os.path.join(OSD_FONT_DIR,
+                                node.attrs[('', attr)] + '.ttf').encode()
             if not os.path.isfile(font):
-                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.TTF')
+                font = os.path.join(OSD_FONT_DIR,
+                                    node.attrs[('', attr)] + '.TTF')
             if not font:
                 print "can find font >%s<" % font
                 font = OSD_DEFAULT_FONT
@@ -136,15 +169,16 @@ class XMLSkin:
                 data.text = subnode.textof()
 
 
-    #
-    # read the skin informations for menu
-    #
     def read_menu(self, file, menu_node, copy_content):
+        """
+        Read the skin information for menu.
+        """
         if copy_content: self.menu = copy.copy(self.menu)
         for node in menu_node.children:
 
             if node.name == u'bgbitmap':
-                self.menu.bgbitmap = os.path.join(os.path.dirname(file), node.textof())
+                self.menu.bgbitmap = os.path.join(os.path.dirname(file),
+                                                  node.textof())
 
             elif node.name == u'title':
                 if copy_content: self.menu.title = copy.copy(self.menu.title)
@@ -175,20 +209,27 @@ class XMLSkin:
 
 
 
-    #
-    # read the skin informations for the mp3 player
-    #
     def read_mp3(self, file, menu_node, copy_content):
+        """
+        Read skin information for the audio player
+        """
         if copy_content: self.mp3 = copy.copy(self.mp3)
         for node in menu_node.children:
             if node.name == u'bgbitmap':
-                self.mp3.bgbitmap = os.path.join(os.path.dirname(file), node.textof())
+                self.mp3.bgbitmap = os.path.join(os.path.dirname(file),
+                                                 node.textof())
 
 
     #
-    # parse the skin file
+    # 
     #
-    def load(self, file, copy_content = 0):
+    def load(self, file, copy_content=0):
+        """
+        file          String. Filename of the XML config file.
+        copy_content  ???
+        
+        Opens the skin config file and parses it.
+        """
         try:
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
@@ -203,19 +244,23 @@ class XMLSkin:
             
 
 
-###############################################################################
-# Skin main functions
-###############################################################################
+# ======================================================================
+# Skin main class
+# ======================================================================
 
 class Skin:
-
+    """
+    Skin
+    """
+    if DEBUG: print "Starting Malt 1 skin!"
+    
     # OSD XML specifiaction
     OSD_XML_DEFINITIONS = 'skins/malt1/768x576.xml'
 
     settings = XMLSkin()
     settings.load(OSD_XML_DEFINITIONS)
 
-    items_per_page = 13
+    items_per_page = 13 # XXX Sigh! tm.
 
 
     def __init__(self):
@@ -246,6 +291,37 @@ class Skin:
 
 
 
+    def message(text=None, icon=None):
+        """
+        text  String, text to display.
+        icon  String, path to filename or pygame imageobject.
+        
+        General function for displaying messages.
+        
+        Notes: Should maybe be named print_message or show_message.
+               Maybe I should use one common box item.
+        """
+        # XXX Since I'm not messing with the osd_sdl module yet I
+        # XXX reimplement stuff found in osd.clearscreen.
+        left     = (osd.width/2)-180
+        top      = (osd.height/2)-30
+        width    =  360
+        height   = 60
+        bd_w     = 1
+        bg_color = gui_sdl.Color(osd.default_bg_color)
+        fg_color = gui_sdl.Color(osd.default_fg_color)
+
+        bg_color.set_alpha(192)
+        
+        mb = gui_sdl.PopupBox(left, top, width, height, text, bg_color,
+                              fg_color, icon, border='flat', bd_width=bd_w)
+        mb.show()
+        osd.update()
+        time.sleep(2.0)
+        mb.hide()
+        osd.update()
+        
+    
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
