@@ -35,6 +35,9 @@ function cleanup_and_pack {
     find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
     find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
     find /tmp/freevo-$version -name '.#*'       | xargs rm -rf
+    rm -rf find /tmp/freevo-$version/WIP /tmp/freevo-$version/dischi1 \
+	/tmp/freevo-$version/aubin1 /tmp/freevo-$version/contrib/gentoo
+
     sudo chown -R root.root /tmp/freevo-$version
 
     cd /tmp/
@@ -97,6 +100,15 @@ function sf_upload {
     cd /usr/portage/distfiles/
     curl -T freevo-src-$version.tgz \
 	ftp://anonymous:dmeyer_tzi.de@upload.sourceforge.net/incoming
+}
+
+function get_wiki {
+    httrack -O wiki http://freevo.sourceforge.net/cgi-bin/moin.cgi/ \
+	"-*action=*" "-*UserPref*" "-*FindPage*" "-*HelpContents*" \
+	"-*FreevoWikiHelp*" "-*RecentChanges*" "-*TitleIndex*" \
+	"-*WordIndex*" "-*SiteNavigation*" "-*Hilfe*" "-*HelpOn*" \
+	"-*AbandonedPages.html*" "-*Aktuelle_c4nderungen.html*" \
+	"-*AufgegebeneSeiten.html*" "-*BenutzerEinstellungen.html*"
 }
 
 eval $2
