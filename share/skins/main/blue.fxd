@@ -149,6 +149,7 @@
     <font label="main" name="VeraBd.ttf" size="30" color="0xdddddd"/>
     <font label="main selected" name="VeraBd.ttf" size="30" color="0xffffff"/>
     <font label="default" name="VeraBd.ttf" size="16" color="0xffffff"/>
+    <font label="detachbar" name="VeraBd.ttf" size="10" color="0xffffff"/>
 
     <color label="selection" value="0xa0000000"/>
 

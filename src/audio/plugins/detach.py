@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/15 03:53:18  outlyer
+# Added Viggo Fredriksen's very cool detachbar plugin... it shows a
+# mini-player in the bottom corner of the screen if you detach a music player.
+#
 # Revision 1.10  2003/12/10 19:07:42  dischi
 # no need for the eventhandler anymore
 #
@@ -64,7 +68,14 @@ class PluginInterface(plugin.MainMenuPlugin):
 
 
     def detach(self):
+        # start detachbar
+        self.detachbar = plugin.getbyname('audio.detachbar')
+        if self.detachbar == None:
+            plugin.activate('audio.detachbar')
+            self.detachbar = plugin.getbyname('audio.detachbar')
+           
         gui  = audio.player.get()
+        gui.detachbar = self.detachbar
 
         # hide the player and show the menu
         gui.hide()
