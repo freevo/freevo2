@@ -213,6 +213,11 @@
       <shadow visible="no"/>
     </font>
 
+    <font label="yellow shadow">
+      <definition name="Arial_Bold" size="20" color="0xffff66"/>
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
     <font label="grey big">
       <definition name="Arial_Bold" size="35" color="0xdddddd"/>
       <shadow visible="no"/>
@@ -306,6 +311,62 @@
 	</item>
       </content>
     </layout>
+
+    <!--
+    **********************************************
+    TV DEFINITIONS
+
+    -->
+    
+    <tv>
+      <screen layout="tv screen" visible="yes">
+	<area x="0" y="0" width="800" height="600"/>
+      </screen>
+      <title visible="no"/>
+      <view layout="player view" visible="no">
+	<area x="430" y="200" width="420" height="360"/> 
+      </view>
+      <info layout="player info" visible="no">
+	<area x="-50" y="80" width="550" height="300"/> 
+      </info>
+      <listing layout="tv listing" visible="yes">
+	<area x="10" y="220" width="780" height="370"/> 
+      </listing>
+    </tv>
+
+    <layout label="tv screen">
+      <background>
+	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <!-- default listing area -->
+    <layout label="tv listing">
+      <content x="10" type="text" spacing="0">
+
+	<item type="label" font="white" width="100">
+	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-3"
+	    width="max+10" height="max+6"/>
+	</item>
+
+	<item type="head" font="white">
+	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-3"
+	    width="max+10" height="max+6"/>
+	</item>
+
+	<item type="default" font="white">
+	  <rectangle bgcolor="0xff000000" color="0x000000" size="1" x="-5"
+	    y="-3" width="max+10" height="max+6"/>
+	</item>
+
+	<item type="selected" font="yellow shadow">
+	  <rectangle bgcolor="0x88ffffff" size="1" color="0x000000" x="-5"
+	    y="-3" width="max+10" height="max+6"/>
+	</item>
+
+      </content>
+    </layout>
+
 
   </skin>
 </freevo>

@@ -21,6 +21,11 @@
       <definition size="16"/>
     </font>
 
+    <font label="yellow shadow">
+      <definition name="Arial_Bold" size="16" color="0xffff66"/>
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
     <font label="grey big">
       <definition size="30"/>
     </font>
