@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/06/24 21:08:41  outlyer
+# Use the episode title if available in the recording filename.
+#
 # Revision 1.17  2003/06/02 21:29:22  outlyer
 # Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
 # "Recorded Shows" which makes a lot more sense then where it was before, which was
@@ -190,7 +193,10 @@ recinfo.quality = Setting('Quality', ['low', 'medium', 'high'], 'high')
 
 def main_menu(prog):
     recinfo.channel = prog.channel_id
-    
+   
+    if prog.sub_title:
+        prog.title = prog.title + ' - '  + prog.sub_title
+
     recinfo.program_name = Setting('Program name', [prog.title, '[Timestamp]'],
                          None, 'Program name: %s')
     
