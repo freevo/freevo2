@@ -1,84 +1,100 @@
-# ----------------------------------------------------------------------
-# freevo_config.py
-# ----------------------------------------------------------------------
+#if 0
+# -----------------------------------------------------------------------
+# freevo_config.py - System configuration
+# -----------------------------------------------------------------------
 # $Id$
 #
-# System configuration, e.g. where to look for MP3:s, AVI files, etc.
+# Notes:    This file contains the freevo settings. To change the settings
+#           you can edit this file, or better, put a file named
+#           local_conf.py in the same directory and add your changes there.
+#           E.g.: when you want a alsa as mplayer audio out, just put
+#           "MPLAYER_AO_DEV = 'alsa9'" in local_conf.py
 #
+# Todo:     o a nice configure or install script to ask these things
+#           o different settings for MPG, AVI, VOB, etc
+#             Reason: maybe you want to enable hwac3 on some files
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.37  2002/08/03 18:14:16  dischi
+# Lots of changes:
+# o added the patch from Thomas Malt with the new audio control
+# o removed the ConfigInit stuff, you can have two version of freevo on
+#   one disc if you need to videotools
+# o added all the options to MPLAYER_ARGS_*
+# o added DVD_SUBTITLE_PREF
+#
+# If you want to change some things for your personal setup, please
+# write this in a file called local_conf.py in the same directory.
+#
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------
+#endif
 
-#
-# Config values for the video tools
-#
-MPLAYER_CMD      = 'mplayer'
-MPLAYER_ARGS_MPG = ''
-MPLAYER_ARGS_DVD = ''
-VIDREC_MQ = ''
-VIDREC_HQ = ''
+
+
+AUDIO_DEVICE        = '/dev/dsp'      # ie: /dev/dsp0, /dev/audio, /dev/alsa/??
+MAJOR_AUDIO_CTRL    = 'PCM'           # Freevo takes control over one audio ctrl
+                                      # 'VOL', 'PCM' 'OGAIN' etc.
+CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
+MAX_VOLUME          = 100             # Set what you want maximum volume level to be.
+DEFAULT_VOLUME      = 40              # Set default volume level.
+TV_IN_VOLUME        = 60              # Set this to your preferred level 0-100.
+VCR_IN_VOLUME       = 90              # If you use different input from TV
+                    
+MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
+MPLAYER_AO_DEV      = 'oss:/dev/dsp0' # oss sdl alsa whatchawant?
+MPLAYER_VO_DEV      = 'mga'           # If you use X 'xv' is a good alternative.
+DVD_LANG_PREF       = 'en,se,no'      # Order of preffered languages on DVD.
+DVD_SUBTITLE_PREF   = ''              # Order of preffered subtitles on DVD.
+
+
 
 #---- You should really _NOT_ need to change these settings  ----
-MPLAYER_ARGS_DEF = '-nolirc'
+MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs'
+MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
+MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
+MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
+MPLAYER_ARGS_DVDNAV  = ''
 #---- End of settings you really _NOT_ should need to change ----
 
-#
-# Audio setup. You might need to alter things here to match your settings
-# (or until we get a fancy install script :)
-# XXX This is not done, I'm working to make the audio stuff more flexible.
-AUDIO_DEVICE     = '/dev/dsp'  # ie: /dev/dsp0, /dev/audio, /dev/alsa/??
-MAJOR_AUDIO_CTRL = 'PCM'       # Freevo takes control over one audio ctrl
-MPLAYER_AO_DEV   = 'oss'
 
-def ConfigInit(videotools = 'sim'):
-    print 'VIDEOTOOLS = %s' % videotools
+VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
+                '-input Television -m -r 22050 -w 320 -h 240 ' +
+                '-ab 80 -vg 100 -vb 800 -H 50 -o %s')
 
-    # global MPLAYER_CMD, not needed already global
-    global MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD, MPLAYER_ARGS_VCD
-    global MPLAYER_ARGS_DVDNAV, VIDREC_MQ, VIDREC_HQ
+# Under development
+VIDREC_MQ_VCR = ('DIVX4rec -F 300000 -norm NTSC ' +
+                 '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
+                 ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s')
 
-    #
-    # There are two sets of tool settings, one for a real box,
-    # and one for development.
-    #
-    # A lot of these settings seem wierd to have in a default setting.
-    #  -idx?, -nobps?
-    # I also don't see the real need for sim versus real? MHO is that
-    # the syntax clutter the configuration file.
-    if videotools == 'real':
-        # Not needed, allready global:
-        # MPLAYER_CMD = 'mplayer'
-        MPLAYER_ARGS_MPG = ('-nolirc -nobps -idx -framedrop -cache 5000 ' +
-                            '-vo mga -screenw 768 -screenh 576 -fs ' +
-                            ' -ao oss:/dev/dsp0')
-        MPLAYER_ARGS_DVD = ('-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
-                            '-ao oss:/dev/dsp0 -dvd %s -alang en,se  ' +      
-                            '-screenw 768 -screenh 576 -fs ')
-        MPLAYER_ARGS_VCD = ('-nolirc -nobps -framedrop -cache 5000 -vo mga ' +
-                            '-ao oss:/dev/dsp0 -vcd %s -alang en,se  ' +      
-                            '-screenw 768 -screenh 576 -fs ')
-        VIDREC_MQ_TV = ('DIVX4rec -F 300000 -norm NTSC ' +
-                        '-input Television -m -r 22050 -w 320 -h 240 ' +
-                        '-ab 80 -vg 100 -vb 800 -H 50 -o %s')
-        # Under development
-        VIDREC_MQ_VCR = ('DIVX4rec -F 300000 -norm NTSC ' +
-                         '-input Composite1 -m -r 22050 -w 320 -h 240 ' +
-                         ' -ab 80 -vg 100 -vb 1000 -H 50 -o %s')
-        # Under development
-        VIDREC_MQ_NUVTV = ('-F 10000 -norm NTSC -input Television -m ' +
-                           '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
-                           '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s')
-        VIDREC_MQ = VIDREC_MQ_TV
-    else:
-        MPLAYER_CMD = 'mplayer'
-        MPLAYER_ARGS_MPG = ('-nobps -idx -framedrop -cache 512 -vo xv ' +
-                            ' -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0')
-        MPLAYER_ARGS_DVD = ('-nobps -framedrop -cache 4096 -vo xv ' +
-                            '-ao oss:/dev/dsp0 -dvd %s -alang en,se ' +
-                            '  -screenw 768 -screenh 576 -fs ')
-        MPLAYER_ARGS_VCD = ('-nobps -framedrop -cache 4096 -vo xv ' +
-                            '-ao oss:/dev/dsp0 -vcd %s -alang en,se ' +
-                            '  -screenw 768 -screenh 576 -fs ')
-        VIDREC_MQ = ('DIVX4rec -F 300000 -norm NTSC ' +
-                     '-input Composite1 -m -r 22050 -w 320 -h 240 -ab 80 ' +
-                     '-vg 300 -vb 800 -H 50 -o %s')
+# Under development
+VIDREC_MQ_NUVTV = ('-F 10000 -norm NTSC -input Television -m ' +
+                   '-r 44100 -w 320 -h 240 -vg 100 -vq 90 -H 50 ' +
+                   '-mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o %s')
+
+VIDREC_MQ = VIDREC_MQ_TV
+VIDREC_HQ = ''
 
 #
 # General settings
@@ -278,8 +294,7 @@ DIR_MP3 = [ ('Test Files', 'testfiles/Music') ]
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = [ ('Video', '/usr/local/mm/video'),
-               ('Serier', '/usr/local/mm/serier')]
+DIR_MOVIES = [ ('Test Movies', 'testfiles/Movies') ]
 
 #
 # Where the image files can be found.
