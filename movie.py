@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2002/10/08 15:49:41  dischi
+# Bugfix. Bad idea to give to variables the same name...
+#
 # Revision 1.42  2002/10/06 14:58:51  dischi
 # Lots of changes:
 # o removed some old cvs log messages
@@ -434,16 +437,16 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     mountdir = arg
     skin_xml_file = mountdir
-    movie_info = None
+    movie_info_media = None
     
     for media in config.REMOVABLE_MEDIA:
         if string.find(mountdir, media.mountdir) == 0:
             util.mount(mountdir)
             if media.info:
-                movie_info = media.info.info
+                movie_info_media = media.info.info
 
-    if movie_info:
-        skin_xml_file = movie_info.xml_file
+    if movie_info_media:
+        skin_xml_file = movie_info_media.xml_file
                 
     dirnames = util.getdirnames(mountdir)
     mplayer_files = util.match_files(mountdir, config.SUFFIX_MPLAYER_FILES)
@@ -469,6 +472,7 @@ def cwd(arg=None, menuw=None):
         # only add movies when we have all needed informations
         if movie_info.title and len(movie_info.playlist) > 0 and \
            movie_info.playlist[0].file:
+            print movie_info.title
             files += [ ( movie_info.title, movie_info.playlist[0], \
                          movie_info.playlist, movie_info.image, movie_info ) ]
 
@@ -496,11 +500,12 @@ def cwd(arg=None, menuw=None):
             image = os.path.splitext(file)[0] + ".jpg"
 
         # add file to list
-        if movie_info:
+        if movie_info_media:
             if not image:
-                image = movie_info.image
-            if movie_info.playlist[0].mplayer_options:
-                file = FileInformation('video', file, movie_info.playlist[0].mplayer_options)
+                image = movie_info_media.image
+            if movie_info_media.playlist[0].mplayer_options:
+                file = FileInformation('video', file, \
+                                       movie_info_media.playlist[0].mplayer_options)
         files += [ ( title, file, [], image, None ) ]
 
 
