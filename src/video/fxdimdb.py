@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/18 19:48:24  dischi
+# support for datadir
+#
 # Revision 1.1  2003/07/12 11:19:49  dischi
 # add new fxdimdb from den_RDC
 #
@@ -205,6 +208,7 @@ class FxdImdb:
     
         self.parsedata(idpage, id)
         idpage.close()
+
     
     def setFxdFile(self, fxdfilename = None, overwrite = FALSE):
         """
@@ -220,7 +224,7 @@ class FxdImdb:
         
         else:
             if self.isdiscset == TRUE:
-                self.fxdfile = os.path.join(config.MOVIE_DATA_DIR ,
+                self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, 'disc-set',
                                             self.getmedia_id(self.device))
             else:
                 #unwrap first video tuple
@@ -240,6 +244,11 @@ class FxdImdb:
         if self.append == TRUE and \
            save_parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
             raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
+
+        if not os.path.isdir(os.path.dirname(self.fxdfile)):
+            print self.fxdfile
+            if os.path.dirname(self.fxdfile):
+                os.makedirs(os.path.dirname(self.fxdfile))
             
     
     def setVideo(self, *videos, **mplayer_opt):
@@ -277,29 +286,50 @@ class FxdImdb:
     def writeFxd(self):
         """Write fxd file"""
         #if fxdfile is empty, set it yourself
-        if not self.fxdfile: self.setFxdFile()
+        if not self.fxdfile:
+            self.setFxdFile()
         
-        #should we add to an existing file?
-        if self.append == TRUE :
-            if self.isdiscset == TRUE:
-                self.update_discset()
-            else: self.update_movie()
-        else:
-            #fetch images
-            self.fetch_image()
-            #should we write a disc-set ?
-            if self.isdiscset == TRUE:
-                self.write_discset()
-            else: self.write_movie()
+        try:
+            #should we add to an existing file?
+            if self.append == TRUE :
+                if self.isdiscset == TRUE:
+                    self.update_discset()
+                else: self.update_movie()
+            else:
+                #fetch images
+                self.fetch_image()
+                #should we write a disc-set ?
+                if self.isdiscset == TRUE:
+                    self.write_discset()
+                else:
+                    self.write_movie()
+
+            #check fxd 
+            if save_parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
+                raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
+                                        "post bugreport, tracebacks and fxd file.""")
+        except (IOError, FxdImdb_IO_Error), error:
+            self.fxdfile = os.path.abspath(self.fxdfile)
+
+            # could not save, try new directory
+            if self.fxdfile.find(config.MOVIE_DATA_DIR) == 0:
+                # can't write in MOVIE_DATA_DIR
+                raise FxdImdb_IO_Error('error saving the file: %s' % str(error))
+
+            # find new filename inside MOVIE_DATA_DIR
+            for item in config.REMOVABLE_MEDIA:
+                if self.fxdfile.find(item.mountdir) == 0:
+                    self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, 'disc',
+                                                self.getmedia_id(item.devicename),
+                                                relative_path(self.fxdfile))
+                    break
+                
+            else:
+                self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, self.fxdfile[1:])
+            if not os.path.isdir(os.path.dirname(self.fxdfile)):
+                os.makedirs(os.path.dirname(self.fxdfile))
+            self.writeFxd()
             
-        #check fxd 
-
-        if save_parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
-            raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
-                                    "post bugreport, tracebacks and fxd file.""")
-
-        
-        
     
     def setDiscset(self, device, regexp, *file_opts, **mpl_global_opt):
         """
@@ -710,11 +740,14 @@ class FxdImdb:
         except:
             pass
         
+        self.image = os.path.basename(self.image)
+
         print "Downloaded cover image from %s" % self.image_url
         print "Freevo knows nothing about the copyright of this image, please"
         print "go to %s to check for more informations about private." % self.image_url
         print "use of this image"
-            
+
+        
     def str2XML(self, line):
         """return a valid XML string"""
         
@@ -851,9 +884,7 @@ def makeVideo(type, id_ref, file, **values):
         if 'device' in values: device = values['device']
         if 'mplayer_opt' in values: mplayer_opt = values['mplayer_opt']
     
-    if device:
-        file = relative_path(file)
-        
+    file = relative_path(file)
     t = type, id_ref, device, mplayer_opt, file
     return t
     

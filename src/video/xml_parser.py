@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/07/18 19:48:24  dischi
+# support for datadir
+#
 # Revision 1.27  2003/07/13 13:11:17  dischi
 # show xml info on variants, too
 #
@@ -398,6 +401,19 @@ def parseMovieFile(file, parent, duplicate_check):
     #     each VideoItem possibly contains a list of VideoItems
     # 
     dir = os.path.dirname(file)
+
+    # find the realdir in case this file is in MOVIE_DATA_DIR
+    if dir.find(config.MOVIE_DATA_DIR) == 0:
+        realdir = os.path.join('/', dir[len(config.MOVIE_DATA_DIR):])
+        if realdir.find('/disc/') == 0:
+            realdir = realdir[6:]
+            for c in config.REMOVABLE_MEDIA:
+                if realdir.find(c.id) == 0:
+                    realdir = os.path.join(c.mountdir, realdir[len(c.id)+1:])
+                    break
+    else:
+        realdir = dir
+                
     movies = []
     
     parser = qp_xml.Parser()
@@ -562,15 +578,15 @@ def parseMovieFile(file, parent, duplicate_check):
                     if video['items'][p]['type'] == 'file':
                         filename = video['items'][p]['data']
                         if filename.find('://') == -1 and not video['items'][p]['media-id']:
-                            video['items'][p]['data'] = os.path.join(dir, filename)
+                            video['items'][p]['data'] = os.path.join(realdir, filename)
                         for i in range(len(duplicate_check)):
                             try:
                                 if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
-                                    os.path.join(dir, filename)):
+                                    os.path.join(realdir, filename)):
                                     del duplicate_check[i]
                                     break
                             except:
-                                if duplicate_check[i] == os.path.join(dir, filename):
+                                if duplicate_check[i] == os.path.join(realdir, filename):
                                     del duplicate_check[i]
                                     break
 
@@ -581,7 +597,7 @@ def parseMovieFile(file, parent, duplicate_check):
                         for i in ( 'audio', 'subtitle' ):
                             if p.has_key( i )  and p[ i ].has_key( 'file' ):
                                 filename = p[ i ][ 'file' ]
-                                filename = os.path.join( dir, filename )
+                                filename = os.path.join( realdir, filename )
                                 if os.path.isfile( filename ):
                                     p[ i ][ 'file' ] = filename
                 

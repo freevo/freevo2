@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/07/18 19:48:24  dischi
+# support for datadir
+#
 # Revision 1.16  2003/07/12 11:20:14  dischi
 # switch to new imdb helper
 #
@@ -82,13 +85,22 @@ class PluginInterface(plugin.ItemPlugin):
         self.item = item
         if item.type == 'video'  and not hasattr(item, 'fxd_file'):
             if item.mode == 'file':
+                self.disc_set = FALSE
                 return [ ( self.imdb_search , 'Search IMDB for this file',
                            'imdb_search_or_cover_search') ]
+            
             if item.mode in ('dvd', 'vcd'):
+                self.disc_set = TRUE
                 s = self.imdb_get_disc_searchstring(self.item)
                 if s:
                     return [ ( self.imdb_search , 'Search IMDB for [%s]' % s,
                                'imdb_search_or_cover_search') ]
+        if item.type == 'dir' and item.media and item.media.mountdir.find(item.dir) == 0:
+            self.disc_set = TRUE
+            s = self.imdb_get_disc_searchstring(self.item)
+            if s:
+                return [ ( self.imdb_search , 'Search IMDB for [%s]' % s,
+                           'imdb_search_or_cover_search') ]
         return []
 
             
@@ -103,14 +115,9 @@ class PluginInterface(plugin.ItemPlugin):
 
         items = []
         
-        if self.item.mode in ('dvd', 'vcd'):
-            disc = TRUE
-        else:
-            disc = FALSE
-
         try:
             duplicates = []
-            for id,name,year,type in fxd.guessImdb(self.item.name, disc):
+            for id,name,year,type in fxd.guessImdb(self.item.name, self.disc_set):
                 try:
                     for i in self.item.parent.play_items:
                         if hasattr(i, 'fxd_file') and i.name == name:
@@ -189,15 +196,18 @@ class PluginInterface(plugin.ItemPlugin):
         #if this exists we got a cdrom/dvdrom
         if self.item.media and self.item.media.devicename: 
             devicename = self.item.media.devicename
-        else: devicename = None
+        else:
+            devicename = None
         
         fxd.setImdbId(arg[0])
         
-        if self.item.mode in ('dvd', 'vcd'):
+        if self.disc_set:
             fxd.setDiscset(devicename, None)
         else:
-            video = makeVideo('file', 'f1', self.item.filename, device=devicename)
+            video = makeVideo('file', 'f1', os.path.basename(self.item.filename),
+                              device=devicename)
             fxd.setVideo(video)
+            fxd.setFxdFile(os.path.splitext(self.item.filename)[0])
 
         fxd.writeFxd()
         self.imdb_menu_back(menuw)

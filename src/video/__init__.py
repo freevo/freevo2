@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/18 19:48:24  dischi
+# support for datadir
+#
 # Revision 1.5  2003/06/29 20:43:30  dischi
 # o mmpython support
 # o mplayer is now a plugin
@@ -102,7 +105,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
                 del_files.remove(file)
 
                 # if a xml file is removed, the covered files should appear
-                for subitem in item.subitems:
+                for subitem in item.subitems + item.variants:
                     if os.path.isfile(subitem.filename) and not \
                        subitem.filename in new_files:
                         new_files += [ subitem.filename ]
@@ -132,10 +135,10 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
             # from the list
             for i in current_items:
                 for item in x:
-                    for subitem in item.subitems:
-                        if i.filename == subitem.filename:
+                    for subitem in item.subitems + item.variants:
+                        if i.filename == subitem.filename and not i in del_items:
                             del_items += [ i ]
-                    if i.filename == item.filename:
+                    if i.filename == item.filename and not i in del_items:
                         del_items += [ i ]
                     
 
