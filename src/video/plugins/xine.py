@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/13 17:23:23  dischi
+# fix when no lirc device is detected
+#
 # Revision 1.7  2003/08/04 19:01:57  dischi
 # prevent crash when interlacing
 #
@@ -174,7 +177,10 @@ class Xine:
         if self.xine_version > 921:
             if self.xine_type == 'X':
                 command = '%s --no-splash' % config.XINE_COMMAND
-            command = '%s --no-lirc --stdctl' % command
+            command = '%s --stdctl' % command
+            if rc.PYLIRC:
+                command = '%s --no-lirc' % command
+
         self.command = '%s -V %s -A %s' % (command, config.XINE_VO_DEV, config.XINE_AO_DEV)
 
         
