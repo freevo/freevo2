@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/03/23 20:00:26  dischi
+# Added patch from Matthieu Weber for better mplayer_options and subitem
+# handling
+#
 # Revision 1.28  2003/03/23 15:19:39  gsbarbieri
 # Fixed a bug when ESC was pressed while watching a movie. Freevo used to crash.
 # Fixed key conflict, rc.SELECT was used to exit and seek to a specifc position, now rc.ENTER (e) is used to seek.
@@ -270,8 +274,10 @@ class MPlayer:
             if not config.NEW_SKIN:
                 skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
                 time.sleep(2.0) 
-                menuwidget.refresh()
 
+            # This event allows the videoitem which contains subitems to
+            # try to play the next subitem
+            rc.post_event(rc.PLAY_END)
             # XXX We should really use return more.
             return 0
        

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/23 20:00:26  dischi
+# Added patch from Matthieu Weber for better mplayer_options and subitem
+# handling
+#
 # Revision 1.24  2003/03/22 20:03:02  dischi
 # add detailed information for tv shows
 #
@@ -301,7 +305,20 @@ class VideoItem(Item):
 
         if self.subitems:
             self.current_subitem = self.subitems[0]
-            self.current_subitem.mplayer_options = self.mplayer_options # Pass along the options
+            # Pass along the options, without loosing the subitem's own
+            # options
+            if self.current_subitem.mplayer_options:
+                if self.mplayer_options:
+                    self.current_subitem.mplayer_options += ' ' + self.mplayer_opions
+            else:
+                self.current_subitem.mplayer_options = self.mplayer_options
+            # When playing a subitem, the menu must be hidden. If it is not,
+            # the playing will stop after the first subitem, since the
+            # PLAY_END/USER_END event is not forwarded to the parent
+            # videoitem.
+            # And besides, we don't need the menu between two subitems.
+            menuw.hide()
+
             self.current_subitem.play(arg, menuw)
             return
 

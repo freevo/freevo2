@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/23 20:00:26  dischi
+# Added patch from Matthieu Weber for better mplayer_options and subitem
+# handling
+#
 # Revision 1.9  2003/03/14 16:24:34  dischi
 # Patch from Matthieu Weber with some bugfixes
 #
@@ -273,9 +277,6 @@ def make_videoitem(video, variant):
     if variant:
         if len(variant['parts']) > 1:
             vitem = VideoItem('', None)
-            vitem.mplayer_options = variant['mplayer-options']
-            if video['items'][variant['parts'][0]['ref']]['mplayer-options']:
-                vitem.mplayer_options += " " + video['items'][part_ref]['mplayer-options']
             for part in variant['parts']:
                 part_ref = part['ref']
                 subitem = VideoItem(video['items'][part_ref]['data'], vitem)
@@ -286,11 +287,17 @@ def make_videoitem(video, variant):
                     vitem.rom_id += [ subitem.media_id ]
                 subitem.subtitle_file = part['subtitle']
                 subitem.audio_file = part['audio']
-                subitem.mplayer_options = variant['mplayer-options']
+                subitem.mplayer_options = ''
+                if video['mplayer-options']:
+                    subitem.mplayer_options += ' ' + video['mplayer-options']
                 if video['items'][part_ref]['mplayer-options']:
-                    if not subitem.mplayer_options:
-                        subitem.mplayer_options = ""
-                    subitem.mplayer_options += " " + video['items'][part_ref]['mplayer-options']
+                    subitem.mplayer_options += ' ' + video['items'][part_ref]['mplayer-options']
+                if variant['mplayer-options']:
+                    subitem.mplayer_options += ' ' + variant['mplayer-options']
+                if part['mplayer-options']:
+                    subitem.mplayer_options += " " + part['mplayer-options']
+                if not subitem.mplayer_options:
+                    subitem.mplayer_options = None
                 vitem.subitems += [ subitem ]
 
         elif len(variant['parts']) == 1:
@@ -302,11 +309,18 @@ def make_videoitem(video, variant):
                 vitem.rom_id += [ vitem.media_id ]
             vitem.subtitle_file = variant['parts'][0]['subtitle']
             vitem.audio_file = variant['parts'][0]['audio']
-            vitem.mplayer_options = variant['mplayer-options']
+
+            vitem.mplayer_options = ''
+            if video['mplayer-options']:
+                vitem.mplayer_options += ' ' + video['mplayer-options']
             if video['items'][part_ref]['mplayer-options']:
-                if not vitem.mplayer_options:
-                    vitem.mplayer_options = ""
-                vitem.mplayer_options += " " + video['items'][part_ref]['mplayer-options']
+                vitem.mplayer_options += ' ' + video['items'][part_ref]['mplayer-options']
+            if variant['mplayer-options']:
+                vitem.mplayer_options += ' ' + variant['mplayer-options']
+            if variant['parts'][0]['mplayer-options']:
+                vitem.mplayer_options += " " + variant['parts'][0]['mplayer-options']
+            if not vitem.mplayer_options:
+                vitem.mplayer_options = None
     else:
         if len(video['items-list']) > 1:
             vitem = VideoItem('', None)
@@ -316,7 +330,13 @@ def make_videoitem(video, variant):
                 subitem.media_id = video['items'][v]['media-id']
                 if subitem.media_id:
                     vitem.rom_id += [ subitem.media_id ]
-                subitem.mplayer_options = video['items'][v]['mplayer-options']
+                subitem.mplayer_options = ''
+                if video['mplayer-options']:
+                    subitem.mplayer_options += ' ' + video['mplayer-options']
+                if video['items'][v]['mplayer-options']:
+                    subitem.mplayer_options += ' ' + video['items'][v]['mplayer-options']
+                if not subitem.mplayer_options:
+                    subitem.mplayer_options = None
                 vitem.subitems += [ subitem ]
         else:
             ref = video['items-list'][0]
@@ -325,7 +345,13 @@ def make_videoitem(video, variant):
             vitem.media_id = video['items'][ref]['media-id']
             if vitem.media_id:
                 vitem.rom_id += [ vitem.media_id ]
-            vitem.mplayer_options = video['items'][ref]['mplayer-options']
+            vitem.mplayer_options = ''
+            if video['mplayer-options']:
+                vitem.mplayer_options += ' ' + video['mplayer-options']
+            if video['items'][ref]['mplayer-options']:
+                vitem.mplayer_options += ' ' + video['items'][ref]['mplayer-options']
+            if not vitem.mplayer_options:
+                vitem.mplayer_options = None
     
     return vitem
 
