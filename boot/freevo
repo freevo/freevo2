@@ -27,7 +27,7 @@ case "$1" in
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-        killall freevo_rt &> /dev/null
+        killall freevo_python &> /dev/null
         killall freevo_xwin &> /dev/null
         killall mplayer &> /dev/null
         kill `pgrep -f "python main.py" -d" "` &> /dev/null
