@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/10/18 09:44:44  dischi
+# add POPEN2 event
+#
 # Revision 1.78  2003/10/14 17:58:04  dischi
 # more debug
 #
@@ -98,7 +101,7 @@ import rc      # The RemoteControl class.
 import signal
 
 from item import Item
-import event as em
+from event import *
 
 skin    = skin.get_singleton()
 
@@ -237,7 +240,7 @@ class MainMenu(Item):
 
         # pressing DISPLAY on the main menu will open a skin selector
         # (only for the new skin code)
-        if event == em.MENU_CHANGE_STYLE:
+        if event == MENU_CHANGE_STYLE:
             items = []
             for name, image, skinfile in skin.GetSkins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
@@ -293,8 +296,13 @@ def main_func():
             event, event_repeat_count = rc_object.poll()
             # OK, now we have a repeat_count... to whom could we give it?
             if event:
-                _debug_('handling event %s' % str(event), 2)
-                break
+                if event == POPEN2:
+                    import popen2
+                    _debug_('popen2 %s' % event.arg[1])
+                    event.arg[0].child = popen2.Popen3(event.arg[1], 1, 100)
+                else:
+                    _debug_('handling event %s' % str(event), 2)
+                    break
 
             for p in poll_plugins:
                 if not (rc_object.app and p.poll_menu_only):
@@ -315,7 +323,7 @@ def main_func():
         for p in eventlistener_plugins:
             p.eventhandler(event=event)
 
-        if event == em.FUNCTION_CALL:
+        if event == FUNCTION_CALL:
             event.arg()
 
         # Send events to either the current app or the menu handler

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/10/18 09:44:44  dischi
+# add POPEN2 event
+#
 # Revision 1.23  2003/09/25 14:07:02  outlyer
 # My autocolor plugin which allows me to run a system command before plaaying
 # video. It doesn't have to be a color command, you can change mixer settings
@@ -497,3 +500,5 @@ OSD_MESSAGE     = Event('OSD_MESSAGE')
 
 VIDEO_START     = Event('VIDEO_START')
 VIDEO_END       = Event('VIDEO_END')
+
+POPEN2          = Event('POPEN2')
