@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/11/13 16:10:21  dischi
+# replace compat.py and config.py with a sysconfig variante
+#
 # Revision 1.6  2004/11/12 20:40:36  dischi
 # support program get from all channels
 #
@@ -54,7 +57,12 @@ import traceback
 import time
 from types import *
 
-import config
+try:
+    # Freevo sysconfig import
+    import sysconfig
+except:
+    # Fallback for stand alone epg usage
+    import config
 
 
 def escape_query(sql):
