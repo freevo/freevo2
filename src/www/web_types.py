@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/12 19:39:35  gsbarbieri
+# <thead>, <tbody> and <tfoot> support.
+#
 # Revision 1.12  2003/09/06 22:11:40  gsbarbieri
 # Rewoked Popup box so it looks better in Internet Exploder.
 # Guide now has configurable precision, defaults to 5 minutes.
@@ -141,16 +144,40 @@ class HTMLResource:
         self.res += "</table>\n"
 
 
+    def tableHeadOpen(self, opts=''):
+        self.res += "  <thead "+opts+">\n"
+
+
+    def tableHeadClose(self, opts=''):
+        self.res += "  </thead>\n"
+
+    def tableBodyOpen(self, opts=''):
+        self.res += "  <tbody "+opts+">\n"
+
+
+    def tableBodyClose(self, opts=''):
+        self.res += "  </tbody>\n"
+
+
+    def tableFootOpen(self, opts=''):
+        self.res += "  <tfoot "+opts+">\n"
+
+
+    def tableFootClose(self, opts=''):
+        self.res += "  </tfoot>\n"
+
+
+
     def tableRowOpen(self, opts=''):
-        self.res += "  <tr "+opts+">\n"
+        self.res += "     <tr "+opts+">\n"
 
 
     def tableRowClose(self):
-        self.res += "  </tr>\n"
+        self.res += "     </tr>\n"
 
 
     def tableCell(self, data='', opts=''):
-        self.res += "    <td "+opts+">"+data+"</td>\n"
+        self.res += "       <td "+opts+">"+data+"</td>\n"
 
 
     def formValue(self, form=None, key=None):
