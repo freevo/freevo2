@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/15 17:22:48  dischi
+# format patch from Davin Sagnol
+#
 # Revision 1.2  2003/11/15 11:25:32  dischi
 # check for crash
 #
@@ -140,8 +143,13 @@ class clock(IdleBarPlugin):
     Note: The clock will always be displayed on the right side of
     the idlebar.
     """
-    def __init__(self, format='%a %I:%M %P'):
+    def __init__(self, format=''):
         IdleBarPlugin.__init__(self)
+	if format == '': # No overiding of the default value
+	    if time.strftime('%P') =='':
+                format ='%a %H:%M'
+            else:
+                format ='%a %I:%M %P'
         self.timeformat = format
         
     def draw(self, (type, object), x, osd):
