@@ -8,6 +8,7 @@ import mevas
 
 import config
 import util
+import util.thumbnail
 import theme_engine
 
 def resizebitmap(image, width=None, height=None):
