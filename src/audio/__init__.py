@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/24 19:25:46  dischi
+# use new fxditem
+#
 # Revision 1.8  2003/11/23 17:03:43  dischi
 # Removed fxd handling from AudioItem and created a new FXDHandler class
 # in __init__.py to let the directory handle the fxd files. The format
@@ -17,10 +20,6 @@
 #
 # Revision 1.7  2003/09/21 13:15:56  dischi
 # handle audio fxd files correctly
-#
-# Revision 1.6  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -48,6 +47,7 @@ import config
 import util
 
 from audioitem import AudioItem
+import fxditem
 
 
 def cwd(parent, files):
@@ -80,7 +80,9 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     new_items += cwd(parent, new_files)
 
 
-class FXDHandler:
+
+
+class FXDHandler(fxditem.FXDItem):
     """
     parse audio specific stuff from fxd files
 
@@ -122,3 +124,7 @@ class FXDHandler:
 
         fxd.parse_info(fxd.get_children(node, 'info', 1), a)
         self.items.append(a)
+
+
+# register the audio fxd parser as parser to build items
+fxditem.register(['audio'], FXDHandler)
