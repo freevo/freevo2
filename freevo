@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2003/10/27 20:39:47  dischi
+# kill helpers with -KILL until it works better with twisted
+#
 # Revision 1.92  2003/10/22 19:43:21  dischi
 # do not KILL the child
 #
@@ -213,14 +216,14 @@ fi
 # needed to work around signal problems when starting
 # a helper
 kill_waiting_child() {
-    kill `cat $PID_FILE` > /dev/null 2>&1
+    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
 }
 
 if [ -e "$script" ]; then
     PID_FILE="$PID_DIR/freevo-$name.pid"
     if [ "$1" = "stop" ]; then
 	if [ -e $PIDFILE ]; then
-	    kill `cat $PID_FILE` > /dev/null 2>&1
+	    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
 	    rm $PID_FILE > /dev/null 2>&1
 	else
 	    echo $name not running
