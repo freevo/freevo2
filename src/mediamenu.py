@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/03/15 17:19:44  dischi
+# renamed skin.xml to folder.fxd for the new skin
+#
 # Revision 1.40  2003/03/15 17:13:22  dischi
 # store rom drive type in media
 #
@@ -370,8 +373,12 @@ class DirItem(Playlist):
                     image = os.path.join(dir, covers[0])
             self.image = image
 
-        if os.path.isfile(dir+'/skin.xml'): 
-            self.xml_file = dir+'/skin.xml'
+        if config.NEW_SKIN:
+            if os.path.isfile(dir+'/folder.fxd'): 
+                self.xml_file = dir+'/folder.fxd'
+        else:
+            if os.path.isfile(dir+'/skin.xml'): 
+                self.xml_file = dir+'/skin.xml'
 
         # set variables to values in xml file
         if self.xml_file and os.path.isfile(self.xml_file):
