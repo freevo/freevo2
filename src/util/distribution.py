@@ -62,6 +62,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/25 19:51:17  dischi
+# add helpers to __init__ del list
+#
 # Revision 1.4  2004/02/25 19:19:36  dischi
 # add skins/plugins from which not to install __init__
 #
@@ -272,7 +275,7 @@ class freevo_install_lib (install_lib.install_lib):
         if os.path.isdir(self.build_dir):
             # remove __init__.py which will override the normal Freevo files
             for i in [ 'plugins', 'plugins/idlebar', 'video/plugins', 'audio/plugins',
-                       'image/plugins', 'tv/plugins', 'skins/plugins']:
+                       'image/plugins', 'tv/plugins', 'skins/plugins', 'helpers']:
                 init = os.path.join(self.build_dir, 'freevo', i, '__init__.py')
                 if os.path.isfile(init):
                     os.remove(init)
