@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/27 11:15:52  dischi
+# do not start the gui for helpers
+#
 # Revision 1.19  2004/07/25 18:17:09  dischi
 # interface update
 #
@@ -116,6 +119,11 @@ def get_settings():
 # skin interface.
 # FIXME: needs cleanup where used!
 
+if not config.HELPER:
+    import fxdparser
+    settings = fxdparser.Settings()
+
+
 def set_base_fxd(file):
     return settings.set_base_fxd(file)
 
@@ -134,10 +142,6 @@ def get_image(name):
 
 def get_icon(name):
     return settings.settings.get_icon(name)
-
-
-import fxdparser
-settings = fxdparser.Settings()
 
 
 # High level widgets
