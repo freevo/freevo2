@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/06/24 22:48:08  outlyer
+# Updated to reflect moved icon.
+#
 # Revision 1.47  2003/06/22 20:49:23  dischi
 # small fix??
 #
@@ -327,7 +330,7 @@ class OSD:
         help += ['h = Help']
         help_str = '    '.join(help)
         pygame.display.set_caption('Freevo' + ' '*7 + help_str)
-        icon = pygame.image.load('skins/icons/misc/freevo_app.png').convert()
+        icon = pygame.image.load('skins/icons/freevo_app.png').convert()
         pygame.display.set_icon(icon)
         
         self.clearscreen(self.COL_BLACK)
