@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/07 04:59:10  outlyer
+# Treat Mixed (CD Audio + Data Track) as CD Audio too since the ioctl
+# returns a different value.
+#
+# It would be nice to have the data track mounted as well. Looking into it now.
+#
 # Revision 1.9  2003/05/29 09:06:18  dischi
 # small fix again
 #
@@ -104,6 +110,7 @@ CDSL_CURRENT=( (int ) ( ~ 0 >> 1 ) )
 CDS_DISC_OK=4
 CDROM_DISC_STATUS=0x5327
 CDS_AUDIO=100
+CDS_MIXED=105
 CDROM_SELECT_SPEED=0x5322
 
 
@@ -365,7 +372,8 @@ class Identify_Thread(threading.Thread):
 
         # Check media type (data, audio)
         s = ioctl(fd, CDROM_DISC_STATUS)
-        if s == CDS_AUDIO:
+        if s == CDS_AUDIO or s == CDS_MIXED:
+            # XXX We should mount the data portion too if the CD is mixed
             os.close(fd)
             media.type  = 'audiocd'
             try:
