@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/27 05:29:42  krister
+# Only change backslashes to slashes if it is an MSDOS file
+#
 # Revision 1.11  2003/02/26 03:56:24  krister
 # Convert MSDOS filenames to unix slashes
 #
@@ -126,7 +129,8 @@ class Playlist(Item):
 
         (curdir, playlistname) = os.path.split(plsname)
         for line in playlist_lines:
-            line = line.replace('\\', '/') # Fix MSDOS slashes
+            if line.endswith('\r\n'):
+                line = line.replace('\\', '/') # Fix MSDOS slashes
             if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
             elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
@@ -158,7 +162,8 @@ class Playlist(Item):
 
         (curdir, playlistname) = os.path.split(plsname)
         for line in playlist_lines:
-            line = line.replace('\\', '/') # Fix MSDOS slashes
+            if line.endswith('\r\n'):
+                line = line.replace('\\', '/') # Fix MSDOS slashes
             if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
             elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
