@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/07 13:28:19  dischi
+# rescan disc after database change
+#
 # Revision 1.2  2002/12/03 18:46:08  dischi
 # fix to avoid crashes when you have a bad cd (e.g. empty disc)
 #
@@ -279,6 +282,8 @@ class Identify_Thread(threading.Thread):
             # This is a simple way for external apps to signal changes
             if os.path.exists("/tmp/freevo-rebuild-database"):
                 xml_parser.hash_xml_database()
+                for media in config.REMOVABLE_MEDIA:
+                    media.drive_status = None
 
             self.check_all()
             time.sleep(2)
