@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2003/09/14 11:10:57  dischi
+# fix return values for bad parameter
+#
 # Revision 1.89  2003/09/13 10:08:21  dischi
 # i18n support
 #
@@ -763,7 +766,7 @@ class OSD:
           or 'soft' (based on words)
         """
         if not string:
-            return '', (0,0,0,0)
+            return '', (x,y,x,y)
 
         if height == -1:
             height = font.height
@@ -773,7 +776,7 @@ class OSD:
             line_height = int(line_height) + 1
 
         if width <= 0 or height < font.height:
-            return string, (0,0,0,0)
+            return string, (x,y,x,y)
             
         num_lines_left = int((height+line_height-font.height) / line_height)
         lines = []
