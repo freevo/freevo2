@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/01 17:41:42  dischi
+# call correct stringsize function
+#
 # Revision 1.5  2003/11/28 20:08:57  dischi
 # renamed some config variables
 #
@@ -100,7 +103,7 @@ class PluginInterface(plugin.DaemonPlugin):
             except:
                 font  = skin.get_singleton().settings.font['default']
 
-        w = font.font.stringsize(self.message)
+        w = font.stringsize(self.message)
 
         if type == 'osd':
             x = config.OSD_OVERSCAN_X
