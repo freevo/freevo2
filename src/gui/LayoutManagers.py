@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/01 18:58:15  dischi
+# Oops, wrong condition
+#
 # Revision 1.11  2003/09/01 18:49:33  dischi
 # add internal_v_align == Align.CENTER for more than one row
 #
@@ -274,7 +277,7 @@ class FlowLayout(LayoutManager):
                 if DEBUG: print '            moved right by %s' % x_offset
 
 
-        if len(self.table) == 1:
+        if len(self.table) > 1:
             space = self.container.height - self.container.v_spacing - global_height
             shift = space / (len(self.table) + 4)
             if self.container.internal_v_align == Align.CENTER and shift > 0:
