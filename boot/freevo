@@ -1,4 +1,6 @@
 #! /bin/sh
+# chkconfig: 234 99 00
+# description: A boot script for the Freevo package
 #
 # Enhanced boot script for freevo
 #

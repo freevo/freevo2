@@ -1,4 +1,6 @@
 #! /bin/sh
+# chkconfig: 234 99 00
+# description: A boot script for the Freevo dependencies
 #
 # script with commands to be executed from init on system startup to 
 # init the stuff that Freevo depends on.
