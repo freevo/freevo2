@@ -28,10 +28,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.25  2003/10/28 02:37:32  outlyer
-# A bugfix for the issue where multiple CDs couldn't be ripped concurrently.
-# The problem is that the main_backup_thread class does not have access to
-# change rip_thread to None, so we have to use what we CAN access to do it.
+# Revision 1.26  2003/11/02 13:48:19  outlyer
+# My first post 1.4rc2 commit... allows you to make sure your ripped mp3's had
+# properly case'd tags.
+#
+# Revision 1.1  2003/10/29 19:00:50  outlyer
+# Presumably this will have to wait until after the freeze. It's a minor
+# change but it includes a preference to allow the user to make sure all
+# CD track information is in normalized title case so you can deal with the
+# annoying ways people submit CDDB data.
+#
+# It's self contained, so it can go in before 1.4, but not before 1.4rc2.
 #
 # Revision 1.24  2003/10/22 18:37:41  mikeruelle
 # if we have the coverart might as well copy it over
@@ -214,7 +221,8 @@ class PluginInterface(plugin.ItemPlugin):
                 ('CD_RIP_PN_PREF', '%(artist)s/%(album)s/%(song)s', ''),
                 ('CD_RIP_LAME_OPTS', '--preset standard', ''),
                 ('CD_RIP_OGG_OPTS', '-m 128', ''),
-                ('FLAC_OPTS', '-8', '8==Best, but slowest compression'))
+                ('FLAC_OPTS', '-8', '8==Best, but slowest compression'),
+                ('RIP_TITLE_CASE','0','Autoconvert all track/album/artist names to title case'))
 
     def actions(self, item):
         self.item = item
@@ -486,13 +494,13 @@ class main_backup_thread(threading.Thread):
 
         # If  valid data was returned from mmpython/CDDB
         else:
-            album   = self.replace_special_char(cd_info.title, '-')
-            artist     = self.replace_special_char(cd_info.artist, '-')
+            album   = self.fix_case(self.replace_special_char(cd_info.title, '-'))
+            artist     = self.fix_case(self.replace_special_char(cd_info.artist, '-'))
             genre    = self.replace_special_char(cd_info.tracks[0].genre, '-')
 
         song_names = []                        
         for track in cd_info.tracks:
-            song_names.append(self.replace_special_char(track.title, '-'))
+            song_names.append(self.fix_case(self.replace_special_char(track.title, '-')))
             
         return [cd_info.id, artist, album, genre, song_names]                
     
@@ -542,3 +550,9 @@ class main_backup_thread(threading.Thread):
             except:
                 _debug_( _( 'ERROR' ) + ': ' + _( 'Problem trying to call:' ) + ' re.subn' )
         return new_string
+
+    def fix_case(self, string):
+        if config.RIP_TITLE_CASE:
+            return util.title_case(string)
+        else:
+            return string
