@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/01/28 01:59:31  krister
+# Fix for DVD playing bug.
+#
 # Revision 1.9  2003/01/19 16:16:18  dischi
 # small bugfix
 #
@@ -203,7 +206,7 @@ class Identify_Thread(threading.Thread):
                 if movie_info:
                     media.info = copy.copy(movie_info)
                 else:
-                    media.info = videoitem.VideoItem('0', None)
+                    media.info = videoitem.VideoItem('1', None)
 
                 media.info.label = label
                 media.info.name = title
