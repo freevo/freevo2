@@ -60,7 +60,7 @@ fi
 # Support executing a standalone Python application, e.g. epg_xmltv.py
 # Usage: freevo execute appname.py arg1 arg2...
 if [ "$1" = "execute" ] ; then
-    export PYTHONPATH=./src
+    export PYTHONPATH=./src:./src/www:./src/tv
     shift 1
     ./runapp python $@
     exit 0
