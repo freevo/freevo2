@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/10 13:17:43  dischi
+# o always check if fxd file contains <skin>
+# o add filename to fxd object
+# o also include info with 'name' when in map
+#
 # Revision 1.6  2004/01/03 17:43:15  dischi
 # OVERLAY_DIR is always used
 #
@@ -184,7 +189,9 @@ class FXD:
         self.read_callback  = {}
         self.write_callback = {}
         self.user_data      = {}
-        
+        self.is_skin_fxd    = False
+        self.filename       = filename
+
         
     def set_handler(self, name, callback, mode='r', force=False):
         """
@@ -209,6 +216,10 @@ class FXD:
         if self.tree.tree.name != 'freevo':
             _debug_('first node not <freevo>')
             return
+        for node in self.tree.tree.children:
+            if node.name == 'skin':
+                self.is_skin_fxd = True
+                break
         for node in self.tree.tree.children:
             if node.name in self.read_callback:
                 callback = self.read_callback[node.name](self, node)
@@ -334,8 +345,7 @@ class FXD:
                     continue
                 if child.name in map:
                     object.info[map[child.name]] = util.format_text(txt)
-                else:
-                    object.info[child.name] = util.format_text(txt)
+                object.info[child.name] = util.format_text(txt)
                     
 
     def add(self, node, parent=None, pos=None):
