@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-11-20 15:05+0100\n"
+"POT-Creation-Date: 2003-11-21 12:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,12 +27,16 @@ msgstr ""
 msgid "Data files on disc"
 msgstr ""
 
-#: audio/xmms.py:159 games/game.py:105
+#: audio/xmms.py:162 games/game.py:105
 #, python-format
 msgid "File \"%s\" not found!"
 msgstr ""
 
-#: audio/xmms.py:352
+#: audio/xmms.py:330
+msgid "Lanching xmms."
+msgstr ""
+
+#: audio/xmms.py:355
 msgid "Timed launching xmms."
 msgstr ""
 
@@ -312,134 +316,162 @@ msgstr ""
 msgid "You need software %s"
 msgstr ""
 
-#: directory.py:145
-msgid "Movie Playlists"
-msgstr ""
-
-#: directory.py:146
-msgid "Use automatic playlist for movie items."
-msgstr ""
-
-#: directory.py:148
+#: directory.py:82
 msgid "Directory Sort By Date"
 msgstr ""
 
-#: directory.py:149
+#: directory.py:83
 msgid "Sort directory by date and not by name."
 msgstr ""
 
-#: directory.py:151
+#: directory.py:85
 msgid "Directory Autoplay Single Item"
 msgstr ""
 
-#: directory.py:152
+#: directory.py:86
 msgid "Don't show directory if only one item exists and auto-select the item."
 msgstr ""
 
-#: directory.py:155
-msgid "Audio Random Playlist"
-msgstr ""
-
-#: directory.py:156
-msgid "Show radom playlist item for audio menus."
-msgstr ""
-
-#: directory.py:158
+#: directory.py:89
 msgid "Force Skin Layout"
 msgstr ""
 
-#: directory.py:159
+#: directory.py:90
 msgid ""
 "Force skin to a specific layout. This option doesn't work with all skins and "
 "the result may differ based on the skin."
 msgstr ""
 
-#: directory.py:162
+#: directory.py:93
 msgid "Directory Smart Sort"
 msgstr ""
 
-#: directory.py:163
+#: directory.py:94
 msgid "Use a smarter way to sort the items."
 msgstr ""
 
-#: directory.py:165
+#: directory.py:96
 msgid "Use MediaID Tag Names"
 msgstr ""
 
-#: directory.py:166
+#: directory.py:97
 msgid "Use the names from the media files tags as display name."
 msgstr ""
 
-#: directory.py:168
+#: directory.py:99
 msgid "Directory Reverse Sort"
 msgstr ""
 
-#: directory.py:169
+#: directory.py:100
 msgid "Show the items in the list in reverse order."
 msgstr ""
 
-#: directory.py:418
+#: directory.py:105
+msgid "Directory Create Playlist"
+msgstr ""
+
+#: directory.py:106
+msgid "Handle the directory as playlist. After one file is played, the next "
+msgstr ""
+
+#: directory.py:107
+msgid "one will be started."
+msgstr ""
+
+#: directory.py:109
+msgid "Directory Add Playlist Files"
+msgstr ""
+
+#: directory.py:110
+msgid "Add playlist files to the list of items"
+msgstr ""
+
+#: directory.py:112
+msgid "Directory Add Random Playlist"
+msgstr ""
+
+#: directory.py:113
+msgid "Add an item for a random playlist"
+msgstr ""
+
+#: directory.py:115
+msgid "Directory Autoplay Items"
+msgstr ""
+
+#: directory.py:116
+msgid "Autoplay the whole directory (as playlist) when it contains only "
+msgstr ""
+
+#: directory.py:117
+msgid "files and no directories"
+msgstr ""
+
+#: directory.py:378
 msgid "Unable to save folder.fxd"
 msgstr ""
 
-#: directory.py:439
+#: directory.py:399
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr ""
 
-#: directory.py:440
+#: directory.py:400
 msgid "Directory"
 msgstr ""
 
-#: directory.py:464 image/plugins/gphoto.py:158
+#: directory.py:428 image/plugins/gphoto.py:158
 msgid "Browse directory"
 msgstr ""
 
-#: directory.py:467
+#: directory.py:429
+msgid "Play all files in directory"
+msgstr ""
+
+#: directory.py:441
 msgid "Random play all items"
 msgstr ""
 
-#: directory.py:469
+#: directory.py:443
 msgid "Recursive random play all items"
 msgstr ""
 
-#: directory.py:471
+#: directory.py:445
 msgid "Recursive play all items"
 msgstr ""
 
-#: directory.py:473
+#: directory.py:447
 msgid "Configure directory"
 msgstr ""
 
-#: directory.py:496
+#: directory.py:477
 msgid "Enter Password"
 msgstr ""
 
-#: directory.py:521
+#: directory.py:498
 msgid "Password incorrect"
 msgstr ""
 
-#: directory.py:565
+#: directory.py:546
 msgid "Scanning disc, be patient..."
 msgstr ""
 
-#: directory.py:567
+#: directory.py:548
 msgid "Scanning directory, be patient..."
 msgstr ""
 
-#: directory.py:893 directory.py:931
+#: directory.py:876 directory.py:914
 msgid "on"
 msgstr ""
 
-#: directory.py:895 directory.py:898 directory.py:933 directory.py:936
+#: directory.py:878 directory.py:881 directory.py:916 directory.py:919
 msgid "off"
 msgstr ""
 
-#: directory.py:900 directory.py:938
+#: directory.py:883 directory.py:921
 msgid "auto"
 msgstr ""
 
-#: directory.py:942
+#: directory.py:925
 msgid "Configure"
 msgstr ""
 
@@ -501,49 +533,57 @@ msgstr ""
 msgid "No action defined for this choice!"
 msgstr ""
 
-#: playlist.py:121 playlist.py:163
+#: playlist.py:99 playlist.py:141
 #, python-format
 msgid "Cannot open file \"%s\""
 msgstr ""
 
-#: playlist.py:250
+#: playlist.py:228
 msgid "Random Playlist"
 msgstr ""
 
-#: playlist.py:255 playlist.py:259 playlist.py:367 video/configure.py:181
+#: playlist.py:233 playlist.py:237 playlist.py:349 video/configure.py:181
 #: video/videoitem.py:296
 msgid "Play"
 msgstr ""
 
-#: playlist.py:256 playlist.py:258
+#: playlist.py:234 playlist.py:236
 msgid "Browse Playlist"
 msgstr ""
 
-#: playlist.py:274
+#: playlist.py:252
 msgid "empty playlist"
 msgstr ""
 
-#: osd.py:423
+#: playlist.py:301
+msgid "no next item in playlist"
+msgstr ""
+
+#: playlist.py:325
+msgid "no previous item in playlist"
+msgstr ""
+
+#: osd.py:311
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:424
+#: osd.py:312
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:425
+#: osd.py:313
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:426
+#: osd.py:314
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:427
+#: osd.py:315
 msgid "h = Help"
 msgstr ""
 
-#: setup_freevo.py:105
+#: setup_freevo.py:108
 msgid ""
 "Usage: ./freevo setup [OPTION]...\n"
 "Set up Freevo for your specific environment.\n"
@@ -576,42 +616,42 @@ msgid ""
 "Please report bugs to <freevo-users@lists.sourceforge.net>.\n"
 msgstr ""
 
-#: setup_freevo.py:209
+#: setup_freevo.py:212
 #, python-format
 msgid "checking for %-13s"
 msgstr ""
 
-#: setup_freevo.py:222
+#: setup_freevo.py:225
 #, python-format
 msgid "ERROR: can't find %s"
 msgstr ""
 
-#: setup_freevo.py:223
+#: setup_freevo.py:226
 msgid "Please install the application respectively put it in your path."
 msgstr ""
 
-#: setup_freevo.py:224
+#: setup_freevo.py:227
 msgid "Freevo won't work without it."
 msgstr ""
 
-#: setup_freevo.py:230
+#: setup_freevo.py:233
 msgid "not found (deactivated)"
 msgstr ""
 
-#: setup_freevo.py:293
+#: setup_freevo.py:296
 #, python-format
 msgid "System path first=%s"
 msgstr ""
 
-#: setup_freevo.py:293
+#: setup_freevo.py:296
 msgid "No"
 msgstr ""
 
-#: setup_freevo.py:293
+#: setup_freevo.py:296
 msgid "Yes"
 msgstr ""
 
-#: setup_freevo.py:309
+#: setup_freevo.py:312
 msgid "Settings:"
 msgstr ""
 
@@ -631,26 +671,26 @@ msgstr ""
 msgid "CANCEL"
 msgstr ""
 
-#: image/plugins/gphoto.py:122 image/imageitem.py:110
+#: image/plugins/gphoto.py:122 image/imageitem.py:109
 msgid "View Image"
 msgstr ""
 
-#: image/viewer.py:118
+#: image/viewer.py:111
 #, python-format
 msgid ""
 "Can't Open Image\n"
 "'%s'"
 msgstr ""
 
-#: image/viewer.py:351
+#: image/viewer.py:350
 msgid "Title: "
 msgstr ""
 
-#: image/viewer.py:352
+#: image/viewer.py:351
 msgid "Description: "
 msgstr ""
 
-#: image/viewer.py:386
+#: image/viewer.py:385
 msgid "No information available"
 msgstr ""
 
