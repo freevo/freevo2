@@ -118,7 +118,12 @@ class PluginInterface(Plugin):
         if self.item and not self.item in recordings:
             log.info('%s.schedule: recording item no longer in list' % \
                      self.name)
+            log.info(str(self.item))
             self.stop()
+            # return here, this function gets called by notifier using the
+            # new rec_timer at once because stop() called schedule again.
+            return False
+
         self.recordings = recordings
         if server:
             self.server = server
@@ -174,6 +179,7 @@ class PluginInterface(Plugin):
         if self.item:
             log.info('%s.record: there is something running, stopping it' % \
                      self.name)
+            log.info(str(self.item))
             self.stop()
             # return here, this function gets called by notifier using the
             # new rec_timer at once because stop() called schedule again.
@@ -208,6 +214,10 @@ class PluginInterface(Plugin):
             d = os.path.dirname(rec.url[5:])
             if not os.path.isdir(d):
                 os.makedirs(d)
+
+        log.info('start new recording')
+        log.info(str(self.item))
+
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
         self.item = rec
