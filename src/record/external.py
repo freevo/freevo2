@@ -206,7 +206,7 @@ class Recorder(recorder.Plugin):
             if remote.id == UNKNOWN_ID and not remote.valid:
                 # remove it from the list, the external app still doesn't
                 # know about this
-                self.recordings.remove(rec)
+                self.recordings.remove(remote.recording)
                 continue
             if remote.id == UNKNOWN_ID:
                 # add the recording
@@ -222,7 +222,7 @@ class Recorder(recorder.Plugin):
                 break
             if not remote.valid:
                 # remove the recording
-                log.info('%s: remove %s' % (self.name, String(rec.name)))
+                log.info('%s: remove %s' % (self.name, String(remote.recording.name)))
                 try:
                     self.entity.call('vdr.remove', self.__vdr_remove,
                                      remote.id)
