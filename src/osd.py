@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/06/21 08:17:45  gsbarbieri
+# Small fix
+#
 # Revision 1.43  2003/06/13 23:34:06  rshortt
 # In _getfont include IOError as well as RuntimeError because of changes in recent SDL_ttf2 or pygame.
 #
@@ -855,9 +858,10 @@ class OSD:
                 x0 = x                    
                 if not return_x0 or return_x0 > x0:
                     return_x0 = x0
-                lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * \
-                                           (len(lines[line_number]) -1 )
                 if len(lines[line_number]) > 1:
+                    lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * \
+                                               (len(lines[line_number]) -1 )
+                    
                     spacing = (width - lines_size[line_number]) / \
                               ( len(lines[line_number]) -1 )
                 else:
@@ -867,8 +871,7 @@ class OSD:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
                         self.drawstring(word, x0, y0, fgcolor, None, font, ptsize, layer=layer)
-                        x0 += spacing
-                        x0 += word_size
+                        x0 += spacing + word_size 
                     
             elif align_h == 'center':
                 x0 = x + (width - lines_size[line_number]) / 2
@@ -900,7 +903,7 @@ class OSD:
                 spacing = MINIMUM_SPACE_BETWEEN_WORDS
                 line_len = len(lines[line_number])
                 for word_number in range(len(lines[line_number])):
-                    if word:
+                    if lines[line_number][word_number]:
                         pos = line_len - word_number -1
                         word_size, word_height = \
                                    self.stringsize(lines[line_number][pos], font,ptsize)
@@ -1053,9 +1056,8 @@ class OSD:
 
         
         for line in lines:
-            if align_h == 'left':
-                x0 = x
-            elif align_h == 'center' or align_h == 'justified':
+            x0 = x
+            if align_h == 'center' or align_h == 'justified':
                 line_size, line_heigth = self.stringsize(line, font, ptsize)
                 x0 = x + (width - line_size) / 2
             elif align_h == 'right':
