@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/05/13 12:30:53  dischi
+# 2.6 fix from Viggo Fredriksen
+#
 # Revision 1.8  2004/02/08 18:45:23  dischi
 # do not use font.font.stringsize, there is no border calculated, use font.stringsize
 #
@@ -114,15 +117,24 @@ class procstats(IdleBarPlugin):
         May not be correct, but i like to see
         total free mem as freemem+cached
         """
-        free = 0
-        f = open('/proc/meminfo')
-
-        if f:
+        free    = 0
+        meminfo = None
+        try:
+            f = file('/proc/meminfo', 'r')
             meminfo = f.read()
-            free = int(string.split(string.split(meminfo,'\n')[1])[3])
+            f.close()
+        except OSError:
+            _debug_('[procstats]: The file /proc/meminfo is not available')
 
-        f.close()
-        self.currentMem = _('%iM') % (((free)/1024)/1024)
+        if meminfo:
+            i = 0
+            meminfo = meminfo.split()
+            for l in meminfo:
+                if l in ['MemFree:', 'Buffers:', 'Cached:']:
+                    free += int(meminfo[i+1])
+                i += 1
+
+        self.currentMem = _('%iM') % (free/1024)
 
     def getCpuUsage(self):
         """
@@ -150,8 +162,12 @@ class procstats(IdleBarPlugin):
         self.currentCpu = _('%s%%') % round(usage,self.precision)
  
     def draw(self, (type, object), x, osd):
+        try:
+            self.getStats()
+        except:
+            _debug_('[procstats]: Not working, this plugin is only tested with 2.4 and 2.6 kernels')
+
         font = osd.get_font('small0')
-        self.getStats()
         widthmem = 0
         widthcpu = 0
 
