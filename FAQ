@@ -8,10 +8,9 @@ $Id$
 ----------------------------------------------------------------------
 Q: How do I play (S)VCD?
 
-A: You have to manually change the freevo_config.py mplayer options
-   for now to properly start VCD playing.
-
-   Menu support is planned for a future relase.
+A: Make sure freevo_config.py is properly setup (MPLAYER_ARGS_VCD).
+   Test the same commandline from the shell to make sure it can be 
+   played. Use "VCD" in Freevo to play it.
 
 ----------------------------------------------------------------------
 Q: How do I play CD audio disks?

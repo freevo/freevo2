@@ -7,6 +7,7 @@ $Id$
 WARNING: The framebuffer code can render the console unusuable if set up
          incorrectly! Do not attempt if you cannot login from another
          computer on the network!
+         This is not a problem if you run the X11 version.
 
 
 Quickstart (X11 version)
@@ -26,8 +27,9 @@ Detailed instructions
 ---------------------
 
 Some of these steps are optional, a minimal Freevo system can be set up
-that doesn't require TV-out, framebuffer, Video4Linux or lirc. It will
-still be useful to play movies/mp3's under X11.
+that doesn't require TV-out, Video4Linux or lirc. It will
+still be useful to play movies/mp3's under X11 or the 
+framebuffer (if there's a remote control).
 
 
 o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
@@ -36,18 +38,24 @@ o Recompile the Linux kernel (>=2.4.13). It is assumed that all options
   o This step is not needed until you need the Video4Linux and/or TV-out.
 
 o Test the video4linux driver using xawtv (optional)
-  o Freevo uses its' own tables for channels
+  o Freevo uses its' own config files for channels etc
+  o Right now the only TV watching application for Freevo is 
+    for Matrox G400 Framebuffer using a Video4Linux1 device, it is part
+    of Freevo in freevo/matrox_g400/v41l1_to_mga.
 
 o Compile and install the needed external apps. MPlayer and mpg321/mpg123
   are needed for the core Video/Audio playback functionality, the others
   can be installed as needed.
-  o Install MPlayer
-    o Test with the MGA graphics driver
-  o Install mpg321 (or alternately, mpg123)
+  o Install MPlayer  (Play movies, DVDs, VideoCDs)
+    o Test with the the graphics driver and settings you intend to use.
+      Update freevo_config.py, settings called MPLAYER_XXXX
+  o Install mpg321  (play MP3. Alternately, mpg123)
     o Test audio output with an mp3
-  o Install NVrec
+  o Install NVrec (record from Video4Linux video in to file)
     o Test recording to a file
-  o Install lirc
+    o NVrec support is currently not enabled in Freevo, it is work
+      in progress.
+  o Install lirc  (remote control receiver software)
     o Test:
       o Insert the serial driver module
       o Start the daemon
@@ -55,14 +63,16 @@ o Compile and install the needed external apps. MPlayer and mpg321/mpg123
 o Compile Freevo
   o ./configure --osd=fb ; make
     o Use "./configure --help" for more information
+    o The default is to compile for the Framebuffer, X11 and SDL are 
+      also supported.
+  o Requires Python >= version 2.1 (We've had reports of problems with 1.5.x)
+    o http://www.python.org/ftp/python/2.2.1/Python-2.2.1.tgz
   o Requires freetype 2 (2.0.9 is preferred for now)
     o http://prdownloads.sourceforge.net/freetype/freetype-2.0.9.tar.gz?download
   o Requires libpng
     o http://prdownloads.sourceforge.net/libpng/libpng-1.2.3.tar.gz?download
   o Requires libz (already installed on most Linux distros)
     o http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz?download
-  o Requires Python >= version 2.1 (We've had reports of problems with 1.5.x)
-    o http://www.python.org/ftp/python/2.2.1/Python-2.2.1.tgz
   o Requires PyXML (Tested with 0.7.1)
     o http://unc.dl.sourceforge.net/sourceforge/pyxml/PyXML-0.7.1.tar.gz
       o tar xvzf PyXML-0.7.1.tar.gz
