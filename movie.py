@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2002/09/15 11:53:41  dischi
+# Make info in RemovableMedia a class (RemovableMediaInfo)
+#
 # Revision 1.33  2002/09/13 17:34:59  dischi
 # Added menu with all tracks for (S)VCDs. Currently I only have one SVCD
 # for testing, but it should work for VCDs, too. We need a way to check
@@ -109,10 +112,10 @@ def play_movie(arg=None, menuw=None):
     mode = arg[0]      # 'dvd', 'vcd', etc
     filename = arg[1]
     playlist = arg[2]
-    mplayer_options = ""
+    play_options = ""
 
     if len(arg) > 3:
-        mplayer_options = arg[3]
+        play_options = arg[3]
 
     print 'playmovie: Got arg=%s, filename="%s"' % (arg, filename)
 
@@ -129,7 +132,7 @@ def play_movie(arg=None, menuw=None):
                 util.mount(media.mountdir)
                 break
                 
-    mplayer.play(mode, filename, playlist, 0, mplayer_options)
+    mplayer.play(mode, filename, playlist, 0, play_options)
 
 
 def play_dvd(arg=None, menuw=None):
@@ -203,10 +206,10 @@ def dvd_vcd_menu_generate(media, type, menuw):
         m = menu.MenuItem('Play Title %s' % title, play_function,
                           '%s -cdrom-device %s' % (title, media.devicename), 
                           dvd_menu_eventhandler, media)
-        m.setImage(('movie', media.info[2]))
+        m.setImage(('movie', media.info.image))
         items += [m]
 
-    label = media.info[1]
+    label = media.info.label
     moviemenu = menu.Menu(label, items, umount_all = 1)
     menuw.pushmenu(moviemenu)
 
@@ -295,16 +298,15 @@ def main_menu_generate():
             # b) Drive x: label
             # c) Drive x: type label
 
-            (type, label, image, play_options) = media.info
             # Is this media playable as is?
-            if play_options:
+            if media.info.play_options:
 
-                m = menu.MenuItem(label, play_movie, play_options,
+                m = menu.MenuItem(media.info.label, play_movie, media.info.play_options,
                                   eventhandler, media)
-            elif type != None:
+            elif media.info.type != None:
                 # Just data files
-                m = menu.MenuItem(label, cwd, media.mountdir, eventhandler, media)
-            m.setImage(('movie', image))
+                m = menu.MenuItem(media.info.label, cwd, media.mountdir, eventhandler, media)
+            m.setImage(('movie', media.info.image))
         else:
             m = menu.MenuItem('Drive %s (no disc)' % media.drivename, None,
                               None, eventhandler, media)
@@ -348,12 +350,12 @@ def cwd(arg=None, menuw=None):
 
     # XML files
     for file in util.match_files(mountdir, config.SUFFIX_FREEVO_FILES):
-        title, image, (mode, first_file, playlist, mplayer_options), id, info =\
+        title, image, (mode, first_file, playlist, play_options), id, info =\
                movie_xml.parse(file, mountdir, mplayer_files)
 
         # only add movies when we have all needed informations
         if title != "" and first_file != "":
-            files += [ ( title, mode, first_file, playlist, mplayer_options, image ) ]
+            files += [ ( title, mode, first_file, playlist, play_options, image ) ]
 
     # "normal" movie files
     for file in mplayer_files:
@@ -386,8 +388,8 @@ def cwd(arg=None, menuw=None):
     files.sort(lambda l, o: cmp(l[0].upper(), o[0].upper()))
 
     # add everything to the menu
-    for (title, mode, file, playlist, mplayer_options, image) in files:
-        m = menu.MenuItem(title, play_movie, (mode, file, playlist, mplayer_options),
+    for (title, mode, file, playlist, play_options, image) in files:
+        m = menu.MenuItem(title, play_movie, (mode, file, playlist, play_options),
                           eventhandler = eventhandler)
         m.setImage(('movie', image))
         items += [m]

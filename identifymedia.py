@@ -9,6 +9,8 @@ import rc
 import string
 import movie_xml
 
+from main import RemovableMediaInfo
+
 DEBUG = 1   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
@@ -45,7 +47,7 @@ class Identify_Thread(threading.Thread):
         if s == cdrom.CDS_AUDIO:
             os.close(fd)
             # XXX add cddb informations here
-            media.info = ('AUDIO-CD', None, None, None)
+            media.info = RemovableMediaInfo('AUDIO-CD')
             return
 
         mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
@@ -78,8 +80,8 @@ class Identify_Thread(threading.Thread):
                 if not title:
                     title = '%s [%s]' % (mediatype[0], label)
 
-                # XXX Add Dischis -cdrom-device fix!
-                media.info = (mediatype[0], title, image, (mediatype[2], media.mountdir, []))
+                media.info = RemovableMediaInfo(mediatype[0], title, image,\
+                                                (mediatype[2], media.mountdir, []))
                 return
                 
         mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)
@@ -100,17 +102,19 @@ class Identify_Thread(threading.Thread):
             # return the title and action is play
             if title and len(mplayer_files) == 1:
                 # XXX add mplayer_options, too
-                info = 'DIVX', title, image, ('video', mplayer_files[0], [])
+                info = RemovableMediaInfo('DIVX', title, image, \
+                                          ('video', mplayer_files[0], []))
 
             # return the title
             elif title:
-                info = 'DIVX', title, image, None
+                info = RemovableMediaInfo('DIVX', title, image)
 
             # only one movie on DVD/CD, title is movie name and action is play
             elif len(mplayer_files) == 1:
                 s = os.path.splitext(os.path.basename(mplayer_files[0]))[0]
                 title = s.capitalize()
-                info = 'DIVX', title, image, ('video', mplayer_files[0], [])
+                info = RemovableMediaInfo('DIVX', title, image, \
+                                          ('video', mplayer_files[0], []))
 
             # We're done if it was 
             if info:
@@ -135,30 +139,30 @@ class Identify_Thread(threading.Thread):
                     image = (config.TV_SHOW_IMAGES + show_name + ".png").lower()
                 elif os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".jpg").lower()):
                     image = (config.TV_SHOW_IMAGES + show_name + ".jpg").lower()
-                info = "DIVX", show_name + ' ('+ volumes + ')', image, None
+                info = RemovableMediaInfo("DIVX", show_name + ' ('+ volumes + ')', image)
 
             else:
                 # nothing found, return the label
-                info = "DIVX", label, None, None
+                info = RemovableMediaInfo("DIVX", label)
             media.info = info
             return
 
         # XXX add more intelligence to cds with audio files
         if (not mplayer_files) and mp3_files:
-            info = "AUDIO" , '%s [%s]' % (media.drivename, label), None, None
+            info = RemovableMediaInfo("AUDIO" , '%s [%s]' % (media.drivename, label))
 
         # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
-            info = "IMAGE", '%s [%s]' % (media.drivename, label), None, None
+            info = RemovableMediaInfo("IMAGE", '%s [%s]' % (media.drivename, label))
 
         elif mplayer_files or image_files or mp3_files:
             if title:
-                info = 'DATA', title, image, None
+                info = RemovableMediaInfo('DATA', title, image)
             else:
-                info = "DATA", '%s [%s]' % (media.drivename, label), None, None
+                info = RemovableMediaInfo("DATA", '%s [%s]' % (media.drivename, label))
 
         else:
-            info = "DATA" , '%s [%s]' % (media.drivename, label), None, None
+            info = RemovableMediaInfo("DATA" , '%s [%s]' % (media.drivename, label))
 
         media.info = info
 

@@ -153,16 +153,15 @@ def main_menu_generate():
 
     for media in config.REMOVABLE_MEDIA:
         if media.info:
-            (type, label, image, play_options) = media.info
             # Is this media playable as is?
-            if play_options:
-                m = menu.MenuItem(label, play_mame, play_options,
+            if media.info.play_options:
+                m = menu.MenuItem(media.info.label, play_mame, media.info.play_options,
                                   eventhandler, media)
             elif type != None:
                 # Just data files
                 m = menu.MenuItem('Drive ' + media.drivename, cwd, dir,
                                   eventhandler, media)
-            m.setImage(('movie', image))
+            m.setImage(('movie', media.info.image))
         else:
             m = menu.MenuItem('Drive %s (no disc)' % media.drivename, None,
                               None, eventhandler, media)

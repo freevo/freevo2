@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/09/15 11:53:41  dischi
+# Make info in RemovableMedia a class (RemovableMediaInfo)
+#
 # Revision 1.9  2002/09/07 06:19:45  krister
 # Improved removable media support.
 #
@@ -145,14 +148,10 @@ def main_menu(arg=None, menuw=None):
                                   
     for media in config.REMOVABLE_MEDIA:
         if media.info:
-            (mediatype, label, image, play_options) = media.info
-            print("What is identify: " + str(mediatype) + ',' + str(label) +
-                  ',' + str(image) + ',' + str(play_options))
-
             if mediatype == 'AUDIO':
-                s = 'Drive %s [%s]' % (media.drivename, label)
+                s = 'Drive %s [%s]' % (media.drivename, media.info.label)
                 items += [menu.MenuItem(s, parse_entry,
-                                        (label, media.mountdir),
+                                        (media.info.label, media.mountdir),
                                         handle_config, ('dir', media.mountdir),
                                         'dir')]
             

@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2002/09/15 11:53:41  dischi
+# Make info in RemovableMedia a class (RemovableMediaInfo)
+#
 # Revision 1.65  2002/09/14 16:55:33  dischi
 # cosmetic change
 #
@@ -226,24 +229,23 @@ def eventhandler(event = None, menuw=None, arg=None):
         media = config.REMOVABLE_MEDIA[0] # XXX kludge, handle more drives
         
         if media.info:
-            (mediatype, label, image, play_options) = media.info
-            if play_options:
+            if media.info.play_options:
                 util.mount(media.mountdir)
-                movie.play_movie(menuw=None, arg=play_options)
+                movie.play_movie(menuw=None, arg=media.info.play_options)
 
-            elif mediatype == 'AUDIO-CD':
+            elif media.info.type == 'AUDIO-CD':
                 print "play the audio cd -- not implemented yet"
                 menuw.refresh()
 
-            elif mediatype == 'DIVX':
+            elif media.info.type == 'DIVX':
                 util.mount(media.mountdir)
                 movie.cwd(media.mountdir, menuwidget)
 
-            elif mediatype == 'AUDIO':
+            elif media.info.type == 'AUDIO':
                 util.mount(media.mountdir)
                 music.parse_entry([media.mountdir, media.mountdir], menuwidget)
 
-            elif mediatype == 'IMAGE':
+            elif media.info.type == 'IMAGE':
                 util.mount(media.mountdir)
                 imenu.cwd(media.mountdir, menuwidget)
 
@@ -332,6 +334,17 @@ def getcmd():
             menuwidget.eventhandler(event)
         
 
+class RemovableMediaInfo:
+
+    def __init__(self, type, label = None, image = None, play_options = None, \
+                 xml_file = None):
+        self.type = type
+        self.label = label
+        self.image = image
+        self.play_options = play_options
+        self.xml_file = xml_file
+        
+    
 class RemovableMedia:
 
     def __init__(self, mountdir='', devicename='', drivename=''):
@@ -344,9 +357,6 @@ class RemovableMedia:
         self.tray_open = 0
         self.drive_status = None  # return code from ioctl for DRIVE_STATUS
 
-        # info = (mediatype, label, image, (mplayer playoptions))
-        # mediatype can be DATA/IMAGE/AUDIO/AUDIO-CD/DIVX/DVD/VCD/SVCD
-        # XXX This should be a class
         self.info = None
         
 
