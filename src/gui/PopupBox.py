@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/09/07 11:17:21  dischi
+# add basic refresh function
+#
 # Revision 1.28  2003/09/06 17:12:50  rshortt
 # For Label use parent's text_prop if available before resorting to defaults.
 #
@@ -166,7 +169,7 @@ class PopupBox(Container):
 
         if icon:
             self.set_icon(icon)
-                
+
 
     def get_text(self):
         """
@@ -281,6 +284,14 @@ class PopupBox(Container):
         if DEBUG: print "    ...", self
 
 
+    def refresh(self):
+        """
+        draw and update the screen
+        """
+        self.draw()
+        self.osd.update()
+
+        
     def eventhandler(self, event):
         if DEBUG: print 'PopupBox: event = %s' % event
 

@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/09/07 11:15:17  dischi
+# add basic refresh function
+#
 # Revision 1.26  2003/08/26 20:10:50  outlyer
 # More warnings fixed by using explicit types
 #
@@ -367,7 +370,7 @@ class GUIObject:
         """
         At the moment not implemented.
         """
-        pass
+        self.draw()
 
 
     def layout(self):
