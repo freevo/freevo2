@@ -67,16 +67,24 @@ class Identify_Thread(threading.Thread):
             label = m.group(1)
         img.close()
 
+        # is the id in the database?
         if id in config.MOVIE_INFORMATIONS_ID:
             title, image, xml_filename = config.MOVIE_INFORMATIONS_ID[id]
+
+        # no? Maybe we can find a label regexp match
         else:
             for db_info in config.MOVIE_INFORMATIONS_LABEL:
                 if db_info[0].match(label):
                     title, image, xml_filename = db_info[1:]
                     m = db_info[0].match(label).groups()
                     re_count = 1
-                    for k in m:
-                        title=string.replace(title, '\\%s' % re_count, k)
+
+                    # found, now change the title with the regexp. E.g.:
+                    # label is "bla_2", the label regexp "bla_[0-9]" and the title
+                    # is "Something \1", the \1 will be replaced with the first item
+                    # in the regexp group, here 2. The title is now "Something 2"
+                    for g in m:
+                        title=string.replace(title, '\\%s' % re_count, g)
                         re_count += 1
                         
         # Disc is data of some sort. Mount it to get the file info
@@ -188,14 +196,12 @@ class Identify_Thread(threading.Thread):
 
             if last_status != media.drive_status:
                 if DEBUG:
-                    print 'MEDIA: Status=%s, info=%s' % (media.drive_status,
-                                                         media.info),
-                    print ' Posting IDENTIFY_MEDIA event'
+                    print 'MEDIA: Status=%s' % media.drive_status
+                    print 'Posting IDENTIFY_MEDIA event'
                 rclient.post_event(rclient.IDENTIFY_MEDIA)
             else:
                 if DEBUG > 1:
-                    print 'MEDIA: Status=%s, info=%s' % (media.drive_status,
-                                                         media.info)
+                    print 'MEDIA: Status=%s' % media.drive_status
                 
                 
     def __init__(self):
