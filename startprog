@@ -1,0 +1,89 @@
+#!/bin/sh
+
+#if 0 /*
+# -----------------------------------------------------------------------
+# startprog - This shell script starts an executable in the first argument
+#             using either the freevo_loader loader+runtime, or just 
+#             the executable directly.
+#
+#             There is special handling for Python programs, which are
+#             started using "python" as the name, but executed using
+#             runtime/apps/freevo_python, or the distro Python (e.g. 
+#             /usr/local/bin/python).
+#
+#             This shell script never returns, it is replaced by the 
+#             started executable.
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.1  2003/02/05 06:10:02  krister
+# Script to start runapp, mplayer, etc with the freevo runtime loader+dll, or just execute them
+#
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
+BASEDIR=`dirname $0`
+
+STARTAPP=$1
+shift 1
+
+if [ "$STARTAPP" = "python" ] ; then
+
+    # First check if the runtime is installed
+    if [ -e $BASEDIR/runtime/apps/freevo_python ] ; then
+        # Setup the Python environment variables
+        export PYTHONHOME=$BASEDIR/runtime
+        STARTAPP=$BASEDIR/runtime/apps/freevo_python
+    else
+        # XXX Add checks for python2 for Red Hat etc
+        STARTAPP=python
+    fi
+fi
+
+if [ -e $BASEDIR/runtime/preloads ] ; then
+    # Gentoo has some preloads in runtime, but no complete environment
+    # We don't need to check the version, gentoo emerge will do this for us
+
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_runtime. Only use this for freevo itself, there are some
+    # problems with the rc_client and the preloads
+    export FREEVO_LD_PRELOAD=`cat runtime/preloads`
+fi
+
+if [ -e $BASEDIR/runtime/dll/freevo_loader ] ; then
+    # Use the freevo program loader
+    exec $BASEDIR/runtime/dll/freevo_loader $STARTAPP "$@"
+else
+    # Just start the program
+    exec $STARTAPP "$@"
+fi
+
+echo ERROR: STARTPROG FAILED!!!!
+
+exit 1
