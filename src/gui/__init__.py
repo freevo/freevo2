@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/30 14:40:21  dischi
+# add ProgressBox
+#
 # Revision 1.10  2003/11/29 11:41:35  dischi
 # do not import from gui, this object _is_ gui
 #
@@ -121,7 +124,7 @@ from exceptions        import *
 from scrolldemo        import *
 from listboxdemo       import *
 from optiondemo        import *
-
+from ProgressBox       import *
 
 if config.DEBUG > 1:
     from debug import *
