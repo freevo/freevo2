@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/07 13:30:21  dischi
+# Add plugin support
+#
 # Revision 1.3  2002/12/03 19:15:13  dischi
 # Give all menu callback functions the parameter arg
 #
@@ -40,6 +43,7 @@
 #
 
 import sys, os, time
+import traceback
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -50,9 +54,6 @@ import util
 # The skin class
 import skin
 
-# The OSD class, used to communicate with the OSD daemon
-import osd
-
 # The RemoteControl class, sets up a UDP daemon that the remote control client
 # sends commands to
 import rc
@@ -61,7 +62,6 @@ TRUE  = 1
 FALSE = 0
 
 rc   = rc.get_singleton()   # Create the remote control object
-osd  = osd.get_singleton()  # Create the OSD object
 skin = skin.get_singleton() # Crate the skin object.
 
 # Module variable that contains an initialized MenuWidget() object
@@ -283,12 +283,15 @@ class MenuWidget:
                     action( menuw=self )
 
         elif event == rc.K0:
-            try:
                 actions = menu.selected.actions()
+                if config.FREEVO_PLUGINS.has_key(menu.selected.type):
+                    for a in config.FREEVO_PLUGINS[menu.selected.type]:
+                        try:
+                            actions += a(menu.selected)
+                        except:
+                            traceback.print_exc()
                 if len(actions) > 1:
                     self.make_submenu(menu.selected.name, actions)
-            except:
-                pass
             
         elif event == rc.REFRESH_SCREEN:
             self.refresh()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/07 13:30:21  dischi
+# Add plugin support
+#
 # Revision 1.3  2002/12/03 05:13:03  krister
 # Changed so that the EPG can be run standalone again. Disabled mplayer process killing, not good on a multiuser machine.
 #
@@ -364,6 +367,24 @@ def main_func():
     im_thread = identifymedia.Identify_Thread()
     im_thread.start()
     
+    # scan for plugins
+    for t in ('video', 'audio', 'image', 'games'):
+        config.FREEVO_PLUGINS[t] = []
+        dirname = 'src/%s/plugins' % t
+        if os.path.isdir(dirname):
+            for plugin in [ os.path.splitext(fname)[0] for fname in os.listdir(dirname)
+                            if os.path.isfile(os.path.join(dirname, fname))\
+                            and os.path.splitext(fname)[1].lower()[1:] == 'py' \
+                            and not fname == '__init__.py']:
+                try:
+                    exec('import %s.plugins.%s' % (t, plugin))
+                    if hasattr(eval('%s.plugins.%s'  % (t, plugin)), 'actions'):
+                        print 'load %s plugin %s ' % (t, plugin)
+                    config.FREEVO_PLUGINS[t] += [ eval('%s.plugins.%s.actions'\
+                                                       % (t, plugin)) ]
+                except:
+                    traceback.print_exc()
+
     # Kick off the main menu loop
     print 'Main loop starting...'
     getcmd()
