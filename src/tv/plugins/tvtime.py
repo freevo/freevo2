@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/06/06 17:15:10  mikeruelle
+# removed some old bad code. mplayer debug has been superceded by childapp debug. the kill method is just plain bad.
+#
 # Revision 1.35  2004/05/29 23:01:03  mikeruelle
 # make better use of freevo channels. getting better video group support slowly
 #
@@ -628,36 +631,7 @@ class TVTimeApp(childapp.ChildApp2):
     """
 
     def __init__(self, (app)):
-        if config.MPLAYER_DEBUG:
-            fname_out = os.path.join(config.LOGDIR, 'tvtime_stdout.log')
-            fname_err = os.path.join(config.LOGDIR, 'tvtime_stderr.log')
-            try:
-                self.log_stdout = open(fname_out, 'a')
-                self.log_stderr = open(fname_err, 'a')
-            except IOError:
-                print
-                print (('ERROR: Cannot open "%s" and "%s" for ' +
-                        'TVTime logging!') % (fname_out, fname_err))
-                print 'Please set MPLAYER_DEBUG=0 in local_conf.py, or '
-                print 'start Freevo from a directory that is writeable!'
-                print
-            else:
-                print 'TVTime logging to "%s" and "%s"' % (fname_out, fname_err)
-
         childapp.ChildApp2.__init__(self, app, stop_osd=1)
-        
-
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure TVTime shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        self.write('quit\n')
-        childapp.ChildApp.kill(self, signal.SIGINT)
-        if DEBUG: print 'Killing tvtime'
-        if config.MPLAYER_DEBUG:
-            self.log_stdout.close()
-            self.log_stderr.close()
-
 
     def stdout_cb(self, line):
         if not len(line) > 0: return
@@ -697,17 +671,4 @@ class TVTimeApp(childapp.ChildApp2):
                 if DEBUG: print 'posted translated tvtime event "%s"' % event
             else:
                 if DEBUG: print 'tvtime cmd "%s" not found!' % line
-        
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stdout.write(line + '\n')
-            except ValueError:
-                pass # File closed
    
-    def stderr_cb(self, line):
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stderr.write(line + '\n')
-            except ValueError:
-                pass # File closed
-
