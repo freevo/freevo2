@@ -146,7 +146,8 @@ class RecordServer(RPCServer):
         for r in next_recordings:
             try:
                 r.recorder = self.best_recorder[r.channel]
-                r.status   = SCHEDULED
+                if r.status != RECORDING:
+                    r.status   = SCHEDULED
             except KeyError:
                 r.recorder = None, None
                 r.status   = CONFLICT
@@ -194,7 +195,7 @@ class RecordServer(RPCServer):
         print 'recordserver.check_favorites'
         for f in copy.copy(self.favorites):
             for entry in self.epgdb.search_programs(f.name):
-                dbid, channel, title, subtitle, foo, descr, \
+                dbid, channel, title, subtitle, descr, episode, \
                       start, stop = entry[:8]
                 if not f.match(title, channel, start):
                     continue
@@ -321,9 +322,23 @@ class RecordServer(RPCServer):
         parameter: name channel priority start stop optionals
         optionals: subtitle, url, start-padding, stop-padding, description
         """
-        name, channel, priority, start, stop, info = \
-              self.parse_parameter(val, ( unicode, unicode, int, int, int,
-                                          dict ) )
+        if len(val) == 2 or len(val) == 5:
+            # missing optionals
+            val.append([])
+        if len(val) == 3:
+            # add by dbid
+            dbid, priority, info = \
+                  self.parse_parameter(val, ( int, int, dict ))
+            channel, name, subtitle, descr, episode, \
+                     start, stop = self.epgdb.get_programs_by_id(dbid)[1:8]
+            if subtitle and not info.has_key('subtitle'):
+                info['subtitle'] = subtitle
+            if descr and not info.has_key('description'):
+                info['description'] = descr
+        else:
+            name, channel, priority, start, stop, info = \
+                  self.parse_parameter(val, ( unicode, unicode, int, int, int,
+                                              dict ) )
         print 'recording.add: %s' % String(name)
         r = Recording(self.rec_id, name, channel, priority, start, stop,
                       info = info)
