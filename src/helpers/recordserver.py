@@ -6,6 +6,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/07/09 02:28:53  outlyer
+# If the automatic caching fails (as was happening for me) then just leave
+# the png file in place for Freevo's OSD to pickle on access (rather than
+# pre-pickled as before)
+#
+# If your system was caching the image properly before, then this shouldn't
+# make any difference and the code probably won't even be called.
+#
 # Revision 1.50  2004/07/01 19:10:45  dischi
 # add TV_RECORD_SERVER_GID
 #
@@ -72,6 +80,7 @@
 
 import sys, string, random, time, os, re, pwd
 import config
+from util import vfs
 
 # change uid
 if __name__ == '__main__':
@@ -918,6 +927,10 @@ class RecordServer(xmlrpc.XMLRPC):
                 try:
                     snapshot(prog.filename)
                 except:
+                    # If automatic pickling fails, use on-demand caching when
+                    # the file is accessed instead. 
+                    os.rename(vfs.getoverlay(prog.filename + '.raw.tmp'),
+                              vfs.getoverlay(os.path.splitext(prog.filename)[0] + '.png'))
                     pass
                 if config.VCR_POST_REC:
                     util.popen3.Popen3(config.VCR_POST_REC)
