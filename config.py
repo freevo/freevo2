@@ -75,12 +75,14 @@ cfgfilepath = [ '/etc/freevo',
                 ]
 
 found = 0
+founddir = ''
 for dir in cfgfilepath:
     cfgfilename = dir + '/freevo_config.py'
     if os.path.isfile(cfgfilename):
         print 'Loading cfg: %s' % cfgfilename
         execfile(cfgfilename, globals(), locals())
         found = 1
+        founddir = dir
         break
     else:
         print '%s not found' % cfgfilename
@@ -93,3 +95,10 @@ if not found:
         print ' '*5 + dir
 
     raise 'Cannot find freevo_config.py'
+else:
+    overridefile = founddir + '/local_conf.py'
+    if os.path.isfile(overridefile):
+        print 'Loading cfg overrides: %s' % overridefile
+        execfile(overridefile, globals(), locals())
+    else:
+        print 'No overrides loaded'
