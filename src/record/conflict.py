@@ -55,7 +55,7 @@
 # -----------------------------------------------------------------------------
 
 
-__all__ = [ 'resolve' ]
+__all__ = [ 'resolve', 'clear_cache' ]
 
 # python imports
 import logging
@@ -91,7 +91,7 @@ class Device:
                     if not c in self.all_channels:
                         self.all_channels.append(c)
 
-        
+
     def is_possible(self):
         if self.rec[-1].status == RECORDING:
             # the recording is running right now, do not move it to
@@ -113,8 +113,8 @@ class Device:
             # FIXME: maybe ok
             return False
         return True
-    
-        
+
+
 def scan(recordings, include_padding):
     """
     Scan the schedule for conflicts. A conflict is a list of recordings
@@ -132,7 +132,7 @@ def scan(recordings, include_padding):
 
     # recordings already scanned
     scanned   = []
-    
+
     # Check all recordings in the list for conflicts
     for r in recordings:
         if r in scanned:
@@ -254,7 +254,7 @@ def check(devices, fixed, to_check, best_rating):
     call_notifier = (call_notifier + 1) % 1000
     if not call_notifier:
         notifier.step(False, False)
-        
+
     c = to_check[0]
     for d in devices:
         d.rec.append(c)
@@ -313,3 +313,12 @@ def resolve(recordings):
             # store cache result
             _conflict_cache[conflict_id] = result
     return True
+
+
+def clear_cache():
+    """
+    Clear the global conflict resolve cache
+    """
+    global _conflict_cache
+    _conflict_cache = ObjectCache(30, 'conflict')
+

@@ -55,6 +55,7 @@ from mcomm import RPCServer, RPCError, RPCReturn
 
 # record imports
 import recorder
+import external
 from types import *
 from recording import Recording
 from favorite import Favorite
@@ -66,6 +67,8 @@ log = logging.getLogger('record')
 # FIXME: move to config file
 EPGDB = sysconfig.datafile('epgdb')
 
+# external recording daemon
+DAEMON = {'type': 'home-theatre', 'module': 'record-daemon'}
 
 class RecordServer(RPCServer):
     """
@@ -84,17 +87,7 @@ class RecordServer(RPCServer):
         # init the recorder
         plugin.init(exclusive = [ 'record' ])
         # get list of best recorder for each channel
-        self.best_recorder = {}
-        for p in recorder.plugins:
-            for dev, rating, listing in p.get_channel_list():
-                for l in listing:
-                    for c in l:
-                        if not self.best_recorder.has_key(c):
-                            self.best_recorder[c] = -1, None
-                        if self.best_recorder[c][0] < rating:
-                            self.best_recorder[c] = rating, p, dev
-        for c in self.best_recorder:
-            self.best_recorder[c] = self.best_recorder[c][1:]
+        self.check_recorder(False)
         # variables for check_recordings
         self.check_timer = None
         self.check_running = False
@@ -105,8 +98,35 @@ class RecordServer(RPCServer):
         self.check_favorites()
 
 
+    def check_recorder(self, update=True):
+        """
+        Check all possible recorders. If 'update' is True, all recordings
+        will be re-checked.
+        """
+        # clear the conflict cache
+        conflict.clear_cache()
+        # reset best recorder list
+        self.best_recorder = {}
+        for p in recorder.plugins:
+            p.server = self
+            for dev, rating, listing in p.get_channel_list():
+                for l in listing:
+                    for c in l:
+                        if not self.best_recorder.has_key(c):
+                            self.best_recorder[c] = -1, None
+                        if self.best_recorder[c][0] < rating:
+                            self.best_recorder[c] = rating, p, dev
+        for c in self.best_recorder:
+            self.best_recorder[c] = self.best_recorder[c][1:]
+        if update:
+            # update recordings
+            self.check_recordings()
+
+
     def send_update(self):
-        # send and updated list to the clients
+        """
+        Send and updated list to the clients
+        """
         ret = []
         for r in self.recordings:
             ret.append(r.short_list())
@@ -114,7 +134,7 @@ class RecordServer(RPCServer):
             log.info('send update to %s' % c)
             self.mbus_instance.send_event(c, 'record.list.update', ret)
 
-        
+
     def __check_epg(self):
         """
         Update the recording list with the epg
@@ -145,8 +165,8 @@ class RecordServer(RPCServer):
                 else:
                     log.info('unable to find recording in epg:\n%s' % r)
         return True
-    
-        
+
+
     def check_recordings(self):
         """
         Wrapper for __check_recordings to avoid recursive calling
@@ -202,7 +222,7 @@ class RecordServer(RPCServer):
                         break
                 else:
                     log.info('unable to find recording in epg:\n%s' % r)
-                    
+
         for r in next_recordings:
             try:
                 r.recorder = self.best_recorder[r.channel]
@@ -228,20 +248,19 @@ class RecordServer(RPCServer):
         log.info(info)
         log.info('next ids: record=%s favorite=%s' % \
                  (self.rec_id, self.fav_id))
-        
+
         # save status
         self.save()
 
         # send schedule to plugins
         for p in recorder.plugins:
-            p.schedule(filter(lambda x: x.recorder[0] == p, next_recordings),
-                       self)
+            p.schedule(filter(lambda x: x.recorder[0] == p, next_recordings))
 
         log.info('checking took %2.2f seconds' % (t2 - t1))
 
         # send update
         self.send_update()
-        
+
         # check if something requested a new check while this function was
         # running. If so, call the check_recordings functions again
         self.check_running = False
@@ -272,6 +291,7 @@ class RecordServer(RPCServer):
                     continue
                 r.episode  = p.episode
                 r.subtitle = p.subtitle
+                r.description = p.description
                 log.info('added %s: %s (%s)' % (String(p.channel.id),
                                                 String(p.title), p.start))
                 f.add_data(r)
@@ -358,13 +378,22 @@ class RecordServer(RPCServer):
         except:
             log.exception('lost the recordings.fxd, send me the trace')
 
-            
+
     def __entity_update(self, entity):
         if not entity.present and entity in self.clients:
             log.info('lost client %s' % entity)
             self.clients.remove(entity)
 
-            
+        if not entity.matches(DAEMON):
+            return
+
+        if entity.present:
+            rec = external.Recorder(entity)
+            rec.server = self
+        else:
+            # FIXME
+            pass
+
     #
     # home.theatre.recording rpc commands
     #
