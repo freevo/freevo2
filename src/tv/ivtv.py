@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/24 00:57:30  rshortt
+# Remove framespergop setting for now.  We don't want to hardcode an NTSC
+# setting for anyone in PAL or SECAM land.
+#
 # Revision 1.5  2003/07/14 17:08:45  rshortt
 # Remove setting the framerate and rely on the card's initialized defaults instead.
 #
@@ -144,7 +148,8 @@ class IVTV(v4l2.Videodev):
         codec.dnr_type      = opts['dnr_type']
         # XXX: Ignore framerate for now, use the card's initialized default.
         # codec.framerate     = opts['framerate']
-        codec.framespergop  = opts['framespergop']
+        # XXX: Ignore framespergop for now, use the card's initialized default.
+        # codec.framespergop  = opts['framespergop']
         codec.gop_closure   = opts['gop_closure']
         codec.pulldown      = opts['pulldown']
         codec.stream_type   = opts['stream_type']
