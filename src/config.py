@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.123  2004/09/27 18:43:06  dischi
+# import input
+#
 # Revision 1.122  2004/09/12 21:20:57  mikeruelle
 # for non v4l2 speaking devices
 #
@@ -103,6 +106,7 @@ import setup_freevo
 import traceback
 import __builtin__
 import version
+import input
 
 if float(sys.version[0:3]) >= 2.3:
     import warnings
