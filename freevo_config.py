@@ -1041,11 +1041,17 @@ TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
 # if using record_daemon from cron
 REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
 
-# if using the persitant record_server
+# if using the persitant recordserver
 RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
 RECORD_SERVER_IP = 'localhost'
 RECORD_SERVER_PORT = 18001
+
+# start every recording X minutes before scheduled,
+# and stop X minutes after scheduled - default to zero minutes.
+# This must be a value in seconds although at the moment only has
+# the percision of one minute.
+RECORD_PADDING = 0 * 60
 
 if os.uname()[0] == 'FreeBSD':
   # FreeBSD's bsdbt848 TV driver doesn't support audio settings?
