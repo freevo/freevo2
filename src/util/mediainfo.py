@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/05/31 15:58:26  dischi
+# do not cache bad info
+#
 # Revision 1.45  2004/05/28 15:53:46  dischi
 # add chapters support
 #
@@ -649,7 +652,13 @@ def disc_info(media):
         mmdata = util.read_pickle(cachefile)
     else:
         mmdata = mmpython.parse(media.devicename)
-        util.save_pickle(mmdata, cachefile)
+        if not mmdata:
+            print '*****************************************'
+            print 'Error detecting the disc'
+            print 'Please contact the developers'
+            print '*****************************************'
+        else:
+            util.save_pickle(mmdata, cachefile)
 
     cachefile = os.path.join(cachedir, id + '.freevo')
 
