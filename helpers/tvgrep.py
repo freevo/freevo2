@@ -92,7 +92,10 @@ picklefile = config.XMLTV_FILE + '-0.pickled'
 # Ugly.
 
 if len(sys.argv) > 2:
-    ARG = '.*' + sys.argv[2] + '*.'
+    pattern = sys.argv[2]
+    for m in sys.argv[3:]:
+        pattern += '\ ' + m
+    ARG = '.*' + pattern + '*.'
     REGEXP = re.compile(ARG,re.IGNORECASE)
 else:
     print "Usage: " + str(sys.argv[0]) + " [-listing | -schedule] [TV PROGRAM]"

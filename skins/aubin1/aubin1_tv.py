@@ -9,6 +9,28 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/14 04:56:53  outlyer
+# Two small changes:
+#
+# o highlight an timeslot when a show is scheduled (in case you have multiple
+# pages of channels) so you can tell at a glance if a recording time is free.
+#
+# o allow multiple words to be specified with tvgrep. This should have been
+# obvious.
+#
+# Things like:
+#
+# tvgrep -listing family\ guy
+# or
+# tvgrep -listing family guy
+# or
+# tvgrep -listing "family guy"
+#
+# will all work.
+#
+# Before, it would have just searched for "family" which takes a long time and
+# produces too many results.
+#
 # Revision 1.1  2003/03/07 17:21:19  outlyer
 # Highlight shows being recorded in red; I would have put this in the skin, but
 # with the current flux around the XML format, I figured it would be better to
@@ -245,8 +267,21 @@ class Skin_TV:
             
             drawroundbox(x0, y, x1, y+ str_h_head + 2 * val.spacing,
                          val.head.bgcolor, 1, val.border_color, radius=val.head.radius)   
+            recnow = 0
+            for recprogs in recordingshows:
+                channel_id,start,stop = recprogs
 
-            DrawTextFramed(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
+                if (start >= to_listing[0][i+1]) and (stop <= (to_listing[0][i+1]+(col_time*60))):
+                    recnow = 1
+
+            if recnow:
+                stack = settings2.color
+                settings2.color = 0xffff66 #0xdd9999
+                DrawTextFramed(time.strftime("%I:%M %P",time.localtime(to_listing[0][i+1])),
+                           settings2, x0 + val.spacing, y + val.spacing, x1-x0, str_h_head)
+                settings2.color = stack
+            else:
+                DrawTextFramed(time.strftime("%I:%M %P",time.localtime(to_listing[0][i+1])),
                            settings2, x0 + val.spacing, y + val.spacing, x1-x0, str_h_head)
 
         # define start and stop time
@@ -395,7 +430,10 @@ class Skin_TV:
             
             vals = s.strip().split(',')
            
-            start_time = time.mktime(time.strptime(vals[0], '%Y-%m-%d %H:%M:%S'))
+            try: 
+	    	start_time = time.mktime(time.strptime(vals[0], '%Y-%m-%d %H:%M:%S'))
+	    except ValueError:
+	    	continue
             stop_time = start_time+int(vals[1])
             channel_id = vals[3]
             recordingshows.append((channel_id,start_time,stop_time))
