@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/24 05:08:11  rshortt
+# Differentiate between name and title.
+#
 # Revision 1.31  2004/02/24 04:42:03  rshortt
 # Add FavoriteItem class here but we could find a better place for them both.
 # One possability is merging the types in here, epg_types, and record_types
@@ -216,7 +219,7 @@ class FavoriteItem(Item):
     def __init__(self, parent, fav):
         Item.__init__(self, parent, skin_type='video')
         self.fav   = fav
-        self.name  = self.title = fav.name
+        self.name  = fav.name
         self.title = fav.title
 
         if fav.channel == 'ANY':
