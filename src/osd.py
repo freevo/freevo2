@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/01/31 02:09:00  krister
+# Changed the X11 display option to automatically select between xv,x11,etc.
+#
 # Revision 1.8  2003/01/24 04:48:59  krister
 # Changed keyboard volume +/- keys
 #
@@ -259,8 +262,7 @@ class OSD:
 
         self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
 
-        if ((config.CONF.display == 'x11' or config.CONF.display == 'xv') 
-            and config.START_FULLSCREEN_X == 1):
+        if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             pygame.display.toggle_fullscreen()
 
         help = ['z = Toggle Fullscreen']

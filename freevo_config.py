@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2003/01/31 02:08:59  krister
+# Changed the X11 display option to automatically select between xv,x11,etc.
+#
 # Revision 1.111  2003/01/30 02:49:28  krister
 # Moved VCR settings to freevo_config
 #
@@ -422,7 +425,11 @@ print 'Using MPlayer: %s' % MPLAYER_CMD
 MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 MPLAYER_AO_HWAC3_DEV = ''              # set this to an audio device which is
                                        # capable of hwac3
-MPLAYER_VO_DEV       = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer docs
+if CONF.display == 'x11':
+    MPLAYER_VO_DEV       = 'xmga,xv,x11,'  # X11 drivers in order of preference
+else:
+    MPLAYER_VO_DEV       = CONF.display    # e.g.: x11,mga,fbdev, see mplayer docs
+    
 MPLAYER_VO_DEV_OPTS  = ''	       # e.g.: ':some_var=vcal'
 
 DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
