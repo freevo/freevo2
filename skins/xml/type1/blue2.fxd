@@ -17,7 +17,7 @@
     </menu>
 
     <menu type="image">
-      <style image="image menu with info"/>
+      <style image="image menu with info" text="normal text style"/>
       <style text="normal text style"/>
     </menu>
 
