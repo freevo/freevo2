@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/12/30 15:30:56  dischi
+# IDENTIFY_MEDIA now sends the media as arg
+#
 # Revision 1.47  2003/12/29 22:09:38  dischi
 # move to new Item attributes
 #
@@ -17,24 +20,6 @@
 #
 # Revision 1.45  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
-#
-# Revision 1.44  2003/11/28 20:08:57  dischi
-# renamed some config variables
-#
-# Revision 1.43  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.42  2003/11/24 19:25:28  dischi
-# adjust to variable moving
-#
-# Revision 1.41  2003/11/22 20:36:04  dischi
-# use new vfs
-#
-# Revision 1.40  2003/11/09 16:17:32  dischi
-# fix mmpython info parsing for movies on disc
-#
-# Revision 1.39  2003/11/09 13:05:04  dischi
-# support for disc images without fxd file
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -69,6 +54,8 @@ import traceback
 import mmpython
 from struct import *
 import array
+import rc
+
 
 try:
     from CDROM import *
@@ -129,7 +116,7 @@ def init():
 
     # Remove the ROM_DRIVES member to make sure it is not used by
     # legacy code!
-    del config.ROM_DRIVES   # XXX Remove later
+    del config.ROM_DRIVES
     
     # Start identifymedia thread
     global im_thread
@@ -144,10 +131,14 @@ class autostart(plugin.DaemonPlugin):
     the main menu
     """
     def __init__(self):
+        """
+        load the plugin and start the thread
+        """
         plugin.DaemonPlugin.__init__(self)
         global im_thread
         if not im_thread:
             init()
+
             
     def eventhandler(self, event = None, menuw=None, arg=None):
         """
@@ -158,9 +149,9 @@ class autostart(plugin.DaemonPlugin):
 
         # if we are at the main menu and there is an IDENTIFY_MEDIA event,
         # try to autorun the media
-        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and im_thread.last_media and \
-           menuw and len(menuw.menustack) == 1:
-            media = im_thread.last_media
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and menuw and \
+               len(menuw.menustack) == 1 and not event.arg[1]:
+            media = event.arg[0]
             if media.info:
                 media.info.parent = menuw.menustack[0].selected
             if media.info and media.info.actions():
@@ -187,8 +178,10 @@ class rom_items(plugin.MainMenuPlugin):
     or most likely the video/audio/image/games main menu
     """
     def __init__(self):
+        """
+        load the plugin and start the thread
+        """
         plugin.MainMenuPlugin.__init__(self)
-        self.parent = None
         global im_thread
         if not im_thread:
             init()
@@ -197,19 +190,10 @@ class rom_items(plugin.MainMenuPlugin):
         """
         return the list of rom drives
         """
-        self.parent = parent
         items = []
         for media in config.REMOVABLE_MEDIA:
             if media.info:
-                # if this is a video item (e.g. DVD) and we are not in video
-                # mode, deactivate it
-                if media.info.type == 'video' and parent.display_type != 'video':
-                    m = Item(parent)
-                    m.type = media.info.type
-                    m.copy(media.info)
-                    m.media = media
-
-                elif parent.display_type == 'video' and media.videoinfo:
+                if parent.display_type == 'video' and media.videoinfo:
                     m = media.videoinfo
                     
                 else:
@@ -224,7 +208,6 @@ class rom_items(plugin.MainMenuPlugin):
                 m.media = media
                 media.info = m
 
-            # hack: now make self the parent to get the events
             m.parent = parent
             m.eventhandler_plugins.append(self.items_eventhandler)
             items.append(m)
@@ -264,14 +247,18 @@ class RemovableMedia:
         self.type      = 'empty_cdrom'
         self.cached   = False
 
+
     def is_tray_open(self):
+        """
+        return tray status
+        """
         return self.tray_open
 
 
     def move_tray(self, dir='toggle', notify=1):
-        """Move the tray. dir can be toggle/open/close
         """
-
+        Move the tray. dir can be toggle/open/close
+        """
         if dir == 'toggle':
             if self.is_tray_open():
                 dir = 'close'
@@ -345,18 +332,18 @@ class RemovableMedia:
 
     
     def mount(self):
-        """Mount the media
         """
-
+        Mount the media
+        """
         _debug_('Mounting disc in drive %s' % self.drivename,2)
         util.mount(self.mountdir, force=True)
         return
 
     
     def umount(self):
-        """Mount the media
         """
-
+        Mount the media
+        """
         _debug_('Unmounting disc in drive %s' % self.drivename,2)
         util.umount(self.mountdir)
         return
@@ -435,7 +422,7 @@ class Identify_Thread(threading.Thread):
             media.info = AudioDiskItem(disc_id, parent=None,
                                        devicename=media.devicename,
                                        display_type='audio')
-            media.type  = media.info.type
+            media.type = media.info.type
             media.info.handle_type = 'audio'
             media.info.media = media
             if data.title:
@@ -566,8 +553,8 @@ class Identify_Thread(threading.Thread):
                 show_name = ""
                 the_same  = 1
                 volumes   = ''
-                start_ep = 0
-                end_ep   = 0
+                start_ep  = 0
+                end_ep    = 0
 
                 mplayer_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
@@ -640,8 +627,6 @@ class Identify_Thread(threading.Thread):
             title = '%s [%s]' % (media.drivename, label)
 
 
-        if movie_info:
-            media.info.copy(movie_info)
         if title:
             media.info.name = title
         if image:
@@ -653,14 +638,14 @@ class Identify_Thread(threading.Thread):
             
         if len(mplayer_files) == 1:
             util.mount(media.mountdir)
-            media.videoinfo = VideoItem(mplayer_files[0], None)
-            util.umount(media.mountdir)
-            media.videoinfo.media = media
-            media.videoinfo.media_id = media.id
-            media.videoinfo.label = media.label
-            
             if movie_info:
-                media.videoinfo.copy(movie_info)
+                media.videoinfo = copy.deepcopy(movie_info)
+            else:
+                media.videoinfo = VideoItem(mplayer_files[0], None)
+            util.umount(media.mountdir)
+            media.videoinfo.media    = media
+            media.videoinfo.media_id = media.id
+            
             if title:
                 media.videoinfo.name = title
             if image:
@@ -675,6 +660,13 @@ class Identify_Thread(threading.Thread):
 
 
     def check_all(self):
+        """
+        check all drives
+        """
+        if rc.app():
+            # Some app is running, do not scan, it's not necessary
+            return
+        
         self.lock.acquire()
         for media in config.REMOVABLE_MEDIA:
             last_status = media.drive_status
@@ -683,20 +675,25 @@ class Identify_Thread(threading.Thread):
             if last_status != media.drive_status:
                 _debug_('MEDIA: Status=%s' % media.drive_status,2)
                 _debug_('Posting IDENTIFY_MEDIA event',2)
-                if last_status:
-                    self.last_media = media
-                rc.post_event(plugin.event('IDENTIFY_MEDIA'))
+                if last_status == None:
+                    rc.post_event(plugin.event('IDENTIFY_MEDIA', arg=(media, True)))
+                else:
+                    rc.post_event(plugin.event('IDENTIFY_MEDIA', arg=(media, False)))
         self.lock.release()
 
                 
     def __init__(self):
+        """
+        init the thread
+        """
         threading.Thread.__init__(self)
-        self.last_media = None          # last changed media
         self.lock = thread.allocate_lock()
 
         
     def run(self):
-
+        """
+        thread main function
+        """
         rebuild_file = '/tmp/freevo-rebuild-database'
         # Make sure the movie database is rebuilt at startup
         util.touch(rebuild_file)
