@@ -8,6 +8,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/06 20:04:27  rshortt
+# Change favorites to use tv_util.get_chan_displayname(prog) as
+# favorite.channel rather than channel_id.
+#
 # Revision 1.7  2003/05/22 00:10:16  rshortt
 # Getting rid of LD_PRELOAD.
 #
@@ -133,13 +137,15 @@ class RecordServer(xmlrpc.XMLRPC):
             if file_ver != TYPES_VERSION:
                 log.debug(('ScheduledRecordings version number %s is stale (new is %s), must ' +
                         'be reloaded') % (file_ver, TYPES_VERSION))
+                scheduledRecordings = None
             else:
                 if DEBUG:
                     log.debug('Got ScheduledRecordings (version %s).' % file_ver)
     
-        if scheduledRecordings == None:
+        if not scheduledRecordings:
             log.debug('GET: making a new ScheduledRecordings')
             scheduledRecordings = ScheduledRecordings()
+            self.saveScheduledRecordings(scheduledRecordings)
     
         log.debug('ScheduledRecordings has %s items.' % len(scheduledRecordings.programList))
     
@@ -356,7 +362,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
         fav.name = name
         fav.title = title
-        fav.channel_id = chan
+        fav.channel = chan
         fav.dow = dow
         fav.mod = mod
         fav.priority = priority
@@ -459,7 +465,8 @@ class RecordServer(xmlrpc.XMLRPC):
         for fav in favs.values():
     
             if prog.title == fav.title:    
-                if fav.channel_id == prog.channel_id or fav.channel_id == 'ANY':
+                if fav.channel == tv_util.get_chan_displayname(prog) \
+                   or fav.channel == 'ANY':
                     if fav.dow == dow or fav.dow == 'ANY':
                         if fav.mod == min_of_day or fav.mod == 'ANY':
                             return (TRUE, fav.name)

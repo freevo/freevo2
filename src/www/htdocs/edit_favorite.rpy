@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/06 20:04:26  rshortt
+# Change favorites to use tv_util.get_chan_displayname(prog) as
+# favorite.channel rather than channel_id.
+#
 # Revision 1.6  2003/05/22 21:33:23  outlyer
 # Lots of cosmetic changes:
 #
@@ -146,14 +150,14 @@ class EditFavoriteResource(FreevoResource):
         cell = '<input type="hidden" name="title" value="%s">%s' % (fav.title, fav.title)
         fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
 
-        cell = '\n<select name="chan" selected="%s">\n' % fav.channel_id
+        cell = '\n<select name="chan" selected="%s">\n' % fav.channel
         cell += '  <option value=ANY>ANY CHANNEL</option>\n'
 
         i=1
         for ch in guide.chan_list:
-            if ch.id == fav.channel_id:
+            if ch.displayname == fav.channel:
                 chan_index = i
-            cell += '  <option value="%s">%s</option>\n' % (ch.id, ch.id)
+            cell += '  <option value="%s">%s</option>\n' % (ch.displayname, ch.displayname)
             i = i +1
 
         cell += '</select>\n'
@@ -247,7 +251,7 @@ class EditFavoriteResource(FreevoResource):
 
         fv.res += '<script language="JavaScript">'
 
-        if fav.channel_id == 'ANY':
+        if fav.channel == 'ANY':
             fv.res += 'document.editfavorite.chan.options[0].selected=true'
         else:
             fv.res += 'document.editfavorite.chan.options[%s].selected=true' % chan_index

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/06 20:04:27  rshortt
+# Change favorites to use tv_util.get_chan_displayname(prog) as
+# favorite.channel rather than channel_id.
+#
 # Revision 1.1  2003/05/11 22:41:51  rshortt
 # Classes used by tv/recording apps.
 #
@@ -39,17 +43,12 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys
-import time, os, string
-# import config
-# import rec_interface 
-# from epg_types import TvProgram
-
-from twisted.spread import pb
+import sys, time, os, string
+import tv_util
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
-TYPES_VERSION = 1
+TYPES_VERSION = 2
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -152,9 +151,9 @@ class Favorite:
             self.title = prog.title
 
 	    if exactchan:
-                self.channel_id = prog.channel_id
+                self.channel = tv_util.get_chan_displayname(prog)
             else:
-                self.channel_id = 'ANY'
+                self.channel = 'ANY'
           
 	    if exactdow:
 	        lt = time.localtime(prog.start)
@@ -163,16 +162,14 @@ class Favorite:
                 self.dow = 'ANY'
           
 	    if exacttod:
-	        # TODO: translate the TOD from prog.start
 	        lt = time.localtime(prog.start)
-                # self.tod = '%s:%s' % (lt[3], lt[4])
                 self.mod = (lt[3]*60)+lt[4]
             else:
                 self.mod = 'ANY'
 
         else:
             self.title = 'NONE'
-            self.channel_id = 'NONE'
+            self.channel = 'NONE'
             self.dow = 'NONE'
             self.mod = 'NONE'
 

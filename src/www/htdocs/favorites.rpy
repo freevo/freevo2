@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/06 20:04:26  rshortt
+# Change favorites to use tv_util.get_chan_displayname(prog) as
+# favorite.channel rather than channel_id.
+#
 # Revision 1.5  2003/05/22 21:33:23  outlyer
 # Lots of cosmetic changes:
 #
@@ -141,7 +145,7 @@ class FavoritesResource(FreevoResource):
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell(fav.name, 'class="'+status+'" align="left" colspan="1"')
             fv.tableCell(fav.title, 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(fav.channel_id, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(fav.channel, 'class="'+status+'" align="left" colspan="1"')
 
             if fav.dow != 'ANY':
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
