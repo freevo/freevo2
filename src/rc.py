@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/07/24 00:12:05  rshortt
+# Network remote bugfix.
+#
 # Revision 1.19  2003/07/12 10:10:56  dischi
 # load osd only when needed
 #
@@ -228,7 +231,7 @@ class RemoteControl:
                     print 'Lost the connection'
                     self.conn.close()
                 else:
-                    return data
+                    return self.key_event_mapper(data)
             except:
                 # No data available
                 pass
