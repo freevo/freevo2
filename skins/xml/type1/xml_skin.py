@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/10/26 14:51:25  dischi
+# better location-finder of included files
+#
 # Revision 1.16  2002/10/24 04:31:44  gsbarbieri
 # Now it handle a new tag <head> into the <listing> tag from extendedmenu.
 #
@@ -681,12 +684,28 @@ class XMLSkin:
                         new_scale = scale * new_scale
                     elif scale:
                         new_scale = scale
-                        
-                    if include:
-                        print "load %s with scale %s" % (include, new_scale)
-                        self.load(include + ".xml", copy_content, new_scale)
 
-                    self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
+                    if include:
+                        # locate the skin file we need
+                        if os.path.isfile(include+".xml"):
+                            include += ".xml"
+
+                        in2 = "skins/xml/type1/%s" % os.path.basename(include)
+                        if os.path.isfile(in2):
+                            include = in2
+
+                        if os.path.isfile(in2+".xml"):
+                            include = "%s.xml" % in2
+
+                        if not os.path.isfile(include):
+                            print "can't find skin file %s" % include
+
+                        else:
+                            print "load %s with scale %s" % (include, new_scale)
+                            self.load(include, copy_content, new_scale)
+
+                    self.parse(freevo_type, scale, os.path.dirname(file),
+                               copy_content)
 
         except:
             print "ERROR: XML file corrupt"
