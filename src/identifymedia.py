@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/17 21:14:02  dischi
+# Bugfix. CD detection now works again
+#
 # Revision 1.15  2003/02/17 06:03:58  krister
 # Disable CDDB is the runtime is used, there's some problem with that right now.
 #
@@ -289,10 +292,12 @@ class Identify_Thread(threading.Thread):
             print 'identifymedia: mp3="%s"' % mp3_files
             print 'identifymedia: image="%s"' % image_files
             
-        info = None
-
+        media.info = DirItem(media.mountdir, None)
+        
         # Is this a movie disc?
         if mplayer_files and not mp3_files:
+            media.info.handle_type = 'video'
+
             # try to find out if it is a series cd
             if not title:
                 show_name = ""
@@ -314,40 +319,47 @@ class Identify_Thread(threading.Thread):
                         image = (config.TV_SHOW_IMAGES + show_name + ".jpg").lower()
                     title = show_name + ' ('+ volumes + ')'
                 elif not show_name:
-                    if os.path.isfile(config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.png'):
-                        image = config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.png'
-                    elif os.path.isfile(config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.jpg'):
-                        image = config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.jpg'
+                    if os.path.isfile(config.COVER_DIR+\
+                                      os.path.splitext(os.path.basename(movie))[0]+'.png'):
+                        image = config.COVER_DIR+\
+                                os.path.splitext(os.path.basename(movie))[0]+'.png'
+                    elif os.path.isfile(config.COVER_DIR+\
+                                        os.path.splitext(os.path.basename(movie))[0]+'.jpg'):
+                        image = config.COVER_DIR+\
+                                os.path.splitext(os.path.basename(movie))[0]+'.jpg'
                     title = os.path.splitext(os.path.basename(movie))[0]
             # nothing found, give up: return the label
             if not title:
                 title = label
 
+
         # XXX add more intelligence to cds with audio files
-        if (not mplayer_files) and mp3_files:
-            title = "AUDIO" , '%s [%s]' % (media.drivename, label)
+        elif (not mplayer_files) and mp3_files:
+            media.info.handle_type = 'audio'
+            title = '%s [%s]' % (media.drivename, label)
 
         # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
-            title = "IMAGES" , '%s [%s]' % (media.drivename, label)
+            media.info.handle_type = 'image'
+            title = '%s [%s]' % (media.drivename, label)
 
         # Mixed media?
         elif mplayer_files or image_files or mp3_files:
-            title = "DATA" , '%s [%s]' % (media.drivename, label)
+            media.info.handle_type = None
+            title = '%s [%s]' % (media.drivename, label)
         
         # Strange, no useable files
         else:
-            title = "DATA" , '%s [%s]' % (media.drivename, label)
+            media.info.handle_type = None
+            title = '%s [%s]' % (media.drivename, label)
 
-        media.info = DirItem(media.mountdir, None)
-        
+
         if movie_info:
             media.info.copy(movie_info)
         if title:
             media.info.name = title
         if image:
             media.info.image = image
-            media.info.handle_type = 'video'
         media.info.media = media
         return
 
