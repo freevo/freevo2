@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-27 21:12+0100\n"
+"POT-Creation-Date: 2003-11-10 19:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,12 +15,16 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: audio/audiodiskitem.py:60 audio/plugins/cdbackup.py:473
+#: audio/audiodiskitem.py:67 audio/plugins/cdbackup.py:489
 msgid "Unknown CD Album"
 msgstr ""
 
-#: audio/audiodiskitem.py:95 directory.py:454 image/plugins/gphoto.py:155
-msgid "Browse directory"
+#: audio/audiodiskitem.py:102
+msgid "Browse disc"
+msgstr ""
+
+#: audio/audiodiskitem.py:149
+msgid "Data files on disc"
 msgstr ""
 
 #: audio/xmms.py:156 games/game.py:105
@@ -28,112 +32,112 @@ msgstr ""
 msgid "File \"%s\" not found!"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:220
+#: audio/plugins/cdbackup.py:236
 msgid "Show CD ripping status"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:225
+#: audio/plugins/cdbackup.py:241
 msgid "Rip the CD to the hard drive"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:226
+#: audio/plugins/cdbackup.py:242
 msgid "Get CDs available for ripping"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:228 audio/plugins/cdbackup.py:538
-#: audio/plugins/mplayer.py:237 audio/plugins/xine.py:77
-#: audio/plugins/xine.py:101 plugins/lcd.py:716 plugins/lcd.py:913
-#: plugins/lcd.py:924 plugins/lcd.py:935 video/plugins/mplayer.py:586
-#: video/plugins/mplayer.py:640 video/plugins/xine.py:100
-#: video/plugins/xine.py:131 skins/main/info_area.py:135
+#: audio/plugins/cdbackup.py:244 audio/plugins/cdbackup.py:558
+#: audio/plugins/mplayer.py:244 audio/plugins/xine.py:85
+#: audio/plugins/xine.py:109 plugins/lcd.py:716 plugins/lcd.py:913
+#: plugins/lcd.py:924 plugins/lcd.py:935 skins/main/info_area.py:135
+#: video/plugins/mplayer.py:429 video/plugins/mplayer.py:483
+#: video/plugins/xine.py:106 video/plugins/xine.py:137
 msgid "ERROR"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:228
+#: audio/plugins/cdbackup.py:244
 msgid "Item is not an Audio CD"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:235
+#: audio/plugins/cdbackup.py:251
 #, python-format
 msgid ""
 "Ripping in progress\n"
 "Track %d of %d"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:250
+#: audio/plugins/cdbackup.py:266
 msgid "Backup CD to hard drive in mp3 format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:253
+#: audio/plugins/cdbackup.py:269
 msgid "Backup CD to hard drive in Ogg format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:256
+#: audio/plugins/cdbackup.py:272
 msgid "Backup CD to hard drive in FLAC format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:258
+#: audio/plugins/cdbackup.py:274
 msgid "Backup CD to hard drive in wav format"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:261
+#: audio/plugins/cdbackup.py:277
 msgid "CD Backup"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:269
+#: audio/plugins/cdbackup.py:285
 msgid "Ripping started"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:336
+#: audio/plugins/cdbackup.py:352
 #, python-format
 msgid "Directory %s already exists"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:469 audio/plugins/coversearch.py:173
-#: audio/plugins/coversearch.py:181 audio/plugins/coversearch.py:189
+#: audio/plugins/cdbackup.py:485 audio/plugins/coversearch.py:176
+#: audio/plugins/coversearch.py:184 audio/plugins/coversearch.py:192
 #: plugins/lcd.py:910 plugins/lcd.py:921 plugins/lcd.py:934
-#: video/plugins/xine.py:134
+#: video/plugins/xine.py:140
 msgid "WARNING"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:469
+#: audio/plugins/cdbackup.py:485
 msgid "No CDDB data available to mmpython"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:472
+#: audio/plugins/cdbackup.py:488
 msgid "Unknown Artist"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:472 audio/plugins/cdbackup.py:473
+#: audio/plugins/cdbackup.py:488 audio/plugins/cdbackup.py:489
 msgid "RENAME"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:474
+#: audio/plugins/cdbackup.py:490
 msgid "Other"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:477
+#: audio/plugins/cdbackup.py:493
 msgid ""
 "CD info not found!\n"
 "Must manually rename files\n"
 "when finished ripping"
 msgstr ""
 
-#: audio/plugins/cdbackup.py:538
+#: audio/plugins/cdbackup.py:558
 msgid "Problem trying to call:"
 msgstr ""
 
-#: audio/plugins/coversearch.py:143
+#: audio/plugins/coversearch.py:146
 msgid ""
 "To search for covers you need an Amazon.com Web Services\n"
 "license key. You can get yours from:\n"
 msgstr ""
 
-#: audio/plugins/coversearch.py:169
+#: audio/plugins/coversearch.py:172
 msgid "Find a cover for this music"
 msgstr ""
 
-#: audio/plugins/coversearch.py:173 audio/plugins/coversearch.py:181
+#: audio/plugins/coversearch.py:176 audio/plugins/coversearch.py:184
 #, python-format
 msgid ""
 "Plugin 'coversearch' was disabled for this item! 'coversearch' needs an item "
@@ -142,36 +146,36 @@ msgid ""
 "Info. Maybe you must fix this file (%s) tag?"
 msgstr ""
 
-#: audio/plugins/coversearch.py:189
+#: audio/plugins/coversearch.py:192
 msgid "Unknown CD, cover searching is disabled"
 msgstr ""
 
-#: audio/plugins/coversearch.py:197
+#: audio/plugins/coversearch.py:200
 msgid "searching Amazon..."
 msgstr ""
 
-#: audio/plugins/coversearch.py:214
+#: audio/plugins/coversearch.py:217
 #, python-format
 msgid "No matches for %(artist)s - %(album)s"
 msgstr ""
 
-#: audio/plugins/coversearch.py:222
+#: audio/plugins/coversearch.py:225
 msgid "The cover provider returned bad information."
 msgstr ""
 
-#: audio/plugins/coversearch.py:259 audio/plugins/coversearch.py:269
+#: audio/plugins/coversearch.py:262 audio/plugins/coversearch.py:272
 msgid "small"
 msgstr ""
 
-#: audio/plugins/coversearch.py:278
+#: audio/plugins/coversearch.py:281
 msgid "Cover Search Results"
 msgstr ""
 
-#: audio/plugins/coversearch.py:282
+#: audio/plugins/coversearch.py:285
 msgid "No covers available from Amazon"
 msgstr ""
 
-#: audio/plugins/coversearch.py:296 video/plugins/imdb.py:224
+#: audio/plugins/coversearch.py:298 video/plugins/imdb.py:224
 msgid "getting data..."
 msgstr ""
 
@@ -179,29 +183,29 @@ msgstr ""
 msgid "Show player"
 msgstr ""
 
-#: audio/plugins/mplayer.py:141
+#: audio/plugins/mplayer.py:145
 #, python-format
 msgid ""
 "%s\n"
 "not found!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:168
+#: audio/plugins/mplayer.py:175
 msgid "Invalid audio file"
 msgstr ""
 
-#: audio/plugins/mplayer.py:237 video/plugins/mplayer.py:586
+#: audio/plugins/mplayer.py:244 video/plugins/mplayer.py:429
 #, python-format
 msgid "Cannot open \"%s\" and \"%s\" for MPlayer logging!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:240
+#: audio/plugins/mplayer.py:247
 msgid ""
 "Please set MPLAYER_DEBUG=0 in local_conf.py, or start Freevo from a "
 "directory that is writeable!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:244 video/plugins/mplayer.py:583
+#: audio/plugins/mplayer.py:251 video/plugins/mplayer.py:426
 #, python-format
 msgid "MPlayer logging to \"%s\" and \"%s\""
 msgstr ""
@@ -282,151 +286,155 @@ msgstr ""
 msgid "Webradio Genre List"
 msgstr ""
 
-#: audio/plugins/xine.py:77
+#: audio/plugins/xine.py:85
 msgid "'fbxine' not found, plugin 'xine' deactivated"
 msgstr ""
 
-#: audio/plugins/xine.py:101 video/plugins/xine.py:131
+#: audio/plugins/xine.py:109 video/plugins/xine.py:137
 msgid "'fbxine' version too old, plugin 'xine' deactivated"
 msgstr ""
 
-#: audio/plugins/xine.py:102 video/plugins/xine.py:132
+#: audio/plugins/xine.py:110 video/plugins/xine.py:138
 #, python-format
 msgid "You need software %s"
 msgstr ""
 
-#: directory.py:136
+#: directory.py:142
 msgid "Movie Playlists"
 msgstr ""
 
-#: directory.py:137
+#: directory.py:143
 msgid "Use automatic playlist for movie items."
 msgstr ""
 
-#: directory.py:139
+#: directory.py:145
 msgid "Directory Sort By Date"
 msgstr ""
 
-#: directory.py:140
+#: directory.py:146
 msgid "Sort directory by date and not by name."
 msgstr ""
 
-#: directory.py:142
+#: directory.py:148
 msgid "Directory Autoplay Single Item"
 msgstr ""
 
-#: directory.py:143
+#: directory.py:149
 msgid "Don't show directory if only one item exists and auto-select the item."
 msgstr ""
 
-#: directory.py:146
+#: directory.py:152
 msgid "Audio Random Playlist"
 msgstr ""
 
-#: directory.py:147
+#: directory.py:153
 msgid "Show radom playlist item for audio menus."
 msgstr ""
 
-#: directory.py:149
+#: directory.py:155
 msgid "Force Skin Layout"
 msgstr ""
 
-#: directory.py:150
+#: directory.py:156
 msgid ""
 "Force skin to a specific layout. This option doesn't work with all skins and "
 "the result may differ based on the skin."
 msgstr ""
 
-#: directory.py:153
+#: directory.py:159
 msgid "Directory Smart Sort"
 msgstr ""
 
-#: directory.py:154
+#: directory.py:160
 msgid "Use a smarter way to sort the items."
 msgstr ""
 
-#: directory.py:156
+#: directory.py:162
 msgid "Use MediaID Tag Names"
 msgstr ""
 
-#: directory.py:157
+#: directory.py:163
 msgid "Use the names from the media files tags as display name."
 msgstr ""
 
-#: directory.py:159
+#: directory.py:165
 msgid "Directory Reverse Sort"
 msgstr ""
 
-#: directory.py:160
+#: directory.py:166
 msgid "Show the items in the list in reverse order."
 msgstr ""
 
-#: directory.py:429
+#: directory.py:436
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr ""
 
-#: directory.py:430
+#: directory.py:437
 msgid "Directory"
 msgstr ""
 
-#: directory.py:457
+#: directory.py:461 image/plugins/gphoto.py:158
+msgid "Browse directory"
+msgstr ""
+
+#: directory.py:464
 msgid "Random play all items"
 msgstr ""
 
-#: directory.py:459
+#: directory.py:466
 msgid "Recursive random play all items"
 msgstr ""
 
-#: directory.py:461
+#: directory.py:468
 msgid "Recursive play all items"
 msgstr ""
 
-#: directory.py:463
+#: directory.py:470
 msgid "Configure directory"
 msgstr ""
 
-#: directory.py:486
+#: directory.py:493
 msgid "Enter Password"
 msgstr ""
 
-#: directory.py:511
+#: directory.py:518
 msgid "Password incorrect"
 msgstr ""
 
-#: directory.py:555
+#: directory.py:562
 msgid "Scanning disc, be patient..."
 msgstr ""
 
-#: directory.py:557
+#: directory.py:564
 msgid "Scanning directory, be patient..."
 msgstr ""
 
-#: directory.py:875 directory.py:913
+#: directory.py:882 directory.py:920
 msgid "on"
 msgstr ""
 
-#: directory.py:877 directory.py:880 directory.py:915 directory.py:918
+#: directory.py:884 directory.py:887 directory.py:922 directory.py:925
 msgid "off"
 msgstr ""
 
-#: directory.py:882 directory.py:920
+#: directory.py:889 directory.py:927
 msgid "auto"
 msgstr ""
 
-#: directory.py:924
+#: directory.py:931
 msgid "Configure"
 msgstr ""
 
-#: main.py:134
+#: main.py:125
 msgid "shutting down..."
 msgstr ""
 
-#: main.py:250
+#: main.py:235
 msgid "Freevo Main Menu"
 msgstr ""
 
-#: main.py:365
+#: main.py:349
 #, python-format
 msgid ""
 "Event '%s' crashed\n"
@@ -443,23 +451,23 @@ msgstr ""
 msgid "No action defined for this choice!"
 msgstr ""
 
-#: osd.py:417
+#: osd.py:423
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:418
+#: osd.py:424
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:419
+#: osd.py:425
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:420
+#: osd.py:426
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:421
+#: osd.py:427
 msgid "h = Help"
 msgstr ""
 
@@ -472,8 +480,8 @@ msgstr ""
 msgid "Random Playlist"
 msgstr ""
 
-#: playlist.py:255 playlist.py:259 playlist.py:367 video/configure.py:178
-#: video/videoitem.py:290
+#: playlist.py:255 playlist.py:259 playlist.py:367 video/configure.py:181
+#: video/videoitem.py:293
 msgid "Play"
 msgstr ""
 
@@ -489,7 +497,7 @@ msgstr ""
 msgid "Generating MAME cache, please wait."
 msgstr ""
 
-#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:174
+#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:194
 msgid "OK"
 msgstr ""
 
@@ -497,7 +505,7 @@ msgstr ""
 msgid "CANCEL"
 msgstr ""
 
-#: image/plugins/gphoto.py:119 image/imageitem.py:110
+#: image/plugins/gphoto.py:122 image/imageitem.py:110
 msgid "View Image"
 msgstr ""
 
@@ -520,53 +528,129 @@ msgstr ""
 msgid "No information available"
 msgstr ""
 
-#: plugins/commands.py:159
+#: plugins/idlebar/system.py:116
+#, python-format
+msgid "%iM"
+msgstr ""
+
+#: plugins/idlebar/system.py:141
+#, python-format
+msgid "%s%%"
+msgstr ""
+
+#: plugins/base.py:81 plugins/base.py:84
+msgid "Shutdown Freevo"
+msgstr ""
+
+#: plugins/base.py:82 plugins/base.py:85
+msgid "Shutdown system"
+msgstr ""
+
+#: plugins/base.py:96
+msgid "Do you really want to shut down Freevo?"
+msgstr ""
+
+#: plugins/base.py:105
+msgid "Do you really want to shut down the system?"
+msgstr ""
+
+#: plugins/commands.py:179
 msgid "Command finished"
 msgstr ""
 
-#: plugins/commands.py:175
+#: plugins/commands.py:196
 msgid "Show Stderr"
 msgstr ""
 
-#: plugins/commands.py:176
+#: plugins/commands.py:198
 msgid "Show Stdout"
 msgstr ""
 
-#: plugins/commands.py:190
+#: plugins/commands.py:214
 msgid "Stdout File"
 msgstr ""
 
-#: plugins/commands.py:194
+#: plugins/commands.py:218
 msgid "Stderr File"
 msgstr ""
 
-#: plugins/commands.py:248
+#: plugins/commands.py:279
 msgid "Run Command"
 msgstr ""
 
-#: plugins/commands.py:257
+#: plugins/commands.py:288
 msgid "Running Command..."
 msgstr ""
 
-#: plugins/commands.py:271
+#: plugins/commands.py:310
 msgid "Command Failed"
 msgstr ""
 
-#: plugins/commands.py:274
+#: plugins/commands.py:313
 msgid "Command Completed"
 msgstr ""
 
-#: plugins/commands.py:299
+#: plugins/commands.py:339
 msgid "No Commands found"
 msgstr ""
 
-#: plugins/commands.py:300 plugins/commands.py:326
+#: plugins/commands.py:341 plugins/commands.py:368
 msgid "Commands"
 msgstr ""
 
 #: plugins/df.py:73
 #, python-format
 msgid "%i free of %i Mb total"
+msgstr ""
+
+#: plugins/file_ops.py:89
+msgid "Delete file"
+msgstr ""
+
+#: plugins/file_ops.py:91
+msgid "Delete info"
+msgstr ""
+
+#: plugins/file_ops.py:97
+#, python-format
+msgid ""
+"Do you wish to delete\n"
+" '%s'?"
+msgstr ""
+
+#: plugins/file_ops.py:102
+#, python-format
+msgid ""
+"Delete info about\n"
+" '%s'?"
+msgstr ""
+
+#: plugins/headlines.py:120 plugins/headlines.py:287
+msgid "Headlines"
+msgstr ""
+
+#: plugins/headlines.py:210
+msgid "Show Sites Headlines"
+msgstr ""
+
+#: plugins/headlines.py:232
+msgid "Fetching headlines..."
+msgstr ""
+
+#: plugins/headlines.py:285
+msgid "No Headlines found"
+msgstr ""
+
+#: plugins/headlines.py:302 plugins/headlines.py:316
+msgid "Headlines Sites"
+msgstr ""
+
+#: plugins/headlines.py:314
+msgid "No Headlines Sites found"
+msgstr ""
+
+#: plugins/icecastchanger.py:77
+msgid "Set as icecast playlist"
 msgstr ""
 
 #: plugins/lcd.py:118 plugins/lcd.py:126
@@ -753,115 +837,39 @@ msgstr ""
 msgid "%s Main Menu"
 msgstr ""
 
-#: plugins/headlines.py:117 plugins/headlines.py:283
-msgid "Headlines"
-msgstr ""
-
-#: plugins/headlines.py:206
-msgid "Show Sites Headlines"
-msgstr ""
-
-#: plugins/headlines.py:228
-msgid "Fetching headlines..."
-msgstr ""
-
-#: plugins/headlines.py:281
-msgid "No Headlines found"
-msgstr ""
-
-#: plugins/headlines.py:298 plugins/headlines.py:312
-msgid "Headlines Sites"
-msgstr ""
-
-#: plugins/headlines.py:310
-msgid "No Headlines Sites found"
-msgstr ""
-
-#: plugins/icecastchanger.py:77
-msgid "Set as icecast playlist"
-msgstr ""
-
-#: plugins/rom_drives.py:260
+#: plugins/rom_drives.py:269
 #, python-format
 msgid "Drive %s (no disc)"
 msgstr ""
 
-#: plugins/rom_drives.py:323
+#: plugins/rom_drives.py:332
 #, python-format
 msgid "Ejecting disc in drive %s"
 msgstr ""
 
-#: plugins/rom_drives.py:356
+#: plugins/rom_drives.py:365
 #, python-format
 msgid "Reading disc in drive %s"
 msgstr ""
 
-#: plugins/file_ops.py:89
-msgid "Delete file"
+#: skins/main/listing_area.py:264
+msgid "This directory is empty"
 msgstr ""
 
-#: plugins/file_ops.py:91
-msgid "Delete info"
+#: skins/main/main.py:163
+msgid "TV GUIDE"
 msgstr ""
 
-#: plugins/file_ops.py:97
-#, python-format
-msgid ""
-"Do you wish to delete\n"
-" '%s'?"
+#: skins/main/main.py:296
+msgid "Starting Freevo, please wait ..."
 msgstr ""
 
-#: plugins/file_ops.py:102
-#, python-format
-msgid ""
-"Delete info about\n"
-" '%s'?"
+#: skins/main/main.py:556 skins/main/main.py:628
+msgid "INTERNAL ERROR, NO MENU!"
 msgstr ""
 
-#: plugins/idlebar/system.py:103
-#, python-format
-msgid "%iM"
-msgstr ""
-
-#: plugins/idlebar/system.py:128
-#, python-format
-msgid "%s%%"
-msgstr ""
-
-#: plugins/base.py:71
-msgid "Shutdown Freevo"
-msgstr ""
-
-#: plugins/base.py:72
-msgid "Shutdown system"
-msgstr ""
-
-#: tv/record_schedule.py:98
-msgid "View Recording Schedule"
-msgstr ""
-
-#: tv/record_schedule.py:100
-msgid "Delete Scheduled Item"
-msgstr ""
-
-#: tv/record_schedule.py:102
-msgid "RECORDING SCHEDULE"
-msgstr ""
-
-#: tv/record_schedule.py:175
-msgid "VIEW RECORDING SCHEDULE"
-msgstr ""
-
-#: tv/record_schedule.py:178
-msgid "DELETE SCHEDULED ITEM"
-msgstr ""
-
-#: tv/record_schedule.py:182
-msgid "All Currently Recording Items Have Been Killed!"
-msgstr ""
-
-#: tv/tvguide.py:77 tv/tvguide.py:525 tv/tvguide.py:527
-#: skins/main/tvlisting_area.py:367
+#: skins/main/tvlisting_area.py:367 tv/tvguide.py:77 tv/tvguide.py:525
+#: tv/tvguide.py:527
 msgid "This channel has no data loaded"
 msgstr ""
 
@@ -873,36 +881,40 @@ msgstr ""
 msgid "TV Guide is corrupt!"
 msgstr ""
 
-#: tv/tvmenu.py:147 tv/tvmenu.py:155
+#: tv/tvmenu.py:150 tv/tvmenu.py:158
 #, python-format
 msgid "Could not find TV channel %s"
 msgstr ""
 
-#: tv/tvmenu.py:180
+#: tv/tvmenu.py:183
 msgid "TV Guide"
 msgstr ""
 
-#: tv/tvmenu.py:181
+#: tv/tvmenu.py:185
+msgid "View VCR Input"
+msgstr ""
+
+#: tv/tvmenu.py:186
 msgid "Recorded Shows"
 msgstr ""
 
-#: tv/tvmenu.py:183
+#: tv/tvmenu.py:188
 msgid "Scheduled Recordings"
 msgstr ""
 
-#: tv/tvmenu.py:185
+#: tv/tvmenu.py:190
 msgid "Search Guide"
 msgstr ""
 
-#: tv/tvmenu.py:188
+#: tv/tvmenu.py:193
 msgid "TV Main Menu"
 msgstr ""
 
-#: tv/tvmenu.py:224
+#: tv/tvmenu.py:229
 msgid "The list of TV channels is invalid!\n"
 msgstr ""
 
-#: tv/tvmenu.py:225
+#: tv/tvmenu.py:230
 msgid "Please check the config file."
 msgstr ""
 
@@ -952,11 +964,11 @@ msgstr ""
 msgid "There is no IMDB information for this file."
 msgstr ""
 
-#: video/plugins/linkbrowser.py:155
+#: video/plugins/linkbrowser.py:158
 msgid "Downloading link list..."
 msgstr ""
 
-#: video/plugins/linkbrowser.py:162
+#: video/plugins/linkbrowser.py:165
 #, python-format
 msgid "Failed to download %s"
 msgstr ""
@@ -966,143 +978,127 @@ msgstr ""
 msgid "Move to [%s]"
 msgstr ""
 
-#: video/plugins/mplayer.py:640
+#: video/plugins/mplayer.py:483
 msgid "unknow error while playing file"
 msgstr ""
 
-#: video/plugins/xine.py:100
+#: video/plugins/xine.py:106
 msgid "'XINE_COMMAND' not defined, plugin 'xine' deactivated"
 msgstr ""
 
-#: video/plugins/xine.py:101
+#: video/plugins/xine.py:107
 msgid "please check the xine section in freevo_config.py"
 msgstr ""
 
-#: video/plugins/xine.py:134
+#: video/plugins/xine.py:140
 msgid "'xine' version too old, plugin in fallback mode"
 msgstr ""
 
-#: video/plugins/xine.py:135
+#: video/plugins/xine.py:141
 #, python-format
 msgid "You need %s to use all features of the '%s' plugin"
 msgstr ""
 
-#: video/configure.py:83
+#: video/configure.py:86
 msgid "Audio Menu"
 msgstr ""
 
-#: video/configure.py:99
+#: video/configure.py:102
 msgid "no subtitles"
 msgstr ""
 
-#: video/configure.py:102
+#: video/configure.py:105
 msgid "Subtitle Menu"
 msgstr ""
 
-#: video/configure.py:118
+#: video/configure.py:121
 #, python-format
 msgid "Play chapter %s"
 msgstr ""
 
-#: video/configure.py:120
+#: video/configure.py:123
 msgid "Chapter Menu"
 msgstr ""
 
-#: video/configure.py:147
+#: video/configure.py:150
 #, python-format
 msgid "Turn off %s"
 msgstr ""
 
-#: video/configure.py:148
+#: video/configure.py:151
 #, python-format
 msgid "Turn on %s"
 msgstr ""
 
-#: video/configure.py:163
+#: video/configure.py:166
 msgid "Audio selection"
 msgstr ""
 
-#: video/configure.py:165
+#: video/configure.py:168
 msgid "Subtitle selection"
 msgstr ""
 
-#: video/configure.py:168
+#: video/configure.py:171
 msgid "Chapter selection"
 msgstr ""
 
-#: video/configure.py:170
+#: video/configure.py:173
 msgid "deinterlacing"
 msgstr ""
 
-#: video/configure.py:179
+#: video/configure.py:182
 msgid "Config Menu"
 msgstr ""
 
-#: video/videoitem.py:294
+#: video/videoitem.py:297
 msgid "Play DVD"
 msgstr ""
 
-#: video/videoitem.py:295 video/videoitem.py:297
+#: video/videoitem.py:298 video/videoitem.py:300
 msgid "DVD title list"
 msgstr ""
 
-#: video/videoitem.py:298 video/videoitem.py:306
+#: video/videoitem.py:301 video/videoitem.py:309
 msgid "Play default track"
 msgstr ""
 
-#: video/videoitem.py:302
+#: video/videoitem.py:305
 msgid "Play VCD"
 msgstr ""
 
-#: video/videoitem.py:303 video/videoitem.py:305
+#: video/videoitem.py:306 video/videoitem.py:308
 msgid "VCD title list"
 msgstr ""
 
-#: video/videoitem.py:311
+#: video/videoitem.py:314
 msgid "Play with maximum cache"
 msgstr ""
 
-#: video/videoitem.py:314
+#: video/videoitem.py:317
 msgid "Show variants"
 msgstr ""
 
-#: video/videoitem.py:395
+#: video/videoitem.py:398
 msgid "Wait while detecting media..."
 msgstr ""
 
-#: video/videoitem.py:417
+#: video/videoitem.py:420
 #, python-format
 msgid "Media not found for file \"%s\".\n"
 msgstr ""
 
-#: video/videoitem.py:418
+#: video/videoitem.py:421
 msgid "Please insert the media."
 msgstr ""
 
-#: video/videoitem.py:434
+#: video/videoitem.py:437
 #, python-format
 msgid "Media not found for %s track %s"
 msgstr ""
 
-#: video/videoitem.py:554
+#: video/videoitem.py:558
 #, python-format
 msgid "Play Title %s"
-msgstr ""
-
-#: skins/main/main.py:160
-msgid "TV GUIDE"
-msgstr ""
-
-#: skins/main/main.py:290
-msgid "Starting Freevo, please wait ..."
-msgstr ""
-
-#: skins/main/main.py:550 skins/main/main.py:622
-msgid "INTERNAL ERROR, NO MENU!"
-msgstr ""
-
-#: skins/main/listing_area.py:264
-msgid "This directory is empty"
 msgstr ""
 # Manualy added from fxd skin files
 msgid "TV"
