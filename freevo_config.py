@@ -22,6 +22,7 @@
 # -----------------------------------------------------------------------
 #
 # Changes:
+#    o Generate ROM_DRIVES from /etc/fstab on startup
 #    o Added FREEVO_CONF_VERSION and LOCAL_CONF_VERSION to keep the three
 #      different files on sync
 #
@@ -99,9 +100,15 @@ START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or
 # Format [ ('mountdir1', 'devicename1', 'displayed name1'),
 #          ('mountdir2', 'devicename2', 'displayed name2'), ...]
 #
-ROM_DRIVES = [ ('/mnt/cdrom', '/dev/cdrom', 'CD-1'),
-               ('/mnt/dvd', '/dev/dvd', 'CD-2') ]
 
+ROM_DRIVES = []
+
+if os.path.isfile('/etc/fstab'):
+    for line in open('/etc/fstab').readlines():
+        match = re.compile('^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I).match(line)
+        if match:
+            ROM_DRIVES += [ ( match.group(2), match.group(1),
+                              'CD-%s' % (len(ROM_DRIVES)+1)) ]
 
 ROM_SPEED = 0                         # try to set the drive speed of the rom
                                       #drive a good value for playing movies
