@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2004/01/01 17:42:23  dischi
+# add FileInformation
+#
 # Revision 1.80  2003/12/31 16:40:24  dischi
 # small speed enhancements
 #
@@ -77,7 +80,7 @@ import skin
 import plugin
 import osd
 
-from item import Item
+from item import Item, FileInformation
 from playlist import Playlist
 from event import *
 from gui import PasswordInputBox, AlertBox, ProgressBox
@@ -136,6 +139,12 @@ class DirItem(Playlist):
         self.menu  = None
         self.name  = os.path.basename(directory)
 
+        # store FileInformation for moving/copying
+        self.files = FileInformation()
+        if self.media:
+            self.files.read_only = True
+        self.files.append(directory)
+        
         if name:
             self.name = name
         
@@ -145,7 +154,7 @@ class DirItem(Playlist):
         self.info          = {}
         self.mountpoint    = None
         self.skin_settings = False
-
+        
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args
 
