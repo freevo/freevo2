@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2002/08/22 04:46:03  krister
+# Select between the freevo_apps mplayer and a generic one from the path.
+#
 # Revision 1.53  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -239,8 +242,13 @@ if CONF.display == 'mga':
 # mplayer section:
 # ======================================================================
 
-
-MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
+if os.path.isfile('../freevo_apps/mplayer/mplayer'):
+    MPLAYER_CMD = '../freevo_apps/mplayer/mplayer' # Binary dist
+    print 'Using ../freevo_apps/mplayer'
+else:
+    MPLAYER_CMD         = 'mplayer'       # Lets hope it is in the path
+    print 'Using system MPlayer'
+    
 MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 MPLAYER_VO_DEV      = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer docs
 
