@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/05 20:07:08  dischi
+# don't show tv guide item when there are no channels
+#
 # Revision 1.4  2003/09/05 02:06:36  rshortt
 # renaming tv.py to tvmenu.py because it is already in the 'tv.' namespace
 # and that breaks things. also added tv. namespace usage.
@@ -167,7 +170,8 @@ class TVMenu(Item):
 
     def main_menu(self, arg, menuw):
         items = []
-        items.append(menu.MenuItem('TV Guide', action=self.start_tvguide))
+        if config.TV_CHANNELS:
+            items.append(menu.MenuItem('TV Guide', action=self.start_tvguide))
         items.append(DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
                              display_type='tv'))
         items.append(menu.MenuItem('Scheduled Recordings', 
