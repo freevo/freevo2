@@ -37,6 +37,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/02 21:35:19  dischi
+# Don't print the warning when the area is invisible
+#
 # Revision 1.8  2003/03/02 19:31:35  dischi
 # split the draw function in two parts
 #
@@ -363,7 +366,8 @@ class Skin_Area:
             redraw = TRUE
             
         if not settings.layout.has_key(area.layout):
-            print '*** layout <%s> not found' % area.layout
+            if self.area_val.visible:
+                print '*** layout <%s> not found' % area.layout
             return FALSE
 
         old_layout = self.layout
