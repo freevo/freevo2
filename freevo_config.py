@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2002/09/04 05:32:32  krister
+# Added some helptext for the remote control config.
+#
 # Revision 1.59  2002/09/04 04:09:10  krister
 # Added the movie suffix *.M2V which is for SVCDs.
 #
@@ -474,6 +477,8 @@ else:
 #
 # Remote control commands translation table. Replace this with the commands that
 # lirc sends for your remote. NB: The .lircrc file is not used.
+# Change the commands in the *LEFT* column, the right column is what Freevo
+# expects to see!
 #
 # Universal remote "ONE FOR ALL", model "Cinema 7" (URC-7201B00 on the back),
 # bought from Walmart ($17.00).
