@@ -1,0 +1,124 @@
+#if 0 /*
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
+# util/dbutil.py - database wrapper
+# -----------------------------------------------------------------------
+# $Id: dbutil.py,v #
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.1  2004/01/16 08:14:04  outlyer
+# Forgot to commit this earlier. This is:
+#
+# extendedmeta: Parser for embedded covers, folder cache, and sqlite scoring
+# dbutil:       Helper class for dealing with the sqlite db
+# extendedadd:  A tool which calls the extendedmeta functions on a path, an
+#               example of how to add all three types of data from the
+#               command-line. Since the data is already used in blurr2, and
+#               the info skins, it's nice to have.
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
+import os
+import config
+
+# helper functions
+
+def tracknum(track):
+    """ 
+    Extract the track numbers from a mmpython result
+    """
+
+    trackno = -1
+    trackof = -1
+
+    if track:
+        trackno = inti(track.split('/')[0])
+        if track.find('/') != -1:
+            trackof = inti(track.split('/')[1])
+    return (trackno, trackof)    
+
+
+def escape(sql):
+    """
+    Escape a SQL query in a manner suitable for sqlite
+    """
+    if sql:
+        sql = sql.replace('\'','\'\'')
+        return sql
+    else:
+        return 'null'
+
+def inti(a):
+    if a:
+        return int(a)
+    else:
+        return 0
+
+# defines:
+DATABASE = os.path.join(config.FREEVO_CACHEDIR, 'freevo.sqlite')
+
+try:
+    import sqlite
+except:
+    print "Python SQLite not installed!"
+
+
+class MetaDatabase:
+    """ Class for working with the database """
+    def __init__(self):
+        # Private Variables
+        DATABASE = os.path.join(config.FREEVO_CACHEDIR, 'freevo1.sqlite')
+        self.db = sqlite.connect(DATABASE)
+        self.cursor = self.db.cursor()
+
+    def runQuery(self,query, close=False):
+        self.cursor.execute(query)
+        if close:
+            # run a single query then close
+            result = self.cursor.fetchall()
+            self.db.commit()           
+            self.db.close()
+            return result
+        else:
+            return self.cursor.fetchall()
+        
+    def close(self):
+        self.db.commit()
+        self.db.close()
+
+    def checkTable(self,table=None):
+        if not table:
+            return False
+        # verify the table exists
+        self.cursor.execute('SELECT name FROM sqlite_master where \
+                             name="%s" and type="table"' % table)
+        if not self.cursor.fetchone():
+            return None
+        return table
+    
+
