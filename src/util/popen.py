@@ -54,7 +54,8 @@ def killall():
     """
     killall running processes
     """
-    watcher.killall()
+    if watcher:
+        watcher.killall()
 
 
 class Process:
@@ -96,6 +97,16 @@ class Process:
         # IO_Handler for stderr
         self.stderr = IO_Handler( 'stderr', self.child.childerr,
                                     self.stderr_cb, debugname )
+
+        global watcher
+        if not watcher:
+            # init global watcher object
+            watcher = _Watcher()
+
+            # add checking for dead children to the notifier
+            notifier.addDispatcher( watcher.step )
+
+        # add child to watcher
         watcher.add( self, self.__child_died )
 
 
@@ -368,10 +379,3 @@ class _Watcher:
     def killall( self ):
         for p in copy.copy(self.__processes):
             p.stop()
-
-
-# init global watcher object
-watcher = _Watcher()
-
-# add checking for dead children to the notifier
-notifier.addDispatcher( watcher.step )
