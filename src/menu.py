@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/09 07:08:00  krister
+# Display a popup error box if there is no action defined for a menu entry (i.e. DVD not identified yet)
+#
 # Revision 1.10  2003/01/19 11:27:21  dischi
 # Removed some debug.
 #
@@ -82,11 +85,15 @@ import skin
 # sends commands to
 import rc
 
+# The OSD
+import osd
+
 TRUE  = 1
 FALSE = 0
 
 rc   = rc.get_singleton()   # Create the remote control object
 skin = skin.get_singleton() # Crate the skin object.
+osd  = osd.get_singleton()
 
 # Module variable that contains an initialized MenuWidget() object
 _singleton = None
@@ -343,6 +350,9 @@ class MenuWidget:
                     
             if action == None:
                 print 'No action.. '
+                skin.PopupBox('No action defined for this choice!')
+                osd.update()
+                time.sleep(2.0)
                 self.refresh()
             else:
                 if hasattr(menu.selected, 'action_arg'):
