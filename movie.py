@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2002/09/19 19:10:18  dischi
+# bugfix
+#
 # Revision 1.37  2002/09/18 18:42:19  dischi
 # Some small changes here and there, nothing important
 #
@@ -368,7 +371,7 @@ def cwd(arg=None, menuw=None):
 
     # XML files
     for file in util.match_files(mountdir, config.SUFFIX_FREEVO_FILES):
-        title, image, (mode, first_file, playlist, play_options), id, info =\
+        title, image, (mode, first_file, playlist, play_options), id, label, info =\
                movie_xml.parse(file, mountdir, mplayer_files)
 
         # only add movies when we have all needed informations
