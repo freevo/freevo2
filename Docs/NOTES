@@ -86,6 +86,14 @@ Then run
     depmod -a
 
 
+
+MPlayer TV viewing
+mplayer -vo xv -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=640:height=480:outfmt=yuy2 -nocache 
+
+Mencoder TV recording
+mencoder -tv on:driver=v4l:input=0:norm=NTSC:channel=49:chanlist=us-cable:width=320:height=240:outfmt=yuy2:adevice=/dev/dsp2:audiorate=32000 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq -oac mp3lame -lameopts br=80:cbr -ffourcc divx -o tst.avi
+
+
 ----------------------------------------------------------------------
 
 NVREC:
@@ -109,6 +117,14 @@ Record sound using the btaudio device
 ./nuvrec -F 300000 -norm NTSC -input Television -w 320 -h 240 -vq 100 \
     -d /dev/dsp2 -mixsrc /dev/mixer2:line1 -o tst2.avi
 
+Speed on a Celeron 500 MHz:
+(32000 Hz, 16 bit mono PCM)
+640x480 framedrops heavily.
+nuvrec 640x240  -vq 100         75%               6.34 Mbit/s
+nuvrec 320x240  -vq 100         35%               4.35 Mbit/s  =  1.8 GB/h
+nuvrec 320x240  -vq  90         35%               3.95 Mbit/s  =  1.6 GB/h
+
+
 ----------------------------------------------------------------------
 Video4Linux1 API docs:
 
@@ -120,16 +136,12 @@ Aspect ratio resolutions:
 1.33  576x432
 1.78  688x384
 
-XviD encoder for DVDs:
-/usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 \
-  -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 \
-  -o moviename.avi -dvd 1 -alang en
-
-
 FFMPEG encoder for DVDs
-/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=800:keyint=300:vhq \
+/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900:vratetol=100000:keyint=100:vhq \
   -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o tst.avi -dvd 1 \
   -ffourcc divx -alang en
+
+Add "-ofps 23.976" if there are a lot of "skip frame!!!" messages (inverse telecine).
 
 Scale and crop a 2.35:1 DVD
 usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 \
