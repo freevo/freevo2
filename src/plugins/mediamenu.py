@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/11/26 18:30:22  dischi
+# make it possible to add fxd items and not only directories
+#
 # Revision 1.23  2003/10/11 12:34:36  dischi
 # Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to config
 # to add more control when to switch to text view.
@@ -18,44 +21,6 @@
 #
 # Revision 1.21  2003/09/21 13:19:13  dischi
 # make it possible to change between video, audio, image and games view
-#
-# Revision 1.20  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.19  2003/09/05 16:11:45  mikeruelle
-# allow games to get its additional args
-#
-# Revision 1.18  2003/08/28 20:52:23  dischi
-# small fix when you want to see all roms
-#
-# Revision 1.17  2003/08/24 06:58:18  gsbarbieri
-# Partial support for "out" icons in main menu.
-# The missing part is in listing_area, which have other changes to
-# allow box_under_icon feature (I mailed the list asking for opinions on
-# that)
-#
-# Revision 1.16  2003/08/24 05:20:15  gsbarbieri
-# Empty cdroms type is now 'empty_cdrom' instead of None
-#
-# Revision 1.15  2003/08/24 05:03:36  gsbarbieri
-# List empty roms in video|audio menus.
-#
-# Revision 1.14  2003/08/23 19:42:09  dischi
-# make a config option HIDE_UNUSABLE_DISCS
-#
-# Revision 1.13  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
-# Revision 1.12  2003/08/22 19:18:08  gsbarbieri
-# Now it shows empty ROMs again.
-#
-# Revision 1.11  2003/08/21 20:54:44  gsbarbieri
-#    *ROM media just shows up when needed, ie: audiocd is not displayed in
-# video main menu.
-#    * ROM media is able to use variants, subtitles and more.
-#    * When media is not present, ask for it and wait until media is
-# identified. A better solution is to force identify media and BLOCK until
-# it's done.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -91,6 +56,7 @@ import event as em
 
 from item import Item
 import directory
+import fxditem
 
 import plugin
 import plugins.rom_drives
@@ -154,7 +120,7 @@ class MediaMenu(Item):
                 'audio': [ 'dir', 'audiocd', 'audio', 'empty_cdrom' ],
                 'video': [ 'dir', 'video', 'vcd', 'dvd', 'empty_cdrom' ],
                 'image': [ 'dir', 'empty_cdrom' ],
-                'games': [ 'dir',  'empty_cdrom' ],
+                'games': [ 'dir', 'empty_cdrom' ],
                 }
         else:
             dir_types = {}
@@ -209,15 +175,19 @@ class MediaMenu(Item):
         # add default items
         for d in dirs:
             try:
-                (t, dir) = d[:2]
-                if len(d) > 2:
-                    add_args = d[2:]
+                if isinstance(d, str):
+                    # it has to be an fxd file
+                    self.normal_items += fxditem.cwd(self, [ d ])
                 else:
-                    add_args = None
-                d = directory.DirItem(dir, self, name = t,
-                                      display_type = self.display_type,
-                                      add_args = add_args)
-                self.normal_items += [ d ]
+                    (t, dir) = d[:2]
+                    if len(d) > 2:
+                        add_args = d[2:]
+                    else:
+                        add_args = None
+                    d = directory.DirItem(dir, self, name = t,
+                                          display_type = self.display_type,
+                                          add_args = add_args)
+                    self.normal_items.append(d)
             except:
                 traceback.print_exc()
 
