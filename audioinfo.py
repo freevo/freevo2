@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/10/21 05:09:50  krister
+# Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
+#
 # Revision 1.13  2002/10/13 14:06:50  dischi
 # Accept jpg as cover images, too, and when there is no title, return
 # the filename as title
@@ -129,7 +132,7 @@ class AudioInfo:
     __pause_timer = 0 # Private variable to store time for pause.
     __lastupdate  = 0.0
     
-    def __init__( self, file, drawall=0 ):
+    def __init__(self, file, drawall=0):
         self.drawall    = drawall
         self.filename   = file
         self.album      = ''
@@ -149,11 +152,11 @@ class AudioInfo:
         # XXX able to handle files with messed up extentions.
         if self.is_ogg():
             if DEBUG: print "Got ogg..."
-            self.set_info_ogg( self.filename )
+            self.set_info_ogg(self.filename)
 
         elif self.is_mp3():
             if DEBUG: print "Got mp3..."
-            self.set_info_mp3( self.filename )
+            self.set_info_mp3(self.filename)
         else:
             if DEBUG: print "Got something else..."
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2002/10/21 05:09:50  krister
+# Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
+#
 # Revision 1.39  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -120,22 +123,28 @@ class MPlayer:
                          
     def play(self, mode, file, playlist, repeat=0):
 
-        self.mode   = mode   # setting global var to mode.
-        self.repeat = repeat # Repeat playlist setting
-        mplayer_options = ''
-        
         filename = file
         if isinstance(filename, FileInformation):
             mplayer_options = file.mplayer_options
             mode = file.mode
             filename = filename.file
+        else:
+            mplayer_options = ''
+            
+        self.mode = mode   # setting global var to mode.
+        self.repeat = repeat # Repeat playlist setting
+
+        # Is the file streamed over the network?
+        if filename.find('://') != -1:
+            network_play = 1
+        else:
+            network_play = 0
             
         if DEBUG:
             print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
-            
 
         if (((mode == 'video') or (mode == 'audio')) and
-            not os.path.isfile(filename)):
+            not os.path.isfile(filename) and not network_play):
 	    skin.PopupBox('%s\nnot found!' % filename)
             time.sleep(2.0) 
             menuwidget.refresh()
@@ -194,9 +203,14 @@ class MPlayer:
 
 
         elif mode == 'audio':
-            command = (mpl + " " + '-vo null ' + get_demuxer(filename) +
-                       ' "' + filename + '"')
+            if not network_play:
+                demux = ' %s ' % get_demuxer(filename)
+            else:
+                # Don't include demuxer for network files
+                demux = ''
 
+            command = '%s -vo null %s "%s"' % (mpl, demux, filename)
+            
         elif mode == 'dvd':
             mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -alang ' + config.DVD_LANG_PREF +
                     ' -vo ' + config.MPLAYER_VO_DEV)
@@ -232,9 +246,9 @@ class MPlayer:
         # This should _really_ be set to zero when playing other audio.
 
         if mode == 'audio':
-            self.thread.audioinfo = audioinfo.AudioInfo( filename, 1 )
+            self.thread.audioinfo = audioinfo.AudioInfo(filename, 1)
             self.thread.audioinfo.start = time.time()
-            skin.DrawMP3( self.thread.audioinfo ) 
+            skin.DrawMP3(self.thread.audioinfo) 
             self.thread.audioinfo.drawall = 0
         else:
             # clear the screen for mplayer

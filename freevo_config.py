@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2002/10/21 05:09:50  krister
+# Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
+#
 # Revision 1.84  2002/10/21 02:04:41  krister
 # Added video input device selection.
 #
@@ -186,9 +189,14 @@ MUSICPLAYER          = 'MPLAYER'   # Must be 'XMMS' or 'MPLAYER'
 
 #
 # Where the Audio (mp3, ogg) files can be found.
-# Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
+# Format: [ ('Title1', 'directory1', 'mplayer options'),
+#           ('Title2', 'directory2'), ... ]
+# The 'mplayer options' field can be omitted.
 #
-DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
+DIR_AUDIO = [ ('Test Files', 'testfiles/Music'),
+              ('Radio City 107.3 (Göteborg/Sweden)',
+               'http://www.minradio.no/asx/radiocitygb2.asx',
+               '-cache 100') ]
 
 #
 # The list of filename suffixes that are used to match the files that

@@ -9,11 +9,13 @@
 #              Thomas Malt <thomas@malt.no>
 # Notes:       - Functions having arg and menuw arguments in different
 #                order is confusing.
-# Todo:        * Add support for Ogg-Vorbis
-#              * Start using mplayer as playing engine.
+# Todo:        
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/10/21 05:09:50  krister
+# Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
+#
 # Revision 1.19  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -73,7 +75,12 @@ __version__ = "$Revision$"
 import sys
 import random
 import time, os
-import string, popen2, fcntl, select, struct
+import string
+import popen2
+import fcntl
+import select
+import struct
+from types import *
 
 import config  # Configuration file object. currently executes a lot of code.
 import util    # Various utilities defined for freevo.
@@ -82,6 +89,7 @@ import mplayer # Module for running mplayer.
 import rc      # The remote controller class
 import osd     # Yes.. we use the GUI for printing stuff.
 import skin    # The skin class
+import datatypes
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -102,7 +110,7 @@ osd     = osd.get_singleton()
 skin = skin.get_singleton()
 
 
-def play(arg=None, menuw=None):
+def play(arg=None, menuw=None, fileinfo=None):
     """
     calls the play function of mplayer to play audio.
 
@@ -110,20 +118,28 @@ def play(arg=None, menuw=None):
     be played and a list of the entire playlist so that the player can
     start on the next one.
 
+    menuw is unused.
+
+    fileinfo is used in place of the 'arg' argument if supplied.
+
     Arguments: mode - mode of playing audio for music, video, dvd etc.
                file - filename to play.
                list - is playlist, ie rest of files in directory.
     Returns:   None
     """
 
-    if not arg:
-        return
-    
-    (mode, file, list) = arg
-    if not mode:
-        mode = 'audio'
+    if fileinfo:
+        musicplayer.play(fileinfo.mode, fileinfo, None)
+    else:
+        if not arg:
+            return
+
+        (mode, file, list) = arg
+
+        if not mode:
+            mode = 'audio'
         
-    musicplayer.play(mode, file, list)
+        musicplayer.play(mode, file, list)
     
 
 #
@@ -171,14 +187,27 @@ def eventhandler(event = None, menuw=None, arg=None):
 # ======================================================================
 
 #
-# The Movie module main menu
+# The Music module main menu
 #
 def main_menu_generate():
     items = []    
 
-    for (title, dir) in config.DIR_AUDIO:
+    for vals in config.DIR_AUDIO:
+        title, dir = vals[:2]
+
+        if dir.find('://') != -1:
+            file_type = None
+        else:
+            file_type = 'dir'
+            
+        # The mplayer_opts field is optional, pack it into a tuple with
+        # directory name if present.
+        if len(vals) > 2:
+            mplayer_opts = vals[2]
+            dir = (dir, mplayer_opts)
+
         items += [menu.MenuItem(title, parse_entry, (title, dir), eventhandler,
-                                type = 'dir')]
+                                type = file_type)]
 
     for media in config.REMOVABLE_MEDIA:
         if media.info:
@@ -243,7 +272,19 @@ def parse_entry(arg=None, menuw=None):
                for it in main_menu, but it shouldn't be a problem.
                Got crash on playlist handling.
     """
-    (new_title, mdir) = arg
+
+    new_title, mdir = arg
+
+    # mdir can be either a string with the dir/filename, or it
+    # is a tuple with the dir/filename and extra mplayer options.
+    if type(mdir) == tuple:
+        mplayer_opts = mdir[1]
+        mdir = mdir[0]
+        if DEBUG:
+            args = new_title, mdir, mplayer_opts
+            print 'music: new_title = %s, mdir = %s, mplayer_opts = %s' % args
+    else:
+        mplayer_opts = None
 
     # If the dir is on a removable media it needs to be mounted
     for media in config.REMOVABLE_MEDIA:
@@ -318,12 +359,16 @@ def parse_entry(arg=None, menuw=None):
         We should be able to handle that. that opens for a more
         generic function..
         """
-        # items = []
-        # title = new_title
-        # items += [menu.MenuItem( title, play, ('audio', dir, None) )]
-        play(None, ['audio', mdir, None])
-    
 
+        if DEBUG:
+            print 'music: got file entry in main menu'
+            
+        # Set up a FileInformation object if mplayer_opts was specified
+        if mplayer_opts:
+            fileinfo = datatypes.FileInformation('audio', mdir, mplayer_opts)
+            play(fileinfo=fileinfo)
+        else:
+            play(arg=['audio', mdir, None], menuw=None)
 
         
 #
