@@ -35,7 +35,7 @@
 #  |   
 #  |   from distutils.core import setup, Extension
 #  |   import distutils.command.install
-#  |   import freevo.util.distutils
+#  |   from freevo.util.distutils import *
 #  |   
 #  |   # now start the python magic
 #  |   setup (name = "nice_plugin",
@@ -45,10 +45,11 @@
 #  |          author_email = "my@mail.address",
 #  |          url = "http://i-also-have-a-web.address",
 #  |   
-#  |          package_dir = freevo.util.distutils.package_dir,
-#  |          packages = freevo.util.distutils.packages,
-#  |          data_files = freevo.util.distutils.data_files
+#  |          package_dir = package_dir,
+#  |          packages    = packages,
+#  |          data_files  = data_files
 #  |          )
+#  |   finalize()
 #
 #
 #  To auto-build distribution packages, a MANIFEST.in is helpfull. You should
@@ -66,6 +67,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/05 19:19:34  dischi
+# Oops
+#
 # Revision 1.9  2003/11/05 19:14:52  dischi
 # enhance i18n support and better doc
 #
@@ -127,7 +131,6 @@ def data_finder(result, dirname, names):
     """
     os.path.walk helper for data directories
     """
-    Transform all files in 
     files = []
     for name in names:
         if os.path.isfile(os.path.join(dirname, name)):
