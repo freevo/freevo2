@@ -578,8 +578,8 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 # NEW GAMES SYSTEM :
 # =================
 # The DIR_GAMES structure is now build as follows :
-# <NAME>, <FOLDER>, [<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
-# <FILE_SUFFIX_FOR_GENERIC>]
+# <NAME>, <FOLDER>, (<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
+# [<FILE_SUFFIX_FOR_GENERIC>])
 # where :
 #              - <TYPE> : Internal game types (MAME or SNES) or
 #                         generic one (GENERIC)
@@ -594,6 +594,8 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 #                 '/home/media/games/xmame/shots', None)),
 #               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
 #                ('SNES', '/usr/local/bin/zsnes', '-m -r 3 -k 100 -cs -u', '', None )),
+#               ('Visual Boy Advance', '/home/media/games/vba/roms/',
+#                ('GENERIC', '/usr/local/vba/VisualBoyAdvance', ' ', '', [ 'gba' ] )),
 #               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
 #                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
 
