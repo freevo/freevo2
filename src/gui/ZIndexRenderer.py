@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/12 10:11:34  dischi
+# load osd only when needed
+#
 # Revision 1.8  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -97,7 +100,6 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 import osd
 import pygame
 
-osd = osd.get_singleton()
 
 DEBUG = 0
 
@@ -211,7 +213,7 @@ class ZIndexRenderer:
                         iname = '/tmp/last-hide.bmp' 
                         pygame.image.save( o.bg_image, iname )
                         iname = '/tmp/last-screen.bmp' 
-                        pygame.image.save( osd.screen.convert(), iname )
+                        pygame.image.save( osd.get_singleton().screen.convert(), iname )
 
 
     def update_show(self, object):        

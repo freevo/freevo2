@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/07/12 10:10:56  dischi
+# load osd only when needed
+#
 # Revision 1.18  2003/07/11 02:01:11  rshortt
 # Stop freevo from getting double events in some cases.
 #
@@ -90,8 +93,6 @@ import util
 from event import Event, BUTTON
 import osd
 
-osd = osd.get_singleton()
-
 PYLIRC = 1
 try:
     import pylirc
@@ -143,6 +144,7 @@ class RemoteControl:
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
         self.pylirc = PYLIRC
+        self.osd    = osd.get_singleton()
         if self.pylirc:
             try:
                 pylirc.init('freevo', config.LIRCRC)
@@ -206,7 +208,7 @@ class RemoteControl:
             del self.queue[0]
             return ret
 
-        e = self.key_event_mapper(osd._cb())
+        e = self.key_event_mapper(self.osd._cb())
         if e:
             return e
         
@@ -215,7 +217,7 @@ class RemoteControl:
             if list:
                 for code in list:
                     e = self.key_event_mapper(code)
-	            if not e:  e = self.key_event_mapper(osd._cb)
+	            if not e:  e = self.key_event_mapper(self.osd._cb)
                     if e:
                         return e
                 
