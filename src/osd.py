@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.137  2004/02/11 21:21:56  dischi
+# deactivate arialbd fix, font is broken
+#
 # Revision 1.136  2004/02/11 14:23:33  dischi
 # search system for fonts
 #
@@ -314,9 +317,10 @@ class OSDFont:
                 font  = self.__loadfont__(fname, ptsize)
                 if font:
                     break
-                font  = self.__loadfont__(fname.replace('_bold', 'bd'), ptsize)
-                if font:
-                    break
+                # deactivated: arialbd seems to be have a wrong height
+                # font  = self.__loadfont__(fname.replace('_bold', 'bd'), ptsize)
+                # if font:
+                #     break
                 
         if not font:
             _debug_('Couldnt load font "%s"' % os.path.basename(filename).lower())
