@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/07/06 14:10:41  outlyer
+# Reclaim stdout from config.
+#
 # Revision 1.20  2003/06/07 14:24:12  dischi
 # Sometimes cPickle crashes (with a strange cause). Try to use the
 # normal pickle (== slower but works) when it failed.
@@ -401,6 +404,7 @@ def find_favorites():
                         print tvgrep.make_schedule(b)
 
 if __name__ == '__main__':
+    sys.stdout = sys.__stdout__
     # Remove a pickled file (if any) if we're trying to list all channels
     if not config.TV_CHANNELS:
         if os.path.isfile('%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid())):
