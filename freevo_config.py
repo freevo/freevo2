@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2002/08/18 04:09:38  krister
+# Made the main skin always the default.
+#
 # Revision 1.48  2002/08/13 09:56:18  dischi
 # configure has three new parameters for the new OSD_SDL:
 # --output=x11_800x600 | --output=mga_pal | --output=mga_ntcs
@@ -217,9 +220,6 @@ if OUTPUT == 'sdl_800x600':
 # from skin.py
 #
 OSD_SKIN = 'skins/main1/skin_main1.py'
-
-if OUTPUT != 'default':
-    OSD_SKIN = 'skins/dischi1/skin_dischi1.py'
 
 #
 # XML file for the skin
