@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/02 20:15:41  rshortt
+# GUIObject and PopupBox now get skin settings from the new skin.  I put
+# a test for config.NEW_SKIN in GUIObject because this object is used by
+# MenuWidget, so I'll remove this case when the new skin is finished.
+#
+# PopupBox can not be used by the old skin so anywhere it is used should
+# be inside a config.NEW_SKIN check.
+#
+# PopupBox -> GUIObject now has better OOP behaviour and I will be doing the
+# same with the other objects as I make them skinnable.
+#
 # Revision 1.2  2003/02/24 12:14:57  rshortt
 # Removed more unneeded self.parent.refresh() calls.
 #
@@ -67,50 +78,25 @@ class AlertBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text, icon=None, left=None, top=None, width=None, 
-                 height=None, bg_color=None, fg_color=None, border=None, 
+    def __init__(self, text=" ", left=None, top=None, width=300, height=160, 
+                 bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self)
 
-        self.text     = text
-        self.icon     = icon
-        self.border   = border
-        self.label    = None
-        self.h_margin = 10
-        self.v_margin = 10
-        self.bd_color = bd_color
-        self.bd_width = bd_width
-        self.width    = width
-        self.height   = height
-        self.left     = left
-        self.top      = top
-        self.bg_color = bg_color
-        self.fg_color = fg_color
+        PopupBox.__init__(self, text, left, top, width, height, bg_color, 
+                          fg_color, icon, border, bd_color, bd_width)
 
-        # XXX: Place a call to the skin object here then set the defaults
-        #      acodringly. self.skin is set in the superclass.
 
-        if not self.width:    self.width  = 300
-        if not self.height:   self.height = 160
-        if not self.left:     self.left   = self.osd.width/2 - self.width/2
-        if not self.top:      self.top    = self.osd.height/2 - self.height/2
-        if not self.bg_color: self.bg_color = Color(self.osd.default_bg_color)
-        if not self.fg_color: self.fg_color = Color(self.osd.default_fg_color)
-        if not self.bd_color: self.bd_color = Color(self.osd.default_fg_color) 
-        if not self.bd_width: self.bd_width = 2
-        if not self.border:   self.border = Border(self, Border.BORDER_FLAT, 
-                                                   self.bd_color, self.bd_width)
-        
-        if type(text) is StringType:
-            if text: self.set_text(text)
-        elif not text:
-            self.text = None
-        else:
-            raise TypeError, text
-        
-        if icon:
-            self.set_icon(icon)
+        ((bg_type, skin_bg), skin_spacing, skin_color, skin_font, 
+         skin_button_default, skin_button_selected) = \
+         self.skin.GetPopupBoxStyle()
+
+        print 'STYLE: %s, %s, %s, %s, %s, %s' % (skin_bg, skin_spacing, 
+               skin_color, skin_font, skin_button_default, skin_button_selected)
+
+# STYLE: ('rectangle', <xml_skin.XML_rectangle instance at 0x801b73ec>), 9, 16777215, <xml_skin.XML_font instance at 0x801b6c7c>, <xml_skin.XML_data instance at 0x80474974>, <xml_skin.XML_data instance at 0x80302e6c>
+
+
 
         self.set_h_align(Align.CENTER)
 
@@ -130,7 +116,7 @@ class AlertBox(PopupBox):
         trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
         if trapped.count(event) > 0:
             return
-        elif event == self.rc.ENTER or event == self.rc.SELECT:
+        elif [self.rc.ENTER, self.rc.SELECT, self.rc.EXIT].count(event) > 0:
             print 'HIT OK'
             self.destroy()
         else:

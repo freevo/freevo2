@@ -9,6 +9,17 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/02 20:15:41  rshortt
+# GUIObject and PopupBox now get skin settings from the new skin.  I put
+# a test for config.NEW_SKIN in GUIObject because this object is used by
+# MenuWidget, so I'll remove this case when the new skin is finished.
+#
+# PopupBox can not be used by the old skin so anywhere it is used should
+# be inside a config.NEW_SKIN check.
+#
+# PopupBox -> GUIObject now has better OOP behaviour and I will be doing the
+# same with the other objects as I make them skinnable.
+#
 # Revision 1.3  2003/02/23 18:21:50  rshortt
 # Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
 #
@@ -108,7 +119,7 @@ class Label(GUIObject):
         if v_align: self.set_v_align(align)
         if text:    self.set_text(text)
 
-        self.set_foreground_color(Color( (0,0,0,255) ))
+        # self.set_foreground_color(Color( (0,0,0,255) ))
 
 
     def get_text(self):
@@ -129,7 +140,7 @@ class Label(GUIObject):
             raise TypeError, type(text)
 
 
-    def set_font(self, font=None, size=None):
+    def set_font(self, font=None, size=None, color=None):
         """
         font  String. Filename of font to use.
         size  Size in pixels to render font.
@@ -143,6 +154,11 @@ class Label(GUIObject):
             self.font = self.osd._getfont(font, size)
         else:
             raise TypeError, 'font'
+
+        if isinstance(color, Color):
+            self.set_foreground_color(color)
+        else:
+            self.set_foreground_color(self.parent.get_foreground_color())
 
             
     def get_font(self):

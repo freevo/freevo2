@@ -10,6 +10,17 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/02 20:15:41  rshortt
+# GUIObject and PopupBox now get skin settings from the new skin.  I put
+# a test for config.NEW_SKIN in GUIObject because this object is used by
+# MenuWidget, so I'll remove this case when the new skin is finished.
+#
+# PopupBox can not be used by the old skin so anywhere it is used should
+# be inside a config.NEW_SKIN check.
+#
+# PopupBox -> GUIObject now has better OOP behaviour and I will be doing the
+# same with the other objects as I make them skinnable.
+#
 # Revision 1.4  2003/02/23 18:21:50  rshortt
 # Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
 #
@@ -79,8 +90,7 @@ from Border    import *
 from Label     import *
 from types     import *
 
-DEBUG = 1
-
+DEBUG = 0
 
 
 class PopupBox(GUIObject):
@@ -100,31 +110,49 @@ class PopupBox(GUIObject):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, left=None, top=None, width=None, height=None,
-                 text=" ", bg_color=None, fg_color=None, icon=None,
-                 border=None, bd_color=None, bd_width=None):
-        """
-        Create a PopupBox object.
-        """
+    def __init__(self, text=" ", left=None, top=None, width=None, height=None,
+                 bg_color=None, fg_color=None, icon=None, border=None, 
+                 bd_color=None, bd_width=None):
 
-        GUIObject.__init__(self)
+        GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
 
-        self.text     = None
-        self.icon     = None
-        self.border   = None
-        self.h_margin = 10
-        self.v_margin = 10
-        self.bd_color = Color(self.osd.default_fg_color) 
 
+        self.border   = border
+        self.bd_color = bd_color
+        self.bd_width = bd_width
+
+        # In the future we will support duration where the popup
+        # will destroy() after x seconds.
         self.duration = 0
 
-        # If some of these are still not set we set them to "our default.
-        if not self.left:     self.left   = self.osd.width/2 - 180
-        if not self.top:      self.top    = self.osd.height/2 - 10
+        # XXX: skin settings
+        ((bg_type, skin_bg), BLAH, BLAH, skin_font, BLAH, BLAH) = \
+         self.skin.GetPopupBoxStyle()
+
+
         if not self.width:    self.width  = 360
         if not self.height:   self.height = 60
-        if not self.bg_color: Color(self.osd.default_bg_color)
-        if not self.fg_color: Color(self.osd.default_fg_color)
+
+        if not self.left:     self.left   = self.osd.width/2 - self.width/2
+        if not self.top:      self.top    = self.osd.height/2 - self.height/2
+
+
+        if not self.bd_color: 
+            if skin_bg.color:
+                self.bd_color = Color(skin_bg.color)
+            else:
+                self.bd_color = Color(self.osd.default_fg_color)
+
+        if not self.bd_width: 
+            if skin_bg.size:
+                self.bd_width = skin_bg.size
+            else:
+                self.bd_width = 2
+
+        if not self.border:   
+            self.border = Border(self, Border.BORDER_FLAT,
+                                 self.bd_color, self.bd_width)
+
         
         if type(text) is StringType:
             if text: self.set_text(text)
@@ -132,27 +160,23 @@ class PopupBox(GUIObject):
             self.text = None
         else:
             raise TypeError, text
-        
-        if icon:
-            self.set_icon(icon)
 
-        if bd_color:
-            # XXX Do I really need to handle bd_color here? Can't I just
-            # XXX pass it to border?
-            if isinstance(bd_color, Color):
-                self.bd_color = bd_color
-            else:
-                self.bd_color.set_color(bd_color)
-
-        if border:
-            if isinstance(border, Border):
-                self.border = border # Do sanity checking inside border
-            else:
-                self.border = Border(self, border, bd_color, bd_width)
+        if skin_font:       
+            self.set_font(skin_font.name, 
+                          skin_font.size, 
+                          Color(skin_font.color))
+        else:
+            self.set_font(config.OSD_DEFAULT_FONTNAME,
+                          config.OSD_DEFAULT_FONTSIZE)
                 
         self.label.set_h_align(Align.CENTER)
         self.label.set_v_align(Align.TOP)
+ 
+
+        if icon:
+            self.set_icon(icon)
                 
+
     def get_text(self):
         """
         Get the text to display
@@ -182,10 +206,6 @@ class PopupBox(GUIObject):
         if not self.label:
             self.label = Label(text)
             self.label.set_parent(self)
-            # These values can also be maipulated by the user through
-            # get_font and set_font functions.
-            self.label.set_font( config.OSD_DEFAULT_FONTNAME,
-                                 config.OSD_DEFAULT_FONTSIZE )
             # XXX Set the background color to none so it is transparent.
             self.label.set_background_color(None)
             self.label.set_h_margin(self.h_margin)
@@ -203,14 +223,14 @@ class PopupBox(GUIObject):
         return (self.label.font.filename, self.label.font.ptsize)
 
 
-    def set_font(self, file, size):
+    def set_font(self, file, size, color):
         """
         Set the font.
 
         Just hands the info down to the label. Might raise an exception.
         """
         if self.label:
-            self.label.set_font(file, size)
+            self.label.set_font(file, size, color)
         else:
             raise TypeError, file
 
@@ -311,7 +331,7 @@ class PopupBox(GUIObject):
 
         if DEBUG: print "  Inside PopupBox._erase..."
         # Only update the part of screen we're at.
-        self.osd.screen.blit(self.bg_image, self.get_position(),
+        self.osd.screen.blit(self.bg_surface, self.get_position(),
                         self.get_rect())
         
         if self.border:
@@ -324,11 +344,12 @@ class PopupBox(GUIObject):
     def eventhandler(self, event):
         if DEBUG: print 'PopupBox: event = %s' % event
 
-        trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
+        trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT,
+                   self.rc.ENTER, self.rc.SELECT]
+
         if trapped.count(event) > 0:
             return
-        elif event == self.rc.ENTER or event == self.rc.SELECT:
-            print 'HIT OK'
+        elif [self.rc.EXIT, ].count(event) > 0:
             self.destroy()
         else:
             return self.parent.eventhandler(event)

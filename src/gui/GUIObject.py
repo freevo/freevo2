@@ -7,6 +7,17 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/02 20:15:41  rshortt
+# GUIObject and PopupBox now get skin settings from the new skin.  I put
+# a test for config.NEW_SKIN in GUIObject because this object is used by
+# MenuWidget, so I'll remove this case when the new skin is finished.
+#
+# PopupBox can not be used by the old skin so anywhere it is used should
+# be inside a config.NEW_SKIN check.
+#
+# PopupBox -> GUIObject now has better OOP behaviour and I will be doing the
+# same with the other objects as I make them skinnable.
+#
 # Revision 1.5  2003/02/24 12:10:24  rshortt
 # Fixed a bug where a popup would reapear after it was disposed of since its
 # parent would redraw it before it completely left.
@@ -93,12 +104,13 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 
 import rc
 import osd
+import config
 import skin
 import ZIndexRenderer
 
 from Color import *
 
-DEBUG = 1
+DEBUG = 0
 
 
 class GUIObject:
@@ -110,58 +122,70 @@ class GUIObject:
 
     def __init__(self, left=None, top=None, width=None, height=None,
                  bg_color=None, fg_color=None):
-        """
-        Constructor. Creates the inital object.
-
-        Todo: I should off course check if input values are valid.
-        """
 
         self.rc   = rc.get_singleton()
         self.osd  = osd.get_singleton()
         self.skin = skin.get_singleton()
-        # self.zir  = ZIndexRenderer.get_singleton()
+        self.zir  = ZIndexRenderer.get_singleton()
 
-        self.left     = 0
-        self.top      = 0
-        self.width    = 0
-        self.height   = 0
-        self.visible  = 0
-        self.bg_color = Color( self.osd.default_bg_color )
-        self.fg_color = Color( self.osd.default_fg_color )
-        self.bg_image = None
-        self.parent   = None
-        self.children = []
-        self.enabled  = 1
-        self.selected = 0
-        self.label    = None
-        self.icon     = None
+        self.label      = None
+        self.icon       = None
+        self.bg_surface = None
+        self.bg_image   = None
+        self.parent     = None
+        self.children   = []
+        self.enabled    = 1
+        self.selected   = 0
+        self.visible    = 0
+
+        self.left     = left
+        self.top      = top
+        self.width    = width
+        self.height   = height
+        self.bg_color = bg_color
+        self.fg_color = fg_color
+
         
         if DEBUG: print "inside GUIOBJECT INIT"
 
-        # XXX At the moment we know about this since I hardcoded it, but
-        # XXX maybe it's a good idea to supply zindex object at construction
-        # XXX maybe get_zindex_handler and set_zindex_handler function.s
-        # self.zindex_pos = self.zir.add_object(self)
-        
-        if left:   self.left   = left
-        if top:    self.top    = top
-        if width:  self.width  = width
-        if height: self.height = height
+        # XXX: skin settings
+        # This if/else should be removed when the new skin is in place.
+        if config.NEW_SKIN:
+            ((bg_type, skin_bg), skin_spacing, skin_color, BLAH, BLAH, BLAH) = \
+             self.skin.GetPopupBoxStyle()
+        else:
+            skin_spacing = None
+            if not self.bg_color:
+                self.bg_color = Color(self.osd.default_bg_color)
+            if not self.fg_color:
+                self.fg_color = Color(self.osd.default_fg_color)
 
+
+        if skin_spacing:
+            self.h_margin = skin_spacing
+            self.v_margin = skin_spacing
+        else:
+            self.h_margin = 10
+            self.v_margin = 10
+
+        if not self.bg_color:
+            if skin_bg.bgcolor:
+                self.bg_color = Color(skin_bg.bgcolor)
+            else:
+                self.bg_color = Color(self.osd.default_bg_color)
+
+        if not self.fg_color:
+            if skin_color:
+                self.fg_color = Color(skin_color)
+            else:
+                self.fg_color = Color(self.osd.default_fg_color)
+
+
+        self.zindex_pos = self.zir.add_object(self)
+        
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.NONE)
 
-        if bg_color:
-            if isinstance(bg_color, Color):
-                self.bg_color = bg_color
-            else:
-                self.bg_color.set_color(bg_color)
-                
-        if fg_color:
-            if isinstance(fg_color, Color):
-                self.fg_color = fg_color
-            else:
-                self.fg_color.set_color(fg_color)
                 
 
     def get_rect(self):
@@ -262,23 +286,18 @@ class GUIObject:
 
         This is really handled by the render object.
         """
-        # self.zir.update_show(self)
         self.visible = 1    
-        self._draw()
+        self.zir.update_show(self)
 
 
     def hide(self):
         """
         Hide the object.
-
-        A lot of stuff updating the display is done by the reder object.
         """
-        if DEBUG: pygame.image.save( self.bg_image, '/tmp/object_hide.bmp' )
-        if DEBUG: print "   Inside hide.. check picture"
-        if DEBUG: wait_loop()
-        self._erase()
+
         self.visible = 0
-        # self.zir.update_hide(self)
+        self.zir.update_hide(self)
+        self.osd.update(self.get_rect())
 
 
     def move(self, x, y):
@@ -380,14 +399,17 @@ class GUIObject:
         if self.parent:
             self.parent.children.remove(self)
             if self.osd.focused_app == self:
-                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
+                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
+                                 self.osd.focused_app
                 self.osd.focused_app = self.parent
-                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
+                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
+                                 self.osd.focused_app
             self.parent.refresh()
         if self.children:
             for child in self.children:
                 child.destroy()
             self.children = []
+        self.hide()
         self.set_parent(None)
 
 
