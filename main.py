@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2002/08/19 05:51:15  krister
+# Load main menu items from the skin.
+#
 # Revision 1.55  2002/08/19 02:08:38  krister
 # Added killall for freevo_xwin at shutdown. Fixed tabs.
 #
@@ -195,30 +198,12 @@ def autostart():
 def getcmd():
     items = []
 
-    # XXX A kludge to handle Gustavo's new skin.
-    # XXX Change to 'mainmenu = skin.get_mainmenu()'
-    if config.OSD_SKIN == 'skins/barbieri/skin_barbieri.py':
-        menu_items = skin.settings.mainmenu.items
-        for i in menu_items:
-            if i.visible:
-                items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
-    elif 0 and config.OSD_SKIN == 'skins/krister1/skin_krister1.py':
-        menu_items = skin.settings.mainmenu.items
-        for i in menu_items:
-            print i
-            if i.visible:
-                items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
-    else:
-        if config.ENABLE_TV:
-            items += [menu.MenuItem('TV', tv.main_menu, 'tv', None, None, 'icons/tv.png',0)]
-        items += [menu.MenuItem('Movies', movie.main_menu,'', None, None, 'icons/movies.png',0)]
-        items += [menu.MenuItem('Music', music.main_menu,'', None, None, 'icons/mp3.png',0)]
-        if config.ENABLE_IMAGES:
-            items += [menu.MenuItem('Images', imenu.main_menu,'',None, None, 'icons/images.png',0)]
-        if config.ENABLE_SHUTDOWN:
-            items += [menu.MenuItem('Shutdown', shutdown, None, None, None, \
-                                    'icons/shutdown2.png', 0) ]
-
+    # Load the main menu items from the skin
+    menu_items = skin.settings.mainmenu.items
+    for i in menu_items:
+        if i.visible:
+            items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
+            
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)
 
