@@ -32,7 +32,7 @@ if test -a $RT_DIR/freevo_python ; then
     if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
         echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
         echo Please install the required version in $RT_DIR/
-        exit
+        exit 1
     fi
 
     # Setup the Python environment variables
@@ -64,7 +64,7 @@ if test -a $RT_DIR/freevo_python ; then
     killall -9 freevo_python &> /dev/null
     killall -9 freevo_xwin &> /dev/null
     killall -9 mplayer &> /dev/null
-    exit
+    exit 0
 
 fi
 
@@ -82,7 +82,7 @@ RT_DIR=../freevo_runtime$RUNTIME_VERSION
 # Is runapp present? If not it needs to be compiled
 if ! test -a runapp ; then
     echo ./runapp not found! You must compile freevo, see the INSTALL file.
-    exit
+    exit 1
 fi
 
 # First check if the runtime is installed
@@ -93,7 +93,7 @@ if test -a $RT_DIR/freevo_rt ; then
     if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
         echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
         echo Please install the required version in $RT_DIR/
-        exit
+        exit 1
     fi
 
     # Prevent the linker from using other libraries than the ones
@@ -122,7 +122,7 @@ if test -a $RT_DIR/freevo_rt ; then
     killall -9 freevo_rt &> /dev/null
     killall -9 freevo_xwin &> /dev/null
     killall -9 mplayer &> /dev/null
-    exit
+    exit 0
 
 fi
 
@@ -158,3 +158,5 @@ kill -9 `pgrep -f "python main.py" -d" "` &> /dev/null
 kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
 killall -9 freevo_xwin &> /dev/null
 killall -9 mplayer &> /dev/null
+
+exit 0
