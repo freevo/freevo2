@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2002/10/08 04:48:08  krister
+# Made popup box width stringsize dependent.
+#
 # Revision 1.37  2002/10/07 04:37:48  outlyer
 # Reverting my changes which were to the wrong file.
 #
@@ -265,9 +268,12 @@ class Skin:
         Notes: Should maybe be named print_message or show_message.
                Maybe I should use one common box item.
         """
-        left   = (osd.width/2)-180
+
+        width, tmp = osd.stringsize(text, 'skins/fonts/bluehigh.ttf', 24)
+        if icon:
+            width += 64  # XXX hardcoded, fix
+        left   = (osd.width/2)-(width/2)
         top    = (osd.height/2)-30
-        width  = 360
         height = 60
         icn    = icon
         bd_w   = 2
