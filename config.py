@@ -90,7 +90,6 @@ SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 # You must change this to fit your local conditions! Check out the
 # file matrox_g400/frequencies.[ch] for possible choices.
 #
-WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 TV_SETTINGS = 'ntsc television us-cable'
 VCR_SETTINGS = 'ntsc composite1 us-cable'
 TV_CHANNELS = ['2', '4', '5', '6', '8', '9', '10', '11', '13', 
@@ -101,6 +100,10 @@ TV_CHANNELS = ['2', '4', '5', '6', '8', '9', '10', '11', '13',
                '62', '64', '65', '66', '67', '69', 
                '70', '71', '72', '73', '74',
                '75', '99']
+# XXX There might be a bug in this application that could cause problems on some systems,
+# XXX it is disabled while I'm checking into it the next few days (2002-05-09)
+WATCH_TV_APP = '/bin/echo'   # XXX Dummy
+#WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
 #
 # Where the MP3 files can be found.
