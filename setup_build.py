@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/02/05 15:22:51  krister
+# Updated build stuff, Changelog
+#
 # Revision 1.28  2003/02/05 06:05:21  krister
 # Removed the backup of old config files, they just clutter the folder
 #
@@ -210,8 +213,11 @@ def main():
     create_config(conf)
 
     print
-    print 'Now you can type "make" to build freevo. It can be run from here,'
-    print 'just type "freevo" to start it.'
+    print 'Now you can type "freevo" to run freevo if you have the full '
+    print 'binary release.'
+    print
+    print 'If you only downloaded the source package you need to compile it,'
+    print 'type "make" to build freevo.'
     print
     print 'Do "make install" as root to put the binaries into /usr/local/freevo'
     print

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/02/05 15:22:51  krister
+# Updated build stuff, Changelog
+#
 # Revision 1.18  2003/02/05 06:08:58  krister
 # Delete all .pyc and .pyo when doing a make clean
 #
@@ -64,7 +67,7 @@ CACHEDIR = /var/cache/freevo
 all: subdirs runapp freevo_xwin python_compile
 
 python_compile:
-	python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
+	./startprog python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
 	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"

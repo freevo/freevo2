@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/05 15:22:52  krister
+# Updated build stuff, Changelog
+#
 # Revision 1.4  2003/02/05 06:10:46  krister
 # Changed the start scripts and childapp.py to use startprog to start all programs.
 #
@@ -105,7 +108,6 @@ python_copy:
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
 	rm -rf lib/python2.2/config
-	rm -rf lib/python2.2/distutils
 	rm -rf lib/python2.2/lib-tk
 	rm -rf lib/python2.2/lib-old
 	rm -rf lib/python2.2/test
