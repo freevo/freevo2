@@ -1,34 +1,20 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # fxdparser.py - Parser for fxd files
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This file handles the basic fxd fileparsing. It is possible to register
+# specific handlers for parsing the different subnodes after <freevo>.
+# The parsed fxd is stored in the vfs for faster access later.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.18  2004/10/28 19:33:38  dischi
-# cleanup utils:
-# o remove config dependency when possible
-# o add sysconfig support
-# o shorten to 80 chars/line
-# o add new header
-# o add more docs
-#
-# Revision 1.17  2004/10/26 19:14:52  dischi
-# adjust to new sysconfig file
-#
-# Revision 1.16  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.15  2004/03/06 10:15:22  dischi
-# patches from Sylvain
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -45,26 +31,28 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
 import stat
 import traceback
-
-# XML support
-from xml.utils import qp_xml
-
-import util
 import codecs
 
+# xml support
+from xml.utils import qp_xml
 
+# freevo utils
+import vfs
+import fileops
+import cache
 
 class XMLnode:
     """
     One node for the FXDtree
     """
-    def __init__(self, name, attr = [], first_cdata=None, following_cdata=None):
+    def __init__(self, name, attr = [], first_cdata=None,
+                 following_cdata=None):
         self.name = name
         self.attr_list = []
         for name, val in attr:
@@ -73,14 +61,14 @@ class XMLnode:
         self.children = []
         self.first_cdata = first_cdata
         self.following_cdata = following_cdata
-        
+
     def items(self):
         return self.attr_list
 
 
 class FXDtree(qp_xml.Parser):
     """
-    class to parse and write fxd files
+    Class to parse and write fxd files
     """
     def __init__(self, filename):
         """
@@ -93,17 +81,17 @@ class FXDtree(qp_xml.Parser):
             self.tree = XMLnode('freevo')
         else:
             self.tree = None
-            cache = vfs.getoverlay(filename + '.raw')
-            if os.path.isfile(filename) and os.path.isfile(cache) and \
-                   os.stat(cache)[stat.ST_MTIME] >= os.stat(filename)[stat.ST_MTIME]:
-                self.tree = util.read_pickle(cache)
+            cachename = vfs.getoverlay(filename + '.raw')
+            if os.path.isfile(filename) and os.path.isfile(cachename) and \
+                   fileops.mtime(cachename) >= fileops.mtime(filename):
+                self.tree = cache.load(cachename)
             if not self.tree:
                 f = vfs.open(filename)
                 self.tree = self.parse(f)
                 f.close()
                 if self.tree:
-                    util.save_pickle(self.tree, cache)
-                
+                    cache.save(cachename, self.tree)
+
 
     def add(self, node, parent=None, pos=None):
         """
@@ -138,7 +126,7 @@ class FXDtree(qp_xml.Parser):
         self.tree = self.parse(f)
         f.close()
         if self.tree:
-            util.save_pickle(self.tree, vfs.getoverlay(filename + '.raw'))
+            cache.save(vfs.getoverlay(filename + '.raw'), self.tree)
 
 
 
@@ -159,7 +147,7 @@ class FXDtree(qp_xml.Parser):
             else:
                 data = Unicode(elem.first_cdata).replace(u'&', u'&amp;')
                 f.write(u'>' + data)
-                    
+
             for child in elem.children:
                 self._dump_recurse(f, child, depth=depth+1)
                 if child.following_cdata == None:
@@ -180,13 +168,13 @@ class FXD:
     """
     class to help parsing fxd files
     """
-    
+
     class XMLnode(XMLnode):
         """
         a new node
         """
         pass
-    
+
     def __init__(self, filename):
         self.tree = FXDtree(filename)
         self.read_callback  = {}
@@ -195,7 +183,7 @@ class FXD:
         self.is_skin_fxd    = False
         self.filename       = filename
 
-        
+
     def set_handler(self, name, callback, mode='r', force=False):
         """
         create callbacks for a node named 'name'. Mode can be 'r' when
@@ -209,9 +197,18 @@ class FXD:
         elif mode == 'w':
             self.write_callback[name] = [ callback, force ]
         else:
-            debug('unknown mode %s for fxd handler' % mode, 0)
+            print 'fxdparser: unknown mode %s for fxd handler' % mode
 
-            
+
+    def __format_text(self, text):
+        while len(text) and text[0] in (u' ', u'\t', u'\n'):
+            text = text[1:]
+        text = re.sub(u'\n[\t *]', u' ', text)
+        while len(text) and text[-1] in (u' ', u'\t', u'\n'):
+            text = text[:-1]
+        return text
+
+
     def parse(self):
         """
         parse the tree and call all the callbacks
@@ -254,8 +251,8 @@ class FXD:
 
         # and save
         self.tree.save()
-        
-        
+
+
     def get_children(self, node, name, deep=1):
         """
         deep = 0, every deep, 1 = children, 2 = childrens children, etc.
@@ -281,23 +278,23 @@ class FXD:
         child = XMLnode(name)
         self.add(child, node)
         return child
-    
-        
+
+
     def childcontent(self, node, name):
         """
         return the content of the child node with the given name
         """
         for child in node.children:
             if child.name == name:
-                return util.format_text(child.textof())
+                return self.__format_text(child.textof())
         return ''
 
 
     def getattr(self, node, name, default=''):
         """
-        return the attribute of the node or the 'default' if the atrribute is not
-        set. If 'node' is 'None', it return the user defined data in the fxd
-        object.
+        return the attribute of the node or the 'default' if the atrribute
+        is not set. If 'node' is 'None', it return the user defined data
+        in the fxd object.
         """
         r = default
         if node:
@@ -328,8 +325,8 @@ class FXD:
 
     def setattr(self, node, name, value):
         """
-        sets the attribute of the node or if node is 'None', set user defined data
-        for the fxd parser.
+        sets the attribute of the node or if node is 'None', set user
+        defined data for the fxd parser.
         """
         if node:
             node.attr_list.append(((None, name), value))
@@ -342,7 +339,7 @@ class FXD:
         """
         rerurn the text of the node
         """
-        return util.format_text(node.textof())
+        return self.__format_text(node.textof())
 
 
     def parse_info(self, nodes, object, map={}):
@@ -361,16 +358,16 @@ class FXD:
                     break
             else:
                 nodes = []
-                
+
         for node in nodes:
             for child in node.children:
                 txt = child.textof()
                 if not txt:
                     continue
                 if child.name in map:
-                    object.info[map[child.name]] = util.format_text(txt)
-                object.info[child.name] = util.format_text(txt)
-                    
+                    object.info[map[child.name]] = self.__format_text(txt)
+                object.info[child.name] = self.__format_text(txt)
+
 
     def add(self, node, parent=None, pos=None):
         """
