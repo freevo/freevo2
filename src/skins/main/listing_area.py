@@ -9,32 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/03/14 17:22:47  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.26  2004/02/27 20:15:03  dischi
 # more unicode fixes
 #
 # Revision 1.25  2004/02/24 21:20:30  dischi
 # unicode fix
-#
-# Revision 1.24  2004/02/04 19:05:36  dischi
-# remove bad log message
-#
-# Revision 1.23  2004/02/04 18:37:14  dischi
-# <removed wrong log message>
-#
-# Revision 1.22  2004/02/01 17:03:58  dischi
-# speedup
-#
-# Revision 1.21  2004/01/31 16:35:26  dischi
-# moved shadow code to listing area, it is much faster now
-#
-# Revision 1.20  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.19  2004/01/17 12:36:29  dischi
-# add shadow support for image listing
-#
-# Revision 1.18  2004/01/10 13:20:21  dischi
-# fix stringsize for tv shows and blurr2
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -385,11 +367,11 @@ class Listing_Area(Skin_Area):
                     self.drawstring(' - %s' % sn[3], val.font, content,
                                     x=x0 + hskip + icon_x + tvs_w,
                                     y=y0 + vskip, width=width-icon_x-tvs_w, height=-1,
-                                    align_h='left', mode='hard')
+                                    align_h='left', dim=False, mode='hard')
                     self.drawstring(sn[2], val.font, content,
                                     x=x0 + hskip + icon_x + tvs_w - 100,
                                     y=y0 + vskip, width=100, height=-1,
-                                    align_h='right', mode='hard')
+                                    align_h='right', dim=False, mode='hard')
                     if all_tvs and tvs_shortname:
                         text = '%sx' % sn[1]
                     else:
@@ -416,13 +398,13 @@ class Listing_Area(Skin_Area):
                             self.drawstring(table_text[i], val.font, content,
                                             x=table_x + x_mod,
                                             y=y0 + vskip, width=table_w, height=-1,
-                                            align_h=val.align, mode='hard')
+                                            align_h=val.align, mode='hard', dim=False)
                         table_x += table_w + 5
 
                 else:
                     self.drawstring(text, val.font, content, x=x0 + hskip + x_icon,
                                     y=y0 + vskip, width=width-icon_x, height=-1,
-                                    align_h=val.align, mode='hard')
+                                    align_h=val.align, mode='hard', dim=True)
 
 
             elif content.type == 'image' or content.type == 'image+text':
@@ -475,7 +457,7 @@ class Listing_Area(Skin_Area):
                 if content.type == 'image+text':
                     self.drawstring(choice.name, val.font, content, x=x0,
                                     y=y0 + val.height, width=val.width, height=-1,
-                                    align_h=val.align, mode='hard', ellipses='')
+                                    align_h=val.align, mode='hard', ellipses='', dim=False)
                     
             else:
                 print 'no support for content type %s' % content.type

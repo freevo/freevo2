@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.149  2004/03/14 17:22:43  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.148  2004/03/14 13:10:41  dischi
 # more dim/ellipse fixes
 #
@@ -827,7 +830,7 @@ class OSD:
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
-                         layer=None, ellipses='dim'):
+                         layer=None, ellipses='...', dim=True):
         """
         draws a string (text) in a frame. This tries to fit the
         string in lines, if it can't, it truncates the text,
@@ -860,15 +863,9 @@ class OSD:
         border_color  = None
         border_radius = 0
 
-        dim = False
-        if config.OSD_DIM_TEXT and ellipses == 'dim':
-            ellipses = ''
-            dim = True
-            # XXX pixels to dim, this should probably be tweaked
-            dim_size = 25
-
-        elif ellipses == 'dim':
-            ellipses = '...'
+        dim = config.OSD_DIM_TEXT and dim
+        # XXX pixels to dim, this should probably be tweaked
+        dim_size = 25
             
         if hasattr(font, 'shadow'):
             # skin font
@@ -913,9 +910,11 @@ class OSD:
         current_ellipses = ''
         hard = mode == 'hard'
 
-        if num_lines_left > 1 and dim:
-            dim      = False
-            ellipses = '...'
+        if num_lines_left == 1 and dim:
+            ellipses = ''
+            mode = hard = 'hard'
+        else:
+            dim = False
             
         while(num_lines_left):
             # calc each line and put the rest into the next
@@ -976,17 +975,10 @@ class OSD:
         if border_color != None:
             border_color = self._sdlcol(border_color)
 
-        line_pos = 0
-        dim_line = False
         for w, l in lines:
             if not l:
                 continue
 
-            if dim:
-                line_pos += 1
-                if line_pos == len(lines):
-                    dim_line = True
-                    
             x0 = x
             if layer:
                 try:
@@ -1013,7 +1005,7 @@ class OSD:
                         # draw the text 8 times with the border_color to get
                         # the border effect
                         re = font.font.render(l, 1, border_color)
-                        if dim_line:
+                        if dim:
                             # draw on a tmp surface if we need to dim. It looks
                             # bad if we don't do that
                             tmp = pygame.Surface((render.get_size()[0] + \
@@ -1039,13 +1031,13 @@ class OSD:
                     if shadow_x or shadow_y:
                         # draw the text in the shadow_color to get a shadow
                         re = font.font.render(l, 1, shadow_color)
-                        if dim_line:
+                        if dim:
                             self.__draw_transparent_text__(re, dim_size)
                         layer.blit(re, (x0+shadow_x, y0+shadow_y))
 
                     # draw the text in the fgcolor
-                    if not (border_color and dim_line):
-                        if dim_line:
+                    if not (border_color and dim):
+                        if dim:
                             self.__draw_transparent_text__(render, dim_size)
                         layer.blit(render, (x0, y0))
 

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/03/14 17:22:47  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.9  2004/02/01 17:03:58  dischi
 # speedup
 #
@@ -14,9 +17,6 @@
 #
 # Revision 1.7  2004/01/01 17:41:05  dischi
 # add border support for Font
-#
-# Revision 1.6  2004/01/01 15:53:18  dischi
-# move the shadow code into osd.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -196,12 +196,12 @@ class Screen:
                     layer.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
 
             for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
-                    ellipses in self.drawlist.text:
+                    ellipses, dim in self.drawlist.text:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     osd.drawstringframed(text, x1, y1, x2 - x1, height, font,
                                          align_h = align_h,
                                          align_v = align_v, mode=mode,
-                                         ellipses=ellipses, layer=layer)
+                                         ellipses=ellipses, dim=dim, layer=layer)
 
         if not update_area:
             return None

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/03/14 17:22:47  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.21  2004/03/14 13:10:41  dischi
 # more dim/ellipse fixes
 #
@@ -17,10 +20,6 @@
 #
 # Revision 1.19  2004/02/23 16:34:27  dischi
 # better skin i18n support
-#
-# Revision 1.18  2004/02/19 04:57:57  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
 #
 # Revision 1.17  2004/02/13 20:28:35  dischi
 # fix alignment right/center with MAX
@@ -31,21 +30,6 @@
 # Revision 1.15  2004/02/05 05:44:26  gsbarbieri
 # Fixes some bugs related to handling unicode internally.
 # NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
-#
-# Revision 1.14  2004/02/04 19:05:36  dischi
-# remove bad log message
-#
-# Revision 1.13  2004/01/14 21:30:44  dischi
-# add ==, != and string support to exp
-#
-# Revision 1.12  2004/01/11 20:23:31  dischi
-# move skin font handling to osd to avoid duplicate code
-#
-# Revision 1.11  2004/01/11 10:57:58  dischi
-# support for function calls (e.g. comingup)
-#
-# Revision 1.10  2004/01/10 16:53:22  dischi
-# make eval more secure (and remove trailing whitespaces)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -159,7 +143,8 @@ class Info_Area(Skin_Area):
                                  i.width , i.height,
                                  align_v = i.valign, align_h = i.align,
                                  mode = i.mode,
-                                 ellipses = i.ellipses )
+                                 ellipses = i.ellipses,
+                                 dim = i.dim )
 
             elif isinstance( i, xml_skin.FormatImg ):
                 if i.src:
@@ -414,7 +399,8 @@ class Info_Area(Skin_Area):
                                              r.width, r.height,
                                              element.font, None, None,
                                              element.align, element.valign,
-                                             element.mode, layer='' )[ 1 ]
+                                             element.mode, ellipses=element.ellipses,
+                                             dim=element.dim, layer='' )[ 1 ]
                 m_width  = size[ 2 ] - size[ 0 ]
                 m_height = size[ 3 ] - size[ 1 ]
 

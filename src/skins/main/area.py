@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/03/14 17:22:46  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.38  2004/03/14 12:55:11  dischi
 # dim support for texts
 #
@@ -50,30 +53,6 @@
 #
 # Revision 1.31  2004/02/07 11:52:17  dischi
 # always show submenus "with image"
-#
-# Revision 1.30  2004/02/04 19:05:18  dischi
-# o revert rectange calculation
-# o remove bad log message
-#
-# <removed wrong log message>
-#
-# Revision 1.28  2004/02/01 17:03:57  dischi
-# speedup
-#
-# Revision 1.27  2004/01/17 12:35:59  dischi
-# make eval saver
-#
-# Revision 1.26  2004/01/11 15:43:16  dischi
-# better display type handling, added type main menu
-#
-# Revision 1.25  2004/01/03 17:43:15  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.24  2004/01/01 16:03:53  dischi
-# use vfs.open because it creates the needed dirs
-#
-# Revision 1.23  2004/01/01 12:25:48  dischi
-# use pickle to cache the large background images
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -660,7 +639,8 @@ class Skin_Area:
 
             
     def drawstring(self, text, font, content, x=-1, y=-1, width=None, height=None,
-                   align_h = None, align_v = None, mode='hard', ellipses='dim'):
+                   align_h = None, align_v = None, mode='hard', ellipses='...',
+                   dim=True):
         """
         writes a text ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -695,7 +675,7 @@ class Skin_Area:
             height2 = font.h + 2
 
         self.tmp_objects.text.append((x, y, x+width, y+height2, text, font, height,
-                                            align_h, align_v, mode, ellipses))
+                                            align_h, align_v, mode, ellipses, dim))
 
 
     def loadimage(self, image, val, redraw=True):

@@ -11,32 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/03/14 17:22:47  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.9  2004/02/07 19:07:55  dischi
 # fix Unicode problem
-#
-# Revision 1.8  2004/02/05 19:54:55  dischi
-# fix crash
-#
-# Revision 1.7  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.6  2004/01/13 19:12:12  dischi
-# small fix
-#
-# Revision 1.5  2004/01/05 21:13:36  dischi
-# make it possible that menu itself has title and subtitle
-#
-# Revision 1.4  2004/01/04 18:39:41  dischi
-# take a look at the parent name when building a short name
-#
-# Revision 1.3  2004/01/04 18:25:17  dischi
-# again, better tv show handling
-#
-# Revision 1.2  2004/01/04 18:18:16  dischi
-# exclude raw images by shorten the tv show name
-#
-# Revision 1.1  2003/12/06 16:41:45  dischi
-# move some classes into extra files
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

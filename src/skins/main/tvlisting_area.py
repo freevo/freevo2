@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/03/14 17:22:47  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.20  2004/03/14 11:17:38  dischi
 # remove old stuff
 #
@@ -29,24 +32,6 @@
 # Revision 1.16  2004/02/04 19:04:49  dischi
 # o fix item rectange calculation
 # o remove bad log message
-#
-# Revision 1.15  2004/02/04 18:37:14  dischi
-# <removed wrong log message>
-#
-# Revision 1.14  2003/12/14 17:39:52  dischi
-# Change TRUE and FALSE to True and False; vfs fixes
-#
-# Revision 1.13  2003/12/06 13:43:03  dischi
-# more cleanup
-#
-# Revision 1.12  2003/10/18 09:35:30  dischi
-# handling to show scheduled recordings
-#
-# Revision 1.11  2003/09/21 18:19:36  dischi
-# Oops. remove debug
-#
-# Revision 1.10  2003/09/21 18:18:31  dischi
-# do not calc the arrows twice
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

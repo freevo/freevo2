@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/03/14 17:22:47  dischi
+# seperate ellipses and dim in drawstringframed
+#
 # Revision 1.33  2004/03/14 13:10:41  dischi
 # more dim/ellipse fixes
 #
@@ -304,6 +307,7 @@ XML_types = {
     'border'   : ('visible', 0),
     'icon'     : ('str', 0),    
     'ellipses' : ('str', 0),    
+    'dim'      : ('visible', 0),    
 }
 
 class XML_data:
@@ -618,10 +622,11 @@ class Content(XML_data):
 class FormatText(XML_data):
     def __init__( self ):
         XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height',
-                                   'ellipses') )
+                                   'ellipses', 'dim') )
         self.mode     = 'hard'
         self.align    = 'left'
-        self.ellipses = 'dim'
+        self.ellipses = '...'
+        self.dim      = True
         self.height   = -1
         self.text     = ''
         self.expression = None
