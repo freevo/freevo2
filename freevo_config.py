@@ -16,6 +16,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2002/08/13 09:22:51  dischi
+# Added a variable OUTPUT to set some values automaticly. This variable
+# should be set by configure
+#
 # Revision 1.46  2002/08/13 08:39:58  dischi
 # Sorted the config file into several groups. Now it's easier to find
 # something. Also added RESOLUTION to set the OSD resolution for OSD_SDL
@@ -64,6 +68,23 @@
 
 
 
+# Helper variable to set some settings based on your system.
+# This is the only variable you _must_ set the variable in this file, if
+# you set it in local_conf.py it has no effect.
+#
+# Possible values are:
+#
+# default:          default OSD server, resolution is fixed at 768x576
+# sdl_800x600       use the Python SDL osd (requires pyGame) with 800x600
+#                   resolution if you have tv out under X11
+# mga_768x576_pal   use the Python SDL osd (requires pyGame) with 768x576
+#                   resolution and tc out for a matrox card with framebuffer
+#                   and a PAL tv set.
+# mga_768x576_ntsc  use the Python SDL osd (requires pyGame) with 768x576
+#                   resolution and tc out for a matrox card with framebuffer
+#                   and a PAL tv set.
+
+OUTPUT = 'default'
 
 # ======================================================================
 # General freevo settings:
@@ -172,25 +193,36 @@ SUFFIX_IMAGE_FILES = [ '/*.[jJ][pP][gG]' ]
 # ======================================================================
 
 
-#
-# Uncomment OSD_SDL = 1 if you want to use the Python SDL OSD
-#
-# OSD_SDL = 1
-
+if OUTPUT != 'default':
+    OSD_SDL = 1
 
 #
 # supported resolutions right now are 800x600 and 768x576. This only works
 # with OSD_SDL = 1. Please change SKIN_XML_FILE to a XML file matching the
 # resolution.
 #
-RESOLUTION          = "800x600"       
+
+RESOLUTION = "768x576"       
+
+if OUTPUT == 'sdl_800x600':
+    RESOLUTION = "800x600"
 
 #
 # Skin file that contains the actual skin code. This is imported
 # from skin.py
 #
 OSD_SKIN = 'skins/main1/skin_main1.py'
-SKIN_XML_FILE = 'skins/xml/type1/800x600.xml'
+
+if OUTPUT != 'default':
+    OSD_SKIN = 'skins/dischi1/skin_dischi1.py'
+
+#
+# XML file for the skin
+#
+SKIN_XML_FILE = 'skins/xml/type1/768x576.xml'
+
+if OUTPUT == 'sdl_800x600':
+    SKIN_XML_FILE = 'skins/xml/type1/800x600.xml'
 
 
 ENABLE_TV = 1            # Disable this if you don't have a tv card
@@ -211,8 +243,13 @@ OSD_DEFAULT_FONTSIZE = 14
 # osd server. Matrox G400 users who wants to use the framebuffer and have
 # a PAL tv may set this to './matrox_g400/mga_pal_768x576.sh'
 #
-OSD_SDL_EXEC_AFTER_STARTUP=""
+OSD_SDL_EXEC_AFTER_STARTUP=''
 
+if OUTPUT == 'mga_768x576_ntsc':
+    OSD_SDL_EXEC_AFTER_STARTUP='./matrox_g400/mga_ntsc_768x576.sh'
+
+if OUTPUT == 'mga_768x576_pal':
+    OSD_SDL_EXEC_AFTER_STARTUP='./matrox_g400/mga_pal_768x576.sh'
 
 
 
@@ -224,6 +261,10 @@ OSD_SDL_EXEC_AFTER_STARTUP=""
 MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
 MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 MPLAYER_VO_DEV      = 'xv'            # e.g.: xv,x11,mga, see mplayer docs
+
+if OUTPUT == 'mga_768x576_ntsc' or OUTPUT == 'mga_768x576_pal':
+    MPLAYER_VO_DEV  = 'mga'
+
 DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
 NICE		    = '/usr/bin/nice' # Priority setting app
@@ -231,8 +272,11 @@ MPLAYER_NICE	    = '0'	      # Priority of mplayer process. 0 is unchanged,
                                       # <0 is higher prio, >0 lower prio. You must run
                                       # freevo as root to use prio <0 !
 
-
 MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs'
+
+if OUTPUT == 'sdl_800x600':
+    MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 800 -screenh 600 -fs'
+
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
 MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
