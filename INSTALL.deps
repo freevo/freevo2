@@ -4,7 +4,7 @@ Freevo, instructions on building the external dependencies
 $Id$
 
 NOTE: You will most likely want to use the freevo_runtime 
-instead of building all the dependencies yourself! 
+instead of building all these dependencies yourself! 
 See http://freevo.sourceforge.net for the download.
 
 
@@ -16,13 +16,13 @@ SDL
 ===
 Uses specially patched versions:
   o SDL-1.2.4-freevo1.tgz:  Makes it possible to start fbcon remotely
-  o SDL_ttf2-freevo1.tgz: Fixes a bug where the lib will crash for some fonts
+  o SDL_ttf2-freevo2.tgz: Fixes a bug where the lib will crash for some fonts
   o SDL_image-CVS20020805.tgz: Snapshot from the SDL CVS, can display JPEG EXIF
 
 
 Download:
 http://freevo.sourceforge.net/SDL-1.2.4-freevo1.tgz
-http://freevo.sourceforge.net/SDL_ttf-2.0.5-freevo1.tgz
+http://freevo.sourceforge.net/SDL_ttf-2.0.5-freevo2.tgz
 http://freevo.sourceforge.net/SDL_image-CVS20020805.tgz
 
 Run the following as root:
@@ -41,8 +41,8 @@ make
 make install
 cd ..
 
-tar xvzf SDL_ttf-2.0.5-freevo1.tgz
-cd SDL_ttf-2.0.5-freevo1
+tar xvzf SDL_ttf-2.0.5-freevo2.tgz
+cd SDL_ttf-2.0.5-freevo2
 ./configure --with-sdl-exec-prefix=/usr/local
 make
 make install

@@ -9,29 +9,29 @@ Quickstart
 o Download freevo and freevo-runtime from the website.
 o Un-tar somewhere. /usr/local is the recommended place for a regular
   installation, but it will run from anywhere, e.g. /tmp
-  cd tmp
-  tar xvzf freevo-1.2.5.tar.gz
-  tar xvzf freevo_runtime1.tar.gz
-  tar xvzf freevo_apps1.tar.gz
-  cd freevo
+     cd tmp
+     tar xvzf freevo-1.2.6.tar.gz
+     tar xvzf freevo_runtime3.tar.gz
+     tar xvzf freevo_apps1.tar.gz
+     cd freevo
 o Run configure in the Freevo directory. This will create freevo.conf
   which contains settings for your system such as screen size, video devices,
   etc. The default configuration is screensize 800x600, NTSC video input/output.
   You can skip this step to begin with if that is OK.
-  ./configure --help
+     ./configure --help
 o Make a copy of freevo_config.py to local_conf.py. Update local_conf.py
   to suit your system (optional). The settings that are in local_conf.py 
   will override freevo_config.py.
 o If you downloaded a full release you will not need to compile anything.
   If you checked out a CVS version you will need to compile runapp and 
   freevo_xwin:
-  make
+     make
 o Run Freevo:
-  o ./freevo
+     ./freevo
 o Install MPlayer to play music, movies and view TV: www.mplayerhq.hu
 o Install Freevo in /usr/local/freevo:
   make install
-  (Do not forget to place the runtime in /usr/local/freevo_runtime1!)
+  (Do not forget to place the runtime in /usr/local/freevo_runtime3!)
 
 
 Detailed instructions
