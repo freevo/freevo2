@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/06 19:25:46  dischi
+# added mtime function using stat
+#
 # Revision 1.9  2004/01/05 17:39:22  dischi
 # make overlay abspath before getting the dirname
 #
@@ -71,6 +74,8 @@ import os
 import copy
 import traceback
 import codecs
+from stat import ST_MTIME
+
 
 import config
 
@@ -122,6 +127,19 @@ def stat(name):
     if not absname:
         raise IOError, 'file %s not found' % name
     return os.stat(absname)
+
+
+def mtime(name):
+    """
+    Return the modification time of the file. If the files also exists
+    in OVERLAY_DIR, return the max of both. If the file does not exist
+    in the normal directory, OSError is raised.
+    """
+    t = os.stat(name)[ST_MTIME]
+    try:
+        return max(os.stat(getoverlay(name))[ST_MTIME], t)
+    except (OSError, IOError):
+        return t
 
     
 def open(name, mode='r'):
