@@ -6,6 +6,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/11 13:58:06  outlyer
+# Initial implementation of user configurable naming styles for recording
+# filenames. The 'mask' variable should move into config, but due to Dischi's
+# changes yesterday, I don't want to do it until he lets me know how things
+# like this should work?
+#
+# (Namely, he suggested less variables in freevo_config, in which case I don't
+# know where they should go)
+#
 # Revision 1.7  2003/09/08 19:44:44  dischi
 # exception handling, just in case...
 #
@@ -53,6 +62,23 @@ DEBUG = 0
 TRUE = 1
 FALSE = 0
 
+def progname2filename(progname):
+    '''Translate a program name to something that can be used as a filename.'''
+
+    # Letters that can be used in the filename
+    ok = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
+
+    s = ''
+    for letter in progname:
+        if letter in ok:
+            s += letter
+        else:
+            if s and s[-1] != '_':
+                s += '_'
+
+    return s
+
+
 
 def getKey(prog=None):
     if not prog:
@@ -74,8 +100,15 @@ def progRunning(prog=None):
 def getProgFilename(prog=None):
     if not prog:
         return 'ERROR: no prog'
+    
+    mask = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
+    filename_array = { 'progname': prog.title,
+                       'title'   : prog.sub_title }
 
-    return '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H%M', time.localtime(prog.start)))
+    filemask = mask % filename_array
+    filemask = time.strftime(filemask, time.localtime(prog.start))
+    filename = progname2filename(filemask)
+    return filename
 
 
 def minToTOD(min):
