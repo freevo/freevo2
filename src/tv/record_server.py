@@ -8,6 +8,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/11 18:01:24  rshortt
+# Further integration of record_server.  Moved config items and plugin info
+# into freevo_config.py.  Also in freevo_config.py I moved FREEVO_CACHEDIR
+# higher up in the file so more things can use it.
+#
 # Revision 1.9  2003/07/13 18:08:52  rshortt
 # Change tv_util.get_chan_displayname() to accept channel_id instead of
 # a TvProgram object and also use config.TV_CHANNELS when available, which
@@ -79,6 +84,7 @@ from twisted.python import log
 from record_types import TYPES_VERSION
 from record_types import ScheduledRecordings
 
+import config
 import record_types
 import epg_xmltv
 import tv_util
@@ -89,27 +95,17 @@ import plugin
 # a staticly compiled one.
 os.environ['LD_PRELOAD'] = ''
 
-# We need to locate record_config.py
-cfgfilepath = [ os.environ['FREEVO_STARTDIR'],
-                os.path.expanduser('~/.freevo'),
-                '/etc/freevo',
-                '.' ]
-
-got_cfg = 0
-for dirname in cfgfilepath:
-    cfgfilename = dirname + '/record_config.py'
-    if os.path.isfile(cfgfilename):
-        print 'Loading cfg: %s' % cfgfilename
-        execfile(cfgfilename, globals(), locals())
-        got_cfg = 1
-        break
-
-if not got_cfg:
-    print "\nERROR: can't find record_config.py"
-    sys.exit(1)
+print 'PLUGIN_RECORD: %s' % config.plugin_record
 
 
-plugin.init()
+def load_plugin(id):
+    for name, type, level, args, number in plugin.__all_plugins__:
+        if number == int(id):
+            plugin.__load_plugin__(name, type, level, args, number)
+            return
+
+load_plugin(config.plugin_record)
+
 
 DEBUG = 1
 
@@ -130,9 +126,9 @@ class RecordServer(xmlrpc.XMLRPC):
         file_ver = None
         scheduledRecordings = None
 
-        if os.path.isfile(RECORD_SCHEDULE):
-            if DEBUG: log.debug('GET: reading cached file (%s)' % RECORD_SCHEDULE)
-            scheduledRecordings = marmalade.unjellyFromXML(open(RECORD_SCHEDULE, 'r'))
+        if os.path.isfile(config.RECORD_SCHEDULE):
+            if DEBUG: log.debug('GET: reading cached file (%s)' % config.RECORD_SCHEDULE)
+            scheduledRecordings = marmalade.unjellyFromXML(open(config.RECORD_SCHEDULE, 'r'))
     
             try:
                 file_ver = scheduledRecordings.TYPES_VERSION
@@ -166,9 +162,9 @@ class RecordServer(xmlrpc.XMLRPC):
             if DEBUG: print 'SAVE: making a new ScheduledRecordings'
             scheduledRecordings = ScheduledRecordings()
     
-        if DEBUG: log.debug('SAVE: saving cached file (%s)' % RECORD_SCHEDULE)
+        if DEBUG: log.debug('SAVE: saving cached file (%s)' % config.RECORD_SCHEDULE)
         if DEBUG: log.debug("SAVE: ScheduledRecordings has %s items." % len(scheduledRecordings.programList))
-        marmalade.jellyToXML(scheduledRecordings, open(RECORD_SCHEDULE, 'w'))
+        marmalade.jellyToXML(scheduledRecordings, open(config.RECORD_SCHEDULE, 'w'))
         return TRUE
 
  
@@ -308,22 +304,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 duration = int(prog.stop - now - 10)
                 if duration < 10:
                     return FALSE
-                # title = tv_util.getProgFilename(prog)
-                # rec_cmd = '%s %s %s "%s"' % \
-                #   (config.REC_CMD, prog.tunerid, duration, title)
-                # aflags = '-d /dev/dsp1 -r 32000 -b 16 -s -ab 128'
-                # vflags = '-input Television -vb 1400 -vq 100 -w 480 -h 360'
 
-                # cl_options = { 'channel'  : prog.tunerid,
-                #                'filename' : title,
-                #                'seconds'  : duration }
-
-                # rec_cmd = config.VCR_CMD % cl_options
-
-                # rec_cmd = '/var/media/bin/tvrecord %s %s "%s"' % \
-                #    (prog.tunerid, duration, title)
-
-                # log.debug('REC_CMD: %s' % rec_cmd)
                 log.debug('going to record: %s' % prog)
                 prog.isRecording = TRUE
                 prog.rec_duration = duration
@@ -732,7 +713,7 @@ class RecordServer(xmlrpc.XMLRPC):
 def main():
     app = Application("RecordServer")
     rs = RecordServer()
-    app.listenTCP(RECORD_SERVER_PORT, server.Site(rs))
+    app.listenTCP(config.RECORD_SERVER_PORT, server.Site(rs))
     rs.startMinuteCheck()
     app.run(save=0)
     

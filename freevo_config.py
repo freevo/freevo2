@@ -298,14 +298,19 @@ plugin.activate('audio.detach', level=20)
 # plugin.activate('tv.tvtime')
 plugin.activate('tv.mplayer')
 
+# For recording tv
+#
+# generic_record plugin needs VCR_CMD to be set correctly
+plugin_record = plugin.activate('plugins.generic_record')
+#
+# Use this ivtv_record instead if you have an ivtv based card (PVR-250/350)
+# and want freevo to do everthing for you.  TV_SETTINGS must be set 
+# correctly.  To use you need the following two lines in local_conf.py:
+# plugin.remove('plugins.generic_record')
+# plugin_record = plugin.activate('plugins.ivtv_record')
+
 # For CD ripping
 # plugin.activate('audio.cdbackup')
-
-  
-
- 
-
-
 
 # For joystick support:
 # plugin.activate('joy')
@@ -368,6 +373,17 @@ FORCE_SKIN_LAYOUT = -1
 # This is the default - track name only
 #
 AUDIO_FORMAT_STRING = '%(t)s'
+
+# ======================================================================
+# Freevo cache dir:
+# ======================================================================
+
+if os.path.isdir('/var/cache/freevo'):
+    FREEVO_CACHEDIR = '/var/cache/freevo'
+else:
+    if not os.path.isdir('/tmp/freevo/cache'):
+        os.makedirs('/tmp/freevo/cache')
+    FREEVO_CACHEDIR = '/tmp/freevo/cache'
 
 
 # ======================================================================
@@ -513,6 +529,8 @@ DIR_GAMES = [ ('Test Games', './testfiles/Mame') ]
 # 
 SUFFIX_MAME_FILES = [ 'zip' ]
 SUFFIX_SNES_FILES = [ 'smc', 'fig' ]
+
+MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 MAME_CMD         = CONF.xmame
 SNES_CMD         = CONF.snes
@@ -806,6 +824,8 @@ TIMESHIFT_BUFFER_SIZE = 128
 TIMESHIFT_ENCODE_CMD = 'mp1e -m3 -c%s -p%s -r14,100' % \
                        (TV_SETTINGS.split()[3], AUDIO_INPUT_DEVICE) 
 
+TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
+
 TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
 
 TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
@@ -829,8 +849,11 @@ TVGUIDE_HOURS_PER_PAGE = 2
 # XXX Example cron script:
 # XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
 
+# if using record_daemon from cron
 REC_SCHEDULE_FILE = '/tmp/freevo_record.lst'
-REC_SCHEDULE = '/tmp/freevo_record.pickle'
+
+# if using the persitant record_server
+RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
 RECORD_SERVER_IP = 'localhost'
 RECORD_SERVER_PORT = 18001
@@ -1107,19 +1130,6 @@ ENABLE_NETWORK_REMOTE = 0
 REMOTE_CONTROL_HOST = '127.0.0.1'
 REMOTE_CONTROL_PORT = 16310
 
-# Cache for Freevo data
-
-if os.path.isdir('/var/cache/freevo'):
-    FREEVO_CACHEDIR = '/var/cache/freevo'
-else:
-    if not os.path.isdir('/tmp/freevo/cache'):
-        os.makedirs('/tmp/freevo/cache')
-    FREEVO_CACHEDIR = '/tmp/freevo/cache'
-
-import os
-MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
-
-TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
 
 #
 # XMLTV File
