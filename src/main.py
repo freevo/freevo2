@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2004/02/12 16:26:57  dischi
+# fix watermark problem once and for all
+#
 # Revision 1.113  2004/02/11 11:09:40  dischi
 # cachetime checking not working right now
 #
@@ -177,6 +180,9 @@ class MainMenu(Item):
         items = []
         for p in plugin.get('mainmenu'):
             items += p.items(self)
+
+        for i in items:
+            i.is_mainmenu_item = True
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         menuw.pushmenu(mainmenu)

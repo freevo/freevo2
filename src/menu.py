@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2004/02/12 16:27:06  dischi
+# fix watermark problem once and for all
+#
 # Revision 1.84  2004/02/06 20:42:55  dischi
 # fix LEFT and RIGHT for tv guide
 #
@@ -348,11 +351,8 @@ class MenuWidget(GUIObject):
             fxd_file = item.skin_fxd
 
         for i in items:
-            try:
-                if not i.image and item.image.find('images/watermarks/') == -1:
-                    i.image = item.image
-            except:
-                pass
+            if not hasattr(item, 'is_mainmenu_item'):
+                i.image = item.image
             if hasattr(item, 'display_type'):
                 i.display_type = item.display_type
             elif hasattr(item, 'type'):

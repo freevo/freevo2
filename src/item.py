@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/02/12 16:26:59  dischi
+# fix watermark problem once and for all
+#
 # Revision 1.65  2004/02/08 17:39:39  dischi
 # small cosmetic fixes
 #
@@ -228,9 +231,7 @@ class Item:
         
         if parent:
             self.image = parent.image
-            if self.image and isinstance(self.image, str) and \
-                   self.image.startswith(config.IMAGE_DIR) and \
-                   self.image.find('watermark') > 0:
+            if hasattr(parent, 'is_mainmenu_item'):
                 self.image = None
             self.skin_fxd    = parent.skin_fxd
             self.media       = parent.media
