@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/06/22 01:07:49  rshortt
+# Move stuff into __init__() and fix a bug for twisted's serialization.
+#
 # Revision 1.17  2004/03/05 20:49:11  rshortt
 # Add support for searching by movies only.  This uses the date field in xmltv
 # which is what tv_imdb uses and is really acurate.  I added a date property
@@ -81,10 +84,7 @@ import config
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
-EPG_VERSION = 4
-
-TRUE = 1
-FALSE = 0
+EPG_VERSION = 5
 
 
 # Cache variables for last GetPrograms()
@@ -98,16 +98,22 @@ cache_last_time = 0
 
 class TvProgram:
 
-    channel_id = ''
-    title      = ''
-    desc       = ''
-    sub_title  = ''
-    start      = 0.0
-    stop       = 0.0
-    ratings    = {}
-    categories = []
-    scheduled  = False
-    date       = None
+    def __init__(self):
+        self.channel_id = ''
+        self.title      = ''
+        self.desc       = ''
+        self.sub_title  = ''
+        self.start      = 0.0
+        self.stop       = 0.0
+        self.ratings    = {}
+        self.advisories = []
+        self.categories = []
+        self.date       = None
+
+        # Due to problems with Twisted's marmalade this should not be changed
+        # to a boolean type. 
+        self.scheduled  = 0
+
 
     def __str__(self):
         bt = time.localtime(self.start)   # Beginning time tuple
