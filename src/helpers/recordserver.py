@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # record_server.py - A network aware TV recording server.
@@ -7,6 +7,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/07/12 14:52:32  outlyer
+# More debug. If no one objects, I'll delete these completely rather than
+# commenting them out.
+#
 # Revision 1.56  2004/07/11 13:54:33  dischi
 # cache scheduledRecordings in memory
 #
@@ -269,7 +273,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         # if prog.start <= now and prog.stop >= now and recording:
         if recording:
-            print 'stopping current recording'
+            #print 'stopping current recording'
             rec_plugin = plugin.getbyname('RECORD')
             if rec_plugin:
                 rec_plugin.Stop()
