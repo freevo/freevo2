@@ -98,9 +98,6 @@ HIDE_UNUSABLE_DISCS = 1
 # plugin.remove('tv.generic_record')
 # plugin_record = plugin.activate('tv.ivtv_record')
 
-# For CD ripping
-# plugin.activate('audio.cdbackup')
-
 # For joystick support:
 # plugin.activate('joy')
 
@@ -240,8 +237,6 @@ HIDE_UNUSABLE_DISCS = 1
 #
 # DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
-# AUDIO_BACKUP_DIR = DIR_AUDIO[ 0 ][ 1 ] # or a path, like /home/user/mp3/
-
 
 # ======================================================================
 # Freevo image viewer settings:
@@ -293,12 +288,14 @@ HIDE_UNUSABLE_DISCS = 1
 #              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
 #                                            type, then you must specify here
 #                                        the file suffix used by the emulator
-# DIR_GAMES = [ ('MAME',       '/home/media/games/xmame/roms',     ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', '/home/media/games/xmame/shots', None) ),
-#    ('SUPER NINTENDO', '/home/media/games/snes/roms',      ('SNES', '/usr/local/bin/zsnes',     '-m -r 3 -k 100 -cs -u', '', None )),
-#    ('MEGADRIVE',      '/home/media/games/megadrive/roms', ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
+# DIR_GAMES = [ ('MAME', '/home/media/games/xmame/roms',     
+#                ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', 
+#                 '/home/media/games/xmame/shots', None)),
+#               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
+#                ('SNES', '/usr/local/bin/zsnes', '-m -r 3 -k 100 -cs -u', '', None )),
+#               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
+#                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
  
-DIR_GAMES = [ ('Test MAME Games',       './testfiles/Mame',     ('MAME', CONF.xmame, '-nosound -fullscreen -modenumber 6', './testfiles/Mame', None) ) ]
-
 # are used for the Mame arcade emulator.
 #
 GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
@@ -378,15 +375,6 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 #     'button 4'       : 'ENTER',
 #     }
 
-
-
-# ======================================================================
-# cdbackup section and lame defaults:
-# ======================================================================
-
-# CD_RIP_PN_PREF = '%(artist)s/%(album)s/%(song)s'
-# CD_RIP_LAME_OPTS = '--preset standard'
-# CD_RIP_OGG_OPTS = '-m 128'
 
 
 # ======================================================================

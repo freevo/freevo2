@@ -319,15 +319,12 @@ plugin.activate('video.bookmarker', level=0)
 #
 # generic_record plugin needs VCR_CMD to be set correctly
 plugin_record = plugin.activate('tv.generic_record')
-#
+
 # Use this ivtv_record instead if you have an ivtv based card (PVR-250/350)
 # and want freevo to do everthing for you.  TV_SETTINGS must be set 
 # correctly.  To use you need the following two lines in local_conf.py:
 # plugin.remove('tv.generic_record')
 # plugin_record = plugin.activate('tv.ivtv_record')
-
-# For CD ripping
-# plugin.activate('audio.cdbackup')
 
 # For joystick support:
 # plugin.activate('joy')
@@ -478,8 +475,6 @@ ONLY_SCAN_DATADIR = 0
 #
 DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
-AUDIO_BACKUP_DIR = DIR_AUDIO[ 0 ][ 1 ] # or a path, like /home/user/mp3/
-
 #
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
@@ -558,11 +553,17 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 #              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
 #                                            type, then you must specify here
 #                                        the file suffix used by the emulator
-# DIR_GAMES = [ ('MAME',       '/home/media/games/xmame/roms',     ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', '/home/media/games/xmame/shots', None) ),
-#    ('SUPER NINTENDO', '/home/media/games/snes/roms',      ('SNES', '/usr/local/bin/zsnes',     '-m -r 3 -k 100 -cs -u', '', None )),
-#    ('MEGADRIVE',      '/home/media/games/megadrive/roms', ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
- 
-DIR_GAMES = [ ('Test MAME Games',       './testfiles/Mame',     ('MAME', CONF.xmame, '-nosound -fullscreen -modenumber 6', './testfiles/Mame', None) ) ]
+# DIR_GAMES = [ ('MAME', '/home/media/games/xmame/roms',     
+#                ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', 
+#                 '/home/media/games/xmame/shots', None)),
+#               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
+#                ('SNES', '/usr/local/bin/zsnes', '-m -r 3 -k 100 -cs -u', '', None )),
+#               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
+#                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
+
+DIR_GAMES = [ ('Test MAME Games', './testfiles/Mame',
+               ('MAME', CONF.xmame, '-nosound -fullscreen -modenumber 6',
+                './testfiles/Mame', None) ) ]
 
 # are used for the Mame arcade emulator.
 #
@@ -687,19 +688,6 @@ JOY_CMDS = {
 # ======================================================================
 
 TVTIME_CMD = CONF.tvtime
-
-# ======================================================================
-# cdbackup section and lame defaults:
-# ======================================================================
-
-LAME_CMD = CONF.lame
-CDPAR_CMD = CONF.cdparanoia
-OGGENC_CMD = CONF.oggenc
-FLAC_CMD = CONF.flac
-CD_RIP_PN_PREF = '%(artist)s/%(album)s/%(song)s'
-CD_RIP_LAME_OPTS = '--preset standard'
-CD_RIP_OGG_OPTS = '-m 128'
-FLAC_OPTS = '-8'                # Best, but slowest compression
 
 # ======================================================================
 # Holiday idlebar plugin
