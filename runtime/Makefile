@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/04 05:44:36  krister
+# Added fchksum
+#
 # Revision 1.10  2003/02/21 04:36:43  krister
 # Bugfix for missing network libs.
 #
@@ -135,7 +138,7 @@ python_copy:
 	cp -a lib/python2.2/site-packages/{CDDB.py,DiscID.py,Numeric,Numeric.pth} tmp
 	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,_xmms.so,aomodule.so} tmp
 	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,psyco,pygame} tmp
-	cp -a lib/python2.2/site-packages/{xmms.py,pylircmodule.so} tmp
+	cp -a lib/python2.2/site-packages/{xmms.py,pylircmodule.so,fchksum.so} tmp
 	rm -rf lib/python2.2/site-packages
 	mv tmp lib/python2.2/site-packages
 	cp -a /usr/local/bin/python2.2 apps/freevo_python
