@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/09/10 18:13:48  dischi
+# support for plugins to add defaults to config
+#
 # Revision 1.38  2003/09/09 18:36:11  dischi
 # add a plugin helper to get more informations about the plugins
 #
@@ -86,11 +89,17 @@ class Plugin:
     class
     """
     def __init__(self):
+        import config
         self._type   = None
         self._level  = 10
         self._number = 0
         self.plugin_name   = ''
-
+        for var, val, desc in self.config():
+            if not hasattr(config, var):
+                setattr(config, var, val)
+            
+    def config(self):
+        return []
         
 class MainMenuPlugin(Plugin):
     """
