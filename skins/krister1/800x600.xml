@@ -23,7 +23,15 @@
       </submenu>
     </menu>
     
-    
+        <main>        
+      <item pos="0" name="TV"       action="tv.main_menu"  arg="" visible="yes" icon="icons/tv.png"   />
+      <item pos="1" name="Movie"    action="movie.main_menu" arg="" visible="yes" icon="icons/movies.png"  />
+      <item pos="2" name="Music"    action="music.main_menu" arg="" visible="yes" icon="icons/mp3.png"  />
+      <item pos="3" name="Image"    action="imenu.main_menu" arg="" visible="yes" icon="icons/images.png"  />
+      <item pos="4" name="Shutdown" action="shutdown" arg="" visible="yes" icon="icons/shutdown2.png"  />
+    </main>
+
+
     <!-- Settings for the mp3 player -->
     <!-- (nothing more than the bgbitmap right now) -->
     <mp3>

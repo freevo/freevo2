@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2002/08/19 02:15:44  krister
+# Added settings for TV viewing/recording.
+#
 # Revision 1.50  2002/08/18 06:10:58  krister
 # Converted tabs to spaces. Please use tabnanny in the future!
 #
@@ -288,6 +291,7 @@ if OUTPUT == 'sdl_800x600':
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
 MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
+MPLAYER_ARGS_TVVIEW  = '-nocache'
 MPLAYER_ARGS_DVDNAV  = ''
 
 
@@ -304,6 +308,18 @@ MPLAYER_ARGS_DVDNAV  = ''
 #
 TV_SETTINGS = 'ntsc television us-cable'
 VCR_SETTINGS = 'ntsc composite1 us-cable'
+
+# TV capture size for viewing and recording. Max 768x480 for NTSC,
+# 768x576 for PAL. Set lower if you have a slow computer
+TV_VIEW_SIZE = (640, 480)
+TV_REC_SIZE = (320, 240)   # Default for slower computers
+
+# Input formats for viewing and recording. The format affect viewing
+# and recording performance. It is specific to your hardware, so read
+# the MPlayer docs and experiment with mplayer to see which one fits
+# your computer best.
+TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
+TV_REC_OUTFMT = 'yuy2'
 
 #
 # TV Channels. This list contains a mapping from the displayed channel name
