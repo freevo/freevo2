@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2004/01/04 13:06:20  dischi
+# delete skin information on update
+#
 # Revision 1.84  2004/01/04 10:24:12  dischi
 # inherit config variables from parent if possible
 #
@@ -485,7 +488,13 @@ class DirItem(Playlist):
                 # store the current selected item
                 selected_id  = self.menu.selected.id()
                 selected_pos = self.menu.choices.index(self.menu.selected)
-                
+            if hasattr(self.menu, 'skin_default_has_description'):
+                del self.menu.skin_default_has_description
+            if hasattr(self.menu, 'skin_default_no_images'):
+                del self.menu.skin_default_no_images
+            if hasattr(self.menu, 'skin_force_text_view'):
+                del self.menu.skin_force_text_view
+
         if arg and arg.startswith('playlist:'):
             if arg.endswith(':random'):
                 Playlist(playlist = [ (self.dir, 0) ], parent = self,
