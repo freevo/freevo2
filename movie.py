@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2002/09/13 08:01:23  dischi
+# fix -cdrom-device for (S)VCD
+#
 # Revision 1.30  2002/09/12 08:36:59  dischi
 # Show identified title instead of the disc label for non
 # right-now-playable discs.
@@ -145,10 +148,11 @@ def play_movie(arg=None, menuw=None):
             if mode == 'dvd':
                 dvd_menu_generate(media, menuw)
                 return
-            if mode == 'vcd':
+            if mode == 'vcd' or mode == 'svcd':
                 # XXX A kludge to make (S)VCD work by just playing chapter 1
                 # XXX on the selected drive
-                mplayer.play(mode, '1', [], 0, '-cdrom-device %s' % media.devicename)
+                mplayer_options = mplayer_options + ' -cdrom-device ' + media.devicename
+                mplayer.play(mode, '1', [], 0, mplayer_options)
                 return
             else:
                 util.mount(media.mountdir)

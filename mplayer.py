@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2002/09/13 08:01:24  dischi
+# fix -cdrom-device for (S)VCD
+#
 # Revision 1.31  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -239,6 +242,11 @@ class MPlayer:
         elif mode == 'vcd':
             mpl += (' ' + config.MPLAYER_ARGS_VCD + ' -alang ' + config.DVD_LANG_PREF +
                     ' -vo ' + config.MPLAYER_VO_DEV)
+            # Add special arguments
+            if mplayer_options:
+                mpl += (' ' + mplayer_options)
+                if DEBUG: print 'options, mpl = "%s"' % mpl
+
             if config.DVD_SUBTITLE_PREF:
                 mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
             command = mpl % filename  # Filename is VCD chapter
