@@ -908,7 +908,7 @@ void
 osd_clearscreen (int color)
 {
    uint32 *pBuf = (uint32 *) framebuffer;
-   int i;
+   /* int i; */
 
    memset(pBuf, color, SCREEN_WIDTH*SCREEN_HEIGHT*4);
    /* Set the first line to the color in question */
