@@ -12,6 +12,7 @@ Release 1.3.2 (TBD):
   * XMLTV format (stop time not present)
   * Image errors (fixed crash, display message about load problem instead)
   * MP3 time display	
+  * FreevoWeb channel selection when recording	
  * Use "freevo setup" instead of "./configure" to set up Freevo
  * New display mode for the image viewer, with nice thumbnails etc
  * Added Joakim Berglunds patches for audio random lists off, extra cover dir	

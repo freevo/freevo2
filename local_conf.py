@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/17 05:58:43  krister
+# Updated mplayer video settings.
+#
 # Revision 1.2  2003/02/16 22:00:56  krister
 # Updated TV guide instructions.
 #
@@ -182,10 +185,10 @@ CONFIG_VERSION = 1.0
 # europe-east, italy, newzealand, australia, ireland, france, china-bcast,
 # southafrica, argentina, canada-cable
 #
-# DEVICE: Usually /dev/video, but might be /dev/video1 instead for multiple
+# DEVICE: Usually /dev/video0, but might be /dev/video1 instead for multiple
 # boards.
 #
-#TV_SETTINGS = '%s television %s /dev/video' % (CONF.tv, CONF.chanlist)
+#TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
 
 #
 # XXX Recording is still work in progress. You need to change
@@ -205,6 +208,7 @@ CONFIG_VERSION = 1.0
 #            ':chanlist=us-cable' +          # Change
 #            ':width=320:height=240' +       # Change if needed
 #            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
+#            ':device=/dev/video0' +         # CHANGE!
 #            ':adevice=/dev/dsp4' +          # CHANGE!
 #            ':audiorate=32000' +            # 44100 for better sound
 #            ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver

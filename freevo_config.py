@@ -440,7 +440,8 @@ DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
 MPLAYER_NICE         = -20             
 
 if CONF.display == 'dfbmga':
-    MPLAYER_ARGS_DEF     = '-ac mad, -autosync 100 -nolirc -autoq 100 -fs -vsync -double'
+    MPLAYER_ARGS_DEF     = ('-ac mad, -autosync 100 -nolirc ' +
+                            '-autoq 100 -fs -vsync -double')
 else:
     MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
@@ -491,10 +492,10 @@ XMMS_CMD             = 'xmms'
 # europe-east, italy, newzealand, australia, ireland, france, china-bcast,
 # southafrica, argentina, canada-cable
 #
-# DEVICE: Usually /dev/video, but might be /dev/video1 instead for multiple
+# DEVICE: Usually /dev/video0, but might be /dev/video1 instead for multiple
 # boards.
 #
-TV_SETTINGS = '%s television %s /dev/video' % (CONF.tv, CONF.chanlist)
+TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
 
 #
 # XXX Recording is still work in progress. You need to change
@@ -514,6 +515,7 @@ VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtim
            ':chanlist=us-cable' +          # Change
            ':width=320:height=240' +       # Change if needed
            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
+           ':device=/dev/video0' +         # CHANGE!
            ':adevice=/dev/dsp4' +          # CHANGE!
            ':audiorate=32000' +            # 44100 for better sound
            ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver
@@ -528,7 +530,7 @@ VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtim
            '-o %s.avi ')                   # Filled in by Freevo
 
 # XXX Not used yet
-VCR_SETTINGS = '%s composite1 %s /dev/video' % (CONF.tv, CONF.chanlist)
+VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
