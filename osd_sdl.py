@@ -255,16 +255,7 @@ class OSD:
 
     # Loads and zooms a bitmap without copying it to the OSD drawing
     # buffer.
-    def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0):
-        pass # XXX Fix later
-    
-        
-    # Draw a bitmap on the OSD. It is automatically loaded into the cache
-    # if not already there. The loadbitmap()/zoombitmap() functions can
-    # be used to "pipeline" bitmap loading/drawing.
-    def drawbitmap(self, filename, x=0, y=0, scaling=None,
-                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
-
+    def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
         image = self._getbitmap(filename)
 
         if not image: return
@@ -285,7 +276,19 @@ class OSD:
 
         elif rotation:
             image = pygame.transform.rotate(image, rotation)
-            
+
+        return image
+
+    
+        
+    # Draw a bitmap on the OSD. It is automatically loaded into the cache
+    # if not already there. The loadbitmap()/zoombitmap() functions can
+    # be used to "pipeline" bitmap loading/drawing.
+    def drawbitmap(self, filename, x=0, y=0, scaling=None,
+                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
+
+        image = self.zoombitmap(filename, scaling, bbx, bby, bbw, bbh, rotation)
+        if not image: return
         self.screen.blit(image, (x, y))
 
 
