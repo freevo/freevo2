@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/04/24 18:07:16  dischi
+# add vcd main movie track detection
+#
 # Revision 1.41  2003/04/24 11:46:30  dischi
 # fixed 'to many open files' bug
 #
@@ -410,9 +413,32 @@ class VideoItem(Item):
                     rc.post_event(rc.PLAY_END)
                     return
 
-        if (not self.filename or self.filename == '0') and \
-           (self.mode == 'dvd' or self.mode == 'vcd'):
-            file = '1'
+        if not self.filename or self.filename == '0':
+            if self.mode == 'dvd':
+                file = '1'
+            elif self.mode == 'vcd':
+                # try to get the longest track:
+                try:
+                    import cdrom
+                    device = open(self.media.devicename)
+                    (first, last) = cdrom.toc_header(device)
+
+                    lmin = 0
+                    lsec = 0
+
+                    mainmovie = (0, 0)
+                    for i in range(first, last + 2):
+                        if i == last + 1:
+                            min, sec, frames = cdrom.leadout(device)
+                        else:
+                            min, sec, frames = cdrom.toc_entry(device, i)
+                        if (min-lmin) * 60 + (sec-lsec) > mainmovie[0]:
+                            mainmovie = (min-lmin) * 60 + (sec-lsec), i-1
+                        lmin, lsec = min, sec
+                    file = str(mainmovie[1])
+                    device.close()
+                except:
+                    file = '1'
 
         mplayer_options = self.mplayer_options
         if not mplayer_options:
