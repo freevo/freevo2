@@ -81,6 +81,8 @@ o Use getop for python argument parsing
 o MP3 playing:
   o Have a play queue that files can be added to/removed from while the
     MP3 player is playing from it. 
+  o Random playing
+  o Select several playlists and AND or OR them together.
 
 
 Long-term
