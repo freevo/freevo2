@@ -15,8 +15,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "portable.h"
+#include "readpng.h"
 #include "osd.h"
 #include "fs.h"
 #include "fb.h"
@@ -32,6 +34,8 @@
 #endif
 #endif
 
+#define TRANSP(t,col) ((t << 24) | col)
+
 #define COL_RED     0xff0000
 #define COL_GREEN   0x00ff00
 #define COL_BLUE    0x0000ff
@@ -42,6 +46,11 @@
 
 font_t *stdfont;
 
+static uint8 framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH][4]; /* BGR0 */
+
+void osd_close (void);
+void osd_update (void);
+void osd_drawbitmap (char *filename, uint16 x0, uint16 y0);
 void osd_drawline (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_clearscreen (int color);
@@ -109,24 +118,23 @@ executecommand (char command[], char args[][1000], int argc)
   
   if (!strcmp ("quit", command)) {
     printf ("Exec: quit\n");
-#ifdef OSD_FB
-   fb_close ();
-#endif
-
-#ifdef OSD_X11
-   x11_close ();
-#endif
+    osd_close ();
     exit (0);
   }
 
   if (!strcmp ("clearscreen", command)) {
-    printf ("Exec: clearscreen\n");
+    printf ("Exec: clearscreen (0x%08x)\n", atoi (args[0]));
     osd_clearscreen (atoi (args[0]));
   }
 
   if (!strcmp ("setpixel", command)) {
     printf ("Exec: setpixel\n");
     osd_setpixel (atoi (args[0]), atoi (args[1]), atoi (args[2]));
+  }
+
+  if (!strcmp ("drawbitmap", command)) {
+    printf ("Exec: drawbitmap\n");
+    osd_drawbitmap (args[0], atoi (args[1]), atoi (args[2]));
   }
 
   if (!strcmp ("drawline", command)) {
@@ -147,12 +155,13 @@ executecommand (char command[], char args[][1000], int argc)
                     atoi (args[3]), atoi (args[4]), atoi (args[5]), &tmp);
   }
   
-#ifdef OSD_X11
-   x11_flush ();
-#endif
+  if (!strcmp ("update", command)) {
+     printf ("Exec: update\n");
+     osd_update ();
+  }
+  
    
 }
-
 
 
 void
@@ -186,14 +195,12 @@ udpserver (int port)
     exit (1);
   }
 
-  osd_clearscreen (0);
+  osd_clearscreen (0x006d9bff);
   osd_drawstring (stdfont, "Waiting for client...",
-                  300, 280, 0x3366cc, 0, &tmp);
+                  300, 280, TRANSP(48, 0), TRANSP(255,0), &tmp);
   
-#ifdef OSD_X11
-   x11_flush ();
-#endif
-   
+  osd_update ();
+  
   while (1) {
     printf ("Waiting for data...\n");
     
@@ -212,22 +219,104 @@ udpserver (int port)
 
 
 void
-osd_setpixel (uint16 x, uint16 y, uint32 color)
+osd_close (void)
 {
-  
-  if ((x >= SCREEN_WIDTH) || (y >= SCREEN_HEIGHT)) {
-    return;
-  }
-
 #ifdef OSD_FB
-  fb_setpixel (x, y, color);
+   fb_close ();
 #endif
 
 #ifdef OSD_X11
-  x11_setpixel (x, y, color);
+   x11_close ();
+#endif
+}
+
+
+void
+osd_update (void)
+{
+#ifdef OSD_FB
+    fb_update ((uint8 *) framebuffer);
 #endif
 
+#ifdef OSD_X11
+    x11_update ((uint8 *) framebuffer);
+#endif
+}
 
+
+/* Alpha blending algorithm. Uses fixedpoint math. */
+#define ALPHA_BLEND(old, new, transp) (((old * transp) + (new*(255-transp))) >> 8)
+
+
+void
+osd_setpixel (uint16 x, uint16 y, uint32 color)
+{
+   uint8 old_r, old_g, old_b;
+   uint8 r, g, b;
+   uint8 new_r, new_g, new_b;
+   uint8 t;
+   
+
+   /* Basic clipping */
+  if ((x >= SCREEN_WIDTH) || (y >= SCREEN_HEIGHT)) {
+    return;
+  }
+  
+  t = color >> 24;
+
+  if (t == 0x00) {              /* Straight copy */
+     framebuffer[y][x][3] = 0;
+     framebuffer[y][x][2] = (color >> 16) & 0xff;
+     framebuffer[y][x][1] = (color >>  8) & 0xff;
+     framebuffer[y][x][0] = (color >>  0) & 0xff;
+  } else if (t < 255) {           /* Alpha blend */
+
+     /* Current values */
+     old_r = framebuffer[y][x][2];
+     old_g = framebuffer[y][x][1];
+     old_b = framebuffer[y][x][0];
+
+     /* Incoming values */
+     r = (color >> 16) & 0xff;
+     g = (color >>  8) & 0xff;
+     b = (color >>  0) & 0xff;
+
+     /* Alpha blended values */
+     new_r = ALPHA_BLEND (old_r, r, t);
+     new_g = ALPHA_BLEND (old_g, g, t);
+     new_b = ALPHA_BLEND (old_b, b, t);
+     
+     framebuffer[y][x][3] = 0;
+     framebuffer[y][x][2] = new_r;
+     framebuffer[y][x][1] = new_g;
+     framebuffer[y][x][0] = new_b;
+  } /* else don't change the pixel */
+  
+}
+
+
+/* Draw a bitmap at the specified x0;y0. Only PNG for now... */
+void
+osd_drawbitmap (char *filename, uint16 x0, uint16 y0)
+{
+   uint32 *pBM;
+   uint16 w, h;
+   int x, y;
+   
+   
+   if (read_png (filename, (uint8 **) &pBM, &w, &h) != OK) {
+      fprintf (stderr, "cannot load bitmap '%s'!\n", filename);
+      return;
+   }
+
+   for (y = 0; y < h; y++) {
+      for (x = 0; x < w; x++) {
+         osd_setpixel (x0 + x, y0 + y, *pBM++);
+      }
+   }
+
+   free (pBM);
+   
 }
 
 
@@ -320,7 +409,6 @@ osd_drawline (int x0, int y0, int x1, int y1, int width, uint32 color)
 }
 
 
-
 void
 osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color)
 {
@@ -336,20 +424,24 @@ osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color)
 }
 
 
-
 void
 osd_clearscreen (int color)
 {
-#ifdef OSD_FB
-   fb_clearscreen (color);
-#endif
+   uint32 *pBuf = (uint32 *) framebuffer;
+   int i;
 
-#ifdef OSD_X11
-   x11_clearscreen (color);
-#endif
+
+   /* Set the first line to the color in question */
+   for (i = 0; i < SCREEN_WIDTH; i++) {
+      pBuf[i] = color;
+   }
+
+   /* And then repeatedly copy that line to the other lines */
+   for (i = 1; i < SCREEN_HEIGHT; i++) {
+      memcpy (framebuffer[i], framebuffer[0], SCREEN_WIDTH*4);
+   }
 
 }
-
 
 
 void
@@ -366,12 +458,26 @@ osd_drawstring (font_t *pFont, char str[], int x, int y,
 }
 
 
+static void doexit (int dummy1, siginfo_t *pInfo, void *pDummy)
+{
+   fprintf (stderr, "Got CTRL-C, exiting...\n");
+   exit (0);
+}
+
 
 int
 main (int ac, char *av[])
 {
    char *fn;
+   struct sigaction act;
 
+
+   /* Set up signal action */
+   act.sa_sigaction = doexit;
+   sigfillset (&act.sa_mask);
+   act.sa_flags = SA_SIGINFO;
+
+   sigaction (SIGINT, &act, (struct sigaction *) NULL);
 
    if (ac < 2) {
       fn = (char *) NULL;
@@ -386,7 +492,7 @@ main (int ac, char *av[])
 #ifdef OSD_X11
    x11_open (SCREEN_WIDTH, SCREEN_HEIGHT);
 #endif
-   
+
    /* Try to open an the font module*/
    stdfont = fs_open (fn);      /* XXX use the name! */
    
@@ -400,22 +506,18 @@ main (int ac, char *av[])
       int i;
 
 
-      osd_clearscreen (0xffffff);
-      osd_drawstring (stdfont, "abcdefghijklmnopqrst",
-                      10, 50, 0x000000, 0xffffff, (int *) NULL);
+      osd_clearscreen (0);
+      osd_drawline (0, 0, 100, 0, 5, COL_RED);
+      osd_drawline (0, 20, 100, 20, 5, COL_GREEN);
+      osd_drawline (0, 40, 100, 40, 5, COL_BLUE);
+      osd_update ();
       getchar ();
    }  
 #endif
   
    udpserver (16480);           /* XXX get config info from central file */
    
-#ifdef OSD_FB
-   fb_close ();
-#endif
-
-#ifdef OSD_X11
-   x11_close ();
-#endif
+   osd_close ();
    
    exit (0);
   
