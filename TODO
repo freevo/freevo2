@@ -1,16 +1,38 @@
 Todo list for Freevo
 ====================
 
+$Id
+
+
 Short-term
 ----------
 o Add rcs id to all files!
 o Channel guide layout
 o Installation instructions, clean up config stuff
+  Paul Aubin:
+  1) A lot of the python paths are hardcoded. I s'//'-ed through and fixed
+     them; though that's mostly because Debian puts python in /usr/bin
+  2) The lirc stuff is tricky. I'm used to an lircrc file, as I imagine
+     most people are. It wasn't terribly difficult, in all fairness, just
+     took a little getting used to.
+  3) The boot script does more than it needs to :) mga_vid, lirc are
+     both their own "thing" so it might make sense to leave them in
+     /etc/modules or at least keep them something like this:
+     --
+     if grep -q '^mga_vid$' /etc/modules; then
+      /sbin/modprobe mga_vid || echo "Could not initialize Matrox BES"
+     fi
+     --
+
+     A similar approach to check for a running lircd might be good too. 
+
+   4) Lots of hard coded things within the application root that probably
+     don't need to be there (fbset, matroxset)
+
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
 o clean up Notes
 o Add DVD rip
   o mencoder works fine with XviD/FFMPEG, but it cannot be started from Freevo yet
-o package for alpha release (tgz, no CVS or RPM)
 o Add a digital filter to remove 50/60 Hz line-noise from audio line input
   o Is only a problem for connecting line in to a VCR?
 o Finish LICENSE
@@ -23,7 +45,6 @@ o Website:
 
 Mid-term
 --------
-o Setup CVS support
 o Adjustment of saturation, contrast, etc for both TV-in and
   TV-out.
   o Have a menu choice to save the settings to a config file
@@ -59,6 +80,3 @@ Ideas
 o Voice recognition -> sub-titles, at least phonetic text
 o Chat with others watching the same show
 
-
-Recently done
--------------
