@@ -31,21 +31,22 @@
 
 
 import os
-import vdr.vdr
+from vdr.vdr import VDR
 
 
 def update(guide, vdr_dir=None, channels_file=None, epg_file=None,
-             host=None, port=None, access_by='sid',
-             exclude_channels=None, verbose=1):
+             host=None, port=None, access_by='sid', verbose=1):
+
+    exclude_channels = guide.exclude_channels
     if not (isinstance(exclude_channels, list) or \
             isinstance(exclude_channels, tuple)):
         exclude_channels = []
 
     print 'excluding channels: %s' % exclude_channels
 
-    vdr = vdr.vdr.VDR(host=host, port=port, videopath=vdr_dir,
-                      channelsfile=channels_file, epgfile=epg_file,
-                      close_connection=0)
+    vdr = VDR(host=host, port=port, videopath=vdr_dir,
+              channelsfile=channels_file, epgfile=epg_file,
+              close_connection=0)
 
     if vdr.epgfile and os.path.isfile(vdr.epgfile):
         print 'Using VDR EPG from %s.' % vdr.epgfile
@@ -84,7 +85,7 @@ def update(guide, vdr_dir=None, channels_file=None, epg_file=None,
             desc = e.desc
             if not desc: desc = ''
 
-            quide.sql_add_program(c.id, e.title, e.start, int(e.start+e.dur),
+            guide.sql_add_program(c.id, e.title, e.start, int(e.start+e.dur),
                                   subtitle=subtitle, description=desc)
 
     return True

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/12/12 15:33:37  rshortt
+# pyepg updates
+#
 # Revision 1.15  2004/12/10 19:56:22  dischi
 # changes to new pyepg
 #
@@ -81,7 +84,7 @@ import mcomm
 
 import pyepg
 pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
-pyepg.load()
+pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
 
 
 def usage():
@@ -122,8 +125,7 @@ def grab():
         print 'Loading data into epgdb, this may take a while'
 
         shutil.move(xmltvtmp, config.XMLTV_FILE)
-        pyepg.guide.add_data('xmltv', config.XMLTV_FILE,
-                             config.TV_CHANNELS_EXCLUDE)
+        pyepg.update('xmltv', config.XMLTV_FILE,)
 
 
 if __name__ == '__main__':

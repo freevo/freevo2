@@ -47,7 +47,8 @@ import config
 import sysconfig
 import mcomm
 
-epg = pyepg.get_epg(sysconfig.datafile('epgdb'))
+pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
+pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE) 
 
 
 def usage():
@@ -61,9 +62,8 @@ def usage():
 def grab():
     print 'Fetching guide from VDR.'
 
-    epg.add_data_vdr(config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG, 
-                     config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID,
-                     config.TV_CHANNELS_EXCLUDE)
+    pyepg.update('vdr', config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG, 
+                 config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID)
 
 
 if __name__ == '__main__':
