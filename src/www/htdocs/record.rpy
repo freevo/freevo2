@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/03/12 03:05:50  outlyer
+# Use the episode title where available.
+#
 # Revision 1.14  2004/03/04 15:23:36  rshortt
 # I am pretty sure we should have %b %d in here, the configurable timestamp doesn't really fit in here.
 #
@@ -183,6 +186,7 @@ class RecordResource(FreevoResource):
         fv.tableCell(_('Stop Time'), 'class="guidehead" colspan="1"')
         fv.tableCell(_('Channel'), 'class="guidehead" colspan="1"')
         fv.tableCell(_('Title'), 'class="guidehead" colspan="1"')
+        fv.tableCell(_('Episode'),'class="guidehead" colspan="1"')
         fv.tableCell(_('Program Description'), 'class="guidehead" colspan="1"')
         fv.tableCell(_('Actions'), 'class="guidehead" colspan="1"')
         fv.tableRowClose()
@@ -211,6 +215,13 @@ class RecordResource(FreevoResource):
             if not chan: chan = _('UNKNOWN')
             fv.tableCell(chan, 'class="'+status+'" colspan="1"')
             fv.tableCell(Unicode(prog.title), 'class="'+status+'" colspan="1"')
+
+            if prog.sub_title == '':
+                cell = '&nbsp;'
+            else:
+                cell = Unicode(prog.sub_title)
+            fv.tableCell(cell,'class="'+status+'" colspan="1"')
+
     
             if prog.desc == '':
                 cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+prog.title+'</b>')

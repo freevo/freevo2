@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/03/12 03:05:50  outlyer
+# Use the episode title where available.
+#
 # Revision 1.24  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -292,6 +295,13 @@ class GuideResource(FreevoResource):
                         desc = desc.lstrip()
                         if MAX_DESCRIPTION_CHAR and len(desc) > MAX_DESCRIPTION_CHAR:
                             desc=desc[:desc[:MAX_DESCRIPTION_CHAR].rfind('.')] + '. [...]'
+
+                        
+
+                        if prog.sub_title:
+                            desc = '"%s"<br/>%s' % (prog.sub_title,desc)
+
+
                         pops += (
                             u"<div id=\"%s\" class=\"proginfo\">\n"\
                             u"   <table class=\"popup\"\n"\
