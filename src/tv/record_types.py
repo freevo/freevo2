@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/10/23 14:36:20  rshortt
+# Moved get_chan_displayname from util to channels.py.  Avoids circular import.
+#
 # Revision 1.14  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -42,7 +45,7 @@
 
 import sys, time, os, string
 import config
-import util.tv_util as tv_util
+from tv.channels import get_chan_displayname
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
@@ -172,7 +175,7 @@ class Favorite:
             self.title = prog.title
 
 	    if exactchan:
-                self.channel = tv_util.get_chan_displayname(prog.channel_id)
+                self.channel = get_chan_displayname(prog.channel_id)
             else:
                 self.channel = 'ANY'
           
