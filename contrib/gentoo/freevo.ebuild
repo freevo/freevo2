@@ -11,16 +11,16 @@ IUSE="matrox dvd encode lirc X"
 inherit distutils
 
 DEPEND=">=dev-python/pygame-1.5.6
-	>=media-libs/freetype-2.1.4
-	>=dev-python/Imaging-1.1.3
-	>=dev-python/pyxml-0.8.2
-	>=dev-python/twisted-1.0.7
-	>=media-libs/libsdl-1.2.5
-	>=dev-python/mmpython-0.3
+	>=media-libs/freetype-2.1.5
+	>=dev-python/Imaging-1.1.4
+	>=dev-python/pyxml-0.8.3
+	>=dev-python/twisted-1.2.0
+	>=media-libs/libsdl-1.2.7
+	>=dev-python/mmpython-0.4.3
 	matrox? ( >=media-video/matroxset-0.3 )
-	>=media-video/mplayer-0.92
+	>=media-video/mplayer-1.0_pre4
 	>=sys-apps/sed-4
-	dvd? ( >=media-video/xine-ui-0.9.22 )
+	dvd? ( >=media-video/xine-ui-0.9.23 )
 	encode? ( >=media-sound/cdparanoia-3.9.8 >=media-sound/lame-3.93.1 )
 	lirc? ( app-misc/lirc >=dev-python/pylirc-0.0.3 )
 	X? ( virtual/x11 )"
