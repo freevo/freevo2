@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/11/28 16:00:40  dischi
+# delete some bad debug
+#
 # Revision 1.24  2004/11/19 04:25:35  rshortt
 # Removed setchanlist function and use frequency code from tv.freq.
 #
@@ -145,8 +148,6 @@ class Videodev:
         self.devfd = os.open(device, os.O_TRUNC)
         if self.devfd < 0:
             sys.exit("Error: %d\n" %self.devfd)
-        else:
-            if DEBUG: print "Video Opened at %s" % device
 
         results           = self.querycap()
         self.driver       = results[0]
