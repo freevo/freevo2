@@ -108,7 +108,7 @@
     <!-- LAYOUT DEFINITIONS -->
 
 
-    <image label="background" filename="aubin/blurr.jpg"/>
+    <image label="background" filename="blurrback.jpg"/>
     
     <layout label="screen watermark">
       <background>
