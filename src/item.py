@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/12/29 22:06:01  dischi
+# Add support for url inside an item. This is usefull for items depending
+# on files or other types of url. If set_url is used, other special
+# attributes are set.
+#
 # Revision 1.35  2003/12/06 13:46:47  dischi
 # return nothing if there is no length (e.g. webradio)
 #
@@ -51,68 +56,106 @@
 
 import os
 import gettext
+import shutil
+import mmpython
 
+import config
 from event import *
 import plugin
-import config
+import util
+
+class FileInformation:
+    """
+    file operations for an item
+    """
+    def __init__(self):
+        self.files     = []
+        self.fxd_file  = ''
+        self.image     = ''
+        self.read_only = False
+
+
+    def append(self, filename):
+        self.files.append(filename)
+
+
+    def get(self):
+        return self.files
+
+
+    def copy_possible(self):
+        return self.files != []
+
+    
+    def copy(self, destdir):
+        for f in self.files + [ self.fxd_file, self.image ]:
+            if f:
+                shutil.copy(f, destdir)
+
+
+    def move_possible(self):
+        return self.files and not self.read_only
+
+
+    def move(self, destdir):
+        for f in self.files + [ self.fxd_file, self.image ]:
+            if f:
+                os.system('mv "%s" "%s"' % (f, destdir))
+
+    def delete_possible(self):
+        return self.files and not self.read_only
+
+
+    def delete(self):
+        for f in self.files + [ self.fxd_file, self.image ]:
+            if os.path.isdir(f):
+                shutil.rmtree(f, ignore_errors=1)
+            else:
+                try:
+                    os.unlink(f)
+                except:
+                    print 'can\'t delete %s' % f
+        
+                
 
 class Item:
     """
     Item class. This is the base class for all items in the menu. It's a template
     for MenuItem and for other info items like VideoItem, AudioItem and ImageItem
     """
-    def __init__(self, parent = None, info = None, skin_type = None):
+    def __init__(self, parent=None, info=None, skin_type=None):
         """
         Init the item. Sets all needed variables, if parent is given also inherit
         some settings from there. Set self.info to info if given.
         """
-        self.image       = None            # imagefile
-        self.type        = None            # type: e.g. video, audio, dir, playlist
-        self.icon        = None
-        self.parent      = parent          # parent item to pass unmapped event
-        self.xml_file    = None            # skin informationes etc.
-        self.menuw       = None
-        self.description = ''
+        if not hasattr(self, 'type'):
+            self.type     = None            # e.g. video, audio, dir, playlist
+        self.name         = ''              # name in menu
+        self.image        = None            # imagefile
+        self.icon         = None
+        if info:
+            self.info     = info
+        else:
+            self.info     = {}
+        self.parent       = parent          # parent item to pass unmapped event
+        self.fxd_file     = None            # skin informationes etc.
+        self.menuw        = None
+        self.description  = ''
+        self.handle_type  = None            # handle item in skin as video, audio, image
+                                            # e.g. a directory has all video info like
+                                            # directories of a cdrom
+
+        self.media        = None
 
         self.eventhandler_plugins = []
-        
-        if not info:
-            self.info = {}
-        else:
-            self.info = info
 
-        use_info_title = 1
         try:
-            use_info_title = parent.DIRECTORY_USE_MEDIAID_TAG_NAMES
-        except:
-            pass
-        
-        # name in menu
-        self.name = None                
-        try:
-            if use_info_title:
+            if parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
                 self.name = info['title']
             
         except (TypeError, AttributeError, KeyError):
             pass
         
-        # possible variables for an item.
-        # some or only needed for video or image or audio
-        # these variables are copied by the copy function
-
-        self.handle_type = None         # handle item in skin as video, audio, image
-                                        # e.g. a directory has all video info like
-                                        # directories of a cdrom
-
-        self.mplayer_options = ''
-
-        self.rom_id    = []
-        self.rom_label = []
-        self.media     = None
-
-        # interactive stuff for video, parsed by mplayer
-        self.elapsed   = 0
-
         if parent:
             self.image = parent.image
             if self.image and isinstance(self.image, str) and \
@@ -120,8 +163,10 @@ class Item:
                    self.image.find(config.IMAGE_DIR) == 0:
                 self.image = None
             self.handle_type = parent.handle_type
-            self.xml_file = parent.xml_file
-            self.media = parent.media
+            self.fxd_file    = parent.fxd_file
+            self.media       = parent.media
+            if hasattr(self.parent, 'fxd_file') and not self.fxd_file:
+                self.fxd_file = self.parent.fxd_file
             if hasattr(parent, '_'):
                 self._ = parent._
 
@@ -139,6 +184,7 @@ class Item:
                     self.outicon = os.path.join(settings.icon_dir, skin_info.icon)
             
 
+
     def copy(self, obj):
         """
         copy all known attributes from 'obj'
@@ -146,19 +192,98 @@ class Item:
         if not self.image:
             self.image = obj.image
         if not self.name:
-            self.name = obj.name
+            self.name  = obj.name
             
-        self.xml_file = obj.xml_file
-        self.handle_type = obj.handle_type
-        self.mplayer_options = obj.mplayer_options
+        self.fxd_file     = obj.fxd_file
+        self.handle_type  = obj.handle_type
+        self.info         = obj.info
+        self.media        = obj.media
 
-        self.rom_id    = obj.rom_id
-        self.rom_label = obj.rom_label
-        self.media     = obj.media
+        # copy additional attributes if the item has an url, which
+        # means it also has attributes like mimetype
+        if hasattr(obj, 'url'):
+            self.url          = obj.url
+            self.network_play = obj.network_play
+            self.id           = obj.id
+            self.media_id     = obj.media_id
+            self.mimetype     = obj.mimetype
+            self.filename     = obj.filename
+            self.dirname      = obj.dirname
+            self.files        = obj.files
 
-        self.elapsed   = obj.elapsed
-        self.info      = obj.info
+
+    def set_url(self, url, info=True):
+        """
+        Set a new url to the item and adjust all attributes depending
+        on the url.
+        """
+        self.network_play = True        # network url, like http
+        self.url          = url         # the url itself
+        self.filename     = ''          # filename if it's a file:// url
+        self.dirname      = ''          # directory of the file:// url
+        self.mode         = ''          # the type of the url (file, http, dvd...)
+        self.mimetype     = ''          # extention or mode
+        self.media_id     = ''
+
+        if not url:
+            self.files = None
+            return
         
+        if url.find('://') == -1:
+            self.url = 'file://' + url
+        
+        self.files = FileInformation()
+        if self.media:
+            self.files.read_only = True
+
+        if self.url.startswith('file://'):
+            self.network_play = False
+            self.filename     = self.url[7:]
+            if os.path.isfile(self.filename):
+                self.files.append(self.filename)
+                self.dirname = os.path.dirname(self.filename)
+                self.image   = util.getimage(self.dirname+'/cover', self.image)
+
+                image = util.getimage(self.filename[:self.filename.rfind('.')])
+                if image:
+                    self.image = image
+                    self.files.image = image
+            else:
+                self.filename = ''
+                self.url      = ''
+                return
+            
+        if info and self.filename:
+            if self.parent and self.parent.media:
+                mmpython_url = 'cd://%s:%s:%s' % (self.parent.media.devicename,
+                                                  self.parent.media.mountdir,
+                                                  self.filename[len(self.media.mountdir)+1:])
+            else:
+                mmpython_url = self.filename
+            info = mmpython.parse(mmpython_url)
+            if info:
+                self.info = info
+
+                
+        if not self.name:
+            if self.filename:
+                self.name = util.getname(self.filename)
+            else:
+                self.name = self.url
+
+        self.id   = self.url
+        self.mode = self.url[:self.url.find('://')]
+
+        if self.mode == 'file':
+            try:
+                self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
+            except:
+                self.mimetype = self.type
+        elif self.network_play:
+            self.mimetype = self.type
+        else:
+            self.mimetype = self.url[:self.url.find('://')].lower()
+
 
     def translation(self, application):
         """
@@ -231,8 +356,8 @@ class Item:
                 return True
         return False
     
-        
-    def getattr(self, attr):
+
+    def __getitem__(self, attr):
         """
         return the specific attribute as string or an empty string
         """
@@ -279,5 +404,11 @@ class Item:
                 
             if r != None and str(r):
                 return str(r)
-
         return ''
+
+
+    def getattr(self, attr):
+        """
+        wrapper for __getitem__
+        """
+        return self.__getitem__(attr)
