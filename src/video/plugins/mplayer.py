@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2004/07/08 19:29:43  dischi
+# make sure plugins are stopped
+#
 # Revision 1.70  2004/06/23 19:46:17  dischi
 # prevent mplayer from seeking after the end of a growing file
 #
@@ -399,15 +402,15 @@ class MPlayer:
         """
         Stop mplayer
         """
+        for p in self.plugins:
+            command = p.stop()
+
         if not self.app:
             return
         
         self.app.stop('quit\n')
         rc.app(None)
         self.app = None
-
-        for p in self.plugins:
-            command = p.stop()
 
 
     def eventhandler(self, event, menuw=None):
