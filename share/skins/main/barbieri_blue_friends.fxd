@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<freevo>
+   <skin geometry="800x600" include="barbieri_blue" >
+
+      <main>
+         <item label="tv"       name="Watch TV  "       icon="mainmenu/54x54/tv.png" />
+         <item label="video"    name="Watch a Movies"   icon="mainmenu/54x54/movies.png" />
+         <item label="audio"    name="Listen to Music"  icon="mainmenu/54x54/music.png" />
+         <item label="image"    name="Look at Pictures" icon="mainmenu/54x54/images.png" />
+         <item label="shutdown" name="Shutdown"         icon="mainmenu/54x54/shutdown.png" />
+      </main>
+
+      <menuset label="main menu">
+         <listing width="360"/>
+      </menuset>
+
+
+      <font label="title" name="flubber" size="35" color="0x8080dc">
+         <shadow x="1" y="1" color="0x303052" visible="yes"/>         
+      </font>
+
+      <font label="item" name="friends" size="14" color="0x303030"/>
+      <font label="selected" name="friends" size="14" color="0xffffff">
+         <shadow x="1" y="1" color="0x000000" visible="yes"/>         
+      </font>
+
+      <font label="main" name="friends" size="18" color="main fg"/>
+      <font label="main selected" name="friends" size="18" color="main selection fg">
+         <shadow x="2" y="2" color="0x000000" visible="yes" />
+      </font>
+
+      <font label="info title" name="friends" size="20" color="0xD59215">
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+      <font label="clock"   name="friends" size="13" color="0xffffff">
+         <shadow x="1" y="1" color="0x303030" visible="yes" />
+      </font>
+
+   </skin>
+</freevo>
