@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/08/30 12:20:10  dischi
+# Respect the given parent for parsing. This avoids calling mmpython again
+# with maybe wrong informations (disc or not). Also restructured the code
+#
 # Revision 1.33  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -38,7 +42,6 @@
 import os
 import re
 import traceback
-import mmpython
 
 import config
 import util
@@ -240,13 +243,13 @@ def xml_parseInfo(info_node):
             i['rating'] = node.textof().encode('latin-1')
     return i
 
-def make_videoitem(video, variant):
+def make_videoitem(video, variant, parent):
     # Returns a VideoItem based on video and on variant.
 
     vitem = None
     if variant:
         if len(variant['parts']) > 1:
-            vitem = VideoItem('', None)
+            vitem = VideoItem('', parent)
             for part in variant['parts']:
                 part_ref = part['ref']
                 subitem = VideoItem(video['items'][part_ref]['data'], vitem)
@@ -272,7 +275,7 @@ def make_videoitem(video, variant):
 
         elif len(variant['parts']) == 1:
             part_ref = variant['parts'][0]['ref']
-            vitem = VideoItem(video['items'][part_ref]['data'], None)
+            vitem = VideoItem(video['items'][part_ref]['data'], parent)
             vitem.mode = video['items'][part_ref]['type']
             vitem.media_id = video['items'][part_ref]['media-id']
             if vitem.media_id:
@@ -303,7 +306,7 @@ def make_videoitem(video, variant):
                 vitem.mplayer_options += ' ' + video['mplayer-options']
 
         elif len(video['items-list']) > 1:
-            vitem = VideoItem('', None)
+            vitem = VideoItem('', parent)
             for v in video['items-list']:
                 subitem = VideoItem(video['items'][v]['data'], vitem)
                 subitem.mode = video['items'][v]['type']
@@ -320,7 +323,7 @@ def make_videoitem(video, variant):
                 vitem.subitems += [ subitem ]
         else:
             ref = video['items-list'][0]
-            vitem = VideoItem(video['items'][ref]['data'], None)
+            vitem = VideoItem(video['items'][ref]['data'], parent)
             vitem.mode = video['items'][ref]['type']
             vitem.media_id = video['items'][ref]['media-id']
             if vitem.media_id:
@@ -335,23 +338,147 @@ def make_videoitem(video, variant):
     
     return vitem
 
-#
-# parse a XML movie file
-#
-def save_parseMovieFile(file, parent, duplicate_check):
-    try:
-        return parseMovieFile(file, parent, duplicate_check)
-    except:
-        print 'Error parsing %s' % file
-        traceback.print_exc()
-        return []
 
-    
-def parseMovieFile(file, parent, duplicate_check):
-    # Returns:
-    #   a list of VideoItems,
-    #     each VideoItem possibly contains a list of VideoItems
-    # 
+def parse_disc_set(node, file, parent, duplicate_check):
+    """
+    parse disc-set
+
+    Data structure:
+    disc-set -+- [title]
+        +- [cover]
+        +- info -+- ...
+        +- disc -+- 1...
+            +- 2...
+            +- 3 -+- [media-id]
+                +- [title]
+                +- [l_re]
+                +- [cover]
+                +- info -+- ...
+                +- file -+- 1...
+                    +- 2...
+                    +- 3 -+- file-id
+                        +- mplayer_options
+
+    Data types:
+        disc-set: dictionary
+        info:     dictionary
+        disc:     list of dictionaries
+        file:     list of dictionaries
+        others:   string
+    """
+    # node == /freevo/disc-set
+    disc_set = {}
+    disc_set['disc'] = []
+    disc_set['cover'] = None
+    disc_set['title'] = None
+    disc_set['info'] = {}
+
+    movies = []
+
+    try:
+        disc_set['title'] = node.attrs[('', "title")].encode('latin-1')
+    except KeyError:
+        pass
+
+    dir = os.path.dirname(file)
+
+    for disc_set_child in node.children:
+        if disc_set_child.name == 'disc':
+            # disc_set_child == /freevo/disc-set/disc
+            disc = {}
+            label_required = 0 
+            disc['media-id'] = None
+            disc['mplayer-options'] = None
+            disc['files-options'] = []
+            # One of the media-id or label-regexp attributes is mandatory.
+            # If not there, the disc is useless
+            try:
+                disc['media-id'] = disc_set_child.attrs[('', "media-id")]
+            except KeyError:
+                label_required = 1
+
+            disc['l_re'] = None
+            try:
+                disc['l_re'] = disc_set_child.attrs[('', "label-regexp")]
+            except KeyError:
+                if label_required == 1:
+                    continue
+            try:
+                disc['mplayer-options'] = disc_set_child.attrs[('', "mplayer-options")]
+            except KeyError:
+                pass
+
+            for disc_child in disc_set_child.children:
+                if disc_child.name == 'file-opt':
+                    fo = {}
+                    fo['media-id'] = disc['media-id']
+                    fo['mplayer-options'] = disc['mplayer-options']
+                    fo['name'] = None
+                    fo['file-id'] = None
+                    try:
+                        if fo['mplayer-options']:
+                            fo['mplayer-options'] += " " + \
+                                                     disc_child.attrs[('', "mplayer-options")]
+                        else:
+                            fo['mplayer-options'] = disc_child.attrs[('', "mplayer-options")]
+                    except KeyError:
+                        pass
+                    if not fo['media-id']:
+                        try:
+                            fo['media-id'] = disc_child.attrs[('', "media-id")]
+                        except KeyError:
+                            continue
+
+                    fo['name'] = disc_child.textof().encode('latin-1')
+                    fo['file-id'] = fo['media-id']
+                    if fo['name']:
+                        fo['file-id'] += fo['name']
+
+                    disc['files-options'] += [ fo ]
+
+            disc_set['disc'] += [ disc ]
+
+        elif disc_set_child.name == u'cover-img':
+            # disc_child == /freevo/disc_set/disc/cover-img
+            img = disc_set_child.textof().encode('ascii')
+            if os.path.isfile(os.path.join(dir, img)):
+                disc_set['cover'] = os.path.join(dir,img)
+
+        elif disc_set_child.name == u'info':
+            # disc_child == /freevo/disc_set/info
+            disc_set['info'] = xml_parseInfo(disc_set_child)
+
+    if disc_set:
+        dsitem = VideoItem('', parent)
+        dsitem.name = disc_set['title']
+        dsitem.image = disc_set['cover']
+        dsitem.info = disc_set['info']
+        dsitem.xml_file = file
+        if disc['l_re']:
+            dsitem.rom_label += [ disc['l_re'] ]
+        for disc in disc_set['disc']:
+            if disc['media-id']:
+                dsitem.rom_id += [ disc['media-id'] ]
+            if disc['files-options']:
+                for fo in disc['files-options']:
+                    dsitem.files_options += [ fo ]
+        movies += [ dsitem ]
+    return movies
+
+
+
+def parse_movie(node, file, parent, duplicate_check):
+    """
+    parse the <movie> tag
+    """
+    movies = []
+
+    # node == /freevo/items/movie
+    video = {}
+    variants = []
+    info = {}
+    image = ""
+
     dir = os.path.dirname(file)
 
     # find the realdir in case this file is in MOVIE_DATA_DIR
@@ -365,237 +492,118 @@ def parseMovieFile(file, parent, duplicate_check):
                     break
     else:
         realdir = dir
-                
-    movies = []
-    
-    parser = qp_xml.Parser()
-    # Let's name node variables after their XML names
-    f = open(file)
-    freevo = parser.parse(f.read())
-    f.close()
-    
-    for freevo_child in freevo.children:
-        if freevo_child.name == 'disc-set':
-            """
-            Data structure:
-            disc-set -+- [title]
-                      +- [cover]
-                      +- info -+- ...
-                      +- disc -+- 1...
-                               +- 2...
-                               +- 3 -+- [media-id]
-                                     +- [title]
-                                     +- [l_re]
-                                     +- [cover]
-                                     +- info -+- ...
-                                     +- file -+- 1...
-                                              +- 2...
-                                              +- 3 -+- file-id
-                                                    +- mplayer_options
 
-            Data types:
-              disc-set: dictionary
-              info:     dictionary
-              disc:     list of dictionaries
-              file:     list of dictionaries
-              others:   string
-            """
-            # freevo_child == /freevo/disc-set
-            disc_set = {}
-            disc_set['disc'] = []
-            disc_set['cover'] = None
-            disc_set['title'] = None
-            disc_set['info'] = {}
-            
-            try:
-                disc_set['title'] = freevo_child.attrs[('', "title")].encode('latin-1')
-            except KeyError:
-                pass
-                
-            for disc_set_child in freevo_child.children:
-                if disc_set_child.name == 'disc':
-                    # disc_set_child == /freevo/disc-set/disc
-                    disc = {}
-                    label_required = 0 
-                    disc['media-id'] = None
-                    disc['mplayer-options'] = None
-                    disc['files-options'] = []
-                    # One of the media-id or label-regexp attributes is mandatory.
-                    # If not there, the disc is useless
+    for movie_child in node.children:
+        if movie_child.name == u'video':
+            # movie_child == /freevo/items/movie/video
+            video = xml_parseVideo(movie_child)
+        elif movie_child.name == u'variants':
+            # movie_child == /freevo/items/movie/variants
+            variants = xml_parseVariants(movie_child)
+        elif movie_child.name == u'info':
+            # movie_child == /freevo/items/movie/info
+            info = xml_parseInfo(movie_child)
+        elif movie_child.name == u'cover-img':
+            # movie_child == /freevo/items/movie/cover-img
+            img = movie_child.textof().encode('ascii')
+            # the image file must be stored in the same
+            # directory than that XML file
+            if os.path.isfile(os.path.join(dir, img)):
+                image = os.path.join(dir, img)
+
+    title = None
+    try:
+        title = node.attrs[('', "title")].encode('latin-1')
+    except KeyError:
+        pass
+
+    if video.has_key('items'):
+        for p in video['items'].keys():
+            if video['items'][p]['type'] == 'file':
+                filename = video['items'][p]['data']
+                if filename.find('://') == -1 and not video['items'][p]['media-id']:
+                    video['items'][p]['data'] = os.path.join(realdir, filename)
+                for i in range(len(duplicate_check)):
                     try:
-                        disc['media-id'] = disc_set_child.attrs[('', "media-id")]
-                    except KeyError:
-                        label_required = 1
+                        if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
+                            os.path.join(realdir, filename)):
+                            del duplicate_check[i]
+                            break
+                    except:
+                        if duplicate_check[i] == os.path.join(realdir, filename):
+                            del duplicate_check[i]
+                            break
 
-                    disc['l_re'] = None
-                    try:
-                        disc['l_re'] = disc_set_child.attrs[('', "label-regexp")]
-                    except KeyError:
-                        if label_required == 1:
-                            continue
-                    try:
-                        disc['mplayer-options'] = disc_set_child.attrs[('', "mplayer-options")]
-                    except KeyError:
-                        pass
+    mitem = None
+    if variants:
+        for v in variants:
+            for p in v[ 'parts' ]:
+                for i in ( 'audio', 'subtitle' ):
+                    if p.has_key( i )  and p[ i ].has_key( 'file' ):
+                        filename = p[ i ][ 'file' ]
+                        filename = os.path.join( realdir, filename )
+                        if os.path.isfile( filename ):
+                            p[ i ][ 'file' ] = filename
 
-                    for disc_child in disc_set_child.children:
-                        if disc_child.name == 'file-opt':
-                            fo = {}
-                            fo['media-id'] = disc['media-id']
-                            fo['mplayer-options'] = disc['mplayer-options']
-                            fo['name'] = None
-                            fo['file-id'] = None
-                            try:
-                                if fo['mplayer-options']:
-                                    fo['mplayer-options'] += " " + disc_child.attrs[('', "mplayer-options")]
-                                else:
-                                    fo['mplayer-options'] = disc_child.attrs[('', "mplayer-options")]
-                            except KeyError:
-                                pass
-                            if not fo['media-id']:
-                                try:
-                                    fo['media-id'] = disc_child.attrs[('', "media-id")]
-                                except KeyError:
-                                    continue
+        mitem = make_videoitem(video, variants[0], parent)
+    else:
+        mitem = make_videoitem(video, None, parent)
+    mitem.name = title
+    mitem.image = image
+    mitem.xml_file = file
+    for i in info:
+        mitem.info[i] = info[i]
 
-                            fo['name'] = disc_child.textof().encode('latin-1')
-                            fo['file-id'] = fo['media-id']
-                            if fo['name']:
-                                fo['file-id'] += fo['name']
+    for subitem in mitem.subitems:
+        subitem.xml_file = file
+    # Be careful: singular and plural names are used
+    for variant in variants:
+        varitem = make_videoitem(video, variant, mitem)
+        varitem.name = variant['name']
+        varitem.image = image
+        for i in info:
+            varitem.info[i] = info[i]
+        varitem.xml_file = file
+        for subitem in varitem.subitems:
+            subitem.xml_file = file
+        mitem.variants += [ varitem ] 
 
-                            disc['files-options'] += [ fo ]
-
-                    disc_set['disc'] += [ disc ]
-                    
-                elif disc_set_child.name == u'cover-img':
-                    # disc_child == /freevo/disc_set/disc/cover-img
-                    img = disc_set_child.textof().encode('ascii')
-                    if os.path.isfile(os.path.join(dir, img)):
-                        disc_set['cover'] = os.path.join(dir,img)
-
-                elif disc_set_child.name == u'info':
-                    # disc_child == /freevo/disc_set/info
-                    disc_set['info'] = xml_parseInfo(disc_set_child)
-
-            if disc_set:
-                dsitem = VideoItem('', None)
-                dsitem.parent = parent
-                dsitem.name = disc_set['title']
-                dsitem.image = disc_set['cover']
-                dsitem.info = disc_set['info']
-                dsitem.xml_file = file
-                if disc['l_re']:
-                    dsitem.rom_label += [ disc['l_re'] ]
-                for disc in disc_set['disc']:
-                    if disc['media-id']:
-                        dsitem.rom_id += [ disc['media-id'] ]
-                    if disc['files-options']:
-                        for fo in disc['files-options']:
-                            dsitem.files_options += [ fo ]
-                movies += [ dsitem ]
-
-        elif freevo_child.name == 'movie':
-            # freevo_child == /freevo/items/movie
-            video = {}
-            variants = []
-            info = {}
-            image = ""
-
-            for movie_child in freevo_child.children:
-                if movie_child.name == u'video':
-                    # movie_child == /freevo/items/movie/video
-                    video = xml_parseVideo(movie_child)
-                elif movie_child.name == u'variants':
-                    # movie_child == /freevo/items/movie/variants
-                    variants = xml_parseVariants(movie_child)
-                elif movie_child.name == u'info':
-                    # movie_child == /freevo/items/movie/info
-                    info = xml_parseInfo(movie_child)
-                elif movie_child.name == u'cover-img':
-                    # movie_child == /freevo/items/movie/cover-img
-                    img = movie_child.textof().encode('ascii')
-                    # the image file must be stored in the same
-                    # directory than that XML file
-                    if os.path.isfile(os.path.join(dir, img)):
-                        image = os.path.join(dir, img)
-
-            title = None
-            try:
-                title = freevo_child.attrs[('', "title")].encode('latin-1')
-            except KeyError:
-                pass
-
-            if video.has_key('items'):
-                for p in video['items'].keys():
-                    if video['items'][p]['type'] == 'file':
-                        filename = video['items'][p]['data']
-                        if filename.find('://') == -1 and not video['items'][p]['media-id']:
-                            video['items'][p]['data'] = os.path.join(realdir, filename)
-                        for i in range(len(duplicate_check)):
-                            try:
-                                if (unicode(duplicate_check[i], 'latin1', 'ignore') == \
-                                    os.path.join(realdir, filename)):
-                                    del duplicate_check[i]
-                                    break
-                            except:
-                                if duplicate_check[i] == os.path.join(realdir, filename):
-                                    del duplicate_check[i]
-                                    break
-
-            mitem = None
-            if variants:
-                for v in variants:
-                    for p in v[ 'parts' ]:
-                        for i in ( 'audio', 'subtitle' ):
-                            if p.has_key( i )  and p[ i ].has_key( 'file' ):
-                                filename = p[ i ][ 'file' ]
-                                filename = os.path.join( realdir, filename )
-                                if os.path.isfile( filename ):
-                                    p[ i ][ 'file' ] = filename
-                
-                mitem = make_videoitem(video, variants[0])
-            else:
-                mitem = make_videoitem(video, None)
-            mitem.parent = parent
-            mitem.name = title
-            mitem.image = image
-            mitem.xml_file = file
-            mitem.info = info
-            
-            for subitem in mitem.subitems:
-                subitem.xml_file = file
-            # Be careful: singular and plural names are used
-            for variant in variants:
-                varitem = make_videoitem(video, variant)
-                varitem.parent = mitem
-                varitem.name = variant['name']
-                varitem.image = image
-                varitem.info = info
-                varitem.xml_file = file
-                for subitem in varitem.subitems:
-                    subitem.xml_file = file
-                mitem.variants += [ varitem ] 
-
-            movies += [ mitem ]
-
-    for m in movies:
-        m.fxd_file = file
-        if not m.subitems and os.path.isfile(m.filename):
-            mminfo = mmpython.parse(m.filename)
-            if mminfo:
-                for i in m.info:
-                    if m.info[i]:
-                        mminfo[i] = m.info[i]
-                m.info = mminfo
-        elif m.subitems and os.path.isfile(m.subitems[0].filename):
-            mminfo = mmpython.parse(m.subitems[0].filename)
-            if mminfo:
-                for i in m.info:
-                    if m.info[i]:
-                        mminfo[i] = m.info[i]
-                m.info = mminfo
-
+    movies += [ mitem ]
     return movies
+
+
+def parseMovieFile(file, parent=None, duplicate_check=[]):
+    """
+    parse a XML movie file
+
+    Returns:
+      a list of VideoItems,
+      each VideoItem possibly contains a list of VideoItems
+    """ 
+    try:
+        movies = []
+
+        parser = qp_xml.Parser()
+        # Let's name node variables after their XML names
+        f = open(file)
+        freevo = parser.parse(f.read())
+        f.close()
+
+        for freevo_child in freevo.children:
+            if freevo_child.name == 'disc-set':
+                movies = parse_disc_set(freevo_child, file, parent, duplicate_check)
+
+            elif freevo_child.name == 'movie':
+                movies = parse_movie(freevo_child, file, parent, duplicate_check)
+
+        for m in movies:
+            m.fxd_file = file
+
+        return movies
+    except:
+        print 'Error parsing %s' % file
+        traceback.print_exc()
+        return []
 
 
 # --------------------------------------------------------------------------------------
@@ -628,7 +636,7 @@ def hash_xml_database():
     if not config.ONLY_SCAN_DATADIR:
         for name,dir in config.DIR_MOVIES:
             for file in util.recursefolders(dir,1,'*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-                infolist = save_parseMovieFile(file, os.path.dirname(file),[])
+                infolist = parseMovieFile(file)
                 for info in infolist:
                     if info.rom_id:
                         for i in info.rom_id:
@@ -640,7 +648,7 @@ def hash_xml_database():
                 
     for file in util.recursefolders(config.MOVIE_DATA_DIR,1,
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-        infolist = save_parseMovieFile(file, os.path.dirname(file),[])
+        infolist = parseMovieFile(file)
         for info in infolist:
             config.MOVIE_INFORMATIONS += [ info ]
             if info.rom_id:
@@ -656,7 +664,7 @@ def hash_xml_database():
 
     for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-        infolist = save_parseMovieFile(file, os.path.dirname(file),[])
+        infolist = parseMovieFile(file)
         for info in infolist:
             k = os.path.splitext(os.path.basename(file))[0]
             config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options,
