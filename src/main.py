@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/12 10:28:27  dischi
+# Added new xml file support. The old xml files won't work, you need to
+# convert them.
+#
 # Revision 1.12  2003/02/08 23:31:37  gsbarbieri
 # hanged the Image menu to ExtendedMenu.
 #
@@ -355,7 +359,9 @@ class RemovableMedia:
         self.tray_open = 0
         self.drive_status = None  # return code from ioctl for DRIVE_STATUS
 
-        self.info = None
+        self.id    = ''
+        self.label = ''
+        self.info  = None
         
 
     def is_tray_open(self):

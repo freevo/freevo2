@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/12 10:28:28  dischi
+# Added new xml file support. The old xml files won't work, you need to
+# convert them.
+#
 # Revision 1.11  2003/01/28 11:34:28  dischi
 # Reversed the bugfix in identifymedia and fixed it in videoitem. Track 1
 # should play track 1, track 0 should be dvdnav (in the future, right now
@@ -127,6 +131,9 @@ class Identify_Thread(threading.Thread):
 
         media.drive_status = s
 
+        media.id    = ''
+        media.label = ''
+
         # Is there a disc present?
         if s != CDS_DISC_OK:
             os.close(fd)
@@ -154,6 +161,7 @@ class Identify_Thread(threading.Thread):
         image = title = movie_info = None
 
         # Read the volume label directly from the ISO9660 file system
+        
         os.close(fd)
         try:
             img = open(media.devicename)
@@ -168,6 +176,9 @@ class Identify_Thread(threading.Thread):
         except IOError:
             print 'I/O error on disc %s' % media.devicename
             return
+
+        media.id    = id
+        media.label = ''
         
         # is the id in the database?
         if id in config.MOVIE_INFORMATIONS_ID:

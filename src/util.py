@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/12 10:28:28  dischi
+# Added new xml file support. The old xml files won't work, you need to
+# convert them.
+#
 # Revision 1.9  2003/02/07 20:11:32  dischi
 # bugfix
 #
@@ -408,3 +412,24 @@ def killall(appname, sig=9):
                 break # Done with this process, go on to the next one
 
     return
+
+
+ 
+def resolve_media_mountdir(media_id, file):
+    mountdir = None
+    full_filename = file
+    # Find on what media it is located
+    for media in config.REMOVABLE_MEDIA:
+        if media_id == media.id:
+            # Then set the filename
+            mountdir = media.mountdir
+            full_filename = os.path.join(media.mountdir, file)
+            break
+
+    return mountdir, full_filename
+
+def check_media(media_id):
+    for media in config.REMOVABLE_MEDIA:
+        if media_id == media.id:
+            return media
+    return None

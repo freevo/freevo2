@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/12 10:28:28  dischi
+# Added new xml file support. The old xml files won't work, you need to
+# convert them.
+#
 # Revision 1.12  2003/02/11 18:40:09  dischi
 # Fixed bug when the title list wasn't allowed in the item menu
 #
@@ -105,6 +109,7 @@ import copy
 rc         = rc.get_singleton()
 skin       = skin.get_singleton()
 osd        = osd.get_singleton()
+menuwidget = menu.get_singleton()
 
 from item import Item
 import configure
@@ -119,13 +124,19 @@ class VideoItem(Item):
         self.handle_type = 'video'
 
         self.mode  = 'file'             # file, dvd or vcd
+        self.media_id = ''              # if media == vcd or dvd
 
+        self.variants = []              # if this item has variants
         self.subitems = []              # if this item has more than one file/track to play
         self.current_subitem = None
+
+        self.subtitle_file = {}         # text subtitles
+        self.audio_file = {}            # audio dubbing
 
         self.filename = filename
         
         self.name    = util.getname(filename)
+
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
@@ -194,8 +205,11 @@ class VideoItem(Item):
         """
         return a list of possible actions on this item.
         """
+        
         items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
-
+        if self.variants:
+            items += [ (self.show_variants, 'Show variants') ]
+        
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
         if not self.filename or self.filename == '0':
@@ -206,6 +220,10 @@ class VideoItem(Item):
                 items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
         return items
 
+
+    def show_variants(self, arg=None, menuw=None):
+        m = menu.Menu(self.name, self.variants, reload_func=None)
+        menuw.pushmenu(m)
 
     def play(self, arg=None, menuw=None):
         """
@@ -220,11 +238,37 @@ class VideoItem(Item):
             return
 
         file = self.filename
+        if self.mode == "file":
+            if self.media_id:
+                mountdir, file = util.resolve_media_mountdir(self.media_id,file)
+                if mountdir:
+                    util.mount(mountdir)
+                else:
+                    # TODO: prompt for the right media
+                    skin.PopupBox('Media not found for file %s' % (file))
+                    time.sleep(2.0)
+                    rc.post_event(rc.PLAY_END)
+                    menuwidget.refresh()
+                    return
+        elif self.mode == 'dvd' or self.mode == 'vcd':
+            if not self.media:
+                media = util.check_media(self.media_id)
+                if media:
+                    self.media = media
+                else:
+                    skin.PopupBox('Media not found for %s track %s' % (self.mode, file))
+                    time.sleep(2.0)
+                    rc.post_event(rc.PLAY_END)
+                    menuwidget.refresh()
+                    return
+
         if (not self.filename or self.filename == '0') and \
            (self.mode == 'dvd' or self.mode == 'vcd'):
             file = '1'
 
         mplayer_options = self.mplayer_options
+        if not mplayer_options:
+            mplayer_options = ""
 
         if self.media:
             mplayer_options += ' -cdrom-device %s -dvd-device %s' % \
@@ -236,12 +280,24 @@ class VideoItem(Item):
         if self.selected_audio:
             mplayer_options += ' -aid %s' % self.selected_audio
 
+        if self.subtitle_file:
+            d, f = util.resolve_media_mountdir(self.subtitle_file['media-id'],self.subtitle_file['file'])
+            if d:
+                util.mount(d)
+            mplayer_options += ' -sub %s' % f
+
+        if self.audio_file:
+            d, f = util.resolve_media_mountdir(self.audio_file['media-id'],self.audio_file['file'])
+            if d:
+                util.mount(d)
+            mplayer_options += ' -audiofile %s' % f
+
         if arg:
             mplayer_options += ' %s' % arg
 
         if self.deinterlace:
             mplayer_options += ' -vop pp=fd'
-            
+
         self.video_player.play(file, mplayer_options, self)
 
 
