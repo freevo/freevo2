@@ -16,6 +16,10 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/07/31 14:28:28  outlyer
+# Added sampling frequency '9' as '44100' to cope with a (possibly broken) VBR
+# mp3 file I had. This prevents an indexerror/crash.
+#
 # Revision 1.4  2002/07/31 00:59:09  outlyer
 # Patch from Thomas Malt <tm@false.linpro.no>
 # 1) When paused the timer for the audio did not pause, so when
@@ -492,8 +496,9 @@ def mp3info(fn):
 	print xing_frames
 	print xing_bytes
 	if (flags & 0x08):
+		print nh['sampling_frequency']
 		tpf = float([0,384,1152,1152,576][int(nh['lay'])])
-		tpf = tpf / ([44100, 48000, 32000, 22050, 24000, 16000, 11025, 12000, 8000][int(nh['sampling_frequency'])] << nh['lsf'])
+		tpf = tpf / ([44100, 48000, 32000, 22050, 24000, 16000, 11025, 12000, 8000, 44100][int(nh['sampling_frequency'])] << nh['lsf'])
 		h['bitrate'] = (xing_bytes * 8.) / (tpf * xing_frames * 1000)
 
     if h['id']:
