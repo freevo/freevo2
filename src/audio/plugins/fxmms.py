@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/21 15:51:42  mikeruelle
+# make sure always on top is not set
+#
 # Revision 1.1  2004/01/19 20:50:52  mikeruelle
 # XMMS support is now back in regular freevo. Much thanks to a great patch from
 # Roman Stanchak for making it possible. see doc string for details.
@@ -239,6 +242,7 @@ class FXMMS:
         xmms.main_win_toggle(0)
         xmms.pl_win_toggle(0)
         xmms.eq_win_toggle(0)
+        xmms.toggle_aot(0)
 
     def stop(self):
         """
