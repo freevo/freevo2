@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/11/04 11:49:09  dischi
+# only parse existing files with mmpython
+#
 # Revision 1.41  2003/10/04 19:51:04  dischi
 # copy info to prevent mmpython from storing the fxd infos in the cache
 #
@@ -264,10 +267,15 @@ def make_videoitem(video, variant, parent):
     vitem = None
     if variant:
         if len(variant['parts']) > 1:
-            vitem = VideoItem('', parent)
+            vitem = VideoItem('', parent, parse=False)
             for part in variant['parts']:
                 part_ref = part['ref']
-                subitem = VideoItem(video['items'][part_ref]['data'], vitem)
+                f = video['items'][part_ref]['data']
+                if os.path.isfile(f):
+                    subitem = VideoItem(f, vitem)
+                else:
+                    subitem = VideoItem(f, vitem, parse=False)
+                    
                 subitem.mode = video['items'][part_ref]['type']
                 subitem.name = variant['name']
                 subitem.media_id = video['items'][part_ref]['media-id']
@@ -290,7 +298,11 @@ def make_videoitem(video, variant, parent):
 
         elif len(variant['parts']) == 1:
             part_ref = variant['parts'][0]['ref']
-            vitem = VideoItem(video['items'][part_ref]['data'], parent)
+            f = video['items'][part_ref]['data']
+            if os.path.isfile(f):
+                vitem = VideoItem(f, parent)
+            else:
+                vitem = VideoItem(f, parent, parse=False)
             vitem.mode = video['items'][part_ref]['type']
             vitem.media_id = video['items'][part_ref]['media-id']
             if vitem.media_id:
@@ -312,18 +324,22 @@ def make_videoitem(video, variant, parent):
     else:
         if not video.has_key('items-list'):
             video['items-list'] = []
-            vitem = VideoItem('', None)
+            vitem = VideoItem('', None, parse=False)
             
         elif len(video['items-list']) == 0:
-            vitem = VideoItem('', None)
+            vitem = VideoItem('', None, parse=False)
             vitem.mplayer_options = ''
             if video['mplayer-options']:
                 vitem.mplayer_options += ' ' + video['mplayer-options']
 
         elif len(video['items-list']) > 1:
-            vitem = VideoItem('', parent)
+            vitem = VideoItem('', parent, parse=False)
             for v in video['items-list']:
-                subitem = VideoItem(video['items'][v]['data'], vitem)
+                f = video['items'][v]['data']
+                if os.path.isfile(f):
+                    subitem = VideoItem(f, vitem)
+                else:
+                    subitem = VideoItem(f, vitem, parse=False)
                 subitem.mode = video['items'][v]['type']
                 subitem.media_id = video['items'][v]['media-id']
                 if subitem.media_id:
@@ -338,7 +354,11 @@ def make_videoitem(video, variant, parent):
                 vitem.subitems += [ subitem ]
         else:
             ref = video['items-list'][0]
-            vitem = VideoItem(video['items'][ref]['data'], parent)
+            f = video['items'][ref]['data']
+            if os.path.isfile(f):
+                vitem = VideoItem(f, parent)
+            else:
+                vitem = VideoItem(f, parent, parse=False)
             vitem.mode = video['items'][ref]['type']
             vitem.media_id = video['items'][ref]['media-id']
             if vitem.media_id:
@@ -464,7 +484,7 @@ def parse_disc_set(node, file, parent, duplicate_check):
             disc_set['info'] = xml_parseInfo(disc_set_child)
 
     if disc_set:
-        dsitem = VideoItem('', parent)
+        dsitem = VideoItem('', parent, parse=False)
         dsitem.name = disc_set['title']
         dsitem.image = disc_set['cover']
         dsitem.info = disc_set['info']
