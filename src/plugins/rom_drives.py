@@ -351,8 +351,6 @@ class Watcher:
     """
     def __init__(self):
         self.rebuild_file = sysconfig.cachefile('freevo-rebuild-database')
-        # Make sure the movie database is rebuilt at startup
-        util.touch(self.rebuild_file)
         self.locked = False
 
         # Add the drives to the config.removable_media list. There doesn't have
@@ -721,5 +719,4 @@ class Watcher:
 
 
 # start the watcher
-global watcher
 watcher = Watcher()
