@@ -48,18 +48,17 @@ import time
 
 # freevo imports
 import config
+import util.cache
 
 # gui imports
-import util
 import gui.animation as animation 
 from gui.widgets import Container
 
-# default areas
-from listing_area   import ListingArea
-from tvlisting_area import TVListingArea as TvlistingArea
-from view_area      import ViewArea
-from info_area      import InfoArea
-from default_areas  import ScreenArea, TitleArea, SubtitleArea
+# areas
+from default_areas  import *
+for f in os.listdir(os.path.dirname(__file__)):
+    if f.endswith('_area.py'):
+        exec('from %s import *' % f[:-3])
 
 
 class AreaHandler:
@@ -102,7 +101,7 @@ class AreaHandler:
             
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR,
                                          'skin-%s' % os.getuid())
-        self.storage = util.read_pickle(self.storage_file)
+        self.storage = util.cache.load(self.storage_file)
         if self.storage and self.storage.has_key(config.SKIN_XML_FILE):
             self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
         else:
@@ -149,7 +148,7 @@ class AreaHandler:
                                      len(area.style)
 
         self.storage[config.SKIN_XML_FILE] = self.display_style['menu']
-        util.save_pickle(self.storage, self.storage_file)
+        util.cache.save(self.storage_file, self.storage)
 
 
 
