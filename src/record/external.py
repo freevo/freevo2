@@ -44,9 +44,11 @@
 # python imports
 import copy
 import logging
+import time
 
 import pyepg
 import mbus
+import notifier
 
 # record imports
 from record.recorder import Plugin
@@ -96,14 +98,22 @@ class Recorder(Plugin):
             self.channels[channel.id] = channel.access_id
         self.suffix = '.mpg'
         self.entity.call('devices.list', self.__devices_list)
+        # add check timer every 30 minutes
+        notifier.addTimer(30000, self.check_recordings)
+        log.info('add external plugin')
 
 
     def __devices_list(self, result):
         """
         RPC return for device.list()
         """
-        if result.appResult != 'OK' or not result.appStatus:
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.deactivate()
+            return
+        if not result.appStatus:
             log.error(str(result.appDescription))
+            self.deactivate()
             return
         for device in result.arguments:
             self.entity.call('device.describe', self.__devices_desc, device)
@@ -113,8 +123,13 @@ class Recorder(Plugin):
         """
         RPC return for device.describe()
         """
-        if result.appResult != 'OK' or not result.appStatus:
+        if isinstance(result, mbus.types.MError):
+            log.error(str(result))
+            self.deactivate()
+            return
+        if not result.appStatus:
             log.error(str(result.appDescription))
+            self.deactivate()
             return
 
         # transform external name into local channel ids
@@ -159,7 +174,7 @@ class Recorder(Plugin):
             log.error(str(result))
             self.deactivate()
             return
-        if result.appResult != 'OK' or not result.appStatus:
+        if not result.appStatus:
             log.error(str(result.appDescription))
             self.deactivate()
             return
@@ -183,7 +198,7 @@ class Recorder(Plugin):
             log.error(str(result))
             self.deactivate()
             return
-        if result.appResult != 'OK' or not result.appStatus:
+        if not result.appStatus:
             log.error(str(result.appDescription))
             self.deactivate()
             return
@@ -197,6 +212,9 @@ class Recorder(Plugin):
         the external application.
         """
         for rec in copy.copy(self.recordings):
+            if rec.rec.start - rec.rec.start_padding > time.time() + 60000:
+                # only schedule for the next hour
+                continue
             if rec.id == IN_PROGRESS:
                 # already checking
                 break
@@ -211,6 +229,7 @@ class Recorder(Plugin):
                 channel  = self.channels[rec.rec.channel]
                 filename = self.get_url(rec.rec)
                 filename = filename.replace('file:/', 'file-mpeg:///')
+                log.info('schedule %s' % String(rec.rec.name))
                 self.entity.call('vdr.record', self.__vdr_record, device,
                                  channel, rec.rec.start - rec.rec.start_padding,
                                  rec.rec.stop + rec.rec.stop_padding,
@@ -222,7 +241,9 @@ class Recorder(Plugin):
                 self.entity.call('vdr.remove', self.__vdr_remove, rec.id)
                 self.recordings.remove(rec)
                 break
-
+        # return True to be rescheduled by notifier
+        return True
+    
 
     def schedule(self, recordings, server=None):
         """
