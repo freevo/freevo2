@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/04 13:07:32  dischi
+# close file handlers
+#
 # Revision 1.8  2003/12/10 19:46:35  dischi
 # add function to get the stdout of a command call
 #
@@ -181,4 +184,7 @@ def stdout(app):
             break
         ret.append(data)
     child.wait()
+    child.fromchild.close()
+    child.childerr.close()
+    child.tochild.close()
     return ret
