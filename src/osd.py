@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/06/22 20:49:23  dischi
+# small fix??
+#
 # Revision 1.46  2003/06/22 11:35:36  dischi
 # Added null_layer. This layer can be used for drawstringframed to avoid
 # unneccessay drawings.
@@ -1013,6 +1016,7 @@ class OSD:
         lines = [ '' ]
         line_number = 0
         ellipses_size = self.stringsize(ellipses, font, ptsize)[0]
+        i = 0
         for i in range(len(string)):
             char = string[i]
             if string[i] == '\t':
