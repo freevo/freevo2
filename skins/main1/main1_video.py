@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/02 19:02:15  dischi
+# Add [] for directories in the normal menu and don't change the name
+# for the extended once.
+#
 # Revision 1.5  2003/02/19 14:54:02  dischi
 # Some cleanups:
 # utils has a function to return a preview image based on the item and
@@ -198,7 +202,7 @@ class Skin_Video:
                     
                     
             elif item.type == 'dir':
-                DrawTextFramed('Folder: %s' %  item.name[1:-1], val, x, y, w, h)
+                DrawTextFramed('Folder: %s' %  item.name, val, x, y, w, h)
                 y += str_h
                 DrawTextFramed('Path: %s' %  item.dir, val, x, y, w, h)
                 

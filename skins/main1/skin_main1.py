@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2003/03/02 19:02:15  dischi
+# Add [] for directories in the normal menu and don't change the name
+# for the extended once.
+#
 # Revision 1.85  2003/03/02 14:35:11  dischi
 # Added clear function
 #
@@ -524,6 +528,9 @@ class Skin:
             text = choice.name
             if choice.type == 'playlist':
                 text = 'PL: %s' % text
+            if choice.type == 'dir' and choice.parent and \
+               choice.parent.type != 'mediamenu':
+                text = '[%s]' % text
             font_w, font_h = osd.stringsize(text, font=obj.font, ptsize=obj.size)
 
             if not spacing:

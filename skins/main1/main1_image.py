@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/02 19:02:14  dischi
+# Add [] for directories in the normal menu and don't change the name
+# for the extended once.
+#
 # Revision 1.8  2003/02/21 04:59:55  krister
 # Bugfix for downarrow on last page.
 #
@@ -209,7 +213,7 @@ class Skin_Image:
                     y += str_h
 
             elif item.type == 'dir':
-                DrawTextFramed('Folder: %s' %  item.name[1:-1], val, x, y, w, h)
+                DrawTextFramed('Folder: %s' %  item.name, val, x, y, w, h)
                 y += str_h
                 DrawTextFramed('Path: %s' %  item.dir, val, x, y, w, h)
 
