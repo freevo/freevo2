@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/08/04 20:38:59  dischi
+# Notice the user that pre-caching is missing
+#
 # Revision 1.55  2003/08/01 13:17:48  outlyer
 # Added Matthew Weber's "rc repeat" patch; it requires pylirc 0.0.4 or newer (CVS)
 #
@@ -415,7 +418,13 @@ if __name__ == "__main__":
     mmpython.use_cache(mmcache)
     mmpython.mediainfo.DEBUG = 0
     mmpython.factory.DEBUG = 0
-    
+
+    if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
+        print '\nWARNING: no pre-cached data'
+        print 'Freevo will cache each directory when you first enter it. This can'
+        print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
+        print 'up usage of freevo'
+        print
     try:
         main_func()
     except KeyboardInterrupt:

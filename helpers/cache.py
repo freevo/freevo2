@@ -49,8 +49,10 @@ def cache_directories():
     for d in all_dirs:
         print d
         mmpython.cache_dir(d)
+        
+    os.system('touch %s/VERSION' % mmcache)
 
-    
+
 if __name__ == "__main__":
     if len(sys.argv)>1 and sys.argv[1] == '--help':
         print 'freevo cache helper to delete unused cache entries and to'
