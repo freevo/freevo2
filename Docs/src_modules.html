@@ -1,0 +1,554 @@
+<html><head>
+<title>Freevo Modules</title></head>
+<body>
+
+<h2>Freevo Modules</h2>
+
+Created by Ibon Urretavizcaya. <br>
+Modified: 2002-10-23.<br><br>
+
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">audioinfo.py</th><th>v1.14</th></tr>
+<tr><th colspan="2">Getting info about mp3 files</th><td>skin</td></tr>
+<tr><td rowspan="15">AudioInfo</td><td>__init__()</td><td></td></tr>
+<tr><td>get_cover_image()</td><td>os, imghdr</td></tr>
+<tr><td>set_cover_image()</td><td></td></tr>
+<tr><td>toggle_pause()</td><td>time</td></tr>
+<tr><td>set_info_ogg()</td><td>ogg</td></tr>
+<tr><td>set_info_mp3()</td><td>mp3_id3, os</td></tr>
+<tr><td>yes()</td><td></td></tr>
+<tr><td>is_ogg()</td><td>re</td></tr>
+<tr><td>is_mp3()</td><td>re</td></tr>
+<tr><td>get_elapsed()</td><td>time</td></tr>
+<tr><td>get_remain()</td><td></td></tr>
+<tr><td>get_done()</td><td></td></tr>
+<tr><td>ffwd()</td><td></td></tr>
+<tr><td>rwd()</td><td>time</td></tr>
+<tr><td>draw()</td><td>time, skin</td></tr>
+<tr><td>mp3info()</td><td>MP3 Info</td><td></td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">cdrom.py</th><th>v1.1</th></tr>
+<tr><th colspan="3">CD-ROM</th></tr>
+<tr><td>sizeof()</td><td>???</td><td>struct</td></tr>
+<tr><td>__constant_cpu_to_le16()</td></tr>
+<tr><td>__constant_cpu_to_le32()</td></tr>
+<tr><td>__constant_cpu_to_le64()</td></tr>
+<tr><td>__constant_le16_to_cpu()</td></tr>
+<tr><td>__constant_le32_to_cpu()</td></tr>
+<tr><td>__constant_le64_to_cpu()</td></tr>
+<tr><td>__cpu_to_le16()</td></tr>
+<tr><td>__cpu_to_le32()</td></tr>
+<tr><td>__cpu_to_le64()</td></tr>
+<tr><td>__le16_to_cpu()</td></tr>
+<tr><td>__le32_to_cpu()</td></tr>
+<tr><td>__le64_to_cpu()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">childapp.py</th><th>v1.7</th></tr>
+<tr><th colspan="2">Runs an application in a child process</th><td>time, app, sys</td></tr>
+<tr><td rowspan="6">ChildApp</td><td>__init__()</td><td>popen2, time</td></tr>
+<tr><td>write()</td></tr>
+<tr><td>stdout_cb()</td></tr>
+<tr><td>stderr_cb()</td></tr>
+<tr><td>isAlive()</td></tr>
+<tr><td>kill()</td><td>os</td></tr>
+<tr><td rowspan="3">Read_Thread</td><td>__init__()</td><td>threading</td></tr>
+<tr><td>run()</td></tr>
+<tr><td>_handle_input()</td></tr>
+<tr><td rowspan="2">Test_Thread</td><td>__init__()</td><td>threading</td></tr>
+<tr><td>run()</td><td>sys</td></tr>
+<tr><td rowspan="2">Rec</td><td>stdout_cb()</td></tr>
+<tr><td>stderr_cb()</td></tr>
+</tbody></table>
+
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">config.py</th><th>v1.40</th></tr>
+<tr><th colspan="2">Handle the configuration file init</th><td>os, sys</td></tr>
+<tr><td rowspan="4">Logger</td><td>__init__()</td><td>os, time</td></tr>
+<tr><td>write()</td><td>sys, msg, time</td></tr>
+<tr><td>flush()</td></tr>
+<tr><td>close()</td></tr>
+<tr><td rowspan="1">Struct</td></tr>
+<tr><td>read_config()</td><td>Read Config File</td></tr>
+</tbody></table>
+
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">datatypes.py</th><th>v1.3</th></tr>
+<tr><th colspan="3">Some datatypes we need all the time</th></tr>
+<tr><td>RemovableMediaInfo</td><td>__init__()</td></tr>
+<tr><td>FileInformation</td><td>__init__()</td></tr>
+<tr><td>MovieInformation</td><td>__init__()</td></tr>
+<tr><td>MovieExtraInformation</td><td>__init__()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">epg_types.py</th><th>v1.7</th></tr>
+<tr><th colspan="2">Types for the Freevo Electronic Program Guide module</th><td>config</td></tr>
+<tr><td>TvProgram</td><td>__str__()</td><td>time</td></tr>
+<tr><td rowspan="3">TvChannel</td><td>__init__()</td></tr>
+<tr><td>Sort()</td></tr>
+<tr><td>__str__()</td></tr>
+<tr><td rowspan="6">TvGuide</td><td>__init__()</td></tr>
+<tr><td>AddChannel()</td></tr>
+<tr><td>AddProgram()</td></tr>
+<tr><td>GetPrograms()</td></tr>
+<tr><td>Sort()</td></tr>
+<tr><td>__str__()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">epg_xmltv.py</th><th>v1.13</th></tr>
+<tr><th colspan="2">Freevo Electronic Program Guide module for XMLTV</th><td>config, os, sys</td></tr>
+<tr><td>myversion()</td><td>Shows xmltv Python parser version</td></tr>
+<tr><td>get_guide()</td><td>Get a TV guide from memory cache</td><td>os, config, pickle, epg_types</td></tr>
+<tr><td>load_guide()</td><td>Load a guide from the raw XMLTV file</td><td>epg_types, os, config</td></tr>
+<tr><td>timestr2secs_utc()</td><td>Convert a timestring to UTC (=GMT) seconds</td><td>time, strptime</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">exif.py</th><th>non-freevo</th></tr>
+<tr><th colspan="3">Library to extract EXIF information in digital camera image files</th></tr>
+<tr><td>...</td></tr>
+<tr><td>process_file()</td><td>Process an image file</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">ExtendedMenu.py</th><th>v1.1</th></tr>
+<tr><th colspan="2">Extended Menu</th><td>sys, rc, osd</td></tr>
+<tr><td rowspan="4">ExtendedMenu</td><td>__init__()</td></tr>
+<tr><td>refresh()</td><td>osd</td></tr>
+<tr><td>clear()</td></tr>
+<tr><td>eventhandler()</td><td>rc, osd</td></tr>
+<tr><td rowspan="5">ExtendedMenuView</td><td>__init__()</td></tr>
+<tr><td>setVisible()</td></tr>
+<tr><td>getVisible()</td></tr>
+<tr><td>ToView()</td></tr>
+<tr><td>refresh()</td></tr>
+<tr><td rowspan="5">ExtendedMenuInfo</td><td>__init__()</td></tr>
+<tr><td>setVisible()</td></tr>
+<tr><td>getVisible()</td></tr>
+<tr><td>ToInfo()</td></tr>
+<tr><td>refresh()</td></tr>
+<tr><td rowspan="6">ExtendedMenuListing</td><td>__init__()</td></tr>
+<tr><td>setVisible()</td></tr>
+<tr><td>getVisible()</td></tr>
+<tr><td>ToListing()</td></tr>
+<tr><td>eventhandler()</td></tr>
+<tr><td>refresh()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">freevo_config.py</th><th>v1.86</th></tr>
+<tr><th colspan="2">System configuration</th><td>conf, os</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">identifymedia.py</th><th>v1.18</th></tr>   
+<tr><th colspan="2">The Freevo identifymedia/automount module</th><td>config, re</td></tr>
+<tr><td rowspan="3">Identify_Thread</td><td>identify()</td><td>os, ioctl, media, string, util, config, rc</td></tr>
+<tr><td>__init__()</td><td>threading</td></tr>
+<tr><td>run()</td><td>os, time</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">imenu.py</th><th>v1.11</th></tr>   
+<tr><th colspan="2">The Freevo image viewer menu module</th><td>config, osd, iview</td></tr>
+<tr><td>view_image()</td><td>View the image</td><td>osd, iview</td></tr>
+<tr><td>main_menu()</td><td>The image viewer main menu</td><td>config, menu</td></tr>
+<tr><td>cwd()</td><td>The image viewer module change directory handling function</td><td>osd, util, config, os, menu</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">iview.py</th><th>v1.16</th></tr>
+<tr><th colspan="2">Freevo image viewer</th><td>config, osd, rc, menu, skin</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td rowspan="3">ImageViewer</td><td>view()</td><td>rc, osd</td></tr>
+<tr><td>eventhandler()</td><td>rc, menuwidget, osd, Image, os</td></tr>
+<tr><td>drawosd()</td><td>exif, osd</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">main.py</th><th>v1.76</th></tr>
+<tr><th colspan="2">This is the Freevo main application code</th><td>config, mplayer, skin, mixer, rc, osd, menu, sys, traceback, time</td></tr>
+<tr><td>shutdown()</td><td>Shutdown</td><td>osd, time, config, os</td></tr>
+<tr><td>eventhandler()</td><td>Eventhandler for stuff like CD inserted</td><td>rc, config, media, util, movie, music, imenu</td></tr>
+<tr><td>getcmd()</td><td>Setup the main menu and handle events (remote control, etc)</td><td>skin, menu, menuwidget, osd, rc, time, config, mixer, media</td></tr>
+<tr><td rowspan="5">RemovableMedia</td><td>__init__()</td><td></td></tr>
+<tr><td>is_tray_open()</td><td></td></tr>
+<tr><td>move_tray()</td><td>skin, osd, os, rc</td></tr>
+<tr><td>mount()</td><td>skin, osd, util</td></tr>
+<tr><td>umount()</td><td>skin, osd, util</td></tr>
+<tr><td>signal_handler()</td><td>Signal Handler</td><td>signal, osd, os</td></tr>
+<tr><td>main_func()</td><td>Main init</td><td>config, media, osd, config, os, signal, identifymedia</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">makelogos.py</th><th>v1.4</th></tr>
+<tr><th colspan="2">Make Logos</th><td>os, config, xmltv, urllib2, cStringIO, Image</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">mame.py</th><th>v1.5</th></tr>
+<tr><th colspan="2">The Freevo mame module</th><td>config, osd, rc, menu, mixer, skin, sys</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td rowspan="4">Mame</td><td>__init__()</td></tr>
+<tr><td>play()</td><td>os, osd, time, menuwidget, config, mixer, rc</td></tr>
+<tr><td>stop()</td><td>time</td></tr>
+<tr><td>eventhandler()</td><td>rc, menuwidget</td></tr>
+<tr><td>MameApp</td><td>kill()</td><td>childapp, signal, osd</td></tr>
+<tr><td rowspan="3">Mame_Thread</td><td>__init__()</td><td>threading</td></tr>
+<tr><td>run()</td><td>osd, time, rc</td></tr>
+<tr><td>cmd()</td><td></td></tr>
+<tr><td>mameKey()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">menu.py</th><th>v1.34</th></tr>
+<tr><th colspan="2">The Freevo menu handling system</th><td>rc, osd, skin</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td rowspan="4">MenuItem</td><td>__init__()</td></tr>
+<tr><td>setImage()</td></tr>
+<tr><td>select()</td></tr>
+<tr><td>eventhandler()</td></tr>
+<tr><td>Menu</td><td>__init__()</td><td>skin</td></tr>
+<tr><td rowspan="9">MenuWidget</td><td>__init__()</td></tr>
+<tr><td>back_one_menu()</td></tr>
+<tr><td>goto_main_menu()</td></tr>
+<tr><td>goto_prev_page()</td></tr>
+<tr><td>goto_next_page()</td></tr>
+<tr><td>pushmenu()</td></tr>
+<tr><td>refresh()</td><td>config, util, media, skin</td></tr>
+<tr><td>eventhandler()</td><td>rc</td></tr>
+<tr><td>init_page()</td><td>skin</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">mixer.py</th><th>v1.11</th></tr>
+<tr><th colspan="2">The mixer interface for freevo</th><td>config</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td rowspan="18">Mixer</td><td>__init__()</td><td>config, struct, fcntl</td></tr>
+<tr><td>_setVolume()</td><td>fcntl</td></tr>
+<tr><td>getMainVolume()</td></tr>
+<tr><td>setMainVolume()</td></tr>
+<tr><td>incMainVolume()</td></tr>
+<tr><td>decMainVolume()</td></tr>
+<tr><td>getPcmVolume()</td></tr>
+<tr><td>setPcmVolume()</td></tr>
+<tr><td>incPcmVolume()</td></tr>
+<tr><td>decPcmVolume()</td></tr>
+<tr><td>setLineinVolume()</td></tr>
+<tr><td>getLineinVolume()</td></tr>
+<tr><td>setMicVolume()</td></tr>
+<tr><td>setIgainVolume()</td><td>os</td></tr>
+<tr><td>getIgainVolume()</td></tr>
+<tr><td>decIgainVolume()</td><td>os</td></tr>
+<tr><td>incIgainVolume()</td><td>os</td></tr>
+<tr><td>setOgainVolume()</td><td>os</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">movie.py</th><th>v1.44</th></tr>
+<tr><th colspan="2">The Freevo Movie module</th><td>rc, osd, skin, config, mplayer</td></tr>
+<tr><td>play_movie()</td><td>mplayer dummy</td><td>config, util, mplayer</td></tr>
+<tr><td>dvd_vcd_handler()</td><td>Generate special menu for DVD/VCD/SVCD content</td><td>skin, osd, os, media, config, time, util, menu</td></tr>
+<tr><td>dvd_menu_eventhandler()</td><td>EJECT handling for when we're in the DVD title menu</td><td>rc</td></tr>
+<tr><td>eventhandler()</td><td>EJECT handling</td><td>rc, config, media</td></tr>
+<tr><td>main_menu_generate()</td><td>The Movie module main menu</td><td>config, menu, media</td></tr>
+<tr><td>main_menu()</td><td>Main Menu</td><td>menu</td></tr>
+<tr><td>cwd()</td><td>The change directory handling function</td><td>config, string, media, util, os, menu</td></tr>
+</tbody></table>
+
+<br>                                                                           
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">movie_xml.py</th><th>v1.13</th></tr>
+<tr><th colspan="2">The Freevo Movie XML Parser module</th><td>config</td></tr>
+<tr><td>parseVideo()</td><td>parse &lt;video&gt; tag</td><td>os</td></tr>
+<tr><td>parseInfo()</td><td>parse &lt;info&gt; tag</td><td></td></tr>
+<tr><td>parse()</td><td>parse a XML movie file</td><td>qp_xml, os</td></tr>
+<tr><td>hash_xml_database()</td><td>Hash all XML movie files</td><td>config, os, util, re</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">mp3_id3.py</th><th>non-freevo</th></tr>
+<tr><th colspan="3">MP3 ID handling</th></tr>
+<tr><td>...</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">mplayer.py</th><th>v1.40</th></tr>
+<tr><th colspan="2">The Freevo MPlayer module</th><td>config, osd, rc, menu, mixer, skin, sys</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td>get_demuxer()</td><td>os, string</td></tr>
+<tr><td rowspan="5">MPlayer</td><td>__init__()</td></tr>
+<tr><td>play()</td><td>os, skin, time, menu, config, osd, mixer, audioinfo, rc</td></tr>
+<tr><td>stop()</td><td>time</td></tr>
+<tr><td>eventhandler_audio()</td><td>rc, menu</td></tr>
+<tr><td>eventhandler()</td><td>rc, menu</td></tr>
+<tr><td>MPlayerApp</td><td>kill()</td><td>childapp, osd, os</td></tr>
+<tr><td rowspan="3">MPlayer_Thread()</td><td>__init__()</td><td>threading</td></tr>
+<tr><td>run()</td><td>time, rc</td></tr>
+<tr><td>cmd()</td></tr>
+<tr><td>mplayerKey()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">mplayer_tv.py</th><th>v1.11</th></tr>
+<tr><th colspan="2">Temporary implementation of a TV function using MPlayer</th><td>rc, config, osd, menu, mixer, sys</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td rowspan="8">MPlayer</td><td>__init__()</td></tr>
+<tr><td>TunerSetChannel()</td><td>config</td></tr>
+<tr><td>TunerGetChannel()</td><td>config</td></tr>
+<tr><td>TunerNextChannel()</td><td>config</td></tr>
+<tr><td>TunerPrevChannel()</td><td>config</td></tr>
+<tr><td>Play()</td><td>config, rc, menu, os, osd, time, mixer, skin</td></tr>
+<tr><td>Stop()</td><td>mixer, time, os</td></tr>
+<tr><td>EventHandler()</td><td>time, rc, os, skin, tv, mixer</td></tr>
+<tr><td>MPlayerApp</td><td>kill()</td><td>childapp</td></tr>
+<tr><td rowspan="3">MPlayer_Thread()</td><td>__init__()</td><td>threading</td></tr>
+<tr><td>run()</td><td>time, rc</td></tr>
+<tr><td>cmd()</td></tr>
+<tr><td>mplayerKey()</td><td>Translate an abstract remote control command to an mplayer command key</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">music.py</th><th>v1.20</th></tr>
+<tr><th colspan="2">This is the Freevo MP3 and OGG-Vorbis module</th><td>config, xmmsaudioplayer, mplayer, rc, osd, skin</td></tr>
+<tr><td>play()</td><td>Play</td></tr>
+<tr><td>eventhandler()</td><td>EJECT handling</td><td>rc, config</td></tr>
+<tr><td>main_menu_generate()</td><td>The Music module main menu</td><td>config, menu</td></tr>
+<tr><td>main_menu()</td><td>Main Menu</td><td>menu</td></tr>
+<tr><td>parse_entry()</td><td>Parse Entry</td><td>os, util, config, menu</td></tr>
+<tr><td>create_randomized_playlist()</td><td>Autogenerated randomized playlist with all MP3 files in this directory</td><td>random</td></tr>
+<tr><td>make_playlist_menu()</td><td>This is the (m3u) playlist handling function</td><td>os, menu</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">osd.py</th><th>v1.45</th></tr>
+<tr><th colspan="2"> Low level graphics routines</th><td>config, osd, time</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td>stringproxy()</td></tr>
+<tr><td>Font</td></tr>
+<tr><td rowspan="36">OSD</td><td>__init__()</td><td>config, pygame, os</td></tr>
+<tr><td>_cb()</td><td>pygame</td></tr>
+<tr><td>_send()</td></tr>
+<tr><td>shutdown()</td><td>pygame</td></tr>
+<tr><td>restartdisplay()</td><td>pygame, config</td></tr>
+<tr><td>stopdisplay()</td><td>pygame</td></tr>
+<tr><td>clearscreen()</td><td>pygame</td></tr>
+<tr><td>setpixel()</td></tr>
+<tr><td>loadbitmap()</td></tr>
+<tr><td>zoombitmap()</td><td>pygame</td></tr>
+<tr><td>drawbitmap()</td><td>pygame</td></tr>
+<tr><td>bitmapsize()</td><td>pygame</td></tr>
+<tr><td>drawline()</td><td>pygame</td></tr>
+<tr><td>drawbox()</td><td>pygame</td></tr>
+<tr><td>getsurface()</td><td>pygame</td></tr>
+<tr><td>putsurface()</td></tr>
+<tr><td>drawstringframed()</td></tr>
+<tr><td>drawstringframedsoft()</td><td>pygame, config, string, re</td></tr>
+<tr><td>drawstringframedhard()</td><td>pygame, config</td></tr>
+<tr><td>drawstring()</td><td>pygame, config</td></tr>
+<tr><td>_renderstring()</td><td>pygame</td></tr>
+<tr><td>charsize()</td></tr>
+<tr><td>stringsize()</td></tr>
+<tr><td>_stringsize()</td><td>pygame, config</td></tr>
+<tr><td>createlayer()</td><td>pygame</td></tr>
+<tr><td>putlayer()</td></tr>
+<tr><td>_savepixel()</td></tr>
+<tr><td>_restorepixel()</td></tr>
+<tr><td>drawcircle()</td><td>pygame</td></tr>
+<tr><td>drawroundbox()</td><td>pygame</td></tr>
+<tr><td>update()</td><td>pygame</td></tr>
+<tr><td>_getfont()</td><td>pygame, config, os</td></tr>
+<tr><td>_getbitmap()</td><td>pgame, os</td></tr>
+<tr><td>_deletefromcache()</td></tr>
+<tr><td>_helpscreen()</td><td>pygame</td></tr>
+<tr><td>_sdlcol()</td></tr>
+<tr><td>_get_method_names()</td></tr>
+<tr><td rowspan="2">_SynchronizedMethod</td><td>__init__()</td></tr>
+<tr><td>__call__ ()</td></tr>
+<tr><td rowspan="2">SynchronizedObject</td><td>__init__ ()</td><td>threading</td></tr>
+<tr><td>__getattr__ ()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">rc.py</th><th>v1.9</th></tr>
+<tr><th colspan="2">Remote control handling</th><td>config</td></tr>
+<tr><td>get_singleton()</td></tr>
+<tr><td rowspan="3">RemoteControl</td><td>__init__()</td></tr>
+<tr><td>post_event()</td></tr>
+<tr><td>poll()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">setup_build.py</th><th>v1.20</th></tr>
+<tr><th colspan="3">Autoconfigure Freevo</th></tr>
+<tr><td>print_usage()</td></tr>
+<tr><td>Struct</td></tr>
+<tr><td>main()</td><td>Default Options</td><td>getopt, sys</td></tr>
+<tr><td>check_config()</td><td>Check Configuration</td><td>sys</td></tr>
+<tr><td>create_config()</td><td>Create Configuration</td><td>os</td></tr>
+<tr><td>check_program()</td><td>Check Program</td><td>os, sys</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">skin.py</th><th>v1.9</th></tr>
+<tr><th colspan="2">The Freevo top-level skin code</th><td>config, sys, os</td></tr>
+<tr><td>get_singleton()</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">strptime.py</th><th>non-freevo</th></tr>
+<tr><th colspan="3">Python version of strptime</th></tr>
+<tr><td>strptime()</td><td>attempts to simulate time.strptime</td></tr>
+<tr><td>...</td></tr>
+</tbody></table>
+
+<br>
+                                                                                <table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">tv.py</th><th>v1.25</th></tr>
+<tr><th colspan="2">The Freevo TV module</th><td>sys, config, osd, rc, mixer, mplayer_tv, menu, skin, ExtendedMenu_TV</td></tr>
+<tr><td>get_start_time()</td><td>Get Start Time</td><td>time</td></tr>
+<tr><td>start_tv()</td><td>Start Tv</td></tr>
+<tr><td>get_tunerid()</td><td>Get Turner ID</td><td>config, skin, time</td></tr>
+<tr><td>eventhandler()</td><td>Event Handler</td><td>rc, ExtendedMenu_TV</td></tr>
+<tr><td>refresh()</td><td>Refresh</td><td>ExtendedMenu_TV</td></tr>
+<tr><td>main_menu()</td><td>Main Menu</td><td>config, skin, time, menu, rc, epg_xmltv, ExtendedMenu_TV</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">util.py</th><th>v1.40</th></tr>
+<tr><th colspan="3">Utility Functions for Freevo</th></tr>
+<tr><td>unique()</td><td>Return a list of the elements without duplicates</td></tr>
+<tr><td>getdirnames()</td><td>Get all subdirectories</td><td>glob, os</td></tr>
+<tr><td>match_files()</td><td>Find all files in a directory that matches a list</td><td>glob</td></tr>
+<tr><td>match_files_recursively_helper()</td><td></td><td>os</td></tr>
+<tr><td>match_files_recursively()</td><td></td><td>os, operator, fnmatch</td></tr>
+<tr><td>hexify()</td><td>Helper function for the md5 routine</td><td>string</td></tr>
+<tr><td>md5file()</td><td>Calculate MD5 for a file</td><td>md5</td></tr>
+<tr><td>pngsize()</td><td>Image Size</td><td>os, Image</td></tr>
+<tr><td>resize()</td><td>Resize Image</td><td>Image, os, config</td></tr>
+<tr><td>getExifThumbnail()</td><td>Get EXIF Thumbnail</td><td>Image, exif, config</td></tr>
+<tr><td>recursefolders()</td><td>Recurse Folders</td><td>os, string, fnmatch</td></tr>
+<tr><td>proc_mount()</td></tr>
+<tr><td>umount()</td><td>Umount</td><td>os</td></tr>
+<tr><td>mount()</td><td>Mount</td><td>os</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">videogame.py</th><th>v1.6</th></tr>
+<tr><th colspan="2">The Freevo VideoGame module</th><td>rc, osd, skin, config, mame</td></tr>
+<tr><td>play_mame()</td><td>mame dummy</td><td>config, string, util, mame</td></tr>
+<tr><td>eventhandler()</td><td>EJECT handling</td><td>rc, config</td></tr>
+<tr><td>main_menu_generate()</td><td>The Movie module main menu</td><td>config, menu</td></tr>
+<tr><td>main_menu()</td><td>Main menu</td><td>os, skin, osd, time, rc, menu</td></tr>
+<tr><td>cwd()</td><td>The change directory handling function</td><td>config, util, os, menu</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">xmltv.py</th><th>non-freevo</th></tr>
+<tr><th colspan="3">Python interface to XMLTV format</th></tr>
+<tr><td>...</td></tr>
+</tbody></table>
+
+<br>
+
+<table border="1">
+<tbody><tr bgcolor="orange"><th colspan="2">xmmsaudioplayer.py</th><th>v1.4</th></tr>
+<tr><th colspan="2">Play music using XMMS</th><td>xmms, sys, config</td></tr>
+<tr><td>Globals</td><td></td><td>osd, rc, menu, mixer</td></tr>
+<tr><td>Constants</td></tr>
+<tr><td>NotImplementedError</td><td></td><td>exceptions</td></tr>
+<tr><td>AbstractAudioPlayerThread</td><td>Module variable that contains an initialized Xmms() object</td><td>threading</td></tr>
+<tr><td>Singleton</td><td>get_singleton()</td></tr>
+<tr><td rowspan="6">AbstractAudioPlayer</td><td>play()</td></tr>
+<tr><td>stop()</td></tr>
+<tr><td>eventhandler()</td></tr>
+<tr><td>reset_thread()</td></tr>
+<tr><td>file_not_found()</td><td>osd, time, menu</td></tr>
+<tr><td>set_mixer_levels()</td><td>config, mixer</td></tr>
+<tr><td>AbstractAudioPlayerApp</td><td>kill()</td></tr>
+<tr><td>AudioPlayerApp</td><td>kill()</td><td>childapp, osd</td></tr>
+<tr><td rowspan="6">AudioPlayerThread()</td><td>__init__()</td></tr>
+<tr><td>_set_app()</td><td>time</td></tr>
+<tr><td>reset_alive()</td></tr>
+<tr><td>run()</td><td>time, rc</td></tr>
+<tr><td>_alive()</td><td>xmms</td></tr>
+<tr><td>cmd()</td><td>xmms</td></tr>
+<tr><td rowspan="7">AudioPlayer</td><td>__init__()</td></tr>
+<tr><td>_return_to_menu()</td><td>rc, menu</td></tr>
+<tr><td>eventhandler()</td><td>rc</td></tr>
+<tr><td>build_play_command()</td><td>config</td></tr>
+<tr><td>play()</td><td>os, osd, rc</td></tr>
+<tr><td>load_and_play()</td><td>xmms</td></tr>
+<tr><td>stop()</td><td>time</td></tr>
+</tbody></table>
+
+</body></html>
