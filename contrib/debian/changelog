@@ -1,3 +1,9 @@
+freevo (1.5.0-0rc1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Aubin Paul <debian@outlyer.org>  Fri,  7 May 2004 16:43:43 -0400
+
 freevo (1.5.0-0pre1) unstable; urgency=low
 
   * New upstream release
