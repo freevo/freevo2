@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/01/22 01:49:30  krister
+# Fixed typo.
+#
 # Revision 1.13  2003/01/18 15:51:07  dischi
 # Add the function vop_append to support more than one -vop argument for
 # mplayer (from different mplayer_options sources). All -vop args will
@@ -392,7 +395,7 @@ class MPlayer:
 
 class MPlayerParser:
     """
-    class to parse the mplayer output and store some informations
+    class to parse the mplayer output and store some information
     in the videoitem
     """
     
