@@ -365,8 +365,7 @@ class TvlistingArea(Area):
                     flag_right  = 0
 
                     if prg.start < start_time:
-                        if prg.valid:
-                            flag_left = 1
+                        flag_left = 1
                         x0 = x_contents
                         t_start = start_time
                     else:
@@ -375,8 +374,7 @@ class TvlistingArea(Area):
                         t_start = prg.start
 
                     if prg.stop > stop_time:
-                        if prg.valid:
-                            flag_right = 1
+                        flag_right = 1
                         w = w_contents + x_contents - x0
                         x1 = x_contents + w_contents
                     else:
@@ -392,10 +390,6 @@ class TvlistingArea(Area):
                         val = default_val
 
                     font = val.font
-
-                    if not prg.valid:
-                        val = copy.copy(val)
-                        val.align='center'
 
                     if x0 > x1:
                         continue
