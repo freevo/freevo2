@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/02/21 06:51:15  krister
+# XXX Debug the event loop, remove later.
+#
 # Revision 1.18  2003/02/21 05:26:59  krister
 # Enable the IdleTool if Aubins skin is used.
 #
@@ -322,6 +325,7 @@ def getcmd():
     else:
         m = None
     m and m.refresh()
+    sleep_ctr = 0
     while 1:
         
         # Get next command
@@ -332,6 +336,8 @@ def getcmd():
             event = rc.poll()
             if event: break
             if not rc.app: m and m.poll()
+            print '*' * 50, 'sleeping.... (%s)' % sleep_ctr
+            sleep_ctr += 1
             time.sleep(0.1)
 
 
