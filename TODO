@@ -45,7 +45,7 @@ o Use the "Guide" button to jump to the menu bar (?)
     page (if not there already) on the first click, and then change page on the 
     second click.
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
-o clean up Notes
+o clean up Docs/Notes
 o Add DVD rip
   o mencoder works fine with XviD/FFMPEG, but it cannot be started from Freevo yet
 o Add a digital filter to remove 50/60 Hz line-noise from audio line input
@@ -78,6 +78,9 @@ o Add support for mjpeg recording of video for off-line compression
   o Could also be used to watch the recorded piece in real-time as it 
     is being recorded
 o Use getop for python argument parsing
+o MP3 playing:
+  o Have a play queue that files can be added to/removed from while the
+    MP3 player is playing from it. 
 
 
 Long-term
