@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/10/13 14:16:55  dischi
+# Popup box and mp3 player are now working, too. This skin can look
+# like main1 and aubin1. I droped the support for the gui classes
+# because there are not powerfull enough
+#
 # Revision 1.13  2002/10/12 19:00:55  dischi
 # deactivated the movie box since we don't have informations for this
 # right now.
@@ -55,7 +60,7 @@ import util
 import mixer
 
 # The OSD class, used to communicate with the OSD daemon
-import osd,pygame
+import osd
 
 
 # XXX Krister, please change this to 1 and start freevo with and
@@ -199,33 +204,81 @@ class Skin:
 
     def PopupBox(self, text=None, icon=None):
         """
-        text  STring to display
+        text  String to display
 
         Draw a popupbox with an optional icon and a text.
         
         Notes: Should maybe be named print_message or show_message.
                Maybe I should use one common box item.
         """
-       	osd.drawbitmap('skins/images/popup.png',163,232)
-	osd.drawstring(text,384,280,fgcolor=0xffffff,align='center')	
-	
-	
-	osd.update()
+
+        val = self.settings.popup
+
+        # XXX If someone has the time, please fix this. It's a bad mixture
+        # XXX between hardcoded stuff (some values and the alpha mask) and
+        # XXX the use of the gui toolkit
+
+        x = val.message.x
+        width = val.message.width
+        
+        # if we have an alpha mask, don't use the gui toolkit
+        # just draw it
+        if val.mask:
+            osd.drawbitmap(val.mask, val.x, val.y)
+            
+        if icon:
+            icon_width, icon_height = util.pngsize(icon)
+            x += icon_width
+            width -= icon_width
+
+        need = osd.drawstringframed(text, x, val.message.y, width, val.message.height, \
+                                    val.message.color, None, val.message.font, \
+                                    val.message.size, val.message.align, 'center')
+        (x0, y0, x1, y1) = need[1]
+
+        if icon:
+            x0 -= icon_width + 10
+            if icon_height > (y1 - y0):
+                missing = (icon_height - (y1 - y0)) / 2
+                y1 += missing
+                y0 -= missing
+                
+        if val.mask:
+            if icon:
+                osd.drawbitmap(icon, val.x+25, y0 + (y1-y0) / 2 - (icon_height/2))
+                
+        else:            
+            osd.drawbox(x0-10, y0-10, x1+10, y1+10, width = -1, color = val.bgcolor)
+            if val.border_size:
+                osd.drawbox(x0-10, y0-10, x1+10, y1+10, width = val.border_size,
+                            color=val.border_color)
+
+            if icon:
+                osd.drawbitmap(icon, x0, y0 + (y1-y0) / 2 - (icon_height/2))
+
+            osd.drawstringframed(text, x, val.message.y, width, val.message.height, \
+                                 val.message.color, None, val.message.font, \
+                                 val.message.size, val.message.align, 'center')
+
+        osd.update()
+
         
 
     # Draws a text based on the settings in the XML file
-    def DrawText(self, text, settings, x=-1, y=-1):
+    def DrawText(self, text, settings, x=-1, y=-1, align=''):
         if x == -1:
             x = settings.x
         if y == -1:
             y = settings.y
-            
+        if not align:
+            align = settings.align
+
         if settings.shadow_visible:
             osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                            settings.shadow_color, None, settings.font,
-                           settings.size, settings.align)
+                           settings.size, align)
         osd.drawstring(text, x, y, settings.color, None, settings.font,
-                       settings.size, settings.align)
+                       settings.size, align)
 
 
     def DrawMenu_Cover(self, menuw, settings):
@@ -391,7 +444,8 @@ class Skin:
             # draw icon
             if choice.icon != None:
                 icon_x = x0 - icon_size - 15
-                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x, y0)
+                icon_y = y0 - (icon_size - font_h) / 2
+                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x, icon_y)
 
             y0 += spacing
         
@@ -403,7 +457,7 @@ class Skin:
             print 'skin.drawmenu() hold!'
             return
         
-        osd.clearscreen(osd.COL_WHITE)
+        osd.clearscreen(osd.COL_BLACK)
 
         menu = menuw.menustack[-1]
 
@@ -620,17 +674,20 @@ class Skin:
     def DrawMP3(self, info):
 
         val = self.settings.mp3
-        val2 = copy.copy(val)
-        val2.align = 'right'
+        iv  = val.info
 
-        str_w_title, str_h_title = osd.stringsize('Title: ',val2.font, val2.size)
-        str_w_artist, str_h_artist = osd.stringsize('Artist: ',val2.font, val2.size)
-        str_w_album, str_h_album = osd.stringsize('Album: ',val2.font, val2.size)
-        str_w_year, str_h_year = osd.stringsize('Year: ',val2.font, val2.size)
-        str_w_track, str_h_track = osd.stringsize('Track: ',val2.font, val2.size)
-        str_w_time, str_h_time = osd.stringsize('Time: ',val2.font, val2.size)
-        left = max( str_w_title, str_w_artist, str_w_album, str_w_year, str_w_track, str_w_time )
-        left += 30
+        str_w_title, str_h_title = osd.stringsize('Title: ',iv.font, iv.size)
+        str_w_artist, str_h_artist = osd.stringsize('Artist: ',iv.font, iv.size)
+        str_w_album, str_h_album = osd.stringsize('Album: ',iv.font, iv.size)
+        str_w_year, str_h_year = osd.stringsize('Year: ',iv.font, iv.size)
+        str_w_track, str_h_track = osd.stringsize('Track: ',iv.font, iv.size)
+        str_w_length, str_h_length = osd.stringsize('Length: ',iv.font, iv.size)
+        str_w_time, str_h_time = osd.stringsize('Time: ',iv.font, iv.size)
+        left = max( str_w_title, str_w_artist, str_w_album, str_w_year, \
+                    str_w_track, str_w_length, str_w_time )
+        left += iv.x
+
+        spacing = iv.height / 7
 
         if info.drawall:
             osd.clearscreen()
@@ -641,10 +698,21 @@ class Skin:
             if val.background.mask:
                 osd.drawbitmap(val.background.mask,-1,-1)
 
+            if val.title.visible:
+                osd.drawstring('Playing Music', val.title.x, val.title.y,
+                               val.title.color, font=val.title.font,
+                               ptsize=val.title.size, align=val.title.align)
+
+            if val.logo.image and val.logo.visible:
+                osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
+
             #Display the cover image file if it is present
             if info.image:
-                osd.drawbox(465,190, 755, 480, width=1, color=0x000000)   
-                osd.drawbitmap(util.resize(info.image, 289, 289), 466, 191)
+                c = val.cover
+                osd.drawbox(c.x - c.border_size, c.y - c.border_size, \
+                            c.x + c.border_size + c.width, c.y + c.border_size + c.height,\
+                            width=c.border_size, color=c.border_color)
+                osd.drawbitmap(util.resize(info.image, c.width, c.height), c.x, c.y)
                
             file_name = info.filename.split('/')
             dir_name = ''
@@ -653,37 +721,49 @@ class Skin:
 
             file_name = file_name[i+1]
             py = val.progressbar.y
-                
-            self.DrawText('Title: ', val2, x=left, y=100)
 
-            self.DrawText('%s ' % info.title, val, x=left, y=100)
- 
-            self.DrawText('Artist: ', val2, x=left, y=130)
-            self.DrawText('%s ' % info.artist, val, x=left, y=130)
+            top = iv.y
+            self.DrawText('Title: ', iv, x=left, y=top, align='right')
+            self.DrawText('%s ' % info.title, iv, x=left, y=top)
 
-            self.DrawText('Album: ', val2, x=left, y=160)
-            self.DrawText('%s ' % info.album, val, x=left, y=160)
-        
-            self.DrawText('Year: ', val2, x=left, y=190)
-            self.DrawText('%s ' % info.year, val, x=left, y=190)
+            if info.artist:
+                top += spacing
+                self.DrawText('Artist: ', iv, x=left, y=top, align='right')
+                self.DrawText('%s ' % info.artist, iv, x=left, y=top)
 
-            self.DrawText('Track: ', val2, x=left, y=220)
-            self.DrawText('%s ' % info.track, val, x=left, y=220)
+            if info.album:
+                top += spacing
+                self.DrawText('Album: ', iv, x=left, y=top, align='right')
+                self.DrawText('%s ' % info.album, iv, x=left, y=top)
 
-            self.DrawText('Time: ', val2, x=left, y=250)
+            if info.year:
+                top += spacing
+                self.DrawText('Year: ', iv, x=left, y=top, align='right')
+                self.DrawText('%s ' % info.year, iv, x=left, y=top)
 
+            if info.track:
+                top += spacing
+                self.DrawText('Track: ', iv, x=left, y=top, align='right')
+                self.DrawText('%s ' % info.track, iv, x=left, y=top)
+
+            top += spacing
+            self.DrawText('Length: ', iv, x=left, y=top, align='right')
+            self.DrawText('%s:%s ' % (info.length / 60, info.length % 60), \
+                          iv, x=left, y=top)
+
+            top += spacing
+            self.DrawText('Time: ', iv, x=left, y=top, align='right')
+
+            # remember the surface to redraw it
+            self.time_y = top
+            self.time_surface = osd.getsurface(left, top, 100, spacing)
+            
                 
         else:
-            # Erase the portion that will be redrawn
-            if val.background.image:
-                osd.drawbitmap( val.background.image, left, 250, None, left,
-                                250, 100, 30 )
-	        #osd.drawbitmap('skins/images/highlight.png', left, 250, None, left,
-		#		250, 100, 30)
-		box = pygame.Surface((100,30),0,32)
-		box.fill ((0,0,0))
-		box.set_alpha(128)
-		osd.screen.blit(box,(left,250))
+
+            # redraw the surface on some positions
+            osd.putsurface(self.time_surface, left, self.time_y)
+
 
         # XXX I changed this because round rounds up on 3.58 etc. instead
         # XXX of giving us the desired "round down modulo" effect.
@@ -693,7 +773,7 @@ class Skin:
         rem_sec = int(info.remain)%60
 
         str = '%s:%02d ' % (el_min, el_sec)
-        self.DrawText(str, val, x=left, y=250)
+        self.DrawText(str, iv, x=left, y=self.time_y)
 
         # Draw the progress bar
         if val.progressbar.visible:

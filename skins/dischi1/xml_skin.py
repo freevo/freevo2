@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/10/13 14:16:55  dischi
+# Popup box and mp3 player are now working, too. This skin can look
+# like main1 and aubin1. I droped the support for the gui classes
+# because there are not powerfull enough
+#
 # Revision 1.1  2002/10/12 18:45:25  dischi
 # New skin, Work in progress
 #
@@ -154,12 +159,18 @@ class XML_menu:
         self.submenu = XML_menuitem()
 
     
-class XML_mp3(XML_data):
+class XML_mp3:
     def __init__(self):
         self.background = XML_data()
         self.progressbar = XML_data()
         self.title = XML_data()    
-    
+        self.cover = XML_data()    
+        self.info  = XML_data()
+        self.logo  = XML_data()
+
+class XML_popup(XML_data):
+    def __init__(self):
+        self.message = XML_data()    
 
 
 # compatibilty mode, remove later
@@ -179,8 +190,9 @@ class XMLSkin:
         self.menu_default = XML_menu()
         self.menu_main    = XML_menu()
         self.menu_tv      = XML_menu()
-        self.mp3  = XML_mp3()
-
+        self.mp3          = XML_mp3()
+        self.popup        = XML_popup()
+        
         # compatibilty mode, remove later
         self.mainmenu = XML_mainmenu()
     
@@ -362,8 +374,6 @@ class XMLSkin:
     def read_mp3(self, file, menu_node, copy_content):
         if copy_content: self.mp3 = copy.copy(self.mp3)
 
-        self.parse_node(menu_node, self.mp3)
-
         for node in menu_node.children:
             if node.name == u'background':
                 if copy_content: self.mp3.background = copy.copy(self.mp3.background)
@@ -373,9 +383,33 @@ class XMLSkin:
                 if copy_content: self.mp3.title = copy.copy(self.mp3.title)
                 self.parse_node(node, self.mp3.title)
 
+            elif node.name == u'cover':
+                if copy_content: self.mp3.cover = copy.copy(self.mp3.cover)
+                self.parse_node(node, self.mp3.cover)
+
             elif node.name == u'progressbar':
                 if copy_content: self.mp3.progressbar = copy.copy(self.mp3.progressbar)
                 self.parse_node(node, self.mp3.progressbar)
+
+            elif node.name == u'fileinfo':
+                if copy_content: self.mp3.info = copy.copy(self.mp3.info)
+                self.parse_node(node, self.mp3.info)
+
+            elif node.name == u'logo':
+                if copy_content: self.mp3.logo = copy.copy(self.mp3.logo)
+                self.parse_node(node, self.mp3.logo, os.path.dirname(file))
+
+    #
+    # read the skin informations for a popup
+    #
+    def read_popup(self, file, popup_node, copy_content):
+        if copy_content: self.popup = copy.copy(self.popup)
+        self.parse_node(popup_node, self.popup, os.path.dirname(file))
+
+        for node in popup_node.children:
+            if node.name == u'message':
+                if copy_content: self.popup.message = copy.copy(self.popup.message)
+                self.parse_node(node, self.popup.message)
 
 
     #
@@ -433,6 +467,8 @@ class XMLSkin:
 
                         if node.name == u'mp3':
                             self.read_mp3(file, node, copy_content)
+                        if node.name == u'popup':
+                            self.read_popup(file, node, copy_content)
                         if node.name == u'main':
                             self.read_mainmenu(file, node)
                     
