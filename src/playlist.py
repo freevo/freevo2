@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2004/08/29 18:37:30  dischi
+# make playlist an mediaitem
+#
 # Revision 1.76  2004/08/26 15:26:49  dischi
 # add code to do some memory debugging
 #
@@ -64,10 +67,10 @@ import eventhandler
 import plugin
 
 from event import *
-from item import Item
+from item import Item, MediaItem
 
 
-class Playlist(Item):
+class Playlist(MediaItem):
 
     def __init__(self, name='', playlist=[], parent=None, display_type=None,
                  random=False, build=False, autoplay=False, repeat=False):
@@ -81,9 +84,7 @@ class Playlist(Item):
                      3) a list (directoryname, recursive=0|1)
         build:    create the playlist. This means unfold the directories
         """
-        Item.__init__(self, parent)
-
-        self.type     = 'playlist'
+        MediaItem.__init__(self, 'playlist', parent)
         self.menuw    = None
         self.name     = Unicode(name)
 
@@ -494,14 +495,14 @@ class Playlist(Item):
                 eventhandler.post(Event(OSD_MESSAGE, arg=_('no previous item in playlist')))
 
         # give the event to the next eventhandler in the list
-        return Item.eventhandler(self, event, menuw)
+        return MediaItem.eventhandler(self, event, menuw)
 
 
     def delete(self):
         """
         callback when this item is deleted from the menu
         """
-        Item.delete(self)
+        MediaItem.delete(self)
         self.playlist = []
         
 
