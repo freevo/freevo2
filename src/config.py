@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/12 19:45:39  krister
+# Fixed more stupid bugs in rom-drives autodetect for automounted drives.
+#
 # Revision 1.14  2003/02/12 16:20:31  krister
 # Fixed stupid bugs in rom-drives autodetect for cdrecorder and automounted drives.
 #
@@ -323,6 +326,8 @@ if not ROM_DRIVES:
                     dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
                 elif devname.lower().find('dvd') != -1:
                     dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
+                else:
+                    mntdir = devname = dispname = ''
 
             # Weed out duplicates
             for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:
