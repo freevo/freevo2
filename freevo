@@ -16,13 +16,33 @@ PYTHON=python
 
 # Required runtime version
 RUNTIME_VERSION=3
+RUNTIME_VERSION4=4
 
 # The runtime is stored in a directory one level up
 RT_DIR=../freevo_runtime$RUNTIME_VERSION
 
-
 # First check if the runtime is installed
-if test -a $RT_DIR/freevo_python ; then
+if test -a runtime/apps/freevo_python ; then
+    
+    # Double-check that we have the correct runtime version
+    rt_ver=`cat runtime/VERSION`
+    if [[ "$rt_ver" != "$RUNTIME_VERSION4" ]] ; then
+        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION4 is required!
+        echo Please install the required version in runtime/
+        exit 1
+    fi
+
+    # Setup the Python environment variables
+    export PYTHONHOME=runtime
+    
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_runtime
+    export LD_PRELOAD=`cat runtime/preloads`
+
+    # Execute using the runtime:
+    echo "Using the Freevo runtime (./runtime)"
+    PYTHON=runtime/apps/freevo_python
+elif test -a $RT_DIR/freevo_python ; then
     
     # Double-check that we have the correct runtime version
     rt_ver=`cat $RT_DIR/VERSION`
