@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/11/14 15:56:04  dischi
+# try to find a strange bug
+#
 # Revision 1.58  2004/11/13 16:08:30  dischi
 # remove some old code from tv, some tv plugins do not work anymore
 #
@@ -305,7 +308,11 @@ class TVGuide(MenuApplication):
         elif event == MENU_DOWN:
             self.channel_list.down()
             self.channel  = self.channel_list.get()
-            self.selected = self.channel.get(self.current_time)[0]
+            try:
+                self.selected = self.channel.get(self.current_time)[0]
+            except Exception, e:
+                print e
+                print self.current_time
             self.refresh()
 
         elif event == MENU_LEFT:
