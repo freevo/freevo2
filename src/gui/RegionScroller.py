@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/24 18:21:27  outlyer
+# Fix assignment to None. I screwed up the first time I did it, but this
+# should be correct.
+#
 # Revision 1.18  2003/09/13 10:32:56  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -239,8 +243,8 @@ class RegionScroller(Container):
     def set_surface(self, surface):
         self.region_surface = surface
 
-        (None, None, self.s_w, self.s_h) = self.region_surface_rect \
-                                         = self.region_surface.get_rect()
+        (self.s_w, self.s_h) = self.region_surface_rect \
+                                         = self.region_surface.get_rect()[2:4]
 
         self.v_x = 0
         self.v_y = 0
