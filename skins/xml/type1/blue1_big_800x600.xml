@@ -124,15 +124,15 @@
 	<shadow visible="no"/>
       </header>
 
-      <info spacing="5">
-        <geometry x="20" y="80" width="630" height="120"/>
+      <info spacing="10">
+        <geometry x="20" y="80" width="620" height="130"/>
 	<background color="0xaa000000"/>
 	<font name="Arial_Bold" size="16" color="0xffffff" align="left"/>
 	<shadow visible="no" color="0x000000" x="1" y="1"/>
       </info>
       
       <view>
-        <geometry x="660" y="80" width="120" height="120"/>
+        <geometry x="650" y="80" width="130" height="130"/>
 	<background color="0x000000"/>
 	<font name="Arial_Bold" size="20" color="0xffffff" align="center" valign="center"/>
 	<shadow visible="no"/>
