@@ -4,7 +4,7 @@
 
     <!-- Settings for a normal menu -->
     <menu>
-      <bgbitmap>../images/aubin_bg1.png</bgbitmap>
+      <bgbitmap>../../images/aubin_bg1.png</bgbitmap>
       <title visible="yes" x="160" y="50">
 	<font name="Cultstup" size="22" color="0x000000"/>
       </title>
@@ -27,7 +27,7 @@
     <!-- Settings for the mp3 player -->
     <!-- (nothing more than the bgbitmap right now) -->
     <mp3>
-      <bgbitmap>../images/aubin_bg1.png</bgbitmap>
+      <bgbitmap>../../images/aubin_bg1.png</bgbitmap>
     </mp3>
   </skin>
 </freevo>

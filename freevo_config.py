@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/08/12 07:12:33  dischi
+# moved xml to subdir type1
+#
 # Revision 1.44  2002/08/11 08:13:00  dischi
 # New variable SKIN_XML_FILE, where to find the xml file for the skin
 #
@@ -178,7 +181,7 @@ MOVIE_DATA_DIR = 'movie-data/'
 # from skin.py
 #
 OSD_SKIN = 'skins/main1/skin_main1.py'
-SKIN_XML_FILE = 'skins/xml/768x576.xml'
+SKIN_XML_FILE = 'skins/xml/type1/768x576.xml'
 
 # OSD default font. It is only used for debug/error stuff, not regular
 # skinning.
