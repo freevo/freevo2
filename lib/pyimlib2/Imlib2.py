@@ -658,6 +658,9 @@ def new(size, bytes = None, from_format = "BGRA"):
 	"""
 	if 0 in size:
 		raise ValueError, "Invalid image size %s" % repr(size)
+	for val in size:
+		if not isinstance(val, int):
+			raise ValueError, "Invalid image size %s" % repr(size)
 	if bytes:
 		if isinstance(bytes, BufferProxy):
 			bytes = bytes._buffer
