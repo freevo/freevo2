@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/22 12:24:39  dischi
+# add delete to directories
+#
 # Revision 1.10  2003/10/23 23:05:24  outlyer
 # Remove some debug.
 #
@@ -70,6 +73,7 @@
 import os
 import config
 import plugin
+import util
 
 from gui.ConfirmBox import ConfirmBox
 
@@ -89,6 +93,9 @@ class PluginInterface(plugin.ItemPlugin):
             items.append((self.confirm_delete, _('Delete file'), 'delete'))
             if item.type == 'video' and hasattr(item, 'fxd_file'):
                 items.append((self.confirm_info_delete, _('Delete info'), 'delete_info'))
+        if item.type == 'dir':
+            self.item = item
+            items.append((self.confirm_delete, _('Delete directory'), 'delete'))
         return items
 
 
@@ -126,13 +133,20 @@ class PluginInterface(plugin.ItemPlugin):
             self.safe_unlink(self.item.fxd_file)
 
     def delete_file(self):
-        _debug_('Deleting %s' % self.item.filename)
+        if self.item.type == 'dir':
+            _debug_('Deleting %s' % self.item.dir)
+            try:
+                util.rmrf(self.item.dir)
+            except:
+                print 'can\'t delete %s' % self.item.dir
+        else:
+            _debug_('Deleting %s' % self.item.filename)
 
-        self.delete_pictures()
-        self.delete_fxd()
+            self.delete_pictures()
+            self.delete_fxd()
 
-        if os.path.isfile(self.item.filename):
-            self.safe_unlink(self.item.filename)
+            if os.path.isfile(self.item.filename):
+                self.safe_unlink(self.item.filename)
 
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
