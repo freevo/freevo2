@@ -312,6 +312,12 @@ AUDIO_RANDOM_PLAYLIST = 1
 DIRECTORY_SORT_BY_DATE = 2
 
 #
+# Should we use "smart" sorting to ignore 'The' in directories
+# 0 = no, 1 = yes
+#
+DIRECTORY_SMART_SORT = 0
+
+#
 # Should freevo autoplay the item if only one item is in the directory
 #
 DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1

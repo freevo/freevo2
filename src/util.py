@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/06/14 00:09:40  outlyer
+# The "Smartsort" code. You can enable it in local_conf, it's disabled
+# by default. I fixed the smartsort cmpfunc to work a little more
+# efficiently though quite frankly, it could probably be optimized better.
+#
 # Revision 1.29  2003/06/13 18:19:57  outlyer
 # A cmpfunc for doing a "smart sort" which is to say, a sort that ignores
 # "The" at the beginning of titles. Doesn't do anything yet.
@@ -519,15 +524,16 @@ def freespace(path):
 def smartsort(x,y): # A compare function for use in list.sort()
     """
     Compares strings after stripping off 'The' to be "smarter"
+    Also obviously ignores the full path when looking for 'The' 
     """
-    if x.find('The ') == 0:
-        m = x.replace('The ','',1)
-    else:
-        m=x
-    if y.find('The ') == 0:
-        n = y.replace('The ','',1)
-    else:
-        n=y
+    m = os.path.basename(x)
+    n = os.path.basename(y)
+    
+    if m.find('The ') == 0:
+        m = m.replace('The ','',1)
+    if n.find('The ') == 0:
+        n = n.replace('The ','',1)
+
     return cmp(m.upper(),n.upper()) # be case insensitive
 
 def totalspace(path):

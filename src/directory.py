@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/06/14 00:09:40  outlyer
+# The "Smartsort" code. You can enable it in local_conf, it's disabled
+# by default. I fixed the smartsort cmpfunc to work a little more
+# efficiently though quite frankly, it could probably be optimized better.
+#
 # Revision 1.14  2003/06/07 11:28:33  dischi
 # use an id to find the new selected item (e.g. after creating a fxd file
 #
@@ -147,7 +152,8 @@ class DirItem(Playlist):
 	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
                          'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
                          'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT',
-                         'AUDIO_FORMAT_STRING')
+                         'AUDIO_FORMAT_STRING','DIRECTORY_SMART_SORT')
+
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
@@ -391,7 +397,11 @@ class DirItem(Playlist):
                 dir_items += [ DirItem(filename, self, display_type =
                                        self.display_type) ]
 
-        dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+        if self.DIRECTORY_SMART_SORT:
+            dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
+        else:
+            dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+ 
 
 
         # build items for playlists
