@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/08 19:44:44  dischi
+# exception handling, just in case...
+#
 # Revision 1.6  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -116,9 +119,11 @@ def get_chan_displayname(channel_id):
             return tv_display_name
 
     guide = tv.epg_xmltv.get_guide()
-    return guide.chan_dict.get(channel_id).displayname
-
-    return None
+    c = guide.chan_dict.get(channel_id)
+    if c:
+        return c.displayname
+    # this shouldn't happen, but just in case
+    return 'Unknown'
 
 def when_listings_expire():
     guide = tv.epg_xmltv.get_guide()
