@@ -1,6 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# tv.py - IdleBarPlugin for information about XMLTV-listings
+# tvstatus.py - IdleBarPlugin for information about XMLTV-listings, and
+#               the activity of your TV capture card.
 # -----------------------------------------------------------------------
 # $Id:
 #
@@ -33,7 +34,7 @@ import time
 
 import gui
 import config
-import util.tv_util as tv_util
+from tv.channels import when_listings_expire
 from plugins.idlebar import IdleBarPlugin
 
 
@@ -42,7 +43,7 @@ class PluginInterface(IdleBarPlugin):
     Informs you, when the xmltv-listings expires.
 
     Activate with:
-    plugin.activate('idlebar.tv', level=20, args=(listings_threshold,))
+    plugin.activate('idlebar.tvstatus', level=20, args=(listings_threshold,))
     listings_threshold must be a number in hours.  For example if you put
     args=(12, ) then 12 hours befor your xmltv listings run out the tv icon
     will present a warning.  Once your xmltv data is expired it will present
@@ -84,7 +85,7 @@ class PluginInterface(IdleBarPlugin):
             now = time.time()
 
             if now > self.next_guide_check:
-                self.listings_expire = tv_util.when_listings_expire()
+                self.listings_expire = when_listings_expire()
                 # check again in 10 minutes
                 self.next_guide_check = now + 10*60
 
