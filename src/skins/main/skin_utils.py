@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/22 18:26:10  dischi
+# Changes in the table code of menu items:
+# o use percentage again, pixel sizes are bad because they don't scale
+# o add special handling to avoid hardcoding texts in the skin file
+# o new function for the skin: text_or_icon for this handling
+#
+# Format for this texts inside a table:
+# ICON_<ORIENTATION>_<IMAGE_NAME>_<TEXT IF NO IMAGE IS THERE>
+#
 # Revision 1.6  2003/09/03 21:13:48  dischi
 # fix aspect calc to check if correction is needed
 #
@@ -167,3 +176,48 @@ def format_image(settings, item, width, height, force=0):
     format_imagecache[cname] = cimage, width, height
     return cimage, width, height
     
+
+def text_or_icon(settings, string, x, width, font):
+    l = string.split('_')
+    if len(l) != 4:
+        return string
+    try:
+        height = font.h
+        image = settings.images[l[2].lower()].filename
+        if image:
+            cname = '%s-%s-%s-%s-%s' % (image, x, l[1], width, height)
+            cimage = format_imagecache[cname]
+            if cimage:
+                return cimage
+            
+            image = osd.loadbitmap(image)
+            if not image:
+                raise KeyError
+            i_w, i_h = image.get_size()
+            original_width = width
+            if int(float(width * i_h) / i_w) > height:
+                width =  int(float(height * i_w) / i_h)
+            else:
+                height = int(float(width * i_h) / i_w)
+        
+            cimage = pygame.transform.scale(image, (width, height))
+            cimage.set_alpha(cimage.get_alpha(), RLEACCEL)
+            x_mod = 0
+            if l[1] == 'CENTER':
+                x_mod = (original_width - width) / 2
+            if l[1] == 'RIGHT':
+                x_mod = original_width - width
+            format_imagecache[cname] = x_mod, cimage
+            return x_mod, cimage
+    except KeyError:
+        _debug_('no image %s' % l[2])
+        pass
+
+    mod_x = width - font.font.stringsize(l[3])
+    if mod_x < 0:
+        mod_x = 0
+    if l[1] == 'CENTER':
+        return mod_x / 2, l[3]
+    if l[1] == 'RIGHT':
+        return mod_x, l[3]
+    return 0, l[3]

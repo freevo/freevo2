@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/10/22 18:26:08  dischi
+# Changes in the table code of menu items:
+# o use percentage again, pixel sizes are bad because they don't scale
+# o add special handling to avoid hardcoding texts in the skin file
+# o new function for the skin: text_or_icon for this handling
+#
+# Format for this texts inside a table:
+# ICON_<ORIENTATION>_<IMAGE_NAME>_<TEXT IF NO IMAGE IS THERE>
+#
 # Revision 1.54  2003/10/22 03:00:11  gsbarbieri
 # Support icons instead of labels "on", "off" and "auto"
 #
@@ -860,16 +869,17 @@ class DirItem(Playlist):
         item.name = item.name[:item.name.find('\t') + 1]
         if arg in self.modified_vars:
             if arg == 'FORCE_SKIN_LAYOUT':
-                item.name += str(getattr(self, arg))
+                item.name += 'ICON_RIGHT_%s_%s' % (str(getattr(self, arg)),
+                                                   str(getattr(self, arg)))
             elif getattr(self, arg):
-                item.name += _('on')
+                item.name += 'ICON_RIGHT_ON_' + _('on')
             else:
-                item.name += _('off')
+                item.name += 'ICON_RIGHT_OFF_' + _('off')
         else:
             if arg == 'FORCE_SKIN_LAYOUT':
-                item.name += _('off')
+                item.name += 'ICON_RIGHT_OFF_' + _('off')
             else:
-                item.name += _('auto')
+                item.name += 'ICON_RIGHT_AUTO_' + _('auto')
 
         # write folder.fxd
         if not self.write_fxd():
@@ -897,21 +907,22 @@ class DirItem(Playlist):
             name += '\t'
             if i in self.modified_vars:
                 if i == 'FORCE_SKIN_LAYOUT':
-                    name += str(getattr(self, i))
+                    name += 'ICON_RIGHT_%s_%s' % (str(getattr(self, i)),
+                                                  str(getattr(self, i)))
                 elif getattr(self, i):
-                    name += _('on')
+                    name += 'ICON_RIGHT_ON_' + _('on')
                 else:
-                    name += _('off')
+                    name += 'ICON_RIGHT_OFF_' + _('off')
             else:
                 if i == 'FORCE_SKIN_LAYOUT':
-                    name += _('off')
+                    name += 'ICON_RIGHT_OFF_' + _('off')
                 else:
-                    name += _('auto')
+                    name += 'ICON_RIGHT_AUTO_' + _('auto')
             mi = menu_module.MenuItem(name, self.configure_set_var, i)
             mi.description = descr
             items.append(mi)
         m = menu_module.Menu(_('Configure'), items)
-        m.table = [ -1, 30 ] # < 0 == take all remaining space, > 1 pixels that this column should use
+        m.table = (80, 20)
         m.back_one_menu = 2
         menuw.pushmenu(m)
 

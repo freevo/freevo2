@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/22 18:26:09  dischi
+# Changes in the table code of menu items:
+# o use percentage again, pixel sizes are bad because they don't scale
+# o add special handling to avoid hardcoding texts in the skin file
+# o new function for the skin: text_or_icon for this handling
+#
+# Format for this texts inside a table:
+# ICON_<ORIENTATION>_<IMAGE_NAME>_<TEXT IF NO IMAGE IS THERE>
+#
 # Revision 1.11  2003/10/22 03:00:12  gsbarbieri
 # Support icons instead of labels "on", "off" and "auto"
 #
@@ -399,69 +408,27 @@ class Listing_Area(Skin_Area):
                 # if the menu has an attr table, the menu is a table. Each
                 # item _must_ have that many tabs as the table needs!!!
                 if hasattr(menu, 'table'):
-                    if -1 in menu.table:
-                        # calculate the remaining space to use instead of -1
-                        space_taken = 0
-                        divisors = 0
-                        for i in menu.table:
-                            if i >= 1:
-                                space_taken += i
-                            elif i <= 0:
-                                divisors += 1
-                            # else -> percentage
-                            
-                        if divisors > 0:
-                            space_left = ( width - space_taken - hskip * 2 ) / divisors
-                            for i in range( len( menu.table ) ):
-                                if menu.table[ i ] <= 0:
-                                    menu.table[ i ] = space_left
-                        
-                    table_x = x0 + x_icon + hskip
-                    y0 += vskip
+                    table_x = x0 + hskip + x_icon
+                    table_text = text.split('\t')
                     for i in range(len(menu.table)):
-                        table_w = menu.table[i]
-                        # XXX TODO: handle values between 0 and 1 as percentage.
-                        
-                        my_text = text.split( '\t' )
-                        
-                        # Quick Hack to show icons instead of label for "on", "off" and "auto"
-                        use_text=1
-                        if my_text[ i ] in ( _("on"), _("off"), _("auto") ):
-                            img = None
-                            if my_text[ i ] == _( "on" ):
-                                img = "on"
-                            elif my_text[ i ] == _( "off" ):
-                                img = "off"
-                            elif my_text[ i ] == _( "auto" ):
-                                img = "auto"
-
-                            # check if there's the image
-                            image = None
-                            try:                                
-                                img = area.images[ img ].filename
-                                image = osd.loadbitmap( img , True )
-                                my_width, my_height = image.get_size()
-                            except:
-                                # Fallback to text mode
-                                use_text = 1
+                        table_w = ((width-icon_x-len(table_text)*5)*menu.table[i]) / 100
+                        if i != len(menu.table) - 1:
+                            table_w += 5
+                        x_mod = 0
+                        if table_text[i].find('ICON_') == 0:
+                            x_mod, table_text[i] = text_or_icon(area, table_text[i], table_x,
+                                                                table_w, val.font)
+                            if not isinstance(table_text[i], str):
+                                self.draw_image(table_text[i], (table_x + x_mod, y0 + vskip))
+                                table_text[i] = ''
                                 
-                            if image:
-                                my_w = min( table_w, my_width )
-                                my_h = min( vspace - vskip * 2, my_height )
-                                
-                                if my_width == my_height:
-                                    my_w = my_h = min( my_w, my_h )
-                                self.draw_image( img, ( table_x + (table_w - my_w) / 2,
-                                                        y0,
-                                                        my_w, my_h ) )
-                                use_text = 0                            
-
-                        if use_text:
-                            self.write_text(my_text[i], val.font, content,
-                                            x=table_x, y=y0, width=table_w, height=-1,
+                        if table_text[i]:
+                            self.write_text(table_text[i], val.font, content,
+                                            x=table_x + x_mod,
+                                            y=y0 + vskip, width=table_w, height=-1,
                                             align_h=val.align, mode='hard')
-                        
-                        table_x += table_w + hskip
+                        table_x += table_w + 5
+
                 else:
                     self.write_text(text, val.font, content, x=x0 + hskip + x_icon,
                                     y=y0 + vskip, width=width-icon_x, height=-1,
