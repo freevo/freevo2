@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.12  2003/08/23 19:21:29  mikeruelle
 # fixing an error that appends items to DIR_MOVIES when downloading an item
 #
@@ -97,10 +100,9 @@ import sys, os, string, urllib, re
 
 
 # needed to put these here to suppress its output
-import config
-import util
-import tv_util
-import record_client as ri
+import config, util
+import tv.tv_util
+import tv.record_client as ri
 
 from web_types import HTMLResource, FreevoResource
 from twisted.web import static
@@ -297,7 +299,7 @@ class LibraryResource(FreevoResource):
                     for prog in progl:
                         try:
                             if prog.isRecording == TRUE:
-                                recordingprogram = tv_util.getProgFilename(prog)
+                                recordingprogram = tv.tv_util.getProgFilename(prog)
                                 recordingprogram = string.replace(recordingprogram, ' ', '_')
                                 break
                         except:
@@ -373,7 +375,7 @@ class LibraryResource(FreevoResource):
                     status = 'favorite'
                 fv.tableRowOpen('class="chanrow"')
                 fv.tableCell(file, 'class="'+status+'" align="left" colspan="1"')
-                fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(tv.tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
                 if suppressaction == TRUE:
                     fv.tableCell('&nbsp;', 'class="'+status+'" align="center" colspan="1"')
                 else:

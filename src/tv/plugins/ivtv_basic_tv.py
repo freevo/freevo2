@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.10  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -59,7 +62,7 @@ import rc      # The RemoteControl class.
 import event as em
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
-import ivtv
+import tv.ivtv as ivtv
 
 import plugin
 

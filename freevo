@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.79  2003/09/02 19:40:10  dischi
 # fix link handling to helper
 #
@@ -113,7 +116,7 @@ if [ "$USER" = "" ]; then
 fi
 
 # Set this globaly, everything here should have access to these modules.
-export PYTHONPATH=$FREEVO_PYTHON:$FREEVO_PYTHON/www:$FREEVO_PYTHON/tv:$PYTHONPATH
+export PYTHONPATH=$FREEVO_PYTHON:$PYTHONPATH
 
 # expand PATH to stuff that should be in it
 export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/X11R6/bin

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.7  2003/07/06 20:04:26  rshortt
 # Change favorites to use tv_util.get_chan_displayname(prog) as
 # favorite.channel rather than channel_id.
@@ -66,11 +69,11 @@
 
 import sys, time
 
-from record_types import Favorite
-import epg_xmltv
-import record_client as ri
+from tv.record_types import Favorite
+import tv.epg_xmltv
+import tv.record_client as ri
 
-from web_types import HTMLResource, FreevoResource
+from www.web_types import HTMLResource, FreevoResource
 
 TRUE = 1
 FALSE = 0
@@ -116,7 +119,7 @@ class EditFavoriteResource(FreevoResource):
             pass
 
 
-        guide = epg_xmltv.get_guide()
+        guide = tv.epg_xmltv.get_guide()
 
         fv.printHeader('Edit Favorite', 'styles/main.css')
 

@@ -32,11 +32,10 @@
 
 import sys, time
 
-import epg_xmltv
-import epg_types
-import record_client as ri
+import tv.epg_xmltv, tv.epg_types
+import tv.record_client as ri
 
-from web_types import HTMLResource, FreevoResource
+from www.web_types import HTMLResource, FreevoResource
 
 TRUE = 1
 FALSE = 0
@@ -44,10 +43,9 @@ FALSE = 0
 # maxinum number of days we can record
 MAXDAYS = 7
 
-# minimum amount of time it would take cron to pick us up in seconds
-# by default it is one minute  plus a few seconds since the cron job
-# runs every minute and to allow for processing time.
-MINCRONPICKUP = 70
+# minimum amount of time it would take record_server.py to pick us up in seconds
+# by default it is one minute plus a few seconds just in case
+MINPICKUP = 70
 
 
 class ManualRecordResource(FreevoResource):
@@ -100,11 +98,11 @@ class ManualRecordResource(FreevoResource):
                 # so we don't record for more then maxdays (maxdays day * 24hr/day * 60 min/hr * 60 sec/min)
                 if abs(stoptime - starttime) < (MAXDAYS * 86400): 
                     if starttime < stoptime:
-                        if stoptime < curtime_epoch + MINCRONPICKUP:
+                        if stoptime < curtime_epoch + MINPICKUP:
                             errormsg = "Sorry, the stop time does not give enough time for cron to pickup the change.  Please set it to record for a few minutes longer."
                         else:
                             # assign attributes to object
-                            prog = epg_types.TvProgram()
+                            prog = tv.epg_types.TvProgram()
                             prog.channel_id = chan
                             if title:
                                 prog.title = title
@@ -123,7 +121,7 @@ class ManualRecordResource(FreevoResource):
                     errormsg = "Program would record for more than " + str(MAXDAYS) + " day(s)!"
 
         if errormsg or not action:
-            guide = epg_xmltv.get_guide()
+            guide = tv.epg_xmltv.get_guide()
             channelselect = '<select name="chan">'
             for ch in guide.chan_list:
                 channelselect = channelselect + '<option value="'+ch.id+'">'+ch.tunerid+"\n"

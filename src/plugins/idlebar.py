@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.37  2003/08/24 19:59:43  outlyer
 # Fixed this to be endian independent, as required by Python 2.3 (prevents
 # another warning)
@@ -91,7 +94,7 @@ import sys
 import string
 import mailbox
 import skin
-import tv_util
+import tv.tv_util as tv_util
 
 import plugin
 

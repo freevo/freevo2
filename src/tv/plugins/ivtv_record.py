@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.10  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -43,7 +46,7 @@ import threading
 import signal
 
 import config
-import tv_util, ivtv
+import tv.ivtv
 import childapp 
 import plugin 
 
@@ -121,7 +124,7 @@ class Record_Thread(threading.Thread):
                 
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
 
-                v = ivtv.IVTV(v_dev)
+                v = tv.ivtv.IVTV(v_dev)
 
                 v.init_settings()
 

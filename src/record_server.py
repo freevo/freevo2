@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.2  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -58,13 +61,13 @@ from twisted.internet import reactor
 from twisted.persisted import marmalade
 from twisted.python import log
 
-from record_types import TYPES_VERSION
-from record_types import ScheduledRecordings
+from tv.record_types import TYPES_VERSION
+from tv.record_types import ScheduledRecordings
 
 import config
-import record_types
-import epg_xmltv
-import tv_util
+import tv.record_types
+import tv.epg_xmltv
+import tv.tv_util
 import plugin
 
 # We won't be needing LD_PRELOAD.
@@ -160,7 +163,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 prog.tunerid = chan.tunerid
     
         scheduledRecordings = self.getScheduledRecordings()
-        scheduledRecordings.addProgram(prog, tv_util.getKey(prog))
+        scheduledRecordings.addProgram(prog, tv.tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
        
         return (TRUE, 'recording scheduled')
@@ -171,7 +174,7 @@ class RecordServer(xmlrpc.XMLRPC):
             return (FALSE, 'no prog')
 
         scheduledRecordings = self.getScheduledRecordings()
-        scheduledRecordings.removeProgram(prog, tv_util.getKey(prog))
+        scheduledRecordings.removeProgram(prog, tv.tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
        
         return (TRUE, 'recording removed')
@@ -248,7 +251,7 @@ class RecordServer(xmlrpc.XMLRPC):
         global guide
 
         # XXX TODO: only do this if the guide has changed?
-        guide = epg_xmltv.get_guide()
+        guide = tv.epg_xmltv.get_guide()
 
         
     def checkToRecord(self):
@@ -283,7 +286,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 log.debug('going to record: %s' % prog)
                 prog.isRecording = TRUE
                 prog.rec_duration = duration
-                prog.filename = tv_util.getProgFilename(prog)
+                prog.filename = tv.tv_util.getProgFilename(prog)
                 rec_prog = prog
 
 
@@ -292,7 +295,7 @@ class RecordServer(xmlrpc.XMLRPC):
             if prog.stop < now:
                 log.debug('found a program to clean')
                 cleaned = TRUE
-                del progs[tv_util.getKey(prog)]
+                del progs[tv.tv_util.getKey(prog)]
 
         if rec_prog or cleaned:
             scheduledRecordings.setProgramList(progs)
@@ -308,7 +311,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
         (status, favs) = self.getFavorites()
         priority = len(favs) + 1
-        fav = record_types.Favorite(name, prog, exactchan, exactdow, exacttod, priority)
+        fav = tv.record_types.Favorite(name, prog, exactchan, exactdow, exacttod, priority)
     
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.addFavorite(fav)
@@ -319,7 +322,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
     
     def addEditedFavorite(self, name, title, chan, dow, mod, priority):
-        fav = record_types.Favorite()
+        fav = tv.record_types.Favorite()
     
         fav.name = name
         fav.title = title
@@ -426,7 +429,7 @@ class RecordServer(xmlrpc.XMLRPC):
         for fav in favs.values():
     
             if prog.title == fav.title:    
-                if fav.channel == tv_util.get_chan_displayname(prog.channel_id) \
+                if fav.channel == tv.tv_util.get_chan_displayname(prog.channel_id) \
                    or fav.channel == 'ANY':
                     if fav.dow == dow or fav.dow == 'ANY':
                         if fav.mod == min_of_day or fav.mod == 'ANY':

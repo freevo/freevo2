@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.10  2003/08/20 03:51:48  rshortt
 # Patch from Mike so that the option boxes default to the day and time as
 # displayed in the guide.
@@ -78,15 +81,13 @@
 import sys, string
 import time
 
-from web_types import HTMLResource, FreevoResource
+from www.web_types import HTMLResource, FreevoResource
 from twisted.web.woven import page
 
-import web
-import tv_util
+import tv.tv_util
 import config 
-import xmltv
-import epg_xmltv 
-import record_client as ri
+import tv.epg_xmltv 
+import tv.record_client as ri
 from twisted.web import static
 
 DEBUG = 0
@@ -104,7 +105,7 @@ class GuideResource(FreevoResource):
         gstart_t = time.localtime(gstart)
         myt = time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, 
                            myt_t[6], myt_t[7], -1))
-        listh = tv_util.when_listings_expire()
+        listh = tv.tv_util.when_listings_expire()
         if listh == 0:
             return retval + '</select>\n'
         listd = int((listh/24)+2)
@@ -135,7 +136,7 @@ class GuideResource(FreevoResource):
             if (abs(gstart - hrinc) < 60):
                 retval += ' SELECTED '
             retval += '>' + time.strftime('%H:%M', time.localtime(hrinc)) + '\n'
-            hrinc += web.INTERVAL
+            hrinc += config.WWW_GUIDE_INTERVAL
         retval += '</select>\n'
         return retval
 
@@ -144,8 +145,8 @@ class GuideResource(FreevoResource):
         fv = HTMLResource()
         form = request.args
 
-        INTERVAL = web.INTERVAL
-        n_cols = web.n_cols
+        INTERVAL = config.WWW_GUIDE_INTERVAL
+        n_cols = config.WWW_GUIDE_COLS
 
         mfrguidestart = time.time()
         mfrguideinput = fv.formValue(form, 'stime')
@@ -164,12 +165,12 @@ class GuideResource(FreevoResource):
         if mfrprevguide < now2:
             mfrprevguide = 0
 
-        guide = epg_xmltv.get_guide()
+        guide = tv.epg_xmltv.get_guide()
         (got_schedule, schedule) = ri.getScheduledRecordings()
         if got_schedule:
             schedule = schedule.getProgramList()
 
-        fv.printHeader('TV Guide', web.STYLESHEET, web.JAVASCRIPT)
+        fv.printHeader('TV Guide', config.WWW_STYLESHEET, config.WWW_JAVASCRIPT)
 
         if not got_schedule:
             fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'

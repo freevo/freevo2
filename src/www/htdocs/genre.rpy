@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.1  2003/08/24 21:41:44  mikeruelle
 # adding a new page to see shows of a certain category
 #
@@ -39,13 +42,10 @@
 
 import sys, time, string
 
-import record_client as ri
-from web_types import HTMLResource, FreevoResource
-import web
-import epg_xmltv
-import util
-import tv_util
-import config
+import tv.record_client as ri
+from www.web_types import HTMLResource, FreevoResource
+import tv.epg_xmltv
+import util, config
 
 TRUE = 1
 FALSE = 0
@@ -89,12 +89,12 @@ class GenreResource(FreevoResource):
 
         category = fv.formValue(form, 'category')
 
-        guide = epg_xmltv.get_guide()
+        guide = tv.epg_xmltv.get_guide()
         (got_schedule, schedule) = ri.getScheduledRecordings()
         if got_schedule:
             schedule = schedule.getProgramList()
 
-        fv.printHeader('TV Genre for %s' % time.strftime('%a %b %d', time.localtime(mfrguidestart)), web.STYLESHEET, web.JAVASCRIPT)
+        fv.printHeader('TV Genre for %s' % time.strftime('%a %b %d', time.localtime(mfrguidestart)), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT)
 
         if not got_schedule:
             fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'

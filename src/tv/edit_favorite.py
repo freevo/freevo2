@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.3  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -40,12 +43,13 @@
 
 import time
 
-import config, record_client, epg_xmltv, view_favorites
+import config, tv.epg_xmltv, tv.view_favorites
+import tv.record_client as record_client
 import event as em
 
-from record_types import Favorite
-import record_types
-from epg_types import TvProgram
+from tv.record_types import Favorite
+import tv.record_types
+from tv.epg_types import TvProgram
 
 from gui.GUIObject      import *
 from gui.Border         import *
@@ -75,7 +79,7 @@ class EditFavorite(PopupBox):
 
         print 'DEBUG::subject: %s' % dir(subject)
         print 'DEBUG::subject::__module__ %s' % subject.__module__
-        #if isinstance(subject, record_types.Favorite):
+        #if isinstance(subject, tv.record_types.Favorite):
         #    print 'DEBUG::subject: FUCK'
         #    self.fav = subject
         #    self.oldname = self.fav.name
@@ -107,7 +111,7 @@ class EditFavorite(PopupBox):
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
-        guide = epg_xmltv.get_guide()
+        guide = tv.epg_xmltv.get_guide()
 
         name = Label('Name:\t', self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)
@@ -328,7 +332,7 @@ class EditFavorite(PopupBox):
                              self.tod_box.list.get_selected_item().value, 
                              self.fav.priority)
                 if result:
-                    view_favorites.ViewFavorites(parent=self.parent, text='Favorites').show()
+                    tv.view_favorites.ViewFavorites(parent=self.parent, text='Favorites').show()
                     self.destroy()
                 else:
                     AlertBox(parent=self, text='Failed: %s' % msg)

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.7  2003/07/13 18:08:53  rshortt
 # Change tv_util.get_chan_displayname() to accept channel_id instead of
 # a TvProgram object and also use config.TV_CHANNELS when available, which
@@ -67,11 +70,11 @@
 #endif
 
 import sys, time
-import tv_util
+import tv.tv_util
 
-import record_client as ri
+import tv.record_client as ri
 
-from web_types import HTMLResource, FreevoResource
+from www.web_types import HTMLResource, FreevoResource
 
 TRUE = 1
 FALSE = 0
@@ -149,7 +152,7 @@ class RecordResource(FreevoResource):
             fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
             fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
 
-            chan = tv_util.get_chan_displayname(prog.channel_id)
+            chan = tv.tv_util.get_chan_displayname(prog.channel_id)
             if not chan: chan = 'UNKNOWN'
             fv.tableCell(chan, 'class="'+status+'" align="left" colspan="1"')
             fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')

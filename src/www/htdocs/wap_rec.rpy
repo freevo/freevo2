@@ -3,15 +3,47 @@
 #if 0 /*
 # -----------------------------------------------------------------------
 # wap_rec.rpy - Wap shedule recording page.
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
 # ----------------------------------------------------------------------- */
 #endif
 
 import sys, time
 
-import epg_xmltv
-import epg_types
-import record_client as ri
-from wap_types import WapResource, FreevoWapResource
+import tv.epg_xmltv
+import tv.epg_types
+import tv.record_client as ri
+from www.wap_types import WapResource, FreevoWapResource
 
 class WRecResource(FreevoWapResource):
 
@@ -41,7 +73,7 @@ class WRecResource(FreevoWapResource):
               stoptime = time.mktime(time.strptime(str(startdate)+" "+str(stop)+":00",'%d/%m/%y %H:%M:%S'))
               if stoptime < starttime:
                   stoptime = stoptime + 86400
-              prog = epg_types.TvProgram()
+              prog = tv.epg_types.TvProgram()
               prog.channel_id = channel
               prog.title = "Wap Recorded"
               prog.start = starttime
@@ -65,7 +97,7 @@ class WRecResource(FreevoWapResource):
                 fv.res += '     </anchor></p>\n'
                 fv.res += '  </card>\n'
             else:
-                guide = epg_xmltv.get_guide()
+                guide = tv.epg_xmltv.get_guide()
 
                 fv.res += '  <card id="card1" title="Freevo" ontimer="#card2">\n'
                 fv.res += '  <timer value="30"/>\n'

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.5  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -40,7 +43,7 @@
 import sys, string, re
 import time, os, string
 
-import util, config, epg_xmltv
+import util, config, tv.epg_xmltv
 
 DEBUG = 0
 
@@ -112,13 +115,13 @@ def get_chan_displayname(channel_id):
         if tv_channel_id == channel_id:
             return tv_display_name
 
-    guide = epg_xmltv.get_guide()
+    guide = tv.epg_xmltv.get_guide()
     return guide.chan_dict.get(channel_id).displayname
 
     return None
 
 def when_listings_expire():
-    guide = epg_xmltv.get_guide()
+    guide = tv.epg_xmltv.get_guide()
     last = 0
     left = 0
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.6  2003/08/24 06:58:18  gsbarbieri
 # Partial support for "out" icons in main menu.
 # The missing part is in listing_area, which have other changes to
@@ -53,7 +56,7 @@ class PluginInterface(plugin.MainMenuPlugin):
 
     def items(self, parent):
         import skin
-        import tv
+        import tvmenu
 
         skin = skin.get_singleton()
         menu_items = skin.settings.mainmenu.items
@@ -65,7 +68,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         if menu_items['tv'].outicon:
             outicon = os.path.join(skin.settings.icon_dir, menu_items['tv'].outicon)
         return ( menu.MenuItem(menu_items['tv'].name, icon=icon,
-                               action=tv.TVMenu().main_menu, type='main',
+                               action=tvmenu.TVMenu().main_menu, type='main',
                                image=menu_items['tv'].image, parent=parent, outicon=outicon), )
 
 

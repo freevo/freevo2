@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.1  2003/06/24 17:52:00  dischi
 # added iceslistchanger
 #
@@ -41,10 +44,8 @@
 
 import sys, time, os, urllib
 
-import record_client 
-from web_types import HTMLResource, FreevoResource
-import util
-import config
+from www.web_types import HTMLResource, FreevoResource
+import util, config
 
 TRUE = 1
 FALSE = 0

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.7  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -42,7 +45,8 @@
 
 import time
 
-import config, record_client, program_display, tv_util
+import config, tv.program_display, tv.tv_util
+import tv.record_client as record_client
 import event as em
 
 from gui.GUIObject      import *
@@ -132,7 +136,7 @@ class ProgramSearch(PopupBox):
                 self.results.add_item(text='%s %s: %s' % \
                                         (time.strftime('%b %d %I:%M %p', 
                                            time.localtime(prog.start)), 
-                                         tv_util.get_chan_displayname(prog.channel_id),
+                                         tv.tv_util.get_chan_displayname(prog.channel_id),
                                          prog.title),
                                       value=prog)
 
@@ -197,7 +201,7 @@ class ProgramSearch(PopupBox):
             elif event == em.INPUT_ENTER:
                 prog = self.results.get_selected_child().value
                 if prog:
-                    program_display.ProgramDisplay(parent=self, prog=prog).show()
+                    tv.program_display.ProgramDisplay(parent=self, prog=prog).show()
                 return
 
         if event == em.INPUT_EXIT:

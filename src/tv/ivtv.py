@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.9  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -37,7 +40,7 @@
 
 import string, struct, fcntl, time
 
-import v4l2, config
+import tv.v4l2, config
 
 # ioctls
 IVTV_IOC_G_CODEC = 0xFFEE7703
@@ -58,10 +61,10 @@ CODEC_ST = '15I'
 MSP_MATRIX_ST = '2i'
 
 
-class IVTV(v4l2.Videodev):
+class IVTV(tv.v4l2.Videodev):
 
     def __init__(self, device):
-        v4l2.Videodev.__init__(self, device)
+        tv.v4l2.Videodev.__init__(self, device)
 
 
     def setCodecInfo(self, codec):
@@ -85,7 +88,7 @@ class IVTV(v4l2.Videodev):
 
 
     def setstd(self, value):
-        v4l2.Videodev.setstd(self, value)
+        tv.v4l2.Videodev.setstd(self, value)
         time.sleep(1)
         self.mspSetMatrix()
 
@@ -109,7 +112,7 @@ class IVTV(v4l2.Videodev):
         if not opts:
             opts = config.IVTV_OPTIONS
 
-        v4l2.Videodev.init_settings(self)
+        tv.v4l2.Videodev.init_settings(self)
 
         self.setinput(opts['input'])
 
@@ -140,7 +143,7 @@ class IVTV(v4l2.Videodev):
 
 
     def print_settings(self):
-        v4l2.Videodev.print_settings(self)
+        tv.v4l2.Videodev.print_settings(self)
 
         codec = self.getCodecInfo()
 

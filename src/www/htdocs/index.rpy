@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/05 02:48:13  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.6  2003/07/26 17:15:15  rshortt
 # Some changes from Mike Ruelle that let you know if your xmltv data is out
 # of date and also tell you if something is recording (and what it is).
@@ -61,11 +64,10 @@
 
 import sys, time
 
-import record_client 
-from web_types import HTMLResource, FreevoResource
-import util
-import tv_util
-import config
+import tv.record_client 
+from www.web_types import HTMLResource, FreevoResource
+import util, config
+import tv.tv_util
 
 TRUE = 1
 FALSE = 0
@@ -79,13 +81,13 @@ class IndexResource(FreevoResource):
     
         fv.res += '<h2>Freevo Web Status as of %s</h2>' % time.strftime('%B %d %H:%M', time.localtime())
     
-        (server_available, schedule) = record_client.connectionTest()
+        (server_available, schedule) = tv.record_client.connectionTest()
         if not server_available:
             fv.res += '<p><font color="red" >Notice: The recording server is down.</font></p>'
         else:
             fv.res += '<p><font color="white" >The recording server is up and running.</font></p>'
 
-        listexpire = tv_util.when_listings_expire()
+        listexpire = tv.tv_util.when_listings_expire()
         if listexpire == 1:
             fv.res += '<p><font color="red" >Notice: Your listings expire in 1 hour.</font></p>'
         elif listexpire < 12:
@@ -93,7 +95,7 @@ class IndexResource(FreevoResource):
         else:
             fv.res += '<p><font color="white" >Your listings are up to date.</font></p>'
 
-        (got_schedule, recordings) = record_client.getScheduledRecordings()
+        (got_schedule, recordings) = tv.record_client.getScheduledRecordings()
         if got_schedule:
             progl = recordings.getProgramList().values()
             f = lambda a, b: cmp(a.start, b.start)

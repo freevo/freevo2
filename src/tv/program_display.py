@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/05 02:48:12  rshortt
+# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
+#
 # Revision 1.9  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -40,8 +43,9 @@
 
 import time
 
-import config, record_client, edit_favorite, tv_util
-import view_favorites, program_search
+import config, tv.edit_favorite, tv.tv_util
+import tv.record_client as record_client
+import tv.view_favorites, tv.program_search
 import event as em
 
 from gui.GUIObject import *
@@ -92,7 +96,7 @@ class ProgramDisplay(PopupBox):
         desc = Label('Description:  %s' % self.prog.desc, self, Align.LEFT)
 
         chan = Label('Channel:  %s' % \
-                      tv_util.get_chan_displayname(self.prog.channel_id), 
+                      tv.tv_util.get_chan_displayname(self.prog.channel_id), 
                                                    self, Align.LEFT)
 
         start = Label('Start:  %s' % time.strftime('%A %b %d %I:%M %p', 
@@ -149,10 +153,10 @@ class ProgramDisplay(PopupBox):
                     AlertBox(parent=self, 
                              text='Scheduling Failed: %s' % msg).show()
             elif self.options.get_selected_item().value == 2:
-                program_search.ProgramSearch(parent=self, 
+                tv.program_search.ProgramSearch(parent=self, 
                                              search=self.prog.title).show()
             elif self.options.get_selected_item().value == 3:
-                edit_favorite.EditFavorite(parent=self, 
+                tv.edit_favorite.EditFavorite(parent=self, 
                                            subject=self.prog).show()
             elif self.options.get_selected_item().value == 4:
                 (result, msg) = record_client.removeScheduledRecording(self.prog)
@@ -240,7 +244,7 @@ class ScheduledRecordings(PopupBox):
                 self.results.add_item(text='%s %s: %s' % \
                                         (time.strftime('%b %d %I:%M %p',
                                            time.localtime(prog.start)),
-                                         tv_util.get_chan_displayname(prog.channel_id),
+                                         tv.tv_util.get_chan_displayname(prog.channel_id),
                                          prog.title),
                                       value=prog)
 
