@@ -119,7 +119,7 @@ class Recording:
                 options[pattern[2:-1]] = pattern
         url = re.sub('%\([a-z]*\)', lambda x: x.group(0)+'s', self.url)
         url = url % options
-        self.url = 'file:' + url.rstrip(' -_:') + '.suffix'
+        self.url = url.rstrip(' -_:') + '.suffix'
     
 
     def parse_fxd(self, parser, node):
