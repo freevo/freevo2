@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/06/13 23:34:06  rshortt
+# In _getfont include IOError as well as RuntimeError because of changes in recent SDL_ttf2 or pygame.
+#
 # Revision 1.42  2003/06/12 00:37:12  gsbarbieri
 # Some bug fixes
 #
@@ -1350,7 +1353,7 @@ class OSD:
             print 'OSD: Loading font "%s"' % filename
         try:
             font = pygame.font.Font(filename, ptsize)
-        except RuntimeError:
+        except (RuntimeError, IOError):
             print 'Couldnt load font "%s"' % filename
             if DEBUG >= 2:
                 print 'Call stack:'
@@ -1368,7 +1371,7 @@ class OSD:
                 print 'trying alternate: %s' % alt_fname
                 try:
                     font = pygame.font.Font(alt_fname, ptsize)
-                except RuntimeError:
+                except (RuntimeError, IOError):
                     print 'Couldnt load alternate font "%s"' % alt_fname
                     raise
             else:
