@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/08/14 08:40:08  dischi
+# bugfix for new menu interface
+#
 # Revision 1.39  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -260,7 +263,6 @@ class MediaMenu(Item):
                     menu.selected = None
 
             if menu == menuw.menustack[-1] and eventhandler.is_menu():
-                menuw.init_page()
                 menuw.refresh()
             # others may need this event, too
             return False
