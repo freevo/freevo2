@@ -18,31 +18,54 @@ Q: How do I play CD audio disks?
 A: It is not supported yet.
 
    Support is planned for a future relase.
+
 ----------------------------------------------------------------------
 
-Q: I have an old computer with a processor less than 400 Mhz, will it work?
+Q: I have an old computer with a processor less than 400 Mhz, will 
+   it be able to do all functions in Freevo?
 
-A: Most likely not. 400 Mhz probably won't even be enough when we get
-   simultaneous recording and playback working. I'd recommend
+A: No. The core application will work on slower machines, as well
+   as image viewing and MP3 playback. But video/DVD playback and 
+   recording requires around 400 MHz, and simultaneous 
+   video record and playback requires an even faster machine,
+   especially for higher resolutions. We'd recommend
    something over 1 Ghz if you want to use that feature when it comes
    out (based on the hardware needs of mythtv). If you only want video
    playback, less than 400 Mhz may be enough, please check the mplayer
    doc about this (http://www.mplayerhq.hu/DOCS/).
+
 ----------------------------------------------------------------------
 
 Q: I have a board other than a matrox G400 will that work with freevo?
 
-A: Not in framebuffer mode. If the card works with linux in tv-out
-   mode you can most likely use it with freevo in X11 mode (nvidia
-   cards should work (add more here as people test them).
+A: Yes. Versions >= 1.2.5 of Freevo supports all boards that SDL 
+   do (www.libsdl.org) for the menus and framework, and all boards
+   that MPlayer supports for video playback.
+
 ----------------------------------------------------------------------
 
 Q: I'm using distribution X will that work with freevo?
 
 A: Most any distribution should work with freevo. As long as the the
    requirements are met (listed on the main page) and you have a
-   compiler that is either 2.95 or 3.xx (redhat 7.3 and lower and
+   compiler (GCC) that is either 2.95 or 3.xx (redhat 7.3 and lower and
    mandrake 8.2 and lower come with 2.96 which doesn't seem to work
    very well, but gcc3 is included in redhat >= 7.2 as extra rpm) it
-   should work fine (if freevo ever gets to the point where it is
-   distributed as rpms or debs you can ignore the compiler part).
+   should work fine.
+
+   If you use the Freevo runtime framework all dependencies are  
+   included there, so it shouldn't matter which distribution
+   you run. You will still need the correct version of GCC to
+   compile MPlayer though.
+
+----------------------------------------------------------------------
+
+Q: I'm running Freevo on a Matrox G400 in framebuffer mode. Why 
+   is the screen "squeezed together" horizontally. I have black bars
+   about 1" (3 cm) on either side of the TV screen!
+
+A: SDL that Freevo uses resets the framebuffer settings. This is 
+   fixed by re-running the "fbset" command, which is done using the 
+   scripts in matrox_g400/mga_[ntsc|pal]_*. There is an option
+   to run a script like this automatically after startup, 
+   see OSD_SDL_EXEC_AFTER_STARTUP in freevo_config.py
