@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/01/31 12:38:47  dischi
+# remove \0 checking, fixed mmpython
+#
 # Revision 1.55  2004/01/30 20:42:59  dischi
 # fix name setting
 #
@@ -306,12 +309,11 @@ class Item:
                    self.info.has_key('title'):
                 self.name = self.info['title']
 
-        if not self.name or self.name == '\0':
+        if not self.name:
             if self.filename:
                 self.name = util.getname(self.filename)
             else:
                 self.name = self.url
-
             
     def __setitem__(self, key, value):
         """
