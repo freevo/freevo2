@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/14 19:28:12  outlyer
+# Fix a display issue.
+#
 # Revision 1.13  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -138,6 +141,7 @@ class SearchResource(FreevoResource):
             fv.res += '<h3>No matches</h3>'
 
         else:
+            fv.res += '<div id="content"><br>'
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
@@ -195,6 +199,7 @@ class SearchResource(FreevoResource):
 
             fv.tableClose()
 
+        fv.res += '</div>'
         fv.printSearchForm()
 
         fv.printLinks()
