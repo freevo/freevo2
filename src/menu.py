@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/30 16:52:51  dischi
+# removed debug
+#
 # Revision 1.26  2003/03/30 16:50:19  dischi
 # pass xml_file definition to submenus
 #
@@ -212,7 +215,6 @@ class Menu:
         self.umount_all = umount_all    # umount all ROM drives on display?
         self.surface = None
         if xml_file:
-            print 'has'
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
