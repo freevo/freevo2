@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/08/31 15:50:18  dischi
+# add X11R6 to PATH
+#
 # Revision 1.76  2003/08/31 11:02:37  dischi
 # support "freevo start" to start in background
 #
@@ -103,7 +106,7 @@ fi
 export PYTHONPATH=$FREEVO_PYTHON:$FREEVO_PYTHON/www:$FREEVO_PYTHON/tv:$PYTHONPATH
 
 # expand PATH to stuff that should be in it
-export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin
+export PATH=$PATH:/bin:/usr/bin:/sbin:/usr/sbin:/usr/X11R6/bin
 
 # option -fs
 # This will start a new X session and start Freevo as windowmanager
