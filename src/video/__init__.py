@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/08/28 17:17:19  dischi
+# fix bug in auto join feature
+#
 # Revision 1.34  2004/07/11 10:26:49  dischi
 # sort items before checking because of auto-join
 #
@@ -50,6 +53,7 @@
 import os
 import copy
 import re
+import string
 
 import config
 import util
@@ -119,6 +123,11 @@ class PluginInterface(plugin.MimetypePlugin):
             if config.VIDEO_AUTOJOIN and file.find('1') > 0:
                 pos = 0
                 for count in range(file.count('1')):
+                    # only count single digests
+                    if file[pos+file[pos:].find('1')-1] in string.digits or \
+                           file[pos+file[pos:].find('1')+1] in string.digits:
+                        pos += file[pos:].find('1') + 1
+                        continue
                     add_file = []
                     missing  = 0
                     for i in range(2, 6):
