@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2004/01/25 14:54:31  dischi
+# save parent after skin change
+#
 # Revision 1.109  2004/01/24 18:53:54  dischi
 # add mmpython md5 disc id support
 #
@@ -142,9 +145,10 @@ class SkinSelectItem(Item):
         skin.set_base_fxd(self.skin)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
 
+        parent = menuw.menustack[0].choices[0].parent
         menuw.menustack[0].choices = []
         for p in plugin.get('mainmenu'):
-            menuw.menustack[0].choices += p.items(self)
+            menuw.menustack[0].choices += p.items(parent)
 
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
         menuw.back_one_menu()
