@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/05/12 20:07:01  dischi
+# do not delete raw files for discs
+#
 # Revision 1.33  2004/05/02 11:46:13  dischi
 # make it possible to turn off image caching
 #
@@ -128,6 +131,8 @@ def delete_old_files_2():
     sys.__stdout__.flush()
     num = 0
     for file in util.match_files_recursively(config.OVERLAY_DIR, ['raw']):
+        if file.startswith(config.OVERLAY_DIR + '/disc/'):
+            continue
         if not vfs.isfile(file[len(config.OVERLAY_DIR):-4]):
             os.unlink(file)
             num += 1
