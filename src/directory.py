@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.137  2004/08/01 10:56:46  dischi
+# deactivate password checking, InputBox is broken
+#
 # Revision 1.136  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -509,7 +512,8 @@ class DirItem(Playlist):
                 util.mount(self.dir)
                 self.media = media
 
-	if vfs.isfile(self.dir + '/.password'):
+        # FIXME: add support again when InputBox is working
+	if vfs.isfile(self.dir + '/.password') and 0:
 	    print 'password protected dir'
             self.arg   = arg
             self.menuw = menuw
