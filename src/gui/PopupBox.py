@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/30 18:02:31  dischi
+# set parent before calling the parent constructor
+#
 # Revision 1.10  2003/03/30 17:42:20  rshortt
 # Now passing self along to skin.GetPopupBoxStyle in an attempt to get the
 # skin propertied of the current menu in case we are using a menu based skin.
@@ -138,6 +141,8 @@ class PopupBox(GUIObject):
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
+        self.parent = parent
+        
         GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
 
         if parent:
