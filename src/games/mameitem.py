@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/10 16:37:41  dischi
+# Fix menu redraw after playing ended (untested, please test)
+#
 # Revision 1.5  2003/04/06 21:12:57  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -132,8 +135,14 @@ class MameItem(Item):
         return [ ( self.play, 'Play' ) ]
     
 
-    def play(self, menuw=None):
+    def play(self, arg=None, menuw=None):
         self.parent.current_item = self
+
+        if not self.menuw:
+            self.menuw = menuw
+
+        if self.menuw.visible:
+            self.menuw.hide()
 
         print "Playing:  %s" % self.filename
 
