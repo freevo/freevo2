@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/05/20 15:45:07  outlyer
+# Fixes for favorites containing the '&' symbol... covert it from the HTML
+# "%26" into "&"
+#
 # Revision 1.16  2004/04/11 06:51:17  dischi
 # unicode patch
 #
@@ -104,7 +108,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, time
+import sys, time, string
 
 from tv.record_types import Favorite
 import tv.epg_xmltv
@@ -137,6 +141,7 @@ class EditFavoriteResource(FreevoResource):
         start = fv.formValue(form, 'start')
         action = fv.formValue(form, 'action')
         name = Unicode(fv.formValue(form, 'name'))
+        name = string.replace(name,'%26','&')
         if isinstance( name, str ):
             name = Unicode( name, 'latin-1' )
 
