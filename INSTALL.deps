@@ -122,3 +122,16 @@ o OGG Vorbis:
   o http://www.vorbis.com/download_unix.psp:
     o libogg-1.0.tar.gz
     o libvorbis-1.0.tar.gz
+o Optional: XMMS instead of MPlayer for music playing, has visualization
+  on X11. 
+  o http://www.xmms.org/files/1.2.x/xmms-1.2.7-pre2.tar.gz
+    o tar xvzf xmms-1.2.7-pre2.tar.gz
+    o cd xmms-1.2.7-pre2
+    o ./configure --prefix=/usr/local   (needed for PyXMMS below)
+    o (as root) make install
+  o PyXMMS required:
+    o http://www.via.ecp.fr/~flo/2002/PyXMMS/dist/pyxmms-1.06.tar.gz
+      o tar xvzf pyxmms-1.06.tar.gz
+      o cd pyxmms-1.06
+      o python setup.py build      
+      o (as root) python setup.py install
