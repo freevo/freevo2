@@ -283,13 +283,13 @@ for type in ('video', 'audio', 'image', 'games'):
 
 # Items in the main menu.
 plugin_tv       = plugin.activate('tv', level=10)
-plugin_video    = plugin.activate('mediamenu', level=20, args=('video', ))
-plugin_audio    = plugin.activate('mediamenu', level=30, args=('audio', ))
+plugin_video    = plugin.activate('mediamenu', level=20, args='video')
+plugin_audio    = plugin.activate('mediamenu', level=30, args='audio')
 plugin_image    = plugin.activate('mediamenu', level=40, args=('image', True))
 plugin_shutdown = plugin.activate('base.shutdown', level=50)
 
 if CONF.xmame or CONF.snes:
-    plugin_games = plugin.activate('mediamenu', level=45, args=('games', ))
+    plugin_games = plugin.activate('mediamenu', level=45, args='games')
 
 # mixer
 plugin.activate('mixer')
@@ -303,6 +303,12 @@ IMDB_REMOVE_FROM_LABEL = ('season[\._ -][0-9]+', 'disc[\._ -][0-9]+',
 
 # list of words to ignore when searching based on a filename
 IMDB_REMOVE_FROM_SEARCHSTRING = ('the', 'a')
+
+# When searching for a movie title in imdb, should the result be
+# autoaccepted if it is only one hit?
+# 0 = show menu even if it is only one hit (gives you an opportunity to cancel)
+# 1 = autoaccept
+IMDB_AUTOACCEPT_SINGLE_HIT = True
 
 # delete file in menu
 plugin.activate('file_ops', level=20)
@@ -432,20 +438,20 @@ if not os.path.isdir(FREEVO_CACHEDIR):
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = [ ('Test Movies', 'testfiles/Movies') ]
+DIR_MOVIES = None
 
 #
 # This is where recorded video is written.
 #
 # XXX the path doesn't work from the www cgi scripts!
-DIR_RECORD = 'testfiles/Movies/Recorded'
+DIR_RECORD = None
 
 #
 # Directory for XML definitions for DVDs and VCDs. Items in this
 # directory won't be in the MOVIE MAIN MENU, but will be used to find
 # titles and images for the current DVD/VCD
 #
-MOVIE_DATA_DIR = 'movie-data/'
+MOVIE_DATA_DIR = None
 
 #
 # Directory containing images for tv shows. A tv show maches the regular
@@ -453,14 +459,14 @@ MOVIE_DATA_DIR = 'movie-data/'
 # name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
 # image
 #
-TV_SHOW_DATA_DIR = "testfiles/tv-show-images/"
+TV_SHOW_DATA_DIR = None
 
 #
 # Directory for cover images for CD/VCD/DVD and music CDs or when you can't
 # add a cover image to the dir you want. Not for replacing the normal
 # cover file function.
 #
-COVER_DIR = 'testfiles/Covers/'
+COVER_DIR = None
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -489,7 +495,7 @@ ONLY_SCAN_DATADIR = 0
 #           ('Title2', 'directory2'), ... ]
 # The 'mplayer options' field can be omitted.
 #
-DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
+DIR_AUDIO = None
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -513,11 +519,7 @@ AUDIO_COVER_REGEXP = 'front|-f'
 #
 # Where the image files can be found.
 #
-DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
-
-# Temporarily disabled, doesn't work
-#DIR_IMAGES = [ ('Test Images', './testfiles/Images'),
-#               ('Test Show',  'testfiles/Images/CA_Coast.ssr') ]
+DIR_IMAGES = None
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -577,9 +579,7 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 #               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
 #                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
 
-DIR_GAMES = [ ('Test MAME Games', './testfiles/Mame',
-               ('MAME', CONF.xmame, '-nosound -fullscreen -modenumber 6',
-                './testfiles/Mame', None) ) ]
+DIR_GAMES = None
 
 # are used for the Mame arcade emulator.
 #

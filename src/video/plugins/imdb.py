@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/09/20 15:46:48  dischi
+# fxd and imdb patches from Eirik Meland
+#
 # Revision 1.22  2003/09/20 09:50:07  dischi
 # cleanup
 #
@@ -152,7 +155,7 @@ class PluginInterface(plugin.ItemPlugin):
         #                             self.imdb_add_to_fxd, (d, 'variant')) ] + items
 
         box.destroy()
-        if len(items) == 1:
+        if config.IMDB_AUTOACCEPT_SINGLE_HIT and len(items) == 1:
             self.imdb_create_fxd(arg=items[0].arg, menuw=menuw)
             return
 

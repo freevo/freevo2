@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/20 15:46:48  dischi
+# fxd and imdb patches from Eirik Meland
+#
 # Revision 1.5  2003/09/20 15:08:26  dischi
 # some adjustments to the missing testfiles
 #
@@ -63,45 +66,64 @@ class PluginInterface(plugin.ItemPlugin):
         """
         create list of possible actions
         """
+        items = []
         if ((item.type == 'video' and item.mode == 'file') or \
             item.type in ( 'audio', 'image' )) and not item.media:
             self.item = item
-            return [ (self.confirm_delete, 'Delete file', 'delete') ]
-        return []
+            items.append((self.confirm_delete, 'Delete file', 'delete'))
+            if item.type == 'video' and hasattr(item, 'fxd_file'):
+                items.append((self.confirm_info_delete, 'Delete info', 'delete_info'))
+        return items
 
 
     def confirm_delete(self, arg=None, menuw=None):
         self.menuw = menuw
-        ConfirmBox(text='Do you wish to delete\n %s?' % self.item.name,
+        ConfirmBox(text='Do you wish to delete\n \'%s\'?' % self.item.name,
                    handler=self.delete_file, default_choice=1).show()
+        
+    def confirm_info_delete(self, arg=None, menuw=None):
+        self.menuw = menuw
+        ConfirmBox(text='Delete info about\n \'%s\'?' % self.item.name,
+                   handler=self.delete_info, default_choice=1).show()
 
-    def save_unlink(self, filename):
+    def safe_unlink(self, filename):
         try:
             os.unlink(filename)
         except:
             print 'can\'t delete %s' % filename
         
-    def delete_file(self):
-        _debug_('Deleting %s' % self.item.filename)
-
+    def delete_pictures(self):
+        _debug_('Deleting pictures for %s' % self.item.filename)
         if self.item.type in ('video', 'audio'):
             base = os.path.splitext(self.item.filename)[0] + '.'
             if os.path.isfile(base + 'jpg'):
-                self.save_unlink(base + 'jpg')
+                self.safe_unlink(base + 'jpg')
             if os.path.isfile(base + 'png'):
-                self.save_unlink(base + 'png')
+                self.safe_unlink(base + 'png')
+
+    def delete_fxd(self):
+        _debug_('Deleting fxd for %s' % self.item.filename)
+        if self.item.type == 'video' and hasattr(self.item, 'fxd_file') and \
+               os.path.isfile(self.item.fxd_file) and \
+               ((not config.TV_SHOW_DATA_DIR) or \
+                (self.item.fxd_file.find(config.TV_SHOW_DATA_DIR) != 0)):
+            self.safe_unlink(self.item.fxd_file)
+
+    def delete_file(self):
+        _debug_('Deleting %s' % self.item.filename)
+
+        self.delete_pictures()
+        self.delete_fxd()
 
         if os.path.isfile(self.item.filename):
-            self.save_unlink(self.item.filename)
+            self.safe_unlink(self.item.filename)
 
-        if self.item.type == 'video' and hasattr(self, 'fxd_file') and \
-               os.path.isfile(self.item.fxd_file) and \
-               (not config.MOVIE_DATA_DIR or \
-                self.item.fxd_file.find(config.MOVIE_DATA_DIR)) and \
-               (not config.TV_SHOW_DATA_DIR or \
-                self.item.fxd_file.find(config.TV_SHOW_DATA_DIR) == -1)
-               (not config.TV_SHOW_IMAGE_DIR or \
-                self.item.fxd_file.find(config.TV_SHOW_IMAGE_DIR) == -1):
-                   self.save_unlink(self.item.fxd_file)
+        if self.menuw:
+            self.menuw.back_one_menu(arg='reload')
+
+    def delete_info(self):
+        _debug_('Deleting info for %s' % self.item.filename)
+        self.delete_pictures()
+        self.delete_fxd()
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
