@@ -60,7 +60,7 @@ if [ "$call" == "freevo" ] && [ "$1" == "-fs" ]; then
 	let servernum+=1
     done
 
-    exec xinit $0 --force-fs -- :$servernum >/dev/null 2>/dev/null
+    exec xinit $0 --force-fs -- :$servernum
 fi
 
 # call helper if the script is called as wrapper
@@ -163,9 +163,14 @@ if [ "$1" = "runapp" ] ; then
     if [ -e "runtime/apps/$1" ]; then
 	app=runtime/apps/$1
     else
-	if which --skip-functions --skip-alias $1 >/dev/null 2>/dev/null; then
-	    app=`which --skip-functions --skip-alias $1`
-	else
+	app=""
+	for p in `echo $PATH | sed 's/:/ /g'`; do 
+	    if [ -e "$p/$1" ]; then
+		app="$p/$1"
+		break
+	    fi
+	done
+	if [ "$app" = "" ]; then
 	    echo $1 not found
 	    exit 1
 	fi
