@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/16 17:45:19  mikeruelle
+# put our only i18n change
+#
 # Revision 1.2  2003/09/22 20:28:46  mikeruelle
 # adding help document strings for the web interface
 #
@@ -71,6 +74,6 @@ class PluginInterface(plugin.ItemPlugin):
             fsuffix = os.path.splitext(item.filename)[1].lower()[1:]
             if fsuffix == 'm3u':
                 return [ (self.change2m3u,
-                          'Set as icecast playlist') ]
+                          _('Set as icecast playlist')) ]
         return []
 
