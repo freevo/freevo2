@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/07/12 17:29:58  dischi
+# redraw when polling
+#
 # Revision 1.19  2003/07/12 17:17:27  dischi
 # moved idlebar to a skin plugin
 #
@@ -118,6 +121,7 @@ import config
 import sys
 import string
 import mailbox
+import skin
 
 import plugin
 
@@ -139,7 +143,7 @@ class interface(plugin.DaemonPlugin):
         osd.drawroundbox(0, 0, osd.width, osd.y + 60, (0x80000000, 0, 0, 0))
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
-        x = osd.x
+        x = osd.x + 10
         for p in self.plugins:
             add_x = p.draw((type, object), x, osd)
             if add_x:
@@ -147,9 +151,8 @@ class interface(plugin.DaemonPlugin):
 
 
     def poll(self):
-        # XXX This probably shouldn't be None,None, but at least it doesn't crash
-        # self.draw((None,None))
-        pass
+        skin.get_singleton().redraw()
+        
 
 class IdleBarPlugin(plugin.Plugin):
     def __init__(self):
