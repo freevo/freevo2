@@ -65,7 +65,9 @@ class task:
 
 class AppArgs:
 
-    def __init__(self, app_name, exec_name, exec_args = [], exec_args_dict = {}):
+    def __init__(self, app_name, exec_name, exec_args = None, exec_args_dict = {}):
+        if not exec_args:
+            exec_args = []
         self.app_name = app_name
         self.exec_name = exec_name
         for i in range(len(exec_args)):
