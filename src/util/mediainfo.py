@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/01 18:34:24  dischi
+# do not believe extentions :-)
+#
 # Revision 1.13  2004/02/01 18:24:01  dischi
 # fix crash on update
 #
@@ -330,7 +333,7 @@ class MMCache(Cache):
 
     
     def create(self, filename):
-        info = mmpython.Factory().create(filename, ext_only=True)
+        info = mmpython.Factory().create(filename)
         if info:
             return self.simplify(info)
         return {}
