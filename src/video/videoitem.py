@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.135  2004/05/13 13:49:24  outlyer
+# The much appreciated 'alternate player' patch from den_RDC. Allows you to
+# switch between your default player and an alternate without restarting
+# Freevo.
+#
 # Revision 1.134  2004/05/12 19:24:54  dischi
 # remove debug and cvs log
 #
@@ -284,6 +289,8 @@ class VideoItem(Item):
                           (self.play, _('Play default track')) ]
         else:
             items = [ (self.play, _('Play')) ]
+            if len(self.possible_player) > 1:
+                items.append((self.play_alternate, _('Play with alternate player')))
 
         if self.network_play:
             items.append((self.play_max_cache, _('Play with maximum cache')))
@@ -329,6 +336,12 @@ class VideoItem(Item):
         play and use maximum cache with mplayer
         """
         self.play(menuw=menuw, arg='-cache 65536')
+        
+    def play_alternate(self, arg=None, menuw=None):
+        """
+        play and use maximum cache with mplayer
+        """
+        self.play(menuw=menuw, arg=arg, alternateplayer=True)
 
 
     def set_next_available_subitem(self):
@@ -377,7 +390,7 @@ class VideoItem(Item):
         return not from_start
 
 
-    def play(self, arg=None, menuw=None):
+    def play(self, arg=None, menuw=None, alternateplayer=False):
         """
         play the item.
         """
@@ -389,8 +402,11 @@ class VideoItem(Item):
                 if hasattr(self, 'force_player') and p.name == self.force_player:
                     rating += 100
                 self.possible_player.append((rating, p))
-
+        
             self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
+        
+        if alternateplayer:
+            self.possible_player.reverse()
 
         if not self.possible_player:
             return
