@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/10/30 18:47:14  dischi
+# fix missing import
+#
 # Revision 1.64  2004/10/29 18:16:41  dischi
 # moved killall to this file
 #
@@ -77,6 +80,7 @@ import signal
 import copy
 import popen2
 import glob
+import re
 
 import notifier
 

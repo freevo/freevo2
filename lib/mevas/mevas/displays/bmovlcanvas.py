@@ -1,6 +1,7 @@
 import mevas.rect as rect
 import os
 from bitmapcanvas import *
+from mevas import imagelib
 
 class BmovlCanvas(BitmapCanvas):
 
