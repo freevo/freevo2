@@ -12,3 +12,6 @@ o There are some problems with some of the included fonts when linked against
 o Left/Right does not goto prev/next movie. It works for music.
 o Add VCD playing to the Movie menu.
 o Add the skin settings (shadow etc) for menus other than MP3.
+o mount checking does not work with supermount
+o identifymedia fails on some drives
+
