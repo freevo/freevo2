@@ -1060,7 +1060,8 @@ TV_REC_OUTFMT = 'yuy2'
 # XXX below. Some stuff must be changed (adevice), others probably
 # XXX should be ("Change"), or could be in some cases ("change?")
 VCR_CMD = (CONF.mencoder + ' ' +
-           '-tv on:driver=%s:input=%d' % (TV_DRIVER, TV_INPUT) +
+           'tv:// ' +                      # New mplayer requires this.
+           '-tv driver=%s:input=%d' % (TV_DRIVER, TV_INPUT) +
            ':norm=%s' % CONF.tv +
            ':channel=%(channel)s' +        # Filled in by Freevo
            ':chanlist=%s' % CONF.chanlist +

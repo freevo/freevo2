@@ -566,6 +566,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 # XXX below. Some stuff must be changed (adevice), others probably
 # XXX should be ("Change"), or could be in some cases ("change?")
 # VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
+#            'tv:// ' +                      # New mplayer requires this.
 #            '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
 #            ':norm=NTSC' +                  # Change
 #            ':channel=%(channel)s' +         # Filled in by Freevo
