@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/14 17:03:38  dischi
+# add smartsort patch from Eirik Meland
+#
 # Revision 1.1  2003/10/11 11:20:11  dischi
 # move util.py into a directory and split it into two files
 #
@@ -263,16 +266,18 @@ def list_usb_devices():
 
 def smartsort(x,y): # A compare function for use in list.sort()
     """
-    Compares strings after stripping off 'The' to be "smarter"
-    Also obviously ignores the full path when looking for 'The' 
+    Compares strings after stripping off 'The' and 'A' to be 'smarter'
+    Also obviously ignores the full path when looking for 'The' and 'A' 
     """
     m = os.path.basename(x)
     n = os.path.basename(y)
     
-    if m.find('The ') == 0:
-        m = m.replace('The ','',1)
-    if n.find('The ') == 0:
-        n = n.replace('The ','',1)
+    for word in ('The', 'A'):
+        word += ' '
+        if m.find(word) == 0:
+            m = m.replace(word, '', 1)
+        if n.find(word) == 0:
+            n = n.replace(word, '', 1)
 
     return cmp(m.upper(),n.upper()) # be case insensitive
 
