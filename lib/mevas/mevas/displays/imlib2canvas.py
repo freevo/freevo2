@@ -25,7 +25,7 @@ class Imlib2Canvas(BitmapCanvas):
 			img = Imlib2.new( size, data, "RGB" )
 			self._display.render(img, pos)
 
-		print "Blit", r, "took", time.time()-t0, r
+		#print "Blit", r, "took", time.time()-t0, r
 
 
 

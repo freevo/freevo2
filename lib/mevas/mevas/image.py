@@ -142,7 +142,7 @@ class CanvasImage(CanvasObject):
 		return metrics
 
 	def draw_rectangle(self, pos, size, color = (255, 255, 255, 255), fill = True):
-		print "Draw rect", pos, size, color, fill
+		#print "Draw rect", pos, size, color, fill
 		self.image.draw_rectangle(pos, size, color, fill)
 		self._image_changed()
 

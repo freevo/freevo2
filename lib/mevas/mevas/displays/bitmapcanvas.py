@@ -111,7 +111,7 @@ class BitmapCanvas(Canvas):
 		# backing store by remove_child(), so all we need to do is ensure it
 		# gets drawn on the next update.
 		if child.get_parent() and hasattr(child, "_backing_store_info"):
-			print "Child deleted", child
+			#print "Child deleted", child
 			child.parent().queue_paint()
 
 
