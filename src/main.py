@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2003/11/30 14:39:54  dischi
+# load the fxditem
+#
 # Revision 1.92  2003/11/29 11:40:45  dischi
 # create menuw on startup
 #
@@ -287,8 +290,13 @@ def signal_handler(sig, frame):
 # Main init
 #
 def main_func():
-    import plugin
+    # load the fxditem to make sure it's the first in the
+    # mimetypes list
+    import fxditem
 
+    # load all plugins
+    import plugin
+    
     if hasattr(skin, 'Splashscreen'):
         plugin.init(skin.Splashscreen().progress)
     else:
