@@ -152,6 +152,8 @@ class _Cache:
 
         new = 0
         for filename in os.listdir(directory):
+            if filename.startswith('.'):
+                continue
             fullname  = os.path.join(directory, filename)
             try:
                 info = self.find(filename, directory, fullname)
