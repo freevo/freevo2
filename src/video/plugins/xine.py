@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/28 03:46:13  outlyer
+# Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
+#
 # Revision 1.11  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -181,7 +184,7 @@ class Xine:
         rc.app(self)
 
         command = self.command
-        
+        os.system('/usr/sbin/matroxcolor')    
         if DEBUG:
             print 'Xine.play(): Starting thread, cmd=%s' % command
 
@@ -217,6 +220,7 @@ class Xine:
         self.thread.mode_flag.set()
         self.thread.item = None
         rc.app(None)
+        os.system('/usr/sbin/undomatroxcolor')
         while self.thread.mode == 'stop':
             time.sleep(0.3)
             
@@ -292,6 +296,14 @@ class Xine:
             
         if event == DVDNAV_MENU:
             self.thread.app.write('Menu\n')
+            return TRUE
+
+        if event == NEXT:
+            self.thread.app.write('EventNext\n')
+            return TRUE
+
+        if event == PREV:
+            self.thread.app.write('EventPrior\n')
             return TRUE
 
 

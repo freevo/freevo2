@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/08/28 03:46:13  outlyer
+# Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
+#
 # Revision 1.17  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -156,7 +159,8 @@ DVDNAV_DOWN            = Event('DVDNAV_DOWN')
 DVDNAV_SELECT          = Event('DVDNAV_SELECT')
 DVDNAV_TITLEMENU       = Event('DVDNAV_TITLEMENU')
 DVDNAV_MENU            = Event('DVDNAV_MENU')
-
+NEXT                   = Event('NEXT')
+PREV                   = Event('PREV')
 #
 # Audio module
 #
@@ -332,7 +336,9 @@ DVD_EVENTS = {
     'MENU'      : DVDNAV_TITLEMENU,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'MUTE'      : MIXER_MUTE,
+    'CH+'       : NEXT,
+    'CH-'       : PREV
     }
 
 VCD_EVENTS = {
