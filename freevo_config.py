@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2002/10/21 02:04:41  krister
+# Added video input device selection.
+#
 # Revision 1.83  2002/10/21 01:20:25  krister
 # Clarified TV_CHANNELS updates.
 #
@@ -342,7 +345,7 @@ XMMS_CMD             = 'xmms'   # Priority of the XMMS process. 0 is unchanged,
 #
 # XXX You must change this to fit your local conditions!
 #
-# TV/VCR_SETTINGS = 'NORM INPUT CHANLIST'
+# TV/VCR_SETTINGS = 'NORM INPUT CHANLIST DEVICE'
 #
 # NORM: ntsc, pal, secam
 # INPUT: television, composite1
@@ -352,8 +355,11 @@ XMMS_CMD             = 'xmms'   # Priority of the XMMS process. 0 is unchanged,
 # europe-east, italy, newzealand, australia, ireland, france, china-bcast,
 # southafrica, argentina, canada-cable
 #
-TV_SETTINGS = '%s television %s' % (CONF.tv, CONF.chanlist)
-VCR_SETTINGS = '%s composite1 %s' % (CONF.tv, CONF.chanlist)
+# DEVICE: Usually /dev/video, but might be /dev/video1 instead for multiple
+# boards.
+#
+TV_SETTINGS = '%s television %s /dev/video' % (CONF.tv, CONF.chanlist)
+VCR_SETTINGS = '%s composite1 %s /dev/video' % (CONF.tv, CONF.chanlist)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!

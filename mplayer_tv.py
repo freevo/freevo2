@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/10/21 02:04:41  krister
+# Added video input device selection.
+#
 # Revision 1.9  2002/10/18 06:19:53  krister
 # Changed TV button rc button 'menu' to 'display'. Changed to stay in the TV guide while watching TV. Fixed a bug where a new XMLTV guide was not loaded properly after update. Started adding simple recording support, not nearly done.
 #
@@ -163,20 +166,22 @@ class MPlayer:
         if mode == 'tv':
             tuner_channel = self.TunerGetChannel()
 
-            cf_norm, cf_input, cf_clist = config.TV_SETTINGS.split()
+            cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
 
             # Convert to MPlayer TV setting strings
             norm = 'norm=%s' % cf_norm.upper()
-            tmp = { 'television':0, 'composite1':1}[cf_input.lower()]
+            tmp = { 'television':0, 'composite1':1, 'composite2':2,
+                    's-video':3}[cf_input.lower()]
             input = 'input=%s' % tmp
             chanlist = 'chanlist=%s' % cf_clist
-
+            device= 'device=%s' % cf_device
+            
             w, h = config.TV_VIEW_SIZE
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
-            tvcmd = ('-tv on:driver=v4l:%s:%s:channel=%s:'
+            tvcmd = ('-tv on:driver=v4l:%s:%s:%s:channel=%s:'
                      '%s:width=%s:height=%s:%s' %
-                     (input, norm, tuner_channel, chanlist, w, h, outfmt))
+                     (device, input, norm, tuner_channel, chanlist, w, h, outfmt))
             
             # Build the MPlayer command
             mpl = '--prio=%s %s -vo %s -fs %s %s' % (config.MPLAYER_NICE,
@@ -186,19 +191,21 @@ class MPlayer:
                                                      config.MPLAYER_ARGS_TVVIEW)
 
         elif mode == 'vcr':
-            cf_norm, cf_input, tmp = config.VCR_SETTINGS.split()
+            cf_norm, cf_input, tmp, cf_device = config.VCR_SETTINGS.split()
 
             # Convert to MPlayer TV setting strings
             norm = 'norm=%s' % cf_norm.upper()
-            tmp = { 'television':0, 'composite1':1}[cf_input.lower()]
+            tmp = { 'television':0, 'composite1':1, 'composite2':2,
+                    's-video':3}[cf_input.lower()]
             input = 'input=%s' % tmp
+            device= 'device=%s' % cf_device
 
             w, h = config.TV_VIEW_SIZE
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
             
-            tvcmd = ('-tv on:driver=v4l:%s:%s:channel=2:'
+            tvcmd = ('-tv on:driver=v4l:%s:%s:%s:channel=2:'
                      'chanlist=us-cable:width=%s:height=%s:%s' %
-                     (input, norm, w, h, outfmt))
+                     (device, input, norm, w, h, outfmt))
             
             mpl = ('%s -vo %s -fs %s %s' %
                    (config.MPLAYER_CMD, config.MPLAYER_VO_DEV, tvcmd,
