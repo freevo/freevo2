@@ -1,0 +1,593 @@
+# translation of freevo-pt_BR.po to Português do Brasil
+# translation of freevo.po to Português do Brasil
+# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Gustavo Sverzut Barbieri <gustavo@linuxdicas.com.br>, 2003
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: freevo-pt_BR\n"
+"POT-Creation-Date: 2003-10-03 17:36+0200\n"
+"PO-Revision-Date: 2003-10-03 19:12-0300\n"
+"Last-Translator: Gustavo Sverzut Barbieri <gustavo@linuxdicas.com.br>\n"
+"Language-Team: Português do Brasil <linux_pt_BR@yahoogrupos.com.br>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.0\n"
+
+#: audio/audiodiskitem.py:60
+msgid "Unknown CD Album"
+msgstr "CD Desconhecido"
+
+#: audio/audiodiskitem.py:95 directory.py:368 image/plugins/gphoto.py:155
+msgid "Browse directory"
+msgstr "Navegar pelo diretório"
+
+#: audio/xmms.py:156 games/game.py:99
+#, python-format
+msgid "File \"%s\" not found!"
+msgstr "Arquivo \"%s\" não encontrado!"
+
+#: audio/plugins/cdbackup.py:207
+msgid "Rip the CD to the hard drive"
+msgstr "Copiar o CD para o disco rígido"
+
+#: audio/plugins/cdbackup.py:208
+msgid "Get CDs available for ripping"
+msgstr "Listar CDs disponíveis para gravar"
+
+#: audio/plugins/cdbackup.py:233
+msgid "Backup CD to hard drive in mp3 format"
+msgstr "Gravar o CD para disco rígido no formato MP3"
+
+#: audio/plugins/cdbackup.py:236
+msgid "Backup CD to hard drive in Ogg format"
+msgstr "Gravar o CD para disco rígido no formato OGG"
+
+#: audio/plugins/cdbackup.py:239
+msgid "Backup CD to hard drive in FLAC format"
+msgstr "Gravar o CD para disco rígido no formato FLAC"
+
+#: audio/plugins/cdbackup.py:241
+msgid "Backup CD to hard drive in wav format"
+msgstr "Gravar o CD para disco rígido no formato WAV"
+
+#: audio/plugins/cdbackup.py:244
+msgid "CD Backup"
+msgstr "Backup de CDs"
+
+#: audio/plugins/detach.py:63
+msgid "Show player"
+msgstr "Mostrar Tocador"
+
+#: audio/plugins/mplayer.py:131
+#, python-format
+msgid ""
+"%s\n"
+"not found!"
+msgstr ""
+"%s\n"
+"não encontrado!"
+
+#: audio/plugins/mplayer.py:158
+msgid "Invalid audio file"
+msgstr "Arquivo de áudio inválido"
+
+#: audio/plugins/vux.py:90
+msgid "[VUX] Start playing"
+msgstr "[VUX] Começar a tocar"
+
+#: audio/plugins/vux.py:91
+msgid "[VUX] Stop playing"
+msgstr "[VUX] Parar de tocar"
+
+#: audio/plugins/vux.py:92
+msgid "[VUX] Next (rating down)"
+msgstr "[VUX] Próximo (taxar negativamente)"
+
+#: audio/plugins/vux.py:93
+msgid "[VUX] Next (rating intact)"
+msgstr "[VUX] Próximo (sem taxar)"
+
+#: audio/plugins/vux.py:94
+msgid "[VUX] Next (rating up)"
+msgstr "[VUX] Próximo (taxar positivamente)"
+
+#: audio/plugins/vux.py:95
+msgid "[VUX] Playing item rating up"
+msgstr "[VUX] Tocando ítem, taxado positivamente"
+
+#: audio/plugins/vux.py:96
+msgid "[VUX] Playing item rating down"
+msgstr "[VUX] Tocando ítem, taxado negativamente"
+
+#: audio/plugins/vux.py:97
+msgid "[VUX] a dir item do not select"
+msgstr "[VUX] um ítem diretório, não selecione"
+
+#: audio/plugins/vux.py:98
+msgid "[VUX] an audio item, do not select"
+msgstr "[VUX] um ítem de áudio, não selecione"
+
+#: directory.py:349
+#, python-format
+msgid "Directory on disc [%s]"
+msgstr "Diretório em disco [%s]"
+
+#: directory.py:350
+msgid "Directory"
+msgstr "Diretório"
+
+#: directory.py:374
+msgid "Recursive random play all items"
+msgstr "Tocar aleatóriamente e recursivamente todos os ítens"
+
+#: directory.py:375
+msgid "Configure directory"
+msgstr "Configurar diretório"
+
+#: directory.py:398
+msgid "Enter Password"
+msgstr "Digite a Senha"
+
+#: directory.py:423
+msgid "Password incorrect"
+msgstr "Senha incorreta"
+
+#: directory.py:465
+msgid "Scanning disc, be patient..."
+msgstr "Examinando disco, seja paciente..."
+
+#: directory.py:467
+msgid "Scanning directory, be patient..."
+msgstr "Examinando diretório, seja paciente..."
+
+#: menu.py:545
+msgid "No action defined for this choice!"
+msgstr "Nenhuma ação definida para esta escolha!"
+
+#: osd.py:395
+msgid "z = Toggle Fullscreen"
+msgstr "z = Mudar tela cheia"
+
+#: osd.py:396
+msgid "Arrow Keys = Move"
+msgstr "Setas = Move"
+
+#: osd.py:397
+msgid "Spacebar = Select"
+msgstr "Barra de Espaço = Seleciona"
+
+#: osd.py:398
+msgid "Escape = Stop/Prev. Menu"
+msgstr "Esc = Pára/Menu anterior"
+
+#: osd.py:399
+msgid "h = Help"
+msgstr "h = Ajuda"
+
+#: games/mame_cache.py:170
+msgid "Generating MAME cache, please wait."
+msgstr "Gerando cache MAME, aguarde."
+
+#: gui/AlertBox.py:161 gui/ConfirmBox.py:161 plugins/commands.py:171
+msgid "OK"
+msgstr "Ok"
+
+#: gui/ConfirmBox.py:165
+msgid "CANCEL"
+msgstr "Cancelar"
+
+#: image/plugins/gphoto.py:119 image/imageitem.py:110
+msgid "View Image"
+msgstr "Ver Imagem"
+
+#: image/viewer.py:118
+#, python-format
+msgid ""
+"Can't Open Image\n"
+"'%s'"
+msgstr ""
+"Não pude abrir Imagem\n"
+"'%s'"
+
+#: image/viewer.py:351
+msgid "Title: "
+msgstr "Título: "
+
+#: image/viewer.py:352
+msgid "Description: "
+msgstr "Descrição: "
+
+#: image/viewer.py:386
+msgid "No information available"
+msgstr "Informação não disponível"
+
+#: plugins/commands.py:156
+msgid "Command finished"
+msgstr "Comando terminado"
+
+#: plugins/commands.py:172
+msgid "Show Stderr"
+msgstr "Mostrar Stderr"
+
+#: plugins/commands.py:173
+msgid "Show Stdout"
+msgstr "Mostrar Stdout"
+
+#: plugins/commands.py:187
+msgid "Stdout File"
+msgstr "Arquivo Stdout"
+
+#: plugins/commands.py:191
+msgid "Stderr File"
+msgstr "Arquivo Stderr"
+
+#: plugins/commands.py:245
+msgid "Run Command"
+msgstr "Executar Comando"
+
+#: plugins/commands.py:268
+msgid "Command Failed"
+msgstr "Comando Falhou"
+
+#: plugins/commands.py:271
+msgid "Command Completed"
+msgstr "Comando Completado"
+
+#: plugins/commands.py:296
+msgid "No Commands found"
+msgstr "Nenhum comando encontrado"
+
+#: plugins/commands.py:297 plugins/commands.py:323
+msgid "Commands"
+msgstr "Comandos"
+
+#: plugins/df.py:70
+#, python-format
+msgid "%i of %i Mb free"
+msgstr "%i de %i Mb livres"
+
+#: plugins/idlebar.py:465
+#, python-format
+msgid "%iM"
+msgstr "%iM"
+
+#: plugins/idlebar.py:490
+#, python-format
+msgid "%s%%"
+msgstr "%s%%"
+
+#: plugins/rom_drives.py:254
+#, python-format
+msgid "Drive %s (no disc)"
+msgstr "Drive %s (sem disco)"
+
+#: plugins/rom_drives.py:317
+#, python-format
+msgid "Ejecting disc in drive %s"
+msgstr "Ejetando disco do drive %s"
+
+#: plugins/rom_drives.py:350
+#, python-format
+msgid "Reading disc in drive %s"
+msgstr "Lendo disco do drive %s"
+
+#: plugins/base.py:68
+msgid "Shutdown Freevo"
+msgstr "Desligar o Freevo"
+
+#: plugins/base.py:69
+msgid "Shutdown system"
+msgstr "Desligar o sistema"
+
+#: tv/record_schedule.py:98
+msgid "View Recording Schedule"
+msgstr "Ver gravações agendadas"
+
+#: tv/record_schedule.py:100
+msgid "Delete Scheduled Item"
+msgstr "Desagendar gravação deste ítem"
+
+#: tv/record_schedule.py:102
+msgid "RECORDING SCHEDULE"
+msgstr ""
+
+#: tv/record_schedule.py:175
+msgid "VIEW RECORDING SCHEDULE"
+msgstr ""
+
+#: tv/record_schedule.py:178
+msgid "DELETE SCHEDULED ITEM"
+msgstr "Desagendar gravação deste ítem"
+
+#: tv/record_schedule.py:182
+msgid "All Currently Recording Items Have Been Killed!"
+msgstr "Todos os ítens a gravar foram desagendados!"
+
+#: tv/tvguide.py:73 tv/tvguide.py:490 tv/tvguide.py:492
+#: skins/main/tvlisting_area.py:363
+msgid "This channel has no data loaded"
+msgstr "Este canal não tem dados disponíveis"
+
+#: tv/tvguide.py:83
+msgid "Preparing the program guide"
+msgstr "Preparando a Grade de Programação"
+
+#: tv/tvguide.py:87
+msgid "TV Guide is corrupt!"
+msgstr "A Grade de Programação está corrompida!"
+
+#: tv/tvmenu.py:144 tv/tvmenu.py:152
+#, python-format
+msgid "Could not find TV channel %s"
+msgstr "Não pude achar canal de TV %s"
+
+#: tv/tvmenu.py:177
+msgid "TV Guide"
+msgstr "Grade de Programação"
+
+#: tv/tvmenu.py:178
+msgid "Recorded Shows"
+msgstr "Shows Gravados"
+
+#: tv/tvmenu.py:180
+msgid "Scheduled Recordings"
+msgstr "Gravações Agendadas"
+
+#: tv/tvmenu.py:182
+msgid "Search Guide"
+msgstr "Procurar na Grade"
+
+#: tv/tvmenu.py:185
+msgid "TV Main Menu"
+msgstr "Menu Principal de TV"
+
+#: tv/tvmenu.py:221
+msgid "The list of TV channels is invalid!\n"
+msgstr "A lista de Canais de TV é inválida!\n"
+
+#: tv/tvmenu.py:222
+msgid "Please check the config file."
+msgstr "Por favor confira o arquivo de configuração."
+
+#: video/plugins/imdb_info.py:72
+msgid "Show info for this file"
+msgstr "Mostrar informações deste arquivo"
+
+#: video/plugins/imdb_info.py:86
+msgid "There is no IMDB information for this file."
+msgstr "Não existe informação do IMDB para este arquivo."
+
+#: video/plugins/imdb.py:116 video/plugins/imdb.py:122
+#, python-format
+msgid "Search IMDB for [%s]"
+msgstr "Procurar IMDB por [%s]"
+
+#: video/plugins/imdb.py:133
+msgid "searching IMDB..."
+msgstr "Procurando IMBD..."
+
+#: video/plugins/imdb.py:157
+msgid "Unknown error while connecting to IMDB"
+msgstr "Erro desconhecido enquanto conectava ao IMDB"
+
+#: video/plugins/imdb.py:179
+msgid "No information available from IMDB"
+msgstr "Sem informação disponível no IMDB"
+
+#: video/plugins/imdb.py:218
+msgid "getting data..."
+msgstr "pegando dados..."
+
+#: video/plugins/mover.py:64
+#, python-format
+msgid "Move to [%s]"
+msgstr "Mover para [%s]"
+
+#: video/plugins/linkbrowser.py:159
+#, python-format
+msgid "Failed to download %s"
+msgstr "Falhei ao fazer download de %s"
+
+#: video/configure.py:80
+msgid "AUDIO MENU"
+msgstr "Menu de Áudio"
+
+#: video/configure.py:99
+msgid "SUBTITLE MENU"
+msgstr "Menu de legendas"
+
+#: video/configure.py:117
+msgid "CHAPTER MENU"
+msgstr "Menu de Capítulos"
+
+#: video/configure.py:175
+msgid "CONFIG MENU"
+msgstr "Menu de Configuração"
+
+#: video/videoitem.py:291
+msgid "Play DVD"
+msgstr "Assistir DVD"
+
+#: video/videoitem.py:299
+msgid "Play VCD"
+msgstr "Assistir VCD"
+
+#: video/videoitem.py:303
+msgid "Play default track"
+msgstr "Assistir faixa padrão"
+
+#: video/videoitem.py:308
+msgid "Play with maximum cache"
+msgstr "Assistir usando máximo de cache"
+
+#: video/videoitem.py:392
+msgid "Wait while detecting media..."
+msgstr "Espere enquanto detecto mídia..."
+
+#: video/videoitem.py:414
+#, python-format
+msgid "Media not found for file \"%s\".\n"
+msgstr "Mídia não encontrada para arquivo \"%s\".\n"
+
+#: video/videoitem.py:415
+msgid "Please insert the media."
+msgstr "Por favor insira a mídia."
+
+#: video/videoitem.py:431
+#, python-format
+msgid "Media not found for %s track %s"
+msgstr "Mídia não encontrada para %s faixa %s"
+
+#: video/videoitem.py:551
+#, python-format
+msgid "Play Title %s"
+msgstr "Assistir ao título %s"
+
+#: main.py:117
+msgid "shutting down..."
+msgstr "desligando..."
+
+#: main.py:223
+msgid "Freevo Main Menu"
+msgstr "Menu Principal do Freevo"
+
+#: skins/main/main.py:154
+msgid "TV GUIDE"
+msgstr "Grade de Programação"
+
+#: skins/main/main.py:284
+msgid "Starting Freevo, please wait ..."
+msgstr "Iniciando Freevo, arguarde..."
+
+#: skins/main/main.py:544 skins/main/main.py:612
+msgid "INTERNAL ERROR, NO MENU!"
+msgstr "ERRO INTERNO, SEM MENU!"
+
+#: skins/main/listing_area.py:249
+msgid "This directory is empty"
+msgstr "Este diretório está vazio"
+
+# Manualy added from fxd skin files
+msgid "TV"
+msgstr "TV"
+
+msgid "Movies"
+msgstr "Vídeos"
+
+msgid "Music"
+msgstr "Música"
+
+msgid "Images"
+msgstr "Imagens"
+
+msgid "Games"
+msgstr "Jogos"
+
+msgid "Shutdown"
+msgstr "Desligar"
+
+msgid "Watch TV"
+msgstr "Assistir TV"
+
+msgid "Watch a Movie"
+msgstr "Assistir Filmes"
+
+msgid "Listen to Music"
+msgstr "Ouvir Música"
+
+msgid "Look at Pictures"
+msgstr "Olhar Imagens"
+
+msgid " of "
+msgstr " de "
+
+msgid " MB free"
+msgstr " MB livres"
+
+msgid "Artist:"
+msgstr "Artista:"
+
+msgid "Album:"
+msgstr "Álbum:"
+
+msgid " musics in this playlist."
+msgstr " músicas nesta lista."
+
+msgid "Just one music in this playlist."
+msgstr "Somente uma música nesta lista."
+
+msgid "This playlist is empty!"
+msgstr "Esta lista está vazia!"
+
+msgid " movies in this playlist."
+msgstr " vídeos nesta lista."
+
+msgid "Just one movie in this playlist."
+msgstr "Somente um vídeo nesta lista."
+
+msgid "Year:"
+msgstr "Ano:"
+
+msgid "Genre:"
+msgstr "Gênero:"
+
+msgid "Rating:"
+msgstr "Classificação:"
+
+msgid "Runtime:"
+msgstr "Duração:"
+
+msgid "Type:"
+msgstr "Tipo:"
+
+msgid "Resolution:"
+msgstr "Resolução:"
+
+msgid "Copyright:"
+msgstr "Licença:"
+
+msgid "Geometry:"
+msgstr "Geometria:"
+
+msgid "Date:"
+msgstr "Data:"
+
+msgid " pictures in this slideshow."
+msgstr " figuras nesta lista."
+
+msgid "Just one picture in this slideshow."
+msgstr "Somente uma figura nesta lista."
+
+msgid "This slideshow is empty!"
+msgstr "Esta lista está vazia!"
+
+msgid "Track:"
+msgstr "Faixa:"
+
+msgid "Length:"
+msgstr "Duração:"
+
+msgid "Elapsed:"
+msgstr "Tocados:"
+
+msgid " min. "
+msgstr " min "
+
+msgid " Audiotracks, "
+msgstr " Faixas de áudio, "
+
+msgid " Subtitles, "
+msgstr " Legendas, "
+
+msgid " Chapter"
+msgstr " Capítulo"
+
+msgid "Size:"
+msgstr "Tamanho:"
+
+msgid " items in this playlist"
+msgstr " ítens nesta lista."
+
