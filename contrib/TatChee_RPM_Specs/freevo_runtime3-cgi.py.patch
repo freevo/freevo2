@@ -1,0 +1,8 @@
+--- freevo_runtime3/lib/python2.2/cgi.py.orig	Thu Oct 17 17:07:57 2002
++++ freevo_runtime3/lib/python2.2/cgi.py	Thu Oct 17 17:08:05 2002
+@@ -1,4 +1,4 @@
+-#! /usr/local/bin/python
++#! /usr/bin/python
+ 
+ # NOTE: the above "/usr/local/bin/python" is NOT a mistake.  It is
+ # intentionally NOT "/usr/bin/env python".  On many systems
