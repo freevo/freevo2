@@ -208,7 +208,7 @@ LOCAL_CONF_CHANGES = [
      now. Also added OSD_EXTRA_FONT_PATH to search for fonts'''),
     (5.08,
      '''Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
-     skin''') ]
+     skin. Also added RESTART_SYS_CMD.''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -271,6 +271,7 @@ ROM_SPEED = 0                         # try to set the drive speed of the rom
 SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
+RESTART_SYS_CMD  = 'shutdown -r now'  # like SHUTDOWN_SYS_CMD, only for reboot
 
 ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
                          # For standalone boxes.

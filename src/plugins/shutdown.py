@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/03/14 11:50:02  dischi
+# added restart
+#
+# 
+# Revision 1.3  2004/03/12 02:45:44 dopeflish
+# add system restart function
+#
 # Revision 1.2  2004/01/19 20:25:53  dischi
 # sync metainfo before stopping
 #
@@ -49,10 +56,11 @@ from item import Item
 from plugin import MainMenuPlugin
 
 
-def shutdown(menuw=None, arg=None, exit=False):
+def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     """
     Function to shut down freevo or the whole system. This system will be
-    shut down when arg is True, else only Freevo will be stopped.
+    shut down when argshutdown is True, restarted when argrestart is true,
+    else only Freevo will be stopped.
     """
     import osd
     import plugin
@@ -75,7 +83,7 @@ def shutdown(menuw=None, arg=None, exit=False):
     osd.update()
     time.sleep(0.5)
 
-    if arg:  
+    if argshutdown or argrestart:  
         # shutdown dual head for mga
         if config.CONF.display == 'mga':
             os.system('%s runapp matroxset -f /dev/fb1 -m 0' % \
@@ -89,7 +97,10 @@ def shutdown(menuw=None, arg=None, exit=False):
         childapp.shutdown()
         osd.shutdown()
 
-        os.system(config.SHUTDOWN_SYS_CMD)
+        if argshutdown and not argrestart:
+            os.system(config.SHUTDOWN_SYS_CMD)
+        elif argrestart and not argshutdown:
+            os.system(config.RESTART_SYS_CMD)
         # let freevo be killed by init, looks nicer for mga
         while 1:
             time.sleep(1)
@@ -121,8 +132,6 @@ def shutdown(menuw=None, arg=None, exit=False):
         
 
 
-
-
 class ShutdownItem(Item):
     """
     Item for shutdown
@@ -138,12 +147,17 @@ class ShutdownItem(Item):
         """
         if config.CONFIRM_SHUTDOWN:
             items = [ (self.confirm_freevo, _('Shutdown Freevo') ),
-                      (self.confirm_system, _('Shutdown system') ) ]
+                          (self.confirm_system, _('Shutdown system') ),
+                          (self.confirm_system_restart, _('Restart system') ) ]
         else:
             items = [ (self.shutdown_freevo, _('Shutdown Freevo') ),
-                      (self.shutdown_system, _('Shutdown system') ) ]
+                          (self.shutdown_system, _('Shutdown system') ),
+                          (self.shutdown_system_restart, _('Restart system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
-            items.reverse()
+            items = [ (self.shutdown_system, _('Shutdown system') ),
+                          (self.shutdown_freevo, _('Shutdown Freevo') ),
+                          (self.shutdown_system_restart, _('Restart system') ) ]
+
         return items
 
 
@@ -163,20 +177,35 @@ class ShutdownItem(Item):
         self.menuw = menuw
         what = _('Do you really want to shut down the system?')
         ConfirmBox(text=what, handler=self.shutdown_system, default_choice=1).show()
-        
+
+    def confirm_system_restart(self, arg=None, menuw=None):
+        """
+        Pops up a ConfirmBox.
+        """
+        self.menuw = menuw
+        what = _('Do you really want to restart the system?')
+        ConfirmBox(text=what, handler=self.shutdown_system_restart, default_choice=1).show()
+
 
     def shutdown_freevo(self, arg=None, menuw=None):
         """
         shutdown freevo, don't shutdown the system
         """
-        shutdown(menuw=menuw, arg=False)
+        shutdown(menuw=menuw, argshutdown=False, argrestart=False)
 
         
     def shutdown_system(self, arg=None, menuw=None):
         """
         shutdown the complete system
         """
-        shutdown(menuw=menuw, arg=True)
+        shutdown(menuw=menuw, argshutdown=True, argrestart=False)
+
+    def shutdown_system_restart(self, arg=None, menuw=None):
+        """
+        restart the complete system
+        """
+        shutdown(menuw=menuw, argshutdown=False, argrestart=True)
+
         
         
 
