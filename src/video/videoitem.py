@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # videoitem.py - Item for video objects
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file contains a VideoItem. A VideoItem can not only hold a simple
@@ -9,47 +9,13 @@
 # if the video is splitted into several files. DVD and VCD are also
 # VideoItems.
 #
-# Notes:
-#
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.153  2004/11/20 18:23:05  dischi
-# use python logger module for debug
-#
-# Revision 1.152  2004/11/13 15:54:12  dischi
-# small bugfix
-#
-# Revision 1.151  2004/10/22 18:43:54  dischi
-# make sure aspect is a string
-#
-# Revision 1.150  2004/09/14 20:07:04  dischi
-# restructure and add docs
-#
-# Revision 1.149  2004/08/28 17:18:07  dischi
-# fix multiple files in one video when replaying
-#
-# Revision 1.148  2004/08/27 14:23:39  dischi
-# VideoItem is now based on MediaItem
-#
-# Revision 1.147  2004/08/24 16:42:44  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.146  2004/08/01 10:46:34  dischi
-# remove menuw hiding, add some test code
-#
-# Revision 1.145  2004/07/26 18:10:19  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.144  2004/07/21 11:34:59  dischi
-# disable one track auto-play for dvd
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -66,17 +32,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import os
 import copy
+import logging
 
+# freevo imports
 import config
 import util
 import eventhandler
 import menu
-import configure
 import plugin
 import util.videothumb
 import util.mediainfo
@@ -85,9 +52,11 @@ from gui   import PopupBox, AlertBox, ConfirmBox
 from item  import MediaItem, FileInformation
 from event import *
 
-from database import tv_show_informations, discset_informations
+# video imports
+import configure
+import database
 
-import logging
+# get logging object
 log = logging.getLogger('video')
 
 class VideoItem(MediaItem):
@@ -116,7 +85,7 @@ class VideoItem(MediaItem):
         self.selected_subtitle = None
         self.selected_audio    = None
         self.elapsed           = 0
-        
+
         self.possible_player   = []
 
         # find image for tv show and build new title
@@ -133,8 +102,8 @@ class VideoItem(MediaItem):
                                           show_name[0].lower())
                 if image:
                     self.image = image
-                if tv_show_informations.has_key(show_name[0].lower()):
-                    tvinfo = tv_show_informations[show_name[0].lower()]
+                if database.tv_shows.has_key(show_name[0].lower()):
+                    tvinfo = database.tv_shows[show_name[0].lower()]
                     self.info.set_variables(tvinfo[1])
                     if not self.image:
                         self.image = tvinfo[0]
@@ -144,15 +113,15 @@ class VideoItem(MediaItem):
                 self.show_name     = show_name
                 self.tv_show_name  = show_name[0]
                 self.tv_show_ep    = show_name[3]
-                
-        # extra infos in discset_informations
+
+        # extra infos in database.discset
         if parent and parent.media:
             fid = parent.media.id + \
                   self.filename[len(os.path.join(parent.media.mountdir,"")):]
-            if discset_informations.has_key(fid):
-                self.mplayer_options = discset_informations[fid]
+            if database.discset.has_key(fid):
+                self.mplayer_options = database.discset[fid]
 
-        
+
     def set_url(self, url, info=True):
         """
         Sets a new url to the item. Always use this function and not set 'url'
@@ -177,12 +146,12 @@ class VideoItem(MediaItem):
                 self.filename = self.url[5:self.url.rfind('/')]
             else:
                 self.filename = ''
-                
+
         elif url.endswith('.iso') and self.info['mime'] == 'video/dvd':
             self.mimetype = 'dvd'
             self.mode     = 'dvd'
             self.url      = 'dvd' + self.url[4:] + '/'
-            
+
         if not self.image or (self.parent and self.image == self.parent.image):
            image = vfs.getoverlay(self.filename + '.raw')
            if os.path.exists(image):
@@ -193,8 +162,8 @@ class VideoItem(MediaItem):
                and not self['deinterlace']:
             # force deinterlacing
             self['deinterlace'] = 1
-               
-        
+
+
     def id(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -220,7 +189,7 @@ class VideoItem(MediaItem):
         if key == 'aspect' and self.info['aspect']:
             aspect = str(self.info['aspect'])
             return aspect[:aspect.find(' ')].replace('/', ':')
-            
+
         if key == 'runtime':
             length = None
 
@@ -248,7 +217,7 @@ class VideoItem(MediaItem):
 
         return MediaItem.__getitem__(self, key)
 
-    
+
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
@@ -281,7 +250,7 @@ class VideoItem(MediaItem):
             self.current_subitem = self.conf_select_this_item
             del self.conf_select_this_item
             return True
-            
+
         cont = 1
         from_start = 0
         si = self.current_subitem
@@ -331,8 +300,8 @@ class VideoItem(MediaItem):
             possible_player.append((rating, p))
         possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
         return possible_player
-    
-        
+
+
     # ------------------------------------------------------------------------
     # actions:
 
@@ -360,7 +329,7 @@ class VideoItem(MediaItem):
             else:
                 items = [ ( self.dvd_vcd_title_menu, _('DVD title list') ),
                           (self.play, _('Play default track')) ]
-                    
+
         elif self.url == 'vcd://':
             if self.player_rating >= 20:
                 items = [ (self.play, _('Play VCD')),
@@ -411,7 +380,7 @@ class VideoItem(MediaItem):
         """
         # delete the submenu that got us here
         menuw.delete_submenu(False)
-        
+
         # build a menu
         items = []
         for title in range(len(self.info['tracks'])):
@@ -452,7 +421,7 @@ class VideoItem(MediaItem):
         """
         self.play(menuw=menuw, arg='-cache 65536')
 
-        
+
     def play_alternate(self, arg=None, menuw=None):
         """
         play and use maximum cache with mplayer
@@ -476,7 +445,7 @@ class VideoItem(MediaItem):
             self.menuw = menuw
         else:
             menuw = self.menuw
-            
+
         if self.variants:
             # if we have variants, play the first one as default
             self.variants[0].play(arg, menuw)
@@ -512,7 +481,7 @@ class VideoItem(MediaItem):
                     # Go to the next playable subitem, using the loop in
                     # eventhandler()
                     self.eventhandler(PLAY_END)
-                    
+
             elif not result:
                 # No media at all was found: error
                 ConfirmBox(text=(_('No media found for "%s".\n')+
@@ -562,7 +531,7 @@ class VideoItem(MediaItem):
         # rating if the player can play this item or not
         if not self.possible_player:
             self.possible_player = self._get_possible_player()
-        
+
         if alternateplayer:
             self.possible_player.reverse()
 
@@ -625,7 +594,7 @@ class VideoItem(MediaItem):
             if event == PLAY_END:
                 self._set_next_available_subitem()
                 # Loop until we find a subitem which plays without error
-                while self.current_subitem: 
+                while self.current_subitem:
                     log.info('playing next item')
                     error = self.current_subitem.play()
                     if error:
@@ -637,7 +606,7 @@ class VideoItem(MediaItem):
                 if self.error_in_subitem:
                     # No more subitems to play, and an error occured
                     AlertBox(text=self.last_error_msg).show()
-                    
+
             elif event == USER_END:
                 pass
 
@@ -648,5 +617,5 @@ class VideoItem(MediaItem):
             confmenu = configure.get_menu(self, self.menuw)
             self.menuw.pushmenu(confmenu)
             return True
-        
+
         return MediaItem.eventhandler(self, event)
