@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/14 16:14:25  dischi
+# Oops, remove debug
+#
 # Revision 1.11  2003/09/14 16:14:02  dischi
 # fix imdb redirect
 #
@@ -189,7 +192,6 @@ class FxdImdb:
             return self.imdb_id_list
 
         for line in response.read().split("\n"):
-            print line
             m = regexp_type.match(line)
             if m:
                 type = m.group(1)
