@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/11/07 16:39:21  dischi
+# create extra finish function
+#
 # Revision 1.67  2004/11/04 17:40:17  dischi
 # change to new notifier interface
 #
@@ -301,7 +304,10 @@ class Instance:
         self.__io_err.cleanup()
         if self.__kill_timer:
             notifier.removeTimer( self.__kill_timer )
-            
+        self.finished()
+
+        
+    def finished(self):
         # Ok, we can use the OSD again.
         if self.stop_osd:
             gui.display.show()
@@ -309,8 +315,8 @@ class Instance:
         if not self.stopping:
             if self.is_video:
                 eventhandler.post( Event( VIDEO_END ) )
-        
             eventhandler.post( self.stop_event() )
+
         
     # Override this method to receive stdout from the child app
     # The function receives complete lines
