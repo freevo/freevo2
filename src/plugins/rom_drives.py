@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/10/18 17:57:22  dischi
+# remove debug
+#
 # Revision 1.36  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -724,8 +727,6 @@ class Identify_Thread(threading.Thread):
                 if last_status:
                     self.last_media = media
                 rc.post_event(plugin.event('IDENTIFY_MEDIA'))
-            else:
-                _debug_('MEDIA: Status=%s' % media.drive_status, 2)
         self.lock.release()
 
                 
