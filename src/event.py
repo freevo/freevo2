@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/04 23:00:42  rshortt
+# Add some new TV_EVENTS.
+#
 # Revision 1.8  2003/06/02 22:56:19  rshortt
 # Need a pageup/pagedown for input events.
 #
@@ -290,7 +293,12 @@ TV_EVENTS = {
     'EXIT'      : STOP,
     'SELECT'    : STOP,
     'CH+'       : TV_CHANNEL_UP,
-    'CH-'       : TV_CHANNEL_DOWN
+    'CH-'       : TV_CHANNEL_DOWN,
+    'LEFT'      : Event(SEEK, arg=-60),
+    'RIGHT'     : Event(SEEK, arg=60),
+    'REW'       : Event(SEEK, arg=-10),
+    'FFWD'      : Event(SEEK, arg=10),
+    'DISPLAY'   : TOGGLE_OSD,
     }
 
 VIDEO_EVENTS = {
