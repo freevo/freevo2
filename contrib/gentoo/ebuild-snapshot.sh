@@ -78,22 +78,12 @@ function ebuild {
 
 function ebuild_upload {
     sudo rm -rf /tmp/ebuild*
-    cd /usr/local/portage/media-video
+    cd /usr/local/portage
 
-    tar --atime-preserve -zcvf /tmp/ebuild-devel.tgz freevo freevo_runtime >/dev/null
-    cd /tmp
-    sudo rm -rf freevo freevo-runtime
-    tar -zxvf ebuild-devel.tgz >/dev/null
-    for i in freevo/*pre*; do
-	sed 's/KEYWORDS="x86"/KEYWORDS="~x86"/' $i > /tmp/$$
-	mv /tmp/$$ $i
-	touch $i
-    done
-    tar --atime-preserve -zcvf ebuild.tgz freevo freevo_runtime >/dev/null
-    rm -rf freevo freevo-runtime
-
-    scp -r /tmp/ebuild*.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
-    rm /tmp/ebuild.tgz
+    tar --atime-preserve -zcvf /tmp/freevo-ebuild.tgz media-video/freevo \
+	dev-python/mmpython dev-python/pylirc >/dev/null
+    scp -r /tmp/freevo-ebuild.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
+    rm /tmp/freevo-ebuild.tgz
 }
 
 function sf_upload {

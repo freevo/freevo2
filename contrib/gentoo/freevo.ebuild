@@ -1,9 +1,9 @@
 DESCRIPTION="Freevo"
 FREEVO_INSTALL_DIR="${D}/opt/freevo"
 
-IUSE="dxr3 matrox"
+IUSE="matrox"
 
-PV=`echo ${PV} | sed 's/_\(pre[0-9]\)/-\1/'`
+PV=`echo ${PV} | sed 's/_\(pre[0-9]\)/-\1/' | sed 's/_\(test[0-9]\)/-\1/'`
 S="${WORKDIR}/freevo-${PV}"
 
 SRC_URI="mirror://sourceforge/freevo/freevo-src-${PV}.tgz"
@@ -15,23 +15,28 @@ SLOT="0"
 KEYWORDS="x86"
 
 DEPEND=">=dev-python/pygame-1.5.5
+	>=media-libs/freetype-2.1.4
 	>=dev-python/Imaging-1.1.3
 	>=dev-python/PyXML-0.8.1
-	>=media-libs/libsdl-1.2.4
-	>=media-video/mplayer-0.90_rc4
-	>=freevo_runtime-1.3.1
-	ogg? (>=media-libs/pyvorbis-1.1)"
+	>=dev-python/twisted-1.0.6
+	>=media-libs/libsdl-1.2.5
+	>=dev-python/mmpython-0.1
+	>=media-video/mplayer-0.90_rc5"
+
+if [ -f /usr/include/lirc/lirc_client.h ]
+then
+    DEPEND="$DEPEND
+            >=dev-python/pylirc-0.0.3"
+fi
 
 
 src_unpack() {
 	unpack freevo-src-${PV}.tgz
-	cd freevo-${PV}
 }
 
 src_compile() {
 	local myconf="--geometry=800x600 --display=sdl"
 	use matrox && myconf="--geometry=768x576 --display=mga"
-	use dxr3 && myconf="--geometry=768x576 --display=dxr3"
 
 	/bin/ls -l /etc/localtime | grep Europe >/dev/null 2>/dev/null && \
 	    myconf="$myconf --tv=pal"
@@ -58,7 +63,7 @@ src_install() {
 
         dodir /usr/share/doc/${PF}/html
         mv Docs/html/* ${D}/usr/share/doc/${PF}/html/
-	
+	mv Docs/freevo_howto ${D}/usr/share/doc/${PF}/
 	make PREFIX=$FREEVO_INSTALL_DIR \
 	    LOGDIR=${D}/var/log/freevo \
 	    CACHEDIR=${D}/var/cache/freevo install

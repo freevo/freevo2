@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# rsync-freevo
+#
+#   <dmeyer@tzi.de>
+# $Id$
+
+
+VERSION=1.0
+
+
+. /etc/make.conf
+
+file=freevo-ebuild.tgz
+
+if [ "$PORTDIR_OVERLAY" = "" ]; then
+    echo please define a PORTDIR_OVERLAY in /etc/make.conf
+    echo and make sure you have the oermission to write in it
+    exit 1
+fi
+
+cd /tmp
+rm rsync-ChangeLog $file 2>/dev/null
+wget http://freevo.sourceforge.net/gentoo/ChangeLog -O rsync-ChangeLog
+
+if [ '!' -e rsync-ChangeLog ]; then
+    echo download failed
+    exit 1
+fi
+
+if ! head -n 1 rsync-ChangeLog | grep "$VERSION" >/dev/null; then
+    cat rsync-ChangeLog
+    echo
+    echo please download a new version of rsync-freevo from
+    echo http://freevo.sourceforge.net/gentoo/
+    rm rsync-ChangeLog
+    exit 1
+fi
+
+wget http://freevo.sourceforge.net/gentoo/$file
+
+if [ '!' -e $file ]; then
+    echo download failed
+    rm rsync-ChangeLog
+    exit 1
+fi
+
+cd $PORTDIR_OVERLAY
+
+rm -rf app-misc/freevo_runtime app-misc/freevo_snapshot \
+    media-video/freevo_runtime media-video/freevo_snapshot media-video/freevo \
+    dev-python/mmpython dev-python/pylirc
+
+tar -zxvf /tmp/$file
+rm /tmp/$file /tmp/rsync-ChangeLog
+
+# end of rsync-freevo
