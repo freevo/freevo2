@@ -915,7 +915,7 @@ MPLAYER_SOFTWARE_SCALER = ''
 #
 MPLAYER_ARGS = { 'dvd'    : '-cache 8192',
                  'vcd'    : '-cache 4096',
-                 'cd'     : '-cache 500 -cdda speed=1',
+                 'cd'     : '-cache 1024 -cdda speed=2',
                  'tv'     : '-nocache',
                  'ivtv'   : '-cache 8192',
                  'avi'    : '-cache 5000 -idx',
