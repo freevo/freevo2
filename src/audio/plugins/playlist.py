@@ -46,6 +46,8 @@ import menu
 import plugin
 import time
 import config
+import rc
+from event import *
 
 class PluginInterface(plugin.ItemPlugin):
     """
@@ -97,9 +99,11 @@ class PluginInterface(plugin.ItemPlugin):
             self.playlist_handle = open(('%s/%s.m3u' % (self.playlist_folder, time.strftime(self.naming))),'w+')
         self.playlist_handle.write('%s\n' % self.item.filename)
         self.playlist_handle.flush()
+        rc.post_event(Event(OSD_MESSAGE, arg='Queued Track'))
         return
 
     def new_playlist(self, arg=None, menuw=None):
+        rc.post_event(Event(OSD_MESSAGE, arg='Added New Playlist'))
         if self.playlist_handle:
             self.playlist_handle.close()
             self.playlist_handle = None
