@@ -492,6 +492,8 @@ plugin.activate('tv.manual_record')
 # Enable this for joystick support:
 # plugin.activate('joy')
 
+# control freevo over mbus
+plugin.activate('mbus')
 
 
 # ======================================================================
