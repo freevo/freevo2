@@ -5,4 +5,20 @@
 # $Id$
 #
 
+# Is runapp present? If not it needs to be compiled
+if ! test -a runapp ; then
+    echo ./runapp not found! You must compile freevo, see INSTALL.
+    exit
+fi
+
+# First check if the runtime is installed
+if test -a freevo_rtfreevo_rt ; then
+    echo Found the runtime, will use it.
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_rt
+    export LD_PRELOAD=`cat freevo_rt/preloads`
+    # Execute using the runtime
+    freevo_rt/ld-linux.so.2 freevo_rt/freevo_rt main.py $*
+fi
+
 python startup.py $*
