@@ -26,6 +26,7 @@ o CDROM_MOUNT_POINT is deprecated now, use ROM_DRIVES to define all your drives
 o Added support for shutdown of Freevo from the main menu. This can also 
   be configured to shutdown the entire system for standalone boxes, but it
   is disabled by default.
+o Basic DXR3 support
 o XXX document all changes!
 	
 Internal:
