@@ -9,6 +9,10 @@ Release 1.3.0 (2002-10-XX):
 Features, bugfixes:
 o Added a font alias list in freevo_config to substitute missing non-free
   fonts in skins with free fonts.
+o Changed the TV guide to use Gustavo's new extended menus.
+o The XML skins can now include other skin files. This makes
+  it easier to adapt skins to new screen sizes.
+o XML skins can now load a local_skin.xml for changes by the user.
 	
 
 Release 1.2.6 (2002-10-12):
