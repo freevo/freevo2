@@ -597,7 +597,7 @@ if __name__ == "__main__":
         print "searching " + filename
         keys = local_search(filename)
         if keys == None:
-            print 'Local database not found. Please download movies.list.gz' % imdb_title_list
+            print 'Local database not found. Please download movies.list.gz'
             print 'from the imdb interface website, unpack it and move it to'
             print '%s.' % imdb_title_list
             print 'To get the file go to http://www.imdb.com/interfaces'
