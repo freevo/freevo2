@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/03 20:51:12  dischi
+# fix/enhance dvd on disc
+#
 # Revision 1.15  2004/02/01 19:47:13  dischi
 # some fixes by using new mmpython data
 #
@@ -212,6 +215,12 @@ def parse_movie(fxd, node):
         if url.startswith('file://') and os.path.isfile(url[7:]):
             variables = item.info.get_variables()
             item.set_url(url, info=True)
+            item.info.set_variables(variables)
+        elif url.startswith('file://') and os.path.isdir(url[7:]):
+            # dvd dir
+            variables = item.info.get_variables()
+            item.set_url(url.replace('file://', 'dvd:/')+ '/VIDEO_TS/', info=True)
+            print item.url
             item.info.set_variables(variables)
         else:
             item.set_url(url, info=False)

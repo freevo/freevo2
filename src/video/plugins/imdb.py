@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/02/03 20:51:12  dischi
+# fix/enhance dvd on disc
+#
 # Revision 1.33  2004/01/10 13:23:23  dischi
 # reflect self.fxd_file changes
 #
@@ -95,12 +98,14 @@ class PluginInterface(plugin.ItemPlugin):
         self.item = item
 
         if item.type == 'video' and (not item.files or not item.files.fxd_file):
-            if item.mode == 'file':
+            if item.mode == 'file' or (item.mode in ('dvd', 'vcd') and \
+                                       item.info.has_key('tracks') and not \
+                                       item.media):
                 self.disc_set = False
                 return [ ( self.imdb_search , _('Search IMDB for this file'),
                            'imdb_search_or_cover_search') ]
             
-            if item.mode in ('dvd', 'vcd'):
+            elif item.mode in ('dvd', 'vcd') and item.info.has_key('tracks'):
                 self.disc_set = True
                 s = self.imdb_get_disc_searchstring(self.item)
                 if s:

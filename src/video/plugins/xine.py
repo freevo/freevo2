@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/02/03 20:51:12  dischi
+# fix/enhance dvd on disc
+#
 # Revision 1.37  2004/02/02 22:15:53  outlyer
 # Support for mirrors of DVDs...
 #
@@ -209,8 +212,10 @@ class Xine:
 
         if item.mode == 'dvd' and hasattr(item.media,'devicename'):
             # dvd:///dev/dvd/2
+            print item.media
             command.append('dvd://%s/%s' % (item.media.devicename, item.url[6:]))
-        elif item.mode == 'dvd':                # no devicename? Probably a mirror image on the HD
+        elif item.mode == 'dvd': # no devicename? Probably a mirror image on the HD
+            print item.url
             command.append(item.url)
 
         elif item.mode == 'vcd':

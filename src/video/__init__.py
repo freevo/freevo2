@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/02/03 20:51:12  dischi
+# fix/enhance dvd on disc
+#
 # Revision 1.26  2004/02/02 22:15:53  outlyer
 # Support for mirrors of DVDs...
 #
@@ -121,10 +124,8 @@ class PluginInterface(plugin.MimetypePlugin):
             if os.path.isdir(i+'/VIDEO_TS'):
                 # DVD Image
                 x = VideoItem('', None)
-                x.set_url('dvd://' + i[1:] + '/VIDEO_TS/')  # Trailing slash is important for Xine
-                x.type = 'dvd'
-                x.media = 'file'
-                x.devicename = ''
+                # Trailing slash is important for Xine
+                x.set_url('dvd://' + i[1:] + '/VIDEO_TS/')  
                 x.name = os.path.basename(i)
                 items += [ x ]
                 files.remove(i)

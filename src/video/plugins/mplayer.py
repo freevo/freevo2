@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/02/03 20:51:12  dischi
+# fix/enhance dvd on disc
+#
 # Revision 1.60  2004/02/02 22:15:53  outlyer
 # Support for mirrors of DVDs...
 #
@@ -195,7 +198,7 @@ class MPlayer:
         if mode == 'file':
             url = item.url[6:]
 
-        if url == 'dvd://':
+        if url.startswith('dvd://') and url[-1] == '/':
             url += '1'
             
         if url == 'vcd://':
@@ -241,7 +244,11 @@ class MPlayer:
 
         if hasattr(item.media,'devicename'):
             additional_args += [ '-dvd-device', item.media.devicename ]
-
+        elif mode == 'dvd':
+            # dvd on harddisc
+            additional_args += [ '-dvd-device', url[5:url.rfind('/VIDEO_TS/')] ]
+            url = url[:6] + url[url.rfind('/')+1:]
+            
         if item.media and hasattr(item.media,'devicename'):
             additional_args += [ '-cdrom-device', item.media.devicename ]
 
@@ -249,13 +256,13 @@ class MPlayer:
             additional_args += [ '-noautosub' ]
 
         elif item.selected_subtitle and mode == 'file':
-            additional_args += [ '-vobsubid', item.selected_subtitle ]
+            additional_args += [ '-vobsubid', str(item.selected_subtitle) ]
 
         elif item.selected_subtitle:
-            additional_args += [ '-sid', item.selected_subtitle ]
+            additional_args += [ '-sid', str(item.selected_subtitle) ]
             
         if item.selected_audio:
-            additional_args += [ '-aid', item.selected_audio ]
+            additional_args += [ '-aid', str(item.selected_audio) ]
 
         if self.version >= 1 and item['deinterlace']:
             additional_args += [ '-vf',  'pp=de/fd' ]

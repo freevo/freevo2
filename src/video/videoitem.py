@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.122  2004/02/03 20:51:12  dischi
+# fix/enhance dvd on disc
+#
 # Revision 1.121  2004/02/01 19:47:13  dischi
 # some fixes by using new mmpython data
 #
@@ -94,7 +97,7 @@ import configure
 import plugin
 
 from gui   import PopupBox, AlertBox, ConfirmBox
-from item  import Item
+from item  import Item, FileInformation
 from event import *
 
 class VideoItem(Item):
@@ -174,12 +177,21 @@ class VideoItem(Item):
         if url.startswith('dvd://') or url.startswith('vcd://'):
             self.network_play = False
             self.mimetype = self.url[:self.url.find('://')].lower()
+
+            if self.url.find('/VIDEO_TS/') > 0:
+                # dvd on harddisc
+                self.filename = self.url[5:self.url.rfind('/VIDEO_TS/')]
+                self.info  = util.mediainfo.get(self.filename)
+                self.files = FileInformation()
+                self.files.append(self.filename)
+                self.num_titles = len(self.info['tracks'])
+                
         if not self.image or (self.parent and self.image == self.parent.image):
            image = vfs.getoverlay(self.filename + '.raw')
            if os.path.exists(image):
                self.image = image
                self.files.image = image
-        
+
         
     def id(self):
         """
@@ -265,7 +277,7 @@ class VideoItem(Item):
 
         self.player_rating, self.player = self.possible_player[0]
 
-        if self.url == 'dvd://':
+        if self.url.startswith('dvd://') and self.url[-1] == '/':
             if self.player_rating >= 20:
                 items = [ (self.play, _('Play DVD')),
                           ( self.dvd_vcd_title_menu, _('DVD title list') ) ]
@@ -291,7 +303,7 @@ class VideoItem(Item):
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, _('Show variants')) ] + items
 
-        if not self.image and self.filename and not self.variants and not self.subitems:
+        if not self.image and self.mode == 'file' and not self.variants and not self.subitems:
             items.append((self.create_thumbnail, _('Create Thumbnail'), 'create_thumbnail'))
             
         return items
@@ -458,7 +470,7 @@ class VideoItem(Item):
                 util.mount(os.path.dirname(self.filename))
 
         elif self.url.startswith('dvd://') or self.url.startswith('vcd://'):
-            if not self.media:
+            if self.url.rfind('/') < 6 and not self.media:
                 media = util.check_media(self.media_id)
                 if media:
                     self.media = media
@@ -524,15 +536,20 @@ class VideoItem(Item):
         items = []
         for title in range(1,self.num_titles+1):
             i = copy.copy(self)
+            i.set_url(self.url + str(title), False)
             i.info = copy.copy(self.info)
-            i.possible_player = []
             # copy the attributes from mmpython about this track
             if self.info.has_key('tracks'):
                 i.info.mmdata = self.info.mmdata['tracks'][title-1]
-            i.info_type = 'track'
-            i.set_url(self.url + str(title), False)
-            i.name = _('Play Title %s') % title
-            items += [i]
+                i.info.set_variables(self.info.get_variables())
+                i.info['audio']     = i.info.mmdata.audio 
+                i.info['subtitles'] = i.info.mmdata.subtitles 
+                i.info['chapters']  = i.info.mmdata.chapters 
+            i.info_type       = 'track'
+            i.possible_player = []
+            i.files           = None
+            i.name            = _('Play Title %s') % title
+            items.append(i)
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.skin_fxd)
         moviemenu.item_types = 'video'
