@@ -1,0 +1,84 @@
+Index: cfg-common.h
+===================================================================
+RCS file: /cvsroot/mplayer/main/cfg-common.h,v
+retrieving revision 1.82
+diff -u -u -r1.82 cfg-common.h
+--- cfg-common.h	27 Jan 2003 23:41:38 -0000	1.82
++++ cfg-common.h	29 Jan 2003 04:47:25 -0000
+@@ -22,6 +22,8 @@
+ 	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
+ 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
+ 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
++	{"dvdprotection-override", &dvdprotection_override, CONF_TYPE_FLAG, 0, 0, 1, NULL},
++	{"nodvdprotection-override", &dvdprotection_override, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+ #else
+ 	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+ #endif
+Index: libmpdemux/stream.h
+===================================================================
+RCS file: /cvsroot/mplayer/main/libmpdemux/stream.h,v
+retrieving revision 1.55
+diff -u -u -r1.55 stream.h
+--- libmpdemux/stream.h	4 Jan 2003 20:11:06 -0000	1.55
++++ libmpdemux/stream.h	29 Jan 2003 04:47:25 -0000
+@@ -206,6 +206,13 @@
+ 
+ #ifdef USE_DVDREAD
+ 
++/*
++ * Override DVD protection (=DeCSS). Default == 1 (override = use DeCSS).
++ * This variable is set from the command line, and used in
++ * mplayer/libmpdvdkit2/libdvdcss.c.
++ */
++extern int dvdprotection_override;
++
+ #ifdef USE_MPDVDKIT
+ #if (USE_MPDVDKIT == 2)
+ #include "../libmpdvdkit2/dvd_reader.h"
+Index: libmpdvdkit2/libdvdcss.c
+===================================================================
+RCS file: /cvsroot/mplayer/main/libmpdvdkit2/libdvdcss.c,v
+retrieving revision 1.7
+diff -u -u -r1.7 libdvdcss.c
+--- libmpdvdkit2/libdvdcss.c	8 Jan 2003 16:10:39 -0000	1.7
++++ libmpdvdkit2/libdvdcss.c	29 Jan 2003 04:47:26 -0000
+@@ -97,6 +97,8 @@
+ #   include <unistd.h>
+ #endif
+ 
++#include "../mp_msg.h"
++
+ #include "dvdcss.h"
+ 
+ #include "common.h"
+@@ -119,6 +121,9 @@
+ 
+ char * dvdcss_cache_dir = NULL;
+ 
++/* Override DVD protection (=DeCSS). Default is on. */
++int dvdprotection_override = 1;
++
+ /**
+  * \brief Open a DVD device or directory and return a dvdcss instance.
+  *
+@@ -245,6 +250,20 @@
+ 	}
+     }
+ 
++    /* Check the global DVD protection override flag */
++    if ( dvdcss->b_scrambled && !dvdprotection_override )
++    {
++        static char err_msg[] = "The DVD is protected! "
++                                "Use -dvdprotection-override to override "
++                                "the protection, but only if legal "
++                                "in your jurisdiction!\n";
++
++        
++        /* The DVD is protected, and protection is not overridden by the user  */
++        mp_msg( MSGT_DVD, MSGL_ERR, err_msg);
++        return NULL;
++    }
++      
+     /* If disc is CSS protected and the ioctls work, authenticate the drive */
+     if( dvdcss->b_scrambled && dvdcss->b_ioctls )
+     {
