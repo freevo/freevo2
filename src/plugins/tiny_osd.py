@@ -14,14 +14,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/08/01 10:49:06  dischi
+# move to new gui code
+#
 # Revision 1.12  2004/07/24 12:23:39  dischi
 # deactivate plugin
-#
-# Revision 1.11  2004/07/10 12:33:40  dischi
-# header cleanup
-#
-# Revision 1.10  2004/02/14 13:05:04  dischi
-# do not call skin.get_singleton() anymore
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,16 +42,12 @@
 # ----------------------------------------------------------------------- */
 
 
-import os
-import sys
-import copy
+import config
+import plugin
+import gui
 import rc
 
-import config
-import skin
-import plugin
-
-from event import *
+from event import OSD_MESSAGE
 
 
 class PluginInterface(plugin.DaemonPlugin):
@@ -70,56 +63,45 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         init the osd
         """
-        self.reason = 'not working while gui rebuild'
-        return
         plugin.DaemonPlugin.__init__(self)
-        self.poll_interval   = 200
-        self.plugins = None
-        plugin.register(self, 'osd')
-        self.visible = True
-        self.message = ''
-        # set to 2 == we have no idea right now if
-        # we have an idlebar
-        self.idlebar_visible = 2
-        self.poll_menu_only  = False
+        self.message    = ''
+        self.gui_object = None
+        self.active     = False
         
 
-    def draw(self, (type, object), renderer):
+    def update(self):
         """
-        draw current message
+        update the screen
         """
+        screen = gui.get_screen()
+        if self.gui_object:
+            # remove the current text from the screen
+            self.gui_object.screen.remove(self.gui_object)
+            self.gui_object = None
+
         if not self.message:
+            # if we don't have a text right now,
+            # update the screen without the old message
+            screen.update()
             return
 
-        # check for the idlebar plugin
-        if self.idlebar_visible == 2:
-            self.idlebar_visible = plugin.getbyname('idlebar')
+        # get the osd from from the settings
+        font = gui.get_font('osd')
 
-        try:
-            font  = renderer.get_font('osd')
-        except AttributeError:
-            font  = skin.get_font('osd')
+        # create the text object
+        # FIXME: do respect the idlebar if active
+        self.gui_object = gui.Text(config.OSD_OVERSCAN_X,
+                                   config.OSD_OVERSCAN_Y + 10,
+                                   screen.width - 10 - 2 * config.OSD_OVERSCAN_X,
+                                   config.OSD_OVERSCAN_Y + 10 + font.height, 
+                                   self.message, font, align_h='right')
 
-        w = font.stringsize(self.message)
+        # make sure the object is on top of everything else
+        self.gui_object.layer = 20
 
-        if type == 'osd':
-            x = config.OSD_OVERSCAN_X
-            y = config.OSD_OVERSCAN_Y
-
-            renderer.drawstringframed(self.message, config.OSD_OVERSCAN_X,
-                                      config.OSD_OVERSCAN_Y + 10,
-                                      renderer.width - 10 - 2 * config.OSD_OVERSCAN_X, -1,
-                                      font, align_h='right', mode='hard')
-
-        else:
-            y = renderer.y + 10
-            if self.idlebar_visible:
-                y += 60
-
-            renderer.drawstring(self.message, font, None,
-                                (renderer.x + renderer.width-w - 10), y,
-                                w, -1, 'right', 'center')
-
+        # add the text and update the screen
+        screen.add(self.gui_object)
+        screen.update()
 
 
     def eventhandler(self, event, menuw=None):
@@ -128,22 +110,21 @@ class PluginInterface(plugin.DaemonPlugin):
         else is watching for the event.
         """
         if event == OSD_MESSAGE:
-            self.poll_counter = 1
             self.message = event.arg
-            if not rc.app() or not skin.get_singleton().force_redraw:
-                skin.redraw()
-            elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
-                rc.app().im_self.redraw()
+            if self.active:
+                # a not used callback is active, remove it
+                rc.unregister(self.hide)
+            # register a callback in 2 seconds for hiding
+            rc.register(self.hide, False, 200)
+            self.active = True
+            self.update()
         return False
 
-    
-    def poll(self):
+
+    def hide(self):
         """
-        clear the osd after 2 seconds
+        Hide the osd
         """
-        if self.message:
-            self.message = ''
-            if not rc.app() or not skin.get_singleton().force_redraw:
-                skin.redraw()
-            elif hasattr(rc.app(), 'im_self') and hasattr(rc.app().im_self, 'redraw'):
-                rc.app().im_self.redraw()
+        self.message = ''
+        self.active  = False
+        self.update()
