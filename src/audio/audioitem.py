@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/04/21 13:27:46  dischi
+# o make it possible to hide() the audio player
+# o mplayer is now a plugin, controlled by the PlayerGUI
+#
 # Revision 1.19  2003/04/20 12:43:32  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -60,14 +64,13 @@ import string
 import time
 import re
 import eyed3
-import skin
 import imghdr
 import traceback
 import config
-import mplayer
 import util
 import rc
 
+from player import PlayerGUI
 from item import Item
 
 
@@ -76,8 +79,6 @@ DEBUG = config.DEBUG
 TRUE  = 1
 FALSE = 0
 
-skin = skin.get_singleton()
-
 class AudioItem(Item):
     """
     This is the common class to get information about audiofiles.
@@ -85,7 +86,6 @@ class AudioItem(Item):
     
     def __init__(self, file, parent, cache = None, name = None):
         Item.__init__(self, parent)
-        self.drawall    = 1
         self.filename   = file[:]
         if name:
             self.name   = name
@@ -127,7 +127,7 @@ class AudioItem(Item):
                 if DEBUG > 1: print "Got something else..."
 
         if self.title:
-            self.name = skin.format_track(self)
+            self.name = self.format_track()
         else:
             self.title = self.name
 
@@ -196,7 +196,6 @@ class AudioItem(Item):
             except UnicodeError:
                 print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
-        self.audio_player = mplayer.get_singleton()
 
 
     def copy(self, obj):
@@ -383,12 +382,10 @@ class AudioItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
-        if self.menuw.visible:
-            self.menuw.hide()
+        self.player = PlayerGUI(self, menuw)
+        error = self.player.play()
 
-        error = self.audio_player.play(self)
-
-        if error:
+        if error and menuw:
             AlertBox(text=error).show()
             rc.post_event(rc.PLAY_END)
 
@@ -397,17 +394,35 @@ class AudioItem(Item):
         """
         Stop the current playing
         """
-        self.audio_player.stop()
+        self.player.stop()
 
-        
-    def draw(self):
-        """
-        Give information to the skin..
-        """
-        # Calculate some new values
-        if not self.length:
-            self.remain = 0
+    def format_track(self):
+        """ Return a formatted string for use in music.py """
+	# This is the default - track name only
+	formatstr = '%(t)s'
+       	# This will show the track number as well 
+	#formatstr = '%(n)s - %(t)s'
+
+	# Since we can't specify the length of the integer in the
+	# format string (Python doesn't seem to recognize it) we
+	# strip it out first, when we see the only thing that can be
+	# a number.
+
+
+        # Before we begin, make sure track is an integer
+    
+        if self.track:
+            try:
+    	        mytrack = ('%0.2d' % int(self.track))
+            except ValueError:
+    	        mytrack = None
         else:
-            self.remain = self.length - self.elapsed
-        skin.draw(('player', self))
-        return
+           mytrack = None
+    
+        song_info = {  'a'  : self.artist,
+       	               'l'  : self.album,
+    	               'n'  : mytrack,
+    	               't'  : self.title,
+    	               'y'  : self.year }
+   
+        return formatstr % song_info
