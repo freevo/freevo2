@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 12:43:32  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.1  2003/04/20 10:53:23  dischi
 # moved identifymedia and mediamenu to plugins
 #
@@ -73,7 +79,6 @@ from image import bins
 TRUE  = 1
 FALSE = 0
 
-rc = rc.get_singleton()
 skin = skin.get_singleton()
 
 dirwatcher_thread = None
@@ -576,8 +581,7 @@ class DirwatcherThread(threading.Thread):
     def run(self):
         while 1:
             if self.dir and self.menuw and \
-               self.menuw.menustack[-1] == self.item_menu and \
-               not rc.app:
+               self.menuw.menustack[-1] == self.item_menu and not rc.app():
                 self.scan()
             time.sleep(2)
 

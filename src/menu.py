@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/04/20 12:43:32  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.40  2003/04/20 11:44:45  dischi
 # add item plugins
 #
@@ -118,7 +124,6 @@ from gui.AlertBox import AlertBox
 TRUE  = 1
 FALSE = 0
 
-rc   = rc.get_singleton()   # Create the remote control object
 skin = skin.get_singleton() # Crate the skin object.
 
 # Module variable that contains an initialized MenuWidget() object
@@ -407,7 +412,7 @@ class MenuWidget(GUIObject):
 
         if not isinstance(menu, Menu) and menu.eventhandler(event):
             return
-        
+
         if event == rc.REFRESH_SCREEN:
             self.refresh()
             return
@@ -423,6 +428,14 @@ class MenuWidget(GUIObject):
             return
             
         if not isinstance(menu, Menu):
+            if self.eventhandler_plugins == None:
+                self.eventhandler_plugins = plugin.get('daemon_eventhandler')
+
+            for p in self.eventhandler_plugins:
+                if p.eventhandler(event=event, menuw=self):
+                    return
+
+            print 'no eventhandler for event %s' % event
             return
 
         if event == rc.UP:

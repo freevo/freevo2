@@ -20,6 +20,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/04/20 12:43:34  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.32  2003/04/20 10:55:41  dischi
 # mixer is now a plugin, too
 #
@@ -104,7 +110,6 @@ FALSE = 0
 
 # Setting up the default objects:
 osd        = osd.get_singleton()
-rc         = rc.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
 _singleton = None
@@ -154,7 +159,7 @@ class MPlayer:
         self.thread.start()
         self.mode = None
         self.filename = None
-
+        self.app_mode = 'video'
                          
     def play(self, filename, options, item, mode = None):
         """
@@ -266,8 +271,7 @@ class MPlayer:
 
         self.thread.command = command
         self.thread.mode_flag.set()
-        rc.app = self.eventhandler
-        rc.func = 'video'
+        rc.app(self)
         return None
     
 
@@ -278,8 +282,7 @@ class MPlayer:
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         self.thread.item = None
-        rc.app = None
-        rc.func = None
+        rc.app(None)
         while self.thread.mode == 'stop':
             time.sleep(0.3)
             

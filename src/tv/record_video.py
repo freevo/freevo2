@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/04/20 12:43:34  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.11  2003/04/06 21:12:58  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -139,9 +145,6 @@ FALSE = 0
 # Create the OSD object
 osd = osd.get_singleton()
 
-# Create the remote control object
-rc = rc.get_singleton()
-
 menuwidget = menu.get_singleton()
 
 
@@ -204,8 +207,6 @@ def main_menu(prog):
     prog_time = time.strftime('%H:%M', time.localtime(prog.start))
     recinfo.start_time.set_selected(prog_time)
     
-    #rc.app = None # XXX We'll jump back to the main menu for now, should be the TV menu
-
     days = []
     today = time.time()
     for i in range(60):
@@ -247,7 +248,7 @@ def generate_main():
 
     recmenu = menu.Menu('RECORD CHANNEL %s' % recinfo.channel, items, reload_func=generate_main)
 
-    rc.app = eventhandler
+    rc.app(eventhandler)
 
     return recmenu
 
@@ -352,8 +353,6 @@ def eventhandler( event):
         record_schedule.main_menu()
     elif event == rc.EXIT or event == rc.MENU:
         menu.MenuWidget.eventhandler( menuwidget, event )
-        rc.app = None #give control back to the main program
+        rc.app(None) #give control back to the main program
     else:
         menu.MenuWidget.eventhandler( menuwidget, event )
-
-

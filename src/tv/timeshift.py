@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 12:43:34  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.2  2003/03/27 03:43:50  rshortt
 # Moved as much information as I could into freevo_config.py.  Also fixed a couple bugs, chanup and chandown were backwards, the channel wasn't getting set when you start to watch tv, and the RESET command for the timeshifter was in lower case.
 #
@@ -50,9 +56,6 @@ import rc
 from mplayer import MPlayer_Thread
 
 DEBUG = 1
-
-remote = rc.get_singleton()
-
 
 # Module variable that contains an initialized V4L1TV() object
 _singleton = None
@@ -139,16 +142,16 @@ class Timeshifter:
         self.mplayerthread.mode_flag.set()
 
 
-    def EventHandler(self,event):
+    def eventhandler(self,event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
-        if (event == remote.MENU or event == remote.STOP or event == remote.EXIT or
-            event == remote.SELECT or event == remote.PLAY_END):
+        if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
+            event == rc.SELECT or event == rc.PLAY_END):
             self.Play('stop')
-            remote.app = tv.eventhandler            
+            rc.app(tv)
             tv.refresh()
             return TRUE
-        elif event == remote.CHUP or event == remote.CHDOWN:
-            if event == remote.CHUP:
+        elif event == rc.CHUP or event == rc.CHDOWN:
+            if event == rc.CHUP:
                 self.TunerNextChannel()
             else:
                 self.TunerPrevChannel()
@@ -158,20 +161,20 @@ class Timeshifter:
             # self.encoderthread.app.write('RESET\n')
             self.mplayerthread.app.write('seek 0 type=2\n')
             return TRUE
-        elif event == remote.LEFT:
+        elif event == rc.LEFT:
             self.StartEncoder()
             return TRUE
-        elif event == remote.RIGHT:
+        elif event == rc.RIGHT:
             self.StopEncoder()
             return TRUE
-        elif event == remote.PAUSE or event == remote.PLAY:
+        elif event == rc.PAUSE or event == rc.PLAY:
             self.mplayerthread.app.write('pause\n')
             # TODO: Check whether timeshifter has an overrun, in that case unpause
             return TRUE
-        elif event == remote.FFWD:
+        elif event == rc.FFWD:
             self.mplayerthread.app.write('seek 10\n')
             return TRUE
-        elif event == remote.REW:
+        elif event == rc.REW:
             self.mplayerthread.app.write('seek -10\n')
             return TRUE
         return TRUE
@@ -198,7 +201,7 @@ class Timeshifter:
 
             self.encoderthread.mode = mode
             self.encoderthread.mode_flag.set()
-            remote.app = self.EventHandler
+            rc.app(self)
             # Wait for the Task to be up and running
             time.sleep(1)
             # Then, immediately start encoding

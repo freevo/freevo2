@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.4  2003/04/20 10:55:40  dischi
 # mixer is now a plugin, too
 #
@@ -66,7 +72,6 @@ FALSE = 0
 
 # Setting up the default objects:
 osd        = osd.get_singleton()
-rc         = rc.get_singleton()
 menuwidget = menu.get_singleton()
 
 # Module variable that contains an initialized Game() object
@@ -123,13 +128,13 @@ class Game:
 
         self.thread.command = self.command
         self.thread.mode_flag.set()
-        rc.app = self.eventhandler
+        rc.app(self)
         
 
     def stop(self):
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
-        rc.app = None
+        rc.app(None)
         while self.thread.mode == 'stop':
             time.sleep(0.3)
 

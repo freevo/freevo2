@@ -15,6 +15,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.2  2003/04/06 21:12:58  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -80,9 +86,6 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
-# Create the remote control object
-rc = rc.get_singleton()
-
 menuwidget = menu.get_singleton()
 
 killflag = 0
@@ -110,7 +113,7 @@ def generate_main():
     recmenu = menu.Menu('RECORDING SCHEDULE', items,
                          reload_func=generate_main)
 
-    rc.app = None
+    rc.app(None)
 
     return recmenu
 

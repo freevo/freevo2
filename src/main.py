@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/04/20 12:43:32  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.39  2003/04/20 10:55:40  dischi
 # mixer is now a plugin, too
 #
@@ -125,7 +131,7 @@ TRUE  = 1
 FALSE = 0
 
 # Create the remote control object
-rc = rc.get_singleton()
+rc_object = rc.get_singleton()
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -288,7 +294,8 @@ def main_func():
     main.getcmd()
 
     poll_plugins = plugin.get('daemon_poll')
-
+    eventhandler_plugins = plugin.get('daemon_eventhandler')
+    
     # Kick off the main menu loop
     print 'Main loop starting...'
 
@@ -300,26 +307,34 @@ def main_func():
             event = osd._cb()
             if event:
                 break
-            event = rc.poll()
+            event = rc_object.poll()
             if event:
                 break
-            if not rc.func:
+            if not rc_object.func:
                 for p in poll_plugins:
                     p.poll()
             time.sleep(0.1)
 
-        if not rc.func:
+        if not rc_object.func:
             for p in poll_plugins:
                 p.poll()
 
         # Send events to either the current app or the menu handler
-        if rc.app:
-            rc.app(event)
+        used = FALSE
+        if rc_object.app:
+            if not rc_object.app(event):
+                for p in eventhandler_plugins:
+                    if p.eventhandler(event=event):
+                        break
+                else:
+                    print 'no eventhandler for event %s' % event
+
         else:
             if osd.focused_app:
                 osd.focused_app.eventhandler(event)
-
-
+            else:
+                print 'no target for events given'
+                
 #
 # Main function
 #

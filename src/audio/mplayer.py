@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/20 12:43:32  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.10  2003/04/20 10:55:40  dischi
 # mixer is now a plugin, too
 #
@@ -71,7 +77,6 @@ FALSE = 0
 
 # Setting up the default objects:
 osd        = osd.get_singleton()
-rc         = rc.get_singleton()
 menuwidget = menu.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
@@ -108,7 +113,7 @@ class MPlayer:
         self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
-
+        self.app_mode = 'audio'
                          
     def play(self, item):
         """
@@ -163,7 +168,7 @@ class MPlayer:
         self.thread.mode    = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
-        rc.app = self.eventhandler
+        rc.app(self)
         return None
     
 
@@ -173,7 +178,7 @@ class MPlayer:
         """
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
-        rc.app = None
+        rc.app(None)
         self.thread.item = None
         while self.thread.mode == 'stop':
             time.sleep(0.3)
@@ -187,7 +192,7 @@ class MPlayer:
         if event == rc.EXIT or event == rc.STOP:
             self.thread.item = None
             self.stop ()
-            rc.app = None
+            rc.app(None)
             return self.item.eventhandler(event)
 
         elif event == rc.PAUSE:
@@ -207,7 +212,7 @@ class MPlayer:
 
         elif event == rc.PLAY_END:
             self.stop()
-            rc.app = None
+            rc.app(None)
             # PLAY_END may also be important for the item
             return self.item.eventhandler(event)
         else:

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.18  2003/04/06 21:12:57  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -55,7 +61,7 @@ import time
 
 import config # Configuration file. 
 import osd    # The OSD class, used to communicate with the OSD daemon
-import rc as rc_class # The RemoteControl class.
+import rc
 import exif
 
 DEBUG = config.DEBUG
@@ -65,8 +71,6 @@ FALSE = 0
 
 
 osd        = osd.get_singleton()  # Create the OSD object
-rc         = rc_class.get_singleton()   # Create the remote control object
-
 rc_app_bkp = None
 
 
@@ -110,12 +114,9 @@ class ImageViewer:
             elif i_orientation == 'left_bottom':
                 self.rotation=-270.0
 
-        
-
-        rc = rc_class.get_singleton() # to get the rc.app, so we can go back (on rc.EXIT)
-        if rc.app != self.eventhandler:
-            rc_app_bkp = rc.app
-        rc.app = self.eventhandler
+        if rc.app() != self.eventhandler:
+            rc_app_bkp = rc.app()
+        rc.app(self)
 
         if filename and len(filename) > 0:
             image = osd.loadbitmap(filename)
@@ -239,8 +240,8 @@ class ImageViewer:
         
 
     def signalhandler(self, signum, frame):
-        if rc.app == self.eventhandler and self.slideshow:
-            rc.app = None
+        if rc.app() == self.eventhandler and self.slideshow:
+            rc.app(None)
             self.eventhandler(rc.PLAY_END)
 
 
@@ -255,7 +256,7 @@ class ImageViewer:
                 signal.alarm(1)
 
         elif event == rc.STOP or event == rc.EXIT:
-            rc.app = rc_app_bkp
+            rc.app(rc_app_bkp)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
 

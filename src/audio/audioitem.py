@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/04/20 12:43:32  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.18  2003/04/10 16:36:17  dischi
 # small fix
 #
@@ -71,7 +77,6 @@ TRUE  = 1
 FALSE = 0
 
 skin = skin.get_singleton()
-rc   = rc.get_singleton()
 
 class AudioItem(Item):
     """

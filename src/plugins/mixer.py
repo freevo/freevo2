@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.1  2003/04/20 10:55:40  dischi
 # mixer is now a plugin, too
 #
@@ -53,9 +59,6 @@ import os
 
 import plugin
 import rc
-
-# Create the remote control object
-rc = rc.get_singleton()
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG

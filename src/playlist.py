@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/04/20 12:43:32  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.13  2003/04/06 21:12:55  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -71,7 +77,6 @@ from video.videoitem import VideoItem
 from image.imageitem import ImageItem
 
 import rc
-rc = rc.get_singleton()
 
 TRUE  = 1
 FALSE = 0

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.1  2003/04/20 10:53:23  dischi
 # moved identifymedia and mediamenu to plugins
 #
@@ -48,8 +54,6 @@ from directory import DirItem
 
 TRUE  = 1
 FALSE = 0
-
-rc = rc.get_singleton()
 
 import plugin
 
@@ -164,7 +168,7 @@ class MediaMenu(Item):
             if not menu.selected in menu.choices:
                 menu.selected = menu.choices[sel]
 
-            if menu == menuw.menustack[-1] and not rc.app:
+            if menu == menuw.menustack[-1] and not rc.app():
                 menuw.init_page()
                 menuw.refresh()
             return TRUE

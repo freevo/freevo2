@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.6  2003/04/10 16:37:41  dischi
 # Fix menu redraw after playing ended (untested, please test)
 #
@@ -73,9 +79,6 @@ import menu
 import rc
 import time
 import copy
-
-rc = rc.get_singleton()
-
 
 from item import Item
 
@@ -158,7 +161,7 @@ class MameItem(Item):
         if not mythread == None:
             if event == rc.STOP or event == rc.SELECT:
                 self.stop()
-                rc.app = None
+                rc.app(None)
                 if not menuw == None:
                     menuw.refresh(reload=1)
             elif event == rc.MENU:

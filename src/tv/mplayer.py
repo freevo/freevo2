@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/20 12:43:33  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.10  2003/04/20 10:55:41  dischi
 # mixer is now a plugin, too
 #
@@ -78,10 +84,6 @@ import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
 import childapp # Handle child applications
 import epg_xmltv as epg # The Electronic Program Guide
-
-
-# Create the remote control object
-rc = rc.get_singleton()
 
 
 # Set to 1 for debug output
@@ -277,8 +279,8 @@ class MPlayer:
         self.thread.command = command
         self.thread.mode_flag.set()
         
-        self.parent_eventhandler = rc.app
-        rc.app = self.EventHandler
+        self.prev_app = rc.app()
+        rc.app(self)
 
         if osd.focused_app:
             osd.focused_app.hide()
@@ -309,7 +311,7 @@ class MPlayer:
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
 
-        rc.app = self.parent_eventhandler
+        rc.app(self.prev_app)
         if osd.focused_app:
             osd.focused_app.show()
 
@@ -319,13 +321,14 @@ class MPlayer:
         os.system('rm -f /tmp/freevo.wid')
 
 
-    def EventHandler(self, event):
+    def eventhandler(self, event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
         if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
             event == rc.SELECT or event == rc.PLAY_END):
             self.Stop()
             rc.post_event(rc.PLAY_END)
-
+            return TRUE
+        
         elif event == rc.CHUP or event == rc.CHDOWN:
             if self.mode == 'vcr':
                 return
@@ -346,9 +349,10 @@ class MPlayer:
             #msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
             #cmd = 'show_osd_msg "%s" 4000\n' % msg
             #self.thread.app.write(cmd)
+            return TRUE
             
         elif event == rc.DISPLAY:
-            return
+            return FALSE
         
             # Display the channel info message
             # XXX Experimental, disabled for now
@@ -359,28 +363,8 @@ class MPlayer:
             print 'msg = "%s" %s chars' % (msg, len(msg))
             self.thread.app.write(cmd)
             
-        elif event == rc.VOLUP:
-            mixer.incIgainVolume()
-
-        elif event == rc.VOLDOWN:
-            mixer.decIgainVolume()
-
-        elif event == rc.MUTE:
-            if self.__muted:
-                self.__muted = 0
-            else:
-                self.__muted = 1
-            self.MuteOnOff(mute=self.__muted)
-            
-
-    def MuteOnOff(self, mute=0):
-        if mute:
-            self.__igainvol = mixer.getIgainVolume()
-            mixer.setIgainVolume(0)
-        else:
-            mixer.setIgainVolume(self.__igainvol)
-        
-            
+        return FALSE
+    
 
 # ======================================================================
 class MPlayerApp(childapp.ChildApp):

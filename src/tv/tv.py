@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/20 12:43:34  dischi
+# make the rc events global in rc.py to avoid get_singleton. There is now
+# a function app() to get/set the app. Also the events should be passed to
+# the daemon plugins when there is no handler for them before. Please test
+# it, especialy the mixer functions.
+#
 # Revision 1.8  2003/04/20 10:55:41  dischi
 # mixer is now a plugin, too
 #
@@ -97,9 +103,6 @@ DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
-
-# Create the remote control object
-rc = rc.get_singleton()
 
 # Set up the TV application
 # Select MPlayer by default, tvtime is work in progress
