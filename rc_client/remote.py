@@ -64,7 +64,8 @@ cmds_kbd = {
     'f'           : 'FFWD',
     'u'           : 'PAUSE',
     's'           : 'STOP',
-    'e'           : 'REC'
+    'e'           : 'REC',
+    'Y'           : 'EJECT'
     }
 
 
