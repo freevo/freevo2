@@ -99,6 +99,7 @@
 
 import plugin
 from event import *
+from util import getXMLTVChannels
 
 ########################################################################
 # If you want to change some things for your personal setup, please
