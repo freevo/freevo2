@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/03/11 03:21:19  gsbarbieri
+# Fix a bug when comming back from image viewer. Now all the screen is restored (force_redraw=TRUE)
+#
 # Revision 1.15  2003/02/17 06:38:26  krister
 # Cleaned up, need a better background for the image not loadable warning.
 #
@@ -303,6 +306,7 @@ class ImageViewer:
         elif event == rc.STOP or event == rc.EXIT:
             rc.app = rc_app_bkp
             signal.alarm(0)
+            skin.force_redraw = TRUE
             rc.post_event(rc.REFRESH_SCREEN)
 
         # up and down will stop the slideshow and pass the
