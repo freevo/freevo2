@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/06 18:33:06  dischi
+# fix mimetype handling
+#
 # Revision 1.12  2004/01/25 20:16:04  dischi
 # add type back to the plugin item
 #
@@ -68,7 +71,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL, arg=self.detach)
         self.show_item = menu.MenuItem(_('Show player'), action=self.show)
-        self.type = 'detached_player'
+        self.show_item.type = 'detached_player'
 
     def detach(self):
         # start detachbar
