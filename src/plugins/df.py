@@ -5,11 +5,16 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
+# Notes: but plugin.activate('df') in your local_conf.py. You can see the
+#        disc usage by pressing ENTER on a directory item
+#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/05 17:00:01  dischi
+# added doc
+#
 # Revision 1.2  2003/05/28 17:58:48  dischi
 # moved freespace and totalspace from df.py to util.py
 #
