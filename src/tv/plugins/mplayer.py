@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/02 20:29:53  dischi
+# only use mixer if we have one
+#
 # Revision 1.17  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -244,9 +247,10 @@ class MPlayer:
         
     def Stop(self):
         mixer = plugin.getbyname('MIXER')
-        mixer.setLineinVolume(0)
-        mixer.setMicVolume(0)
-        mixer.setIgainVolume(0) # Input on emu10k cards.
+        if mixer:
+            mixer.setLineinVolume(0)
+            mixer.setMicVolume(0)
+            mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
