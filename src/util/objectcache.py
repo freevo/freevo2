@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/01/30 20:40:28  dischi
+# make key an unicode object to prevent crash
+#
 # Revision 1.3  2004/01/19 20:24:51  dischi
 # remove unneeded try except blocks
 #
@@ -56,6 +59,8 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import config
+
 class ObjectCache:
     '''Provides a cache for objects indexed by a string. It should
     be slow for a large number of objects, since searching takes
@@ -72,6 +77,9 @@ class ObjectCache:
 
 
     def __getitem__(self, key):
+        if isinstance(key, str):
+            key = unicode(key, config.LOCALE)
+
         if not key in self.cache:
             return None
         
@@ -81,6 +89,9 @@ class ObjectCache:
 
 
     def __setitem__(self, key, object):
+        if isinstance(key, str):
+            key = unicode(key, config.LOCALE)
+
         # Do we need to delete the oldest item?
         if len(self.cache) > self.cachesize:
             # Yes
@@ -92,6 +103,9 @@ class ObjectCache:
         
 
     def __delitem__(self, key):
+        if isinstance(key, str):
+            key = unicode(key, config.LOCALE)
+
         if not key in self.cache:
             return
 
