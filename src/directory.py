@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/24 19:14:49  dischi
+# pass xml_file to directory and videoitems
+#
 # Revision 1.6  2003/04/21 18:17:46  dischi
 # Moved the code from interface.py for video/audio/image/games to __init__.py
 #
@@ -190,7 +193,9 @@ class DirItem(Playlist):
                 self.info = tvinfo[1]
                 if not self.image:
                     self.image = tvinfo[0]
-            
+                if not self.xml_file:
+                    self.xml_file = tvinfo[3]
+
         if os.path.isfile(dir+'/folder.fxd'): 
             self.xml_file = dir+'/folder.fxd'
 

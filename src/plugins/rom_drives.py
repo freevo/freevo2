@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/24 19:14:50  dischi
+# pass xml_file to directory and videoitems
+#
 # Revision 1.3  2003/04/20 17:36:49  dischi
 # Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
 # images like before, but also fxd files for the tv show with global
@@ -406,7 +409,7 @@ class Identify_Thread(threading.Thread):
                       ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd'),
 		      ('DVD','/VIDEO_TS/','dvd')]
 
-        image = title = movie_info = more_info = None
+        image = title = movie_info = more_info = xml_file = None
 
         # Read the volume label directly from the ISO9660 file system
         
@@ -528,6 +531,8 @@ class Identify_Thread(threading.Thread):
                         more_info = tvinfo[1]
                         if not image:
                             image = tvinfo[0]
+                        if not xml_file:
+                            xml_file = tvinfo[3]
                     
                 elif not show_name:
                     if os.path.isfile(config.COVER_DIR+\
@@ -573,6 +578,8 @@ class Identify_Thread(threading.Thread):
             media.info.image = image
         if more_info:
             media.info.info = more_info
+        if xml_file:
+            media.info.xml_file = xml_file
 
         if len(mplayer_files) == 1:
             media.videoinfo = VideoItem(mplayer_files[0], None)
@@ -586,6 +593,8 @@ class Identify_Thread(threading.Thread):
                 media.videoinfo.image = image
             if more_info:
                 media.videoinfo.info = more_info
+            if xml_file:
+                media.videoinfo.xml_file = xml_file
             
         media.info.media = media
         return

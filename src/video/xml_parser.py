@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/04/24 19:14:51  dischi
+# pass xml_file to directory and videoitems
+#
 # Revision 1.15  2003/04/24 18:07:45  dischi
 # use format_text for plot and tagline
 #
@@ -605,6 +608,7 @@ def hash_xml_database():
         infolist = parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
             k = os.path.splitext(os.path.basename(file))[0]
-            config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options)
+            config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options,
+                                              file)
             
     if DEBUG: print 'done'

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/04/24 19:14:50  dischi
+# pass xml_file to directory and videoitems
+#
 # Revision 1.42  2003/04/24 18:07:16  dischi
 # add vcd main movie track detection
 #
@@ -255,7 +258,9 @@ class VideoItem(Item):
         self.deinterlace       = 0
 
         self.xml_file = None
-
+        if parent and hasattr(self.parent, 'xml_file'):
+            self.xml_file = self.parent.xml_file
+            
         
     def copy(self, obj):
         """
