@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/05 09:24:32  dischi
+# fixed cname cache
+#
 # Revision 1.6  2003/07/03 21:30:00  dischi
 # minor speed changes
 #
@@ -69,10 +72,9 @@ def format_image(settings, item, width, height, force=0):
     except:
         type = item.type
 
-    try:
+    cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
+    if item.media:
         cname = '%s-%s' % (cname, item.media)
-    except:
-        cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
         
     cimage = format_imagecache[cname]
 
