@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/14 19:31:31  dischi
+# also cache playlist dir
+#
 # Revision 1.24  2004/02/13 17:34:18  dischi
 # small fix
 #
@@ -477,6 +480,8 @@ if __name__ == "__main__":
                 print 'ERROR: %s_ITEMS contains root directory, skipped.' % type
                 setattr(config, '%s_ITEMS' % type, [])
 
+    if os.path.isdir('%s/playlists' % config.FREEVO_CACHEDIR):
+        config.AUDIO_ITEMS.append(('Playlists', '%s/playlists' % config.FREEVO_CACHEDIR))
     delete_old_files_1()
     delete_old_files_2()
 
