@@ -289,9 +289,6 @@ class Skin:
         
         for choice in menuw.menu_items:
             if len(menuw.menustack) == 1:
-                if y0 > 450:
-                    y0 = 100   ## XXX Hardcoded
-                    x0 = 384
                 ptscale = 2.0
             else:
                 ptscale = 1.0
@@ -311,20 +308,16 @@ class Skin:
                            font=val.items.font,
                            ptsize=fontsize)
 	    if menu.selected == choice:
-                if len(menuw.menustack) == 1:
-                    osd.drawbox(x0 + w, y0 - 3, x0 + 300, y0 + fontsize*1.5, width=-1,
-                                color=((160 << 24) | val.items.sel_color))
-                else:
-                    osd.drawbox(x0 - 8 + w, y0 - 3, x0 - 8 + val.items.sel_length,\
-                                y0 + fontsize*1.5, width=-1,
-                                color=((160 << 24) | val.items.sel_color))
+                osd.drawbox(x0 - 8 + w, y0 - 3, x0 - 8 + val.items.sel_length,\
+                            y0 + fontsize*1.5, width=-1,
+                            color=((160 << 24) | val.items.sel_color))
 
                 image = choice.image
 
 
             y0 += spacing
 
-        print val.items.sel_length
+
         # draw the image
         if image != None:
             (type, image) = image
