@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/06/27 15:24:39  dischi
+# small fix
+#
 # Revision 1.28  2003/06/20 18:18:23  dischi
 # add comment about the xmame change to force the user to rerun setup
 #
@@ -177,6 +180,7 @@ CONF.jpegtran = ''
 CONF.mplayer = ''
 CONF.snes = ''
 CONF.version = 0
+CONF.tvtime = ''
 
 class MainMenuItem:
     def __init__(self, label, action, arg):
