@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/06/17 23:16:05  rshortt
+# Add events for RECORD_START/STOP. (forgot to check in this file earlier).
+#
 # Revision 1.44  2004/05/12 18:56:36  dischi
 # add keys to move inside a zoom image in image viewer
 #
@@ -578,3 +581,7 @@ VIDEO_END        = Event('VIDEO_END')
 OS_EVENT_POPEN2  = Event('OS_EVENT_POPEN2')
 OS_EVENT_WAITPID = Event('OS_EVENT_WAITPID')
 OS_EVENT_KILL    = Event('OS_EVENT_KILL')
+
+RECORD_START     = Event('RECORD_START')
+RECORD_STOP      = Event('RECORD_STOP')
+
