@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/11/10 01:09:42  rshortt
+# Turn the runapp's DEBUG on.
+#
 # Revision 1.22  2003/11/09 19:35:46  rshortt
 # Runtime fixes.
 #
@@ -137,12 +140,12 @@ all:
 
 runapp_static: src/runapp.c
 	rm -f runapp
-	$(CC) $(CFLAGS) -static -o runapp src/runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" 
+	$(CC) $(CFLAGS) -static -o runapp src/runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" -DDEBUG
 	strip runapp
 
 runapp_dyn: src/runapp.c
 	rm -f runapp
-	$(CC) $(CFLAGS) -o runapp src/runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
+	$(CC) $(CFLAGS) -o runapp src/runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" -DDEBUG
 	strip runapp
 
 
