@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/10 13:19:23  dischi
+# use fxd.filename
+#
 # Revision 1.9  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -177,7 +180,7 @@ class Container(item.Item):
     a simple container containing for items parsed from the fxd
     """
     def __init__(self, fxd, node):
-        fxd_file = fxd.getattr(None, 'filename', '')
+        fxd_file = fxd.filename
         item.Item.__init__(self, fxd.getattr(None, 'parent', None))
 
         self.items    = []
@@ -187,7 +190,7 @@ class Container(item.Item):
         
         self.image    = fxd.childcontent(node, 'cover-img')
         if self.image:
-            self.image = vfs.join(vfs.dirname(self.fxd_file), self.image)
+            self.image = vfs.join(vfs.dirname(fxd_file), self.image)
 
         parent_items  = fxd.getattr(None, 'items', [])
         display_type  = fxd.getattr(None, 'display_type', None)
