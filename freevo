@@ -37,7 +37,7 @@ export FREEVO_STARTDIR=$PWD
 export PYTHONPATH=$FREEVO_HOME:$FREEVO_HOME/$src:$FREEVO_HOME/$src/www:$FREEVO_HOME/$src/tv
 
 # Is runapp present? If not it needs to be compiled
-if ! [ -e "$FREEVO_HOME/runapp" ]; then
+if [ ! -e "$FREEVO_HOME/runapp" ]; then
     echo
     echo "*************************************************************"
     echo "* Please note that there is a standalone binary release     *"
@@ -52,7 +52,7 @@ if ! [ -e "$FREEVO_HOME/runapp" ]; then
 fi
 
 # call new x session if needed
-if [ "$call" == "freevo" ] && [ "$1" == "-fs" ]; then
+if [ "$call" = "freevo" -a "$1" = "-fs" ]; then
     servernum=0
 
     while true; do
@@ -64,7 +64,7 @@ if [ "$call" == "freevo" ] && [ "$1" == "-fs" ]; then
 fi
 
 # call helper if the script is called as wrapper
-if [ "$call" == "freevo" ]; then
+if [ "$call" = "freevo" ]; then
     script="$FREEVO_HOME/$helpers/$1.py"
     if [ -e "$script" ]; then
 	shift
@@ -86,7 +86,7 @@ else
 fi
 
 # cd to the freevo directory if necessary
-if ! [ -e src/identifymedia.py ]; then
+if [ ! -e src/identifymedia.py ]; then
     cd $FREEVO_HOME
     unset FREEVO_HOME
 fi
@@ -108,7 +108,7 @@ fi
 
 
 # Help
-if [ "$1" = "--help" ] || [ "$1" = "-" ] ; then
+if [ "$1" = "--help" -o "$1" = "-" ] ; then
     echo "freevo [ script | options]"
     echo "options:"
     echo "  -fs            start freevo in a new x session in fullscreen"
@@ -146,10 +146,10 @@ fi
 
 # Is freevo.conf present? If not, ./configure is needed
 # Check the possible locations in prio order
-if ! [ -e $FREEVO_STARTDIR/freevo.conf ]; then
-    if ! [ -e $HOME/.freevo/freevo.conf ]; then
-        if ! [ -e /etc/freevo/freevo.conf ]; then
-            if ! [ -e ./freevo.conf ]; then
+if [ ! -e $FREEVO_STARTDIR/freevo.conf ]; then
+    if [ ! -e $HOME/.freevo/freevo.conf ]; then
+        if [ ! -e /etc/freevo/freevo.conf ]; then
+            if [ ! -e ./freevo.conf ]; then
                 echo "Please run 'freevo setup' first (freevo.conf not found)"
                 exit 1
             fi
@@ -197,7 +197,7 @@ if [ "$1" = "execute" ] ; then
     if [ -f $PID_FILE ] ; then
         PID=`cat $PID_FILE`
         RUNNING=`ps -ef | grep " $PID " | grep $APP`
-        if ! [ "$RUNNING" = "" ] ; then
+        if [ ! "$RUNNING" = "" ] ; then
           echo "Freevo's $APP is already running as process $PID."
           exit 0
         fi
@@ -231,7 +231,7 @@ PID_FILE=$PID_DIR/freevo-main.pid
 if [ -f $PID_FILE ] ; then
     PID=`cat $PID_FILE`
     RUNNING=`ps -ef | grep " $PID " | grep main`
-    if ! [ "$RUNNING" = "" ] ; then
+    if [ ! "$RUNNING" = "" ] ; then
       echo "Freevo is already running as process $PID."
       exit 0
     fi
