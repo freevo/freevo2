@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/11/29 11:27:41  dischi
+# move objectcache to util
+#
 # Revision 1.20  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -83,7 +86,6 @@ import osd
 import pygame
 
 import stat
-import objectcache
 
 # XML parser for skin informations
 sys.path.append('skins/main1')
@@ -395,7 +397,7 @@ class Skin:
         self.force_redraw = TRUE
         self.last_draw = None, None
         self.screen = Screen()
-        self.xml_cache = objectcache.ObjectCache(3, desc='xmlskin')
+        self.xml_cache = util.objectcache.ObjectCache(3, desc='xmlskin')
 
         self.normal_areas = []
         self.tv_areas = []

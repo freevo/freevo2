@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/11/29 11:27:41  dischi
+# move objectcache to util
+#
 # Revision 1.5  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/29 11:27:41  dischi
+# move objectcache to util
+#
 # Revision 1.8  2003/10/22 18:45:12  dischi
 # scan for the images without fxd info
 #
@@ -64,12 +67,12 @@ import ImageFile
 
 import osd
 import os
-import objectcache
+import util
 
 osd = osd.get_singleton()
 
-format_imagecache = objectcache.ObjectCache(30, desc='format_image')
-load_imagecache   = objectcache.ObjectCache(20, desc='load_image')
+format_imagecache = util.objectcache.ObjectCache(30, desc='format_image')
+load_imagecache   = util.objectcache.ObjectCache(20, desc='load_image')
 
 
 def format_image(settings, item, width, height, force=0):

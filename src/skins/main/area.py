@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/11/29 11:27:41  dischi
+# move objectcache to util
+#
 # Revision 1.14  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -94,7 +97,7 @@ import pygame
 
 import osd
 import config
-import objectcache
+import util
 
 import xml_skin
 
@@ -284,8 +287,8 @@ class Skin_Area:
         self.screen    = screen
         self.objects   = SkinObjects()
         
-        self.imagecache = objectcache.ObjectCache(imagecachesize,
-                                                  desc='%s_image' % self.name)
+        self.imagecache = util.objectcache.ObjectCache(imagecachesize,
+                                                       desc='%s_image' % self.name)
 
 
     def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):

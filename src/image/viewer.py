@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/11/29 11:27:40  dischi
+# move objectcache to util
+#
 # Revision 1.34  2003/11/28 20:08:57  dischi
 # renamed some config variables
 #
@@ -55,7 +58,7 @@ import plugin
 import config # Configuration file. 
 import osd    # The OSD class, used to communicate with the OSD daemon
 import event as em
-import objectcache
+import util
 import rc
 
 from gui.GUIObject import GUIObject
@@ -92,7 +95,7 @@ class ImageViewer(GUIObject):
         self.slideshow   = TRUE  # currently in slideshow mode
         self.alertbox    = None  # AlertBox active
         self.app_mode    = 'image'
-        self.bitmapcache = objectcache.ObjectCache(3, desc='viewer')
+        self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
         self.last_image  = (None, None)
         
     def view(self, item, zoom=0, rotation=0):

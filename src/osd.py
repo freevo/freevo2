@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2003/11/29 11:27:40  dischi
+# move objectcache to util
+#
 # Revision 1.106  2003/11/23 19:48:59  krister
 # Added optional new blend settings (nr of steps and total time), must be enabled explicitly in freevo_config
 #
@@ -52,7 +55,6 @@ import Image
 import re
 import traceback
 from types import *
-import objectcache
 import util
 import md5
 from fcntl import ioctl
@@ -260,7 +262,7 @@ class OSD:
         self.fullscreen = 0 # Keep track of fullscreen state
         self.app_list = []
 
-        self.bitmapcache = objectcache.ObjectCache(10, desc='bitmap')
+        self.bitmapcache = util.objectcache.ObjectCache(10, desc='bitmap')
         self.font_info_cache = {}
         
         self.default_fg_color = self.COL_BLACK
