@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/07/09 11:19:21  dischi
+# fix unicode crash
+#
 # Revision 1.51  2004/07/09 02:28:53  outlyer
 # If the automatic caching fails (as was happening for me) then just leave
 # the png file in place for Freevo's OSD to pickle on access (rather than
@@ -227,7 +230,7 @@ class RecordServer(xmlrpc.XMLRPC):
         progs = sr.getProgramList()
 
         for saved_prog in progs.values():
-            if str(saved_prog) == str(prog):
+            if String(saved_prog) == String(prog):
                 prog = saved_prog
                 break
             
