@@ -44,6 +44,16 @@ osd = osd.get_singleton()
 
 class Skin:
 
+    # OSD fonts
+    OSD_FONTNAME = 'skins/fonts/Cultstup.ttf'
+    OSD_FONTSIZE = 14
+    OSD_FONTNAME_HDR = 'skins/fonts/Cultstup.ttf'
+    OSD_FONTSIZE_HDR = 22
+    OSD_FONTNAME_ITEMS = 'skins/fonts/SF Arborcrest Medium.ttf'
+    OSD_FONTSIZE_ITEMS = 15
+    OSD_FONTNAME_BTNS = 'skins/fonts/RUBTTS__.TTF'
+    OSD_FONTSIZE_BTNS = 18
+
     # OSD background bitmap. Must be PNG.
     # Format: (filename, x, y)  x=y=-1 means integer tiling
 
