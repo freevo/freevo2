@@ -12,9 +12,16 @@ o Changed the osd_server/Makefile to use /usr/X11R6 instead of /usr/X11,
 o Changed mixer.py to use /dev/mixer instead of /dev/mixer0
 o Hide cursor in X11 OSD
 o Added simple skins
-o Display MP3 file and album PNG cover images
+o Display MP3 file and album PNG cover images and thumbnails
 o Automatic X11 mode switching
 o XMLTV support added
+o SDL output support
+o IMDB support (Images and extended info)
+o Channel logo support
+o Added min/sec display to music player
+o Added icons to default skin
+o Added PAL support
+o Fullscreen X support
 
 
 Release 1.2.3 (2002-06-01):
