@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/08/25 12:08:20  outlyer
+# Additional compatibility patches for FreeBSD from Lars Eggert
+#
 # Revision 1.43  2003/08/24 01:35:59  outlyer
 # These two changes reduce the amount of stuff being emailed to people when they
 # use cron.
@@ -309,10 +312,10 @@ OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 if not ROM_DRIVES:
     if os.path.isfile('/etc/fstab'):        
-        re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/a?cd\dc?[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
+        re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/[am]?cd[0-9]+[a-z]?)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_cdrec     = re.compile( '^(/dev/cdrecorder[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_dvd       = re.compile( '^(/dev/dvd[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
-        re_iso       = re.compile( '^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I )
+        re_iso       = re.compile( '^([^ \t]+)[ \t]+([^ \t]+)[ \t]+(iso|cd)9660', re.I )
         re_automount = re.compile( '^none[ \t]+([^ \t]+) supermount dev=([^,]+)', re.I )
         re_bymountcd = re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*cdrom[0-9]*)[ \t]+', re.I )
         re_bymountdvd= re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*dvd[0-9]*)[ \t]+', re.I )
@@ -356,9 +359,13 @@ if not ROM_DRIVES:
                 else:
                     mntdir = devname = dispname = ''
 
-	    # FreeBSD mount point is device name + "c"
             if os.uname()[0] == 'FreeBSD':
-                devname = devname[:-1]
+                # FreeBSD-STABLE mount point is often device name + "c",
+                # strip that off
+                if devname and devname[-1] == 'c':
+                    devname = devname[:-1]
+                # Use native FreeBSD device names
+                dispname = devname[5:]
  
             # Weed out duplicates
             for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/08/25 12:08:20  outlyer
+# Additional compatibility patches for FreeBSD from Lars Eggert
+#
 # Revision 1.24  2003/08/24 05:20:15  gsbarbieri
 # Empty cdroms type is now 'empty_cdrom' instead of None
 #
@@ -64,7 +67,8 @@ import threading
 import thread
 import string
 import copy
-from CDROM import *
+if os.uname()[0] != 'FreeBSD':
+    from CDROM import *
 import traceback
 
 import config
@@ -90,6 +94,17 @@ DEBUG = config.DEBUG   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
+from struct import *
+import array
+if os.uname()[0] == 'FreeBSD':
+    # FreeBSD ioctls - there is no CDROM.py
+    CDIOCEJECT = 0x20006318
+    CDIOCCLOSE = 0x2000631c
+    CDIOREADTOCENTRYS = 0xc0086305
+    CD_LBA_FORMAT = 1
+    CD_MSF_FORMAT = 2
+    CDS_NO_DISC = 1
+    CDS_DISC_OK = 4
 
 # Identify_Thread
 im_thread = None
@@ -270,7 +285,10 @@ class RemovableMedia:
 
             try:
                 fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
-                s = ioctl(fd, CDROMEJECT)
+                if os.uname()[0] == 'FreeBSD':
+                    s = ioctl(fd, CDIOCEJECT, 0)
+                else:
+                    s = ioctl(fd, CDROMEJECT)
                 os.close(fd)
             except:
                 traceback.print_exc()
@@ -298,7 +316,10 @@ class RemovableMedia:
             # including refresh screen
             try:
                 fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
-                s = ioctl(fd, CDROMCLOSETRAY)
+                if os.uname()[0] == 'FreeBSD':            
+                    s = ioctl(fd, CDIOCCLOSE, 0)
+                else:
+                    s = ioctl(fd, CDROMCLOSETRAY)
                 os.close(fd)
             except:
                 traceback.print_exc()
@@ -351,7 +372,17 @@ class Identify_Thread(threading.Thread):
         try:
             CDSL_CURRENT = ( (int ) ( ~ 0 >> 1 ) )
             fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
-            s = ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
+            if os.uname()[0] == 'FreeBSD':
+                try:
+                    data = array.array('c', '\000'*4096)
+                    (address, length) = data.buffer_info()
+                    buf = pack('BBHP', CD_MSF_FORMAT, 0, length, address)
+                    s = ioctl(fd, CDIOREADTOCENTRYS, buf)
+                    s = CDS_DISC_OK
+                except:
+                    s = CDS_NO_DISC
+            else:
+                s = ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
         except:
             # maybe we need to close the fd if ioctl fails, maybe
             # open fails and there is no fd
