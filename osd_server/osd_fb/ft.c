@@ -145,7 +145,7 @@ ft_puts (char *pFontFilename, int ptsize, int x, int y,
   
 #ifdef TEST
 
-#define DEF_FONT "/home/krister/ftp/fonts/AOASWFTE.TTF"
+#define DEF_FONT "./AOASWFTE.TTF"
 
 int
 main (int ac, char *av[])
