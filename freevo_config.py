@@ -60,7 +60,7 @@
 # is different, there will be only a warning
 
 FREEVO_CONF_VERSION = 1.0
-LOCAL_CONF_VERSION  = 2.1
+LOCAL_CONF_VERSION  = 3.0
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [] # None so far
@@ -78,7 +78,12 @@ LOCAL_CONF_CHANGES = [
      standard Lirc program config files, see freevo_config.py for
      more info.'''),
     (2.1,
-     '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.''')]
+     '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.'''),
+    (3.0,
+     '''New skin engine. The new engine has no automatic TV overscan support, you
+     need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables for this
+     engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu will be activated
+     automaticly if setup.py found mame or snes''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -134,8 +139,7 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
-# Items in the main menu. This variable has only affect for the new
-# skin (dischi1). To activate games, just add
+# Items in the main menu.
 # MainMenuItem('games', 'MediaMenu().main_menu', 'games')
 
 MAIN_MENU_ITEMS = [
@@ -146,23 +150,19 @@ MAIN_MENU_ITEMS = [
     MainMenuItem('shutdown', 'ShutdownItem', '')
     ]
 
+if CONF.xmame_SDL or CONF.snes:
+    MAIN_MENU_ITEMS = MAIN_MENU_ITEMS[:-2] + \
+                      [ MainMenuItem('games', 'MediaMenu().main_menu', 'games') ] + \
+                      MAIN_MENU_ITEMS[-1:]
+
 # ======================================================================
 # Freevo directory settings:
 # ======================================================================
 
-# You can change all this variables in the skin.xml on a per folder
+# You can change all this variables in the folder.fxd on a per folder
 # basis
 #
 # Example:
-# <freevo>
-#   <variables>
-#     <directory_autoplay_single_item>0</directory_autoplay_single_item>
-#   </variables>
-# </freevo>
-#
-# and for the new skin (dischi1) in a file called folder.fxd with the following
-# syntax:
-#
 # <freevo>
 #   <folder>
 #     <setvar name="directory_autoplay_single_item" val="0"/>
@@ -192,7 +192,7 @@ DIRECTORY_SORT_BY_DATE = 2
 DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1
 
 #
-# Force the new skin to a specific layout number. -1 == no force. The layout
+# Force the skin to a specific layout number. -1 == no force. The layout
 # toggle with DISPLAY will be disabled
 #
 FORCE_SKIN_LAYOUT = -1
