@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/13 20:27:30  dischi
+# fix attr geometry and add formated date
+#
 # Revision 1.22  2004/01/24 18:56:45  dischi
 # rotation is now stored in mediainfo
 #
@@ -61,9 +64,11 @@
 
 import util
 import os
-
-import viewer
+import time
 import mmpython
+
+import config
+import viewer
 
 from item import Item
 from event import *
@@ -89,12 +94,17 @@ class ImageItem(Item):
         """
         return the specific attribute as string or an empty string
         """
-        if key in [ "geometry" ]:
+        if key == "geometry":
+            if self['width'] and self['height']:
+                return '%sx%s' % (self['width'], self['height'])
+            return ''
+        
+        if key == "date":
             try:
-                image = self.info
-                if attr == 'geometry':
-                    print "geometry=%sx%s" % (image.width, image.height)
-                    return '%sx%s' % (image.width, image.height)
+                t = str(Item.__getitem__(self, key))
+                if t:
+                    return time.strftime(config.TV_DATETIMEFORMAT,
+                                         time.strptime(t, '%Y:%m:%d %H:%M:%S'))
             except:
                 pass
             
