@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/06/06 10:32:02  dischi
+# protect freevo files
+#
 # Revision 1.7  2003/12/01 20:07:27  dischi
 # fix missing vfs for plugin installation
 #
@@ -131,9 +134,21 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
             if os.path.isfile(file) and (new_file.find('share') == 0 or
                                          new_file.find('src') == 0 or
                                          new_file.find('i18n') == 0):
-                print 'installing %s' % new_file
-                mkalldir(os.path.dirname(new_file))
-                os.rename(file, new_file)
+                for protected in ('tv', 'audio', 'video', 'plugins',
+                                  'plugins/idlebar', 'skins'):
+                    if new_file == 'src/%s/__init__.py' % protected:
+                        print 'skipping %s' % new_file
+                        break
+                    if new_file == 'src/%s/plugins/__init__.py' % protected:
+                        print 'skipping %s' % new_file
+                        break
+                else:
+                    if os.path.isfile(new_file):
+                        print 'updating %s' % new_file
+                    else:
+                        print 'installing %s' % new_file
+                    mkalldir(os.path.dirname(new_file))
+                    os.rename(file, new_file)
     else:
         # check package
         d = util.fileops.getdirnames('tmp')
