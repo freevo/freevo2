@@ -82,7 +82,9 @@ fi
 # Usage: freevo execute appname.py arg1 arg2...
 if [ "$1" = "execute" ] ; then
     shift 1
-    PID_FILE=$PID_DIR/freevo-`basename $1`.pid
+    APP=`basename $1`
+    PID_FILE=$PID_DIR/freevo-$APP.pid
+    trap './freevo stop $APP' 1 2 15
     ./runapp python $@ &
     echo PID is $!
     echo $! > $PID_FILE
@@ -105,6 +107,7 @@ fi
 
 # Start the main freevo application
 PID_FILE=$PID_DIR/freevo-main.pid
+trap './freevo stop' 1 2 15
 ./runapp python src/main.py $@ &
 echo $! > $PID_FILE
 wait `cat $PID_FILE`
