@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/14 19:30:36  rshortt
+# Library update from Mike Ruelle.  Now you can view other media types and
+# download as well.
+#
 # Revision 1.8  2003/05/29 23:13:26  rshortt
 # The guide looked wierd squished to the right, but now I'm not sure if I like
 # it taking up the entire width either.
@@ -212,7 +216,7 @@ class HTMLResource:
         <td class="tablelink" onClick="document.location=\'guide.rpy\'">&nbsp;&nbsp;TV Guide&nbsp;&nbsp;</td>
         <td class="tablelink" onClick="document.location=\'record.rpy\'">&nbsp;&nbsp;Scheduled Recordings&nbsp;&nbsp;</td>
         <td class="tablelink" onClick="document.location=\'favorites.rpy\'">&nbsp;&nbsp;Favorites&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'library.rpy\'">&nbsp;&nbsp;Video Library&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'library.rpy\'">&nbsp;&nbsp;Media Library&nbsp;&nbsp;</td>
         <td class="tablelink" onClick="document.location=\'manualrecord.rpy\'">&nbsp;&nbsp;Manually Record&nbsp;&nbsp;</td>
 	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
       </tr>

@@ -7,12 +7,14 @@
 # $Id$
 #
 # Notes:
-# Todo:        
-#   figure a way to know whether DIR_RECORD has a trailing slash and only
-#     add if required when replacing.
-#   human readable size rather than bytes from os
+# Todo: -allow for an imdb popup
+#       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/14 19:30:37  rshortt
+# Library update from Mike Ruelle.  Now you can view other media types and
+# download as well.
+#
 # Revision 1.8  2003/07/07 03:20:22  rshortt
 # Make the favorites match use the newer file naming scheme (s/ /_/g).
 #
@@ -91,12 +93,64 @@ import tv_util
 import record_client as ri
 
 from web_types import HTMLResource, FreevoResource
+from twisted.web import static
 
 TRUE = 1
 FALSE = 0
 
 
 class LibraryResource(FreevoResource):
+    isLeaf=1
+    def get_suffixes (self, media):
+        suffixes = []
+        if media == 'music':
+            suffixes = config.SUFFIX_AUDIO_FILES
+            suffixes += config.SUFFIX_AUDIO_PLAYLISTS
+        if media == 'images':
+            suffixes = config.SUFFIX_IMAGE_FILES
+        if media == 'movies':
+            suffixes = config.SUFFIX_VIDEO_FILES
+        if media == 'rectv':
+            suffixes = config.SUFFIX_VIDEO_FILES
+        return suffixes
+
+    def get_dirlist(self, media):
+        dirs = []
+        dirs2 = []
+
+        if media == 'movies':
+            dirs = config.DIR_MOVIES
+        elif media == 'music':
+            dirs = config.DIR_AUDIO
+        elif media == 'rectv':
+            dirs = [ ('Recorded TV', config.DIR_RECORD) ]
+        elif media == 'images':
+            dirs2 = config.DIR_IMAGES
+            #strip out ssr files
+            for d in dirs2:
+                (title, tdir) = d
+                if os.path.isdir(tdir):
+                    dirs.append(d)            
+        elif media == 'download':
+            dirs = config.DIR_MOVIES
+            dirs += config.DIR_AUDIO
+            dirs += [ ('Recorded TV', config.DIR_RECORD) ]
+            dirs2 = config.DIR_IMAGES
+            #strip out ssr files
+            for d in dirs2:
+                (title, tdir) = d
+                if os.path.isdir(tdir):
+                    dirs.append(d)            
+        return dirs
+
+    def check_dir(self, media, dir):
+        dirs2 = []
+        dirs2 = self.get_dirlist(media)
+        for d in dirs2:
+            (title, tdir) = d
+            if re.match(tdir, dir):
+                return TRUE
+        return FALSE
 
     def _render(self, request):
         fv = HTMLResource()
@@ -105,6 +159,18 @@ class LibraryResource(FreevoResource):
         action = fv.formValue(form, 'action')
         action_file = fv.formValue(form, 'file')
         action_newfile = fv.formValue(form, 'newfile')
+        action_dir = fv.formValue(form, 'dir')
+        action_mediatype = fv.formValue(form, 'media')
+        action_script = os.path.basename(request.path)
+        #use request.postpath array to set action to download
+        if not action and len(request.postpath) > 0:
+            action = "download"
+            action_file = request.postpath[-1]
+            action_dir = os.sep + string.join(request.postpath[0:-1], os.sep)
+            action_mediatype = "download"
+        elif not action:
+            action = "view"
+
 
         #check to make sure no bad chars in action_file
         fs_result = 0
@@ -115,11 +181,11 @@ class LibraryResource(FreevoResource):
 
         #do actions here
         if bs_result == -1 and fs_result == -1:
-            file_loc = os.path.join(config.DIR_RECORD, action_file)
+            file_loc = os.path.join(action_dir, action_file)
             if os.path.isfile(file_loc):
                 if action == 'rename':
                     if action_newfile:
-                        newfile_loc = os.path.join(config.DIR_RECORD, action_newfile)
+                        newfile_loc = os.path.join(action_dir, action_newfile)
                         if os.path.isfile(newfile_loc):
                             print '%s already exists file not renamed.' % newfile_loc
                         else:
@@ -130,93 +196,191 @@ class LibraryResource(FreevoResource):
                 elif action == 'delete':
                     print 'delete %s' % file_loc
                     if os.path.exists(file_loc): os.unlink(file_loc)
+                elif action == 'download':
+                    sys.stderr.write('download %s' % file_loc)
+                    sys.stderr.flush()
+                    static.File(file_loc).render(request)
+                    request.finish()
             else:
                 fv.res += '%s does not exist. no action taken.' % file_loc
         else:
             print 'I do not process names(%s) with slashes for security reasons.' % action_file
 
-        fv.printHeader('Video Library', 'styles/main.css')
+        directories = []
+        if action_mediatype:
+            directories = self.get_dirlist(action_mediatype)
 
-        fv.res += '<script language="JavaScript"><!--\n'
-        fv.res += 'function renameFile(file) {\n'
-        fv.res += '   newfile=window.prompt("New name please.");\n'
-        fv.res += '   if(newfile == "" || newfile == null) return;\n'
-        fv.res += '   document.location="library.rpy?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile);\n'
-        fv.res += '}\n'
-        fv.res += '//--></script>\n'
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Name', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Size', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
-        fv.tableRowClose()
+        if action and action != "download":
+            fv.printHeader('Media Library', 'styles/main.css')
+            fv.res += '<script language="JavaScript"><!--' + "\n"
+            fv.res += 'function renameFile(basedir, file, mediatype) {' + "\n"
+            fv.res += '   newfile=window.prompt("New name please.");' + "\n"
+            fv.res += '   if(newfile == "" || newfile == null) return;' + "\n"
+            fv.res += '   document.location="' + action_script +'?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
+            fv.res += '}' + "\n"
+            fv.res += '//--></script>' + "\n"
+            if action_mediatype:
+                fv.res += "\n<!-- " + action_mediatype + " -->\n"
 
-        # find out if anything is recording
-        recordingprogram = ''
-
-        (got_schedule, recordings) = ri.getScheduledRecordings()
-        if got_schedule:
-            progs = recordings.getProgramList()
-            f = lambda a, b: cmp(a.start, b.start)
-            progl = progs.values()
-            progl.sort(f)
-            for prog in progl:
-                try:
-                    if prog.isRecording == TRUE:
-                        recordingprogram = tv_util.getProgFilename(prog)
-                        break
-                except:
-                    # sorry, have to pass without doing anything.
-                    pass
-        else:
-            fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
-            
-
-        #generate our favorites regular expression
-        favre = ''
-        (result, favorites) = ri.getFavorites()
-        if result:
-            favs = favorites.values()
-        else:
-            favs = []
-
-        if favs:
-            favtitles = [ fav.title for fav in favs ]
-            favre = string.join(favtitles, '|') # no I am not a packers fan
-            favre = string.replace(favre, ' ', '_')
-
-        # loop over directory here
-        items = util.match_files(config.DIR_RECORD, config.SUFFIX_VIDEO_FILES)
-        for file in items:
-            status = 'basic'
-            suppressaction = FALSE
-            #find size
-            len_file = os.stat(file)[6]
-            #chop dir from in front of file
-            file = string.replace(file, config.DIR_RECORD + '/', '')
-            if recordingprogram and re.match(recordingprogram, file):
-                status = 'recording'
-                suppressaction = TRUE
-            elif favs and re.match(favre, file):
-                status = 'favorite'
+        if not action_mediatype:
+            fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="85%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(file, 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
-            if suppressaction == TRUE:
-                fv.tableCell('&nbsp;', 'class="'+status+'" align="center" colspan="1"')
-            else:
-                file_esc = urllib.quote(file)
-                rename = '<a href="javascript:renameFile(\'%s\')">Rename</a>' % file_esc
-                delete = '<a href="library.rpy?action=delete&file=%s">Delete</a>' % file_esc
-                fv.tableCell(rename + '&nbsp;&nbsp;' + delete, 'class="'+status+'" align="center" colspan="1"')
+            movmuslink = '<a href="%s?media=%s"><img src="images/%s.png" border=0 align="center">%s</a>' 
+            rectvlink = '<a href="%s?media=%s&dir=%s"><img src="images/%s.png" border=0 align="center">%s</a>' 
+            fv.tableCell(movmuslink % (action_script, "movies","movies","Movies"), 'align=center')
+            fv.tableRowClose()
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell(rectvlink % (action_script, "rectv", config.DIR_RECORD, "tv","Recorded TV"), 'align=center')
+            fv.tableRowClose()
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell(movmuslink % (action_script,"music","mp3","Music"), 'align=center')
+            fv.tableRowClose()
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell(movmuslink % (action_script,"images","images","Images"), 'align=center')
+            fv.tableRowClose()
+            fv.tableClose()
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+        elif action_mediatype and not action_dir:
+            # show the appropriate dirs from config variables
+            # make a back to pick music or movies
+            # now make the list unique
+            fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="85%"')
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('Choose a Directory', 'class="guidehead" align="center" colspan="1"')
+            fv.tableRowClose()
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<a href="' + action_script + '">Back</a>', 'class="basic" align="left" colspan="1"')
+            fv.tableRowClose()
+            for d in directories:
+                (title, dir) = d
+                link = '<a href="' + action_script +'?media='+action_mediatype+'&dir='+urllib.quote(dir)+'">'+title+'</a>'
+                fv.tableRowOpen('class="chanrow"')
+                fv.tableCell(link, 'class="basic" align="left" colspan="1"')
+                fv.tableRowClose()
+            fv.tableClose()
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
+        elif action_mediatype and action_dir and not action == "download":
+            if not self.check_dir(action_mediatype,action_dir):
+                sys.exit(1)
+
+            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('Name', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Size', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
             fv.tableRowClose()
 
-        fv.tableClose()
+            # find out if anything is recording
+            recordingprogram = ''
+            favre = ''
+            favs = []
+            if action_mediatype == 'movies' or action_mediatype == 'rectv':
+                (got_schedule, recordings) = ri.getScheduledRecordings()
+                if got_schedule:
+                    progs = recordings.getProgramList()
+                    f = lambda a, b: cmp(a.start, b.start)
+                    progl = progs.values()
+                    progl.sort(f)
+                    for prog in progl:
+                        try:
+                            if prog.isRecording == TRUE:
+                                recordingprogram = ri.getProgFilename(prog)
+                                break
+                        except:
+                            # sorry, have to pass without doing anything.
+                            pass
+                else:
+                    fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
+            
 
-        fv.printSearchForm()
-        fv.printLinks()
-        fv.printFooter()
+                #generate our favorites regular expression
+                favre = ''
+                (result, favorites) = ri.getFavorites()
+                if result:
+                    favs = favorites.values()
+                else:
+                    favs = []
+
+                if favs:
+                    favtitles = [ fav.title for fav in favs ]
+                    # no I am not a packers fan
+                    favre = string.join(favtitles, '|') 
+                    favre = string.replace(favre, ' ', '_')
+
+            #put in back up directory link
+            #figure out if action_dir is in directories variable and change 
+            #back if it is
+            actiondir_is_root = FALSE
+            for d in directories:
+                (title, dir) = d
+                if dir == action_dir:
+                    actiondir_is_root = TRUE
+                    break
+            backlink = ''
+            if actiondir_is_root == TRUE and action_mediatype == 'rectv':
+                backlink = '<a href="'+ action_script +'">Back</a>'
+            elif actiondir_is_root == TRUE:
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'">Back</a>'
+            else:
+                backdir = os.path.dirname(action_dir)
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(backdir)+'">Back</a>'
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell(backlink, 'class="basic" align="left" colspan="1"')
+            fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
+            fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
+            fv.tableRowClose()
+
+            # get me the directories to output
+            directorylist = util.getdirnames(action_dir)
+            for mydir in directorylist:
+                fv.tableRowOpen('class="chanrow"')
+                mydispdir = os.path.basename(mydir)
+                mydirlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(mydir)+'">'+mydispdir+'</a>'
+                fv.tableCell(mydirlink, 'class="basic" align="left" colspan="1"')
+                fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
+                fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
+                fv.tableRowClose()
+
+            suffixes = self.get_suffixes(action_mediatype)
+
+            # loop over directory here
+            items = util.match_files(action_dir, suffixes)
+            for file in items:
+                status = 'basic'
+                suppressaction = FALSE
+                #find size
+                len_file = os.stat(file)[6]
+                #chop dir from in front of file
+                (basedir, file) = os.path.split(file)
+                if recordingprogram and re.match(recordingprogram, file):
+                    status = 'recording'
+                    suppressaction = TRUE
+                elif favs and re.match(favre, file):
+                    status = 'favorite'
+                fv.tableRowOpen('class="chanrow"')
+                fv.tableCell(file, 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
+                if suppressaction == TRUE:
+                    fv.tableCell('&nbsp;', 'class="'+status+'" align="center" colspan="1"')
+                else:
+                    file_esc = urllib.quote(file)
+                    dllink = '<a href="'+action_script+'%s">Download</a>' %  os.path.join(basedir,file)
+                    filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
+                    delete = filelink % (action_mediatype, basedir, 'delete', file_esc,'Delete')
+                    rename = '<a href="javascript:renameFile(\'%s\',\'%s\',\'%s\')">Rename</a>' % (basedir, file_esc, action_mediatype)
+                    fv.tableCell(rename + '&nbsp;&nbsp;' + delete + '&nbsp;&nbsp;' + dllink, 'class="'+status+'" align="center" colspan="1"')
+                fv.tableRowClose()
+
+            fv.tableClose()
+
+            fv.printSearchForm()
+            fv.printLinks()
+            fv.printFooter()
 
         return fv.res
     
