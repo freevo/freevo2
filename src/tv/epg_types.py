@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/16 19:29:06  dischi
+# add getattr to TvProgram
+#
 # Revision 1.3  2003/03/08 17:37:56  dischi
 # added compare function
 #
@@ -96,6 +99,23 @@ class TvProgram:
                self.start != other.start or \
                self.stop  != other.stop or \
                self.channel_id != other.channel_id
+
+
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if attr == 'start':
+            bt = time.localtime(self.start)   # Beginning time tuple
+            return '%02d:%02d' % (bt[3], bt[4])
+        if attr == 'stop':
+            et = time.localtime(self.stop)   # End time tuple
+            return '%02d:%02d' % (et[3], et[4])
+
+        if hasattr(self, attr):
+            return str(getattr(self,attr))
+        return ''
+
 
 
 class TvChannel:
