@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/09/05 20:10:36  dischi
+# use util.encode to encode strings
+#
 # Revision 1.30  2003/09/05 03:32:15  rshortt
 # Updating to use the tv. namespace.
 #
@@ -274,7 +277,7 @@ def load_guide():
             return None     # No
         
         for chan in xmltv_channels:
-            id = chan['id'].encode('Latin-1')
+            id = util.encode(chan['id'], 'Latin-1')
             c = epg_types.TvChannel()
             c.id = id
             if ' ' in id:
@@ -297,17 +300,20 @@ def load_guide():
 
     for p in xmltv_programs:
         prog = epg_types.TvProgram()
-        prog.channel_id = p['channel'].encode('Latin-1')
-        prog.title = p['title'][0][0].encode('Latin-1')
+        prog.channel_id = util.encode(p['channel'], 'Latin-1')
+        prog.title = util.encode(p['title'][0][0], 'Latin-1')
         if p.has_key('rating'):
-            for darating in p['rating']:
-                prog.ratings[darating['system'].encode('Latin-1')] = darating['value'].encode('Latin-1')
+            try:
+                for darating in p['rating']:
+                    prog.ratings[util.encode(darating['system'], 'Latin-1')] = util.encode(darating['value'], 'Latin-1')
+            except KeyError:
+                pass
         if p.has_key('category'):
-             prog.categories = [ cat[0].encode('Latin-1') for cat in p['category'] ]
+             prog.categories = [ util.encode(cat[0], 'Latin-1') for cat in p['category'] ]
         if p.has_key('desc'):
-            prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1'))
+            prog.desc = util.format_text(util.encode(p['desc'][0][0], 'Latin-1'))
         if p.has_key('sub-title'):
-            prog.sub_title = p['sub-title'][0][0].encode('Latin-1')
+            prog.sub_title = util.encode(p['sub-title'][0][0], 'Latin-1')
         try:
             prog.start = timestr2secs_utc(p['start'])
             try:
@@ -338,6 +344,8 @@ def timestr2secs_utc(str):
         # The time value couldn't be decoded
         raise EPG_TIME_EXC
 
+    if tz == 'CET':
+        tz='+2'
     # Is it the '+1' format?
     if tz[0] == '+' or tz[0] == '-':
         tmTuple = ( int(tval[0:4]), int(tval[4:6]), int(tval[6:8]), 
