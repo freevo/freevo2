@@ -32,7 +32,7 @@
 
 #define MGA_PALETTE MGA_VID_FORMAT_YUY2
 
-#define MGA_DST_IMAGE_WIDTH 768
+#define MGA_DST_IMAGE_WIDTH 768 /* XXX Hardcoded values that depend on the size of the FB! */
 #define MGA_DST_IMAGE_HEIGHT 576
 
 #define V4L_SRC_IMAGE_PALETTE VIDEO_PALETTE_YUV422
@@ -45,26 +45,18 @@
 #define V4L_DST_IMAGE_HEIGHT 480
 #define V4L_DST_IMAGE_DEPTH 16
 
-/* XXX This is an ugly hack that hardcodes the kernel address that the
- * video4linux driver is given to put the captured frames at.
- * Hopefully this entire program can be dropped as soon as
- * the mplayer tv stuff works
+/* This is the _physical_ address of the MGA G400 Back-End-Scaler framebuffer.
+ * It is needed for the Video4Linux1 direct video overlay to the framebuffer.
  */
-
-#if 0
-#define MGA_VID_ADDR mga_vid_base
-#else
-#define MGA_VID_ADDR (0xe2000000 + 0x1F60000) 
-#endif
+#define MGA_VID_ADDR mga_vid_besbase_addr
 
 
 int mga_fd;
 mga_vid_config_t config;
-uint8_t *mga_vid_base;
-uint32_t is_g400;
+uint32_t mga_vid_besbase_addr;
 
 int v4l1_init (void);
-void mga_setup (void);
+int mga_setup (void);
 void get_channels (int fd, int channels, int audios);
 void set_input (int fd, char *norm, char *input, float freq);
 float get_freq (char *name, char *channel);
@@ -86,7 +78,10 @@ main (int ac, char *av[])
   sigaddset (&set, 32);
   sigprocmask (SIG_SETMASK, &set, (sigset_t *) NULL);
         
-  mga_setup ();  
+  if (mga_setup ()) {
+     printf ("Couldn't set up the MGA G400 graphics board.\n");
+     exit (1);
+  }
 
   fd = v4l1_init ();
 
@@ -250,113 +245,15 @@ v4l1_init (void)
   
 }
 
-
-uint8_t y_image[V4L_DST_IMAGE_WIDTH * V4L_DST_IMAGE_HEIGHT];
-uint8_t cr_image[V4L_DST_IMAGE_WIDTH * V4L_DST_IMAGE_HEIGHT];
-uint8_t cb_image[V4L_DST_IMAGE_WIDTH * V4L_DST_IMAGE_HEIGHT];
-
-
-
-void
-write_frame_g400(uint8_t *y,uint8_t *cr, uint8_t *cb)
-{
-	uint8_t *dest;
-	uint32_t bespitch,h;
-
-	dest = mga_vid_base;
-	bespitch = (config.src_width + 31) & ~31;
-
-	for(h=0; h < config.src_height; h++) 
-	{
-           memcpy(dest, y, config.src_width);
-           y += config.src_width;
-           dest += bespitch;
-	}
-
-	for(h=0; h < config.src_height/2; h++) 
-	{
-           memcpy(dest, cb, config.src_width/2);
-           cb += config.src_width/2;
-           dest += bespitch/2;
-	}
-
-	for(h=0; h < config.src_height/2; h++) 
-	{
-           memcpy(dest, cr, config.src_width/2);
-           cr += config.src_width/2;
-           dest += bespitch/2;
-	}
-}
-
-void write_frame(uint8_t *y,uint8_t *cr, uint8_t *cb)
-{
-   write_frame_g400(y,cr,cb);
-}
-
-void
-draw_cool_pattern(void)
-{
-	int i,x,y;
-
-	i = 0;
-	for (y=0; y<config.src_height; y++) {
-		for (x=0; x<config.src_width; x++) {
-			y_image[i++] = x*x/2 + y*y/2 - 128;
-		}
-	}
-
-	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
-		{
-				cr_image[i++] = x - 128;
-		}
-
-	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
-		{
-				cb_image[i++] = y - 128;
-		}
-}
-
-void
-draw_color_blend(void)
-{
-	int i,x,y;
-
-	i = 0;
-	for (y=0; y<config.src_height; y++) {
-		for (x=0; x<config.src_width; x++) {
-			y_image[i++] = 0;
-		}
-	}
-
-	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
-		{
-				cr_image[i++] = x - 128;
-		}
-
-	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
-		{
-				cb_image[i++] = y - 128;
-		}
-}
-
-
-void
+int
 mga_setup (void)
 {
-  
+   
    mga_fd = open ("/dev/mga_vid",O_RDWR);
 
    if (mga_fd == -1) {
-      fprintf(stderr,"Couldn't open driver\n");
-      exit(1);
+      printf ("Couldn't open driver\n");
+      return (-1);
    }
 
    config.version = MGA_VID_VERSION;
@@ -372,22 +269,20 @@ mga_setup (void)
    config.num_frames=1;
 
    if (ioctl (mga_fd, MGA_VID_CONFIG, &config)) {
-      perror("Error in config ioctl");
+      perror ("Error in config ioctl");
+      return (-1);
    }
 
-   if (config.card_type == MGA_G200) {
-      printf("Testing MGA G200 Backend Scaler with %d MB of RAM\n", config.ram_size);
-      is_g400 = 0;
+   if (ioctl (mga_fd, MGA_VID_GET_BESADDR, &mga_vid_besbase_addr) == 0) {
+      printf ("BES addr = 0x%08x\n", mga_vid_besbase_addr);
    } else {
-      printf("Testing MGA G400 Backend Scaler with %d MB of RAM\n", config.ram_size);
-      is_g400 = 1;
+      printf ("ioctl failed, errno = %d.\n", errno);
+      return (-1);
    }
-	
-   ioctl (mga_fd, MGA_VID_ON, 0);
-   mga_vid_base = (uint8_t *) mmap(0, 256 * 4096, PROT_WRITE, MAP_SHARED, mga_fd, 0);
-   printf ("mga_vid_base = %8p\n", mga_vid_base);
 
-   return;
+   /* Done */
+   return (0);
+   
 }
 
 
