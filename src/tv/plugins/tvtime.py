@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/22 17:21:28  mikeruelle
+# adding numeric channel changing and previous channel support
+#
 # Revision 1.19  2003/10/22 00:01:38  mikeruelle
 # found another 4suite probelm, gonna look at minidom instead
 #
@@ -532,6 +535,15 @@ class TVTime:
             self.thread.app.write('DISPLAY_INFO\n')
             return True
         
+        elif event == em.BUTTON:
+	    if re.search('^\d+$', event.arg) and int(event.arg) in range(10):
+                self.thread.app.write('CHANNEL_%s\n' % event.arg)
+                return True
+            if event.arg == 'PREV_CH':
+                self.thread.app.write('CHANNEL_PREV\n')
+                return True
+	        
+
         return False
         
             
