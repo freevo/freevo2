@@ -156,16 +156,17 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
 	return result
 
 def identifymedia(device):
-	mediatypes = [('VCD','/mpegav/'),
-					('SVCD','/SVCD/'),
-					('DVD','/video_ts/') ]
+	default_image = 'icons/dvd.png'
+	mediatypes = [('VCD','/mpegav/','icons/dvd.png'),
+					('SVCD','/SVCD/','icons/dvd.png'),
+					('DVD','/video_ts/','icons/dvd.png') ]
 
 	for media in mediatypes:
-		if os.path.exists(device + media[1]): return media[0]
+		if os.path.exists(device + media[1]): return media[0],media[2]
 
 	mplayer_files = match_files(device, config.SUFFIX_MPLAYER_FILES)
 	mp3_files = match_files(device, config.SUFFIX_MPG123_FILES)
 	image_files = match_files(device, config.SUFFIX_IMAGE_FILES)
-	if mplayer_files and not mp3_files and not image_files: return "DivX"
-	elif not mplayer_files and mp3_files and not image_files: return "MP3 CD" 
-	elif not mplayer_files and not mp3_files and image_files: return "Image Library"
+	if mplayer_files and not mp3_files and not image_files: return "DivX", default_image
+	elif not mplayer_files and mp3_files and not image_files: return "MP3 CD" , default_image
+	elif not mplayer_files and not mp3_files and image_files: return "Image Library", default_image
