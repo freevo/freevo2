@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/24 18:28:32  outlyer
+# Remove excessive chatter from osd, and fix bit shift in v4l2
+#
 # Revision 1.8  2003/09/18 00:50:12  rshortt
 # FutureWarning isn't a class of python 2.2, is there another one we can use?  This one crashes.
 #
@@ -71,9 +74,9 @@ _IOC_SIZESHIFT = (_IOC_TYPESHIFT+_IOC_TYPEBITS)
 _IOC_DIRSHIFT = (_IOC_SIZESHIFT+_IOC_SIZEBITS)
 
 # Direction bits.
-_IOC_NONE = 0
-_IOC_WRITE = 1
-_IOC_READ = 2
+_IOC_NONE = 0L
+_IOC_WRITE = 1L
+_IOC_READ = 2L
 
 def _IOC(dir,type,nr,size):
     return (((dir)  << _IOC_DIRSHIFT) | \

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2003/09/24 18:28:32  outlyer
+# Remove excessive chatter from osd, and fix bit shift in v4l2
+#
 # Revision 1.93  2003/09/23 13:37:51  outlyer
 # Move some informational debug messages into a higher level so they are not
 # shown by default.
@@ -437,8 +440,8 @@ class OSD:
         for _time in range(_times):
             self.app_list.remove(app)
         if _times and hasattr(self.focused_app(), 'event_context'):
-            _debug_('app is %s' % self.focused_app())
-            _debug_('Setting context to %s' % self.focused_app().event_context)
+            _debug_('app is %s' % self.focused_app(),2)
+            _debug_('Setting context to %s' % self.focused_app().event_context,2)
             rc.set_context(self.focused_app().event_context)
 
 
