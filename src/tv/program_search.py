@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/25 02:28:34  rshortt
+# Add vertical_expansion stuff.
+#
 # Revision 1.3  2003/06/03 01:55:19  rshortt
 # More realistic height's.
 #
@@ -77,15 +80,16 @@ class ProgramSearch(PopupBox):
 
         
     def __init__(self, parent='osd', text=None, search=None, handler=None, 
-                 left=None, top=None, width=600, height=340, bg_color=None, 
+                 left=None, top=None, width=600, height=200, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
-                 bd_width=None):
+                 bd_width=None, vertical_expansion=1):
 
         if not text:
             text = 'Program Search'
         
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+                          bg_color, fg_color, icon, border, bd_color, bd_width,
+                          vertical_expansion)
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:

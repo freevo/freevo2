@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/25 02:28:34  rshortt
+# Add vertical_expansion stuff.
+#
 # Revision 1.4  2003/06/04 12:10:38  rshortt
 # ScheduledRecordings needs to be bigger until i fix a known bug.
 #
@@ -71,7 +74,7 @@ class ProgramDisplay(PopupBox):
     """
     
     def __init__(self, parent=None, prog=None, context=None, left=None, 
-                 top=None, width=600, height=440):
+                 top=None, width=600, height=300, vertical_expansion=1):
 
         self.left = left
         self.top = top
@@ -84,7 +87,7 @@ class ProgramDisplay(PopupBox):
             self.context = 'guide'
 
         PopupBox.__init__(self, left=left, top=top, width=width, 
-                          height=height)
+                          height=height, vertical_expansion=vertical_expansion)
 
         self.v_spacing = 15
         self.h_margin = 20
@@ -196,15 +199,16 @@ class ScheduledRecordings(PopupBox):
 
         
     def __init__(self, parent='osd', text=None, handler=None, 
-                 left=None, top=None, width=600, height=400, bg_color=None, 
+                 left=None, top=None, width=600, height=300, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
-                 bd_width=None):
+                 bd_width=None, vertical_expansion=1):
 
         if not text:
             text = 'Scheduled Recordings'
         
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+                          bg_color, fg_color, icon, border, bd_color, bd_width,
+                          vertical_expansion)
 
 
         (self.result, recordings) = record_client.getScheduledRecordings()
