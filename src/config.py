@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/03/01 10:45:43  dischi
+# new variable config.NEW_SKIN to integrate the gui code
+#
 # Revision 1.18  2003/02/25 04:37:29  krister
 # Updated local_conf version to 2.0 to make it clear that the remote control stuff changed. Added automatic information about what has changed in the config files since the user's version.
 #
@@ -424,3 +427,4 @@ TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").spli
 
 FREEVO_PLUGINS = {}
 
+NEW_SKIN = (OSD_SKIN == 'skins/dischi1/skin_dischi1.py')
