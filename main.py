@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/08/11 19:23:35  krister
+# Updated shutdown code.
+#
 # Revision 1.44  2002/08/11 17:03:50  krister
 # Removed delay after crash. Updated the shutdown process.
 #
@@ -127,8 +130,10 @@ def shutdown(menuw=None, arg=None):
     
     # XXX kludge to signal startup.py to abort
     os.system('touch /tmp/freevo-shutdown') 
-    # XXX kludge to shutdown the runtime version
+    # XXX kludge to shutdown the runtime version (linker)
     os.system('killall -9 freevo_rt/ld-linux.so.2') 
+    # XXX kludge to shutdown the runtime version (no linker)
+    os.system('killall -9 freevo_rt/freevo_rt') 
     # XXX Kludge to shutdown if started with "python main.py"
     os.system('kill -9 `pgrep -f "python main.py" -d" "`') 
 
