@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/02/19 07:16:11  krister
+# Matthieu Weber's patch for smart music cover search, modified the logic slightly.
+#
 # Revision 1.30  2003/02/18 05:51:21  gsbarbieri
 # now we add '[' and ']' to dirname ([dirname]) only if the menu is in the old display mode. (But you must toggle the extended menu mode *before* enter the desired dir)
 #
@@ -99,6 +102,7 @@
 
 import os
 import traceback
+import re
 
 import util
 import config
@@ -314,6 +318,32 @@ class DirItem(Playlist):
             if self.display_type:
                 self.handle_type = self.display_type
             
+        if not self.image:
+            images = ()
+            covers = ()
+            files =()
+            def image_filter(x):
+                return re.match('.*(jpg|png)$', x, re.IGNORECASE)
+            def cover_filter(x):
+                return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
+
+            # Pick an image if it is the only image in this dir, or it matches
+            # the configurable regexp
+            try:
+                files = os.listdir(dir)
+            except OSError:
+                print "oops, os.listdir() error"
+                traceback.print_exc()
+            images = filter(image_filter, files)
+            image = None
+            if len(images) == 1:
+                image = os.path.join(dir, images[0])
+            elif len(images) > 1:
+                covers = filter(cover_filter, images)
+                if covers:
+                    image = os.path.join(dir, covers[0])
+            self.image = image
+
         if os.path.isfile(dir+'/skin.xml'): 
             self.xml_file = dir+'/skin.xml'
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/19 07:16:11  krister
+# Matthieu Weber's patch for smart music cover search, modified the logic slightly.
+#
 # Revision 1.13  2003/02/18 06:16:48  krister
 # Added parts of Thomas Schuppels CDDB updates.
 #
@@ -183,6 +186,34 @@ class AudioItem(Item):
             self.image = os.path.splitext(file)[0] + '.png'
         elif os.path.isfile(os.path.splitext(file)[0] + '.jpg'):
             self.image = os.path.splitext(file)[0] + '.jpg'
+
+        # Let's try to find if there is any image in the current directory
+        # that could be used as a cover
+        if not self.image:
+            images = ()
+            covers = ()
+            files =()
+            def image_filter(x):
+                return re.match('.*(jpg|png)$', x, re.IGNORECASE)
+            def cover_filter(x):
+                return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
+
+            # Pick an image if it is the only image in this dir, or it matches
+            # the configurable regexp
+            try:
+                files = os.listdir(os.path.dirname(file))
+            except OSError:
+                print "oops, os.listdir() error"
+                traceback.print_exc()
+            images = filter(image_filter, files)
+            image = None
+            if len(images) == 1:
+                image = os.path.join(os.path.dirname(file), images[0])
+            elif len(images) > 1:
+                covers = filter(cover_filter, images)
+                if covers:
+                    image = os.path.join(os.path.dirname(file), covers[0])
+            self.image = image
 
         if DEBUG > 1:
             try:

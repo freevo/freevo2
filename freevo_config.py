@@ -208,6 +208,11 @@ DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav' ]
 SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 
+# This regexp should recognize filenames which are likely to be covers
+# for an album. This example will match front.jpg and cover-f.jpg, but
+# not back.jpg nor cover-b.jpg
+#
+AUDIO_COVER_REGEXP = 'front|-f'
 
 # ======================================================================
 # Freevo image viewer settings:
