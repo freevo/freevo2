@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/04/11 10:32:59  dischi
+# fixed bug for non Menu items
+#
 # Revision 1.31  2003/04/06 21:11:09  dischi
 # o Switch to the new main1 skin
 # o You can now add any object to the menuwidget, not only Menu objects
@@ -388,6 +391,8 @@ class MenuWidget(GUIObject):
                 self.back_one_menu()
             return
             
+        if not isinstance(menu, Menu):
+            return
 
         if event == rc.UP:
             curr_selected = self.all_items.index(menu.selected)
