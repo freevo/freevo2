@@ -34,6 +34,10 @@ for file in ([ os.path.join('.', fname) for fname in os.listdir('.') ]):
         sys.stdout.flush()
         file = os.path.join(file, 'LC_MESSAGES/freevo.po')
         mo = os.path.splitext(file)[0] + '.mo'
-        os.system('msgmerge --update --backup=off %s ./freevo.pot' % file)
+        if len(sys.argv)==1 or sys.argv[1] != '--no-merge':
+            os.system('msgmerge --update --backup=off %s ./freevo.pot' % file)
+        else:
+            print 'done (no merge)'
         os.system('msgfmt -o %s %s' % (mo, file))
         
+
