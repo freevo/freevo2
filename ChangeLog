@@ -13,6 +13,10 @@ o Changed the TV guide to use Gustavo's new extended menus.
 o The XML skins can now include other skin files. This makes
   it easier to adapt skins to new screen sizes.
 o XML skins can now load a local_skin.xml for changes by the user.
+o Changed the "freevo" script so that it can be used to execute 
+  standalone python scripts, e.g. "freevo execute epg_xmltv.py"
+o Changed runapp to support priority settings of the new app,
+  /usr/bin/nice is no longer needed.
 	
 
 Release 1.2.6 (2002-10-12):
