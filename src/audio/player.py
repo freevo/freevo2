@@ -4,7 +4,7 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# This module provides the auido player. It will use one of the registered
+# This module provides the audio player. It will use one of the registered
 # player plugins to play the audio item (e.g. audio.mplayer)
 #
 # You can access the player by calling audioplayer()
@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/09/14 20:04:33  dischi
+# fix typo
+#
 # Revision 1.29  2004/09/13 19:35:35  dischi
 # replace player.get_singleton() with audioplayer()
 #
