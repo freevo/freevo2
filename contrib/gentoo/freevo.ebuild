@@ -38,7 +38,7 @@ src_compile() {
 
 src_install() {
 	install -d ${D}/etc/freevo
-	install -m 644 freevo_config.py freevo.conf ${D}/etc/freevo
+	install -m 644 freevo.conf local_conf.py ${D}/etc/freevo
 
 	mydocs="BUGS COPYING ChangeLog FAQ INSTALL README TODO VERSION"
 	mydocs="$mydocs Docs/CREDITS Docs/NOTES"
@@ -49,7 +49,7 @@ src_install() {
 	    CACHEDIR=${D}/var/cache/freevo install
 
 	cd $FREEVO_INSTALL_DIR
-	rm -rf $mydocs Docs runtime freevo_config.py freevo.conf local_conf.py \
+	rm -rf $mydocs Docs runtime freevo.conf local_conf.py \
 	    configure setup_build.py *.c *.h Makefile fbcon/Makefile fbcon/vtrelease.c \
 	    contrib/TatChee_RPM_Specs contrib/gentoo skins/aubin1 skins/barbieri \
 	    skins/dischi1 skins/krister1 skins/malt1
@@ -62,7 +62,12 @@ pkg_postinst() {
 	einfo "is not working. You need to install a newer (masked) version"
 	einfo "of PyXML (version 0.8.1)"
 	einfo
-	einfo "Please check /etc/freevo/freevo.conf and"
-	einfo "/etc/freevo/freevo_config.py before starting freevo"
+	einfo "Please check /etc/freevo/freevo.conf and /etc/freevo/local_conf.py and"
+	einfo "before starting freevo."
 	einfo
+
+	if [ -e /etc/freevo/freevo_config.py ]; then
+		ewarn "Please remove /etc/freevo/freevo_config.py"
+		sleep 5
+	fi
 }
