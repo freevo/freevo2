@@ -62,7 +62,7 @@ class Callback:
         del _callbacks[self.name]
         # call callback function
         self.function(*self.args, **self.kwargs)
-        return True
+        return False
 
 
     def remove(self):
