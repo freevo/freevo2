@@ -11,6 +11,12 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2002/08/11 09:32:59  dischi
+# If the movie title is a tv show (regexp TV_SHOW_REGEXP_MATCH) add \t
+# between name, number and title for a nice alignment with the new SDL
+# osd. This may cause some trouble with the krister1 skin if you have
+# series and other movies in the same dir.
+#
 # Revision 1.21  2002/08/08 03:16:56  krister
 # Changed move playing so that the next movie is not started automatically.
 #
@@ -232,7 +238,7 @@ def cwd(arg=None, menuw=None):
         # find image for tv show and build new title
         if TV_SHOW_REGEXP_MATCH(title):
             show_name = TV_SHOW_REGEXP_SPLIT(os.path.basename(title))
-            title = show_name[0] + " " + show_name[1] + "x" + show_name[2] + " - " + \
+            title = show_name[0] + "\t" + show_name[1] + "x" + show_name[2] + "\t-\t" + \
                     show_name[3] 
 
             if os.path.isfile((config.TV_SHOW_IMAGES + show_name[0] + ".png").lower()):
