@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/24 11:01:59  dischi
+# use round not int after scaling
+#
 # Revision 1.5  2003/08/24 10:04:05  dischi
 # added font_h as variable for y and height settings
 #
@@ -94,7 +97,7 @@ def attr_int(node, attr, default, scale=0.0):
                     pos = len(val)
 
                 try:
-                    i = int(int(scale*int(val[:pos])))
+                    i = int(round(scale*int(val[:pos])))
                     if i < 0:
                         new_val += str(i)
                     else:
