@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/24 17:04:39  mikeruelle
+# Add some info to the info area where we have it
+#
 # Revision 1.17  2004/01/19 21:33:02  mikeruelle
 #  a patch from Sylvian to use the new set_url stuff
 #
@@ -71,6 +74,7 @@ import menu
 import event as em
 import time
 import copy
+import mame_cache
 
 from item import Item
 
@@ -114,6 +118,11 @@ class MameItem(Item):
 	print "Command for MAME : %s" % self.command
 
         self.game_player = game.get_singleton()
+	rominfo = mame_cache.getMameItemInfo(file)
+	if rominfo:
+	    self.info = { 'description' : '%s - %s - %s' % (rominfo.description,rominfo.manufacturer,rominfo.year) }
+	else:
+	    self.info = { 'description' : 'No ROM information' }
         
 
     def sort(self, mode=None):

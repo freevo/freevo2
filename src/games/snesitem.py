@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/24 17:04:39  mikeruelle
+# Add some info to the info area where we have it
+#
 # Revision 1.17  2004/02/24 16:03:11  mikeruelle
 # contributed patch from Andraes Leitner. i changed the values used to legit ones but this patch allows some broken roms to play
 #
@@ -287,9 +290,9 @@ class SnesItem(Item):
         else:
             romCountryTxt = 'Unknown'
         if match('[a-zA-Z0-9 ]{4}', romName[0:4]) == None:
-            self.name = os.path.splitext(os.path.basename(file))[0]  + ' (' + romCountryTxt + ' - ' + romLicTxt + ')'
+            self.name = os.path.splitext(os.path.basename(file))[0]
         else:
-            self.name = capwords(romName) + ' (' + romCountryTxt + ' - ' + romLicTxt + ')'
+            self.name = capwords(romName)
         self.parent = parent
         
         # find image for this file
@@ -311,6 +314,7 @@ class SnesItem(Item):
         self.command = command
 
         self.game_player = game.get_singleton()
+	self.info = {'description' :  romCountryTxt + ' - ' + romLicTxt }
         
 
     def sort(self, mode=None):

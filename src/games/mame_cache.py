@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/24 17:04:39  mikeruelle
+# Add some info to the info area where we have it
+#
 # Revision 1.16  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -178,7 +181,6 @@ def getMameItemInfoList(mame_files, mame_cmd):
         if not mame_ok:
             return (mame_files, [])
 
-
     mameRomList = getMameRomList()
     roms = mameRomList.getMameRoms()
 
@@ -190,3 +192,16 @@ def getMameItemInfoList(mame_files, mame_cmd):
             rm_files.append(romfile)
 
     return (rm_files, items)
+
+
+def getMameItemInfo(mame_file):
+    if not os.path.isfile(config.GAMES_MAME_CACHE):
+        return
+    mameRomList = getMameRomList()
+    roms = mameRomList.getMameRoms()
+    key = os.path.splitext(os.path.basename(mame_file))[0]
+    if roms.has_key(key):
+        return roms[key]
+    else:
+        return
+
