@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/25 23:27:36  dischi
+# changed max usage
+#
 # Revision 1.10  2003/02/25 22:56:00  dischi
 # New version of the new skin. It still looks the same (except that icons
 # are working now), but the internal structure has changed. Now it will
@@ -86,7 +89,10 @@ def attr_int(node, attr, default, scale=0.0):
             if scale:
                 val = scale*int(val)
             if max:
-                return 'max%d' % int(val)
+                if int(val) < 0:
+                    return 'MAX%d' % int(val)
+                else:
+                    return 'MAX+%d' % int(val)
             else:
                 return int(val)
 

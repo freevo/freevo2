@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/25 23:27:36  dischi
+# changed max usage
+#
 # Revision 1.1  2003/02/25 22:56:00  dischi
 # New version of the new skin. It still looks the same (except that icons
 # are working now), but the internal structure has changed. Now it will
@@ -66,22 +69,17 @@ class Skin_Listing(Skin_Area):
         
         if not r.width:
             r.width = item_w
-        else:
-            try:
-                if r.width[:3] == 'max':
-                    r.width = item_w + int(r.width[3:])
-            except TypeError:
-                pass
-            
+
         if not r.height:
             r.height = item_h
-        else:
-            try:
-                if r.height[:3] == 'max':
-                    r.height = item_h + int(r.height[3:])
-            except TypeError:
-                pass
+
+        MAX = item_w
+        r.x = int(eval('%s' % r.x))
+        r.width = int(eval('%s' % r.width))
             
+        MAX = item_h
+        r.y = int(eval('%s' % r.y))
+        r.height = int(eval('%s' % r.height))
 
         if r.x < 0:
             item_w -= r.x

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/25 23:27:36  dischi
+# changed max usage
+#
 # Revision 1.1  2003/02/25 22:56:00  dischi
 # New version of the new skin. It still looks the same (except that icons
 # are working now), but the internal structure has changed. Now it will
@@ -95,18 +98,12 @@ class Skin_Area:
     def calc_geometry(self, object, copy_object=0, fit_area=1):
         if copy_object:
             object = copy.deepcopy(object)
-            
-        try:
-            if object.width[:3] == 'max':
-                object.width = self.area_val.width + int(object.width[3:])
-        except TypeError:
-            pass
-        
-        try:
-            if object.height[:3] == 'max':
-                object.height = self.area_val.height + int(object.height[3:])
-        except TypeError:
-            pass
+
+        MAX = self.area_val.width
+        object.width = eval('%s' % object.width)
+
+        MAX = self.area_val.height
+        object.height = eval('%s' % object.height)
 
         if fit_area:
             object.x += self.area_val.x
