@@ -938,7 +938,7 @@ if CONF.display == 'mga':
     OSD_OVERSCAN_X = 20
     OSD_OVERSCAN_Y = 10
 
-if CONF.display == 'dfbmga':
+if CONF.display in ( 'directfb', 'dfbmga' ):
     OSD_OVERSCAN_X = 50
     OSD_OVERSCAN_Y = 50
 
@@ -952,7 +952,7 @@ if CONF.display == 'dxr3':
 #
 OSD_STOP_WHEN_PLAYING = 0
 
-if CONF.display in ( 'dfbmga', 'dxr3', 'dga' ):
+if CONF.display in ( 'directfb', 'dfbmga', 'dxr3', 'dga' ):
     OSD_STOP_WHEN_PLAYING = 1
 
 #
@@ -1043,7 +1043,7 @@ DVD_SUBTITLE_PREF    = ''                # Order of preferred subtitles on DVD.
 # prio <0 has no effect unless run as root.
 MPLAYER_NICE         = -20             
 
-if CONF.display == 'dfbmga':
+if CONF.display in ( 'directfb', 'dfbmga' ):
     MPLAYER_ARGS_DEF     = ('-autosync 100 -nolirc ' +
                             '-autoq 100 -fs ')
 else:

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/08 12:44:40  rshortt
+# Add directfb as a display option.
+#
 # Revision 1.16  2004/04/20 17:33:59  dischi
 # lsdvd check
 #
@@ -129,7 +132,7 @@ Set up Freevo for your specific environment.
 
    --display=DISP               set the display
                                   DISP can be x11, fbdev, dxr3, mga, 
-                                  dfbmga or dga
+                                  directfb, dfbmga or dga
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
@@ -167,7 +170,7 @@ def match_files_recursively_helper(result, dirname, names):
 
 def check_config(conf):
     vals_geometry = ['800x600', '768x576', '640x480']
-    vals_display = ['x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'dga']
+    vals_display = ['x11', 'fbdev', 'directfb', 'dfbmga', 'mga', 'dxr3', 'dga']
     vals_tv = ['ntsc', 'pal', 'secam']
     vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                      'japan-bcast', 'japan-cable', 'europe-west',
@@ -316,7 +319,7 @@ if __name__ == '__main__':
     check_config(conf)
 
     # set geometry for display/tv combinations without a choice
-    if conf.display == 'dfbmga':
+    if conf.display in ( 'directfb', 'dfbmga' ):
         if conf.tv == 'ntsc':
             conf.geometry = '720x480'
         else:

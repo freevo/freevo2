@@ -5,12 +5,12 @@ import plugin
 
 class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
-        if config.CONF.display in ('dxr3', 'dfbmga'):
+        if config.CONF.display in ('dxr3', 'directfb', 'dfbmga'):
             print 'For some strange reason, the starting of the webserver inside'
-            print 'Freevo messes up with the DXR3 and dfbmga output. The webserver'
+            print 'Freevo messes up with the DXR3 and directfb output. The webserver'
             print 'plugin will be disabled. Start it from outside Freevo with'
             print 'freevo webserver [start|stop]'
-            self.reason = 'dxr3 or dfbmga output'
+            self.reason = 'dxr3 or directfb output'
             return
         plugin.DaemonPlugin.__init__(self)
         self.pid = None

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.164  2004/07/08 12:44:40  rshortt
+# Add directfb as a display option.
+#
 # Revision 1.163  2004/06/29 18:29:20  dischi
 # auto repair broken thumbnails
 #
@@ -339,10 +342,9 @@ class OSD:
         self.width  = config.CONF.width
         self.height = config.CONF.height
 
-        if config.CONF.display== 'dxr3':
+        if config.CONF.display == 'dxr3':
             os.environ['SDL_VIDEODRIVER'] = 'dxr3'
-
-        if config.CONF.display == 'dfbmga':
+        elif config.CONF.display in ( 'directfb', 'dfbmga' ):
             os.environ['SDL_VIDEODRIVER'] = 'directfb'
 
         # sometimes this fails

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/08 12:44:40  rshortt
+# Add directfb as a display option.
+#
 # Revision 1.36  2004/06/06 17:15:10  mikeruelle
 # removed some old bad code. mplayer debug has been superceded by childapp debug. the kill method is just plain bad.
 #
@@ -476,9 +479,9 @@ class TVTime:
             outputplugin = config.CONF.display
             if config.CONF.display == 'x11':
                 outputplugin = 'Xv'
-            if config.CONF.display == 'mga':
+            elif config.CONF.display == 'mga':
                 outputplugin = 'mga'
-            if config.CONF.display == 'dfbmga':
+            elif config.CONF.display in ( 'directfb', 'dfbmga' ):
                 outputplugin = 'directfb'
 
             if mode == 'vcr':

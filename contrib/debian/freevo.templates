@@ -1,6 +1,6 @@
 Template: freevo/display
 Type: select
-Choices: x11, fbdev, dxr3, mga, dfbmga, dga
+Choices: x11, fbdev, dxr3, mga, directfb, dfbmga, dga
 Description: Video output
  Choose the output method to use for Freevo
 
