@@ -26,6 +26,10 @@
 # -----------------------------------------------------------------------
 #
 # $Log$
+# Revision 1.10  2003/07/03 04:24:45  outlyer
+# use OGGENC_CMD, and only show encoding options for encoders that are
+# actually available.
+#
 # Revision 1.9  2003/07/03 04:19:31  outlyer
 # Updated cdbackup with Rich's new Ogg patch; also changed some variables,
 # and added oggenc to setup and configuration.
@@ -295,7 +299,7 @@ class main_backup_thread(threading.Thread):
             elif string.upper(rip_format) == 'OGG':
                 oggenc_command = \
                     '%s %s -a "%s" -G "%s" -N "%s" -t "%s" -l "%s" "%s%s.wav" -o "%s%s.ogg"' % \
-                    (config.OGG_CMD, config.CD_RIP_OGG_OPTS, 
+                    (config.OGGENC_CMD, config.CD_RIP_OGG_OPTS, 
                     artist, genre, track, song_names[i], album,
                     pathname_cdparanoia, path_tail_cdparanoia, pathname, path_tail)
 
@@ -424,10 +428,11 @@ class PluginInterface(plugin.ItemPlugin):
     def create_backup_items(self, arg, menuw):   
         items = []
 
-        items += [menu.MenuItem('Backup CD to hard drive in mp3 format',
+        if config.LAME_CMD:
+            items += [menu.MenuItem('Backup CD to hard drive in mp3 format',
                                 self.cd_backup_mp3, arg=arg)]
-        
-        items += [menu.MenuItem('Backup CD to hard drive in Ogg format',
+        if config.OGGENC_CMD:
+            items += [menu.MenuItem('Backup CD to hard drive in Ogg format',
                                 self.cd_backup_ogg, arg=arg)]
                                 
         items += [menu.MenuItem('Backup CD to hard drive in wav format',
