@@ -1,60 +1,18 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# tv_grab.py - wrapper for xmltv
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# tv_grab.py - Freevo helper to populate the EPG with TV listings.
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
 #
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.16  2004/12/12 15:33:37  rshortt
-# pyepg updates
-#
-# Revision 1.15  2004/12/10 19:56:22  dischi
-# changes to new pyepg
-#
-# Revision 1.14  2004/12/04 01:25:28  rshortt
-# Add --query-exclude for help generating TV_CHANNELS_EXCLUDE.  Update location
-# of EPGDB.
-#
-# Revision 1.13  2004/11/06 17:56:21  dischi
-# Current status of the recordserver:
-# o add/delete/modify/list recordings
-# o add/list favorites
-# o tv_grab will force an internal favorite update
-# o create recordings based on favorites
-# o basic conflict detection
-# o store everything in a fxd file
-# Recording itself (a.k.a. record/plugins) is not working yet
-#
-# Revision 1.12  2004/10/20 12:33:01  rshortt
-# Put epg loading inside xmltv results check.
-#
-# Revision 1.11  2004/10/19 19:05:23  dischi
-# add data to db even if not sorted
-#
-# Revision 1.10  2004/10/18 01:21:50  rshortt
-# Load data into new pyepg database.
-#
-# Revision 1.9  2004/08/14 01:26:02  rshortt
-# Oops, we don't need a reference to the epg.
-#
-# Revision 1.8  2004/08/14 01:18:07  rshortt
-# Make tv_grab helper work again, now with pyepg.
-#
-# Revision 1.7  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.6  2004/03/28 15:04:42  rshortt
-# Bugfix.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#                Rob Shortt <rshortt@users.sf.net>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -71,12 +29,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-
+# -----------------------------------------------------------------------------
 
 import sys
 import os
 import shutil
+from optparse import OptionParser
 
 import config
 import sysconfig
@@ -87,24 +45,15 @@ pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
 pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
 
 
-def usage():
-    print 'Downloads the listing for xmltv and cache the data'
-    print
-    print 'usage: freevo tv_grab [ --query ]'
-    print 'options:'
-    print '  --query:  print a list of all stations. The list can be used to set TV_CHANNELS'
-    print '  --query-exclude:  print a list of channels for use with TV_CHANNELS_EXCLUDE'
-    sys.exit(0)
+def grab_xmltv():
 
-
-def grab():
     if not config.XMLTV_GRABBER:
         print 'No program found to grab the listings. Please set XMLTV_GRABBER'
         print 'in local.conf.py to the grabber you need'
         print
         usage()
 
-    print 'Grabbing listings.'
+    print 'Grabbing listings using XMLTV.'
     xmltvtmp = '/tmp/TV.xml.tmp'
     os.system('%s --output %s --days %s' % ( config.XMLTV_GRABBER, 
                                              xmltvtmp,
@@ -128,12 +77,31 @@ def grab():
         pyepg.update('xmltv', config.XMLTV_FILE,)
 
 
-if __name__ == '__main__':
+def grab_vdr():
+    print 'Fetching guide from VDR.'
 
-    if len(sys.argv)>1 and sys.argv[1] == '--help':
-        usage()
-    
-    if len(sys.argv)>1 and sys.argv[1] == '--query':
+    pyepg.update('vdr', config.VDR_DIR, config.VDR_CHANNELS, config.VDR_EPG,
+                 config.VDR_HOST, config.VDR_PORT, config.VDR_ACCESS_ID)
+
+
+def main():
+    parser = OptionParser()
+
+    parser.add_option('-s', '--source', dest='source', default='xmltv',
+                      help='set the source for the guide: xmltv (default) ' + \
+                            'or vdr')
+    parser.add_option('-q', '--query', action="store_true", dest='query', 
+                      default=False,
+                      help='print a list that can be used to set TV_CHANNELS')
+    parser.add_option('-e', '--query-exclude', action="store_true", dest='exclude',
+                      default=False,
+                      help='print a list that can be used to set ' + \
+                           'TV_CHANNELS_EXCLUDE')
+
+    (options, args) = parser.parse_args()
+
+
+    if options.query:
         chanlist = pyepg.guide.sql_get_channels()
 
         print
@@ -143,12 +111,16 @@ if __name__ == '__main__':
         print
         print 'TV_CHANNELS = ['
         for c in chanlist[:-1]:
-            print '    ( \'%s\', \'%s\', \'%s\' ), ' % (c['id'], c['call_sign'], c['tuner_id'])
+            print '    ( \'%s\', \'%s\', \'%s\' ), ' % (c['id'], 
+                                                        c['display_name'], 
+                                                        c['access_id'])
         print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % \
-              (chanlist[-1]['id'], chanlist[-1]['call_sign'], chanlist[-1]['tuner_id'])
+              (chanlist[-1]['id'], chanlist[-1]['display_name'], 
+               chanlist[-1]['access_id'])
         sys.exit(0)
 
-    if len(sys.argv)>1 and sys.argv[1] == '--query-exclude':
+
+    if options.exclude:
         chanlist = pyepg.guide.sql_get_channels()
 
         print
@@ -165,7 +137,14 @@ if __name__ == '__main__':
         sys.exit(0)
 
 
-    grab()
+    if options.source == 'xmltv':
+        grab_xmltv()
+    elif options.source == 'vdr':
+        grab_vdr()
+    else:
+        print 'ERROR: source "%s" not supported.' % options.source
+        sys.exit(0)
+
 
     print 'connecting to recordserver'
     rs = mcomm.find('recordserver')
@@ -174,3 +153,8 @@ if __name__ == '__main__':
         sys.exit(0)
     print 'update favorites'
     rs.favorite_update()
+
+
+if __name__ == '__main__':
+    main()
+
