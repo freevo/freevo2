@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/04/25 18:19:10  mikeruelle
+# missing comma causes 8 to not show
+#
 # Revision 1.16  2004/03/13 22:32:44  dischi
 # Improve input handling:
 # o support upper and lower case
@@ -286,7 +289,7 @@ class LetterBox(Button):
                   [ "J", "K", "L", "5" ],
                   [ "M", "N", "O", "6" ],
                   [ "P", "Q", "R", "S", "7" ],
-                  [ "T", "U", "V"  "8"],
+                  [ "T", "U", "V", "8"],
                   [ "W", "X", "Y", "Z" ,"9"])
         
 
