@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/24 00:37:06  rshortt
+# OptionBox now uses skin properties.
+#
 # Revision 1.6  2003/03/23 23:19:39  rshortt
 # When selected these objects now use skin properties as well.
 #
@@ -239,6 +242,13 @@ class ListBox(RegionScroller):
         self.adjust_surface()
 
 
+    def sort_items(self):
+        (x, y) = (0, 0)
+        for item in self.items:
+            item.set_position(x,y)
+            y = y + item.height
+
+
     def add_item(self, item=None, text=None, value=None):
         if not item:
             if not text:
@@ -293,13 +303,10 @@ class ListBox(RegionScroller):
         if not self.width or not self.height or not self.surface:
             raise TypeError, 'Not all needed variables set.'
 
-
-        (x, y) = (0, 0)
+        self.sort_items()
         for item in self.items:
-            item.set_position(x,y)
-            y = y + item.height
             item.draw(self.surface)
-    
+
         RegionScroller._draw(self)
 
 
