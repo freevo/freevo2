@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/04 20:30:33  gsbarbieri
+# Added some clauses to avoid exceptions.
+#
 # Revision 1.3  2003/08/04 04:08:10  gsbarbieri
 # Now you can have screens for Lines x Columns, before we could just have screens for Lines.
 #
@@ -347,8 +350,15 @@ class PluginInterface( plugin.DaemonPlugin ):
         init the lcd
         """
         plugin.DaemonPlugin.__init__( self )
-        self.lcd = pylcd.client()
-        cm = self.lcd.connect()
+        try:
+            self.lcd = pylcd.client()
+            cm = self.lcd.connect()
+        except:
+            print "ERROR: LCD plugin will not load! " + \
+                  "Maybe you don't have LCDd (lcdproc daemon) running?"
+            self.disable = 1
+            return
+        
         if DEBUG > 0:
             print "Connecting to LCD: %s" % cm
             print "Info as know by the module:"
@@ -367,7 +377,12 @@ class PluginInterface( plugin.DaemonPlugin ):
         for w in self.screens[ "welcome" ]:
             type, param, val = self.screens[ "welcome" ][ w ]            
             if val: param = param % eval( val )
-            self.lcd.widget_set( "welcome", w, param )
+
+            try:
+                self.lcd.widget_set( "welcome", w, param.encode( 'latin1' ) )
+            except UnicodeError:
+                self.lcd.widget_set( "welcome", w, param )
+                
         self.lcd.screen_set( "welcome", "-priority 192 -duration 2 -heartbeat off" )
         self.last_screen = "welcome"
 
@@ -436,9 +451,7 @@ class PluginInterface( plugin.DaemonPlugin ):
         for w in s:
             t, param, val = s[ w ]
             try:
-                #print "param=%s \tval=%s" % ( param, val )
                 if val: param = param % eval( val )
-                #print "   -> %s" % param
             except:
                 pass
             k = '%s %s' % ( sname, w )
@@ -452,14 +465,6 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:
                 self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
             except UnicodeError:
-                # Comment from Magnus:
-                # With param.encode python crashes with:
-                # File "src/plugins/lcd.py", line 364, in draw
-                #    self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
-                # UnicodeError: ASCII decoding error: ordinal not in range(128)
-                # when a file contains a german encoding for an umlaut, eg 'oe',
-                # which is then converted to 'ö', however without the param.encode
-                # the umlaut gets still magically converted ?!
                 self.lcd.widget_set( sname, w, param )
 
         if self.last_screen != sname:
@@ -483,7 +488,10 @@ class PluginInterface( plugin.DaemonPlugin ):
                 type, param, val = self.screens[ s ][ w ]
                 
                 if val: param = param % eval( val )
-                self.lcd.widget_set( s, w, param )
+                try:
+                    self.lcd.widget_set( s, w, param.encode( 'latin1' ) )
+                except UnicodeError:
+                    self.lcd.widget_set( s, w, param )
         
 
     def generate_screens( self ):
