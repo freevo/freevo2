@@ -16,6 +16,8 @@ static XImage *pImage;
 static uint8 *pFrameBuffer;
 static int swap = 0;            /* RGB => BGR */
 
+static void hidecursor (void);
+
 
 int
 x11_open (int width, int height)
@@ -58,6 +60,8 @@ x11_open (int width, int height)
    XSelectInput (dpy, w, StructureNotifyMask | KeyPressMask |
                  ExposureMask);
 
+   hidecursor ();
+   
    XMapWindow (dpy, w);
 
    gc = XCreateGC (dpy, w, 0, 0);
@@ -100,6 +104,27 @@ x11_open (int width, int height)
 }
 
 
+static void
+hidecursor (void)
+{
+  Cursor c;
+  Pixmap pmap1, pmap2;
+  XColor fg, bg;
+
+
+  pmap1 = XCreatePixmap (dpy, w, 1, 1, 1);
+  pmap2 = XCreatePixmap (dpy, w, 1, 1, 1);
+
+  memset (&fg, 0, sizeof (XColor));
+  memset (&bg, 0, sizeof (XColor));
+  
+  c = XCreatePixmapCursor (dpy, pmap1, pmap2, &fg, &bg, 0, 0);
+
+  XDefineCursor (dpy, w, c);
+  
+}
+
+      
 void
 x11_update (uint8 *pFB)
 {
