@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.8  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -50,10 +53,11 @@
 import os, popen2, fcntl, select, time
 
 #freevo modules
-import config, menu, rc, plugin, util
+import config, menu, plugin, util
 from audio.player import PlayerGUI
 from item import Item
-
+import eventhandler
+from event import *
 
 class RadioItem(Item):
     """
@@ -82,7 +86,7 @@ class RadioItem(Item):
 
         if error and menuw:
             AlertBox(text=error).show()
-            rc.post_event(rc.PLAY_END)
+            eventhandler.post(PLAY_END)
 
     def stop(self, arg=None, menuw=None):
         """
@@ -128,7 +132,6 @@ class RadioMainMenuItem(Item):
             station_items += [menu.MenuItem( _( 'No Radio Stations found' ),
                                              menwu.goto_prev_page, 0)]
         station_menu = menu.Menu( _( 'Radio Stations' ), station_items)
-        rc.app(None)
         menuw.pushmenu(station_menu)
         menuw.refresh()
 

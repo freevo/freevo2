@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.98  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
@@ -55,7 +58,7 @@ import config
 import plugin
 import util
 import skin
-import rc
+import eventhandler
 
 from event import *
 from item import Item
@@ -215,7 +218,7 @@ class MenuWidget:
             else:
                 self.delete_menu()
         elif len(self.menustack) > 1 and osd_message:
-            rc.post_event(Event(OSD_MESSAGE, arg=osd_message))
+            eventhandler.post(Event(OSD_MESSAGE, arg=osd_message))
 
             
     def back_one_menu(self, arg=None, menuw=None):

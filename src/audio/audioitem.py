@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.58  2004/07/21 16:14:42  outlyer
 # Typo. I'll put the fix into the stable branch in a second.
 #
@@ -68,11 +71,11 @@ import re
 import traceback
 import config
 import util
-import rc
+import eventhandler
 
 from player import PlayerGUI
 from item import Item
-
+from event import *
 
 class AudioItem(Item):
     """
@@ -199,7 +202,7 @@ class AudioItem(Item):
 
         if error and menuw:
             AlertBox(text=error).show()
-            rc.post_event(rc.PLAY_END)
+            eventhandler.post(PLAY_END)
 
 
     def stop(self, arg=None, menuw=None):

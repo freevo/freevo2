@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.40  2004/07/25 19:47:40  dischi
 # use application and not rc.app
 #
@@ -68,14 +71,14 @@ import time, os
 
 import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
-import rc      # The RemoteControl class.
+      # The RemoteControl class.
 import event as em
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 from tv.channels import FreevoChannels
 import tv.ivtv as ivtv
 import plugin
-import application
+import eventhandler
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -204,7 +207,7 @@ class MPlayer:
         # Start up the TV task
         self.app = childapp.ChildApp2(command)
         
-        application.append(self)
+        eventhandler.append(self)
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -233,7 +236,7 @@ class MPlayer:
 
         self.app.stop('quit\n')
 
-        application.remove(self)
+        eventhandler.remove(self)
 
 #         if rc.focused_app() and not channel_change:
 #             rc.focused_app().show()
@@ -246,7 +249,7 @@ class MPlayer:
 
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
-            rc.post_event(em.PLAY_END)
+            eventhandler.post(em.PLAY_END)
             return TRUE
 
         elif event in [ em.TV_CHANNEL_UP, em.TV_CHANNEL_DOWN] or s_event.startswith('INPUT_'):

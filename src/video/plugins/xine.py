@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/07/26 18:10:20  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.46  2004/07/25 19:47:41  dischi
 # use application and not rc.app
 #
@@ -78,7 +81,7 @@ import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
-import application
+import eventhandler
 
 from event import *
 import plugin
@@ -232,7 +235,7 @@ class Xine:
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        application.append(self)
+        eventhandler.append(self)
         self.app = childapp.ChildApp2(command)
         return None
     
@@ -243,7 +246,7 @@ class Xine:
         """
         if self.app:
             self.app.stop('quit\n')
-            application.remove(self)
+            eventhandler.remove(self)
             
 
     def eventhandler(self, event, menuw=None):

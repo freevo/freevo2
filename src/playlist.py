@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.72  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -48,7 +51,7 @@ import copy
 import config
 import menu
 import util
-import rc
+import eventhandler
 import plugin
 
 from event import *
@@ -424,12 +427,12 @@ class Playlist(Item):
         # That doesn't belong here! It should be part of the player!!!
         if event == PLAY_END:
             if self.current_item and self.current_item.type == 'audio':
-                rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
+                eventhandler.post(Event(AUDIO_LOG, arg=self.current_item.filename))
 
         if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and \
                event.arg and self.current_item and hasattr(self.current_item,'type'):
             if (self.current_item.type == 'audio'):
-                rc.post_event(Event(RATING,(event.arg,self.current_item.filename)))
+                eventhandler.post(Event(RATING,(event.arg,self.current_item.filename)))
 
 
         if not menuw:
@@ -438,9 +441,9 @@ class Playlist(Item):
         if event == PLAYLIST_TOGGLE_REPEAT:
             self.repeat = not self.repeat
             if self.repeat:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('playlist repeat on')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('playlist repeat on')))
             else:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('playlist repeat off')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('playlist repeat off')))
 
         if event in ( PLAYLIST_NEXT, PLAY_END, USER_END) \
                and self.current_item and self.playlist:
@@ -454,7 +457,7 @@ class Playlist(Item):
                 self.play(menuw=menuw, arg='next')
                 return True
             elif event == PLAYLIST_NEXT:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('no next item in playlist')))
 
                 
         # end and no next item
@@ -481,7 +484,7 @@ class Playlist(Item):
                 self.play(menuw=menuw, arg='next')
                 return True
             else:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('no previous item in playlist')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('no previous item in playlist')))
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)

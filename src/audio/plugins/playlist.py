@@ -43,7 +43,6 @@ import menu
 import plugin
 import time
 import config
-import rc
 import util
 
 from event import *

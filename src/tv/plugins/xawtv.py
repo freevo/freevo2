@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.6  2004/07/25 19:47:40  dischi
 # use application and not rc.app
 #
@@ -50,14 +53,14 @@ import signal
 import re
 
 import util    # Various utilities
-import rc      # The RemoteControl class.
+      # The RemoteControl class.
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 import event as em
 from tv.channels import FreevoChannels
 
 import plugin
-import application
+import eventhandler
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -206,7 +209,7 @@ class Xawtv:
 	    self.app.sendcmd('setstation %s' % tuner_channel)
         #XXX use remote to change the input we want
 
-        application.append(self)
+        eventhandler.append(self)
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -233,7 +236,7 @@ class Xawtv:
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.app.stop()
-        application.remove(self)
+        eventhandler.remove(self)
 
     def eventhandler(self, event, menuw=None):
         _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
@@ -241,7 +244,7 @@ class Xawtv:
             self.app.sendcmd('quit')
             time.sleep(1)
             self.Stop()
-            rc.post_event(em.PLAY_END)
+            eventhandler.post(em.PLAY_END)
             return True
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:

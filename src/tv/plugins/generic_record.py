@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.22  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -59,7 +62,7 @@ import signal
 import config
 import childapp 
 import plugin 
-import rc
+import eventhandler
 import util.tv_util as tv_util
 
 from event import *
@@ -169,7 +172,7 @@ class Record_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
-                rc.post_event(Event('RECORD_START', arg=self.prog))
+                eventhandler.post(Event('RECORD_START', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: cmd=%s' % self.command)
 
                 self.app = RecordApp(self.command)
@@ -184,12 +187,12 @@ class Record_Thread(threading.Thread):
                         
                 if DEBUG: print('Record_Thread::run: past wait()!!')
 
-                rc.post_event(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
+                eventhandler.post(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
                 self.app.kill()
 
                 self.mode = 'idle'
 
-                rc.post_event(Event('RECORD_STOP', arg=self.prog))
+                eventhandler.post(Event('RECORD_STOP', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: finished recording')
                 
             else:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.56  2004/07/25 19:47:40  dischi
 # use application and not rc.app
 #
@@ -62,6 +65,7 @@ from mmpython.disc.discinfo import cdrom_disc_id
 import config
 import util
 import application
+import rc
 
 class FileOutdatedException(Exception):
     pass
@@ -819,5 +823,5 @@ if __freevo_app__ == 'main':
         print
         print
 
-    import rc
+    
     rc.register(check_cache_status, True, 100)

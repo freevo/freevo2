@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.2  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -42,7 +45,7 @@ import os
 import config
 import plugin
 from playlist import Playlist
-import rc
+import eventhandler
 import event as em
 import fxditem
 
@@ -134,7 +137,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def poll(self):
         _debug_("Saver got polled %f" % time.time())
 	if not self.screensaver_showing and (time.time() - self.last_event) > self.saver_delay :
-	    rc.post_event(em.Event("SCREENSAVER_START"))
+	    eventhandler.post(em.Event("SCREENSAVER_START"))
 
     def start_saver (self):
 	 _debug_("start screensaver")
@@ -171,9 +174,9 @@ class PluginInterface(plugin.DaemonPlugin):
 	 elif self.saver_type == 'script':
 	     os.system('%s' % self.arg2)
 	 elif self.saver_type == 'ssr':
-	     rc.post_event(em.STOP)
+	     eventhandler.post(em.STOP)
 	 elif self.saver_type == 'fxd':
-	     rc.post_event(em.STOP)
+	     eventhandler.post(em.STOP)
 	 else:
 	     _debug_("Unknown saver type to stop.")
 

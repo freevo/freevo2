@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.136  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.135  2004/07/25 19:47:37  dischi
 # use application and not rc.app
 #
@@ -51,7 +54,7 @@ import traceback
 import re
 import stat
 import copy
-import rc
+
 import util.mediainfo as mediainfo
 
 import config
@@ -61,7 +64,7 @@ import menu
 import skin
 import plugin
 import fxditem
-import application
+import eventhandler
 
 from item import Item, FileInformation
 from playlist import Playlist
@@ -345,7 +348,7 @@ class DirItem(Playlist):
                 menuw.menustack[-2].selected = newdir
                 pos = menuw.menustack[-2].choices.index(self)
                 menuw.menustack[-2].choices[pos] = newdir
-                rc.post_event(Event(OSD_MESSAGE, arg='%s view' % type))
+                eventhandler.post(Event(OSD_MESSAGE, arg='%s view' % type))
                 return True
             except (IndexError, ValueError):
                 pass
@@ -1001,7 +1004,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
 
             # send EXIT to go one menu up:
-            rc.post_event(MENU_BACK_ONE_MENU)
+            eventhandler.post(MENU_BACK_ONE_MENU)
             self.dir = None
             return
 
@@ -1033,7 +1036,7 @@ class Dirwatcher(plugin.DaemonPlugin):
     
     def poll(self):
         if self.dir and self.menuw and \
-               self.menuw.menustack[-1] == self.item_menu and application.is_menu():
+               self.menuw.menustack[-1] == self.item_menu and eventhandler.is_menu():
             self.scan()
 
 # and activate that DaemonPlugin

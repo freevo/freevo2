@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.5  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
@@ -39,7 +42,7 @@
 import copy
 
 import gui
-import application
+import eventhandler
 
 from base import GUIObject
 
@@ -125,9 +128,9 @@ class Window(GUIObject):
     def show(self):
         if self.screen:
             return
-        self.parent = application.get()
+        self.parent = eventhandler.get()
         self.parent_handler = self.parent.eventhandler
-        application.append(self)
+        eventhandler.append(self)
 
         self.screen = gui.get_screen()
 
@@ -137,7 +140,7 @@ class Window(GUIObject):
         
 
     def destroy(self):
-        application.remove(self)
+        eventhandler.remove(self)
 
         for o in self.objects:
             self.screen.remove('content', o)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.4  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -57,7 +60,6 @@ except ImportError:
 # freevo imports
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
-import rc
 import plugin
 from event import *
 import util

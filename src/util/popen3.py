@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.11  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -49,7 +52,7 @@ import thread
 import types
 
 import config
-import rc
+import eventhandler
 from event import *
 
 class child_handler:
@@ -96,7 +99,7 @@ def Popen3(cmd, cwd = None):
         
     childapp = child_handler()
     
-    rc.post_event(Event(OS_EVENT_POPEN2, (childapp, cmd)))
+    eventhandler.post(Event(OS_EVENT_POPEN2, (childapp, cmd)))
     while(childapp.child == ''):
         time.sleep(0.01)
     
@@ -128,7 +131,7 @@ def waitpid(pid=0):
         return
     
     if config.IS_RECORDSERVER:
-        rc.post_event(Event(OS_EVENT_WAITPID, (pid,)))
+        eventhandler.post(Event(OS_EVENT_WAITPID, (pid,)))
         return True
 
     # do not use this for helpers

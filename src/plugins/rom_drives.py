@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.64  2004/07/25 19:47:39  dischi
 # use application and not rc.app
 #
@@ -54,8 +57,8 @@ import traceback
 import util.mediainfo
 from struct import *
 import array
-import rc
-import application
+
+import eventhandler
 
 try:
     from CDROM import *
@@ -84,7 +87,7 @@ except:
 
 import config
 import util
-import rc
+
 import plugin
 import video
 
@@ -692,7 +695,7 @@ class Identify_Thread(threading.Thread):
         """
         check all drives
         """
-        if not application.is_menu():
+        if not eventhandler.is_menu():
             # Some app is running, do not scan, it's not necessary
             return
         
@@ -705,9 +708,9 @@ class Identify_Thread(threading.Thread):
                 _debug_('MEDIA: Status=%s' % media.drive_status,2)
                 _debug_('Posting IDENTIFY_MEDIA event',2)
                 if last_status == None:
-                    rc.post_event(plugin.event('IDENTIFY_MEDIA', arg=(media, True)))
+                    eventhandler.post(plugin.event('IDENTIFY_MEDIA', arg=(media, True)))
                 else:
-                    rc.post_event(plugin.event('IDENTIFY_MEDIA', arg=(media, False)))
+                    eventhandler.post(plugin.event('IDENTIFY_MEDIA', arg=(media, False)))
         self.lock.release()
 
                 
@@ -737,7 +740,7 @@ class Identify_Thread(threading.Thread):
                 for media in config.REMOVABLE_MEDIA:
                     media.drive_status = None
 
-            if application.is_menu():
+            if eventhandler.is_menu():
                 # check only in the menu
                 self.check_all()
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.3  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -38,7 +41,7 @@ import skin,audio.player,plugin
 import config
 from event import *
 from util.dbutil import *
-import rc
+import eventhandler
 import util
 import os
 import time
@@ -76,4 +79,4 @@ class PluginInterface(plugin.DaemonPlugin):
             self.log_track(event.arg)
         if event == RATING and str(event.arg[0]) in '12345':
             self.log_rating(event.arg[1],event.arg[0])
-            rc.post_event(Event(OSD_MESSAGE,'Rated: %s' % str(event.arg[0])))
+            eventhandler.post(Event(OSD_MESSAGE,'Rated: %s' % str(event.arg[0])))

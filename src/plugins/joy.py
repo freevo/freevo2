@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.12  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -122,6 +125,6 @@ class PluginInterface(plugin.DaemonPlugin):
             _debug_('Translation: "%s" -> "%s"' % (button, command))
             command = rc.key_event_mapper(command)
             if command:
-                rc.post_event(command)
+                eventhandler.post(command)
     
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.22  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
@@ -48,7 +51,7 @@
 
 import config
 import skin
-import rc
+
 import plugin
 import event
 
@@ -108,12 +111,12 @@ class PlayerGUI:
             print error
             self.running = False
             if self.visible:
-                application.remove(self.player)
+                eventhandler.remove(self.player)
             self.item.eventhandler(event.PLAY_END)
             
         else:
             if self.visible:
-                application.append(self.player)
+                eventhandler.append(self.player)
             self.refresh()
 
 
@@ -143,21 +146,21 @@ class PlayerGUI:
         self.player.stop()
         self.running = False
         if self.visible:
-            application.remove(self.player)
+            eventhandler.remove(self.player)
         
 
     def show(self):
         if not self.visible:
             self.visible = 1
             self.refresh()
-            application.append(self.player)
+            eventhandler.append(self.player)
             
 
     def hide(self):
         if self.visible:
             self.visible = 0
             skin.clear()
-            application.remove(self.player)
+            eventhandler.remove(self.player)
             
 
     def refresh(self):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.69  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
@@ -52,8 +55,9 @@ import gettext
 import copy
 
 from event import Event
+
+import eventhandler
 import rc
-import application
 
 DEBUG = 0
 
@@ -168,7 +172,7 @@ class DaemonPlugin(Plugin):
 
 
     def poll_wrapper(self):
-        if self.poll_menu_only and not application.is_menu():
+        if self.poll_menu_only and not eventhandler.is_menu():
             return
         self.real_poll()
 
@@ -535,7 +539,7 @@ def __load_plugin__(name, type, level, args, number):
     """
     load the plugin and add it to the lists
     """
-    import rc
+    
     
     global __plugin_type_list__
     global __named_plugins__

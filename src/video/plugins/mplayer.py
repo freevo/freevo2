@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2004/07/26 18:10:20  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.74  2004/07/25 19:47:41  dischi
 # use application and not rc.app
 #
@@ -60,8 +63,8 @@ import mmpython
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-import rc         # The RemoteControl class.
-import application
+         # The RemoteControl class.
+import eventhandler
 import plugin
 
 from event import *
@@ -329,7 +332,7 @@ class MPlayer:
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        application.append(self)
+        eventhandler.append(self)
 
         self.app = MPlayerApp(command, self)
         return None
@@ -346,7 +349,7 @@ class MPlayer:
             return
         
         self.app.stop('quit\n')
-        application.remove(self)
+        eventhandler.remove(self)
         self.app = None
 
 
@@ -364,7 +367,7 @@ class MPlayer:
 
         if event == VIDEO_MANUAL_SEEK:
             self.seek = 0
-            application.set_context('input')
+            eventhandler.set_context('input')
             return True
         
         if event.context == 'input':
@@ -379,14 +382,14 @@ class MPlayer:
                 self.app.write('seek ' + str(self.seek) + ' 2\n')
                 _debug_("seek "+str(self.seek)+" 2\n")
                 self.seek = 0
-                application.set_context('video')
+                eventhandler.set_context('video')
                 return True
 
             elif event == INPUT_EXIT:
                 _debug_('seek stopped')
                 self.seek_timer.cancel()
                 self.seek = 0
-                application.set_context('video')
+                eventhandler.set_context('video')
                 return True
 
         if event == STOP:
@@ -455,7 +458,7 @@ class MPlayer:
     def reset_seek(self):
         _debug_('seek timeout')
         self.seek = 0
-        application.set_context('video')
+        eventhandler.set_context('video')
 
         
     def reset_seek_timeout(self):
@@ -595,7 +598,7 @@ class MPlayerApp(childapp.ChildApp2):
                     # OK, audio is broken, restart without -alang
                     self.check_audio = 2
                     self.item.mplayer_audio_broken = True
-                    rc.post_event(Event('AUDIO_ERROR_START_AGAIN'))
+                    eventhandler.post(Event('AUDIO_ERROR_START_AGAIN'))
                 
                 if self.RE_START(line):
                     if self.check_audio == 1:

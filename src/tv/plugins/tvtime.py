@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.39  2004/07/25 19:47:40  dischi
 # use application and not rc.app
 #
@@ -63,14 +66,14 @@ from cStringIO import StringIO
 
 import util    # Various utilities
 import osd
-import rc      # The RemoteControl class.
+      # The RemoteControl class.
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 import event as em
 from tv.channels import FreevoChannels
 
 import plugin
-import application
+import eventhandler
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -470,7 +473,7 @@ class TVTime:
         # Start up the TV task
         self.app=TVTimeApp(command)        
 
-        application.append(self)
+        eventhandler.append(self)
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -497,13 +500,13 @@ class TVTime:
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.app.stop('quit\n')
-        application.remove(self)
+        eventhandler.remove(self)
 
     def eventhandler(self, event, menuw=None):
         _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
         if event == em.STOP or event == em.PLAY_END:
             self.Stop()
-            rc.post_event(em.PLAY_END)
+            eventhandler.post(em.PLAY_END)
             return True
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
@@ -604,7 +607,7 @@ class TVTimeApp(childapp.ChildApp2):
         else:
             event = events.get(line, None)
             if event is not None:
-                rc.post_event(event)
+                eventhandler.post(event)
                 if DEBUG: print 'posted translated tvtime event "%s"' % event
             else:
                 if DEBUG: print 'tvtime cmd "%s" not found!' % line

@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/26 18:10:20  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.12  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -55,7 +58,7 @@ import plugin
 import config
 import util
 import menu
-import rc
+import eventhandler
 
 from event import *
 
@@ -143,7 +146,7 @@ class PluginInterface(plugin.ItemPlugin):
             handle.write(str(item.elapsed))
             handle.write('\n')
             handle.close()
-            rc.post_event(Event(OSD_MESSAGE, arg='Added Bookmark'))
+            eventhandler.post(Event(OSD_MESSAGE, arg='Added Bookmark'))
             return True
 
         return False

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.38  2004/07/25 19:47:39  dischi
 # use application and not rc.app
 #
@@ -47,9 +50,9 @@ import copy
 
 import config
 import menu
-import rc
+
 import directory
-import application
+import eventhandler
 
 import plugin
 import plugins.rom_drives
@@ -256,7 +259,7 @@ class MediaMenu(Item):
                 else:
                     menu.selected = None
 
-            if menu == menuw.menustack[-1] and application.is_menu():
+            if menu == menuw.menustack[-1] and eventhandler.is_menu():
                 menuw.init_page()
                 menuw.refresh()
             # others may need this event, too

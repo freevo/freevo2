@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.3  2004/07/25 19:47:40  dischi
 # use application and not rc.app
 #
@@ -52,7 +55,7 @@ import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
 import osd
-import application
+import eventhandler
 
 from tv.channels import FreevoChannels
 
@@ -163,7 +166,7 @@ class Xine:
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        application.append(self)
+        eventhandler.append(self)
 
         self.app = childapp.ChildApp2(command)
         return None
@@ -175,7 +178,7 @@ class Xine:
         """
         if self.app:
             self.app.stop('quit\n')
-            application.remove(self)
+            eventhandler.remove(self)
 
             if not channel_change:
                 pass
@@ -188,7 +191,7 @@ class Xine:
         """
         if event in ( PLAY_END, USER_END, STOP ):
             self.stop()
-            rc.post_event(PLAY_END)
+            eventhandler.post(PLAY_END)
             return True
 
         if event == PAUSE or event == PLAY:

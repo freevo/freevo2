@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.38  2004/07/21 11:18:26  dischi
 # fix unicode error
 #
@@ -47,7 +50,6 @@ import re
 import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 
-import rc
 import plugin
 
 from event import *

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.135  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.134  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
@@ -72,7 +75,7 @@ os.environ['LD_PRELOAD'] = ''
 import sys, time
 import traceback
 import signal
-import application
+import eventhandler
 
 # i18n support
 
@@ -205,7 +208,7 @@ class MainMenu(Item):
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         menuw.pushmenu(mainmenu)
-        application.append(menuw)
+        eventhandler.append(menuw)
 
 
     def get_skins(self):
@@ -429,7 +432,8 @@ try:
 
     # Kick off the main menu loop
     _debug_('Main loop starting...',2)
-    application.get_singleton().run()
+    import rc
+    rc.get_singleton().run()
 
 
 except KeyboardInterrupt:

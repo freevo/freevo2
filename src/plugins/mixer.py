@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.14  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -45,7 +48,7 @@ import struct
 import os
 
 import config
-import rc
+import eventhandler
 import plugin
 from event import *
 
@@ -122,27 +125,27 @@ class PluginInterface(plugin.DaemonPlugin):
         if event == MIXER_VOLUP:
             if config.MAJOR_AUDIO_CTRL == 'VOL':
                 self.incMainVolume(event.arg)
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
             elif config.MAJOR_AUDIO_CTRL == 'PCM':
                 self.incPcmVolume(event.arg)
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
             return True
         
         elif event == MIXER_VOLDOWN:
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
                 self.decMainVolume(event.arg)
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
                 self.decPcmVolume(event.arg)
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
             return True
 
         elif event == MIXER_MUTE:
             if self.getMuted() == 1:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Volume: %s%%') % self.getVolume()))
                 self.setMuted(0)
             else:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Mute')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Mute')))
                 self.setMuted(1)
             return True
 

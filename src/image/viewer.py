@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.56  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
@@ -63,8 +66,8 @@ import os
 
 import config 
 import util
-import rc
-import application
+
+import eventhandler
 
 from event import *
 
@@ -125,7 +128,7 @@ class ImageViewer:
         else:
             self.app_mode    = 'image'
 
-        application.append(self)
+        eventhandler.append(self)
 
         swidth  = gui.get_screen().width
         sheight = gui.get_screen().height
@@ -341,19 +344,19 @@ class ImageViewer:
 
     def signalhandler(self, signum, frame):
         print 'signal'
-        if application.get() == self and self.slideshow:
-            application.remove(self)
+        if eventhandler.get() == self and self.slideshow:
+            eventhandler.remove(self)
             self.eventhandler(PLAY_END)
 
 
     def eventhandler(self, event, menuw=None):
         if event == PAUSE or event == PLAY:
             if self.slideshow:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('pause')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('pause')))
                 self.slideshow = False
                 signal.alarm(0)
             else:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('play')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('play')))
                 self.slideshow = True
                 signal.alarm(1)
             return True
@@ -374,7 +377,7 @@ class ImageViewer:
                 self.osd_box = None
 
             self.filename = None
-            application.remove(self)
+            eventhandler.remove(self)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
             return True

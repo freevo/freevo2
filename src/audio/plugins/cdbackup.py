@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.34  2004/07/22 21:21:46  dischi
 # small fixes to fit the new gui code
 #
@@ -72,7 +75,7 @@ import config
 import menu
 import util
 import plugin
-import rc
+import eventhandler
 
 from gui import AlertBox
 from event import *
@@ -249,7 +252,7 @@ class PluginInterface(plugin.ItemPlugin):
         # delete submenu
         menuw.delete_submenu()
         # show message
-        rc.post_event(Event(OSD_MESSAGE, _( 'Ripping started' )))
+        eventhandler.post(Event(OSD_MESSAGE, _( 'Ripping started' )))
 
 
 
@@ -332,7 +335,7 @@ class main_backup_thread(threading.Thread):
         self.max_track = len(song_names)
         for i in range (0, len(song_names)):
             if self.abort:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
                 self.current_track = -1
                 return
 
@@ -385,7 +388,7 @@ class main_backup_thread(threading.Thread):
             # Have the OS execute the CD Paranoia rip command
             popen3.run(cdparanoia_command, self, 9)
             if self.abort:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
                 self.current_track = -1
 
                 # Remove the .wav file.
@@ -455,7 +458,7 @@ class main_backup_thread(threading.Thread):
 
             # abort set?
             if self.abort:
-                rc.post_event(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
+                eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
                 self.current_track = -1
 
                 # Remove the unfinished output file.
@@ -468,7 +471,7 @@ class main_backup_thread(threading.Thread):
                 media.type = 'audio'
 
         # done
-        rc.post_event(Event(OSD_MESSAGE, arg=_('Ripping complete')))
+        eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping complete')))
         self.current_track = -1
 
 

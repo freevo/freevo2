@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.168  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.167  2004/07/24 12:23:09  dischi
 # replaced osd.py with a dummy
 #
@@ -74,7 +77,6 @@ import cStringIO
 
 # Freevo modules
 import config
-import rc
 import util
 
 

@@ -1,18 +1,15 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# application.py - Event and Application handling
+# eventhandler.py - Event handling
 # -----------------------------------------------------------------------
 # $Id$
 #
 # Notes: 
 #
-# Todo:        move event mapping from rc.py in this file
-#              (see the FIXME comments for bad rc.py updates)
-#
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2004/07/25 19:46:33  dischi
-# new class for application / focus / event handling
+# Revision 1.1  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
 #
 #
 # -----------------------------------------------------------------------
@@ -38,6 +35,7 @@
 
 
 import time
+import thread
 
 import config
 from event import *
@@ -53,7 +51,7 @@ def get_singleton():
 
     # One-time init
     if _singleton == None:
-        _singleton = Application()
+        _singleton = Eventhandler()
         
     return _singleton
 
@@ -93,9 +91,26 @@ def set_context(context):
     return get_singleton().set_context(context)
 
 
+def post(event):
+    """
+    Send an event to the event queue
+    """
+    return get_singleton().post(event)
+    
+
+def post_key(key):
+    """
+    Send a keyboard event to the event queue
+    """
+    return get_singleton().post_key(key)
 
 
-class Application:
+
+
+# --------------------------------------------------------------------------------
+
+
+class Eventhandler:
     """
     This is the main application for Freevo, handling applications
     with an event handler and the event mapping.
@@ -105,7 +120,7 @@ class Application:
         self.context = None
 
         self.eventhandler_plugins = None
-
+        self.queue = []
 
     def append(self, app):
         """
@@ -118,9 +133,6 @@ class Application:
         else:
             self.context = app.event_context
         self.focus.append(app)
-        # FIXME:
-        import rc
-        rc.get_singleton().context = self.context
 
 
     def remove(self, app):
@@ -136,9 +148,6 @@ class Application:
             self.context = app.app_mode
         else:
             self.context = app.event_context
-        # FIXME:
-        import rc
-        rc.get_singleton().context = self.context
 
 
     def get(self):
@@ -160,15 +169,53 @@ class Application:
         Set context
         """
         self.context = context
-        # FIXME:
-        import rc
-        rc.get_singleton().context = self.context
 
         
-    def eventhandler(self, event):
+    def post(self, event):
+        """
+        Send an event to the event queue
+        """
+        if not isinstance(event, Event):
+            self.queue += [ Event(event, context=self.context) ]
+        else:
+            self.queue += [ event ]
+
+
+
+    def post_key(self, key):
+        """
+        Send a keyboard event to the event queue
+        """
+        if not key:
+            return None
+
+        for c in (self.context, 'global'):
+            try:
+                e = config.EVENTS[c][key]
+                e.context = self.context
+                self.queue.append(e)
+                break
+            except KeyError:
+                pass
+        else:
+            if self.context != 'input':
+                print 'no event mapping for key %s in context %s' % (key, self.context)
+                print 'send button event BUTTON arg=%s' % key
+            self.queue.append(Event(BUTTON, arg=key))
+
+
+
+    def handle(self):
         """
         event handling function
         """
+        # search for events in the queue
+        if not len(self.queue):
+            return
+
+        event = self.queue[0]
+        del self.queue[0]
+        
         _debug_('handling event %s' % str(event), 2)
 
         if self.eventhandler_plugins == None:
@@ -235,15 +282,3 @@ class Application:
                 pop.show()
             else:
                 raise 
-
-
-
-    def run(self):
-        """
-        Run the main loop (FIXME: should only be a callback)
-        """
-        import rc
-        while 1:
-            get_singleton().eventhandler(rc.get_event(True))
-
-        

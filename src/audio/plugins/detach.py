@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/26 18:10:17  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.17  2004/07/10 12:33:37  dischi
 # header cleanup
 #
@@ -40,7 +43,7 @@
 import config
 import plugin
 import menu
-import rc
+import eventhandler
 import audio.player
 
 from event import *
@@ -78,7 +81,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         gui.item.menuw = None
         if gui.item.parent:
             gui.item.parent.menuw = None
-        rc.post_event(plugin.event('DETACH'))
+        eventhandler.post(plugin.event('DETACH'))
         
 
     def items(self, parent):

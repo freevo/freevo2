@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.40  2004/07/25 19:47:39  dischi
 # use application and not rc.app
 #
@@ -65,7 +68,6 @@ import os
 import time
 
 import config
-import rc
 import util
 
 from gui import PopupBox

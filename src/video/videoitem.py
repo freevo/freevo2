@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.145  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.144  2004/07/21 11:34:59  dischi
 # disable one track auto-play for dvd
 #
@@ -76,7 +79,7 @@ import copy
 
 import config
 import util
-import rc
+import eventhandler
 import menu
 import configure
 import plugin
@@ -545,7 +548,7 @@ class VideoItem(Item):
         error handler if play doesn't work to send the end event and stop
         the player
         """
-        rc.post_event(PLAY_END)
+        eventhandler.post(PLAY_END)
         self.stop()
 
 

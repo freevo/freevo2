@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.8  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -43,7 +46,7 @@ import os
 import config
 import plugin
 import util
-import rc
+import eventhandler
 from gui import PopupBox
 
 class PluginInterface(plugin.DaemonPlugin):
@@ -100,6 +103,6 @@ class PluginInterface(plugin.DaemonPlugin):
             print 'usb.py: removed device %s' % d
 
         if changes:
-            rc.post_event(plugin.event('USB'))
+            eventhandler.post(plugin.event('USB'))
             
         self.devices = current_devices

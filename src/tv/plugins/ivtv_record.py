@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/07/26 18:10:19  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.27  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -69,7 +72,7 @@ import config
 import tv.ivtv
 import childapp 
 import plugin 
-import rc
+import eventhandler
 import util.tv_util as tv_util
 
 from event import Event
@@ -138,7 +141,7 @@ class Record_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
-                rc.post_event(Event('RECORD_START', arg=self.prog))
+                eventhandler.post(Event('RECORD_START', arg=self.prog))
                 if DEBUG: print 'Record_Thread::run: started recording'
 
                 fc = FreevoChannels()
@@ -180,7 +183,7 @@ class Record_Thread(threading.Thread):
 
                 self.mode = 'idle'
 
-                rc.post_event(Event('RECORD_STOP', arg=self.prog))
+                eventhandler.post(Event('RECORD_STOP', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: finished recording')
 
             else:

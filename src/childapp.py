@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.57  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -60,6 +63,7 @@ import copy
 import config
 import osd
 import rc
+import eventhandler
 import util
 
 from event import *
@@ -364,7 +368,7 @@ class ChildApp2(ChildApp):
         self.is_video = 0                       # Be more explicit
         if stop_osd == 2: 
             self.is_video = 1
-            rc.post_event(Event(VIDEO_START))
+            eventhandler.post(Event(VIDEO_START))
             stop_osd = config.OSD_STOP_WHEN_PLAYING
 
         self.stop_osd = stop_osd
@@ -372,7 +376,7 @@ class ChildApp2(ChildApp):
            osd.stop()
         
         if hasattr(self, 'item'):
-            rc.post_event(Event(PLAY_START, arg=self.item))
+            eventhandler.post(Event(PLAY_START, arg=self.item))
 
         # return status of the child
         self.status = 0
@@ -428,7 +432,7 @@ class ChildApp2(ChildApp):
             osd.restart()
 
         if self.is_video:
-            rc.post_event(Event(VIDEO_END))
+            eventhandler.post(Event(VIDEO_END))
 
         
     def poll(self):
@@ -436,6 +440,6 @@ class ChildApp2(ChildApp):
         stop everything when child is dead
         """
         if not self.isAlive():
-            rc.post_event(self.stop_event())
+            eventhandler.post(self.stop_event())
             self.stop()
             

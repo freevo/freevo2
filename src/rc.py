@@ -9,30 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/26 18:10:16  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.38  2004/07/25 19:47:38  dischi
 # use application and not rc.app
 #
 # Revision 1.37  2004/07/24 12:22:37  dischi
 # move focus handling to rc for now
-#
-# Revision 1.36  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.35  2004/05/31 10:39:55  dischi
-# Again some interface changes. There is now only one function
-# handling all callbacks, including repeating calls with timer
-#
-# Revision 1.34  2004/05/30 18:27:53  dischi
-# More event / main loop cleanup. rc.py has a changed interface now
-#
-# Revision 1.33  2004/05/29 19:06:26  dischi
-# move some code from main to rc, create main class
-#
-# Revision 1.32  2004/05/20 18:26:27  dischi
-# patch from Viggo
-#
-# Revision 1.31  2004/05/09 14:16:16  dischi
-# let the child stdout handled by main
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -65,6 +49,7 @@ import types
 import config
 
 from event import Event, BUTTON
+import eventhandler
 
 SHUTDOWN = -1
 
@@ -72,7 +57,7 @@ PYLIRC     = False
 _singleton = None
 
 
-def get_singleton(**kwargs):
+def get_singleton():
     """
     get the global rc object
     """
@@ -80,16 +65,9 @@ def get_singleton(**kwargs):
 
     # One-time init
     if _singleton == None:
-        _singleton = EventHandler(**kwargs)
+        _singleton = MainLoop()
         
     return _singleton
-
-
-def post_event(event):
-    """
-    add an event to the event queue
-    """
-    return get_singleton().post_event(event)
 
 
 def register(function, repeat, timer, *arg):
@@ -113,21 +91,6 @@ def shutdown():
     shutdown the rc
     """
     return get_singleton().shutdown()
-
-
-def poll():
-    """
-    poll all registered callbacks
-    """
-    return get_singleton().poll()
-
-
-def get_event(blocking=False):
-    """
-    get next event. If blocking is True, this function will block until
-    there is a new event (also call all registered callbacks while waiting)
-    """
-    return get_singleton().get_event(blocking)
 
 
 # --------------------------------------------------------------------------------
@@ -204,7 +167,7 @@ class Lirc:
 
 
 
-    def poll(self, rc):
+    def poll(self):
         """
         return next event
         """
@@ -242,7 +205,7 @@ class Lirc:
             self.repeat_count += 1
 
             for code in list:
-                return code
+                eventhandler.post_key(code)
 
         
 # --------------------------------------------------------------------------------
@@ -259,12 +222,14 @@ class Keyboard:
         self.callback = gui.get_keyboard().poll
 
 
-    def poll(self, rc):
+    def poll(self):
         """
         return next event
         """
-        return self.callback(rc.context != 'input')
-
+        e = self.callback()
+        if e:
+            eventhandler.post_key(e)
+            
 
 # --------------------------------------------------------------------------------
 
@@ -284,7 +249,7 @@ class Network:
         self.sock.bind(('', self.port))
         
 
-    def poll(self, rc):
+    def poll(self):
         """
         return next event
         """
@@ -297,7 +262,7 @@ class Network:
 
 # --------------------------------------------------------------------------------
     
-class EventHandler:
+class MainLoop:
     """
     Class to transform input keys or buttons into events. This class
     also handles the complete event queue (post_event)
@@ -320,75 +285,14 @@ class EventHandler:
                config.REMOTE_CONTROL_PORT:
             self.inputs.append(Network())
 
-        self.app                = None
-        self.context            = 'menu'
-        self.queue              = []
-        self.event_callback     = None
         self.callbacks          = []
         self.shutdown_callbacks = []
-        self.poll_objects       = []
+
         # lock all critical parts
         self.lock               = thread.allocate_lock()
         # last time we stopped sleeping
         self.sleep_timer        = 0
         
-
-    def set_app(self, app, context):
-        """
-        set default eventhandler and context
-        """
-        self.app     = app
-        self.context = context
-
-
-    def get_app(self):
-        """
-        get current eventhandler (app)
-        """
-        return self.app
-
-
-    def set_context(self, context):
-        """
-        set context for key mapping
-        """
-        self.context = context
-        
-
-    def post_event(self, e):
-        """
-        add event to the queue
-        """
-        self.lock.acquire()
-        if not isinstance(e, Event):
-            self.queue += [ Event(e, context=self.context) ]
-        else:
-            self.queue += [ e ]
-        self.lock.release()
-
-        if self.event_callback:
-            self.event_callback()
-
-
-    def key_event_mapper(self, key):
-        """
-        map key to event based on current context
-        """
-        if not key:
-            return None
-
-        for c in (self.context, 'global'):
-            try:
-                e = config.EVENTS[c][key]
-                e.context = self.context
-                return e
-            except KeyError:
-                pass
-
-        if self.context != 'input':
-            print 'no event mapping for key %s in context %s' % (key, self.context)
-            print 'send button event BUTTON arg=%s' % key
-        return Event(BUTTON, arg=key)
 
 
     def register(self, function, repeat, timer, *arg):
@@ -433,71 +337,35 @@ class EventHandler:
             c[0](*c[1])
 
 
-    def poll(self):
-        """
-        poll all registered functions
-        """
-        # run all registered callbacks
-        for c in copy.copy(self.callbacks):
-            if c[2] == c[3]:
-                # time is up, call it:
-                c[0](*c[4])
-                if not c[1]:
-                    # remove if it is no repeat callback:
-                    self.lock.acquire()
-                    self.callbacks.remove(c)
-                    self.lock.release()
+    def run(self):
+        eh = eventhandler._singleton
+        while 1:
+            # wait some time
+            duration = 0.01 - (time.time() - self.sleep_timer)
+            if duration > 0:
+                time.sleep(duration)
+            self.sleep_timer = time.time()
+
+            for i in self.inputs:
+                e = i.poll()
+
+            # run all registered callbacks
+            for c in copy.copy(self.callbacks):
+                if c[2] == c[3]:
+                    # time is up, call it:
+                    c[0](*c[4])
+                    if not c[1]:
+                        # remove if it is no repeat callback:
+                        self.lock.acquire()
+                        self.callbacks.remove(c)
+                        self.lock.release()
+                    else:
+                        # reset counter for next run
+                        c[3] = 0
                 else:
-                    # reset counter for next run
-                    c[3] = 0
-            else:
-                c[3] += 1
+                    c[3] += 1
 
-
-    def get_event(self, blocking=False):
-        """
-        get next event. If blocking is True, this function will block until
-        there is a new event (also call all registered callbacks while waiting)
-        """
-        if blocking:
-            while 1:
-                # get non blocking event
-                event = self.get_event(False)
-                if event:
-                    return event
-                # poll everything
-                self.poll()
-
-                # wait some time
-                duration = 0.01 - (time.time() - self.sleep_timer)
-                if duration > 0:
-                    time.sleep(duration)
-                self.sleep_timer = time.time()
-
+            while eh.queue:
+                eh.handle()
                 
-        # search for events in the queue
-        if len(self.queue):
-            self.lock.acquire()
-            ret = self.queue[0]
-            del self.queue[0]
-            self.lock.release()
-            return ret
-
-        # search all input objects for new events
-        for i in self.inputs:
-            e = i.poll(self)
-            if e:
-                return self.key_event_mapper(e)
-
         return None
-
-
-
-    def subscribe(self, event_callback=None):
-        """
-        subscribe to 'post_event'
-        """
-        if not event_callback:
-            return
-
-        self.event_callback = event_callback

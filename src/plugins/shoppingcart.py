@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.7  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -52,7 +55,7 @@ import config
 import shutil
 import util
 from gui import PopupBox
-import rc
+import eventhandler
 import event as em
 import menu
 
@@ -77,7 +80,7 @@ class PluginInterface(plugin.ItemPlugin):
             cartfile.files.move(self.item.dir)
         popup.destroy()
         self.cart = []
-        rc.post_event(em.MENU_BACK_ONE_MENU)
+        eventhandler.post(em.MENU_BACK_ONE_MENU)
 
 
     def copyHere(self, arg=None, menuw=None):
@@ -87,20 +90,20 @@ class PluginInterface(plugin.ItemPlugin):
             cartfile.files.copy(self.item.dir)
         popup.destroy()
         self.cart = []
-        rc.post_event(em.MENU_BACK_ONE_MENU)
+        eventhandler.post(em.MENU_BACK_ONE_MENU)
 
 
     def addToCart(self, arg=None, menuw=None):
         self.cart.append(self.item)
         if isinstance(menuw.menustack[-1].selected, menu.MenuItem):
-            rc.post_event(em.MENU_BACK_ONE_MENU)
+            eventhandler.post(em.MENU_BACK_ONE_MENU)
         else:
-            rc.post_event(em.Event(em.OSD_MESSAGE, arg=_('Added to Cart')))
+            eventhandler.post(em.Event(em.OSD_MESSAGE, arg=_('Added to Cart')))
             
 
     def deleteCart(self, arg=None, menuw=None):
         self.cart = []
-        rc.post_event(em.MENU_BACK_ONE_MENU)
+        eventhandler.post(em.MENU_BACK_ONE_MENU)
 
 
     def actions(self, item):

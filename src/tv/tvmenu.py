@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/26 18:10:18  dischi
+# move global event handling to eventhandler.py
+#
 # Revision 1.18  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -50,10 +53,6 @@ import config
 
 # The menu widget class
 import menu
-
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
 
 import plugin
 
