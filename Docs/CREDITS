@@ -18,24 +18,22 @@ People:
 -------
 
 Please email one of the maintainers if your name happens to
-be missing here!
+be missing here or the information is wrong!
 
 Maintainers:
+
 Krister Lagerstrom <krister-freevo@kmlager.com>:
 o Initial implementation
-o osd server and bulk of code and libraries
-o and more...
+o Core developer
 
 Aubin Paul <aubin@outlyer.org>:
-o Testing, ideas, shell programming
-o XMLTV integration and mp3 player fixes
-o MP3 Tag support and error checking
-o and more...
+o Core developer
 
 Dirk Meyer <dmeyer@tzi.de>:
-o IMDB support
-o XML config files for movies/albums
-o and more...
+o Core developer
+
+Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
+o Core developer
 
 Jason Ball <jason.ball@ce.com.au>:
 o SDL support in the OSD
@@ -44,8 +42,6 @@ Thomas Malt <thomas@malt.no>
 o Mplayer for Audio support
 o Ogg Vorbis Tag and Playback support
 
-Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
-o Skin and XML code
 
 
 Occasional contributors:
@@ -72,6 +68,7 @@ o ID3v2.x support
 
 Rob Shortt <rob@infointeractive.com>
 o Enhancements to Mame support
+o Freevo web interface for recording
 
 John M Cooper <john.cooper@yourcommunications.co.uk>
 o Bins support
