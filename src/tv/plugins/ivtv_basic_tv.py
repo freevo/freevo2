@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/14 17:09:15  rshortt
+# User the init_ and print_ functions from the IVTV class.
+#
 # Revision 1.1  2003/07/13 19:26:53  rshortt
 # A basic tv viewing plugin for IVTV based capture cards (PVR-250/350)
 # that does not have pause/rewind/fast forward functionality.
@@ -144,16 +147,14 @@ class IVTV_TV:
         if mode == 'tv':
             cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
 
-            w, h = config.TV_VIEW_SIZE
             self.videodev = ivtv.IVTV(cf_device)
-            self.videodev.setchanlist(cf_clist)
+            self.videodev.init_settings()
+            self.videodev.print_settings()
+
             self.videodev.setchannel(self.TunerGetChannel())
 
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
-            # XXX: set channel, norm, codec, etc
-            # (tuner_channel, device, input, norm, chanlist, w, h, outfmt))
-            
             # Build the MPlayer command
             args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
                     config.MPLAYER_VO_DEV_OPTS)
