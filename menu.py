@@ -137,9 +137,8 @@ class MenuWidget:
 
     def refresh(self):
         if self.menustack[-1].umount_all == 1:
-            if config.ROM_DRIVES:
-                for rom in config.ROM_DRIVES:
-                    util.umount(rom[0])
+            for media in config.REMOVABLE_MEDIA:
+                util.umount(media.mountdir)
     
         skin.DrawMenu(self)
         
@@ -207,14 +206,16 @@ class MenuWidget:
                 #osd.drawstring('Args: %s' % arg_str, 50, 280)
                 print 'Calling action "%s"' % str(action)
                 action( arg=menu.selected.arg, menuw=self )
+        elif event == rc.REFRESH_SCREEN:
+            self.refresh()
         else:
             action = menu.selected.eventhandler
             if action:
                 action_str = str(action)
                 arg_str = str(menu.selected.eventhandler_args)[0:40]
                 print 'Calling action "%s"' % str(action)
-                action( event = event, arg=menu.selected.eventhandler_args,
-                        menuw=self )
+                action(event = event, arg=menu.selected.eventhandler_args,
+                       menuw=self)
         return 0
 
 
