@@ -13,11 +13,13 @@ Release 1.3.2 (TBD):
   * Image errors (fixed crash, display message about load problem instead)
   * MP3 time display	
   * FreevoWeb channel selection when recording	
+  * identify media now return correct titles again
  * Use "freevo setup" instead of "./configure" to set up Freevo
- * New display mode for the image viewer, with nice thumbnails etc
+ * New display mode for the image browser, with nice thumbnails etc
+ * New display mode for the video browser
  * Added Joakim Berglunds patches for audio random lists off, extra cover dir	
  * Changed the movie xml files to the new format by Matthieu Weber
-	
+
 Release 1.3.1 (2003-02-12):
 ---------------------------
 o The runtime and apps packages are now included in the binary release!	
