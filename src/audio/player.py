@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/12 11:01:19  dischi
+# Don't show black screen between selecting and playing an audio file
+#
 # Revision 1.7  2003/09/20 09:44:23  dischi
 # cleanup
 #
@@ -84,7 +87,7 @@ class PlayerGUI(GUIObject):
             self.stop()
             
         if self.menuw and self.menuw.visible:
-            self.menuw.hide()
+            self.menuw.hide(clear=False)
 
         self.running = True
         error = self.player.play(self.item, self)

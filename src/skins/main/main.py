@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/10/12 11:01:20  dischi
+# Don't show black screen between selecting and playing an audio file
+#
 # Revision 1.14  2003/09/24 18:13:44  outlyer
 # Fix hex constant (endian independent as per Python >= 2.3 requirement)
 #
@@ -564,13 +567,14 @@ class Skin:
 
 
 
-    def clear(self):
+    def clear(self, osd_update=True):
         """
         clean the screen
         """
         self.force_redraw = TRUE
         osd.clearscreen(osd.COL_BLACK)
-        osd.update()
+        if osd_update:
+            osd.update()
 
 
     def redraw(self):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2003/10/12 11:01:19  dischi
+# Don't show black screen between selecting and playing an audio file
+#
 # Revision 1.65  2003/10/12 09:49:46  dischi
 # make option how much "one menu" is and go back 2 for configure directory
 #
@@ -217,10 +220,11 @@ class MenuWidget(GUIObject):
             self.visible = 1
             self.refresh(reload=1)
             
-    def hide(self):
+    def hide(self, clear=True):
         if self.visible:
             self.visible = 0
-            self.skin.clear()
+            if clear:
+                self.skin.clear(osd_update=clear)
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         if len(self.menustack) > 1:
