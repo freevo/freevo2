@@ -167,7 +167,7 @@ def subitem_selection_menu(arg=None, menuw=None):
         menu_items += [ menu.MenuItem(_('Play chapter %s') % (pos+1),
                                       subitem_selection, (arg, pos)) ]
     moviemenu = menu.Menu(_('Chapter Menu'), menu_items,
-                          fxd_file=item.skin_fxd)
+                          theme=item.skin_fxd)
     menuw.pushmenu(moviemenu)
 
 
