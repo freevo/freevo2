@@ -94,7 +94,7 @@ class Guide:
         self.db.close()
 
 
-    def __escape_query(self.sql):
+    def __escape_query(self, sql):
         """
         Escape a SQL query in a manner suitable for sqlite
         """
@@ -104,7 +104,7 @@ class Guide:
         return sql
 
 
-    def __escape_value(self.val):
+    def __escape_value(self, val):
         """
         Escape a SQL value in a manner to be quoted inside a query
         """
