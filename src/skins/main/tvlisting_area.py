@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/21 18:19:36  dischi
+# Oops. remove debug
+#
 # Revision 1.10  2003/09/21 18:18:31  dischi
 # do not calc the arrows twice
 #
@@ -407,7 +410,7 @@ class TVListing_Area(Skin_Area):
             else:
                 v = area.images['downarrow']
             self.draw_image(area.images['downarrow'].filename, v)
-        print 'x'
+
         
     def check_schedule (self):
 
