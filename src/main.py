@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2003/10/23 17:28:41  dischi
+# correct shutdown
+#
 # Revision 1.83  2003/10/20 19:32:33  dischi
 # catch exception caused by eventhandlers
 #
@@ -171,6 +174,10 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     # SDL must be shutdown to restore video modes etc
     osd.clearscreen(color=osd.COL_BLACK)
     osd.shutdown()
+
+    for t in traceback.extract_stack():
+        if t[2].find('signal_handler') == 0:
+            sys.exit(0)
 
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
@@ -439,6 +446,9 @@ if __name__ == "__main__":
         # Shutdown the application
         shutdown(allow_sys_shutdown=0)
 
+    except SystemExit:
+        sys.exit(0)
+
     except:
         print 'Crash!'
         try:
@@ -464,7 +474,7 @@ if __name__ == "__main__":
                                fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
                 osd.update()
                 time.sleep(1)
-                
+
         except:
             pass
         traceback.print_exc()
