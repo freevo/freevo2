@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/12 17:16:30  dischi
+# created a special area for plugins to draw
+#
 # Revision 1.13  2003/07/11 19:44:18  dischi
 # close file after parsing
 #
@@ -882,16 +885,16 @@ class XMLSkin:
         self.tv     = copy.deepcopy(self._tv)
         self.player = copy.deepcopy(self._player)
         
-        font        = copy.deepcopy(self._font)
+        self.font   = copy.deepcopy(self._font)
         layout      = copy.deepcopy(self._layout)
         
         search_dirs = self.skin_directories + [ 'skins/images', self.icon_dir, '.' ]
         
-        for f in font:
-            font[f].prepare(self._color, scale=self.font_scale)
+        for f in self.font:
+            self.font[f].prepare(self._color, scale=self.font_scale)
             
         for l in layout:
-            layout[l].prepare(font, self._color, search_dirs, self._images)
+            layout[l].prepare(self.font, self._color, search_dirs, self._images)
         for menu in self.menu:
             self.menu[menu].prepare(self._menuset, layout)
 

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/12 17:16:30  dischi
+# created a special area for plugins to draw
+#
 # Revision 1.14  2003/07/10 20:01:11  dischi
 # small bugfix for blue_round1
 #
@@ -307,7 +310,8 @@ class Skin_Area:
         """
 
         self.display_style = display_style
-
+        self.xml_settings = settings
+        
         if widget_type == 'menu':
             self.menuw = obj
             self.menu  = obj.menustack[-1]
@@ -361,13 +365,16 @@ class Skin_Area:
                                               old_area.y + old_area.height))
             self.objects = SkinObjects()
 
-        if not area.visible or not self.layout:
-            self.objects = SkinObjects()
-            return
+        if not self.area_name == 'plugin':
+            if not area.visible or not self.layout:
+                self.objects = SkinObjects()
+                return
 
-        self.tmp_objects = SkinObjects()
-        self.draw_background()
-
+            self.tmp_objects = SkinObjects()
+            self.draw_background()
+        else:
+            self.tmp_objects = SkinObjects()
+            
         # dependencies haven't changed
         if not self.redraw:
             # no update needed: return
@@ -628,11 +635,18 @@ class Skin_Area:
                 print 'want to fall back, but no text view defined'
                 area = area[0]
 
-        try:
-            area = getattr(area, self.area_name)
-        except AttributeError:
-            area = xml_skin.XML_area(self.area_name)
-            area.visible = FALSE
+        if self.area_name == 'plugin':
+            if not self.area_val:
+                self.area_val = xml_skin.XML_area(self.area_name)
+                self.area_val.visible = TRUE
+                self.area_val.r = (0, 0, osd.width, osd.height)
+            return TRUE
+        else:
+            try:
+                area = getattr(area, self.area_name)
+            except AttributeError:
+                area = xml_skin.XML_area(self.area_name)
+                area.visible = FALSE
             
 
         if (not self.area_val) or area != self.area_val:
@@ -722,10 +736,12 @@ class Skin_Area:
         draw a round box ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
-
-        self.tmp_objects.rectangles.append(( x, y, x + width, y + height, rect.bgcolor,
-                                             rect.size, rect.color, rect.radius ))
-
+        try:
+            self.tmp_objects.rectangles.append(( x, y, x + width, y + height, rect.bgcolor,
+                                                 rect.size, rect.color, rect.radius ))
+        except AttributeError:
+            self.tmp_objects.rectangles.append(( x, y, x + width, y + height, rect[0],
+                                                 rect[1], rect[2], rect[3] ))
             
     # Draws a text inside a frame based on the settings in the XML file
     def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
@@ -779,7 +795,9 @@ class Skin_Area:
         cimage = self.imagecache[cname]
         if not cimage:
             try:
-                image = pygame.transform.scale(osd.loadbitmap(image), (w, h))
+                image = osd.loadbitmap(image)
+                if w > 0 and h > 0:
+                    image = pygame.transform.scale(image, (w, h))
                 self.imagecache[cname] = image
             except:
                 return None
@@ -795,26 +813,31 @@ class Skin_Area:
         """
 
         if not image:
-            return
+            return 0,0
         
         if isinstance(image, str):
-            image = self.load_image(image, val)
-                
+            if isinstance(val, tuple):
+                image = self.load_image(image, val[2:])
+            else:
+                image = self.load_image(image, val)
+
         if not image:
-            return
+            return 0,0
         
         if isinstance(val, tuple):
             self.tmp_objects.images.append((val[0], val[1], val[0] + image.get_width(),
                                             val[1] + image.get_height(), image))
-            return
+            return image.get_width(), image.get_height()
 
         try:
             if val.label == 'background':
                 self.tmp_objects.bgimages.append((val.x, val.y, val.x + val.width,
                                                   val.y + val.height, image))
-                return
+                return val.width, val.height
         except:
             pass
         
         self.tmp_objects.images.append((val.x, val.y, val.x + val.width,
                                         val.y + val.height, image))
+        return val.width, val.height
+        

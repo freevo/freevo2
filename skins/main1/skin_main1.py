@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2003/07/12 17:16:30  dischi
+# created a special area for plugins to draw
+#
 # Revision 1.105  2003/07/10 20:01:11  dischi
 # small bugfix for blue_round1
 #
@@ -214,6 +217,42 @@ class Subtitle_Area(Title_Area):
         self.text = ''
 
 
+class Plugin_Area(Skin_Area):
+    """
+    in this area all plugins can draw
+    """
+    def __init__(self, parent, screen):
+        Skin_Area.__init__(self, 'plugin', screen)
+        self.plugins = None
+        self.x = config.OVERSCAN_X
+        self.y = config.OVERSCAN_Y
+        self.width   = osd.width  - 2 * config.OVERSCAN_X
+        self.height  = osd.height - 2 * config.OVERSCAN_Y
+        
+    def get_font(self, name):
+        try:
+            return self.xml_settings.font[name]
+        except:
+            return self.xml_settings.font['default']
+    
+    def update_content_needed(self):
+        """
+        this area needs never a content update
+        """
+        return TRUE
+
+    def update_content(self):
+        """
+        there is no content in this area
+        """
+        if self.plugins == None:
+            self.plugins = plugin.get('daemon_draw')
+
+        for p in self.plugins:
+            p.draw((type, object), self)
+
+
+
 ###############################################################################
 
 
@@ -236,7 +275,7 @@ class Skin:
         self.normal_areas = []
         self.tv_areas = []
 
-        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info'):
+        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'):
             o = eval('%s%s_Area(self, self.screen)' % (a[0].upper(), a[1:]))
             self.normal_areas.append(o)
             if a == 'listing':
@@ -261,8 +300,6 @@ class Skin:
                 self.settings.load(local_skin)
                 break
 
-        self.plugin_refresh = None
-                
     
     def LoadSettings(self, dir, copy_content = 1):
         """
@@ -467,9 +504,6 @@ class Skin:
         if not self.settings.prepared:
             self.settings.prepare()
             
-        if self.plugin_refresh == None:
-            self.plugin_refresh = plugin.get('daemon_draw')
-
         menu = None
         if type == 'menu':
             menuw = object
@@ -526,9 +560,6 @@ class Skin:
             a.draw(settings, object, style, self.last_draw, self.force_redraw)
             
         self.screen.show(self.force_redraw)
-
-        for p in self.plugin_refresh:
-            p.draw((type, object))
 
         osd.update()
         self.force_redraw = FALSE
