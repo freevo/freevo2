@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2003/10/26 17:59:15  dischi
+# typo
+#
 # Revision 1.99  2003/10/20 19:25:15  dischi
 # show more than one newline as free space
 #
@@ -322,7 +325,7 @@ class OSDFont:
                 try:
                     font = pygame.font.Font(config.OSD_DEFAULT_FONTNAME, ptsize)
                 except (RuntimeError, IOError):
-                    print 'Couldnt load alternate font "%s"' % alt_fname
+                    print 'Couldnt load font "%s"' % config.OSD_DEFAULT_FONTNAME
                     raise
         f = Font(filename, ptsize, font)
         return f.font
