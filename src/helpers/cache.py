@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/21 11:33:34  dischi
+# support one file thumbnailing
+#
 # Revision 1.37  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -353,10 +356,11 @@ if __name__ == "__main__":
         if sys.argv[2] == '--recursive':
             dirname = os.path.abspath(sys.argv[3])
             files = util.match_files_recursively(dirname, config.VIDEO_SUFFIX)
-        else:
+        elif os.path.isdir(sys.argv[2]):
             dirname = os.path.abspath(sys.argv[2])
             files = util.match_files(dirname, config.VIDEO_SUFFIX)
-            
+        else:
+            files = [ os.path.abspath(sys.argv[2]) ]
         print 'creating video thumbnails....'
         for filename in files:
             print '  %4d/%-4d %s' % (files.index(filename)+1, len(files),
