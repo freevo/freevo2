@@ -346,7 +346,7 @@ h2.SUBTITLE { padding-left: 0em; }
     #header {
       float:left;
       width:100%;
-      background: #666699 url("/images/tab/bg.gif") repeat-x bottom;
+      background: #666699 url("../images/tab/bg.gif") repeat-x bottom;
       font-size:93%;
       line-height:normal;
       }
@@ -357,13 +357,13 @@ h2.SUBTITLE { padding-left: 0em; }
       }
     #header li {
       float:left;
-      background:url("/images/tab/left.gif") no-repeat left top;
+      background:url("../images/tab/left.gif") no-repeat left top;
       margin:0;
       padding:0 0 0 9px;
       }
     #header a {
       display:block;
-      background:url("/images/tab/right.gif") no-repeat right top;
+      background:url("../images/tab/right.gif") no-repeat right top;
       padding:5px 15px 4px 6px;
       text-decoration:none;
       font-weight:bold;
@@ -373,10 +373,10 @@ h2.SUBTITLE { padding-left: 0em; }
       color:#333;
       }
     #header #current {
-      background-image:url("/images/tab/left_on.gif");
+      background-image:url("../images/tab/left_on.gif");
       }
     #header #current a {
-      background-image:url("/images/tab/right_on.gif");
+      background-image:url("../images/tab/right_on.gif");
       color:#333;
       padding-bottom:5px;
       }
