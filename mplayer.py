@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/10/31 21:10:11  dischi
+# mplayer.py doesn't believe the type for a file anymore and checks
+# the type by parsing config.SUFFIX_AUDIO_FILES. This had to be done
+# because there can be mixed playlists now.
+#
 # Revision 1.43  2002/10/28 21:52:20  dischi
 # Fixed a bug that DrawMP3 is called when we start a movie and
 # prev. listened to music and it stopped by itself (rc.PLAY_END).
@@ -99,6 +104,7 @@ import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
 import audioinfo  # This just for ID3 functions and stuff.
 import skin       # Cause audio handling needs skin functions.
+import fnmatch
 
 from datatypes import *
 
@@ -154,6 +160,14 @@ class MPlayer:
             filename = filename.file
         else:
             mplayer_options = ''
+
+        # since we have mixed playlists don't believe
+        # the given mode
+        if not mode or mode == 'video' or mode == 'audio':
+            mode = 'video'
+            for a_type in config.SUFFIX_AUDIO_FILES:
+                if fnmatch.fnmatchcase(filename, a_type):
+                    mode = 'audio'
             
         self.mode = mode   # setting global var to mode.
         self.repeat = repeat # Repeat playlist setting
@@ -169,7 +183,7 @@ class MPlayer:
 
         if (((mode == 'video') or (mode == 'audio')) and
             not os.path.isfile(filename) and not network_play):
-	    skin.PopupBox('%s\nnot found!' % filename)
+	    skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
             time.sleep(2.0) 
             menuwidget.refresh()
             # XXX We should really use return more. And this escape should
