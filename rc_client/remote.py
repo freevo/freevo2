@@ -1,5 +1,3 @@
-#!/usr/local/bin/python
-
 #
 # remote.py  -  Freevo remote control handling.
 #
