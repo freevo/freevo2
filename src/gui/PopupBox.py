@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/19 02:02:55  rshortt
+# Fixed some bugs in the eventhandler.
+#
 # Revision 1.2  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -317,8 +320,14 @@ class PopupBox(GUIObject):
 
     def eventhandler(self, event):
         if DEBUG: print 'PopupBox: event = %s' % event
-        if event == rc.UP:
-            print 'GOT EVENT rc.UP'
+
+        trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
+        if trapped.count(event) > 0:
+            return
+        elif event == self.rc.ENTER or event == self.rc.SELECT:
+            print 'HIT OK'
+            self.parent.refresh()
+            self.destroy()
         else:
             return self.parent.eventhandler(event)
 
