@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/02 11:02:50  dischi
+# make needed dirs
+#
 # Revision 1.3  2003/11/02 10:51:14  dischi
 # change runtime name
 #
@@ -54,6 +57,14 @@ os.environ['LD_PRELOAD'] = ''
 
 import util.fileops
 
+def mkalldir(d):
+    cd = ''
+    for p in d.split('/'):
+        cd = os.path.join(cd, p)
+        if not os.path.isdir(cd):
+            os.mkdir(cd)
+            
+    
 if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
     is_local = False
     tgz = os.path.abspath(sys.argv[1])
@@ -94,6 +105,7 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
                                          new_file.find('src') == 0 or
                                          new_file.find('i18n') == 0):
                 print 'installing %s' % new_file
+                mkalldir(os.path.dirname(new_file))
                 os.rename(file, new_file)
     else:
         # check package
