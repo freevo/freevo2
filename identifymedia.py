@@ -67,7 +67,8 @@ class Identify_Thread(threading.Thread):
         for media in mediatypes:
             if os.path.exists(dir + media[1]):
                 util.umount(dir)
-                info = media[0], '%s [%s]' % (media[0], label), image, (media[2], 1, [])
+                info = media[0], '%s [%s]' % (media[0], label), image, \
+                       (media[2], '1 -cdrom-device %s' % device, [])
                 return last_code, info
                 
         mplayer_files = util.match_files(dir, config.SUFFIX_MPLAYER_FILES)
