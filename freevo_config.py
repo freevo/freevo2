@@ -674,7 +674,7 @@ OSD_DEFAULT_FONTNAME = 'Vera.ttf'
 OSD_DEFAULT_FONTSIZE = 18
 
 # Font aliases, all names must be lowercase!
-# All alternate fonts must be in './skins/fonts/'
+# All alternate fonts must be in './share/fonts/'
 OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
 
 OSD_SDL_EXEC_AFTER_STARTUP = ""
@@ -839,7 +839,7 @@ MPLAYER_AUTOCROP = 0
 # Try to set correct 'delay' and 'mc' values for mplayer based on the delay
 # from mmpython. This should correct av sync problems with mplayer for some
 # files, but may also break things (I don't know, that's why it's disabled
-# as default). WARNING: when seeking, the playpack is out of sync for some
+# as default). WARNING: when seeking, the playback is out of sync for some
 # seconds! This only works with mmpython > 0.2
 #
 MPLAYER_SET_AUDIO_DELAY = 0
@@ -1008,7 +1008,7 @@ VCR_CMD = (CONF.mencoder + ' ' +
            'vcodec=mpeg4' +                # lavcodec mpeg-4
            ':vbitrate=1200:' +             # Change lower/higher, bitrate
            'keyint=30 ' +                  # Keyframe every 10 secs, change?
-           '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
+           '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding, must be enabled in mencoder!
            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
@@ -1054,8 +1054,8 @@ IVTV_OPTIONS = {
 # For the standard frequancy tables see src/tv/freq.py.  To add your own just 
 # replace tuner_id in the following example with a valid tuner id (ie: '5' or
 # 'BBC1') and a frequency in KHz.  You may have as many entries as you like,
-# anything here will simply override a coresponding entry in your standard
-# frequency table and you can also have entries here that are not present i
+# anything here will simply override a corresponding entry in your standard
+# frequency table and you can also have entries here that are not present in
 # there.
 
 FREQUENCY_TABLE = {
