@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.137  2004/05/29 13:10:55  dischi
+# re-use string for better translation
+#
 # Revision 1.136  2004/05/28 15:50:28  dischi
 # configure menu items cleanup
 # support chapters as ChapterInfo in mmpython (e.g. ogm files)
@@ -471,7 +474,7 @@ class VideoItem(Item):
                     util.mount(mountdir)
                 else:
                     self.menuw.show()
-                    ConfirmBox(text=(_('Media not found for file "%s".\n')+
+                    ConfirmBox(text=(_('No media found for "%s".\n')+
                                      _('Please insert the media.')) % file,
                                handler=self.play ).show()
                     return
@@ -485,7 +488,7 @@ class VideoItem(Item):
                 self.media = media
             else:
                 self.menuw.show()
-                ConfirmBox(text=(_('Media not found for "%s".\n')+
+                ConfirmBox(text=(_('No media found for "%s".\n')+
                                  _('Please insert the media.')) % self.url,
                            handler=self.play).show()
                 return
