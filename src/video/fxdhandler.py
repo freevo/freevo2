@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/05/13 12:50:21  dischi
+# fix duplicate removal for fxd files in vfs
+#
 # Revision 1.19  2004/03/02 20:56:59  dischi
 # fxd files are always right about the name
 #
@@ -103,6 +106,8 @@ def parse_movie(fxd, node):
         if mode == 'file':
             if not media_id:
                 filename = os.path.join(dirname, filename)
+                if vfs.isoverlay(filename):
+                    filename = vfs.normalize(filename)
             if filename and not filename in files:
                 files.append(filename)
         if mode == 'url':
