@@ -3,10 +3,13 @@ Freevo Changelog
 
 $Id$
 
-Release XXX (200X-XX-XX):
+Release 1.4.0-rc4 (2003-11-??):
 -------------------------------
  * Added testcode for viewing the Composite input on the TV card
   * Change src/tv/tvmenu.py:181 to enable it
+ * Bugfix in the xine audio plugin
+ * Support for mixed audio discs
+ * more bugfixes
 	
 
 Release 1.4.0-rc3 (2003-11-03):
