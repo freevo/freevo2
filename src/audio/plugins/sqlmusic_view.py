@@ -52,7 +52,7 @@ class PluginInterface(plugin.ItemPlugin):
         md5,last_play,play_count,rating = cursor.fetchone()
        
         box = AlertBox(width=550, height=400, text='MD5: %s\nLast Play: %s\nPlay Count: %s\nRating: %s\n' 
-            % (str(md5),str(last_play),str(play_count),str(rating)))
+            % (str(md5),str(time.strftime("%a, %d %b %Y %I:%M:%P", time.localtime(last_play))),str(play_count),str(rating)))
         box.show()
         db.close()
         return
