@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/09/07 18:52:51  dischi
+# move thumbnail to extra file
+#
 # Revision 1.26  2004/08/29 18:37:05  dischi
 # epeg support for fast jpg thumbnailing
 #
@@ -58,17 +61,13 @@ import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
 import traceback
+import mevas
 
 # image stuff
 import Image
 import cStringIO
 from mmpython.image import EXIF as exif
 
-try:
-    import epeg
-except ImportError:
-    _debug_('epeg not found')
-    
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
 else:
@@ -465,99 +464,3 @@ def save_pickle(data, file):
 # cache utils
 #
 
-def read_thumbnail(filename):
-    """
-    return image cached inside filename
-    """
-    f = open(filename)
-    header = f.read(10)
-    if not header[:3] == 'FRI':
-        return read_pickle(filename)
-    data = f.read(), (ord(header[3]), ord(header[4])), header[5:].strip(' ')
-    f.close()
-    return data
-
-
-def create_thumbnail(filename, thumbnail=None):
-    """
-    cache image for faster access
-    """
-    thumb = vfs.getoverlay(filename + '.raw')
-    image = None
-
-    if thumbnail:
-        try:
-            image = Image.open(cStringIO.StringIO(thumbnail))
-        except Exception, e:
-            _debug_('Invalid thumbnail for %s' % filename, 0)
-            if config.DEBUG:
-                print e
-
-    if not image:
-        try:
-            # epeg support for fast jpg thumbnailing
-            return epeg.fri_thumbnail(filename, thumb)
-        except:
-            pass
-
-        if __freevo_app__ == 'main':
-            try:
-                f=open(filename, 'rb')
-                tags=exif.process_file(f)
-                f.close()
-                
-                if tags.has_key('JPEGThumbnail'):
-                    image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
-            except Exception, e:
-                print 'Error loading thumbnail %s' % filename
-                if config.DEBUG:
-                    print e
-
-        if not image or image.size[0] < 100 or image.size[1] < 100:
-            try:
-                image = Image.open(filename)
-            except Exception, e:
-                print 'error caching image %s' % filename
-                if config.DEBUG:
-                    print e
-                return None
-        
-    try:
-        if image.size[0] > 255 or image.size[1] > 255:
-            image.thumbnail((255,255), Image.ANTIALIAS)
-
-        if image.mode == 'P':
-            image = image.convert('RGB')
-
-        data = (image.tostring(), image.size, image.mode)
-
-        f = vfs.open(thumb, 'w')
-        f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
-        f.write(data[0])
-        f.close()
-        return data
-    except Exception, e:
-        print 'error caching image %s' % filename
-        if config.DEBUG:
-            print e
-        return None
-        
-
-def cache_image(filename, thumbnail=None, use_exif=False):
-    """
-    cache image for faster access, return cached image
-    """
-    thumb = vfs.getoverlay(filename + '.raw')
-    try:
-        if os.stat(thumb)[stat.ST_MTIME] > os.stat(filename)[stat.ST_MTIME]:
-            data = read_thumbnail(thumb)
-            if data:
-                return data
-    except OSError:
-        pass
-
-    data = create_thumbnail(filename, thumbnail)
-    if not data:
-        # epeg
-        return read_thumbnail(filename)
-    

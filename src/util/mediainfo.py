@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/09/07 18:52:51  dischi
+# move thumbnail to extra file
+#
 # Revision 1.59  2004/08/28 17:17:05  dischi
 # force rechecking if it seems a dvd but is not detected as one
 #
@@ -72,6 +75,7 @@ import config
 import util
 import eventhandler
 import rc
+import thumbnail
 
 class FileOutdatedException(Exception):
     pass
@@ -334,9 +338,9 @@ class MMCache(Cache):
         """
         info = mmpython.Factory().create(filename)
         if info:
-            thumbnail = None
+            thumbnail_file = None
             if info.has_key('thumbnail'):
-                thumbnail = info.thumbnail
+                thumbnail_file = info.thumbnail
                 
             info = self.simplify(info)
             name = util.getname(filename)
@@ -352,12 +356,13 @@ class MMCache(Cache):
                            (info.has_key(variable) and info[variable]):
                             info[variable] = video[variable]
 
-            if thumbnail and config.IMAGE_USE_EXIF_THUMBNAIL and config.CACHE_IMAGES:
-                util.cache_image(filename, thumbnail)
+            if thumbnail_file and config.IMAGE_USE_EXIF_THUMBNAIL and config.CACHE_IMAGES:
+                if not thumbnail.get_name(filename):
+                    thumbnail.create(filename)
             elif config.CACHE_IMAGES and info.has_key('mime') and info['mime'] and \
                      info['mime'].startswith('image'):
-                util.cache_image(filename)
-
+                if not thumbnail.get_name(filename):
+                    thumbnail.create(filename)
             return info
         return {}
 

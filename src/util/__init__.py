@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/09/07 18:52:51  dischi
+# move thumbnail to extra file
+#
 # Revision 1.19  2004/08/26 15:30:39  dischi
 # add weakref
 #
@@ -91,3 +94,4 @@ if sys.argv[0].find('setup.py') == -1:
     __builtin__.__dict__['String']  = String
 
     import mediainfo
+    import thumbnail
