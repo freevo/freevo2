@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2003/09/06 15:34:21  rshortt
+# Adding pid file support for the foreground way of starting helpers.  This
+# is usefull if you run something from inittab (or started from a different
+# shell) and would like to stop it using ./freevo <helpername> stop.
+#
 # Revision 1.80  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -171,7 +176,9 @@ if [ -e "$script" ]; then
 	    echo $name not running
 	fi
     else
-	$RUNAPP python "$script" "$@"
+	$RUNAPP python "$script" "$@" &
+	echo $! > $PID_FILE
+	wait `cat $PID_FILE`
     fi
     exit 0
 fi
