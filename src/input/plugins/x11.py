@@ -40,20 +40,23 @@ class PluginInterface(plugin.InputPlugin):
         plugin.InputPlugin.__init__(self)
 
         self.keymap = {}
-        for key in config.KEYMAP:
+        for key in config.KEYBOARD_MAP:
             if hasattr(linux_input, 'KEY_%s' % key):
                 code = getattr(linux_input, 'KEY_%s' % key)
-                self.keymap[code] = config.KEYMAP[key]
+                self.keymap[code] = config.KEYBOARD_MAP[key]
             elif key == 'ESCAPE':
-                self.keymap[ linux_input.KEY_ESC ] = config.KEYMAP[ key ]
+                self.keymap[ linux_input.KEY_ESC ] = config.KEYBOARD_MAP[ key ]
             elif key == 'RETURN':
-                self.keymap[ linux_input.KEY_ENTER ] = config.KEYMAP[ key ]
+                self.keymap[ linux_input.KEY_ENTER ] = \
+                             config.KEYBOARD_MAP[ key ]
             elif key == 'PERIOD':
-                self.keymap[ linux_input.KEY_DOT ] = config.KEYMAP[ key ]
+                self.keymap[ linux_input.KEY_DOT ] = config.KEYBOARD_MAP[ key ]
             elif key == 'KP_MINUS':
-                self.keymap[ linux_input.KEY_KPMINUS ] = config.KEYMAP[ key ]
+                self.keymap[ linux_input.KEY_KPMINUS ] = \
+                             config.KEYBOARD_MAP[ key ]
             elif key == 'KP_PLUS':
-                self.keymap[ linux_input.KEY_KPPLUS ] = config.KEYMAP[ key ]
+                self.keymap[ linux_input.KEY_KPPLUS ] = \
+                             config.KEYBOARD_MAP[ key ]
             else:
                 _debug_('Error: unable to find key code for %s' % key, 0)
         gui.get_display()._display.callback = self.handle
