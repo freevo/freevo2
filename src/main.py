@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2003/11/29 11:40:45  dischi
+# create menuw on startup
+#
 # Revision 1.91  2003/11/22 16:06:06  dischi
 # use drawstringframed to center shutdown message
 #
@@ -128,10 +131,6 @@ rc_object = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
-# Create the MenuWidget object
-menuwidget = menu.get_singleton()
-
-
 def shutdown(menuw=None, arg=None, allow_sys_shutdown=True, exit=False):
     """
     function to shut down freevo or the whole system
@@ -249,17 +248,16 @@ class MainMenu(Item):
     """
     this class handles the main menu
     """
-    
     def getcmd(self):
         """
         Setup the main menu and handle events (remote control, etc)
         """
-        
+        menuw = menu.MenuWidget()
         items = get_main_menu(self)
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
-        menuwidget.pushmenu(mainmenu)
-        osd.add_app(menuwidget)
+        menuw.pushmenu(mainmenu)
+        osd.add_app(menuw)
 
     def eventhandler(self, event = None, menuw=None, arg=None):
         """
@@ -273,7 +271,7 @@ class MainMenu(Item):
             for name, image, skinfile in skin.GetSkins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
-            menuwidget.pushmenu(menu.Menu('SKIN SELECTOR', items))
+            menuw.pushmenu(menu.Menu('SKIN SELECTOR', items))
             return True
 
         # give the event to the next eventhandler in the list
