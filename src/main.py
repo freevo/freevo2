@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2003/12/07 15:42:20  dischi
+# cleanup
+#
 # Revision 1.96  2003/12/06 13:46:11  dischi
 # changes to the new draw function in skin
 #
@@ -21,39 +24,6 @@
 #
 # Revision 1.93  2003/11/30 14:39:54  dischi
 # load the fxditem
-#
-# Revision 1.92  2003/11/29 11:40:45  dischi
-# create menuw on startup
-#
-# Revision 1.91  2003/11/22 16:06:06  dischi
-# use drawstringframed to center shutdown message
-#
-# Revision 1.90  2003/11/16 17:41:04  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.89  2003/11/16 14:35:08  dischi
-# better help doc when deps are missing
-#
-# Revision 1.88  2003/11/16 10:18:10  dischi
-# add -dpms for xset
-#
-# Revision 1.87  2003/11/02 09:01:28  dischi
-# check for missing libs on startup
-#
-# Revision 1.86  2003/10/27 20:38:30  dischi
-# cleaner shutdown
-#
-# Revision 1.85  2003/10/23 17:58:14  dischi
-# kill/stop threads before exit
-#
-# Revision 1.84  2003/10/23 17:28:41  dischi
-# correct shutdown
-#
-# Revision 1.83  2003/10/20 19:32:33  dischi
-# catch exception caused by eventhandlers
-#
-# Revision 1.82  2003/10/19 11:17:38  dischi
-# move gettext into config so that everything has _()
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -84,6 +54,8 @@ os.environ['LD_PRELOAD'] = ''
 
 import sys, time
 import traceback
+import signal
+
 
 
 # i18n support
@@ -129,12 +101,8 @@ import menu    # The menu widget class
 import skin    # The skin class
 import rc      # The RemoteControl class.
 
-import signal
-
 from item import Item
 from event import *
-
-skin    = skin.get_singleton()
 
 
 # Create the remote control object
@@ -143,11 +111,15 @@ rc_object = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
+# Create the skin object
+skin = skin.get_singleton()
+
+
+
 def shutdown(menuw=None, arg=None, allow_sys_shutdown=True, exit=False):
     """
     function to shut down freevo or the whole system
     """
-
     if not osd.active:
         # this function is called from the signal handler, but
         # we are dead already.
@@ -271,11 +243,11 @@ class MainMenu(Item):
         menuw.pushmenu(mainmenu)
         osd.add_app(menuw)
 
+
     def eventhandler(self, event = None, menuw=None, arg=None):
         """
         Automatically perform actions depending on the event, e.g. play DVD
         """
-
         # pressing DISPLAY on the main menu will open a skin selector
         # (only for the new skin code)
         if event == MENU_CHANGE_STYLE:
@@ -300,7 +272,7 @@ class Splashscreen(skin.Area):
         skin.Area.__init__(self, 'content')
 
         self.pos          = 0
-        self.bar_border   = skin.Rectange(bgcolor=0xff000000, size=2)
+        self.bar_border   = skin.Rectange(bgcolor=0xff000000L, size=2)
         self.bar_position = skin.Rectange(bgcolor=0xa0000000L)
 
 
@@ -456,6 +428,7 @@ def main_func():
 # Main function
 #
 if __name__ == "__main__":
+
     def tracefunc(frame, event, arg, _indent=[0]):
         if event == 'call':
             filename = frame.f_code.co_filename
@@ -477,38 +450,51 @@ if __name__ == "__main__":
 
         return tracefunc
 
-    if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
-        os.system('xset -dpms s off')
-        config.START_FULLSCREEN_X = 1
+
+    if len(sys.argv) >= 2:
+
+        if sys.argv[1] == '-force-fs':
+            os.system('xset -dpms s off')
+            config.START_FULLSCREEN_X = 1
+
         
-    if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
-        tracefd = open(os.path.join(config.LOGDIR, 'trace.txt'), 'w')
-        sys.settrace(tracefunc)
+        if sys.argv[1] == '-trace':
+            tracefd = open(os.path.join(config.LOGDIR, 'trace.txt'), 'w')
+            sys.settrace(tracefunc)
+            config.DEBUG = 2
 
-    if len(sys.argv) >= 2 and sys.argv[1] == '--doc':
-        import pydoc
-        import re
-        sys.path.append('src/gui')
-        for file in util.match_files_recursively('src/', ['py', ]):
-            # doesn't work for everything :-(
-            if file not in ( 'src/tv/record_server.py', ) and file.find('src/www'):
-                file = re.sub('/', '.', file)
-                pydoc.writedoc(file[4:-3])
-        # now copy the files to Docs/api
-        try:
-            os.mkdir('Docs/api')
-        except:
-            pass
-        for file in util.match_files('.', ['html', ]):
-            print 'moving %s' % file
-            os.rename(file, 'Docs/api/%s' % file)
-        shutdown(allow_sys_shutdown=0)
+        
+        if sys.argv[1] == '-doc':
+            import pydoc
+            import re
+            for file in util.match_files_recursively('src/', ['py' ]):
+                # doesn't work for everything :-(
+                if file not in ( 'src/tv/record_server.py', ) and \
+                       file.find('src/www') == -1 and \
+                       file.find('src/helpers') == -1:
+                    file = re.sub('/', '.', file)
+                    try:
+                        pydoc.writedoc(file[4:-3])
+                    except:
+                        pass
+            try:
+                os.mkdir('Docs/api')
+            except:
+                pass
+            for file in util.match_files('.', ['html', ]):
+                print 'moving %s' % file
+                os.rename(file, 'Docs/api/%s' % file)
+            print
+            print 'wrote api doc to \'Docs/api\''
+            shutdown(allow_sys_shutdown=False, exit=True)
 
+
+            
+    # setup mmpython
     mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
     if not os.path.isdir(mmcache):
         os.mkdir(mmcache)
 
-    # setup mmpython
     mmpython.use_cache(mmcache)
     if config.DEBUG > 2:
         mmpython.mediainfo.DEBUG = config.DEBUG
@@ -525,6 +511,9 @@ if __name__ == "__main__":
         print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
         print 'up usage of freevo'
         print
+
+
+    # start
     try:
         main_func()
     except KeyboardInterrupt:

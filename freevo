@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2003/12/07 15:42:19  dischi
+# cleanup
+#
 # Revision 1.98  2003/11/20 18:06:10  dischi
 # check for stat
 #
@@ -216,7 +219,7 @@ if [ `basename $0` = "freevo" -a "$1" = "-fs" ]; then
 	test -e /tmp/.X11-unix/X$servernum || break
 	let servernum+=1
     done
-    exec xinit $0 --force-fs -- :$servernum
+    exec xinit $0 -force-fs -- :$servernum
 fi
 
 
@@ -290,6 +293,8 @@ help() {
     echo "freevo [ script | options]"
     echo "options:"
     echo "  -fs            start freevo in a new x session in fullscreen"
+    echo "  -doc           create api documentation (for developers)"
+    echo "  -trace         activate full trace (usefull for debugging)"
     echo "  setup          run freevo setup to scan your environment"
     echo "  start          start freevo as daemon in background"
     echo "  stop           stop the current freevo process"
@@ -448,7 +453,7 @@ fi
 valid_parameter=1
 if [ "$1" != "" ]; then
     valid_parameter=0
-    for known_parameter in "--force-fs" "--trace" "--doc"; do
+    for known_parameter in "-force-fs" "-trace" "-doc"; do
 	if [ "$1" = "$known_parameter" ]; then
 	    valid_parameter=1
 	    break
