@@ -1,0 +1,184 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <skin include="blue1_small" geometry="800x600">
+
+    <main>
+      <item label="tv" name="Watch TV" icon="" 
+	image="tv_watermark.png"/>
+      <item label="video" name="Watch a Movie" icon=""
+	image="movie_watermark.png"/>
+      <item label="audio" name="Listen to Music" icon="" 
+	image="music_watermark.png"/>
+      <item label="image" name="Look at Pictures" icon="" 
+	image="image_watermark.png"/>
+      <item label="games" name="Games" icon="" image=""/>
+      <item label="shutdown" name="Shutdown" icon="" 
+	image="shutdown_watermark.png" />
+    </main>
+    
+    <!-- Redefine of the type default -->
+    <menuset label="normal text style">
+      <screen layout="screen0" visible="yes"/>
+
+      <!-- 
+      title0 is already defined in blue1_big, but there will
+      is a new definition of the font from the layout (white big)
+      -->
+      <title visible="no"/>
+      <view x="20" y="100" width="300" height="300"/> 
+      <listing layout="listing" x="330" y="110" width="460" height="450">
+	<image label="uparrow" x="290" y="110"/>
+	<image label="downarrow" x="290" y="520"/>
+      </listing>
+    </menuset>
+
+
+    <!-- definition of the main menu -->
+    <menuset label="main menu">
+      <screen layout="screen watermark" visible="yes">
+	<area x="0" y="0" width="800" height="600"/>
+      </screen>
+      <listing layout="main listing" visible="yes">
+	<area x="230" y="180" width="360" height="240"/> 
+      </listing>
+      <view visible="no"/>
+    </menuset>
+
+    <!-- definition of video/audio/image menu. The same as default, but with a -->
+    <!-- different background -->
+    <menu type="video">
+      <style text="video"/>
+    </menu>
+      
+    <menu type="audio">
+      <style text="audio"/>
+    </menu>
+      
+    <menu type="image">
+      <style text="image"/>
+    </menu>
+      
+    <menuset label="video" inherits="normal text style">
+      <screen layout="video screen"/>
+    </menuset>
+      
+    <menuset label="audio" inherits="normal text style">
+      <screen layout="audio screen"/>
+    </menuset>
+      
+    <menuset label="image" inherits="normal text style">
+      <screen layout="image screen"/>
+    </menuset>
+      
+
+
+
+    <!-- ********************************************** -->
+    <!-- LAYOUT DEFINITIONS -->
+
+
+    <!-- background -->
+    <layout label="screen0">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <layout label="screen watermark">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image x="435" y="230" width="370" height="380" label="watermark"/>
+      </background>
+    </layout>
+
+    <layout label="video screen">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="movie_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+    <layout label="audio screen">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="music_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+    <layout label="image screen">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="image_watermark.png" x="435" y="230" width="370"
+	  height="380"/>
+      </background>
+    </layout>
+
+
+
+    <!-- default view area -->
+    <layout label="view0">
+      <content align="center" valign="center">
+	<item type="default">
+	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
+	    width="max+20" height="max+20"/>
+	</item>
+      </content>
+    </layout>
+    
+
+    <!-- default listing area -->
+    <layout label="listing">
+      <background/>
+      <content type="text" spacing="2">
+	<item type="default" font="grey"/>
+	<item type="selected" font="white">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+	    height="max+6" radius="15"/>
+	</item>
+      </content>
+    </layout>
+
+
+    <!-- redefine the main menu listing area -->
+    <layout label="main listing">
+      <content type="text" spacing="10">
+	<item type="default" font="grey big" align="center"/>
+	<item type="selected" font="white big" align="center">
+	  <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
+	    width="max+6" height="max+6" radius="8"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- ********************************************** -->
+    <!-- FONT DEFINITIONS -->
+
+
+    <font label="grey" name="Arial_Bold" size="16" color="0xdddddd"/>
+    <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
+    <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
+
+    <!-- ********************************************** -->
+    <!-- AUDIO PLAYER DEFINITIONS -->
+
+    <layout label="player screen">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <!-- ********************************************** -->
+    <!-- TV DEFINITIONS -->
+
+    <layout label="tv screen">
+      <background>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+  </skin>
+</freevo>
