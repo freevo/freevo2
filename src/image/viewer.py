@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/08/05 17:31:59  dischi
+# remove bad hack
+#
 # Revision 1.59  2004/08/01 10:44:40  dischi
 # make the viewer an "Application"
 #
@@ -297,11 +300,9 @@ class ImageViewer(Application):
         self.last_image = (item, image)
 
         # XXX Hack to move the selected item to the current showing image
-        # XXX TODO: find a way to add it to directory.py or playlist.py
         if item.parent and hasattr(item.parent, 'menu') and item.parent.menu and \
                item in item.parent.menu.choices:
-            item.parent.menu.selected = item
-            item.menuw.force_page_rebuild = True
+            item.parent.menu.set_selection(item)
 
         # save zoom, but revert the rotation mix up
         if not isinstance(zoom, int) and self.rotation:
