@@ -52,14 +52,6 @@ class Layer:
         return self.renderer.drawroundbox(*arg1, **arg2)
 
 
-    def drawstringframed(self, *arg1, **arg2):
-        """
-        Interface for the objects draw a string
-        """
-        arg2['layer'] = self.screen
-        return self.renderer.drawstringframed(*arg1, **arg2)
-
-
     def in_update(self, x1, y1, x2, y2, update_area, full=False):
         """
         Helper function to check if we need to update or not
