@@ -6,45 +6,38 @@
 #
 # Notes:
 #
-# This is a bad hack to make it work. Freevo has _no_ control over
-# Xine, the remote or keyboard events are the one from Xine, not
-# Freevo. Because of that, this plugin only works for playing a
-# DVD. For other files or when you select a specific title, mplayer
-# will be taken.
+# Activate this plugin by putting plugin.activate('video.xine') in your
+# local_conf.py. Than xine will be used for DVDs when you SELECT the item.
+# When you select a title directly in the menu, this plugin won't be used
+# and the default player (mplayer) will be used. You need the current xine
+# CVS version to use this.
 #
-# To activate this plugin write plugin.activate('video.xine') in your
-# local_conf.py and set XINE_COMMAND to the command line how to start
-# xine. For X11 this may be 'xine -V xv -g -f'. Make sure you have
-# configured xine correctly. For frambuffer use this is more
-# complicated. First set XINE_COMMAND to 'fbxine -V vidixfb' and than
-# you have to patch fbxine. fbxine tries to open the keyboard from the
-# calling tty, but Freevo called xine, there is no tty. Delete the
-# keyboard init in /src/fb/main.c, function fbxine_init. It may also
-# be usefull to add '-A <audiosettings> to XINE_COMMAND.
+# This plugin can also be used for VCD playback with menus. Install
+# xine-vcdnav and set XINE_USE_VCDNAV = 1
+#
+# WARNING:
+# xine-vcdnav has some problems. Some VCDs won't play at all, some one
+# in some drives. It also can take up to 10 secs until the video
+# starts. When nothing happens and you press STOP, it can also take up
+# to 10 secs until xine dies (better: xine will be killed). This could
+# also crash Freevo (python segfault). 
 #
 #
 # Todo:        
 #
-# Again: this is a bad hack. Someone should enhance pyxine or build
-# something else above xine-lib to have complete control over xine.
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.3  2003/07/20 21:03:58  dischi
-# add doc
+# Revision 1.4  2003/08/01 17:55:45  dischi
+# Make xine_cvs the normal xine plugin. We don't support older versions
+# of xine, it was a very bad hack. You need xine-ui > 0.9.21 to use the
+# plugin.
 #
-# Revision 1.2  2003/07/20 19:56:25  dischi
-# small fixes
-#
-# Revision 1.1  2003/07/20 17:50:24  dischi
-# Very basic Xine support. By loading this plugin and setting XINE_COMMAND
-# in the local_conf.py, xine will be used as DVD player when you hit PLAY
-# on the item (or SELECT it). In all other cases, mplayer will be taken.
-# Xine is only used for DVDnav support. There is no eventhandler, xine
-# must be in the foreground and the keys and lirc commands are taken from
-# Xine, not Freevo. Only testet with X, I don't know if framebuffer works
-# at all.
-#
+# Revision 1.2  2003/07/29 19:08:35  dischi
+# o new notes
+# o VCD support (vcdnav)
+# o deinterlacing with tvtime or -D paramter
+# o VIDEO_NEXT_AUDIOLANG warp around
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -97,26 +90,25 @@ class PluginInterface(plugin.Plugin):
     Xine plugin for the video player. Use xine to play all video
     files.
     """
-    def __init__(self):
+    def __init__(self, dvd=TRUE, vcd=FALSE):
         global xine
-        # create the xine object
-        plugin.Plugin.__init__(self)
-        try:
-            command = config.XINE_COMMAND
-        except:
-            print '***********************************************************'
-            print 'loading xine plugin failed, please set XINE_COMMAND in your'
-            print 'local_config.py. Possible good values are'
-            print '"xine -V xv -g -f" for using xine while running X'
-            print '"fbxine -V vidix"  for using xine on the framebuffer'
-            print 'Please read the notes in src/video/plugins/xine.py'
-            print '***********************************************************'
-            return
-        
-        xine = util.SynchronizedObject(Xine(command))
 
-        # register it as the object to play audio
+        plugin.Plugin.__init__(self)
+
+        try:
+            config.XINE_COMMAND
+        except:
+            print 'XINE_COMMAND not defined, plugin deactivated'
+            print 'please check the xine section in freevo_config.py'
+            return
+
+        # create the xine object
+        xine = util.SynchronizedObject(Xine())
+
+        # register it as the object to play
         plugin.register(xine, plugin.DVD_PLAYER)
+        if config.XINE_USE_VCDNAV:
+            plugin.register(xine, plugin.VCD_PLAYER)
 
 
 class Xine:
@@ -124,18 +116,19 @@ class Xine:
     the main class to control xine
     """
     
-    def __init__(self, command):
+    def __init__(self):
         self.thread = Xine_Thread()
         self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
-        self.app_mode = 'video'
-        self.command = command
+        self.app_mode = ''
             
     def play(self, item):
         """
         play a dvd with xine
         """
+
+        self.app_mode = item.mode       # dvd or vcd keymap
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
@@ -147,9 +140,28 @@ class Xine:
             print 'Xine.play(): Starting thread, cmd=%s' % command
         rc.app(self)
 
+        command = '%s -V %s -A %s --no-lirc --stdctl' % \
+                  (config.XINE_COMMAND, config.XINE_VO_DEV, config.XINE_AO_DEV)
+
+        if item.deinterlace:
+            if self.command.find('vidix') > 0 or self.command.find('fbxine') >= 0:
+                command = '%s --post tvtime' % command
+            else:
+                command = '%s -D' % command
+
+        self.max_audio = 0
+        self.current_audio = -1
+
+        if item.mode == 'dvd':
+            for track in item.info['tracks']:
+                self.max_audio = max(self.max_audio, len(track['audio']))
+
         skin.get_singleton().clear()
         self.thread.mode    = 'play'
-        self.thread.command = '%s dvd://' % self.command
+        if item.mode == 'dvd':
+            self.thread.command = '%s dvd://' % command
+        else:
+            self.thread.command = '%s vcdx:/%s:' % (command, item.media.devicename)
         self.thread.mode_flag.set()
         return None
     
@@ -171,6 +183,96 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        if event == PAUSE or event == PLAY:
+            self.thread.app.write('pause\n')
+            return TRUE
+
+        if event == STOP:
+            self.thread.app.write('quit\n')
+            for i in range(10):
+                if self.thread.mode == 'idle':
+                    break
+                time.sleep(0.3)
+            else:
+                # sometimes xine refuses to die
+                self.stop()
+            return TRUE
+
+        if event == SEEK:
+            pos = int(event.arg)
+            if pos < 0:
+                action='SeekRelative-'
+                pos = 0 - pos
+            else:
+                action='SeekRelative+'
+            if pos <= 15:
+                pos = 15
+            elif pos <= 30:
+                pos = 30
+            else:
+                pos = 30
+            self.thread.app.write('%s%s\n' % (action, pos))
+            return TRUE
+
+        # DVD NAVIGATION
+        if event == DVDNAV_LEFT:
+            self.thread.app.write('EventLeft\n')
+            return TRUE
+            
+        if event == DVDNAV_RIGHT:
+            self.thread.app.write('EventRight\n')
+            return TRUE
+            
+        if event == DVDNAV_UP:
+            self.thread.app.write('EventUp\n')
+            return TRUE
+            
+        if event == DVDNAV_DOWN:
+            self.thread.app.write('EventDown\n')
+            return TRUE
+            
+        if event == DVDNAV_SELECT:
+            self.thread.app.write('EventSelect\n')
+            return TRUE
+            
+        if event == DVDNAV_TITLEMENU:
+            self.thread.app.write('TitleMenu\n')
+            return TRUE
+            
+        if event == DVDNAV_MENU:
+            self.thread.app.write('Menu\n')
+            return TRUE
+
+
+        # VCD NAVIGATION
+        if event in INPUT_ALL_NUMBERS:
+            self.thread.app.write('Number%s\n' % event.arg)
+            time.sleep(0.1)
+            self.thread.app.write('EventSelect\n')
+            return TRUE
+        
+        if event == MENU:
+            self.thread.app.write('TitleMenu\n')
+            return TRUE
+
+
+        if event == VIDEO_NEXT_AUDIOLANG and self.max_audio:
+            if self.current_audio < self.max_audio - 1:
+                self.thread.app.write('AudioChannelNext\n')
+                self.current_audio += 1
+                # wait until the stream is changed
+                time.sleep(0.1)
+            else:
+                # bad hack to warp around
+                if self.command.find('fbxine'):
+                    self.thread.app.write('AudioChannelDefault\n')
+                    time.sleep(0.1)
+                for i in range(self.max_audio):
+                    self.thread.app.write('AudioChannelPrior\n')
+                    time.sleep(0.1)
+                self.current_audio = -1
+            return TRUE
+            
         if event in ( PLAY_END, USER_END ):
             self.stop()
             return self.item.eventhandler(event)
