@@ -3,8 +3,15 @@
 # GUIObject - Common object for all GUI Classes
 #-----------------------------------------------------------------------
 # $Id$
+#
+# Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/18 21:50:51  tfmalt
+# o Added support for handling both lists, tupes and separate values on
+#   functions with coordinates (set_size and set_position)
+# o Started work on a move() function.
+#
 # Revision 1.1  2002/08/15 22:45:42  tfmalt
 # o Inital commit of Freevo GUI library. Files are put in directory 'gui'
 #   under Freevo.
@@ -125,16 +132,17 @@ class GUIObject:
         """
         return (self.left, self.top)
 
-    def set_position(self, left, top):
+    def set_position(self, left, top=None):
         """
         Set the position of PopupBox
-
-        Arguments: left - left corner
-                   top - top corner
-        returns:   None
         """
-        self.left = left
-        self.top = top
+        # XXX Please tell if you know of a better way to accept both
+        # XXX tuples and lists.
+        if type(left) is ListType or type(left) is TupleType:
+            self.left, self.top = left
+        else:
+            self.left = left
+            self.top  = top
 
 
     def get_size(self):
@@ -146,15 +154,17 @@ class GUIObject:
         """
         return (self.width, self.height)
 
-    def set_size(self, width, height):
+
+    def set_size(self, width, height=None):
         """
         Set the width adn height of box
-
-        Arguments: width, height
-          Returns: None
         """
-        self.width  = width
-        self.height = height
+        if type(width) is ListType or TupleType:
+            self.width, self.height = width
+        else:
+            self.width  = width
+            self.height = height
+
 
     def get_foreground_color(self):
         """
@@ -212,6 +222,24 @@ class GUIObject:
         self.visible = 0
         zir.update_hide(self)
 
+    def move(self, x, y):
+        """
+        x Integer, amount to move along x axis.
+        y Integer, amount to move along y axis.
+        
+        Move the object by a certain amount
+
+        Note: either the user would have to hide and show the object
+              moving, or we do it for him. Not decided yet.
+        """
+        self._erase()
+        zir.update_hide(self)
+        self.visible = 0
+        self.set_position( self.left+x, self.top+y )
+        self._draw()
+        zir.update_show(self)
+        self.visible = 1
+        
     def is_visible(self):
         """
         Returns whether the object is visible or not.
