@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/11/01 20:51:49  dischi
+# fix bug in delay
+#
 # Revision 1.36  2003/10/21 21:17:42  gsbarbieri
 # Some more i18n improvements.
 #
@@ -311,7 +314,7 @@ class MPlayer:
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
                item.info['delay'] > 0:
             mpl += ('-mc', str(int(item.info['delay'])+1), '-delay',
-                    str(item.info['delay']))
+                    '-' + str(item.info['delay']))
 
         command = mpl
 
