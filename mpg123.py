@@ -93,11 +93,21 @@ class MPG123:
 
             id = ID3(filename)
 
+	    # Get cover.png from current directory
+	    cover_logo = os.path.dirname(filename)
+	    cover_logo += '/cover.png'
+
             osd.drawstring('Title: %s' % id.title, 30, 80)
             osd.drawstring('Artist: %s' % id.artist, 30, 110)
             osd.drawstring('Album: %s' % id.album, 30, 140)
             osd.drawstring('Year: %s' % id.year, 30, 170)
 	    osd.drawstring('Track: %s' % id.track, 30, 200)
+
+	    # Only draw the cover if the file exists. We'll
+	    # have to assume the filename isn't lying about
+	    # being a png though. 
+	    if os.path.isfile(cover_logo):
+	    	osd.drawbitmap(cover_logo,500,80)
         osd.update()
         
         
