@@ -13,16 +13,28 @@ A:visited {
     color: white; 
 }
 
+p { padding: 1em;
+    text-align: justify; 
+    }
+
 TD.tablelink { 
     background: #2A577E; 
     color: white; 
     text-align: left;
     cursor: pointer;
+    text-decoration: none;
 }
+
+TD.tablelink a { text-decoration: none; 
+                 padding-left: 1em;
+                 padding-right: 1em; 
+                 }
+
 
 TD.tablelink:hover { 
     background: #0B1C52; 
-    color: #FFFFFF 
+    color: #FFFFFF;
+    text-decoration: none;
 }
 
 TD.channel { 

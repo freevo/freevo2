@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/01/28 03:35:01  outlyer
+# Cleanup...
+#
+# o Indent paragraphs
+# o Use normal 'href' links in the main bar as well as the javascript so
+# non-javascript browsers can still work.
+#
 # Revision 1.18  2004/01/14 22:07:26  outlyer
 # The new header code...
 #
@@ -221,20 +228,21 @@ class HTMLResource:
     <table border="0" cellpadding="0" cellspacing="0">
       <tr>
         <td height="24" width="11" background="images/round_left.png">&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%sindex.rpy\'">&nbsp;&nbsp;Home&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%sguide.rpy\'">&nbsp;&nbsp;TV Guide&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%srecord.rpy\'">&nbsp;&nbsp;Scheduled Recordings&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%sfavorites.rpy\'">&nbsp;&nbsp;Favorites&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%slibrary.rpy\'">&nbsp;&nbsp;Media Library&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'%smanualrecord.rpy\'">&nbsp;&nbsp;Manually Record&nbsp;&nbsp;</td>
-     """ % (strprefix,strprefix,strprefix,strprefix,strprefix,strprefix)
+        <td class="tablelink" onClick="document.location=\'%sindex.rpy\'"><a title="Home" href="%sindex.rpy">Home</a></td>
+        <td class="tablelink" onClick="document.location=\'%sguide.rpy\'"><a title="View Guide" href="%sguide.rpy">TV Guide</a></td>
+        <td class="tablelink" onClick="document.location=\'%srecord.rpy\'"><a title="View Scheduled Recordings" href="%srecord.rpy">Scheduled Recordings</a></td>
+        <td class="tablelink" onClick="document.location=\'%sfavorites.rpy\'"><a title="View Favourites" href="%sfavorites.rpy">Favorites</a></td>
+        <td class="tablelink" onClick="document.location=\'%slibrary.rpy\'"><a title="View Media Library" href="%slibrary.rpy">Media Library</a></td>
+        <td class="tablelink" onClick="document.location=\'%smanualrecord.rpy\'"><a title="Schedule a Manual Recording" href="%smanualrecord.rpy">Manually Record</a></td>
+     """ % (strprefix,strprefix,strprefix,strprefix,strprefix,strprefix,
+            strprefix,strprefix,strprefix,strprefix,strprefix,strprefix)
         try:
             if config.ICECAST_WWW_PAGE:
-                self.res += '<td class="tablelink" onClick="document.location=\'%siceslistchanger.rpy\'">&nbsp;&nbsp;Change&nbsp;Icecast&nbsp;List&nbsp;&nbsp;</td>' % strprefix
+                self.res += '<td class="tablelink" onClick="document.location=\'%siceslistchanger.rpy\'">Change Icecast List</td>' % strprefix
         except AttributeError:
             pass
 
-        self.res += '<td class="tablelink" onClick="document.location=\'%shelp/\'">&nbsp;&nbsp;Help&nbsp;&nbsp;</td>' % strprefix
+        self.res += '<td class="tablelink" onClick="document.location=\'%shelp/\'"><a href="%shelp/" title="Get Help with Freevo">Help</a></td>' % (strprefix, strprefix)
 
         self.res += """
 	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
