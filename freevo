@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2004/06/08 19:11:56  dischi
+# support direct start without execute
+#
 # Revision 1.111  2004/04/12 05:34:14  dischi
 # extend PATH and set HOME and USER
 #
@@ -442,8 +445,13 @@ else:
 if name != 'freevo':
     proc = [ os.path.join(freevo_python, 'helpers', name + '.py') ] +  sys.argv[1:]
     if not os.path.isfile(proc[0]):
-        print 'can\'t find helper %s' % name
-        sys.exit(1)
+        if os.path.isfile(name):
+            name = os.path.splitext(os.path.basename(name))[0]
+            proc = proc[1:]
+        else:
+            proc = [ os.path.join(freevo_python, 'helpers', name + '.py') ] +  sys.argv[1:]
+            print 'can\'t find helper %s' % name
+            sys.exit(1)
 
 if getpid(name, python + proc)[1] and check:
     if name != 'freevo':
