@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/06/29 21:31:55  gsbarbieri
+# subtitle and audio now use the path to files and are quoted.
+#
 # Revision 1.57  2003/06/29 20:43:30  dischi
 # o mmpython support
 # o mplayer is now a plugin
@@ -458,14 +461,14 @@ class VideoItem(Item):
                                                self.subtitle_file['file'])
             if d:
                 util.mount(d)
-            mplayer_options += ' -sub %s' % f
+            mplayer_options += ' -sub "%s"' % f
 
         if self.audio_file:
             d, f = util.resolve_media_mountdir(self.audio_file['media-id'],
                                                self.audio_file['file'])
             if d:
                 util.mount(d)
-            mplayer_options += ' -audiofile %s' % f
+            mplayer_options += ' -audiofile "%s"' % f
 
         if arg:
             mplayer_options += ' %s' % arg

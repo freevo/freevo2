@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/06/29 21:31:56  gsbarbieri
+# subtitle and audio now use the path to files and are quoted.
+#
 # Revision 1.21  2003/06/29 20:43:30  dischi
 # o mmpython support
 # o mplayer is now a plugin
@@ -556,6 +559,15 @@ def parseMovieFile(file, parent, duplicate_check):
 
             mitem = None
             if variants:
+                for v in variants:
+                    for p in v[ 'parts' ]:
+                        for i in ( 'audio', 'subtitle' ):
+                            if p.has_key( i )  and p[ i ].has_key( 'file' ):
+                                filename = p[ i ][ 'file' ]
+                                filename = os.path.join( dir, filename )
+                                if os.path.isfile( filename ):
+                                    p[ i ][ 'file' ] = filename
+                
                 mitem = make_videoitem(video, variants[0])
             else:
                 mitem = make_videoitem(video, None)
