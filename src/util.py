@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/31 19:24:41  outlyer
+# Replaced proc_mount with python version from 'os' module. Currently
+# commented out... can someone try it and make sure it works? I don't
+# have a CDRom drive so I can't test it, but I can't imagine it not
+# working.
+#
 # Revision 1.5  2002/12/07 11:32:59  dischi
 # Added interface.py into video/audio/image/games. The file contains a
 # function cwd to return the items for the list of files. games support
@@ -343,11 +349,17 @@ def proc_mount(dir):
 def umount(dir):
     if proc_mount(dir):
         os.system("umount %s" % dir)
+    # Platform independent version
+    # if os.path.ismount(dir):
+    #     os.system("umount %s" % dir)
 
 
 def mount(dir):
     if not proc_mount(dir):
         os.system("mount %s 2>/dev/null" % dir)
+    # Platform independent version
+    # if os.path.ismount(dir):
+    #    os.system("mount %s 2>/dev/null" % dir)
 
 def gzopen(file):
     import gzip
