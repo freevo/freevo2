@@ -145,7 +145,6 @@ except Exception, e:
 
 # freevo imports
 import eventhandler
-import childapp
 import gui
 import util
 import util.mediainfo
@@ -400,7 +399,6 @@ try:
     
     # kick off the main menu loop
     notifier.addDispatcher( eventhandler.get_singleton().handle )
-    notifier.addDispatcher( childapp.watcher.step )
 
     # start main loop
     notifier.loop()
