@@ -167,6 +167,15 @@ else:
     else:
         print 'No overrides loaded'
 
+    # XXX Check that the user has updated the config file for the new
+    # XXX ROM_DRIVES format.
+    if ROM_DRIVES:
+        for drive in ROM_DRIVES:
+            if len(drive) != 3:
+                sys.__stdout__.write('ERROR! config.ROM_DRIVES is ' +
+                                     'not 3 elements!\n')
+                sys.exit(1)
+
 
 #
 # find movie informations
