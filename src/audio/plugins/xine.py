@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/22 15:30:55  dischi
+# support more than one player
+#
 # Revision 1.8  2003/11/08 13:20:26  dischi
 # support for AUDIOCD plugin type
 #
@@ -73,8 +76,6 @@ import plugin
 class PluginInterface(plugin.Plugin):
     """
     Xine plugin for the video player.
-
-    Set AUDIO_XINE_AUDIOCD_ONLY to activate this plugin only for audio cds
     """
     def __init__(self):
         plugin.Plugin.__init__(self)
@@ -82,7 +83,8 @@ class PluginInterface(plugin.Plugin):
         try:
             config.CONF.fbxine
         except:
-            print  _( 'ERROR' ) + ': ' + _( "'fbxine' not found, plugin 'xine' deactivated" )
+            print _( 'ERROR' ) + ': ' + \
+                  _( "'fbxine' not found, plugin 'xine' deactivated" )
             return
 
         xine_version = 0
@@ -106,7 +108,8 @@ class PluginInterface(plugin.Plugin):
             xine_version += 1
             
         if xine_version < 923:
-            print _( 'ERROR' ) + ': ' + _( "'fbxine' version too old, plugin 'xine' deactivated" )
+            print _( 'ERROR' ) + ': ' + \
+                  _( "'fbxine' version too old, plugin 'xine' deactivated" )
             print _( 'You need software %s' ) % 'xine-ui > 0.9.22'
             return
             
@@ -114,10 +117,7 @@ class PluginInterface(plugin.Plugin):
         xine = util.SynchronizedObject(Xine(xine_version))
 
         # register it as the object to play
-        if not (hasattr(config, 'AUDIO_XINE_AUDIOCD_ONLY') and \
-                config.AUDIO_XINE_AUDIOCD_ONLY):
-            plugin.register(xine, plugin.AUDIO_PLAYER)
-        plugin.register(xine, plugin.AUDIOCD_PLAYER)
+        plugin.register(xine, plugin.AUDIO_PLAYER, True)
 
 
 # ======================================================================
@@ -128,6 +128,7 @@ class Xine:
     """
     
     def __init__(self, version):
+        self.name = 'xine'
         self.thread = childapp.ChildThread()
         self.mode = None
         self.xine_version = version
@@ -138,6 +139,16 @@ class Xine:
             self.command = '%s --no-lirc' % self.command
 
         
+    def rate(self, item):
+        """
+        How good can this player play the file:
+        2 = good
+        1 = possible, but not good
+        0 = unplayable
+        """
+        return 2
+
+
     def play(self, item, playerGUI):
         """
         play an audio file with xine
@@ -186,6 +197,10 @@ class Xine:
         function it will be passed over to the items eventhandler
         """
         if event == AUDIO_PLAY_END:
+            if event.arg:
+                self.stop()
+                if self.playerGUI.try_next_player():
+                    return True
             event = PLAY_END
 
         if event in ( PLAY_END, USER_END ):
@@ -233,9 +248,10 @@ class XineApp(childapp.ChildApp):
         childapp.ChildApp.__init__(self, app)
         self.elapsed = 0
         self.refresh = refresh
+        self.stop_reason = 0 # 0 = ok, 1 = error
 
     def stopped(self):
-        rc.post_event(AUDIO_PLAY_END)
+        rc.post_event(Event(AUDIO_PLAY_END, self.stop_reason))
 
 
     def stdout_cb(self, line):
@@ -245,3 +261,9 @@ class XineApp(childapp.ChildApp):
             if self.item.elapsed != self.elapsed:
                 self.refresh()
             self.elapsed = self.item.elapsed
+
+
+    def stderr_cb(self, line):
+        if line.startswith('Unable to open MRL'):
+            self.stop_reason = 1
+            

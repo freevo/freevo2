@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/11/22 15:30:55  dischi
+# support more than one player
+#
 # Revision 1.25  2003/11/11 18:01:44  dischi
 # fix playback problems with fxd files (and transform to list app style)
 #
@@ -20,36 +23,6 @@
 #
 # Revision 1.22  2003/10/20 13:36:07  outlyer
 # Remove the double-quit
-#
-# Revision 1.21  2003/10/08 03:24:47  outlyer
-# Try the 'double-quit' here as well. Seems to result in a faster shutdown of
-# mplayer.
-#
-# Revision 1.20  2003/09/20 08:56:24  dischi
-# fix the refresh bug the way it is handled for xine
-#
-# Revision 1.19  2003/09/20 01:55:04  mikeruelle
-# fix refresh issue
-#
-# Revision 1.18  2003/09/19 22:09:16  dischi
-# use new childapp thread function
-#
-# Revision 1.17  2003/09/15 20:06:42  dischi
-# cdda url handling repaired and only stop on playing player
-#
-# Revision 1.16  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.15  2003/09/03 17:54:38  dischi
-# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
-# doesn't exist anymore.
-#
-# Revision 1.14  2003/09/01 19:46:01  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.13  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -98,8 +71,7 @@ class PluginInterface(plugin.Plugin):
         mplayer = util.SynchronizedObject(MPlayer())
 
         # register it as the object to play audio
-        plugin.register(mplayer, plugin.AUDIO_PLAYER)
-        plugin.register(mplayer, plugin.AUDIOCD_PLAYER)
+        plugin.register(mplayer, plugin.AUDIO_PLAYER, True)
 
 
 class MPlayer:
@@ -108,9 +80,22 @@ class MPlayer:
     """
     
     def __init__(self):
+        self.name = 'mplayer'
         self.thread = childapp.ChildThread()
         self.mode = None
         self.app_mode = 'audio'
+
+
+    def rate(self, item):
+        """
+        How good can this player play the file:
+        2 = good
+        1 = possible, but not good
+        0 = unplayable
+        """
+        if item.filename.startswith('cdda://'):
+            return 1
+        return 2
 
         
     def get_demuxer(self, filename):
@@ -209,6 +194,10 @@ class MPlayer:
         """
 
         if event == AUDIO_PLAY_END:
+            if event.arg:
+                self.stop()
+                if self.playerGUI.try_next_player():
+                    return True
             event = PLAY_END
             
         if event == AUDIO_SEND_MPLAYER_CMD:
@@ -240,54 +229,24 @@ class MPlayerApp(childapp.ChildApp):
     """
 
     def __init__(self, (app, item, refresh)):
-        if config.MPLAYER_DEBUG:
-            fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
-            fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
-            try:
-                self.log_stdout = open(fname_out, 'a')
-                self.log_stderr = open(fname_err, 'a')
-            except IOError:
-                print
-                print ( _('ERROR') + ': ' + _( 'Cannot open "%s" and "%s" for ' \
-                                               'MPlayer logging!')
-                        ) % (fname_out, fname_err)
-                print _( 'Please set MPLAYER_DEBUG=0 in local_conf.py, or ' \
-                         'start Freevo from a directory that is writeable!' )
-                print
-            else:
-                print _( 'MPlayer logging to "%s" and "%s"' ) % (fname_out, fname_err)
-
         self.item = item
         self.elapsed = 0
         childapp.ChildApp.__init__(self, app)
         self.RE_TIME = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
         self.refresh = refresh
-
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        childapp.ChildApp.kill(self, signal.SIGINT)
-        if config.MPLAYER_DEBUG:
-            self.log_stdout.close()
-            self.log_stderr.close()
+        self.stop_reason = 0 # 0 = ok, 1 = error
 
 
     def stopped(self):
-        rc.post_event(AUDIO_PLAY_END)
+        rc.post_event(Event(AUDIO_PLAY_END, self.stop_reason))
 
         
     def stdout_cb(self, line):
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stdout.write(line + '\n')
-            except ValueError:
-                pass # File closed
-                     
         if line.startswith("A:"):         # get current time
             m = self.RE_TIME_NEW(line)
             if m:
+                self.stop_reason = 0
 		timestrs = string.split(m.group(),":")
 		if len(timestrs) == 5:
 		    # playing for days!
@@ -318,8 +277,5 @@ class MPlayerApp(childapp.ChildApp):
 
 
     def stderr_cb(self, line):
-        if config.MPLAYER_DEBUG:
-            try:
-                self.log_stderr.write(line + '\n')
-            except ValueError:
-                pass # File closed
+        if line.startswith('Failed to open'):
+            self.stop_reason = 1

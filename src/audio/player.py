@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/22 15:30:55  dischi
+# support more than one player
+#
 # Revision 1.9  2003/11/08 13:19:06  dischi
 # add AUDIOCD as plugin type
 #
@@ -61,6 +64,7 @@
 
 from gui.GUIObject import GUIObject
 
+import config
 import skin
 import rc
 import plugin
@@ -80,18 +84,27 @@ class PlayerGUI(GUIObject):
         self.menuw = menuw
         self.item = item
 
-        if item.type == 'radio':
-            self.player = plugin.getbyname(plugin.RADIO_PLAYER)
-        elif item.filename.startswith('cdda:/'):
-            self.player = plugin.getbyname(plugin.AUDIOCD_PLAYER)
-        else:
-            self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
+        self.player  = None
         self.running = False
+
         
-    def play(self):
-        if self.player.is_playing():
+    def play(self, player=None):
+
+        if self.player and self.player.is_playing():
             self.stop()
             
+        if player:
+            self.player = player
+        else:
+            self.possible_player = []
+            for p in plugin.getbyname(plugin.AUDIO_PLAYER, True):
+                rating = p.rate(self.item) * 10
+                if config.AUDIO_PREFERED_PLAYER == p.name:
+                    rating += 1
+                self.possible_player.append((rating, p))
+            self.possible_player.sort(lambda l, o: -cmp(l[0], o[0]))
+            self.player = self.possible_player[0][1]
+        
         if self.menuw and self.menuw.visible:
             self.menuw.hide(clear=False)
 
@@ -109,24 +122,45 @@ class PlayerGUI(GUIObject):
                 rc.app(self.player)
             self.refresh()
 
+    def try_next_player(self):
+        self.stop()
+        _debug_('error, try next player')
+        player = None
+        next   = False
+        for r, p in self.possible_player:
+            if next:
+                player = p
+                break
+            if p == self.player:
+                next = True
+
+        if player:
+            self.play(player=player)
+            return 1
+        _debug_('no more players found')
+        return 0
+        
     def stop(self):
         self.player.stop()
         self.running = False
         if self.visible:
             rc.app(None)
         
+
     def show(self):
         if not self.visible:
             self.visible = 1
             self.refresh()
             rc.app(self.player)
             
+
     def hide(self):
         if self.visible:
             self.visible = 0
             skin.clear()
             rc.app(None)
             
+
     def refresh(self):
         """
         Give information to the skin..
