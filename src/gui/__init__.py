@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/10/05 19:52:11  dischi
+# changes to reflect widget update
+#
 # Revision 1.27  2004/08/24 19:23:37  dischi
 # more theme updates and design cleanups
 #
@@ -55,14 +58,7 @@ import copy
 import config
 
 # basic objects
-from widgets.image import Image
-from widgets.text import Text
-from widgets.textbox import Textbox
-from widgets.infotext import InfoText
-from widgets.rectangle import Rectangle
-
-# Container for widgets
-from mevas import CanvasContainer
+from widgets import *
 
 # Display engine control module
 import displays
@@ -131,26 +127,6 @@ def AreaHandler(type, area_list):
 
 from theme_engine import *
 
-
-
-# High level widgets
-from widgets.label             import Label
-from widgets.button            import Button
-from widgets.progressbar       import Progressbar
-
 # dialog boxes
-from widgets.Window            import Window
-from widgets.PopupBox          import PopupBox
-
-# broken boxes
-from widgets.AlertBox          import AlertBox
-from widgets.ConfirmBox        import ConfirmBox
-from widgets.ProgressBox       import ProgressBox
-from widgets.InputBox          import InputBox
-from widgets.ListBox           import ListBox
-
-# from widgets.LetterBoxGroup    import *
-# from widgets.RegionScroller    import *
-# from widgets.Scrollbar         import *
-# from widgets.LayoutManagers    import *
-# from widgets.exceptions        import *
+from window   import Window
+from popupbox import *
