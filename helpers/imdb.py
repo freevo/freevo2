@@ -102,6 +102,7 @@ def search(name):
             elif type == 'TV-Movies':
                 type = 'TV-Movie'
         m = regexp_title.match(line)
+
         if m and not type == 'Video Games':
             id   = m.group(1)
             name = m.group(2)
@@ -118,7 +119,6 @@ def search(name):
                     break
             else:
                 results += [ ( id , name, year, type ) ]
-            
     return results
 
 
@@ -280,9 +280,11 @@ def print_video(file, part):
                (part, getCDID(drive), file[3:])
 
 
-    elif os.path.ismount(os.path.dirname(file)):
-        return "        <file id=\"p%s\" media-id=\"%s\">%s</file>\n" % \
-               (part, getCDID(drive), str2XML(os.path.basename(file)))
+    # FIXME: ismount doesn't mean it's a rom drive !!!!
+    #
+    # elif os.path.ismount(os.path.dirname(file)):
+    #     return "        <file id=\"p%s\" media-id=\"%s\">%s</file>\n" % \
+    #            (part, getCDID(drive), str2XML(os.path.basename(file)))
 
     else:
         return "        <file id=\"p%s\">%s</file>\n" % \
