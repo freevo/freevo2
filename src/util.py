@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/08/23 15:15:21  dischi
+# add cover searcher
+#
 # Revision 1.43  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -337,6 +340,14 @@ def gzopen(file):
     return f
 
 FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
+
+def getimage(base):
+    if os.path.isfile(base+'.png'):
+        return base+'.png'
+    if os.path.isfile(base+'.jpg'):
+        return base+'.jpg'
+    return None
+
 
 def getname(file):
     if not os.path.exists(file):
