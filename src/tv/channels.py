@@ -1,96 +1,18 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # channels.py - Freevo module to handle channel changing.
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.31  2004/11/13 16:08:28  dischi
-# remove some old code from tv, some tv plugins do not work anymore
-#
-# Revision 1.30  2004/11/12 20:40:07  dischi
-# some tv crash fixes and cleanup
-#
-# Revision 1.29  2004/10/23 15:51:54  rshortt
-# -Move get_dummy_programs() out of the ChannelItem class and into the module.
-# -Bugfixes for dummy programs.
-# -Add channels from config.TV_CHANNELS if they don't exist in the database.
-#
-# Revision 1.28  2004/10/23 14:46:35  rshortt
-# -Move ProgramItem into program_display.py (at least for now).
-# -Move when_listings_expire() and get_chan_displayname() to here from util.
-# -Remove index for ChanelItem's programs.
-# -Add import_programs() for getting programs from the database and adding
-#  ProgramItems to self.programs of ChannelItem.  This also checks for gaps
-#  in program data and fills them with default ProgramItems.  It sorts the
-#  list as well.
-# -Modified ChannelItem's get() to check self.programs first, then call
-#  import_programs() for what we may be missing.  Also next() and prev() both
-#  check self.programs, then call import_programs() if there is no next or
-#  prev program.
-# -Add import_programs() to ChannelList which calls it on all of its channels.
-#
-# Revision 1.27  2004/10/18 01:15:20  rshortt
-# Changes to use new pyepg:
-# -Add ProgramItem and ChannelItem classes which take code from the old tv
-#  and channel classes.
-# -change freq vars to uri, we already have a freq (KHz, tv/freq.py)
-# -preserve tuner_id, which is mostly useful for people in North America as
-#  most prefer to see it in the display.
-#
-# Revision 1.26  2004/10/09 09:11:56  dischi
-# wrap epg scanning in a thread
-#
-# Revision 1.25  2004/08/23 01:23:31  rshortt
-# -Add functions for lockfile handling based on the device used.
-# -Convenience functions to retrieve settings based on channel id or name.
-# -Function to get the actual channel (tuner id) based on a channel id and
-#  type (ie: tv0 or dvb1).
-#
-# Revision 1.24  2004/08/14 01:19:04  rshortt
-# Add a simple but effective memory cache.
-#
-# Revision 1.23  2004/08/13 02:08:25  rshortt
-# Add reference to config.TV_DEFAULT_SETTINGS and settings() to Channel class.
-# TODO: add logic to include something like TV_SETTINGS_ALTERNATES = { 'tv0' : 'tv1' }
-# to say that tv0 and tv1 have the same channels.
-#
-# Revision 1.22  2004/08/10 19:37:22  dischi
-# better pyepg integration
-#
-# Revision 1.21  2004/08/09 21:19:47  dischi
-# make tv guide working again (but very buggy)
-#
-# Revision 1.20  2004/08/05 17:27:16  dischi
-# Major (unfinished) tv update:
-# o the epg is now taken from pyepg in lib
-# o all player should inherit from player.py
-# o VideoGroups are replaced by channels.py
-# o the recordserver plugins are in an extra dir
-#
-# Bugs:
-# o The listing area in the tv guide is blank right now, some code
-#   needs to be moved to gui but it's not done yet.
-# o The only player working right now is xine with dvb
-# o channels.py needs much work to support something else than dvb
-# o recording looks broken, too
-#
-# Revision 1.19  2004/07/11 12:33:29  dischi
-# no tuner id is ok for dvb
-#
-# Revision 1.18  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.17  2004/03/05 04:04:10  rshortt
-# Only call setChannel on an external tuner plugin if we really have one.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#                Rob Shortt <rob@infointeractive.com>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -107,27 +29,26 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# python imports
 import os
-import string
 import time
 import traceback
 
+# the electronic program guide
+import pyepg
+
+# freevo imports
 import config
 import plugin
+import item
 
-from item import Item
-from tv.program_display import ProgramItem
-
-# The Electronic Program Guide
-import pyepg
+# tv imports
+from program import ProgramItem
 
 EPGDB = os.path.join(config.FREEVO_CACHEDIR, 'epgdb')
 
-DEBUG = config.DEBUG
-
-NO_DATA = _('no data')
 _channels = None
 _epg = None
 
@@ -170,7 +91,7 @@ def get_settings_by_id(chan_id):
     for c in get_channels().get_all():
         if c.id == chan_id:
             for u in c.uri:
-                which = string.split(u, ':')[0]
+                which = u.split(':')[0]
                 settings.append(which)
             return settings
     return None
@@ -183,7 +104,7 @@ def get_settings_by_name(chan_name):
     for c in get_channels().get_all():
         if c.name == chan_name:
             for u in c.uri:
-                which = string.split(u, ':')[0]
+                which = u.split(':')[0]
                 settings.append(which)
             return settings
     return None
@@ -198,7 +119,7 @@ def get_lockfile(which):
 
     dev_lock = False
     settings = config.TV_SETTINGS.get(which)
-    
+
     if not settings:
         _debug_('No settings for %s' % which)
 
@@ -215,7 +136,7 @@ def get_lockfile(which):
 
     if dev_lock:
         lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % \
-                   string.replace(dev, os.sep, '_'))
+                   dev.replace(os.sep, '_'))
     else:
         lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % which)
 
@@ -226,7 +147,7 @@ def get_lockfile(which):
 def lock_device(which):
     """
     """
-    
+
     lockfile = get_lockfile(which)
 
     if os.path.exists(lockfile):
@@ -245,7 +166,7 @@ def lock_device(which):
 def unlock_device(which):
     """
     """
-    
+
     lockfile = get_lockfile(which)
 
     if os.path.exists(lockfile):
@@ -264,7 +185,7 @@ def unlock_device(which):
 def is_locked(which):
     """
     """
-    
+
     lockfile = get_lockfile(which)
 
     if os.path.exists(lockfile):
@@ -277,18 +198,18 @@ def is_locked(which):
 def get_actual_channel(channel_id, which):
     """
     """
-    
+
     for chan in get_channels().get_all():
         if chan.id == channel_id:
             for u in chan.uri:
-                if string.split(u, ':')[0] == which:
-                    return string.lstrip(u, '%s:' % which)
+                if u.split(':')[0] == which:
+                    return u.lstrip('%s:' % which)
 
 
 def get_chan_displayname(channel_id):
 
     for chan in get_channels().get_all():
-        if chan.info['id'] == channel_id:
+        if chan.chan_id == channel_id:
             return chan.name
 
     return 'Unknown'
@@ -313,7 +234,7 @@ def when_listings_expire():
     return left
 
 
-def get_dummy_programs(channel_id, start, stop):
+def get_dummy_programs(channel, start, stop):
     """
     Return some default ProgramItems with intervals no longer than a
     set default.
@@ -332,28 +253,28 @@ def get_dummy_programs(channel_id, start, stop):
             d_stop = stop
 
         dummies.append(ProgramItem(u'NO DATA', d_start, d_stop,
-                                   id=-1, channel_id=channel_id))
+                                   id=-1, channel = channel))
 
         sec_until_next = default_prog_interval
         d_start = d_stop
 
     return dummies
- 
 
 
-class ChannelItem(Item):
+
+class ChannelItem(item.Item):
     """
     Information about one specific channel, also containing
     epg informations.
     """
     def __init__(self, id, display_name, uri):
-        Item.__init__(self)
+        item.Item.__init__(self)
 
-        self.info['id'] = id
-        self.info['tuner_id'] = ''
-        self.uri = []
+        self.chan_id  = id
+        self.tuner_id = ''
+        self.uri      = []
         self.programs = []
-        self.logo = ''
+        self.logo     = ''
 
         if isinstance(uri, list) or isinstance(uri, tuple):
             for u in uri:
@@ -404,7 +325,7 @@ class ChannelItem(Item):
         settings = {}
 
         for u in self.uri:
-            type = string.split(u, ':')[0]
+            type = u.split(':')[0]
             settings[type] = config.TV_SETTINGS.get(type)
 
         return settings
@@ -425,11 +346,11 @@ class ChannelItem(Item):
         dummy_progs = []
 
         if not progs:
-            progs = get_epg().get_programs(self.info['id'], start, stop)
+            progs = get_epg().get_programs(self.chan_id, start, stop)
         for p in progs:
             i = ProgramItem(p.title, p.start, p.stop, subtitle=p.subtitle,
-                            description=p.description, id=p.id,
-                            channel_id=self.info['id'])
+                            description=p['description'], id=p.id,
+                            channel=self)
             new_progs.append(i)
 
             # TODO: add information about program being recorded which
@@ -438,30 +359,29 @@ class ChannelItem(Item):
 
         l = len(new_progs)
         if not l:
-            dummy_progs = get_dummy_programs(self.info['id'], start, stop)
+            dummy_progs = get_dummy_programs(self, start, stop)
         else:
             for p in new_progs:
                 i = new_progs.index(p)
                 if i == 0:
                     # fill gaps before
                     if p.start > start:
-                        n = get_dummy_programs(self.info['id'], start, p.start)
+                        n = get_dummy_programs(self, start, p.start)
                         dummy_progs += n
 
                 if i < l-1:
                     # fill gaps between programs
                     next_p = new_progs[i+1]
-                    if p.stop < next_p.start: 
-                        n = get_dummy_programs(self.info['id'], p.stop,
-                                               next_p.start)
+                    if p.stop < next_p.start:
+                        n = get_dummy_programs(self, p.stop, next_p.start)
                         dummy_progs += n
 
                 elif i == l-1:
                     # fill gaps at the end
                     if p.stop < stop:
-                        n = get_dummy_programs(self.info['id'], p.stop, stop)
+                        n = get_dummy_programs(self, p.stop, stop)
                         dummy_progs += n
-                
+
         for i in new_progs + dummy_progs:
             if not i in self.programs:
                 self.programs.append(i)
@@ -489,7 +409,7 @@ class ChannelItem(Item):
                     self.import_programs(p.stop, stop)
         else:
             self.import_programs(start, stop)
-     
+
         # return the needed programs
         if stop == 0:
             # only get what's running at time start
@@ -537,7 +457,7 @@ class ChannelItem(Item):
         # print 'next: returning prog %s' % prog
         return prog
 
-    
+
     def prev(self, prog):
         """
         return previous program before 'prog'
@@ -577,16 +497,16 @@ class ChannelList:
 
         for c in config.TV_CHANNELS:
             self.add_channel(ChannelItem(c[0], c[1], c[2]))
-        
+
 
     def add_channel(self, channel):
         """
         add a channel to the list
         """
-        if not self.channel_dict.has_key(channel['id']):
+        if not self.channel_dict.has_key(channel.chan_id):
             # Add the channel to both the dictionary and the list. This works
             # well in Python since they will both point to the same object!
-            self.channel_dict[channel['id']] = channel
+            self.channel_dict[channel.chan_id] = channel
             self.channel_list.append(channel)
 
 
@@ -595,7 +515,7 @@ class ChannelList:
         """
         e = self.epg.get_programs([], start, stop)
         for c in self.channel_list:
-            id = c.info['id']
+            id = c.chan_id
             c.import_programs(start, stop, filter(lambda x: x[1] == id, e))
 
 
@@ -619,7 +539,7 @@ class ChannelList:
         set channel
         """
         self.selected = pos
-        
+
 
     def get(self, id=None):
         """
@@ -638,4 +558,4 @@ class ChannelList:
         return all channels
         """
         return self.channel_list
-    
+

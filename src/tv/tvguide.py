@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/11/17 19:41:29  dischi
+# more work to make tv stable again
+#
 # Revision 1.59  2004/11/14 15:56:04  dischi
 # try to find a strange bug
 #
@@ -145,22 +148,9 @@ class TVGuide(MenuApplication):
         
 
     def start(self, parent):
-        self.engine = gui.AreaHandler('tv', ('screen', 'title', 'subtitle', 'view',
-                                             'tvlisting', 'info'))
+        self.engine = gui.AreaHandler('tv', ('screen', 'title', 'subtitle',
+                                             'view', 'tvlisting', 'info'))
         self.parent = parent
-        
-        # theme = self.engine.get_theme()
-        # print 'ENGINE: %s' % dir(self.engine.get_theme())
-        # print '_sets: %s' % theme._sets
-        # print '_layout: %s' % theme._layout
-        # print '_menuset: %s' % theme._menuset
-        # print '_menu: %s' % theme._menu
-        # print 'all_variables: %s' % theme.all_variables
-          
-
-        # hours_per_page = self.engine.get_theme().hours_per_page
-        #self.n_items, hours_per_page = self.engine.hours_per_page(('tv', self))
-        #stop_time = start_time + hours_per_page * 60 * 60
 
         box = gui.PopupBox(text=_('Preparing the program guide'))
         box.show()
@@ -175,7 +165,6 @@ class TVGuide(MenuApplication):
             return False
 
         self.current_time = int(time.time())
-        # stop_time = self.current_time + hours_per_page * 60 * 60
         stop_time = self.current_time + 3*3600
         channels.import_programs(self.current_time-3*3600, stop_time)
 
@@ -205,16 +194,6 @@ class TVGuide(MenuApplication):
         MenuApplication.hide(self)
             
         
-    def start_tv(self):
-        """
-        start the best player for the current channel
-        """
-        p = self.channel.player()
-        if p:
-            app, device, freq = p
-            app.play(self.channel, device, freq)
-
-
     def update_schedules(self, force=False):
         # TODO: this will most likely change into something like
         #       epg.get_scheduled_recordings() which will in turn just
@@ -223,33 +202,6 @@ class TVGuide(MenuApplication):
         #
         # NOT WORKING RIGHT NOW
         return
-    
-        if not force and self.last_update + 60 > time.time():
-            return
-
-        # less than one second? Do not belive the force update
-        if self.last_update + 1 > time.time():
-            return
-
-        upsoon = '%s/upsoon' % (config.FREEVO_CACHEDIR)
-        if os.path.isfile(upsoon):
-            os.unlink(upsoon)
-            
-        _debug_('update schedule')
-        self.last_update = time.time()
-        self.scheduled_programs = []
-        # try:
-        #     (got_schedule, schedule) = ri.getScheduledRecordings()
-        # except Exception, e:
-        #     print e
-        #     return
-        
-        # util.misc.comingup(None, (got_schedule, schedule))
-
-        if got_schedule:
-            l = schedule.getProgramList()
-            for k in l:
-                self.scheduled_programs.append(l[k])
 
         
     def eventhandler(self, event):
@@ -258,42 +210,8 @@ class TVGuide(MenuApplication):
 
         _debug_('TVGUIDE EVENT is %s' % event, 2)
 
-#         if event == MENU_CHANGE_STYLE:
-#             if self.engine.toggle_display_style('tv'):
-#                 start_time    = self.start_time
-#                 stop_time     = self.stop_time
-#                 start_channel = self.start_channel
-#                 selected      = self.selected
-
-#                 self.n_items, hours_per_page = self.engine.items_per_page(('tv', self))
-
-#                 before = -1
-#                 after  = -1
-#                 for c in self.guide.chan_list:
-#                     if before >= 0 and after == -1:
-#                         before += 1
-#                     if after >= 0:
-#                         after += 1
-#                     if c.id == start_channel:
-#                         before = 0
-#                     if c.id == selected.channel_id:
-#                         after = 0
-                    
-#                 if self.n_items <= before:
-#                     start_channel = selected.channel_id
-
-#                 if after < self.n_items:
-#                     up = min(self.n_items -after, len(self.guide.chan_list)) - 1
-#                     for i in range(len(self.guide.chan_list) - up):
-#                         if self.guide.chan_list[i+up].id == start_channel:
-#                             start_channel = self.guide.chan_list[i].id
-#                             break
-                    
-#                 stop_time = start_time + hours_per_page * 60 * 60
-
-#                 self.n_cols  = (stop_time - start_time) / 60 / self.col_time
-#                 self.rebuild(start_time, stop_time, start_channel, selected)
-#                 self.refresh()
+        if event == MENU_CHANGE_STYLE:
+            pass
             
         if event == MENU_UP:
             self.channel_list.up()
@@ -331,26 +249,24 @@ class TVGuide(MenuApplication):
                 self.current_time -= 60 * 30
             self.refresh()
 
-#         elif event == MENU_PAGEUP:
-#             self.event_change_channel(-self.n_items)
-#             self.refresh()
+        elif event == MENU_PAGEUP:
+            pass
 
-#         elif event == MENU_PAGEDOWN:
-#             self.event_change_channel(self.n_items)
-#             self.refresh()
+        elif event == MENU_PAGEDOWN:
+            pass
 
         elif event == TV_SHOW_CHANNEL:
-            _debug_('show channel')
             items = []
-            for prog in self.channel.get(time.time(), -1):
+            channel = channels.get_settings_by_id(self.chan_id)
+            for prog in channel.get(time.time(), -1):
                 items.append(prog)
             cmenu = menu.Menu(self.channel.name, items)
             # FIXME: the percent values need to be calculated
-            #cmenu.table = (15, 15, 70)
+            # cmenu.table = (15, 15, 70)
             self.menuw.pushmenu(cmenu)
 
         elif event == TV_START_RECORDING:
-            self.event_RECORD()
+            self.show_item_menu()
             self.refresh()
  
         elif event == MENU_SELECT or event == PLAY:
@@ -360,12 +276,12 @@ class TVGuide(MenuApplication):
             # if so, bring up the record dialog
             now = time.time() + (7*60)
             if self.selected.start > now:
-                self.event_RECORD()
+                self.show_item_menu()
             
             elif os.path.exists(tvlockfile):
                 # XXX: In the future add the options to watch what we are
                 #      recording or cancel it and watch TV.
-                gui.AlertBox(_('Sorry, you cannot watch TV while recording. ')+ \
+                gui.AlertBox(_('You cannot watch TV while recording. ')+ \
                              _('If this is not true then remove ') + \
                              tvlockfile + '.').show()
                 return True
@@ -385,8 +301,18 @@ class TVGuide(MenuApplication):
         self.engine.draw(self)
 
 
-    def event_RECORD(self):
-        self.selected.display_program(menuw=self.menuw)
+    def start_tv(self):
+        """
+        start the best player for the current channel
+        """
+        p = self.channel.player()
+        if p:
+            app, device, freq = p
+            app.play(self.channel, device, freq)
+
+
+    def show_item_menu(self):
+        self.selected.submenu(menuw=self.menuw, additional_items=True)
 
 
     def __del__(self):
