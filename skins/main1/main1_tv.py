@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/10/16 19:59:59  dischi
+# use mode='soft' for drawstringframed for info
+#
 # Revision 1.2  2002/10/16 19:40:19  dischi
 # Now the table looks ok for any height/font combination. Also fixed a
 # float->int bug that caused one pixel spaces here and there. Some cleanups
@@ -100,7 +103,7 @@ class Skin_TV:
         osd.drawbox(val.x, val.y, val.x+val.width, val.y+val.height,
                     color=val.bgcolor, width=-1)
         DrawTextFramed(to_info, val, x=val.x, y=val.y, width=val.width,
-                       height=val.height)
+                       height=val.height, mode='soft')
 
 
 
