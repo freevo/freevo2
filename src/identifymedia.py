@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/01/28 11:34:28  dischi
+# Reversed the bugfix in identifymedia and fixed it in videoitem. Track 1
+# should play track 1, track 0 should be dvdnav (in the future, right now
+# it's also track 1).
+#
 # Revision 1.10  2003/01/28 01:59:31  krister
 # Fix for DVD playing bug.
 #
@@ -206,7 +211,7 @@ class Identify_Thread(threading.Thread):
                 if movie_info:
                     media.info = copy.copy(movie_info)
                 else:
-                    media.info = videoitem.VideoItem('1', None)
+                    media.info = videoitem.VideoItem('0', None)
 
                 media.info.label = label
                 media.info.name = title

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/01/28 11:34:28  dischi
+# Reversed the bugfix in identifymedia and fixed it in videoitem. Track 1
+# should play track 1, track 0 should be dvdnav (in the future, right now
+# it's also track 1).
+#
 # Revision 1.10  2003/01/12 10:58:31  dischi
 # Changed the multiple file handling. If a videoitem has more than one file,
 # the videoitem gets the filename '' and subitems for each file. With that
@@ -212,7 +217,8 @@ class VideoItem(Item):
             return
 
         file = self.filename
-        if not self.filename and (self.mode == 'dvd' or self.mode == 'vcd'):
+        if (not self.filename or self.filename == '0') and \
+           (self.mode == 'dvd' or self.mode == 'vcd'):
             file = '1'
 
         mplayer_options = self.mplayer_options
