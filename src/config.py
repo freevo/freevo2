@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2003/12/14 17:13:51  dischi
+# second supermount patch for mandrake
+#
 # Revision 1.80  2003/12/14 12:49:37  dischi
 # supermount patch for mandrake
 #
@@ -673,7 +676,7 @@ if ROM_DRIVES == None:
                 mntdir = match_automount.group(1)
                 devname = match_automount.group(2)
                 # Must check that the supermount device is cd or dvd
-                if devname.lower().find('cdrom') != -1:
+                if devname.lower().find('cd') != -1:
                     dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
                 elif devname.lower().find('dvd') != -1:
                     dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
