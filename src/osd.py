@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.124  2004/01/13 19:11:19  dischi
+# backup screen before osd shutdown
+#
 # Revision 1.123  2004/01/12 19:10:35  dischi
 # support spaces inside a string after a \n
 #
@@ -532,6 +535,9 @@ class OSD:
         """
         stop the display to give other apps the right to use it
         """
+        # backup the screen
+        self.__stop_screen__ = pygame.Surface((self.width, self.height))
+        self.__stop_screen__.blit(self.screen, (0,0))
         pygame.display.quit()
 
 
@@ -540,10 +546,14 @@ class OSD:
         restores a stopped display
         """
         pygame.display.init()
-        self.width = config.CONF.width
+        self.width  = config.CONF.width
         self.height = config.CONF.height
         self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
                                               self.depth)
+        if hasattr(self, '__stop_screen__'):
+            self.screen.blit(self.__stop_screen__, (0,0))
+            del self.__stop_screen__
+            
         # We need to go back to fullscreen mode if that was the mode before the shutdown
         if self.fullscreen:
             pygame.display.toggle_fullscreen()
