@@ -7,6 +7,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/06/13 19:21:39  dischi
+# prevent strange crash
+#
 # Revision 1.1  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -163,6 +166,15 @@ class Window(GUIObject):
                                       self.surface)
 
         self.get_selected_child = self.content.get_selected_child
+        if not self.content.parent:
+            print '******************************************************************'
+            print 'Error: content has no parent, fixing...'
+            print 'If you can reproduce this error message, please send a'
+            print 'mail with the subject \'[Freevo-Bugreport] GUI\' to'
+            print 'freevo@dischi-home.de.'
+            print '******************************************************************'
+            self.content.parent = self
+            
         self.content.surface = self.content.get_surface()
         self.content.draw()
         self.blit_parent()
