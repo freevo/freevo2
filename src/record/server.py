@@ -191,7 +191,7 @@ class RecordServer(RPCServer):
         """
         log.info('recordserver.check_favorites')
         for f in copy.copy(self.favorites):
-            for p in pyepg.guide.search_programs(f.name):
+            for p in pyepg.search(f.name):
                 if not f.match(p.title, p.channel.id, p.start):
                     continue
                 r = Recording(self.rec_id, p.title, p.channel.id, f.priority,

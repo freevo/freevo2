@@ -109,13 +109,13 @@ class TVGuide(MenuApplication):
             return True
             
         if event == MENU_UP:
-            self.channel = pyepg.guide.get_channel(-1, self.channel)
+            self.channel = pyepg.get_channel(self.channel, -1)
             self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True
 
         if event == MENU_DOWN:
-            self.channel = pyepg.guide.get_channel(1, self.channel)
+            self.channel = pyepg.get_channel(self.channel, 1)
             self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True

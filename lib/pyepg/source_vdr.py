@@ -34,7 +34,7 @@ import os
 import vdr.vdr
 
 
-def add_data(guide, vdr_dir=None, channels_file=None, epg_file=None,
+def update(guide, vdr_dir=None, channels_file=None, epg_file=None,
              host=None, port=None, access_by='sid',
              exclude_channels=None, verbose=1):
     if not (isinstance(exclude_channels, list) or \

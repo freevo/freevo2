@@ -108,7 +108,7 @@ def timestr2secs_utc(timestr):
     return secs
 
 
-def add_data(guide, XMLTV_FILE, exclude_channels=None):
+def update(guide, XMLTV_FILE):
     """
     Load guide data from a raw XMLTV file into the database, parsing using
     the XMLTV using the xmltv.py support lib.
@@ -127,7 +127,7 @@ def add_data(guide, XMLTV_FILE, exclude_channels=None):
 
     new_channels = []
 
-
+    exclude_channels = guide.exclude_channels
     if not (isinstance(exclude_channels, list) or \
             isinstance(exclude_channels, tuple)):
         exclude_channels = []

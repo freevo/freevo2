@@ -73,6 +73,7 @@ class Guide:
         """
         Load channel listing from the database
         """
+        self.exclude_channels = TV_CHANNELS_EXCLUDE
         # Check TV_CHANNELS and add them to the list
         for c in TV_CHANNELS:
             self.add_channel(Channel(c[0], c[1], c[2:], self))
@@ -412,13 +413,13 @@ class Guide:
     # Interface functions to get channels / programs
     #
 
-    def add_data(self, backend, *args, **kwargs):
+    def update(self, backend, *args, **kwargs):
         """
         Add data with the given backend to the database. The code for the
         real adding is in source_`backend`.py
         """
         exec('import source_%s as backend' % backend)
-        backend.add_data(self, *args, **kwargs)
+        backend.update(self, *args, **kwargs)
         self.sql_expire_programs()
 
 
@@ -451,7 +452,7 @@ class Guide:
             return self.channel_dict[key]
 
 
-    def get_channel(self, pos, start=None):
+    def get_channel(self, start, pos):
         """
         Get a channel relative to the given channel 'start'. The function
         will start from the beginning of the list if the index is greater
@@ -464,7 +465,7 @@ class Guide:
         return self.channel_list[pos]
 
 
-    def search_programs(self, title, by_chan=None):
+    def search(self, title, by_chan=None):
         """
         Return a list of programs with a title similar to the given parameter.
         If by_chan is given, it has no by a valid channel id and only programs
