@@ -180,15 +180,16 @@ def rmrf(top=None):
 
 def unlink(filename):
     try:
-        if os.stat(filename)[stat.ST_SIZE] > 1000000:
-            name = os.path.join(os.path.dirname(filename),
-                                '.' + os.path.basename(filename) + '.freevo~')
+        if os.path.isdir(filename) or \
+               os.stat(filename)[stat.ST_SIZE] > 1000000:
+            base = '.' + os.path.basename(filename) + '.freevo~'
+            name = os.path.join(os.path.dirname(filename), base)
             os.rename(filename, name)
             popen.Process(['rm', '-rf', name])
         else:
             os.unlink(filename)
-    except (OSError, IOError):
-        log.error('can\'t delete %s' % filename)
+    except (OSError, IOError), e:
+        log.error('can\'t delete %s: %s' % (filename, e))
         
 
 #
