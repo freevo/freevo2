@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.03
+LOCAL_CONF_VERSION  = 5.04
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -193,7 +193,10 @@ LOCAL_CONF_CHANGES = [
      '''Add XINE_ARGS_DEF to set xine arguments and OSD_BUSYICON_TIMER to show
      a busy icon when the menu takes too much time building'''),
     (5.03,
-     '''Add UMASK to set umask for files in vfs''' ) ]
+     '''Add UMASK to set umask for files in vfs''' ),
+    (5.04,
+     '''SKIN_XML_FILE set to nothing as default, SKIN_START_LAYOUT is removed.
+     When SKIN_XML_FILE is not set, the skin will remeber the last settings''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -697,16 +700,11 @@ GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 SKIN_MODULE = 'main'
 
 #
-# XML file for the skin
+# XML file for the skin. If SKIN_XML_FILE is set, this skin will be
+# used, otherwise the skin will rememeber the last choosen skin.
 #
-SKIN_XML_FILE = 'noia'
-
-#
-# Start the new skin with a specific layout. Default is 0, DISPLAY toggles
-# between the different layouts. If a menu hasn't that layout number, 0 will
-# be taken
-#
-SKIN_START_LAYOUT = 0
+SKIN_XML_FILE         = ''
+SKIN_DEFAULT_XML_FILE = 'noia'
 
 #
 # Select a way when to switch to text view even if a image menu is there
