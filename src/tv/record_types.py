@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/06/21 22:41:44  rshortt
+# Small cleanup, use config.DEBUG.
+#
 # Revision 1.11  2004/02/22 06:23:51  gsbarbieri
 # Unicode support: name could be an unicode object and unicode doesn't provide
 # translate() method.
@@ -61,21 +64,15 @@
 #endif
 
 import sys, time, os, string
+import config
 import util.tv_util as tv_util
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
 TYPES_VERSION = 2
 
-# Set to 1 for debug output
-DEBUG = 0
-
-TRUE = 1
-FALSE = 0
-
 
 class ScheduledRecordings:
- 
 
     def __init__(self):
         self.programList = {}
@@ -88,13 +85,13 @@ class ScheduledRecordings:
             # key = rec_interface.getKey(prog)
             pass
 
-        if DEBUG: print 'addProgram: key is "%s"' % key
+        if config.DEBUG: print 'addProgram: key is "%s"' % key
         if not self.programList.has_key(key):
-            if DEBUG: print 'addProgram: actually adding "%s"' % prog
+            if config.DEBUG: print 'addProgram: actually adding "%s"' % prog
             self.programList[key] = prog
         else:
-            if DEBUG: print 'We already know about this recording.'
-        if DEBUG: print 'addProgram: len is "%s"' % len(self.programList)
+            if config.DEBUG: print 'We already know about this recording.'
+        if config.DEBUG: print 'addProgram: len is "%s"' % len(self.programList)
 
 
     def removeProgram(self, prog, key=None):
@@ -104,9 +101,9 @@ class ScheduledRecordings:
 
         if self.programList.has_key(key):
             del self.programList[key]
-            if DEBUG: print 'removed recording: %s' % prog
+            if config.DEBUG: print 'removed recording: %s' % prog
         else:
-            if DEBUG: print 'We do not know about this recording.'
+            if config.DEBUG: print 'We do not know about this recording.'
 
 
     def getProgramList(self):
@@ -119,18 +116,18 @@ class ScheduledRecordings:
 
     def addFavorite(self, fav):
         if not self.favorites.has_key(fav.name):
-            if DEBUG: print 'addFavorites: actually adding "%s"' % fav.name
+            if config.DEBUG: print 'addFavorites: actually adding "%s"' % fav.name
             self.favorites[fav.name] = fav
         else:
-            if DEBUG: print 'We already have a favorite called "%s".' % fav.name
+            if config.DEBUG: print 'We already have a favorite called "%s".' % fav.name
 
 
     def removeFavorite(self, name):
         if self.favorites.has_key(name):
             del self.favorites[name]
-            if DEBUG: print 'removed favorite: %s' % name
+            if config.DEBUG: print 'removed favorite: %s' % name
         else:
-            if DEBUG: print 'We do not have a favorite called "%s".' % name
+            if config.DEBUG: print 'We do not have a favorite called "%s".' % name
 
 
     def getFavorites(self):
