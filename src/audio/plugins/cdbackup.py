@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/10/22 18:37:41  mikeruelle
+# if we have the coverart might as well copy it over
+#
 # Revision 1.23  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -98,6 +101,7 @@ import string
 import sys
 import threading
 import re
+import shutil
 
 import config
 import menu
@@ -302,7 +306,7 @@ class main_backup_thread(threading.Thread):
             media.info.handle_type = 'cdrip'
         
         # Get the artist, album and song_names	
-        (artist, album, genre, song_names) = self.get_formatted_cd_info(device)
+        (discid, artist, album, genre, song_names) = self.get_formatted_cd_info(device)
                
         dir_audio = config.AUDIO_BACKUP_DIR
         
@@ -330,6 +334,13 @@ class main_backup_thread(threading.Thread):
             os.makedirs(pathname, 0777)
         except:
             _debug_(_( 'Directory %s already exists' ) % pathname)
+
+        try:
+	    mycoverart = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR, discid)
+	    if os.path.isfile(mycoverart):
+	        shutil.copy(mycoverart, os.path.join(pathname,'cover.jpg'))
+	except:
+            _debug_('can not copy over cover art')
 
         self.output_directory = pathname
         cdparanoia_command = []
@@ -478,7 +489,7 @@ class main_backup_thread(threading.Thread):
         for track in cd_info.tracks:
             song_names.append(self.replace_special_char(track.title, '-'))
             
-        return [artist, album, genre, song_names]                
+        return [cd_info.id, artist, album, genre, song_names]                
     
 
     # This function gets rid of the slash, '/', in a string, and replaces it
