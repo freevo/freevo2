@@ -436,109 +436,162 @@
       <TIME start="0"/>
     </ENTRY>
   </SUB>
-  <SUB NAME="Spraydio">
+  <SUB NAME="Nordic Stations">
     <ENTRY>
-      <TITLE>Visby (Pop)</TITLE>
+      <TITLE>Spraydio Visby (Pop)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/visby"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Chelsea (Indie)</TITLE>
+      <TITLE>Spraydio Chelsea (Indie)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/chelsea"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Picadilly (80s)</TITLE>
-      <REF HREF="mms://wms03.nordicwebradio.com/visbyhitradio"/>
+      <TITLE>Spraydio Piccadilly (80s)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/piccadilly"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Manilla (Hip Hop)</TITLE>
+      <TITLE>Spraydio Manilla (Hip Hop)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/manilla"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Krakow (Metal)</TITLE>
+      <TITLE>Spraydio Krakow (Metal)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/krakow"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Nashville (Country)</TITLE>
+      <TITLE>Spraydio Nashville (Country)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/nashville"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Detroit (Techno)</TITLE>
+      <TITLE>Spraydio Detroit (Techno)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/detroit"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Seattle (Grunge)</TITLE>
+      <TITLE>Spraydio Seattle (Grunge)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/krakow"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Motown (Soul)</TITLE>
+      <TITLE>Spraydio Motown (Soul)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/motown"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Studio 54 (Disco)</TITLE>
+      <TITLE>Spraydio Studio 54 (Disco)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/studio54"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>90s Dance (Euro)</TITLE>
+      <TITLE>Spraydio 90s Dance (Euro)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/90sdance"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Santa Cruz (Punk)</TITLE>
+      <TITLE>Spraydio Santa Cruz (Punk)</TITLE>
       <REF HREF="mms://wms03.nordicwebradio.com/santacruz"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - Radio City Stockholm</TITLE>
+      <TITLE>Spraydio San Francisco (Gay)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/sanfrancisco"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Spraydio Tokyo (Grrrl Riot)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/tokyo"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Spraydio Schlagerradio (Schlager)</TITLE>
+      <REF HREF="mms://wms03.nordicwebradio.com/svenskschlager"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>MyHitMusic Pop</TITLE>
+      <REF HREF="mms://212.112.179.15/myhitmusic1?WMContentBitrate=49000"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>MyHitMusic Dance</TITLE>
+      <REF HREF="mms://212.112.179.15/myhitmusic2?WMContentBitrate"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Radio City Stockholm</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/radiocitysthlm2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - Radio City Goteborg</TITLE>
+      <TITLE>Radio City Goteborg</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/radiocitygbg2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - Radio City Malmo</TITLE>
+      <TITLE>Radio City Malmo</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/radiocitymalmo2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - Mix Megapol</TITLE>
+      <TITLE>Mix Megapol</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/mix2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - E-FM</TITLE>
+      <TITLE>E-FM</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/efm2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - Rockklassiker</TITLE>
+      <TITLE>Rockklassiker</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/rockklassiker2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - Vinyl 107</TITLE>
+      <TITLE>Vinyl 107</TITLE>
       <REF HREF="mms://wms05.nordicwebradio.com/vinyl2"/>
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>FM - NRJ</TITLE>
+      <TITLE>NRJ</TITLE>
       <REF HREF="http://live2.nrj.net/nrj"/>
       <TIME start="0"/>
     </ENTRY>
-  </SUB>
-  <SUB NAME="Sveriges Radio">
+    <ENTRY>
+      <TITLE>Rix FM</TITLE>
+      <REF HREF="mms://wms01.nordicwebradio.com/rix2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Power Hit Radio</TITLE>
+      <REF HREF="mms://wms01.nordicwebradio.com/power2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Lugna Favoriter</TITLE>
+      <REF HREF="mms://wms01.nordicwebradio.com/lugna2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Metro FM</TITLE>
+      <REF HREF="mms://wms01.nordicwebradio.com/metro2"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Radio Match</TITLE>
+      <REF HREF="mms://192.165.38.187/radiomatch"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Gold FM</TITLE>
+      <REF HREF="mms://192.165.38.187/goldfm"/>
+      <TIME start="0"/>
+    </ENTRY>
     <ENTRY>
       <TITLE>Sveriges Radio: P1</TITLE>
       <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=p1-wm-High"/>
@@ -570,11 +623,6 @@
       <TIME start="0"/>
     </ENTRY>
     <ENTRY>
-      <TITLE>Sisuradio</TITLE>
-      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=sisu-wm-High"/>
-      <TIME start="0"/>
-    </ENTRY>
-    <ENTRY>
       <TITLE>Sveriges Radio: SR c</TITLE>
       <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=src-wm-High"/>
       <TIME start="0"/>
@@ -587,6 +635,51 @@
     <ENTRY>
       <TITLE>Sveriges Radio: SR X</TITLE>
       <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=srx-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>Sisuradio</TITLE>
+      <REF HREF="http://www.sr.se/cgi-bin/spelare/createAsx.asp?namn=sisu-wm-High"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK P1</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_p1_hoy.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK P2</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_p2_hoy.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK Petre</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_p3_hoy.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK mPetre</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_mptre_hoy.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK Alltid Nyheter</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_alltidnyheter_lav.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK Alltid Klassisk</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_alltidklassisk_hoy.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK Stortinget</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_storting_lav.asx"/>
+      <TIME start="0"/>
+    </ENTRY>
+    <ENTRY>
+      <TITLE>NRK Sami Radio</TITLE>
+      <REF HREF="http://www6.nrk.no/nettradio/nrk_sami_hoy.asx"/>
       <TIME start="0"/>
     </ENTRY>
   </SUB>
