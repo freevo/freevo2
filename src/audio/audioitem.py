@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/18 06:16:48  krister
+# Added parts of Thomas Schuppels CDDB updates.
+#
 # Revision 1.12  2003/02/17 03:27:11  outlyer
 # Added Thomas' CDDB support patch. I don't have a CD-rom drive in my machine,
 # so I can't verify it works; code looks good though.
@@ -109,7 +112,6 @@ class AudioItem(Item):
     """
     
     def __init__(self, file, parent, cache = None, name = None):
-        print "__init__"
         Item.__init__(self, parent)
         self.drawall    = 1
         self.filename   = file[:]
@@ -335,6 +337,15 @@ class AudioItem(Item):
         if not self.track:
             self.track = ''
         return 1
+
+   
+    def set_info(self, artist, album, title, track, trackof, year):
+        self.album = album
+        self.track = track
+        self.trackof = trackof
+        self.artist = artist
+        self.year = year
+        self.title = title
 
 
     # ----------------------------------------------------------------------------
