@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/20 21:46:05  outlyer
+# Missing bracket, prevents this file from being loaded.
+#
 # Revision 1.5  2003/11/16 17:41:04  dischi
 # i18n patch from David Sagnol
 #
@@ -324,7 +327,7 @@ class AudioPlayer(AbstractAudioPlayer):
 	    self.mode = mode # setting global var to mode.
 	    self.repeat = repeat # Repeat playlist setting
 	    
-	    globals.skin.PopupBox(_'Lanching xmms.'))
+	    globals.skin.PopupBox(_('Lanching xmms.'))
 	    self.set_mixer_levels()
         
 	    self.thread.mode  = constants.playmode
