@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/10/28 19:39:09  dischi
+# adhust to internal plugin.py changes
+#
 # Revision 1.11  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -61,7 +64,7 @@ def parse_plugins():
     all_plugins = []
     
     active = []
-    for p in plugin.__all_plugins__:
+    for p in plugin._all_plugins:
         active.append(p[0])
 
     for file in util.recursefolders(os.environ['FREEVO_PYTHON'],1, '*.py',1):
@@ -153,7 +156,7 @@ def print_info(plugin_name, all_plugins):
                     print
             if status == 'active':
                 print 'The plugin is loaded with the following settings:'
-                for p in plugin.__all_plugins__:
+                for p in plugin._all_plugins:
                     if p[0] == name:
                         type = p[1]
                         if not type:
@@ -222,7 +225,7 @@ def info_html(plugin_name, all_plugins):
 
             if status == 'active':
                 ret += '<p>The plugin is loaded with the following settings:'
-                for p in plugin.__all_plugins__:
+                for p in plugin._all_plugins:
                     if p[0] == name:
                         type = p[1]
                         if not type:
