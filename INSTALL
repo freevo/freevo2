@@ -10,7 +10,7 @@ o Download freevo and freevo-runtime from the website.
 o Un-tar somewhere. /usr/local is the recommended place for a regular
   installation, but it will run from anywhere, e.g. /tmp
      cd tmp
-     tar xvzf freevo-1.2.6.tar.gz
+     tar xvzf freevo-1.3.0.tar.gz
      tar xvzf freevo_runtime3.tar.gz
      tar xvzf freevo_apps1.tar.gz
      cd freevo

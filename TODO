@@ -6,13 +6,10 @@ $Id$
 
 Before next release:
 --------------------
-o Integrate the new extended menu for at least the TV guide.
-o Supply compiled versions of freevo_xwin, etc in CVS.
 
 
 Short-term
 ----------
-o Better movie XML file mplayer options
 o TV live pause
 o Play audio CD-roms
   o Use MPlayer, it has CDDA/CDDB support
@@ -23,8 +20,6 @@ o MP3 playing:
 o TV Channel guide layout
   o 1/4 size TV playing the channel that is currently selected on the guide.
   o Set recording from the TV guide
-o Add basic DVD navigation (chapters, languages, subtitles),
-  also DVD-nav if it works better now.
 o DVD backups. Settings for bitrate etc.
 o CD backups, CDDB support.
 o Settings for TV capture color, contrast, etc
