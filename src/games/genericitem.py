@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/29 11:39:38  dischi
+# use the given menuw abd not a global one
+#
 # Revision 1.2  2003/09/25 21:19:57  mikeruelle
 # fix crash for missing arg
 #
@@ -118,7 +121,7 @@ class GenericItem(Item):
 
         print "Playing:  %s" % self.filename
 
-        self.game_player.play(self)
+        self.game_player.play(self, menuw)
 
 
     def stop(self, menuw=None):

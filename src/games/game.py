@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/11/29 11:39:38  dischi
+# use the given menuw abd not a global one
+#
 # Revision 1.12  2003/10/23 00:30:42  rshortt
 # Bugfix for xmame.x11.  Since our new process code xmame will go defunct after
 # exit and Freevo will hang.  This used to happen with xmame.SDL and the
@@ -70,7 +73,6 @@ FALSE = 0
 
 # Setting up the default objects:
 osd        = osd.get_singleton()
-menuwidget = menu.get_singleton()
 
 # Module variable that contains an initialized Game() object
 _singleton = None
@@ -93,19 +95,20 @@ class Game:
         self.mode = None
         self.app_mode = 'games'
 
-    def play(self, item):
+    def play(self, item, menuw):
 
         self.item = item
         self.filename = item.filename 
         self.command = item.command
         self.mode = item.mode
-
+        self.menuw = menuw
+        
         if not os.path.isfile(self.filename):
             osd.clearscreen()
             osd.drawstring(_('File "%s" not found!') % self.filename, 30, 280)
             osd.update()
             time.sleep(2.0) 
-            menuwidget.refresh()
+            self.menuw.refresh()
             return 0
 
         if plugin.getbyname('MIXER'):
@@ -138,7 +141,7 @@ class Game:
 
 
     def eventhandler(self, event, menuw=None):
-        return self.item.eventhandler(event, menuwidget, self.thread)
+        return self.item.eventhandler(event, self.menuw, self.thread)
 
  
 # ======================================================================

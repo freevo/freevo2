@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/29 11:39:38  dischi
+# use the given menuw abd not a global one
+#
 # Revision 1.10  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -66,7 +69,6 @@ from genesisitem import GenesisItem
 from genericitem import GenericItem
 from gui.AlertBox import PopupBox
 
-menuwidget = menu.get_singleton()
 
 def cwd(parent, files):
     """
