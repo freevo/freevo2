@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/06/06 08:31:37  dischi
+# fix crash
+#
 # Revision 1.35  2004/06/06 06:41:47  dischi
 # delete cache on mmpython update
 #
@@ -180,7 +183,7 @@ def cache_directories(rebuild):
     if rebuild:
         print 'deleting cache files..................................',
         sys.__stdout__.flush()
-        mediainfo.del_cache()
+        util.mediainfo.del_cache()
         print 'done'
 
     all_dirs = []
