@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/01/14 22:07:26  outlyer
+# The new header code...
+#
 # Revision 1.17  2004/01/09 19:35:49  outlyer
 # Inherit DEBUG parameter from config, move some prints into DEBUG
 #
@@ -133,16 +136,10 @@ class HTMLResource:
         self.res += '\n\n\n\n<body>\n'
         # Header
         self.res += '<!-- Header Logo and Status Line -->'
-        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headerbg.png"')
-        self.tableRowOpen()
-        self.tableCell('<a target="_new" href="http://freevo.sf.net/"><img src="images/headerfreevo.png" width="313" height="101" border="0"/></a>')
-        self.tableRowClose()
-        self.tableClose()
-        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headertxtbg.png"')
-        self.tableRowOpen()
-        self.tableCell('<center>' + title + '</center>','height=22')
-        self.tableRowClose()
-        self.tableClose()
+        self.res += '<div id="titlebar"></div>\n'
+        self.res += '<div id="subtitle">\n'
+        self.res += str(title) + '\n'
+        self.res += '</div>\n'
         self.res += '<!-- Main Content -->'
         self.res+=('<br />')
 
