@@ -34,6 +34,9 @@
 # python imports
 import time
 
+# notifier
+import notifier
+
 # freevo imports
 import config
 import menu
@@ -193,9 +196,16 @@ class ProgramItem(Item):
 
     def channel_details(self, arg=None, menuw=None):
         items = []
+        # keep the notifier alive
+        notifier_counter = 0
         for prog in self.channel.get(time.time(), -1):
-            items.append(prog)
-        cmenu = menu.Menu(self.channel.name, items)
+            if not prog.id == -1:
+                items.append(ProgramItem(prog))
+            notifier_counter = (notifier_counter + 1) % 500
+            if not notifier_counter:
+                notifier.step(False, False)
+        cmenu = menu.Menu(self.channel.name, items,
+                          item_types = 'tv program menu')
         # FIXME: the percent values need to be calculated
         # cmenu.table = (15, 15, 70)
         menuw.pushmenu(cmenu)
