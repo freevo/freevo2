@@ -787,10 +787,10 @@ DVD_SUBTITLE_PREF    = ''              # Order of preferred subtitles on DVD.
 MPLAYER_NICE         = -20             
 
 if CONF.display == 'dfbmga':
-    MPLAYER_ARGS_DEF     = ('-ac mad, -autosync 100 -nolirc ' +
+    MPLAYER_ARGS_DEF     = ('-autosync 100 -nolirc ' +
                             '-autoq 100 -fs ')
 else:
-    MPLAYER_ARGS_DEF     = (('-ac mad, -autosync 100 -nolirc -autoq 100 -screenw %s '
+    MPLAYER_ARGS_DEF     = (('-autosync 100 -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
 
 
@@ -811,13 +811,13 @@ MPLAYER_SOFTWARE_SCALER = ''
 # Mplayer args for the different kinds of files. Possible values are dvd, vcd,
 # cd (audio cd), tv, all extentions and default if nothing matches
 #
-MPLAYER_ARGS = { 'dvd': '-cache 8192',
-                 'vcd': '-cache 4096',
+MPLAYER_ARGS = { 'dvd': '-ac mad, -cache 8192',
+                 'vcd': '-ac mad, -cache 4096',
                  'cd' : '-cache 500 -cdda speed=1',
                  'tv' : '-nocache',
-                 'ivtv' : '-cache 8192',
-                 'avi': '-cache 5000 -idx',
-                 'rm' : '-cache 5000 -forceidx',
+                 'ivtv' : '-ac mad, -cache 8192',
+                 'avi': '-ac mad, -cache 5000 -idx',
+                 'rm' : '-ac mad, -cache 5000 -forceidx',
                  'default': '-cache 5000'
                  }
 
