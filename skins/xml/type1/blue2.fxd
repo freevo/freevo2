@@ -102,6 +102,9 @@
 	</item>
 	<item type="dir">
 	  Directory: \t@name@
+	  @tagline@
+
+	  @plot@
 	</item>
 	<item type="playlist">
 	  This is a playlist.
@@ -123,6 +126,13 @@
 	</item>
 	<item type="dir">
 	  Directory: \t@name@
+	  @tagline@
+
+	  @plot@
+
+	  Genre:   \t@genre@
+	  Rating:  \t@rating@
+	  Runtime: \t@runtime@
 	</item>
       </content>
     </layout>
