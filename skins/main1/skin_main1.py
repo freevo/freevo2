@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2003/02/15 20:47:50  dischi
+# Use getFormatedImage from main1_image to speed up the display for
+# image thumbnails
+#
 # Revision 1.77  2003/02/12 10:38:51  dischi
 # Added a patch to make the current menu system work with the new
 # main1_image.py to have an extended menu for images
@@ -374,35 +378,24 @@ class Skin:
                 if type == 'image' and val.cover_image.visible:
                     image_x = val.cover_image.x-val.cover_image.spacing
                     if menu.selected == item:
-                        thumb = util.getExifThumbnail(image)
-                        if not thumb:
-                            thumb = image
-
-                        w, h = util.pngsize(thumb)
-
-                        # don't make thumbnails for very large images when
-                        # they don't have a thumbnail in the exif header, it
-                        # takes too much time
-                        if w<1100 and h<800:
-                            scale = min(float(val.cover_image.width) / w,
-                                        float(val.cover_image.height) / h)
-                            
-                            i_file = util.resize(thumb, int(w*scale), int(h*scale))
-                            i_val = copy.deepcopy(val.cover_image)
+                        (i_file, w, h) = self.image.getFormatedImage \
+                                         (image, val.cover_image.width,
+                                          val.cover_image.height)
+                        i_val = copy.deepcopy(val.cover_image)
+                        i_val.height = h
+                        i_val.width  = w
                         
-                            # check all round masks if they are around the image
-                            # and shorten the width of those who are to fit
-                            # the new size
-                            if isinstance(i_val.mask, list):
-                                for m in i_val.mask:
-                                    if m.x <= i_val.x and m.y <= i_val.y and \
-                                       m.width >= i_val.width and \
-                                       m.height >= i_val.height:
-                                        m.height -= val.cover_image.height-h*scale
-                                        m.width -= val.cover_image.width-w*scale
+                        # check all round masks if they are around the image
+                        # and shorten the width of those who are to fit
+                        # the new size
+                        if isinstance(i_val.mask, list):
+                            for m in i_val.mask:
+                                if m.x <= i_val.x and m.y <= i_val.y and \
+                                   m.width >= i_val.width and \
+                                   m.height >= i_val.height:
+                                    m.height -= val.cover_image.height-h
+                                    m.width -= val.cover_image.width-w
                                     
-                            i_val.height = h*scale
-                            i_val.width  = w*scale
 
 
                 elif type == 'video' and val.cover_movie.visible:
@@ -447,7 +440,7 @@ class Skin:
                         i_val = val.cover_music
 
 
-        return max(0, image_x-val.items.default.selection.spacing), i_val, i_file
+        return i_file, max(0, image_x-val.items.default.selection.spacing), i_val
 
 
     
@@ -619,7 +612,7 @@ class Skin:
             val = val.menu_default
 
 
-        image_x, image_val, image_file = self.DrawMenu_Cover(menuw, val)
+        image_object, image_x, image_val = self.DrawMenu_Cover(menuw, val)
 
         if image_val:
             InitScreen(val, (val.background.mask, image_val.mask), image_x)
@@ -644,8 +637,8 @@ class Skin:
             else:
                 osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
 
-        if image_file:
-            osd.drawbitmap(image_file, image_val.x, image_val.y)
+        if image_object:
+            osd.drawbitmap(image_object, image_val.x, image_val.y)
 
             if image_val and image_val.border_size > 0:
                 osd.drawbox(image_val.x - image_val.border_size,
