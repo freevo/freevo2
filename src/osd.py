@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/03 04:38:35  krister
+# Made pygame init explicit to avoid mixer problems.
+#
 # Revision 1.10  2003/02/03 03:05:23  outlyer
 # We raise an exception in _renderstring, but we don't seem to do anything
 # with it, which of course equals horrifying crash. I'm trapping it, printing
@@ -257,14 +260,8 @@ class OSD:
             os.environ['SDL_VIDEODRIVER'] = 'directfb'
 
         # Initialize the PyGame modules.
-        pygame.init()
-
-        # The mixer module must not be running, it will
-        # prevent sound from working.
-        try:
-            pygame.mixer.quit()
-        except NotImplementedError, MissingPygameModule:
-            pass # Ok, we didn't have the mixer module anyways
+        pygame.display.init()
+        pygame.font.init()
 
         self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
 
