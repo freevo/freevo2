@@ -15,26 +15,79 @@ DAEMON=$FREEVO_HOME/freevo
 NAME=freevo
 DESC=freevo
 
+if [ "$ROOTUSERINFO" == "yes" ]; then
+    USER=root
+    HOME=/root/
+    export USER HOME
+fi
+
 test -f $DAEMON || exit 0
+
+freevoserver() {
+    # $1 is the server
+    # $2 is the action
+    $DAEMON $1 $2 2>&1 > /dev/null
+}
 
 case "$1" in
   start)
         echo -n "Setting up RTC: "
         sysctl -w dev.rtc.max-user-freq=1024 > /dev/null
         echo "sysctl."
-	echo -n "Starting $DESC: "
-	export SDL_NOKEYBOARD=true
-        export SDL_NOMOUSE=true
-	export SDL_VIDEODRIVER=fbcon
-	(cd $FREEVO_STARTDIR && $DAEMON >> $FREEVO_LOG 2>&1 &)
-	echo "$NAME."
+        if [ "$RECORDSERVER" == "yes" ]; then
+            echo -n "Starting Freevo Recordserver: "
+            freevoserver "recordserver" "start"
+            echo "Recordserver."
+        fi
+        if [ "$WEBSERVER" == "yes" ]; then
+            echo -n "Starting Freevo Webserver "
+            freevoserver "webserver" "start"
+            echo "Webserver."
+        fi
+        if [ "$SETNUMLOCK" == "yes" ]; then
+            echo -n "Setting NUMLock on: "
+            setleds +num
+            echo "setleds."
+        fi
+        if [ "$HAVEKEYBOARD" == "no" ]; then
+  	    export SDL_NOKEYBOARD=true
+        fi
+        if [ "$HAVEMOUSE" == "no" ]; then
+            export SDL_NOMOUSE=true
+        fi
+	export SDL_VIDEODRIVER=$SDL_VIDEODRIVER
+        if [ "$FREEVO" == "daemon" ]; then
+	    echo -n "Starting $DESC: "
+            freevoserver "daemon" "start"
+	    echo "$NAME."
+        elif [ "$FREEVO" == "yes" ]; then
+	    echo -n "Starting $DESC: "
+            if egrep -q '^display.*(x11|dga)' /etc/freevo/freevo.conf ; then
+                PATH=$PATH:/usr/X11R6/bin
+  	        $DAEMON -fs >> $FREEVO_LOG 2>&1 &
+            else
+  	        $DAEMON >> $FREEVO_LOG 2>&1 &
+            fi
+	    echo "$NAME."
+        fi
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-        (cd $FREEVO_STARTDIR && $DAEMON stop >> $FREEVO_LOG 2>&1 &)
+        $DAEMON stop >> $FREEVO_LOG 2>&1 &
+        sleep 5
         kill `pgrep -f "python src/main.py" -d" "` &> /dev/null
 	kill `pgrep -f "python main.py" -d" "` &> /dev/null
 	echo "$NAME."
+        if [ "$RECORDSERVER" == "yes" ]; then
+            echo -n "Starting Freevo Recordserver: "
+            freevoserver "recordserver" "stop"
+            echo "Recordserver."
+        fi
+        if [ "$WEBSERVER" == "yes" ]; then
+            echo -n "Starting Freevo Webserver "
+            freevoserver "webserver" "stop"
+            echo "Webserver."
+        fi
         echo -n "Hard kill to be sure: "
         ps aux | grep python | grep main.py | awk '{ print "kill -9 " $2 }' | sh
         echo "kill."
