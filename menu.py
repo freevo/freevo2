@@ -162,7 +162,7 @@ class MenuWidget:
         x0 = 40
         y0 = 505
         for item in self.nav_items:
-            fontsize = config.OSD_FONTSIZE_BTNS*ptscale
+            fontsize = config.OSD_FONTSIZE_BTNS
             self.osd.drawstring(item.name, x0, y0,
                             font=config.OSD_FONTNAME_BTNS,
                             ptsize=fontsize)
