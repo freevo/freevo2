@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/08/14 01:30:21  rshortt
+# Change guide access a bit.
+#
 # Revision 1.29  2004/08/14 01:23:30  rshortt
 # Use the chanlist/epg from cache.
 #
@@ -103,7 +106,7 @@ import util.tv_util as tv_util
 import util
 import config 
 import tv.record_client as ri
-import tv.channels
+from tv.channels import get_channels
 from twisted.web import static
 
 DEBUG = 0
@@ -201,7 +204,6 @@ class GuideResource(FreevoResource):
         if mfrprevguide < now2:
             mfrprevguide = 0
 
-        guide = tv.channels.get_channels()
         (got_schedule, schedule) = ri.getScheduledRecordings()
         if got_schedule:
             schedule = schedule.getProgramList()
@@ -219,7 +221,7 @@ class GuideResource(FreevoResource):
         fv.tableOpen()
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell('<form>'+_('Time')+':&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="'+_('View')+'"></form>', 'class="utilhead"')
-        categorybox =  self.makecategorybox(guide.get_all())
+        categorybox =  self.makecategorybox(get_channels().get_all())
         if categorybox:
             fv.tableCell('<form action="genre.rpy">'+_('Show')+'&nbsp;'+_('Category')+':&nbsp;'+categorybox+'<input type=submit value="'+_('Change')+'"></form>', 'class="utilhead"')
         fv.tableRowClose()
@@ -228,7 +230,7 @@ class GuideResource(FreevoResource):
         fv.tableOpen('id="guide" cols=\"%d\"' % \
                      ( n_cols*cpb + 1 ) )
         showheader = 0
-        for chan in guide.get_all():
+        for chan in get_channels().get_all():
             chan = chan.epg
             #put guidehead every X rows
             if showheader % 15 == 0:
