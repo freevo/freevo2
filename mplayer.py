@@ -157,9 +157,9 @@ class MPlayer:
                 self.thread.app.write('J')
             else:
                 self.thread.cmd('skip_back2')
-        elif event == rc.RIGHT:
+        elif event == rc.LEFT:
             if self.mode == 'dvdnav':
-                self.thread.app.write('L')
+                self.thread.app.write('H')
             else:
                 self.stop()
                 if self.playlist == []:
@@ -171,9 +171,9 @@ class MPlayer:
                     pos = (pos-1) % len(self.playlist)
                     filename = self.playlist[pos]
                     self.play(self.mode, filename, self.playlist)
-        elif event == rc.PLAY_END or event == rc.LEFT:
+        elif event == rc.PLAY_END or event == rc.RIGHT:
             if event == rc.LEFT and self.mode == 'dvdnav':
-                self.thread.app.write('H')
+                self.thread.app.write('L')
             else:
                 self.stop()
                 if self.playlist == []:
