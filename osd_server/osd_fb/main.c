@@ -301,7 +301,7 @@ osd_setpixel (uint16 x, uint16 y, uint32 color)
 void
 osd_drawbitmap (char *filename, uint16 x0, uint16 y0)
 {
-   uint32 *pBM;
+   uint32 *pBM, *pBM2;
    uint16 w, h;
    int x, y;
    
@@ -311,13 +311,15 @@ osd_drawbitmap (char *filename, uint16 x0, uint16 y0)
       return;
    }
 
+   pBM2 = pBM;
+   
    for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
-         osd_setpixel (x0 + x, y0 + y, *pBM++);
+         osd_setpixel (x0 + x, y0 + y, (*pBM++) & 0x00ffffff);
       }
    }
 
-   free (pBM);
+   free (pBM2);
    
 }
 
