@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/30 18:49:44  dischi
+# small fix
+#
 # Revision 1.26  2003/08/30 17:03:02  dischi
 # support for eventhandler in ItemPlugins
 #
@@ -152,7 +155,7 @@ class Item:
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event == em.STOP or em.PLAY_END or event == em.USER_END and menuw:
+            if event in (em.STOP, em.PLAY_END, em.USER_END) and menuw:
                 if menuw.visible:
                     menuw.refresh()
                 else:
