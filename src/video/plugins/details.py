@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/14 15:11:11  dischi
+# deactivate plugin
+#
 # Revision 1.4  2004/08/05 17:34:03  dischi
 # import fix
 #
@@ -62,6 +65,8 @@ class PluginInterface(plugin.ItemPlugin):
     It replaces the item menu with a menu showing informations about the file.
     """
     def __init__(self):
+        self.reason = 'not working while gui rebuild'
+        return
         plugin.ItemPlugin.__init__(self)
         gui.get_areas().register('video_details', ('screen', 'title', 'view',
                                                    'listing', 'info'))
