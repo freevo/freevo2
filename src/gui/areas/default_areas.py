@@ -11,20 +11,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
+#
 # Revision 1.3  2004/08/05 17:30:24  dischi
 # cleanup
-#
-# Revision 1.2  2004/07/24 12:21:30  dischi
-# use new renderer and screen features
-#
-# Revision 1.1  2004/07/22 21:13:39  dischi
-# move skin code to gui, update to new interface started
-#
-# Revision 1.11  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.10  2004/03/14 17:22:47  dischi
-# seperate ellipses and dim in drawstringframed
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -48,58 +44,44 @@
 # -----------------------------------------------------------------------
 
 
-import config
-import plugin
-
-from area import Skin_Area
+from area import Area
 
 
-class Screen_Area(Skin_Area):
+class Screen_Area(Area):
     """
     this area is the screen or background of the skin
     """
     def __init__(self):
-        Skin_Area.__init__(self, 'screen', imagecachesize=3)
-
-    def update_content_needed(self):
-        """
-        this area needs never a content update
-        """
-        return False
-
-    def update_content(self):
-        """
-        there is no content in this area
-        """
-        pass
+        Area.__init__(self, 'screen', imagecachesize=3)
 
 
 
-class Title_Area(Skin_Area):
+class Title_Area(Area):
     """
     in this area the title of the menu is drawn
     """
-    def __init__(self):
-        Skin_Area.__init__(self, 'title')
-        self.text = ''
-
-        
-    def update_content_needed(self):
-        """
-        check if the content needs an update. This function does the same as
-        update_content, so it's faster to return always 1
-        """
-        return 1
+    def __init__(self, type='title'):
+        Area.__init__(self, type)
+        self.text = (None, None, None)
+        self.gui_object = None
 
 
-    def update_content(self):
+    def clear(self):
         """
-        update the content
+        delete the title
+        """
+        if self.gui_object:
+            self.screen.remove(self.gui_object)
+            self.gui_object = None
+        self.text = (None, None, None)
+
+            
+    def update(self):
+        """
+        update the screen area
         """
         menu      = self.menu
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=True)
+        content   = self.calc_geometry(self.layout.content, copy_object=True)
 
         text = ''
         try:
@@ -142,9 +124,13 @@ class Title_Area(Skin_Area):
                 elif hasattr(menu, 'title'):
                     text = menu.title
 
-        self.text = text
-        self.drawstring(text, content.font, content, mode='hard')
-
+        if self.text == (text, content.font, content):
+            return
+        
+        self.clear()
+        self.text = text, content.font, content
+        self.gui_object = self.drawstring(text, content.font, content, mode='hard')
+        
 
 
 class Subtitle_Area(Title_Area):
@@ -152,7 +138,4 @@ class Subtitle_Area(Title_Area):
     in this area the subtitle of the menu is drawn
     """
     def __init__(self):
-        Skin_Area.__init__(self, 'subtitle')
-        self.text = ''
-
-
+        Title_Area.__init__(self, 'subtitle')

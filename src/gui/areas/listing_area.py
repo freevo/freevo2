@@ -9,26 +9,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
+#
 # Revision 1.5  2004/08/05 17:30:24  dischi
 # cleanup
 #
 # Revision 1.4  2004/07/27 18:52:30  dischi
 # support more layer (see README.txt in backends for details
-#
-# Revision 1.3  2004/07/24 17:49:05  dischi
-# interface cleanup
-#
-# Revision 1.2  2004/07/24 12:21:31  dischi
-# use new renderer and screen features
-#
-# Revision 1.1  2004/07/22 21:13:39  dischi
-# move skin code to gui, update to new interface started
-#
-# Revision 1.28  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.27  2004/03/14 17:22:47  dischi
-# seperate ellipses and dim in drawstringframed
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -54,31 +47,60 @@
 
 import copy
 
-from area import Skin_Area
+from area import Area
 from skin_utils import *
 import config
 
-class Listing_Area(Skin_Area):
+class Listing_Area(Area):
     """
     this call defines the listing area
     """
 
     def __init__(self):
-        Skin_Area.__init__(self, 'listing')
+        Area.__init__(self, 'listing')
+        self.content           = []
+        self.last_listing      = []
+        self.last_content_type = ''
+        self.last_selection    = None
+        self.last_start        = -1
+        self.last_max_len      = -1
+        self.empty_listing     = None
+        self.arrows            = []
 
+
+    def clear(self, keep_settings=False):
+        """
+        clear the listing area
+        """
+        # delete the listing
+        for c in self.last_listing:
+            for o in c[2]:
+                self.screen.remove(o)
+        self.last_listing = []
+        # delete the arrows
+        for a in self.arrows:
+            self.screen.remove(a)
+        self.arrows = []
+        # reset variables
+        if not keep_settings:
+            self.last_content_type = ''
+            self.last_selection    = None
+            self.last_start        = -1
+            self.last_max_len      = -1
+        # delete 'empty listing' message
+        if self.empty_listing:
+            self.screen.remove(self.empty_listing)
+            self.empty_listing = None
         
-    def get_items_geometry(self, settings, menu, display_style):
+        
+    def get_items_geometry(self, settings, menu, area_settings):
         """
         get the geometry of the items. How many items per row/col, spaces
         between each item, etc
         """
-
-        if menu.force_skin_layout != -1:
-            display_style = menu.force_skin_layout
-
-        # ok, we use settings + display_style as key
+        # ok, we use settings + area_settings as key
         # FIXME: is that ok or do we need something else?
-        key = '%s-%s-%s' % (settings, display_style, self.layout.content.type)
+        key = '%s-%s-%s' % (settings, area_settings, self.layout.content.type)
         try:
             # returned cached information
             return menu.listing_area_dict[key]
@@ -182,36 +204,27 @@ class Listing_Area(Skin_Area):
         return info
 
 
-    def update_content_needed(self):
-        """
-        check if the content needs an update
-        """
-        return True
-            
-        
-    def update_content(self):
+    def update(self):
         """
         update the listing area
         """
-
         menu      = self.menu
         settings  = self.settings
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=True)
+        area      = self.area_values
+        content   = self.calc_geometry(self.layout.content, copy_object=True)
 
         if not len(menu.choices):
-            self.drawstring(_('This directory is empty'), content.font, content)
+            if not self.empty_listing:
+                self.empty_listing = self.drawstring(_('This directory is empty'),
+                                                     content.font, content)
             return
         
         cols, rows, hspace, vspace, hskip, vskip, width = \
-              self.get_items_geometry(settings, menu, self.display_style)
+              self.get_items_geometry(settings, menu, area)
 
         menu.rows = rows
         menu.cols = cols
         
-        BOX_UNDER_ICON = self.xml_settings.box_under_icon
-
         if content.align == 'center':
             item_x0 = content.x + (content.width - cols * hspace) / 2
         else:
@@ -232,62 +245,112 @@ class Listing_Area(Skin_Area):
         all_tvs       = True
         tvs_shortname = True
 
-        start = (menu.selected_pos / (cols * rows)) * (cols * rows)
-        end   = start + cols * rows
+        start   = (menu.selected_pos / (cols * rows)) * (cols * rows)
+        end     = start + cols * rows
+        listing = menu.choices[start:end]
 
-        for choice in menu.choices[start:end]:
-            if content.types.has_key( '%s selected' % choice.type ):
-                s_val = content.types[ '%s selected' % choice.type ]
+        # do some checking if we have to redraw everything
+        # or only update because the selection changed
+        if self.last_content_type != content.type or \
+           len(listing) != len(self.last_listing) or \
+           self.last_start != start or self.last_max_len != len(menu.choices):
+            self.last_content_type = content.type
+            self.last_start        = start
+            self.last_max_len      = len(menu.choices)
+            redraw = True
+        else:
+            redraw = False
+            
+        if redraw:
+            # delete all current gui objects
+            self.clear(keep_settings=True)
+
+        for choice in listing:
+            draw_this_item = True
+
+            #
+            # check if this items needs to be drawn or not
+            #
+            if redraw:
+                self.last_listing.append((choice.name, choice.image, []))
+                gui_objects = self.last_listing[-1][2]
             else:
-                s_val = content.types[ 'selected' ]
+                index = listing.index(choice)
+                # check if the item is still the same
+                if self.last_listing[index][:2] != (choice.name, choice.image):
+                    for o in self.last_listing[index][2]:
+                        self.screen.remove(o)
+                    gui_objects = []
+                    self.last_listing[index] = choice.name, choice.image, gui_objects
+                elif choice == self.last_selection or choice == menu.selected:
+                    gui_objects = self.last_listing[index][2]
+                    while len(gui_objects):
+                        o = gui_objects.pop()
+                        self.screen.remove(o)
+                else:
+                    draw_this_item = False
 
-            if content.types.has_key( choice.type ):
-                n_val = content.types[ choice.type ]
-            else:
-                n_val = content.types['default']
-                
 
-            if choice == menu.selected:
-                val = s_val
-            else:
-                val = n_val
-                
-            text = choice.name
-            if not text:
-                text = "unknown"
+            # init the 'val' settings
+            if draw_this_item:
+                if content.types.has_key( '%s selected' % choice.type ):
+                    s_val = content.types[ '%s selected' % choice.type ]
+                else:
+                    s_val = content.types[ 'selected' ]
 
-            type_image = None
-            if hasattr( val, 'icon' ):
-                type_image = val.icon
-                
-            if not choice.icon and not type_image:
-                if choice.type == 'playlist':
-                    text = 'PL: %s' % text
+                if content.types.has_key( choice.type ):
+                    n_val = content.types[ choice.type ]
+                else:
+                    n_val = content.types['default']
 
-                if choice.type == 'dir' and choice.parent and \
-                   choice.parent.type != 'mediamenu':
-                    text = '[%s]' % text
 
-            if content.type == 'text':
-                x0 = item_x0
-                y0 = item_y0
+                if choice == menu.selected:
+                    val = s_val
+                else:
+                    val = n_val
+
+            #
+            # text listing --------------------------------------------------------
+            #
+            if draw_this_item and content.type == 'text':
+                x0     = item_x0
+                y0     = item_y0
                 icon_x = 0
-                image = None
-                align = val.align or content.align
+                icon   = None
+                align   = val.align or content.align
                 
+                icon_type = None
+                if hasattr(val, 'icon'):
+                    icon_type = val.icon
+
+                text = choice.name
+                if not text:
+                    text = "unknown"
+
+                if not choice.icon and not icon_type:
+                    if choice.type == 'playlist':
+                        text = 'PL: %s' % text
+
+                    if choice.type == 'dir' and choice.parent and \
+                       choice.parent.type != 'mediamenu':
+                        text = '[%s]' % text
+
                 if choice != menu.selected and hasattr( choice, 'outicon' ) and \
                        choice.outicon:
-                    image = self.loadimage(choice.outicon, (vspace-content.spacing,
+                    icon = self.loadimage(choice.outicon, (vspace-content.spacing,
                                                             vspace-content.spacing))
                 elif choice.icon:
-                    image = self.loadimage(choice.icon, (vspace-content.spacing,
+                    icon = self.loadimage(choice.icon, (vspace-content.spacing,
                                                          vspace-content.spacing))
-                if not image and type_image:
-                    image = self.loadimage( settings.icon_dir + '/' + type_image,
-                                             ( vspace-content.spacing,
-                                               vspace-content.spacing ) )
+                if not icon and icon_type:
+                    icon = self.loadimage(settings.icon_dir + '/' + icon_type,
+                                          (vspace-content.spacing, vspace-content.spacing))
+
+                #
+                # display an icon for the item
+                #
                 x_icon = 0
-                if image:
+                if icon:
                     mx = x0
                     icon_x = vspace
                     x_icon = icon_x
@@ -312,16 +375,23 @@ class Listing_Area(Skin_Area):
 
                         mx = x0 + width + hskip + ( max_rw + min_rx - width ) - icon_x 
                         x_icon = 0
-                    self.drawimage(image, (mx, y0))
+                    gui_objects.append(self.drawimage(icon, (mx, y0)))
 
+                #
+                # draw the rectangle below the item
+                #
                 if val.rectangle:
                     r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
-                    self.drawbox(x0 + hskip + r.x + x_icon - BOX_UNDER_ICON * x_icon,
-                                 y0 + vskip + r.y,
-                                 r.width - icon_x + BOX_UNDER_ICON * icon_x,
-                                 r.height, r)
+                    b = self.drawbox(x0 + hskip + r.x + x_icon - \
+                                     self.settings.box_under_icon * x_icon,
+                                     y0 + vskip + r.y,
+                                     r.width - icon_x + self.settings.box_under_icon * icon_x,
+                                     r.height, r)
+                    gui_objects.append(b)
 
+                #
                 # special handling for tv shows
+                #
                 if choice.type == 'video' and hasattr(choice,'tv_show') and \
                    choice.tv_show and (val.align=='left' or val.align=='') and \
                    (content.align=='left' or content.align==''):
@@ -355,21 +425,25 @@ class Listing_Area(Skin_Area):
                             tvs_w = val.font.stringsize('%s x' % sn[0]) + season + episode
                         last_tvs = (sn[0], tvs_w)
                         
-                    self.drawstring(' - %s' % sn[3], val.font, content,
-                                    x=x0 + hskip + icon_x + tvs_w,
-                                    y=y0 + vskip, width=width-icon_x-tvs_w, height=-1,
-                                    align_h='left', dim=False, mode='hard')
-                    self.drawstring(sn[2], val.font, content,
-                                    x=x0 + hskip + icon_x + tvs_w - 100,
-                                    y=y0 + vskip, width=100, height=-1,
-                                    align_h='right', dim=False, mode='hard')
+                    s = self.drawstring(' - %s' % sn[3], val.font, content,
+                                        x=x0 + hskip + icon_x + tvs_w,
+                                        y=y0 + vskip, width=width-icon_x-tvs_w, height=-1,
+                                        align_h='left', dim=False, mode='hard')
+                    gui_objects.append(s)
+                    s = self.drawstring(sn[2], val.font, content,
+                                        x=x0 + hskip + icon_x + tvs_w - 100,
+                                        y=y0 + vskip, width=100, height=-1,
+                                        align_h='right', dim=False, mode='hard')
+                    gui_objects.append(s)
                     if all_tvs and tvs_shortname:
                         text = '%sx' % sn[1]
                     else:
                         text = '%s %sx' % (sn[0], sn[1])
 
+                #
                 # if the menu has an attr table, the menu is a table. Each
                 # item _must_ have that many tabs as the table needs!!!
+                #
                 if hasattr(menu, 'table'):
                     table_x = x0 + hskip + x_icon
                     table_text = text.split('\t')
@@ -383,23 +457,33 @@ class Listing_Area(Skin_Area):
                                                                 table_x, table_w, val.font,
                                                                 self.screen.renderer)
                             if not isstring(table_text[i]):
-                                self.drawimage(table_text[i], (table_x + x_mod, y0 + vskip))
+                                i = self.drawimage(table_text[i],
+                                                   (table_x + x_mod, y0 + vskip))
+                                gui_objects.append(i)
                                 table_text[i] = ''
                                 
                         if table_text[i]:
-                            self.drawstring(table_text[i], val.font, content,
-                                            x=table_x + x_mod,
-                                            y=y0 + vskip, width=table_w, height=-1,
-                                            align_h=val.align, mode='hard', dim=False)
+                            s = self.drawstring(table_text[i], val.font, content,
+                                                x=table_x + x_mod,
+                                                y=y0 + vskip, width=table_w, height=-1,
+                                                align_h=val.align, mode='hard', dim=False)
+                            gui_objects.append(s)
                         table_x += table_w + 5
 
                 else:
-                    self.drawstring(text, val.font, content, x=x0 + hskip + x_icon,
-                                    y=y0 + vskip, width=width-icon_x, height=-1,
-                                    align_h=val.align, mode='hard', dim=True)
+                    #
+                    # draw the text
+                    #
+                    s = self.drawstring(text, val.font, content, x=x0 + hskip + x_icon,
+                                        y=y0 + vskip, width=width-icon_x, height=-1,
+                                        align_h=val.align, mode='hard', dim=True)
+                    gui_objects.append(s)
 
 
-            elif content.type == 'image' or content.type == 'image+text':
+            #
+            # image listing --------------------------------------------------------
+            #
+            if draw_this_item and content.type == 'image' or content.type == 'image+text':
                 rec_h = val.height
                 if content.type == 'image+text':
                     rec_h += int(1.1 * val.font.h)
@@ -420,7 +504,8 @@ class Listing_Area(Skin_Area):
                                                     max(rec_h, int(val.font.h * 1.1)))[2]
                     else:
                         r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
-                    self.drawbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
+                    b = self.drawbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
+                    gui_objects.append(b)
 
                 image, i_w, i_h = format_image(self.screen.renderer, settings,
                                                choice, val.width, val.height, force=True)
@@ -445,17 +530,23 @@ class Listing_Area(Skin_Area):
                                            image.get_width(), image.get_height(),
                                            (val.shadow.color, 0, 0, 0))
                         box.layer = -1
+                        gui_objects.append(box)
                         
-                    self.drawimage(image, (x0 + addx, y0 + addy))
+                    i = self.drawimage(image, (x0 + addx, y0 + addy))
+                    gui_objects.append(i)
                         
                 if content.type == 'image+text':
-                    self.drawstring(choice.name, val.font, content, x=x0,
-                                    y=y0 + val.height, width=val.width, height=-1,
-                                    align_h=val.align, mode='hard', ellipses='', dim=False)
+                    s = self.drawstring(choice.name, val.font, content, x=x0,
+                                        y=y0 + val.height, width=val.width, height=-1,
+                                        align_h=val.align, mode='hard',
+                                        ellipses='', dim=False)
+                    gui_objects.append(s)
                     
-            else:
-                print 'no support for content type %s' % content.type
 
+
+            #
+            # calculate next item position ----------------------------------------
+            #
             if current_col == cols:
                 if content.align == 'center':
                     item_x0 = content.x + (content.width - cols * hspace) / 2
@@ -466,18 +557,24 @@ class Listing_Area(Skin_Area):
             else:
                 item_x0 += hspace
                 current_col += 1
-                
-        # print arrow:
-        try:
-            if start > 0 and area.images['uparrow']:
-                self.drawimage(area.images['uparrow'].filename, area.images['uparrow'])
-            if end < len(menu.choices):
-                if isinstance(area.images['downarrow'].y, str):
-                    v = copy.copy(area.images['downarrow'])
-                    v.y = eval(v.y, {'MAX':(item_y0-vskip)})
-                else:
-                    v = area.images['downarrow']
-                self.drawimage(area.images['downarrow'].filename, v)
 
-        except Exception, e:
-            print e
+
+        # remember last selection
+        self.last_selection = menu.selected
+
+        if redraw:
+            # draw the arrows
+            try:
+                if start > 0 and area.images['uparrow']:
+                    self.arrows.append(self.drawimage(area.images['uparrow'].filename,
+                                                      area.images['uparrow']))
+                if end < len(menu.choices):
+                    if isinstance(area.images['downarrow'].y, str):
+                        v = copy.copy(area.images['downarrow'])
+                        v.y = eval(v.y, {'MAX':(item_y0-vskip)})
+                    else:
+                        v = area.images['downarrow']
+                    self.arrows.append(self.drawimage(area.images['downarrow'].filename, v))
+            except Exception, e:
+                print e
+          

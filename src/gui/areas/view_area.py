@@ -9,20 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
+#
 # Revision 1.3  2004/07/24 17:49:05  dischi
 # interface cleanup
-#
-# Revision 1.2  2004/07/24 12:21:31  dischi
-# use new renderer and screen features
-#
-# Revision 1.1  2004/07/22 21:13:39  dischi
-# move skin code to gui, update to new interface started
-#
-# Revision 1.7  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.6  2004/02/04 19:05:36  dischi
-# remove bad log message
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,61 +42,67 @@
 # -----------------------------------------------------------------------
 
 
-from area import Skin_Area
+from area import Area
 from skin_utils import *
 
-class View_Area(Skin_Area):
+
+class View_Area(Area):
     """
     this call defines the view area
     """
 
     def __init__(self):
-        Skin_Area.__init__(self, 'view')
-        self.image = None
+        Area.__init__(self, 'view')
+        self.info    = (None, None, None, None)
+        self.content = []
 
 
-    def update_content_needed(self):
+    def clear(self):
         """
-        check if the content needs an update
+        delete the shown image from screen
         """
-        item = self.viewitem
-        image = None
+        self.info  = (None, None, None, None)
+        for c in self.content:
+            self.screen.remove(c)
+        self.content = []
 
-        if hasattr(item, 'image') and item.image:
-            image = item.image
-
-        return image != self.image
-    
-
-    def update_content(self):
+        
+    def update(self):
         """
         update the view area
         """
+        item  = self.viewitem
+        image = None
+        try:
+            image = item.image
+        except:
+            pass
 
-        item = self.viewitem
-        
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=True)
-
-        if hasattr(item, 'type') and content.types.has_key(item.type):
-            val = content.types[item.type]
-        else:
-            val = content.types['default']
-
-        if hasattr(item, 'image') and item.image:
-            self.image = item.image
-        else:
-            self.image = None
+        if not image:
+            if self.content:
+                self.clear()
             return
+
+        # get layout values and calc the geometry
+        content = self.calc_geometry(self.layout.content, copy_object=True)
+        width   = content.width  - 2 * content.spacing
+        height  = content.height - 2 * content.spacing
+
+        # check if we need a redraw
+        if self.info == (self.settings, item.image, width, height):
+            return
+        self.clear()
+        self.info = self.settings, item.image, width, height
+
 
         x0 = 0
         y0 = 0
 
-        width  = content.width - 2*content.spacing
-        height = content.height - 2*content.spacing
+        try:
+            val = content.types[item.type]
+        except (KeyError, AttributeError):
+            val = content.types['default']
 
-        
         if val.rectangle:
             r = self.get_item_rectangle(val.rectangle, width, height)[2]
 
@@ -142,9 +144,9 @@ class View_Area(Skin_Area):
         x0 += addx
         y0 += addy
 
-        self.drawimage(image, (x0, y0))
+        self.content.append(self.drawimage(image, (x0, y0)))
 
         if val.rectangle:
-            r.width -= width - i_w
+            r.width  -= width  - i_w
             r.height -= height - i_h
-            self.drawbox(r.x + addx, r.y + addy, r.width, r.height, r)
+            self.content.append(self.drawbox(r.x + addx, r.y + addy, r.width, r.height, r))

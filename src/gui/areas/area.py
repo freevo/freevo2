@@ -9,7 +9,7 @@
 #
 # This is the main class for all area.
 #
-# If you want to create a new Skin_Area, please keep my problems in mind:
+# If you want to create a new Area, please keep my problems in mind:
 #
 #
 # 1. Not all areas are visible at the same time, some areas may change
@@ -27,6 +27,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
+#
 # Revision 1.6  2004/08/05 17:30:24  dischi
 # cleanup
 #
@@ -110,7 +118,7 @@ class Geometry:
 
 
 
-class Skin_Area:
+class Area:
     """
     the base call for all areas. Each child needs two functions:
 
@@ -118,15 +126,20 @@ class Skin_Area:
     def update_content
     """
     def __init__(self, name, imagecachesize=5):
-        self.area_name = name
-        self.area_val  = None
-        self.layout    = None
-        self.name      = name
-        self.screen    = None
-        self.objects   = SkinObjects()
+        self.area_name   = name
+        self.area_values = None
+        self.layout      = None
+        self.name        = name
+        self.screen      = None
+        self.objects     = SkinObjects()
+        self.NEW_STYLE   = True
+
+        self.__background__ = []
         
         self.imagecache = util.objectcache.ObjectCache(imagecachesize,
                                                        desc='%s_image' % self.name)
+        self.Rectangle = fxdparser.Rectangle
+        self.Image     = fxdparser.Image
 
 
     def set_screen(self, screen):
@@ -134,7 +147,7 @@ class Skin_Area:
         move this area to a new screen object
         """
         if self.screen:
-            self.clear()
+            self.clear_all()
         self.screen = screen
 
         
@@ -149,29 +162,48 @@ class Skin_Area:
         """
         there is no content in this area
         """
+        return True
+    
+
+    def update(self):
+        """
+        there is no content in this area
+        """
         pass
     
 
     def clear(self):
+        """
+        clear the content objects
+        """
+        pass
+
+
+    def clear_all(self):
         if not self.screen:
             _debug_('ERROR in area %s: no screen defined' % self.name)
             return
-        try:
-            for o in self.objects.bgimages:
-                self.screen.remove(o)
-            for o in self.objects.rectangles:
-                self.screen.remove(o)
-            for o in self.objects.images:
-                self.screen.remove(o)
-            for o in self.objects.text:
-                self.screen.remove(o)
-        except Exception, e:
-            print e
-            
-        self.objects = SkinObjects()
+        if self.NEW_STYLE:
+            for b in self.__background__:
+                self.screen.remove(b)
+            self.__background__ = []
+            self.clear()
+        else:
+            try:
+                for o in self.objects.bgimages:
+                    self.screen.remove(o)
+                for o in self.objects.rectangles:
+                    self.screen.remove(o)
+                for o in self.objects.images:
+                    self.screen.remove(o)
+                for o in self.objects.text:
+                    self.screen.remove(o)
+            except Exception, e:
+                print e
+            self.objects = SkinObjects()
             
 
-    def draw(self, settings, obj, display_style=0, widget_type='menu'):
+    def draw(self, settings, obj, viewitem, infoitem, area_definitions):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
@@ -180,60 +212,34 @@ class Skin_Area:
         if not self.screen:
             return
 
-        self.display_style = display_style
-        self.xml_settings  = settings
-        self.widget_type   = widget_type
-
-        if widget_type == 'menu':
-            menu = obj
-            self.menu = menu
-            if self.menu.force_skin_layout != -1:
-                self.display_style = self.menu.force_skin_layout
+        self.menu     = obj
+        self.viewitem = viewitem
+        self.infoitem = infoitem
             
-            if self.menu.viewitem:
-                self.viewitem = self.menu.viewitem
-            else:
-                self.viewitem  = self.menu.selected
-            if self.menu.infoitem:
-                self.infoitem = self.menu.infoitem
-            else:
-                self.infoitem  = self.menu.selected
-            item_type  = self.menu.item_types
-            self.scan_for_text_view(self.menu)
-
-        else:
-            self.menu = obj
-            item_type = None
-            try:
-                self.viewitem = obj.selected
-                self.infoitem = obj.selected
-            except AttributeError:
-                self.viewitem = obj
-                self.infoitem = obj
-
-        area = self.area_val
-        if area:
-            visible = area.visible
+        if self.area_values:
+            visible = self.area_values.visible
         else:
             visible = False
 
-        redraw = self.init_vars(settings, item_type, widget_type)
-        area   = self.area_val
+        redraw = self.init_vars(settings, area_definitions)
 
         # maybe we are NOW invisible
-        if visible and not area.visible:
-            print 'FIXME area.py:', area.name
+        if visible and not self.area_values.visible:
+            print 'FIXME area.py:', self.area_values.name
 
-        if not self.area_name == 'plugin':
-            if not area.visible or not self.layout:
-                self.clear()
-                return
+        if not self.area_values.visible or not self.layout:
+            self.clear_all()
+            return
 
-            self.tmp_objects = SkinObjects()
-            redraw = self.__draw_background__() or redraw
-        else:
-            self.tmp_objects = SkinObjects()
-            
+        if self.NEW_STYLE:
+            self.__draw_background__()
+            self.update()
+            return
+
+        
+        self.tmp_objects = SkinObjects()
+        redraw = self.__draw_background__() or redraw
+
         # dependencies haven't changed, if no update needed: return
         if not redraw and not self.update_content_needed():
             return
@@ -283,91 +289,6 @@ class Skin_Area:
         self.objects = self.tmp_objects
 
 
-    def scan_for_text_view(self, menu):
-        """
-        scan if we have to fall back to text view. This will be done if some
-        items have images and all images are the same. And the number of items
-        must be greater 5. With that the skin will fall back to text view for
-        e.g. mp3s inside a folder with cover file
-        """
-        try:
-            self.use_text_view = menu.skin_force_text_view
-            try:
-                self.use_images      = menu.skin_default_has_images
-                self.use_description = menu.skin_default_has_description
-            except:
-                self.use_images      = False
-                self.use_description = False
-            return
-        except:
-            pass
-
-        image  = None
-        folder = 0
-
-        menu.skin_default_has_images      = False
-        menu.skin_default_has_description = False
-
-        if hasattr(menu, 'is_submenu'):
-            menu.skin_default_has_images = True
-            
-        for i in menu.choices:
-            if i.image:
-                menu.skin_default_has_images = True
-            if i['description'] or i.type:
-                # have have a description if description is an attribute
-                # or when the item has a type (special skin handling here)
-                menu.skin_default_has_description = True
-            if menu.skin_default_has_images and menu.skin_default_has_description:
-                break
-            
-        self.use_images      = menu.skin_default_has_images
-        self.use_description = menu.skin_default_has_description
-
-        if len(menu.choices) < 6:
-            try:
-                if menu.choices[0].info_type == 'track':
-                    menu.skin_force_text_view = True
-                    self.use_text_view = True
-                    return
-            except:
-                pass
-
-            for i in menu.choices:
-                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and \
-                       i.type == 'dir' and not i.media:
-                    # directory with few items and folder:
-                    self.use_text_view = False
-                    return
-                    
-                if image and i.image != image:
-                    menu.skin_force_text_view = False
-                    self.use_text_view        = False
-                    return
-                image = i.image
-
-            menu.skin_force_text_view = True
-            self.use_text_view        = True
-            return
-
-        for i in menu.choices:
-            if i.type == 'dir':
-                folder += 1
-                # directory with mostly folder:
-                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 and not i.media:
-                    self.use_text_view = False
-                    return
-                    
-            if image and i.image != image:
-                menu.skin_force_text_view = False
-                self.use_text_view        = False
-                return
-            image = i.image
-            
-        menu.skin_force_text_view = True
-        self.use_text_view        = True
-
-    
     def calc_geometry(self, object, copy_object=0):
         """
         calculate the real values of the object (e.g. content) based
@@ -379,25 +300,25 @@ class Skin_Area:
         font_h=0
 
         if isinstance(object.width, str):
-            object.width = int(eval(object.width, {'MAX':self.area_val.width}))
+            object.width = int(eval(object.width, {'MAX':self.area_values.width}))
 
         if isinstance(object.height, str):
-            object.height = int(eval(object.height, {'MAX':self.area_val.height}))
+            object.height = int(eval(object.height, {'MAX':self.area_values.height}))
 
-        object.x += self.area_val.x
-        object.y += self.area_val.y
+        object.x += self.area_values.x
+        object.y += self.area_values.y
         
         if not object.width:
-            object.width = self.area_val.width
+            object.width = self.area_values.width
 
         if not object.height:
-            object.height = self.area_val.height
+            object.height = self.area_values.height
 
-        if object.width + object.x > self.area_val.width + self.area_val.x:
-            object.width = self.area_val.width - object.x
+        if object.width + object.x > self.area_values.width + self.area_values.x:
+            object.width = self.area_values.width - object.x
 
-        if object.height + object.y > self.area_val.height + self.area_val.y:
-            object.height = self.area_val.height + self.area_val.y - object.y
+        if object.height + object.y > self.area_values.height + self.area_values.y:
+            object.height = self.area_values.height + self.area_values.y - object.y
 
         return object
 
@@ -443,57 +364,18 @@ class Skin_Area:
     
 
 
-    def init_vars(self, settings, display_type, widget_type = 'menu'):
+    def init_vars(self, settings, area):
         """
         check which layout is used and set variables for the object
         """
         redraw = False
         self.settings = settings
 
-        if widget_type == 'menu':
-            # get the correct <menu>
-            if display_type and settings.special_menu.has_key(display_type):
-                area = settings.special_menu[display_type]
-            else:
-                name = 'default'
-                if self.use_description:
-                    name += ' description'
-                if not self.use_images:
-                    name += ' no image'
-                area = settings.default_menu[name]
-
-            # get the correct style based on display_style
-            if len(area.style) > self.display_style:
-                area = area.style[self.display_style]
-            else:
-                try:
-                    area = area.style[0]
-                except IndexError:
-                    print 'index error for %s %s' % (self.display_style, widget_type)
-                    raise
-
-            if area[0] and (not self.use_text_view):
-                area = area[0]
-            elif area[1]: 
-                area = area[1]
-            else:
-                print 'want to fall back, but no text view defined'
-                area = area[0]
-
-        else:
-            area = settings.sets[widget_type]
-            if hasattr(area, 'style'):
-                try:
-                    area = area.style[self.display_style][1]
-                except:
-                    area = area.style[0][1]
-
-
         if self.area_name == 'plugin':
-            if not self.area_val:
-                self.area_val = fxdparser.Area(self.area_name)
-                self.area_val.visible = True
-                self.area_val.r = (0, 0, self.screen.width, self.screen.height)
+            if not self.area_values:
+                self.area_values = fxdparser.Area(self.area_name)
+                self.area_values.visible = True
+                self.area_values.r = (0, 0, self.screen.width, self.screen.height)
             return True
         else:
             try:
@@ -502,12 +384,12 @@ class Skin_Area:
                 try:
                     area = area.areas[self.area_name]
                 except (KeyError, AttributeError):
-                    print 'no skin information for %s:%s' % (widget_type, self.area_name)
+                    print 'no skin information for %s' % (self.area_name)
                     area = fxdparser.Area(self.area_name)
                     area.visible = False
 
-        if (not self.area_val) or area != self.area_val:
-            self.area_val = area
+        if (not self.area_values) or area != self.area_values:
+            self.area_values = area
             redraw = True
             
         if not area.layout:
@@ -528,9 +410,12 @@ class Skin_Area:
         """
         draw the <background> of the area
         """
-        area   = self.area_val
+        area   = self.area_values
         redraw = True
 
+        background_image = []
+        background_rect  = []
+        
         for bg in self.layout.background:
             bg = copy.copy(bg)
             if isinstance(bg, fxdparser.Image) and bg.visible:
@@ -554,16 +439,54 @@ class Skin_Area:
                 # set to 'background' to be added to that image list
                 if bg.label != 'top':
                     bg.label = 'background'
-                    
+
                 if imagefile:
-                    image = self.screen.renderer.loadbitmap(imagefile, self.imagecache,
-                                                            bg.width, bg.height, True)
-                    if image:
-                        self.drawimage(image, bg)
-                            
+                    background_image.append((imagefile, bg.x, bg.y, bg.width, bg.height))
+
             elif isinstance(bg, fxdparser.Rectangle):
                 self.calc_geometry(bg)
-                self.drawbox(bg.x, bg.y, bg.width, bg.height, bg)
+                background_rect.append((bg.x, bg.y, bg.width, bg.height, bg.bgcolor,
+                                        bg.size, bg.color, bg.radius))
+
+        if self.NEW_STYLE:
+            for b in copy.copy(self.__background__):
+                try:
+                    background_rect.remove(b.info)
+                except ValueError:
+                    try:
+                        background_image.remove(b.info)
+                    except ValueError:
+                        self.__background__.remove(b)
+                        self.screen.remove(b)
+                    
+            for rec in background_rect:
+                x, y, width, height, bgcolor, size, color, radius = rec
+                box = self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
+                self.__background__.append(box)
+                box.info = rec
+
+                
+            for image in background_image:
+                imagefile, x, y, width, height = image
+                i = self.screen.renderer.loadbitmap(imagefile, self.imagecache,
+                                                    width, height, True)
+                if i:
+                    i = self.drawimage(i, (x, y, width, height), background=True)
+                    self.__background__.append(i)
+                    i.info = image
+                    
+
+
+        else:
+            for x, y, width, height, bgcolor, size, color, radius in background_rect:
+                self.drawbox(x, y, width, height, (bgcolor, size, color, radius))
+
+            for imagefile, x, y, width, height in background_image:
+                i = self.screen.renderer.loadbitmap(imagefile, self.imagecache,
+                                                    width, height, True)
+                if i:
+                    self.drawimage(i, (x, y, width, height), background=True)
+                            
         return redraw
             
 
@@ -586,7 +509,10 @@ class Skin_Area:
             r = Rectangle(x, y, x + width, y + height, rect[0], rect[1], rect[2], rect[3])
 
         r.layer = -3
-        self.tmp_objects.rectangles.append(r)
+        if self.NEW_STYLE:
+            self.screen.add(r)
+        else: 
+            self.tmp_objects.rectangles.append(r)
         return r
     
             
@@ -599,7 +525,7 @@ class Skin_Area:
         """
 
         if not text:
-            return (0,0,0,0)
+            return None
 
         # set default values from 'content'
         if x == -1:
@@ -628,8 +554,14 @@ class Skin_Area:
 
         t = Text(x, y, x+width, y+height2, text, font, height,
                  align_h, align_v, mode, ellipses, dim)
-        self.tmp_objects.text.append(t)
 
+        if self.NEW_STYLE:
+            self.screen.add(t)
+        else: 
+            self.tmp_objects.text.append(t)
+        return t
+
+    
 
     def loadimage(self, image, val):
         """
@@ -663,9 +595,8 @@ class Skin_Area:
         draws an image ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
-
         if not image:
-            return 0,0
+            return None
 
         if isstring(image):
             if isinstance(val, tuple):
@@ -674,29 +605,29 @@ class Skin_Area:
                 image = self.loadimage(String(image), val)
 
         if not image:
-            return 0,0
+            return None
         
         if isinstance(val, tuple):
             i = Image(val[0], val[1], val[0] + image.get_width(),
                       val[1] + image.get_height(), image)
+            if self.NEW_STYLE:
+                if background:
+                    i.layer = -5
+                self.screen.add(i)
+                return i
+
             if background:
                 i.layer = -5
                 self.tmp_objects.bgimages.append(i)
             else:
                 self.tmp_objects.images.append(i)
-            return image.get_width(), image.get_height()
-
-        try:
-            if background or val.label == 'background':
-                i = Image(val.x, val.y, val.x + val.width, val.y + val.height, image)
-                i.layer = -5
-                self.tmp_objects.bgimages.append(i)
-                return val.width, val.height
-        except:
-            pass
+            return i
 
         i = Image(val.x, val.y, val.x + val.width, val.y + val.height, image)
-        self.tmp_objects.images.append(i)
-        return val.width, val.height
+        if self.NEW_STYLE:
+            self.screen.add(i)
+        else:
+            self.tmp_objects.images.append(i)
+        return i
         
 

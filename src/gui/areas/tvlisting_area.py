@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
+#
 # Revision 1.4  2004/08/10 19:38:02  dischi
 # better channels.py support
 #
@@ -54,21 +62,22 @@ import copy
 import time
 import config
 import math
-from area import Skin_Area, Geometry
+from area import Area, Geometry
 from skin_utils import *
 
 
-class TVListing_Area(Skin_Area):
+class TVListing_Area(Area):
     """
     this call defines the listing area
     """
 
     def __init__(self):
-        Skin_Area.__init__(self, 'listing', imagecachesize=20)
+        Area.__init__(self, 'listing', imagecachesize=20)
         self.last_choices = ( None, None )
         self.last_settings = None
         self.last_items_geometry = None
         self.last_start_time = 0
+        self.NEW_STYLE = False
         
 
     def update_content_needed(self):
@@ -78,18 +87,15 @@ class TVListing_Area(Skin_Area):
         return True
 
 
-    def get_items_geometry(self, settings, obj, display_style=0):
+    def get_items_geometry(self, settings, obj):
         if self.last_settings == settings:
             return self.last_items_geometry
         
-        self.display_style = display_style
-        self.init_vars(settings, None, widget_type = 'tv')
-
         menuw     = obj
         menu      = obj
         
         layout    = self.layout
-        area      = self.area_val
+        area      = self.area_values
         content   = self.calc_geometry(layout.content, copy_object=True)
 
         label_val     = content.types['label']
@@ -176,7 +182,7 @@ class TVListing_Area(Skin_Area):
         menu      = self.menu
         settings  = self.settings
         layout    = self.layout
-        area      = self.area_val
+        area      = self.area_values
         content   = self.calc_geometry(layout.content, copy_object=True)
 
 #         to_listing     = menu.table

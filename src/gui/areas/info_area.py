@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
+#
 # Revision 1.2  2004/07/24 12:21:31  dischi
 # use new renderer and screen features
 #
@@ -47,7 +55,7 @@ import copy
 import util
 import re
 
-from area import Skin_Area
+from area import Area
 from skin_utils import *
 import gui.fxdparser as fxdparser
 from area import Geometry
@@ -57,13 +65,13 @@ import traceback
 # function calls to get more info from the skin
 function_calls = { 'comingup': util.comingup }
 
-class Info_Area(Skin_Area):
+class Info_Area(Area):
     """
     this call defines the view area
     """
 
     def __init__(self):
-        Skin_Area.__init__(self, 'info')
+        Area.__init__(self, 'info')
         self.last_item = None
         self.content = None
         self.layout_content = None
@@ -71,6 +79,8 @@ class Info_Area(Skin_Area):
         self.updated = 0
         self.sellist = None
         self.i18n_re = re.compile('^( ?)(.*?)([:,]?)( ?)$')
+        self.NEW_STYLE = False
+
 
     def update_content_needed( self ):
         """
@@ -159,11 +169,11 @@ class Info_Area(Skin_Area):
         or does nothing (return 0)
         """
         update=0
-        if self.content and self.area_val and \
-               (self.content.width != self.area_val.width or \
-                self.content.height != self.area_val.height or \
-                self.content.x != self.area_val.x or \
-                self.content.y != self.area_val.y):
+        if self.content and self.area_values and \
+               (self.content.width != self.area_values.width or \
+                self.content.height != self.area_values.height or \
+                self.content.x != self.area_values.x or \
+                self.content.y != self.area_values.y):
             update=1
 
         if self.layout_content is not self.layout.content or update:

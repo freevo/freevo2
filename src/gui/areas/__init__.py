@@ -1,35 +1,22 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# skin_main1.py - Freevo default skin
+# __init__.py - Area handling module
 # -----------------------------------------------------------------------
 # $Id$
 #
 # Notes:
-# Todo:        Do not share AreaHandler:s between menu, tv, player
-#              and splashscreen. They should get one of there own!
+# Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2004/08/05 17:30:24  dischi
-# cleanup
+# Revision 1.8  2004/08/14 15:07:34  dischi
+# New area handling to prepare the code for mevas
+# o each area deletes it's content and only updates what's needed
+# o work around for info and tvlisting still working like before
+# o AreaHandler is no singleton anymore, each type (menu, tv, player)
+#   has it's own instance
+# o clean up old, not needed functions/attributes
 #
-# Revision 1.6  2004/08/01 10:37:39  dischi
-# remove some functions
-#
-# Revision 1.5  2004/07/25 18:17:34  dischi
-# interface update
-#
-# Revision 1.4  2004/07/24 17:18:18  dischi
-# rename show to update
-#
-# Revision 1.3  2004/07/24 12:21:30  dischi
-# use new renderer and screen features
-#
-# Revision 1.2  2004/07/23 19:43:31  dischi
-# move most of the settings code out of the skin engine
-#
-# Revision 1.1  2004/07/22 21:13:39  dischi
-# move skin code to gui, update to new interface started
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,212 +40,5 @@
 # -----------------------------------------------------------------------
 
 
-import os
-import traceback
-
-import config
-import util
-
-from area import Skin_Area
-
-# Bad: import back in directory tree
-from gui import fxdparser as fxdparser
-
-class AreaHandler:
-    """
-    main skin class
-    """
-    
-    Rectange = fxdparser.Rectangle
-    Image    = fxdparser.Image
-    Area     = Skin_Area
-
-    def __init__(self, settings):
-        """
-        init the skin engine
-        """
-        self.settings      = settings
-        self.display_style = { 'menu' : 0 }
-        self.last_draw     = None, None
-        self.screen        = None
-        self.areas         = {}
-        self.all_areas     = []
-        
-        # load default areas
-        from listing_area   import Listing_Area
-        from tvlisting_area import TVListing_Area
-        from view_area      import View_Area
-        from info_area      import Info_Area
-        from default_areas  import Screen_Area, Title_Area, Subtitle_Area
-        
-        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info'):
-            self.areas[a] = eval('%s_Area()' % a.capitalize())
-        self.areas['tvlisting'] = TVListing_Area()
-
-        self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
-        self.storage = util.read_pickle(self.storage_file)
-        if self.storage and self.storage.has_key(config.SKIN_XML_FILE):
-            self.display_style['menu'] = self.storage[config.SKIN_XML_FILE]
-        else:
-            self.display_style['menu'] = 0
-        
-
-    def set_screen(self, screen):
-        """
-        move the current drawing to a new screen object
-        """
-        for a in self.areas:
-            self.areas[a].set_screen(screen)
-        self.screen = screen
-
-
-        
-    def register(self, type, areas):
-        """
-        register a new type objects to the skin
-        """
-        setattr(self, '%s_areas' % type, [])
-        for a in areas:
-            if isinstance(a, str):
-                getattr(self, '%s_areas' % type).append(self.areas[a])
-            else:
-                a.set_screen(self.screen)
-                getattr(self, '%s_areas' % type).append(a)
-
-
-    def delete(self, type):
-        """
-        delete informations about a special skin type
-        """
-        exec('del self.%s_areas' % type)
-        self.last_draw = None, None
-
-
-    def change_area(self, name, module, object):
-        """
-        replace an area with the code from module.object() from skins/plugins
-        """
-        exec('import gui.plugins.%s' % module)
-        self.areas[name] = eval('gui.plugins.%s.%s()' % (module, object))
-
-        
-    def toggle_display_style(self, menu):
-        """
-        Toggle display style
-        """
-        if isinstance(menu, str):
-            if not self.display_style.has_key(menu):
-                self.display_style[menu] = 0
-            self.display_style[menu] = (self.display_style[menu] + 1) % \
-                                       len(self.settings.sets[menu].style)
-            return
-            
-        if menu.force_skin_layout != -1:
-            return
-        
-        if menu and menu.skin_settings:
-            settings = menu.skin_settings
-        else:
-            settings = self.settings
-
-        if settings.special_menu.has_key(menu.item_types):
-            area = settings.special_menu[menu.item_types]
-        else:
-            area = settings.default_menu['default']
-
-        if self.display_style['menu'] >=  len(area.style):
-            self.display_style['menu'] = 0
-        self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
-
-        self.storage[config.SKIN_XML_FILE] = self.display_style['menu']
-        util.save_pickle(self.storage, self.storage_file)
-
-
-
-    def get_display_style(self, menu=None):
-        """
-        return current display style
-        """
-        if isinstance(menu, str):
-            if not self.display_style.has_key(menu):
-                self.display_style[menu] = 0
-            return self.display_style[menu]
-        
-        if menu:            
-            if menu.force_skin_layout != -1:
-                return menu.force_skin_layout
-        return self.display_style['menu']
-
-
-
-    def items_per_page(self, (type, object)):
-        """
-        returns the number of items per menu page
-        (cols, rows) for normal menu and
-        rows         for the tv menu
-        WARNING: only works for tv, will be removed soon
-        """
-        info = self.areas['tvlisting']
-        info = info.get_items_geometry(self.settings, object,
-                                       self.get_display_style('tv'))
-        return (info[4], info[-1])
-
-
-
-    def clear(self, type):
-        """
-        clean the screen
-        """
-        if self.last_draw and self.last_draw[0] == type:
-            _debug_('clear skin (%s)' % type)
-            for a in self.all_areas:
-                a.clear()
-
-
-    def draw(self, type, object):
-        """
-        draw the object.
-        object may be a menu, a table for the tv menu are an audio item for
-        the audio player
-        """
-        if not self.screen:
-            return
-        
-        settings = self.settings
-            
-        if type == 'menu':
-            if object.skin_settings:
-                settings = object.skin_settings
-            style = self.get_display_style(object)
-        else:
-            style = self.get_display_style(type)
-
-        if self.last_draw[0] != type:
-            areas = getattr(self, '%s_areas' % type)
-            for a in self.all_areas:
-                if not a in areas:
-                    _debug_('remove area %s' % a)
-                    a.clear()
-            self.all_areas = areas
-            
-        self.last_draw = type, object
-        try:
-            for a in self.all_areas:
-                a.draw(settings, object, style, type)
-            self.screen.update()
-
-        except UnicodeError, e:
-            print '******************************************************************'
-            print 'Unicode Error: %s' % e
-            print 'Please report the following lines to the freevo mailing list'
-            print 'or with the subject \'[Freevo-Bugreport\] Unicode\' to'
-            print 'freevo@dischi-home.de.'
-            print
-            print traceback.print_exc()
-            print
-            print type, object
-            if hasattr(object, 'choices'):
-                for i in object.choices:
-                    print i
-            print
-            raise UnicodeError, e
+from handler import AreaHandler
+from area import Area
