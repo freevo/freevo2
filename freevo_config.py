@@ -103,6 +103,7 @@ if int(str(CONF.version).split('.')[1]) != \
 # ======================================================================
 
 AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
+AUDIO_INPUT_DEVICE  = '/dev/dsp1'     # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/?
 MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
 CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
@@ -534,6 +535,16 @@ XMMS_CMD             = 'xmms'
 #
 TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
 
+# This is the size (in MB) of the timeshift buffer, ie: how long you can
+# pause tv for.  This is set to a low default because the default buffer
+# location is under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
+TIMESHIFT_BUFFER_SIZE = 128
+
+TIMESHIFT_ENCODE_CMD = 'mp1e -m3 -c%s -p%s -r14,100' % \
+                       (TV_SETTINGS.split()[3], AUDIO_INPUT_DEVICE) 
+
+TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
+
 #
 # XXX Recording is still work in progress. You need to change
 # XXX the entire string below to fit your local settings.
@@ -776,6 +787,8 @@ else:
 
 import os
 MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
+
+TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
 
 #
 # XMLTV File
