@@ -10,11 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/02/13 20:26:39  dischi
+# small bugfix
+#
 # Revision 1.26  2004/02/13 19:42:44  dischi
 # cleanup
-#
-# Revision 1.25  2004/02/12 18:42:44  dischi
-# Oops
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -356,7 +356,7 @@ class MetaCache(Cache):
                 self.cache_modified = True
         if not self.current_objects:
             # delete cache file is no object has any infos
-            if os.path.isfile(self.current_cachefile):
+            if self.current_cachefile and os.path.isfile(self.current_cachefile):
                 os.unlink(self.current_cachefile)
             self.cache_modified = False
             if config.MEDIAINFO_USE_MEMORY:
