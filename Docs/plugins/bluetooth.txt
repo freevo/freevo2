@@ -1,0 +1,252 @@
+#########################################################
+#							#
+#Bluetooth installation!				#
+#							#
+#########################################################
+
+* This is the way I did it, I don't take any responsability for anything (if this sets your house on fire, I can't be blamed)
+* This should work for you, but I'm sure that you will have to try each step at least twice before it works.
+
+Kernel stuff is needed! :)
+
+You'll need bluez-bluefw, bluez-libs and bluez-utils. Just unzip them and compile: "./configure && make"; "su"; "make install".
+
+root@host# hciconfig 
+hci0:   Type: USB 
+        BD Address: 00:00:00:00:00:00 ACL MTU: 0:0  SCO MTU: 0:0
+        DOWN 
+        RX bytes:0 acl:0 sco:0 events:0 errors:0
+        TX bytes:0 acl:0 sco:0 commands:0 errors:0
+* This is how it looks when you first run it. Some distros maybe start this automagicly, making it look like the one below.
+
+root@host# hciconfig hci0 up
+root@host# hciconfig        
+hci0:   Type: USB 
+        BD Address: 00:E0:98:85:C4:BC ACL MTU: 192:8  SCO MTU: 64:8
+        UP RUNNING PSCAN ISCAN 
+        RX bytes:69 acl:0 sco:0 events:8 errors:0
+        TX bytes:27 acl:0 sco:0 commands:7 errors:0
+
+* This is how it should look!
+
+root@host# hcitool scan
+Scanning ...
+        00:80:37:61:D6:36       cell
+
+* Found my cellphone. The numbers is the bluetooth adress, very important to remember it. "Cell" is just the name of my cellphone.
+* Remember that this is _MY_ phone adress/name. Use the numbers _YOU_ get.
+* If you don't find your phone at the first try, don' be scared. Took me an hour to get it to work the second time I did it :)
+* Your phone must be "Searchable/Findable", meaning that it will reply if anything (your computer) asks it if it exists.
+* On my Ericsson T68 you have to get yourself to the bluetooth menu and first, very important, set "Mode" to "ON", NOT "Auto".* Auto will work for the moment, but later on it won't allow any real connections to be made.
+* Now it should say "Searchable/Findable for three minutes" or something like that. Try searching again.
+* If that doesn't work, try rebooting your computer AND your phone. Seems like the phone doesn't always do things the right way.
+
+
+root@host bluez-sdp-1.2/tools# ./sdptool browse 00:80:37:61:D6:36
+Browsing 00:80:37:61:D6:36 ...
+
+...
+
+Service Name: Serial Port 1
+Service RecHandle: 0x10003
+Service Class ID List:
+  "Serial Port" (0x1101)
+Protocol Descriptor List:
+  "L2CAP" (0x0100)
+  "RFCOMM" (0x0003)
+    Channel: 4
+
+Service Name: Serial Port 2
+Service RecHandle: 0x10004
+Service Class ID List:
+  "Serial Port" (0x1101)
+Protocol Descriptor List:
+  "L2CAP" (0x0100)
+  "RFCOMM" (0x0003)
+    Channel: 5
+
+...
+
+* Search for services avalible on your phone. This program won't install itself anywhere but bluez-sdp-1.2/tools/sdptool.
+* Look for "Service Name: Serial Port", the number doesn't matter, and write down what Channel it uses. In my case it's Channel 4 or Channel 5.
+* Doesn't work? Reboot both devices and try again. (Remember to do "hciconfig hci up" after the reboot)
+
+
+root@host# rfcomm bind 1 00:80:37:61:D6:36 5
+
+* This command binds the serial port on the phone to a device on your disk, usually something like /dev/bluetooth/rfcomm/n.
+* The first number (left to right), 1, represents what device it should be. If you use 1 it links /dev/bluetooth/rfcomm/1 to the phones serial port.
+* The second numbers represents the bluetooth adress of the phone, you should know that by now :)
+* The third number, 5, represents the Channel discovered by sdptool.
+
+root@host# rfcomm
+rfcomm1: 00:80:37:61:D6:36 channel 5 clean 
+
+* Should say that.
+
+root@host# cd /etc/bluetooth/
+root@host /etc/bluetooth/# <insert texteditor here> givepin
+
+#/bin/sh
+# Send your pincode to the phone as password.
+echo "PIN:1234"
+
+* Save! :)
+* This little document sends your pincode to your phone. It's compulsary, your phone will drop the connection otherwise.
+* Also, it's VERY IMPORTANT that this file is executable. Took me 20 minutes to figure out what was wrong :)
+* Just chmod the file ("chmod +x givepin" or a better way: "chmod 700 givepin && chown <insert your username here> givepin")
+* Check so that the owner of the file has rx and the others don't (don't want anyone else to read or pin, do we) "ls -l givepin"
+
+root@host /etc/bluetooth/# <insert texteditor here> hcid.conf
+# HCI daemon configuration file.
+#
+#
+options {
+        autoinit yes;
+        security auto;
+        pairing multi;
+        pin_helper /etc/bluetooth/givepin;
+}
+
+device {
+        name "freevo";
+        class 0x100;
+        pkt_type DH1,DM1,HV1;
+        iscan enable; pscan enable;
+        lm master;
+        lp hold,sniff,park;
+        auth enable;
+        encrypt disable;
+}
+
+* This is the HCI deamon config. I honestly don't know how this should be configured but this config works.
+* Not much to say really, just copy this so that we can move on.
+
+* No need to touch the rfcomm.conf file, you'll need to set that manually anyway.
+
+
+root@host# hcid
+
+* Starts the hci daemon (I'm not to sure about that program, so I run "hcid -f /etc/bluetooth/hcid.conf")
+* Do as you please, it should be the default config path anyway.
+
+* IMPORTANT:
+* Now link you phone with your computer, otherwise nothing will work.
+* This is done with the phone, by selecting "Linked units" -> PC -> <insert name of your computer (set in hcid.conf, default "freevo")>
+
+
+
+* NOTE: About the order of doing stuff:
+* "hciconfig hci0 up" ; "hcid -f /etc/bluetooth/hcid.conf" ; "rfcomm bind 1 <your BT adress> <Serial port channel>" 
+* You should put that in a initscript, but remember that this REQUIRES YOUR PHONE TO BE ON AND READY! (bluetooth mode = ON, not AUTO"
+
+
+
+
+#########################################################
+#							#
+# Freevo configuration					#
+#							#
+#########################################################
+
+* This is a snippet from local_conf.py
+
+# Supports as many buttons as your phone has,
+# but make sure there is a corresponding entry in BLUE_CMDS.
+# If you need additional help, please look in the source and if that don't work, mail me.
+# You can find the adress in the source.
+
+# Feels great, doesn't it ;)
+
+plugin.activate('bluetooth')
+
+# Yes it does!
+
+# rfcomm device. Depends on kernel version and how you bind. This is the
+# default.
+BLUE_RFCOMM = "/dev/bluetooth/rfcomm/1"
+
+# The value for poll(), decides how much it will sleep before checking if any
+# new command has arrived.
+# A low value means faster navigation but more load on the CPU. 
+#(0 will not sleep, 10 will sleep to much) 
+# Recommended setting: 1
+BLUE_SLEEP = 1
+
+# Keep alive setting. 
+# Will send "ATI" to your phone every BLUE_SLEEP * BLUE_KEEP_ALIVE seconds. (0 is off)
+# If you don't sleep or use a low value, user a higher here. Recommended to use this, not tested if it works 
+# but I think this will help disconnection problems.
+BLUE_KEEP_ALIVE = 100
+
+
+# Button configuration
+# Check what each button is called by running "freevo bluetooth_config" and press each key.
+# This is the default configuration, special commands like "UNILOCK" or
+# "STEP1" belongs to the plugin, more about that further down.
+#
+# <NAME OF BUTTON>  <COMMAND TO FREEVO>
+# BLUE_CMDS = {
+#     'u'              : 'VOL+',
+#     'd'	       : 'VOL-',
+#     'e'              : 'PLAY',
+#     's'              : 'UNILOCK',
+#     '1'              : 'STEP1',
+#     '2'              : 'STEP2',
+#     '3'              : 'STEP3',
+#     '4'              : 'LEFT',
+#     '5'	       : 'UP',
+#     '6'	       : 'RIGHT',
+#     '7'	       : 'SELECT',
+#     '8'              : 'DOWN',
+#     '9'              : 'EXIT',
+#     '0'              : '0',
+#     'L'              : 'UNLOCK1',
+#     'v'              : 'EXIT',
+#     'c'              : 'SLEEP'
+#     }
+
+# About locking commands. There are five diffrent commands to keep track on
+# the keypad status. 
+# "UNILOCK" = A button that is used for both locking and unlockin. (It's used
+# in the default config. You must press "Yes" to lock you phone and to unlock
+# it)
+# "LOCK1" = The first button you press to lock. 
+# (If "C" then "Yes" locks, then "C" is "LOCK1")
+# "LOCK2" = The second button you press to lock.
+# "UNLOCK1" = The first button you press to unlock.
+# "UNLOCK2" = The second buttin you press to unlock.
+
+
+# It makes the daemon to only accept commands when your keypad is locked! Using the default config above it gets
+# even better, when you get a call you press "yes" to answer, the same button is used for Pause so the movies
+# or music stops until you press "no". 
+BLUE_KP_LOCK = 1
+
+# Keys to replace locking commands. I don't use all of them as default.
+BLUE_UNILOCK = "PAUSE"
+BLUE_LOCK1 = "SELECT"
+
+# These work just as the above, but aren't used in thisconfiguration. I don't
+# use the menubutton on my phone (locking only), therefore it's not set to anything here. They must
+# be set even if you don't use them. 
+BLUE_LOCK2 = ""
+BLUE_UNLOCK1 = ""
+BLUE_UNLOCK2 = ""
+
+
+# Simple zoom = 1; TWO buttons <insert buttons here> will cycle through all the
+# zooms mode. Names: "STEPPING_PLUS" and "STEPPING_MINUS"
+#
+# Simple zoom = 2;  THREE buttons 1,2 and 3 in the default will cycle through
+# all the zoom modes. 1 = zoom modes 1,2,3. 2 = zoom modes 4,5,6. 3 = zoom
+# modes 7,8,9,0. Press 1 once, you'll zoom aread one, press twice and you'll
+# zoom are 2 and so on.
+# Names: "STEP1", "STEP2" and "STEP3"
+BLUE_SIMPLE_ZOOM = 0
+
+
+
+
+
+
