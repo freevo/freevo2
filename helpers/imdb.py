@@ -11,6 +11,7 @@ import os
 freevo_version = '1.3.2'
 
 imdb_title_list = '/tmp/imdb-movies.list'
+imdb_titles = None
 
 def getCDID(drive):
     """
@@ -460,13 +461,18 @@ def load_imdb_titles():
     return data
     
 def local_search(name):
+    global imdb_titles
+
     name  = os.path.basename(os.path.splitext(name)[0])
     name  = re.sub('([a-z])([A-Z])', point_maker, name)
     name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
     name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
     parts = re.split('[\._ -]', name)
 
-    matches = load_imdb_titles()
+    if imdb_titles == None:
+    	imdb_titles = load_imdb_titles()
+
+    matches = imdb_titles
 
     if matches == None:
         return None
@@ -516,6 +522,27 @@ def find_best_match(title, matches):
 
     return best
 
+def guess(filename):
+	print "searching " + filename
+	keys = local_search(filename)
+	if keys == None:
+	    print 'Local database not found. Please download movies.list.gz'
+	    print 'from the imdb interface website, unpack it and move it to'
+	    print '%s.' % imdb_title_list
+	    print 'To get the file go to http://www.imdb.com/interfaces'
+	    sys.exit(1)
+
+	print 'keywords: %s' % keys
+	data = []
+	for result in search(keys):
+	    data.append('%s   %s (%s)' % (result[0], result[1], result[2]))
+	match = find_best_match(filename, data)
+	print 'best match: %s' % match
+	imdb_number = match[:7]
+	files = [ filename ]
+	filename = os.path.splitext(filename)[0]
+	get_data_and_write_fxd(imdb_number, filename, drive, type, files, '')
+
 
 def usage():
     print 'imdb.py -s string:   search imdb for string'
@@ -544,7 +571,7 @@ if __name__ == "__main__":
     search_arg = ''
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'as:g:', ('rom-drive=',))
+        opts, args = getopt.getopt(sys.argv[1:], 'ag:s:', ('rom-drive=','list-guess='))
     except getopt.GetoptError:
         usage()
         pass
@@ -566,6 +593,12 @@ if __name__ == "__main__":
                 usage()
             task = 'guess'
             search_arg = a
+
+        if o == '--list-guess':
+	    if task:
+	        usage()
+	    task = 'list-guess'
+	    search_arg = a
 
         if o == '--rom-drive':
             drive=a
@@ -589,31 +622,28 @@ if __name__ == "__main__":
                 print '%s   %s (%s)' % (result[0], result[1], result[2])
         sys.exit(0)
 
+    if task == 'list-guess':
+    	import fileinput
+	for filename in fileinput.input(search_arg):
+            try:
+                # check for already existing .fxd file and skip if exists
+                open(os.path.splitext(filename)[0] + '.fxd', 'r')
+                print 'skipping %s. info already exists' % filename
+                continue
+            except IOError:
+                pass
+
+            guess(filename)
+
+        sys.exit(0)
+
     if task == 'guess':
         if len(args) != 0:
             usage()
 
-        filename = search_arg
-        print "searching " + filename
-        keys = local_search(filename)
-        if keys == None:
-            print 'Local database not found. Please download movies.list.gz'
-            print 'from the imdb interface website, unpack it and move it to'
-            print '%s.' % imdb_title_list
-            print 'To get the file go to http://www.imdb.com/interfaces'
-            sys.exit(1)
-
-        print 'keywords: %s' % keys
-        data = []
-        for result in search(keys):
-            data.append('%s   %s (%s)' % (result[0], result[1], result[2]))
-        match = find_best_match(filename, data)
-        print 'best match: %s' % match
-        imdb_number = match[:7]
-        files = [ filename ]
-        filename = os.path.splitext(filename)[0]
-        get_data_and_write_fxd(imdb_number, filename, drive, type, files, '')
-        sys.exit(0)
+	guess(search_arg)
+			
+	sys.exit(0)
         
     # normal usage
     if len(args) < 2:
