@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/13 17:50:12  dischi
+# fixed crash by setting the default parent
+#
 # Revision 1.8  2003/03/30 20:49:59  rshortt
 # Improvements in how we get skin properties.
 #
@@ -96,13 +99,16 @@ class ConfirmBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, parent=None, text=" ", handler=None, default_choice=0, 
+    def __init__(self, parent='osd', text=" ", handler=None, default_choice=0, 
                  left=None, top=None, width=300, height=110, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None):
 
         self.handler = handler
 
+        if parent:
+            self.parent = parent
+            
         PopupBox.__init__(self, parent, text, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
