@@ -591,9 +591,9 @@ OVERSCAN_Y = 0
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
-    OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mgafb %s %s ' % (CONF.tv, CONF.geometry)
+    OSD_SDL_EXEC_AFTER_STARTUP='./contrib/fbcon/mgafb %s %s ' % (CONF.tv, CONF.geometry)
     OVERSCAN_X = 20
-    OVERSCAN_Y = 20
+    OVERSCAN_Y = 10
 
 if CONF.display == 'dfbmga':
     OVERSCAN_X = 50
@@ -607,7 +607,7 @@ if CONF.display == 'dxr3':
 OSD_SDL_EXEC_AFTER_CLOSE = ""
 
 if CONF.display == 'mga':
-    OSD_SDL_EXEC_AFTER_CLOSE='./fbcon/mgafb restore'
+    OSD_SDL_EXEC_AFTER_CLOSE='./contrib/fbcon/mgafb restore'
 
 
 # ======================================================================
