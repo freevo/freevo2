@@ -17,6 +17,7 @@ Release 1.3.3 (2003-08-02):
  * Major speed enhancements in the skin drawing code
  * Replaced fonts with Bitstream Vera fonts.
  * Xine support for DVD/VCD (dvdnav/vcdnav)
+ * New LCD plugin
  * Support for Python 2.3
  * Bugfixes and many other things
 
