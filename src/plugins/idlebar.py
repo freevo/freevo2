@@ -22,6 +22,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/04 15:17:56  outlyer
+# New cdstatus plugin. Only tested on my machine so use with caution.
+#
+# To use it:
+# plugin.activate('idlebar.cdstatus', level=60)
+#
+# There are a couple of known problems:
+#
+#     o Only the 'last' drive is shown (last from ROM_DRIVES)
+#     o The way that cdbackup tells us we are ripping isn't so nice
+#
 # Revision 1.13  2003/06/24 22:51:23  outlyer
 # Reflect new path to weather icons.
 #
@@ -152,8 +163,29 @@ class clock(IdleBarPlugin):
         osd.drawstring(clock,580,40,fgcolor=0xffffff,font=self.CLOCKFONT,ptsize=12)
 
 
+class cdstatus(IdleBarPlugin):
+    def __init__(self):
+        IdleBarPlugin.__init__(self)
+        self.cdimages ={}
+        self.cdimages ['audio'] = 'skins/images/status/cd_audio.png'
+        self.cdimages ['empty_cdrom'] = 'skins/images/status/cd_inactive.png'
+        self.cdimages ['images'] = 'skins/images/status/cd_photo.png'
+        self.cdimages ['video'] = 'skins/images/status/cd_video.png'
+        self.cdimages ['burn'] ='skins/images/status/cd_burn.png'
+        self.cdimages ['cdrip'] = 'skins/images/status/cd_rip.png'
+        self.cdimages ['mixed'] = 'skins/images/status/cd_mixed.png'
 
-    
+    def draw(self, (type, object)):
+        image = self.cdimages['empty_cdrom']
+        for media in config.REMOVABLE_MEDIA:
+            if hasattr(media.info,'handle_type'):
+                if not media.info.handle_type:
+                    # mixed CD
+                    image = self.cdimages['mixed']
+                else: 
+                    image = self.cdimages[media.info.handle_type]
+        osd.drawbitmap(image,220,30)
+
 class mail(IdleBarPlugin):
     def __init__(self, mailbox):
         IdleBarPlugin.__init__(self)

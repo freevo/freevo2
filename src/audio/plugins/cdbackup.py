@@ -26,6 +26,17 @@
 # -----------------------------------------------------------------------
 #
 # $Log$
+# Revision 1.11  2003/07/04 15:17:56  outlyer
+# New cdstatus plugin. Only tested on my machine so use with caution.
+#
+# To use it:
+# plugin.activate('idlebar.cdstatus', level=60)
+#
+# There are a couple of known problems:
+#
+#     o Only the 'last' drive is shown (last from ROM_DRIVES)
+#     o The way that cdbackup tells us we are ripping isn't so nice
+#
 # Revision 1.10  2003/07/03 04:24:45  outlyer
 # use OGGENC_CMD, and only show encoding options for encoders that are
 # actually available.
@@ -195,6 +206,8 @@ class main_backup_thread(threading.Thread):
         genre = 'default_genre'
         dir_audio_default = "dir_audio_default"        
         path_head = ''
+        for media in config.REMOVABLE_MEDIA:
+            media.info.handle_type = 'cdrip'
         
         # Get the artist, album and song_names	
         (artist, album, genre, song_names) = self.get_formatted_cd_info(device)
@@ -229,6 +242,8 @@ class main_backup_thread(threading.Thread):
       
         cdparanoia_command = []
         length=len(song_names)
+
+
 
         for i in range (0, len(song_names)):
             # Keep track of track# 
@@ -315,6 +330,8 @@ class main_backup_thread(threading.Thread):
         min = int(time_taken/60)
         sec = int(time_taken%60)
         popup_string="Finished Copying CD in %im%is" % (min,sec)
+        for media in config.REMOVABLE_MEDIA:
+            media.info.handle_type = 'audio'
         #pop = AlertBox(text=popup_string)
         #pop.show()
         # Disabled because if the popup happens when you're listening to music,
