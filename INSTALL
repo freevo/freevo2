@@ -8,9 +8,10 @@ WARNING: The framebuffer code can render the console unusuable if set up
          incorrectly! Do not attempt if you cannot login from another
          computer on the network!
 
+
 Quickstart (X11 version)
 ------------------------
-o Download Freevo, preferably from CVS
+o Download Freevo, preferably from CVS, un-tar
 o Download and install the following dependencies (see below for details):
   o freetype2, libpng, libz, Python >=2.1, PyXML, PIL, Python Checksum lib
 o Update freevo_config.py to suit your system (optional)
@@ -23,12 +24,18 @@ o Run Freevo:
 
 Detailed instructions
 ---------------------
+
+Some of these steps are optional, a minimal Freevo system can be set up
+that doesn't require TV-out, framebuffer, Video4Linux or lirc. It will
+still be useful to play movies/mp3's under X11.
+
+
 o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
   are compiled in statically. If they're compiled as modules instead you
   have to make sure that they're loaded before Freevo.
   o This step is not needed until you need the Video4Linux and/or TV-out.
 
-o Test the video4linux driver using xawtv
+o Test the video4linux driver using xawtv (optional)
   o Freevo uses its' own tables for channels
 
 o Compile and install the needed external apps. MPlayer and mpg321/mpg123
@@ -77,11 +84,11 @@ o Compile Freevo
       o python setup.py build
       o (as root): python setup.py install
   o Test the remote using the lirc application irw, and using the 
-    remote_control_lirc.py Freevo application
+    remote_control_lirc.py Freevo application (optional)
   o Test the X11 OSD test driver
-  o Test the MGA G400 OSD framebuffer driver
+  o Test the MGA G400 OSD framebuffer driver (optional)
 
-o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer)
+o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer, optional)
   o It _must_ be used with the matrox_g400/mga_vid.o module,
     not the one from MPlayer.
   o Check out the source for how to set the input, norm, channel
@@ -90,15 +97,15 @@ o Update the settings in config.py!
   o TV_SETTINGS, VCR_SETTINGS, TV_CHANNELS depending on where you live.
   o DIR_MP3, DIR_MOVIES, DIR_RECORD for where your files are
 
-o XMLTV Method
+o XMLTV method for download TV listings
   o See Docs/XMLTV for usage instructions
 
 o Test Freevo using the X11 OSD and remote, just start "freevo"
   in the main directory
 
-o Run Freevo using the framebuffer OSD driver and the lirc remote
+o Run Freevo using the framebuffer OSD driver and the lirc remote (optional)
 
-o Create a boot-script that will start Freevo when Linux is booting.
+o Create a boot-script that will start Freevo when Linux is booting. (optional)
   boot/freevo is a good start.
   o Make sure that X11 doesn't start up by changing the default 
     runlevel in /etc/inittab to 3
@@ -111,7 +118,7 @@ o Create a boot-script that will start Freevo when Linux is booting.
 Kernel configuration
 --------------------
 
-Use this for configuration of a kernel for Video4Linux+G400 support. You
+Use this for configuration of a kernel with Video4Linux+G400 support. You
 probably have to add support for your particular Video4Linux device as 
 well.
 
