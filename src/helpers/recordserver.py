@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/13 12:49:46  rshortt
+# Fixed a bad return in findMatches when there was no search string.
+#
 # Revision 1.9  2003/09/18 00:36:06  mikeruelle
 # need to import config before any other freevo module
 #
@@ -234,7 +237,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         if not find:
             if DEBUG: log.debug('nothing to find')
-            return []
+            return (FALSE, 'no search string')
 
         self.updateGuide()
 
