@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/08/05 17:41:45  dischi
+# handle empty strings in stringsize
+#
 # Revision 1.76  2003/08/05 17:25:34  dischi
 # better error handling for missing SDL_VIDEODRIVER
 #
@@ -252,6 +255,8 @@ class OSDFont:
             return w
 
     def stringsize(self, s):
+        if not s:
+            return 0
         w = 0
         for c in s:
             w += self.charsize(c)
