@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/12/07 11:12:56  dischi
+# small bugfix
+#
 # Revision 1.35  2003/11/29 11:27:40  dischi
 # move objectcache to util
 #
@@ -16,14 +19,11 @@
 # renamed some config variables
 #
 # Revision 1.33  2003/11/23 19:48:59  krister
-# Added optional new blend settings (nr of steps and total time), must be enabled explicitly in freevo_config
+# Added optional new blend settings (nr of steps and total time), must be enabled
+# explicitly in freevo_config
 #
 # Revision 1.32  2003/11/21 12:22:15  dischi
 # move blending effect to osd.py
-#
-# Revision 1.31  2003/11/21 11:46:51  dischi
-# blend one image to the next, better rotation support
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -213,7 +213,7 @@ class ImageViewer(GUIObject):
         last_image = self.last_image[1]
 
         if (last_image and self.last_image[0] != item and
-            (config.IMAGEVIEWER_BLEND_SPEED or config.IMAGEVIEWER_BLEND_STEPS)):
+            config.IMAGEVIEWER_BLEND_STEPS):
             screen = osd.screen.convert()
             screen.fill((0,0,0,0))
             screen.blit(osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
@@ -221,13 +221,10 @@ class ImageViewer(GUIObject):
             # update the OSD
             self.drawosd(layer=screen)
 
-            # XXX Choose the new style blending if so configured
             if config.IMAGEVIEWER_BLEND_STEPS:
                 osd.update(blend_surface=screen,
                            blend_steps=config.IMAGEVIEWER_BLEND_STEPS,
                            blend_time=config.IMAGEVIEWER_BLEND_TIME)
-            else:
-                osd.update(blend_surface=screen, blend_speed=config.IMAGEVIEWER_BLEND_SPEED)
 
         else:
             osd.clearscreen(color=osd.COL_BLACK)

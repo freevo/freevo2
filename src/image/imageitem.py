@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/12/07 11:12:56  dischi
+# small bugfix
+#
 # Revision 1.14  2003/11/21 11:46:07  dischi
 # moved rotation info into the item
 #
@@ -64,8 +67,8 @@ class ImageItem(Item):
         elif not self.name:
             self.name = util.getname(filename)
 
-        self.image_viewer = viewer.get_singleton()
         self.rotation     = 0
+
         
     def getattr(self, attr):
         """
@@ -113,7 +116,7 @@ class ImageItem(Item):
         """
         caches (loads) the next image
         """
-        self.image_viewer.cache(self)
+        viewer.get_singleton().cache(self)
 
 
     def view(self, arg=None, menuw=None):
@@ -127,7 +130,7 @@ class ImageItem(Item):
         if self.menuw.visible:
             self.menuw.hide()
 
-        self.image_viewer.view(self, rotation=self.rotation)
+        viewer.get_singleton().view(self, rotation=self.rotation)
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()

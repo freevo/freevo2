@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/07 11:13:53  dischi
+# small bugfix
+#
 # Revision 1.6  2003/12/06 13:44:12  dischi
 # move more info to the Mimetype
 #
@@ -74,7 +77,7 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         items = []
         for file in util.find_matches(files, config.IMAGE_SUFFIX):
-            items += [ ImageItem(file, parent) ]
+            items.append(ImageItem(file, parent))
             files.remove(file)
         return items
 
@@ -103,11 +106,11 @@ class PluginInterface(plugin.MimetypePlugin):
                 return
 
             info = info['desc']
-            if info.has_key('sampleimage'):
+            if info.has_key('sampleimage') and info['sampleimage']:
                 image = vfs.join(diritem.dir, info['sampleimage'])
                 if vfs.isfile(image):
                     diritem.image       = image
                     diritem.handle_type = diritem.display_type
 
-            if info.has_key('title'):
+            if info.has_key('title') and info['title']:
                 diritem.name = info['title']
