@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/19 21:25:38  dischi
+# don't load buggy skins
+#
 # Revision 1.1  2003/04/06 21:19:44  dischi
 # Switched to new main1 skin
 #
@@ -534,7 +537,7 @@ class Skin_Area:
                 try:
                     area = area.style[0]
                 except IndexError:
-                    print 'index error for %s %s' % (display_style, widget_type)
+                    print 'index error for %s %s' % (self.display_style, widget_type)
                     raise
                 
             # get image or text view
