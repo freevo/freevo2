@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/11/22 12:02:51  dischi
+# better plugin remove
+#
 # Revision 1.50  2003/11/21 17:55:47  dischi
 # support a list of named plugins
 #
@@ -74,6 +77,7 @@
 import os, sys
 import traceback
 import gettext
+import copy
 
 from event import Event
 
@@ -244,12 +248,9 @@ def remove(id):
 
     # remove by name
     r = [] 
-    for p in __all_plugins__:
+    for p in copy.copy(__all_plugins__):
         if p[0] == id:
-            r.append(p)
-
-    for p in r:
-        __all_plugins__.remove(p)
+            __all_plugins__.remove(p)
 
 
 def is_active(name, arg=None):
