@@ -59,9 +59,9 @@ class Program:
         Compare function, return 0 if the objects are identical, 1 otherwise
         """
         try:
-            return self.title != other.title or \
+            return Unicode(self.title) != Unicode(other.title) or \
                    self.start != other.start or \
                    self.stop  != other.stop or \
-                   self.channel != other.channel
+                   Unicode(self.channel) != Unicode(other.channel)
         except AttributeError:
             return 1
