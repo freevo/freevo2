@@ -9,9 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/07/02 20:02:54  dischi
+# Speed improvements:
+# o thumbanils are now stored as pickled raw bitmaps to improve loading
+#   speed, exif parser is now taken from mmpython
+# o split drawstringframed into a calculating an a drawing part to speed
+#   up the info area
+# removed old unneeded code
+# changed docs
+#
 # Revision 1.51  2003/06/28 01:51:38  gsbarbieri
-# Some code reformating, removed some bloat code and fixed drawstringframedsoft(align='justified')
-# to render justified code properly.
+# Some code reformating, removed some bloat code and fixed
+# drawstringframedsoft(align='justified') to render justified code properly.
 #
 # Revision 1.50  2003/06/27 18:55:40  gsbarbieri
 # Fixed some bugs in osd.drawstringframed*()
@@ -22,76 +31,6 @@
 #
 # Revision 1.48  2003/06/24 22:48:08  outlyer
 # Updated to reflect moved icon.
-#
-# Revision 1.47  2003/06/22 20:49:23  dischi
-# small fix??
-#
-# Revision 1.46  2003/06/22 11:35:36  dischi
-# Added null_layer. This layer can be used for drawstringframed to avoid
-# unneccessay drawings.
-#
-# Revision 1.45  2003/06/21 10:18:34  dischi
-# small fix
-#
-# Revision 1.44  2003/06/21 08:17:45  gsbarbieri
-# Small fix
-#
-# Revision 1.43  2003/06/13 23:34:06  rshortt
-# In _getfont include IOError as well as RuntimeError because of changes in recent SDL_ttf2 or pygame.
-#
-# Revision 1.42  2003/06/12 00:37:12  gsbarbieri
-# Some bug fixes
-#
-# Revision 1.41  2003/06/12 00:09:43  gsbarbieri
-# Fixed some bugs
-#
-# Revision 1.40  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.39  2003/05/06 10:36:46  dischi
-# Added OSD_SDL_EXEC_AFTER_CLOSE patch from Petri Damstén
-#
-# Revision 1.38  2003/04/27 17:36:20  dischi
-# enhance image loading with Imaging fallback
-#
-# Revision 1.37  2003/04/24 19:55:52  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.36  2003/04/23 06:30:45  krister
-# Changed fullscreen toggling, the state is kept throughout
-# stop/restart display, and can be queried so that other apps
-# (e.g. tvtime) can start up in the correct state.
-#
-# Revision 1.35  2003/04/21 12:57:16  dischi
-# moved SynchronizedObject to util.py
-#
-# Revision 1.34  2003/04/20 19:32:53  dischi
-# prepare images for faster blitting
-#
-# Revision 1.33  2003/04/11 21:50:53  dischi
-# autodetection has strange results for the G400
-#
-# Revision 1.32  2003/04/06 21:12:55  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
-#
-# Revision 1.31  2003/04/03 10:23:16  dischi
-# dxr3 fix
-#
-# Revision 1.30  2003/04/03 09:13:21  dischi
-# oops
-#
-# Revision 1.29  2003/04/03 09:11:40  dischi
-# lock the surface if necessary and reduce the bitmap cache size to 3 if
-# we use the new skin.
-#
-# Revision 1.28  2003/04/02 14:00:33  dischi
-# let pygame choose the video mode
-#
-# Revision 1.27  2003/04/02 11:52:38  dischi
-# - use hardware layer (it will be deactivated if not possible by pygame)
-# - don't convert images to alpha layers. If the image format supports that
-#   they already are alpha layers, if not, it makes no sense to convert
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -122,8 +61,6 @@ import Image
 import re
 import traceback
 from types import *
-import urllib
-import urlparse
 import objectcache
 import util
 import md5
@@ -135,9 +72,16 @@ import config
 import pygame
 from pygame.locals import *
 
+from mmpython.image import EXIF as exif
+import cStringIO
+        
+
 # Set to 1 for debug output. A lot of the debug statements are only
 # printed if set to 3 or higher.
 DEBUG = config.DEBUG
+TRUE  = 1
+FALSE = 0
+
 
 help_text = """\
 h       HELP
@@ -246,10 +190,10 @@ def get_singleton():
     return _singleton
 
         
-#
-# Return a unicode representation of a String or Unicode object
-#
 def stringproxy(str):
+    """
+    Return a unicode representation of a String or Unicode object
+    """
     result = str
     try:
         if type(str) == StringType:
@@ -260,18 +204,15 @@ def stringproxy(str):
 
 
 class Font:
-
-    filename = ''
-    ptsize = 0
-    font = None
+    def __init__(self, filename='', ptsize=0, font=None):
+        self.filename = filename
+        self.ptsize   = ptsize
+        self.font     = font
 
 
 class OSD:
 
-    _started = 0
-    
-    # The colors
-    # XXX Add more
+    # Some default colors
     COL_RED = 0xff0000
     COL_GREEN = 0x00ff00
     COL_BLUE = 0x0000ff
@@ -285,16 +226,17 @@ class OSD:
     COL_MEDIUM_GREEN = 0x54D35D
     COL_DARK_GREEN = 0x038D11
 
-    stringsize_cache = { }
-
-
     def __init__(self):
+        """
+        init the osd
+        """
         self.fullscreen = 0 # Keep track of fullscreen state
         self.focused_app = None
 
         self.fontcache = objectcache.ObjectCache(300, desc='font')
         self.stringcache = objectcache.ObjectCache(100, desc='string')
-        self.bitmapcache = objectcache.ObjectCache(3, desc='bitmap')
+        self.bitmapcache = objectcache.ObjectCache(10, desc='bitmap')
+        self.stringsize_cache = {}
         
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
@@ -302,10 +244,6 @@ class OSD:
         self.width = config.CONF.width
         self.height = config.CONF.height
 
-        # layer for drawstringframed if you don't want to draw, only calc
-        # the geometry
-        self.null_layer = 'null layer'
-        
         if config.CONF.display== 'dxr3':
             os.environ['SDL_VIDEODRIVER'] = 'dxr3'
 
@@ -358,7 +296,6 @@ class OSD:
         pygame.mouse.set_visible(0)
         self.mousehidetime = time.time()
         
-        self._started = 1
         self._help = 0  # Is the helpscreen displayed or not
         self._help_saved = pygame.Surface((self.width, self.height))
         self._help_last = 0
@@ -366,10 +303,12 @@ class OSD:
         # Remove old screenshots
         os.system('rm -f /tmp/freevo_ss*.bmp')
         self._screenshotnum = 1
-        
+
 
     def _cb(self):
-
+        """
+        callback for SDL event (not Freevo events)
+        """
         if not pygame.display.get_init():
             return None
 
@@ -409,11 +348,10 @@ class OSD:
                     return cmds_sdl[event.key]
 
     
-    def _send(arg1, *arg, **args): # XXX remove
-        pass
-
-    
     def shutdown(self):
+        """
+        shutdown the display
+        """
         pygame.quit()
         if config.OSD_SDL_EXEC_AFTER_CLOSE:
             if os.path.isfile(config.OSD_SDL_EXEC_AFTER_CLOSE):
@@ -421,7 +359,18 @@ class OSD:
             else:
                 print "ERROR: %s: no such file" % config.OSD_SDL_EXEC_AFTER_CLOSE
 
+
+    def stopdisplay(self):
+        """
+        stop the display to give other apps the right to use it
+        """
+        pygame.display.quit()
+
+
     def restartdisplay(self):
+        """
+        restores a stopped display
+        """
         pygame.display.init()
         self.width = config.CONF.width
         self.height = config.CONF.height
@@ -432,20 +381,27 @@ class OSD:
             pygame.display.toggle_fullscreen()
             
         
-    def stopdisplay(self):
-        pygame.display.quit()
-
     def toggle_fullscreen(self):
-        # Toggle between 0/1
+        """
+        toggle between window and fullscreen mode
+        """
         self.fullscreen = (self.fullscreen+1) % 2
         if pygame.display.get_init():
             pygame.display.toggle_fullscreen()
         if DEBUG: print 'OSD: Setting fullscreen mode to %s' % self.fullscreen
 
+
     def get_fullscreen(self):
+        """
+        return 1 is fullscreen is running
+        """
         return self.fullscreen
     
+
     def clearscreen(self, color=None):
+        """
+        clean the complete screen
+        """
         if not pygame.display.get_init():
             return None
 
@@ -454,37 +410,57 @@ class OSD:
         self.screen.fill(self._sdlcol(color))
         
     
-    def setpixel(self, x, y, color):
-        pass # XXX Not used anywhere
+    def loadbitmap(self, filename, cache=FALSE):
+        """
+        Loads a bitmap in the OSD without displaying it.
+        """
+        if not cache:
+            return self._getbitmap(filename)
+        if cache == TRUE:
+            cache = self.bitmapcache
+        s = cache[filename]
+        if s:
+            return s
+        s = self._getbitmap(filename)
+        cache[filename] = s
+        return s
 
-
-    # Bitmap buffers in Freevo:
-    #
-    # There are 4 different bitmap buffers in the system.
-    # 1) The load bitmap buffer
-    # 2) The zoom bitmap buffer
-    # 3) The OSD drawing buffer
-    # 4) The screen (fb/x11/sdl) buffer
-    #
-    # Drawing operations (text, line, etc) operate on the
-    # OSD drawing buffer, and are copied to the screen buffer
-    # using update().
-    #
-    # The drawbitmap() operation is time-consuming for larger
-    # images, which is why the load, zoom, and draw operations each
-    # have their own buffer. This can speed up things if the
-    # application is pipelined to preload/prezoom the bitmap
-    # where the next bitmap file is known in advance, or the same
-    # portions of the same bitmap is zoomed repeatedly.
-    # 
-
-    # Caches a bitmap in the OSD without displaying it.
-    def loadbitmap(self, filename):
-        return self._getbitmap(filename)
     
-    # Zooms a Surface. It gets a Pygame Surface which is rotated and scaled according
-    # to the parameters.
+    def drawbitmap(self, image, x=0, y=0, scaling=None,
+                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
+        """           
+        Draw a bitmap on the OSD. It is automatically loaded into the cache
+        if not already there.
+        """
+        if not pygame.display.get_init():
+            return None
+        if not isinstance(image, pygame.Surface):
+            image = self.loadbitmap(image, TRUE)
+        self.drawsurface(image, x, y, scaling, bbx, bby, bbw,
+                         bbh, rotation, layer)
+
+
+    def drawsurface(self, image, x=0, y=0, scaling=None,
+                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
+        """
+        scales and rotates a surface and then draws it to the screen.
+        """
+        if not pygame.display.get_init():
+            return None
+        image = self.zoomsurface(image, scaling, bbx,
+                                 bby, bbw, bbh, rotation)
+        if not image: return
+        if layer:
+            layer.blit(image, (x, y))
+        else:
+            self.screen.blit(image, (x, y))
+
+
     def zoomsurface(self, image, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
+        """
+        Zooms a Surface. It gets a Pygame Surface which is rotated and scaled according
+        to the parameters.
+        """
         if not image:
             return None
         
@@ -506,74 +482,12 @@ class OSD:
             image = pygame.transform.rotate(image, rotation)
 
         return image
-    
-
-    # Loads, zooms a bitmap and returns the surface. A cache is currently
-    # missing, but maybe we don't need it, it's fast enough.
-    def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0,
-                   bbh=0, rotation = 0):
-        if not pygame.display.get_init():
-            return None
-        image = self._getbitmap(filename)
-        if not image: return
-        return self.zoomimage(image, scaling, bbx, bby, bbw, bbh, rotation)
-
-    
-    # scales and rotates a surface and then draws it to the screen.
-    def drawsurface(self, image, x=0, y=0, scaling=None,
-                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
-        if not pygame.display.get_init():
-            return None
-        image = self.zoomsurface(image, scaling, bbx,
-                                 bby, bbw, bbh, rotation)
-        if not image: return
-        if layer:
-            layer.blit(image, (x, y))
-        else:
-            self.screen.blit(image, (x, y))
-            
-
-    # Draw a bitmap on the OSD. It is automatically loaded into the cache
-    # if not already there. The loadbitmap()/zoombitmap() functions can
-    # be used to "pipeline" bitmap loading/drawing.
-    def drawbitmap(self, image, x=0, y=0, scaling=None,
-                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0, layer=None):
-        if not pygame.display.get_init():
-            return None
-        if not isinstance(image, pygame.Surface):
-            image = self._getbitmap(image)
-        self.drawsurface(image, x, y, scaling, bbx, bby, bbw,
-                         bbh, rotation, layer)
-
-
-    # returns the size of the bitmap given by a filename
-    def bitmapsize(self, filename):
-        if not pygame.display.get_init():
-            return None
-        image = self._getbitmap(filename)
-        if not image:
-            return 0, 0
-        return image.get_size()
-
-
-    def drawline(self, x0, y0, x1, y1, width=None, color=None):
-        if not pygame.display.get_init():
-            return None
-        if width == None:
-            width = 1
-
-        if color == None:
-            color = self.default_fg_color
-
-        args1 = str(x0) + ';' + str(y0) + ';'
-        args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';' + str(color)
-        self._send('drawline;' + args1 + args2)
 
 
     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0, layer=None):
-        if not pygame.display.get_init():
-            return None
-
+        """
+        draw a normal box
+        """
         # Make sure the order is top left, bottom right
         x0, x1 = min(x0, x1), max(x0, x1)
         y0, y1 = min(y0, y1), max(y0, y1)
@@ -603,93 +517,581 @@ class OSD:
             else:
                 pygame.draw.rect(self.screen, c, r, width)
 
+
     def getsurface(self, x, y, width, height):
+        """
+        returns a copy of the given area of the current screen
+        """
         s = pygame.Surface((width, height))
         s.blit(self.screen, (0,0), (x, y, width, height))
         return s
     
+
     def putsurface(self, surface, x, y):
+        """
+        copy a surface to the screen
+        """
         self.screen.blit(surface, (x, y))
 
 
-    # Gustavo:
-    # drawstringframed: draws a string (text) in a frame. This tries to fit the
-    #                   string in lines, if it can't, it truncates the text,
-    #                   draw the part that fit and returns the other that doesn't.
-    #                   This is a wrapper to drawstringframedsoft() and -hard()
-    #                       
-    # Parameters:
-    #  - string: the string to be drawn. Supports '\n' and '\t' too.
-    #  - x,y: the posistion
-    #  - width, height: the frame dimensions (See TIPS above)
-    #  - fgcolor, bgcolor: the color for the foreground and background
-    #       respectively. (Supports the alpha channel: 0xAARRGGBB)
-    #  - font, ptsize: font and font point size
-    #  - align_h: horizontal align. Can be left, center, right, justified
-    #  - align_v: vertical align. Can be top, bottom, center or middle
-    #  - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
-    #       or 'soft' (based on words)
-    #
-    # TIPS:
-    #  - height = -1 defaults to the font height size
-    #
-    # TODO:
-    #  - Test it
-    #  - Debug it
-    #  - Improve it
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
                          font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
                          layer=None, ellipses='...'):
+        """
+        draws a string (text) in a frame. This tries to fit the
+        string in lines, if it can't, it truncates the text,
+        draw the part that fit and returns the other that doesn't.
+        This is a wrapper to drawstringframedsoft() and -hard()
+
+        Parameters:
+        - string: the string to be drawn. Supports '\n' and '\t' too.
+        - x,y: the posistion
+        - width, height: the frame dimensions,
+          height == -1 defaults to the font height size
+        - fgcolor, bgcolor: the color for the foreground and background
+          respectively. (Supports the alpha channel: 0xAARRGGBB)
+        - font, ptsize: font and font point size
+        - align_h: horizontal align. Can be left, center, right, justified
+        - align_v: vertical align. Can be top, bottom, center or middle
+        - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
+          or 'soft' (based on words)
+        """
+        data = self.dsf_calc(string,x,y,width, height, fgcolor, bgcolor,
+                             font, ptsize, align_h, align_v, mode, ellipses)
+        self.dsf_draw(data[0], layer)
+        return data[1:]
+
+
+    def dsf_calc(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                 font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
+                 ellipses='...'):
+        """
+        calls one of the two 'heart' functions of drawstringframed and returns a
+        list (objects to draw, words not drawn, geometry of the text).
+        The objects to draw can be given to dsf_draw to do the drawing
+        """
         if mode == 'hard':
-            return self.drawstringframedhard(string,x,y,width, height, fgcolor, bgcolor,
-                                             font, ptsize, align_h, align_v, layer, ellipses)
+            return self._dsf_hard(string,x,y,width, height, fgcolor, bgcolor,
+                                  font, ptsize, align_h, align_v, ellipses)
         elif mode == 'soft':
-            return self.drawstringframedsoft(string,x,y,width, height, fgcolor, bgcolor,
-                                             font, ptsize, align_h, align_v, layer, ellipses)
+            return self._dsf_soft(string,x,y,width, height, fgcolor, bgcolor,
+                                  font, ptsize, align_h, align_v, ellipses)
+            
+                    
+    def dsf_draw(self, objects, layer):
+        """
+        draws the objects from dsf_calc
+        """
+        for o in objects:
+            o.draw(layer)
 
-    # Gustavo:
-    # drawstringframedsoft: draws a string (text) in a frame. This tries to fit the
-    #                       string in lines, if it can't, it truncates the text,
-    #                       draw the part that fit and returns the other that doesn't.
-    #                       Different from drawstringframedhard from the way it truncates
-    #                       the line. This one breaks based on words, not chars.
-    #                       
-    # Parameters:
-    #  - string: the string to be drawn. Supports '\n' and '\t' too.
-    #  - x,y: the posistion
-    #  - width, height: the frame dimensions (See TIPS above)
-    #  - fgcolor, bgcolor: the color for the foreground and background
-    #       respectively. (Supports the alpha channel: 0xAARRGGBB)
-    #  - font, ptsize: font and font point size
-    #  - align_h: horizontal align. Can be left, center, right, justified
-    #  - align_v: vertical align. Can be top, bottom, center or middle
-    #
-    # TIPS:
-    #  - height = -1 defaults to the font height size
-    #
-    # TODO:
-    #  - Test it
-    #  - Debug it
-    #  - Improve it
-    def drawstringframedsoft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                             font=None, ptsize=0, align_h='left', align_v='top', layer=None,
-                             ellipses='...'):
 
+    def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
+                   font=None, ptsize=0, align='left', layer=None):
+        """
+        draw a string
+        """
         if not pygame.display.get_init():
-            return string
+            return None
 
+        if not string:
+            return None
+
+        if fgcolor == None:
+            fgcolor = self.default_fg_color
+
+        if font == None:
+            font = config.OSD_DEFAULT_FONTNAME
+
+        if not ptsize:
+            ptsize = config.OSD_DEFAULT_FONTSIZE
+
+        if DEBUG >= 3:
+            print 'FONT: %s %s' % (font, ptsize)
+
+        try:        
+            ren = self._renderstring(string, font, ptsize, fgcolor, bgcolor)
+        except:
+            print "Render failed, skipping..."    
+            return None
+        
+        # Handle horizontal alignment
+        w, h = ren.get_size()
+        tx = x # Left align is default
+        if align == 'center':
+            tx = x - w/2
+        elif align == 'right':
+            tx = x - w
+            
+        if layer:
+            layer.blit(ren, (tx, y))
+        else:
+            self.screen.blit(ren, (tx, y))
+
+
+    def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
+        """
+        Render a string to an SDL surface. Uses a cache for speedup.
+        """
+        key = (string, font, ptsize, fgcolor, bgcolor)
+        surf = self.stringcache[key]
+        if surf:
+            return surf
+
+        f = self._getfont(font, ptsize)
+
+        if not f:
+            print 'Couldnt get font: "%s", size: %s' % (font, ptsize)
+            return
+
+        # Render string with anti-aliasing
+        if bgcolor == None:
+            try:
+                surf = f.render(string, 1, self._sdlcol(fgcolor))
+            except:
+                print 'FAILED: str="%s" col="%s"' % (string, fgcolor)
+                raise
+        else:
+            surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
+
+        # Store the surface in the FIFO, Even if it's None?
+        self.stringcache[key] = surf
+        
+        return surf
+
+
+    def charsize(self, char, font=None, ptsize=0):
+        """
+        Return a (width, height) tuple for the given char, font, size.
+        Use CACHE to speed up things
+        """
+        key = (font, ptsize)
+        try:
+            c = self.stringsize_cache[key]
+        except:
+            c = {}
+            self.stringsize_cache[key] = c
+
+        try:
+            return c[char]
+        except:
+            cs = self._getfont(font, ptsize).size(char)
+            c[char] = cs
+            return cs
+
+
+    def stringsize(self, string, font=None, ptsize=0):
+        """
+        Return a (width, height) tuple for the given string, font, size
+        """
+        if string == None:
+            return (0, 0)
+        
+        size_w = 0
+        size_h = 0
+
+        for i in range(len(string)):
+            size_w_tmp, size_h_tmp = self.charsize(string[i], font, ptsize)
+            size_w += size_w_tmp
+            if size_h_tmp > size_h:
+                size_h = size_h_tmp
+                
+        return (size_w, size_h)
+    
+
+    def _savepixel(self, x, y, s):
+        """
+        help functions to save and restore a pixel
+        for drawcircle
+        """
+        try:
+            return (x, y, s.get_at((x,y)))
+        except:
+            return None
+            
+    def _restorepixel(self, save, s):
+        """
+        restore the saved pixel
+        """
+        if save:
+            s.set_at((save[0],save[1]), save[2])
+
+
+    def drawcircle(self, s, color, x, y, radius):
+        """
+        draws a circle to the surface s and fixes the borders
+        pygame.draw.circle has a bug: there are some pixels where
+        they don't belong. This function stores the values and
+        restores them
+        """
+        p1 = self._savepixel(x-1, y-radius-1, s)
+        p2 = self._savepixel(x,   y-radius-1, s)
+        p3 = self._savepixel(x+1, y-radius-1, s)
+
+        p4 = self._savepixel(x-1, y+radius, s)
+        p5 = self._savepixel(x,   y+radius, s)
+        p6 = self._savepixel(x+1, y+radius, s)
+
+        pygame.draw.circle(s, color, (x, y), radius)
+        
+        self._restorepixel(p1, s)
+        self._restorepixel(p2, s)
+        self._restorepixel(p3, s)
+        self._restorepixel(p4, s)
+        self._restorepixel(p5, s)
+        self._restorepixel(p6, s)
+        
+        
+    def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
+                     radius=0, layer=None):
+        """
+        draw a round box
+        """
+        if not pygame.display.get_init():
+            return None
+
+        # Make sure the order is top left, bottom right
+        x0, x1 = min(x0, x1), max(x0, x1)
+        y0, y1 = min(y0, y1), max(y0, y1)
+        if color == None:
+            color = self.default_fg_color
+
+        if border_color == None:
+            border_color = self.default_fg_color
+
+        if layer:
+            x = x0
+            y = y0
+        else:
+            x = 0
+            y = 0
+            
+        w = x1 - x0
+        h = y1 - y0
+
+        bc = self._sdlcol(border_color)
+        c =  self._sdlcol(color)
+
+        # make sure the radius fits the box
+        radius = min(radius, h / 2, w / 2)
+        
+        if not layer:
+            box = pygame.Surface((w, h), SRCALPHA)
+
+            # clear surface
+            box.fill((0,0,0,0))
+        else:
+            box = layer
+            
+        r,g,b,a = self._sdlcol(color)
+        
+        if border_size:
+            if radius >= 1:
+                self.drawcircle(box, bc, x+radius, y+radius, radius)
+                self.drawcircle(box, bc, x+w-radius, y+radius, radius)
+                self.drawcircle(box, bc, x+radius, y+h-radius, radius)
+                self.drawcircle(box, bc, x+w-radius, y+h-radius, radius)
+                pygame.draw.rect(box, bc, (x+radius, y, w-2*radius, h))
+            pygame.draw.rect(box, bc, (x, y+radius, w, h-2*radius))
+        
+            x += border_size
+            y += border_size
+            h -= 2* border_size
+            w -= 2* border_size
+            radius -= min(0, border_size)
+        
+        if radius >= 1:
+            self.drawcircle(box, c, x+radius, y+radius, radius)
+            self.drawcircle(box, c, x+w-radius, y+radius, radius)
+            self.drawcircle(box, c, x+radius, y+h-radius, radius)
+            self.drawcircle(box, c, x+w-radius, y+h-radius, radius)
+            pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
+        pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
+        
+        if not layer:
+            self.screen.blit(box, (x0, y0))
+
+
+
+    def update(self,rect=None):
+        """
+        update the screen
+        """
+        if not pygame.display.get_init():
+            return None
+        if rect:
+            try:
+                pygame.display.update(rect)
+            except:
+                if DEBUG: print 'osd.update(rect) failed, bad rect?'
+        else:
+            pygame.display.flip()
+
+
+    def _getfont(self, filename, ptsize):
+        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
+
+        key = filename+str(ptsize)
+        f = self.fontcache[key]
+        if f:
+            return f.font
+
+        if DEBUG >= 3:
+            print 'OSD: Loading font "%s"' % filename
+        try:
+            font = pygame.font.Font(filename, ptsize)
+        except (RuntimeError, IOError):
+            print 'Couldnt load font "%s"' % filename
+            if DEBUG >= 2:
+                print 'Call stack:'
+                traceback.print_stack()
+                
+            # Are there any alternate fonts defined?
+            if not 'OSD_FONT_ALIASES' in dir(config):
+                print 'No font aliases defined!'
+                raise # Nope
+                
+            # Ok, see if there is an alternate font to use
+            fontname = os.path.basename(filename).lower()
+            if fontname in config.OSD_FONT_ALIASES:
+                alt_fname = './skins/fonts/' + config.OSD_FONT_ALIASES[fontname]
+                print 'trying alternate: %s' % alt_fname
+                try:
+                    font = pygame.font.Font(alt_fname, ptsize)
+                except (RuntimeError, IOError):
+                    print 'Couldnt load alternate font "%s"' % alt_fname
+                    raise
+            else:
+                print 'No alternate found in the alias list!'
+                raise
+        f = Font(filename, ptsize, font)
+        self.fontcache[key] = f
+
+        return f.font
+
+        
+    def _getbitmap(self, url):
+        """
+        load the bitmap or thumbnail
+        """
+        if not pygame.display.get_init():
+            return None
+
+        if url[:8] == 'thumb://':
+            filename = os.path.abspath(url[8:])
+        else:
+            filename = os.path.abspath(url)
+            
+        if not os.path.isfile(filename):
+            print 'Bitmap file "%s" doesnt exist!' % filename
+            return None
+            
+        image = None
+        try:
+            thumb = None
+            if DEBUG >= 3:
+                print 'Trying to load file "%s"' % filename
+
+            if url[:8] == 'thumb://':
+                sinfo = os.stat(filename)
+                if sinfo[stat.ST_SIZE] > 10000:
+                    m = md5.new(filename)
+                    thumb = os.path.join('%s/thumbnails/%s.raw' % \
+                                         (config.FREEVO_CACHEDIR,
+                                          util.hexify(m.digest())))
+                    data = None
+                    if os.path.isfile(thumb):
+                        tinfo = os.stat(thumb)
+                        if tinfo[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                            data = util.read_pickle(thumb)
+
+                    if not data:
+                        f=open(filename, 'rb')
+                        tags=exif.process_file(f)
+                        f.close()
+                        
+                        if tags.has_key('JPEGThumbnail'):
+                            image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
+                        else:
+                            # convert with Imaging, pygame doesn't work
+                            image = Image.open(filename)
+
+                        image.thumbnail((300,300))
+
+                        # save for future use
+                        data = (filename, image.tostring(), image.size, image.mode)
+                        util.save_pickle(data, thumb)
+
+                    # convert to pygame image
+                    image = pygame.image.fromstring(data[1], data[2], data[3])
+
+            try:
+                if not image:
+                    image = pygame.image.load(filename)
+            except pygame.error, e:
+                print 'SDL image load problem: %s - trying Imaging' % e
+                i = Image.open(filename)
+                s = i.tostring()
+                image = pygame.image.fromstring(s, i.size, i.mode)
+            
+            # convert the surface to speed up blitting later
+            if image.get_alpha():
+                image.set_alpha(image.get_alpha(), RLEACCEL)
+            else:
+                if image.get_bitsize() != self.depth:
+                    i = pygame.Surface((image.get_width(), image.get_height()))
+                    i.blit(image, (0,0))
+                    image = i
+                    
+        except:
+            print 'Unknown Problem while loading image'
+            return None
+
+        return image
+
+        
+    def _helpscreen(self):
+        if not pygame.display.get_init():
+            return None
+
+        self._help = {0:1, 1:0}[self._help]
+        
+        if self._help:
+            if DEBUG: print 'Help on'
+            # Save current display
+            self._help_saved.blit(self.screen, (0, 0))
+            self.clearscreen(self.COL_WHITE)
+            lines = help_text.split('\n')
+
+            row = 0
+            col = 0
+            for line in lines:
+                x = 55 + col*250
+                y = 50 + row*30
+
+                ks = line[:8]
+                cmd = line[8:]
+                
+                print '"%s" "%s" %s %s' % (ks, cmd, x, y)
+                fname = 'skins/fonts/bluehigh.ttf'
+                if ks: self.drawstring(ks, x, y, font=fname, ptsize=14)
+                if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=14)
+                row += 1
+                if row >= 15:
+                    row = 0
+                    col += 1
+
+            self.update()
+        else:
+            if DEBUG: print 'Help off'
+            self.screen.blit(self._help_saved, (0, 0))
+            self.update()
+
+        
+    # Convert a 32-bit TRGB color to a 4 element tuple for SDL
+    def _sdlcol(self, col):
+        a = 255 - ((col >> 24) & 0xff)
+        r = (col >> 16) & 0xff
+        g = (col >> 8) & 0xff
+        b = (col >> 0) & 0xff
+        c = (r, g, b, a)
+        return c
+            
+
+
+
+    class Object:
+        """
+        object used by drawstringframed
+        """
+        def __cmp__(self, other):
+            """
+            basic conpare function
+            """
+            try:
+                sv = vars(self)
+                ov = vars(other)
+                for k in sv:
+                    if sv[k] != ov[k]:
+                        return 1
+                return 0
+            except:
+                return 1
+
+    
+    class BoxObject(Object):
+        """
+        BoxObject used by drawstringframed
+        """
+        def __init__(x0, y0, x1, y1, width=None, color=None, fill=0):
+            self.x0 = x0
+            self.y0 = y0
+            self.x1 = x1
+            self.y1 = y1
+            self.width = width
+            self.color = color
+            self.fill  = fill
+
+        def draw(self, layer=None):
+            get_singleton().drawbox(self.x0, self.y0, self.x1, self.y1, self.width,
+                                    self.color, self.fill, layer)
+
+
+    class TextObject(Object):
+        """
+        TextObject used by drawstringframed
+        """
+        def __init__(self, string, x, y, fgcolor=None, bgcolor=None,
+                     font=None, ptsize=0, align='left'):
+            self.string = string
+            self.x = x
+            self.y = y
+            self.fgcolor = fgcolor
+            self.bgcolor = bgcolor
+            self.font = font
+            self.ptsize = ptsize
+            self.align = align
+
+
+        def draw(self, layer=None):
+            osd = get_singleton()
+            try:        
+                ren = osd._renderstring(self.string, self.font, self.ptsize,
+                                        self.fgcolor, self.bgcolor)
+            except:
+                print "Render failed, skipping..."    
+                return None
+        
+            # Handle horizontal alignment
+            w, h = ren.get_size()
+            tx = self.x
+            if self.align == 'center':
+                tx = self.x - w/2
+            elif self.align == 'right':
+                tx = self.x - w
+            
+            if layer:
+                layer.blit(ren, (tx, self.y))
+            else:
+                osd.screen.blit(ren, (tx, self.y))
+
+
+
+    def _dsf_soft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                  font=None, ptsize=0, align_h='left', align_v='top', ellipses='...'):
+        """
+        draws a string (text) in a frame. This tries to fit the
+        string in lines, if it can't, it truncates the text,
+        draw the part that fit and returns the other that doesn't.
+        Different from drawstringframedhard from the way it truncates
+        the line. This one breaks based on words, not chars.
+        """
         return_x0 = 0
         return_y0 = 0
         return_x1 = 0
         return_y1 = 0
         plain_tab = '   '
 
-        if DEBUG >= 3:
-            print 'drawstringframedsoft (%d;%d; w=%d; h=%d) "%s"' % (x, y,
-                                                                     width,
-                                                                     height,
-                                                                     string)
-        
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if font == None:
@@ -713,7 +1115,7 @@ class OSD:
         s = re.sub(r'([ ]$)','',s)
         s = re.sub(r'(^[ ])','',s)
         if s == '': # string was only a space ' '
-            return s, (0,0,0,0)
+            return ((), s, (0,0,0,0))
         words = s.split(' ')
         occupied_size = 0
         line_number = 0
@@ -726,7 +1128,6 @@ class OSD:
         word_height = 0
         occupied_height = 0
         next_word_size = 0
-        next_word_height = 0
         # First case: height is fewer than the necessary        
         word_size, word_height = self.stringsize('Agj',font,ptsize)
         line_height = word_height
@@ -734,7 +1135,7 @@ class OSD:
         if height == -1:
             height = line_height
         if line_height > height:
-            return string, (0,0,0,0)
+            return ((), string, (0,0,0,0))
         # Fit words in lines
         rest_words = ''
         for word_number in range(len_words):
@@ -757,7 +1158,8 @@ class OSD:
                     occupied_size += word_size
                     lines_size[line_number] = occupied_size
                     if word_number+1 < len_words:
-                        next_word_size , next_word_height = self.stringsize( words[word_number+1], font,ptsize)
+                        next_word_size = self.stringsize(words[word_number+1],
+                                                         font,ptsize)[0]
                         
                     occupied_size += MINIMUM_SPACE_BETWEEN_WORDS
                     
@@ -790,12 +1192,13 @@ class OSD:
                         # check if any pieces still is larger than the width
                         cache_wt = width - tmp_size
                         for i in range(len(tmp_pieces)):
-                            next_word_size, next_word_height = self.stringsize(tmp_pieces[i],font,ptsize)
+                            next_word_size = self.stringsize(tmp_pieces[i],font,ptsize)[0]
                             if next_word_size > cache_wt:
                                 cache_rg = range(next_word_size / cache_wt)
                                 for j in cache_rg:
                                     cache_jwt = ( j - 1 ) * cache_wt
-                                    pieces.append( tmp_pieces[i][ cache_jwt : cache_jwt + cache_wt ] )
+                                    pieces.append(tmp_pieces[i][cache_jwt:cache_jwt+\
+                                                                cache_wt])
                                                    
                             else:
                                 pieces.append(tmp_pieces[i])
@@ -807,7 +1210,7 @@ class OSD:
                         lines_size.append(0)
 
                         for i in range(len(pieces)):
-                            next_word_size, next_word_height = self.stringsize(pieces[i],font,ptsize)
+                            next_word_size = self.stringsize(pieces[i],font,ptsize)[0]
                             if (next_word_size + tmp_occupied_size) < cache_wt:
                                 # this piece fits this line
                                 lines[line_number][0] += pieces[i]
@@ -820,7 +1223,7 @@ class OSD:
                                     char = lines[ line_number ][ -1 ][ -1 ]
                                     char = osd.charsize( char, font, size )[ 0 ]
                                     lines_size[ line_number ] -= char
-                                    lines[ line_number ][ -1 ] = lines[ line_number ][ -1 ][ : -1 ]
+                                    lines[line_number][-1] = lines[line_number][-1][:-1]
                                     
                                 lines[line_number][0] += '-'
                                 lines_size[line_number] += tmp_size
@@ -835,7 +1238,7 @@ class OSD:
                             else:
                                 # No, and we cannot add another line, truncate this text
                                 # and save text that does not fit
-                                next_word_size , next_word_height = self.stringsize('-', font,ptsize)
+                                next_word_size = self.stringsize('-', font,ptsize)[0]
                                 # We need to remove the last piece to place the '...' ?
                                 if (occupied_size + next_word_size) <= width:
                                     # No, just add it
@@ -844,9 +1247,11 @@ class OSD:
                                     
                                 else:
                                     # Yes, put '-' in the last piece place
-                                    lines[line_number][0][0:len(lines[line_number][0])-4] += '-'                           
-                                    tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][0], font,ptsize)
-                                    lines_size[line_number] = tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
+                                    lines[line_number][0][0:-4] += '-'
+                                    tmp_word_size = self.stringsize(lines[line_number][0],
+                                                                    font, ptsize)[0]
+                                    lines_size[line_number] = tmp_word_size  + \
+                                                              MINIMUM_SPACE_BETWEEN_WORDS
                                 # save the text that does not fit.
                                 for tmp in range(word_number, len(pieces)):
                                     try:
@@ -861,13 +1266,14 @@ class OSD:
                 else:
                     # No, and we cannot add another line, truncate this text
                     # and save text that does not fit
-                    next_word_size , next_word_height = self.stringsize(ellipses, font,ptsize)
+                    next_word_size = self.stringsize(ellipses, font,ptsize)[0]
                     if ellipses:
                         # We need to remove the last word to place the '...' ?
                         if (occupied_size + next_word_size) <= width:
                             # No, just add it
                             lines[line_number].append(ellipses)
-                            lines_size[line_number] += next_word_size + MINIMUM_SPACE_BETWEEN_WORDS
+                            lines_size[line_number] += next_word_size + \
+                                                       MINIMUM_SPACE_BETWEEN_WORDS
                             
                         else:
                             # Yes, put '...' in the last word place
@@ -877,8 +1283,9 @@ class OSD:
                             else:
                                 lines[line_number].append('...')
 
-                            tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)                        
-                            lines_size[line_number] += next_word_size - tmp_word_size  + MINIMUM_SPACE_BETWEEN_WORDS
+                            tmp_word_size = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)[0]
+                            lines_size[line_number] += next_word_size - tmp_word_size  + \
+                                                       MINIMUM_SPACE_BETWEEN_WORDS
                     # save the text that does not fit.
                     for tmp in range(word_number, len_words):
                         rest_words += words[tmp]                        
@@ -902,8 +1309,12 @@ class OSD:
         if DEBUG >= 3:
             print "osd.drawstringframedsoft():\n\n%s\n" % lines
 
-        if bgcolor != None and layer != self.null_layer:
-            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
+
+        drawing_objects = []
+
+        if bgcolor != None:
+            drawing_objects.append(self.BoxObject(x,y, x+width, y+height, width=-1,
+                                                  color=bgcolor))
 
         for line_number in range(len(lines)):
             x0 = x
@@ -928,9 +1339,8 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        if layer != self.null_layer:
-                            self.drawstring(word, x0, y0, fgcolor, None, font,
-                                            ptsize, layer=layer)
+                        drawing_objects.append(self.TextObject(word, x0, y0, fgcolor,
+                                                               None, font, ptsize))
                         x0 += spacing + word_size 
                     
             elif align_h == 'center':
@@ -941,9 +1351,8 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        if layer != self.null_layer:
-                            self.drawstring(word, x0, y0, fgcolor, None, font,
-                                            ptsize, layer=layer)
+                        drawing_objects.append(self.TextObject(word, x0, y0, fgcolor,
+                                                               None, font, ptsize))
                         x0 += spacing
                         x0 += word_size
 
@@ -956,9 +1365,8 @@ class OSD:
                 for word in lines[line_number]:
                     if word:
                         word_size, word_height = self.stringsize(word, font,ptsize)
-                        if layer != self.null_layer:
-                            self.drawstring(word, x0, y0, fgcolor, None, font,
-                                            ptsize, layer=layer)
+                        drawing_objects.append(self.TextObject(word, x0, y0, fgcolor,
+                                                               None, font, ptsize))
                         x0 += spacing
                         x0 += word_size
 
@@ -978,10 +1386,10 @@ class OSD:
                         pos = line_len - word_number -1
                         word_size, word_height = \
                                    self.stringsize(lines[line_number][pos], font,ptsize)
-                        if layer != self.null_layer:
-                            self.drawstring(lines[line_number][pos], x0, y0, fgcolor, \
-                                            None, font, ptsize, 'right', layer=layer)
-                            
+                        drawing_objects.append(self.TextObject(lines[line_number][pos],
+                                                               x0, y0, fgcolor,
+                                                               None, font, ptsize,
+                                                               'right'))
                         x0 -= spacing - word_size
         
             y0 += line_height
@@ -997,39 +1405,21 @@ class OSD:
         if align_h == 'right':
             return_x1 = x + width
             
-        #self.drawbox(return_x0,return_y0, return_x1, return_y1, width=3)
-
-        return (rest_words, (return_x0, return_y0, return_x1, return_y1))
-
+        return (drawing_objects, rest_words, (return_x0, return_y0,
+                                              return_x1, return_y1))
 
 
-    # Gustavo:
-    # drawstringframedhard: draws a string (text) in a frame. This tries to fit the
-    #                       string in lines, if it can't, it truncates the text,
-    #                       draw the part that fit and returns the other that doesn't.
-    #                       Different from drawstringframedsoft from the way it truncates
-    #                       the line. This one breaks based on chars, not words.
-    # Parameters:
-    #  - string: the string to be drawn. Supports '\n' and '\t' too.
-    #  - x,y: the posistion
-    #  - width, height: the frame dimensions (See TIPS above)
-    #  - fgcolor, bgcolor: the color for the foreground and background
-    #       respectively. (Supports the alpha channel: 0xAARRGGBB)
-    #  - font, ptsize: font and font point size
-    #  - align_h: horizontal align. Can be left, center, right
-    #  - align_v: vertical align. Can be top, bottom, center or middle
-    #
-    # TIPS:
-    #  - height = -1 defaults to the font height size
-    #
-    # TODO:
-    #  - Test it
-    #  - Debug it
-    #  - Improve it
-    def drawstringframedhard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                             font=None, ptsize=0, align_h='left', align_v='top',
-                             layer=None, ellipses='...'):
+    def _dsf_hard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                  font=None, ptsize=0, align_h='left', align_v='top',
+                  ellipses='...'):
 
+        """
+        draws a string (text) in a frame. This tries to fit the
+        string in lines, if it can't, it truncates the text,
+        draw the part that fit and returns the other that doesn't.
+        Different from drawstringframedsoft from the way it truncates
+        the line. This one breaks based on chars, not words.
+        """
         if not pygame.display.get_init():
             return string
 
@@ -1059,13 +1449,13 @@ class OSD:
         occupied_size = 0
         occupied_height = 0
         # First case: height is fewer than the necessary        
-        word_size, word_height = self.stringsize('Agj',font,ptsize)
+        word_height = self.stringsize('Agj',font,ptsize)[1]
         line_height = word_height
         occupied_height = line_height
         if height == -1:
             height = line_height
         if line_height > height:
-            return string
+            return ((), string, (0,0,0,0))
 
         # Fit chars in lines
         lines = [ '' ]
@@ -1130,8 +1520,11 @@ class OSD:
 
         rest_words = string[i+1:len(string)]
             
+        drawing_objects = []
+
         if bgcolor != None:
-            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor, layer=layer)
+            drawing_objects.append(self.BoxObject(x,y, x+width, y+height, width=-1,
+                                                  color=bgcolor))
 
         y0 = y
         if align_v == 'center' or align_v == 'middle':
@@ -1152,486 +1545,17 @@ class OSD:
             elif align_h == 'right':
                 x0 = x + (width - line_size)
                 
-            if layer != self.null_layer:
-                self.drawstring(line, x0, y0, fgcolor, None, font, ptsize, layer=layer)
+            drawing_objects.append(self.TextObject(line, x0, y0, fgcolor,
+                                                   None, font, ptsize))
                 
             y0 += word_height
             if x0 > return_x0:
                 return_x0 = x0
                 
-            if line_size > return_x1:
-                return_x1 = line_size
+            if x0 + line_size > return_x1:
+                return_x1 = x0 + line_size
 
         return_y1 = y0
-
-        return (rest_words, (return_x0,return_y0, return_x1, return_y1))
-
-
-
-                    
-
-    def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
-                   font=None, ptsize=0, align='left', layer=None):
-
-        if not pygame.display.get_init():
-            return None
-
-        if not string:
-            return None
-
-        # XXX Krister: Workaround for new feature that is only possible in the new
-        # XXX SDL OSD, line up columns delimited by tabs. Here the tabs are just
-        # XXX replaced with spaces
-        s = string.replace('\t', '   ')  
-
-        if DEBUG >= 3:
-            print 'drawstring (%d;%d) "%s"' % (x, y, s)
-        
-        if fgcolor == None:
-            fgcolor = self.default_fg_color
-        if font == None:
-            font = config.OSD_DEFAULT_FONTNAME
-
-        if not ptsize:
-            ptsize = config.OSD_DEFAULT_FONTSIZE
-
-        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
-
-        if DEBUG >= 3:
-            print 'FONT: %s %s' % (font, ptsize)
-
-        try:        
-            ren = self._renderstring(s, font, ptsize, fgcolor, bgcolor)
-        except:
-            print "Render failed, skipping..."    
-            return None
-        
-        # Handle horizontal alignment
-        w, h = ren.get_size()
-        tx = x # Left align is default
-        if align == 'center':
-            tx = x - w/2
-        elif align == 'right':
-            tx = x - w
-            
-        if layer:
-            layer.blit(ren, (tx, y))
-        else:
-            self.screen.blit(ren, (tx, y))
-
-
-    # Render a string to an SDL surface. Uses a cache for speedup.
-    def _renderstring(self, string, font, ptsize, fgcolor, bgcolor):
-
-        if not pygame.display.get_init():
-            return None
-
-        f = self._getfont(font, ptsize)
-
-        if not f:
-            print 'Couldnt get font: "%s", size: %s' % (font, ptsize)
-            return
-
-        # Encode all the strings data into an url so we can enter it
-        # nicely into our string-container
-        # Format: 
-        #  file://path/to/font.ttf?ptsize=55&fgcolor=123536&bgcolor=23142134&string=sometext
-        parameters = urllib.urlencode( [('ptsize',ptsize),('fgcolor',fgcolor),
-                                 ('bgcolor',bgcolor),('string',string)] )
-        url = urlparse.urlunparse( ( 'file', '', font, '', parameters,  '' ) ) 
-        surf = self.stringcache[url]
-        if surf:
-            return surf
-
-        # Render string with anti-aliasing
-        if bgcolor == None:
-            try:
-                surf = f.render(string, 1, self._sdlcol(fgcolor))
-            except:
-                print 'FAILED: str="%s" col="%s"' % (string, fgcolor)
-                raise
-        else:
-            surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
-
-        # Store the surface in the FIFO, Even if it's None?
-        self.stringcache[url] = surf
-        
-        return surf
-
-    # Return a (width, height) tuple for the given char, font, size. Use CACHE to speed up things
-    # Gustavo: This function make use of dictionaries to cache values, so we don't have to calculate them all the time
-    def charsize(self, char, font=None, ptsize=0):
-        if self.stringsize_cache.has_key(font):
-            if self.stringsize_cache[font].has_key(ptsize):
-                if not self.stringsize_cache[font][ptsize].has_key(char):
-                    self.stringsize_cache[font][ptsize][char] = self._stringsize(char,font,ptsize)
-            else:
-                self.stringsize_cache[font][ptsize] = {}
-                self.stringsize_cache[font][ptsize][char] = self._stringsize(char,font,ptsize)
-        else:
-            self.stringsize_cache[font] = {}
-            self.stringsize_cache[font][ptsize] = {}
-            self.stringsize_cache[font][ptsize][char] = self._stringsize(char,font,ptsize)
-        return self.stringsize_cache[font][ptsize][char]
-
-
-    # Return a (width, height) tuple for the given string, font, size
-    # Gustavo: use the charsize() to speed up things
-    def stringsize(self, string, font=None, ptsize=0):
-        size_w = 0
-        size_h = 0
-        if string == None:
-            return (0, 0)
-        
-        for i in range(len(string)):
-            size_w_tmp, size_h_tmp = self.charsize(string[i], font, ptsize)
-            size_w += size_w_tmp
-            if size_h_tmp > size_h:
-                size_h = size_h_tmp
-                
-        return (size_w, size_h)
-    
-
-    # Return a (width, height) tuple for the given string, font, size
-    # Gustavo: Don't use this function directly. Use stringsize(), it is faster (use cache)
-    def _stringsize(self, string, font=None, ptsize=0):
-        if not pygame.display.get_init():
-            return None
-
-        if not ptsize:
-            ptsize = config.OSD_DEFAULT_FONTSIZE
-
-        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies with 0.7 for some reason
-
-        f = self._getfont(font, ptsize)
-
-        if string:
-            return f.size(string)
-        else:
-            return (0, 0)
-
-    # create a new layer for drawings
-    def createlayer(self, width=0, height=0):
-        if not width: width = self.width
-        if not height: height = self.height
-        
-        l = pygame.Surface((width, height), SRCALPHA)
-        l.fill((0,0,0,0))
-        return l
-
-
-    # insert layer into the screen
-    def putlayer(self, layer, x=0, y=0):
-        self.screen.blit(layer, (x, y))
-
-
-    # help functions to save and restore a pixel
-    # for drawcircle
-    def _savepixel(self, x, y, s):
-        try:
-            return (x, y, s.get_at((x,y)))
-        except:
-            return None
-            
-    def _restorepixel(self, save, s):
-        if save:
-            s.set_at((save[0],save[1]), save[2])
-
-    # pygame.draw.circle has a bug: there are some pixels where
-    # they don't belong. This function stores the values and
-    # restores them
-    def drawcircle(self, s, color, x, y, radius):
-        p1 = self._savepixel(x-1, y-radius-1, s)
-        p2 = self._savepixel(x,   y-radius-1, s)
-        p3 = self._savepixel(x+1, y-radius-1, s)
-
-        p4 = self._savepixel(x-1, y+radius, s)
-        p5 = self._savepixel(x,   y+radius, s)
-        p6 = self._savepixel(x+1, y+radius, s)
-
-        pygame.draw.circle(s, color, (x, y), radius)
-        
-        self._restorepixel(p1, s)
-        self._restorepixel(p2, s)
-        self._restorepixel(p3, s)
-        self._restorepixel(p4, s)
-        self._restorepixel(p5, s)
-        self._restorepixel(p6, s)
-        
-        
-    def drawroundbox(self, x0, y0, x1, y1, color=None, border_size=0, border_color=None,
-                     radius=0, layer=None):
-
-        if not pygame.display.get_init():
-            return None
-
-        # Make sure the order is top left, bottom right
-        x0, x1 = min(x0, x1), max(x0, x1)
-        y0, y1 = min(y0, y1), max(y0, y1)
-        if color == None:
-            color = self.default_fg_color
-
-        if border_color == None:
-            border_color = self.default_fg_color
-
-        if layer:
-            x = x0
-            y = y0
-        else:
-            x = 0
-            y = 0
-            
-        w = x1 - x0
-        h = y1 - y0
-
-        bc = self._sdlcol(border_color)
-        c =  self._sdlcol(color)
-
-        # make sure the radius fits the box
-        radius = min(radius, h / 2, w / 2)
-        
-        if not layer:
-            box = pygame.Surface((w, h), SRCALPHA)
-
-            # clear surface
-            box.fill((0,0,0,0))
-        else:
-            box = layer
-            
-        r,g,b,a = self._sdlcol(color)
-        
-        if border_size:
-            if radius >= 1:
-                self.drawcircle(box, bc, x+radius, y+radius, radius)
-                self.drawcircle(box, bc, x+w-radius, y+radius, radius)
-                self.drawcircle(box, bc, x+radius, y+h-radius, radius)
-                self.drawcircle(box, bc, x+w-radius, y+h-radius, radius)
-            pygame.draw.rect(box, bc, (x+radius, y, w-2*radius, h))
-            pygame.draw.rect(box, bc, (x, y+radius, w, h-2*radius))
-        
-            x += border_size
-            y += border_size
-            h -= 2* border_size
-            w -= 2* border_size
-            radius -= min(0, border_size)
-        
-        if radius >= 1:
-            self.drawcircle(box, c, x+radius, y+radius, radius)
-            self.drawcircle(box, c, x+w-radius, y+radius, radius)
-            self.drawcircle(box, c, x+radius, y+h-radius, radius)
-            self.drawcircle(box, c, x+w-radius, y+h-radius, radius)
-        pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
-        pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
-        
-        if not layer:
-            self.screen.blit(box, (x0, y0))
-
-
-
-    def update(self,rect=None):
-        if not pygame.display.get_init():
-            return None
-        if rect:
-            try:
-                pygame.display.update(rect)
-            except:
-                if DEBUG: print 'osd.update(rect) failed, bad rect?'
-        else:
-            pygame.display.flip()
-
-
-    def _getfont(self, filename, ptsize):
-        if not pygame.display.get_init():
-            return None
-
-        url = 'file://%s?%s' % ( filename, urllib.urlencode([('ptsize',ptsize)]) )
-        f = self.fontcache[url]
-        if f:
-            return f.font
-
-        if DEBUG >= 3:
-            print 'OSD: Loading font "%s"' % filename
-        try:
-            font = pygame.font.Font(filename, ptsize)
-        except (RuntimeError, IOError):
-            print 'Couldnt load font "%s"' % filename
-            if DEBUG >= 2:
-                print 'Call stack:'
-                traceback.print_stack()
-                
-            # Are there any alternate fonts defined?
-            if not 'OSD_FONT_ALIASES' in dir(config):
-                print 'No font aliases defined!'
-                raise # Nope
-                
-            # Ok, see if there is an alternate font to use
-            fontname = os.path.basename(filename).lower()
-            if fontname in config.OSD_FONT_ALIASES:
-                alt_fname = './skins/fonts/' + config.OSD_FONT_ALIASES[fontname]
-                print 'trying alternate: %s' % alt_fname
-                try:
-                    font = pygame.font.Font(alt_fname, ptsize)
-                except (RuntimeError, IOError):
-                    print 'Couldnt load alternate font "%s"' % alt_fname
-                    raise
-            else:
-                print 'No alternate found in the alias list!'
-                raise
-        f = Font()
-        f.filename = filename
-        f.ptsize = ptsize
-        f.font = font
-        
-        self.fontcache[url] = f
-
-        return f.font
-
-        
-    def _getbitmap(self, url):
-        # EXIF parser
-        from image import exif
-        import cStringIO
-        
-        if not pygame.display.get_init():
-            return None
-
-        if url[:8] == 'thumb://':
-            filename = url[8:]
-        else:
-            filename = url
-            
-        if not os.path.isfile(filename):
-            print 'Bitmap file "%s" doesnt exist!' % filename
-            return None
-            
-        image = self.bitmapcache[url]
-        if image:
-            return image
-        
-        try:
-            thumb = None
-            if DEBUG >= 3:
-                print 'Trying to load file "%s"' % filename
-
-            if url[:8] == 'thumb://':
-                tmp = util.getExifThumbnail(filename)
-                if tmp:
-                    filename = tmp
-                else:
-                    sinfo = os.stat(filename)
-                    if sinfo[stat.ST_SIZE] > 50000:
-                        m = md5.new('%s/%s-%s' % (filename, sinfo[stat.ST_SIZE],
-                                                  sinfo[stat.ST_MTIME]))
-                        thumb = os.path.join('%s/thumbnails/%s.png' % \
-                                             (config.FREEVO_CACHEDIR,
-                                              util.hexify(m.digest())))
-                    
-                        if not os.path.isfile(thumb):
-                            # convert with Imaging, pygame doesn't work
-                            image = Image.open(filename)
-                            width  = 300
-                            height = 300
-
-                            w, h = image.size
-                            if int(float(width * h) / w) > height:
-                                width = int(float(height * w) / h)
-                            else:
-                                height = int(float(width * h) / w)
-                            image = image.resize((width, height), Image.BICUBIC)
-                            # save for future use
-                            image.save(thumb, 'PNG')
-                            # convert to pygame image
-                            image = pygame.image.fromstring(image.tostring(),
-                                                            image.size, image.mode)
-
-                        filename = thumb
-
-            try:
-                if not image:
-                    image = pygame.image.load(filename)
-            except pygame.error, e:
-                print 'SDL image load problem: %s - trying Imaging' % e
-                i = Image.open(filename)
-                image = pygame.image.fromstring(i.tostring(), i.size, i.mode)
-            
-            # convert the surface to speed up blitting later
-            if image.get_alpha():
-                image.set_alpha(image.get_alpha(), RLEACCEL)
-            else:
-                if image.get_bitsize() != self.depth:
-                    i = pygame.Surface((image.get_width(), image.get_height()))
-                    i.blit(image, (0,0))
-                    image = i
-                    
-        except:
-            print 'Unknown Problem while loading image'
-            return None
-
-        # Update cache
-        self.bitmapcache[url] = image
-
-        return image
-
-        
-    def _helpscreen(self):
-        if not pygame.display.get_init():
-            return None
-
-        self._help = {0:1, 1:0}[self._help]
-        
-        if self._help:
-            if DEBUG: print 'Help on'
-            # Save current display
-            self._help_saved.blit(self.screen, (0, 0))
-            self.clearscreen(self.COL_WHITE)
-            lines = help_text.split('\n')
-
-            row = 0
-            col = 0
-            for line in lines:
-                x = 55 + col*250
-                y = 50 + row*30
-
-                ks = line[:8]
-                cmd = line[8:]
-                
-                print '"%s" "%s" %s %s' % (ks, cmd, x, y)
-                fname = 'skins/fonts/bluehigh.ttf'
-                if ks: self.drawstring(ks, x, y, font=fname, ptsize=14)
-                if cmd: self.drawstring(cmd, x+80, y, font=fname, ptsize=14)
-                row += 1
-                if row >= 15:
-                    row = 0
-                    col += 1
-
-            self.update()
-        else:
-            if DEBUG: print 'Help off'
-            self.screen.blit(self._help_saved, (0, 0))
-            self.update()
-
-        
-    # Convert a 32-bit TRGB color to a 4 element tuple for SDL
-    def _sdlcol(self, col):
-        a = 255 - ((col >> 24) & 0xff)
-        r = (col >> 16) & 0xff
-        g = (col >> 8) & 0xff
-        b = (col >> 0) & 0xff
-        c = (r, g, b, a)
-        return c
-            
-
-
-s = ("/hdc/krister_mp3/mp3/rage_against_the_machine-the_battle_of_los_angeles" +
-       "-1999-bkf/02-Rage_Against_the_Machine-Guerilla_Radio-BKF.mp3")
-#
-# Simple test...
-#
-if __name__ == '__main__':
-    osd = OSD()
-    osd.clearscreen()
-    osd.drawstring(s, 10, 10, font='skins/fonts/bluehigh.ttf', ptsize=14)
-    osd.update()
-    time.sleep(5)
+        return (drawing_objects, rest_words, (return_x0,return_y0, return_x1, return_y1))
 
 
