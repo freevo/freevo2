@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/13 19:58:01  rshortt
+# Fix some display bugs and remove access to favorites until I fix some bugs.
+#
 # Revision 1.5  2003/06/25 02:28:34  rshortt
 # Add vertical_expansion stuff.
 #
@@ -50,7 +53,7 @@
 
 import time
 
-import config, record_client, edit_favorite
+import config, record_client, edit_favorite, tv_util
 import view_favorites, program_search
 import event as em
 
@@ -74,7 +77,7 @@ class ProgramDisplay(PopupBox):
     """
     
     def __init__(self, parent=None, prog=None, context=None, left=None, 
-                 top=None, width=600, height=300, vertical_expansion=1):
+                 top=None, width=600, height=250, vertical_expansion=1):
 
         self.left = left
         self.top = top
@@ -86,7 +89,7 @@ class ProgramDisplay(PopupBox):
         else:
             self.context = 'guide'
 
-        PopupBox.__init__(self, left=left, top=top, width=width, 
+        PopupBox.__init__(self, text=self.prog.title, left=left, top=top, width=width, 
                           height=height, vertical_expansion=vertical_expansion)
 
         self.v_spacing = 15
@@ -96,27 +99,27 @@ class ProgramDisplay(PopupBox):
         self.internal_h_align = Align.LEFT
 
         if self.prog.sub_title:
-            title_txt = 'Title:\t%s - %s' % (self.prog.title, self.prog.sub_title)
-        else:
-            title_txt = 'Title:\t%s' % self.prog.title
+            subtitle_txt = 'Subtitle:  %s' % self.prog.sub_title
+            subtitle = Label(subtitle_txt, self, Align.LEFT)
 
-        title = Label(title_txt, self, Align.LEFT)
+        desc = Label('Description:  %s' % self.prog.desc, self, Align.LEFT)
 
-        desc = Label('Description:\t%s' % self.prog.desc, self, Align.LEFT)
+        chan = Label('Channel:  %s' % \
+                      tv_util.get_chan_displayname(self.prog.channel_id), 
+                                                   self, Align.LEFT)
 
-        chan = Label('Channel:\t%s' % self.prog.channel_id, self, Align.LEFT)
-
-        start = Label('Start:\t%s' % time.strftime('%A %b %d %I:%M %p', 
+        start = Label('Start:  %s' % time.strftime('%A %b %d %I:%M %p', 
                                       time.localtime(self.prog.start)),
                                       self, Align.LEFT)
 
-        stop = Label('Stop:\t%s' % time.strftime('%A %b %d %I:%M %p', 
+        stop = Label('Stop:  %s' % time.strftime('%A %b %d %I:%M %p', 
                                      time.localtime(self.prog.stop)), 
                                      self, Align.LEFT)
         items_height = 40
 
         if self.context == 'guide':
-            num_items = 3
+            # num_items = 3
+            num_items = 1
         else:
             num_items = 1
 
@@ -127,8 +130,8 @@ class ProgramDisplay(PopupBox):
 
         if self.context == 'guide':
             self.options.add_item(text='Record this episode', value=1)
-            self.options.add_item(text='Search for more of this program', value=2)
-            self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
+            # self.options.add_item(text='Search for more of this program', value=2)
+            # self.options.add_item(text='Add "%s" to favorites' % prog.title, value=3)
         else:
             self.options.add_item(text='Remove from scheduled recordings', value=4)
 
@@ -250,7 +253,7 @@ class ScheduledRecordings(PopupBox):
                 self.results.add_item(text='%s %s: %s' % \
                                         (time.strftime('%b %d %I:%M %p',
                                            time.localtime(prog.start)),
-                                         prog.channel_id,
+                                         tv_util.get_chan_displayname(prog.channel_id),
                                          prog.title),
                                       value=prog)
 

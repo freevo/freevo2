@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/13 19:58:01  rshortt
+# Fix some display bugs and remove access to favorites until I fix some bugs.
+#
 # Revision 1.4  2003/06/25 02:28:34  rshortt
 # Add vertical_expansion stuff.
 #
@@ -49,7 +52,7 @@
 
 import time
 
-import config, record_client, program_display
+import config, record_client, program_display, tv_util
 import event as em
 
 from gui.GUIObject      import *
@@ -139,7 +142,7 @@ class ProgramSearch(PopupBox):
                 self.results.add_item(text='%s %s: %s' % \
                                         (time.strftime('%b %d %I:%M %p', 
                                            time.localtime(prog.start)), 
-                                         prog.channel_id,
+                                         tv_util.get_chan_displayname(prog.channel_id),
                                          prog.title),
                                       value=prog)
 
