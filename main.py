@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2002/09/07 06:19:44  krister
+# Improved removable media support.
+#
 # Revision 1.62  2002/09/04 19:47:45  dischi
 # wrap (u)mount to get rid of the error messages
 #
@@ -196,33 +199,47 @@ def shutdown(menuw=None, arg=None):
         time.sleep(1)
         
 
+#
+# Eventhandler for stuff like CD inserted
+#
 def eventhandler(event = None, menuw=None, arg=None):
+    """Automatically perform actions depending on the event, e.g. play DVD
+    """
+
+    print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
+    menuw.refresh()
+    return  # XXX autoplay is disabled for now, there's some bug...
 
     if event == rc.IDENTIFY_MEDIA:
-        dir, device, name, tray, lastcode, info = config.ROM_DRIVES[0]
-        if info:
-            (media, label, image, play_options ) = info
+        
+        media = config.REMOVABLE_MEDIA[0] # XXX kludge, handle more drives
+        
+        if media.info:
+            (mediatype, label, image, play_options) = media.info
             if play_options:
-                util.mount(config.ROM_DRIVES[0][0])
+                util.mount(media.mountdir)
                 movie.play_movie(menuw=None, arg=play_options)
 
-            elif media == 'AUDIO-CD':
+            elif mediatype == 'AUDIO-CD':
                 print "play the audio cd -- not implemented yet"
+                menuw.refresh()
 
-            elif media == 'DIVX':
-                util.mount(config.ROM_DRIVES[0][0])
-                movie.cwd(config.ROM_DRIVES[0][0], menuwidget)
+            elif mediatype == 'DIVX':
+                util.mount(media.mountdir)
+                movie.cwd(media.mountdir, menuwidget)
 
-            elif media == 'AUDIO':
-                util.mount(config.ROM_DRIVES[0][0])
-                music.parse_entry([config.ROM_DRIVES[0][0],
-                                   config.ROM_DRIVES[0][0]],
-                                  menuwidget)
+            elif mediatype == 'AUDIO':
+                util.mount(media.mountdir)
+                music.parse_entry([media.mountdir, media.mountdir], menuwidget)
 
-            elif media == 'IMAGE':
-                util.mount(config.ROM_DRIVES[0][0])
-                imenu.cwd(config.ROM_DRIVES[0][0], menuwidget)
+            elif mediatype == 'IMAGE':
+                util.mount(media.mountdir)
+                imenu.cwd(media.mountdir, menuwidget)
 
+            else:
+                menuw.refresh()
+        else:
+            menuw.refresh()
 
     
 #
@@ -286,24 +303,16 @@ def getcmd():
                     mainVolume = mixer.getPcmVolume()
                     mixer.setPcmVolume(0)
                 muted = 1
-        elif event == rc.EJECT and len(menuwidget.menustack) == 1 and config.ROM_DRIVES:
-            (rom_dir, name, tray) = config.ROM_DRIVES[0]
-            tray_open = tray
-            config.ROM_DRIVES[0] = (rom_dir, name, (tray + 1) % 2)
-            if tray_open:
-                if DEBUG: print 'Inserting %s' % rom_dir
-                osd.popup_box( 'mounting %s' % rom_dir )
-                osd.update()
 
-                # close the tray and mount the cd
-                os.system('eject -t %s' % rom_dir)
-                menuwidget.refresh()
+        # Handle the EJECT key for the main menu
+        elif event == rc.EJECT and len(menuwidget.menustack) == 1:
 
-            else:
-                if DEBUG: print 'Ejecting %s' % rom_dir
-                os.system('eject %s' % rom_dir)
-
+            # Are there any drives defined?
+            if not config.REMOVABLE_MEDIA: continue
             
+            media = config.REMOVABLE_MEDIA[0]  # The default is the first drive in the list
+            media.move_tray(dir='toggle')
+
         # Send events to either the current app or the menu handler
         if rc.app:
             rc.app(event)
@@ -311,19 +320,97 @@ def getcmd():
             # Menu events
             menuwidget.eventhandler(event)
         
+
+class RemovableMedia:
+
+    def __init__(self, mountdir='', devicename='', drivename=''):
+        # This is read-only stuff for the drive itself
+        self.mountdir = mountdir
+        self.devicename = devicename
+        self.drivename = drivename
+
+        # Dynamic stuff
+        self.tray_open = 0
+        self.drive_status = None  # return code from ioctl for DRIVE_STATUS
+
+        # info = (mediatype, label, image, (mplayer playoptions))
+        # mediatype can be DATA/IMAGE/AUDIO/AUDIO-CD/DIVX/DVD/VCD/SVCD
+        # XXX This should be a class
+        self.info = None
+        
+
+    def is_tray_open(self):
+        return self.tray_open
+
+    def move_tray(self, dir='toggle'):
+        """Move the tray. dir can be toggle/open/close
+        """
+
+        if dir == 'toggle':
+            if self.tray_open:
+                dir = 'close'
+            else:
+                dir = 'open'
+
+        if dir == 'open':
+            if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
+            osd.popup_box('Ejecting disc in drive %s' % self.drivename)
+            osd.update()
+            os.system('eject %s' % self.mountdir)
+            self.tray_open = 1
+            rc.post_event(rc.REFRESH_SCREEN)
+        
+        elif dir == 'close':
+            if DEBUG: print 'Inserting %s' % self.drivename
+            osd.popup_box('Reading disc in drive %s' % self.drivename)
+            osd.update()
+
+            # close the tray, identifymedia does the rest,
+            # including refresh screen
+            os.system('eject -t %s' % self.mountdir)
+            self.tray_open = 0
     
+    def mount(self):
+        """Mount the media
+        """
+
+        if DEBUG: print 'Mounting disc in drive %s' % self.drivename
+        osd.popup_box('Locking disc in drive %s' % self.drivename)
+        osd.update()
+        util.mount(self.mountdir)
+        return
+
+    
+    def umount(self):
+        """Mount the media
+        """
+
+        if DEBUG: print 'Unmounting disc in drive %s' % self.drivename
+        osd.popup_box('Releasing disc in drive %s' % self.drivename)
+        osd.update()
+        util.umount(self.mountdir)
+        return
+    
+
 #
 # Main init
 #
 def main_func():
 
-    # add tray status to ROM_DRIVES
+    # Add the drives to the config.removable_media list. There doesn't have
+    # to be any drives defined.
     if config.ROM_DRIVES != None: 
-        pos = 0
-        for (dir, device, name) in config.ROM_DRIVES:
-            config.ROM_DRIVES[pos] = (dir, device, name, 0)
-            pos += 1
+        for i in range(len(config.ROM_DRIVES)):
+            (dir, device, name) = config.ROM_DRIVES[i]
+            media = RemovableMedia(mountdir=dir, devicename=device,
+                                   drivename=name)
+            media.move_tray(dir='close')
+            config.REMOVABLE_MEDIA.append(media)
 
+    # Remove the ROM_DRIVES member to make sure it is not used by
+    # legacy code!
+    del config.ROM_DRIVES
+    
     # Make sure there's no mplayer process lying around.
     os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
                                                   # my mplayer command is actually
@@ -351,5 +438,3 @@ if __name__ == "__main__":
     except:
         print 'Crash!'
         traceback.print_exc()
-
-

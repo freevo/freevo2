@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/09/07 06:19:45  krister
+# Improved removable media support.
+#
 # Revision 1.8  2002/09/04 19:47:46  dischi
 # wrap (u)mount to get rid of the error messages
 #
@@ -140,23 +143,25 @@ def main_menu(arg=None, menuw=None):
                                   handle_config, (type, file), type,
                                   None, None, None ) ]
                                   
-    for (drive) in config.ROM_DRIVES:
-        dir, device, name, ejected, last_code, info = drive
-        if info:
-            (media,label,image,play_options) = info
-            print("What is identify: " + str(media) + ',' + str(label) +
+    for media in config.REMOVABLE_MEDIA:
+        if media.info:
+            (mediatype, label, image, play_options) = media.info
+            print("What is identify: " + str(mediatype) + ',' + str(label) +
                   ',' + str(image) + ',' + str(play_options))
 
-            if media == 'AUDIO':
-                items += [menu.MenuItem(dir, parse_entry, (label,dir),
-                                        handle_config, ('dir', dir), 'dir')]
+            if mediatype == 'AUDIO':
+                s = 'Drive %s [%s]' % (media.drivename, label)
+                items += [menu.MenuItem(s, parse_entry,
+                                        (label, media.mountdir),
+                                        handle_config, ('dir', media.mountdir),
+                                        'dir')]
             
     mp3menu = menu.Menu('MUSIC MAIN MENU', items)
     menuw.pushmenu(mp3menu)
 
 
 
-def parse_entry( arg=None, menuw=None ):
+def parse_entry(arg=None, menuw=None):
     """
     The music module change directory handling function
     formerly known as cwd
@@ -166,14 +171,29 @@ def parse_entry( arg=None, menuw=None ):
                for it in main_menu, but it shouldn't be a problem.
                Got crash on playlist handling.
     """
-    (new_title, dir) = arg
-    
-    items = []
-    if os.path.isdir( dir ):
-        dirnames  = util.getdirnames(dir)
-        playlists = util.match_files(dir, config.SUFFIX_AUDIO_PLAYLISTS)
-        files     = util.match_files(dir, config.SUFFIX_AUDIO_FILES)
+    (new_title, mdir) = arg
 
+    if DEBUG:
+        b = os.path.isdir(mdir)
+        print 'music:parse_entry(): title=%s, dir=%s, isdir=%s' % (new_title, mdir, b)
+
+    # If the dir is on a removable media it needs to be mounted
+    for media in config.REMOVABLE_MEDIA:
+        if mdir.find(media.mountdir) == 0:
+            media.mount()
+            break
+
+    items = []
+    if os.path.isdir(mdir):
+        dirnames  = util.getdirnames(mdir)
+        playlists = util.match_files(mdir, config.SUFFIX_AUDIO_PLAYLISTS)
+        files     = util.match_files(mdir, config.SUFFIX_AUDIO_FILES)
+
+        if DEBUG:
+            print 'music:parse_entry(): d="%s"' % dirnames
+            print 'music:parse_entry(): p="%s"' % playlists
+            print 'music:parse_entry(): f="%s"' % files
+            
         for dirname in dirnames:
             title = '[' + os.path.basename(dirname) + ']'
         
@@ -202,13 +222,12 @@ def parse_entry( arg=None, menuw=None ):
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
                                     handle_config, ('list', playlist), 'list')]
             
-    
         for file in files:
             # XXX Do get title from ID3, Ogg-info here.
-            title = os.path.basename(file)[:-4]
+            title = os.path.splitext(os.path.basename(file))[0]
             items += [menu.MenuItem( title, play, ('audio', file, files) )]
 
-        mp3menu = menu.Menu('MUSIC MENU', items, dir=dir)
+        mp3menu = menu.Menu('MUSIC MENU', items, dir=mdir)
         menuw.pushmenu(mp3menu)
 
     else:
@@ -220,7 +239,7 @@ def parse_entry( arg=None, menuw=None ):
         # items = []
         # title = new_title
         # items += [menu.MenuItem( title, play, ('audio', dir, None) )]
-        play( None, ['audio', dir, None] )
+        play(None, ['audio', mdir, None])
     
 
 
@@ -244,21 +263,12 @@ def handle_config( event=None, menuw=None, arg=None ):
     print( 'inside handle_config actually. type = ' + type + ' file = ' +
            file + ' event = ' + event )
 
-    if event == rc.EJECT and config.ROM_DRIVES:
-        # XXX This only ejects first drive if you have several.
-        (rom_dir, name, tray) = config.ROM_DRIVES[0]
-        tray_open = tray
-        config.ROM_DRIVES[0] = (rom_dir, name, (tray+1)%2)
-        if tray_open:
-            osd.popup_box( 'mounting %s' % rom_dir )
-            osd.update()
-            # close the tray and mount the cd
-            os.system('eject -t %s' % rom_dir)
-            menuw.refresh()
-            main_menu( None, menuw )
-        else:
-            os.system('eject %s' % rom_dir)
-            
+    if event == rc.EJECT and config.REMOVABLE_MEDIA:
+        media = config.REMOVABLE_MEDIA[0]  # The default is the first drive in the list
+        media.move_tray(dir='toggle')
+        if media.tray_open == 0:
+            menuw.back_one_menu()
+            main_menu(None, menuw)
 
         
 #

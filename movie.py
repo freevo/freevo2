@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2002/09/07 06:19:45  krister
+# Improved removable media support.
+#
 # Revision 1.27  2002/09/06 05:25:18  krister
 # Fixed a syntax warning.
 #
@@ -118,21 +121,108 @@ main_menu_selected = -1
 #
 # mplayer dummy
 #
-def play_movie( arg=None, menuw=None ):
-    mode = arg[0]
+def play_movie(arg=None, menuw=None):
+    mode = arg[0]      # 'dvd', 'vcd', etc
     filename = arg[1]
     playlist = arg[2]
     mplayer_options = ""
+
     if len(arg) > 3:
         mplayer_options = arg[3]
 
-    if config.ROM_DRIVES:
-        for rom in config.ROM_DRIVES:
-            if string.find(filename, rom[0]) == 0:
-                util.mount(rom[0])
+    print 'playmovie: Got arg=%s, filename="%s"' % (arg, filename)
+
+    # Is the file on a removable media? If so it needs to be mounted.
+    for media in config.REMOVABLE_MEDIA:
+        if filename.find(media.mountdir) == 0:
+            if mode == 'dvd':
+                dvd_menu_generate(media, menuw)
+                return
+            if mode == 'vcd':
+                # XXX A kludge to make (S)VCD work by just playing chapter 1
+                # XXX on the selected drive
+                mplayer.play(mode, '1', [], 0, '-cdrom-device %s' % media.devicename)
+                return
+            else:
+                util.mount(media.mountdir)
+                break
                 
     mplayer.play(mode, filename, playlist, 0, mplayer_options)
 
+
+def play_dvd(arg=None, menuw=None):
+    titlenum = arg
+
+    print 'play_dvd: Got title %s' % titlenum
+                
+    mplayer.play('dvd', titlenum, [], 0, '')
+
+
+#mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 1> /dev/null 2> /tmp/mplayer_dvd.log
+def dvd_menu_generate(media, menuw):
+
+    # Figure out the number of titles on this disc
+    osd.popup_box('Scanning DVD, be patient...')
+    osd.update()
+    os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
+    # XXX Add an option for DVD device to use in case theres more than one!
+    cmd = ('%s -ao null -nolirc -vo null -frames 0 -dvd 1 ' +
+           '1> /dev/null 2> /tmp/mplayer_dvd.log')
+    os.system((cmd % config.MPLAYER_CMD) + ' ; touch /tmp/mplayer_dvd_done')
+    timeout = time.time() + 20.0
+    done = 0
+    while 1:
+        if time.time() >= timeout:
+            print 'DVD disc read failed!'
+            break
+
+        if os.path.isfile('/tmp/mplayer_dvd_done'):
+            done = 1
+            break
+    found = 0
+    if done:
+        # Look for 'There are NNN titles on this DVD'
+        lines = open('/tmp/mplayer_dvd.log').readlines()
+        for line in lines:
+            if line.find('titles on this DVD') != -1:
+                num_titles = int(line.split()[2])
+                print 'Got num_titles = %s from str "%s"' % (num_titles, line)
+                found = 1
+                break
+
+    if not done or not found:
+        num_titles = 100 # XXX Kludge
+    
+    items = []
+    for title in range(1,num_titles+1):
+        m = menu.MenuItem('Play Title %s' % title, play_dvd, title,
+                          dvd_menu_eventhandler, media)
+        items += [m]
+
+    label = media.info[2]
+    moviemenu = menu.Menu('DVD Titles for disc %s' % label, items,
+                          umount_all = 1)
+    menuw.pushmenu(moviemenu)
+
+    return
+
+
+#
+# EJECT handling for when we're in the DVD title menu.
+#
+def dvd_menu_eventhandler(event = None, menuw=None, arg=None):
+
+    if event == rc.EJECT:
+        print 'EJECT: Arg=%s' % arg
+
+        menuw.back_one_menu()
+        menuw.refresh()
+
+        if not arg: return
+
+        media = arg
+        media.move_tray(dir='toggle')
+        
 
 #
 # EJECT handling
@@ -152,34 +242,28 @@ def eventhandler(event = None, menuw=None, arg=None):
             menuw.init_page()
             menuw.refresh()
 
-            
     if event == rc.EJECT:
 
-        rom = arg[0]
-        if not rom:
-            return
+        print 'EJECT1: Arg=%s' % arg
 
-        # find the drive
-        pos = 0
-        for (dir, device, name, tray, lastcode, info) in config.ROM_DRIVES:
-            if rom == dir:
-                tray_open = tray
-                config.ROM_DRIVES[pos] = (dir, device, name, (tray + 1) % 2, lastcode, info)
-                break
-            pos += 1
-
-        if tray_open:
-            if DEBUG: print 'Inserting %s' % rom
-            osd.popup_box( 'mounting %s' % rom )
-            osd.update()
-            
-            # close the tray, identifymedia does the rest
-            os.system('eject -t %s' % rom)
-
+        # Was the handler called for a specific drive?
+        if not arg:
+            print 'Arg was none'
+            if not config.REMOVABLE_MEDIA:
+                print 'No removable media defined'
+                return # Do nothing if no media defined
+            # Otherwise open/close the first drive in the list
+            media = config.REMOVABLE_MEDIA[0]
+            print 'Selecting first device'
         else:
-            if DEBUG: print 'Ejecting %s' % rom
-            os.system('eject %s' % rom)
-        
+            media = arg
+
+        print media    
+        print dir(media)
+        media.move_tray(dir='toggle')
+
+    # Done
+    return
 
 
 # ======================================================================
@@ -194,19 +278,23 @@ def main_menu_generate():
     for (title, dir) in config.DIR_MOVIES:
         items += [menu.MenuItem(title, cwd, dir, eventhandler, type = 'dir')]
 
-    if config.ROM_DRIVES != None: 
-        for (dir, device, name, tray, lastcode, info) in config.ROM_DRIVES:
-            if info:
-                (type, label, image, play_options ) = info
-                if play_options:
-                    m = menu.MenuItem(label, play_movie, play_options, eventhandler, (dir,))
-                elif type != None:
-                    m = menu.MenuItem(label, cwd, dir, eventhandler, (dir,))
-                m.setImage(('movie', image))
-            else:
-                m = menu.MenuItem('%s (no disc)' % name, None, None, eventhandler, (dir,))
-            items += [m]
-            
+    for media in config.REMOVABLE_MEDIA:
+        if media.info:
+            (type, label, image, play_options) = media.info
+            # Is this media playable as is?
+            if play_options:
+                m = menu.MenuItem(label, play_movie, play_options,
+                                  eventhandler, media)
+            elif type != None:
+                # Just data files
+                m = menu.MenuItem('Drive ' + media.drivename, cwd, dir,
+                                  eventhandler, media)
+            m.setImage(('movie', image))
+        else:
+            m = menu.MenuItem('Drive %s (no disc)' % media.drivename, None,
+                              None, eventhandler, media)
+        items += [m]
+
     return items
 
 
@@ -220,15 +308,14 @@ def main_menu(arg=None, menuw=None):
 # The change directory handling function
 #
 def cwd(arg=None, menuw=None):
-    dir = arg
+    mountdir = arg
 
-    if config.ROM_DRIVES:
-        for rom in config.ROM_DRIVES:
-            if rom[0] == dir:
-                util.mount(rom[0])
+    for media in config.REMOVABLE_MEDIA:
+        if media.mountdir == mountdir:
+            util.mount(mountdir)
                 
-    dirnames = util.getdirnames(dir)
-    mplayer_files = util.match_files(dir, config.SUFFIX_MPLAYER_FILES)
+    dirnames = util.getdirnames(mountdir)
+    mplayer_files = util.match_files(mountdir, config.SUFFIX_MPLAYER_FILES)
 
     items = []
 
@@ -246,9 +333,9 @@ def cwd(arg=None, menuw=None):
     files = []
 
     # XML files
-    for file in util.match_files(dir, config.SUFFIX_FREEVO_FILES):
+    for file in util.match_files(mountdir, config.SUFFIX_FREEVO_FILES):
         title, image, (mode, first_file, playlist, mplayer_options), id, info =\
-               movie_xml.parse(file, dir, mplayer_files)
+               movie_xml.parse(file, mountdir, mplayer_files)
 
         # only add movies when we have all needed informations
         if title != "" and first_file != "":
@@ -291,7 +378,7 @@ def cwd(arg=None, menuw=None):
         m.setImage(('movie', image))
         items += [m]
     
-    moviemenu = menu.Menu('MOVIE MENU', items, dir=dir)
+    moviemenu = menu.Menu('MOVIE MENU', items, dir=mountdir)
 
     if len(menuw.menustack) > 1:
         if menuw.menustack[1] == menuw.menustack[-1]:

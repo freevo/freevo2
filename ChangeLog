@@ -13,7 +13,9 @@ o Added SDL as a display option to configure. Not tested!
 o Added joystick support code from Dan Eriksen. Not tested!
 o Fixed a bug in XML that could cause Freevo to crash.
 o Replaced all fonts with the free Larabie fonts.
-
+o Added a 640x480 mode. The skin is not adapted yet.
+o Improved the handling of removable media (CDROM/DVD)
+	
 	
 Release 1.2.5 (2002-08-21):
 ---------------------------

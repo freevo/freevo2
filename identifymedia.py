@@ -7,48 +7,55 @@ import config
 import util
 import rc
 import string
+import movie_xml
 
-
-rclient = rc.get_singleton()
+DEBUG = 2   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
+
 class Identify_Thread(threading.Thread):
 
-    def identify(self, cd_entry):
-        dir, device, name, ejected, last_code, info = cd_entry
+    def identify(self, media):
 
+        # Check drive status (tray pos, disc ready)
         try:
-            fd = os.open(device, os.O_RDONLY | os.O_NONBLOCK)
+            fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
+            s = ioctl(fd, cdrom.CDROM_DRIVE_STATUS, cdrom.CDSL_CURRENT)
         except:
-            return last_code, None
-            
-        s = ioctl(fd, cdrom.CDROM_DRIVE_STATUS, cdrom.CDSL_CURRENT)
+            media.drive_status = None
+            media.info = None
+            return
 
-        if s == last_code:
+        # Same as last time? If so we're done
+        if s == media.drive_status:
             os.close(fd)
-            return last_code, None
+            return
 
-        last_code = s
-        
+        media.drive_status = s
+
+        # Is there a disc present?
         if s != cdrom.CDS_DISC_OK:
             os.close(fd)
-            return last_code, None
+            media.info = None
+            return
 
-
+        # Check media type (data, audio)
         s = ioctl(fd, cdrom.CDROM_DISC_STATUS)
         if s == cdrom.CDS_AUDIO:
             os.close(fd)
-            # add cddb informations here
-            return last_code, ( 'AUDIO-CD', None, None, None )
+            # XXX add cddb informations here
+            media.info = ('AUDIO-CD', None, None, None)
+            return
 
-        mediatypes = [('VCD','/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), \
-                      ('DVD','/video_ts/', 'dvd') ]
+        mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
+                      ('SVCD','/svcd/', 'vcd'), ('DVD', '/video_ts/', 'dvd') ]
 
         image = title = None
 
+        # Read the volume label directly from the ISO9660 file system
         os.close(fd)
-        img = open(device)
+        img = open(media.devicename)
         img.seek(0x0000832d)
         id = img.read(16)
         img.seek(32808, 0)
@@ -58,25 +65,33 @@ class Identify_Thread(threading.Thread):
             label = m.group(1)
         img.close()
 
-        if id in config.MOVIE_INFORMATIONS.keys():
+        if id in config.MOVIE_INFORMATIONS:
             title, image, xml_filename = config.MOVIE_INFORMATIONS[id]
             
+        # Disc is data of some sort. Mount it to get the file info
+        util.mount(media.mountdir)
 
-        util.mount(dir)
-
-        for media in mediatypes:
-            if os.path.exists(dir + media[1]):
-                util.umount(dir)
-                info = media[0], '%s [%s]' % (media[0], label), image, \
-                       (media[2], '1 -cdrom-device %s' % device, [])
-                return last_code, info
+        for mediatype in mediatypes:
+            if os.path.exists(media.mountdir + mediatype[1]):
+                util.umount(media.mountdir)
+                # XXX Add Dischis -cdrom-device fix!
+                media.info = (mediatype[0],
+                              'Drive %s [%s %s]' % (media.drivename,
+                                                    mediatype[0], label),
+                              image, (mediatype[2], media.mountdir, []))
+                return
                 
-        mplayer_files = util.match_files(dir, config.SUFFIX_MPLAYER_FILES)
-        mp3_files = util.match_files(dir, config.SUFFIX_AUDIO_FILES)
-        image_files = util.match_files(dir, config.SUFFIX_AUDIO_FILES)
+        mplayer_files = util.match_files(media.mountdir, config.SUFFIX_MPLAYER_FILES)
+        mp3_files = util.match_files(media.mountdir, config.SUFFIX_AUDIO_FILES)
+        image_files = util.match_files(media.mountdir, config.SUFFIX_IMAGE_FILES)
 
-        util.umount(dir)
+        util.umount(media.mountdir)
 
+        if DEBUG:
+            print 'identifymedia: mplayer = "%s"' % mplayer_files
+            print 'identifymedia: mp3="%s"' % mp3_files
+            print 'identifymedia: image="%s"' % image_files
+            
         info = None
 
         if mplayer_files and not mp3_files:
@@ -92,12 +107,14 @@ class Identify_Thread(threading.Thread):
 
             # only one movie on DVD/CD, title is movie name and action is play
             elif len(mplayer_files) == 1:
-                title = string.capitalize\
-                        (os.path.splitext(os.path.basename(mplayer_files[0]))[0])
+                s = os.path.splitext(os.path.basename(mplayer_files[0]))[0]
+                title = s.capitalize()
                 info = 'DIVX', title, image, ('video', mplayer_files[0], [])
 
+            # We're done if it was 
             if info:
-                return last_code, info
+                media.info = info
+                return
 
             # try to find out if it is a series cd
             show_name = ""
@@ -122,12 +139,13 @@ class Identify_Thread(threading.Thread):
             else:
                 # nothing found, return the label
                 info = "DIVX", 'CD [%s]' % label, None, None
-            return last_code, info
+            media.info = info
+            return
 
-        if not mplayer_files and mp3_files:
+        if (not mplayer_files) and mp3_files:
             info = "AUDIO" , 'CD [%s]' % label, None, None
 
-        elif not mplayer_files and not mp3_files and image_files:
+        elif (not mplayer_files) and (not mp3_files) and image_files:
             info = "IMAGE", 'CD [%s]' % label, None, None
 
         elif mplayer_files or image_files or mp3_files:
@@ -137,43 +155,44 @@ class Identify_Thread(threading.Thread):
                 info = "DATA", 'CD [%s]' % label, None, None
 
         else:
-            info = "Data" , 'CD [%s]' % label, None, None
-            
-        return last_code, info
+            info = "DATA" , 'CD [%s]' % label, None, None
+
+        media.info = info
+
+        return
 
 
     def check_all(self):
-        if config.ROM_DRIVES != None: 
-            pos = 0
-            for entry in config.ROM_DRIVES:
-                new_entry = self.identify(entry)
-                if new_entry[1]:
-                    print ">>> %s" % new_entry[1][0]
-                
-                dir, device, name, ejected, last_code, info = entry
-                new_code, info = new_entry
+        rclient = rc.get_singleton()
+        
+        for media in config.REMOVABLE_MEDIA:
+            last_status = media.drive_status
+            self.identify(media)
 
-                if new_code != last_code:
-                    config.ROM_DRIVES[pos] = (dir, device, name, ejected, new_code, info)
-                    if last_code != -1:
-                        rclient.post_event(rclient.IDENTIFY_MEDIA)
-                pos += 1
+            if last_status != media.drive_status:
+                if DEBUG:
+                    print 'MEDIA: Status=%s, info=%s' % (media.drive_status,
+                                                         media.info),
+                    print ' Posting IDENTIFY_MEDIA event'
+                rclient.post_event(rclient.IDENTIFY_MEDIA)
+            else:
+                if DEBUG > 1:
+                    print 'MEDIA: Status=%s, info=%s' % (media.drive_status,
+                                                         media.info)
                 
                 
     def __init__(self):
         threading.Thread.__init__(self)
-        if config.ROM_DRIVES != None: 
-            pos = 0
-            for (dir, device, name, ejected) in config.ROM_DRIVES:
-                config.ROM_DRIVES[pos] = (dir, device, name, ejected, -1, None)
-                pos += 1
-        self.check_all()
+
         
     def run(self):
+        # Make sure the movie database is rebuilt at startup
+        os.system('touch /tmp/freevo-rebuild-database')
         while 1:
             time.sleep(2)
 
-            # check if we need to update the database
+            # Check if we need to update the database
+            # This is a simple way for external apps to signal changes
             if os.path.exists("/tmp/freevo-rebuild-database"):
                 movie_xml.hash_xml_database()
 
