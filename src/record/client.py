@@ -68,8 +68,7 @@ class Recording:
         if self.description.has_key('subtitle') and \
            self.description['subtitle']:
             s += u' - %s' % self.description['subtitle']
-        start = time.strftime('%I:%M%p', time.localtime(self.start))
-        return s + u' at %s' % Unicode(start)
+        return s
 
 
     def __str__(self):
@@ -83,13 +82,14 @@ class Recordings:
         self.server = None
         mcomm.register_entity_notification(self.__entity_update)
         mcomm.register_event('record.list.update', self.__list_update)
-        self.comingup = _('The recordserver is down')
-        
+        self.comingup = ''
+        self.running = ''
 
     def __entity_update(self, entity):
         if not entity.present and entity == self.server:
             log.info('recordserver lost')
-            self.comingup = _('The recordserver is down')
+            self.comingup = ''
+            self.running = ''
             self.server = None
             return
 
@@ -168,36 +168,14 @@ class Recordings:
         # create coming up text list
         reclist = copy.copy(self.__recordings.values())
         reclist.sort(lambda x,y: cmp(x.start, y.start))
-        today = []
-        tomorrow = []
-        later = []
-
-        date0 = time.localtime()[:3]
-        date1 = time.localtime(time.time() + 60 * 60 * 24)[:3]
-
-        for what in reclist:
-            if time.localtime(what.start)[:3] == date0:
-                today.append(what)
-            elif time.localtime(what.start)[:3] == date1:
-                tomorrow.append(what)
-            elif what.start > time.time():
-                later.append(what)
-
         self.comingup = ''
-        if len(today) > 0:
-            self.comingup += _('Today') + u':\n'
-            for r in today:
-                self.comingup += u'%s\n' % Unicode(r)
-        if len(tomorrow) > 0:
-            self.comingup += _('Tomorrow') + u':\n'
-            for r in tomorrow:
-                self.comingup += u'  %s\n' % Unicode(r)
-        if len(later) > 0:
-            self.comingup += _('This Week') + u':\n'
-            for r in later:
-                self.comingup += u'  %s\n' % Unicode(r)
-        if not self.comingup:
-            self.comingup = _('No recordings are scheduled')
+        self.running = ''
+
+        for rec in reclist:
+            if rec.status == SCHEDULED:
+                self.comingup += u'%s\n' % Unicode(rec)
+            if rec.status == RECORDING:
+                self.running += u'%s\n' % Unicode(rec)
         
         
     def get(self, channel, start, stop):
@@ -324,6 +302,3 @@ class Favorites:
 
 recordings = Recordings()
 favorites  = Favorites()
-
-def comingup():
-    return recordings.comingup
