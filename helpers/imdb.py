@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/06/24 18:38:41  dischi
+# Fixed handling when search returns only one result
+#
 # Revision 1.23  2003/06/24 18:12:45  dischi
 # fixed string translation with urllib (not urllib2)
 #
@@ -130,6 +133,11 @@ def search(name):
     
     type = ''
 
+    m = re.match('http://.*imdb.com/Title\?([0-9]*)', response.geturl())
+    if m:
+        data = parsedata(response)
+        return [ ( m.group(1), data[0], data[1]['year'], '' ) ]
+    
     for line in response.read().split("\n"):
         m = regexp_type.match(line)
         if m:
@@ -168,6 +176,19 @@ def get_data(id):
     get imdb data about the movie with the given id
     """
 
+    url = 'http://us.imdb.com/Title?%s' % id
+    req = urllib2.Request(url, txdata, txheaders)
+    
+    try:
+        r = urllib2.urlopen(req)
+    except urllib2.HTTPError, error:
+        print error
+        return None
+
+    return parsedata(r, id)
+
+
+def parsedata(results, id=0):
     title = ''
     info = {}
 
@@ -191,18 +212,9 @@ def get_data(id):
     regexp_dvd_image = re.compile('.*(http://images.amazon.com.*?ZZZZZ.*?)"')
     regexp_url   = re.compile('.*href="(http.*?)"', re.I)
 
-    url = 'http://us.imdb.com/Title?%s' % id
-    req = urllib2.Request(url, txdata, txheaders)
-    
-    try:
-        r = urllib2.urlopen(req)
-    except urllib2.HTTPError, error:
-        print error
-        return None
-
     next_line_is = None
 
-    for line in r.read().split("\n"):
+    for line in results.read().split("\n"):
         if next_line_is == 'runtime':
             next_line_is = None
             info['runtime'] = str2XML(line)
@@ -243,21 +255,23 @@ def get_data(id):
         m = regexp_image.match(line)
         if m: image_urls += [ m.group(1) ]
 
-    if dvd:
 
+    if not id:
+        return (title, info, image_urls)
+
+
+    if dvd:
         url = 'http://us.imdb.com/DVD?%s' % id
         req = urllib2.Request(url, txdata, txheaders)
         
         try:
             r = urllib2.urlopen(req)
+            for line in r.read().split("\n"):
+                m = regexp_dvd_image.match(line)
+                if m: image_urls += [ m.group(1) ]
         except urllib2.HTTPError, error:
-            print error
-            return None
+            pass
 
-        for line in r.read().split("\n"):
-
-            m = regexp_dvd_image.match(line)
-            if m: image_urls += [ m.group(1) ]
 
     global image_url_handler
     if not image_url_handler:
@@ -265,7 +279,6 @@ def get_data(id):
 
     url = 'http://us.imdb.com/Posters?%s' % id
     req = urllib2.Request(url, txdata, txheaders)
-        
     try:
         r = urllib2.urlopen(req)
     except urllib2.HTTPError, error:
