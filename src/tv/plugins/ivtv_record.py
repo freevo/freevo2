@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/29 12:08:46  rshortt
+# Make sure we close the device when done.
+#
 # Revision 1.1  2003/05/29 00:45:53  rshortt
 # Plugin to record using an ivtv (PVR-250/350) based capture card.
 #
@@ -116,9 +119,6 @@ class Record_Thread(threading.Thread):
                                              string.replace(self.prog.filename,
                                                             ' ', '_'))
                 
-                #while self.mode == 'record' and self.app.isAlive():
-                #    time.sleep(0.5)
-
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
                 v_norm = string.upper(v_norm)
 
@@ -158,11 +158,9 @@ class Record_Thread(threading.Thread):
                 (buf_type,width,height,pixelformat,field,bytesperline,sizeimage,colorspace) = v.getfmt()
                 print "Width: %i, Height: %i" % (width,height)
                 print "Read Frequency: %i" % v.getfreq()
-                # print v.gettuner(0)
 
                 now = time.time()
                 stop = now + self.prog.rec_duration
-                # stop = now + 15
 
                 v_in  = open('/dev/video0', 'r')
                 v_out = open(video_save_file, 'w')
@@ -173,6 +171,8 @@ class Record_Thread(threading.Thread):
 
                 v_in.close()
                 v_out.close()
+                v.close()
+                v = None
 
                 print('Record_Thread::run: finished recording')
 

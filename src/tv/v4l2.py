@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/29 12:08:45  rshortt
+# Make sure we close the device when done.
+#
 # Revision 1.1  2003/05/28 23:32:50  rshortt
 # V4L device control by Thomas Schueppel.
 #
@@ -122,6 +125,11 @@ class Videodev:
           sys.exit("Error: %d\n" %self.device)
       else:
           print "Video Opened at %s" % device
+
+
+  def close(self):
+      os.close(self.device)
+
 
   def setchanlist(self, chanlist):
       self.chanlistName = chanlist
