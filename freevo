@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2004/01/10 14:56:19  dischi
+# better KeyboardInterrupt handling
+#
 # Revision 1.103  2004/01/09 20:18:31  dischi
 # check if programm is still running
 #
@@ -224,6 +227,9 @@ def start(name, arg, bg):
                 os.waitpid(uid, 0)
             except KeyboardInterrupt:
                 os.kill(uid, SIGTERM)
+                os.waitpid(uid, 0)
+                if os.path.isfile(f.name):
+                    os.unlink(f.name)
     else:
         os.execvp(arg[0], arg)
 
