@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/02/05 06:05:21  krister
+# Removed the backup of old config files, they just clutter the folder
+#
 # Revision 1.27  2003/02/04 13:07:16  dischi
 # setip_build can now compile python files. This is used by the Makefile
 # (make all). The Makefile now also has the directories as variables.
@@ -243,11 +246,6 @@ def check_config(conf):
         
 
 def create_config(conf):
-    # Backup all old config files
-    for i in range(9, 0, -1):
-        os.system('mv freevo.conf.%s freevo.conf.%s &> /dev/null' % (i, i+1))
-        
-    os.system('mv freevo.conf freevo.conf.1 &> /dev/null')
     
     print 'Creating freevo.conf...',
 
