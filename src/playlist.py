@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/12/13 18:16:34  dischi
+# allow fxd playlists with relative path
+#
 # Revision 1.42  2003/12/10 19:51:51  dischi
 # make playlist files work again
 #
@@ -351,7 +354,6 @@ class Playlist(Item):
         if not self.menuw:
             self.menuw = menuw
 
-
         if not self.playlist:
             # XXX PopupBox please
             print _('empty playlist')
@@ -554,16 +556,18 @@ class Mimetype(plugin.MimetypePlugin):
         </freevo>
         """
         children = fxd.get_children(node, 'files')
+        dirname  = os.path.dirname(fxd.getattr(None, 'filename', ''))
         if children:
             children = children[0].children
 
         items = []
         for child in children:
+            fname  = os.path.join(dirname, fxd.gettext(child))
             if child.name == 'directory':
-                items.append((fxd.gettext(child), fxd.getattr(child, 'recursive', 0)))
+                items.append((fname, fxd.getattr(child, 'recursive', 0)))
 
             elif child.name == 'file':
-                items.append(fxd.gettext(child))
+                items.append(fname)
 
         pl = Playlist('', items, fxd.getattr(None, 'parent', None),
                       display_type=fxd.getattr(None, 'display_type'),
