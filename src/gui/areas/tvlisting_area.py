@@ -90,19 +90,19 @@ class TvlistingArea(Area):
         self.down_arrow = None
         self.objects    = []
         self.background = None
-        
+
 
     def __calc_items_geometry(self):
-        # get the content skin information
-        content   = self.calc_geometry(self.layout.content, copy_object=True)
+        # get the settings
+        settings = self.settings
 
         # get all values for the different types
-        label_val     = content.types['label']
-        head_val      = content.types['head']
-        selected_val  = content.types['selected']
-        default_val   = content.types['default']
-        scheduled_val = content.types['scheduled']
-        conflict_val  = content.types['conflict']
+        label_val     = settings.types['label']
+        head_val      = settings.types['head']
+        selected_val  = settings.types['selected']
+        default_val   = settings.types['default']
+        scheduled_val = settings.types['scheduled']
+        conflict_val  = settings.types['conflict']
 
         self.all_vals = label_val, head_val, selected_val, default_val, \
                         scheduled_val, conflict_val
@@ -115,43 +115,42 @@ class TvlistingArea(Area):
         # get label width
         label_width = label_val.width
         if label_val.rectangle:
-            r = self.calc_rectangle(label_val.rectangle, label_width,
-                                    label_val.font.height)[2]
+            r = label_val.rectangle.calculate(label_width,
+                                              label_val.font.height)[2]
             label_width = r.width
         else:
-            label_width += content.spacing
+            label_width += settings.spacing
 
 
         # get headline height
         head_h = head_val.font.height
         if head_val.rectangle:
-            r = self.calc_rectangle(head_val.rectangle, 20,
-                                    head_val.font.height)[2]
-            head_h = max(head_h, r.height + content.spacing)
-            content_y = content.y + r.height + content.spacing
+            r = head_val.rectangle.calculate(20, head_val.font.height)[2]
+            head_h = max(head_h, r.height + settings.spacing)
+            settings_y = settings.y + r.height + settings.spacing
         else:
-            content_y = content.y + head_val.font.height + content.spacing
+            settings_y = settings.y + head_val.font.height + settings.spacing
 
 
         # get item height
         item_h = font_h
         for val in (label_val, default_val, selected_val, conflict_val):
             if val.rectangle:
-                r = self.calc_rectangle(val.rectangle, 20, val.font.height)[2]
-                item_h = max(item_h, r.height + content.spacing)
+                r = val.rectangle.calculate(20, val.font.height)[2]
+                item_h = max(item_h, r.height + settings.spacing)
 
-        num_rows = (content.height + content.y - content_y) / item_h
-        return font_h, label_width, content_y, num_rows, item_h, head_h
+        num_rows = (settings.height + settings.y - settings_y) / item_h
+        return font_h, label_width, settings_y, num_rows, item_h, head_h
 
 
 
-    def fit_item_in_rectangle(self, rectangle, width, height, font_h):
+    def __fit_in_rect(self, rectangle, width, height, font_h):
         """
         calculates the rectangle geometry and fits it into the area
         """
         x = 0
         y = 0
-        r = self.calc_rectangle(rectangle, width, font_h)[2]
+        r = rectangle.calculate(width, font_h)[2]
         if r.width > width:
             r.width, width = width, width - (r.width - width)
         if r.height > height:
@@ -179,7 +178,7 @@ class TvlistingArea(Area):
         self.last_channels = None
 
 
-    def __draw_time_line(self, start_time, content, col_time, x0, y0,
+    def __draw_time_line(self, start_time, settings, col_time, x0, y0,
                          n_cols, col_size, height):
         if self.last_start_time == start_time and self.time_obj:
             return
@@ -193,9 +192,9 @@ class TvlistingArea(Area):
 
         geo = _Geometry( 0, 0, col_size, height )
         if head_val.rectangle:
-            geo, rect = self.fit_item_in_rectangle( head_val.rectangle,
-                                                    col_size, height, height )
-            
+            geo, rect = self.__fit_in_rect( head_val.rectangle,
+                                            col_size, height, height )
+
         for i in range( n_cols ):
             if head_val.rectangle:
                 width = int(math.floor(col_size + x0) - math.floor( x0 ) + 1)
@@ -205,7 +204,7 @@ class TvlistingArea(Area):
             t_str = time.strftime( timeformat,
                                    time.localtime(start_time + col_time*i*60 ))
             self.time_obj.append(self.drawstring( t_str ,
-                                                 head_val.font, content,
+                                                 head_val.font, settings,
                                                  x=( x0 + geo.x ),
                                                  y=( y0 + geo.y ),
                                                  width=geo.width, height=-1,
@@ -214,25 +213,24 @@ class TvlistingArea(Area):
             x0 += col_size
 
 
-        
 
-    def __draw_channel_list(self, channel_list, content, y0, width, item_h,
+
+    def __draw_channel_list(self, channel_list, settings, y0, width, item_h,
                             font_h):
         for o in self.chan_obj:
             if o:
                 o.unparent()
         self.chan_obj = []
-                
+
         label_val = self.all_vals[0]
         for channel in channel_list:
             ty0 = y0
-            tx0 = content.x
+            tx0 = settings.x
 
             logo_geo = [ tx0, ty0, width, font_h ]
 
             if label_val.rectangle:
-                r = self.calc_rectangle(label_val.rectangle, width,
-                                        item_h)[2]
+                r = label_val.rectangle.calculate(width, item_h)[2]
                 if r.x < 0:
                     tx0 -= r.x
                 if r.y < 0:
@@ -251,10 +249,10 @@ class TvlistingArea(Area):
                 img = gui.imagelib.load(channel_logo, (None, None))
                 i = self.drawimage(img, (logo_geo[0], logo_geo[1]))
                 self.chan_obj.append(i)
-            else:  
+            else:
                 self.chan_obj.append(self.drawstring(channel.name,
                                                      label_val.font,
-                                                     content, x=tx0, y=ty0,
+                                                     settings, x=tx0, y=ty0,
                                                      width=r.width+2*r.x,
                                                      height=item_h))
 
@@ -263,20 +261,15 @@ class TvlistingArea(Area):
             y0 += item_h - 1
 
 
-    
     def update(self):
         """
         update the listing area
         """
         menu      = self.menu
-        layout    = self.layout
-        area      = self.area_values
-        content   = self.calc_geometry(layout.content, copy_object=True)
+        settings  = self.settings
 
-        # to_listing     = menu.table
-        # n_cols   = len(to_listing[0])-1
-
-        n_cols = 4
+        # FIXME: move to skin
+        n_cols   = 4
         col_time = 30
 
         if self.last_settings == self.settings:
@@ -324,51 +317,27 @@ class TvlistingArea(Area):
         #         rightarrow_size = (rightarrow.get_width(),
         #                        rightarrow.get_height())
 
-
-        x_contents = content.x + content.spacing
-        y_contents = content.y + content.spacing
-
-        w_contents = content.width  - 2 * content.spacing
-        h_contents = content.height - 2 * content.spacing
-
         # Print the Date of the current list page
         dateformat = config.TV_DATEFORMAT
         if not dateformat:
             dateformat = '%e-%b'
 
-        r = _Geometry( 0, 0, label_width, font_h )
+        r = _Geometry(0, 0, label_width, font_h)
         if label_val.rectangle:
-            r = self.calc_rectangle( label_val.rectangle, label_width,
-                                     head_h )[ 2 ]
-            pad_x = 0
-            pad_y = 0
-            if r.x < 0: pad_x = -1 * r.x
-            if r.y < 0: pad_y = -1 * r.y
+            r = label_val.rectangle.calculate( label_width, head_h )[ 2 ]
 
-        x_contents += r.width
-        y_contents += r.height
-        w_contents -= r.width
-        h_contents -= r.width
+        chan_x = settings.x + settings.spacing + r.width
+        chan_w = settings.width - 2 * settings.spacing - r.width
+
+        timer_y = settings.y + settings.spacing
 
         # 1 sec = x pixels
-        prop_1sec = float(w_contents) / float(n_cols * col_time * 60)
+        prop_1sec = float(chan_w) / float(n_cols * col_time * 60)
         col_size = prop_1sec * 1800 # 30 minutes
 
-
         if not self.background:
-            self.background = self.drawbox( x_contents - r.width,
-                                            y_contents - r.height,
-                                            r.width+1, head_h+1, r )
-
-
-        # use label padding for x; head padding for y
-        #  self.drawstring( time.strftime( dateformat,
-        #       time.localtime( to_listing[ 0 ][ 1 ] ) ),
-        # head_val.font, content,
-        # x=( x_contents  - r.width + pad_x ),
-        # y=( y_contents - r.height + ig.y ),
-        # width=( r.width - 2 * pad_x ), height=-1,
-        # align_v='center', align_h=head_val.align )
+            self.background = self.drawbox(chan_x - r.width, timer_y,
+                                           r.width+1, head_h+1, r)
 
         start_time = self.last_start_time
         if menu.selected.start == 0:
@@ -386,8 +355,8 @@ class TvlistingArea(Area):
                          (60 * col_time)
 
         # Print the time at the table's top
-        self.__draw_time_line(start_time, content, col_time, x_contents,
-                              y_contents - r.height, n_cols, col_size, head_h)
+        self.__draw_time_line(start_time, settings, col_time, chan_x,
+                              timer_y, n_cols, col_size, head_h)
 
         self.last_start_time = start_time
         stop_time  = start_time + col_time * n_cols * 60
@@ -399,10 +368,10 @@ class TvlistingArea(Area):
 
         # draw the channel list
         if self.last_channels != channel_list:
-            self.__draw_channel_list(channel_list, content, y0, label_width,
+            self.__draw_channel_list(channel_list, settings, y0, label_width,
                                      item_h, font_h)
         self.last_channels = channel_list
-        
+
         for channel in channel_list:
             try:
                 for prg in channel[start_time:stop_time]:
@@ -411,21 +380,20 @@ class TvlistingArea(Area):
 
                     if prg.start < start_time:
                         flag_left = 1
-                        x0 = x_contents
+                        x0 = chan_x
                         t_start = start_time
                     else:
-                        x0 = x_contents + int(float(prg.start-start_time) * \
-                                              prop_1sec)
+                        x0 = chan_x+int(float(prg.start-start_time)*prop_1sec)
                         t_start = prg.start
 
                     if prg.stop > stop_time:
                         flag_right = 1
-                        w = w_contents + x_contents - x0
-                        x1 = x_contents + w_contents
+                        x1 = chan_x + chan_w
                     else:
-                        w =  int( float(prg.stop - t_start) * prop_1sec )
-                        x1 = x_contents + int(float(prg.stop-start_time) * \
-                                              prop_1sec)
+                        x1 = chan_x + int(float(prg.stop-start_time)*prop_1sec)
+
+                    if x0 > x1:
+                        continue
 
                     if prg == selected_prog:
                         val = selected_val
@@ -439,82 +407,70 @@ class TvlistingArea(Area):
                         else:
                             val = default_val
 
-                    font = val.font
-
-                    if x0 > x1:
-                        continue
-
-                    # text positions
-                    tx0 = x0
-                    tx1 = x1
-                    ty0 = y0
-
                     # calc the geometry values
-                    ig = _Geometry(0, 0, tx1-tx0+1, item_h)
+                    ig = _Geometry(0, 0, x1-x0+1, item_h)
                     if val.rectangle:
-                        ig, r = self.fit_item_in_rectangle(val.rectangle,
-                                                           tx1-tx0+1,
-                                                           item_h, font_h)
-                        self.objects.append(self.drawbox(tx0+r.x, ty0+r.y,
-                                                         r.width, item_h, r))
+                        ig, r = self.__fit_in_rect(val.rectangle, x1-x0+1,
+                                                   item_h, font_h)
+                        box = self.drawbox(x0+r.x, y0+r.y, r.width, item_h, r)
+                        self.objects.append(box)
 
                     # draw left flag and reduce width and add to x0
                     if flag_left:
-                        tx0      += leftarrow_size[0]
+                        x0 += leftarrow_size[0]
                         ig.width -= leftarrow_size[0]
-                        if tx0 < tx1:
-                            di_y = ty0 + (item_h-leftarrow_size[1])/2
-                            d_i = self.drawimage(leftarrow,
-                                                 (tx0-leftarrow_size[0],
-                                                  di_y))
+                        if x0 < x1:
+                            y = y0 + (item_h-leftarrow_size[1])/2
+                            x = x0 - leftarrow_size[0]
+                            image = self.drawimage(leftarrow, (x, y))
+                            if image:
+                                self.objects.append(d_i)
 
-                            self.objects.append(d_i)
                     # draw right flag and reduce width and x1
                     if flag_right:
-                        tx1      -= rightarrow_size[0]
+                        x1 -= rightarrow_size[0]
                         ig.width -= rightarrow_size[0]
-                        if tx0 < tx1:
-                            di_y = ty0 + (item_h-rightarrow_size[1])/2
-                            self.objects.append(self.drawimage(rightarrow,
-                                                               (tx1, di_y)))
+                        if x0 < x1:
+                            y = y0 + (item_h-rightarrow_size[1])/2
+                            image = self.drawimage(rightarrow, (x1, y))
+                            if image:
+                                self.objects.append(image)
 
                     # draw the text
-                    if tx0 < tx1:
-                        self.objects.append(self.drawstring(prg.title, font,
-                                                            content,
-                                                            x=tx0+ig.x,
-                                                            y=ty0+ig.y,
-                                                            width=ig.width,
-                                                            height=ig.height,
-                                                            align_v='center',
-                                                            align_h=val.align))
-            except Exception, e:
-                log.error(e)
+                    if x0 < x1:
+                        txt = self.drawstring(prg.title, val.font, settings,
+                                              x0+ig.x, y0+ig.y, ig.width,
+                                              ig.height, 'center', val.align)
+                        if txt:
+                            self.objects.append(txt)
+            except:
+                log.exception('tv_listing')
             y0 += item_h - 1
 
-        if start_channel > 0 and area.images['uparrow']:
+
+        if start_channel > 0 and settings.images['uparrow']:
             # up arrow needed
             if not self.up_arrow:
-                self.up_arrow = self.drawimage(area.images['uparrow'].filename,
-                                               area.images['uparrow'])
+                ifile = settings.images['uparrow'].filename
+                self.up_arrow = self.drawimage(ifile,
+                                               settings.images['uparrow'])
         elif self.up_arrow:
             # no arrow needed but on the screen, remove it
             self.up_arrow.unparent()
             self.up_arrow = None
 
         if len(pyepg.channels) >= start_channel+num_rows and \
-               area.images['downarrow']:
+               settings.images['downarrow']:
             if not self.down_arrow:
                 # down arrow needed
-                if isinstance(area.images['downarrow'].y, str):
-                    v = copy.copy(area.images['downarrow'])
+                if isinstance(settings.images['downarrow'].y, str):
+                    v = copy.copy(settings.images['downarrow'])
                     v.y = eval(v.y, {'MAX' : y0})
                 else:
-                    v = area.images['downarrow']
-                fname = area.images['downarrow'].filename
+                    v = settings.images['downarrow']
+                fname = settings.images['downarrow'].filename
                 self.down_arrow = self.drawimage(fname, v)
         elif self.down_arrow:
             # no arrow needed but on the screen, remove it
             self.down_arrow.unparent()
             self.down_arrow = None
-            
