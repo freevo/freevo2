@@ -34,6 +34,8 @@ function cleanup_and_pack {
     find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
     find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
     find /tmp/freevo-$version -name '.#*'       | xargs rm -rf
+    find /tmp/freevo-$version -name '*.pyo'     | xargs rm -rf
+    find /tmp/freevo-$version -name '*.pyc'     | xargs rm -rf
     rm -rf find /tmp/freevo-$version/WIP /tmp/freevo-$version/dischi1 \
 	/tmp/freevo-$version/aubin1 /tmp/freevo-$version/contrib/gentoo
 
