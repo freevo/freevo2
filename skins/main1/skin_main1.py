@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2002/10/24 22:16:50  outlyer
+# We're now using the width field in the fileinfo tag of the XML to decide
+# how wide to write the MP3 data on the screen. This removes the hardcoded
+# '500's from the skin
+#
 # Revision 1.52  2002/10/24 22:03:50  outlyer
 # Changed the DrawTextFramed line to use a hard line height based on the
 # actual height of the displayed string. This way, it's font, skin and
@@ -612,6 +617,11 @@ class Skin:
 
         val = self.settings.mp3
         iv  = val.info
+	
+	right = iv.width
+	# XXX In case it's not defined in the XML
+	# XXX This is just for the interim
+	if right == 0: right = 500
 
         str_w_title, str_h_title = osd.stringsize('Title: ',iv.font, iv.size)
         str_w_artist, str_h_artist = osd.stringsize('Artist: ',iv.font, iv.size)
@@ -659,17 +669,17 @@ class Skin:
 
             top = iv.y
             DrawText('Title: ', iv, x=left, y=top, align='right')
-            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=500, height=(str_h_title+5), mode='soft')
+            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=right, height=(str_h_title+5), mode='soft')
 
             if info.artist:
                 top += spacing
                 DrawText('Artist: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=500,height=(str_h_artist+5), mode='soft')
+                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=right,height=(str_h_artist+5), mode='soft')
 
             if info.album:
                 top += spacing
                 DrawText('Album: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=500,height=(str_h_album+5), mode='soft')
+                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=right,height=(str_h_album+5), mode='soft')
 
             if info.year:
                 top += spacing
