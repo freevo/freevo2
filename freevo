@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/09/02 19:40:10  dischi
+# fix link handling to helper
+#
 # Revision 1.78  2003/09/02 18:48:49  dischi
 # better save than sorry
 #
@@ -147,8 +150,8 @@ if [ `basename $0` = "freevo" ]; then
 	shift
     fi
 else
-    name=$0
-    script="$FREEVO_HELPERS/$0.py"
+    name=`basename $0`
+    script="$FREEVO_HELPERS/$name.py"
 fi
 
 if [ -e "$script" ]; then
