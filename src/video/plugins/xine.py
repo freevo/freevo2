@@ -28,6 +28,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/08/30 18:52:53  dischi
+# Aubin, don't do that :-)
+# Make a nice ItemPlugin do set the color values. Take a look at
+# bookmarker.py how.
+#
 # Revision 1.12  2003/08/28 03:46:13  outlyer
 # Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
 #
@@ -184,7 +189,7 @@ class Xine:
         rc.app(self)
 
         command = self.command
-        os.system('/usr/sbin/matroxcolor')    
+
         if DEBUG:
             print 'Xine.play(): Starting thread, cmd=%s' % command
 
@@ -220,7 +225,7 @@ class Xine:
         self.thread.mode_flag.set()
         self.thread.item = None
         rc.app(None)
-        os.system('/usr/sbin/undomatroxcolor')
+
         while self.thread.mode == 'stop':
             time.sleep(0.3)
             
