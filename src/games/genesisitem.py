@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/12/03 17:25:06  mikeruelle
+# they seem to have lost a patch i put in.
+#
 # Revision 1.2  2003/09/25 21:20:45  mikeruelle
 # fix crash for missing arg
 #
@@ -137,7 +140,7 @@ class GenesisItem(Item):
 
         print "Playing:  %s" % self.filename
 
-        self.game_player.play(self)
+        self.game_player.play(self, menuw)
 
 
     def stop(self, menuw=None):

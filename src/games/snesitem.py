@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/12/03 17:25:05  mikeruelle
+# they seem to have lost a patch i put in.
+#
 # Revision 1.11  2003/09/11 17:38:59  mikeruelle
 # fix a snes crash
 #
@@ -296,7 +299,7 @@ class SnesItem(Item):
 
         print "Playing:  %s" % self.filename
 
-        self.game_player.play(self)
+        self.game_player.play(self, menuw)
 
 
     def stop(self, menuw=None):

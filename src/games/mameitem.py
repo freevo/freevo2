@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/12/03 17:25:04  mikeruelle
+# they seem to have lost a patch i put in.
+#
 # Revision 1.13  2003/09/05 20:48:35  mikeruelle
 # new game system
 #
@@ -131,7 +134,7 @@ class MameItem(Item):
 
         print "Playing:  %s" % self.filename
 
-        self.game_player.play(self)
+        self.game_player.play(self, menuw)
 
 
     def stop(self, menuw=None):
