@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/04 13:07:16  dischi
+# setip_build can now compile python files. This is used by the Makefile
+# (make all). The Makefile now also has the directories as variables.
+#
 # Revision 1.16  2003/01/30 02:47:26  krister
 # Updated clean target
 #
@@ -44,15 +48,23 @@ XLIBS = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib \
         -L/usr/X11R6/lib64 -lX11
 XINC = -I/usr/X11R6/include -I/usr/X11/include -I/usr/openwin/include
 
-SUBDIRS = fbcon
+SUBDIRS  = fbcon
+OPTIMIZE = 0
+
+PREFIX   = /usr/local/freevo
+LOGDIR   = /var/log/freevo
+CACHEDIR = /var/cache/freevo
 
 
 .PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
 
-all: subdirs runapp freevo_xwin
+all: subdirs runapp freevo_xwin python_compile
+
+python_compile:
+	python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
-	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
+	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
 
 freevo_xwin: freevo_xwin.c
 	$(CC) $(CFLAGS) -o freevo_xwin freevo_xwin.c $(XINC) $(XLIBS)
@@ -63,6 +75,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 clean:
+	-rm -f *.pyo */*.pyo */*/*.pyo */*/*/*.pyo
 	-rm -f *.pyc */*.pyc */*/*.pyc */*/*/*.pyc *.o log_main_out 
 	-rm -f log_main_err log.txt runapp freevo_xwin mplayer_std*.log
 	cd fbcon ; $(MAKE) clean
@@ -77,20 +90,22 @@ release: clean
 	  --exclude CVS freevo
 
 
-# XXX Real simple install procedure for now, but freevo is so small it doesn't really
-# XXX matter
+
 install: all
-	-mv /usr/local/freevo /usr/local/freevo_old_`date +%Y%m%d_%H%M%S`
-	-rm -rf /usr/local/freevo
-	-mkdir /usr/local/freevo
+	-rm -rf $(PREFIX)
+	-mkdir -p $(PREFIX)
 
-	-mkdir -p /var/log/freevo
-	chmod ugo+rwx /var/log/freevo
+	-mkdir -p $(LOGDIR)
+	chmod ugo+rwx $(LOGDIR)
 
-	-mkdir -p /var/cache/freevo
-	chmod ugo+rwx /var/cache/freevo
+	-mkdir -p $(CACHEDIR)
+	chmod ugo+rwx $(CACHEDIR)
 
-	-mkdir -p /var/cache/xmltv/logos
-	chmod -R ugo+rwx /var/cache/xmltv
+	-mkdir -p $(CACHEDIR)/xmltv/logos
+	chmod -R ugo+rwx $(CACHEDIR)/xmltv
 
-	cp -r * /usr/local/freevo
+	cp -r * $(PREFIX)
+
+
+uninstall:
+	-rm -rf $(PREFIX) $(CACHEDIR) $(LOGDIR)

@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/02/04 13:07:16  dischi
+# setip_build can now compile python files. This is used by the Makefile
+# (make all). The Makefile now also has the directories as variables.
+#
 # Revision 1.26  2003/01/31 02:08:59  krister
 # Changed the X11 display option to automatically select between xv,x11,etc.
 #
@@ -111,6 +115,17 @@ class Struct:
     pass
 
 
+
+def match_files_recursively_helper(result, dirname, names):
+    if dirname == '.' or dirname[:5].upper() == './WIP':
+        return result
+    for name in names:
+        if os.path.splitext(name)[1].lower()[1:] == 'py':
+            fullpath = os.path.join(dirname, name)
+            result.append(fullpath)
+    return result
+
+
 def main():
     # Default opts
 
@@ -123,7 +138,7 @@ def main():
     
     # Parse commandline options
     try:
-        long_opts = 'help geometry= display= tv= chanlist='.split()
+        long_opts = 'help compile= geometry= display= tv= chanlist='.split()
         opts, args = getopt.getopt(sys.argv[1:], 'h', long_opts)
     except getopt.GetoptError:
         # print help information and exit:
@@ -146,6 +161,23 @@ def main():
 
         if o == '--chanlist':
             conf.chanlist = a
+
+        # this is called by the Makefile, don't call it directly
+        if o == '--compile':
+            # Compile python files:
+            import distutils.util
+            try:
+                optimize=min(int(a[0]),2)
+                prefix=a[2:]
+            except:
+                sys.exit(1)
+
+            files = []
+            os.path.walk('.', match_files_recursively_helper, files)
+            distutils.util.byte_compile(files, prefix='.', base_dir=prefix,
+                                        optimize=optimize)
+            sys.exit(0)
+
 
     check_program(conf, "mplayer", "mplayer", 1)
     check_program(conf, "jpegtran", "jpegtran", 0)
@@ -173,7 +205,7 @@ def main():
 
     # Build everything
     create_config(conf)
-    
+
     print
     print 'Now you can type "make" to build freevo. It can be run from here,'
     print 'just type "freevo" to start it.'
