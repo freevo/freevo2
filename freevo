@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2004/01/09 20:18:31  dischi
+# check if programm is still running
+#
 # Revision 1.102  2004/01/09 18:55:53  dischi
 # helper stop fixes
 #
@@ -142,9 +145,9 @@ def get_python(check_freevo):
 
 
                 
-def stop(name, arg):
+def getpid(name, arg):
     """
-    stop running process 'name'
+    get pid of running 'name'
     """
     for fname in ('/var/run/' + name, '/tmp/' + name + '%s-.pid' % os.getuid()):
         if os.path.isfile(fname):
@@ -153,17 +156,23 @@ def stop(name, arg):
             f.close()
 
             proc = '/proc/' + str(uid) + '/cmdline'
+            # FIXME: BSD support missing here
             try:
                 if os.path.isfile(proc):
                     f = open(proc)
                     proc_arg = f.readline().split('\0')[:-1]
                     f.close()
                 else:
-                    proc_arg = []
+                    # process not running
+                    return fname, 0
+
             except (OSError, IOError):
                 # running, but not freevo (because not mine)
-                return 0
+                return fname, 0
 
+            if '-OO' in proc_arg:
+                proc_arg.remove('-OO')
+                
             if proc_arg and ((arg[0].find('runapp') == -1 and \
                               len(proc_arg)>2 and arg[1] != proc_arg[1]) or \
                              len(proc_arg)>3 and arg[2] != proc_arg[2]):
@@ -172,18 +181,27 @@ def stop(name, arg):
                     os.unlink(fname)
                 except OSError:
                     pass
-                return 0
+                return fname, 0
+            return fname, uid
+    return fname, 0
 
-            try:
-                try:
-                    os.unlink(fname)
-                except OSError:
-                    pass
-                os.kill(uid, SIGTERM)
-                return 1
-            except OSError:
-                return 0
-    return 0
+
+def stop(name, arg):
+    """
+    stop running process 'name'
+    """
+    fname, uid = getpid(name, arg)
+    if not uid:
+        return 0
+    try:
+        try:
+            os.unlink(fname)
+        except OSError:
+            pass
+        os.kill(uid, SIGTERM)
+        return 1
+    except OSError:
+        return 0
 
 
 
@@ -379,5 +397,15 @@ if name != 'freevo':
     if not os.path.isfile(proc[0]):
         print 'can\'t find helper %s' % name
         sys.exit(1)
+
+if getpid(name, python + proc)[1]:
+    if name != 'freevo':
+        print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
+    else:
+        print 'freevo still running, run \'freevo stop\' to stop'
+    sys.exit(0)
+
+if python[0].find('python') != -1:
+    python = [ python[0] , '-OO' ] + python[1:]
 
 start(name, python + proc , bg)
