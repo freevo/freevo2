@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/06/11 00:35:57  mikeruelle
+# move config method to where it can do some good
+#
 # Revision 1.11  2004/05/30 18:28:15  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
 #
@@ -417,11 +420,6 @@ class fxdhandler(plugin.Plugin):
         plugin.register_callback('fxditem', [], 'command', fxdparser)
         plugin.Plugin.__init__(self)
         
-    def config(self):
-        return [ ('COMMAND_SPAWN_WM', '', 'command to start window manager.'),
-                 ('COMMAND_KILL_WM', '', 'command to stop window manager.') ]
-
-
 class CommandMainMenuItem(plugin.MainMenuPlugin):
     """
     A small plugin to put a command in the main menu.
@@ -439,6 +437,10 @@ class CommandMainMenuItem(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         self.cmd_xml = commandxmlfile
     
+    def config(self):
+        return [ ('COMMAND_SPAWN_WM', '', 'command to start window manager.'),
+                 ('COMMAND_KILL_WM', '', 'command to stop window manager.') ]
+
     def items(self, parent):
         command_items = []
         parser = util.fxdparser.FXD(self.cmd_xml)
