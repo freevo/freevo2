@@ -12,6 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/12/13 14:27:19  outlyer
+# Since ChildApp2 defaults to stopping the OSD, stop_osd=0 needs to be defined
+# here or the audio player will try to stop the display and then try to write
+# to the screen (and crash)
+#
 # Revision 1.11  2003/12/10 19:47:49  dischi
 # make it possible to bypass version checking
 #
@@ -221,7 +226,7 @@ class XineApp(childapp.ChildApp2):
         self.player      = player
         self.elapsed     = 0
         self.stop_reason = 0 # 0 = ok, 1 = error
-        childapp.ChildApp2.__init__(self, app)
+        childapp.ChildApp2.__init__(self, app, stop_osd=0)
 
 
     def stop_event(self):

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/12/13 14:27:19  outlyer
+# Since ChildApp2 defaults to stopping the OSD, stop_osd=0 needs to be defined
+# here or the audio player will try to stop the display and then try to write
+# to the screen (and crash)
+#
 # Revision 1.29  2003/12/10 19:10:35  dischi
 # AUDIO_PLAY_END is not needed anymore
 #
@@ -251,7 +256,7 @@ class MPlayerApp(childapp.ChildApp2):
         self.stop_reason = 0 # 0 = ok, 1 = error
         self.RE_TIME     = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
-        childapp.ChildApp2.__init__(self, app)
+        childapp.ChildApp2.__init__(self, app, stop_osd=0)
 
 
     def stop_event(self):
