@@ -63,6 +63,9 @@ import logging
 # notifier
 import notifier
 
+# objectcache
+from util.objectcache import ObjectCache
+
 # record imports
 import recorder
 from types import *
@@ -264,6 +267,8 @@ def check(devices, fixed, to_check, best_rating):
 
 # interface
 
+_conflict_cache = ObjectCache(30, 'conflict')
+
 def resolve(recordings):
     """
     Find and resolve conflicts in recordings.
@@ -285,14 +290,26 @@ def resolve(recordings):
         devices.sort(lambda l, o: cmp(o.rating,l.rating))
 
         for c in conflicts:
-            log.debug('**********************************')
             info = 'found conflict:\n'
+            conflict_id = ''
             for r in c:
                 info += '%s\n' % str(r)[:str(r).rfind(' ')]
+                conflict_id += str(r)
+            result = _conflict_cache[conflict_id]
+            if result:
+                log.info('use cache for conflict resolving')
+                for r in c:
+                    r.status, r.recorder = result[r.id]
+                continue
             log.info(info)
             check(devices, [], c, 0)
+            result = {}
+            for r in c:
+                result[r.id] = (r.status, r.recorder)
             info ='solved by setting:\n'
             for r in c:
                 info += '%s\n' % str(r)
             log.info(info)
+            # store cache result
+            _conflict_cache[conflict_id] = result
     return True
