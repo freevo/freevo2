@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/20 17:30:23  dischi
+# do not close streams when we have to kill the app by force
+#
 # Revision 1.13  2003/09/19 22:07:57  dischi
 # add unified PlayerThread function to avoid duplicate code
 #
@@ -153,15 +156,15 @@ class ChildApp:
         except OSError:
             pass
         
-        try:
-            # this may cause some problems with threads
-            # in the child because not everything died :-(
-            self.outfile.close()
-            self.errfile.close()
-            self.infile.close()
-        except:
-            print 'error closing filehandler'
-            pass
+        # this may cause some problems with threads
+        # in the child because not everything died :-(
+        # try:
+        # self.outfile.close()
+        # self.errfile.close()
+        # self.infile.close()
+        # except:
+        #    print 'error closing filehandler'
+        #    pass
         self.child = None
 
 
