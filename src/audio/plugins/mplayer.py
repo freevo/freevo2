@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/28 15:02:49  dischi
+# ported detach plugin to new event model and other small fixes
+#
 # Revision 1.6  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -55,15 +58,16 @@
 import time, os
 import string
 import threading, signal
+import re
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-import event as em
 
-# RegExp
-import re
+import rc
 import plugin
+from event import *
+
 
 DEBUG = config.DEBUG
 
@@ -194,29 +198,23 @@ class MPlayer:
         function it will be passed over to the items eventhandler
         """
 
-        if event == 'AUDIO_PLAY_END':
-            event = em.PLAY_END
+        if event == AUDIO_PLAY_END:
+            event = PLAY_END
             
-        if event in ( em.STOP, em.PLAY_END, em.USER_END ):
+        if event == AUDIO_SEND_MPLAYER_CMD:
+            self.thread.app.write('%s\n' % event.arg)
+            return TRUE
+
+        if event in ( STOP, PLAY_END, USER_END ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
 
-        # try to find the event in RC_MPLAYER_CMDS 
-        e = config.RC_MPLAYER_AUDIO_CMDS.get(event, None)
-        if e:
-            e = config.RC_MPLAYER_AUDIO_CMDS[event][0]
-            if callable(e):
-                e(self)
-            else:
-                self.thread.app.write('%s\n' % e)
-            return TRUE
-
-        elif event == em.PAUSE or event == em.PLAY:
+        elif event == PAUSE or event == PLAY:
             self.thread.app.write('pause\n')
             return TRUE
 
-        elif event == em.SEEK:
-            self.thread.app.write('seek %s\n', em.arg)
+        elif event == SEEK:
+            self.thread.app.write('seek %s\n', event.arg)
             return TRUE
 
         else:
@@ -323,7 +321,7 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 if self.mode == 'play':
-                    rc.post_event(em.AUDIO_PLAY_END)
+                    rc.post_event(AUDIO_PLAY_END)
 
                 self.mode = 'idle'
                 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/28 15:02:49  dischi
+# ported detach plugin to new event model and other small fixes
+#
 # Revision 1.3  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -55,12 +58,12 @@ class PluginInterface(plugin.MainMenuPlugin):
     """
     def __init__(self):
         plugin.MainMenuPlugin.__init__(self)
-        config.RC_MPLAYER_AUDIO_CMDS['DISPLAY'] = ( self.detach, 'detach player' )
+        config.EVENTS['audio']['DISPLAY'] = em.Event(em.FUNCTION_CALL, arg=self.detach)
         self.player = None
         self.show_item = menu.MenuItem('Show player', action=self.show)
         
-    def detach(self, player):
-        gui   = player.playerGUI
+    def detach(self):
+        gui   = plugin.getbyname(plugin.AUDIO_PLAYER).playerGUI
 
         # hide the player and show the menu
         gui.hide()
