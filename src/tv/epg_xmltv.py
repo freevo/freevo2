@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/06/02 20:58:21  rshortt
+# A couple try/excepy blocks that actually end up fixing a problem when scheduling a recording, record_server tried to init the display.  This was tested on two people's systems.
+#
 # Revision 1.17  2003/05/05 01:33:24  outlyer
 # Show a popup when reading the cached guide too, for visual feedback on slower
 # machines.
@@ -148,9 +151,21 @@ def get_guide(popup=None):
             os.path.isfile(pname) and (os.path.getmtime(pname) >
                                        os.path.getmtime(config.XMLTV_FILE))):
             if DEBUG: print 'XMLTV, reading cached file (%s)' % pname
+
             if popup:
                 popup.show()
-            cached_guide = pickle.load(open(pname, 'r'))
+
+            try:
+                fd = open(pname, 'r')
+            except:
+                print 'DEBUG: failed open of %s' % pname
+                traceback.print_exc()
+            try:		 
+                cached_guide = pickle.load(fd)
+            except:		
+                print 'DEBUG: failed load of the pickle'
+                traceback.print_exc()
+
             if popup:
                 popup.destroy()
 
