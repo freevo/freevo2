@@ -3,6 +3,7 @@
 #
 # This is the Freevo MP3 module. 
 #
+# $Id$
 
 import sys
 import random
@@ -93,19 +94,9 @@ def m3u_playlist(arg=None, menuw=None):
 
     playlist_lines = filter(lambda l: l[0] != '#', playlist_lines_dos)
 
-    #
-    # XXX local stuff to convert from playlist generated from a
-    # XXX network mapped drive on a Win98 box with winamp
-    #
-    playlist_filenames = []
-    for line in playlist_lines:
-        line2 = line.replace('\\', '/')
-        line3 = line2.replace('/Music/', '/hdc/mary/')
-        playlist_filenames += [line3]
-    
     items = []
 
-    for filename in playlist_filenames:
+    for filename in playlist_lines:
         songname = util.strip_suffix(os.path.basename(filename))
         items += [menu.MenuItem(songname, play_mp3, (filename, playlist_filenames))]
 
