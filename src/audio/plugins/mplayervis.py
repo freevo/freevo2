@@ -30,7 +30,7 @@ try:
     import pygoom
 except:
     raise Exception('[audio.mplayervis]: Pygoom not available, please install '+
-                    'or remove this plugin.')
+                    'or remove this plugin (http://freevo.sf.net/pygoom).')
 
 
 # pygame  modules
