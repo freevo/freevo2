@@ -79,7 +79,7 @@
 
         <image label="background" filename="blurrback.jpg"/>
         <image label="logo" filename="gant/logo.png"/>
-        
+        <image label="scheduledtv" filename="gant/scheduledtv.png"/> 
         
         <!-- 
 	*******************************************************
@@ -143,7 +143,7 @@
 			    align="justified" expression="plot"/>
                         <newline/>
                     </if>
-                    <goto_pos y="5" mode="relative"/>
+                    <goto_pos y="190" mode="absolute"/>
                     <if expression="year">
                         <text font="info value">(</text>
                         <text font="info value" expression="year"/>
@@ -565,7 +565,10 @@
         </layout>
         
         <layout label="tv program info">
-            <content x="0" y="0" type="text" spacing="20" font="default">
+            <background>
+                <image image="scheduledtv" x="-5" y="0" width="256" height="256"/>
+            </background>
+            <content x="260" y="0" type="text" spacing="20" font="default">
                 <item type="default">
                     <if expression="title">
                         <text font="tv title" width="550" expression="title"/>
@@ -577,30 +580,30 @@
                         <text font="info tagline">"</text>
                         <newline/>
                     </if>
+                    <if expression="desc">
+                        <text font="info plot" height="60" mode="soft" expression="desc"/>
+                        <newline/>
+                    </if>
+                    <goto_pos y="140" mode="absolute"/> 
                     <if expression="channel">
-	                <text width="150" font="info value" mode="soft">Channel: </text>
+	                <text width="100" font="info value" mode="soft">Channel: </text>
                         <goto_pos x="10" mode="relative"/>
                         <text font="info value" expression="channel" mode="soft" />
                         <newline/>
                     </if>
                     <if expression="start">
-	                <text width="150" font="info value" mode="soft">Start: </text>
-                        <goto_pos x="10" mode="relative"/>
+	                <text width="100" font="info value" mode="soft">Start: </text>
+                        <goto_pos x="3" mode="relative"/>
                         <text font="info value" expression="start" mode="soft" />
                         <newline/>
                     </if>
                     <if expression="stop">
-	                <text width="150" font="info value" mode="soft">Stop: </text>
-                        <goto_pos x="10" mode="relative"/>
+	                <text width="100" font="info value" mode="soft">Stop: </text>
+                        <goto_pos x="3" mode="relative"/>
                         <text font="info value" expression="stop" mode="soft" />
                         <newline/>
                     </if>
-	            <goto_pos y="10" mode="relative"/>
-                    <if expression="desc">
-                        <text font="info plot" height="max" mode="soft" expression="desc"/>
-                        <newline/>
-                    </if>
-                </item>
+	                            </item>
             </content>
         </layout>
 
