@@ -340,6 +340,19 @@ def find(name, timeout = 10000):
     return instance().find(name, timeout)
 
 
+def register_event(mcommand, function):
+    """
+    Register a callback function for the given mcommand.
+    """
+    return instance().register_event(mcommand, function)
+
+
+def send_event(addr, cmdname, cmdargs):
+    """
+    Send an event to the given addr.
+    """
+    return instance().send_event(addr, cmdname, cmdargs)
+
 
 class Instance(mbus.Guides):
     """
@@ -354,6 +367,7 @@ class Instance(mbus.Guides):
         addr['app'] = 'freevo'
 
         # init the mbus interface
+        print '************ create mbus entity', addr
         mbus.Guides.__init__( self, addr )
 
         # set callbacks
@@ -408,6 +422,22 @@ class Instance(mbus.Guides):
             notifier.step(True, False)
 
 
+    def register_event(self, mcommand, function):
+        """
+        Register a callback function for the given mcommand.
+        """
+        return self.addCallback('home-theatre.' + mcommand, function)
+    
+
+    def send_event(self, addr, cmdname, cmdargs):
+        """
+        Send an event to the given addr.
+        """
+        self.send(addr, 'home-theatre.' + cmdname, _build_args(cmdargs))
+        # self.sendReliable(addr, 'home-theatre.' + cmdname,
+        #                   _build_args(cmdargs))
+
+        
     def new_entity(self, maddr):
         """
         pyMbus callback for new entity
