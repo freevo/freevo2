@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/08/26 18:58:20  dischi
+# add time to item
+#
 # Revision 1.50  2004/08/26 15:25:52  dischi
 # some MenuApplication fixes
 #
@@ -106,7 +109,7 @@ def get_singleton():
 class ProgrammItem(Item):
     def __init__(self, parent, prog):
         Item.__init__(self, parent)
-        self.name = prog.title
+        self.name = prog.getattr('date') + '\t' + prog.getattr('start') + '\t' + prog.title
         # Import all variables from the programm
         # FIXME: this needs a cleanup to be a real item
         for var in dir(prog):
@@ -298,6 +301,8 @@ class TVGuide(MenuApplication):
             for prog in self.channel.epg.get(time.time(), time.time() + 10*24*60*60)[:-1]:
                 items.append(ProgrammItem(self.parent, prog))
             cmenu = menu.Menu(self.channel.name, items)
+            # FIXME: the percent values need to be calculated
+            cmenu.table = (15, 17, 70)
             self.menuw.pushmenu(cmenu)
 
         elif event == TV_START_RECORDING:
