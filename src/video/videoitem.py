@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/04/13 18:00:15  dischi
+# reload menu when deleting a file
+#
 # Revision 1.33  2003/04/12 18:30:04  dischi
 # add support for audio/subtitle selection for avis, too
 #
@@ -265,7 +268,7 @@ class VideoItem(Item):
         return a list of possible actions on this item.
         """
         items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
-        if self.filename and self.mode == 'file':
+        if self.filename and self.mode == 'file' and not self.media:
             items += [ (self.confirm_delete, 'Delete file') ]
         if self.variants:
             items += [ (self.show_variants, 'Show variants') ]
@@ -304,8 +307,8 @@ class VideoItem(Item):
 
     def delete_file(self):
         print 'Deleting %s' % self.filename
-        self.menuw.back_one_menu()
         os.remove(self.filename)
+        self.menuw.back_one_menu(arg='reload')
 
 
     def show_variants(self, arg=None, menuw=None):
