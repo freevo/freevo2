@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/24 00:39:29  rshortt
+# Put try/catch in update() for updating rects in case the rect has a bad value for one of its properties.
+#
 # Revision 1.25  2003/03/23 06:28:02  gsbarbieri
 # Corrected drawstringframedhard() truncate.
 #
@@ -1339,7 +1342,10 @@ class OSD:
         if not pygame.display.get_init():
             return None
         if rect:
-            pygame.display.update(rect)
+            try:
+                pygame.display.update(rect)
+            except:
+                if DEBUG: print 'osd.update(rect) failed, bad rect?'
         else:
             pygame.display.flip()
 
