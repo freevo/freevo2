@@ -10,6 +10,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/11 03:22:30  outlyer
+# First try at the "Coming Up" page. It only shows up when a directory in the
+# TV menu is selected, but I'm working on a way to have it show up for the
+# rest of the TV menu.
+#
+# TODO:
+# o Cache the coming up list for an hour at a time (misc.py)
+# o Cleanup the 'comingup()' function, it's currently just executable pseudo-code (misc.py)
+# o Show the Coming Up list for all items (skin)
+#
+# If you don't use 'blurr2.fxd' this will have no effect on you whatsoever.
+#
 # Revision 1.12  2004/01/01 16:18:11  dischi
 # fix crash
 #
@@ -367,6 +379,67 @@ def htmlenties2txt(string):
     #string = string.encode(config.LOCALE, 'ignore')
     return string
 
+
+# 
+# Coming Up for TV schedule
+#
+
+def comingup(items):
+    # XXX We should cache this information and update it hourly/daily
+    # 
+    import tv.record_client as ri
+    import time
+
+    (status, recordings) = ri.getScheduledRecordings()
+    progs = recordings.getProgramList()
+
+    f = lambda a, b: cmp(a.start, b.start)
+    progl = progs.values()
+    progl.sort(f)
+
+    today = []
+    tomorrow = []
+    later = []
+
+    for what in progl:
+        if what.start <= time.time() + 86400:
+            today.append(what)
+        if what.start <= time.time() + 172800 and what.start >= time.time() + 86400:
+            tomorrow.append(what)
+        if what.start >= time.time() + 172800:
+            later.append(what)
+
+    result = ''
+
+
+
+    if len(today) > 0:
+        result = result + 'Today:\n'
+        for m in today:
+            sub_title = ''
+            if m.sub_title:
+                sub_title = ' "' + m.sub_title + '" '
+            result = result + " " + str(m.title) + str(sub_title) + " at " + \
+                str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+
+    if len(tomorrow) > 0:
+        result = result + 'Tomorrow:\n'
+        for m in tomorrow:
+            sub_title = ''
+            if m.sub_title:
+                sub_title = ' "' + m.sub_title + '" '
+            result = result + " " + str(m.title) + str(sub_title) + " at " + \
+                str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+           
+    if len(later) > 0:
+        for m in later:
+            sub_title = ''
+            if m.sub_title:
+                sub_title = ' "' + m.sub_title + '" '
+            result = result + " " + str(m.title) + str(sub_title) + " at " + \
+                str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+
+    return result
 
 
 

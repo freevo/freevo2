@@ -140,6 +140,7 @@
 
     <menuset label="text with tv info style" inherits="text with info style">
         <screen layout="tv screen" visible="yes"/>
+        <info layout="tv extended info" x="50" y="100" width="700" height="300"/>
     </menuset>
 
 
@@ -271,6 +272,91 @@
 
       </content>
     </layout>
+
+    <layout label="tv extended info">
+      <content x="0" y="0" type="text" spacing="20" font="default">
+	<item type="video">
+          <goto_pos x="250" mode="relative"/>
+	  <if expression="tv_show_name">
+	    <text font="info tagline" expression="tv_show_name"/>
+	    <newline/>
+	    <if expression="tv_show_ep">
+	      <text font="info tagline" expression="tv_show_ep"/>
+	      <newline/>
+              <goto_pos x="250" mode="relative"/>
+	    </if>
+	  </if>
+	  <if expression="not tv_show_name">
+	    <if expression="name">
+	      <text font="info tagline" width="max" expression="name"/>
+	      <newline/>
+              <goto_pos x="250" mode="relative"/>	
+	    </if>
+	  </if>
+	  <if expression="tagline">
+            <text font="info tagline">"</text>
+	    <text font="info tagline" width="max" expression="tagline"/>
+            <text font="info tagline">"</text>
+	    <newline/>
+            <goto_pos x="250" mode="relative"/>
+	  </if>
+	  <if expression="plot">
+            <goto_pos x="20" mode="relative"/>
+	    <text font="info plot" height="120" mode="soft" 
+	      align="justified" expression="plot"/>
+            <newline/>
+            <goto_pos x="250" mode="relative"/>
+	  </if>
+          <goto_pos y="5" mode="relative"/>
+	  <if expression="year">
+            <text font="info value">(</text>
+	    <text font="info value" expression="year"/>
+            <text font="info value">)</text>
+	  </if>
+	  <if expression="runtime">
+	    <goto_pos x="30" mode="relative"/>
+	    <text font="info value" expression="length"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="dir">
+          <text font="info tagline" width="max" height="max" expression="comingup" mode="soft"/>
+	  <if expression="tagline">
+	    <text font="info tagline" width="max" expression="tagline"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="plot">
+            <goto_pos x="10" mode="relative"/>
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="plot"/>
+	    <newline/>
+	  </if>
+	  <if expression="content and not plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="content"/>
+	    <newline/>
+	  </if>
+	  <newline/>
+	</item>
+        <item type="playlist">
+          <text font="info label">Playlist</text>
+          <newline/>
+          <if expression="len(playlist)>0">
+             <text font="info value" expression="len(playlist)"/>
+             <text font="info value"> items in this playlist</text>
+             <newline/>
+          </if>
+          <if expression="len(playlist)==0">
+            <text font="info value">This playlist is empty!</text>
+            <newline/>
+          </if>
+        </item>
+
+      </content>
+    </layout>
+
 
 
     <layout label="player info">

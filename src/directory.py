@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2004/01/11 03:22:30  outlyer
+# First try at the "Coming Up" page. It only shows up when a directory in the
+# TV menu is selected, but I'm working on a way to have it show up for the
+# rest of the TV menu.
+#
+# TODO:
+# o Cache the coming up list for an hour at a time (misc.py)
+# o Cleanup the 'comingup()' function, it's currently just executable pseudo-code (misc.py)
+# o Show the Coming Up list for all items (skin)
+#
+# If you don't use 'blurr2.fxd' this will have no effect on you whatsoever.
+#
 # Revision 1.92  2004/01/10 13:19:05  dischi
 # split usage of xml_file to folder_fxd and skin_fxd
 #
@@ -285,7 +297,10 @@ class DirItem(Playlist):
             if space > 1000:
                 space='%s,%s' % (space / 1000, space % 1000)
             return space
-        
+      
+        if attr in ('comingup'):
+            return util.comingup(None)
+
         return Item.getattr(self, attr)
 
 
