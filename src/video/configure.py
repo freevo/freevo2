@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/02 14:58:23  dischi
+# Removed osd.clearscreen and if we have the NEW_SKIN deactivate
+# skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
+#
 # Revision 1.5  2003/01/07 19:45:17  dischi
 # small bugfix
 #
@@ -55,8 +59,6 @@ import menu
 
 # RegExp
 import re
-
-menuw = menu.get_singleton()
 
 
 #
@@ -165,7 +167,7 @@ def main_menu_generate(item):
     return items
 
         
-def main_menu(item):
+def main_menu(item, menuw):
     moviemenu = menu.Menu('CONFIG MENU', main_menu_generate(item))
     menuw.pushmenu(moviemenu)
     

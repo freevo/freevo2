@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/03/02 14:58:23  dischi
+# Removed osd.clearscreen and if we have the NEW_SKIN deactivate
+# skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
+#
 # Revision 1.16  2003/02/24 04:21:40  krister
 # Mathieu Weber's bugfix for multipart movies
 #
@@ -35,42 +39,6 @@
 # the videoitem gets the filename '' and subitems for each file. With that
 # change it is possible to spit a movie that part one is a VCD, part two a
 # file on the harddisc.
-#
-# Revision 1.9  2002/12/30 15:56:11  dischi
-# store label in the videoitem
-#
-# Revision 1.8  2002/12/22 12:59:34  dischi
-# Added function sort() to (audio|video|games|image) item to set the sort
-# mode. Default is alphabetical based on the name. For mp3s and images
-# it's based on the filename. Sort by date is in the code but deactivated
-# (see mediamenu.py how to enable it)
-#
-# Revision 1.7  2002/12/22 12:23:30  dischi
-# Added deinterlacing in the config menu
-#
-# Revision 1.6  2002/12/12 11:45:02  dischi
-# Moved all icons to skins/icons
-#
-# Revision 1.5  2002/12/03 20:03:43  dischi
-# Now it's impossible to show the dvd title menu when you are already in this
-# menu. Also dvdnav support is now working (more or less, depends if mplayer
-# can dvdnav your dvd). Give it a try and select dvdnav in the item menu
-#
-# Revision 1.4  2002/12/03 19:16:23  dischi
-# Some changes in actions(): play will always play the item, for DVD/VCD
-# this means track 1. The DVD/VCD title menu is an extra action
-#
-# Revision 1.3  2002/11/28 19:56:12  dischi
-# Added copy function
-#
-# Revision 1.2  2002/11/26 20:58:44  dischi
-# o Fixed bug that not only the first character of mplayer_options is used
-# o added the configure stuff again (without play from stopped position
-#   because the mplayer -ss option is _very_ broken)
-# o Various fixes in DVD playpack
-#
-# Revision 1.1  2002/11/24 13:58:45  dischi
-# code cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -108,17 +76,19 @@ DEBUG = config.DEBUG
 TRUE  = 1
 FALSE = 0
 
-import menu
 import rc
-import skin
-import osd
+import menu
 import time
 import copy
 
 rc         = rc.get_singleton()
-skin       = skin.get_singleton()
-osd        = osd.get_singleton()
-menuwidget = menu.get_singleton()
+
+if not config.NEW_SKIN:
+    import skin
+    import osd
+    skin = skin.get_singleton()
+    osd  = osd.get_singleton()
+
 
 from item import Item
 import configure
@@ -248,7 +218,6 @@ class VideoItem(Item):
         play the item.
         """
         self.parent.current_item = self
-
         
         if self.subitems:
             self.current_subitem = self.subitems[0]
@@ -263,10 +232,11 @@ class VideoItem(Item):
                     util.mount(mountdir)
                 else:
                     # TODO: prompt for the right media
-                    skin.PopupBox('Media not found for file %s' % (file))
-                    time.sleep(2.0)
-                    rc.post_event(rc.PLAY_END)
-                    menuwidget.refresh()
+                    if not config.NEW_SKIN:
+                        skin.PopupBox('Media not found for file %s' % (file))
+                        time.sleep(2.0)
+                        rc.post_event(rc.PLAY_END)
+                        menuw.refresh()
                     return
         elif self.mode == 'dvd' or self.mode == 'vcd':
             if not self.media:
@@ -274,10 +244,11 @@ class VideoItem(Item):
                 if media:
                     self.media = media
                 else:
-                    skin.PopupBox('Media not found for %s track %s' % (self.mode, file))
-                    time.sleep(2.0)
-                    rc.post_event(rc.PLAY_END)
-                    menuwidget.refresh()
+                    if not config.NEW_SKIN:
+                        skin.PopupBox('Media not found for %s track %s' % (self.mode, file))
+                        time.sleep(2.0)
+                        rc.post_event(rc.PLAY_END)
+                        menuw.refresh()
                     return
 
         if (not self.filename or self.filename == '0') and \
@@ -316,6 +287,12 @@ class VideoItem(Item):
         if self.deinterlace:
             mplayer_options += ' -vop pp=fd'
 
+
+        self.menuw = menuw
+        self.menuw_visible = menuw.visible
+
+        if menuw.visible:
+            menuw.hide()
         self.video_player.play(file, mplayer_options, self)
 
 
@@ -324,6 +301,8 @@ class VideoItem(Item):
         stop playing
         """
         self.video_player.stop()
+        if self.menuw_visible:
+            menuw.show()
 
 
     def dvdnav(self, arg=None, menuw=None):
@@ -345,6 +324,11 @@ class VideoItem(Item):
         if arg:
             mplayer_options += ' %s' % arg
 
+        self.menuw = menuw
+        self.menuw_visible = menuw.visible
+
+        if menuw.visible:
+            menuw.hide()
         self.video_player.play('', mplayer_options, self, 'dvdnav')
 
 
@@ -358,9 +342,12 @@ class VideoItem(Item):
             uid = os.getuid()
 
             # Figure out the number of titles on this disc
-            skin.PopupBox('Scanning disc, be patient...',
-                          icon='skins/icons/misc/cdrom_mount.png')
-            osd.update()
+            if not config.NEW_SKIN:
+                skin.PopupBox('Scanning disc, be patient...',
+                              icon='skins/icons/misc/cdrom_mount.png')
+                osd.update()
+
+                
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
             if self.mode == 'dvd':
@@ -451,9 +438,12 @@ class VideoItem(Item):
             # Use the uid to make a user-unique filename
             uid = os.getuid()
 
-            skin.PopupBox('Scanning disc, be patient...',
-                          icon='skins/icons/misc/cdrom_mount.png')
-            osd.update()
+            if not config.NEW_SKIN:
+                skin.PopupBox('Scanning disc, be patient...',
+                              icon='skins/icons/misc/cdrom_mount.png')
+                osd.update()
+
+                
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
             file = self.filename
@@ -483,14 +473,18 @@ class VideoItem(Item):
             for line in open('/tmp/mplayer_dvd_%s.log' % uid).readlines():
                 p.parse(line)
             
-        configure.main_menu(self)
+        configure.main_menu(self, menuw)
         
 
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for this item
         """
-        
+
+        # when called from mplayer.py, there is no menuw
+        if not menuw:
+            menuw = self.menuw
+
         # PLAY_END: do have have to play another file?
         if self.subitems:
             if event == rc.PLAY_END:
@@ -506,10 +500,16 @@ class VideoItem(Item):
             elif event == rc.USER_END:
                 pass
 
+        if event in ( rc.STOP, rc.SELECT, rc.EXIT, rc.PLAY_END, rc.USER_END ) and \
+           self.menuw_visible:
+            menuw.show()
+            return TRUE
+        
         # show configure menu
         if event == rc.MENU:
             self.video_player.stop()
-            self.settings()
+            self.settings(menuw=menuw)
+            menuw.show()
             return TRUE
         
         # give the event to the next eventhandler in the list

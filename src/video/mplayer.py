@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/03/02 14:58:23  dischi
+# Removed osd.clearscreen and if we have the NEW_SKIN deactivate
+# skin.popupbox, refresh, etc. Use menuw.show and menuw.hide to do this.
+#
 # Revision 1.23  2003/02/24 21:13:18  dischi
 # Moved RC_MPLAYER_CMDS higher in the eventhandler
 #
@@ -139,12 +143,18 @@ import threading, signal
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-import menu       # The menu widget class
 import mixer      # Controls the volumes for playback and recording
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
-import skin       # Cause audio handling needs skin functions.
 import fnmatch
+
+if not config.NEW_SKIN:
+    import menu
+    import skin
+
+    menuwidget = menu.get_singleton()
+    skin       = skin.get_singleton()
+
 
 # RegExp
 import re
@@ -157,9 +167,7 @@ FALSE = 0
 # Setting up the default objects:
 osd        = osd.get_singleton()
 rc         = rc.get_singleton()
-menuwidget = menu.get_singleton()
 mixer      = mixer.get_singleton()
-skin       = skin.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
 _singleton = None
@@ -231,9 +239,11 @@ class MPlayer:
             print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
 
         if mode == 'file' and not os.path.isfile(filename) and not network_play:
-	    skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
-            time.sleep(2.0) 
-            menuwidget.refresh()
+            if not config.NEW_SKIN:
+                skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
+                time.sleep(2.0) 
+                menuwidget.refresh()
+
             # XXX We should really use return more.
             return 0
        
@@ -320,10 +330,6 @@ class MPlayer:
         mixer.setIgainVolume(0) # SB Live input from TV Card.
         # This should _really_ be set to zero when playing other audio.
 
-        # clear the screen for mplayer
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.update()
-
         self.thread.play_mode = self.mode
         self.thread.item  = item
         self.item  = item
@@ -360,31 +366,37 @@ class MPlayer:
         if event == rc.STOP or event == rc.SELECT:
             if self.mode == 'dvdnav':
                 self.thread.app.write('dvdnav 6\n')
+                return TRUE
             else:
+                print self.item
                 self.stop()
                 self.thread.item = None
                 rc.app = None
-                menuwidget.refresh(reload=1)
-            return TRUE
+                print self.item
+                return self.item.eventhandler(event)
 
         if event == rc.EXIT:
             self.stop()
             self.thread.item = None
             rc.app = None
             menuwidget.refresh(reload=1)
-            return TRUE
+            return self.item.eventhandler(event)
         
         if event == rc.PLAY_END or event == rc.USER_END:
             self.stop()
             rc.app = None
+            print self.item
             return self.item.eventhandler(event)
 
         if event == rc.DVD_PROTECTED:
             self.stop()
             rc.app = None
-            skin.PopupBox('The DVD is protected, see the docs for more info!')
-            osd.update()
-            time.sleep(5.0)
+
+            if not config.NEW_SKIN:
+                skin.PopupBox('The DVD is protected, see the docs for more info!')
+                osd.update()
+                time.sleep(5.0)
+
             # Forward the event as if it was a regular end of item
             event = rc.PLAY_END
             return self.item.eventhandler(event)
