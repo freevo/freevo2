@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2003/08/06 19:35:55  dischi
+# included vtrelease directly into freevo
+#
 # Revision 1.77  2003/08/05 17:41:45  dischi
 # handle empty strings in stringsize
 #
@@ -94,6 +97,7 @@ from types import *
 import objectcache
 import util
 import md5
+from fcntl import ioctl
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config, rc
@@ -338,12 +342,22 @@ class OSD:
             os.environ['SDL_VIDEODRIVER'] = 'directfb'
 
         # sometimes this fails
-        if not os.environ.has_key('SDL_VIDEODRIVER'):
-            if config.CONF.display == 'x11':
-                os.environ['SDL_VIDEODRIVER'] = 'x11'
-            if not os.environ.has_key('DISPLAY'):
-                os.environ['SDL_VIDEODRIVER'] = 'fb'
+        if not os.environ.has_key('SDL_VIDEODRIVER') and \
+               config.CONF.display == 'x11':
+            os.environ['SDL_VIDEODRIVER'] = 'x11'
 
+        if config.CONF.display == 'mga':
+            # set ioctl (tty, KDSETMODE, KD_TEXT)
+            try:
+                fd = os.open('/dev/tty0', os.O_RDONLY | os.O_NONBLOCK)
+                try:
+                    ioctl(fd, 0x4B3A, 0)
+                except:
+                    pass
+                os.close(fd)
+            except:
+                pass
+            
         # Initialize the PyGame modules.
         pygame.display.init()
         pygame.font.init()
@@ -377,10 +391,7 @@ class OSD:
         self.update()
 
         if config.OSD_SDL_EXEC_AFTER_STARTUP:
-            if os.path.isfile(config.OSD_SDL_EXEC_AFTER_STARTUP):
-                os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
-            else:
-                print "ERROR: %s: no such file" % config.OSD_SDL_EXEC_AFTER_STARTUP
+            os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
 
         self.sdl_driver = pygame.display.get_driver()
 
@@ -466,10 +477,7 @@ class OSD:
         """
         pygame.quit()
         if config.OSD_SDL_EXEC_AFTER_CLOSE:
-            if os.path.isfile(config.OSD_SDL_EXEC_AFTER_CLOSE):
-                os.system(config.OSD_SDL_EXEC_AFTER_CLOSE)
-            else:
-                print "ERROR: %s: no such file" % config.OSD_SDL_EXEC_AFTER_CLOSE
+            os.system(config.OSD_SDL_EXEC_AFTER_CLOSE)
 
 
     def stopdisplay(self):
