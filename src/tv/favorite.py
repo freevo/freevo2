@@ -45,7 +45,7 @@ class FavoriteItem(Item):
     A favorite item to add/delete/change a favorite for the recordserver.
     """
     def __init__(self, name, start, parent=None):
-        Item.__init__(self, parent, skin_type='video')
+        Item.__init__(self, parent)
         self.name  = self.title = name
         self.start = start
 

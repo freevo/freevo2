@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/01/08 10:27:17  dischi
+# remove unneeded skin_type parameter
+#
 # Revision 1.10  2004/08/01 10:41:52  dischi
 # deactivate plugin
 #
@@ -106,7 +109,7 @@ class RadioMainMenuItem(Item):
     of commands in a submenu.
     """
     def __init__(self, parent):
-        Item.__init__(self, parent, skin_type='radio')
+        Item.__init__(self, parent)
         self.name = _( 'Radio' )
 
 

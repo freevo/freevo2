@@ -54,7 +54,7 @@ class ProgramItem(Item):
     A tv program item for the tv guide and other parts of the tv submenu.
     """
     def __init__(self, program, parent=None):
-        Item.__init__(self, parent, skin_type='video')
+        Item.__init__(self, parent)
         self.program = program
         self.title = program.title
         self.name  = program.title

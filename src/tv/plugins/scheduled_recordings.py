@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/01/08 10:27:18  dischi
+# remove unneeded skin_type parameter
+#
 # Revision 1.10  2004/10/06 18:59:52  dischi
 # remove import rc
 #
@@ -61,7 +64,7 @@ from tv.program_display import ProgramItem
 
 class ScheduledRecordingsItem(Item):
     def __init__(self, parent):
-        Item.__init__(self, parent, skin_type='tv')
+        Item.__init__(self, parent)
         self.name = _('Scheduled Recordings')
         self.menuw = None
 

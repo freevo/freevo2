@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/01/08 10:27:17  dischi
+# remove unneeded skin_type parameter
+#
 # Revision 1.10  2005/01/06 18:49:05  dischi
 # remove old tv_util
 #
@@ -88,7 +91,7 @@ DEBUG = config.DEBUG
 
 class ManualRecordItem(Item):
     def __init__(self, parent):
-        Item.__init__(self, parent, skin_type='video')
+        Item.__init__(self, parent)
 
         self.name = _("Manual Record")
 

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2005/01/08 10:27:17  dischi
+# remove unneeded skin_type parameter
+#
 # Revision 1.8  2004/08/27 14:22:01  dischi
 # The complete image code is working again and should not crash. The zoom
 # handling got a complete rewrite. Only the gphoto plugin is not working
@@ -64,7 +67,7 @@ class ApodMainMenuItem(Item):
     of commands in a submenu.
     """
     def __init__(self, parent, apoddir):
-        Item.__init__(self, parent, skin_type='image')
+        Item.__init__(self, parent)
         self.name = _( 'APOD' )
         self.title = _( 'APOD' )
         self.apoddir = apoddir
