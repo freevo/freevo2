@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/06/29 20:43:30  dischi
+# o mmpython support
+# o mplayer is now a plugin
+#
 # Revision 1.43  2003/06/23 00:16:04  outlyer
 # Fixed the regular expression. It wasn't making bookmarks when less than
 # 1000 seconds has elapsed. I don't know who made this one, but just in case,
@@ -174,17 +178,22 @@ FALSE = 0
 # Setting up the default objects:
 osd        = osd.get_singleton()
 
-# Module variable that contains an initialized MPlayer() object
-_singleton = None
+# contains an initialized MPlayer() object
+mplayer = None
 
-def get_singleton():
-    global _singleton
+class PluginInterface(plugin.Plugin):
+    """
+    Mplayer plugin for the video player. Use mplayer to play all video
+    files.
+    """
+    def __init__(self):
+        global mplayer
+        # create the mplayer object
+        plugin.Plugin.__init__(self)
+        mplayer = util.SynchronizedObject(MPlayer())
 
-    # One-time init
-    if _singleton == None:
-        _singleton = MPlayer()
-        
-    return _singleton
+        # register it as the object to play audio
+        plugin.register(mplayer, plugin.VIDEO_PLAYER)
 
 
 def vop_append(command):
@@ -502,21 +511,8 @@ class MPlayerParser:
     
     def __init__(self, item):
         self.item = item
-        self.RE_AUDIO = re.compile("^\[open\] audio stream: [0-9] audio format:"+\
-                                   "(.*)aid: ([0-9]*)").match
-        self.RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
-                                      "([a-z][a-z])").match
-        self.RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
-        self.RE_AVI_AUIDIO = re.compile("^==> Found audio stream: ([0-9]*)").match
-        self.RE_VOBSUB = re.compile("^\[vobsub\] subtitle \(vobsubid\): "+\
-                                    "([0-9]*) language ([a-z][a-z])").match
         self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
         self.RE_START = re.compile("^Starting playback\.\.\.").match
-
-        self.RE_SIZE = re.compile("^VIDEO:.* ([0-9]+)x([0-9]+) ").match
-
-        self.parse_additional_data = not (self.item.available_audio_tracks or \
-                                          self.item.available_subtitles )
 
         # DVD items also store mplayer_audio_broken to check if you can
         # start them with -alang or not
@@ -527,28 +523,6 @@ class MPlayerParser:
             
         
     def parse(self, line):
-        if self.parse_additional_data:
-            m = self.RE_AUDIO(line)
-            if m: self.item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
-
-            m = self.RE_SUBTITLE(line)
-            if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
-
-            m = self.RE_CHAPTER(line)
-            if m: self.item.available_chapters = int(m.group(1))
-
-            m = self.RE_AVI_AUIDIO(line)
-            if m: self.item.available_audio_tracks += [ (m.group(1),
-                                                         'stream %s' % m.group(1)) ]
-
-            m = self.RE_VOBSUB(line)
-            if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
-
-            m = self.RE_SIZE(line)
-            if m:
-                self.item.video_width = m.group(1)
-                self.item.video_height = m.group(2)
-
         if self.check_audio:
             if line.find('MPEG: No audio stream found -> no sound') == 0:
                 # OK, audio is broken, restart without -alang
@@ -558,7 +532,6 @@ class MPlayerParser:
                 
         if self.RE_START(line):
             print 'data parsing done'
-            self.parse_additional_data = FALSE
             if self.check_audio == 1:
                 # audio seems to be ok
                 self.item.mplayer_audio_broken = FALSE

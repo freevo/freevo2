@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/06/29 20:43:30  dischi
+# o mmpython support
+# o mplayer is now a plugin
+#
 # Revision 1.20  2003/05/11 16:22:14  dischi
 # use format_text for data
 #
@@ -61,6 +65,7 @@
 import os
 import re
 import traceback
+import mmpython
 
 import config
 import util
@@ -251,7 +256,7 @@ def xml_parseInfo(info_node):
         elif node.name == u'genre':
             i['genre'] = node.textof().encode('latin-1')
         elif node.name == u'runtime':
-            i['runtime'] = node.textof().encode('latin-1')
+            i['length'] = node.textof().encode('latin-1')
         elif node.name == u'tagline':
             i['tagline'] = util.format_text(node.textof().encode('latin-1'))
         elif node.name == u'plot':
@@ -575,6 +580,14 @@ def parseMovieFile(file, parent, duplicate_check):
 
             movies += [ mitem ]
 
+    for m in movies:
+        m.fxd_file = file
+        if not m.subitems and os.path.isfile(m.filename):
+            mminfo = mmpython.parse(m.filename)
+            for i in m.info:
+                if m.info[i]:
+                    mminfo[i] = m.info[i]
+            m.info = mminfo
     return movies
 
 

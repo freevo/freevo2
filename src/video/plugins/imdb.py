@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/06/29 20:43:30  dischi
+# o mmpython support
+# o mplayer is now a plugin
+#
 # Revision 1.12  2003/06/27 11:34:09  dischi
 # some small fixes for movies on rom drive
 #
@@ -103,7 +107,7 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
 
-        if item.type == 'video'  and not item.info:
+        if item.type == 'video'  and not hasattr(item, 'fxd_file'):
             if item.mode == 'file':
                 return [ ( self.imdb_search_file, 'Search IMDB for this file',
                            'imdb_search_or_cover_search') ]
@@ -175,7 +179,7 @@ class PluginInterface(plugin.ItemPlugin):
         box = PopupBox(text='searching IMDB...')
         box.show()
         
-        name = self.item.filename
+        name = self.item.name
         
         name  = os.path.basename(os.path.splitext(name)[0])
         name  = re.sub('([a-z])([A-Z])', point_maker, name)

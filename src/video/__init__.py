@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/29 20:43:30  dischi
+# o mmpython support
+# o mplayer is now a plugin
+#
 # Revision 1.4  2003/04/28 17:57:11  dischi
 # exception handling for bad fxd files
 #
@@ -42,6 +46,7 @@
 #endif
 
 
+import mmpython
 import config
 import util
 import xml_parser
@@ -63,7 +68,12 @@ def cwd(parent, files):
             items += x
 
     for file in util.find_matches(files, config.SUFFIX_VIDEO_FILES):
-        x = VideoItem(file, parent)
+        if parent.media:
+            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
+                                     file[len(parent.media.mountdir)+1:])
+        else:
+            url = file
+        x = VideoItem(file, parent, mmpython.parse(url))
         if parent.media:
             file_id = parent.media.id + file[len(os.path.join(parent.media.mountdir,"")):]
             try:

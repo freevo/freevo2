@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2003/06/29 20:43:30  dischi
+# o mmpython support
+# o mplayer is now a plugin
+#
 # Revision 1.56  2003/06/28 02:01:58  outlyer
 # Mplayer won't play a file on a CD rom if -dvd-device is specified and it isn't a
 # DVD rom drive, so just pass -dvd-device if playing an actual DVD.
@@ -145,7 +149,6 @@ import re
 
 import config
 import util
-import mplayer
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -166,11 +169,11 @@ from gui.ConfirmBox import ConfirmBox
 from item import Item
 
 import configure
-
+import plugin
 
 class VideoItem(Item):
-    def __init__(self, filename, parent):
-        Item.__init__(self, parent)
+    def __init__(self, filename, parent, info=None):
+        Item.__init__(self, parent, info)
 
         # fix values
         self.type  = 'video'
@@ -192,15 +195,13 @@ class VideoItem(Item):
 
         self.filename = filename
         self.id       = filename
-        self.name     = util.getname(filename)
+        if not self.name:
+            self.name     = util.getname(filename)
+        self.basename = os.path.basename(os.path.splitext(filename)[0])
         self.tv_show  = FALSE
         self.mplayer_options = ''
         self.xml_file = None
         
-        # XML file infos
-        # possible values are: genre, runtime, tagline, plot, year, rating
-        self.info = {}
-
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(self.name))
@@ -226,10 +227,10 @@ class VideoItem(Item):
             
         # find image for this file
         # First check in COVER_DIR
-        if os.path.isfile(config.COVER_DIR+self.name+'.png'):
-            self.image = config.COVER_DIR+self.name+'.png'
-        elif os.path.isfile(config.COVER_DIR+self.name+'.jpg'):
-            self.image = config.COVER_DIR+self.name+'.jpg'
+        if os.path.isfile(config.COVER_DIR+self.basename+'.png'):
+            self.image = config.COVER_DIR+self.basename+'.png'
+        elif os.path.isfile(config.COVER_DIR+self.basename+'.jpg'):
+            self.image = config.COVER_DIR+self.basename+'.jpg'
         # Then check for episode in TV_SHOW_DATA_DIR
         if os.path.isfile(os.path.splitext(filename)[0] + ".png"):
             self.image = os.path.splitext(filename)[0] + ".png"
@@ -237,12 +238,11 @@ class VideoItem(Item):
             self.image = os.path.splitext(filename)[0] + ".jpg"
 
 
-        self.video_player = mplayer.get_singleton()
+        self.video_player = plugin.getbyname(plugin.VIDEO_PLAYER)
 
         # variables only for VideoItem
         self.label = ''
         
-        self.scanned = FALSE
         self.available_audio_tracks = []
         self.available_subtitles    = []
         self.available_chapters     = 0
@@ -288,14 +288,6 @@ class VideoItem(Item):
         return self.name
 
     
-    def getattr(self, attr):
-        """
-        return the specific attribute as string or an empty string
-        """
-        if self.info and self.info.has_key(attr) and attr == 'length':
-            return '%d:%02d' % (int(self.info[attr] / 60), int(self.info[attr] % 60))
-        return Item.getattr(self, attr)
-
     # ------------------------------------------------------------------------
     # actions:
 
@@ -558,89 +550,9 @@ class VideoItem(Item):
         """
         Generate special menu for DVD/VCD/SVCD content
         """
-        pop = None
-
         if not self.menuw:
             self.menuw = menuw
 
-
-        # XXX all this scanning can be deleted if we switch to mmpython
-        # XXX also delete 'pop' in this function, it's already scanned by
-        # XXX mmpython and we will never use the popup box
-        # XXX
-        # XXX BEGIN BLOCK MARKED FOR DELETION
-        # XXX
-        if not self.num_titles:
-            # Use the uid to make a user-unique filename
-            uid = os.getuid()
-
-            # Figure out the number of titles on this disc
-            pop = PopupBox(text='Scanning disc, be patient...',
-                           icon='skins/icons/misc/cdrom_mount.png')
-            pop.show()
-
-                
-            os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
-
-            if self.mode == 'dvd':
-                # Get the number of titles on the DVD
-                probe_file = '-dvd 1'
-            else:
-                # play track 99 which isn't there (very sure!), scan mplayers list
-                # of found tracks to get the total number of tracks
-                probe_file = '-vcd 99'
-
-            cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
-            if self.media:
-                cmd += ' -cdrom-device %s -dvd-device %s' % \
-                       (self.media.devicename, self.media.devicename)
-            cmd += ' %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % (probe_file, uid)
-
-            os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
-
-            timeout = time.time() + 20.0
-            done = 0
-            while 1:
-                if time.time() >= timeout:
-                    print 'DVD/VCD disc read failed!'
-                    break
-
-                if os.path.isfile('/tmp/mplayer_dvd_done_%s' % uid):
-                    done = 1
-                    break
-
-            found = 0
-            num_files = 0
-
-            if done and self.mode == 'dvd':
-                # Look for 'There are NNN titles on this DVD'
-                for line in util.readfile('/tmp/mplayer_dvd_%s.log' % uid):
-                    if line.find('titles on this DVD') != -1:
-                        self.num_titles = int(line.split()[2])
-                        print 'Got num_titles = %s from str "%s"' % (self.num_titles, line)
-                        found = 1
-                        break
-
-            elif done:
-                # Look for 'track NN'
-                for line in util.readfile('/tmp/mplayer_dvd_%s.log' % uid):
-                    if line.find('track ') == 0:
-                        self.num_titles = int(line[6:8])
-                        found = 1
-
-                # Count the files on the VCD
-                util.mount(self.media.mountdir)
-                for dirname in ('/mpegav/', '/MPEG2/', '/mpeg2/'):
-                    num_files += len(util.match_files(self.media.mountdir + dirname,
-                                                      [ 'mpg', 'dat' ]))
-                util.umount(self.media.mountdir)
-
-            if not done or not found:
-                self.num_titles = 100 # XXX Kludge
-
-        # XXX
-        # XXX END BLOCK MARKED FOR DELETION
-        # XXX
 
         #
         # Done scanning the disc, set up the menu.
@@ -650,8 +562,6 @@ class VideoItem(Item):
         if self.num_titles == 1:
             file = copy.copy(self)
             file.filename = '1'
-            if pop:
-                pop.destroy()
             file.play(menuw = self.menuw)
             return
 
@@ -670,9 +580,6 @@ class VideoItem(Item):
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
         moviemenu.item_types = 'video'
-        if pop:
-            pop.destroy()
-
         self.menuw.pushmenu(moviemenu)
         return
 
@@ -680,62 +587,7 @@ class VideoItem(Item):
     def settings(self, arg=None, menuw=None):
         if not self.menuw:
             self.menuw = menuw
-        pop = None
-        if not self.scanned:
-            self.scanned = TRUE
-            
-            # Use the uid to make a user-unique filename
-            uid = os.getuid()
-
-            if self.media:
-                pop = PopupBox(text='Scanning disc, be patient...',
-                               icon='skins/icons/misc/cdrom_mount.png')
-                if not (self.mode == 'dvd' or self.mode == 'vcd'):
-                    util.mount(os.path.dirname(self.filename))
-            else:
-                pop = PopupBox(text='Scanning file, be patient...')
-    
-            pop.show()
-
-            os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
-
-            file = self.filename
-
-            if not file:
-                file = '1'
-
-            cmd = config.MPLAYER_CMD + ' -v -nocache -nolirc -vo null -frames 0 '
-            if self.media:
-                cmd += ' -cdrom-device %s -dvd-device %s' % \
-                       (self.media.devicename, self.media.devicename)
-            if self.mode == 'dvd' or self.mode == 'vcd':
-                cmd += ' -%s %s' % (self.mode, file)
-            else:
-                cmd += ' "%s"' % file
-
-            cmd += ' 2> /dev/null > /tmp/mplayer_dvd_%s.log' % uid
-
-            os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
-
-            timeout = time.time() + 20.0
-            done = 0
-            while 1:
-                if time.time() >= timeout:
-                    print 'DVD/VCD disc read failed!'
-                    break
-
-                if os.path.isfile('/tmp/mplayer_dvd_done_%s' % uid):
-                    done = 1
-                    break
-
-            p = mplayer.MPlayerParser(self)
-            for line in util.readfile('/tmp/mplayer_dvd_%s.log' % uid):
-                p.parse(line)
-
-            
         confmenu = configure.get_main_menu(self, self.menuw, self.xml_file)
-        if pop:
-            pop.destroy()
         self.menuw.pushmenu(confmenu)
         
 
