@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/04 18:37:19  dischi
+# make ProgressBox work again
+#
 # Revision 1.4  2004/10/03 15:54:00  dischi
 # make PopupBoxes work again as they should
 #
@@ -50,28 +53,17 @@ class ProgressBox(PopupBox):
     """
     """
     def __init__(self, text, full=0):
+        PopupBox.__init__(self, text)
 
-        PopupBox.__init__(self, 'ProgressBox is broken...just wait :-)')
-        return
-
-        PopupBox.__init__(self, text, None, x, y, width, height,
-                          icon, vertical_expansion, text_prop)
-
-        # FIXME: that can't be correct
-        space = self.content_layout.spacing * 2
-
-        self.bar = Progressbar(self.x1 + space, self.y2 - 2 * space, self.x2 - space,
-                               self.y2 - space, full, self.widget_normal)
-        self.add(self.bar)
-
-        # resize label to fill the rest of the box
-        self.label.set_position(self.x1 + space, self.y1 + space,
-                                self.x2 - space, self.y2 - 3 * space)
-
+        c = self.content_pos
+        h = 25
+        y = self.add_row(h)
+        
+        self.bar = Progressbar((c.x1, y), ((self.get_size()[0] - c.width), h),
+                               full, self.widget_normal)
+        self.add_child(self.bar)
 
 
     def tick(self):
-        return
-    
         self.bar.tick()
-        self.screen.update()
+        self.update()

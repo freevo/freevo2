@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/04 18:37:20  dischi
+# make ProgressBox work again
+#
 # Revision 1.2  2004/07/27 18:52:31  dischi
 # support more layer (see README.txt in backends for details
 #
@@ -38,29 +41,26 @@
 # ----------------------------------------------------------------------- */
 
 
-from base import GUIObject
+from mevas.image import CanvasImage
+from rectangle import Rectangle
 
-class Progressbar(GUIObject):
+class Progressbar(CanvasImage):
     """
     """
-
-    def __init__(self, x1, y1, x2, y2, full, style):
-        
-        GUIObject.__init__(self, x1, y1, x2, y2)
+    def __init__(self, pos, size, full, style):
+        CanvasImage.__init__(self, size)
+        self.set_pos(pos)
 
         self.bar_position = 0
-        self.full         = full
-        self.style        = style
+        self.full = full
+        self.style = style
+        self._draw()
+        
 
-
-    def draw(self, rect=None):
-        if not self.screen:
-            raise TypeError, 'no screen defined for %s' % self
-
+    def _draw(self):
+        self.draw_rectangle((0,0), self.get_size(), (0,0,0,0), 1)
         r = self.style.rectangle
-        self.screen.drawbox(self.x1, self.y1, self.x2, self.y2,
-                            color=0xaa000000, border_size=r.size,
-                            border_color=r.color, radius=r.radius)
+        self.draw_image(Rectangle((0,0), self.get_size(), None, r.size, r.color, r.radius))
 
         # catch division by zero error.
         if not self.full:
@@ -68,14 +68,14 @@ class Progressbar(GUIObject):
         
         position = min((self.bar_position * 100) / self.full, 100)
 
-        width = ((self.x2 - self.x1) * position ) / 100
+        width = ((self.get_size()[0]) * position ) / 100
         if width > r.size * 2:
-            self.screen.drawbox(self.x1, self.y1, self.x1 + width, self.y2,
-                                color=r.bgcolor, border_size=r.size,
-                                border_color=r.color, radius=r.radius)
+            self.draw_image(Rectangle((0,0), (width, self.get_size()[1]),
+                                      r.bgcolor, r.size, r.color, r.radius))
+
 
     def tick(self):
         if self.bar_position < self.full:
             self.bar_position += 1
-        self.modified()
+        self._draw()
 
