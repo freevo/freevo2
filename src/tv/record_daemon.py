@@ -72,7 +72,7 @@ class ScheduleItem:
         cmd = self.cmd + (' -v -endpos %s' % len_secs)
 
         #cmd += ' >& /dev/null &'
-        cmd += ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
+        if config.DEBUG: cmd += ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
 
         return cmd
         
