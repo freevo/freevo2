@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. /etc/sysconfig/freevo
+
+if [ $FREEVO_UPDATE_XMLTV == 1 ] ; then
+    /usr/bin/freevo tv_grab
+fi
