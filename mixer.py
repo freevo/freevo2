@@ -39,7 +39,7 @@ class Mixer:
     SOUND_MASK_LINE = 64
     
     def __init__(self):
-        self.mixfd = open('/dev/mixer0', 'r')   # XXX Hardcoded to mixer0
+        self.mixfd = open('/dev/mixer', 'r')   # XXX Hardcoded to mixer0
         self.mainVolume = 0
         self.pcmVolume = 0
         self.lineinVolume = 0
