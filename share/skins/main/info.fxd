@@ -352,20 +352,38 @@
 	    <newline/>
 	  </if>
 	  <goto_pos y="20" mode="relative"/>
-	  <if expression="tagline">
-	    <text font="info tagline" width="max" expression="tagline"/>
+
+	  <!-- audio dir -->
+	  <if expression="display_type == 'audio' and artist and artist != 'Various'">
+	    <text width="100" font="info label">Artist:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="artist"/>
 	    <newline/>
-	    <goto_pos y="10" mode="relative"/>
+	    <if expression="album">
+	      <text width="100" font="info label">Album:</text>
+	      <goto_pos x="10" mode="relative"/>
+	      <text font="info value" expression="album"/>
+	      <newline/>
+	    </if>
 	  </if>
-	  <if expression="plot">
-	    <text font="info plot" height="max" mode="soft" 
-	      align="justified" expression="plot"/>
-	    <newline/>
-	  </if>
-	  <if expression="content and not plot">
-	    <text font="info plot" height="max" mode="soft" 
-	      align="justified" expression="content"/>
-	    <newline/>
+
+	  <!-- other dir -->
+	  <if expression="display_type != 'audio'">
+	    <if expression="tagline">
+	      <text font="info tagline" width="max" expression="tagline"/>
+	      <newline/>
+	      <goto_pos y="10" mode="relative"/>
+	    </if>
+	    <if expression="plot">
+	      <text font="info plot" height="max" mode="soft" 
+		align="justified" expression="plot"/>
+	      <newline/>
+	    </if>
+	    <if expression="content and not plot">
+	      <text font="info plot" height="max" mode="soft" 
+		align="justified" expression="content"/>
+	      <newline/>
+	    </if>
 	  </if>
 	</item>
 
