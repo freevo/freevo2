@@ -7,6 +7,7 @@ Release 1.4.0-rc? (2003-??-??):
 -------------------------------
  * Added a playlist plugin
 
+	
 Release 1.4.0-rc1 (2003-10-05):
 -------------------------------
  * changes in the directory structure
@@ -20,7 +21,8 @@ Release 1.4.0-rc1 (2003-10-05):
  * Support for FLAC encoding, tagging and playback (xine or mplayer >= 1.0pre2)
  * Many fixes for Python 2.3 warnings
  * bugfixes and better error handling
- 
+ * new games system (DIR_GAMES changed!)
+	
 
 Release 1.3.4 (2003-08-03) -- Bugfix release:
 ---------------------------------------------
