@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/09/12 20:32:49  dischi
+# move holiday settings into the plugin
+#
 # Revision 1.38  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -377,23 +380,49 @@ class weather(IdleBarPlugin):
 
 class holidays(IdleBarPlugin):
     """
-    This class checks if the current date is a holiday and will
-    display a user specified icon for that holiday.    
+    Display some holidays in the idlebar
+    
+    This plugin checks if the current date is a holiday and will
+    display a specified icon for that holiday. If no holiday is found,
+    nothing will be displayed. If you use the idlebar, you should activate
+    this plugin, most of the time you won't see it.
+
+    You can customize the list of holidays with the variable HOLIDAYS in
+    local_config.py. The default value is:
+
+    [ ('01-01',  'newyear.png'),
+      ('02-14',  'valentine.png'),
+      ('05-07',  'freevo_bday.png'),
+      ('07-03',  'usa_flag.png'),
+      ('07-04',  'usa_flag.png'),
+      ('10-30',  'ghost.png'),
+      ('10-31',  'pumpkin.png'),
+      ('12-21',  'snowman.png'),
+      ('12-25',  'christmas.png')]
     """
     def __init__(self):
         IdleBarPlugin.__init__(self)
    
+    def config(self):
+        return [ ('HOLIDAYS', [ ('01-01',  'newyear.png'),
+                                ('02-14',  'valentine.png'),
+                                ('05-07',  'freevo_bday.png'),
+                                ('07-03',  'usa_flag.png'),
+                                ('07-04',  'usa_flag.png'),
+                                ('10-30',  'ghost.png'),
+                                ('10-31',  'pumpkin.png'),
+                                ('12-21',  'snowman.png'),
+                                ('12-25',  'christmas.png')],
+                  'list of holidays this plugin knows') ]
+
     def get_holiday_icon(self):
-        if not config.HOLIDAYS:
-            return 0    
-        else:
-           # Creates a string which looks like "07-04" meaning July 04
-            todays_date = time.strftime('%m-%d')
-            
-            for i in config.HOLIDAYS:                        
-                holiday, icon = i
-                if todays_date == holiday:
-                    return os.path.join(config.ICON_DIR, 'holidays', icon)
+        # Creates a string which looks like "07-04" meaning July 04
+        todays_date = time.strftime('%m-%d')
+
+        for i in config.HOLIDAYS:                        
+            holiday, icon = i
+            if todays_date == holiday:
+                return os.path.join(config.ICON_DIR, 'holidays', icon)
 
     def draw(self, (type, object), x, osd):
         icon = self.get_holiday_icon()
