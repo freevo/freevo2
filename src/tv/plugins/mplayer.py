@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/11/24 04:40:29  krister
+# TV viewing is broken(!) Here are some fixes to make it a little better, but it still cannot change channels when viewing TV.
+#
 # Revision 1.24  2003/11/23 19:53:01  rshortt
 # Move some code into src/tv/channels.py and also make use of Freevo's
 # frequency tables (and custom frequencies).
@@ -122,12 +125,12 @@ class MPlayer:
         if tuner_channel != None:
             
             try:
-                self.fc.chanSet(tuner_channel)
+                self.fc.chanSet(tuner_channel, app='mplayer')
             except ValueError:
                 pass
 
         if mode == 'tv':
-            tuner_freq = self.fc.chanSet(app='mplayer')
+            tuner_freq = self.fc.chanSet(tuner_channel, app='mplayer')
             tuner_channel = self.fc.getChannel()
 
             cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
@@ -149,9 +152,9 @@ class MPlayer:
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
 
-            tvcmd = ('tv://%s -tv driver=%s:freq=%s:%s:%s:%s:'
+            tvcmd = ('tv://%s -tv driver=%s:%s:%s:%s:'
                      '%s:width=%s:height=%s:%s %s' %
-                     (tuner_channel, config.TV_DRIVER, tuner_freq, device, 
+                     (tuner_channel, config.TV_DRIVER, device, 
                       input, norm, chanlist, w, h, outfmt, config.TV_OPTS))
             
             # Build the MPlayer command
