@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/12/31 16:13:15  rshortt
+# Make it possible to change channels between those that have different
+# VideoGroups.  For example, on my setup channel 3 is my webcam, 4-50 is
+# analog cable, and 200+ is my satellite system.  I can start on channel 3,
+# see my webcam on the tv (security cam), channel+ and instantly view my
+# cable channels and channel+ through to my satellite channels.
+#
 # Revision 1.29  2003/11/27 03:11:08  rshortt
 # Shuffle things around a little bit and add ivtv capabilities.  I intend to
 # depricate the ivtv_basic_tv plugin in favour of this once since that is
@@ -148,13 +155,16 @@ class MPlayer:
         self.current_vg = None
 
 
-    def Play(self, mode, tuner_channel=None, channel_change=0):
+    def Play(self, mode, tuner_channel=None):
+
+        print 'PLAY CHAN: %s' % tuner_channel
 
         if not tuner_channel:
             tuner_channel = self.fc.getChannel()
+            print 'PLAY CHAN: %s' % tuner_channel
             
         vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
-
+        print 'PLAY GROUP: %s' % vg.desc
 
         # Convert to MPlayer TV setting strings
         norm = 'norm=%s' % vg.tuner_norm
@@ -172,6 +182,7 @@ class MPlayer:
             if vg.group_type == 'ivtv':
                 ivtv_dev = ivtv.IVTV(vg.vdev)
                 ivtv_dev.init_settings()
+                ivtv_dev.setinput(vg.input_num)
                 ivtv_dev.print_settings()
                 self.fc.chanSet(tuner_channel)
             
@@ -179,6 +190,13 @@ class MPlayer:
 
                 if config.MPLAYER_ARGS.has_key('ivtv'):
                     args += (config.MPLAYER_ARGS['ivtv'],)
+
+            elif vg.group_type == 'webcam':
+                self.fc.chanSet(tuner_channel, app='mplayer')
+                tvcmd = ''
+
+                if config.MPLAYER_ARGS.has_key('webcam'):
+                    args += (config.MPLAYER_ARGS['webcam'],)
 
             else:
                 freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
@@ -254,9 +272,9 @@ class MPlayer:
 
         
         
-    def Stop(self):
+    def Stop(self, channel_change=0):
         mixer = plugin.getbyname('MIXER')
-        if mixer:
+        if mixer and not channel_change:
             mixer.setLineinVolume(0)
             mixer.setMicVolume(0)
             mixer.setIgainVolume(0) # Input on emu10k cards.
@@ -264,7 +282,7 @@ class MPlayer:
         self.thread.stop('quit\n')
 
         rc.app(self.prev_app)
-        if osd.focused_app():
+        if osd.focused_app() and not channel_change:
             osd.focused_app().show()
 
         print 'stopped %s app' % self.mode
@@ -279,28 +297,31 @@ class MPlayer:
             return TRUE
         
         elif event == em.TV_CHANNEL_UP or event == em.TV_CHANNEL_DOWN:
-            # XXX: channel Up/Down code will have to be reworked in order
-            #      to handle multiple VideoGroups between channels.
+
+            if event == em.TV_CHANNEL_UP:
+                nextchan = self.fc.getNextChannel()
+            else:
+                nextchan = self.fc.getPrevChannel()
+
+            print 'NEXT CHAN: %s' % nextchan
+            nextvg = self.fc.getVideoGroup(nextchan)
+            print 'NEXT GROUP: %s' % nextvg.desc
+
+            if self.current_vg != nextvg:
+                print 'NEW GROUP!'
+                self.Stop(channel_change=1)
+                self.Play('tv', nextchan)
+                return TRUE
 
             if self.mode == 'vcr':
                 return
             
             elif self.current_vg.group_type == 'ivtv':
-                # Go to the prev/next channel in the list
-                if event == em.TV_CHANNEL_UP:
-                    self.fc.chanUp()
-                else:
-                    self.fc.chanDown()
-    
+                self.fc.chanSet(nextchan)
                 self.thread.app.write('seek 999999 0\n')
 
             else:
-                # Go to the prev/next channel in the list
-                if event == em.TV_CHANNEL_UP:
-                    freq_khz = self.fc.chanUp(app=self.thread.app)
-                else:
-                    freq_khz = self.fc.chanDown(app=self.thread.app)
-    
+                freq_khz = self.fc.chanSet(nextchan, app=self.thread.app)
                 new_freq = '%1.3f' % (freq_khz / 1000.0)
                 self.thread.app.write('tv_set_freq %s\n' % new_freq)
 
