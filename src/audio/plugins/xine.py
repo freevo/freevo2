@@ -4,25 +4,16 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: Use xine (or better fbxine) to play audio files. This requires
-#        xine-ui > 0.9.22 (when writing this plugin this means cvs)
-#
-# Todo:
-#
+# This contains plugin, control and childapp classes for using xine as
+# audio player.
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/09/29 18:58:17  dischi
+# cleanup
+#
 # Revision 1.19  2004/09/29 18:48:41  dischi
 # fix xine lirc handling
-#
-# Revision 1.18  2004/09/29 18:47:36  dischi
-# fix xine lirc handling
-#
-# Revision 1.17  2004/08/01 10:42:23  dischi
-# update to new application/eventhandler code
-#
-# Revision 1.16  2004/07/10 12:33:38  dischi
-# header cleanup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,67 +36,46 @@
 #
 # ----------------------------------------------------------------------- */
 
-
+# python imports
 import re
 
-import config     # Configuration handler. reads config file.
-import childapp   # Handle child applications
-import rc         # The RemoteControl class.
-import util.popen3
-from event import *
+# freevo imports
+import config
+import childapp
 import plugin
+from event import *
 
 
 class PluginInterface(plugin.Plugin):
     """
-    Xine plugin for the video player.
+    Xine plugin for the audio player.
     """
     def __init__(self):
-        plugin.Plugin.__init__(self)
-
         try:
-            config.CONF.fbxine
+            if not config.CONF.fbxine:
+                raise Exception
         except:
-            print String(_( 'ERROR' )) + ': ' + \
-                  String(_( "'fbxine' not found, plugin 'xine' deactivated" ))
+            self.reason = "'fbxine' not found"
             return
 
-        if not hasattr(config, 'FBXINE_VERSION'):
-            config.FBXINE_VERSION = 0
-            for data in util.popen3.stdout('%s --version' % config.CONF.fbxine):
-                m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
-                if m:
-                    config.FBXINE_VERSION = int('%02d%02d%02d' % (int(m.group(1)),
-                                                                  int(m.group(2)),
-                                                                  int(m.group(3))))
-                    if data.find('cvs') >= 0:
-                        config.FBXINE_VERSION += 1
-
-            _debug_('detect fbxine version %s' % config.FBXINE_VERSION)
-
-        
-        if config.FBXINE_VERSION < 923:
-            print String(_( 'ERROR' )) + ': ' + \
-                  String(_( "'fbxine' version too old, plugin 'xine' deactivated" ))
-            print String(_( 'You need software %s' )) % 'xine-ui > 0.9.22'
+        if config.FBXINE_VERSION < '0.99.1':
+            self.reason = "'fbxine' version too old"
             return
             
+        plugin.Plugin.__init__(self)
         # register xine as the object to play
         plugin.register(Xine(), plugin.AUDIO_PLAYER, True)
 
 
-# ======================================================================
-
 class Xine:
     """
-    the main class to control xine
+    The main class to control xine for audio playback
     """
-    
     def __init__(self):
-        self.name         = 'xine'
-        self.app_mode     = 'audio'
-        self.app          = None
-        self.command = '%s -V none -A %s --stdctl' % (config.CONF.fbxine, config.XINE_AO_DEV)
+        self.name = 'xine'
+        self.app = None
+        self.command = '%s -V none -A %s --stdctl' % \
+                       (config.CONF.fbxine, config.XINE_AO_DEV)
         if config.FBXINE_USE_LIRC:
             self.command = '%s --no-lirc' % self.command
 
@@ -126,14 +96,14 @@ class Xine:
         """
         play an audio file with xine
         """
-
         self.item = item
         add_args  = []
         
         url = item.url
         if url.startswith('cdda://'):
             url = url.replace('//', '/')
-            add_args.append('cfg:/input.cdda_device:%s' % item.media.devicename)
+            add_args.append('cfg:/input.cdda_device:%s' % \
+                            item.media.devicename)
             
         command  = self.command.split(' ') + add_args + [ url ]
         self.app = XineApp(command, playerGUI)
@@ -178,14 +148,10 @@ class Xine:
         return False
 
         
-
-# ======================================================================
-
 class XineApp(childapp.ChildApp2):
     """
     class controlling the in and output from the xine process
     """
-
     def __init__(self, app, player):
         self.item        = player.item
         self.player      = player
@@ -195,13 +161,13 @@ class XineApp(childapp.ChildApp2):
 
 
     def stop_event(self):
-        return Event(PLAY_END, self.stop_reason, handler=self.player.eventhandler)
+        return Event(PLAY_END, self.stop_reason,
+                     handler=self.player.eventhandler)
 
 
     def stdout_cb(self, line):
-        if line.startswith("time: "):         # get current time
+        if line.startswith("time: "):
             self.item.elapsed = int(line[6:])
-
             if self.item.elapsed != self.elapsed:
                 self.player.refresh()
             self.elapsed = self.item.elapsed
@@ -210,4 +176,3 @@ class XineApp(childapp.ChildApp2):
     def stderr_cb(self, line):
         if line.startswith('Unable to open MRL'):
             self.stop_reason = 1
-            

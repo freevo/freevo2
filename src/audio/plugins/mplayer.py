@@ -4,26 +4,19 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This contains plugin, control and childapp classes for using mplayer as
+# audio player.
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/09/29 18:58:17  dischi
+# cleanup
+#
 # Revision 1.40  2004/08/01 10:42:23  dischi
 # update to new application/eventhandler code
 #
 # Revision 1.39  2004/07/26 18:10:17  dischi
 # move global event handling to eventhandler.py
-#
-# Revision 1.38  2004/07/21 11:18:26  dischi
-# fix unicode error
-#
-# Revision 1.37  2004/07/10 12:33:38  dischi
-# header cleanup
-#
-# Revision 1.36  2004/07/09 04:08:50  outlyer
-# Fixed webradio support for shoutcast streams using the 'pls' extension. Most
-# use m3u, but some (including ones in the webradio.fxd file) use pls.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,15 +39,14 @@
 #
 # ----------------------------------------------------------------------- */
 
-
+# python imports
 import os
 import re
 
-import config     # Configuration handler. reads config file.
-import childapp   # Handle child applications
-
+# freevo imports
+import config
+import childapp
 import plugin
-
 from event import *
 
 
@@ -72,9 +64,8 @@ class PluginInterface(plugin.Plugin):
 
 class MPlayer:
     """
-    the main class to control mplayer
+    The main class to control mplayer for audio playback
     """
-    
     def __init__(self):
         self.name = 'mplayer'
         self.app  = None
@@ -166,20 +157,17 @@ class MPlayer:
         self.app  = MPlayerApp(command, playerGUI)
 
     
-
     def stop(self):
         """
         Stop mplayer
         """
         self.app.stop('quit\n')
-
         for p in plugin.get('mplayer_audio'):
             command = p.stop()
 
 
     def is_playing(self):
         return self.app.isAlive()
-
 
 
     def eventhandler(self, event, menuw=None):
@@ -233,7 +221,8 @@ class MPlayerApp(childapp.ChildApp2):
 
 
     def stop_event(self):
-        return Event(PLAY_END, self.stop_reason, handler=self.player.eventhandler)
+        return Event(PLAY_END, self.stop_reason,
+                     handler=self.player.eventhandler)
 
         
     def stdout_cb(self, line):
@@ -276,8 +265,6 @@ class MPlayerApp(childapp.ChildApp2):
             for p in self.stdout_plugins:
                 p.stdout(line)
                 
-
-
 
     def stderr_cb(self, line):
         if line.startswith('Failed to open'):
