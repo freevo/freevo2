@@ -79,7 +79,7 @@ class Socket:
         if self.closed:
             return
         self.closed = True
-        if self.out_buffer.getvalue():
+        if self.out_buffer.getvalue() and not self.__write_nf:
             # if need no more sending:
             self.__close()
         
