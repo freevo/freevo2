@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-17 20:53+0200\n"
+"POT-Creation-Date: 2003-10-18 12:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 msgid "Unknown CD Album"
 msgstr ""
 
-#: audio/audiodiskitem.py:95 directory.py:433 image/plugins/gphoto.py:155
+#: audio/audiodiskitem.py:95 directory.py:436 image/plugins/gphoto.py:155
 msgid "Browse directory"
 msgstr ""
 
@@ -107,136 +107,140 @@ msgstr ""
 msgid "[VUX] an audio item, do not select"
 msgstr ""
 
-#: directory.py:115
+#: directory.py:118
 msgid "Movie Playlists"
 msgstr ""
 
-#: directory.py:116
+#: directory.py:119
 msgid "Use automatic playlist for movie items."
 msgstr ""
 
-#: directory.py:118
+#: directory.py:121
 msgid "Directory Sort By Date"
 msgstr ""
 
-#: directory.py:119
+#: directory.py:122
 msgid "Sort directory by date and not by name."
 msgstr ""
 
-#: directory.py:121
+#: directory.py:124
 msgid "Directory Autoplay Single Item"
 msgstr ""
 
-#: directory.py:122
+#: directory.py:125
 msgid "Don't show directory if only one item exists and auto-select "
 msgstr ""
 
-#: directory.py:123
+#: directory.py:126
 msgid "the item."
 msgstr ""
 
-#: directory.py:125
+#: directory.py:128
 msgid "Audio Random Playlist"
 msgstr ""
 
-#: directory.py:126
+#: directory.py:129
 msgid "Show radom playlist item for audio menus."
 msgstr ""
 
-#: directory.py:128
+#: directory.py:131
 msgid "Force Skin Layout"
 msgstr ""
 
-#: directory.py:129
+#: directory.py:132
 msgid "Force skin to a specific layout. This option doesn't work with "
 msgstr ""
 
-#: directory.py:130
+#: directory.py:133
 msgid "all skins and the result may differ based on the skin."
 msgstr ""
 
-#: directory.py:132
+#: directory.py:135
 msgid "Directory Smart Sort"
 msgstr ""
 
-#: directory.py:133
+#: directory.py:136
 msgid "Use a smarter way to sort the items."
 msgstr ""
 
-#: directory.py:135
+#: directory.py:138
 msgid "Use MediaID Tag Names"
 msgstr ""
 
-#: directory.py:136
+#: directory.py:139
 msgid "Use the names from the media files tags as display name."
 msgstr ""
 
-#: directory.py:138
+#: directory.py:141
 msgid "Directory Reverse Sort"
 msgstr ""
 
-#: directory.py:139
+#: directory.py:142
 msgid "Show the items in the list in reverse order."
 msgstr ""
 
-#: directory.py:408
+#: directory.py:411
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr ""
 
-#: directory.py:409
+#: directory.py:412
 msgid "Directory"
 msgstr ""
 
-#: directory.py:436
+#: directory.py:439
 msgid "Random play all items"
 msgstr ""
 
-#: directory.py:438
+#: directory.py:441
 msgid "Recursive random play all items"
 msgstr ""
 
-#: directory.py:440
+#: directory.py:443
+msgid "Recursive play all items"
+msgstr ""
+
+#: directory.py:445
 msgid "Configure directory"
 msgstr ""
 
-#: directory.py:463
+#: directory.py:468
 msgid "Enter Password"
 msgstr ""
 
-#: directory.py:488
+#: directory.py:493
 msgid "Password incorrect"
 msgstr ""
 
-#: directory.py:532
+#: directory.py:537
 msgid "Scanning disc, be patient..."
 msgstr ""
 
-#: directory.py:534
+#: directory.py:539
 msgid "Scanning directory, be patient..."
 msgstr ""
 
-#: directory.py:851 directory.py:888
+#: directory.py:856 directory.py:893
 msgid "on"
 msgstr ""
 
-#: directory.py:853 directory.py:856 directory.py:890 directory.py:893
+#: directory.py:858 directory.py:861 directory.py:895 directory.py:898
 msgid "off"
 msgstr ""
 
-#: directory.py:858 directory.py:895
+#: directory.py:863 directory.py:900
 msgid "auto"
 msgstr ""
 
-#: directory.py:899
+#: directory.py:904
 msgid "Configure"
 msgstr ""
 
-#: main.py:123
+#: main.py:130
 msgid "shutting down..."
 msgstr ""
 
-#: main.py:229
+#: main.py:236
 msgid "Freevo Main Menu"
 msgstr ""
 
@@ -244,36 +248,36 @@ msgstr ""
 msgid "No action defined for this choice!"
 msgstr ""
 
-#: osd.py:401
+#: osd.py:408
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:402
+#: osd.py:409
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:403
+#: osd.py:410
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:404
+#: osd.py:411
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:405
+#: osd.py:412
 msgid "h = Help"
 msgstr ""
 
-#: playlist.py:238
+#: playlist.py:241
 msgid "Random Playlist"
 msgstr ""
 
-#: playlist.py:243 playlist.py:247 playlist.py:345 video/configure.py:178
+#: playlist.py:246 playlist.py:250 playlist.py:350 video/configure.py:178
 #: video/videoitem.py:290
 msgid "Play"
 msgstr ""
 
-#: playlist.py:244 playlist.py:246
+#: playlist.py:247 playlist.py:249
 msgid "Browse Playlist"
 msgstr ""
 
@@ -660,8 +664,8 @@ msgstr ""
 msgid "All Currently Recording Items Have Been Killed!"
 msgstr ""
 
-#: tv/tvguide.py:73 tv/tvguide.py:490 tv/tvguide.py:492
-#: skins/main/tvlisting_area.py:363
+#: tv/tvguide.py:73 tv/tvguide.py:518 tv/tvguide.py:520
+#: skins/main/tvlisting_area.py:367
 msgid "This channel has no data loaded"
 msgstr ""
 
