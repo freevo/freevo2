@@ -9,12 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/12/07 19:12:09  dischi
+# int support in getattr
+#
 # Revision 1.2  2003/11/25 19:00:14  dischi
 # add support for user data
 #
 # Revision 1.1  2003/11/23 16:56:28  dischi
 # a fxd parser for all kinds of fxd files using callbacks
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -250,10 +252,17 @@ class FXD:
         object.
         """
         if node and node.attrs.has_key(('',name)):
-            return node.attrs[('',name)].encode(config.LOCALE)
-        if not node and self.user_data.has_key(name):
-            return self.user_data[name]
-        return default
+            r = node.attrs[('',name)].encode(config.LOCALE)
+        elif not node and self.user_data.has_key(name):
+            r = self.user_data[name]
+        else:
+            r = default
+        if isinstance(default, int):
+            try:
+                r = int(r)
+            except:
+                r = default
+        return r
 
 
     def setattr(self, node, name, value):
