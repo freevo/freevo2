@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/18 18:29:13  outlyer
+# Made the timeformat in Freevo's TV Guide configurable, just like the date
+# format. I don't like Military time :)
+#
 # Revision 1.3  2003/06/12 00:11:39  gsbarbieri
 # Fixed the TV Guide.
 # Added the date to the Guide, it's at left-top corner of the listing
@@ -189,6 +193,9 @@ class TVListing_Area(Skin_Area):
 
         # Print the Date of the current list page
         dateformat = config.TV_DATEFORMAT
+        timeformat = config.TV_TIMEFORMAT
+        if not timeformat:
+            timeformat = '%H:%M'
         if not dateformat:
             dateformat = '%e-%b'
 
@@ -227,7 +234,7 @@ class TVListing_Area(Skin_Area):
             self.drawroundbox( math.floor(x0), ty0,
                                math.floor( col_size + x0 ) - math.floor( x0 ) + 1, head_h + 1, r )
 
-            self.write_text( time.strftime( "%H:%M", time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
+            self.write_text( time.strftime( timeformat, time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
                              head_font, content,
                              x=( x0 + ig.x ), y=( ty0 + ig.y ),
                              width=ig.width, height=-1,
