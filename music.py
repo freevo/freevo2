@@ -14,6 +14,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/09/22 08:50:08  dischi
+# deactivated ROM_DRIVES in main menu (crash!). Someone should make this
+# identifymedia compatible.
+#
 # Revision 1.11  2002/09/15 12:32:01  dischi
 # The DVD/VCD/SCVD/CD description file for the automounter can now also
 # contain skin informations. An announcement will follow. For this the
@@ -152,14 +156,17 @@ def main_menu(arg=None, menuw=None):
                                   handle_config, (type, file), type,
                                   None, None, None ) ]
                                   
-    for media in config.REMOVABLE_MEDIA:
-        if media.info:
-            if mediatype == 'AUDIO':
-                s = 'Drive %s [%s]' % (media.drivename, media.info.label)
-                items += [menu.MenuItem(s, parse_entry,
-                                        (media.info.label, media.mountdir),
-                                        handle_config, ('dir', media.mountdir),
-                                        'dir')]
+
+        # XXX has this ever worked ?
+        
+        #     for media in config.REMOVABLE_MEDIA:
+        #         if media.info:
+        #             if mediatype == 'AUDIO':
+        #                 s = 'Drive %s [%s]' % (media.drivename, media.info.label)
+        #                 items += [menu.MenuItem(s, parse_entry,
+        #                                         (media.info.label, media.mountdir),
+        #                                         handle_config, ('dir', media.mountdir),
+        #                                         'dir')]
             
     mp3menu = menu.Menu('MUSIC MAIN MENU', items)
     menuw.pushmenu(mp3menu)
