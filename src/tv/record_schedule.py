@@ -15,6 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/24 11:52:55  outlyer
+# A quick fix for the problem reported by Wan Tat Chee, if there are
+# no entries in the recording schedule, don't crash. Should be more
+# informative though...
+#
 # Revision 1.5  2003/06/20 21:05:06  outlyer
 # Use icons instead of printing "Recording now" since that takes up a lot of
 # space and can't be seen on shows with titles
@@ -142,7 +147,10 @@ class ScheduleEdit(Item):
         line = '0'
         itemcount = 0
         global killflag
-    
+   
+        if not os.path.isfile(record_daemon.SCHEDULE):
+            return None
+                
         fd = open(record_daemon.SCHEDULE,'r')
     
         #delete old scheduled items from the file since we wont need them
@@ -180,8 +188,8 @@ class ScheduleEdit(Item):
     	        recordingflag = 0
     
     	    #get only the title, the record time and the channel
-    	    line = line[ line.rfind('/') +1: line.find('.avi')]
-            #line = line[ line.rfind('/') +1: line.find('.mpg')]
+    	    #line = line[ line.rfind('/') +1: line.find('.avi')]
+            line = line[ line.rfind('/') +1: line.find('.mpg')]
     	    line = line.replace('_',' ')
             line = line.replace(',','\t\t ')
    
