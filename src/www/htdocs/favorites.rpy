@@ -11,9 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.16  2004/05/20 15:45:07  outlyer
-# Fixes for favorites containing the '&' symbol... covert it from the HTML
-# "%26" into "&"
+# Revision 1.17  2004/05/20 15:56:12  outlyer
+# Oops... don't do the replace until the 'name' actually exists.
 #
 # Revision 1.15  2004/03/13 18:32:29  rshortt
 # Make sure the dow key is a str.
@@ -136,7 +135,7 @@ class FavoritesResource(FreevoResource):
         action = fv.formValue(form, 'action')
         oldname = fv.formValue(form, 'oldname')
         name = fv.formValue(form, 'name')
-        name = string.replace(name,'%26','&')
+        if name: name = string.replace(name,'%26','&')
         title = fv.formValue(form, 'title')
         chan = fv.formValue(form, 'chan')
         dow = fv.formValue(form, 'dow')
