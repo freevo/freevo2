@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/31 03:09:10  krister
+# Fixed the mplayer audio time display bug.
+#
 # Revision 1.2  2002/12/21 18:31:10  dischi
 # Sometimes mplayer won't die. Now childapp will kill -9 the child after
 # it refuses 2 seconds to die.
@@ -157,23 +160,27 @@ class Read_Thread(threading.Thread):
                 data = data.replace('\r', '\n')
                 lines = data.split('\n')
 
-                # Partial line?
+                # Only one partial line?
                 if len(lines) == 1:
                     saved += data
                 else:
-                    # There's one or more lines + possibly a partial line
-                    lastelem = -1
-                    if lines[-1] != '':
-                        # The last line is partial
-                        saved = lines[-1]
-                        lastelem = -2
-
-
-                    # Add first line to saved data
+                    # Combine saved data and first line, send to app
                     self.callback(saved + lines[0])
+                    saved = ''
 
-                    for line in lines[1:lastelem]:
-                        self.callback(line)
+                    # There's one or more lines + possibly a partial line
+                    if lines[-1] != '':
+                        # The last line is partial, save it for the next time
+                        saved = lines[-1]
+
+                        # Send all lines except the last partial line to the app
+                        for line in lines[1:-1]:
+                            self.callback(line)
+                    else:
+                        # Send all lines to the app
+                        for line in lines[1:]:
+                            self.callback(line)
+                        
 
 
 class Test_Thread(threading.Thread):

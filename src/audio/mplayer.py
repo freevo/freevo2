@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/31 03:09:11  krister
+# Fixed the mplayer audio time display bug.
+#
 # Revision 1.3  2003/01/18 15:51:57  dischi
 # Add ao device to mplayer options (like video/mplayer.py does)
 #
@@ -250,14 +253,14 @@ class MPlayerApp(childapp.ChildApp):
         childapp.ChildApp.kill(self, signal.SIGINT)
 
 
-    def stdout_cb(self, str):
+    def stdout_cb(self, line):
         if config.MPLAYER_DEBUG:
             fd = open('./mplayer_stdout.log', 'a')
-            fd.write(str + '\n')
+            fd.write(line + '\n')
             fd.close()
                      
-        if str.find("A:") == 0:         # get current time
-            m = self.RE_TIME(str)
+        if line.find("A:") == 0:         # get current time
+            m = self.RE_TIME(line)
             if m:
                 self.item.elapsed = int(m.group(1))
                 if self.item.elapsed != self.elapsed:
@@ -265,10 +268,10 @@ class MPlayerApp(childapp.ChildApp):
                 self.elapsed = self.item.elapsed
 
 
-    def stderr_cb(self, str):
+    def stderr_cb(self, line):
         if config.MPLAYER_DEBUG:
             fd = open('./mplayer_stderr.log', 'a')
-            fd.write(str + '\n')
+            fd.write(line + '\n')
             fd.close()
                      
 
