@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/23 19:21:49  rshortt
+# Add getChannelInfo, taken from a method of the mplayer tv plugin.  I have
+# some changes to that as well which will use this one instead.
+#
 # Revision 1.2  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
@@ -52,6 +56,7 @@
 
 import config, plugin
 import tv.freq, tv.v4l2
+impot epg_xmltv
 
 DEBUG = config.DEBUG
 
@@ -62,7 +67,6 @@ DEBUG = config.DEBUG
 #               input_type='tuner',
 #               tuner_type='external',
 #               tuner_chan='3',
-#               external_tuner='tv.irtrans-echostar',
 #               desc='Bell ExpressVu',
 #               recordable=True),
 #    VideoGroup(vdev='/dev/video1',
@@ -141,13 +145,15 @@ class FreevoChannels:
 
         if vg.tuner_type == 'external':
             if vg.input_type == 'tuner' and vg.tuner_chan:
-                self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
+                return self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
 
             tuner = plugin.getbyname('EXTERNAL_TUNER')
             tuner.setChannel(new_chan)
 
         else:
-            self.tunerSetFreq(chan, app, app_cmd)
+            return self.tunerSetFreq(chan, app, app_cmd)
+
+        return 0
 
 
     def tunerSetFreq(self, chan, app=None, app_cmd=None):
@@ -170,9 +176,16 @@ class FreevoChannels:
         freq *= 16
         freq /= 1000
 
-        if app and app_cmd:
-            self.appSend(app, app_cmd)
+        if app 
+            if app_cmd:
+                self.appSend(app, app_cmd)
+            else:
+                # If we have app and not app_cmd we return the frequency so
+                # the caller (ie: mplayer/tvtime/mencoder plugin) can set it
+                # or provide it on the command line.
+                return freq
         else:
+            # Letf set the freq ourselves using the V4L device.
             try:
                 vd = tv.v4l2.Videodev(vg.vdev)
                 try:
@@ -182,6 +195,8 @@ class FreevoChannels:
                 vd.close()
             except:
                 print _('Failed to set freq for channel %s') % chan
+
+        return 0
 
 
     def getChannel(self):
@@ -205,6 +220,28 @@ class FreevoChannels:
             return
 
         app.write(app_cmd)
+
+
+    def getChannelInfo(self):
+        '''Get program info for the current channel'''
+
+        tuner_id = self.getChannel()
+        chan_name = config.TV_CHANNELS[self.chan_index][1]
+        chan_id = config.TV_CHANNELS[self.chan_index][0]
+
+        channels = epg_xmltv.get_guide().GetPrograms(start=time.time(),
+                                               stop=time.time(), chanids=[chan_id])
+
+        if channels and channels[0] and channels[0].programs:
+            start_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].start))
+            stop_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].stop))
+            ts = '(%s-%s)' % (start_s, stop_s)
+            prog_info = '%s %s' % (ts, channels[0].programs[0].title)
+        else:
+            prog_info = 'No info'
+
+        return tuner_id, chan_name, prog_info
+
 
 
 
