@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/10/09 17:24:02  dischi
+# only do debug print when we have info
+#
 # Revision 1.9  2002/10/09 02:39:24  outlyer
 # We were throwing away the return value from parseInfo; now we're keeping it.
 #
@@ -179,7 +182,8 @@ def parse(file, dir, mplayer_files):
                     elif node.name == u'info':
                         info = parseInfo(node)
 
-    print info.rating
+    if info:
+        print info.rating
 
     return MovieInformation(title, image, playlist, id, label, info, file)
 
