@@ -12,11 +12,14 @@ WARNING: The framebuffer code can render the console unusuable if set up
 o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
   are compiled in statically. If they're compiled as modules instead you
   have to make sure that they're loaded before Freevo.
+  o This step is not needed until you need the Video4Linux and/or TV-out.
 
 o Test the video4linux driver using xawtv
   o Freevo uses its' own tables for channels
 
-o Compile and install all the programs in apps/
+o Compile and install the needed external apps. MPlayer and mpg321/mpg123
+  are needed for the core Video/Audio playback functionality, the others
+  can be installed as needed.
   o Install MPlayer
     o Test with the MGA graphics driver
   o Install mpg321 (or alternately, mpg123)
@@ -37,6 +40,12 @@ o Compile Freevo
     o http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz?download
   o Requires Python >= version 2.1 (We've had reports of problems with 1.5.x)
     o http://www.python.org/ftp/python/2.2.1/Python-2.2.1.tgz
+  o Requires PyXML (Tested with 0.7.1)
+    o http://unc.dl.sourceforge.net/sourceforge/pyxml/PyXML-0.7.1.tar.gz
+      o tar xvzf PyXML-0.7.1.tar.gz
+      o cd PyXML-0.7.1
+      o python setup.py build
+      o (as root): python setup.py install
   o Python Imaging Library (Tested with 1.1.3)
     o http://www.pythonware.com/downloads/Imaging-1.1.3.tar.gz
       o Installation should use the following method, not from the BUILDME:
@@ -67,14 +76,8 @@ o Update the settings in config.py!
   o TV_SETTINGS, VCR_SETTINGS, TV_CHANNELS depending on where you live.
   o DIR_MP3, DIR_MOVIES, DIR_RECORD for where your files are
 
-o Two TV Guide method are currently supported
-  o Define TV_GUIDE_METHOD to 'yahoo' or 'xmltv' 
-
 o XMLTV Method
   o See Docs/XMLTV for usage instructions
-
-o Yahoo Method
-  o Set the EPG_URL and TV_CHANNELS variable to use Yahoo TV listings. (U.S. Only!)
 
 o Test Freevo using the X11 OSD and remote, just start "freevo"
   in the main directory
