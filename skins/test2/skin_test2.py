@@ -171,3 +171,71 @@ class Skin(skin_test1.Skin):
 
         osd.update()
         
+
+
+
+
+    def DrawMP3(self, info):
+
+        left = 170
+
+        osd.clearscreen()
+
+        if self.bgbitmap[0]:
+            apply(osd.drawbitmap, self.bgbitmap)
+            
+
+        # Display the cover image file if it is present
+        if info.image:
+            # Check size to adjust image placement 
+            (w, h) = util.pngsize(info.image)
+            
+            # Calculate best image placement
+            logox = int(osd.width) - int(w) - 55
+            
+            # Draw border for image
+            osd.drawbox(int(logox), 100, (int(logox) + int(w)), 100 + int(h),
+                        width=6, color=0x000000)
+            osd.drawbitmap(info.image, logox, 100)
+
+        osd.drawstring(info.filename, 30, 520)
+
+        osd.drawstring('Title:', 30, 100)
+        osd.drawstring('%s ' % info.id3.title, left, 100)
+        
+        osd.drawstring('Artist:', 30, 130)
+        osd.drawstring('%s ' % info.id3.artist, left, 130)
+        
+        osd.drawstring('Album:', 30, 160)
+        osd.drawstring('%s ' % info.id3.album, left, 160)
+        
+        osd.drawstring('Year:', 30, 190)
+        osd.drawstring('%s ' % info.id3.year, left, 190)
+        
+        osd.drawstring('Track:', 30, 220)
+        osd.drawstring('%s ' % info.id3.track, left, 220)
+        
+        el_min = int(round(info.elapsed / 60))
+        el_sec = int(round(info.elapsed % 60))
+        rem_min = int(round(info.remain / 60))
+        rem_sec = int(round(info.remain % 60))
+
+        osd.drawstring('Elapsed:', 30, 300, osd.default_fg_color)
+        osd.drawstring('%s:%02d   ' % (el_min, el_sec), left, 300,
+                       osd.default_fg_color)
+        
+        osd.drawstring('Remain:', 30, 340, osd.default_fg_color)
+        osd.drawstring('%s:%02d   ' % (rem_min,rem_sec), left, 340,
+                       osd.default_fg_color)
+        
+        osd.drawstring('Done:', 30, 380, osd.default_fg_color)
+        osd.drawstring('%0.1f%%   ' % info.done, left, 380,
+                       osd.default_fg_color)
+
+        # Draw the progress bar
+        osd.drawbox(33, 440, 635, 460, width = 3)
+        pixels = int(round((info.done) * 6.0))
+        osd.drawbox(34, 441, 34 + pixels, 459, width = -1, color = osd.COL_BLUE)
+
+        osd.update()
+    
