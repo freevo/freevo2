@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/03/05 02:37:05  rshortt
+# Lets add in prog.desc to fill up some of this area.
+#
 # Revision 1.8  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -257,7 +260,7 @@ class GenreResource(FreevoResource):
                             prog.channel_id, prog.start, popid
                             )
                         
-                    fv.tableCell(prog.title, 'class="'+status+'" onclick="showPop(\'%s\', this)" width="80%%"' % popid )
+                    fv.tableCell(prog.title + '&nbsp;&nbsp;-&nbsp;&nbsp;' + prog.desc, 'class="'+status+'" onclick="showPop(\'%s\', this)" width="80%%"' % popid )
                     fv.tableCell(time.strftime('%H:%M', time.localtime(prog.start)), 'class="channel"')
                     fv.tableCell(time.strftime('%H:%M', time.localtime(prog.stop)), 'class="channel"')
                     fv.tableRowClose()
