@@ -214,6 +214,10 @@ def _match_files_recursively_helper(result, dirname, names):
     """
     help function for match_files_recursively
     """
+    if dirname[dirname.rfind('/'):][1] == '.':
+        # ignore directories starting with a dot
+        # Note: subdirectories of that dir will still be searched
+        return result
     for name in names:
         if not name in ('CVS', '.xvpics', '.thumbnails', '.pics',
                         'folder.fxd', 'lost+found'):
