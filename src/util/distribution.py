@@ -62,6 +62,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/06/03 18:20:27  dischi
+# add freevo_config.py to translation list, cleanup
+#
 # Revision 1.7  2004/06/02 19:04:35  dischi
 # translation updates
 #
@@ -281,8 +284,12 @@ class i18n (core.Command):
                                 fxd_strings[text] = [ '%s:%s' % (file, i) ]
 
             # update
-            os.system('(cd src ; find . -name "*.*py" | xargs xgettext -L Python -o ../i18n/%s.pot)' % \
-                      i18n_application)
+            if os.path.isfile('freevo_config.py'):
+                freevo_config = '../freevo_config.py'
+            else:
+                freevo_config = ''
+            os.system('(cd src ; find . -name "*.*py" | xargs xgettext -L ' + \
+                      'Python -o ../i18n/%s.pot %s)' % (i18n_application, freevo_config))
 
             # for freevo main package: check skin
             if i18n_application == 'freevo':
@@ -311,9 +318,14 @@ class i18n (core.Command):
                 f.close()
              
         if not self.no_merge and not self.compile_only:
+            print 'updating po files'
+            print '',
             for file in ([ os.path.join('i18n', fname) for fname in os.listdir('i18n') ]):
                 if os.path.isdir(file) and file.find('CVS') == -1:
-                    print 'updating %s...' % file,
+                    txt = file
+                    for i in range(len(file), 10):
+                        txt += '.'
+                    print txt,
                     sys.stdout.flush()
                     file = os.path.join(file, 'LC_MESSAGES/%s.po' % i18n_application)
                     os.system('msgmerge --update --backup=off %s i18n/%s.pot' % \
@@ -355,7 +367,7 @@ def setup(**attrs):
         global i18n_application
         i18n_application = attrs['i18n']
         cmdclass['i18n'] = i18n
-        if len(sys.argv) > 1 and sys.argv[1].lower() in ('i18n', 'sdist', 'bdist_rpm'):
+        if len(sys.argv) > 1 and sys.argv[1].lower() in ('sdist', 'bdist_rpm'):
             for i in sys.argv:
                 if i.find('--help') != -1:
                     break
