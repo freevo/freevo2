@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/02/14 03:57:48  krister
+# Can't run configure from CVS unless --force is used.
+#
 # Revision 1.15  2003/02/06 09:52:25  krister
 # Changed the runtime handling to use runapp to start programs with the supplied dlls
 #
@@ -56,14 +59,21 @@ if ! [ -e runapp ]; then
     echo "Please make sure you have the most recent version of Freevo,"
     echo "and *please* use the full binary version that includes all"
     echo "dependencies including ./runapp unless you're an experienced user."
+    echo "Experienced == no help needed from the mailing lists."
     echo 
     echo "Trying to start the configure program..."
     echo
     echo
-    
-    # XXX Check for python2 etc?
-    python setup_build.py $@
-    exit 0
+
+    if [ "$1" = "--force" ] ; then
+        shift 1
+        # XXX Check for python2 etc?
+        python setup_build.py $@
+        exit 0
+    else
+        echo "Use './configure --force <options>' to start anyway"
+        exit 1
+    fi
 fi
 
 # ./runapp will figure out which python to use
