@@ -10,4 +10,5 @@ o Remote command events cannot be handled fast enough, e.g. when scrolling
 o There are some problems with some of the included fonts when linked against 
   libfreetype >= 2.1.1; 2.0.9 is recommended for now.
 o Left/Right does not goto prev/next movie. It works for music.
-
+o Add VCD playing to the Movie menu.
+o Add the skin settings (shadow etc) for menus other than MP3.
