@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/01/04 03:52:27  outlyer
+# Fix a crash; a playlist file (m3u/pls/etc.) doesn't have this property,
+# which appears to be assigned to directory items.
+#
 # Revision 1.50  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -101,7 +105,8 @@ class Playlist(Item):
         self.type     = 'playlist'
         self.menuw    = None
         self.name     = name
-        
+        self.DIRECTORY_USE_MEDIAID_TAG_NAMES = config.DIRECTORY_USE_MEDIAID_TAG_NAMES
+
         if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
             self.name = util.getname(playlist)
             
