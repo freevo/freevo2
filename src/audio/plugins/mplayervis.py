@@ -1,15 +1,16 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mplayervis.py - Native Freevo MPlayer Audio Visualization Plugin
-# Author: Viggo Fredriksen <viggo@katatonic.org>
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: - I'm no fan of all the skin.clear() being done :(
-# Todo:  - Migrate with Gustavos pygoom when done and change name to mpav
-#
+# Notes: - This is a demonstrator only atm.
+# Todo:  - Much
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/10/02 11:38:00  dischi
+# update to libvisual
+#
 # Revision 1.11  2004/08/23 12:40:54  dischi
 # remove osd.py dep
 #
@@ -49,371 +50,108 @@
 #
 # ----------------------------------------------------------------------- */
 
-
+REASON = None
 try:
-    import pygoom
+    from libvisual import bin
 except:
-    raise Exception('[audio.mplayervis]: Pygoom not available, please install '+
-                    'or remove this plugin (http://freevo.sf.net/pygoom).')
+    REASON = '[audio.mplayervis]: libvisual not available'
 
 
-# pygame  modules
-# from pygame import Rect, image, transform, Surface
 
 # freevo modules
-import plugin, config, rc, time
+import plugin
+import config
+import gui
 
-from event          import *
-from gui.animation      import render, BaseAnimation
-
-mmap_file = '/tmp/mpav'
-
-class mpv_Goom(BaseAnimation):
-    message    = None
-    coversurf  = None
-
-    blend      = 255
-    blend_step = -2
-    max_blend  = 250
-    c_timeout  = 8         # seconds on cover
-    v_timeout  = 30        # seconds on visual
-    timeout    = v_timeout # start waiting with cover
-
-    def __init__(self, x, y, width, height, coverfile=None):
-        self.coverfile = coverfile
-
-        BaseAnimation.__init__(self, (x, y, width, height), fps=100,
-                               bg_update=False, bg_redraw=False)
-        pygoom.set_exportfile(mmap_file)
-        pygoom.set_resolution(width, height, 0)
-
-
-
-    def set_cover(self, coverfile):
-        """
-        Set a blend image to toggle between visual and cover
-        Updated when resolution is changed
-        """
-        self.coverfile = coverfile
-
-
-    def set_message(self, message, timeout=5):
-        """
-        Pass a message to the screen.
-
-        @message: text to draw
-        @timeout: how long to display
-        """
-
-        font = skin.get_font('detachbar')
-        w = font.stringsize(message)
-        h = font.height
-        x = 10
-        y = 10
-
-        s = Surface((w,h), 0, 32)
-
-        osd.drawstringframed(message, 0, 0, w, h, font,
-                             mode='hard', layer=s)
-
-        self.m_timer   = time.time()
-        self.m_timeout = timeout
-        self.message   = (s, x, y, w, h)
-
-
-    def set_resolution(self, x, y, width, height, cinemascope=0, clear=False):
-        r = Rect (x, y, width, height)
-        if r == self.rect:
-            return
-
-        # clear message
-        self.message = None
-
-        self.rect = r
-        pygoom.set_resolution(width, height, cinemascope)
-
-        # change the cover if neceserry
-        if self.coverfile:
-            s = image.load(self.coverfile)
-
-            # scale and fit to the rect
-            w, h   = s.get_size()
-            aspect = float(w)/float(h)
-
-            if aspect < 1.0:
-                w = self.rect.width
-                h = float(w) / aspect
-                x = 0
-                y = (self.rect.height - h) / 2
-            else:
-                h = self.rect.height
-                w = float(h) * aspect
-                y = 0
-                x = (self.rect.width - w)  / 2
-
-            self.coversurf = (transform.scale(s,(w, h)), x, y)
-            self.max_blend = 250
-            self.c_timer   = time.time()
-
-
-    def set_fullscreen(self):
-        t_h = config.CONF.height-2*config.OSD_OVERSCAN_Y
-        w   = config.CONF.width-2*config.OSD_OVERSCAN_X
-
-        # ~16:9
-        h   = int(9.0*float(w)/16.0)
-        y   = ((t_h-h)/2) + config.OSD_OVERSCAN_Y
-        x   = config.OSD_OVERSCAN_X
-
-        self.set_resolution(x, y, w, h, 0)
-        self.max_blend = 80
-
-
-    def poll(self, current_time):
-        """
-        override to get extra performance
-        """
-
-        if self.next_update < current_time:
-
-            self.next_update = current_time + self.interval
-            gooms = pygoom.get_surface()
-
-            # draw blending
-            if self.coversurf:
-                self.blend += self.blend_step
-
-                if self.blend > self.max_blend:
-                    self.blend = self.max_blend
-                elif self.blend < 0:
-                    self.blend     = 0
-                    self.max_blend = 120
-
-                if time.time() - self.c_timer > self.timeout:
-                    if self.timeout == self.c_timeout:
-                        self.timeout = self.v_timeout
-                    else:
-                        self.timeout = self.c_timeout
-
-                    self.c_timer = time.time()
-                    self.blend_step = - self.blend_step
-
-                if self.blend > 0:
-                    s, x, y = self.coversurf
-                    s.set_alpha(self.blend)
-                    gooms.blit(s, (x, y))
-
-            # draw message
-            if self.message:
-                s, x, y, w, h = self.message
-
-                if time.time() - self.m_timer > self.m_timeout:
-                    self.message = False
-                    s.fill(0)
-
-                gooms.blit(s, (x,y))
-
-            osd.putsurface(gooms, self.rect.left, self.rect.top)
-            osd.update(self.rect)
-
-### MODE definitions
-DOCK = 0 # dock ( default )
-FULL = 1 # fullscreen
-NOVI = 2 # no view
+from event import *
+from audio.player import *
+from gui.animation.base import BaseAnimation
+from mevas.image import CanvasImage
+from mevas.imagelib import *
+#from controlpanel import *
 
 class PluginInterface(plugin.Plugin):
     """
-    Native mplayer audiovisualization for Freevo.
-    Dependant on the pygoom module. Available at
-    the freevo addons page.
+    Audio visualization for Freevo based on libvisual.
 
     Activate with:
      plugin.activate('audio.mplayervis')
 
-    When activated one can change between view-modes
+    When activated one can change between visualizations
     with the 0 (zero) button.
     """
-    player = None
-    visual = None
-    view   = DOCK
-    passed_event = False
-    detached = False
-
     def __init__(self):
-        self.reason = config.REDESIGN_BROKEN
-        return
+        if REASON:
+            self.reason = REASON
+            return
 
+        self.reason = 'needs more work'
+        return
         plugin.Plugin.__init__(self)
         self._type    = 'mplayer_audio'
         self.app_mode = 'audio'
+        self.visual   = None
 
         # Event for changing between viewmodes
-        config.EVENTS['audio']['0'] = Event('CHANGE_MODE')
+        config.EVENTS['audio']['0'] = Event(FUNCTION_CALL, arg=self.change_vis)
 
         self.plugin_name = 'audio.mplayervis'
         plugin.register(self, self.plugin_name)
 
-        self.view_func = [self.dock,
-                          self.fullscreen,
-                          self.noview]
-
 
     def play( self, command, player ):
-        self.player = player
-        self.item   = player.playerGUI.item
-
-        return command + [ "-af", "export=" + mmap_file ]
-
-
-    def toggle_view(self):
         """
-        Toggle between view modes
+        This method is run by mplayer when it is started
         """
-        self.view += 1
-        if self.view > 2:
-            self.view = DOCK
+        return command + [ "-af", "export" ]
 
-        if not self.visual:
-            self.start_visual()
-        else:
-            self.view_func[self.view]()
-
-
-    def eventhandler( self, event=None, arg=None ):
-        """
-        eventhandler to simulate hide/show of mpav
-        """
-
-        if event == 'CHANGE_MODE':
-            self.toggle_view()
-            return True
-
-        if self.visual and self.view == FULL:
-
-            if event == OSD_MESSAGE:
-                self.visual.set_message(event.arg)
-                return True
-
-            if self.passed_event:
-                self.passed_event = False
-                return False
-
-            self.passed_event = True
-
-            if event != PLAY_END:
-                return self.player.eventhandler(event)
-
+    def eventhandler(self, event, arg=None):
         return False
 
-
-    def item_info(self, fmt=None):
+    def change_vis(self):
         """
-        Returns info about the current running song
+        Changes the visualization to the next in list
         """
-
-        if not fmt:
-            fmt = u'%(a)s : %(l)s  %(n)s.  %(t)s (%(y)s)   [%(s)s]'
-
-        item    = self.item
-        info    = item.info
-        name    = item.name
-        length  = None
-        elapsed = '0'
-
-        if info['title']:
-            name = info['title']
-
-        if item.elapsed:
-            elapsed = '%i:%02i' % (int(item.elapsed/60), int(item.elapsed%60))
-
-        if item.length:
-            length = '%i:%02i' % (int(item.length/60), int(item.length%60))
-
-        song = { 'a' : info['artist'],
-                 'l' : info['album'],
-                 'n' : info['trackno'],
-                 't' : name,
-                 'e' : elapsed,
-                 'i' : item.image,
-                 'y' : info['year'],
-                 's' : length }
-
-        return fmt % song
-
-
-    def fullscreen(self):
-        if self.player.playerGUI.visible:
-            self.player.playerGUI.hide()
-
-        self.visual.set_fullscreen()
-        self.visual.set_message(self.item_info())
-        skin.clear()
-        rc.app(self)
-
-    def noview(self):
-
-        if rc.app() != self.player.eventhandler:
-            rc.app(self.player)
-
-        if self.visual:
-            self.stop_visual()
-
-        if not self.player.playerGUI.visible:
-            self.player.playerGUI.show()
-
+        self.visual.next()
 
     def dock(self):
-        if rc.app() != self.player.eventhandler:
-            rc.app(self.player)
+        """
+        Get the rect to draw in from the theme_engine
+        """
+        # calculate pos and size
+        # todo: add content spacing?
+        t = gui.theme_engine.get_theme()
+        view = t._sets['player'].areas['view']
+        x = view.x
+        y = view.y
+        w = view.width
+        h = view.height
 
-        # get the rect from skin
-        #  XXX someone with better knowlegde of the
-        #      skin code should take a look at this
-        imgarea = skin.areas['view']
-        c = imgarea.calc_geometry(imgarea.layout.content, copy_object=True)
-        w = c.width   - 2*c.spacing
-        h = c.height  - 2*c.spacing
-        x = c.x + c.spacing
-        y = c.y + c.spacing
-
-        # check if the view-area has a rectangle
-        try:
-            r = c.types['default'].rectangle
-            x -= r.x
-            y -= r.y
-            w += 2*r.x
-            h += 2*r.y
-        except:
-            pass
-
-        self.visual.set_resolution(x, y, w, h, 0, False)
+        # update the visualization
+        self.visual.set_pos(x, y, w, h)
 
 
-
-    def start_visual(self):
-        if self.visual or self.view == NOVI:
-            return
-
-        if rc.app() == self.player.eventhandler:
-
-            self.visual = mpv_Goom(300, 300, 150, 150, self.item.image)
-
-            if self.view == FULL:
-                self.visual.set_message(self.item.name, 10)
-
-            self.view_func[self.view]()
-            self.visual.start()
-
-
-    def stop_visual(self):
+    def start(self):
+        """
+        Starts a new visualization
+        """
         if self.visual:
-            self.visual.remove()
-            self.visual = None
-            pygoom.quit()
-
+            return
+        try:
+            self.visual = libvisualAnimation(300, 300, 150, 150)
+            self.visual.start()
+            self.dock()
+        except Exception, e:
+            print e
 
     def stop(self):
-        self.stop_visual()
+        """
+        Stops the current visualization
+        """
+        if self.visual:
+            # finish the animation
+            self.visual.finish()
+            self.visual = None
 
 
     def stdout(self, line):
@@ -426,6 +164,99 @@ class PluginInterface(plugin.Plugin):
         if self.visual:
             return
 
-        if line.find( "[export] Memory mapped to file: " + mmap_file ) == 0:
-            _debug_( "Detected MPlayer 'export' audio filter! Using MPAV." )
-            self.start_visual()
+        if line.find( "[export] Memory mapped to file: " ) == 0:
+            _debug_("Detected MPlayer 'export' audio filter! Using libvisual.")
+            self.start()
+
+
+class libvisualAnimation(BaseAnimation):
+    """
+    This is the animation which shows the images produced by libvisual.
+    """
+    def __init__(self, x, y, width, height, actor='oinksie', input='mplayer'):
+        BaseAnimation.__init__(self, fps=15)
+
+        # initialize libvisual with the default oinksie actor,
+        # use mplayer as input plugin.
+        self.bin = bin("oinksie", (300,300), 'mplayer')
+            
+        width, height = 300, 300
+        #self.bin = bin(actor, (width,height), input)
+
+        # this is the image we are drawing to
+        self.image  = gui.Image(CanvasImage((width,height)), (x,y))
+        self.image.draw_rectangle((0, 0), (width, height), (0,0,0,255), 1)
+        # a list of possible actors from libvisual
+        self.possible_actors = self.bin.get_actors()
+
+        # these don't work well here
+        self.possible_actors.remove('gdkpixbuf')
+        self.possible_actors.remove('lv_analyzer')
+
+        self.actor_p = 0
+        self.pos     = (x, y)
+        self.size    = (width, height)
+
+        # add image to the display
+        self.image.set_zindex(1)
+        gui.get_display().add_child(self.image)
+
+        
+    def set_pos(self, x, y, width, height):
+        """
+        Set the pos and size of the visualization
+        """
+        # set the new size in libvisual
+        self.bin.set_size(width, height)
+
+        # scale and place the image
+        self.image.scale((width,height))
+        self.image.set_pos((x, y))
+
+        self.size = (width, height)
+        self.pos  = (x, y)
+        self.update()
+
+    def next(self):
+        """
+        Changes to next actor in list
+        """
+        # set the new actor
+        self.bin.set_actor(self.possible_actors[self.actor_p])
+
+        # update the pointer
+        self.actor_p += 1
+        if self.actor_p >= len(self.possible_actors):
+            self.actor_p = 0
+
+
+    def finish(self):
+        """
+        Run to finish the animation
+        """
+        del self.bin
+        BaseAnimation.finish(self)
+        gui.get_display().remove_child(self.image)
+
+
+    def update(self):
+        """
+        Update the animation
+        """
+        try:
+            # get the current backend
+            b = get_current_backend()
+            i = get_backend(b).new(self.size, self.bin.run(), 'RGB')
+
+            # set the image
+            self.image.set_image(i)
+        except Exception,e:
+            print e
+
+"""
+class VisPanel(ButtonPanel):
+
+TODO: perhaps add a panel for controling the visualizations
+"""
+
+
