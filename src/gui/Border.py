@@ -7,6 +7,17 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.9  2003/10/12 14:07:06  dischi
 # Oops
 #
@@ -15,38 +26,6 @@
 #
 # Revision 1.7  2003/09/01 18:50:04  dischi
 # fix pygame bug by drawing more than one 1 pixel rec
-#
-# Revision 1.6  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.5  2003/04/24 19:56:17  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.4  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.3  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of
-# RegionScroller called ListBox.
-#
-# Revision 1.2  2003/02/18 13:40:52  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
-#
-# Revision 1.1  2002/08/15 22:45:42  tfmalt
-# o Inital commit of Freevo GUI library. Files are put in directory 'gui'
-#   under Freevo.
-# o At the moment the following classes are implemented (but still under
-#   development):
-#     Border, Color, Label, GUIObject, PopupBox, ZIndexRenderer.
-# o These classes are fully workable, any testing and feedback will be
-#   appreciated.
 #
 #-----------------------------------------------------------------------
 #
@@ -83,9 +62,7 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
-import pygame
 import config
-
 from GUIObject import *
 
 class Border(GUIObject):
@@ -139,26 +116,6 @@ class Border(GUIObject):
 
         self.color     = Color(self.osd.default_fg_color)
 
-    def get_erase_rect(self):
-        """
-        Returns the rectangle to erase on updates.
-
-        The borders are drawn both on the outside and the inside of the
-        rect that defines it. Therefore We don't get complete accuracy
-        when updating boxes with borders. This function is part of
-        working around that.
-
-        Suggestions on how to improve this are welcome.
-
-        Returns: (left,top,width,height) - a pygame rect.
-        """
-        x = self.left-(round(self.thickness/2)-1)
-        y = self.top-(round(self.thickness/2)-1)
-        w = self.width+self.thickness*2
-        h = self.height+self.thickness*2
-        return (x,y,w,h)
-
- 
     def get_style(self):
         """
         Return the style of the border.
@@ -186,14 +143,9 @@ class Border(GUIObject):
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
             c = self.color.get_color_sdl()
-            for i in range(0, self.thickness):
-                w, h = self.parent.surface.get_size()
-                # looks strange, but sometimes thinkness doesn't work
-                self.rect = pygame.draw.rect(self.parent.surface, c, 
-                                             (i, i, w-2*i, h-2*i), 1)
-                                             
-        _debug_('Border: x=%s, y=%s, w=%s, h=%s' % \
-                (self.left, self.top, self.width, self.height), 2)
+            w, h = self.parent.surface.get_size()
+            self.rect = self.osd.drawbox(0, 0, w, h, self.thickness, 0, 0x00000000,
+                                         self.parent.surface)
 
         # if self.style == self.BORDER_SHADOW:
         #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,
@@ -208,23 +160,4 @@ class Border(GUIObject):
         #                               self.thickness)
         #
 
-
-    def _erase(self):
-        """
-        Erases the border from screen.
-        """
-        # XXX Hm.. pygame.draw.rect draws border outside bounding box.
-        # XXX Making hack to fix, but should be done proper.
-
-        _debug_("    Inside Border erase.", 2)
-        x,y,w,h = self.get_erase_rect()
-        
-        _debug_(" Thick: %s" % self.thickness, 2)
-        _debug_(" Width: %s" % w, 2)
-        self.osd.screen.blit(self.parent.bg_image, (x,y), (x,y,w,h))
-        if config.DEBUG > 1:
-            save_image(self)
-            _debug_("    Waiting at bottom of border erase", 2)
-            self.osd.update()
-            wait_loop()
 

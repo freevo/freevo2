@@ -9,59 +9,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.14  2004/01/09 02:08:07  rshortt
 # GUI fixes from Matthieu Weber.
-#
-# Revision 1.13  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.12  2003/06/02 03:28:41  rshortt
-# Fixes for event changes.
-#
-# Revision 1.11  2003/05/21 00:04:25  rshortt
-# General improvements to layout and drawing.
-#
-# Revision 1.10  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.9  2003/04/24 19:56:21  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.8  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.7  2003/03/30 18:19:53  rshortt
-# Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.6  2003/03/30 17:21:17  rshortt
-# New classes: PasswordInputBox, PasswordLetterBox.
-# PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
-# extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
-# has a new constructor argument called 'type' which when set to 'password'
-# will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
-#
-# Revision 1.5  2003/03/24 02:40:50  rshortt
-# These objects are now using skin properties.
-#
-# Revision 1.4  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.3  2003/03/07 00:19:58  rshortt
-# Just a quick fix to take care of redrawing when changing the letter and still
-# seeing the previous letter though the alpha.  I will have to come up with
-# a better solution (probably using a bg_surface or something) when I hook
-# this object up to the skin properties because if the non-selected bg_color
-# has a transparency it will still be broken.
-#
-# Revision 1.1  2003/02/18 13:40:53  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -85,9 +45,9 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame, string
+import string
 import config
-import event as em
+from event import *
 
 from GUIObject import Align
 from Button import Button
@@ -106,24 +66,22 @@ class LetterBox(Button):
     bd_color  Border color (Color)
     bd_width  Border width Integer
     """
-
-    
     ourChars = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 
                  'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
                  'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 
                  '-', '.', ' ' ] 
 
     phoneChars = {
-        em.INPUT_1.name : ["1"],
-        em.INPUT_2.name : ["2", "A", "B", "C"],
-        em.INPUT_3.name : ["3", "D", "E", "F"],
-        em.INPUT_4.name : ["4", "G", "H", "I"],
-        em.INPUT_5.name : ["5", "J", "K", "L"],
-        em.INPUT_6.name : ["6", "M", "N", "O"],
-        em.INPUT_7.name : ["7", "P", "Q", "R", "S"],
-        em.INPUT_8.name : ["8", "T", "U", "V"],
-        em.INPUT_9.name : ["9", "W", "X", "Y", "Z"],
-        em.INPUT_0.name : ["0", "-", ".", " "],
+        INPUT_1.name : ["1"],
+        INPUT_2.name : ["2", "A", "B", "C"],
+        INPUT_3.name : ["3", "D", "E", "F"],
+        INPUT_4.name : ["4", "G", "H", "I"],
+        INPUT_5.name : ["5", "J", "K", "L"],
+        INPUT_6.name : ["6", "M", "N", "O"],
+        INPUT_7.name : ["7", "P", "Q", "R", "S"],
+        INPUT_8.name : ["8", "T", "U", "V"],
+        INPUT_9.name : ["9", "W", "X", "Y", "Z"],
+        INPUT_0.name : ["0", "-", ".", " "],
     }
         
 
@@ -138,11 +96,10 @@ class LetterBox(Button):
                         fg_color, selected_bg_color, selected_fg_color,
                         border, bd_color, bd_width)
 
-
-        self.h_margin          = 0
-        self.v_margin          = 0
-        self.h_spacing          = 0
-        self.v_spacing          = 0
+        self.h_margin  = 0
+        self.v_margin  = 0
+        self.h_spacing = 0
+        self.v_spacing = 0
         self.set_v_align(Align.BOTTOM)
         self.set_h_align(Align.CENTER)
         self.label.set_v_align(Align.CENTER)
@@ -152,7 +109,7 @@ class LetterBox(Button):
     def set_text(self, text):
         text = string.upper(text)
         Button.set_text(self, text)
-        self.label.width = self.width
+        self.label.width  = self.width
         self.label.height = self.height
         self.label.set_v_align(Align.CENTER)
         self.label.set_h_align(Align.CENTER)
@@ -167,9 +124,6 @@ class LetterBox(Button):
 
         self.set_text(self.ourChars[charNext])
 
-        # XXX: should not have to draw here but it fixes an align problem.
-        #self.draw()
-
 
     def charDown(self):
         charNow = self.ourChars.index(self.text)
@@ -179,9 +133,6 @@ class LetterBox(Button):
             charNext = len(self.ourChars)-1
 
         self.set_text(self.ourChars[charNext])
-
-        # XXX: should not have to draw here but it fixes an align problem.
-        #self.draw()
 
 
     def cycle_phone_char(self, command):
@@ -201,8 +152,3 @@ class LetterBox(Button):
             else:
                 i = 0
             self.set_text(letters[i])
-
-        # XXX: should not have to draw here but it fixes an align problem.
-        self.draw()
-
-

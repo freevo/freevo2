@@ -6,6 +6,17 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.7  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -52,7 +63,6 @@
 #
 # ----------------------------------------------------------------------
 
-import pygame
 import config
 from GUIObject      import GUIObject
 from GUIObject      import Align
@@ -74,91 +84,38 @@ class Container(GUIObject):
 
         GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
 
-        self.layout_manager = None
-        self.border         = border
-        self.bd_color       = bd_color
-        self.bd_width       = bd_width
+        self.layout_manager     = None
+        self.border             = border
+        self.bd_color           = bd_color
+        self.bd_width           = bd_width
         self.vertical_expansion = vertical_expansion
 
-        self.internal_h_align = Align.LEFT
-        self.internal_v_align = Align.TOP
+        self.internal_h_align   = Align.LEFT
+        self.internal_v_align   = Align.TOP
+        self.h_spacing          = self.h_margin
+        self.v_spacing          = self.v_margin
 
-        if self.skin_info_spacing:
-            self.h_margin = self.skin_info_spacing
-            self.v_margin = self.skin_info_spacing
-        else:
-            self.h_margin = 10
-            self.v_margin = 10
-
-        self.h_spacing = self.h_margin
-        self.v_spacing = self.v_margin
-
-        if type == 'frame':
-            if not self.bd_color:
-                # XXX TODO: background type 'image' is not supported here yet
-                if self.skin_info_background[0] == 'rectangle':
-                    self.bd_color = Color(self.skin_info_background[1].color)
-                else:
-                    self.bd_color = Color(self.osd.default_fg_color)
-    
-            if not self.bd_width:
-                if self.skin_info_background[0] == 'rectangle' \
-                    and self.skin_info_background[1].size:
-                    self.bd_width = self.skin_info_background[1].size
-                else:
-                    self.bd_width = 2
-
-            if not self.border:
-                self.border = Border(self, Border.BORDER_FLAT,
-                                     self.bd_color, self.bd_width)
-
-        elif type == 'widget':
-            self.selected_bg_color = selected_bg_color
-            self.selected_fg_color = selected_fg_color
-
-            if not bg_color:
-                if self.skin_info_widget.rectangle.bgcolor:
-                    self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
-                else:
-                    self.bg_color = Color(self.osd.default_bg_color)
-    
-            if not fg_color:
-                if self.skin_info_widget.font.color:
-                    self.fg_color = Color(self.skin_info_widget.font.color)
-                else:
-                    self.fg_color = Color(self.osd.default_fg_color)
-    
-            if not self.selected_bg_color:
-                if self.skin_info_widget_selected.rectangle.bgcolor:
-                    self.selected_bg_color = Color(self.skin_info_widget_selected.rectangle.bgcolor)
-                else:
-                    self.selected_bg_color = Color((0,255,0,128))
-    
-            if not self.selected_fg_color:
-                if self.skin_info_widget_selected.font.color:
-                    self.selected_fg_color = Color(self.skin_info_widget_selected.font.color)
-                else:
-                    self.selected_fg_color = Color(self.osd.default_fg_color)
+        if type == 'widget':
+            ci = self.content_layout.types['selected'].rectangle
+            self.selected_bg_color = selected_bg_color or Color(ci.bgcolor)
+            self.selected_fg_color = selected_fg_color or Color(ci.color)
     
             if not self.bd_color:
-                if self.skin_info_widget.rectangle.color:
-                    self.bd_color = Color(self.skin_info_widget.rectangle.color)
-                else:
-                    self.bd_color = Color(self.osd.default_fg_color)
+                self.bd_color = Color(self.skin_info_widget.rectangle.color)
     
             if not self.bd_width:
-                if self.skin_info_widget.rectangle.size:
-                    self.bd_width = self.skin_info_widget.rectangle.size
-                else:
-                    self.bd_width = 2
+                self.bd_width = self.skin_info_widget.rectangle.size
     
             if not self.border:
-                self.border = Border(self, Border.BORDER_FLAT,
-                                     self.bd_color, self.bd_width)
+                self.border = Border(self, Border.BORDER_FLAT, self.bd_color, self.bd_width)
+
+            elif border == -1:
+                self.border = None
 
 
     def set_layout(self, layout=None):
-        if not layout: layout = FlowLayout(self)
+        if not layout:
+            layout = FlowLayout(self)
         self.layout_manager = layout
 
 
@@ -177,29 +134,7 @@ class Container(GUIObject):
         _debug_('Container::draw %s' % self, 2)
 
         for child in self.children:
-            child.draw()
-
-        if self.icon:
-            # note that icon handling will be changed totally, ignore this
-            ix,iy = self.get_position()
-            self.osd.screen.blit(self.icon, (ix+self.h_margin,iy+self.v_margin))
-
-
-    def set_border(self, bs):
-        """
-        bs  Border style to create.
-
-        Set which style to draw border around object in. If bs is 'None'
-        no border is drawn.
-
-        Default for PopupBox is to have no border.
-        """
-        if isinstance(self.border, Border):
-            self.border.set_style(bs)
-        elif not bs:
-            self.border = None
-        else:
-            self.border = Border(self, bs)
-
-
-
+            if not child == self.border:
+                child.draw()
+        if self.border:
+            self.border.draw()

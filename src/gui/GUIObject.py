@@ -7,6 +7,17 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.31  2003/12/03 21:52:08  dischi
 # rename some skin function calls
 #
@@ -15,54 +26,6 @@
 #
 # Revision 1.29  2003/10/08 03:14:51  outlyer
 # Make sure get_size() always returns int
-#
-# Revision 1.28  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.27  2003/09/07 11:15:17  dischi
-# add basic refresh function
-#
-# Revision 1.26  2003/08/26 20:10:50  outlyer
-# More warnings fixed by using explicit types
-#
-# Revision 1.25  2003/07/13 19:35:44  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
-#
-# Revision 1.24  2003/06/25 02:27:39  rshortt
-# Allow 'frame' containers to grow verticly to hold all contents.  Also
-# better control of object's background images.
-#
-# Revision 1.23  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.22  2003/05/21 00:04:25  rshortt
-# General improvements to layout and drawing.
-#
-# Revision 1.21  2003/05/15 02:21:53  rshortt
-# got RegionScroller, ListBox, ListItem, OptionBox working again, although
-# they suffer from the same label alignment bouncing bug as everything else
-#
-# Revision 1.20  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.19  2003/04/26 16:46:24  dischi
-# added refresh bugfix from Matthieu Weber
-#
-# Revision 1.18  2003/04/24 19:56:19  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.1  2002/08/15 22:45:42  tfmalt
-# o Inital commit of Freevo GUI library. Files are put in directory 'gui'
-#   under Freevo.
-# o At the moment the following classes are implemented (but still under
-#   development):
-#     Border, Color, Label, GUIObject, PopupBox, ZIndexRenderer.
-# o These classes are fully workable, any testing and feedback will be
-#   appreciated.
 #
 #-----------------------------------------------------------------------
 #
@@ -103,12 +66,10 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
-import pygame
 import rc
 import osd
 import config
 import skin
-import ZIndexRenderer
 
 from Color import *
 
@@ -123,68 +84,42 @@ class GUIObject:
                  bg_color=None, fg_color=None):
 
         self.osd  = osd.get_singleton()
-        self.skin = skin.get_singleton()
-        self.zir  = ZIndexRenderer.get_singleton()
 
-        self.label          = None
-        self.selected_label = None
-        self.icon           = None
-        self.surface        = None
-        self.surface_changed = 1
-        self.bg_surface     = None
-        self.bg_image       = None
+        self.label       = None
+        self.icon        = None
+        self.surface     = None
+        self.bg_surface  = None
+        self.bg_image    = None
 
-        self.parent = None
+        self.parent      = None
 
-        self.children       = []
-        self.enabled        = 1
-        self.selected       = 0
-        self.visible        = 1
+        self.children    = []
+        self.enabled     = 1
+        self.visible     = 1
+        self.selected    = 0
 
-        self.left     = left
-        self.top      = top
-        self.width    = width
-        self.height   = height
-        self.bg_color = bg_color
-        self.fg_color = fg_color
+        self.left        = left
+        self.top         = top
+        self.width       = width
+        self.height      = height
+        self.bg_color    = bg_color
+        self.fg_color    = fg_color
 
         self.event_context = None
 
-        _debug_("inside GUIOBJECT INIT", 2)
-
-        # XXX: skin settings
-        # This if/else should be removed when the new skin is in place.
-        self.skin_info                 = self.skin.get_popupbox_style(self)
-        self.skin_info_background      = self.skin_info[0]
-        self.skin_info_spacing         = self.skin_info[1]
-        self.skin_info_color           = self.skin_info[2]
-        self.skin_info_font            = self.skin_info[3]
-        self.skin_info_widget          = self.skin_info[4]
-        self.skin_info_widget_selected = self.skin_info[5]
-
-        if self.skin_info_spacing:
-            self.h_margin = self.skin_info_spacing
-            self.v_margin = self.skin_info_spacing
-        else:
-            self.h_margin = 10
-            self.v_margin = 10
-
-        if not self.bg_color:
-            if self.skin_info_background[0] == 'rectangle' \
-                and self.skin_info_background[1].bgcolor:
-                self.bg_color = Color(self.skin_info_background[1].bgcolor)
-            else:
-                self.bg_color = Color(self.osd.default_bg_color)
-
-        if not self.fg_color:
-            if self.skin_info_color:
-                self.fg_color = Color(self.skin_info_color)
-            else:
-                self.fg_color = Color(self.osd.default_fg_color)
-
-
-        self.zindex_pos = self.zir.add_object(self)
+        style = skin.get_singleton().get_popupbox_style(self)
+        self.content_layout, self.background_layout = style
         
+        self.skin_info_widget = self.content_layout.types['widget']
+        self.skin_info_font   = self.skin_info_widget.font
+        
+        self.h_margin = self.content_layout.spacing
+        self.v_margin = self.content_layout.spacing
+
+        ci = self.content_layout.types['widget'].rectangle
+        self.bg_color = self.bg_color or Color(ci.bgcolor)
+        self.fg_color = self.fg_color or Color(ci.color)
+
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.NONE)
 
@@ -196,7 +131,6 @@ class GUIObject:
         Returns: left,top,width,height
         """
         return (self.left, self.top, self.width, self.height)
-        # return [self.left, self.top, self.width, self.height]
  
 
     def get_position(self):
@@ -243,42 +177,20 @@ class GUIObject:
             self.height = height
 
 
-    def get_foreground_color(self):
-        """
-        Returns the foreground color of object
-        """
-        return self.fg_color
-    
+    def toggle_selected(self):
+        self.selected = not self.selected
 
-    def set_foreground_color(self, color):
-        """
-        Sets the foreground color of object.
-        """
-        if isinstance(color, Color):
-            self.fg_color = color
-        else:
-            raise BadColorException, type(color)
-           
 
-    def get_background_color(self):
-        """
-        Returns the background color of object.
-        """
-        return self.bg_color
-    
-
-    def set_background_color(self, color):
-        """
-        Sets the background color of object.
-
-        If None background color will be transparent.
-        """
-        if isinstance(color, Color):
-            self.bg_color = color
-        elif not color:
-            self.bg_color = None
-        else:
-            raise BadColorException, type(color)
+    def get_selected_child(self):
+        for child in self.children:
+            if not child.is_visible():
+                continue
+            if child.selected == 1:
+                return child
+            else:
+                selected = child.get_selected_child()
+                if selected:
+                    return child
 
 
     def show(self):
@@ -288,7 +200,7 @@ class GUIObject:
         This is really handled by the render object.
         """
         self.visible = 1    
-        self.zir.update_show(self)
+        self.draw()
         self.osd.update(self.get_rect())
 
 
@@ -296,13 +208,11 @@ class GUIObject:
         """
         Hide the object.
         """
-
         self.visible = 0
-        if self.parent and self.parent.visible:
-            self.zir.update_hide(self)
-            self.bg_replace()
-
-        self.osd.update(self.get_rect())
+        if self.parent and self.parent.visible and self.bg_surface:
+            self.osd.screen.blit(self.bg_surface, self.get_position())
+            self.osd.update(self.get_rect())
+                
 
 
     def move(self, x, y):
@@ -315,13 +225,9 @@ class GUIObject:
         Note: either the user would have to hide and show the object
               moving, or we do it for him. Not decided yet.
         """
-        self._erase()
-        # self.zir.update_hide(self)
-        self.visible = 0
-        self.set_position( self.left+x, self.top+y )
-        self.draw()
-        # self.zir.update_show(self)
-        self.visible = 1
+        self.hide()
+        self.set_position(self.left+x, self.top+y)
+        self.show()
 
         
     def is_visible(self):
@@ -341,37 +247,6 @@ class GUIObject:
         self.enabled = 0
 
 
-    def toggle_selected(self):
-        if self.selected:
-            self.selected = 0
-        else:
-            self.selected = 1
-
-        self.surface_changed = 1
-
-
-    def get_selected_child(self):
-        _debug_('GSC: %s' % self)
-        for child in self.children:
-            if not child.is_visible(): continue
-            _debug_('     child: %s' % child, 2)
-            if child.selected == 1:
-                _debug_('     selected', 2)
-                return child
-            else:
-                selected = child.get_selected_child()
-                if selected: return child
-
-
-    def redraw(self):
-        """
-        Does a redraw of the object.
-
-        At the moment not implemented.
-        """
-        pass
-
-
     def refresh(self):
         """
         At the moment not implemented.
@@ -386,23 +261,31 @@ class GUIObject:
         pass
 
 
-    def draw(self, surface=None):
+    def draw(self, update=False):
         _debug_('GUIObject::draw %s' % self, 2)
 
-        if self.is_visible() == 0: return FALSE
-
-        # self.bg_replace()
+        if self.is_visible() == 0:
+            return False
 
         self.layout()
+        self._draw()
 
-        if surface:
-            self._draw(surface)
-        else:
-            self._draw()
+        if not update:
+            return
+        
+        # now blit all parent to really update
+        object = self.parent
+        while object:
+            if not self.parent or not self.parent.surface or not object.surface:
+                break
+            if object.surface == object.surface.get_abs_parent():
+                object.blit_parent(restore=False)
+            object = object.parent
 
-        self.surface_changed = 0
+        self.osd.app_list[-1].blit_parent()
+        self.osd.update()
 
-
+        
     def _draw(self, surface=None):
         """
         This function should be overriden by those
@@ -411,7 +294,10 @@ class GUIObject:
         pass
 
 
-    def blit_parent(self):
+    def blit_parent(self, restore=True):
+        """
+        blit self.surface to the parent.surface
+        """
         if self.osd.app_list.count(self):
             p = self.osd.screen
         elif self.parent.surface:
@@ -419,28 +305,48 @@ class GUIObject:
         else:
             p = self.osd.screen
 
+        if self.surface != self.surface.get_abs_parent():
+            print 'Error, surface is a subsurface (%s)' % self
+            print 'GUIObject stack:'
+            c = self
+            while c:
+                print '  %s' % c
+                c = c.parent
+            print
+            return
+        
         if not self.bg_surface:
-            self.bg_surface = pygame.Surface((int(self.width), int(self.height)))
-            self.bg_surface.blit(p, (0,0), 
-                                 (self.left, self.top, self.width, self.height))
+            self.bg_surface = self.osd.Surface((int(self.width), int(self.height)))
+            self.bg_surface.blit(p, (0,0), self.get_rect())
+        elif restore:
+            p.blit(self.bg_surface, (self.left, self.top))
 
         p.blit(self.surface, self.get_position())
+        if p == self.osd.screen:
+            self.osd.update(self.get_rect())
 
-
-    def bg_replace(self):
-        if not self.bg_surface: return
-        _debug_('GUIObject::draw: have bg_surface', 2)
-
-        if self.parent.surface:
-            p = self.parent.surface
-        else:
-            p = self.osd.screen
-
-        p.blit(self.bg_surface, (self.left, self.top))
+            
+    def get_surface(self):
+        """
+        get a subsurface from the parent to draw in
+        """
+        try:
+            return self.parent.surface.subsurface(self.get_rect())
+        except Exception, e:
+            print 'Exception: %s' % e
+            print 'wanted %s for %s' % (self.get_rect(), self.parent.surface)
+            print 'GUIObject stack:'
+            c = self
+            while c:
+                print '  %s: %s' % (c, c.get_rect())
+                c = c.parent
+            print
+            raise Exception, e
 
 
     def set_parent(self, parent):
-        """Set the parent of this widget
+        """
+        Set the parent of this widget
         """
         if self.parent != parent and self.parent and self in self.parent.children:
             self.parent.children.remove(self)
@@ -453,7 +359,8 @@ class GUIObject:
 
 
     def add_child(self, child):
-        """Add a child widget.
+        """
+        Add a child widget.
         """
         self.children.append(child)
         child.set_parent(self)
@@ -469,12 +376,6 @@ class GUIObject:
 
     def destroy(self):
         self.visible = 0
-
-        if config.DEBUG > 1:
-            if self.bg_image:
-                iname = '/tmp/bg-%s-%s.bmp' % (self.left, self.top)
-                pygame.image.save( self.bg_image, iname )
-            print 'GUIObject.destroy(): %s' % self
 
         if self.children:
             while self.children:
@@ -522,7 +423,8 @@ class GUIObject:
         Sets vertical alignment of text.
         """
         # XXX: fix this ugly statement
-        if type(align) is IntType and (align == 1000 or align == 1001 or (align > 1003 and align < 1007)):
+        if type(align) is IntType and \
+               (align == 1000 or align == 1001 or (align > 1003 and align < 1007)):
             self.v_align = align
         else:
             raise TypeError, align

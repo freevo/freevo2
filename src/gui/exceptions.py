@@ -8,20 +8,22 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.1  2002/12/07 15:21:31  dischi
 # moved subdir gui into src
 #
 # Revision 1.2  2002/08/18 22:16:21  tfmalt
 # o Added another exception for object handling
-#
-# Revision 1.1  2002/08/15 22:45:42  tfmalt
-# o Inital commit of Freevo GUI library. Files are put in directory 'gui'
-#   under Freevo.
-# o At the moment the following classes are implemented (but still under
-#   development):
-#     Border, Color, Label, GUIObject, PopupBox, ZIndexRenderer.
-# o These classes are fully workable, any testing and feedback will be
-#   appreciated.
 #
 #-----------------------------------------------------------------------
 #
@@ -44,12 +46,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
-"""
-Various exceptions for use with Freevo GUI
-"""
-__date__    = "$Date$"
-__version__ = "$Revision$" 
-__author__  = """Thomas Malt <thomas@malt.no>"""
 
 
 class BadColorException(StandardError):

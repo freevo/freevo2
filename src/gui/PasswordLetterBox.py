@@ -9,26 +9,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.5  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.4  2003/09/13 10:32:56  dischi
 # fix a font problem and cleanup some unneeded stuff
-#
-# Revision 1.3  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.2  2003/04/24 19:56:26  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.1  2003/03/30 17:21:20  rshortt
-# New classes: PasswordInputBox, PasswordLetterBox.
-# PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
-# extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
-# has a new constructor argument called 'type' which when set to 'password'
-# will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -52,15 +48,10 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
 import config
 
 from GUIObject  import *
-from Color      import *
-from Border     import *
-from Label      import * 
 from LetterBox  import * 
-from types      import * 
 
 
 class PasswordLetterBox(LetterBox):

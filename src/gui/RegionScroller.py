@@ -9,82 +9,23 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.20  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.19  2003/09/24 18:21:27  outlyer
 # Fix assignment to None. I screwed up the first time I did it, but this
 # should be correct.
-#
-# Revision 1.18  2003/09/13 10:32:56  dischi
-# fix a font problem and cleanup some unneeded stuff
-#
-# Revision 1.17  2003/09/05 02:55:55  rshortt
-# I have to back out the python 2.3 warning fix because it breaks RegionScroller.  I will have a closer look at why when I have a moment.
-#
-# Revision 1.16  2003/08/26 20:06:14  outlyer
-# Another Python warning down.
-#
-# Revision 1.15  2003/06/25 02:27:39  rshortt
-# Allow 'frame' containers to grow verticly to hold all contents.  Also
-# better control of object's background images.
-#
-# Revision 1.14  2003/06/02 03:28:41  rshortt
-# Fixes for event changes.
-#
-# Revision 1.13  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.12  2003/05/15 02:21:54  rshortt
-# got RegionScroller, ListBox, ListItem, OptionBox working again, although
-# they suffer from the same label alignment bouncing bug as everything else
-#
-# Revision 1.11  2003/05/02 01:09:03  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.10  2003/04/24 19:56:28  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.9  2003/04/20 13:02:29  dischi
-# make the rc changes here, too
-#
-# Revision 1.8  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.7  2003/03/30 18:19:53  rshortt
-# Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.6  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.5  2003/03/05 03:53:34  rshortt
-# More work hooking skin properties into the GUI objects, and also making
-# better use of OOP.
-#
-# ListBox and others are working again, although I have a nasty bug regarding
-# alpha transparencies and the new skin.
-#
-# Revision 1.4  2003/02/24 11:58:28  rshortt
-# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
-# objects.
-#
-# Revision 1.3  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of
-# RegionScroller called ListBox.
-#
-# Revision 1.2  2003/02/19 00:58:18  rshortt
-# Added scrolldemo.py for a better demonstration.  Use my audioitem.py
-# to test.
-#
-# Revision 1.1  2003/02/18 13:40:53  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -108,18 +49,15 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
 import config
+from event import *
 
 from GUIObject import *
 from Container import *
 from Scrollbar import *
 from Color     import *
 from Border    import *
-from Label     import * 
-from types     import * 
 
-import event as em
 
 class RegionScroller(Container):
     """
@@ -171,7 +109,8 @@ class RegionScroller(Container):
         self.h_scrollbar = Scrollbar(self, 'horizontal')
         self.add_child(self.h_scrollbar)
 
-        self.filler = pygame.Surface((self.v_scrollbar.thickness, self.h_scrollbar.thickness), 0, 32)
+        self.filler = self.osd.Surface((self.v_scrollbar.thickness,
+                                        self.h_scrollbar.thickness), 0, 32)
         filler_c = Color((0,0,0,255))
         fc_c = filler_c.get_color_sdl()
         fc_a = filler_c.get_alpha()
@@ -217,22 +156,22 @@ class RegionScroller(Container):
     def scroll(self, direction):
         _debug_('scrolldir: direction="%s"' % direction, 2)
 
-        if direction == em.INPUT_RIGHT:
+        if direction == INPUT_RIGHT:
             new_x = self.v_x + self.x_scroll_interval
             if new_x > self.max_x_offset:
                 new_x = self.max_x_offset
             self.v_x = new_x
-        elif direction == em.INPUT_LEFT:
+        elif direction == INPUT_LEFT:
             new_x = self.v_x - self.x_scroll_interval
             if new_x < 0:
                 new_x = 0
             self.v_x = new_x
-        elif direction == em.INPUT_DOWN:
+        elif direction == INPUT_DOWN:
             new_y = self.v_y + self.y_scroll_interval
             if new_y > self.max_y_offset:
                 new_y = self.max_y_offset
             self.v_y = new_y
-        elif direction == em.INPUT_UP:
+        elif direction == INPUT_UP:
             new_y = self.v_y - self.y_scroll_interval
             if new_y < 0:
                 new_y = 0
@@ -267,25 +206,26 @@ class RegionScroller(Container):
 
         self.set_position(self.left,self.top)
         (x, y) = self.get_location()
-        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface = self.osd.Surface(self.get_size(), 0, 32)
         # self.surface = self.region_surface.subsurface(x, y, self.width, self.height)
         # self.surface.fill((255,255,255,255))
         # self.surface.set_alpha(255)
         self.surface.blit(self.region_surface, (0, 0),  (x, y, self.width, self.height))
 
 
-        if self.show_v_scrollbar:
-            if self.v_scrollbar: self.v_scrollbar.draw()
+        if self.show_v_scrollbar and self.v_scrollbar:
+            self.v_scrollbar.draw()
 
-        if self.show_h_scrollbar:
-            if self.h_scrollbar: self.h_scrollbar.draw()
+        if self.show_h_scrollbar and self.h_scrollbar:
+            self.h_scrollbar.draw()
 
         if self.show_v_scrollbar and self.show_h_scrollbar:
             self.surface.blit(self.filler,
                              (self.width-self.v_scrollbar.thickness,
                               self.height-self.h_scrollbar.thickness))
 
-        if self.border: self.border.draw()
+        if self.border:
+            self.border.draw()
 
         if surface:
             surface.blit(self.surface, self.get_position())
@@ -310,10 +250,9 @@ class RegionScroller(Container):
 
     def eventhandler(self, event):
 
-        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
+        if event in (INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT ):
             self.scroll(event)
-            self.parent.draw()
-            self.osd.update(self.parent.get_rect())
+            self.parent.draw(update=True)
             return
         else:
             return self.parent.eventhandler(event)

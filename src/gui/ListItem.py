@@ -9,53 +9,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.13  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.12  2003/09/13 10:32:56  dischi
 # fix a font problem and cleanup some unneeded stuff
-#
-# Revision 1.11  2003/09/07 11:17:02  dischi
-# use normal button height as item height
-#
-# Revision 1.10  2003/05/21 00:04:26  rshortt
-# General improvements to layout and drawing.
-#
-# Revision 1.9  2003/05/15 02:21:54  rshortt
-# got RegionScroller, ListBox, ListItem, OptionBox working again, although
-# they suffer from the same label alignment bouncing bug as everything else
-#
-# Revision 1.8  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.7  2003/04/24 19:56:24  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.6  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.5  2003/03/30 18:19:53  rshortt
-# Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.4  2003/03/23 23:19:39  rshortt
-# When selected these objects now use skin properties as well.
-#
-# Revision 1.3  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.2  2003/02/24 11:58:28  rshortt
-# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
-# objects.
-#
-# Revision 1.1  2003/02/23 18:24:04  rshortt
-# New classes.  ListBox is a subclass of RegionScroller so that it can
-# scroll though a list of ListItems which are drawn to a surface.
-# Also included is a listboxdemo to demonstrate and test everything.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -79,15 +48,11 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
 import config
 
 from GUIObject import *
-from Color     import *
-from Border    import *
 from Button    import *
-from Label     import * 
-from types     import * 
+
 
 class ListItem(Button):
     """
@@ -137,7 +102,7 @@ class ListItem(Button):
             c = self.bg_color.get_color_sdl()
             a = self.bg_color.get_alpha()
 
-        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface = self.osd.Surface(self.get_size(), 0, 32)
         self.surface.fill(c)
         self.surface.set_alpha(a)
 

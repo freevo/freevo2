@@ -9,67 +9,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.19  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.18  2003/09/13 10:32:55  dischi
 # fix a font problem and cleanup some unneeded stuff
-#
-# Revision 1.17  2003/09/07 11:17:02  dischi
-# use normal button height as item height
-#
-# Revision 1.16  2003/06/02 03:28:41  rshortt
-# Fixes for event changes.
-#
-# Revision 1.15  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.14  2003/05/21 00:04:26  rshortt
-# General improvements to layout and drawing.
-#
-# Revision 1.13  2003/05/15 02:21:54  rshortt
-# got RegionScroller, ListBox, ListItem, OptionBox working again, although
-# they suffer from the same label alignment bouncing bug as everything else
-#
-# Revision 1.12  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.11  2003/04/24 19:56:23  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.10  2003/04/20 13:02:29  dischi
-# make the rc changes here, too
-#
-# Revision 1.9  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.8  2003/03/30 18:19:53  rshortt
-# Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.5  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.4  2003/03/05 03:53:34  rshortt
-# More work hooking skin properties into the GUI objects, and also making
-# better use of OOP.
-#
-# ListBox and others are working again, although I have a nasty bug regarding
-# alpha transparencies and the new skin.
-#
-# Revision 1.2  2003/02/23 18:30:45  rshortt
-# Fixed a really annoying bug where items got reused and appended to.
-# I have about a zillion lines of debug print statements to remove. :)
-# Thanks to Krister for the help nailing it.
-#
-# Revision 1.1  2003/02/23 18:24:04  rshortt
-# New classes.  ListBox is a subclass of RegionScroller so that it can
-# scroll though a list of ListItems which are drawn to a surface.
-# Also included is a listboxdemo to demonstrate and test everything.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -93,19 +48,14 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
 import config
+import osd
 
 from GUIObject      import *
-from Scrollbar      import *
 from RegionScroller import *
-from Color          import *
-from Border         import *
 from Button         import *
-from Label          import * 
 from ListItem       import * 
-from types          import * 
-import pygame
+
 
 class ListBox(RegionScroller):
     """
@@ -141,14 +91,14 @@ class ListBox(RegionScroller):
             self.show_v_scrollbar = 1
 
 
-        dummy_surface = pygame.Surface((1,1), 0, 32)
+        dummy_surface = osd.get_singleton().Surface((1,1), 0, 32)
 
         RegionScroller.__init__(self, dummy_surface, left, top, width, 
                                 height, bg_color, fg_color,
                                 border, bd_color, bd_width,
                                 self.show_h_scrollbar, self.show_v_scrollbar)
 
-        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
+        self.set_surface(self.osd.Surface(self.get_size(), 0, 32))
 
         self.h_margin                 = 2
         self.v_margin                 = 2
@@ -163,10 +113,10 @@ class ListBox(RegionScroller):
     def scroll(self, direction):
         _debug_('listbox scroll: direction="%s"' % direction, 2)
 
-        if direction in (em.INPUT_RIGHT, em.INPUT_LEFT):
+        if direction in (INPUT_RIGHT, INPUT_LEFT):
             return RegionScroller.scroll(self, direction)
 
-        elif direction == em.INPUT_DOWN:
+        elif direction == INPUT_DOWN:
 
             i = self.get_selected_index()
             if i < len(self.items)-1:
@@ -178,7 +128,7 @@ class ListBox(RegionScroller):
                 if new_select.top + new_select.height > self.v_y + self.height:
                     return RegionScroller.scroll(self, direction)
 
-        elif direction == em.INPUT_UP:
+        elif direction == INPUT_UP:
 
             i = self.get_selected_index()
             if i > 0:
@@ -270,7 +220,7 @@ class ListBox(RegionScroller):
 
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
-        self.set_surface(pygame.Surface((x, y), 0, 32))
+        self.set_surface(self.osd.Surface((x, y), 0, 32))
         self.region_surface.fill(c)
         self.region_surface.set_alpha(a)
 
@@ -286,7 +236,6 @@ class ListBox(RegionScroller):
 
         self.sort_items()
         for item in self.items:
-            # item.draw(self.region_surface)
             item.draw()
 
         RegionScroller._draw(self, surface)
@@ -303,12 +252,11 @@ class ListBox(RegionScroller):
     def eventhandler(self, event):
         _debug_('ListBox::eventhandler: event=%s' % event, 2)
 
-        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
+        if event in (INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT ):
             _debug_('ListBox::eventhandler: should scroll', 2)
             self.scroll(event)
-            self.parent.draw()
-            self.osd.update(self.parent.get_rect())
-            return
+            self.draw(update=True)
+            return True
         else:
             return self.parent.eventhandler(event)
 

@@ -10,57 +10,23 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.13  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.12  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
-#
-# Revision 1.11  2003/06/07 11:31:07  dischi
-# bugfix
-#
-# Revision 1.10  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.9  2003/05/21 00:01:31  rshortt
-# Contructors may now accept a handler method to call when ok/enter is selected.
-#
-# Revision 1.8  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.7  2003/04/24 19:56:20  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.6  2003/04/20 13:02:29  dischi
-# make the rc changes here, too
-#
-# Revision 1.5  2003/03/30 15:54:07  rshortt
-# Added 'parent' as a constructor argument for PopupBox and all of its
-# derivatives.
-#
-# Revision 1.4  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.3  2003/03/05 03:53:34  rshortt
-# More work hooking skin properties into the GUI objects, and also making
-# better use of OOP.
-#
-# ListBox and others are working again, although I have a nasty bug regarding
-# alpha transparencies and the new skin.
-#
-# Revision 1.2  2003/02/24 12:14:57  rshortt
-# Removed more unneeded self.parent.refresh() calls.
-#
-# Revision 1.1  2003/02/18 13:40:52  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -85,32 +51,21 @@
 #endif
 
 import config
+from event import *
 
 from GUIObject      import *
 from PopupBox       import *
-from Color          import *
-from Button         import *
-from Border         import *
-from Label          import *
 from LetterBoxGroup import *
-from types          import *
 
-import event as em
 
 class InputBox(PopupBox):
     """
-    left      x coordinate. Integer
-    top       y coordinate. Integer
+    x         x coordinate. Integer
+    y         y coordinate. Integer
     width     Integer
     height    Integer
     text      String to print.
-    handler   Function to call after pressing ENTER.
-    bg_color  Background color (Color)
-    fg_color  Foreground color (Color)
     icon      icon
-    border    Border
-    bd_color  Border color (Color)
-    bd_width  Border width Integer
     text_prop A dict of 3 elements composing text proprieties:
               { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
                  align_v = text vertical alignment
@@ -118,14 +73,11 @@ class InputBox(PopupBox):
                  mode    = hard (break at chars); soft (break at words)
     """
 
-        
-    def __init__(self, parent='osd', text=" ", handler=None, left=None, top=None, 
-                 width=300, height=160, bg_color=None, fg_color=None, icon=None,
-                 border=None, bd_color=None, bd_width=None, text_prop=None):
+    def __init__(self, text, handler=None, x=None, y=None, width=0, height=0,
+                 icon=None, vertical_expansion=1, text_prop=None, parent='osd'):
 
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width,
-                          text_prop=text_prop)
+        PopupBox.__init__(self, text, handler, x, y, width, height,
+                          icon, vertical_expansion, text_prop, parent)
 
         self.lbg = LetterBoxGroup()
         self.add_child(self.lbg)
@@ -133,44 +85,34 @@ class InputBox(PopupBox):
 
     def eventhandler(self, event):
         
-        if event == em.INPUT_LEFT:
+        if event == INPUT_LEFT:
             self.lbg.change_selected_box('left')
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
-        elif event == em.INPUT_RIGHT:
+        elif event == INPUT_RIGHT:
             self.lbg.change_selected_box('right')
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
-        elif event == em.INPUT_ENTER:
+        elif event == INPUT_ENTER:
             self.destroy()
             if self.handler: self.handler(self.lbg.get_word())
 
-        elif event == em.INPUT_EXIT:
+        elif event == INPUT_EXIT:
             self.destroy()
 
-        elif event == em.INPUT_UP:
+        elif event == INPUT_UP:
             self.lbg.get_selected_box().charUp()
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
-        elif event == em.INPUT_DOWN:
+        elif event == INPUT_DOWN:
             self.lbg.get_selected_box().charDown()
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
-        elif event in (em.INPUT_0, em.INPUT_1, em.INPUT_2, em.INPUT_3,
-                       em.INPUT_4, em.INPUT_5, em.INPUT_6, em.INPUT_7,
-                       em.INPUT_8, em.INPUT_9, em.INPUT_0 ):
+        elif event in (INPUT_0, INPUT_1, INPUT_2, INPUT_3,
+                       INPUT_4, INPUT_5, INPUT_6, INPUT_7,
+                       INPUT_8, INPUT_9, INPUT_0 ):
             self.lbg.get_selected_box().cycle_phone_char(event.arg)
-            self.draw()
-            self.osd.update(self.get_rect())
-            # a,b,c,d = self.lbg.get_selected_box().get_rect()
-            # print 'rectangle: %s' % dir(self.lbg.get_selected_box().get_rect())
-            # if DEBUG: print 'a: "%s", b: "%s", c: "%s", d: "%s"' % (a,b,c,d)
-            # self.osd.update_area(self.lbg.get_selected_box().get_rect())
-
+            self.draw(update=True)
         else:
             return self.parent.eventhandler(event)
 

@@ -10,35 +10,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.8  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.7  2003/05/27 17:53:34  dischi
 # Added new event handler module
-#
-# Revision 1.6  2003/05/21 00:01:31  rshortt
-# Contructors may now accept a handler method to call when ok/enter is selected.
-#
-# Revision 1.5  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.4  2003/04/24 19:56:26  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.3  2003/04/21 12:57:41  dischi
-# make osd.focusapp default parent
-#
-# Revision 1.2  2003/04/20 13:02:29  dischi
-# make the rc changes here, too
-#
-# Revision 1.1  2003/03/30 17:21:20  rshortt
-# New classes: PasswordInputBox, PasswordLetterBox.
-# PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
-# extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
-# has a new constructor argument called 'type' which when set to 'password'
-# will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,41 +50,32 @@
 #endif
 
 import config
+from event import *
 
 from GUIObject      import *
 from PopupBox       import *
-from Color          import *
-from Button         import *
-from Border         import *
-from Label          import *
 from LetterBoxGroup import *
-from types          import *
-
-import event as em
 
 class PasswordInputBox(PopupBox):
     """
-    left      x coordinate. Integer
-    top       y coordinate. Integer
+    x         x coordinate. Integer
+    y         y coordinate. Integer
     width     Integer
     height    Integer
     text      String to print.
-    handler   Function to call after pressing ENTER.
-    bg_color  Background color (Color)
-    fg_color  Foreground color (Color)
     icon      icon
-    border    Border
-    bd_color  Border color (Color)
-    bd_width  Border width Integer
+    text_prop A dict of 3 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+                 align_v = text vertical alignment
+                 align_h = text horizontal alignment
+                 mode    = hard (break at chars); soft (break at words)
     """
 
-        
-    def __init__(self, parent='osd', text=' ', handler=None, left=None, top=None, 
-                 width=300, height=160, bg_color=None, fg_color=None, icon=None,
-                 border=None, bd_color=None, bd_width=None):
+    def __init__(self, text, handler=None, x=None, y=None, width=0, height=0,
+                 icon=None, vertical_expansion=1, text_prop=None, parent='osd'):
 
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+        PopupBox.__init__(self, text, handler, x, y, width, height,
+                          icon, vertical_expansion, text_prop, parent)
 
         self.lbg = LetterBoxGroup(type='password')
         self.add_child(self.lbg)
@@ -105,26 +83,25 @@ class PasswordInputBox(PopupBox):
 
     def eventhandler(self, event):
 
-        if event == em.INPUT_LEFT or event == em.INPUT_UP:
+        if event == INPUT_LEFT or event == INPUT_UP:
             self.lbg.change_selected_box('left')
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
-        elif event == em.INPUT_RIGHT or event == em.INPUT_DOWN:
+        elif event == INPUT_RIGHT or event == INPUT_DOWN:
             self.lbg.change_selected_box('right')
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
-        elif event == em.INPUT_ENTER:
+        elif event == INPUT_ENTER:
             self.destroy()
-            if self.handler: self.handler(self.lbg.get_word())
+            if self.handler:
+                self.handler(self.lbg.get_word())
 
-        elif event == em.INPUT_EXIT:
+        elif event == INPUT_EXIT:
             self.destroy()
 
-        elif event in (em.INPUT_0, em.INPUT_1, em.INPUT_2, em.INPUT_3,
-                       em.INPUT_4, em.INPUT_5, em.INPUT_6, em.INPUT_7,
-                       em.INPUT_8, em.INPUT_9, em.INPUT_0 ):
+        elif event in (INPUT_0, INPUT_1, INPUT_2, INPUT_3,
+                       INPUT_4, INPUT_5, INPUT_6, INPUT_7,
+                       INPUT_8, INPUT_9, INPUT_0 ):
             event = event.name[6:]
             print event
 
@@ -132,8 +109,7 @@ class PasswordInputBox(PopupBox):
             the_box.cycle_phone_char(event)
             if self.lbg.boxes.index(the_box) != len(self.lbg.boxes)-1:
                 self.lbg.change_selected_box('right')
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.draw(update=True)
 
         else:
             return self.parent.eventhandler(event)

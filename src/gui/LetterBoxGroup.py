@@ -10,54 +10,23 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.13  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.12  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
-#
-# Revision 1.11  2003/05/21 00:04:26  rshortt
-# General improvements to layout and drawing.
-#
-# Revision 1.10  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.9  2003/04/24 19:56:22  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.8  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.7  2003/03/30 18:19:53  rshortt
-# Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.6  2003/03/30 17:21:19  rshortt
-# New classes: PasswordInputBox, PasswordLetterBox.
-# PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
-# extend InputBox but instead is also a subclass of PopupBox.  LetterBoxGroup
-# has a new constructor argument called 'type' which when set to 'password'
-# will make a LetterBoxGroup of PasswordLetterBox's rather than Letterbox's.
-#
-# Revision 1.3  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.2  2003/03/05 03:53:34  rshortt
-# More work hooking skin properties into the GUI objects, and also making
-# better use of OOP.
-#
-# ListBox and others are working again, although I have a nasty bug regarding
-# alpha transparencies and the new skin.
-#
-# Revision 1.1  2003/02/18 13:40:53  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -81,7 +50,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
 import config
 
 from Container          import Container
@@ -174,9 +142,7 @@ class LetterBoxGroup(Container):
                 boxNext = len(self.boxes)-1
 
         self.boxes[boxNow].toggle_selected()
-        self.boxes[boxNow].draw()
         self.boxes[boxNext].toggle_selected()
-        self.boxes[boxNext].draw()
 
 
     def get_word(self):
@@ -186,23 +152,15 @@ class LetterBoxGroup(Container):
                 word += box.real_char
             else:
                 word = word + box.get_text()
-
         return word.rstrip()
 
 
     def _draw(self):
         """
         The actual internal draw function.
-
         """
-        self.surface = self.parent.surface.subsurface((self.left,
-                                                       self.top,
-                                                       self.width,
-                                                       self.height))
-
+        self.surface = self.get_surface()
         Container._draw(self)
-
-        self.blit_parent()
 
     
 class LetterBoxLayout(LayoutManager):

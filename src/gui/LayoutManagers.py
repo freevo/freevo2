@@ -11,54 +11,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.14  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.13  2003/09/07 11:16:16  dischi
 # add option to center the container on screen
-#
-# Revision 1.12  2003/09/01 18:58:15  dischi
-# Oops, wrong condition
-#
-# Revision 1.11  2003/09/01 18:49:33  dischi
-# add internal_v_align == Align.CENTER for more than one row
-#
-# Revision 1.10  2003/06/26 01:46:49  rshortt
-# Set DEBUG back to 0 as to not annoy everyone with my insane debug statements
-# which I still need to help with gui development. :)
-#
-# Revision 1.9  2003/06/26 01:41:16  rshortt
-# Fixed a bug wit drawstringframed hard.  Its return coords were always 0's
-# which made it impossible to judge the size.
-#
-# Revision 1.8  2003/06/25 02:27:39  rshortt
-# Allow 'frame' containers to grow verticly to hold all contents.  Also
-# better control of object's background images.
-#
-# Revision 1.7  2003/05/21 00:04:25  rshortt
-# General improvements to layout and drawing.
-#
-# Revision 1.6  2003/05/16 02:11:50  rshortt
-# Fixed a nasty label alingment-bouncing bug.  There are lots of leftover
-# comments and DEBUG statements but I will continue to make use of them
-# for improvements.
-#
-# Revision 1.5  2003/05/04 23:03:12  rshortt
-# Fix for a crash with a row with no cols.
-#
-# Revision 1.4  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.3  2003/04/24 19:56:20  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.2  2003/04/22 23:55:20  rshortt
-# FlowLayout now really works.  Still have some quirks to work out.
-#
-# Revision 1.1  2003/04/09 01:38:09  rshortt
-# Initial commit of some in-progress classes.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -83,6 +51,7 @@
 #endif
 
 import config
+
 from Border    import *
 from Scrollbar import *
 from GUIObject import *
@@ -132,18 +101,12 @@ class FlowLayout(LayoutManager):
         num_children = len(self.container.children)
         for i in range(num_children):
             child = self.container.children[i]
-            _debug_('FlowLayout: container="%s"' % self.container, 2)
-            _debug_('            child="%s"' % child, 2)
-            _debug_('            child is %sx%s' % (child.width,child.height), 2)
 
             if not child.is_visible():
-                _debug_('            skipping something invisible', 2)
                 continue
             if isinstance(child, Border):
-                _debug_('            skipping border', 2)
                 continue
             if isinstance(child, Scrollbar):
-                _debug_('            skipping scrollbar', 2)
                 continue
 
             x = next_x
@@ -152,18 +115,7 @@ class FlowLayout(LayoutManager):
             next = self.get_next_child(i)
 
             if child.width == -1:
-                _debug_('            child width not set', 2)
-                # if next and next.h_align == Align.RIGHT and next.width > 0:
-                #     if DEBUG: print '            next align is RIGHT'
-                #     child.width = self.container.width - \
-                #                   2 * self.container.h_margin - \
-                #                   next.width - x
-                # else:
-                #     child.width = self.container.width - \
-                #                   self.container.h_margin - x
-                child.width = self.container.width - \
-                              2 * self.container.h_margin
-                _debug_('            child width set to %s' % child.width, 2)
+                child.width = self.container.width - 2 * self.container.h_margin
 
 
             if child.height == -1 and isinstance(child, Label):
@@ -172,18 +124,13 @@ class FlowLayout(LayoutManager):
                 else:
                     child.height = self.container.height - \
                                    self.container.v_margin - y
-                _debug_('            child was %sx%s' % (child.width,child.height), 2)
                 child.get_rendered_size()
-                _debug_('            child now %sx%s' % (child.width,child.height), 2)
         
             end = x + child.width + self.container.h_margin 
-            _debug_('            end is %s' % end, 2)
-            _debug_('            child row len is %s' % len(self.table[row]), 2)
-            _debug_('            child h_align is %s' % child.h_align, 2)
 
             if end > self.container.width or \
-               (len(self.table[row]) and (child.h_align == Align.LEFT or \
-                                          child.h_align == Align.CENTER)):
+                   (len(self.table[row]) and (child.h_align == Align.LEFT or \
+                                              child.h_align == Align.CENTER)):
                 row += 1
                 self.table.append([])
                 x = self.container.h_margin
@@ -193,28 +140,25 @@ class FlowLayout(LayoutManager):
             if child.height > line_height:
                 line_height = child.height
 
-            if y + child.height > \
-               self.container.height - self.container.v_margin:
+            if y + child.height > self.container.height - self.container.v_margin:
                 if self.container.vertical_expansion:
-                    self.container.height = y + child.height + \
-                                            self.container.v_margin
-                    _debug_('LAYOUT:  fit me in! (%s) - %s' % \
-                            (self.container.height, self), 2)
+                    self.container.height = y + child.height + self.container.v_margin
                 else:
                     break
 
             next_x = x + child.width + self.container.h_spacing
             next_y = y
-                
-            _debug_('            position="%s,%s"' % (x, y), 2)
             child.set_position(x, y)
             self.table[row].append(child)
 
-        if not self.table[-1]: del(self.table[-1])
+        if not self.table[-1]:
+            del(self.table[-1])
         self.internal_align()
 
         if hasattr(self.container, 'center_on_screen'):
             self.container.top = (self.container.osd.height - self.container.height) / 2
+
+
 
 
     def internal_align(self):
@@ -240,10 +184,8 @@ class FlowLayout(LayoutManager):
                     pass
 
                 if child.v_align == Align.CENTER:
-                    y_offset = self.container.height / 2 - \
-                               (child.top + child.height / 2)
+                    y_offset = self.container.height / 2 - (child.top + child.height / 2)
                     child.top += y_offset 
-                    _debug_('            moved down by %s' % y_offset, 2)
 
                 # If there is really just one visible child inside this
                 # container then we are done.
@@ -264,20 +206,17 @@ class FlowLayout(LayoutManager):
                     row_width += self.container.h_spacing
 
             global_height += row_height + self.container.v_spacing
-            
+
             if self.container.internal_h_align == Align.CENTER:
                 row_center = row[0].left + row_width / 2
                 x_offset = self.container.width / 2 - row_center
 
                 for child in row:
                     child.left += x_offset 
-                    _debug_('            moved right by %s' % x_offset, 2)
 
             elif len(row) == 1 and row[0].h_align == Align.CENTER:
-                x_offset = self.container.width / 2 - \
-                           (row[0].left + row[0].width / 2)
+                x_offset = self.container.width / 2 - (row[0].left + row[0].width / 2)
                 row[0].left += x_offset
-                _debug_('            moved right by %s' % x_offset, 2)
 
 
         if len(self.table) > 1:

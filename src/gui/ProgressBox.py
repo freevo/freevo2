@@ -9,12 +9,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.2  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.1  2003/09/01 18:52:55  dischi
 # Add progressbar and box with progressbar
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -40,38 +50,25 @@
 import config
 
 from GUIObject   import *
-from PopupBox    import *
-from Color       import *
-from Progressbar import *
-from Border      import *
-from Label       import *
-from types       import *
-
-import event as em
+from PopupBox    import PopupBox
+from Progressbar import Progressbar
 
 class ProgressBox(PopupBox):
     """
-    left      x coordinate. Integer
-    top       y coordinate. Integer
+    x         x coordinate. Integer
+    y         y coordinate. Integer
     width     Integer
     height    Integer
     text      String to print.
-    bg_color  Background color (Color)
-    fg_color  Foreground color (Color)
     icon      icon
-    border    Border
-    bd_color  Border color (Color)
-    bd_width  Border width Integer
     """
 
-    def __init__(self, parent='osd', text=" ", left=None, 
-                 top=None, width=0, height=0, bg_color=None, fg_color=None,
-                 icon=None, border=None, bd_color=None, bd_width=None,
-                 vertical_expansion=1, full=0):
+    def __init__(self, text, x=None, y=None, width=0, height=0,
+                 icon=None, vertical_expansion=1, text_prop=None,
+                 full=0, parent='osd'):
 
-        PopupBox.__init__(self, parent, text, None, left, top, width, height,
-                          bg_color, fg_color, icon, border, bd_color, bd_width,
-                          vertical_expansion)
+        PopupBox.__init__(self, text, None, x, y, width, height,
+                          icon, vertical_expansion, text_prop, parent)
 
         self.progressbar = Progressbar(full=full, width=self.width-20)
         self.add_child(self.progressbar)
@@ -79,11 +76,4 @@ class ProgressBox(PopupBox):
 
     def tick(self):
         self.progressbar.tick()
-        self.draw()
-        self.osd.update(self.get_rect())
-
-        
-    def eventhandler(self, event):
-        return self.parent.eventhandler(event)
-
-
+        self.draw(update=True)

@@ -6,12 +6,22 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.2  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
 # Revision 1.1  2003/07/14 19:39:01  rshortt
 # A new class for having a small video preview window.  It doesn't work yet!
-#
 #
 #-----------------------------------------------------------------------
 #
@@ -35,7 +45,6 @@
 #
 # ----------------------------------------------------------------------
 
-import pygame
 import config
 from gui.GUIObject      import *
 from gui.Color import Color
@@ -82,7 +91,7 @@ class VideoBox(GUIObject):
         if not self.width or not self.height:
             raise TypeError, 'Not all needed variables set.'
         
-        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface = self.osd.Surface(self.get_size(), 0, 32)
 
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
@@ -94,6 +103,7 @@ class VideoBox(GUIObject):
 
 
     def play_movie(self):
+        import pygame
         movie = pygame.movie.Movie('/var/tmp/test.mpeg')
         movie.set_display(self.osd.screen)
         movie.play()

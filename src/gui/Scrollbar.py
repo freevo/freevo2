@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/18 21:52:04  dischi
+# Major GUI update:
+# o started converting left/right to x/y
+# o added Window class as basic for all popup windows which respects the
+#   skin settings for background
+# o cleanup on the rendering, not finished right now
+# o removed unneeded files/functions/variables/parameter
+# o added special button skin settings
+#
+# Some parts of Freevo may be broken now, please report it to be fixed
+#
 # Revision 1.12  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -18,43 +29,6 @@
 # Revision 1.10  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
-#
-# Revision 1.9  2003/05/15 02:21:54  rshortt
-# got RegionScroller, ListBox, ListItem, OptionBox working again, although
-# they suffer from the same label alignment bouncing bug as everything else
-#
-# Revision 1.8  2003/05/02 01:09:03  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.7  2003/04/24 19:56:29  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.6  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.5  2003/03/30 18:19:53  rshortt
-# Adding self to the other GetPopupBoxStyle calls.
-#
-# Revision 1.4  2003/03/23 23:18:11  rshortt
-# Uses skin properties now.
-#
-# Revision 1.3  2003/03/09 21:37:06  rshortt
-# Improved drawing.  draw() should now be called instead of _draw(). draw()
-# will check to see if the object is visible as well as replace its bg_surface
-# befire drawing if it is available which will make transparencies redraw
-# correctly instead of having the colour darken on every draw.
-#
-# Revision 1.2  2003/02/23 18:21:50  rshortt
-# Some code cleanup, better OOP, influenced by creating a subclass of
-# RegionScroller called ListBox.
-#
-# Revision 1.1  2003/02/18 13:40:53  rshortt
-# Reviving the src/gui code, allso adding some new GUI objects.  Event
-# handling will not work untill I make some minor modifications to main.py,
-# osd.py, and menu.py.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -78,14 +52,11 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import pygame
 import config
 
 from GUIObject import *
 from Color     import *
 from Border    import *
-from Label     import * 
-from types     import * 
 
 
 class Scrollbar(GUIObject):
@@ -115,7 +86,6 @@ class Scrollbar(GUIObject):
         self.border      = border
         self.bd_color    = bd_color
         self.bd_width    = bd_width
-
 
         if not self.bg_color:
             if self.skin_info_widget.rectangle.bgcolor:
@@ -228,7 +198,7 @@ class Scrollbar(GUIObject):
         bg_c = self.bg_color.get_color_sdl()
         bg_a = self.bg_color.get_alpha()
 
-        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface = self.osd.Surface(self.get_size(), 0, 32)
         self.surface.fill(bg_c)
         self.surface.set_alpha(bg_a)
 
@@ -236,12 +206,13 @@ class Scrollbar(GUIObject):
         _debug_('SB: fg_c = %s,%s,%s,%s' % fg_c, 2)
         fg_a = self.fg_color.get_alpha()
 
-        fg_box = pygame.Surface(self.get_handle_size(), 0, 32)
+        fg_box = self.osd.Surface(self.get_handle_size(), 0, 32)
         fg_box.fill(fg_c)
         fg_box.set_alpha(fg_a)
 
         self.surface.blit(fg_box, self.get_handle_coords())
-        if self.border: self.border.draw()
+        if self.border:
+            self.border.draw()
 
         _debug_('SB::_draw: pos=%s,%s' % (self.left, self.top), 2)
         self.blit_parent()
