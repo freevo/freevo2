@@ -2,8 +2,8 @@
 
 Summary: Event-based framework for internet applications
 Name: python-twisted
-Version: 1.1.0
-Release: 1_freevo
+Version: 1.3.0
+Release: 1_fc2
 Source0: Twisted-%{version}.tar.bz2
 License: LGPL
 Group: Development/Python
@@ -53,6 +53,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc
 
 %changelog
+* Mon May 31 2004 TC Wan <tcwan@cs.usm.my>
+- Update to 1.3.0 for RedHat 9, rebuilt for Fedora Core 2
+
 * Tue Sep 16 2003 TC Wan <tcwan@cs.usm.my>
 - Repackaged 1.0.7 for Redhat 
 

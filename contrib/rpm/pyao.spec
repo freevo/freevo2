@@ -2,7 +2,7 @@
 
 %define name pyao
 %define version 0.82
-%define release 1_freevo
+%define release 1_fc2
 
 Summary: A wrapper for the ao library
 Name: %{name}
@@ -52,5 +52,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Mon May 31 2004 TC Wan <tcwan@cs.usm.my>
+- Rebuilt for Fedora Core 2
+
 * Thu Sep 18 2003 TC Wan <tcwan@cs.usm.my>
 - Initial SPEC file for RH 9 (revised from version at vorbis.org)

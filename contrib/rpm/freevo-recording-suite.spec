@@ -1,6 +1,6 @@
 %define freevoname freevo
-%define freevover 1.4
-%define freevorel 4_freevo
+%define freevover 1.5
+%define freevorel 1_freevo
 ##############################################################################
 Summary: Meta-package for Freevo recording functionality
 Name: freevo-recording-suite
@@ -37,6 +37,9 @@ for using freevo to record TV programs.
 %defattr(-,root,root)
 
 %changelog
+* Wed Mar 24 2004 TC Wan <tcwan@cs.usm.my>
+- Rebuilt for freevo 1.5
+
 * Wed Oct 15 2003 TC Wan <tcwan@cs.usm.my>
 - Moved twisted dependency to core, removed pyao, pyogg, pyvorbis dependencies
   since it's no longer needed

@@ -1,6 +1,6 @@
 %define name pylcd
 %define version 0.2
-%define release 1_freevo
+%define release 1_fc2
 
 Summary: Library interface for LCDproc daemon
 Name: %{name}
@@ -43,5 +43,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 
 %changelog
+* Thu Jun  3 2004 TC Wan <tcwan@cs.usm.my>
+- Rebuilt for Fedora Core 2
+
 * Fri Sep 26 2003 TC Wan <tcwan@cs.usm.my>
 - Initial SPEC file for RH 9 

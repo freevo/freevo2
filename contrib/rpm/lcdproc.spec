@@ -1,12 +1,12 @@
 
 Summary: 	LCDproc displays real-time system information on a 20x4 backlit LCD.
 Name:   	lcdproc	
-Version:	0.4.3
-Release:	4_freevo
+Version:	0.4.5
+Release:	1_fc2
 License:	GPL
 Url:       	http://lcdproc.omnipotent.net
 Group:     	Monitoring	
-Source:    	http://lcdproc.omnipotent.net.net/%{name}-%{version}.tar.bz2
+Source:    	http://lcdproc.omnipotent.net.net/%{name}-%{version}.tar.gz
 Source1:	LCDd.init
 BuildRoot: 	%{_tmppath}/%{name}-buildroot
 BuildRequires:	ncurses-devel 

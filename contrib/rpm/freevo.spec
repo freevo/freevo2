@@ -16,8 +16,8 @@
 
 ##########################################################################
 %define name freevo
-%define version 1.4.1
-%define release 1_rh9
+%define version 1.5
+%define release 1_fc2
 %define _cachedir /var/cache
 %define _logdir /var/log
 %define _contribdir /usr/share/freevo/contrib
@@ -38,10 +38,11 @@ BuildRoot: %{_tmppath}/%{name}-buildroot
 #BuildRequires: docbook-utils, wget
 Requires: SDL >= 1.2.6, SDL_image >= 1.2.3, SDL_ttf >= 2.0.6, SDL_mixer >= 1.2.5
 Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
-Requires: python >= 2.2, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
-Requires: mmpython >= 0.3, python-mx-base >= 2.0.4,
+Requires: python >= 2.3, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
+Requires: mmpython >= 0.4.3, mx >= 2.0.5,
 Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
 Requires: python-Twisted >= 1.1.0
+Requires: lsdvd
 Prefix: %{_prefix}
 URL:            http://freevo.sourceforge.net/
 
@@ -193,6 +194,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Fri Jun 18 2004 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.5
+
 * Fri Dec 19 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.4.1
 
