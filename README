@@ -1,6 +1,9 @@
 Freevo
 ------
 
+$Id$
+
+
 Freevo is a Linux application that turns a PC with a TV capture card
 and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
 other applications such as mplayer, mpg123 and NVRec to play and
