@@ -8,6 +8,8 @@ Release 1.2.5 (2002-XX-XX):
 ---------------------------
 o Added JPEG support to the OSD server
 o Added bitmap scaling support to the OSD server
+o Added image display to main menu. JPEG/PNG are supported at 
+  the moment, more will be added later.
 
 
 Release 1.2.4 (2002-07-10):
