@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/07/04 08:15:29  dischi
+# add config.MPLAYER_ARGS_DEF (why was that missing?)
+#
 # Revision 1.35  2004/06/28 17:12:22  dischi
 # reduce cache for dvb
 #
@@ -128,7 +131,7 @@ class MPlayer:
 
         # Build the MPlayer command
         args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                config.MPLAYER_VO_DEV_OPTS)
+                config.MPLAYER_VO_DEV_OPTS, config.MPLAYER_ARGS_DEF)
 
         if mode == 'tv':
             if vg.group_type == 'ivtv':
@@ -183,7 +186,7 @@ class MPlayer:
 
         args += (tvcmd,)
 
-        mpl = '--prio=%s %s -vo %s%s -fs %s -slave %s' % args
+        mpl = '--prio=%s %s -vo %s%s -fs %s -slave %s %s' % args
 
         command = mpl
         self.mode = mode
