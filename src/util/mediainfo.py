@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/02/27 20:42:05  dischi
+# save disc file info
+#
 # Revision 1.33  2004/02/27 20:27:18  dischi
 # add number of files to rom drives
 #
@@ -603,13 +606,14 @@ def disc_info(media):
     else:
         metainfo = {}
 
-        if mmdata.mime == 'unknown/unknown':
-            media.mount()
-            for type in ('video', 'audio', 'image'):
-                items = getattr(config, '%s_SUFFIX' % type.upper())
-                files = util.match_files_recursively(media.mountdir, items)
-                metainfo['disc_num_%s' % type] = len(files)
-            media.umount()
+    if mmdata.mime == 'unknown/unknown' and not metainfo.has_key('disc_num_video'):
+        media.mount()
+        for type in ('video', 'audio', 'image'):
+            items = getattr(config, '%s_SUFFIX' % type.upper())
+            files = util.match_files_recursively(media.mountdir, items)
+            metainfo['disc_num_%s' % type] = len(files)
+        media.umount()
+        util.save_pickle(metainfo, cachefile)
         
     info = Info(cachefile, mmdata, metainfo)
     info.disc = True
