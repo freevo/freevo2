@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/14 16:34:23  dischi
+# Added patch from Erland Lewin to fix a timezone problem
+#
 # Revision 1.11  2003/03/14 06:38:40  outlyer
 # Added (disabled) support for a simple favourites list. Basically, create
 # a file called "watchlist" and put it somewhere, edit this thing and
@@ -100,6 +103,7 @@ import time
 import os
 import traceback
 import cPickle as pickle
+import calendar
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -328,19 +332,25 @@ def timestr2secs_utc(str):
 
     # Is it the '+1' format?
     if tz[0] == '+' or tz[0] == '-':
-        secs = time.mktime(strptime.strptime(tval, xmltv.date_format_notz))
+        tmTuple = ( int(tval[0:4]), int(tval[4:6]), int(tval[6:8]), 
+                    int(tval[8:10]), int(tval[10:12]), 0, -1, -1, -1 )
+        secs = calendar.timegm( tmTuple )
+
         adj_neg = int(tz) >= 0
         adj_secs = int(tz[1:3])*3600+ int(tz[3:5])*60
         if adj_neg:
-            #print 'timestr2secs_utc(%s): secs = %s - %s' % (str, secs, adj_secs)
             secs -= adj_secs
         else:
-            #print 'timestr2secs_utc(%s): secs = %s + %s' % (str, secs, adj_secs)
             secs += adj_secs
     else:
         # No, use the regular conversion
+
+        ## WARNING! BUG HERE!
+        # The line below is incorrect; the strptime.strptime function doesn't
+        # handle time zones. There is no obvious function that does. Therefore
+        # this bug is left in for someone else to solve.
+
         secs = time.mktime(strptime.strptime(str, xmltv.date_format_tz))
-        #print 'timestr2secs_utc(%s): secs = %s' % (str, secs)
 
     return secs
 
