@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/24 04:29:54  gsbarbieri
+# Now we have support to use "type images" in front of items in text listing.
+# I.E.: you can have a playlist icon in front of playlists, a folder icon in
+# front of folders, and goes...
+#
 # Revision 1.4  2003/04/24 19:57:52  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -244,14 +249,14 @@ class Listing_Area(Skin_Area):
         
         for choice in menuw.menu_items:
             if choice == menu.selected:
-                try:
-                    val = content.types['% selected' % choice.type]
-                except:
-                    val = content.types['selected']
+                if content.types.has_key( '%s selected' % choice.type ):
+                    val = content.types[ '%s selected' % choice.type ]
+                else:
+                    val = content.types[ 'selected' ]
             else:
-                try:
-                    val = content.types[choice.type]
-                except:
+                if content.types.has_key( choice.type ):
+                    val = content.types[ choice.type ]
+                else:
                     val = content.types['default']
 
             text = choice.name
@@ -265,16 +270,25 @@ class Listing_Area(Skin_Area):
                choice.parent.type != 'mediamenu':
                 text = '[%s]' % text
 
+            type_image = None
+            if hasattr( val, 'image' ):
+                type_image = val.image
+                
             if content.type == 'text':
                 x0 = item_x0
                 y0 = item_y0
                 icon_x = 0
+                image = None
                 if choice.icon:
                     image = self.load_image(choice.icon, (vspace-content.spacing,
                                                           vspace-content.spacing))
-                    if image:
-                        self.draw_image(image, (x0, y0))
-                        icon_x = vspace
+                if not image and type_image:
+                    image = self.load_image( settings.icon_dir + '/' + type_image,
+                                             ( vspace-content.spacing,
+                                               vspace-content.spacing ) )
+                if image:
+                    self.draw_image(image, (x0, y0))
+                    icon_x = vspace
 
                 if val.rectangle:
                     r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/24 04:29:54  gsbarbieri
+# Now we have support to use "type images" in front of items in text listing.
+# I.E.: you can have a playlist icon in front of playlists, a folder icon in
+# front of folders, and goes...
+#
 # Revision 1.5  2003/05/04 16:45:10  dischi
 # added font scale
 #
@@ -472,7 +477,7 @@ class XML_content(XML_data):
                 type = attr_str(subnode, "type", '')
                 if type and not self.types.has_key(type):
                     self.types[type] = XML_data(('font', 'align', 'valign', 'height',
-                                                 'width'))
+                                                 'width', 'image'))
                     self.types[type].rectangle = None
                     self.types[type].cdata = ''
                 if type:
