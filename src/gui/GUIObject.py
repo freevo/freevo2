@@ -7,6 +7,10 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/24 12:10:24  rshortt
+# Fixed a bug where a popup would reapear after it was disposed of since its
+# parent would redraw it before it completely left.
+#
 # Revision 1.4  2003/02/24 11:53:23  rshortt
 # ZIndexRenderer has a nasty bug which results in _huge_ memory usage.  For
 # every single instance of GUIObject (even if it is not drawn, visible, or
@@ -374,14 +378,12 @@ class GUIObject:
     def destroy(self):
         if DEBUG: print 'GUIObject.destroy(): %s' % self
         if self.parent:
-            # self.parent.children.remove(self)
-            # if DEBUG: print 'GUIObject.destroy(): %s has a parent' % self
+            self.parent.children.remove(self)
             if self.osd.focused_app == self:
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
                 self.osd.focused_app = self.parent
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % self.osd.focused_app
             self.parent.refresh()
-            # self.parent = None
         if self.children:
             for child in self.children:
                 child.destroy()

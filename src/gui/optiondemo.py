@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/24 12:10:24  rshortt
+# Fixed a bug where a popup would reapear after it was disposed of since its
+# parent would redraw it before it completely left.
+#
 # Revision 1.1  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
@@ -143,7 +147,6 @@ class optiondemo(PopupBox):
                 self.ob.toggle_box()
                 self._draw()
         elif event == self.rc.EXIT:
-            self.parent.refresh()
             self.destroy()
         else:
             return self.parent.eventhandler(event)
