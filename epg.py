@@ -31,6 +31,15 @@ class Dummy:
 
 cached_guide = None
 
+#
+# Program guide datatype:
+#
+# guide.timestamp     Unix time (32-bit int, seconds) of guide download
+#
+# program == (channel number (int), program name (str), starttime (Unix secs))
+# channel == [program 1, program 2, ..., program n]  Sorted in time order.
+# guide.programs == [channel 1, channel 2, ..., channel n]
+#
 
 #
 # Check if there's a recently cached guide, if not get a newer one
