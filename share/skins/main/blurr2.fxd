@@ -14,6 +14,8 @@
 	image="gant/image.png"/>
       <item label="games" name="Play a Game" icon=""
         image="gant/games.png"/>
+      <item label="weather" name="Weather Forecast" icon=""
+        image="gant/weather.png"/>
       <item label="shutdown" name="Shutdown" icon="" 
 	image="gant/shutdown.png" visible="no"/> 
     </main>
