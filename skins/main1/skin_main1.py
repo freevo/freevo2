@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2002/11/23 19:50:29  dischi
+# cleanup
+#
 # Revision 1.62  2002/11/21 05:23:44  krister
 # Made the main menu fonts and icons larger. Made the icon sizes scale with the resolution.
 #
@@ -782,8 +785,12 @@ class Skin:
 
             top = iv.y
             DrawText('Title: ', iv, x=left, y=top, align='right')
-            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=right, height=(str_h_title+5), mode='soft')
-
+            if hasattr(info, 'title'):
+                DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=right,
+                               height=(str_h_title+5), mode='soft')
+            else:
+                DrawTextFramed('%s ' % info.name, iv, x=left, y=top, width=right,
+                               height=(str_h_title+5), mode='soft')
             if info.artist:
                 top += spacing
                 DrawText('Artist: ', iv, x=left, y=top, align='right')
