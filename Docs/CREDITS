@@ -83,3 +83,6 @@ o timeshift plugin, pyshift modules and mplayer timefhifting patch
 Michael Ruelle <mikeruelle@attbi.com>
 o Freevo web interface enhancements
 
+Rob Vandermeulen (rdc@kokosnoot.com)
+o fxdimdb class + rewrite of the plugin & helper
+o the df plugin
