@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/20 06:57:15  krister
+# Made the threads daemons, should make them less likely to live after the parent dies.
+#
 # Revision 1.5  2003/02/06 09:52:25  krister
 # Changed the runtime handling to use runapp to start programs with the supplied dlls
 #
@@ -80,9 +83,11 @@ class ChildApp:
         self.infile = self.child.tochild
         
         self.t1 = Read_Thread('stdout', self.outfile, self.stdout_cb)
+        self.t1.setDaemon(1)
         self.t1.start()
         
         self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb)
+        self.t2.setDaemon(1)
         self.t2.start()
 
 
@@ -94,9 +99,9 @@ class ChildApp:
             
 
     # Write a string to the app. 
-    def write(self, str):
+    def write(self, line):
         try:
-            self.infile.write(str)
+            self.infile.write(line)
             self.infile.flush()
         except IOError:
             pass
@@ -104,13 +109,13 @@ class ChildApp:
 
     # Override this method to receive stdout from the child app
     # The function receives complete lines
-    def stdout_cb(self, str):
+    def stdout_cb(self, line):
         pass
 
 
     # Override this method to receive stderr from the child app
     # The function receives complete lines
-    def stderr_cb(self, str):
+    def stderr_cb(self, line):
         pass
 
 
@@ -222,12 +227,12 @@ class Test_Thread(threading.Thread):
             
 class Rec(ChildApp):
 
-    def stdout_cb(self, str):
-        print 'stdout data: "%s"' % str
+    def stdout_cb(self, line):
+        print 'stdout data: "%s"' % line
 
 
-    def stderr_cb(self, str):
-        print 'stderr data: "%s"' % str
+    def stderr_cb(self, line):
+        print 'stderr data: "%s"' % line
 
 
     
