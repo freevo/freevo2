@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2003/01/10 05:32:35  krister
+# Ooops, autosync for mplayer isn't supported until recently. Wait until it is in freevo_apps.
+#
 # Revision 1.105  2003/01/09 05:04:05  krister
 # Added an option to play all movies in a dir, and generate random playlists for them.
 #
@@ -396,9 +399,9 @@ MPLAYER_NICE         = -20             # Priority of mplayer process. 0 is uncha
                                        # prio <0 has no effect unless run as root.
 
 if CONF.display == 'dfbmga':
-    MPLAYER_ARGS_DEF     = '-autosync 30 -nobps -nolirc -autoq 100 -fs -vsync -double'
+    MPLAYER_ARGS_DEF     = '-nobps -nolirc -autoq 100 -fs -vsync -double'
 else:
-    MPLAYER_ARGS_DEF     = (('-autosync 30 -nobps -nolirc -autoq 100 -screenw %s '
+    MPLAYER_ARGS_DEF     = (('-nobps -nolirc -autoq 100 -screenw %s '
                              + '-screenh %s -fs') % (CONF.width, CONF.height))
 
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
