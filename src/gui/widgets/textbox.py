@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/26 15:30:06  dischi
+# bug fix for very small sizes
+#
 # Revision 1.1  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -102,6 +105,10 @@ class Textbox(text.Text):
         box_height = line_height * len(formated_text)
 
         # create the needed CanvasImage
+        if not box_width or not box_height:
+            CanvasImage.__init__(self, (1, 1))
+            return
+            
         CanvasImage.__init__(self, (box_width, box_height))
         
         # set the box position

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/26 15:30:06  dischi
+# bug fix for very small sizes
+#
 # Revision 1.4  2004/08/22 20:06:21  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -125,7 +128,7 @@ class Text(CanvasImage):
         Cut the string and return both halfs of it. 
         Only call this function when the string doesn't fit!
         """
-        c      = 1                      # num of chars fitting
+        c      = 0                      # num of chars fitting
         space  = 0                      # position of last space
         width  = 0                      # current used width
 
@@ -134,6 +137,14 @@ class Text(CanvasImage):
         ellipses_width = 0
 
         while(True):
+            # add a character to the string and calculate the
+            # new width for the text
+            c += 1
+            width = self.font.stringsize(text[:c])
+            if ellipses:
+                ellipses_width = self.font.stringsize(text[:c] + ellipses)
+
+            # check were the last position would be if we have to use the ellipses
             if ellipses and ellipses_c == 0 and ellipses_width > max_width:
                 # if we use ellipses, this is the max position
                 ellipses_c = c
@@ -145,20 +156,28 @@ class Text(CanvasImage):
                 space = c
                 if ellipses_c == 0:
                     ellipses_space = c
-            # add a character to the string
-            width = self.font.stringsize(text[:c])
-            if ellipses:
-                ellipses_width = self.font.stringsize(text[:c] + ellipses)
-            c += 1
         # now we a have string that is too long, shorten it again
         if ellipses:
+            # we have ellipses so the latest positions are not 'c' and
+            # 'space' but 'ellipses_c' and 'ellipses_space'
+            if ellipses_c == 1:
+                # nothing fits at all, maybe not even the ellipses.
+                # shorten the ellipses until it fits the width,
+                # return the ellipses and the complete text as rest
+                while ellipses and self.font.stringsize(ellipses) > max_width:
+                    ellipses = ellipses[:-1]
+                return ellipses, text
             if not word_splitter:
+                # no word splitter, use latest fitting position
                 return text[:ellipses_c-1] + ellipses, text[ellipses_c-1:]
             else:
+                # use latest word splitter position
                 return text[:ellipses_space] + ellipses, text[ellipses_space:]
         if not word_splitter:
+            # no word splitter, use latest fitting position
             return text[:c-1], text[c-1:]
         else:
+            # use latest word splitter position
             return text[:space], text[space:]
 
 
