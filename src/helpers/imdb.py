@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/26 11:28:34  dischi
+# small warning when executed outside freevo env
+#
 # Revision 1.3  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -44,8 +47,13 @@
 import sys
 import os
 
-import config
-
+try:
+    import config
+except ImportError:
+    print 'imdb.py can\'t be executed outside the Freevo environment.'
+    print 'Please use \'freevo imdb [args]\' instead'
+    sys.exit(0)
+    
 from video.fxdimdb import FxdImdb, makeVideo
 from random import Random
 
