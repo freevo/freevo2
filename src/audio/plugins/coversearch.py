@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/06/23 19:28:32  dischi
+# cover support for audio cds (only with installed mmpython)
+#
 # Revision 1.6  2003/06/20 20:51:42  outlyer
 # Trap ParserErrors if Amazon sends bad xml
 #
@@ -97,6 +100,7 @@ import plugin
 import re
 import urllib2
 import time
+import config
 
 from gui.PopupBox import PopupBox
 
@@ -104,9 +108,9 @@ from gui.PopupBox import PopupBox
 class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
-
-        if item.type == 'audio':
-            return [ ( self.cover_search_file, 'Find a cover for this music', 'cover_search') ]
+        if item.type == 'audio' or item.type == 'audiocd':
+            return [ ( self.cover_search_file, 'Find a cover for this music',
+                       'cover_search') ]
         return []
 
 
@@ -119,8 +123,12 @@ class PluginInterface(plugin.ItemPlugin):
         box = PopupBox(text='searching Amazon...')
         box.show()
         
-        album = self.item.album
-        artist = self.item.artist
+        if self.item.type == 'audiocd':
+            album = self.item.info['title']
+            artist = self.item.info['artist']
+        else:
+            album = self.item.album
+            artist = self.item.artist
 
         amazon.setLicense('...') # must get your own key!
         try:
@@ -162,9 +170,9 @@ class PluginInterface(plugin.ItemPlugin):
                                     self.cover_create, cover[i].ImageUrlMedium) ]
                 n.close()
        
-            box.destroy()
         if items: 
             moviemenu = menu.Menu('Cover Results', items)
+            box.destroy()
             menuw.pushmenu(moviemenu)
             return
         else:
@@ -181,24 +189,26 @@ class PluginInterface(plugin.ItemPlugin):
         """
         import amazon
         import directory
-        # image Image, cStringIO  # Required if you want to convert the file into something, Amazon
-                                 # only has JPEGs so it's a wasted step.
         
         box = PopupBox(text='getting data...')
         box.show()
         
         #filename = os.path.splitext(self.item.filename)[0]
-        filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
+        if self.item.type == 'audiocd':
+            filename = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR,
+                                                    self.item.info['id'])
+        else:
+            filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
 
         fp = urllib2.urlopen(str(arg))
         m = open(filename,'wb')
         m.write(fp.read())
         m.close()
         fp.close()
-        #img = cStringIO.StringIO(fp.read())
-        #Image.open(img).save(filename)
 
-
+        if self.item.type == 'audiocd':
+            self.item.image = filename
+            
         # check if we have to go one menu back (called directly) or
         # two (called from the item menu)
         back = 1
