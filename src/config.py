@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2004/01/09 19:49:30  dischi
+# add name of the app/helper
+#
 # Revision 1.88  2004/01/08 14:18:32  dischi
 # do not fix path for games
 #
@@ -324,6 +327,8 @@ def print_help():
 HELPER          = 0
 IS_RECORDSERVER = 0
 IS_WEBSERVER    = 0
+
+__builtin__.__dict__['__freevo_app__'] = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
 if sys.argv[0].find('main.py') == -1:
     HELPER=1
