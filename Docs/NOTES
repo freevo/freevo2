@@ -5,6 +5,8 @@ $Id$
 
 This file contains random notes that are useful when dealing with Freevo
 
+
+grep "open(" log.txt | grep -v "/proc" | grep -v ENOENT | grep -v ENOTDIR | cut -c5- | cut -f1 -d "=" | sort -u
 ----------------------------------------------------------------------
 Python debuggers:
 
