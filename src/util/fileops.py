@@ -294,6 +294,16 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
 
 
 
+def find_file_in_path( file, path = None ):
+    if not path and os.environ.has_key( 'PATH' ):
+        path = os.environ[ 'PATH' ].split( ':' )
+    if not path: return None
+    for p in path:
+        abs = os.path.join( p, file )
+        if os.path.isfile( abs ):
+            return abs
+
+    return None
 
 
 #
