@@ -144,7 +144,7 @@ make
 ./freevo
 
 o Tag a release/checkpoint:
-cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag -r REL-1_2_0
+cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag REL-1_2_0
 
 o Make a .tar.gz file from the tagged version using anonymous export
 cvs -d:pserver:anonymous:dummy@cvs.freevo.sourceforge.net:/cvsroot/freevo login
