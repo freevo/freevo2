@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/28 19:26:36  dischi
+# renamed some config variables
+#
 # Revision 1.7  2003/09/23 13:42:01  outlyer
 # Removed more chatter.
 #
@@ -72,9 +75,9 @@ def get_singleton():
     global _singleton
     if _singleton == None:
         # Loads the skin implementation defined in freevo_config.py
-        exec('import skins.' + config.OSD_SKIN  + '.' + config.OSD_SKIN  + ' as skinimpl')
+        exec('import skins.' + config.SKIN_MODULE  + '.' + config.SKIN_MODULE  + ' as skinimpl')
 
-        _debug_('Imported skin %s' % config.OSD_SKIN,2)
+        _debug_('Imported skin %s' % config.SKIN_MODULE,2)
     
         _singleton = skinimpl.Skin()
 

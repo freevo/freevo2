@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.15  2003/11/23 19:55:27  rshortt
 # Changes to use src/tv/channels.py and VIDEO_GROUPS.
 #
@@ -141,7 +144,7 @@ class Record_Thread(threading.Thread):
                 tv_lock_file = config.FREEVO_CACHEDIR + '/record'
                 open(tv_lock_file, 'w').close()
 
-                video_save_file = '%s/%s.mpeg' % (config.DIR_RECORD, 
+                video_save_file = '%s/%s.mpeg' % (config.TV_RECORD_DIR, 
                                              string.replace(self.prog.filename,
                                                             ' ', '_'))
                 

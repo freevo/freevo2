@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/11/28 19:26:36  dischi
+# renamed some config variables
+#
 # Revision 1.27  2003/11/09 12:10:14  dischi
 # do not rip last track for mixed cds
 #
@@ -215,7 +218,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         list of config variables this plugin needs
         """
-        return (('AUDIO_BACKUP_DIR', config.DIR_AUDIO[ 0 ][ 1 ],
+        return (('AUDIO_BACKUP_DIR', config.AUDIO_ITEMS[ 0 ][ 1 ],
                  'directory where to put the encoded files'),
                 ('LAME_CMD', config.CONF.lame , '' ),
                 ('CDPAR_CMD', config.CONF.cdparanoia, ''),

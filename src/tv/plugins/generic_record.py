@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.11  2003/10/19 16:17:03  rshortt
 # Post event OS_EVENT_KILL for recordserver to do the deed (kill and wait).
 #
@@ -97,7 +100,7 @@ class Recorder:
 
     def Record(self, rec_prog):
         cl_options = { 'channel'  : rec_prog.tunerid,
-                       'filename' : config.DIR_RECORD + '/' + rec_prog.filename,
+                       'filename' : config.TV_RECORD_DIR + '/' + rec_prog.filename,
                        'seconds'  : rec_prog.rec_duration }
 
         self.rec_command = config.VCR_CMD % cl_options

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.8  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -136,7 +139,7 @@ def cache_directories(rebuild=True):
                 os.unlink(f)
     all_dirs = []
     print 'caching directories...'
-    for n, d in config.DIR_MOVIES + config.DIR_AUDIO + config.DIR_IMAGES:
+    for n, d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
         os.path.walk(d, cache_helper, all_dirs)
     for d in all_dirs:
         dname = d

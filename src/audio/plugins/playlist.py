@@ -80,7 +80,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         self.naming = naming
 
-        config.DIR_AUDIO.append( ('Playlists',self.playlist_folder))
+        config.AUDIO_ITEMS.append( ('Playlists',self.playlist_folder))
         self.playlist_handle = None
         plugin.ItemPlugin.__init__(self)
 

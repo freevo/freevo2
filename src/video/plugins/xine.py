@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.23  2003/11/22 21:23:55  dischi
 # fix dvd title playing
 #
@@ -123,7 +126,7 @@ class PluginInterface(plugin.Plugin):
         # register it as the object to play
         plugin.register(xine, plugin.VIDEO_PLAYER, True)
 
-        for i in config.SUFFIX_VIDEO_XINE_FILES:
+        for i in config.VIDEO_XINE_SUFFIX:
             if not i in config.SUFFIX_VIDEO_FILES:
                 config.SUFFIX_VIDEO_FILES.append(i)
 
@@ -173,7 +176,7 @@ class Xine:
             else:
                 return 0
         if os.path.splitext(item.filename)[1][1:].lower() in \
-               config.SUFFIX_VIDEO_XINE_FILES:
+               config.VIDEO_XINE_SUFFIX:
             return 2
         return 0
     

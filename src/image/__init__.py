@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.3  2003/04/24 19:56:32  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -48,7 +51,7 @@ def cwd(parent, files):
     return a list of items based on the files
     """
     items = []
-    for file in util.find_matches(files, config.SUFFIX_IMAGE_FILES):
+    for file in util.find_matches(files, config.IMAGE_SUFFIX):
         items += [ ImageItem(file, parent) ]
         files.remove(file)
     return items
@@ -61,7 +64,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     del_files or add them to new_items based on new_files
     """
     for item in current_items:
-        for file in util.find_matches(del_files, config.SUFFIX_IMAGE_FILES):
+        for file in util.find_matches(del_files, config.IMAGE_SUFFIX):
             if item.type == 'image' and item.filename == file:
                 del_items += [ item ]
                 del_files.remove(file)

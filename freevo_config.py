@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 4.03
+LOCAL_CONF_VERSION  = 5.00
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -156,7 +156,7 @@ LOCAL_CONF_CHANGES = [
      '''Added USE_MEDIAID_TAG_NAMES as directory based variable and
      HIDE_UNUSABLE_DISCS to hide discs in the wrong menus and empty drives'''),
     (3.8,
-     '''Restructured DIR_GAMES and added XMLTV_GRABBER and XMLTV_DAYS for the
+     '''Restructured GAMES_ITEMS and added XMLTV_GRABBER and XMLTV_DAYS for the
      tv_grab helper script. Also added USE_NETWORK to deactivate everything
      that needs a network connection.'''),
     (3.9,
@@ -182,7 +182,11 @@ LOCAL_CONF_CHANGES = [
      added AUDIO_PREFERED_PLAYER.'''),
     (4.03,
      '''Removed MOVIE_DATA_DIR and COVER_DIR. It has been replaved by the new
-     virtual filesystem controlled by OVERLAY_DIR''')]
+     virtual filesystem controlled by OVERLAY_DIR'''),
+    (5.00,
+     '''Changed some config variables. From now on until told otherwise in this log
+     always run \'./freevo convert_config\' to convert your local_conf.py to
+     change the variable names''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -420,7 +424,7 @@ plugin_record = plugin.activate('tv.generic_record')
 
 #
 # Should directories sorted by date instead of filename
-# 0 = no, 1 = yes, 2 = no for normal menus, yes for DIR_RECORD
+# 0 = no, 1 = yes, 2 = no for normal menus, yes for TV_RECORD_DIR
 #
 DIRECTORY_SORT_BY_DATE = 2
 
@@ -537,13 +541,13 @@ if not os.path.isdir(FREEVO_CACHEDIR):
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = None
+VIDEO_ITEMS = None
 
 #
 # This is where recorded video is written.
 #
 # XXX the path doesn't work from the www cgi scripts!
-DIR_RECORD = None
+TV_RECORD_DIR = None
 
 #
 # Directory containing images for tv shows. A tv show maches the regular
@@ -557,7 +561,7 @@ TV_SHOW_DATA_DIR = None
 # The list of filename suffixes that are used to match the files that
 # are played wih MPlayer.
 # 
-SUFFIX_VIDEO_MPLAYER_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
+VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
                                'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
                                'mp4', 'viv', 'nuv', 'mov' ]
 
@@ -565,7 +569,7 @@ SUFFIX_VIDEO_MPLAYER_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
 # The list of filename suffixes that are used to match the files that
 # are played wih Xine.
 # 
-SUFFIX_VIDEO_XINE_FILES = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
+VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
                             'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue' ]
 
 #
@@ -580,7 +584,7 @@ VIDEO_PREFERED_PLAYER = 'mplayer'
 # speed up startup, 0 may be needed if you have fxd files with disc links
 # in your normal movie tree.
 #
-ONLY_SCAN_DATADIR = 1
+VIDEO_ONLY_SCAN_DATADIR = 1
 
 
 # ======================================================================
@@ -593,14 +597,14 @@ ONLY_SCAN_DATADIR = 1
 #           ('Title2', 'directory2'), ... ]
 # The 'mplayer options' field can be omitted.
 #
-DIR_AUDIO = None
+AUDIO_ITEMS = None
 
 #
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
 # 
-SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac']
-SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
+AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac']
+PLAYLIST_SUFFIX = [ 'm3u' ]
 
 #
 # This regexp should recognize filenames which are likely to be covers
@@ -622,26 +626,26 @@ AUDIO_PREFERED_PLAYER = 'mplayer'
 #
 # Where the image files can be found.
 #
-DIR_IMAGES = None
+IMAGE_ITEMS = None
 
 #
 # The list of filename suffixes that are used to match the files that
 # are used for the image viewer.
 # 
-SUFFIX_IMAGE_FILES = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
+IMAGE_SUFFIX = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
 
 # The viewer now supports a new type of menu entry, a slideshow file.
 # It also has the slideshow alarm signal handler for automated shows.
 # It uses a new configuration option:
 
-SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
+IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
-# This defines the file extensions of slideshow playlists. When DIR_IMAGES
-# is parsed, it will look for entries that match the SUFFIX_IMAGE_SSHOW
+# This defines the file extensions of slideshow playlists. When IMAGE_ITEMS
+# is parsed, it will look for entries that match the IMAGE_SSHOW_SUFFIX
 # patterns. If it finds a match, then it will classify that entry as a
 # slideshow playlist instead of a directory of images. For example:
 
-# DIR_IMAGES = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
+# IMAGE_ITEMS = [ ('Arizona 2002', '/video/SlideShows/arizona-2002.ssr'),
 #                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
 #                ('Pics',  '/video/SlideShows') ]
 
@@ -685,7 +689,7 @@ else:
 # 
 # NEW GAMES SYSTEM :
 # =================
-# The DIR_GAMES structure is now build as follows :
+# The GAMES_ITEMS structure is now build as follows :
 # <NAME>, <FOLDER>, (<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
 # [<FILE_SUFFIX_FOR_GENERIC>])
 # where :
@@ -697,7 +701,7 @@ else:
 #              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
 #                                            type, then you must specify here
 #                                        the file suffix used by the emulator
-# DIR_GAMES = [ ('MAME', '/home/media/games/xmame/roms',     
+# GAMES_ITEMS = [ ('MAME', '/home/media/games/xmame/roms',     
 #                ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', 
 #                 '/home/media/games/xmame/shots', None)),
 #               ('SUPER NINTENDO', '/home/media/games/snes/roms', 
@@ -707,7 +711,7 @@ else:
 #               ('MEGADRIVE', '/home/media/games/megadrive/roms', 
 #                ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
 
-DIR_GAMES = None
+GAMES_ITEMS = None
 
 # are used for the Mame arcade emulator.
 #
@@ -715,7 +719,7 @@ GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
                               # <0 is higher prio, >0 lower prio.
                               # prio <0 has no effect unless run as root.
  
-MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
+GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 # ======================================================================
 # freevo OSD section:
@@ -725,7 +729,7 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 # Skin file that contains the actual skin code. This is imported
 # from skin.py
 #
-OSD_SKIN = 'main'
+SKIN_MODULE = 'main'
 
 #
 # XML file for the skin

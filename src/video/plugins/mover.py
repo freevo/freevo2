@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.5  2003/10/16 09:18:20  dischi
 # patch from Eirik Meland
 #
@@ -71,7 +74,7 @@ class PluginInterface(plugin.ItemPlugin):
       map(lambda dir: plugin.activate('video.mover', args=(dir[1],
                                                            '/mnt/media/trash',
                                                            True)),
-          DIR_MOVIES)
+          VIDEO_ITEMS)
    
    
     makedirs (boolean): should freevo create the to-dir if it doesn't exist
@@ -84,7 +87,7 @@ class PluginInterface(plugin.ItemPlugin):
                                                            'seen',
                                                            True,
                                                            True)),
-          DIR_MOVIES) 
+          VIDEO_ITEMS) 
    
       When to-dir is not specified as an absolute path, the mover will try
       to locate it in the current dir. If makedirs==True and to-dir

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.8  2003/11/06 06:08:38  krister
 # Added testcode for viewing the VCR/Composite1 input on the TV card
 #
@@ -183,7 +186,7 @@ class TVMenu(Item):
             items.append(menu.MenuItem(_('TV Guide'), action=self.start_tvguide))
         if 0:
             items.append(menu.MenuItem(_('View VCR Input'), action=self.start_vcr))
-        items.append(DirItem(config.DIR_RECORD, None, name = _('Recorded Shows'),
+        items.append(DirItem(config.TV_RECORD_DIR, None, name = _('Recorded Shows'),
                              display_type='tv'))
         items.append(menu.MenuItem(_('Scheduled Recordings'), 
                                    action=self.view_schedule))

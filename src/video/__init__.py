@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.14  2003/11/25 19:13:19  dischi
 # fix xml file location
 #
@@ -140,8 +143,8 @@ def hash_fxd_movie_database():
     _debug_("Building the xml hash database...",1)
 
     files = []
-    if not config.ONLY_SCAN_DATADIR:
-        for name,dir in config.DIR_MOVIES:
+    if not config.VIDEO_ONLY_SCAN_DATADIR:
+        for name,dir in config.VIDEO_ITEMS:
             files += util.recursefolders(dir,1,'*.fxd',1)
     if config.OVERLAY_DIR:
         for subdir in ('disc', 'disc-set'):

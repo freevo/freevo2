@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.41  2003/11/22 15:57:47  dischi
 # cleanup
 #
@@ -68,7 +71,7 @@ class PluginInterface(plugin.Plugin):
     Mplayer plugin for the video player.
 
     With this plugin Freevo can play all video files defined in
-    SUFFIX_VIDEO_MPLAYER_FILES. This is the default video player for Freevo.
+    VIDEO_MPLAYER_SUFFIX. This is the default video player for Freevo.
     """
     def __init__(self):
         mplayer_version = 0
@@ -96,7 +99,7 @@ class PluginInterface(plugin.Plugin):
         # register it as the object to play audio
         plugin.register(mplayer, plugin.VIDEO_PLAYER, True)
 
-        for i in config.SUFFIX_VIDEO_MPLAYER_FILES:
+        for i in config.VIDEO_MPLAYER_SUFFIX:
             if not i in config.SUFFIX_VIDEO_FILES:
                 config.SUFFIX_VIDEO_FILES.append(i)
 
@@ -129,7 +132,7 @@ class MPlayer:
                 return 1
             return 2
         if os.path.splitext(item.filename)[1][1:].lower() in \
-               config.SUFFIX_VIDEO_MPLAYER_FILES:
+               config.VIDEO_MPLAYER_SUFFIX:
             return 2
         return 0
     

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/11/28 19:26:36  dischi
+# renamed some config variables
+#
 # Revision 1.33  2003/11/21 11:43:58  dischi
 # send event if there is not next playlist event
 #
@@ -79,7 +82,7 @@ class Playlist(Item):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
                 # skip files that don't exist
-                if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
+                if util.match_suffix(line, config.AUDIO_SUFFIX):
                     self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
                 elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
                     self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
@@ -112,7 +115,7 @@ class Playlist(Item):
         for line in playlist_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
-            if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
+            if util.match_suffix(line, config.AUDIO_SUFFIX):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
             elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
                 self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.15  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -74,8 +77,8 @@ def getMameRomList():
     file_ver = None
     mameRomList = None
 
-    if os.path.isfile(config.MAME_CACHE):
-        mameRomList = util.read_pickle(config.MAME_CACHE)
+    if os.path.isfile(config.GAMES_MAME_CACHE):
+        mameRomList = util.read_pickle(config.GAMES_MAME_CACHE)
 
         try:
             file_ver = mameRomList.TYPES_VERSION
@@ -104,7 +107,7 @@ def saveMameRomList(mameRomList):
     if not mameRomList or mameRomList == None:
         mameRomList = mame_types.MameRomList()
 
-    util.save_pickle(mameRomList, config.MAME_CACHE)
+    util.save_pickle(mameRomList, config.GAMES_MAME_CACHE)
 
 
 #
@@ -166,7 +169,7 @@ def getMameItemInfoList(mame_files, mame_cmd):
 
     print "Call MAME command : %s" % mame_cmd
     # Only build the cache if it doesn't exis.
-    if not os.path.isfile(config.MAME_CACHE):
+    if not os.path.isfile(config.GAMES_MAME_CACHE):
         waitmsg = PopupBox(text=_('Generating MAME cache, please wait.'))
 	waitmsg.show()
         mame_ok = updateMameRomList(mame_cmd)

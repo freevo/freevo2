@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.42  2003/11/24 19:25:28  dischi
 # adjust to variable moving
 #
@@ -588,9 +591,9 @@ class Identify_Thread(threading.Thread):
                     file = t['url'][len(media.devicename)+6:].replace(':', '/')
                     if util.match_suffix(file, config.SUFFIX_VIDEO_FILES):
                         mplayer_files.append(file)
-                    if util.match_suffix(file, config.SUFFIX_AUDIO_FILES):
+                    if util.match_suffix(file, config.AUDIO_SUFFIX):
                         mp3_files.append(file)
-                    if util.match_suffix(file, config.SUFFIX_IMAGE_FILES):
+                    if util.match_suffix(file, config.IMAGE_SUFFIX):
                         image_files.append(file)
             media.cached = True
                 
@@ -600,8 +603,8 @@ class Identify_Thread(threading.Thread):
 
             # Check for movies/audio/images on the disc
             mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)
-            mp3_files = util.match_files(media.mountdir, config.SUFFIX_AUDIO_FILES)
-            image_files = util.match_files(media.mountdir, config.SUFFIX_IMAGE_FILES)
+            mp3_files = util.match_files(media.mountdir, config.AUDIO_SUFFIX)
+            image_files = util.match_files(media.mountdir, config.IMAGE_SUFFIX)
 
             util.umount(media.mountdir)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/11/28 19:26:36  dischi
+# renamed some config variables
+#
 # Revision 1.10  2003/11/25 19:00:52  dischi
 # make fxd item parser _much_ simpler
 #
@@ -58,7 +61,7 @@ def cwd(parent, files):
     """
     items = []
 
-    for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES):
+    for file in util.find_matches(files, config.AUDIO_SUFFIX):
         a = AudioItem(file, parent)
         if a.valid:
             items.append(a)
@@ -74,7 +77,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     del_files or add them to new_items based on new_files
     """
     for item in current_items:
-        for file in util.find_matches(del_files, config.SUFFIX_AUDIO_FILES):
+        for file in util.find_matches(del_files, config.AUDIO_SUFFIX):
             if item.type == 'audio' and item.filename == file:
                 del_items += [ item ]
                 del_files.remove(file)

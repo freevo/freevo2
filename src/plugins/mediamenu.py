@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.24  2003/11/26 18:30:22  dischi
 # make it possible to add fxd items and not only directories
 #
@@ -154,23 +157,21 @@ class MediaMenu(Item):
         """
         self.display_type, force_text_view = arg
         title = _('Media')
-        dirs  = []
 
         self.menuw = menuw
         
         if self.display_type == 'video':
             title = _('Movie')
-            dirs += config.DIR_MOVIES
         if self.display_type == 'audio':
             title = _('Audio')
-            dirs += config.DIR_AUDIO
         if self.display_type == 'image':
             title = _('Image')
-            dirs += config.DIR_IMAGES
         if self.display_type == 'games':
             title = _('Games')
-            dirs += config.DIR_GAMES
 
+        if self.display_type:
+            dirs = eval('config.%s_ITEMS' % self.display_type.upper())
+            
         self.normal_items = []
         # add default items
         for d in dirs:

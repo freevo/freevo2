@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2003/11/28 19:26:36  dischi
+# renamed some config variables
+#
 # Revision 1.65  2003/11/24 19:23:49  dischi
 # remove all fxd item stuff, it's in fxditem now
 #
@@ -406,7 +409,7 @@ class DirItem(Playlist):
         """
         suffix = ''
         if self.display_type == 'audio':
-            suffix = config.SUFFIX_AUDIO_FILES
+            suffix = config.AUDIO_SUFFIX
         elif self.display_type == 'video':
             suffix = config.SUFFIX_VIDEO_FILES
 
@@ -624,11 +627,11 @@ class DirItem(Playlist):
 
         pl_items = []
         if not self.display_type or display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
-            for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
+            for pl in util.find_matches(files, config.PLAYLIST_SUFFIX):
                 pl_items += [ Playlist(pl, self) ]
 
         if not self.display_type or self.display_type == 'image':
-            for file in util.find_matches(files, config.SUFFIX_IMAGE_SSHOW):
+            for file in util.find_matches(files, config.IMAGE_SSHOW_SUFFIX):
                 pl = Playlist(file, self)
                 pl.autoplay = True
                 pl_items += [ pl ]
@@ -784,11 +787,11 @@ class DirItem(Playlist):
         # add new playlist items to the menu
         new_pl_items = []
         if not display_type or display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
-            for pl in util.find_matches(new_files, config.SUFFIX_AUDIO_PLAYLISTS):
+            for pl in util.find_matches(new_files, config.PLAYLIST_SUFFIX):
                 new_pl_items += [ Playlist(pl, self) ]
 
         if not display_type or display_type == 'image':
-            for file in util.find_matches(new_files, config.SUFFIX_IMAGE_SSHOW):
+            for file in util.find_matches(new_files, config.IMAGE_SSHOW_SUFFIX):
                 pl = Playlist(file, self)
                 pl.autoplay = True
                 new_pl_items += [ pl ]

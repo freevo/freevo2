@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2003/11/28 19:26:36  dischi
+# renamed some config variables
+#
 # Revision 1.75  2003/11/27 03:12:40  rshortt
 # Add the property group_type to the VideoGroup class to easier handle special
 # capture cards like those based on ivtv chipsets and dvb cards.
@@ -533,53 +536,38 @@ OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 #
 SUFFIX_VIDEO_FILES = []
 
+if HELPER:
+    for s in VIDEO_MPLAYER_SUFFIX + VIDEO_XINE_SUFFIX:
+        if not s in SUFFIX_VIDEO_FILES:
+            SUFFIX_VIDEO_FILES.append(s)
+            
 #
 # set data dirs
 #
-if not DIR_MOVIES:
-    ONLY_SCAN_DATADIR = True
-    DIR_MOVIES = [ ('Root', '/') ]
-    if os.environ.has_key('HOME') and os.environ['HOME']:
-        DIR_MOVIES = [ ('Home', os.environ['HOME']) ] + DIR_MOVIES
-    if not HELPER and plugin.is_active('mediamenu', 'video'):
+for type in ('video', 'audio', 'image', 'games'):
+    n = '%s_ITEMS' % type.upper()
+    x = eval(n)
+    if not x:
+        x = []
+        if os.environ.has_key('HOME') and os.environ['HOME']:
+            x.append(('Home', os.environ['HOME']))
+        x.append(('Root', '/'))
+        exec('%s = x' % n)
+        if not HELPER and plugin.is_active('mediamenu', type):
             print
-            print 'Error: DIR_MOVIES not set, set it to Home directory'
+            print 'Error: %s not set, set it to Home directory' % n
             print
-            
-if not DIR_AUDIO:
-    DIR_AUDIO = [ ('Root', '/') ]
-    if os.environ.has_key('HOME') and os.environ['HOME']:
-        DIR_AUDIO = [ ('Home', os.environ['HOME']) ] + DIR_AUDIO
-    if not HELPER and plugin.is_active('mediamenu', 'audio'):
-        print
-        print 'Error: DIR_AUDIO not set, set it to Home directory'
-        print
+        if type == 'video':
+            VIDEO_ONLY_SCAN_DATADIR = True
 
-if not DIR_IMAGES:
-    DIR_IMAGES = [ ('Root', '/') ]
-    if os.environ.has_key('HOME') and os.environ['HOME']:
-        DIR_IMAGES = [ ('Home', os.environ['HOME']) ] + DIR_IMAGES
-    if not HELPER and plugin.is_active('mediamenu', ('image', True)):
-        print 
-        print 'Error: DIR_IMAGES not set, set it to Home directory'
-        print
-        
-if not DIR_GAMES:
-    DIR_GAMES = [ ('Root', '/') ]
-    if os.environ.has_key('HOME') and os.environ['HOME']:
-        DIR_GAMES = [ ('Home', os.environ['HOME']) ] + DIR_GAMES
-    if not HELPER and plugin.is_active('mediamenu', 'games'):
-        print
-        print 'Error: DIR_GAMES not set, set it to Home directory'
-        print
 
-if not DIR_RECORD:
-    DIR_RECORD = DIR_MOVIES[0][1]
+if not TV_RECORD_DIR:
+    TV_RECORD_DIR = VIDEO_ITEMS[0][1]
     if not HELPER and plugin.is_active('tv'):
         print
-        print 'Error: DIR_RECORD not set'
-        print 'Please set DIR_RECORD to the directory, where recordings should be stored or'
-        print 'remove the tv plugin. Autoset variable to %s.' % DIR_RECORD
+        print 'Error: TV_RECORD_DIR not set'
+        print 'Please set TV_RECORD_DIR to the directory, where recordings should be stored or'
+        print 'remove the tv plugin. Autoset variable to %s.' % TV_RECORD_DIR
         print
         
 if not TV_SHOW_DATA_DIR and not HELPER:

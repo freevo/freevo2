@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/28 19:26:37  dischi
+# renamed some config variables
+#
 # Revision 1.9  2003/11/16 17:41:04  dischi
 # i18n patch from David Sagnol
 #
@@ -16,7 +19,7 @@
 # destroy the popup after some time
 #
 # Revision 1.7  2003/09/16 20:45:02  mikeruelle
-# warn user about old DIR_GAMES entry
+# warn user about old GAMES_ITEMS entry
 #
 # Revision 1.6  2003/09/12 22:25:00  dischi
 # prevent a possible crash
@@ -72,7 +75,7 @@ def cwd(parent, files):
     items = []
 
     if not hasattr(parent, 'add_args') or type(parent.add_args) is not types.TupleType: 
-	pop = PopupBox(text=_('please update DIR_GAMES in local_conf.py'))
+	pop = PopupBox(text=_('please update GAMES_ITEMS in local_conf.py'))
 	pop.show()
         time.sleep(2)
 	pop.destroy()
