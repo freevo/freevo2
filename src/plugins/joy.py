@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/08 12:30:51  dischi
+# only activate plugin when joystick is working
+#
 # Revision 1.10  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -19,7 +22,6 @@
 #
 # Revision 1.8  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,40 +61,37 @@ rc = rc.get_singleton()
 class PluginInterface(plugin.DaemonPlugin):
 
     def __init__(self):
-        plugin.DaemonPlugin.__init__(self)
-
         self.plugin_name = 'JOY'
         self.device_name = ''
-        # If we make it to the end of __init__ successfully then
-        # poll_interval is set to run ok.
-        self.poll_interval = 0
      
         if config.JOY_DEV == 0:
-            print 'Joystick input module disabled, exiting'
+            self.reason = 'Joystick input module disabled'
             return
 
-        self.device_name = '/dev/input/js'+str((config.JOY_DEV - 1))
+        self.device_name = '/dev/input/js' + str((config.JOY_DEV - 1))
 
         try:
-            self.joyfd = os.open(self.device_name, 
-                                      os.O_RDONLY|os.O_NONBLOCK)
+            self.joyfd = os.open(self.device_name, os.O_RDONLY|os.O_NONBLOCK)
         except OSError:
+            
             print 'Unable to open %s, trying /dev/js%s...' % \
                   (self.device_name, str((config.JOY_DEV - 1)))
-            self.device_name = '/dev/js'+str((config.JOY_DEV - 1))
+            self.device_name = '/dev/js' + str((config.JOY_DEV - 1))
 
             try:
-                self.joyfd = os.open(self.device_name, 
-                                          os.O_RDONLY|os.O_NONBLOCK)
+                self.joyfd = os.open(self.device_name, os.O_RDONLY|os.O_NONBLOCK)
             except OSError:
                 print 'Unable to open %s, check modules and/or permissions' % \
                       self.device_name
-                print 'exiting...'
+                self.reason = 'unable to open device'
                 return
-    
+
+        # ok, joystick is working
+        plugin.DaemonPlugin.__init__(self)
+        
         print 'using joystick', config.JOY_DEV
-    
-        self.poll_interval = 1
+        
+        self.poll_interval  = 1
         self.poll_menu_only = False
 
 
