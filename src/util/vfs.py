@@ -16,6 +16,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/05 05:44:26  gsbarbieri
+# Fixes some bugs related to handling unicode internally.
+# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
+#
 # Revision 1.14  2004/02/05 02:52:26  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
@@ -222,8 +226,10 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
             if type( directory ) == str:
                 directory = unicode( directory, encoding )
         except Exception, e:
-            print "ERROR:" + \
-                  "Could not convert %s to unicode using \"%s\" encoding: %s" % ( repr( directory ), encoding, e )
+            _debug_( "ERROR: " + \
+                  "Could not convert %s to unicode using \"%s\" encoding: %s" % \
+                     ( repr( directory ), encoding, e )
+                     )
         
         if include_dot_files:
             for f in os.listdir(directory):
@@ -245,8 +251,10 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
                     try:
                         fname = unicode( fname, encoding )
                     except Exception, e:
-                        print "ERROR:" + \
-                              "Could not convert %s to unicode using \"%s\" encoding: %s" % ( repr( fname ), encoding, e )
+                        _debug_( "ERROR: " + \
+                              "Could not convert %s to unicode using \"%s\" encoding: %s" % \
+                                 ( repr( fname ), encoding, e )
+                                 )
                         
                 f = overlay + fname
         

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/05 05:44:26  gsbarbieri
+# Fixes some bugs related to handling unicode internally.
+# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
+#
 # Revision 1.14  2004/02/04 19:05:36  dischi
 # remove bad log message
 #
@@ -280,7 +284,10 @@ class Info_Area(Skin_Area):
                     if exp:
                         exp = eval(exp, {'attr': item.getattr}, function_calls)
                         if exp:
-                            list[ i ].text = str( exp )
+                            if type( exp ) != unicode and type( exp )!= str:
+                                list[ i ].text = str( exp )
+                            else:
+                                list[ i ].text = exp
                 # I add a tuple here to be able to compare lists and know if we need to
                 # update, this is useful in the mp3 player
                 ret_list += [ index + [ ( i, list[ i ].text ) ] ]

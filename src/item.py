@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/02/05 05:44:26  gsbarbieri
+# Fixes some bugs related to handling unicode internally.
+# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
+#
 # Revision 1.61  2004/02/05 02:52:20  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
@@ -285,6 +289,14 @@ class Item:
                 try:
                     if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
                         self.name = self.info['title'] or self.name
+                        if type( self.name ) == str:
+                            try:
+                                self.name = unicode( self.name, config.encoding )
+                            except UnicodeDecodeError, e:
+                                _debug_( "WARNING: " + \
+                                         "Could not convert %s to unicode using \"%s\" encoding: %s" % \
+                                         ( repr( self.name ), encoding, e )
+                                         )
                 except:
                     pass
                 if not self.name:
@@ -500,8 +512,14 @@ class Item:
         if attr[:4] == 'len(' and attr[-1] == ')':
             return self.__getitem__(attr)
         else:
-            try:
-                return str(self.__getitem__(attr))
-            except UnicodeEncodeError:
-                return self.__getitem__( attr ).encode( config.encoding )
-            
+            r = self.__getitem__(attr)
+            if type( r ) == str:
+                try:
+                    r = unicode( r, config.encoding )
+                except UnicodeDecodeError, e:
+                    _debug_( "WARNING: " + \
+                             "Could not convert %s to unicode using \"%s\" encoding: %s" % \
+                             ( repr( directory ), encoding, e )
+                             )
+                             
+            return r

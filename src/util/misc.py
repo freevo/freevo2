@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/02/05 05:44:26  gsbarbieri
+# Fixes some bugs related to handling unicode internally.
+# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
+#
 # Revision 1.21  2004/02/01 17:06:12  dischi
 # speedup
 #
@@ -281,7 +285,7 @@ def title_case(phrase):
  
 def get_bookmarkfile(filename):
     myfile = vfs.basename(filename) 
-    myfile = config.FREEVO_CACHEDIR + "/" + str(myfile) + '.bookmark'
+    myfile = config.FREEVO_CACHEDIR + "/" + myfile + '.bookmark'
     return myfile
 
 
