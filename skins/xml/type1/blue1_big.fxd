@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <freevo>
-  
+
   <skin geometry="800x600">
     <iconset dir="skins/icons/AquaFusion"/>
 
     <!-- Items of the main menu (will change soon) -->
-    <main>        
+    <main>
       <item label="tv"    name="TV"     icon="tv.png"/>
       <item label="video" name="Movies" icon="movies.png"/>
       <item label="audio" name="Music"  icon="mp3.png"/>
@@ -13,10 +13,10 @@
       <item label="games" name="Games"  icon="package_games.png"/>
       <item label="shutdown" name="Shutdown" icon="shutdown.png"/>
     </main>
-    
+
     <!-- SKIN DEFINITION -->
 
-    <!-- 
+    <!--
     At the beginning there are the menu definitions. A menu has a type for
     the different types of media: video/audio/image/games, main for the
     main menu and default for all the other menus. The type 'all' will
@@ -34,7 +34,7 @@
       <style text="main menu"/>
     </menu>
 
-    <!-- 
+    <!--
     After defining which menu style to use for which item, we need to define
     how the areas of each menuset look like. A menuset has a label (used by
     menu) and the geometry and names for the five areas
@@ -46,16 +46,16 @@
 
       <!-- 2. title: the area where the title of the menu (e.g. directory name -->
       <!-- will be displayed -->
-      <title layout="title0" x="10" y="10" width="780" height="60"/> 
+      <title visible="not idlebar" layout="title0" x="10" y="10" width="780" height="60"/>
 
       <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
-      <view layout="view0" x="580" y="110" width="200" height="300"/> 
+      <view layout="view0" x="580" y="110" width="200" height="300"/>
 
       <!-- 4. listing area: the list of all items -->
-      <listing layout="list0" x="45" y="110" width="515" height="470">
-	<image x="10" y="110" width="32" height="32" label="uparrow" 
+      <listing layout="list0" x="50" y="110" width="510" height="470">
+	<image x="10" y="110" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
-	<image x="10" y="544" width="32" height="32" label="downarrow" 
+	<image x="10" y="544" width="32" height="32" label="downarrow"
 	  filename="down.png"/>
       </listing>
       <!-- 5. info area: additional info. This area is invisible in the default -->
@@ -78,10 +78,10 @@
 
     <!--
     **********************************************
-    LAYOUT DEFINITIONS 
+    LAYOUT DEFINITIONS
     **********************************************
 
-    The menus defined a layout to use. Now here are the definitions of the 
+    The menus defined a layout to use. Now here are the definitions of the
     layouts. Based on the type of area, some attributes have no effect
     (e.g. the background has no content
 
@@ -95,7 +95,8 @@
 	<!-- an image with the label background will ignore OVERSCAN settings -->
 	<!-- in freevo to make sure the complete screen is filled -->
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="logo.png" x="10" y="0" width="200" height="98"/>
+	<image visible="not idlebar" filename="logo.png" x="10" y="0" 
+	  width="200" height="98"/>
       </background>
     </layout>
 
@@ -139,47 +140,8 @@
 
     <!--
     **********************************************
-    FONT DEFINITIONS 
-    **********************************************
+    POPUP DEFINITIONS
 
-    Now the font definitions. Inherited skins like blue1_small only redefines
-    the fonts and the rest will be untouched. It's easy to change the fonts a
-    skin uses without changing anything in the layout
-
-    -->
-
-    <font label="title" name="Arial_Bold" size="35" color="0xffffff"/>
-    <font label="item" name="Arial_Bold" size="20" color="0xdddddd"/>
-    <font label="selected" name="Arial_Bold" size="20" color="0xffffff"/>
-    <font label="main" name="Arial_Bold" size="35" color="0xdddddd"/>
-    <font label="main selected" name="Arial_Bold" size="35" color="0xffffff"/>
-    <font label="default" name="Arial_Bold" size="20" color="0xffffff"/>
-    <font label="widget" name="Arial_Bold" size="11" color="0xffffff"/>
-    <font label="selected widget" name="Arial_Bold" size="11" color="0x164668"/>
-
-
-    <!--
-    **********************************************
-    COLOR DEFINITIONS 
-    **********************************************
-
-    -->
-
-    <color label="selection" value="0xa0000000"/>
-
-    <!--
-    **********************************************
-    IMAGE DEFINITIONS 
-    **********************************************
-
-    -->
-
-    <image label="background" filename="aubin_bg2"/>
-
-    <!--
-    **********************************************
-    POPUP DEFINITIONS 
-    
     A popup definition is only a link to a specific layout, like menu areas
 
     -->
@@ -212,11 +174,11 @@
     there is no listing area and no types (it's always type audio)
 
     -->
-    
+
     <player>
       <screen layout="player screen" x="0" y="0" width="800" height="600"/>
-      <view layout="player view" x="430" y="200" width="420" height="360"/> 
-      <info layout="player info" x="-50" y="80" width="550" height="300"/> 
+      <view layout="player view" x="430" y="200" width="420" height="360"/>
+      <info layout="player info" x="-50" y="80" width="550" height="300"/>
       <title visible="no"/>
     </player>
 
@@ -241,71 +203,47 @@
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
-      <content x="55" y="10" height="max-20" width="max-90" type="text"
+      <content x="70" y="10" height="max-20" width="max-75" type="text"
 	spacing="10" font="player">
 	<item type="default">
 	  <if expression="title">
-	     <text font="info title" 
-	           width="max" height="line_height"
-	           mode="hard" align="left"
-		   expression="title" />
-             <newline />
+	    <text font="info title" expression="title"/>
+	    <newline/>
 	  </if>
 	  <if expression="artist">
-	     <text font="info tagline"
-	           width="max" height="line_height"
-		   mode="hard" align="left" 
-		   expression="artist" />
-	     <newline />
+	    <text font="info tagline" expression="artist"/>
+	    <newline/>
 	  </if>
-	  <goto_pos y="15" mode="relative" />
+	  <goto_pos y="15" mode="relative"/>
 	  <if expression="album">
-  	     <text height="line_height" width="100"
-	           align="right" font="info value" 
-		   mode="hard">Album:</text>
-	     <goto_pos x="10" mode="relative" />		   
-  	     <text height="line_height"
-	           align="left" font="info value" 
-		   mode="hard" expression="album" />
-	     <if expression="date">
-	         <text font="info value"> (</text>
-                 <text height="line_height"
-	               align="left" font="info value" 
-		       mode="hard" expression="date" />
-	         <text font="info value">)</text>
-             </if>
-   	     <newline />	  
+  	     <text width="100" align="right" font="info value">Album:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="album"/>
+	    <if expression="date">
+	      <text font="info value"> (</text>
+	      <text font="info value" expression="date"/>
+	      <text font="info value">)</text>
+	    </if>
+	    <newline/>
 	  </if>
 	  <if expression="trackno">
-  	     <text height="line_height" width="100"
-	           align="right" font="info value" 
-		   mode="hard">Track:</text>
-	     <goto_pos x="10" mode="relative" />		   
-  	     <text height="line_height"
-	           align="left" font="info value" 
-		   mode="hard" expression="trackno" />
-   	     <newline />	  
+	    <text width="100" align="right" font="info value">Track:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="trackno"/>
+	    <newline/>
 	  </if>
-	  <goto_pos y="15" mode="relative" />
+	  <goto_pos y="15" mode="relative"/>
 	  <if expression="length">
-  	     <text height="line_height" width="100"
-	           align="right" font="info value" 
-		   mode="hard">Length:</text>
-	     <goto_pos x="10" mode="relative" />		   
-  	     <text height="line_height"
-	           align="left" font="info value" 
-		   mode="hard" expression="length" />
-   	     <newline />
+	    <text width="100" align="right" font="info value">Length:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="length"/>
+	    <newline/>
 	  </if>
 	  <if expression="elapsed">
-  	     <text height="line_height" width="100"
-	           align="right" font="info value" 
-		   mode="hard">Elapsed:</text>
-	     <goto_pos x="10" mode="relative" />		   
-  	     <text height="line_height"
-	           align="left" font="info value" 
-		   mode="hard" expression="elapsed" />
-   	     <newline />	  
+	    <text width="100" align="right" font="info value">Elapsed:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="elapsed"/>
+	    <newline/>
 	  </if>
 	</item>
       </content>
@@ -318,14 +256,14 @@
     TV DEFINITIONS
 
     -->
-    
+
     <tv>
       <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
       <info layout="tv info" x="10" y="10" width="780" height="190"/>
-      <listing layout="tv listing" x="10" y="220" width="750" height="370"> 
-	<image x="765" y="220" width="32" height="32" label="uparrow" 
+      <listing layout="tv listing" x="10" y="220" width="750" height="370">
+	<image x="765" y="220" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
-	<image x="765" y="544" width="32" height="32" label="downarrow" 
+	<image x="765" y="544" width="32" height="32" label="downarrow"
 	  filename="down.png"/>
 	<image width="16" height="16" label="leftarrow" filename="left.png"/>
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>
@@ -371,7 +309,7 @@
       </content>
     </layout>
 
-    <!-- tv listing area -->
+    <!-- tv info area -->
     <layout label="tv info">
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
@@ -380,51 +318,71 @@
 	spacing="10" font="tv">
 	<item type="default">
 	  <if expression="title">
-	     <text font="info title" 
-	           width="630" height="line_height"
-	           mode="hard" align="left"
-		   expression="title" />
+	    <text font="info title" width="630" expression="title"/>
 	  </if>
-          <text font="info value"
-	        width="max" height="line_height"
-	        mode="hard" align="left" valign="center"
-	        expression="start" />
-          <text font="info value"
-	        width="max" height="line_height"
-	        mode="hard" align="left" valign="center">-</text>
-          <text font="info value"
-	        width="max" height="line_height"
-	        mode="hard" align="left" valign="center"
-	        expression="stop" />
-	  <newline />
+          <text font="info value" valign="center" expression="start"/>
+          <text font="info value" valign="center">-</text>
+          <text font="info value" valign="center" expression="stop"/>
+	  <newline/>
 	  <if expression="sub_title">
-	     <text font="info tagline"
-	           width="max" height="line_height"
-	           mode="hard" align="left"
-		   expression="sub_title" />
-             <newline />
+	     <text font="info tagline" expression="sub_title"/>
+	    <newline/>
 	  </if>
 	  <if expression="desc">
-             <text font="info plot"
-	           width="max" height="line_height"
-	           mode="hard" align="left"
-	          expression="desc" />	  
-             <newline />
+             <text font="info plot" height="max" mode="soft" expression="desc"/>
+             <newline/>
 	  </if>
 	</item>
       </content>
     </layout>
 
 
-    <font label="info title"       name="impact" size="24" color="0xffffff">
-       <shadow x="2" y="2" color="0x000000" visible="yes" />
+    <!--
+    **********************************************
+    FONT DEFINITIONS
+    **********************************************
+
+    Now the font definitions. Inherited skins like blue1_small only redefines
+    the fonts and the rest will be untouched. It's easy to change the fonts a
+    skin uses without changing anything in the layout
+
+    -->
+
+    <font label="title" name="Arial_Bold" size="35" color="0xffffff"/>
+    <font label="item" name="Arial_Bold" size="20" color="0xdddddd"/>
+    <font label="selected" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="main" name="Arial_Bold" size="35" color="0xdddddd"/>
+    <font label="main selected" name="Arial_Bold" size="35" color="0xffffff"/>
+    <font label="default" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="widget" name="Arial_Bold" size="11" color="0xffffff"/>
+    <font label="selected widget" name="Arial_Bold" size="11" color="0x164668"/>
+
+    <font label="info title" name="Arial_Bold" size="24" color="0xffffff">
+      <shadow x="2" y="2" color="0x000000" visible="yes"/>
     </font>
-    <font label="info plot"        name="timesbd" size="16" color="0xffffff" />
-    <font label="info tagline"     name="Arial_Bold" size="16" color="0xffffff" />
-    <font label="info description" name="Arial_Bold" size="14" color="0xffffaa" />
-    <font label="info label"       name="Arial_Bold" size="14" color="0xffffff" />
-    <font label="info value"       name="Arial_Bold" size="14" color="0xffffaa" />
-    
+    <font label="info plot"    name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="info tagline" name="Arial_Bold" size="18" color="0xffffff"/>
+    <font label="info label"   name="Arial_Bold" size="14" color="0xffffff"/>
+    <font label="info value"   name="Arial_Bold" size="14" color="0xffffaa"/>
+
+
+    <!--
+    **********************************************
+    COLOR DEFINITIONS
+    **********************************************
+
+    -->
+
+    <color label="selection" value="0xa0000000"/>
+
+    <!--
+    **********************************************
+    IMAGE DEFINITIONS
+    **********************************************
+
+    -->
+
+    <image label="background" filename="aubin_bg2"/>
 
   </skin>
 </freevo>
