@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-16 18:11+0200\n"
+"POT-Creation-Date: 2003-10-17 20:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 msgid "Unknown CD Album"
 msgstr ""
 
-#: audio/audiodiskitem.py:95 directory.py:386 image/plugins/gphoto.py:155
+#: audio/audiodiskitem.py:95 directory.py:433 image/plugins/gphoto.py:155
 msgid "Browse directory"
 msgstr ""
 
@@ -107,52 +107,128 @@ msgstr ""
 msgid "[VUX] an audio item, do not select"
 msgstr ""
 
-#: directory.py:367
+#: directory.py:115
+msgid "Movie Playlists"
+msgstr ""
+
+#: directory.py:116
+msgid "Use automatic playlist for movie items."
+msgstr ""
+
+#: directory.py:118
+msgid "Directory Sort By Date"
+msgstr ""
+
+#: directory.py:119
+msgid "Sort directory by date and not by name."
+msgstr ""
+
+#: directory.py:121
+msgid "Directory Autoplay Single Item"
+msgstr ""
+
+#: directory.py:122
+msgid "Don't show directory if only one item exists and auto-select "
+msgstr ""
+
+#: directory.py:123
+msgid "the item."
+msgstr ""
+
+#: directory.py:125
+msgid "Audio Random Playlist"
+msgstr ""
+
+#: directory.py:126
+msgid "Show radom playlist item for audio menus."
+msgstr ""
+
+#: directory.py:128
+msgid "Force Skin Layout"
+msgstr ""
+
+#: directory.py:129
+msgid "Force skin to a specific layout. This option doesn't work with "
+msgstr ""
+
+#: directory.py:130
+msgid "all skins and the result may differ based on the skin."
+msgstr ""
+
+#: directory.py:132
+msgid "Directory Smart Sort"
+msgstr ""
+
+#: directory.py:133
+msgid "Use a smarter way to sort the items."
+msgstr ""
+
+#: directory.py:135
+msgid "Use MediaID Tag Names"
+msgstr ""
+
+#: directory.py:136
+msgid "Use the names from the media files tags as display name."
+msgstr ""
+
+#: directory.py:138
+msgid "Directory Reverse Sort"
+msgstr ""
+
+#: directory.py:139
+msgid "Show the items in the list in reverse order."
+msgstr ""
+
+#: directory.py:408
 #, python-format
 msgid "Directory on disc [%s]"
 msgstr ""
 
-#: directory.py:368
+#: directory.py:409
 msgid "Directory"
 msgstr ""
 
-#: directory.py:392
+#: directory.py:436
+msgid "Random play all items"
+msgstr ""
+
+#: directory.py:438
 msgid "Recursive random play all items"
 msgstr ""
 
-#: directory.py:393
+#: directory.py:440
 msgid "Configure directory"
 msgstr ""
 
-#: directory.py:416
+#: directory.py:463
 msgid "Enter Password"
 msgstr ""
 
-#: directory.py:441
+#: directory.py:488
 msgid "Password incorrect"
 msgstr ""
 
-#: directory.py:485
+#: directory.py:532
 msgid "Scanning disc, be patient..."
 msgstr ""
 
-#: directory.py:487
+#: directory.py:534
 msgid "Scanning directory, be patient..."
 msgstr ""
 
-#: directory.py:804 directory.py:841
+#: directory.py:851 directory.py:888
 msgid "on"
 msgstr ""
 
-#: directory.py:806 directory.py:809 directory.py:843 directory.py:846
+#: directory.py:853 directory.py:856 directory.py:890 directory.py:893
 msgid "off"
 msgstr ""
 
-#: directory.py:811 directory.py:848
+#: directory.py:858 directory.py:895
 msgid "auto"
 msgstr ""
 
-#: directory.py:850
+#: directory.py:899
 msgid "Configure"
 msgstr ""
 
@@ -188,16 +264,16 @@ msgstr ""
 msgid "h = Help"
 msgstr ""
 
-#: playlist.py:233
+#: playlist.py:238
 msgid "Random Playlist"
 msgstr ""
 
-#: playlist.py:238 playlist.py:242 playlist.py:340 video/configure.py:178
+#: playlist.py:243 playlist.py:247 playlist.py:345 video/configure.py:178
 #: video/videoitem.py:290
 msgid "Play"
 msgstr ""
 
-#: playlist.py:239 playlist.py:241
+#: playlist.py:244 playlist.py:246
 msgid "Browse Playlist"
 msgstr ""
 
@@ -205,7 +281,7 @@ msgstr ""
 msgid "Generating MAME cache, please wait."
 msgstr ""
 
-#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:171
+#: gui/AlertBox.py:162 gui/ConfirmBox.py:162 plugins/commands.py:174
 msgid "OK"
 msgstr ""
 
@@ -236,103 +312,53 @@ msgstr ""
 msgid "No information available"
 msgstr ""
 
-#: plugins/base.py:71
-msgid "Shutdown Freevo"
-msgstr ""
-
-#: plugins/base.py:72
-msgid "Shutdown system"
-msgstr ""
-
-#: plugins/commands.py:156
+#: plugins/commands.py:159
 msgid "Command finished"
 msgstr ""
 
-#: plugins/commands.py:172
+#: plugins/commands.py:175
 msgid "Show Stderr"
 msgstr ""
 
-#: plugins/commands.py:173
+#: plugins/commands.py:176
 msgid "Show Stdout"
 msgstr ""
 
-#: plugins/commands.py:187
+#: plugins/commands.py:190
 msgid "Stdout File"
 msgstr ""
 
-#: plugins/commands.py:191
+#: plugins/commands.py:194
 msgid "Stderr File"
 msgstr ""
 
-#: plugins/commands.py:245
+#: plugins/commands.py:248
 msgid "Run Command"
 msgstr ""
 
-#: plugins/commands.py:268
-msgid "Command Failed"
+#: plugins/commands.py:257
+msgid "Running Command..."
 msgstr ""
 
 #: plugins/commands.py:271
+msgid "Command Failed"
+msgstr ""
+
+#: plugins/commands.py:274
 msgid "Command Completed"
 msgstr ""
 
-#: plugins/commands.py:296
+#: plugins/commands.py:299
 msgid "No Commands found"
 msgstr ""
 
-#: plugins/commands.py:297 plugins/commands.py:323
+#: plugins/commands.py:300 plugins/commands.py:326
 msgid "Commands"
 msgstr ""
 
 #: plugins/df.py:70
 #, python-format
 msgid "%i of %i Mb free"
-msgstr ""
-
-#: plugins/file_ops.py:83
-msgid "Delete file"
-msgstr ""
-
-#: plugins/file_ops.py:85
-msgid "Delete info"
-msgstr ""
-
-#: plugins/file_ops.py:91
-#, python-format
-msgid ""
-"Do you wish to delete\n"
-" '%s'?"
-msgstr ""
-
-#: plugins/file_ops.py:96
-#, python-format
-msgid ""
-"Delete info about\n"
-" '%s'?"
-msgstr ""
-
-#: plugins/headlines.py:117 plugins/headlines.py:283
-msgid "Headlines"
-msgstr ""
-
-#: plugins/headlines.py:206
-msgid "Show Sites Headlines"
-msgstr ""
-
-#: plugins/headlines.py:228
-msgid "Fetching headlines..."
-msgstr ""
-
-#: plugins/headlines.py:281
-msgid "No Headlines found"
-msgstr ""
-
-#: plugins/headlines.py:298 plugins/headlines.py:312
-msgid "Headlines Sites"
-msgstr ""
-
-#: plugins/headlines.py:310
-msgid "No Headlines Sites found"
 msgstr ""
 
 #: plugins/idlebar.py:479
@@ -537,6 +563,34 @@ msgstr ""
 msgid "%s Main Menu"
 msgstr ""
 
+#: plugins/headlines.py:117 plugins/headlines.py:283
+msgid "Headlines"
+msgstr ""
+
+#: plugins/headlines.py:206
+msgid "Show Sites Headlines"
+msgstr ""
+
+#: plugins/headlines.py:228
+msgid "Fetching headlines..."
+msgstr ""
+
+#: plugins/headlines.py:281
+msgid "No Headlines found"
+msgstr ""
+
+#: plugins/headlines.py:298 plugins/headlines.py:312
+msgid "Headlines Sites"
+msgstr ""
+
+#: plugins/headlines.py:310
+msgid "No Headlines Sites found"
+msgstr ""
+
+#: plugins/icecastchanger.py:77
+msgid "Set as icecast playlist"
+msgstr ""
+
 #: plugins/rom_drives.py:257
 #, python-format
 msgid "Drive %s (no disc)"
@@ -552,25 +606,34 @@ msgstr ""
 msgid "Reading disc in drive %s"
 msgstr ""
 
-#: skins/main/listing_area.py:249
-msgid "This directory is empty"
+#: plugins/file_ops.py:83
+msgid "Delete file"
 msgstr ""
 
-#: skins/main/main.py:160
-msgid "TV GUIDE"
+#: plugins/file_ops.py:85
+msgid "Delete info"
 msgstr ""
 
-#: skins/main/main.py:290
-msgid "Starting Freevo, please wait ..."
+#: plugins/file_ops.py:91
+#, python-format
+msgid ""
+"Do you wish to delete\n"
+" '%s'?"
 msgstr ""
 
-#: skins/main/main.py:550 skins/main/main.py:622
-msgid "INTERNAL ERROR, NO MENU!"
+#: plugins/file_ops.py:96
+#, python-format
+msgid ""
+"Delete info about\n"
+" '%s'?"
 msgstr ""
 
-#: skins/main/tvlisting_area.py:363 tv/tvguide.py:73 tv/tvguide.py:490
-#: tv/tvguide.py:492
-msgid "This channel has no data loaded"
+#: plugins/base.py:71
+msgid "Shutdown Freevo"
+msgstr ""
+
+#: plugins/base.py:72
+msgid "Shutdown system"
 msgstr ""
 
 #: tv/record_schedule.py:98
@@ -595,6 +658,11 @@ msgstr ""
 
 #: tv/record_schedule.py:182
 msgid "All Currently Recording Items Have Been Killed!"
+msgstr ""
+
+#: tv/tvguide.py:73 tv/tvguide.py:490 tv/tvguide.py:492
+#: skins/main/tvlisting_area.py:363
+msgid "This channel has no data loaded"
 msgstr ""
 
 #: tv/tvguide.py:83
@@ -798,6 +866,22 @@ msgstr ""
 #: video/videoitem.py:554
 #, python-format
 msgid "Play Title %s"
+msgstr ""
+
+#: skins/main/main.py:160
+msgid "TV GUIDE"
+msgstr ""
+
+#: skins/main/main.py:290
+msgid "Starting Freevo, please wait ..."
+msgstr ""
+
+#: skins/main/main.py:550 skins/main/main.py:622
+msgid "INTERNAL ERROR, NO MENU!"
+msgstr ""
+
+#: skins/main/listing_area.py:249
+msgid "This directory is empty"
 msgstr ""
 # Manualy added from fxd skin files
 msgid "TV"
