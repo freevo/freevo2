@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/05/06 18:12:17  dischi
+# fix crash
+#
 # Revision 1.24  2004/03/13 23:44:02  dischi
 # audio stream selection fixes
 #
@@ -166,7 +169,9 @@ def toggle(arg=None, menuw=None):
 
     new = add_toogle(arg[0], arg[1], arg[2])
     new.image = old.image
-    new.display_type = old.display_type
+
+    if hasattr(old, 'display_type'):
+        new.display_type = old.display_type
 
     menuw.menustack[-1].choices[pos] = new
     menuw.menustack[-1].selected = menuw.menustack[-1].choices[pos]
