@@ -217,10 +217,54 @@ The skin.xml file for this folder can look like this:
 
 4.3 CD-ROM support
 
-Don't put a skin.xml file on a cd. The format may change. The best way to
-customize a skin for a cd is a directory on your harddisc with links or IMDB
-XML files. I'm working on a way to associate a cd based on it's label to a
-skin.
+Don't put a skin.xml file on a cd. The format may change. You can add skin
+informations to a xml file for the cd.
+
+Example: you have a DVD. Now you make a xml for this movie with imdb.py and
+then add the cd id. The file contains something like
+   <?xml version="1.0" ?>
+   <freevo>
+     <movie>
+       <title>...</title>
+       <id>2002053022520000</id>
+       <cover>bla.jpg</cover>
+       <video>
+         <dvd/>
+         <files>
+         </files>
+       </video>
+       <info>
+         ...
+       </info>
+     </movie>
+   </freevo>
+      
+
+When you insert the DVD and start freevo you should see the title and the image
+in the MOVIE MAIN MENU. When you select the DVD you will see a list of tracks
+-- with the standard background.
+Now start an editor and add skin informations between </movie> and </freevo>,
+e.g.:
+     ...
+     </movie>
+     <skin>
+       <menu>
+         <bgbitmap>background.jpg</bgbitmap>
+         <items>
+        <font color="0x000000"/>
+        <selection length="300" color="0xc4dbe9"/>
+         </items>
+         <cover>
+        <movie visible="no"/>
+         </cover>
+       </menu>
+     </skin>
+   </freevo>
+      
+
+background.jpg has to be in the same directory as the xml file. Now go back to
+the MOVIE MAIN MENU and than back to the DVD. Now you have a special menu
+background for this DVD.
 
 4.4 Python skins
 

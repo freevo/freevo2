@@ -308,12 +308,61 @@ wget http://yasd.cc/xmltv/tv_`date +%Y%m%d`.xml.gz --output-document=- | gzip -d
 
     <h2>4.3 CD-ROM support</h2>
     <p>
-      Don't put a skin.xml file on a cd. The format may change. The
-      best way to customize a skin for a cd is a directory on your
-      harddisc with links or IMDB XML files. I'm working on a way
-      to associate a cd based on it's label to a skin.
+      Don't put a skin.xml file on a cd. The format may change. You can add
+      skin informations to a xml file for the cd. 
     </p>
+    <p>
+      Example: you have a DVD. Now you make a xml for this movie with imdb.py
+      and then add the cd id. The file contains something like
+      <pre>
+   &lt;?xml version="1.0" ?&gt;
+   &lt;freevo&gt;
+     &lt;movie&gt;
+       &lt;title&gt;...&lt;/title&gt;
+       &lt;id&gt;2002053022520000&lt;/id&gt;
+       &lt;cover&gt;bla.jpg&lt;/cover&gt;
+       &lt;video&gt;
+         &lt;dvd/&gt;
+         &lt;files&gt;
+         &lt;/files&gt;
+       &lt;/video&gt;
+       &lt;info&gt;
+         ...
+       &lt;/info&gt;
+     &lt;/movie&gt;
+   &lt;/freevo&gt;
+      </pre>
+    </p>
+    <p>
+      When you insert the DVD and start freevo you should see the title and
+      the image in the MOVIE MAIN MENU. When you select the DVD you will see
+      a list of tracks -- with the standard background.<br></br>
 
+      Now start an editor and add skin informations between &lt;/movie&gt; and
+      &lt;/freevo&gt;, e.g.:
+      <pre>
+     ...
+     &lt;/movie&gt;
+     &lt;skin&gt;
+       &lt;menu&gt;
+         &lt;bgbitmap&gt;background.jpg&lt;/bgbitmap&gt;
+         &lt;items&gt;
+   	&lt;font color="0x000000"/&gt;
+   	&lt;selection length="300" color="0xc4dbe9"/&gt;
+         &lt;/items&gt;
+         &lt;cover&gt;
+   	&lt;movie visible="no"/&gt;
+         &lt;/cover&gt;
+       &lt;/menu&gt;
+     &lt;/skin&gt;
+   &lt;/freevo&gt;
+      </pre>
+    </p>
+    <p>
+      background.jpg has to be in the same directory as the xml file. Now
+      go back to the MOVIE MAIN MENU and than back to the DVD. Now you have
+      a special menu background for this DVD.
+    </p>
     <h2>4.4 Python skins</h2>
     <p>
       If you don't like the current skin at all, you can write your own skin in
