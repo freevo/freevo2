@@ -30,11 +30,11 @@ class Display(MPlayerCanvas):
         if self.start_video and not self.child:
             import childapp
             arg = ['/local/install/mplayer-cvs/mplayer'] + self.mplayer_args.split(' ') + \
+            #arg = ['/home/tack/src/main/mplayer'] + self.mplayer_args.split(' ') + \
                   [config.BMOVL_OSD_VIDEO]
             self.child = childapp.ChildApp2(arg)
             time.sleep(2)
-            self.mplayer_overlay.state |= MPlayerOverlay.STATE_MPLAYER_RUNNING
-            self.mplayer_overlay.state |= MPlayerOverlay.STATE_BMOVL2_READY
+            self.mplayer_overlay.set_can_write(True)
             while 1:
                 if self.mplayer_overlay.can_write():
                     break
