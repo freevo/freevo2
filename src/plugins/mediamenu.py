@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/01/13 19:12:48  dischi
+# Small bugfix
+#
 # Revision 1.29  2004/01/11 15:44:01  dischi
 # changed menu display type to 'x main menu'
 #
@@ -164,6 +167,8 @@ class MediaMenu(Item):
         if self.display_type == 'games':
             title = _('Games')
 
+        menutitle = _('%s Main Menu') % title
+        
         if self.display_type:
             items = eval('config.%s_ITEMS' % self.display_type.upper())
             
@@ -202,8 +207,7 @@ class MediaMenu(Item):
                 traceback.print_exc()
 
 
-        item_menu = menu.Menu(_('%s Main Menu') % title,
-                              self.main_menu_generate(),
+        item_menu = menu.Menu(menutitle, self.main_menu_generate(),
                               item_types = '%s main menu' % self.display_type,
                               umount_all=1, reload_func = self.reload)
         item_menu.skin_force_text_view = force_text_view
