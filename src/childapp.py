@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/01/12 19:52:46  dischi
+# store return value for ChildApp2
+#
 # Revision 1.48  2003/12/13 14:34:43  outlyer
 # Make this clear; we are using stop_osd to figure out if we're playing
 # video or not. It's got nothing to do with stopping the actual OSD :)
@@ -243,7 +246,11 @@ class ChildApp:
     def isAlive(self):
         return self.t1.isAlive() or self.t2.isAlive()
 
-    
+
+    def wait(self):
+        return util.popen3.waitpid(self.child.pid)
+
+        
     def kill(self, signal=15):
         global __all_childapps__
 
@@ -265,7 +272,7 @@ class ChildApp:
 
         self.lock.acquire()
         # maybe child is dead and only waiting?
-        if util.popen3.waitpid(self.child.pid):
+        if self.wait():
             _debug_('done the easy way', 2)
             self.child = None
             if not self.infile.closed:
@@ -282,7 +289,7 @@ class ChildApp:
             
         _debug_('childapp: Before wait(%s)' % self.child.pid)
         for i in range(20):
-            if util.popen3.waitpid(self.child.pid):
+            if self.wait():
                 break
             time.sleep(0.1)
         else:
@@ -292,7 +299,7 @@ class ChildApp:
             except OSError:
                 pass
             for i in range(20):
-                if util.popen3.waitpid(self.child.pid):
+                if self.wait():
                     break
                 time.sleep(0.1)
         _debug_('childapp: After wait()')
@@ -570,6 +577,9 @@ class ChildApp2(ChildApp):
         if hasattr(self, 'item'):
             rc.post_event(Event(PLAY_START, arg=self.item))
 
+        # return status of the child
+        self.status = 0
+        
         # start the child
         ChildApp.__init__(self, app, debugname, doeslogging)
 
@@ -578,6 +588,14 @@ class ChildApp2(ChildApp):
         return PLAY_END
 
 
+    def wait(self):
+        pid, status = os.waitpid(self.child.pid, os.WNOHANG)
+        if pid == self.child.pid:
+            self.status = status
+            return True
+        return False
+    
+        
     def stop(self, cmd=''):
         try:
             global running_children
