@@ -685,6 +685,52 @@
 	    <info layout="info" x="10" y="110" width="780" height="480"/>
 	</headlines>
 
+	<!-- 
+	*******************************************************
+	** Video information
+	******************************************************* -->
+
+	<video>
+	    <screen layout="screen" x="0" y="450" width="800" height="150"/>
+	    <view layout="view" x="10" y="460" width="180" height="130"/>
+	    <info layout="running video info" x="210" y="490" width="580"
+		height="100"/>
+	    <content layout="progressbar" x="210" y="460" width="580"
+		height="20"/>
+	</video>
+
+	<layout label="progressbar">
+	    <content font="default">
+		<rectangle bgcolor="0xaa000000" size="0"/>
+		<rectangle bgcolor="0xaaffffff" size="0"/>
+	    </content>
+	</layout>
+
+	<layout label="running video info">
+	    <content x="0" y="0" type="text" spacing="20" font="default">
+		<item type="video">
+                    <if expression="tv_show_name">
+                        <text font="info tagline" expression="tv_show_name"/>
+                        <newline/>
+                        <if expression="tv_show_ep">
+                            <text font="info tagline" expression="tv_show_ep"/>
+                            <newline/>
+                        </if>
+                    </if>
+                    <if expression="not tv_show_name">
+                        <text font="info tagline" width="max" expression="name"/>
+                        <newline/>
+                    </if>
+                    <if expression="tagline">
+                        <text font="info tagline">"</text>
+                        <text font="info tagline" width="max" expression="tagline"
+			    dim="no"/>
+                        <text font="info tagline">"</text>
+                        <newline/>
+                    </if>
+		</item>
+	    </content>
+	</layout>	    
     </skin>
 </freevo>
 <!-- Keep this comment at the end of the file
