@@ -249,7 +249,7 @@
 
 	<item type="image">
 	  <if expression="width and height">
-	    <text width="130" font="info label">Geometry:</text>
+	    <text width="70" font="info label">Size:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="width"/>
 	    <text font="info value">x</text>
@@ -257,7 +257,7 @@
 	    <newline/>
 	  </if>
 	  <if expression="date">
-	    <text width="130" font="info label">Date:</text>
+	    <text width="70" font="info label">Date:</text>
 	    <goto_pos x="10" mode="relative"/>
 	    <text font="info value" expression="date"/>
 	    <newline/>
