@@ -20,8 +20,12 @@ class BmovlCanvas(BitmapCanvas):
 
 		if not self.children and self.bmovl_visible:
 			_debug_('hide')
-			os.write(self.fifo, 'HIDE\n')
-			os.write(self.fifo, 'CLEAR %s %s 0 0\n' % (self.width, self.height))
+			try:
+				os.write(self.fifo, 'HIDE\n')
+				os.write(self.fifo, 'CLEAR %s %s 0 0\n' % \
+					 (self.width, self.height))
+			except (IOError, OSError):
+				print 'IOError on bmovl.fifo'
 			self.bmovl_visible = False
 
 		pos, size = self._update_rect
@@ -31,13 +35,16 @@ class BmovlCanvas(BitmapCanvas):
 				 (size[0], size[1], pos[0], pos[1], 0, 0))
 
 			os.write(self.fifo, str(img.get_raw_data('RGBA')))
-		except IOError:
+		except (IOError, OSError):
 			print 'IOError on bmovl.fifo'
 		self._update_rect = None
 
 		if self.children and not self.bmovl_visible:
 			_debug_('show')
-			os.write(self.fifo, 'SHOW\n')
+			try:
+				os.write(self.fifo, 'SHOW\n')
+			except (IOError, OSError):
+				print 'IOError on bmovl.fifo'
 			self.bmovl_visible = True
 
 
