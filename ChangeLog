@@ -17,7 +17,7 @@ Release 1.4.0-rc1 (2003-10-05):
  * Merged latest xmltv parsing support
  * Preliminary FreeBSD support from Lars Eggert
  * xine support for audio playback (needs xine-ui cvs)
- * Support for FLAC encoding, tagging and playback (xine or mplayer >= 20031005cvs)
+ * Support for FLAC encoding, tagging and playback (xine or mplayer >= 1.0pre2)
  * Many fixes for Python 2.3 warnings
  * bugfixes and better error handling
  
