@@ -13,6 +13,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/07/19 19:18:16  dischi
+# o Since we already load the image from the net, use that image as preview
+#   for the selection
+# o Some German cds have the wrong cover image in the database. Change .01.
+#   to .03. and it works (don't know why)
+#
 # Revision 1.12  2003/07/03 23:08:24  dischi
 # force refresh
 #
@@ -117,6 +123,8 @@ import re
 import urllib2
 import time
 import config
+import Image
+import cStringIO
 
 from gui.PopupBox import PopupBox
 
@@ -199,8 +207,10 @@ class PluginInterface(plugin.ItemPlugin):
             print "Checking Large Cover"
             m = urllib2.urlopen(cover[i].ImageUrlLarge)
             if not (m.info()['Content-Length'] == '807'):
+                image = Image.open(cStringIO.StringIO(m.read()))
                 items += [ menu.MenuItem('%s' % cover[i].ProductName,
-                                     self.cover_create, cover[i].ImageUrlLarge) ]
+                                         self.cover_create, cover[i].ImageUrlLarge,
+                                         image=image) ]
                 m.close()
             else:
                 m.close()
@@ -208,10 +218,23 @@ class PluginInterface(plugin.ItemPlugin):
                 print "No Large Cover, Checking Small Cover..."
                 n = urllib2.urlopen(cover[i].ImageUrlMedium)
                 if not (n.info()['Content-Length'] == '807'):
+                    image = Image.open(cStringIO.StringIO(n.read()))
                     items += [ menu.MenuItem('%s [small]' % cover[i].ProductName,
                                     self.cover_create, cover[i].ImageUrlMedium) ]
-                n.close()
-       
+                    n.close()
+                else:
+                    n.close()
+                    # maybe the url is wrong, try to change '.01.' to '.03.'
+                    print cover[i].ImageUrlLarge
+                    cover[i].ImageUrlLarge = cover[i].ImageUrlLarge.replace('.01.', '.03.')
+                    print cover[i].ImageUrlLarge
+                    n = urllib2.urlopen(cover[i].ImageUrlLarge)
+                    if not (n.info()['Content-Length'] == '807'):
+                        image = Image.open(cStringIO.StringIO(n.read()))
+                        items += [ menu.MenuItem('%s [small]' % cover[i].ProductName,
+                                                 self.cover_create, cover[i].ImageUrlLarge) ]
+                    n.close()
+
         box.destroy()
         if len(items) == 1:
             self.cover_create(arg=items[0].arg, menuw=menuw)
