@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/03 14:22:16  rshortt
+# bugfix
+#
 # Revision 1.11  2003/07/12 18:34:35  rshortt
 # xmame should run through runapp.
 #
@@ -133,7 +136,7 @@ def saveMameRomList(mameRomList):
     if not mameRomList or mameRomList == None:
         mameRomList = mame_types.MameRomList()
 
-    util.save_pickle(mameRomList)
+    util.save_pickle(mameRomList, config.MAME_CACHE)
     
 
 #
