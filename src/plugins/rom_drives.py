@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/08/23 19:57:41  dischi
+# fix audiocd type setting
+#
 # Revision 1.22  2003/08/23 18:35:40  dischi
 # use new set_xml_file function in DirItem
 #
@@ -384,6 +387,7 @@ class Identify_Thread(threading.Thread):
             media.info = AudioDiskItem(disc_id, parent=None,
                                        devicename=media.devicename,
                                        display_type='audio')
+            media.type  = media.info.type
             media.info.handle_type = 'audio'
             media.info.media = media
             if data.title:
