@@ -2,5 +2,6 @@ Known bugs for the Freevo project
 ---------------------------------
 
 o The osd_x11 server doesn't redraw automatically when moving other windows over it.
-o The electronic program guide (TV programs) has mis-aligned columns.
+o The EPG (electronic program guide = TV programs) has misaligned columns.
 o The menu headings are not centered.
+o The EPG should be reloaded automatically to allow program end/start
