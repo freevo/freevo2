@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2004/01/10 16:53:48  dischi
+# better shutdown
+#
 # Revision 1.104  2004/01/10 14:56:19  dischi
 # better KeyboardInterrupt handling
 #
@@ -227,7 +230,10 @@ def start(name, arg, bg):
                 os.waitpid(uid, 0)
             except KeyboardInterrupt:
                 os.kill(uid, SIGTERM)
-                os.waitpid(uid, 0)
+                try:
+                    os.waitpid(uid, 0)
+                except KeyboardInterrupt:
+                    pass
                 if os.path.isfile(f.name):
                     os.unlink(f.name)
     else:
