@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/10/18 10:46:37  dischi
+# use util popen3 for child control
+#
 # Revision 1.28  2003/10/14 17:57:32  dischi
 # more debug
 #
@@ -97,7 +100,7 @@
 import sys
 import time
 import os
-import popen2
+import util.popen3
 import threading, thread
 import signal
 import traceback
@@ -108,7 +111,7 @@ import rc
 import util
 
 from event import *
-
+import rc
 
 __all_childapps__ = []
 
@@ -155,7 +158,7 @@ class ChildApp:
 
         start_str = '%s %s' % (config.RUNAPP, app)
 
-        self.child = popen2.Popen3(start_str, 1, 100) 
+        self.child = util.popen3.Popen3(start_str)
         self.outfile = self.child.fromchild 
         self.errfile = self.child.childerr
         self.infile = self.child.tochild
@@ -205,7 +208,7 @@ class ChildApp:
         return self.t1.isAlive() or self.t2.isAlive()
 
     
-    def kill(self, signal=9):
+    def kill(self, signal=15):
         global __all_childapps__
 
         if self in __all_childapps__:
@@ -222,49 +225,38 @@ class ChildApp:
 
         self.lock.acquire()
         # maybe child is dead and only waiting?
-        try:
-            if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
-                _debug_('done the easy way', 2)
-                self.child = None
-                if not self.infile.closed:
-                    self.infile.close()
-                self.lock.release()
-                return
-        except OSError:
-            _debug_('OSError, already dead', 2)
-            # Already dead?
+        if util.popen3.waitpid(self.child.pid):
+            _debug_('done the easy way', 2)
             self.child = None
+            if not self.infile.closed:
+                self.infile.close()
             self.lock.release()
             return
 
-        
-        try:
-            if signal:
-                _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
+        if signal:
+            _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
+            try:
                 os.kill(self.child.pid, signal)
-        except OSError:
-            _debug_('OSError, already dead? This should never happen', 2)
-            # Already dead?
-            self.child = None
-            self.lock.release()
-            return
-
+            except OSError:
+                pass
             
-        # Wait for the child to exit
-        try:
-            _debug_('childapp: Before wait(%s)' % self.child.pid)
+        _debug_('childapp: Before wait(%s)' % self.child.pid)
+        for i in range(20):
+            if util.popen3.waitpid(self.child.pid):
+                break
+            time.sleep(0.1)
+        else:
+            print 'force killing with signal 9'
+            try:
+                os.kill(self.child.pid, 9)
+            except OSError:
+                pass
             for i in range(20):
-                if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
+                if util.popen3.waitpid(self.child.pid):
                     break
                 time.sleep(0.1)
-            else:
-                print 'force killing with signal 9'
-                os.kill(self.child.pid, 9)
-                self.child.wait()
-            _debug_('childapp: After wait()')
+        _debug_('childapp: After wait()')
 
-        except OSError:
-            pass
 
         # now check if the app is really dead. If it is, outfile
         # should be closed by the reading thread
@@ -414,6 +406,8 @@ class ChildThread(threading.Thread):
         self.mode = 'stop'
         self.mode_flag.set()
         while self.mode == 'stop':
+            # we are the main thread, we should call the real waitpid()
+            util.popen3.waitpid()
             time.sleep(0.3)
                 
     def run(self):
