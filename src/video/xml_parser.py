@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/08/03 10:03:31  dischi
+# add ONLY_SCAN_DATADIR to speed up startup
+#
 # Revision 1.28  2003/07/18 19:48:24  dischi
 # support for datadir
 #
@@ -673,17 +676,18 @@ def hash_xml_database():
 
     if DEBUG: print "Building the xml hash database...",
 
-    for name,dir in config.DIR_MOVIES:
-        for file in util.recursefolders(dir,1,'*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-            infolist = save_parseMovieFile(file, os.path.dirname(file),[])
-            for info in infolist:
-                if info.rom_id:
-                    for i in info.rom_id:
-                        config.MOVIE_INFORMATIONS_ID[i] = info
-                if info.rom_label:
-                    for l in info.rom_label:
-                        l_re = re.compile(l)
-                        config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
+    if not config.ONLY_SCAN_DATADIR:
+        for name,dir in config.DIR_MOVIES:
+            for file in util.recursefolders(dir,1,'*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
+                infolist = save_parseMovieFile(file, os.path.dirname(file),[])
+                for info in infolist:
+                    if info.rom_id:
+                        for i in info.rom_id:
+                            config.MOVIE_INFORMATIONS_ID[i] = info
+                    if info.rom_label:
+                        for l in info.rom_label:
+                            l_re = re.compile(l)
+                            config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
                 
     for file in util.recursefolders(config.MOVIE_DATA_DIR,1,
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
@@ -710,4 +714,12 @@ def hash_xml_database():
                                               file)
             
     if DEBUG: print 'done'
+
+
+    print config.MOVIE_INFORMATIONS
+    print config.MOVIE_INFORMATIONS_ID
+    print config.MOVIE_INFORMATIONS_LABEL
+    print config.DISC_SET_INFORMATIONS_ID
+    print config.TV_SHOW_INFORMATIONS
+
     return 1

@@ -148,8 +148,8 @@ LOCAL_CONF_CHANGES = [
      other key mappings with the variable EVENTS. See event.py for possible
      events'''),
     (3.5,
-     '''Added xine support (see xine section in freevo_config.py) and
-     MPLAYER_AUTOCROP for 16:9 tv sets''')]
+     '''Added xine support (see xine section in freevo_config.py),
+     MPLAYER_AUTOCROP for 16:9 tv sets and ONLY_SCAN_DATADIR''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -413,6 +413,15 @@ COVER_DIR = 'testfiles/Covers/'
 SUFFIX_VIDEO_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
                        'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
                        'mp4', 'viv', 'nuv', 'mov' ]
+
+#
+# Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
+# informations about a disc. If you only have the fxd files for discs in
+# one of this directories (and subdirectories), set this to 1, it will
+# speed up startup.
+#
+ONLY_SCAN_DATADIR = 0
+
 
 # ======================================================================
 # Freevo audio settings:
