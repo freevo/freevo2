@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/06/20 19:38:31  dischi
+# moved getattr to item.py
+#
 # Revision 1.15  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -177,4 +180,9 @@ class Item:
         """
         if hasattr(self, attr):
             return str(getattr(self,attr))
+        if hasattr(self, 'info') and self.info:
+            if self.info.has_key(attr):
+                return str(self.info[attr])
+            if attr[:4] == 'len_' and self.info.has_key(attr[4:]):
+                return str(len(self.info[attr[4:]]))
         return ''

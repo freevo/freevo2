@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/06/20 19:38:31  dischi
+# moved getattr to item.py
+#
 # Revision 1.54  2003/06/20 18:46:53  dischi
 # set menu type to video and info_item type to track for DVD/VCD menu
 #
@@ -285,13 +288,9 @@ class VideoItem(Item):
         """
         return the specific attribute as string or an empty string
         """
-        a = Item.getattr(self, attr)
-        if not a and self.info and self.info.has_key(attr):
-            if attr == 'length':
-                a = '%s:%s' % (self.info[attr] / 60, self.info[attr] % 60)
-            else:
-                a = str(self.info[attr])
-        return a
+        if self.info and self.info.has_key(attr) and attr == 'length':
+            return '%d:%02d' % (int(self.info[attr] / 60), int(self.info[attr] % 60))
+        return Item.getattr(self, attr)
 
     # ------------------------------------------------------------------------
     # actions:
