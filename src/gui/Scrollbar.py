@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.9  2003/05/15 02:21:54  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -234,7 +238,7 @@ class Scrollbar(GUIObject):
         if self.border: self.border.draw()
 
         if DEBUG: print 'SB::_draw: pos=%s,%s' % (self.left, self.top)
-        self.parent.surface.blit(self.surface, self.get_position())
+        self.blit_parent()
 
 
     

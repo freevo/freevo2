@@ -6,6 +6,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.4  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -62,14 +66,15 @@ class Container(GUIObject):
     def __init__(self, type='frame', left=0, top=0, width=0, height=0, 
                  bg_color=None, fg_color=None, selected_bg_color=None, 
                  selected_fg_color=None, border=None, bd_color=None, 
-                 bd_width=None):
+                 bd_width=None, vertical_expansion=0):
 
         GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
 
-        self.layout         = None
+        self.layout_manager = None
         self.border         = border
         self.bd_color       = bd_color
         self.bd_width       = bd_width
+        self.vertical_expansion = vertical_expansion
 
         self.internal_h_align = Align.LEFT
         self.internal_v_align = Align.TOP
@@ -150,20 +155,22 @@ class Container(GUIObject):
 
     def set_layout(self, layout=None):
         if not layout: layout = FlowLayout(self)
-        self.layout = layout
+        self.layout_manager = layout
 
 
     def get_layout(self):
-        return self.layout 
+        return self.layout_manager 
+
+
+    def layout(self):
+        if not self.layout_manager:
+            self.layout_manager = FlowLayout(self)
+
+        self.layout_manager.layout()
 
 
     def _draw(self):
         if DEBUG: print 'Container::draw %s' % self
-
-        if not self.layout:
-            self.layout = FlowLayout(self)
-
-        self.layout.layout()
 
         for child in self.children:
             child.draw()

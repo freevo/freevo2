@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.14  2003/06/02 03:28:41  rshortt
 # Fixes for event changes.
 #
@@ -273,7 +277,7 @@ class RegionScroller(Container):
         if surface:
             surface.blit(self.surface, self.get_position())
         else:
-            self.parent.surface.blit(self.surface, self.get_position())
+            self.blit_parent()
     
 
     def set_position(self, left, top):

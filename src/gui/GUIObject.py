@@ -7,6 +7,10 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.23  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -277,7 +281,10 @@ class GUIObject:
         """
 
         self.visible = 0
-        self.zir.update_hide(self)
+        if self.parent and self.parent.visible:
+            self.zir.update_hide(self)
+            self.bg_replace()
+
         self.osd.update(self.get_rect())
 
 
@@ -355,14 +362,21 @@ class GUIObject:
         pass
 
 
+    def layout(self):
+        """
+        To be overriden by Container.
+        """
+        pass
+
+
     def draw(self, surface=None):
         if DEBUG: print 'GUIObject::draw %s' % self
 
         if self.is_visible() == 0: return FALSE
 
-        if self.bg_surface:
-            if DEBUG: print 'GUIObject::draw: have bg_surface'
-            self.osd.putsurface(self.bg_surface, self.left, self.top)
+        # self.bg_replace()
+
+        self.layout()
 
         if surface:
             self._draw(surface)
@@ -378,6 +392,31 @@ class GUIObject:
         objects that inherit this.
         """
         pass
+
+
+    def blit_parent(self):
+        if self.parent.surface:
+            p = self.parent.surface
+        else:
+            p = self.osd.screen
+
+        self.bg_surface = pygame.Surface((self.width, self.height))
+        self.bg_surface.blit(p, (0,0), 
+                             (self.left, self.top, self.width, self.height))
+
+        p.blit(self.surface, self.get_position())
+
+
+    def bg_replace(self):
+        if not self.bg_surface: return
+        if DEBUG: print 'GUIObject::draw: have bg_surface'
+
+        if self.parent.surface:
+            p = self.parent.surface
+        else:
+            p = self.osd.screen
+
+        p.blit(self.bg_surface, (self.left, self.top))
 
 
     def set_parent(self, parent):
@@ -409,6 +448,8 @@ class GUIObject:
 
 
     def destroy(self):
+        self.visible = 0
+
         if DEBUG:
             if self.bg_image:
                 iname = '/tmp/bg-%s-%s.bmp' % (self.left, self.top)
@@ -435,9 +476,6 @@ class GUIObject:
             else:
                 if DEBUG: print 'focus has %s not %s' % (self.osd.focused_app, self)
                 
-            # We shouldn't need to call this if we replace the bg right
-            # self.parent.refresh()
-
         self.hide()
         if self.parent:
             self.parent.refresh()

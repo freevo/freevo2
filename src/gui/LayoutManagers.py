@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.7  2003/05/21 00:04:25  rshortt
 # General improvements to layout and drawing.
 #
@@ -173,7 +177,14 @@ class FlowLayout(LayoutManager):
 
             if y + child.height > \
                self.container.height - self.container.v_margin:
-                break
+                if self.container.vertical_expansion:
+                    self.container.height = y + child.height + \
+                                            self.container.v_margin
+                    if DEBUG: 
+                        print 'LAYOUT:  fit me in! (%s) - %s' % \
+                                     (self.container.height, self)
+                else:
+                    break
 
             next_x = x + child.width + self.container.h_spacing
             next_y = y

@@ -10,6 +10,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.20  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -124,12 +128,14 @@ class PopupBox(Container):
     
     def __init__(self, parent='osd', text=' ', handler=None, left=None, 
                  top=None, width=360, height=120, bg_color=None, fg_color=None,
-                 icon=None, border=None, bd_color=None, bd_width=None):
+                 icon=None, border=None, bd_color=None, bd_width=None,
+                 vertical_expansion=1):
 
         self.handler = handler
 
         Container.__init__(self, 'frame', left, top, width, height, bg_color, 
-                           fg_color, None, None, border, bd_color, bd_width)
+                           fg_color, None, None, border, bd_color, bd_width,
+                           vertical_expansion)
 
         if not parent or parent == 'osd':
             parent = self.osd.focused_app
@@ -263,8 +269,7 @@ class PopupBox(Container):
 
         Container._draw(self)
 
-        # self.parent.surface.blit(self.surface, self.get_position())
-        self.osd.screen.blit(self.surface, self.get_position())
+        self.blit_parent()
 
     
     def _erase(self):

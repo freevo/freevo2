@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.8  2003/05/21 00:04:26  rshortt
 # General improvements to layout and drawing.
 #
@@ -176,14 +180,10 @@ class OptionBox(Button):
 
         pygame.draw.polygon(self.surface, arrow_color, [ar_1, ar_2, ar_3])
 
-        # if self.border: self.border.draw()
-
-        # self.label.draw()
-
         if isinstance(self.list, ListBox):
             self.list.set_position(self.left, self.top+self.height)
 
         Container._draw(self)
-        self.parent.surface.blit(self.surface, self.get_position())
+        self.blit_parent()
         if self.list:   self.list.draw(self.parent.surface)
     

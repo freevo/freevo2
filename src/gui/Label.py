@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.10  2003/05/21 00:04:25  rshortt
 # General improvements to layout and drawing.
 #
@@ -251,7 +255,6 @@ class Label(GUIObject):
         else:
             if self.width > pw: self.width = pw
             if self.height > ph: self.height = ph
-            # self.surface = self.parent.surface.subsurface((0, 0, self.width, self.height))
             self.surface = self.parent.surface.subsurface((self.left, self.top, self.width, self.height))
             if DEBUG: print '       surface=%s' % self.surface
 
@@ -291,8 +294,7 @@ class Label(GUIObject):
         self.render()
 
         if DEBUG: print '       draw position="%s,%s"' % self.get_position()
-        # self.parent.surface.blit(self.surface, self.get_position(), self.get_rect())
-        self.parent.surface.blit(self.surface, self.get_position())
+        self.blit_parent()
         
  
     def _erase(self):

@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.11  2003/05/21 00:04:26  rshortt
 # General improvements to layout and drawing.
 #
@@ -197,7 +201,7 @@ class LetterBoxGroup(Container):
 
         Container._draw(self)
 
-        self.parent.surface.blit(self.surface, self.get_position())
+        self.blit_parent()
 
     
 class LetterBoxLayout(LayoutManager):

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.14  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -126,10 +130,12 @@ class AlertBox(PopupBox):
 
     def __init__(self, parent='osd', text=" ", handler=None, left=None, 
                  top=None, width=300, height=150, bg_color=None, fg_color=None,
-                 icon=None, border=None, bd_color=None, bd_width=None):
+                 icon=None, border=None, bd_color=None, bd_width=None,
+                 vertical_expansion=1):
 
         PopupBox.__init__(self, parent, text, handler, left, top, width, height,
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+                          bg_color, fg_color, icon, border, bd_color, bd_width,
+                          vertical_expansion)
 
         b1 = Button('OK')
         b1.toggle_selected()

@@ -6,6 +6,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.7  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -200,8 +204,8 @@ class ZIndexRenderer:
         for o in self.zindex:
             if o == object:
                 if o.bg_surface:
-                    osd.putsurface(o.bg_surface, o.left, o.top)
-                    osd.update()
+                    # osd.putsurface(o.bg_surface, o.left, o.top)
+                    # osd.update()
                     if DEBUG:
                         o.bg_image = o.bg_surface.convert()
                         iname = '/tmp/last-hide.bmp' 
@@ -240,8 +244,8 @@ class ZIndexRenderer:
         xx = 0
         for o in self.zindex:
             if o == object:
-                o.bg_surface = osd.getsurface(o.left, o.top, 
-                                              o.width, o.height)
+                # o.bg_surface = osd.getsurface(o.left, o.top, 
+                #                               o.width, o.height)
                 if DEBUG:
                     o.bg_image = o.bg_surface.convert()
                     iname = '/tmp/bg1-%s.bmp' % xx

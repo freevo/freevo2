@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/25 02:27:39  rshortt
+# Allow 'frame' containers to grow verticly to hold all contents.  Also
+# better control of object's background images.
+#
 # Revision 1.11  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -166,7 +170,7 @@ class Button(Container):
 
         Container._draw(self)
 
-        self.parent.surface.blit(self.surface, self.get_position())
+        self.blit_parent()
 
     
     def get_text(self):
