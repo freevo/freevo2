@@ -5,12 +5,13 @@
 Summary:	Freevo
 Name:		freevo
 Version:	1.2.5
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
 Patch0:		%{name}-%{version}-setup_build.py.patch
 Patch1:		%{name}-%{version}-configure.patch
+Patch2:		%{name}-%{version}-freevo_config.py.patch
 URL:		http://freevo.sourceforge.net/
 Requires:	freevo_runtime
 #Requires:	mplayer, mpg321, xawtv, nvrec
@@ -31,6 +32,7 @@ record video and audio.
 %setup  -n %{name}
 %patch0 -p0
 %patch1 -p0
+%patch2 -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
