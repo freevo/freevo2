@@ -1,0 +1,319 @@
+<?xml version="1.0" ?>
+<freevo>
+  
+  <skin geometry="800x600">
+    <iconset dir="skins/icons/AquaFusion"/>
+
+    <!-- Items of the main menu (will change soon) -->
+    <main>        
+      <item label="tv"    name="TV"     icon="tv.png"/>
+      <item label="video" name="Movies" icon="movies.png"/>
+      <item label="audio" name="Music"  icon="mp3.png"/>
+      <item label="image" name="Images" icon="images.png"/>
+      <item label="games" name="Games"  icon="package_games.png"/>
+      <item label="shutdown" name="Shutdown" icon="shutdown.png"/>
+    </main>
+    
+    <!-- SKIN DEFINITION -->
+
+    <!-- 
+    At the beginning there are the menu definitions. A menu has a type for
+    the different types of media: video/audio/image/games, main for the
+    main menu and default for all the other menus. The type 'all' will
+    delete all existing special definitions. Inside the tag are different
+    styles which can be toggled with the DISPLAY key in Freevo. If an
+    image definition is present, it will be used except when all items
+    have the same or no image
+    -->
+    <menu type="all">
+      <style text="normal text style"/>
+    </menu>
+
+    <!-- this points to a menu for the main menu -->
+    <menu type="main">
+      <style text="main menu"/>
+    </menu>
+
+    <!-- 
+    After defining which menu style to use for which item, we need to define
+    how the areas of each menuset look like. A menuset has a label (used by
+    menu) and the geometry and names for the five areas
+    -->
+    <menuset label="normal text style">
+
+      <!-- 1. screen: the complete background area -->
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+
+      <!-- 2. title: the area where the title of the menu (e.g. directory name -->
+      <!-- will be displayed -->
+      <title layout="title0" x="10" y="10" width="780" height="60"/> 
+
+      <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
+      <view layout="view0" x="580" y="110" width="200" height="300"/> 
+
+      <!-- 4. listing area: the list of all items -->
+      <listing layout="list0" x="45" y="110" width="515" height="470">
+	<image x="10" y="110" width="32" height="32" label="uparrow" 
+	  filename="up.png"/>
+	<image x="10" y="544" width="32" height="32" label="downarrow" 
+	  filename="down.png"/>
+      </listing>
+      <!-- 5. info area: additional info. This area is invisible in the default -->
+      <!-- menu, it's only visible in the extended menus -->
+      <info visible="no"/>
+    </menuset>
+
+
+    <!-- Now the main menu -->
+    <menuset label="main menu">
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <listing layout="list_main" x="230" y="120" width="380" height="390"/>
+
+      <!-- disables info, view and title area. -->
+      <view visible="no"/>
+      <info visible="no"/>
+      <title visible="no"/>
+    </menuset>
+
+
+    <!--
+    **********************************************
+    LAYOUT DEFINITIONS 
+    **********************************************
+
+    The menus defined a layout to use. Now here are the definitions of the 
+    layouts. Based on the type of area, some attributes have no effect
+    (e.g. the background has no content
+
+    -->
+
+
+    <!-- The background for the screen. By redefining layout label=screen0 you -->
+    <!-- can change only the background image -->
+    <layout label="screen0">
+      <background>
+	<!-- an image with the label background will ignore OVERSCAN settings -->
+	<!-- in freevo to make sure the complete screen is filled -->
+	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+	<image filename="logo.png" x="10" y="0" width="200" height="98"/>
+      </background>
+    </layout>
+
+    <!-- title -->
+    <layout label="title0">
+      <content x="210" type="menu" font="title" align="center"/>
+    </layout>
+
+    <!-- default listing area -->
+    <layout label="list0">
+      <content type="text" spacing="2">
+	<item type="default" font="item"/>
+	<item type="selected" font="selected">
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-3" width="max+10"
+	    height="max+6"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- default view area -->
+    <layout label="view0">
+      <content align="center" valign="top">
+	<item type="default">
+	  <rectangle size="1" x="-1" y="-1" width="max+2" height="max+2"/>
+	</item>
+      </content>
+    </layout>
+
+
+    <!-- main menu listing area -->
+    <layout label="list_main">
+      <content type="text" spacing="10">
+	<item type="default" font="main"/>
+	<item type="selected" font="main selected">
+	  <rectangle bgcolor="selection" size="0" y="-5" x="-10"
+	    width="max+20" height="max+10"/>
+	</item>
+      </content>
+    </layout>
+
+
+    <!--
+    **********************************************
+    FONT DEFINITIONS 
+    **********************************************
+
+    Now the font definitions. Inherited skins like blue1_small only redefines
+    the fonts and the rest will be untouched. It's easy to change the fonts a
+    skin uses without changing anything in the layout
+
+    -->
+
+    <font label="title" name="Arial_Bold" size="35" color="0xffffff"/>
+    <font label="item" name="Arial_Bold" size="20" color="0xdddddd"/>
+    <font label="selected" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="main" name="Arial_Bold" size="35" color="0xdddddd"/>
+    <font label="main selected" name="Arial_Bold" size="35" color="0xffffff"/>
+    <font label="default" name="Arial_Bold" size="20" color="0xffffff"/>
+
+    <!--
+    **********************************************
+    COLOR DEFINITIONS 
+    **********************************************
+
+    -->
+
+    <color label="selection" value="0xa0000000"/>
+
+    <!--
+    **********************************************
+    POPUP DEFINITIONS 
+    
+    A popup definition is only a link to a specific layout, like menu areas
+
+    -->
+
+    <popup type="default" layout="popup"/>
+
+    <layout label="popup">
+      <background>
+	<rectangle color="0x000000" size="1" bgcolor="0xa0000000"/>
+      </background>
+      <content type="text" spacing="10" color="0xffffff" font="default">
+	<item type="default" font="default">
+	  <rectangle bgcolor="0xa0000000" size="0"/>
+	</item>
+	<item type="selected" font="default">
+	  <rectangle bgcolor="0xa0ffffff" size="0"/>
+	</item>
+      </content>
+    </layout>
+
+
+
+    <!--
+    **********************************************
+    AUDIO PLAYER DEFINITIONS
+
+    The audio player is very similar to the menu. It has four areas (screen,
+    title, view and info), each area has a layout. The only difference is, that
+    there is no listing area and no types (it's always type audio)
+
+    -->
+    
+    <player>
+      <screen layout="player screen" x="0" y="0" width="800" height="600"/>
+      <view layout="player view" x="430" y="200" width="420" height="360"/> 
+      <info layout="player info" x="-50" y="80" width="550" height="300"/> 
+      <title visible="no"/>
+    </player>
+
+    <font label="player" name="Arial_Bold" size="20" color="0xffffff"/>
+
+    <layout label="player screen">
+      <background>
+	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <layout label="player view">
+      <content type="text" spacing="10">
+	<item type="default">
+	  <rectangle size="0" bgcolor="0x80000000" radius="10" x="-15" y="-15"
+	    width="max+80" height="max+30"/>
+	</item>
+      </content>
+    </layout>
+
+    <layout label="player info">
+      <background>
+	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
+      </background>
+      <content x="55" y="10" height="max-20" width="max-90" type="text"
+	spacing="10" font="player">
+	<item type="default">
+	  Title:   \t@title@
+	  Artist:  \t@artist@
+	  Album:   \t@album@ (@year@)
+	  Track:   \t@track@
+	  
+	  Length:  \t@length@
+	  Elapsed: \t@elapsed@
+	</item>
+      </content>
+    </layout>
+
+
+    <!--
+    **********************************************
+    TV DEFINITIONS
+
+    -->
+    
+    <tv>
+      <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
+      <info layout="tv info" x="10" y="10" width="780" height="190"/>
+      <listing layout="tv listing" x="10" y="220" width="750" height="370"> 
+	<image x="765" y="220" width="32" height="32" label="uparrow" 
+	  filename="up.png"/>
+	<image x="765" y="544" width="32" height="32" label="downarrow" 
+	  filename="down.png"/>
+      </listing>
+      <title visible="no"/>
+    </tv>
+
+    <font label="tv" name="Arial_Bold" size="20" color="0xffffff"/>
+    <font label="tv selected" name="Arial_Bold" size="20" color="0xffff66">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
+    <layout label="tv screen">
+      <background>
+	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <!-- tv listing area -->
+    <layout label="tv listing">
+      <content type="text" spacing="0">
+
+	<item type="label" font="tv" width="100">
+	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
+	    width="max+10" height="max+10"/>
+	</item>
+
+	<item type="head" font="tv">
+	  <rectangle bgcolor="0x88000066" size="1" color="0x000000" x="-5" y="-5"
+	    width="max+10" height="max+10"/>
+	</item>
+
+	<item type="default" font="tv">
+	  <rectangle bgcolor="0xff000000" color="0x000000" size="1" x="-5"
+	    y="-5" width="max+10" height="max+10"/>
+	</item>
+
+	<item type="selected" font="tv selected">
+	  <rectangle bgcolor="0x88ffffff" size="1" color="0x000000" x="-5"
+	    y="-5" width="max+10" height="max+10"/>
+	</item>
+
+      </content>
+    </layout>
+
+    <!-- tv listing area -->
+    <layout label="tv info">
+      <background>
+	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
+      </background>
+      <content x="10" y="10" height="max-20" width="max-20" type="text"
+	spacing="10" font="tv">
+	<item type="default">
+	  @title@
+	  @start@ - @stop@
+
+	  @desc@
+	</item>
+      </content>
+    </layout>
+
+  </skin>
+</freevo>

@@ -3,6 +3,11 @@ This directory conatins the xml files for the main1 skin.
 blue1_big_800x600 and grey1_800x600 conatin all needed information for
 a skin. All other skins inherit for one of these. 
 
+|  IMPORTANT:
+|  
+|  the xml files are for the main1 skin, the fxd files for the new
+|  dischi1 skin.
+
 Developers: if you update/add some global stuff, please update these
 skins to auto-update all others skins. If you want to update a
 specific xml skin, please make the updates to the 800x600 version, the

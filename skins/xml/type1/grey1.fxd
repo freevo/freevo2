@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <skin include="blue1_big" geometry="800x600">
+
+    <menuset label="normal text style">
+      <listing height="400">
+	<image label="downarrow" x="10" y="544"/>
+	<image label="uparrow" x="50" y="544"/>
+      </listing>
+    </menuset>
+
+    <layout label="screen0">
+      <background>
+	<image filename="../images/aubin_bg1" x="0" y="0" label="background"/>
+      </background>
+    </layout>
+
+    <layout label="title0">
+      <content x="0" type="menu" font="title" align="center"/>
+    </layout>
+
+    <color label="selection" value="0xa0000033"/>
+
+    <font label="item" name="bluehigh" size="18" color="0x000000"/>
+    <font label="title" name="oliversb" size="36" color="0x000000"/>
+    <font label="default" name="bluehigh" size="18" color="0x000000"/>
+
+    <font label="selected" name="bluehigh" size="18" color="0xffffff">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
+    <font label="main" name="neuropol" size="32" color="0x38474c">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
+    <font label="main selected" name="neuropol" size="32" color="0xffffff">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
+  </skin>
+</freevo>
