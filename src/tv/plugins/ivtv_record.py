@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/06/28 18:23:34  rshortt
+# I guess this shouldn't be in here since its back in recordserver.
+#
 # Revision 1.25  2004/06/23 19:07:05  outlyer
 # The snapshot in the event doesn't work. I've tried it numerous times, and it
 # is being killed before completing.
@@ -213,9 +216,6 @@ class Record_Thread(threading.Thread):
                 v = None
 
                 self.mode = 'idle'
-
-                from  util.videothumb import snapshot
-                snapshot(self.prog.filename)
 
                 rc.post_event(Event('RECORD_STOP', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: finished recording')
