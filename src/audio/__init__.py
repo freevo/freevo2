@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/13 17:26:25  dischi
+# save coversearch result
+#
 # Revision 1.23  2004/01/31 12:39:47  dischi
 # delete unused audio variables
 #
@@ -76,6 +79,7 @@
 
 import os
 import re
+import stat
 
 import config
 import util
@@ -130,17 +134,24 @@ class PluginInterface(plugin.MimetypePlugin):
         set informations for a diritem based on the content, etc.
         """
         if not diritem.image:
-            # Pick an image if it is the only image in this dir, or it matches
-            # the configurable regexp
-            files = util.find_matches(vfs.listdir(diritem.dir, include_overlay=True),
-                                      ('jpg', 'gif', 'png' ))
-            if len(files) == 1:
-                diritem.image = os.path.join(diritem.dir, files[0])
-            elif len(files) > 1:
-                covers = filter(cover_filter, files)
-                if covers:
-                    diritem.image = os.path.join(diritem.dir, covers[0])
-
+            timestamp = os.stat(diritem.dir)[stat.ST_MTIME]
+            if not diritem['coversearch_timestamp'] or \
+                   timestamp > diritem['coversearch_timestamp']:
+                # Pick an image if it is the only image in this dir, or it matches
+                # the configurable regexp
+                files = util.find_matches(vfs.listdir(diritem.dir, include_overlay=True),
+                                          ('jpg', 'gif', 'png' ))
+                if len(files) == 1:
+                    diritem.image = os.path.join(diritem.dir, files[0])
+                elif len(files) > 1:
+                    covers = filter(cover_filter, files)
+                    if covers:
+                        diritem.image = os.path.join(diritem.dir, covers[0])
+                diritem.store_info('coversearch_timestamp', timestamp)
+                diritem.store_info('coversearch_result', diritem.image)
+            else:
+                diritem.image = diritem['coversearch_result']
+                
         if not diritem.info.has_key('title') and diritem.parent:
             # ok, try some good name creation
             p_album  = diritem.parent['album']
