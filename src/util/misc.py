@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/11 10:56:52  dischi
+# Fixes in comingup:
+# o do not crash when the recordserver is down
+# o show a message when no schedules are set and not nothing
+# o make arg optional (why is it there anyway?)
+#
 # Revision 1.16  2004/01/11 05:59:41  outlyer
 # How overcomplicated could I have made something so simple? This is a little
 # embarassing. I think this "algorithm" is less dumb.
@@ -376,7 +382,7 @@ def htmlenties2txt(string):
 # Coming Up for TV schedule
 #
 
-def comingup(items):
+def comingup(items=None):
     import tv.record_client as ri
     import time
    
@@ -392,6 +398,11 @@ def comingup(items):
         return result
 
     (status, recordings) = ri.getScheduledRecordings()
+
+    if not status:
+        result = _('The recordserver is down')
+        return result
+
     progs = recordings.getProgramList()
 
     f = lambda a, b: cmp(a.start, b.start)
@@ -437,6 +448,9 @@ def comingup(items):
             result = result + " " + str(m.title) + str(sub_title) + " at " + \
                 str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
 
+    if not result:
+        result = _('No recordings are scheduled')
+        
     cache = open(cachefile,'w')
     cache.write(result)
     cache.close()
