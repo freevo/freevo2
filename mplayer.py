@@ -13,6 +13,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/07/29 18:13:13  outlyer
+# Fixed "deja vu" of audio progressbar when playing movies after playing mp3s.
+#
 # Revision 1.14  2002/07/29 05:24:35  outlyer
 # Lots and lots of changes for new mplayer-based audio playing code.
 # o You'll need to modify your config file, as well as setup the new mplayer
@@ -180,6 +183,11 @@ class MPlayer:
         if event == rc.STOP or event == rc.SELECT:
             if self.mode == 'dvdnav':
                 self.thread.app.write('S')
+	    elif self.mode == 'audio':
+	    	self.thread.audioinfo = None
+		self.stop ()
+		rc.app = None
+		menuwidget.refresh()
             else:
                 self.stop()
                 rc.app = None
