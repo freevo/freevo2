@@ -11,6 +11,9 @@ if ! test -a runapp ; then
     exit
 fi
 
+# Defaults
+PYTHON=python
+
 # Required runtime version
 RUNTIME_VERSION=3
 
@@ -36,62 +39,43 @@ if test -a $RT_DIR/freevo_python ; then
     # in freevo_runtime
     export LD_PRELOAD=`cat $RT_DIR/preloads`
 
-    # Support for using just Python
-    if [[ $1 = prompt ]] ; then
-        $RT_DIR/freevo_python 
-        exit 0
-    fi
-    
-    # Support executing a standalone Python application, e.g. epg_xmltv.py
-    # Usage: freevo execute appname.py arg1 arg2...
-    if [[ $1 = execute ]] ; then
-        export PYTHONPATH=./src
-        $RT_DIR/freevo_python $2 $3 $4 $5 $6 $7 $8 $9
-        exit 0
-    fi
-    
-    # Start the lirc remote control app if the device is present
-    if test -S /dev/lircd ; then
-        echo Found a lirc device, starting the remote control daemon
-        $RT_DIR/freevo_python rc_client/remote.py --remote=lirc &> /dev/null &
-    fi
-
     # Execute using the runtime:
     echo "Using the Freevo runtime ($RT_DIR)"
-    
-    # XXX Uncomment the command below to enable joystick input. 
-    # XXX It has not been tested! Please send in testreports!
-    # If JOY_DEV is 0 then joy.py just exits.
-    #$RT_DIR/freevo_python rc_client/joy.py &> /dev/null &
-
-    # Start the main freevo application
-    $RT_DIR/freevo_python src/main.py $*
-
-    # Freevo exited, make sure all children are killed
-    sleep 1
-    killall -9 freevo_python &> /dev/null
-    killall -9 freevo_xwin &> /dev/null
-    #killall -9 mplayer &> /dev/null
-    exit 0
-
+    PYTHON=$RT_DIR/freevo_python
+else
+    echo
+    echo
+    echo
+    echo No runtime found!
+    echo 
+    echo If Freevo does not work for you, download the runtime from 
+    echo the website, http://freevo.sourceforge.net
+    echo
+    echo Starting using the regular environment.
+    echo
+    echo
 fi
 
-echo
-echo
-echo
-echo No runtime found!
-echo 
-echo If Freevo does not work for you, download the runtime from 
-echo the website, http://freevo.sourceforge.net
-echo
-echo Starting using the regular environment.
-echo
-echo
+
+# Support for using just Python
+if [[ $1 = prompt ]] ; then
+    $PYTHON
+    exit 0
+fi
+    
+# Support executing a standalone Python application, e.g. epg_xmltv.py
+# Usage: freevo execute appname.py arg1 arg2...
+if [[ $1 = execute ]] ; then
+    export PYTHONPATH=./src
+    $PYTHON $2 $3 $4 $5 $6 $7 $8 $9
+    exit 0
+fi
+    
 
 # Start the lirc remote control app if the device is present
 if test -S /dev/lircd ; then
     echo Found a lirc device, starting the remote control daemon
-    python rc_client/remote.py --remote=lirc &> /dev/null &
+    $PYTHON rc_client/remote.py --remote=lirc &> /dev/null &
 fi
 
 # XXX Uncomment the command below to enable joystick input. 
@@ -100,13 +84,15 @@ fi
 # python rc_client/joy.py &> /dev/null &
 
 # Start the main freevo application
-python src/main.py $*
+$PYTHON src/main.py $*
 
 # Freevo exited, make sure all children are killed
 sleep 1
 kill -9 `pgrep -f "python src/main.py" -d" "` &> /dev/null
 kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
+kill -9 `pgrep -f PYTHON -d" "` &> /dev/null
 killall -9 freevo_xwin &> /dev/null
+killall -9 freevo_python &> /dev/null
 #killall -9 mplayer &> /dev/null
 
 exit 0
