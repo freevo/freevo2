@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/23 10:41:24  dischi
+# Oops, remove debug
+#
 # Revision 1.5  2003/08/23 10:39:13  dischi
 # fixed "&" handling
 #
@@ -766,8 +769,6 @@ class FxdImdb:
         
     def str2XML(self, line):
         """return a valid XML string"""
-        
-        print line
         try:
             s = unicode(line, 'latin-1')
             while s[-1] == ' ':
@@ -781,8 +782,6 @@ class FxdImdb:
 
             # ... but this may be wrong for &#
             s = s.replace("&amp;#", "&#")
-            print s
-
             return s
         except:
             return line
