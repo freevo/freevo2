@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/10/14 21:05:52  gsbarbieri
+# i18n
+#
 # Revision 1.13  2003/10/07 04:35:27  gsbarbieri
 # Applied patch from: Immo Goltz <immo [At] nothrix.org>
 # It fixes screens for 2-line LCD and now it uses "marquee" scrolling instead
@@ -112,26 +115,26 @@ animation_audioplayer_chars = ['-','\\','|','/']
 # <ATTRIBUTE> is some valid attribute to item.getattr()
 menu_info = {
     "main" : [ ],
-    "audio" : [ ( "length", "Length: %s" ),
-                ( "artist", "Artist: %s" ),
-                ( "album", "Album: %s" ),
-                ( "year", "Year: %s" ) ],
-    "audiocd" : [ ( "len(tracks)", "Tracks: %s" ),
-                  ( "artist", "Artist: %s" ),
-                  ( "album", "Album: %s" ),
-                  ( "year", "Year: %s" ) ],
-    "video" : [ ( "length", "Length: %s" ),
-                ( "geometry", "Resolution: %s" ),
-                ( "aspect", "Aspect: %s" ),
-                ( "tagline", "Tagline: %s" ),
-                ( "plot", "Plot: %s" ) ],
-    "dir" : [ ( "plot", "Plot: %s" ),
-              ( "tagline", "Tagline: %s" ) ],
-    "image" : [ ( "geometry", "Geometry: %s" ),
-                ( "date", "Date: %s" ),
-                ( "description", "Description: %s" ) ],
-    "playlist" : [ ( "len(playlist)", "%s items" ) ],
-    "mame" : [ ( "description", "Description: %s" ) ],
+    "audio" : [ ( "length", _( "Length: %s" ) ),
+                ( "artist", _( "Artist: %s" ) ),
+                ( "album", _( "Album: %s" ) ),
+                ( "year", _( "Year: %s" ) ) ],
+    "audiocd" : [ ( "len(tracks)", _( "Tracks: %s" ) ),
+                  ( "artist", _( "Artist: %s" ) ),
+                  ( "album", _( "Album: %s" ) ),
+                  ( "year", _( "Year: %s" ) ) ],
+    "video" : [ ( "length", _( "Length: %s" ) ),
+                ( "geometry", _( "Resolution: %s" ) ),
+                ( "aspect", _( "Aspect: %s" ) ),
+                ( "tagline", _( "Tagline: %s" ) ),
+                ( "plot", _( "Plot: %s" ) ) ],
+    "dir" : [ ( "plot", _( "Plot: %s" ) ),
+              ( "tagline", _( "Tagline: %s" ) ) ],
+    "image" : [ ( "geometry", _( "Geometry: %s" ) ),
+                ( "date", _( "Date: %s" ) ),
+                ( "description", _( "Description: %s" ) ) ],
+    "playlist" : [ ( "len(playlist)", _( "%s items" ) ) ],
+    "mame" : [ ( "description", _( "Description: %s" ) ) ],
     "unknow" : [ ]
     }
 # menu_strinfo: will be passed to time.strinfo() and added to the end of info (after menu_info)
@@ -185,7 +188,7 @@ layouts = { 4 : # 4 lines display
                                  "Freevo",
                                  None ),
                   "calendar" : ( "scroller",
-                                 "1 2 %d 2 m 3 \"Today is %s.%s\"",
+                                 "1 2 %d 2 m 3 \"" + _( "Today is %s." ) + "%s\"",
                                  "( self.width, time.strftime('%A, %d-%B'), self.get_sepstrmscroll(time.strftime('%A, %d-%B')) )" ),
                   "clock"    : ( "string",
                                  "%d 3 \"%s\"",
@@ -195,16 +198,16 @@ layouts = { 4 : # 4 lines display
                 
                 "menu"    :
                 { "title_l"  : ( "string",
-                                 "1 1 'MENU: '",
+                                 "1 1 '"+ _( "MENU" ) + ": '",
                                  None ),
                   "item_l"   : ( "string",
-                                 "1 2 'ITEM: '",
+                                 "1 2 '" + _( "ITEM" ) + ": '",
                                  None ),
                   "type_l"   : ( "string",
-                                 "1 3 'TYPE: '",
+                                 "1 3 '" + _( "TYPE" ) + ": '",
                                  None ),
                   "info_l"   : ( "string",
-                                 "1 4 'INFO: '",
+                                 "1 4 '" + _( "INFO" ) + ": '",
                                  None ),                
                   "title_v"  : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -222,13 +225,13 @@ layouts = { 4 : # 4 lines display
                 
                 "audio_player"  :
                 { "music_l"   : ( "string",
-                                  "2 1 'MUSIC: '",
+                                  "1 1 '" + _( " MUSIC" ) + ": '",
                                   None ),
                   "album_l"   : ( "string",
-                                  "2 2 'ALBUM: '",
+                                  "1 2 '" + _( " ALBUM" ) + ": '",
                                   None ),
                   "artist_l"  : ( "string",
-                                  "1 3 'ARTIST: '",
+                                  "1 3 '" + _( "ARTIST" ) + ": '",
                                   None ),
                   "music_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -260,13 +263,13 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_l"   : ( "string",
-                                  "2 1 'VIDEO: '",
+                                  "2 1 '" + _( "VIDEO" ) + ": '",
                                   None ),
                   "tag_l"     : ( "string",
-                                  "2 2 '  TAG: '",
+                                  "2 2 '" + _( "  TAG" ) + ": '",
                                   None ),
                   "genre_l"   : ( "string",
-                                  "1 3 'GENRE: '",
+                                  "1 3 '" + _( "GENRE" ) + ": '",
                                   None ),
                   "video_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -299,16 +302,16 @@ layouts = { 4 : # 4 lines display
                 
                 "tv"            :
                 { "chan_l"   : ( "string",
-                                 "1 1 'CHAN: '",
+                                 "1 1 '" + _( "CHAN" ) + ": '",
                                  None ),
                   "prog_l"   : ( "string",
-                                 "1 2 'PROG: '",
+                                 "1 2 '" + _( "PROG" ) + ": '",
                                  None ),
                   "time_l"  : ( "string",
-                                "1 3 'TIME: '",
+                                "1 3 '" + _( "TIME" ) + ": '",
                                 None ),
                   "desc_l"  : ( "string",
-                                "1 4 'DESC: '",
+                                "1 4 '" + _( "DESC" ) + ": '",
                                 None ),                
                   "chan_v"   : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -333,7 +336,7 @@ layouts = { 4 : # 4 lines display
                                  "Freevo",
                                  None ),
                   "calendar" : ( "scroller",
-                                 "1 2 %d 2 m 3 \"Today is %s.%s\"",
+                                 "1 2 %d 2 m 3 \"" + _( "Today is %s." ) + "%s\"",
                                  "( self.width, time.strftime('%A, %d-%B'), self.get_sepstrmscroll(time.strftime('%A, %d-%B')) )" ),
                   "clock"    : ( "string",
                                  "%d 3 \"%s\"",
@@ -554,10 +557,10 @@ layouts = { 4 : # 4 lines display
 
                  "menu":
                  { "title_l"  : ( "string",
-                                 "1 1 'MENU: '",
+                                 "1 1 '" + _( "MENU" ) + ": '",
                                  None ),
                   "item_l"   : ( "string",
-                                 "1 2 'ITEM: '",
+                                 "1 2 '" + _( "ITEM" ) + ": '",
                                  None ),
                    "title_v"  : ( "scroller",
                                   "7 1 %d 1 m 3 \"%s%s\"",
@@ -569,7 +572,7 @@ layouts = { 4 : # 4 lines display
 
                  "audio_player":
                  { "music_l"   : ( "string",
-                                  "1 1 'MUSIC: '",
+                                  "1 1 '" + _( "MUSIC" ) + ": '",
                                   None ),
                   "music_v"   : ( "scroller",
                                   "8 1 %d 1 m 3 \"%s%s\"",
@@ -596,7 +599,7 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_l"   : ( "string",
-                                  "2 1 'VIDEO: '",
+                                  "2 1 '" + _( "VIDEO" ) + ": '",
                                   None ),
                   "video_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -624,10 +627,10 @@ layouts = { 4 : # 4 lines display
 
                 "tv":
                 { "chan_l"   : ( "string",
-                                 "1 1 'CHAN: '",
+                                 "1 1 '" + _( "CHAN" ) + ": '",
                                  None ),
                   "prog_l"   : ( "string",
-                                 "1 2 'PROG: '",
+                                 "1 2 '" + _( "PROG" ) + ": '",
                                  None ),
                   "chan_v"   : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -710,14 +713,13 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.lcd = pylcd.client()
             cm = self.lcd.connect()
         except:
-            print "ERROR: LCD plugin will not load! " + \
-                  "Maybe you don't have LCDd (lcdproc daemon) running?"
+            print _( "ERROR" ) + ":" + _( "LCD plugin will not load! Maybe you don't have LCDd (lcdproc daemon) running?" )
             self.disable = 1
             return
         
         if config.DEBUG > 0:
-            print "Connecting to LCD: %s" % cm
-            print "Info as know by the module:"
+            print _( "Connecting to LCD: %s" ) % cm
+            print _( "Info as know by the LCD module:" )
             self.lcd.getinfo()
             print ""
             
@@ -905,10 +907,10 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:                
                 screens = layouts[ l ]
             except KeyError:
-                _debug_("WARNING: Could not find screens for %d lines LCD!" % l)
+                _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines LCD!" ) % l )
                 l -= 1
                 if l < 1:
-                    print "ERROR: No screens found!"
+                    print _( "ERROR" ) + ": " + _( "No screens found for this LCD (%dx%d)!" ) % ( self.height, self.width )
                     self.disable = 1
                     return
         # find a display with 'l' line and 'c' columns
@@ -916,11 +918,10 @@ class PluginInterface( plugin.DaemonPlugin ):
             try:
                 screens = layouts[ l ][ c ]
             except KeyError:
-                _debug_("WARNING: Could not find screens for %d lines and %d "\
-                        "columns LCD!" % ( l, c ))
+                _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines and %d columns LCD!" ) % ( l, c ) )
                 c -= 1
                 if c < 1:
-                    print "ERROR: No screens found!"
+                    print _( "ERROR" ) + ": " + _( "No screens found for this LCD (%dx%d)!" ) % ( self.height, self.width )
                     self.disable = 1
                     return
 
@@ -930,9 +931,8 @@ class PluginInterface( plugin.DaemonPlugin ):
         try:
             self.screens = screens = layouts[ l ][ c ]
         except KeyError:
-            _debug_("WARNING: Could not find screens for %d lines"\
-                    " and %d columns LCD!" % ( self.height, self.width ))
-            print "ERROR: No screens found!"
+            _debug_( _( "WARNING" ) + ": " + _( "Could not find screens for %d lines and %d columns LCD!" ) % ( self.height, self.width ))
+            print _( "ERROR" ) + ": " + _( "No screens found for this LCD (%dx%d)!" ) % ( self.height, self.width )
             self.disable = 1
             return
         
