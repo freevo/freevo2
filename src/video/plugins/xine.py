@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/02 16:21:24  dischi
+# wait for child to exit
+#
 # Revision 1.5  2003/08/02 09:08:14  dischi
 # support different versions of xine, check version at startup
 #
@@ -116,9 +119,9 @@ class PluginInterface(plugin.Plugin):
         xine_version = 0
         xine_cvs     = 0
         
-        x = popen2.Popen3('%s --version' % config.XINE_COMMAND, 1, 100)
+        child = popen2.Popen3('%s --version' % config.XINE_COMMAND, 1, 100)
         while(1):
-            data = x.fromchild.readline()
+            data = child.fromchild.readline()
             if not data:
                 break
             m = re.match('^.* v?([0-9])\.([0-9]+)\.([0-9]*).*', data)
@@ -127,6 +130,8 @@ class PluginInterface(plugin.Plugin):
                     xine_cvs = 1
                 xine_version =int('%02d%02d%02d' % (int(m.group(1)), int(m.group(2)),
                                                     int(m.group(3))))
+
+        child.wait()
 
         if xine_cvs:
             xine_version += 1
