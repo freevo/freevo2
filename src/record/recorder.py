@@ -30,8 +30,14 @@
 #
 # -----------------------------------------------------------------------------
 
+# python imports
+import os
+import time
+
 # freevo imports
 import plugin
+from util.fxdimdb import FxdImdb, makeVideo
+from util.videothumb import snapshot
 
 # list of possible plugins
 plugins = []
@@ -51,11 +57,47 @@ class Plugin(plugin.Plugin):
     def create_fxd(self, rec):
         """
         Create fxd file for the recording
-        TODO: write this function
         """
-        pass
+        if not rec.url.startswith('file:'):
+            return
+        filename = rec.url[5:]
+
+        fxd = FxdImdb()
+        (filebase, fileext) = os.path.splitext(filename)
+        fxd.setFxdFile(filebase, overwrite = True)
+
+        video = makeVideo('file', 'f1', os.path.basename(filename))
+        fxd.setVideo(video)
+        if rec.subtitle:
+            fxd.info['tagline'] = fxd.str2XML(rec.subtitle)
+        for i in rec.info:
+            fxd.info[i] = fxd.str2XML(rec.info[i])
+        fxd.info['runtime'] = '%s min.' % int((rec.stop - rec.start) / 60)
+        fxd.info['time'] = str(rec.start)
+        fxd.info['year'] = time.strftime('%m-%d %H:%M',
+                                         time.localtime(rec.start))
+        if rec.fxdname:
+            fxd.title = rec.fxdname 
+        else:
+            fxd.title = rec.name 
+        fxd.writeFxd()
 
 
+    def delete_fxd(self, rec):
+        if not rec.url.startswith('file:'):
+            return
+        filename = os.path.splitext(rec.url[5:])[0] + '.fxd'
+        if vfs.isfile(filename):
+            vfs.unlink(filename)
+
+        
+    def create_thumbnail(self, rec):
+        if not rec.url.startswith('file:'):
+            return
+        filename = rec.url[5:]
+        snapshot(filename)
+
+        
     def get_channel_list(self):
         raise Exception('plugin has not defined get_channel_list()')
 

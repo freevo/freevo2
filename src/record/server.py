@@ -200,9 +200,6 @@ class RecordServer(RPCServer):
                     continue
                 r = Recording(self.rec_id, title, channel, f.priority,
                               start, stop)
-                r.favorite = True
-                r.start_padding = f.start_padding
-                r.stop_padding = f.stop_padding
                 if r in self.recordings:
                     # This does not only avoids adding recordings twice, it
                     # also prevents from added a deleted favorite as active
@@ -210,13 +207,7 @@ class RecordServer(RPCServer):
                     continue
                 print '  added %s: %s (%s)' % (String(channel),
                                                String(title), start)
-                if f.url:
-                    # add url template to recording
-                    try:
-                        r.url = f.url
-                        r.resolve_url()
-                    except Exception, e:
-                        print 'Error setting recording url:', e
+                f.add_data(r)
                 self.recordings.append(r)
                 self.rec_id += 1
                 if f.once:

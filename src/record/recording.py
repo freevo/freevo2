@@ -71,6 +71,7 @@ class Recording:
 
         self.subtitle = ''
         self.url      = ''
+        self.fxdname  = ''
         self.start_padding = config.TV_RECORD_PADDING
         self.stop_padding  = config.TV_RECORD_PADDING
         for i in info:
@@ -105,30 +106,14 @@ class Recording:
                info
 
 
-    def resolve_url(self):
-        t = time.strftime('%Y %m %d %H:%M', time.localtime(self.start))
-        year, month, day, hour_min = t.split(' ')
-        options = { 'title'    : self.name,
-                    'year'     : year,
-                    'month'    : month,
-                    'day'      : day,
-                    'time'     : hour_min,
-                    'subtitle' : self.subtitle }
-        for pattern in re.findall('%\([a-z]*\)', self.url):
-            if not pattern[2:-1] in options:
-                options[pattern[2:-1]] = pattern
-        url = re.sub('%\([a-z]*\)', lambda x: x.group(0)+'s', self.url)
-        url = url % options
-        self.url = url.rstrip(' -_:') + '.suffix'
-    
-
     def parse_fxd(self, parser, node):
         """
         Parse informations from a fxd node and set the internal variables.
         """
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
-            for var in ('name', 'channel', 'status', 'subtitle', 'url'):
+            for var in ('name', 'channel', 'status', 'subtitle', 'url',
+                        'fxdname'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
             if child.name == 'priority':
@@ -170,9 +155,10 @@ class Recording:
         """
         node = fxdparser.XMLnode('recording', [ ('id', self.id ) ] )
         for var in ('name', 'channel', 'priority', 'url', 'status',
-                    'subtitle'):
-            subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
-            fxd.add(subnode, node)
+                    'subtitle', 'fxdname'):
+            if getattr(self, var):
+                subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
+                fxd.add(subnode, node)
         timer = fxdparser.XMLnode('timer', [ ('start', _int2time(self.start)),
                                              ('stop', _int2time(self.stop)) ])
         fxd.add(timer, node)

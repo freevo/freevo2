@@ -264,10 +264,10 @@ class PluginInterface(Plugin):
             filename = self.item.url[5:]
             if os.path.isfile(filename):
                 self.item.status = 'saved'
-                # TODO: create thumbnail
+                self.create_thumbnail(self.item)
             else:
                 self.item.status = 'failed'
-                # TODO: delete fxd
+                self.delete_fxd(self.item)
         else:
             self.item.status = 'done'
         print '%s.stopped: recording finished, new status' % self.name

@@ -51,6 +51,7 @@ favorites because they create recordings. Here a small example:
     <name>Tagesschau</name>
     <priority>50</priority>
     <url>file:/home/dmeyer/video/tagesschau</url>
+    <fxdname>%(title) from %(year).%(month).%(day)</fxdname>
     <channels>ard.de</channels>
     <days>0 1 2 3 4 5 6</days>
     <times>20:00-20:00</times>
@@ -68,7 +69,6 @@ favorites because they create recordings. Here a small example:
   <favorite id="2">
     <name>Genial daneben - Die Comedy-Arena</name>
     <priority>50</priority>
-    <url></url>
     <channels>rtl.de sat1.de prosieben.de</channels>
     <days>5 6</days>
     <times>20:15-20:15 21:00-23:45</times>
@@ -78,8 +78,8 @@ favorites because they create recordings. Here a small example:
 
 This is my recordings.fxd file. It only contains favorites. Each
 favorite has a priority, a list of channels, days and times. And
-optional informations are url and padding and once (missing in the
-example).
+optional informations are url, fxdname and padding and once (missing
+in the example).
 
 The priority is the priority of the recording created from the
 favorite. Freevo will use 50 as default priority for favorites and
@@ -96,10 +96,18 @@ recording will go to the same file. The 'Tagesschau' is a news
 program, I don't need older once so they can override themself. The
 second favorite has an url with %(year), %(month) and %(day) in it
 (notice that this is no python expression, it is %(...) not
-%(...)s). It is a relative path with a directory. So the recordings
+%(...)s). Possible expressions are title, year, month, day, time
+(HH:MM) and subtitle.
+
+It is a relative path with a directory. So the recordings
 all go into "TV_RECORD_DIR/Bravo Bernd" with the given filename. The
 last favorite has no url, so the default settings will be taken,
 similar to the old recordserver. 
+
+The fxdname tag specifies the name set in the fxd file for the
+recording. You can use this to avoid having a directory of favorites
+all with the same name. If fxdname is not given, the name of the
+favorite will be the name of the recording in the fxd file. 
 
 The channels tag is a list of channels. The last favorite has three
 channels. This is similar to ANY from the old server, only that you
@@ -156,6 +164,7 @@ from the favorites:
     <priority>40</priority>
     <url>file:Bravo Bernd/Bravo Bernd - 2004.11.19.suffix</url>
     <status>scheduled</status>
+    <fxdname>Bravo Bernd - 2004.11.19</fxdname>
     <subtitle></subtitle>
     <timer start="20041119.20:55" stop="20041119.21:00"/>
     <padding start="60" stop="60"/>
@@ -165,10 +174,9 @@ from the favorites:
 Most tags are similar to the favorites. New is the timer setting start
 and stop time of the recording. It is YearMonthDay.Hour:Minute. The
 info tag can contain additional data like a description used in the
-fxd file. The creation of fxd files and thumbnails is not implemented
-yet. The url contains a dummy suffix, the real suffix will be added
-later by the recorder since the server doesn't know now if it will be
-a mpeg from the dvb card or an avi from an analog one. 
+fxd file. The url contains a dummy suffix, the real suffix will be
+added later by the recorder since the server doesn't know now if it
+will be a mpeg from the dvb card or an avi from an analog one.
 
 Let's now see what happens when this recordings are scheduled and you
 only have one tv card. The debug messages will show the following

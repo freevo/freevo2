@@ -52,6 +52,7 @@ class Favorite:
         self.days     = days
         self.times    = []
         self.url      = ''
+        self.fxdname  = ''
         self.once     = once
         for t in times:
             m = _time_re.match(t).groups()
@@ -83,7 +84,7 @@ class Favorite:
         """
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
-            for var in ('name', 'url'):
+            for var in ('name', 'url', 'fxdname'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
             if child.name == 'once':
@@ -127,6 +128,52 @@ class Favorite:
         return False
 
 
+    def __fill_template(self, rec, text):
+        """
+        Fill template like url and fxdname from the favorite to something
+        specific for the recording.
+        """
+        t = time.strftime('%Y %m %d %H:%M', time.localtime(rec.start))
+        year, month, day, hour_min = t.split(' ')
+        options = { 'title'    : rec.name,
+                    'year'     : year,
+                    'month'    : month,
+                    'day'      : day,
+                    'time'     : hour_min,
+                    'subtitle' : rec.subtitle }
+        for pattern in re.findall('%\([a-z]*\)', text):
+            if not pattern[2:-1] in options:
+                options[pattern[2:-1]] = pattern
+        text = re.sub('%\([a-z]*\)', lambda x: x.group(0)+'s', text)
+        text = text % options
+        return text.rstrip(' -_:')
+    
+
+    def add_data(self, rec):
+        """
+        Add additional data from the favorite to the recording
+        """
+        rec.favorite      = True
+        rec.start_padding = self.start_padding
+        rec.stop_padding  = self.stop_padding
+        rec.fxdname       = self.fxdname
+        if self.url:
+            # add url template to recording
+            try:
+                rec.url = self.__fill_template(rec, self.url) + '.suffix'
+            except Exception, e:
+                print 'Error setting recording url:', e
+                rec.url = ''
+        if self.fxdname:
+            # add fxd name template to recording
+            try:
+                rec.fxdname = self.__fill_template(rec, self.fxdname)
+            except Exception, e:
+                print 'Error setting recording fxd name:', e
+                rec.fxdname = ''
+        return True
+    
+        
     def __str__(self):
         """
         A simple string representation for a favorite for debugging in the
@@ -149,9 +196,10 @@ class Favorite:
         Dump informations about the favorite in a fxd file node.
         """
         node = fxdparser.XMLnode('favorite', [ ('id', self.id ) ] )
-        for var in ('name', 'priority', 'url'):
-            subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
-            fxd.add(subnode, node)
+        for var in ('name', 'priority', 'url', 'fxdname'):
+            if getattr(self, var):
+                subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
+                fxd.add(subnode, node)
         for var in ('channels', 'days'):
             s = ''
             for v in getattr(self, var):
