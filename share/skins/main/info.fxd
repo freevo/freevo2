@@ -66,6 +66,10 @@
       <style text="plain text style"/>
     </menu>
 
+    <menu type="default description no image">
+      <style text="plain text style with info"/>
+    </menu>
+
     <!-- special settings for audio. The default style is an image based style -->
     <!-- with an info area. By pressing DISPLAY this can be toggled to the default view -->
     <menu type="audio">
@@ -89,6 +93,10 @@
     <menuset label="plain text style" inherits="normal text style">
       <listing width="700"/>
       <view visible="no"/>
+    </menuset>
+
+    <menuset label="plain text style with info" inherits="plain text style">
+      <info visible="yes" layout="info" x="40" y="460" width="750" height="120"/>
     </menuset>
 
     <!-- Now the "text with info style" -->

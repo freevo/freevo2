@@ -310,7 +310,12 @@
 	  </if>
 	</item>
 
-	<item type="default"/>
+	<item type="default">
+	  <if expression="description">
+	    <text font="info plot" height="max" mode="soft" expression="description"/>
+	    <newline/>
+	  </if>
+	</item>
 
       </content>
     </layout>
