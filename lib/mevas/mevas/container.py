@@ -72,7 +72,7 @@ class CanvasContainer(CanvasObject):
 			self._backing_store_dirty = True
 			x, y = o._backing_store_info["pos"]
 			w, h = o._backing_store_info["size"]
-			self._backing_store_info["dirty-rects"] += [( (x, y), (w, h) )]
+			self._backing_store_info["dirty-rects"].append(( (x, y), (w, h) ))
 			#print "Child delete", o,  self._backing_store_info["dirty-rects"]
 	
 		self.queue_paint()		
@@ -164,12 +164,14 @@ class CanvasContainer(CanvasObject):
 		up to the canvas child_paint() method to figure out what to do, since that
 		will depend on the backend.
 		"""
-		self.dirty = True
-		self._backing_store_dirty = True
-
 		if child and child not in self.dirty_children:
 			self.dirty_children.append(child)
 
+		if self.dirty:
+			return
+
+		self.dirty = True
+		self._backing_store_dirty = True
 		if check_weakref(self.parent):
 			self.parent().queue_paint(self)
 
@@ -305,7 +307,7 @@ class CanvasContainer(CanvasObject):
 		if 0 in (width, height):
 			return None, []
 
-		t0=time.time()
+		#t0=time.time()
 		#print "*** Begin _get_backing_store", self, update_object, self._backing_store_dirty
 		if not self._backing_store_dirty or (use_cached and self._backing_store):
 			return self._backing_store, []
@@ -331,7 +333,7 @@ class CanvasContainer(CanvasObject):
 			# are dirty, and we already have a backing store, we just return
 			# the backing store as is.  It's up to the caller to blend us at
 			# our alpha.
-			dirty_rects += ( (offset_x, offset_y), (width, height) ),
+			dirty_rects.append(((offset_x, offset_y), (width, height) ))
 			if len(self.dirty_children) == 0 and self._backing_store:
 				if update_object == self and update:
 					self.unqueue_paint()
@@ -359,7 +361,7 @@ class CanvasContainer(CanvasObject):
 		# (Note rectangles are relative to the container, not the backing
 		# store, so negative coordinates are ok; they will be translated
 		# later).
-		t1 = time.time()
+		#t1 = time.time()
 		# Sort children in order of their z-index.
 		self.children.sort(lambda a, b: cmp(a.zindex, b.zindex))
 
@@ -401,9 +403,15 @@ class CanvasContainer(CanvasObject):
 
 			# If the child is invisible (either hidden or alpha of 0) then 
 			# we don't bother with this child.
-			if ("visible" in bsi and not child.visible and not bsi["visible"]) or \
-			   ("alpha" in bsi and child.alpha == 0 and bsi["alpha"] == 0):
-				continue
+			# *****************************************
+			# FIXME:
+			# Dischi to Tack: Isn't that a bad idea? We just made it not
+			# dirty and by calling continue now, we will never set
+			# the child to dirty=false
+			# *****************************************
+			# if ("visible" in bsi and not child.visible and not bsi["visible"]) or \
+			#    ("alpha" in bsi and child.alpha == 0 and bsi["alpha"] == 0):
+			# 	continue
 
 			# If the child has either changed positions or changed sizes (or
 			# both), we add the child's old rectangle and the new one to the
@@ -415,19 +423,19 @@ class CanvasContainer(CanvasObject):
 				# negative coordinates.
 
 				# Old rectangle.
-				dirty_rects += ( (bsi["pos"][0] + child_offset_x, bsi["pos"][1] + child_offset_y), bsi["size"]),
+				dirty_rects.append(((bsi["pos"][0] + child_offset_x, bsi["pos"][1] + child_offset_y), bsi["size"]))
 				# New rectangle.
-				dirty_rects += ( (child_x + child_offset_x, child_y + child_offset_y), (child_w, child_h) ),
+				dirty_rects.append(((child_x + child_offset_x, child_y + child_offset_y), (child_w, child_h) ))
 
 			# If visibility or zindex has changed, entire child region gets invalidated.
 			elif ("visible" in bsi and bsi["visible"] != child.visible) or \
 			     ("z-index" in bsi and bsi["z-index"] != child.zindex):
-				dirty_rects += ( (child_x + child_offset_x, child_y + child_offset_y), (child_w, child_h) ),
+				dirty_rects.append(( (child_x + child_offset_x, child_y + child_offset_y), (child_w, child_h) ))
 
 			# If we've gotten this far and the child is an image, then we
 			# assume the whole image needs blitting.
 			elif isinstance(child, CanvasImage):
-				dirty_rects += ( (child_x, child_y), (child_w, child_h) ),
+				dirty_rects.append(( (child_x, child_y), (child_w, child_h) ))
 
 			# Remember the current values.
 			bsi["pos"] = child_x, child_y
@@ -456,8 +464,14 @@ class CanvasContainer(CanvasObject):
 		# So now we have a list of dirty rectangles.   We optimize the
 		# list for rendering by removing redundant rectangles (if A is fully
 		# contained in B, remove A), and removing interections.
-		dirty_rects = rect.optimize_for_rendering(dirty_rects)
-
+		# FIXME: Tacl doesm't like this hack, but it is faster
+		if len(dirty_rects) > 10:
+			# more changes than children, reduce the dirty_rects
+			# by making all a big union. This is not correct, but will
+			# speed up the later blitting.
+			dirty_rects = [ reduce(lambda x,y: rect.union(x,y), dirty_rects) ]
+		else:
+			dirty_rects = rect.optimize_for_rendering(dirty_rects)
 		# Broken code.
 		#if self.has_canvas():
 		#	print "PRE CLIP", dirty_rects
@@ -473,7 +487,7 @@ class CanvasContainer(CanvasObject):
 		# Clear all dirty rectangles on the backing store.  "Clear" in this
 		# context means setting those pixels to (0, 0, 0, 0).
 
-		t2 = time.time()
+		#t2 = time.time()
 		if not self._backing_store:
 			# First time calling _get_backing_store() on this container or it
 			# has resized, so create backing store image.
@@ -505,9 +519,9 @@ class CanvasContainer(CanvasObject):
 					# the edges that are stale.
 					self._backing_store.copy_rect( (0, 0), self._backing_store.size, (move_x, move_y))
 					if move_x < 0:
-						dirty_rects += [ ((width + move_x, 0), (bs_width-width, bs_height)) ]
+						dirty_rects.append(((width + move_x, 0), (bs_width-width, bs_height)))
 					if move_y < 0:
-						dirty_rects += [ ((0, height + move_y), (bs_width, bs_height-height)) ]
+						dirty_rects.append(((0, height + move_y), (bs_width, bs_height-height)))
 
 			dirty_rects = rect.remove_intersections(dirty_rects)
 			for r in dirty_rects:
@@ -528,11 +542,16 @@ class CanvasContainer(CanvasObject):
 		# ======
 		# Render the intersections between all children and all dirty
 		# rectangles.  Children are already sorted in order of z-index.
-		t3 = time.time()
+		#t3 = time.time()
 		for child in self.children:
 			if not child.visible or child.alpha <= 0 or not dirty_rects:
 				continue
 
+			child_size = child.get_size()
+			if child_size == (0,0):
+				# ignore this child, it is empty
+				continue
+				
 			if isinstance(child, CanvasContainer):
 				child_offset_x, child_offset_y = child._get_child_min_pos()
 			else:
@@ -547,7 +566,7 @@ class CanvasContainer(CanvasObject):
 			# Get all regions this child intersects with.
 			intersects = []
 			for r in dirty_rects:
-				intersect = rect.intersect( ((child_x + child_offset_x, child_y + child_offset_y), child.get_size() ), r)
+				intersect = rect.intersect( ((child_x + child_offset_x, child_y + child_offset_y), child_size ), r)
 				if intersect != rect.empty:
 					intersects.append(intersect)
 
@@ -585,7 +604,7 @@ class CanvasContainer(CanvasObject):
 
 		if not update_object or update_object == self:
 			self._backing_store_dirty = False
-		t4 = time.time()
+		#t4 = time.time()
 		#print "*!* Return from _get_backing_store", self, " - (0 = %.04f, 1 = %.04f, 2 = %.04f, 3 = %.04f, total = %.04f" % (t1-t0, t2-t1, t3-t2, t4-t3, t4-t0)
 		return self._backing_store, dirty_rects
 
