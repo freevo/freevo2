@@ -27,7 +27,18 @@ from xml.utils import qp_xml
 # RegExp
 import re
 
+# The OSD class, used to communicate with the OSD daemon
+import osd
 
+# The RemoteControl class, sets up a UDP daemon that the remote control client
+# sends commands to
+import rc
+
+# Create the remote control object
+rc = rc.get_singleton()
+
+# Create the OSD object
+osd = osd.get_singleton()
 
 # compile the regexp
 TV_SHOW_REGEXP_MATCH = re.compile("^.*" + config.TV_SHOW_REGEXP).match
@@ -55,6 +66,71 @@ def play_movie(menuw=None, arg=None):
 
 
 #
+# mplayer dummy
+#
+def eventhandler(event = None, menuw=None, arg=None):
+    rom = arg[0]
+    if event == rc.EJECT:
+
+        # find the drive
+        pos = 0
+        for (dir, name, tray) in config.ROM_DRIVES:
+            if rom == dir:
+                tray_open = tray
+                config.ROM_DRIVES[pos] = (dir, name, (tray + 1) % 2)
+                break
+            pos += 1
+
+        if tray_open:
+            if DEBUG: print 'Inserting %s' % rom
+
+            # XXX FIXME: this doesn't look very good, we need
+            # XXX some sort of a pop-up widget
+            osd.drawbox(osd.width/2 - 180, osd.height/2 - 30, osd.width/2 + 180,\
+                        osd.height/2+30, width=-1,
+                        color=((60 << 24) | osd.COL_BLACK))
+            osd.drawstring('mounting %s' % rom, \
+                           osd.width/2 - 160, osd.height/2 - 10,
+                           fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+            osd.update()
+            
+            # close the tray and mount the cd
+            os.system('eject -t %s' % rom)
+            os.system('mount %s' % rom)
+            
+            item = menuw.all_items[menuw.all_items.index(menuw.menustack[-1].selected)]
+            
+            (type, id, label) = util.identifymedia(rom)
+            if type == 'DVD':
+                item.name = 'DVD [%s]' % label
+                item.action = play_movie
+                item.arg = ('dvd', 1, [])
+            elif type == 'VCD':
+                item.name = 'VCD [%s]' % label
+                item.action = play_movie
+                item.arg = ('vcd', 1, [])
+            elif type == 'SVCD':
+                item.name = 'SVCD [%s]' % label
+                item.action = play_movie
+                item.arg = ('vcd', 1, [])
+            elif type != None:
+                item.name = 'CD [%s]' % label
+                item.action = cwd
+                item.arg = rom
+            else:
+                item.name = '%s (no disc)' % name
+                
+            menuw.refresh()
+
+        else:
+            if DEBUG: print 'Ejecting %s' % rom
+            os.system('eject %s' % rom)
+            item = menuw.all_items[menuw.all_items.index(menuw.menustack[-1].selected)]
+            item.name = '%s (no disc)' % name
+            menuw.refresh()
+        
+
+#
 # The Movie module main menu
 #
 def main_menu(arg=None, menuw=None):
@@ -65,15 +141,23 @@ def main_menu(arg=None, menuw=None):
         items += [menu.MenuItem('[%s]' % title, cwd, dir)]
 
 
-    # XXX identifymedia needed here to do something clever
-    # XXX problems: how to eject a specific drive and regenerate
-    # XXX this menu (new cd/dvd = new items)
     if config.ROM_DRIVES != None: 
-        for (dir, name) in config.ROM_DRIVES:
-            items += [menu.MenuItem('[%s]' % name, cwd, dir)]
-            
-        items += [menu.MenuItem('DVD', play_movie, ('dvd', 1, []))]
-        items += [menu.MenuItem('VCD', play_movie, ('vcd', 1, []))]
+        for (dir, name, tray) in config.ROM_DRIVES:
+            (type, id, label) = util.identifymedia(dir)
+            if type == 'DVD':
+                items += [menu.MenuItem('DVD [%s]' % label, play_movie, ('dvd', 1, []),\
+                                        eventhandler, (dir,))]
+            elif type == 'VCD':
+                items += [menu.MenuItem('VCD [%s]' % label, play_movie, ('vcd', 1, []), \
+                                        eventhandler, (dir,))]
+            elif type == 'SVCD':
+                items += [menu.MenuItem('SVCD [%s]' % label, play_movie, ('vcd', 1, []), \
+                                        eventhandler, (dir,))]
+            elif type != None:
+                items += [menu.MenuItem('CD [%s]' % label, cwd, dir, eventhandler, (dir,))]
+            else:
+                items += [menu.MenuItem('%s (no disc)' % name, None, None, \
+                                        eventhandler, (dir,))]
 
     moviemenu = menu.Menu('MOVIE MAIN MENU', items)
     menuw.pushmenu(moviemenu)
