@@ -1,0 +1,135 @@
+BODY, TH, TD { 
+    background: #638BCA; 
+    font-family: Helvetica, Verdana, sans-serif; 
+    color: navy; 
+}
+
+A:link { 
+    color: white; 
+}
+
+A:visited { 
+    color: white; 
+}
+
+TD.tablelink { 
+    background: #2A577E; 
+    color: white; 
+    text-align: left 
+}
+
+TD.tablelink:hover { 
+    background: #0B1C52; 
+    color: #FFFFFF 
+}
+
+TD.channel { 
+    background: #0B1C52; 
+    color: white; 
+    font-weight: bold; 
+    text-align: center 
+}
+
+TD.guidehead { 
+    background: #0B1C52; 
+    color: white; 
+    font-weight: bold; 
+    text-align: center 
+}
+
+TD.heading { 
+    color: white; 
+    font-weight: bold; 
+    font-size: 40;
+    text-align: left 
+}
+
+TD.basic { 
+    background: #2A577E; 
+    color: white; 
+    text-align: left 
+}
+
+TD.recording { 
+    background: #993333; 
+    color: white; 
+    text-align: left 
+}
+
+TD.scheduled { 
+    background: #996600; 
+    color: white; 
+    text-align: left 
+}
+
+TD.favorite { 
+    background: #006666; 
+    color: white; 
+    text-align: left 
+}
+
+TD.program { 
+    background: #2A577E; 
+    color: white; 
+    text-align: left 
+}
+
+TD.program:hover { 
+    background: #638BCA; 
+    color: #000000 
+}
+
+TR.chanrow { 
+    height: 42 
+}
+
+TD.popbottom { 
+    background: #2A577E; 
+    color: white; 
+    text-align: left 
+}
+
+TD.popbottom:hover { 
+    background: #0B1C52; 
+    color: #FFFFFF 
+}
+
+.move {
+    width: 100%;
+    background: #0B1C52;
+    border-bottom: 1px solid white;
+    font-size: 22px;
+    font-family: Helvetica, Verdana, sans-serif;
+    color: white;
+    text-align: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.poplinks {
+    width: 100%;
+    background-color: #FFFFFF;
+    border-top: 1px solid white;
+    font-size: 13px;
+    font-family: Helvetica, Verdana, sans-serif;
+    font-color: #33CCAA;
+}
+.proginfo {
+    width: 450;
+    position: absolute;
+    border: 2px solid white;
+    left: 250;
+    top: 200;
+    font-size: 13px;
+    font-family: Helvetica, Verdana, sans-serif;
+    visibility: hidden;
+}
+
+.progdesc {
+    width: 430;
+    background-color: #638BCA;
+    font-size: 15px;
+    padding: 10;
+    overflow: auto;
+    font-family: Helvetica, Verdana, sans-serif;
+}
