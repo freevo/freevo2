@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/10/28 19:33:38  dischi
+# cleanup utils:
+# o remove config dependency when possible
+# o add sysconfig support
+# o shorten to 80 chars/line
+# o add new header
+# o add more docs
+#
 # Revision 1.17  2004/10/26 19:14:52  dischi
 # adjust to new sysconfig file
 #
@@ -209,7 +217,7 @@ class FXD:
         parse the tree and call all the callbacks
         """
         if self.tree.tree.name != 'freevo':
-            _debug_('first node not <freevo>')
+            print 'fxdparser error: first node not <freevo>'
             return
         for node in self.tree.tree.children:
             if node.name == 'skin':

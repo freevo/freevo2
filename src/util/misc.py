@@ -5,10 +5,18 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/10/28 19:33:38  dischi
+# cleanup utils:
+# o remove config dependency when possible
+# o add sysconfig support
+# o shorten to 80 chars/line
+# o add new header
+# o add more docs
+#
 # Revision 1.47  2004/10/26 19:14:52  dischi
 # adjust to new sysconfig file
 #
@@ -42,7 +50,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -167,7 +175,7 @@ def escape(sql):
         return String(sql)
     else:
         return 'null'
-    
+
 
 
 FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
@@ -201,9 +209,9 @@ def getname(file, skip_ext=True):
         # filename, I don't know what to do here. This should
         # never happen
         return Unicode(file)
-    
+
     name = name[0].upper() + name[1:]
-    
+
     while file.find('_') > 0 and FILENAME_REGEXP.match(name):
         m = FILENAME_REGEXP.match(name)
         if m:
@@ -222,7 +230,7 @@ def killall(appname, sig=9):
 
     unify_name = re.compile('[^A-Za-z0-9]').sub
     appname = unify_name('', appname)
-    
+
     cmdline_filenames = glob.glob('/proc/[0-9]*/cmdline')
 
     for cmdline_filename in cmdline_filenames:
@@ -246,7 +254,7 @@ def killall(appname, sig=9):
 
 def title_case(phrase):
     """
-    Return a text string (i.e. from CDDB) with 
+    Return a text string (i.e. from CDDB) with
     the case normalized into title case.
     This is because people frequently put in ugly
     information, and we can avoid it here'
@@ -264,10 +272,10 @@ def title_case(phrase):
 
 
 
- 
+
 def get_bookmarkfile(filename):
-    myfile = vfs.basename(filename) 
-    myfile = sysconfig.CONF.cachedir + "/" + myfile + '.bookmark'
+    myfile = vfs.basename(filename)
+    myfile = sysconfig.CACHEDIR + "/" + myfile + '.bookmark'
     return myfile
 
 
@@ -304,11 +312,11 @@ def is_usb_storage_device():
 def smartsort(x,y): # A compare function for use in list.sort()
     """
     Compares strings after stripping off 'The' and 'A' to be 'smarter'
-    Also obviously ignores the full path when looking for 'The' and 'A' 
+    Also obviously ignores the full path when looking for 'The' and 'A'
     """
     m = os.path.basename(x)
     n = os.path.basename(y)
-    
+
     for word in ('The', 'A'):
         word += ' '
         if m.find(word) == 0:
@@ -341,12 +349,12 @@ def find_start_string(s1, s2):
 
 def remove_start_string(string, start):
     """
-    remove start from the beginning of string. 
+    remove start from the beginning of string.
     """
     start = start.replace(u' ', '')
     for i in range(len(start)):
         string = string[1:].lstrip(' -_,:.')
-            
+
     return string[0].upper() + string[1:]
 
 
@@ -366,7 +374,7 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None,
     if album:  tag.setAlbum(String(album))
     if title:  tag.setTitle(String(title))
     if track:  tag.setTrackNum((track,tracktotal))   # eyed3 accepts None for tracktotal
-    if year:   tag.setDate(year) 
+    if year:   tag.setDate(year)
     tag.update()
     return
 
@@ -409,7 +417,7 @@ def htmlenties2txt(string):
     return string
 
 
-# 
+#
 # Coming Up for TV schedule
 #
 
@@ -417,14 +425,14 @@ def comingup(items=None, ScheduledRecordings=None):
     import tv.record_client as ri
     import time
     import codecs
-   
+
     result = u''
 
-    cachefile = '%s/upsoon' % sysconfig.CONF.cachedir
+    cachefile = '%s/upsoon' % sysconfig.CACHEDIR
     if not ScheduledRecordings:
         if (os.path.exists(cachefile) and \
             (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
-            cache = codecs.open(cachefile,'r', sysconfig.CONF.encoding)
+            cache = codecs.open(cachefile,'r', sysconfig.ENCODING)
             for a in cache.readlines():
                 result = result + a
             cache.close()
@@ -439,7 +447,7 @@ def comingup(items=None, ScheduledRecordings=None):
         return result
 
     progs = recordings.getProgramList()
-    
+
     f = lambda a, b: cmp(a.start, b.start)
     progl = progs.values()
     progl.sort(f)
@@ -475,7 +483,7 @@ def comingup(items=None, ScheduledRecordings=None):
             result = result + u"- %s%s at %s\n" % \
                      ( Unicode(m.title), Unicode(sub_title),
                        Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
-           
+
     if len(later) > 0:
         result = result + _('This Week') + u':\n'
         for m in later:
@@ -488,10 +496,10 @@ def comingup(items=None, ScheduledRecordings=None):
 
     if not result:
         result = _('No recordings are scheduled')
-        
+
     if os.path.isfile(cachefile):
         os.unlink(cachefile)
-    cache = codecs.open(cachefile,'w', sysconfig.CONF.encoding)
+    cache = codecs.open(cachefile,'w', sysconfig.ENCODING)
     cache.write(result)
     cache.close()
 
@@ -503,12 +511,12 @@ def comingup(items=None, ScheduledRecordings=None):
 # synchronized objects and methods.
 # By André Bjärby
 # From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/65202
-# 
+#
 from types import *
 def _get_method_names (obj):
     if type(obj) == InstanceType:
         return _get_method_names(obj.__class__)
-    
+
     elif type(obj) == ClassType:
         result = []
         for name, func in obj.__dict__.items():
@@ -538,7 +546,7 @@ class _SynchronizedMethod:
 
 
 class SynchronizedObject:
-    
+
     def __init__ (self, obj, ignore=[], lock=None):
         import threading
 
@@ -581,7 +589,7 @@ def run(app, object, signal=15):
     if isinstance(app, str) or isinstance(app, unicode):
         print 'WARNING: popen.run with string as app'
         print 'This may cause some problems with threads'
-        
+
     child = popen2.Popen3(app, 1, 100)
     child.childerr.close()
     child.fromchild.close()
@@ -594,8 +602,8 @@ def run(app, object, signal=15):
             pid = os.waitpid(child.pid, os.WNOHANG)[0]
         except OSError:
             break
-        
+
         if pid:
             break
-        
+
     child.tochild.close()

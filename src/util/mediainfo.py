@@ -1,53 +1,22 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# util/mediainfo.py - media info storage/parsing
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# mediainfo.py - media info storage/parsing
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:        
+# This module handles the media data cache. It includes caching of mmpython
+# results, creating thumbnails for images and storing additional informations
+# about an item.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.61  2004/10/06 19:24:02  dischi
-# switch from rc.py to pyNotifier
+# TODO: o Maybe it is faster to use a sqlite db instead of pickled objects
 #
-# Revision 1.60  2004/09/07 18:52:51  dischi
-# move thumbnail to extra file
-#
-# Revision 1.59  2004/08/28 17:17:05  dischi
-# force rechecking if it seems a dvd but is not detected as one
-#
-# Revision 1.58  2004/07/27 09:24:38  dischi
-# rename application to eventhandler
-#
-# Revision 1.57  2004/07/26 18:10:19  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.56  2004/07/25 19:47:40  dischi
-# use application and not rc.app
-#
-# Revision 1.55  2004/07/11 10:05:14  dischi
-# fix crash for bad discs
-#
-# Revision 1.54  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.53  2004/07/09 14:34:52  dischi
-# inverse the rc.app() call. One line, two bugs :-(
-#
-# Revision 1.52  2004/07/09 14:33:05  dischi
-# bugfix: rc.app is always true, it is rc.app() we want
-#
-# Revision 1.51  2004/07/08 14:37:47  dischi
-# prevent crash for bad pickle results
-#
-# Revision 1.50  2004/06/29 18:07:03  dischi
-# reload cache if cache helper runs while running freevo
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -64,34 +33,42 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
-import os, stat
+# python imports
+import os
+import stat
 import sys
 import copy
 
+# extra package imports
+import notifier
 import mmpython
 from mmpython.disc.discinfo import cdrom_disc_id
 
+# freevo imports
+import sysconfig
 import config
-import util
 import eventhandler
-import thumbnail
 
-import notifier
+# util imports
+import fileops
+import thumbnail
+import cache
+from fileops import mtime
+from misc import getname
 
 class FileOutdatedException(Exception):
     pass
 
 
-class Cache:
+class _Cache:
     """
     Class to cache objects
     """
     def __init__(self, filename):
         self.filename = filename
-        
+
         self.current_objects    = {}
         self.current_cachefile  = None
         self.current_cachedir   = None
@@ -100,9 +77,9 @@ class Cache:
 
         # file database
         self.all_directories  = {}
-                
 
-    def __get_filename__(self, dirname):
+
+    def __get_filename(self, dirname):
         """
         return the cache filename for that directory/device
         """
@@ -110,27 +87,24 @@ class Cache:
         if not os.path.exists(cachefile):
             os.makedirs(cachefile)
         return os.path.join(cachefile, self.filename)
-            
 
-    def __need_update__(self, dirname):
+
+    def __need_update(self, dirname):
         """
         check if the cache needs an update
         """
-        cachefile = self.__get_filename__(dirname)
-        if os.path.isfile(cachefile) and \
-               os.stat( cachefile )[ stat.ST_MTIME ] > \
-               os.stat( dirname )[ stat.ST_MTIME ]:
+        cachefile = self.__get_filename(dirname)
+        if os.path.isfile(cachefile) and mtime(cachefile) > mtime(dirname):
             return 0
         return 1
-    
-        
+
+
     def save_cache(self):
         """
         save a modified cache file
         """
         if self.cache_modified:
-            _debug_('save cache %s' % self.current_cachefile, 2)
-            util.save_pickle(self.current_objects, self.current_cachefile)
+            cache.save(self.current_cachefile, self.current_objects)
             self.cache_modified = False
             if config.MEDIAINFO_USE_MEMORY:
                 self.all_directories[ self.current_cachefile ] = \
@@ -146,16 +120,15 @@ class Cache:
 
         if self.cache_modified:
             self.save_cache()
-            
-        cachefile = self.__get_filename__(dirname)
-        _debug_('load cache %s' % cachefile, 2)
+
+        cachefile = self.__get_filename(dirname)
 
         if config.MEDIAINFO_USE_MEMORY and \
                self.all_directories.has_key( cachefile ):
             self.current_objects = self.all_directories[cachefile]
         else:
             if os.path.isfile(cachefile):
-                self.current_objects = util.read_pickle(cachefile)
+                self.current_objects = cache.load(cachefile)
                 # maybe the cache file is broken and read_pickle returns None
                 if not self.current_objects:
                     self.current_objects = {}
@@ -163,20 +136,20 @@ class Cache:
                 self.current_objects = {}
             if config.MEDIAINFO_USE_MEMORY:
                 self.all_directories[cachefile] = self.current_objects
-            
+
         self.current_cachefile = cachefile
         self.current_cachedir  = dirname
         self.cache_modified    = False
 
-        
+
     def check_cache(self, directory):
         """
         Return how many files in this directory are not in the cache. It's
         possible to guess how much time the update will need.
         """
-        if not self.__need_update__(directory):
+        if not self.__need_update(directory):
             return 0
-        
+
         new = 0
         for filename in os.listdir(directory):
             fullname  = os.path.join(directory, filename)
@@ -187,24 +160,24 @@ class Cache:
             except (OSError, IOError):
                 pass
         return new
-    
-        
+
+
 
     def cache_dir(self, directory, callback):
         """
         cache every file in the directory for future use
         """
-        if not self.__need_update__(directory):
+        if not self.__need_update(directory):
             return 0
 
         self.load_cache(directory)
-        
+
         objects = {}
         for filename in os.listdir(directory):
             try:
                 key       = filename
                 fullname  = os.path.join(directory, filename)
-                timestamp = os.stat(fullname)[stat.ST_MTIME]
+                timestamp = mtime(fullname)
 
                 info = self.find(filename, directory, fullname)
             except KeyError:
@@ -223,7 +196,7 @@ class Cache:
                 except:
                     timestamp = 0
                 info = {}
-            
+
             objects[key] = (info, timestamp)
 
         self.current_objects   = objects
@@ -239,14 +212,13 @@ class Cache:
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
         try:
-            self.current_objects[ filename ] = \
-                                  ( info, os.stat( fullname )[ stat.ST_MTIME ] )
+            self.current_objects[filename] = (info, mtime(fullname))
             self.cache_modified = True
         except OSError:
             # key, the file is gone now
             pass
-        
-        
+
+
     def get(self, filename, create=True):
         """
         get info about a file
@@ -279,7 +251,7 @@ class Cache:
             return self.current_objects[filename][0]
         except:
             return {}
-            
+
 
     def find(self, filename, dirname, fullname, update_check=True):
         """
@@ -302,12 +274,12 @@ class Cache:
 # ======================================================================
 
 
-class MMCache(Cache):
+class MMCache(_Cache):
     """
     cache for mmpython informations
     """
     def __init__(self):
-        Cache.__init__(self, 'mmpython.cache')
+        _Cache.__init__(self, 'mmpython.cache')
         self.uncachable_keys = [ 'thumbnail', 'url' ]
 
 
@@ -340,7 +312,7 @@ class MMCache(Cache):
 
         return ret
 
-    
+
     def create(self, filename):
         """
         create mmpython information about the given file
@@ -350,12 +322,12 @@ class MMCache(Cache):
             thumbnail_file = None
             if info.has_key('thumbnail'):
                 thumbnail_file = info.thumbnail
-                
+
             info = self.simplify(info)
-            name = util.getname(filename)
+            name = getname(filename)
             if name == name.upper() and info.has_key('type') and \
                    info['type'] in ('DVD', 'VCD'):
-                name = util.getname(filename.lower())
+                name = getname(filename.lower())
             info['title:filename'] = name
 
             if info.has_key('video'):
@@ -381,9 +353,9 @@ class MMCache(Cache):
         """
         return true if the information needs an update
         """
-        return timestamp < os.stat(filename)[stat.ST_MTIME]
+        return timestamp < mtime(filename)
 
-        
+
     def update(self, filename, info):
         """
         update mmpython cache information
@@ -394,12 +366,12 @@ class MMCache(Cache):
 # ======================================================================
 
 
-class MetaCache(Cache):
+class MetaCache(_Cache):
     """
     cache for other freevo metadata
     """
     def __init__(self):
-        Cache.__init__(self, 'freevo.cache')
+        _Cache.__init__(self, 'freevo.cache')
 
     def save_cache(self):
         """
@@ -422,15 +394,15 @@ class MetaCache(Cache):
                 self.all_directories[ self.current_cachefile ] = \
                                       self.current_objects
             return
-        # call save_file from 'Cache'
-        Cache.save_cache(self)
+        # call save_file from '_Cache'
+        _Cache.save_cache(self)
 
     def create(self, filename):
         return {}
 
     def update_needed(self, filename, timestamp):
         return False
-        
+
     def update(self, filename, info):
         return info
 
@@ -438,11 +410,11 @@ class MetaCache(Cache):
 # ======================================================================
 
 # info values in metacache that should not be returned
-bad_info = [ '__various__', ]
+_bad_info = [ '__various__', ]
 
 # the two cache objects
-mmpython_cache  = MMCache()
-meta_cache      = MetaCache()
+_mmpython_cache  = MMCache()
+_meta_cache      = MetaCache()
 
 # ======================================================================
 
@@ -465,7 +437,7 @@ class Info:
             self.metadata  = {}
         self.dicts     = ( self.mmdata, self.variables, self.metadata )
 
-        
+
     def __getitem__(self, key):
         """
         get the value of 'key'
@@ -474,13 +446,13 @@ class Info:
         for var in self.dicts:
             if var and var.has_key(key):
                 val = var[key]
-                if not var == self.metadata or not val in bad_info:
+                if not var == self.metadata or not val in _bad_info:
                     result = val
                 if result != None and result != '':
                     return result
         return result
 
-        
+
     def __setitem__(self, key, val):
         """
         set the value of 'key' to 'val'
@@ -505,16 +477,16 @@ class Info:
         self.metadata[key] = value
         if self.disc:
             self.metadata[key] = value
-            util.save_pickle(self.metadata, self.filename)
+            cache.save(self.filename, self.metadata)
             return True
         elif not self.filename:
             return False
         else:
-            meta_cache.set( os.path.basename(self.filename),
+            _meta_cache.set(os.path.basename(self.filename),
                             os.path.dirname(self.filename),
-                            self.filename, self.metadata )
+                            self.filename, self.metadata)
             return True
-        
+
 
     def delete(self, key):
         """
@@ -523,25 +495,25 @@ class Info:
         if self.disc:
             if self.metadata.has_key(key):
                 del self.metadata[key]
-                util.save_pickle(self.metadata, self.filename)
+                cache.save(self.filename, self.metadata)
             return True
         elif not self.filename:
             return False
         if self.metadata.has_key(key):
             del self.metadata[key]
-            meta_cache.set( os.path.basename( self.filename ),
-                            os.path.dirname( self.filename ),
-                            self.filename, self.metadata )
+            _meta_cache.set(os.path.basename(self.filename),
+                            os.path.dirname(self.filename),
+                            self.filename, self.metadata)
             return True
 
-        
+
     def set_variables(self, variables):
         """
         set personal user variables (not to storage) to 'variables'
         """
         self.variables = variables
-        self.dicts     = ( self.mmdata, self.variables, self.metadata )
-        
+        self.dicts     = (self.mmdata, self.variables, self.metadata)
+
 
     def get_variables(self):
         """
@@ -549,7 +521,7 @@ class Info:
         """
         return self.variables
 
-    
+
 
 # ======================================================================
 # Interface to the rest of Freevo
@@ -559,23 +531,23 @@ def check_cache(dirname):
     """
     check the cache how many files need an update
     """
-    return mmpython_cache.check_cache(dirname)
-        
-    
+    return _mmpython_cache.check_cache(dirname)
+
+
 def cache_dir(dirname, callback=None):
     """
     cache the complete directory
     """
-    mmpython_cache.cache_dir(dirname, callback)
+    _mmpython_cache.cache_dir(dirname, callback)
 
 
-class CacheStatus:
+class _CacheStatus:
     def __init__(self, num_changes, txt):
         self.num_changes = num_changes
         self.txt         = txt
         self.pos         = 0
         self.callback()
-        
+
     def callback(self):
         if self.num_changes != 0:
             progress = '%3d%%' % (self.pos * 100 / self.num_changes)
@@ -594,7 +566,7 @@ def cache_recursive(dirlist, verbose=False):
 
     # create a list of all subdirs
     for dir in dirlist:
-        for dirname in util.get_subdirs_recursively(dir):
+        for dirname in fileops.get_subdirs_recursively(dir):
             if not dirname in all_dirs and \
                    not os.path.basename( dirname ) in \
                    ( '.xvpics', '.thumbnails', 'CVS' ):
@@ -616,9 +588,9 @@ def cache_recursive(dirlist, verbose=False):
             dname = d
             if len(dname) > 55:
                 dname = dname[:15] + ' [...] ' + dname[-35:]
-            cache_status = CacheStatus( check_cache( d ), '  %4d/%-4d %s' % \
-                                        ( all_dirs.index( d ) + 1,
-                                          len( all_dirs ), dname ) )
+            cache_status = _CacheStatus(check_cache(d), '  %4d/%-4d %s' % \
+                                        (all_dirs.index(d) + 1,
+                                         len(all_dirs), dname))
             cache_dir(d, cache_status.callback)
             print
         else:
@@ -626,7 +598,7 @@ def cache_recursive(dirlist, verbose=False):
     if all_dirs:
         print
 
-        
+
 def disc_info(media, force=False):
     """
     return mmpython disc information for the media
@@ -635,12 +607,12 @@ def disc_info(media, force=False):
     if not id:
         # bad disc, e.g. blank disc
         return {}
-    
-    cachedir  = os.path.join(config.OVERLAY_DIR, 'disc/metadata')
+
+    cachedir  = os.path.join(sysconfig.VFS_DIR, 'disc/metadata')
     cachefile = os.path.join(cachedir, id + '.mmpython')
 
     if os.path.isfile(cachefile) and not force:
-        mmdata = util.read_pickle(cachefile)
+        mmdata = cache.load(cachefile)
     else:
         mmdata = mmpython.parse(media.devicename)
         if not mmdata:
@@ -650,12 +622,12 @@ def disc_info(media, force=False):
             print '*****************************************'
             return {}
         else:
-            util.save_pickle(mmdata, cachefile)
+            cache.save(cachefile, mmdata)
 
     cachefile = os.path.join(cachedir, id + '.freevo')
 
     if os.path.isfile(cachefile):
-        metainfo = util.read_pickle(cachefile)
+        metainfo = cache.load(cachefile)
     else:
         metainfo = {}
 
@@ -664,98 +636,98 @@ def disc_info(media, force=False):
         media.mount()
         for type in ('video', 'audio', 'image'):
             items = getattr(config, '%s_SUFFIX' % type.upper())
-            files = util.match_files_recursively(media.mountdir, items)
+            files = fileops.match_files_recursively(media.mountdir, items)
             metainfo['disc_num_%s' % type] = len(files)
         media.umount()
-        util.save_pickle(metainfo, cachefile)
-        
+        cache.save(cachefile, metainfo)
+
     info = Info(cachefile, mmdata, metainfo)
     info.disc = True
     return info
 
-    
+
 def get(filename):
     """
     return an Info object with all the informations Freevo has about
     the filename
     """
-    return Info(filename, mmpython_cache.get(filename),
-                meta_cache.get(filename, create=False))
+    return Info(filename, _mmpython_cache.get(filename),
+                _meta_cache.get(filename, create=False))
 
-        
+
 def get_dir(dirname):
     """
     return an Info object with all the informations Freevo has about
     the directory
     """
-    return Info(dirname, {}, meta_cache.get(dirname, create=False))
+    return Info(dirname, {}, _meta_cache.get(dirname, create=False))
 
-        
+
 def set(filename, key, value):
     """
-    set a variable (key) in the meta_cache to value and saves the cache
+    set a variable (key) in the _meta_cache to value and saves the cache
     """
-    info      = meta_cache.get(filename)
+    info      = _meta_cache.get(filename)
     info[key] = value
     fullname  = filename
     dirname   = os.path.dirname(filename)
     filename  = os.path.basename(filename)
-    meta_cache.set(filename, dirname, fullname, info)
+    _meta_cache.set(filename, dirname, fullname, info)
 
 
 def sync():
     """
     sync database to disc (force writing)
     """
-    mmpython_cache.save_cache()
-    meta_cache.save_cache()
-    
+    _mmpython_cache.save_cache()
+    _meta_cache.save_cache()
+
 
 def load_cache(dirname):
     """
     load the cache for dirname
     """
-    mmpython_cache.load_cache(dirname)
-    meta_cache.load_cache(dirname)
-    
+    _mmpython_cache.load_cache(dirname)
+    _meta_cache.load_cache(dirname)
+
 
 def del_cache():
     """
     delete all cache files because mmpython got updated
     """
-    for f in util.recursefolders(config.OVERLAY_DIR,1,'mmpython.cache',1):
+    for f in fileops.recursefolders(sysconfig.VFS_DIR,1,'mmpython.cache',1):
         os.unlink(f)
-    for f in util.match_files( config.OVERLAY_DIR + '/disc/metadata',
-                               [ 'mmpython' ] ):
+    for f in fileops.match_files(sysconfig.VFS_DIR + '/disc/metadata',
+                                 [ 'mmpython' ]):
         os.unlink(f)
-    cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
-    util.save_pickle((mmpython.version.CHANGED, 0, 0, 0), cachefile)
+    cachefile = sysconfig.cachefile('mediainfo')
+    cache.save(cachefile, (mmpython.version.CHANGED, 0, 0, 0))
 
 
-__last_status_check__ = 0
+_last_status_check = 0
 
 def check_cache_status():
     """
     check if cache got updated with helper while freevo is running
     """
-    global __last_status_check__
+    global _last_status_check
     if not eventhandler.is_menu():
         return
     try:
-        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
-        if os.stat(cachefile)[stat.ST_MTIME] <= __last_status_check__:
+        cachefile = sysconfig.cachefile('mediainfo')
+        if mtime(cachefile) <= _last_status_check:
             return
-        if not __last_status_check__:
-            __last_status_check__ = os.stat(cachefile)[stat.ST_MTIME]
+        if not _last_status_check:
+            _last_status_check = mtime(cachefile)
             return
     except:
-        __last_status_check__ = 1
+        _last_status_check = 1
         return
-        
-    __last_status_check__ = os.stat(cachefile)[stat.ST_MTIME]
+
+    _last_status_check = mtime(cachefile)
     open_cache_files = []
 
-    for cache in mmpython_cache, meta_cache:
+    for cache in _mmpython_cache, _meta_cache:
         # save current cache
         cache.save_cache()
         # delete all info about loaded objects
@@ -763,7 +735,7 @@ def check_cache_status():
         cache.current_cachefile  = None
         cache.current_cachedir   = None
         cache.cache_modified     = False
-        
+
         # file database
         for d in cache.all_directories:
             if d and not os.path.dirname(vfs.normalize(d)) in open_cache_files:
@@ -783,6 +755,8 @@ def check_cache_status():
     box.destroy()
 
     return True
+
+
 #
 # setup mmpython
 #
@@ -804,9 +778,8 @@ if __freevo_app__ == 'main':
     try:
         import mmpython.version
         import time
-        
-        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
-        info = util.read_pickle(cachefile)
+
+        info = cache.load(sysconfig.cachefile('mediainfo'))
         if not info:
             print
             print 'Error: can\'t detect last cache rebuild'
@@ -830,7 +803,7 @@ if __freevo_app__ == 'main':
                 print 'Please rerun \'freevo cache\' to speed up Freevo'
                 print
                 del_cache()
-                
+
             elif mmpython.version.CHANGED > mmchanged:
                 print
                 print 'Warning: mmpython as changed.'
@@ -853,4 +826,4 @@ if __freevo_app__ == 'main':
         print
         print
 
-    notifier.addTimer( 1000, notifier.Callback( check_cache_status ) )
+    notifier.addTimer(1000, notifier.Callback(check_cache_status))

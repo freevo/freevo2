@@ -1,45 +1,21 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# util/vfs.py - virtual filesystem
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# vfs.py - virtual filesystem
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#
 # This is a virtual filesystem for Freevo. It uses the structure in
-# config.OVERLAY_DIR to store files that should be in the normal
-# directory, but the user has no write access to it. It's meant to
-# store fxd and image files (covers).
+# sysconfig.VFS_DIR to store files that should be in the normal directory,
+# but the user has no write access to it. It's meant to store fxd and image
+# files (covers).
 #
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.21  2004/10/26 19:14:52  dischi
-# adjust to new sysconfig file
-#
-# Revision 1.20  2004/09/07 18:53:28  dischi
-# exclude new jpg thumbnails
-#
-# Revision 1.19  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.18  2004/06/09 20:09:10  dischi
-# cleanup
-#
-# Revision 1.17  2004/02/14 15:45:26  dischi
-# do not include folder.fxd
-#
-# Revision 1.16  2004/02/05 19:26:42  dischi
-# fix unicode handling
-#
-# Revision 1.15  2004/02/05 05:44:26  gsbarbieri
-# Fixes some bugs related to handling unicode internally.
-# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -56,18 +32,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-            
+# -----------------------------------------------------------------------------
 
+# python imports
 import os
-import copy
 import traceback
 import codecs
 from stat import ST_MTIME
 
 import sysconfig
 
-_VFS_DIR = sysconfig.CONF.vfsdir
+_VFS_DIR = sysconfig.VFS_DIR
 
 def getoverlay(directory):
     if not directory.startswith('/'):
@@ -83,7 +58,7 @@ def getoverlay(directory):
 
 def abspath(name):
     """
-    return the complete filename (including OVERLAY_DIR)
+    return the complete filename (including VFS_DIR)
     """
     if os.path.exists(name):
         if not name.startswith('/'):
@@ -122,7 +97,7 @@ def stat(name):
 def mtime(name):
     """
     Return the modification time of the file. If the files also exists
-    in OVERLAY_DIR, return the max of both. If the file does not exist
+    in VFS_DIR, return the max of both. If the file does not exist
     in the normal directory, OSError is raised.
     """
     t = os.stat(name)[ST_MTIME]
@@ -131,7 +106,7 @@ def mtime(name):
     except (OSError, IOError):
         return t
 
-    
+
 def open(name, mode='r'):
     """
     open the file
@@ -176,22 +151,23 @@ def codecs_open(name, mode, encoding):
         except IOError, e:
             print 'error opening file %s' % overlay
             raise IOError, e
-    
+
 
 def listdir(directory, handle_exception=True, include_dot_files=False,
             include_overlay=False):
     """
-    get a directory listing (including OVERLAY_DIR)
+    get a directory listing (including VFS_DIR)
     """
     try:
         if not directory.endswith('/'):
             directory = directory + '/'
-            
+
         files = []
 
         if include_dot_files:
             for f in os.listdir(directory):
-                if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', 'folder.fxd'):
+                if not f in ('CVS', '.xvpics', '.thumbnails', '.pics',
+                             'folder.fxd'):
                     files.append(directory + f)
         else:
             for f in os.listdir(directory):
@@ -204,16 +180,12 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
         overlay = getoverlay(directory)
         if overlay and overlay != directory and os.path.isdir(overlay):
             for fname in os.listdir(overlay):
-                if fname.endswith('.raw') or fname.startswith('.') or \
-                       fname == 'folder.fxd' or fname.endswith('.thumb.jpg') :
-                    continue
-                f = overlay + fname
-                if not os.path.isdir(f):
-                    files.append(f)
+                if fname.endswith('.fxd'):
+                    files.append(overlay + fname)
         return files
-    
+
     except OSError:
-        _debug_('Error in dir %s' % directory)
+        print 'vfs.py: Error in dir %s' % directory
         traceback.print_exc()
         if not handle_exception:
             raise OSError
@@ -229,7 +201,7 @@ def isoverlay(name):
 
 def normalize(name):
     """
-    remove OVERLAY_DIR if it's in the path
+    remove VFS_DIR if it's in the path
     """
     if isoverlay(name):
         name = name[len(_VFS_DIR):]
@@ -257,4 +229,4 @@ exists   = os.path.exists
 isdir    = os.path.isdir
 islink   = os.path.islink
 
-    
+

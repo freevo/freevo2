@@ -40,7 +40,7 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'run' ]
+__all__ = [ 'call' ]
 
 import threading
 import notifier
@@ -56,7 +56,7 @@ class _FThread(threading.Thread):
         self.kargs    = kargs
         self.result   = None
         self.finished = False
-        
+
     def run(self):
         """
         Call the function and store the result
@@ -64,7 +64,7 @@ class _FThread(threading.Thread):
         self.result = self.function(*self.args, **self.kargs)
         self.finished = True
 
-        
+
 def call(function, *args, **kargs):
     """
     Run function(*args, **kargs) in a thread and return the result. Keep
