@@ -58,8 +58,8 @@ OSD_DEFAULT_FONT = 'skins/fonts/SF Arborcrest Medium.ttf'
 #
 
 class XML_data:
-    color = 0
-    x = y = height = width = length = size = 0
+    color = sel_color = 0
+    x = y = height = width = size = sel_length = 0
     visible = 1
     text = None
     font = OSD_DEFAULT_FONT
@@ -69,12 +69,10 @@ class XML_menu:
     bgbitmap = ''
     title = XML_data()
     items = XML_data()
-    item_selection = XML_data()
     cover_movie = XML_data()
     cover_music = XML_data()
     cover_image = XML_data()
     submenu = XML_data()
-    submenu_selection = XML_data()
     
 class XML_mp3:
     bgbitmap = ''
@@ -124,17 +122,23 @@ class XMLSkin:
 
 
     def parse_node(self, node, data):
-        data.color = self.attr_hex(node, "color", data.color)
         data.x = self.attr_int(node, "x", data.x)
         data.y = self.attr_int(node, "y", data.y)
-        data.length = self.attr_int(node, "length", data.length)
         data.height = self.attr_int(node, "height", data.height)
         data.width = self.attr_int(node, "width", data.width)
-        data.size = self.attr_int(node, "size", data.size)
-        data.font = self.attr_font(node, "font", data.font)
         data.visible = self.attr_bool(node, "visible", data.visible)
-        if node.textof():
-            data.text = node.textof()
+
+        for subnode in node.children:
+            if subnode.name == u'font':
+                data.color = self.attr_hex(subnode, "color", data.color)
+                data.size = self.attr_int(subnode, "size", data.size)
+                data.font = self.attr_font(subnode, "name", data.font)
+            if subnode.name == u'selection':
+                data.sel_color = self.attr_hex(subnode, "color", data.sel_color)
+                data.sel_length = self.attr_int(subnode, "length", data.sel_length)
+            if subnode.name == u'text':
+                data.text = subnode.textof()
+
 
     #
     # read the skin informations for menu
@@ -153,11 +157,6 @@ class XMLSkin:
             elif node.name == u'items':
                 if copy_content: self.menu.items = copy.copy(self.menu.items)
                 self.parse_node(node, self.menu.items)
-                for subnode in node.children:
-                    if subnode.name == u'selection':
-                        if copy_content:
-                            self.menu.item_selection = copy.copy(self.menu.item_selection)
-                        self.parse_node(subnode, self.menu.item_selection)
 
             elif node.name == u'cover':
                 for subnode in node.children:
@@ -177,12 +176,6 @@ class XMLSkin:
             elif node.name == u'submenu':
                 if copy_content: self.menu.submenu = copy.copy(self.menu.submenu)
                 self.parse_node(node, self.menu.submenu)
-                for subnode in node.children:
-                    if subnode.name == u'selection':
-                        if copy_content:
-                            self.menu.submenu_selection = copy.\
-                                                          copy(self.menu.submenu_selection)
-                        self.parse_node(subnode, self.menu.submenu_selection)
 
 
 
@@ -271,7 +264,6 @@ class Skin:
         else:
             val = self.settings.menu
 
-        print val.bgbitmap
         if val.bgbitmap[0]:
             apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
         
@@ -321,17 +313,18 @@ class Skin:
 	    if menu.selected == choice:
                 if len(menuw.menustack) == 1:
                     osd.drawbox(x0 + w, y0 - 3, x0 + 300, y0 + fontsize*1.5, width=-1,
-                                color=((160 << 24) | val.item_selection.color))
+                                color=((160 << 24) | val.items.sel_color))
                 else:
-                    osd.drawbox(x0 - 8 + w, y0 - 3, x0 - 8 + val.item_selection.length,\
+                    osd.drawbox(x0 - 8 + w, y0 - 3, x0 - 8 + val.items.sel_length,\
                                 y0 + fontsize*1.5, width=-1,
-                                color=((160 << 24) | val.item_selection.color))
+                                color=((160 << 24) | val.items.sel_color))
 
                 image = choice.image
 
 
             y0 += spacing
 
+        print val.items.sel_length
         # draw the image
         if image != None:
             (type, image) = image
@@ -362,10 +355,10 @@ class Skin:
                            font=val.submenu.font,
                            ptsize=val.submenu.size)
             if menu.selected == item:
-                osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu_selection.length, \
+                osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu.sel_length, \
                             y0 + val.submenu.size*1.5,
                             width=-1,
-                            color=((160 << 24) | val.submenu_selection.color))
+                            color=((160 << 24) | val.submenu.sel_color))
 	    x0 += 190
 
         osd.update()
