@@ -82,6 +82,7 @@ try:
     
     import config
     import system
+    system.detect('tvcards')
 
     if config.OSD_DISPLAY == 'SDL':
         import pygame

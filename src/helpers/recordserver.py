@@ -7,6 +7,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/11/19 02:10:28  rshortt
+# First crack at moving autodetect code for TV cards into src/system.  Added a
+# detect() to system/__init__.py that will call detect() on a system/ module.
+# The general idea here is that only Freevo processes that care about certain
+# things (ie: devices) will request and have the information.  If you want
+# your helper to know about TV_SETTINGS you would:
+#
+# import config
+# import system
+# system.detect('tvcards')
+#
 # Revision 1.66  2004/11/14 15:57:25  dischi
 # better chuid handling
 #
@@ -74,10 +85,14 @@ except Exception, e:
     print e
 
 import config
+import system
 import plugin
 import childapp
 import notifier
 import record.server
+
+system.detect('tvcards')
+
 
 while 1:
     try:

@@ -22,6 +22,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.131  2004/11/19 02:10:27  rshortt
+# First crack at moving autodetect code for TV cards into src/system.  Added a
+# detect() to system/__init__.py that will call detect() on a system/ module.
+# The general idea here is that only Freevo processes that care about certain
+# things (ie: devices) will request and have the information.  If you want
+# your helper to know about TV_SETTINGS you would:
+#
+# import config
+# import system
+# system.detect('tvcards')
+#
 # Revision 1.130  2004/11/16 14:47:17  rshortt
 # Fix bug where ivtvX would not be detected if device nodes are available for dvbX but no driver loaded.  Also add some informational statements.
 #
@@ -360,153 +371,9 @@ class TVSettings(dict):
         number = key[-1]
         dict.__setitem__(self, key, val(number))
     
-
-class TVCard:
-    def __init__(self, number):
-        self.vdev = '/dev/video' + number
-        self.adev = None
-        self.norm = string.upper(CONF.tv)
-        self.chanlist = CONF.chanlist
-        self.input = 0
-        # TODO: autodetect input_name
-        self.input_name = 'tuner'
-        self.driver = 'unknown'
-
-        # If passthrough is set then we'll use that channel on the input to get
-        # our signal.  For example someone may have an external cable box
-        # connected and have to set the local tuner to channel 4 to get it.
-        self.passthrough = None
-
-        
-class IVTVCard(TVCard):
-    def __init__(self, number):
-        TVCard.__init__(self, number)
-
-        # XXX TODO: take care of proper PAL / NTSC defaults
-        self.input = 4
-        self.resolution = '720x480'
-        self.aspect = 2
-        self.audio_bitmask = 0x00a9
-        self.bframes = 3
-        self.bitrate_mode = 1
-        self.bitrate = 4500000
-        self.bitrate_peak = 4500000
-        self.dnr_mode = 0
-        self.dnr_spatial = 0
-        self.dnr_temporal = 0
-        self.dnr_type = 0
-        self.framerate = 0
-        self.framespergop = 15
-        self.gop_closure = 1
-        self.pulldown = 0
-        self.stream_type = 14
-
-        
-class DVBCard:
-    def __init__(self, number):
-        self.adapter = '/dev/dvb/adapter' + number
-        _debug_('register dvb device %s' % self.adapter)
-        INFO_ST = '128s10i'
-        val = ioctl.pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
-        devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
-        r = ioctl.ioctl(devfd, ioctl.IOR('o', 61, INFO_ST), val)
-        os.close(devfd)
-        val = ioctl.unpack( INFO_ST, r )
-        name = val[0]
-        if val[1] == 0:
-            self.type = 'DVB-S'
-        elif val[1] == 1:
-            self.type = 'DVB-C'
-        elif val[1] == 2:
-            self.type = 'DVB-T'
-        else:
-            self.type = 'unknown (%s)' % val[1]
-        if name.find('\0') > 0:
-            name = name[:name.find('\0')]
-        self.name = name
-        
 TV_SETTINGS = TVSettings()
 
-
-# auto-load TV_SETTINGS:
-tvn = 0
-ivtvn = 0
-for i in range(10):
-    if os.uname()[0] == 'FreeBSD':
-        if os.path.exists('/dev/bktr%s' % i):
-            key = 'tv%s' % i
-            TV_SETTINGS[key] = TVCard
-            TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
-            TV_SETTINGS[key].driver = 'bsdbt848'
-            TV_SETTINGS[key].input = 1
-            print 'BSD TV card detected as %s' % key
-
-        continue
-
-    if os.path.isdir('/dev/dvb/adapter%s' % i):
-        try:
-            TV_SETTINGS['dvb%s' % i] = DVBCard
-            print 'DVB card detected as dvb%s' % i
-        except OSError: 
-            # likely no device attached
-            pass
-        except: 
-            traceback.print_exc()
-
-    vdev = '/dev/video%s' % i
-    if os.path.exists(vdev):
-        type = 'tv'
-        driver = None
-        try:
-            import tv.v4l2
-            v = tv.v4l2.Videodev(device=vdev)
-            driver = v.driver
-            if string.find(driver, 'ivtv') != -1:
-                type = 'ivtv'
-            v.close()
-            del v
-        except OSError: 
-            # likely no device attached
-            continue
-        except IOError: 
-            # found something that doesn't speak v4l2
-            continue
-        except: 
-            traceback.print_exc()
-            
-        if type == 'ivtv':
-            key = '%s%s' % (type,ivtvn)
-            print 'IVTV card detected as %s' % key
-            TV_SETTINGS[key]  = IVTVCard
-            if ivtvn != i:
-                TV_SETTINGS[key].vdev = vdev
-            ivtvn = ivtvn + 1
-
-        else:
-            # Default to 'tv' type as set above.
-            key = '%s%s' % (type,tvn)
-            print 'TV card detected as %s' % key
-            TV_SETTINGS[key]  = TVCard
-            if tvn != i:
-                TV_SETTINGS[key].vdev = vdev
-            tvn = tvn + 1
-
-        TV_SETTINGS[key].driver = driver
-
-
-# TESTCODE FOR freevo_config.py:
-# TV_SETTINGS['tv0']  = TVCard
-# TV_SETTINGS['tv1']  = TVCard
-# TV_SETTINGS['tv0'].adev = '/dev/dsp'
-# TV_SETTINGS['dvb0'] = DVBCard
-
-
 TV_DEFAULT_SETTINGS = None
-
-for type in ['dvb0', 'tv0', 'ivtv0']:
-    if type in TV_SETTINGS.keys():
-        TV_DEFAULT_SETTINGS = type
-        break
 
 
 #
@@ -888,24 +755,3 @@ REDESIGN_BROKEN   = 'not working while gui redesign'
 REDESIGN_FIXME    = 'not working since gui redesign, feel free to fix this'
 REDESIGN_UNKNOWN  = 'plugin may be broken after gui redesign, please check'
 
-device_re = re.compile('^((dvb|tv|ivtv)([0-9])?:)?(.*)')
-
-# add all possible channels to the cards
-for card in TV_SETTINGS:
-    channels = {}
-    for c in TV_CHANNELS:
-        for freq in c[2:]:
-            device, type, number, freq = device_re.match(String(freq)).groups()
-            if number and device[:-1] != card:
-                continue
-            if type and not card.startswith(type):
-                continue
-            try:
-                freq = int(freq)
-                if card.startswith('dvb'):
-                    continue
-            except ValueError:
-                if not card.startswith('dvb'):
-                    continue
-            channels[c[0]] = freq
-    TV_SETTINGS[card].channels = channels
