@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/09/06 22:58:13  mikeruelle
+# fix something i don't think sould have a gap
+#
 # Revision 1.15  2003/09/06 22:11:40  gsbarbieri
 # Rewoked Popup box so it looks better in Internet Exploder.
 # Guide now has configurable precision, defaults to 5 minutes.
@@ -215,10 +218,10 @@ class GuideResource(FreevoResource):
 
         fv.tableOpen('border="0" cellpadding="0" cellspacing="0" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="Change"></form>', 'class="guidehead"')
+        fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="Change"></form>', 'class="utilhead"')
         categorybox =  self.makecategorybox(guide.chan_list)
         if categorybox:
-            fv.tableCell('<form action="genre.rpy">Show&nbsp;Category:&nbsp;'+categorybox+'<input type=submit value="Change"></form>', 'class="guidehead"')
+            fv.tableCell('<form action="genre.rpy">Show&nbsp;Category:&nbsp;'+categorybox+'<input type=submit value="Change"></form>', 'class="utilhead"')
         fv.tableRowClose()
         fv.tableClose()
 
