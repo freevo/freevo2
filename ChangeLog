@@ -3,6 +3,12 @@ Freevo Changelog
 
 $Id$
 
+Release 1.3.X (???):
+--------------------
+ * Moved all metadata parsing into mmpython
+ * Added CD ripping plugin from Rich C.
+ * Initial database support for music via sqlite
+
 
 Release 1.3.2 (2003-06-29):
 ---------------------------
