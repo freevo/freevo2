@@ -6,6 +6,13 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.5  2003/03/03 00:43:34  rshortt
 # DEBUG shouldn't be set to 1 automaticly since I write a bmp to /tmp
 #
@@ -188,6 +195,13 @@ class ZIndexRenderer:
             if o == object:
                 if o.bg_surface:
                     osd.putsurface(o.bg_surface, o.left, o.top)
+                    osd.update()
+                    if DEBUG:
+                        o.bg_image = o.bg_surface.convert()
+                        iname = '/tmp/last-hide.bmp' 
+                        pygame.image.save( o.bg_image, iname )
+                        iname = '/tmp/last-screen.bmp' 
+                        pygame.image.save( osd.screen.convert(), iname )
 
 
     def update_show(self, object):        

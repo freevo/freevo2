@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.3  2003/03/02 20:15:41  rshortt
 # GUIObject and PopupBox now get skin settings from the new skin.  I put
 # a test for config.NEW_SKIN in GUIObject because this object is used by
@@ -82,20 +89,8 @@ class AlertBox(PopupBox):
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
-
         PopupBox.__init__(self, text, left, top, width, height, bg_color, 
                           fg_color, icon, border, bd_color, bd_width)
-
-
-        ((bg_type, skin_bg), skin_spacing, skin_color, skin_font, 
-         skin_button_default, skin_button_selected) = \
-         self.skin.GetPopupBoxStyle()
-
-        print 'STYLE: %s, %s, %s, %s, %s, %s' % (skin_bg, skin_spacing, 
-               skin_color, skin_font, skin_button_default, skin_button_selected)
-
-# STYLE: ('rectangle', <xml_skin.XML_rectangle instance at 0x801b73ec>), 9, 16777215, <xml_skin.XML_font instance at 0x801b6c7c>, <xml_skin.XML_data instance at 0x80474974>, <xml_skin.XML_data instance at 0x80302e6c>
-
 
 
         self.set_h_align(Align.CENTER)
@@ -107,6 +102,7 @@ class AlertBox(PopupBox):
         btop = self.top + self.height - b1.height - 25
         b1.set_position(bleft, btop) 
         b1.toggle_selected()
+
         self.add_child(b1)
 
 
@@ -117,7 +113,7 @@ class AlertBox(PopupBox):
         if trapped.count(event) > 0:
             return
         elif [self.rc.ENTER, self.rc.SELECT, self.rc.EXIT].count(event) > 0:
-            print 'HIT OK'
+            if DEBUG: print 'HIT OK'
             self.destroy()
         else:
             return self.parent.eventhandler(event)

@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.1  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -140,6 +147,7 @@ class LetterBox(GUIObject):
             charNext = 0
 
         self.set_text(self.ourChars[charNext])
+        self._draw()
 
 
     def charDown(self):
@@ -150,6 +158,7 @@ class LetterBox(GUIObject):
             charNext = len(self.ourChars)-1
 
         self.set_text(self.ourChars[charNext])
+        self._draw()
 
 
     def cycle_phone_char(self, command):
@@ -170,7 +179,7 @@ class LetterBox(GUIObject):
                 i = 0
             self.set_text(letters[i])
 
-        # self._draw()
+        self._draw()
         # self.osd.update_area(self.get_rect())
 
 

@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.4  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
@@ -79,46 +86,58 @@ class RegionScroller(GUIObject):
     """
 
     
-    def __init__(self, surface=None, left=None, top=None, width=None, 
-                 height=None, border=None, bd_color=None, bd_width=None, 
-                 show_h_scrollbar=None, show_v_scrollbar=None):
+    def __init__(self, surface=None, left=None, top=None, width=300, 
+                 height=160, bg_color=None, fg_color=None, border=None, 
+                 bd_color=None, bd_width=None, show_h_scrollbar=None, 
+                 show_v_scrollbar=None):
 
-        GUIObject.__init__(self)
-
-        self.surface        = surface
-        self.border         = border
-        self.h_margin       = 2
-        self.v_margin       = 2
-        self.bd_color       = bd_color
-        self.bd_width       = bd_width
-        self.width          = width
-        self.height         = height
-        self.left           = left
-        self.top            = top
+        self.surface          = surface
+        self.border           = border
+        self.bd_color         = bd_color
+        self.bd_width         = bd_width
+        self.bg_color         = bg_color
+        self.fg_color         = fg_color
         self.show_h_scrollbar = show_h_scrollbar
         self.show_v_scrollbar = show_v_scrollbar
 
+        GUIObject.__init__(self, left, top, width, height,
+                           self.bg_color, self.fg_color)
 
-        # XXX: Place a call to the skin object here then set the defaults
-        #      acodringly. self.skin is set in the superclass.
 
-        if not self.width:    self.width  = 300
-        if not self.height:   self.height = 160
-        if not self.left:     self.left   = -100
-        if not self.top:      self.top    = -100
-        if not self.bd_color: self.bd_color = Color(self.osd.default_fg_color) 
-        if not self.bd_width: self.bd_width = 2
-        if not self.border:   self.border = Border(self, Border.BORDER_FLAT, 
-                                                   self.bd_color, self.bd_width)
-        if self.show_h_scrollbar != 0 and not self.show_h_scrollbar: 
+        self.skin = skin.get_singleton()
+
+        (BLAH, BLAH, BLAH, BLAH,
+         button_default, BLAH) = self.skin.GetPopupBoxStyle()
+
+        if not self.bd_color: 
+            if button_default.rectangle.color:
+                self.bd_color = Color(button_default.rectangle.color)
+            else:
+                self.bd_color = Color(self.osd.default_fg_color)
+
+        if not self.bd_width: 
+            if button_default.rectangle.size:
+                self.bd_width = button_default.rectangle.size
+            else:
+                self.bd_width = 2
+
+        if not self.border:   
+            self.border = Border(self, Border.BORDER_FLAT,
+                                 self.bd_color, self.bd_width)
+
+
+        if self.show_h_scrollbar != 0 and not self.show_h_scrollbar:
             self.show_h_scrollbar = 1
-        if self.show_v_scrollbar != 0 and not self.show_v_scrollbar: 
+        if self.show_v_scrollbar != 0 and not self.show_v_scrollbar:
             self.show_v_scrollbar = 1
 
-        self.set_surface(surface)
 
+        self.set_surface(surface)
         self.x_scroll_interval = 25
         self.y_scroll_interval = 25
+        self.h_margin = 2
+        self.v_margin = 2
+
 
         self.v_scrollbar = Scrollbar(self, 'vertical')
         self.add_child(self.v_scrollbar)

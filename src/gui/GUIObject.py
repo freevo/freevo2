@@ -7,6 +7,13 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.7  2003/03/03 00:41:41  rshortt
 # show() now updates its own area
 #
@@ -105,6 +112,7 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
+import pygame
 import rc
 import osd
 import config
@@ -123,7 +131,7 @@ class GUIObject:
     """
 
 
-    def __init__(self, left=None, top=None, width=None, height=None,
+    def __init__(self, left=0, top=0, width=0, height=0,
                  bg_color=None, fg_color=None):
 
         self.rc   = rc.get_singleton()
@@ -345,7 +353,10 @@ class GUIObject:
             self.selected = 0
         else:
             self.selected = 1
-        self._draw()
+        # I just figured out that we do not always want to
+        # draw here.  If a child gets drawn before the parent
+        # its bg_surface will be wrong!
+        # self._draw()
 
 
     def redraw(self):
@@ -399,16 +410,22 @@ class GUIObject:
 
 
     def destroy(self):
+        if DEBUG:
+            if self.bg_image:
+                iname = '/tmp/bg-%s-%s.bmp' % (self.left, self.top)
+                pygame.image.save( self.bg_image, iname )
+
         if DEBUG: print 'GUIObject.destroy(): %s' % self
         if self.parent:
-            self.parent.children.remove(self)
+            # self.parent.children.remove(self)
             if self.osd.focused_app == self:
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
                                  self.osd.focused_app
                 self.osd.focused_app = self.parent
                 if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
                                  self.osd.focused_app
-            self.parent.refresh()
+            # We shouldn't need to call this if we replace the bg right
+            # self.parent.refresh()
         if self.children:
             for child in self.children:
                 child.destroy()

@@ -10,6 +10,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.1  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -148,7 +155,9 @@ class LetterBoxGroup(GUIObject):
                 boxNext = len(self.boxes)-1
 
         self.boxes[boxNow].toggle_selected()
+        self.boxes[boxNow]._draw()
         self.boxes[boxNext].toggle_selected()
+        self.boxes[boxNext]._draw()
 
 
     def get_word(self):

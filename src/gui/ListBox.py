@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.3  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
@@ -79,54 +86,83 @@ class ListBox(RegionScroller):
     """
 
     
-    def __init__(self, items=None, left=None, top=None, width=None, height=None, 
+    def __init__(self, items=None, left=None, top=None, width=100, height=200, 
                  bg_color=None, fg_color=None, selected_bg_color=None,
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None, show_h_scrollbar=None, show_v_scrollbar=None):
 
-
-        self.border         = border
-        self.items          = items
-        self.h_margin       = 2
-        self.v_margin       = 2
-        self.bg_color       = bg_color
-        self.fg_color       = fg_color
-        self.bd_color       = bd_color
-        self.bd_width       = bd_width
-        self.width          = width
-        self.height         = height
-        self.left           = left
-        self.top            = top
-        self.selected_bg_color = selected_bg_color
+        self.items             = items
+        self.width             = width
+        self.height            = height
+        self.border            = border
+        self.bd_color          = bd_color
+        self.bd_width          = bd_width
+        self.bg_color          = bg_color
+        self.fg_color          = fg_color
         self.selected_fg_color = selected_fg_color
-        self.show_h_scrollbar = show_h_scrollbar
-        self.show_v_scrollbar = show_v_scrollbar
+        self.selected_bg_color = selected_bg_color
+        self.show_h_scrollbar  = show_h_scrollbar
+        self.show_v_scrollbar  = show_v_scrollbar
 
-        if not self.width:    self.width  = 100
-        if not self.height:   self.height = 200
-        if not self.items:    self.items  = []
+
+        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
+
+        self.skin = skin.get_singleton()
+        self.osd  = osd.get_singleton()
+    
+        (BLAH, BLAH, BLAH, BLAH,
+         button_default, button_selected) = \
+         self.skin.GetPopupBoxStyle()
+    
+        # I am commenting a lot of this out until I get alpha
+        # transparencies working correctly.
+        if not self.bg_color:
+            self.bg_color = Color(self.osd.default_bg_color)
+            # if button_default.rectangle.bgcolor:
+            #     self.bg_color = Color(button_default.rectangle.bgcolor)
+            # else:
+            #     self.bg_color = Color(self.osd.default_bg_color)
+
+        if not self.fg_color:
+            self.fg_color = Color(self.osd.default_fg_color)
+            # if button_default.font.color:
+            #     self.fg_color = Color(button_default.font.color)
+            # else:
+            #     self.fg_color = Color(self.osd.default_fg_color)
+
+        if not self.selected_bg_color:
+            self.selected_bg_color = Color((0,255,0,128))
+            # if button_selected.rectangle.bgcolor:
+            #     self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
+            # else:
+            #     self.selected_bg_color = Color((0,255,0,128))
+
+        if not self.selected_fg_color:
+            self.fg_color = Color(self.osd.default_fg_color)
+            # if button_selected.font.color:
+            #     self.selected_fg_color = Color(button_selected.font.color)
+            # else:
+            #     self.selected_fg_color = Color(self.osd.default_fg_color)
+
 
         if self.show_h_scrollbar != 0 and not self.show_h_scrollbar:
             self.show_h_scrollbar = 0
         if self.show_v_scrollbar != 0 and not self.show_v_scrollbar:
             self.show_v_scrollbar = 1
 
-        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
+        RegionScroller.__init__(self, self.surface, left, top, self.width, 
+                                self.height, self.bg_color, self.fg_color,
+                                border, bd_color, bd_width,
+                                self.show_h_scrollbar, self.show_v_scrollbar)
 
-        RegionScroller.__init__(self, self.surface, self.left, self.top, self.width,
-                                self.height, self.border, self.bd_color,
-                                self.bd_width, self.show_h_scrollbar,
-                                self.show_v_scrollbar)
 
-        if not self.bg_color: Color(self.osd.default_bg_color)
-        if not self.fg_color: Color(self.osd.default_fg_color)
-        if not self.selected_fg_color: self.selected_fg_color = self.fg_color
-        if not self.selected_bg_color: self.selected_bg_color = Color((0,255,0,128))
+        self.h_margin                 = 2
+        self.v_margin                 = 2
+        self.x_scroll_interval        = 25
+        self.y_scroll_interval        = 25
+        if not self.items: self.items = []
 
         if self.items: self.set_items(self.items)
-
-        self.x_scroll_interval = 25
-        self.y_scroll_interval = 25
 
 
     def scroll(self, direction):
@@ -243,7 +279,7 @@ class ListBox(RegionScroller):
         Lets alter the surface then get our superclass to do the draw.
 
         """
-        if self.is_visible() == 0: return
+        # if self.is_visible() == 0: return
 
         if not self.width or not self.height or not self.surface:
             raise TypeError, 'Not all needed variables set.'

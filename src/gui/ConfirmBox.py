@@ -10,6 +10,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.2  2003/02/24 12:14:57  rshortt
 # Removed more unneeded self.parent.refresh() calls.
 #
@@ -70,51 +77,15 @@ class ConfirmBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text, handler=None, icon=None, left=None, top=None, 
-                 width=None, height=None, bg_color=None, fg_color=None, 
-                 border=None, bd_color=None, bd_width=None):
+    def __init__(self, text=" ", handler=None, left=None, top=None, 
+                 width=300, height=160, bg_color=None, fg_color=None, 
+                 icon=None, border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self)
+        self.handler = handler
 
-        self.text     = text
-        self.handler  = handler
-        self.icon     = icon
-        self.border   = border
-        self.label    = None
-        self.h_margin = 10
-        self.v_margin = 10
-        self.bd_color = bd_color
-        self.bd_width = bd_width
-        self.width    = width
-        self.height   = height
-        self.left     = left
-        self.top      = top
-        self.bg_color = bg_color
-        self.fg_color = fg_color
+        PopupBox.__init__(self, text, left, top, width, height, bg_color, 
+                          fg_color, icon, border, bd_color, bd_width)
 
-        # XXX: Place a call to the skin object here then set the defaults
-        #      acodringly. self.skin is set in the superclass.
-
-        if not self.width:    self.width  = 300
-        if not self.height:   self.height = 160
-        if not self.left:     self.left   = self.osd.width/2 - self.width/2
-        if not self.top:      self.top    = self.osd.height/2 - self.height/2
-        if not self.bg_color: self.bg_color = Color(self.osd.default_bg_color)
-        if not self.fg_color: self.fg_color = Color(self.osd.default_fg_color)
-        if not self.bd_color: self.bd_color = Color(self.osd.default_fg_color) 
-        if not self.bd_width: self.bd_width = 2
-        if not self.border:   self.border = Border(self, Border.BORDER_FLAT, 
-                                                   self.bd_color, self.bd_width)
-        
-        if type(text) is StringType:
-            if text: self.set_text(text)
-        elif not text:
-            self.text = None
-        else:
-            raise TypeError, text
-        
-        if icon:
-            self.set_icon(icon)
 
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.CENTER)
@@ -149,7 +120,8 @@ class ConfirmBox(PopupBox):
         elif event == self.rc.LEFT or event == self.rc.RIGHT:
             self.b1.toggle_selected()
             self.b2.toggle_selected()
-            self.osd.update()
+            self._draw()
+            self.osd.update(self.get_rect())
             return
         elif event == self.rc.ENTER or event == self.rc.SELECT:
             if self.b1.selected:

@@ -10,6 +10,13 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/05 03:53:34  rshortt
+# More work hooking skin properties into the GUI objects, and also making
+# better use of OOP.
+#
+# ListBox and others are working again, although I have a nasty bug regarding
+# alpha transparencies and the new skin.
+#
 # Revision 1.5  2003/03/02 20:15:41  rshortt
 # GUIObject and PopupBox now get skin settings from the new skin.  I put
 # a test for config.NEW_SKIN in GUIObject because this object is used by
@@ -306,7 +313,14 @@ class PopupBox(GUIObject):
 
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
+        # if self.bg_surface:
+        #     print 'PB: have bg_surface'
+        #     box = self.bg_surface
+        #     self.osd.putsurface(self.bg_surface, self.left, self.top)
+        # else:
+        #     print 'PB: no bg_surface'
         box = pygame.Surface(self.get_size(), 0, 32)
+
         box.fill(c)
         box.set_alpha(a)
 
