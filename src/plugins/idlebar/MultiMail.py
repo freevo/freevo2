@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/24 17:49:48  dischi
+# rename or deactivate some stuff for gui update
+#
 # Revision 1.4  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -73,14 +76,14 @@ class MultiMail(IdleBarPlugin):
 
     def draw(self, (type, object), x, osd):
         if self.unread > 0:
-            image_width = osd.draw_image(self.MAILIMAGE, (x, osd.y + 2, -1, -1))[0]
+            image_width = osd.drawimage(self.MAILIMAGE, (x, osd.y + 2, -1, -1))[0]
             font  = osd.get_font('weather')
             unread_str = '%3s' % self.unread
             text_width = font.stringsize(unread_str)
-            osd.write_text(unread_str, font, None, x, osd.y + 55 - font.h, text_width, font.h, 'left', 'top')
+            osd.drawstring(unread_str, font, None, x, osd.y + 55 - font.h, text_width, font.h, 'left', 'top')
             display_width = max(image_width, text_width)
         else:
-            display_width = osd.draw_image(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0] 
+            display_width = osd.drawimage(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0] 
         return display_width
 
 class Imap(MultiMail):

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/24 17:49:48  dischi
+# rename or deactivate some stuff for gui update
+#
 # Revision 1.19  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -185,7 +188,7 @@ class clock(IdleBarPlugin):
         h = font.font.height
         if h > idlebar_height:
             h = idlebar_height
-        osd.write_text( clock, font, None,
+        osd.drawstring( clock, font, None,
                        ( osd.x + osd.width - w -pad_x ),
                        ( osd.y + ( idlebar_height - h ) / 2 ),
                        ( w + 1 ), h , 'right', 'center')
@@ -225,7 +228,7 @@ class cdstatus(IdleBarPlugin):
             else:
                 image = self.cdimages['mixed']
 
-            width += osd.draw_image(image, (x+width, osd.y + 10, -1, -1))[0] + 10
+            width += osd.drawimage(image, (x+width, osd.y + 10, -1, -1))[0] + 10
         if width:
             width -= 10
         return width
@@ -261,9 +264,9 @@ class mail(IdleBarPlugin):
 
     def draw(self, (type, object), x, osd):
         if self.checkmail() > 0:
-            return osd.draw_image(self.MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
+            return osd.drawimage(self.MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
         else:
-            return osd.draw_image(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
+            return osd.drawimage(self.NO_MAILIMAGE, (x, osd.y + 10, -1, -1))[0]
 
 
 
@@ -301,7 +304,7 @@ class tv(IdleBarPlugin):
     def draw(self, (type, object), x, osd):
 
         if self.checktv() == 1:
-            return osd.draw_image(self.TVLOCKED, (x, osd.y + 10, -1, -1))[0]
+            return osd.drawimage(self.TVLOCKED, (x, osd.y + 10, -1, -1))[0]
 
         if self.listings_threshold != -1:
             now = time.time()
@@ -314,11 +317,11 @@ class tv(IdleBarPlugin):
                 self.next_guide_check = now + 10*60
 
             if self.listings_expire == 0:
-                return osd.draw_image(self.EXPIRED, (x, osd.y + 10, -1, -1))[0]
+                return osd.drawimage(self.EXPIRED, (x, osd.y + 10, -1, -1))[0]
             elif self.listings_expire <= self.listings_threshold:
-                return osd.draw_image(self.NEAR_EXPIRED, (x, osd.y + 10, -1, -1))[0]
+                return osd.drawimage(self.NEAR_EXPIRED, (x, osd.y + 10, -1, -1))[0]
 
-        return osd.draw_image(self.TVFREE, (x, osd.y + 10, -1, -1))[0]
+        return osd.drawimage(self.TVFREE, (x, osd.y + 10, -1, -1))[0]
 
 
 
@@ -405,11 +408,11 @@ class weather(IdleBarPlugin):
     def draw(self, (type, object), x, osd):
         temp,icon = self.checkweather()
         font  = osd.get_font('small0')
-        osd.draw_image(os.path.join(config.ICON_DIR, 'weather/' + icon),
+        osd.drawimage(os.path.join(config.ICON_DIR, 'weather/' + icon),
                         (x, osd.y + 15, -1, -1))
         temp = u'%s\xb0' % temp
         width = font.stringsize(temp)
-        osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
+        osd.drawstring(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
                        'left', 'top')
         return width + 15
 
@@ -463,7 +466,7 @@ class holidays(IdleBarPlugin):
     def draw(self, (type, object), x, osd):
         icon = self.get_holiday_icon()
         if icon:
-            return osd.draw_image(icon, (x, osd.y + 10, -1, -1))[0]
+            return osd.drawimage(icon, (x, osd.y + 10, -1, -1))[0]
 
 
 

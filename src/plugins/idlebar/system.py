@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/24 17:49:48  dischi
+# rename or deactivate some stuff for gui update
+#
 # Revision 1.11  2004/07/11 11:06:56  dischi
 # 2.6.x kernel fixes
 #
@@ -152,17 +155,17 @@ class procstats(IdleBarPlugin):
 
         if self.drawCpu == 1:
             widthcpu = font.stringsize(self.currentCpu)
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
+            osd.drawimage(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
                           (x, osd.y + 7, -1, -1))    
-            osd.write_text(self.currentCpu, font, None, x + 15, osd.y + 55 - font.h,
+            osd.drawstring(self.currentCpu, font, None, x + 15, osd.y + 55 - font.h,
                            widthcpu, font.h, 'left', 'top')
 
         if self.drawMem == 1:
             widthmem = font.stringsize(self.currentMem)
 
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
+            osd.drawimage(os.path.join(config.ICON_DIR, 'misc/memory.png'),
                           (x + 15 + widthcpu, osd.y + 7, -1, -1))
-            osd.write_text(self.currentMem, font, None, x + 40 + widthcpu, 
+            osd.drawstring(self.currentMem, font, None, x + 40 + widthcpu, 
                            osd.y + 55 - font.h, widthmem, font.h, 'left', 'top')
 
         return widthmem + widthcpu + 15
@@ -338,9 +341,9 @@ class sensors(IdleBarPlugin):
         
         cputemp = self.cpu.temp()        
         widthcpu = font.stringsize(cputemp)
-        osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
+        osd.drawimage(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
                        (x, osd.y + 8, -1, -1))
-        osd.write_text(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
+        osd.drawstring(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
                        'left', 'top')
         widthcpu = max(widthcpu, 32) + 10
 
@@ -348,9 +351,9 @@ class sensors(IdleBarPlugin):
             casetemp = self.case.temp()
             
             widthcase = font.stringsize(casetemp)
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/case.png'),
+            osd.drawimage(os.path.join(config.ICON_DIR, 'misc/case.png'),
                                         (x + 15 + widthcpu, osd.y + 7, -1, -1))
-            osd.write_text(casetemp, font, None, x + 40 + widthcpu,
+            osd.drawstring(casetemp, font, None, x + 40 + widthcpu,
                            osd.y + 55 - font.h, widthcase, font.h,
                            'left', 'top')
             widthcase = max(widthcase, 32) + 10
@@ -362,9 +365,9 @@ class sensors(IdleBarPlugin):
                 img_width = x + 15 + widthcpu + widthcase + 15
             else:
                 img_width = x + 15 + widthcpu
-            osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
+            osd.drawimage(os.path.join(config.ICON_DIR, 'misc/memory.png'),
                            (img_width, osd.y + 7, -1, -1))
-            osd.write_text(text, font, None, img_width + 15, osd.y + 55 - font.h,
+            osd.drawstring(text, font, None, img_width + 15, osd.y + 55 - font.h,
                            widthram, font.h, 'left', 'top')
                        
         if self.retwidth == 0:

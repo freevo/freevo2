@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/24 17:49:48  dischi
+# rename or deactivate some stuff for gui update
+#
 # Revision 1.10  2004/07/24 17:27:27  dischi
 # deactivate plugin
 #
@@ -186,12 +189,12 @@ class PluginInterface(plugin.DaemonPlugin):
                                  (0xf0000000L, 1, 0xb0000000L, 10))
             
             if self.image:
-                osd.draw_image(self.image, (origin+5, self.y, 50, 50))
+                osd.drawimage(self.image, (origin+5, self.y, 50, 50))
                     
             y = self.t_y
         
             for r in self.render:
-                osd.write_text( r, font, None, self.t_x, y, self.t_w,
+                osd.drawstring( r, font, None, self.t_x, y, self.t_w,
                                 self.font_h, 'center', 'center')
                 y+=self.font_h
 
@@ -201,7 +204,7 @@ class PluginInterface(plugin.DaemonPlugin):
             else:
                 progress = '%s' % self.formattime(self.player.item.elapsed)
 
-            osd.write_text( progress, font, None, self.t_x, y,
+            osd.drawstring( progress, font, None, self.t_x, y,
                             self.t_w, self.font_h , 'center', 'center')
         return 0
    

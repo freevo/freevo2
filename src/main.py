@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.132  2004/07/24 17:49:48  dischi
+# rename or deactivate some stuff for gui update
+#
 # Revision 1.131  2004/07/24 12:24:02  dischi
 # reflect gui changes
 #
@@ -268,15 +271,15 @@ class Splashscreen(skin.Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=True)
 
-        self.write_text(self.text, content.font, content, height=-1, align_h='center')
+        self.drawstring(self.text, content.font, content, height=-1, align_h='center')
 
         pos = 0
         x0, x1 = content.x, content.x + content.width
         y = content.y + content.font.font.height + content.spacing
         if self.pos:
             pos = round(float((x1 - x0 - 4)) / (float(100) / self.pos))
-        self.drawroundbox(x0, y, x1-x0, 20, self.bar_border)
-        self.drawroundbox(x0+2, y+2, pos, 16, self.bar_position)
+        self.drawbox(x0, y, x1-x0, 20, self.bar_border)
+        self.drawbox(x0+2, y+2, pos, 16, self.bar_position)
 
 
     def progress(self, pos):
