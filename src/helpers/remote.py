@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/01 05:09:43  krister
+# Fixed typos in the usage text
+#
 # Revision 1.2  2003/10/22 23:05:43  mikeruelle
 # well it really does have two options
 #
@@ -49,12 +52,12 @@ def usage():
         print
         print 'It takes two optional arguments:'
 	print '    - the first is host which defaults to localhost'
-	print '    - the second is port which defaults to 16130'
+	print '    - the second is port which defaults to 16310'
 	print 
-	print 'when run with no args it connects to the localhost on port 16130'
+	print 'when run with no args it connects to the localhost on port 16310'
 	print 'freevo remote'
 	print 
-	print 'when run with one arg it connects to the given host on port 16130'
+	print 'when run with one arg it connects to the given host on port 16310'
 	print 'freevo remote myfreevo.local'
         print
         sys.exit(0)
