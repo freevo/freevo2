@@ -871,6 +871,7 @@ MPLAYER_ARGS = { 'dvd'    : '-cache 8192',
                  'ivtv'   : '-cache 8192',
                  'avi'    : '-cache 5000 -idx',
                  'rm'     : '-cache 5000 -forceidx',
+                 'rmvb'   : '-cache 5000 -forceidx',
                  'default': '-cache 5000'
                  }
 
