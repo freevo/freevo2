@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/06/23 12:18:54  outlyer
+# More crashe fixes for assumed variables that don't exist.
+#
 # Revision 1.37  2004/05/28 23:38:21  mikeruelle
 # better backoff so we do not see intermediate menu
 #
@@ -94,8 +97,8 @@ class ProgramItem(Item):
         self.context = context
 
         self.name = self.title = prog.title
-        self.sub_title = prog.sub_title
-        self.desc = prog.desc
+        if hasattr(prog,'sub_title'): self.sub_title = prog.sub_title
+        if hasattr(prog,'desc'): self.desc = prog.desc
         self.channel = tv_util.get_chan_displayname(prog.channel_id)
 
         if hasattr(prog, 'scheduled'):
@@ -117,8 +120,11 @@ class ProgramItem(Item):
                 self.categories += '%s' % cat
 
         self.ratings = ''
-        for rat in prog.ratings.keys():
-            self.ratings += '%s ' % rat
+        try:
+            for rat in prog.ratings.keys():
+                self.ratings += '%s ' % rat
+        except:
+            pass
 
 
     def actions(self):
