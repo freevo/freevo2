@@ -145,10 +145,7 @@
     <!-- listing area for audio with images -->
     <layout label="audio list">
       <content type="image" spacing="-2">
-	<item type="default" width="100" height="100" align="center" valign="center">
-	  <rectangle bgcolor="0xd0000000" size="0" x="0" y="0" width="max"
-	    height="max"/>
-	</item>
+	<item type="default" width="100" height="100" align="center" valign="center"/>
 	<item type="selected" width="110" height="110" align="center" valign="center">
 	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
 	    height="max+10"/>
@@ -159,10 +156,7 @@
     <!-- listing area for video with images -->
     <layout label="video list">
       <content type="image" spacing="-2">
-	<item type="default" width="80" height="112" align="center" valign="center">
-	  <rectangle bgcolor="0xd0000000" size="0" x="0" y="0" width="max"
-	    height="max"/>
-	</item>
+	<item type="default" width="80" height="112" align="center" valign="center"/>
 	<item type="selected" width="87" height="122" align="center" valign="center">
 	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
 	    height="max+10"/>
@@ -174,10 +168,7 @@
     <layout label="image list">
       <content type="image" spacing="-2">
 	<item type="default" width="140" height="115" align="center"
-	  valign="center">
-	  <rectangle bgcolor="0xd0000000" size="0" x="0" y="0" width="max"
-	    height="max"/>
-	</item>
+	  valign="center"/>
 	<item type="selected" width="154" height="131"
 	  align="center" valign="center">
 	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"

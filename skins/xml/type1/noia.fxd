@@ -40,5 +40,33 @@
 
     <font label="default" name="Vera" size="18" color="0xffffff"/>
 
+
+    <layout label="audio list">
+      <content type="image">
+	<item type="default">
+	  <rectangle bgcolor="0xd0000000" size="0" x="0" y="0" width="max"
+	    height="max"/>
+	</item>
+      </content>
+    </layout>
+
+    <layout label="video list">
+      <content type="image">
+	<item type="default">
+	  <rectangle bgcolor="0xd0000000" size="0" x="0" y="0" width="max"
+	    height="max"/>
+	</item>
+      </content>
+    </layout>
+
+    <layout label="image list">
+      <content type="image">
+	<item type="default">
+	  <rectangle bgcolor="0xd0000000" size="0" x="0" y="0" width="max"
+	    height="max"/>
+	</item>
+      </content>
+    </layout>
+
   </skin>
 </freevo>
