@@ -13,8 +13,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
-# Revision 1.16  2002/07/31 08:06:15  dischi
-# Fixed my mail address
+# Revision 1.17  2002/07/31 08:13:22  dischi
+# make screen black before mplayer starts in case mplayer doesn't cover
+# the hole screen
 #
 # Revision 1.15  2002/07/29 18:13:13  outlyer
 # Fixed "deja vu" of audio progressbar when playing movies after playing mp3s.
@@ -155,19 +156,17 @@ class MPlayer:
         mixer.setLineinVolume(0)
         mixer.setMicVolume(0)
 
-        # XXX Is this really needed? We need to do different stuff
-        # XXX for music GUI
-        #osd.clearscreen(color=osd.COL_BLACK)
-        #osd.drawstring('mplayer %s "%s"' % (mode, filename), 30, 280,
-        #               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-        # osd.update()
-
         if mode == 'audio':
             self.thread.audioinfo = audioinfo.AudioInfo( filename, 1 )
             self.thread.audioinfo.start = time.time()
             skin.DrawMP3( self.thread.audioinfo ) 
             self.thread.audioinfo.drawall = 0
+        else:
+            # clear the screen for mplayer
+            osd.clearscreen(color=osd.COL_BLACK)
+            osd.update()
 
+            
         self.mplayer_options = mplayer_options
 
         self.thread.mode    = 'play'
