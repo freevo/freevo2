@@ -10,6 +10,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/05 02:52:26  gsbarbieri
+# Handle filenames internally as unicode objects.
+#
+# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+#
+# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
+#
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+#
 # Revision 1.13  2004/01/16 16:23:29  dischi
 # add softlink checking
 #
@@ -151,6 +160,15 @@ def freespace(path):
     Return the number of bytes available to the user on the file system
     pointed to by path.
     """
+    encoding = config.encoding
+    try:
+        if type( path ) == unicode:
+            path = path.encode( encoding )
+    except Exception, e:
+        print "ERROR:" + \
+              "Could not encode %s to \"%s\" encoding: %s" % \
+              ( repr( path ), encoding, e )
+        
     s = os.statvfs(path)
     return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
         
@@ -161,6 +179,16 @@ def totalspace(path):
     Return the number of total bytes available on the file system
     pointed to by path.
     """
+    
+    encoding = config.encoding
+    try:
+        if type( path ) == unicode:
+            path = path.encode( encoding )
+    except Exception, e:
+        print "ERROR:" + \
+              "Could not encode %s to \"%s\" encoding: %s" % \
+              ( repr( path ), encoding, e )
+        
     s = os.statvfs(path)
     return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
         

@@ -16,6 +16,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/05 02:52:26  gsbarbieri
+# Handle filenames internally as unicode objects.
+#
+# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+#
+# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
+#
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+#
 # Revision 1.13  2004/02/04 11:54:27  dischi
 # check if directory is not overlay_dir
 #
@@ -207,6 +216,15 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
             directory = directory + '/'
             
         files = []
+
+        encoding=config.encoding
+        try:
+            if type( directory ) == str:
+                directory = unicode( directory, encoding )
+        except Exception, e:
+            print "ERROR:" + \
+                  "Could not convert %s to unicode using \"%s\" encoding: %s" % ( repr( directory ), encoding, e )
+        
         if include_dot_files:
             for f in os.listdir(directory):
                 if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
@@ -221,7 +239,17 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
 
         overlay = getoverlay(directory)
         if overlay and overlay != directory and os.path.isdir(overlay):
-            for f in ([ overlay + fname for fname in os.listdir(overlay) ]):
+            for fname in os.listdir( overlay ):
+                
+                if type( fname ) == str:
+                    try:
+                        fname = unicode( fname, encoding )
+                    except Exception, e:
+                        print "ERROR:" + \
+                              "Could not convert %s to unicode using \"%s\" encoding: %s" % ( repr( fname ), encoding, e )
+                        
+                f = overlay + fname
+        
                 if not os.path.isdir(f) and not f.endswith('.raw'):
                     files.append(f)
         return files

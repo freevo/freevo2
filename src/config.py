@@ -22,6 +22,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2004/02/05 02:52:20  gsbarbieri
+# Handle filenames internally as unicode objects.
+#
+# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+#
+# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
+#
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+#
 # Revision 1.92  2004/01/17 20:30:18  dischi
 # use new metainfo
 #
@@ -842,3 +851,21 @@ if not os.path.isdir(os.path.join(FREEVO_CACHEDIR, 'disc')):
 if HELPER:
     os.environ['LD_PRELOAD'] = ''
     
+encoding = None
+try:
+    encoding = os.environ[ 'FREEVO_LOCALE' ].split( '.' )[ 1 ]
+except:
+    try:
+        encoding = os.environ[ 'LANG' ].split( '.' )[ 1 ]
+    except:
+        try:
+            encoding = os.environ[ 'LC_ALL' ].split( '.' )[ 1 ]
+        except:
+            encoding = sys.getdefaultencoding()
+            print "WARNING:" + \
+                   "Could not determine system encoding! Did look in FREEVO_LOCALE, LANG and LC_ALL environment variables for 'language.encoding' pair, but nothing found! Using %s" % encoding
+
+if not encoding:
+    encoding = sys.getdefaultencoding()
+
+_debug_( "Using '%s' encoding" % encoding )

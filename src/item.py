@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/02/05 02:52:20  gsbarbieri
+# Handle filenames internally as unicode objects.
+#
+# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+#
+# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
+#
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+#
 # Revision 1.60  2004/02/03 20:46:57  dischi
 # fix debug warning
 #
@@ -491,5 +500,8 @@ class Item:
         if attr[:4] == 'len(' and attr[-1] == ')':
             return self.__getitem__(attr)
         else:
-            return str(self.__getitem__(attr))
+            try:
+                return str(self.__getitem__(attr))
+            except UnicodeEncodeError:
+                return self.__getitem__( attr ).encode( config.encoding )
             
