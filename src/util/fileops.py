@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/06/21 12:00:56  dischi
+# wrap exif call inside the try except
+#
 # Revision 1.21  2004/06/13 18:49:39  dischi
 # do not take care of install.py
 #
@@ -490,17 +493,17 @@ def create_thumbnail(filename, thumbnail=None):
 
     if not image:
         if __freevo_app__ == 'main':
-            f=open(filename, 'rb')
-            tags=exif.process_file(f)
-            f.close()
-            
-            if tags.has_key('JPEGThumbnail'):
-                try:
+            try:
+                f=open(filename, 'rb')
+                tags=exif.process_file(f)
+                f.close()
+                
+                if tags.has_key('JPEGThumbnail'):
                     image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
-                except Exception, e:
-                    print 'Error loading thumbnail %s' % filename
-                    if config.DEBUG:
-                        print e
+            except Exception, e:
+                print 'Error loading thumbnail %s' % filename
+                if config.DEBUG:
+                    print e
 
         if not image or image.size[0] < 100 or image.size[1] < 100:
             try:
