@@ -26,7 +26,7 @@
 # The following is a modeline for setting up NTSC on the TV output (vga 2) on 
 # a matrox dual-head card.
 
-./fbset/fbset -db fbset.db -fb /dev/fb0 "ntsc-640x480_60a" > /dev/null 2> /dev/null
+./fbset/fbset -db fbset.db -fb /dev/fb0 "ntsc-640x480_60c" > /dev/null 2> /dev/null
 
 # Set up a regular VGA monitor on vga connector 1. 
 #
