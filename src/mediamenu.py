@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/03/30 20:55:25  rshortt
+# Commiting Brian J. Murrell's password protected folder patch so that people can hide their porn.  This uses the new PasswordInputBox and modified for other new gui code as well.
+#
 # Revision 1.43  2003/03/30 14:18:16  dischi
 # Added FORCE_SKIN_LAYOUT and changed to layout of folder.fxd (see
 # freevo_config.py for details)
@@ -156,6 +159,14 @@ import video.interface
 import audio.interface
 import image.interface
 import games.interface
+
+from osd import SynchronizedObject
+import osd
+osd = osd.get_singleton()
+from item import Item
+
+import gui.PasswordInputBox as PasswordInputBox
+import gui.AlertBox as AlertBox
 
 # XML support
 from xml.utils import qp_xml
@@ -459,6 +470,41 @@ class DirItem(Playlist):
                 util.mount(self.dir)
                 self.media = media
 
+	if os.path.isfile(self.dir + '/.password'):
+	    print 'password protected dir'
+	    pb = PasswordInputBox(osd.focused_app, 'Enter Password', 
+                                  self.pass_cmp_cb)
+	    pb.show()
+	    # save these so the InputBox callback can pass them to do_cwd
+	    self.arg = arg
+	    self.menuw = menuw
+	    self.foo = "bar"
+	else:
+	    self.do_cwd(arg, menuw)
+
+
+    def pass_cmp_cb(self, word=None):
+
+	# read the contents of self.dir/.passwd and compare to word
+	try:
+	    pwfile = open(self.dir + '/.password')
+	    line = pwfile.readline()
+	except IOError, e:
+	    print 'error %d (%s) reading password file for %s' % \
+		  (e.errno, e.strerror, self.dir)
+	    return
+
+	pwfile.close()
+	password = line.strip()
+	if word == password:
+	    self.do_cwd(self.arg, self.menuw)
+	else:
+	    pb = AlertBox(osd.focused_app, 'Password incorrect')
+	    pb.show()
+            return
+
+
+    def do_cwd(self, arg=None, menuw=None):
         try:
             files = ([ os.path.join(self.dir, fname)
                        for fname in os.listdir(self.dir) ])
