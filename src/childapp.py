@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/12/13 14:29:45  outlyer
+# The purpose of checking for "stop_osd" is to figure out if it's a video
+# file; it's not to do with the config variable, because we need to post
+# VIDEO_START/VIDEO_END for the autocolor plugin regardless of whether or
+# not we're going to shut down the display.
+#
 # Revision 1.46  2003/12/13 10:47:11  dischi
 # better stop for new ChildApp2 children
 #
@@ -547,13 +553,15 @@ class ChildApp2(ChildApp):
         global running_children
         running_children.append(self)
 
+
+        print "STOP_OSD: " + str(stop_osd)
         if stop_osd == 2:
+            rc.post_event(Event(VIDEO_START))
             stop_osd = config.OSD_STOP_WHEN_PLAYING
 
         self.stop_osd = stop_osd
         if self.stop_osd:
-            rc.post_event(Event(VIDEO_START))
-            osd.stop()
+           osd.stop()
         
         if hasattr(self, 'item'):
             rc.post_event(Event(PLAY_START, arg=self.item))
@@ -589,7 +597,7 @@ class ChildApp2(ChildApp):
         if self.stop_osd:
             osd.restart()
 
-        if self.stop_osd:       # Implies a video file
+        if stop_osd:       # Implies a video file
             rc.post_event(Event(VIDEO_END))
 
         
