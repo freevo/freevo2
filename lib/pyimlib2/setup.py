@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 import os
 import sys
 
-files = ["imlib2.c", "image.c", "font.c", "rawformats.c", "display.c"]
+files = ["imlib2.c", "image.c", "font.c", "rawformats.c"]
 
 include_dirs = []
 library_dirs = []
@@ -40,6 +40,7 @@ def check_config(name, minver):
 if not check_config('imlib2', '1.1.1'):
     sys.exit(1)
 
+
 config_h = open('config.h', 'w')
 
 try:
@@ -57,6 +58,12 @@ try:
 except ImportError:
     print 'pygame extention disabled'
 
+if 'X11' in libraries:
+    files.append('display.c')
+    config_h.write('#define USE_IMLIB2_DISPLAY\n')
+else:
+    print 'Imlib2 compiled without X11, deactivation imlib2 display'
+    
 config_h.close()
 
 setup(name="_Imlib2", version="0.0.7", 

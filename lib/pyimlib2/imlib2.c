@@ -12,7 +12,9 @@
 #include "image.h"
 #include "rawformats.h"
 #include "font.h"
+#ifdef USE_IMLIB2_DISPLAY
 #include "display.h"
+#endif
 
 PyObject *imlib2_create(PyObject *self, PyObject *args)
 {
@@ -107,12 +109,17 @@ PyObject *imlib2_load_font(PyObject *self, PyObject *args)
 
 PyObject *imlib2_new_display(PyObject *self, PyObject *args)
 {
+#ifdef USE_IMLIB2_DISPLAY
 	int w, h;
 
 	if (!PyArg_ParseTuple(args, "ii", &w, &h))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	return display_new(w, h);
+#else
+	return PyErr_SetString(PyExc_ValueError, "X11 support missing"), (PyObject*)NULL;
+#endif
+
 } 
 PyObject *imlib2__shm_unlink(PyObject *self, PyObject *args)
 {
