@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/11 02:02:29  rshortt
+# Fix for new events, we must call rc.key_event_mapper for the right event
+# for what context we are in.
+#
 # Revision 1.3  2003/05/01 22:50:43  rshortt
 # This is now a real plugin that no longer needs ENABLE_NETWORK_REMOTE to work.
 #
@@ -51,6 +55,8 @@ from time import sleep
 import config
 import plugin
 import rc
+
+rc = rc.get_singleton()
 
 DEBUG = 0
 
@@ -97,9 +103,9 @@ class PluginInterface(plugin.DaemonPlugin):
 
     def poll(self):
         command = ''    
-        if DEBUG: print 'self.joyfd = %s' % self.joyfd
+        if DEBUG > 5: print 'self.joyfd = %s' % self.joyfd
         (r, w, e) = select.select([self.joyfd], [], [], 0)
-        if DEBUG: print 'r,w,e = %s,%s,%s' % (r,w,e)
+        if DEBUG > 5: print 'r,w,e = %s,%s,%s' % (r,w,e)
         
         if r:
             c = os.read(self.joyfd, 8)
@@ -126,6 +132,8 @@ class PluginInterface(plugin.DaemonPlugin):
                 command = config.JOY_CMDS['right']
         if command != '':
             if DEBUG: print 'Translation: "%s" -> "%s"' % (button, command)
-            rc.post_event(command)
+            command = rc.key_event_mapper(command)
+            if command:
+                rc.post_event(command)
     
 
