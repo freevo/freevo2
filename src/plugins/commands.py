@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/16 17:49:59  mikeruelle
+# put in a small i18n change
+#
 # Revision 1.6  2003/09/30 17:09:56  mikeruelle
 # add a default dir for commands
 #
@@ -251,7 +254,7 @@ class CommandItem(Item):
     #  4) dispose running popup
     #  5) make new alert popup with messages
     def flashpopup(self, arg=None, menuw=None):
-        popup_string="Running Command..."
+        popup_string=_("Running Command...")
         pop = PopupBox(text=popup_string)
         pop.show()
         #print self.cmd
