@@ -108,3 +108,12 @@ Q: /dev/dsp doesn't work under KDE, it complains that the sound device
    is busy.
 
 A: Try setting AUDIO_DEVICE in freevo_config.py to '/dev/dsp1' instead.
+
+----------------------------------------------------------------------
+Q: Can you recommend a tv card that really works under linux?
+
+A: The Hauppauge WinTV works great, despite their name! ;) At least
+   the Analog PCI-ones. Radio works great too! The hardware
+   compression of all cards are only mpeg1 (and some mpeg2) though and
+   you probably want mpeg4/divx-recordings.  
+   Check http://www.hauppauge.com
