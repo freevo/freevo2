@@ -1,79 +1,76 @@
+# ----------------------------------------------------------------------
+# skin.py This is the Freevo top-level skin code.
+# ----------------------------------------------------------------------
+# $Id$#
+# 
+# Notes: This looks like some wierd kind of reversed inheritance or
+#        something. Why do we call all these functions from impl. istead
+#        of inheriting.. oh.. I don't get it.
+# ----------------------------------------------------------------------
+# $Log$
+# Revision 1.5  2002/08/13 23:49:51  tfmalt
+# o Skin.py cleanup and rewrite. Trimmed to be only a middle layer between
+#   the settings in freevo_config and the rest of the system.
 #
-# skin.py
+# ----------------------------------------------------------------------
 #
-# This is the Freevo top-level skin code.
+# Freevo - A Home Theater PC framework
 #
-# $Id$
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------
+"""
+Works as a middle layer between the users preferred skin and rest of
+the system.
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-# Logging is initialized here, so it should be imported first
-import config
+Which skin you want to use is set in freevo_config.py. This small
+module gets your skin preferences from the configuration file and loads
+the correct skin implementation into the system.
 
-import sys, socket, random, time, os
+The path to the skin implementation is also added to the system path.
 
-# Various utilities
-import util
+get_singleton() returns an initialized skin object which is kept unique
+and consistent throughout.
+"""
+__version__ = "$Revision$"
+__date__    = "$Date$"
+__author__  = """Krister Lagerstrom <krister@kmlager.com>,
+Thomas malt <thomas@malt.no>""" # See, I snuck it in again ;)
 
-# The mixer class, controls the volumes for playback and recording
-import mixer
+import config # Freevo configuration.
+import sys
+import os.path
 
-# The OSD class, used to communicate with the OSD daemon
-import osd
-
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
-
-# The actual skin implementation is imported from the file
-# as defined in freevo_config.py
+# Loads the skin implementation defined in freevo_config.py
 sys.path += [os.path.dirname(config.OSD_SKIN)]
-modname = os.path.basename(config.OSD_SKIN)[:-3]
+modname   = os.path.basename(config.OSD_SKIN)[:-3]
 exec('import ' + modname  + ' as skinimpl')
 
-# Set to 1 for debug output
-DEBUG = 1
+_singleton = None
 
-TRUE = 1
-FALSE = 0
+def get_singleton():
+    """
+    Returns an initialized skin object, containing the users preferred
+    skin.
+    """
+    global _singleton
+    if _singleton == None:
+        _singleton = skinimpl.Skin()
 
-###############################################################################
+    return _singleton
 
-# Set up the mixer
-mixer = mixer.get_singleton()
-
-# Create the remote control object
-rc = rc.get_singleton()
-
-# Create the OSD object
-osd = osd.get_singleton()
-
-# Create the skin implementation object
-impl = skinimpl.Skin()
-
-items_per_page = impl.items_per_page
-
-
-# This function is called from the rc module and other places
-def HandleEvent(ev):
-    # Handle event (remote control, timer, msg display...)
-    # Some events are handled directly (volume control),
-    # RC cmds are handled using the menu lib, and events
-    # might be passed directly to a foreground application
-    # that handles its' own graphics
-    impl.HandleEvent(ev)
-
-
-# Load special settings for this menu
-def LoadSettings(dir):
-    return impl.LoadSettings(dir)
-
-
-# Called from the MenuWidget class to draw a menu page on the
-# screen
-def DrawMenu(menuw):
-    impl.DrawMenu(menuw)
-
-
-# Called from the MP3 player to update the MP3 info
-def DrawMP3(info):
-    impl.DrawMP3(info)
