@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/10/15 19:57:56  dischi
+# Added extended menu support
+#
 # Revision 1.15  2002/10/14 18:47:00  dischi
 # o added scale support, you can define a scale value for the import
 #   grey640x480 and grey768x576 are very simple now
@@ -82,6 +85,13 @@ import rc
 sys.path.append('.')
 import xml_skin
 
+# Create the OSD object
+osd = osd.get_singleton()
+
+from utils_dischi1 import *
+
+import tv_dischi1
+
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -99,10 +109,6 @@ mixer = mixer.get_singleton()
 
 # Create the remote control object
 rc = rc.get_singleton()
-
-# Create the OSD object
-osd = osd.get_singleton()
-
 
 ###############################################################################
 # Skin main functions
@@ -133,7 +139,7 @@ class Skin:
 
 
     def __init__(self):
-        # Push main menu items
+        self.tv = tv_dischi1.Skin_TV()
         pass
 
 
@@ -248,7 +254,8 @@ class Skin:
 
         need = osd.drawstringframed(text, x, val.message.y, width, val.message.height, \
                                     val.message.color, None, val.message.font, \
-                                    val.message.size, val.message.align, 'center')
+                                    val.message.size, val.message.align, 'center',
+                                    mode='soft')
         (x0, y0, x1, y1) = need[1]
 
         if icon:
@@ -278,23 +285,6 @@ class Skin:
         osd.update()
 
         
-
-    # Draws a text based on the settings in the XML file
-    def DrawText(self, text, settings, x=-1, y=-1, align=''):
-        if x == -1:
-            x = settings.x
-        if y == -1:
-            y = settings.y
-        if not align:
-            align = settings.align
-
-        if settings.shadow_visible:
-            osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
-                           settings.shadow_color, None, settings.font,
-                           settings.size, align)
-        osd.drawstring(text, x, y, settings.color, None, settings.font,
-                       settings.size, align)
-
 
     def DrawMenu_Cover(self, menuw, settings):
         image_x = 0
@@ -427,7 +417,7 @@ class Skin:
             # TV show, align the text with all files from the same show
             if show_name[0]:
                 x = x0
-                self.DrawText(show_name[0], obj, x=x, y=top)
+                DrawText(show_name[0], obj, x=x, y=top)
 
                 season_w = 0
                 volume_w = 0
@@ -445,16 +435,16 @@ class Skin:
                     osd.stringsize('%s  ' % show_name[0], font=obj.font, \
                                    ptsize=obj.size)[0] - season_w + \
                     osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
-                self.DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top)
+                DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top)
 
                 x = x + season_w + volume_w + \
                     osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
-                self.DrawText('-  %s' % show_name[3], obj, x=x, y=top)
+                DrawText('-  %s' % show_name[3], obj, x=x, y=top)
                 
 
             # normal items
             else:
-                self.DrawText(text, obj, x=x0, y=top)
+                DrawText(text, obj, x=x0, y=top)
 
             # draw icon
             if choice.icon != None:
@@ -506,7 +496,7 @@ class Skin:
             if val.title.text:
                 menu.heading = val.title.text
 
-            self.DrawText(menu.heading, val.title)
+            DrawText(menu.heading, val.title)
 
         if val.logo.image and val.logo.visible:
             osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
@@ -544,10 +534,10 @@ class Skin:
                             width=-1,
                             color=((160 << 24) | val.submenu.selection.bgcolor))
                 
-                self.DrawText(item.name, val.submenu.selection, x=x0, y=y0)
+                DrawText(item.name, val.submenu.selection, x=x0, y=y0)
                 
             else:
-                self.DrawText(item.name, val.submenu, x=x0, y=y0)
+                DrawText(item.name, val.submenu, x=x0, y=y0)
             x0 += 190
 
         osd.update()
@@ -678,9 +668,9 @@ class Skin:
                             width=-1, color=((160 << 24) |
                                              val.submenu.selection.bgcolor))
                 
-                self.DrawText(item.name, val.submenu.selection, x=x0, y=y0)
+                DrawText(item.name, val.submenu.selection, x=x0, y=y0)
             else:
-                self.DrawText(item.name, val.submenu, x=x0, y=y0)
+                DrawText(item.name, val.submenu, x=x0, y=y0)
             x0 += 190
 
         osd.update()
@@ -738,36 +728,36 @@ class Skin:
             py = val.progressbar.y
 
             top = iv.y
-            self.DrawText('Title: ', iv, x=left, y=top, align='right')
-            self.DrawText('%s ' % info.title, iv, x=left, y=top)
+            DrawText('Title: ', iv, x=left, y=top, align='right')
+            DrawText('%s ' % info.title, iv, x=left, y=top)
 
             if info.artist:
                 top += spacing
-                self.DrawText('Artist: ', iv, x=left, y=top, align='right')
-                self.DrawText('%s ' % info.artist, iv, x=left, y=top)
+                DrawText('Artist: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.artist, iv, x=left, y=top)
 
             if info.album:
                 top += spacing
-                self.DrawText('Album: ', iv, x=left, y=top, align='right')
-                self.DrawText('%s ' % info.album, iv, x=left, y=top)
+                DrawText('Album: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.album, iv, x=left, y=top)
 
             if info.year:
                 top += spacing
-                self.DrawText('Year: ', iv, x=left, y=top, align='right')
-                self.DrawText('%s ' % info.year, iv, x=left, y=top)
+                DrawText('Year: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.year, iv, x=left, y=top)
 
             if info.track:
                 top += spacing
-                self.DrawText('Track: ', iv, x=left, y=top, align='right')
-                self.DrawText('%s ' % info.track, iv, x=left, y=top)
+                DrawText('Track: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.track, iv, x=left, y=top)
 
             top += spacing
-            self.DrawText('Length: ', iv, x=left, y=top, align='right')
-            self.DrawText('%s:%s ' % (info.length / 60, info.length % 60), \
+            DrawText('Length: ', iv, x=left, y=top, align='right')
+            DrawText('%s:%s ' % (info.length / 60, info.length % 60), \
                           iv, x=left, y=top)
 
             top += spacing
-            self.DrawText('Time: ', iv, x=left, y=top, align='right')
+            DrawText('Time: ', iv, x=left, y=top, align='right')
 
             # remember the surface to redraw it
             self.time_y = top
@@ -788,7 +778,7 @@ class Skin:
         rem_sec = int(info.remain)%60
 
         str = '%s:%02d ' % (el_min, el_sec)
-        self.DrawText(str, iv, x=left, y=self.time_y)
+        DrawText(str, iv, x=left, y=self.time_y)
 
         # Draw the progress bar
         if val.progressbar.visible:
@@ -818,4 +808,37 @@ class Skin:
                         color = val.progressbar.color)
             
         osd.update()
-    
+
+
+
+    def DrawTVGuide(self):
+        if 'tv' in self.settings.e_menu:
+            self.tv.DrawTVGuide(self.settings.e_menu['tv'])
+        
+    def DrawTVGuide_Clear(self):
+        if 'tv' in self.settings.e_menu:
+            self.tv.DrawTVGuide_Clear(self.settings.e_menu['tv'])
+
+    def DrawTVGuide_getExpand(self):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_getExpand(self.settings.e_menu['tv'])
+
+    def DrawTVGuide_setExpand(self, expand):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_setExpand(expand, self.settings.e_menu['tv'])
+
+    def DrawTVGuide_View(self, to_view):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_View(to_view, self.settings.e_menu['tv'])
+
+    def DrawTVGuide_Info(self, to_info):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_Info(to_info, self.settings.e_menu['tv'])
+                         
+    def DrawTVGuide_ItemsPerPage(self):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_ItemsPerPage(self.settings.e_menu['tv'])
+
+    def DrawTVGuide_Listing(self, to_listing):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_Listing(to_listing, self.settings.e_menu['tv'])

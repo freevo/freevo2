@@ -13,6 +13,10 @@
       <background image="../images/aubin_bg1.png"/>
     </mp3>
 
+    <extendedmenu type="tv">
+      <background image="../images/aubin_bg1.png"/>
+    </extendedmenu>
+
   </skin>
   
 </freevo>

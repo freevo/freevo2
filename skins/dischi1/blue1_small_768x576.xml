@@ -27,6 +27,19 @@
       </items>
     </menu>
 
+    <extendedmenu type="tv">
+      <info>
+	<font size="14"/>
+      </info>
+      <listing>
+	<font size="14"/>
+	<selection>
+	  <font size="14"/>
+	</selection>
+      </listing>
+    </extendedmenu>
+
+
   </skin>
   
 </freevo>

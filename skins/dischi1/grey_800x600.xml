@@ -118,6 +118,71 @@
       </message>
     </popup>
 
+
+
+
+
+
+    <extendedmenu type="tv">
+      <background image="../images/aubin_bg1_800x600.png" mask=""/>
+      <logo visible="no"/>
+
+      <header>
+        <geometry x="10" y="25" width="780" height="50"/>
+	<font name="oliversb" size="28" color="0x000000" align="center" valign="center"/>
+	<shadow visible="no"/>
+      </header>
+
+      <info>
+        <geometry x="10" y="100" width="670" height="100"/>
+	<background color="0xaa000000"/>
+	<font name="bluehigh" size="16" color="0xffffff" align="left"/>
+	<shadow visible="no" color="0x000000" x="1" y="1"/>
+      </info>
+      
+      <view>
+        <geometry x="690" y="100" width="100" height="100"/>
+	<background color="0x000000"/>
+	<font name="oliversb" size="24" color="0xffffff" align="center" valign="center"/>
+	<shadow visible="no"/>
+      </view>
+      
+      <listing>
+        <geometry x="10" y="210" width="780" height="300"/>
+	<background color="0xbb58677c"/>
+	
+	<expand>
+	  <geometry x="10" y="100" width="780" height="410"/>
+	  <background color="0xffffffff"/>
+	</expand>
+
+	<font name="bluehigh" size="18" color="0x111111" align="left"/>
+	<shadow visible="no"/>
+
+	<selection bgcolor="0xff000000">
+	  <font name="bluehigh" size="18" color="0x000000"/>
+	  <shadow visible="no"/>
+	</selection>
+
+
+	<!-- I don't like the name and structure of the next tags -->
+
+	<head bgcolor="0x88000066" x="393" y="20">
+	  <font name="bluehigh" size="18" color="0xffffff" align="center" valign="center"/>
+	  <shadow visible="no"/>
+	</head>
+
+
+	<border color="0xaa000000" size="2"/>
+	<spacing value="2"/>
+	<channel_width value="158"/>
+	<indicator>
+	  <left image="skins/images/arrow_left.png"/>
+	  <right image="skins/images/arrow_right.png"/>
+	</indicator>
+      </listing>
+    </extendedmenu>
+
   </skin>
   
 </freevo>

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/10/15 19:57:57  dischi
+# Added extended menu support
+#
 # Revision 1.4  2002/10/14 18:47:00  dischi
 # o added scale support, you can define a scale value for the import
 #   grey640x480 and grey768x576 are very simple now
@@ -142,6 +145,7 @@ class XML_data:
     border_color = 0
     border_size = 0
     align = 'left'
+    valign = 'top'
     image = ''
     mask = ''
     
@@ -193,7 +197,28 @@ class XML_mainmenuitem:
 
 class XML_mainmenu:
     items = {}
-    
+
+class XML_listingmenuitem(XML_menuitem):
+    head = XML_data()
+    expand = XML_data()
+    border_color = 0
+    border_size = 1
+    spacing = 2
+    channel_width = 100
+    left_arrow = None
+    right_arrow = None
+    up_arrow = None
+    down_arrow = None
+
+class XML_extendedmenu:
+    def __init__(self):
+        self.background = XML_data()
+        self.logo = XML_data()
+        self.header = XML_data()
+        self.view = XML_data()
+        self.info = XML_data()
+        self.listing = XML_listingmenuitem()
+
 class XMLSkin:
     def __init__(self):
         self.menu_default = XML_menu()
@@ -203,6 +228,7 @@ class XMLSkin:
         self.popup        = XML_popup()
 
         self.mainmenu = XML_mainmenu()
+        self.e_menu = { }
 
         self.scale = 0.0
 
@@ -216,7 +242,7 @@ class XMLSkin:
                 val = int(node.attrs[('', attr)])
                 if scale:
                     val = scale*val
-                return val
+                return int(val)
         except ValueError:
             pass
         return default
@@ -303,6 +329,7 @@ class XMLSkin:
                 data.size = self.attr_int(subnode, "size", data.size, self.scale)
                 data.font = self.attr_font(subnode, "name", data.font)
                 data.align = self.attr_str(subnode, "align", data.align)
+                data.valign = self.attr_str(subnode, "valign", data.valign)
             if subnode.name == u'selection':
                 data.selection = copy.copy(data.selection)
                 self.parse_node(subnode, data.selection)
@@ -313,6 +340,13 @@ class XMLSkin:
                 data.shadow_color = self.attr_hex(subnode, "color", data.shadow_color)
                 data.shadow_pad_x = self.attr_int(subnode, "x", data.shadow_pad_x)
                 data.shadow_pad_y = self.attr_int(subnode, "y", data.shadow_pad_y)
+            if subnode.name == u'background':
+                data.bgcolor = self.attr_hex(subnode, "color", data.bgcolor)                
+            if subnode.name == u'geometry':
+                data.x = self.attr_int(subnode, "x", data.x, self.scale)
+                data.y = self.attr_int(subnode, "y", data.y, self.scale)
+                data.width = self.attr_int(subnode, "width", data.width, self.scale)
+                data.height = self.attr_int(subnode, "height", data.height, self.scale)
                 
 
     #
@@ -466,6 +500,78 @@ class XMLSkin:
                 self.mainmenu.items[item.pos] = item                
 
 
+    # parse listing conf from extendedmenu
+    def parse_listingnode(self, node, data):
+        self.parse_node(node, data)
+        for subnode in node.children:
+            if subnode.name == u'expand':
+                data.expand = copy.copy(data.expand)
+                self.parse_node(subnode, data.expand)
+            elif subnode.name == u'head':
+                data.head = copy.copy(data.head)
+                self.parse_node(subnode, data.head)
+            elif subnode.name == u'border':
+                data.border_size = copy.copy(data.border_size)
+                data.border_size = self.attr_int(subnode,'size', data.border_size)
+                data.border_color = copy.copy(data.border_color)
+                data.border_color = self.attr_hex(subnode,'color', data.border_color)
+            elif subnode.name == u'spacing':
+                data.spacing = self.attr_int(subnode,'value', data.spacing, self.scale)
+            elif subnode.name == u'channel_width':
+                data.channel_width = copy.copy(data.channel_width)
+                data.channel_width = self.attr_int(subnode,'value', data.channel_width, self.scale)
+            elif subnode.name == u'indicator':
+                for sub_subnode in subnode.children:
+                    if sub_subnode.name == u'left':
+                        data.left_arrow = copy.copy(data.left_arrow)
+                        data.left_arrow = self.attr_str(sub_subnode,'image', data.left_arrow)
+                    if sub_subnode.name == u'right':
+                        data.right_arrow = copy.copy(data.right_arrow)
+                        data.right_arrow = self.attr_str(sub_subnode,'image', data.right_arrow)
+                    if sub_subnode.name == u'down':
+                        data.down_arrow = copy.copy(data.down_arrow)
+                        data.down_arrow = self.attr_str(sub_subnode,'image', data.down_arrow)
+                    if sub_subnode.name == u'up':
+                        data.up_arrow = copy.copy(data.up_arrow)
+                        data.up_arrow = self.attr_str(sub_subnode,'image', data.up_arrow)
+                        
+
+    #
+    # read the skin informations for extendedmenu
+    #
+    def read_extendedmenu(self, file, menu_node, copy_content):
+        emn = self.attr_str(menu_node, "type", None)
+        if not emn:
+            return
+
+        if not 'tv' in self.e_menu:
+            self.e_menu[emn] = XML_extendedmenu() 
+        else:
+            if copy_content: self.e_menu = copy.copy(self.e_menu)
+
+        for node in menu_node.children:
+            if node.name == u'background':
+                if copy_content:
+                    self.e_menu[emn].background = copy.copy(self.e_menu[emn].background)
+                self.parse_node(node, self.e_menu[emn].background, os.path.dirname(file))
+            elif node.name == u'logo':
+                if copy_content: self.e_menu[emn].logo = copy.copy(self.e_menu[emn].logo)
+                self.parse_node(node, self.e_menu[emn].logo, os.path.dirname(file))
+            elif node.name == u'header':
+                if copy_content: self.e_menu[emn].header = copy.copy(self.e_menu[emn].header)
+                self.parse_node(node, self.e_menu[emn].header)
+            elif node.name == u'view':
+                if copy_content: self.e_menu[emn].view = copy.copy(self.e_menu[emn].view)
+                self.parse_node(node, self.e_menu[emn].view)
+            elif node.name == u'info':
+                if copy_content: self.e_menu[emn].info = copy.copy(self.e_menu[emn].info)
+                self.parse_node(node, self.e_menu[emn].info)
+            elif node.name == u'listing':
+                if copy_content: self.e_menu[emn].listing = \
+                   copy.copy(self.e_menu[emn].listing)
+                self.parse_listingnode(node, self.e_menu[emn].listing)
+
+
     #
     # parse the skin file
     #
@@ -515,6 +621,8 @@ class XMLSkin:
                             self.read_popup(file, node, copy_content)
                         if node.name == u'main':
                             self.read_mainmenu(file, node)
+                        if node.name == u'extendedmenu':
+                            self.read_extendedmenu(file, node, copy_content)
                         
         except:
             print "ERROR: XML file corrupt"

@@ -124,6 +124,68 @@
       </message>
     </popup>
 
+
+
+    <extendedmenu type="tv">
+      <background image="../images/aubin_bg2.png" mask=""/>
+      <logo visible="yes" x="10" y="10" width="100" height="60" image="../images/logo.png"/>
+
+      <header>
+        <geometry x="10" y="10" width="748" height="50"/>
+	<font name="Arial_Bold" size="24" color="0xffffff" align="center" valign="center"/>
+	<shadow visible="no"/>
+     </header>
+
+     <info>
+        <geometry x="10" y="70" width="640" height="100"/>
+	<background color="0xaa000000"/>
+	<font name="Arial_Bold" size="16" color="0xffffff" align="left"/>
+	<shadow visible="no" color="0x000000" x="1" y="1"/>
+     </info>
+
+     <view>
+        <geometry x="658" y="70" width="100" height="100"/>
+	<background color="0x000000"/>
+	<font name="Arial_Bold" size="20" color="0xffffff" align="center" valign="center"/>
+	<shadow visible="no"/>
+     </view>
+
+     <listing>
+        <geometry x="10" y="180" width="748" height="370"/>
+	<background color="0xbb58677c"/>
+
+	<expand>
+	  <geometry x="10" y="70" width="748" height="480"/>
+	  <background color="0xffffffff"/>
+	</expand>
+
+	<font name="Arial_Bold" size="18" color="0xffffff" align="left"/>
+	<shadow visible="no"/>
+
+	<selection bgcolor="0x88ffffff">
+	  <font name="Arial_Bold" size="18" color="0xffff66"/>
+	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
+	</selection>
+
+
+	<!-- I don't like the name and structure of the next tags -->
+
+	<head bgcolor="0x88000066" x="393" y="20">
+	  <font name="Arial_Bold" size="18" color="0xffffff" align="center" valign="center"/>
+	  <shadow visible="no"/>
+	</head>
+
+
+	<border color="0xaa000000" size="2"/>
+	<spacing value="2"/>
+	<channel_width value="158"/>
+	<indicator>
+	  <left image="skins/images/arrow_left.png"/>
+	  <right image="skins/images/arrow_right.png"/>
+	</indicator>
+      </listing>
+    </extendedmenu>
+
   </skin>
   
 </freevo>
