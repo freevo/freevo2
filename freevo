@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2003/10/05 10:36:37  dischi
+# search for correct python binary
+#
 # Revision 1.85  2003/09/23 13:31:23  outlyer
 # More FreeBSD patches from Lars
 #
@@ -94,6 +97,17 @@ fi
 
 export RUNAPP=""
 
+# search for the correct Python binary
+PYTHON=python
+for name in python python2 python2.3; do
+    for p in `echo $PATH | sed 's/:/ /g'`; do 
+	if [ -e "$p/$name" ]; then
+	    PYTHON="$p/$name"
+	    break
+	fi
+    done
+done
+
 # Check the environment we started in. There are three choices:
 # o installed into the system
 # o everything in one directory without the runtime
@@ -111,13 +125,14 @@ if [ -e "`dirname $FREEVO_SCRIPT`/src/plugins" ]; then
     if [ -e "`dirname $FREEVO_SCRIPT`/runtime/runapp" ]; then
 	# we also have a runtime
 	export RUNAPP="`dirname $FREEVO_SCRIPT`/runtime/runapp"
+	PYTHON=python
     fi
 
 elif [ -e "`dirname $FREEVO_SCRIPT`/../share/freevo" ]; then
     # we have an installed version
     # find the freevo libs
-    python -c 'import freevo' || exit 1
-    export FREEVO_PYTHON=`python -c 'import freevo; print freevo.__path__' | \
+    $PYTHON -c 'import freevo' || exit 1
+    export FREEVO_PYTHON=`$PYTHON -c 'import freevo; print freevo.__path__' | \
                    sed 's/..\(.*\)../\1/'`
     FREEVO_HELPERS=$FREEVO_PYTHON/helpers
     export FREEVO_SHARE=`dirname $FREEVO_SCRIPT`/../share/freevo
@@ -186,7 +201,7 @@ kill_waiting_child() {
 if [ -e "$script" ]; then
     PID_FILE="$PID_DIR/freevo-$name.pid"
     if [ "$1" = "start" ]; then
-	$RUNAPP python "$script" &
+	$RUNAPP $PYTHON "$script" &
 	echo $! > $PID_FILE
 	disown
     elif [ "$1" = "stop" ]; then
@@ -197,7 +212,7 @@ if [ -e "$script" ]; then
 	    echo $name not running
 	fi
     else
-	$RUNAPP python "$script" "$@" &
+	$RUNAPP $PYTHON "$script" "$@" &
 	echo $! > $PID_FILE
 	trap kill_waiting_child SIGTERM
 	trap kill_waiting_child SIGINT
@@ -247,7 +262,7 @@ fi
 # This is more a helper script to create the config file.
 if [ "$1" = "setup" ] ; then
     shift 1
-    $RUNAPP python $FREEVO_PYTHON/setup_freevo.py $@
+    $RUNAPP $PYTHON $FREEVO_PYTHON/setup_freevo.py $@
     exit 0
 fi
 
@@ -276,7 +291,7 @@ fi
     
 # Support for using just Python
 if [ "$1" = "prompt" ] ; then
-    $RUNAPP python
+    $RUNAPP $PYTHON
     exit 0
 fi
     
@@ -298,7 +313,7 @@ if [ "$1" = "execute" ] ; then
     fi
 
     trap './freevo stop $APP' 1 2 15
-    $RUNAPP python $@ &
+    $RUNAPP $PYTHON $@ &
     #echo PID is $!
     echo $! > $PID_FILE
     wait `cat $PID_FILE` >/dev/null 2>/dev/null
@@ -353,7 +368,7 @@ if [ "$1" = "start" ]; then
     shift
 
     # Start the main freevo application
-    $RUNAPP python $OPTIMZE $FREEVO_PYTHON/main.py $@ > /dev/null 2>&1 &
+    $RUNAPP $PYTHON $OPTIMZE $FREEVO_PYTHON/main.py $@ > /dev/null 2>&1 &
     
     echo $! > $PID_FILE
     disown
@@ -361,7 +376,7 @@ if [ "$1" = "start" ]; then
 fi
 
 # Start the main freevo application
-$RUNAPP python $OPTIMZE $FREEVO_PYTHON/main.py $@ &
+$RUNAPP $PYTHON $OPTIMZE $FREEVO_PYTHON/main.py $@ &
 
 echo $! > $PID_FILE
 PID=`cat $PID_FILE`
