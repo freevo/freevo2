@@ -3,13 +3,16 @@
 # guide.py - This contains EPGDB which is the pyepg interface to the 
 #            database.
 # -----------------------------------------------------------------------
-# $Id: #
+# $Id$#
 #
 # Notes:
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/23 14:29:35  rshortt
+# Updates and bugfixes.  Please excuse the mass of commented code and debug.
+#
 # Revision 1.3  2004/10/20 01:06:30  rshortt
 # Unicode changes.
 #
@@ -55,7 +58,8 @@ def escape_query(sql):
     if not type(sql) in StringTypes:
         return sql
 
-    sql = sql.replace('\'','\'\'')
+    # sql = sql.replace('\'','\'\'')
+    sql = sql.replace('\'','')
     return sql
 
 
@@ -199,8 +203,10 @@ class EPGDB:
         if len(rows) > 1:
             # Bad. We should only have one program for each chanid:start
             # Lets end this right here.
-            rows = self.execute('select id from programs where channel_id="%s" \
-                                 and start=%s' % (channel_id, start))
+            #rows = self.execute('select id from programs where channel_id="%s" \
+            #                     and start=%s' % (channel_id, start))
+
+            # print 'RLS: add_program got %d rows - should delete' % len(rows)
             for row in rows:
                 del_list.append(row.id)
 
@@ -233,25 +239,28 @@ class EPGDB:
 
             return
 
+        else:
+            # old prog and new prog have same times but different title,
+            # this is probably a schedule change, remove the old one
+            # TODO: check for shifting times and program overlaps
+
+            self.remove_program(old_prog)
+
         #
         # If we made it here there's no identical program in the table 
         # to modify.
         #
 
-        #for row in res:
-        #    del_list.append(row[0])
-
         # TODO:
         # Delete any entries of the same program title on the same channel 
         # within 10 minues of the start time to somewhat compensate for
         # shifting times.
-#        self.execute('delete from programs where channel_id="%s" and \
-#                            title="%s" and abs(%s-start)<=600' % \
-#                           (channel_id, title, start))
+        # self.execute('delete from programs where channel_id="%s" and \
+        #               title="%s" and abs(%s-start)<=600' % \
+        #               (channel_id, title, start))
         #for row in res:
         #    if del_list.index(row[0]) >= 0: continue
         #    del_list.append(row[0])
-
         #self.remove_programs(del_list)
 
 
@@ -266,12 +275,14 @@ class EPGDB:
                         (channel_id, title, start, stop, 
                          subtitle, episode, description)
 
+        # print 'RLS: no dupes of %s at %d on %s' % (title, start, channel_id)
         # print 'QUERY: "%s"' % query
         self.execute(query)
         self.commit()
                 
 
     def get_programs(self, channels, start=0, stop=-1):
+        print 'RLS: get_programs(%s,%d,%d)' % (channels, start, stop)
         if type(channels) != ListType:
             channels = [ channels, ]
     
@@ -292,7 +303,7 @@ class EPGDB:
             # get everything from time start onwards
             query = '%s and ((start<=%d and stop>%d) or start>%d)' % \
                     (query, start, start, start)
-        elif stop > now:
+        elif stop > 0:
             # get everything from time start to time stop
             query = '%s and ((start<=%d and stop>%d) or \
                              (start>%d and stop<%d) or \
@@ -301,6 +312,7 @@ class EPGDB:
         else:
             return []
 
+        query = '%s order by start' % query
         rows = self.execute(query)
         return rows
 
@@ -308,6 +320,7 @@ class EPGDB:
     def remove_program(self, id):
         query = 'delete from programs where id="%s' % id
 
+        # print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
         self.commit()
 
@@ -317,8 +330,9 @@ class EPGDB:
         for id in ids:
             query = '%s id="%s"' % (query, id)
             if ids.index(id) < len(ids)-1: 
-                query = '%s and' % query
+                query = '%s or' % query
 
+        # print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
         self.commit()
 
