@@ -194,10 +194,7 @@ MUSICPLAYER          = 'MPLAYER'   # Must be 'XMMS' or 'MPLAYER'
 #           ('Title2', 'directory2'), ... ]
 # The 'mplayer options' field can be omitted.
 #
-DIR_AUDIO = [ ('Test Files', 'testfiles/Music'),
-              ('Radio City 107.3 (Göteborg/Sweden)',
-               'http://www.minradio.no/asx/radiocitygb2.asx',
-               '-cache 100') ]
+DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
 #
 # The list of filename suffixes that are used to match the files that
