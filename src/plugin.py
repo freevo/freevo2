@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/08/31 17:15:00  dischi
+# default level is 10 now to make it possible to set items before default ones
+#
 # Revision 1.33  2003/08/31 14:18:31  dischi
 # added support for a progress callback (0-100)
 #
@@ -72,7 +75,7 @@ class Plugin:
     """
     def __init__(self):
         self._type   = None
-        self._level  = 0
+        self._level  = 10
         self._number = 0
         self.plugin_name   = ''
 
@@ -159,7 +162,7 @@ RADIO_PLAYER   = 'RADIO_PLAYER'
 #
 
 
-def activate(name, type=None, level=0, args=None):
+def activate(name, type=None, level=10, args=None):
     """
     activate a plugin
     """
