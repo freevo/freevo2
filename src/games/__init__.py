@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/03 05:14:46  mikeruelle
+# fixing dischis cut and paste error
+#
 # Revision 1.12  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -81,10 +84,10 @@ class PluginInterface(plugin.MimetypePlugin):
     """
     def __init__(self):
         plugin.MimetypePlugin.__init__(self)
-        self.display_type = [ 'image' ]
+        self.display_type = [ 'games' ]
 
         # activate the mediamenu for image
-        plugin.activate('mediamenu', level=plugin.is_active('image')[2], args='image')
+        plugin.activate('mediamenu', level=plugin.is_active('games')[2], args='games')
         
 
     def suffix(self):
