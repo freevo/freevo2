@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/12/08 15:57:32  mikeruelle
+# change cwd to get
+#
 # Revision 1.13  2003/12/03 05:14:46  mikeruelle
 # fixing dischis cut and paste error
 #
@@ -166,6 +169,6 @@ class PluginInterface(plugin.MimetypePlugin):
                     del_items += [ item ]
                     del_files.remove(file)
 
-        new_items += cwd(parent, new_files)
+        new_items += self.get(parent, new_files)
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/12/08 15:58:50  mikeruelle
+# change cwd to get
+#
 # Revision 1.8  2003/12/07 19:09:24  dischi
 # add <slideshow> fxd support with background music
 #
@@ -100,7 +103,7 @@ class PluginInterface(plugin.MimetypePlugin):
                     del_items += [ item ]
                     del_files.remove(file)
 
-        new_items += cwd(parent, new_files)
+        new_items += self.get(parent, new_files)
 
 
     def dirinfo(self, diritem):
