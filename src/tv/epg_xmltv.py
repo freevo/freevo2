@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/02/22 06:22:16  gsbarbieri
+# Handle info in unicode (don't need to convert to string anymore).
+# People envolved to Record & Favorites, please test it and ensure it works.
+#
 # Revision 1.44  2004/02/19 04:57:57  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -363,17 +367,17 @@ def load_guide():
         print 'creating guide for %s' % needed_ids
 
     for p in xmltv_programs:
-        if not p['channel'].encode(config.LOCALE, 'ignore') in needed_ids:
+        if not p['channel'] in needed_ids:
             continue
         prog = epg_types.TvProgram()
-        prog.channel_id = p['channel'].encode(config.LOCALE, 'ignore')
-        prog.title = p['title'][0][0].encode(config.LOCALE, 'ignore')
+        prog.channel_id = p['channel']
+        prog.title = p['title'][0][0]
         if p.has_key('category'):
-             prog.categories = [ cat[0].encode(config.LOCALE, 'ignore') for cat in p['category'] ]
+             prog.categories = [ cat[0] for cat in p['category'] ]
         if p.has_key('desc'):
-            prog.desc = util.format_text(p['desc'][0][0].encode(config.LOCALE, 'ignore'))
+            prog.desc = util.format_text(p['desc'][0][0])
         if p.has_key('sub-title'):
-            prog.sub_title = p['sub-title'][0][0].encode(config.LOCALE, 'ignore')
+            prog.sub_title = p['sub-title'][0][0]
         try:
             prog.start = timestr2secs_utc(p['start'])
             try:
