@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/07/07 17:10:46  dischi
+# small fix. Someone should clean up all the gui font stuff and use OSDFont for it
+#
 # Revision 1.16  2003/07/07 16:24:55  dischi
 # changes to work with the new drawstringframed
 #
@@ -209,7 +212,7 @@ class Label(GUIObject):
 
         if type(font) is StringType and type(size) is IntType:
             if self.surface: self.surface = None
-            self.font = self.osd._getfont(font, size)
+            self.font = self.osd.getfont(font, size)
         else:
             raise TypeError, 'font'
 
