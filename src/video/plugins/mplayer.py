@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2004/09/13 19:40:02  dischi
+# fix non vobsub subtitle handling
+#
 # Revision 1.86  2004/09/07 18:56:13  dischi
 # internal colors are now lists, not int
 #
@@ -235,8 +238,11 @@ class MPlayer(Application):
             additional_args += [ '-noautosub' ]
 
         elif item.selected_subtitle and mode == 'file':
-            additional_args += [ '-vobsubid', str(item.selected_subtitle) ]
-
+            if os.path.isfile(os.path.splitext(item.filename)[0]+'.idx'):
+                additional_args += [ '-vobsubid', str(item.selected_subtitle) ]
+            else:
+                additional_args += [ '-sid', str(item.selected_subtitle) ]
+                
         elif item.selected_subtitle:
             additional_args += [ '-sid', str(item.selected_subtitle) ]
             
