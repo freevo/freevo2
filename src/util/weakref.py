@@ -61,6 +61,11 @@ class weakref:
         else:
             return 0
 
+    def __cmp__(self, other):
+        if isinstance(other, weakref):
+            other = other.__dict__['ref']()
+        return cmp(self.__dict__['ref'](), other)
+
     def __str__(self):
         if self.__dict__['ref']:
             return str(self.__dict__['ref']())
