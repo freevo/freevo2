@@ -1,7 +1,7 @@
 Summary:	Freevo_apps
 Name:		freevo_apps
 Version:	1
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}%{version}.tar.gz
@@ -28,6 +28,8 @@ rm -rf `find . -name CVS`
 %build
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
+
+%install
 cp -av . %{buildroot}%{_prefix}
 
 %clean
