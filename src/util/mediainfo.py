@@ -173,7 +173,7 @@ class _Cache:
         self.load_cache(directory)
 
         objects = {}
-        for filename in vfs.listdir(directory):
+        for filename in os.listdir(directory):
             try:
                 key       = filename
                 fullname  = os.path.join(directory, filename)
