@@ -149,14 +149,18 @@ class Recordings:
         return None
 
 
+    def list(self):
+        return self.__recordings.values()
+
+
     def schedule(self, prog):
         if not self.server:
             return False, 'Recordserver unavailable'
         info = {}
-        if prog['description']:
-            info['description'] = prog['description']
-        if prog['subtitle']:
-            info['subtitle'] = prog['subtitle']
+        if prog.description:
+            info['description'] = prog.description
+        if prog.subtitle:
+            info['subtitle'] = prog.subtitle
         try:
             return self.server.recording_add(prog.title, prog.channel.id, 1000,
                                              prog.start, prog.stop, info)
