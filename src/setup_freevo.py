@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/20 19:00:02  dischi
+# removed sdl and added dga
+#
 # Revision 1.1  2003/08/03 09:56:15  dischi
 # moved setup_freevo into src
 #
@@ -76,7 +79,7 @@ Set up Freevo for your specific environment.
 
    --display=DISP               set the display
                                   DISP can be x11, fbdev, dxr3, mga, 
-                                  dfbmga or sdl
+                                  dfbmga or dga
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
@@ -117,7 +120,7 @@ def match_files_recursively_helper(result, dirname, names):
 
 def check_config(conf):
     vals_geometry = ['800x600', '768x576', '640x480']
-    vals_display = ['x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'sdl']
+    vals_display = ['x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'dga']
     vals_tv = ['ntsc', 'pal', 'secam']
     vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                      'japan-bcast', 'japan-cable', 'europe-west',
