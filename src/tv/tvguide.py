@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/08/26 18:59:14  dischi
+# bugfix
+#
 # Revision 1.51  2004/08/26 18:58:20  dischi
 # add time to item
 #
@@ -302,7 +305,7 @@ class TVGuide(MenuApplication):
                 items.append(ProgrammItem(self.parent, prog))
             cmenu = menu.Menu(self.channel.name, items)
             # FIXME: the percent values need to be calculated
-            cmenu.table = (15, 17, 70)
+            cmenu.table = (15, 15, 70)
             self.menuw.pushmenu(cmenu)
 
         elif event == TV_START_RECORDING:
