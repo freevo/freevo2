@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/13 20:08:25  dischi
+# fix handle to match notifier callback
+#
 # Revision 1.3  2004/10/06 19:24:01  dischi
 # switch from rc.py to pyNotifier
 #
@@ -104,7 +107,7 @@ class PluginInterface(plugin.InputPlugin):
         notifier.addSocket( self.joyfd, self.handle )
 
 
-    def handle( self ):
+    def handle( self, socket ):
         command = ''    
         c = os.read( self.joyfd, 8 )
 

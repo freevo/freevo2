@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/13 20:08:25  dischi
+# fix handle to match notifier callback
+#
 # Revision 1.4  2004/10/06 19:24:02  dischi
 # switch from rc.py to pyNotifier
 #
@@ -127,7 +130,7 @@ class PluginInterface(plugin.InputPlugin):
 
 
 
-    def handle( self ):
+    def handle( self, socket ):
         """
         return next event
         """

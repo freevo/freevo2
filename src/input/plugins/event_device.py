@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/13 20:08:25  dischi
+# fix handle to match notifier callback
+#
 # Revision 1.3  2004/10/06 18:52:52  dischi
 # use REMOTE_MAP now and switch to new notifier code
 #
@@ -144,7 +147,7 @@ class PluginInterface(plugin.InputPlugin):
                   'Time between consecutive repeats (miliseconds).' ), ]
 
 
-    def handle( self ):
+    def handle( self, socket ):
         command = ''    
         c = os.read(self.fd, 16)
 
