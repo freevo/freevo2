@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/05 02:34:05  rshortt
+# A simple helper to start record_server.py.
+#
 # Revision 1.1  2003/08/31 16:06:03  dischi
 # Rob, waiting for the new recordserver
 #
@@ -37,4 +40,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-print 'This script does not work right now'
+import record_server
+
+record_server.main()
