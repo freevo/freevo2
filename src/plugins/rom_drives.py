@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/29 09:06:18  dischi
+# small fix again
+#
 # Revision 1.8  2003/05/28 15:11:43  dischi
 # small bugfix
 #
@@ -575,7 +578,8 @@ class Identify_Thread(threading.Thread):
         if len(mplayer_files) == 1:
             media.videoinfo = VideoItem(mplayer_files[0], None)
             media.videoinfo.media = media
-            media.videoinfo.media_id = media_id
+            media.videoinfo.media_id = media.id
+            media.videoinfo.label = media.label
             
             if movie_info:
                 media.videoinfo.copy(movie_info)
