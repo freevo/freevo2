@@ -25,6 +25,9 @@ DEBUG_STDOUT = 0
 # Automatically turn on all DEBUG flags in all modules?
 DEBUG_ALL = 1
 
+# Debug this module?
+DEBUG = 1
+
 
 if os.path.isdir('/var/log/freevo'):
     LOGDIR = '/var/log/freevo'
@@ -100,19 +103,46 @@ cfgfilepath = [ '/etc/freevo',
                 '.'
                 ]
 
+class Struct:
+    pass
+
+# Default settings
+CONF = Struct()
+CONF.geometry = '800x600'
+CONF.display = 'x11'
+CONF.tv = 'ntsc'
+CONF.chanlist = 'us-cable'
+
+def read_config(filename, conf):
+    if DEBUG: print 'Reading config file %s' % filename
+    
+    lines = open(filename).readlines()
+    for line in lines:
+        vals = line.strip().split()
+        if DEBUG: print 'Cfg file data: "%s"' % line.strip()
+        try:
+            name, val = vals[0], vals[2]
+        except:
+            print 'Error parsing config file data "%s"' % line.strip()
+            continue
+        conf.__dict__[name] = val
+
+    w, h = conf.geometry.split('x')
+    conf.width, conf.height = int(w), int(h)
+        
+    
 found = 0
 founddir = ''
 for dir in cfgfilepath:
     cfgfilename = dir + '/freevo_config.py'
     if os.path.isfile(cfgfilename):
-        OUTPUT = 'default'
 
-        configure_conf = os.path.dirname(cfgfilename) + "/configure_conf.py"
-        if os.path.isfile(configure_conf):
-            print 'Loading configure settings: %s' % configure_conf
-            execfile(configure_conf, globals(), locals())
+        freevoconf = os.path.dirname(cfgfilename) + "/freevo.conf"
+        if os.path.isfile(freevoconf):
+            print 'Loading configure settings: %s' % freevoconf
+            read_config(freevoconf, CONF)
 
-        print 'Loading cfg: %s for output %s' % (cfgfilename, OUTPUT)
+        print 'Loading cfg: %s' % cfgfilename
         execfile(cfgfilename, globals(), locals())
         found = 1
         founddir = dir

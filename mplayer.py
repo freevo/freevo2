@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2002/08/21 04:58:26  krister
+# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
+#
 # Revision 1.30  2002/08/18 06:10:58  krister
 # Converted tabs to spaces. Please use tabnanny in the future!
 #
@@ -185,14 +188,13 @@ class MPlayer:
        
         # build mplayer command
         mpl = (config.NICE + " -" + config.MPLAYER_NICE + " " +
-               config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + 
-               ' -ao ' +  config.MPLAYER_AO_DEV + ' ' +
+               config.MPLAYER_CMD + ' -ao ' +  config.MPLAYER_AO_DEV + ' ' +
                config.MPLAYER_ARGS_DEF)
 
         if mode == 'video':
 
             # Mplayer command and standard arguments
-            mpl += (' ' + config.MPLAYER_ARGS_MPG)
+            mpl += (' ' + config.MPLAYER_ARGS_MPG + ' -vo ' + config.MPLAYER_VO_DEV)
             
             # Add special arguments for the hole playlist from the
             # XML file
@@ -230,22 +232,25 @@ class MPlayer:
             
 
         elif mode == 'dvdnav':
-            mpl += (' ' + config.MPLAYER_ARGS_DVDNAV)
+            mpl += (' ' + config.MPLAYER_ARGS_DVDNAV + ' -vo ' + config.MPLAYER_VO_DEV)
             command = mpl
 
 
         elif mode == 'vcd':
-            mpl += (' ' + config.MPLAYER_ARGS_VCD + ' -alang ' + config.DVD_LANG_PREF)
+            mpl += (' ' + config.MPLAYER_ARGS_VCD + ' -alang ' + config.DVD_LANG_PREF +
+                    ' -vo ' + config.MPLAYER_VO_DEV)
             if config.DVD_SUBTITLE_PREF:
                 mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
             command = mpl % filename  # Filename is VCD chapter
 
 
         elif mode == 'audio':
-            command = mpl + " " + get_demuxer(filename) + ' "' + filename + '"'
+            command = (mpl + " " + '-vo null ' + get_demuxer(filename) +
+                       ' "' + filename + '"')
 
         else:
-            mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -alang ' + config.DVD_LANG_PREF)
+            mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -alang ' + config.DVD_LANG_PREF +
+                    ' -vo ' + config.MPLAYER_VO_DEV)
             if config.DVD_SUBTITLE_PREF:
                 mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
             print "What is:      " + str(filename)

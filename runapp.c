@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 
 extern int errno;
 
@@ -85,4 +86,7 @@ main (int ac, char *av[])
   fprintf (fp, "runapp: failed! errno = %d\n", errno);
   
   fclose (fp);
+
+  exit (0);
+  
 }

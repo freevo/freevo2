@@ -1,6 +1,9 @@
 How to create the Freevo runtime
 ================================
 
+XXX THIS FILE IS OUT OF DATE! freevo_rt is called freevo_runtimeX now.
+
+
 Making freevo_rt:
 -----------------
 
@@ -23,16 +26,12 @@ Replace 'HEAD' with a version tag if needed.
 (The reason we're not using the version that make_rt is in is that we
  might want to use a different version.)
 
-NOTE: freevo_rt only works with the SDL OSD, make sure the freevo_config.py
-      has 'OSD_SDL = 1'.
-> echo 'OSD_SDL = 1' >> freevo/freevo_config.py
-
 
 Make freevo utils:
 ------------------
-Compile runapp and v4l1_to_mga:
+Compile runapp, freevo_xwin and vtrelease:
 
-> make -C freevo -f Makefile.in runapp matrox_g400
+> cd freevo ; make ; cd ..
 
 
 Copy freevo_rt:

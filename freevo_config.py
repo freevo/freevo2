@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2002/08/21 04:58:26  krister
+# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
+#
 # Revision 1.52  2002/08/19 05:50:39  krister
 # Added helptext for configuring the TV.
 #
@@ -60,11 +63,6 @@
 #       default (high priority) set it to 0 for normal priority or +10 for
 #       low priority.
 #
-# If you want to change some things for your personal setup, please
-# write this in a file called local_conf.py in the same directory.
-#
-#
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -88,27 +86,17 @@
 #endif
 
 
-
-# configure will write a helper variable OUTPUT to set same values based
-# on the output. Possible values for OUTPUT are:
-#
-# default:          default OSD server, resolution is fixed at 768x576
-# sdl_800x600       use the Python SDL osd (requires pyGame) with 800x600
-#                   resolution if you have tv out under X11
-# mga_768x576_pal   use the Python SDL osd (requires pyGame) with 768x576
-#                   resolution and tc out for a matrox card with framebuffer
-#                   and a PAL tv set.
-# mga_768x576_ntsc  use the Python SDL osd (requires pyGame) with 768x576
-#                   resolution and tc out for a matrox card with framebuffer
-#                   and a PAL tv set.
-
+########################################################################
+# If you want to change some things for your personal setup, please
+# write this in a file called local_conf.py in the same directory.
+########################################################################
 
 # ======================================================================
 # General freevo settings:
 # ======================================================================
 
 AUDIO_DEVICE        = '/dev/dsp'      # e.g.: /dev/dsp0, /dev/audio, /dev/alsa/??
-MAJOR_AUDIO_CTRL    = 'PCM'           # Freevo takes control over one audio ctrl
+MAJOR_AUDIO_CTRL    = 'VOL'           # Freevo takes control over one audio ctrl
                                       # 'VOL', 'PCM' 'OGAIN' etc.
 CONTROL_ALL_AUDIO   = 1               # Should Freevo take complete control of audio
 MAX_VOLUME          = 100             # Set what you want maximum volume level to be.
@@ -209,21 +197,6 @@ SUFFIX_IMAGE_FILES = [ '/*.[jJ][pP][gG]' ]
 # freevo OSD section:
 # ======================================================================
 
-
-if OUTPUT != 'default':
-    OSD_SDL = 1
-
-#
-# supported resolutions right now are 800x600 and 768x576. This only works
-# with OSD_SDL = 1. Please change SKIN_XML_FILE to a XML file matching the
-# resolution.
-#
-
-RESOLUTION = "768x576"       
-
-if OUTPUT == 'sdl_800x600':
-    RESOLUTION = "800x600"
-
 #
 # Skin file that contains the actual skin code. This is imported
 # from skin.py
@@ -233,11 +206,7 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 # XML file for the skin
 #
-SKIN_XML_FILE = 'skins/xml/type1/768x576.xml'
-
-if OUTPUT == 'sdl_800x600':
-    SKIN_XML_FILE = 'skins/xml/type1/800x600.xml'
-
+SKIN_XML_FILE = 'skins/xml/type1/%s.xml' % CONF.geometry
 
 ENABLE_TV = 1            # Disable this if you don't have a tv card
 ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
@@ -245,7 +214,7 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxe
 ENABLE_IMAGES = 1        # Disable this if you don't want/use the Image Browser
 
 #
-# OSD default font. It is only used for debug/error stuff, not regular
+# OSD default font. It is only used for debug/error stuff, not regular   XXX remove
 # skinning.
 #
 OSD_DEFAULT_FONTNAME = 'skins/fonts/Cultstup.ttf'
@@ -259,12 +228,11 @@ OSD_DEFAULT_FONTSIZE = 14
 #
 OSD_SDL_EXEC_AFTER_STARTUP=''
 
-if OUTPUT == 'mga_768x576_ntsc':
-    OSD_SDL_EXEC_AFTER_STARTUP='./matrox_g400/mga_ntsc_768x576.sh'
-
-if OUTPUT == 'mga_768x576_pal':
-    OSD_SDL_EXEC_AFTER_STARTUP='./matrox_g400/mga_pal_768x576.sh'
-
+if CONF.display == 'mga':
+    if CONF.tv == 'ntsc':
+        OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_ntsc_768x576.sh'
+    elif CONF.tv == 'pal':
+        OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_pal_768x576.sh'
 
 
 # ======================================================================
@@ -274,10 +242,7 @@ if OUTPUT == 'mga_768x576_pal':
 
 MPLAYER_CMD         = 'mplayer'       # A complete path may be nice.
 MPLAYER_AO_DEV      = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
-MPLAYER_VO_DEV      = 'xv'            # e.g.: xv,x11,mga, see mplayer docs
-
-if OUTPUT == 'mga_768x576_ntsc' or OUTPUT == 'mga_768x576_pal':
-    MPLAYER_VO_DEV  = 'mga'
+MPLAYER_VO_DEV      = CONF.display    # e.g.: xv,x11,mga,fbdev, see mplayer docs
 
 DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
@@ -286,10 +251,8 @@ MPLAYER_NICE        = '0'             # Priority of mplayer process. 0 is unchan
                                       # <0 is higher prio, >0 lower prio. You must run
                                       # freevo as root to use prio <0 !
 
-MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs'
-
-if OUTPUT == 'sdl_800x600':
-    MPLAYER_ARGS_DEF     = '-nobps -framedrop -nolirc -screenw 800 -screenh 600 -fs'
+MPLAYER_ARGS_DEF     = ('-nobps -framedrop -nolirc -screenw %s -screenh %s -fs' %
+                        (CONF.width, CONF.height))
 
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
@@ -318,8 +281,8 @@ MPLAYER_ARGS_DVDNAV  = ''
 # europe-east, italy, newzealand, australia, ireland, france, china-bcast,
 # southafrica, argentina, canada-cable
 #
-TV_SETTINGS = 'ntsc television us-cable'
-VCR_SETTINGS = 'ntsc composite1 us-cable'
+TV_SETTINGS = '%s television %s' % (CONF.tv, CONF.chanlist)
+VCR_SETTINGS = '%s composite1 %s' % (CONF.tv, CONF.chanlist)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
@@ -407,9 +370,6 @@ TV_CHANNELS = [('2 KTVI', 'KTVI', '2'),
                ('74 BRAVO', 'BRAVO', '74'),
                ('75 TOOND', 'TOOND', '75'),
                ('99', 'TEST', '99')]
-
-WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
-
 
 
 # ======================================================================

@@ -49,6 +49,7 @@ if test -a $RT_DIR/freevo_rt ; then
     sleep 1
     killall -9 freevo_rt &> /dev/null
     killall -9 freevo_xwin &> /dev/null
+    killall -9 mplayer &> /dev/null
     exit
 
 fi
@@ -77,3 +78,6 @@ python main.py $*
 # Freevo exited, make sure all children are killed
 sleep 1
 kill -9 `pgrep -f "python main.py" -d" "` &> /dev/null
+kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
+killall -9 freevo_xwin &> /dev/null
+killall -9 mplayer &> /dev/null

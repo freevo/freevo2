@@ -4,49 +4,49 @@ Installation instructions for Freevo
 $Id$
 
 
-WARNING: The framebuffer code can render the console unusuable if set up
-         incorrectly! Do not attempt if you cannot login from another
-         computer on the network!
-         This is not a problem if you run the X11 version.
-
-
-Quickstart (X11 version)
-------------------------
-o Download Freevo, preferably from CVS, un-tar
-o Download and install the following dependencies (see below for details):
-  o freetype2, libpng, libz, Python >=2.1, PyXML, Python Image Library
-o Update freevo_config.py to suit your system (optional)
-o This will check the dependencies and make the X11 version:
-  o ./configure --osd=x11 ; make
+Quickstart
+----------
+o Download freevo and freevo-runtime from the website.
+o Un-tar somewhere. /usr/local is the recommended place for a regular
+  installation, but it will run from anywhere, e.g. /tmp
+  cd tmp
+  tar xvzf freevo-1.2.5.tar.gz
+  tar xvzf freevo-runtime1.tar.gz
+  cd freevo
+o Run configure in the Freevo directory. This will create freevo.conf
+  which contains settings for your system such as screen size, video devices,
+  etc. The default configuration is screensize 800x600, NTSC video input/output.
+  You can skip this step to begin with if that is OK.
+  ./configure --help
+o Make a copy of freevo_config.py to local_conf.py. Update local_conf.py
+  to suit your system (optional). The settings that are in local_conf.py 
+  will override freevo_config.py.
+o If you downloaded a full release you will not need to compile anything.
+  If you checked out a CVS version you will need to compile runapp and 
+  freevo_xwin:
+  make
 o Run Freevo:
   o ./freevo
-  o You must use the remote control xterm window for keyboard input!
+o Install MPlayer to play music, movies and view TV: www.mplayerhq.hu
+o Install Freevo in /usr/local/freevo:
+  make install
+  (Do not forget to place the runtime in /usr/local/freevo_runtime1!)
 
 
 Detailed instructions
 ---------------------
 
-Some of these steps are optional, a minimal Freevo system can be set up
-that doesn't require TV-out, Video4Linux or lirc. It will
-still be useful to play movies/mp3's under X11 or the 
-framebuffer (if there's a remote control).
-
+Some of these steps are optional.
 
 o Recompile the Linux kernel (>=2.4.13). It is assumed that all options 
   are compiled in statically. If they're compiled as modules instead you
   have to make sure that they're loaded before Freevo.
-  o This step is not needed until you need the Video4Linux and/or TV-out.
-
-o Test the video4linux driver using xawtv (optional)
-  o Freevo uses its' own config files for channels etc
-  o Right now the only TV watching application for Freevo is 
-    for Matrox G400 Framebuffer using a Video4Linux1 device, it is part
-    of Freevo in freevo/matrox_g400/v41l1_to_mga.
+  o This step is not needed until you need the Video4Linux and/or TV-out,
+    or if your current kernel already has support.
 
 o Compile and install the needed external apps. MPlayer is required for
-  the core Video/Audio playback functionality, the others
-  can be installed as needed.
-  o Install MPlayer  (Play movies, DVDs, VideoCDs)
+  most functions, the others can be installed as needed.
+  o Install MPlayer (Play movies, DVDs, VideoCDs, music, watch TV)
     o Test with the the graphics driver and settings you intend to use.
       Update freevo_config.py, settings called MPLAYER_XXXX
   o Install NVrec (record from Video4Linux video in to file)
@@ -57,62 +57,29 @@ o Compile and install the needed external apps. MPlayer is required for
     o Test:
       o Insert the serial driver module
       o Start the daemon
+      o Run the lirc app "irw" to check the function of the remote 
+        control.
 
 o Compile Freevo
-  o ./configure --osd=fb ; make
+  o ./configure [options] ; make
     o Use "./configure --help" for more information
-    o The default is to compile for the Framebuffer, X11 and SDL are 
-      also supported.
-  o Requires Python >= version 2.1 (We've had reports of problems with 1.5.x)
-    o http://www.python.org/ftp/python/2.2.1/Python-2.2.1.tgz
-  o Requires freetype 2 (2.0.9 is preferred for now)
-    o http://prdownloads.sourceforge.net/freetype/freetype-2.0.9.tar.gz?download
-  o Requires libpng
-    o http://prdownloads.sourceforge.net/libpng/libpng-1.2.3.tar.gz?download
-  o Requires libz (already installed on most Linux distros)
-    o http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz?download
-  o Requires PyXML (Tested with 0.7.1)
-    o http://unc.dl.sourceforge.net/sourceforge/pyxml/PyXML-0.7.1.tar.gz
-      o tar xvzf PyXML-0.7.1.tar.gz
-      o cd PyXML-0.7.1
-      o python setup.py build
-      o (as root): python setup.py install
-  o PIL, Python Imaging Library (Tested with 1.1.3)
-    o http://www.pythonware.com/downloads/Imaging-1.1.3.tar.gz
-      o Installation should use the following method, not from the BUILDME:
-      o tar xvzf Imaging-1.1.3.tar.gz
-      o cd Imaging-1.1.3/libImaging
-      o ./configure
-      o make
-      o cd ..
-      o python setup.py build
-      o (as root): python setup.py install
+
+  o It is *strongly* recommended that you use the freevo-runtime that 
+    contains *all* external dependencies except MPlayer. Instructions on 
+    how to download and install all the dependencies is in the file 
+    INSTALL.deps.
+
   o Test the remote using the lirc application irw, and using the 
     remote_control_lirc.py Freevo application (optional)
-  o Test the X11 OSD test driver
-  o Test the MGA G400 OSD framebuffer driver (optional)
-    Before you start freevo with the OSD driver change the framebuffer 
-    resolution to 768x576.
-
-o Optionally install the Python ogg/vorbis modules for ogg vorbis tag support. 
-  o It can be obtained here: http://www.duke.edu/~ahc4/pyogg/
-
-o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer, optional)
-  o It _must_ be used with the matrox_g400/mga_vid.o module,
-    not the one from MPlayer.
-  o Check out the source for how to set the input, norm, channel
 
 o Update the settings in freevo_config.py!
-  o TV_SETTINGS, VCR_SETTINGS, TV_CHANNELS depending on where you live.
-  o DIR_MP3, DIR_MOVIES, DIR_RECORD for where your files are
+  o TV_CHANNELS depending on where you live.
+  o DIR_AUDIO, DIR_MOVIES, DIR_IMAGES for where your files are
 
 o XMLTV method for download TV listings
   o See Docs/XMLTV for usage instructions
 
-o Test Freevo using the X11 OSD and remote, just start "freevo"
-  in the main directory
-
-o Run Freevo using the framebuffer OSD driver and the lirc remote (optional)
+o Test Freevo using X11 or the framebuffer mode.
 
 o Create a boot-script that will start Freevo when Linux is booting. (optional)
   boot/freevo is a good start.

@@ -38,20 +38,12 @@ case "$1" in
         /usr/local/sbin/lircd /usr/local/freevo/boot/URC-7201B00
         echo Done
 
-        #
-        # Insert the modified mga_vid.o MGA driver
-        #
-        echo -n "Inserting the mga_vid.o module... "
-        insmod /usr/local/freevo/matrox_g400/mga_vid.o
-        echo Done
-
         # Done
         ;;
 
     stop)
         killall lircd > /dev/null 2>&1
         rmmod lirc_serial > /dev/null 2>&1
-        rmmod mga_vid > /dev/null 2>&1
         
         # Done
         ;;

@@ -51,6 +51,10 @@ clean:
 	cd rc_client ; make clean
 	cd osd_server ; make clean
 
+# Remove all compiled python files
+distclean:
+	find . -name "*.pyc*" -exec rm -f {} \;
+
 
 # XXX Real simple install procedure for now, but freevo is so small it doesn't really
 # XXX matter

@@ -1,6 +1,12 @@
 Freevo, instructions on building the external dependencies
 ==========================================================
 
+$Id$
+
+NOTE: You will most likely want to use the freevo_runtime 
+instead of building all the dependencies yourself! 
+See http://freevo.sourceforge.net for the download.
+
 
 XXX If you're running using fbcon, see the env. vars below which must
 XXX be set before startup, e.g. in boot/freevo.

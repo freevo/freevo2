@@ -40,17 +40,16 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	export SDL_NOKEYBOARD=true
 	export SDL_VIDEODRIVER=fbcon
-	(cd $FREEVO_HOME && $DAEMON $FREEVO_OPTIONS >> $FREEVO_LOG 2>&1 &)
+	(cd $FREEVO_HOME && $DAEMON >> $FREEVO_LOG 2>&1 &)
 	echo "$NAME."
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-	kill -HUP `ps -ef | grep v4l1_to_mga | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
-	kill -HUP `ps -ef | grep startup.py | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
-	kill -HUP `ps -ef | grep main.py | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
-	kill -HUP `ps -ef | grep remote.py | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
-	kill -HUP `ps -ef | grep osds_fb | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
-	kill -HUP `ps -ef | grep osds_sdl | grep -v -e grep -e bin/sh | cut -c9-14` > /dev/null 2>&1
+        killall -9 freevo_rt &> /dev/null
+        killall -9 freevo_xwin &> /dev/null
+        killall -9 mplayer &> /dev/null
+        kill -9 `pgrep -f "python main.py" -d" "` &> /dev/null
+        kill -9 `pgrep -f "python rc_client" -d" "` &> /dev/null
 	echo "$NAME."
 	echo -n "Releasing the VT: "
 	$VTRELEASE

@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2002/08/21 04:58:26  krister
+# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
+#
 # Revision 1.56  2002/08/19 05:51:15  krister
 # Load main menu items from the skin.
 #
@@ -214,9 +217,8 @@ def getcmd():
         # Get next command
         while 1:
 
-            if 'OSD_SDL' in dir(config):  
-                event = osd._cb()
-                if event: break
+            event = osd._cb()
+            if event: break
             
             event = rc.poll()
             if event == rc.NONE:

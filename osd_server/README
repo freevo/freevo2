@@ -1,6 +1,0 @@
-osd_server
-----------
-
-This directory contains the linux framebuffer OSD server. It sets up a UDP/IP 
-server that the main control application sends commands to. It can 
-display text, clear the screen, draw lines, etc.

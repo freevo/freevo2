@@ -2,15 +2,63 @@
 
 # configure - the main configure script
 #
+# XXX This file duplicates lots of the "freevo" script, can they use
+# a common subroutine file?
+#
 # $Id$
 #
 
-PYTHON_VERSION=`python -c "import sys ; ok = sys.version_info[:3] >= (2,1,0) ; print ok"`
+# Required runtime version
+RUNTIME_VERSION=1
+
+# The runtime is stored in a directory one level up
+RT_DIR=../freevo_runtime$RUNTIME_VERSION
+
+# First check if the runtime is installed
+if test -a $RT_DIR/freevo_rt ; then
+    
+    # Double-check that we have the correct runtime version
+    rt_ver=`cat $RT_DIR/VERSION`
+    if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
+        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
+        echo Please install the required version in $RT_DIR/
+        exit
+    fi
+
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_rt
+    export LD_PRELOAD=`cat $RT_DIR/preloads`
+
+    # Execute using the runtime:
+    echo "Using the Freevo runtime ($RT_DIR)"
+    
+    # Start the setup_build.py application
+    $RT_DIR/freevo_rt setup_build.py $*
+
+    # Freevo exited, make sure all children are killed
+    sleep 1
+    killall -9 freevo_rt &> /dev/null
+    exit
+
+fi
+
+echo
+echo
+echo
+echo Runtime not found!
+echo 
+echo If Freevo does not work for you, download the runtime from 
+echo the website, http://freevo.sourceforge.net
+echo
+echo Starting using the regular environment.
+echo
+echo
+
+PYTHON_VERSION=`python -c "import sys ; ok = sys.version_info[:3] >= (2,2,0) ; print ok"`
 
 if python -V 2>/dev/null >/dev/null  && \
     [[ "$PYTHON_VERSION" -eq "1" ]]; then
 	python setup_build.py $*
 else
-	echo "Installed python version is outdated. Please upgrade to 2.1.0 or better"
+    echo "Installed python version is outdated. Please upgrade to 2.2.0 or better"
 fi
-

@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/08/21 04:58:26  krister
+# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
+#
 # Revision 1.4  2002/08/05 00:53:41  tfmalt
 # o Added support for ejecting and mounting CD's in the Music menu aswell.
 #   It uses the same osd.popup_box() as main.py
@@ -96,6 +99,9 @@ def play( arg=None, menuw=None ):
                list - is playlist, ie rest of files in directory.
     Returns:   None
     """
+
+    if not arg:
+        return
     
     (mode, file, list) = arg
     if not mode:

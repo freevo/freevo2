@@ -4,11 +4,13 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: You can only zoom a rotated image with OSD_SDL enabled
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/08/21 04:58:26  krister
+# Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
+#
 # Revision 1.12  2002/08/18 21:19:09  tfmalt
 # o Cleaned up a little bit. Removed unneeded imports.
 #
@@ -112,15 +114,15 @@ class ImageViewer:
 
         if zoom:
             # Translate the 9-element grid to bounding boxes
-            if 'OSD_SDL' in dir(config) and self.rotation == 90:
+            if self.rotation == 90:
                 bb = { 1:(2,0), 2:(2,1), 3:(2,2),
                        4:(1,0), 5:(1,1), 6:(1,2),
                        7:(0,0), 8:(0,1), 9:(0,2) }
-            elif 'OSD_SDL' in dir(config) and self.rotation == 180:
+            elif self.rotation == 180:
                 bb = { 1:(2,2), 2:(1,2), 3:(0,2),
                        4:(2,1), 5:(1,1), 6:(0,1),
                        7:(2,0), 8:(1,0), 9:(0,0) }
-            elif 'OSD_SDL' in dir(config) and self.rotation == 270:
+            elif self.rotation == 270:
                 bb = { 1:(0,2), 2:(0,1), 3:(0,0),
                        4:(1,2), 5:(1,1), 6:(1,0),
                        7:(2,2), 8:(2,1), 9:(2,0) }
@@ -135,7 +137,7 @@ class ImageViewer:
             bbcx = ([1, 3, 5][h]) * width / 6
             bbcy = ([1, 3, 5][v]) * height / 6
 
-            if 'OSD_SDL' in dir(config) and self.rotation % 180:
+            if self.rotation % 180:
                 # different calculations because image width is screen height
                 scale_x = float(osd.width) / (height / 3)
                 scale_y = float(osd.height) / (width / 3)
@@ -164,7 +166,7 @@ class ImageViewer:
             if bbx + bbw > width:  bbx = width - bbw
             if bby + bbh > height: bby = height - bbh
 
-            if 'OSD_SDL' in dir(config) and self.rotation % 180:
+            if self.rotation % 180:
                 new_h, new_w = bbw * scale, bbh * scale
             else:
                 new_w, new_h = bbw * scale, bbh * scale
@@ -172,7 +174,7 @@ class ImageViewer:
 
 
         else:
-            if 'OSD_SDL' in dir(config) and self.rotation % 180:  
+            if self.rotation % 180:  
                 height, width = width, height
                 
             # scale_x = scale_y = 1.0
@@ -193,11 +195,8 @@ class ImageViewer:
         y = (osd.height - new_h) / 2
         
         osd.clearscreen(color=osd.COL_BLACK)
-        if 'OSD_SDL' in dir(config):
-            osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh,
-                           rotation = self.rotation)
-        else:
-            osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh)
+        osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh,
+                       rotation = self.rotation)
 
         # update the OSD
         self.drawosd()
@@ -213,19 +212,6 @@ class ImageViewer:
             
             width, height = osd.bitmapsize(filename)
             
-            # osd.bitmapsize caches the image. Because zoombitmap has no
-            # caching function right now, we don't need this with OSD_SDL
-            if not 'OSD_SDL' in dir(config):
-                scale_x = scale_y = 1.0
-                if width > osd.width: scale_x = float(osd.width) / width
-                if height > osd.height: scale_y = float(osd.height) / height
-            
-                scale = min(scale_x, scale_y)
-
-                # This will both load the next image into the load cache,
-                # zoom it into the zoom cache.
-                osd.zoombitmap(filename, scale)
-
 
     def eventhandler(self, event):
 
@@ -259,56 +245,29 @@ class ImageViewer:
         if event == rc.LEFT or event == rc.RIGHT:
             osd.clearscreen(color=osd.COL_BLACK)
 
-            if event == rc.LEFT:
+            if event == rc.RIGHT:
                 self.rotation = (self.rotation + 270) % 360
             else:
                 self.rotation = (self.rotation + 90) % 360
 
 
-            if 'OSD_SDL' in dir(config):  
-                image = Image.open(self.filename)
-                
-                if self.rotation % 180:
-                    height, width = image.size
-                else:
-                    width, height = image.size
-                    
-                scale_x = scale_y = 1.0
-                if width > osd.width: scale_x = float(osd.width) / width
-                if height > osd.height: scale_y = float(osd.height) / height
-                
-                scale = min(scale_x, scale_y)
-                
-                new_w, new_h = int(scale*width), int(scale*height)
-                
-                osd.drawbitmap(self.filename, (osd.width-new_w) / 2, (osd.height-new_h) / 2,
-                               scaling=scale, rotation=self.rotation)
+            image = Image.open(self.filename)
 
+            if self.rotation % 180:
+                height, width = image.size
             else:
-                osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.update()
-                osd.clearscreen(color=osd.COL_BLACK)
-
-                pos = self.playlist.index(self.filename)
-                image_file = (config.FREEVO_CACHEDIR + '/' +
-                              os.path.basename('image-viewer-%s.png' % pos))
-                
-                image = Image.open(self.filename).rotate(self.rotation)
                 width, height = image.size
-                
-                scale_x = scale_y = 1.0
-                if width > osd.width: scale_x = float(osd.width) / width
-                if height > osd.height: scale_y = float(osd.height) / height
-                
-                scale = min(scale_x, scale_y)
-                
-                new_w, new_h = int(scale*width), int(scale*height)
-                
-                im_res = image.resize((new_w,new_h))
-                im_res.save(image_file,'PNG')
 
-                osd.drawbitmap(image_file, (osd.width - new_w) / 2, (osd.height - new_h) / 2)
+            scale_x = scale_y = 1.0
+            if width > osd.width: scale_x = float(osd.width) / width
+            if height > osd.height: scale_y = float(osd.height) / height
+
+            scale = min(scale_x, scale_y)
+
+            new_w, new_h = int(scale*width), int(scale*height)
+
+            osd.drawbitmap(self.filename, (osd.width-new_w) / 2, (osd.height-new_h) / 2,
+                           scaling=scale, rotation=self.rotation)
 
             osd.update()
 
