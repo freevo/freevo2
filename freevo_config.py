@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2002/08/18 06:10:58  krister
+# Converted tabs to spaces. Please use tabnanny in the future!
+#
 # Revision 1.49  2002/08/18 04:09:38  krister
 # Made the main skin always the default.
 #
@@ -47,9 +50,9 @@
 #
 # o You can now set the priority of the mplayer process via a nice setting
 # o This involves two lines in the config file: NICE and MPLAYER_NICE for the
-# 	path to 'nice' and the actual numeric priority where '-10' is the
-# 	default (high priority) set it to 0 for normal priority or +10 for
-# 	low priority.
+#       path to 'nice' and the actual numeric priority where '-10' is the
+#       default (high priority) set it to 0 for normal priority or +10 for
+#       low priority.
 #
 # If you want to change some things for your personal setup, please
 # write this in a file called local_conf.py in the same directory.
@@ -153,11 +156,11 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[mM][pP][eE][gG]',
                          '/*.[wW][mM][vV]',
                          '/*.[bB][iI][nN]',
- 			 '/*.[rR][mM]',
-			 '/*.[dD][iI][vV][xX]',
-			 '/*.[oO][gG][mM]',
-			 '/*.[vV][oO][bB]',
-			 '/*.[aA][sS][fF]' ]
+                         '/*.[rR][mM]',
+                         '/*.[dD][iI][vV][xX]',
+                         '/*.[oO][gG][mM]',
+                         '/*.[vV][oO][bB]',
+                         '/*.[aA][sS][fF]' ]
 
 
 # ======================================================================
@@ -233,7 +236,7 @@ if OUTPUT == 'sdl_800x600':
 ENABLE_TV = 1            # Disable this if you don't have a tv card
 ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
 ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
-ENABLE_IMAGES = 1	 # Disable this if you don't want/use the Image Browser
+ENABLE_IMAGES = 1        # Disable this if you don't want/use the Image Browser
 
 #
 # OSD default font. It is only used for debug/error stuff, not regular
@@ -272,8 +275,8 @@ if OUTPUT == 'mga_768x576_ntsc' or OUTPUT == 'mga_768x576_pal':
 
 DVD_LANG_PREF       = 'en,se,no'      # Order of preferred languages on DVD.
 DVD_SUBTITLE_PREF   = ''              # Order of preferred subtitles on DVD.
-NICE		    = '/usr/bin/nice' # Priority setting app
-MPLAYER_NICE	    = '0'	      # Priority of mplayer process. 0 is unchanged,
+NICE                = '/usr/bin/nice' # Priority setting app
+MPLAYER_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
                                       # <0 is higher prio, >0 lower prio. You must run
                                       # freevo as root to use prio <0 !
 

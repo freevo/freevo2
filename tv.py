@@ -100,8 +100,8 @@ def main_menu(arg, menuw):
         # Channel display name
         menu_str = '%s' % channel.displayname
         # Logo
-	channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
-	if not os.path.isfile(channel_logo):
+        channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
+        if not os.path.isfile(channel_logo):
             if DEBUG: print 'TV: Cannot find logo "%s"' % channel_logo
             channel_logo = None
 

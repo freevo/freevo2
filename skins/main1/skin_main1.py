@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/08/18 06:10:59  krister
+# Converted tabs to spaces. Please use tabnanny in the future!
+#
 # Revision 1.13  2002/08/17 18:37:21  krister
 # Changed to use ../xml/type1/xml_skin.py.
 #
@@ -177,9 +180,9 @@ class Skin:
             else:
                 ptscale = 1.0
             fontsize = val.items.size*ptscale
-	    w = 0
-	    h = 0
-	    if choice.icon != None: 
+            w = 0
+            h = 0
+            if choice.icon != None: 
                 osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), x0, y0)
                 w = icon_size + 20
                 h = 5
@@ -187,7 +190,7 @@ class Skin:
             osd.drawstring(choice.name, (x0+w+10), y0+h, val.items.color,
                            font=val.items.font,
                            ptsize=fontsize)
-	    if menu.selected == choice:
+            if menu.selected == choice:
                 osd.drawbox(x0 - 8 + w, y0 - 3 + h, x0 - 8 + val.items.sel_length,\
                             y0 + fontsize*1.5 + h, width=-1,
                             color=((160 << 24) | val.items.sel_color))
@@ -232,7 +235,7 @@ class Skin:
                             y0 + val.submenu.size*1.5,
                             width=-1,
                             color=((160 << 24) | val.submenu.sel_color))
-	    x0 += 190
+            x0 += 190
 
         osd.update()
         

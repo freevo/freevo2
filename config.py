@@ -20,7 +20,7 @@ import sys, os, time, re
 import movie_xml
 
 
-DEBUG_STDOUT = 0
+DEBUG_STDOUT = 1
 
 
 if os.path.isdir('/var/log/freevo'):
@@ -37,12 +37,12 @@ class Logger:
     def __init__(self, logtype='(unknown)'):
         self.lineno = 1
         self.logtype = logtype
-	try:
+        try:
             appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
             logfile = '%s/internal-%s.log' % (LOGDIR, appname)
             self.fp = open(logfile, 'a')
             print 'Logging info in %s' % logfile
-	except IOError:
+        except IOError:
             print 'Could not open logfile: %s' % logfile
             self.fp = open('/dev/null','a')
         self.softspace = 0

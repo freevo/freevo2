@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/18 06:12:30  krister
+# Converted tabs to spaces. Please use tabnanny in the future!
+#
 # Revision 1.1  2002/08/17 02:55:45  krister
 # Submitted by Gustavo Barbieri.
 #
@@ -186,13 +189,13 @@ class Skin:
             else:
                 ptscale = 1.0
             fontsize = val.items.size*ptscale
-	    w = 0
-	    h = 0
-	    if choice.icon != None: 
+            w = 0
+            h = 0
+            if choice.icon != None: 
                 osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), x0, y0)
                 w = icon_size + 20
                 h = 5
-	    if menu.selected == choice:
+            if menu.selected == choice:
                 image = choice.image
 
             if choice.eventhandler_args:
@@ -336,7 +339,7 @@ class Skin:
                               val.submenu.size, val.submenu.shadow_visible,
                               val.submenu.shadow_mode,
                               val.submenu.shadow_pad_x, val.submenu.shadow_pad_y)
-	    x0 += 190
+            x0 += 190
 
         osd.update()
         

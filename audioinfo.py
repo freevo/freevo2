@@ -4,7 +4,7 @@
 # $Id$
 #
 # Authors: Thomas Malt <thomas@malt.no>
-#	   Aubin Paul <aubin@debian.org>
+#          Aubin Paul <aubin@debian.org>
 #          Scott Hassan (afaik)
 # Notes:   - Lot of code taken from an mp3 module by Scott Hassan
 #          - From now on ogg.vorbis is an optional dependency.
@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/08/18 06:10:58  krister
+# Converted tabs to spaces. Please use tabnanny in the future!
+#
 # Revision 1.10  2002/08/14 09:28:37  tfmalt
 #  o Updated all files using skin to create a skin object with the new
 #    get_singleton function. Please tell or add yourself if I forgot a
@@ -147,7 +150,7 @@ class AudioInfo:
         else:
             if DEBUG: print "Got something else..."
 
-	temp = self.get_cover_image ( self.filename )
+        temp = self.get_cover_image ( self.filename )
         if DEBUG:
             try:
                 print "DEBUG:"
@@ -162,17 +165,17 @@ class AudioInfo:
                 print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
     def get_cover_image( self, filename ):
-    	cover_logo = os.path.dirname(filename)
-	cover_logo += '/cover.png'
-	print cover_logo
-	# Only draw the cover if the file exists. We'll
-	# use the standard imghdr function to check if
-	# it's a real png, and not a lying one :)
-	if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
-		self.image = cover_logo
-	# Allow per mp3 covers. As per Chris' request ;)
-	if os.path.isfile(os.path.splitext(filename)[0] + '.png'):
-	        self.image = os.path.splitext(filename)[0] + '.png'
+        cover_logo = os.path.dirname(filename)
+        cover_logo += '/cover.png'
+        print cover_logo
+        # Only draw the cover if the file exists. We'll
+        # use the standard imghdr function to check if
+        # it's a real png, and not a lying one :)
+        if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
+            self.image = cover_logo
+        # Allow per mp3 covers. As per Chris' request ;)
+        if os.path.isfile(os.path.splitext(filename)[0] + '.png'):
+            self.image = os.path.splitext(filename)[0] + '.png'
         return self.image
 
     def set_cover_image( self, str ):
@@ -194,10 +197,10 @@ class AudioInfo:
         Arguments: Filename of file to get info from
         Returns:   1 if success.
         """
-	try:
-		import ogg.vorbis
-	except ImportError:
-		return None
+        try:
+            import ogg.vorbis
+        except ImportError:
+            return None
         try: 
             vf = ogg.vorbis.VorbisFile( file )
             vc = vf.comment()
@@ -247,7 +250,7 @@ class AudioInfo:
         """
         id3 = mp3_id3.ID3( file )
         m =  mp3_id3.mp3header( file)
-	s,b = m.info()
+        s,b = m.info()
 
         self.album  = id3.album
         self.artist = id3.artist
@@ -351,4 +354,3 @@ def mp3info(fn):
         i['FREQUENCY'] = ''
 
     return i
-			    

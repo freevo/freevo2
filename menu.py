@@ -49,10 +49,10 @@ class MenuItem:
         self.arg               = arg
         self.eventhandler      = eventhandler
         self.eventhandler_args = eventhandler_args
-	self.icon              = icon
-	self.scale             = scale
-	self.popup             = popup
-	self.image             = None
+        self.icon              = icon
+        self.scale             = scale
+        self.popup             = popup
+        self.image             = None
 
 
     def setImage(self, image):

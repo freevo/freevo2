@@ -48,23 +48,23 @@ def match_files(dir, suffix_list):
 # write filenames that aren't in lower ascii so we uhm,
 # hexify them.
 def hexify(str):
-	hexStr = string.hexdigits
-	r = ''
-	for ch in str:
-		i = ord(ch)
-		r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
-	return r
+        hexStr = string.hexdigits
+        r = ''
+        for ch in str:
+                i = ord(ch)
+                r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
+        return r
 
 
 # Python's bundled MD5 class only acts on strings, so
 # we have to calculate it in this loop
 def md5file(file):
-	m = md5.new()
-	f = open(file, 'r')
-	for line in f.readlines():
-		m.update(line)
-	f.close()
-	return hexify(m.digest())
+        m = md5.new()
+        f = open(file, 'r')
+        for line in f.readlines():
+                m.update(line)
+        f.close()
+        return hexify(m.digest())
     
 
 # Simple Python Imaging routine to return image size
@@ -80,18 +80,18 @@ def pngsize(file):
 
 
 def resize(file, x0=25, y0=25):
-	import Image
-	# Since the filenames are not unique we need
-	# to cache them by content, not name.
-	mythumb = (config.FREEVO_CACHEDIR + '/' +
+        import Image
+        # Since the filenames are not unique we need
+        # to cache them by content, not name.
+        mythumb = (config.FREEVO_CACHEDIR + '/' +
                    os.path.basename(md5file(file)) + '-%s-%s.png' % (x0, y0))
-	if os.path.isfile(mythumb):
-		return mythumb
-	else:
-		im = Image.open(file)
-		im_res = im.resize((x0,y0))
-		im_res.save(mythumb,'PNG')
-		return mythumb
+        if os.path.isfile(mythumb):
+                return mythumb
+        else:
+                im = Image.open(file)
+                im_res = im.resize((x0,y0))
+                im_res.save(mythumb,'PNG')
+                return mythumb
 
 def getExifThumbnail(file, x0=0, y0=0):
     import Image
@@ -114,48 +114,48 @@ def getExifThumbnail(file, x0=0, y0=0):
 
     
 def recursefolders(root, recurse=0, pattern='*', return_folders=0):
-	# Before anyone asks why I didn't use os.path.walk; it's simple, 
-	# os.path.walk is difficult, clunky and doesn't work right in my
-	# mind. 
-	#
-	# Here's how you use this function:
-	#
-	# songs = recursefolders('/media/Music/Guttermouth',1,'*.mp3',1):
-	# for song in songs:
-	#	print song	
-	#
-	# Should be easy to add to the mp3.py app.
+        # Before anyone asks why I didn't use os.path.walk; it's simple, 
+        # os.path.walk is difficult, clunky and doesn't work right in my
+        # mind. 
+        #
+        # Here's how you use this function:
+        #
+        # songs = recursefolders('/media/Music/Guttermouth',1,'*.mp3',1):
+        # for song in songs:
+        #       print song      
+        #
+        # Should be easy to add to the mp3.py app.
 
-	# initialize
-	result = []
+        # initialize
+        result = []
 
-	# must have at least root folder
-	try:
-		names = os.listdir(root)
-	except os.error:
-		return result
+        # must have at least root folder
+        try:
+                names = os.listdir(root)
+        except os.error:
+                return result
 
-	# expand pattern
-	pattern = pattern or '*'
-	pat_list = string.splitfields( pattern , ';' )
-	
-	# check each file
-	for name in names:
-		fullname = os.path.normpath(os.path.join(root, name))
+        # expand pattern
+        pattern = pattern or '*'
+        pat_list = string.splitfields( pattern , ';' )
+        
+        # check each file
+        for name in names:
+                fullname = os.path.normpath(os.path.join(root, name))
 
-		# grab if it matches our pattern and entry type
-		for pat in pat_list:
-			if fnmatch.fnmatch(name, pat):
-				if os.path.isfile(fullname) or (return_folders and os.path.isdir(fullname)):
-					result.append(fullname)
-				continue
-				
-		# recursively scan other folders, appending results
-		if recurse:
-			if os.path.isdir(fullname) and not os.path.islink(fullname):
-				result = result + recursefolders( fullname, recurse, pattern, return_folders )
-			
-	return result
+                # grab if it matches our pattern and entry type
+                for pat in pat_list:
+                        if fnmatch.fnmatch(name, pat):
+                                if os.path.isfile(fullname) or (return_folders and os.path.isdir(fullname)):
+                                        result.append(fullname)
+                                continue
+                                
+                # recursively scan other folders, appending results
+                if recurse:
+                        if os.path.isdir(fullname) and not os.path.islink(fullname):
+                                result = result + recursefolders( fullname, recurse, pattern, return_folders )
+                        
+        return result
 
 
 

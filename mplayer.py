@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2002/08/18 06:10:58  krister
+# Converted tabs to spaces. Please use tabnanny in the future!
+#
 # Revision 1.29  2002/08/14 09:28:37  tfmalt
 #  o Updated all files using skin to create a skin object with the new
 #    get_singleton function. Please tell or add yourself if I forgot a
@@ -57,9 +60,9 @@
 #
 # o You can now set the priority of the mplayer process via a nice setting
 # o This involves two lines in the config file: NICE and MPLAYER_NICE for the
-# 	path to 'nice' and the actual numeric priority where '-10' is the
-# 	default (high priority) set it to 0 for normal priority or +10 for
-# 	low priority.
+#       path to 'nice' and the actual numeric priority where '-10' is the
+#       default (high priority) set it to 0 for normal priority or +10 for
+#       low priority.
 #
 # Revision 1.18  2002/08/03 18:15:22  dischi
 # o added the patch from Thomas Malt for better audio control
@@ -145,13 +148,13 @@ def get_singleton():
 def get_demuxer(filename):
     DEMUXER_MP3 = 17
     DEMUXER_OGG = 18
-    rest, extension	= os.path.splitext(filename)
+    rest, extension     = os.path.splitext(filename)
     if string.lower(extension) == '.mp3':
-	return "-demuxer " + str(DEMUXER_MP3)
+        return "-demuxer " + str(DEMUXER_MP3)
     if string.lower(extension) == '.ogg':
-	return "-demuxer " + str(DEMUXER_OGG)
+        return "-demuxer " + str(DEMUXER_OGG)
     else:
-    	return ''
+        return ''
 
 
 class MPlayer:
@@ -452,7 +455,7 @@ class MPlayerApp(childapp.ChildApp):
         
     def kill(self):
         childapp.ChildApp.kill(self, signal.SIGINT)
-	osd.update()
+        osd.update()
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         os.system('killall -9 freevo_xwin 2&> /dev/null')

@@ -72,7 +72,7 @@ def get_guide():
 
     if not cached_guide:
         # An error occurred, return an empty guide
-   	cached_guide = epg_types.TvGuide()
+        cached_guide = epg_types.TvGuide()
         
     return cached_guide
 

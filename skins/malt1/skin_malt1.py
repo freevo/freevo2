@@ -328,7 +328,7 @@ class Skin:
         # Draw the menu items, with icons if any
         row = 0
         for choice in menuw.menu_items:
-	    if choice.icon != None:
+            if choice.icon != None:
                 icon_x = x0 - icon_size - 10 - 25*is_main
                 osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size),
                                icon_x, y0)
@@ -338,7 +338,7 @@ class Skin:
                            font=val.items.font,
                            ptsize=fontsize)
             
-	    if menu.selected == choice:
+            if menu.selected == choice:
                 osd.drawbox(x0 - 3 - 5*is_main, y0 - 3,
                             x0 + maxwidth + 3 + 5*is_main,
                             y0 + fontsize*1.5 + 1 + 2*is_main, width=-1,
@@ -411,7 +411,7 @@ class Skin:
                             y0 + val.submenu.size*1.5,
                             width=-1,
                             color=((160 << 24) | val.submenu.sel_color))
-	    x0 += 190
+            x0 += 190
 
         osd.update()
         

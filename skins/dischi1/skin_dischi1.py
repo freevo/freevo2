@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/08/18 06:10:59  krister
+# Converted tabs to spaces. Please use tabnanny in the future!
+#
 # Revision 1.4  2002/08/11 10:36:23  dischi
 # bugfix
 #
@@ -222,15 +225,15 @@ class Skin(skin_main1.Skin):
         # Draw the first row
         row = 0
         for choice in menuw.menu_items:
-	    w = 0
-	    h = 0
+            w = 0
+            h = 0
 
-	    if choice.icon != None: 
+            if choice.icon != None: 
                 osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), x0, y0)
                 w = icon_size + 20
                 h = 5
                 
-	    if menu.selected == choice:
+            if menu.selected == choice:
                 osd.drawbox(x0 - 8 + w, y0 - 3 + h, x0 - 8 + selection_length,\
                             y0 + fontsize*1.5 + h, width=-1,
                             color=((160 << 24) | val.items.sel_color))
@@ -316,7 +319,7 @@ class Skin(skin_main1.Skin):
                             y0 + val.submenu.size*1.5,
                             width=-1,
                             color=((160 << 24) | val.submenu.sel_color))
-	    x0 += 190
+            x0 += 190
 
         osd.update()
         
