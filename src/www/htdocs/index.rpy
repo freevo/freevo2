@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/29 11:40:42  rshortt
+# Applied a patch by Mike Ruelle that adds info about disk free, scheduled recordings, and shows the time.
+#
 # Revision 1.4  2003/05/22 21:33:23  outlyer
 # Lots of cosmetic changes:
 #
@@ -54,8 +57,10 @@
 
 import sys, time
 
-import record_client
+import record_client 
 from web_types import HTMLResource, FreevoResource
+import util
+import config
 
 TRUE = 1
 FALSE = 0
@@ -67,9 +72,28 @@ class IndexResource(FreevoResource):
 
         fv.printHeader('Welcome', 'styles/main.css')
     
+        fv.res += '<h2>Freevo Web Status as of %s</h2>' % time.strftime('%B %d %H:%M', time.localtime())
+    
         (server_available, schedule) = record_client.connectionTest()
         if not server_available:
-            fv.res += '<h4>Notice: The recording server is down.</h4>'
+            fv.res += '<p><font color="red" >Notice: The recording server is down.</font></p>'
+        else:
+            fv.res += '<p><font color="white" >The recording server is up and running.</font></p>'
+
+        (got_schedule, recordings) = record_client.getScheduledRecordings()
+        if got_schedule:
+            num_sched_progs = len(recordings.getProgramList().values())
+            if num_sched_progs == 1:
+                fv.res += '<p><font color="white" >One program scheduled to record.</font></p>'
+            elif num_sched_progs > 0:
+                fv.res += '<p><font color="white" >%i programs scheduled to record.</font></p>' % num_sched_progs
+            else:
+                fv.res += '<p><font color="white" >No programs scheduled to record.</font></p>'
+        else:
+            fv.res += '<p><font color="white" >No programs scheduled to record.</font></p>'
+
+        diskfree = '%i of %i Mb free in %s'  % ( (( util.freespace(config.DIR_RECORD) / 1024) / 1024), ((util.totalspace(config.DIR_RECORD) /1024) /1024), config.DIR_RECORD)
+        fv.res += '<p><font color="white" >' + diskfree + '</font></p>'
 
         fv.printSearchForm()
         fv.printLinks()
