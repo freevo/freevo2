@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/05 19:47:27  dischi
+# fix fallback value
+#
 # Revision 1.1  2003/08/05 18:59:22  dischi
 # Directory cleanup, part 1:
 # move skins/main1/* to src/skins/main
@@ -442,7 +445,7 @@ class Skin_Area:
             
         self.use_images = menu.skin_default_no_images
 
-        if len(menu.choices) < 5:
+        if len(menu.choices) < 6:
             try:
                 if menu.choices[0].info_type == 'track':
                     menu.skin_force_text_view = TRUE
