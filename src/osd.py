@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.125  2004/01/16 12:19:09  dischi
+# fix crash when filename already is an image object
+#
 # Revision 1.124  2004/01/13 19:11:19  dischi
 # backup screen before osd shutdown
 #
@@ -1271,7 +1274,7 @@ class OSD:
             thumb = None
             _debug_('Trying to load file "%s"' % filename, level=3)
 
-            if filename.endswith('.raw'):
+            if isinstance(filename, str) and filename.endswith('.raw'):
                 data  = util.read_pickle(filename)
                 image = pygame.image.fromstring(data[0], data[1], data[2])
 
