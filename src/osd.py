@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.129  2004/01/30 20:42:38  dischi
+# add debug
+#
 # Revision 1.128  2004/01/25 13:09:04  dischi
 # unicode support for filenames
 #
@@ -992,7 +995,7 @@ class OSD:
                     # draw the text in the fgcolor
                     layer.blit(render, (x0, y0))
                 except:
-                    print "Render failed, skipping..."    
+                    print 'Render failed, skipping \'%s\'...' % l
 
             if x0 < min_x:
                 min_x = x0
