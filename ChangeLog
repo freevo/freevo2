@@ -3,6 +3,16 @@ Freevo Changelog
 
 $Id$
 
+Release 1.5.1 (2004-09-xx):
+---------------------------
+ * Better support for multi file videos
+ * Improved DVD detection
+ * Faster web-server TV guide
+ * Games snes header caching
+ * Imageviewer slideshow enhancements
+ * Bugfixes
+ 
+
 Release 1.5.0 (2004-07-17):
 ---------------------------
  * Bugfixes
