@@ -36,6 +36,11 @@ src_compile() {
 	/bin/ls -l /etc/localtime | grep Europe >/dev/null 2>/dev/null && \
 	    myconf="$myconf --tv=pal"
 
+	if [ "`use -X`" ]; then
+	    mv Makefile Makefile.bak
+	    sed 's/\(all.*\)freevo_xwin/\1/' Makefile.bak > Makefile
+	    rm Makefile.bak
+	fi
 	emake || make || die
 	./freevo setup ${myconf} || die
 }

@@ -21,7 +21,7 @@ if [ "$PORTDIR_OVERLAY" = "" ]; then
 fi
 
 cd /tmp
-rm $file.tgz
+rm -f $file.tgz
 wget http://freevo.sourceforge.net/gentoo/$file.tgz
 
 if [ '!' -e $file.tgz ]; then
@@ -43,6 +43,6 @@ tar -zxvf /tmp/$file.tgz
 rm /tmp/$file.tgz
 
 # clear the dep cache because we have new informations
-rm /var/cache/edb/dep/media-video/freevo-*
+rm -f /var/cache/edb/dep/media-video/freevo-*
 
 # end of rsync-freevo

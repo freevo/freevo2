@@ -6,7 +6,7 @@
 # $Id$
 
 
-version=`echo $1 | sed 's/-bla/_/g' | sed 's/_r[0-9]//'`
+version=`echo $1 | sed 's/-bla/_/g' | sed 's/-r[0-9]//'`
 ebuild_version=`echo $1 | sed 's/-/_/g' | sed 's/_\(r[0-9]\)/-\1/'`
 tag=REL-`echo $1 | sed 's/\./_/g' | sed 'y/prerc/PRERC/'` 
 echo src name: freevo-$ebuild_version and freevo-src-$version
