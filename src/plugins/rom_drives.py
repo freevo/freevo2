@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/11/09 16:17:32  dischi
+# fix mmpython info parsing for movies on disc
+#
 # Revision 1.39  2003/11/09 13:05:04  dischi
 # support for disc images without fxd file
 #
@@ -704,7 +707,9 @@ class Identify_Thread(threading.Thread):
             media.info.set_xml_file(xml_file)
             
         if len(mplayer_files) == 1:
+            util.mount(media.mountdir)
             media.videoinfo = VideoItem(mplayer_files[0], None)
+            util.umount(media.mountdir)
             media.videoinfo.media = media
             media.videoinfo.media_id = media.id
             media.videoinfo.label = media.label
