@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/08/12 16:52:49  rshortt
+# Work on autodetecting tv cards.
+#
 # Revision 1.16  2004/08/11 20:47:17  rshortt
 # Start adding some try/except.
 #
@@ -286,12 +289,14 @@ class Videodev:
         r = fcntl.ioctl(self.device,SET_AUDIO_NO,val)
 
 
-    def init_settings(self):
-        (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
-        v_norm = string.upper(v_norm)
-        self.setstd(NORMS.get(v_norm))
+    def init_settings(self, which):
+        card = config.TV_SETTINGS.get(which)
+        if not card:
+            # XXX: print a clever error
+            return
 
-        self.setchanlist(v_clist)
+        self.setstd(NORMS.get(card.norm))
+        self.setchanlist(card.chanlist)
 
         # XXX TODO: make a good way of setting the input
         # self.setinput(....)
@@ -329,24 +334,5 @@ class Videodev:
         print "Width: %i, Height: %i" % (width,height)
 
         print "Read Frequency: %i" % self.getfreq()
-
-
-class V4LGroup:
-    def __init__(self):
-        # Types:
-        #   tv-v4l1 - video capture card with a tv tuner using v4l1
-        #   tv-v4l2 - video capture card with a tv tuner using v4l2
-        #   video   - video capture card (v4l1 or v4l2) using an external video
-        #             source such as sattelite, digital cable box, video or
-        #             security camera.
-        #   webcam  - such as a USB webcam, these are handled a bit differently
-        #             than most other v4l devices.
-
-        self.type = type
-        self.vdev = vdev
-        self.vinput = vinput
-        self.adev = adev
-        self.desc = desc
-        self.inuse = FALSE
 
 

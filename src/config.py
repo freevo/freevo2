@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2004/08/12 16:52:49  rshortt
+# Work on autodetecting tv cards.
+#
 # Revision 1.113  2004/08/09 14:37:45  dischi
 # fix encoding detection
 #
@@ -312,6 +315,19 @@ __builtin__.__dict__['_debug_']= _debug_function_
 
 
 #
+# Default settings
+# These will be overwritten by the contents of 'freevo.conf'
+#
+CONF = setup_freevo.Struct()
+CONF.geometry = '800x600'
+CONF.width, CONF.height = 800, 600
+CONF.display = 'x11'
+CONF.tv = 'ntsc'
+CONF.chanlist = 'us-cable'
+CONF.version = 0
+
+
+#
 # TV card settup
 #
 
@@ -326,6 +342,32 @@ class TVCard:
     def __init__(self, number):
         self.vdev = '/dev/video' + number
         self.adev = None
+        self.norm = string.upper(CONF.tv)
+        self.chanlist = CONF.chanlist
+
+        
+class IVTVCard(TVCard):
+    def __init__(self, number):
+        TVCard.__init__(self, number)
+
+        # XXX TODO: take care of proper PAL / NTSC defaults
+        self.input = 4
+        self.resolution = '720x480'
+        self.aspect = 2
+        self.audio_bitmask = 0x00a9
+        self.bframes = 3
+        self.bitrate_mode = 1
+        self.bitrate = 4500000
+        self.bitrate_peak = 4500000
+        self.dnr_mode = 0
+        self.dnr_spatial = 0
+        self.dnr_temporal = 0
+        self.dnr_type = 0
+        self.framerate = 0
+        self.framespergop = 15
+        self.gop_closure = 1
+        self.pulldown = 0
+        self.stream_type = 14
 
         
 class DVBCard:
@@ -335,18 +377,51 @@ class DVBCard:
 
 TV_SETTINGS = TVSettings()
 
+
 # auto-load TV_SETTINGS:
+tvn = 0
+ivtvn = 0
 for i in range(10):
     if os.path.isdir('/dev/dvb/adapter%s' % i):
         TV_SETTINGS['dvb%s' % i] = DVBCard
-    if os.path.isdir('/dev/video%s' % i):
-        TV_SETTINGS['tv%s' % i]  = TVCard
+
+    vdev = '/dev/video%s' % i
+    if os.path.exists(vdev):
+        type = 'tv'
+        try:
+            import tv.v4l2
+            v = tv.v4l2.Videodev(vdev)
+            if string.find(v.driver, 'ivtv') != -1:
+                type = 'ivtv'
+            v.close()
+            del v
+        except OSError: 
+            # likely no device attached
+            continue
+        except: 
+            traceback.print_exc()
+            
+        if type == 'tv':
+            key = '%s%s' % (type,tvn)
+            TV_SETTINGS[key]  = TVCard
+            if tvn != i:
+                TV_SETTINGS[key].vdev = vdev
+            tvn = tvn + 1
+
+        elif type == 'ivtv':
+            key = '%s%s' % (type,ivtvn)
+            TV_SETTINGS[key]  = IVTVCard
+            if ivtvn != i:
+                TV_SETTINGS[key].vdev = vdev
+            ivtvn = ivtvn + 1
+
 
 
 # TESTCODE FOR freevo_config.py:
-TV_SETTINGS['tv0']  = TVCard
-TV_SETTINGS['tv0'].adev = '/dev/dsp'
-TV_SETTINGS['dvb0'] = DVBCard
+# TV_SETTINGS['tv0']  = TVCard
+# TV_SETTINGS['tv1']  = TVCard
+# TV_SETTINGS['tv0'].adev = '/dev/dsp'
+# TV_SETTINGS['dvb0'] = DVBCard
 
 
 
@@ -357,18 +432,6 @@ TV_SETTINGS['dvb0'] = DVBCard
 cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo',
                 '/usr/local/etc/freevo' ]
 
-
-#
-# Default settings
-# These will be overwritten by the contents of 'freevo.conf'
-#
-CONF = setup_freevo.Struct()
-CONF.geometry = '800x600'
-CONF.width, CONF.height = 800, 600
-CONF.display = 'x11'
-CONF.tv = 'ntsc'
-CONF.chanlist = 'us-cable'
-CONF.version = 0
 
 #
 # Read the environment set by the start script

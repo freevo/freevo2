@@ -489,7 +489,7 @@ plugin.activate('tiny_osd')
 # For recording tv
 #
 # generic_record plugin needs VCR_CMD to be set correctly
-plugin_record = plugin.activate('record.generic_record')
+# plugin.activate('record.generic_record')
 
 #
 # Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
@@ -497,7 +497,7 @@ plugin_record = plugin.activate('record.generic_record')
 # correctly. To use you need to set the following two lines:
 #
 # plugin.remove('record.generic_record')
-# plugin_record = plugin.activate('record.ivtv_record')
+# plugin.activate('record.ivtv_record')
 
 # TV menu plugin to view scheduled recordings
 plugin.activate('tv.scheduled_recordings')
@@ -1181,7 +1181,7 @@ else:
 # For example, TV_OPTS = '-vop pp=ci' would turn on deinterlacing.
 TV_OPTS = ''
 
-TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
+# TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 #
 # Size (in MB) of the timeshift buffer. (ie: how long you can pause tv for.)  
@@ -1190,8 +1190,7 @@ TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 #
 TIMESHIFT_BUFFER_SIZE = 128
 
-TIMESHIFT_ENCODE_CMD = 'mp1e -m3 -c%s -p%s -r14,100' % \
-                       (TV_SETTINGS.split()[3], AUDIO_INPUT_DEVICE) 
+TIMESHIFT_ENCODE_CMD = None
 
 TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
 

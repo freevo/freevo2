@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/08/12 16:52:49  rshortt
+# Work on autodetecting tv cards.
+#
 # Revision 1.13  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -103,11 +106,11 @@ class IVTV(tv.v4l2.Videodev):
         r = fcntl.ioctl(self.device, MSP_SET_MATRIX, val)
 
 
-    def init_settings(self, opts=None):
+    def init_settings(self, which, opts=None):
         if not opts:
             opts = config.TV_IVTV_OPTIONS
 
-        tv.v4l2.Videodev.init_settings(self)
+        tv.v4l2.Videodev.init_settings(self, which)
 
         (width, height) = string.split(opts['resolution'], 'x')
         self.setfmt(int(width), int(height))
