@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/11 14:41:05  dischi
+# add all <background> images to the bgimage list
+#
 # Revision 1.31  2004/02/07 11:52:17  dischi
 # always show submenus "with image"
 #
@@ -582,8 +585,8 @@ class Skin_Area:
                 else:
                     imagefile = bg.filename
 
-                if self.name == 'screen':
-                    bg.label = 'background'
+                # set to 'background' to be added to that image list
+                bg.label = 'background'
                     
                 if imagefile:
                     cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
