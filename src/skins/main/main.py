@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/01/13 19:12:02  dischi
+# support for basic.fxd
+#
 # Revision 1.33  2004/01/13 17:20:54  dischi
 # fixed display toggle
 #
@@ -236,7 +239,7 @@ class Skin:
         # try to find the skin xml file
         if not self.settings.load(name, clear=True):
             print "skin not found, using fallback skin"
-            self.settings.load('blue.fxd', clear=True)
+            self.settings.load('basic.fxd', clear=True)
             
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.fxd' % dir
@@ -287,6 +290,7 @@ class Skin:
 
         # image is not usable stand alone
         skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
+        skin_files.remove(os.path.join(config.SKIN_DIR, 'main/basic.fxd'))
         
         for skin in skin_files:
             name  = os.path.splitext(os.path.basename(skin))[0]
