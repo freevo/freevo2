@@ -47,6 +47,8 @@ import plugin
 import time
 import config
 import rc
+import util
+
 from event import *
 
 class PluginInterface(plugin.ItemPlugin):
@@ -68,7 +70,8 @@ class PluginInterface(plugin.ItemPlugin):
 
     Add something like this to your local_conf.py
 
-    EVENTS['menu']['REC'] = Event(MENU_CALL_ITEM_ACTION, arg='queue_a_track')
+    EVENTS['menu']['REC']  = Event(MENU_CALL_ITEM_ACTION, arg='queue_a_track')
+    EVENTS['menu']['SAVE'] = Event(MENU_CALL_ITEM_ACTION, arg='close_playlist')
 
     """
     
@@ -97,29 +100,36 @@ class PluginInterface(plugin.ItemPlugin):
         if self.item.type == 'playlist':
             # that could cause us much trouble
             return []
-        
-        return [ ( self.queue_file, _( 'Enqueue this Music in Playlist' ),
-                   'queue_a_track'),
-                 ( self.new_playlist, _( 'Make a new Audio Playlist' ),
-                   'close_playlist')]
 
+        items = [ (self.queue_file, _('Enqueue this Music in Playlist'), 'queue_a_track') ]
+        if self.playlist_handle:
+            items.append((self.new_playlist, _( 'Make a new Audio Playlist' ),
+                          'close_playlist'))
+        return items
+
+    
     def queue_file(self,arg=None, menuw=None):
         if not self.playlist_handle:
             self.playlist_handle = open(('%s/%s.m3u' % (self.playlist_folder,
                                                         time.strftime(self.naming))),'w+')
         for f in self.item.files.get():
             if os.path.isdir(f):
-                for file in os.listdir(f):
+                for file in util.match_files_recursively(f, config.AUDIO_SUFFIX):
                     self.playlist_handle.write('%s\n' % os.path.join(f, file))
             else:
                 self.playlist_handle.write('%s\n' % f)
         self.playlist_handle.flush()
-        rc.post_event(Event(OSD_MESSAGE, arg='Queued Track'))
+        if menuw:
+            if self.item.type == 'dir':
+                menuw.delete_submenu(True, True, _('Queued Directory'))
+            else:
+                menuw.delete_submenu(True, True, _('Queued Track'))
         return
 
     def new_playlist(self, arg=None, menuw=None):
-        rc.post_event(Event(OSD_MESSAGE, arg='Added New Playlist'))
         if self.playlist_handle:
             self.playlist_handle.close()
             self.playlist_handle = None
+        if menuw:
+            menuw.delete_submenu(True, True, _('Added New Playlist'))
         return
