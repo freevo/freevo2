@@ -3,26 +3,22 @@
 """Setup script for the freevo distribution."""
 
 
-# This is the first version of a real python setup script to install
-# Freevo directly into the system. This script can't be used with
-# the runtime, because the runtime contains it's own python.
-
-
 __revision__ = "$Id$"
 
+# Python distutils stuff
 from distutils.core import setup, Extension
-import distutils.command.install
 import os
 import sys
 
+# Freevo distutils stuff
 sys.path.append('./src')
 import version
-import util.distutils
+from util.distutils import *
 
-util.distutils.check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
-                           ('pygame', 'http://www.pygame.org'),
-                           ('Image', 'http://www.pythonware.com/products/pil/'),
-                           ('twisted', 'http://www.twistedmatrix.com/')))
+check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
+            ('pygame', 'http://www.pygame.org'),
+            ('Image', 'http://www.pythonware.com/products/pil/'),
+            ('twisted', 'http://www.twistedmatrix.com/')))
 
 
 # check if everything is in place
@@ -31,8 +27,7 @@ if not os.path.isdir('./Docs/installation/html'):
     print 'of Freevo. Please run ./autogen.sh first'
     sys.exit(0)
 
-data_files = util.distutils.data_files
-
+# add some files to Docs
 for f in ('BUGS', 'COPYING', 'ChangeLog', 'INSTALL', 'README'):
     data_files.append(('share/doc/freevo-%s' % version.__version__, ['%s' % f ]))
 data_files.append(('share/doc/freevo-%s' % version.__version__, ['Docs/CREDITS' ]))
@@ -42,9 +37,11 @@ data_files.append(('share/doc/freevo-%s' % version.__version__, ['Docs/CREDITS' 
 data_files.append(('share/freevo', [ 'freevo_config.py' ]))
 
 # add docbook style howtos
-os.path.walk('./Docs/installation', util.distutils.docbook_finder, data_files)
-os.path.walk('./Docs/plugin_writing', util.distutils.docbook_finder, data_files)
+os.path.walk('./Docs/installation', docbook_finder, data_files)
+os.path.walk('./Docs/plugin_writing', docbook_finder, data_files)
 
+# i18n support
+i18n('freevo')
 
 scripts = ['freevo']
 
@@ -57,9 +54,10 @@ setup (name         = "freevo",
        url          = "http://www.freevo.org",
        license      = "GPL",
 
-       scripts=scripts,
-       package_dir = util.distutils.package_dir,
-       packages = util.distutils.packages,
-       data_files = data_files
+       scripts      =scripts,
+       package_dir  = package_dir,
+       packages     = packages,
+       data_files   = data_files
        )
 
+finalize()
