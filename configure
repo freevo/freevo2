@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/05 19:56:05  krister
+# Missed the commandline args
+#
 # Revision 1.13  2003/02/05 06:10:46  krister
 # Changed the start scripts and childapp.py to use startprog to start all programs.
 #
@@ -41,6 +44,6 @@ if ! [ -e src/identifymedia.py ]; then
     cd `dirname $0`
 fi
 
-./startprog python setup_build.py
+./startprog python setup_build.py $@
 
 exit 0
