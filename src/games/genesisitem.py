@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/19 21:33:02  mikeruelle
+#  a patch from Sylvian to use the new set_url stuff
+#
 # Revision 1.6  2004/01/14 18:29:49  mikeruelle
 # .
 #
@@ -76,10 +79,10 @@ genesisromExtensions = ['smd', 'bin']
 
 class GenesisItem(Item):
     def __init__(self, file, cmd = None, args = None, imgpath = None, parent = None):
-        Item.__init__(self)
-        self.type  = 'genesis'         # fix value
-        self.mode  = 'file'            # file, dvd or vcd
-        self.filename = file
+        Item.__init__(self, parent)
+        self.type  = 'genesis'            # fix value
+        self.set_url(file, info=True)
+        self.parent = parent
         romName = ''
 
         genesisFile = None

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/19 21:33:02  mikeruelle
+#  a patch from Sylvian to use the new set_url stuff
+#
 # Revision 1.16  2004/01/14 18:29:49  mikeruelle
 # .
 #
@@ -74,13 +77,11 @@ from item import Item
 
 class MameItem(Item):
     def __init__(self, title, file, image = None, cmd = None, args = None, imgpath = None, parent = None):
-        Item.__init__(self)
+        Item.__init__(self, parent)
         self.type  = 'mame'            # fix value
-        self.mode  = 'file'            # file, dvd or vcd
+        self.set_url(file, info=True)
         self.image = image
-        self.name = title
-        self.filename = file
-
+        self.name  = title
         self.parent = parent
 
         # find image for this file
@@ -107,9 +108,10 @@ class MameItem(Item):
 
         romname = os.path.basename(file)
         romdir = os.path.dirname(file)
-        command = '%s -rp %s "%s"' % (command, romdir, romname)
+        command = '%s %s' % (command, file)
 
         self.command = command
+	print "Command for MAME : %s" % self.command
 
         self.game_player = game.get_singleton()
         

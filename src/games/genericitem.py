@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/19 21:32:58  mikeruelle
+#  a patch from Sylvian to use the new set_url stuff
+#
 # Revision 1.5  2004/01/14 18:29:49  mikeruelle
 # .
 #
@@ -70,13 +73,12 @@ from re import *
 
 class GenericItem(Item):
     def __init__(self, file, cmd = None, args = None, imgpath = None, parent = None):
-        Item.__init__(self)
-        self.type  = 'generic'         # fix value
-        self.mode  = 'file'            # file, dvd or vcd
-        self.filename = file
+        Item.__init__(self, parent)
+        self.type  = 'generic'            # fix value
+        self.set_url(file, info=True)
+        self.parent = parent
 
         self.name = os.path.splitext(os.path.basename(file))[0]
-        self.parent = parent
 
         # find image for this file
         # find image for this file
