@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/08/19 02:06:57  krister
+# Added X11 TV viewing. Use the TV norm, chanlist etc from the config file.
+#
 # Revision 1.2  2002/08/17 18:33:36  krister
 # Changed format from yv12 to yuy2 (12->16 bpp). Added cache. Still a little jerky sometimes, mplayer will hopefully be fixed soon.
 #
@@ -40,6 +43,9 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+# Configuration file. Determines where to look for AVI/MP3 files, etc
+import config
+
 import sys
 import random
 import time, os, glob
@@ -47,28 +53,18 @@ import string, popen2, fcntl, select, struct
 import threading
 import signal
 
-
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
-
-# Various utilities
-import util
-
-# Handle child applications
-import childapp
-
-# The menu widget class
-import menu
-
-# The mixer class, controls the volumes for playback and recording
-import mixer
-
-# The OSD class, used to communicate with the OSD daemon
-import osd
-
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
+import util    # Various utilities
+import menu    # The menu widget class
+import skin    # The skin class
+import mixer   # The mixer class
+import osd     # The OSD class, used to communicate with the OSD daemon
+import rc      # The RemoteControl class.
+import music   # The Music module
+import movie   # The Movie module
+import tv      # The TV module
+import imenu   # The Image viewer module
+import mplayer
+import childapp # Handle child applications
 
 # Create the remote control object
 rc = rc.get_singleton()
@@ -147,23 +143,90 @@ class MPlayer:
 
         if mode == 'tv':
             tuner_channel = self.TunerGetChannel()
-            tvcmd = ('-tv on:driver=v4l:input=0:norm=NTSC:channel=%s:'
-                     'chanlist=us-cable:width=640:height=480:outfmt=yuy2' % tuner_channel)
-            command = ('../apps/mplayer -vo %s -fs %s -cache 3000' %
-                       (config.MPLAYER_VO_DEV, tvcmd))
-        elif mode == 'vcr':
-            raise 'Not implemented'
-            command = config.WATCH_TV_APP + ' "' + config.VCR_SETTINGS + ' 2"'  # Channel isn't used
-        else:
-            raise 'Not implemented'
-            now = time.localtime(time.time())
-            outfile = time.strftime("0_rec_%Y-%m-%d_%H%M%S.avi", now)
-            outfile = config.DIR_RECORD + '/' + outfile
-            command = (config.VIDREC_MQ % outfile)
 
+            cf_norm, cf_input, cf_clist = config.TV_SETTINGS.split()
+
+            # Convert to MPlayer TV setting strings
+            norm = 'norm=%s' % cf_norm.upper()
+            tmp = { 'television':0, 'composite1':1}[cf_input.lower()]
+            input = 'input=%s' % tmp
+            chanlist = 'chanlist=%s' % cf_clist
+
+            w, h = config.TV_VIEW_SIZE
+            outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
+
+            tvcmd = ('-tv on:driver=v4l:%s:%s:channel=%s:'
+                     '%s:width=%s:height=%s:%s' %
+                     (input, norm, tuner_channel, chanlist, w, h, outfmt))
+            
+            mpl = ('../apps/mplayer -vo %s -fs %s %s' %
+                   (config.MPLAYER_VO_DEV, tvcmd,
+                    config.MPLAYER_ARGS_TVVIEW))
+
+        elif mode == 'vcr':
+            cf_norm, cf_input, tmp = config.VCR_SETTINGS.split()
+
+            # Convert to MPlayer TV setting strings
+            norm = 'norm=%s' % cf_norm.upper()
+            tmp = { 'television':0, 'composite1':1}[cf_input.lower()]
+            input = 'input=%s' % tmp
+
+            w, h = config.TV_VIEW_SIZE
+            outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
+            
+            tvcmd = ('-tv on:driver=v4l:%s:%s:channel=2:'
+                     'chanlist=us-cable:width=%s:height=%s:%s' %
+                     (input, norm, w, h, outfmt))
+            
+            mpl = ('../apps/mplayer -vo %s -fs %s %s' %
+                   (config.MPLAYER_VO_DEV, tvcmd,
+                    config.MPLAYER_ARGS_TVVIEW))
+
+        else:
+            print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
+            rc.app = None
+            menuwidget.refresh()
+            return
+
+        # Support for X11, getting the keyboard events
+        if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':
+            if DEBUG: print 'Got freevo_xwin and x11'
+            os.system('rm -f /tmp/freevo.wid')
+            os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
+                      (osd.width, osd.height))
+
+            # Wait until freevo_xwin signals us, but have a timeout so we
+            # don't hang here if something goes wrong!
+            delay_ms = 50
+            timeout_ms = 5000
+            while 1:
+                if os.path.isfile('/tmp/freevo.wid'):
+                    # Check if the whole line has been written yet
+                    val = open('/tmp/freevo.wid').read()
+                    if len(val) > 5 and val[-1] == '\n':
+                        break
+                time.sleep(delay_ms / 1000.0)
+                timeout_ms -= delay_ms
+                if timeout_ms < 0.0:
+                    print 'Could not start freevo_xwin!'  # XXX ui.message()
+                    return
+
+            if DEBUG: print 'Got freevo.wid'
+            try:
+                wid = int(open('/tmp/freevo.wid').read().strip(), 16)
+                mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
+                if DEBUG: print 'Got WID = 0x%08x' % wid
+            except:
+                print 'Cannot access freevo_xwin data!'   # XXX ui.message()
+                pass
+
+        command = mpl
+                
         self.mode = mode
 
         # XXX Mixer manipulation code.
+        linein_vol = mixer.getLineinVolume()
+        igain_vol  = mixer.getIgainVolume()
         if config.MAJOR_AUDIO_CTRL == 'VOL':
             mixer.setPcmVolume(0)
         elif config.MAJOR_AUDIO_CTRL == 'PCM':
@@ -174,9 +237,9 @@ class MPlayer:
             mixer.setMicVolume(0)
 
         # XXX Should be moved out in appropriate functions.
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.drawstring('Running the "%s" application' % mode, 30, 280,
-                       fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+        #osd.clearscreen(color=osd.COL_BLACK)
+        #osd.drawstring('Running the "%s" application' % mode, 30, 280,
+        # fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
         self.thread.mode = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
@@ -184,16 +247,18 @@ class MPlayer:
         rc.app = self.EventHandler
 
         # Suppress annoying audio clicks
-        time.sleep(0.5)
+        time.sleep(0.3)
         # XXX Hm.. This is hardcoded and very unflexible.
         if mode == 'vcr':
-            mixer.setMicVolume( config.VCR_IN_VOLUME )
+            mixer.setMicVolume(config.VCR_IN_VOLUME)
         else:
-            mixer.setLineinVolume( config.TV_IN_VOLUME )
-            mixer.setIgainVolume( config.TV_IN_VOLUME )
+            mixer.setLineinVolume(linein_vol)
+            mixer.setIgainVolume(igain_vol)
             
-        print '%s: started %s app' % (time.time(), self.mode)
+        if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
 
+        skin.hold = TRUE  # Prevent the skin from drawing stuff while TV is on
+        
         
     def Stop(self):
         if config.MAJOR_AUDIO_CTRL == 'VOL':
@@ -209,34 +274,22 @@ class MPlayer:
         while self.thread.mode == 'stop':
             time.sleep(0.05)
         print 'stopped %s app' % self.mode
+        os.system('rm -f /tmp/freevo.wid')
 
-
-    def channel_change(self):
-        """This is a helper function for channel up and down events"""
-        linein_vol = mixer.getLineinVolume()
-        igain_vol  = mixer.getIgainVolume()
-        
-        mixer.setLineinVolume(0)
-        mixer.setIgainVolume(0) # Input from TV om emu10k1 cards.
-
-        tuner_channel = self.TunerGetChannel()
-        self.thread.app.write( config.TV_SETTINGS + ' ' +
-                               tuner_channel + '\n' )
-        time.sleep(0.1)
-        mixer.setLineinVolume(linein_vol)
-        mixer.setIgainVolume(igain_vol)
-        
 
     def EventHandler(self, event):
         print '%s: %s app got %s event' % (time.time(), self.mode, event)
-        if event == rc.MENU or event == rc.STOP or event == rc.SELECT or event == rc.PLAY_END:
+        if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
+            event == rc.SELECT or event == rc.PLAY_END):
             self.Stop()
+            skin.hold = FALSE  # Allow drawing again
             rc.app = None
             menuwidget.refresh()
 
         elif event == rc.CHUP:
             if self.mode == 'vcr':
                 return
+            
             # Go to the next channel in the list
             self.TunerNextChannel()
             self.Stop()
@@ -245,6 +298,7 @@ class MPlayer:
         elif event == rc.CHDOWN:
             if self.mode == 'vcr':
                 return
+            
             # Go to the previous channel in the list
             self.TunerPrevChannel()
             self.Stop()
@@ -271,11 +325,9 @@ class MPlayerApp(childapp.ChildApp):
         
     def kill(self):
         childapp.ChildApp.kill(self, signal.SIGINT)
-	osd.update()
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         os.system('killall -9 freevo_xwin 2&> /dev/null')
-        os.system('rm -f /tmp/freevo.wid')
 
     # def stdout_cb
 
