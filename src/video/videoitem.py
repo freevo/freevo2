@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.152  2004/11/13 15:54:12  dischi
+# small bugfix
+#
 # Revision 1.151  2004/10/22 18:43:54  dischi
 # make sure aspect is a string
 #
@@ -73,6 +76,7 @@ import menu
 import configure
 import plugin
 import util.videothumb
+import util.mediainfo
 
 from gui   import PopupBox, AlertBox, ConfirmBox
 from item  import MediaItem, FileInformation
@@ -552,7 +556,7 @@ class VideoItem(MediaItem):
         # get the correct player for this item and check the
         # rating if the player can play this item or not
         if not self.possible_player:
-            self.possible_player = _get_possible_player()
+            self.possible_player = self._get_possible_player()
         
         if alternateplayer:
             self.possible_player.reverse()
