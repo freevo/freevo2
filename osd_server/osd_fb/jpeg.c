@@ -44,6 +44,9 @@ jpeg_readbitmap (FILE *fp, uint16 *pWidth, uint16 *pHeight)
     uint8 tmp[2048*3];
     
 
+    memset (&cinfo, 0, sizeof (cinfo));
+    memset (&jerr, 0, sizeof (jerr));
+    
     cinfo.err = jpeg_std_error (&jerr);
     
     jpeg_create_decompress (&cinfo);
@@ -87,3 +90,27 @@ jpeg_readbitmap (FILE *fp, uint16 *pWidth, uint16 *pHeight)
 
     return (pBitmap);
 }
+
+
+#ifdef JPEGTEST
+int
+main (int ac, char *av[])
+{
+   FILE *fp;
+   uint8 *pBitmap;
+   uint16 w, h;
+   
+   
+   printf ("open()\n");
+
+   fp = fopen (av[1], "r");
+
+   pBitmap = jpeg_readbitmap (fp, &w, &h);
+
+
+   return (0);
+   
+}
+#endif /* JPEGTEST */
+
+
