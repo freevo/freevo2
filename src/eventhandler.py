@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/09/29 18:27:30  dischi
+# turn off some debug
+#
 # Revision 1.12  2004/09/27 18:41:38  dischi
 # remove key->event mapping, it is in the input plugins now
 #
@@ -327,7 +330,7 @@ class Eventhandler:
             event = self.queue[0]
             del self.queue[0]
         
-        _debug_('handling event %s' % str(event), 1)
+        _debug_('handling event %s' % str(event), 2)
         
         if self.eventhandler_plugins == None:
             _debug_('init', 1)
