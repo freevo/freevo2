@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/08/23 12:37:36  dischi
+# better display handling
+#
 # Revision 1.23  2004/08/22 20:06:16  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -47,88 +50,61 @@ from widgets.textbox import Textbox
 from widgets.infotext import InfoText
 from widgets.rectangle import Rectangle
 
+# Container for widgets
 from mevas import CanvasContainer
 
-_display  = []
-_skin     = None
-_renderer = None
-_keyboard = None
-
-def get_keyboard():
-    """
-    return the screen object
-    """
-    global _keyboard
-    if not _keyboard:
-        import backends.sdl
-        _keyboard = backends.sdl.Keyboard()
-        print _keyboard
-    return _keyboard
-
-
+# Display engine control module
 import displays
 
 def get_display():
     """
-    return the screen object
+    return current display output or create the default one
+    if no display is currently set
     """
-    if not _display:
-        _display.append(displays.default())
-    return _display[-1]
+    return displays.get_display()
 
 
-def set_display(display, size):
+def set_display(name, size):
     """
-    set a new screen
+    set a new output display
     """
-    old = _display[-1]
-
-    # remove all children add update old display
-    children = copy.copy(old.children)
-    for c in children:
-        old.remove_child(c)
-    old.update()
-    old.hide()
-
-    # create a new display
-    new = displays.new(display, size)
-    _display.append(new)
-
-    # move all children to new display
-    for c in children:
-        new.add_child(c)
-    new.update()
-    return _display[-1]
+    global display
+    display = displays.set_display(name, size)
+    width   = display.width
+    height  = display.height
+    return display
 
 
-def remove_display(screen):
+def remove_display(name):
     """
-    remove screen
+    remove the output display
     """
-    global _display
-    if screen != _display[-1]:
-        _debug_('FIXME: removing screen not on top')
-        return
+    global display
+    display = displays.remove_display(name)
+    width   = display.width
+    height  = display.height
+    return display
 
-    _display = _display[:-1]
-    # move all active children to new display
-    for c in copy.copy(screen.children):
-        screen.remove_child(c)
-        _display[-1].add_child(c)
 
-    # stop old display, reactivate new one
-    # warning: no update() is called
-    screen.stop()
-    _display[-1].show()
-    
-    
+# create default display and set gui width and height
+# in case some part of Freevo needs this
+if not config.HELPER:
+    display = get_display()
+    width   = display.width
+    height  = display.height
+else:
+    display = None
+    width   = 0
+    height  = 0
+
+
 def AreaHandler(type, area_list):
     """
     return the area object
     """
     import areas
     import imagelib
-    return areas.AreaHandler(type, area_list, get_settings(), get_display(), imagelib)
+    return areas.AreaHandler(type, area_list, get_settings(), display, imagelib)
 
     
 def get_settings():
@@ -175,15 +151,14 @@ from widgets.label             import Label
 from widgets.button            import Button
 from widgets.progressbar       import Progressbar
 
-
 # dialog boxes
 from widgets.Window            import Window
 from widgets.PopupBox          import PopupBox
+
+# broken boxes
 from widgets.AlertBox          import AlertBox
 from widgets.ConfirmBox        import ConfirmBox
 from widgets.ProgressBox       import ProgressBox
-
-# broken boxes
 from widgets.InputBox          import InputBox
 from widgets.ListBox           import ListBox
 
