@@ -68,7 +68,7 @@ class VideoItem(MediaItem):
     def __init__(self, url, parent, info=None, parse=True):
         self.autovars = [ ('deinterlace', 0) ]
         MediaItem.__init__(self, 'video', parent)
-
+        
         self.variants          = []         # if this item has variants
         self.subitems          = []         # more than one file/track to play
         self.current_subitem   = None
@@ -109,10 +109,16 @@ class VideoItem(MediaItem):
         show_name = None
         self.tv_show = False
 
+        if self.name.find(u"The ") == 0:
+            self.sort_name = self.name[4:]
+        self.sort_name = self.name
+        
         if self.info['episode'] and self.info['subtitle']:
             # get informations for recordings
             show_name = (self.name, '', self.info['episode'], \
                          self.info['subtitle'])
+            self.sort_name += u' ' + self.info['episode'] + u' ' + \
+                              self.info['subtitle']
         elif config.VIDEO_SHOW_REGEXP_MATCH(self.name) and not \
                  self.network_play:
             # split tv show files based on regexp
@@ -256,9 +262,7 @@ class VideoItem(MediaItem):
                os.path.isfile(self.filename):
             return u'%s%s' % (os.stat(self.filename).st_ctime,
                               Unicode(self.filename))
-        if self.name.find(u"The ") == 0:
-            return self.name[4:]
-        return self.name
+        return self.sort_name
 
 
     def __set_next_available_subitem(self):
