@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/02 10:51:14  dischi
+# change runtime name
+#
 # Revision 1.2  2003/11/02 09:24:34  dischi
 # Check for libs and make it possible to install runtime from within
 # freevo
@@ -62,7 +65,7 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
         is_local = True
         os.chdir(os.path.join(os.environ['FREEVO_PYTHON'], '..'))
 
-    if os.path.basename(tgz).startswith('runtime'):
+    if os.path.basename(tgz).startswith('freevo-runtime-'):
         if not is_local:
             print 'impossible to install a runtime in an installed version'
             print 'of freevo.'
