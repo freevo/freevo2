@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/05 17:34:03  dischi
+# import fix
+#
 # Revision 1.3  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -48,7 +51,7 @@ import os
 import menu
 import config
 import plugin
-import skin
+import gui
 import item
 
 
@@ -60,8 +63,8 @@ class PluginInterface(plugin.ItemPlugin):
     """
     def __init__(self):
         plugin.ItemPlugin.__init__(self)
-        skin.register('video_details', ('screen', 'title', 'view',
-                                        'listing', 'info', 'plugin'))
+        gui.get_areas().register('video_details', ('screen', 'title', 'view',
+                                                   'listing', 'info'))
         print
         print 'Activated plugin video.details'
         print 'This plugin may cause some problems because it changes the'

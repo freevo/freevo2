@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/08/05 17:34:03  dischi
+# import fix
+#
 # Revision 1.18  2004/07/24 12:24:03  dischi
 # reflect gui changes
 #
@@ -75,7 +78,6 @@ import time
 import config
 import plugin
 import osd
-import skin
 import pygame
 import time
 
