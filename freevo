@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2003/10/16 04:20:56  outlyer
+# Bash-ism fixes from Lars
+#
 # Revision 1.88  2003/10/12 09:54:27  dischi
 # BSD patches from Lars
 #
@@ -393,14 +396,14 @@ valid_parameter=1
 if [ "$1" != "" ]; then
     valid_parameter=0
     for known_parameter in "--force-fs" "--trace" "--doc"; do
-	if [ "$1" == "$known_parameter" ]; then
+	if [ "$1" = "$known_parameter" ]; then
 	    valid_parameter=1
 	    break
 	fi
     done
 fi
 
-if [ "$valid_parameter" == 0 ]; then
+if [ "$valid_parameter" = 0 ]; then
     echo "unknown parameter: $1"
     echo
     echo "usage:"
