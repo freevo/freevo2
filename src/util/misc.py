@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/31 16:43:49  dischi
+# major speed enhancements
+#
 # Revision 1.10  2003/12/30 22:30:50  dischi
 # major speedup in vfs using
 #
@@ -169,9 +172,10 @@ def getimage(base, default=None):
     return the image base+'.png' or base+'.jpg' if one of them exists.
     If not return the default
     """
-    for suffix in ('png', 'jpg', 'gif'):
-        if vfs_abspath(base+'.'+suffix):
-            return vfs_abspath(base+'.'+suffix)
+    for suffix in ('.png', '.jpg', '.gif'):
+        image = vfs_abspath(base+suffix)
+        if image:
+            return image
     return default
 
 
@@ -183,7 +187,8 @@ def getname(file):
         return file
     
     name = os.path.basename(file)
-    name = name[:name.rfind('.'):].capitalize()
+    name = name[:name.rfind('.'):]
+    name = name[0].upper() + name[1:]
     
     while FILENAME_REGEXP.match(name):
         m = FILENAME_REGEXP.match(name)

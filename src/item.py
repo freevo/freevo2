@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/12/31 16:40:49  dischi
+# major speed enhancements
+#
 # Revision 1.39  2003/12/30 22:31:09  dischi
 # speedup
 #
@@ -142,45 +145,40 @@ class Item:
         if not hasattr(self, 'type'):
             self.type     = None            # e.g. video, audio, dir, playlist
         self.name         = ''              # name in menu
-        self.image        = None            # imagefile
         self.icon         = None
         if info:
             self.info     = info
         else:
             self.info     = {}
         self.parent       = parent          # parent item to pass unmapped event
-        self.fxd_file     = None            # skin informationes etc.
         self.menuw        = None
         self.description  = ''
-        self.handle_type  = None            # handle item in skin as video, audio, image
-                                            # e.g. a directory has all video info like
-                                            # directories of a cdrom
-
-        self.media        = None
 
         self.eventhandler_plugins = []
 
-        try:
-            if parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
-                self.name = info['title']
-            
-        except (TypeError, AttributeError, KeyError):
-            pass
+        if info and parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(self.info, 'title'):
+            self.name = self.info['title']
         
         if parent:
             self.image = parent.image
             if self.image and isinstance(self.image, str) and \
-                   self.image.find('watermark') > 0 and \
-                   self.image.find(config.IMAGE_DIR) == 0:
+                   self.image.startswith(config.IMAGE_DIR) and \
+                   self.image.find('watermark') > 0:
                 self.image = None
             self.handle_type = parent.handle_type
             self.fxd_file    = parent.fxd_file
             self.media       = parent.media
-            if hasattr(self.parent, 'fxd_file') and not self.fxd_file:
-                self.fxd_file = self.parent.fxd_file
             if hasattr(parent, '_'):
                 self._ = parent._
+        else:
+            self.image        = None            # imagefile
+            self.fxd_file     = None            # skin informationes etc.
+            self.handle_type  = None            # handle item in skin as video, audio, image
+                                                # e.g. a directory has all video info like
+                                                # directories of a cdrom
+            self.media        = None
 
+                
         if skin_type:
             import skin
             settings  = skin.get_singleton().settings
@@ -196,7 +194,7 @@ class Item:
             
 
 
-    def set_url(self, url, info=True):
+    def set_url(self, url, info=True, search_image=True):
         """
         Set a new url to the item and adjust all attributes depending
         on the url.
@@ -204,13 +202,12 @@ class Item:
         self.network_play = True        # network url, like http
         self.url          = url         # the url itself
         self.filename     = ''          # filename if it's a file:// url
-        self.dirname      = ''          # directory of the file:// url
-        self.mode         = ''          # the type of the url (file, http, dvd...)
-        self.mimetype     = ''          # extention or mode
         self.media_id     = ''
 
         if not url:
-            self.files = None
+            self.mode     = ''          # the type of the url (file, http, dvd...)
+            self.files    = None        # FileInformation
+            self.mimetype = ''          # extention or mode
             return
         
         if url.find('://') == -1:
@@ -220,24 +217,38 @@ class Item:
         if self.media:
             self.files.read_only = True
 
-        if self.url.startswith('file://'):
+        self.mode = self.url[:self.url.find('://')]
+
+        if self.mode == 'file':
             self.network_play = False
             self.filename     = self.url[7:]
-            if os.path.isfile(self.filename):
+            if os.path.exists(self.filename):
                 self.files.append(self.filename)
-                self.dirname = os.path.dirname(self.filename)
-
-                image = util.getimage(self.filename[:self.filename.rfind('.')])
-                if image:
-                    self.image = image
-                    self.files.image = image
-                elif self.parent and self.parent.type != 'dir':
-                    self.image = util.getimage(self.dirname+'/cover', self.image)
+                if search_image:
+                    image = util.getimage(self.filename[:self.filename.rfind('.')])
+                    if image:
+                        self.image = image
+                        self.files.image = image
+                    elif self.parent and self.parent.type != 'dir':
+                        self.image = util.getimage(os.path.dirname(self.filename)+\
+                                                   '/cover', self.image)
 
             else:
                 self.filename = ''
                 self.url      = ''
+                self.mimetype = ''
                 return
+
+            try:
+                self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
+            except:
+                self.mimetype = self.type
+
+        elif self.network_play:
+            self.mimetype = self.type
+        else:
+            self.mimetype = self.mode
+
             
         if info and self.filename:
             if self.parent and self.parent.media:
@@ -249,25 +260,14 @@ class Item:
             info = mmpython.parse(mmpython_url)
             if info:
                 self.info = info
-
-                
+                if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and hasattr(info, 'title'):
+                    self.name = info['title']
+        
         if not self.name:
             if self.filename:
                 self.name = util.getname(self.filename)
             else:
                 self.name = self.url
-
-        self.mode = self.url[:self.url.find('://')]
-
-        if self.mode == 'file':
-            try:
-                self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
-            except:
-                self.mimetype = self.type
-        elif self.network_play:
-            self.mimetype = self.type
-        else:
-            self.mimetype = self.url[:self.url.find('://')].lower()
 
 
     def id(self):

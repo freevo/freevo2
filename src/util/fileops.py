@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/31 16:43:49  dischi
+# major speed enhancements
+#
 # Revision 1.9  2003/12/30 15:28:34  dischi
 # support for OVERLAY_DIR_STORE_THUMBNAILS
 #
@@ -243,7 +246,7 @@ def find_matches(files, suffix_list):
     The correct implementation is
     filter(lambda x: os.path.splitext(x)[1].lower()[1:] in suffix_list, files)
     but this one should also work and is _much_ faster. On a Duron 800, Python 2.2
-    and 700 photos 0.01 secs insteat of 0.2.
+    and 700 photos 0.01 secs instead of 0.2.
     """
     return filter(lambda x: x[x.rfind('.')+1:].lower() in suffix_list, files)
 

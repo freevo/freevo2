@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/31 16:43:49  dischi
+# major speed enhancements
+#
 # Revision 1.6  2003/12/30 22:30:50  dischi
 # major speedup in vfs using
 #
@@ -83,7 +86,9 @@ def abspath(name):
     return the complete filename (including OVERLAY_DIR)
     """
     if os.path.exists(name):
-        return os.path.abspath(name)
+        if not name.startswith('/'):
+            return os.path.abspath(name)
+        return name
     overlay = getoverlay(name)
     if overlay and os.path.isfile(overlay):
         return overlay
@@ -165,19 +170,18 @@ def listdir(directory, handle_exception=True):
     get a directory listing (including OVERLAY_DIR)
     """
     try:
-        files = ([ os.path.join(directory, fname)
-                   for fname in os.listdir(directory) ])
+        if not directory.endswith('/'):
+            directory = directory + '/'
+            
+        files = []
+        for f in os.listdir(directory):
+            if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
+                files.append(directory + f)
         overlay = getoverlay(directory)
         if overlay and os.path.isdir(overlay):
-            for f in ([ os.path.join(overlay, fname)
-                        for fname in os.listdir(overlay) ]):
-                if not os.path.isdir(f):
+            for f in ([ overlay + fname for fname in os.listdir(overlay) ]):
+                if not os.path.isdir(f) and not f.endswith('.raw'):
                     files.append(f)
-
-        # remove unwanted directories
-        for f in copy.copy(files):
-            if vfs.basename(f) in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
-                files.remove(f)
         return files
     
     except OSError:
