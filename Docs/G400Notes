@@ -1,0 +1,17 @@
+If you've noticed that your G400 is a little too dark and seems to lack
+colour, there is an easy fix which will make the TV Out much sharper, with
+finer colour detail.
+
+First, download this program:
+ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/maven-prog.tgz
+
+Build and install as normal, and then run the following commands as
+root:
+
+matrox 0x1e 0xd0
+matrox 0x20 0xff
+matrox 0x22 0xff
+
+This sets contrast, saturation, hue and brightness.
+
+

@@ -117,3 +117,8 @@ A: The Hauppauge WinTV works great, despite their name! ;) At least
    compression of all cards are only mpeg1 (and some mpeg2) though and
    you probably want mpeg4/divx-recordings.  
    Check http://www.hauppauge.com
+----------------------------------------------------------------------
+Q: My G400's TV Out is really dim, can I fix that?
+
+A: Yes, see Docs/G400Notes for information on adjusting the card's 
+registers for optimum picture quality.
