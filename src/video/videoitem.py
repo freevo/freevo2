@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2004/01/04 18:18:56  dischi
+# add more infos about tv shows
+#
 # Revision 1.111  2004/01/04 17:20:20  dischi
 # check for .raw file as image
 #
@@ -147,8 +150,11 @@ class VideoItem(Item):
                         self.fxd_file = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
 
-                self.tv_show   = True
-                self.show_name = show_name
+                self.tv_show       = True
+                self.show_name     = show_name
+                self.tv_show_name  = show_name[0]
+                self.tv_show_ep    = show_name[3]
+                
 
         # extra infos in discset_informations
         if parent and parent.media:
