@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2003/11/23 18:56:33  rshortt
+# Cleanup VideoGroup class a bit.
+#
 # Revision 1.70  2003/11/22 20:35:10  dischi
 # config changes for the use new vfs
 #
@@ -182,8 +185,7 @@ class VideoGroup:
 
     def __init__(self, vdev='/dev/video', adev='/dev/dsp', input_type='tuner',
                  tuner_norm='NTSC', tuner_chanlist='us-cable', 
-                 tuner_type='internal', tuner_chan=None, external_tuner=None,
-                 et_conf=None, et_device=None, et_remote=None,
+                 tuner_type='internal', tuner_chan=None,
                  recordable=True, desc='Freevo default VideoGroup'):
 
         # XXX: Put checks in here for supplied values.
@@ -194,10 +196,6 @@ class VideoGroup:
         self.tuner_norm = tuner_norm
         self.tuner_chanlist = tuner_chanlist
         self.tuner_chan = tuner_chan
-        self.external_tuner = external_tuner
-        self.et_conf = et_conf
-        self.et_device = et_device
-        self.et_remote = et_remote
         self.recordable = recordable
         self.desc = desc
         self.in_use = FALSE
