@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2002/11/15 02:11:37  krister
+# Applied Bob Pauwes latest image slideshow patches.
+#
 # Revision 1.91  2002/11/14 04:38:47  krister
 # Added Bob Pauwe's image slideshow patches.
 #
@@ -215,7 +218,8 @@ SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 #
 # Where the image files can be found.
 #
-DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
+DIR_IMAGES = [ ('Test Images', './testfiles/Images'),
+               ('Test Show',  'testfiles/Images/CA_Coast.ssr') ]
 
 #
 # The list of filename suffixes that are used to match the files that

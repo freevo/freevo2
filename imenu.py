@@ -202,6 +202,9 @@ def cwd(arg=None, menuw=None):
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
         items += [menu.MenuItem(title, cwd, dirname, type = 'dir')]
+
+    if len(files) > 1:
+        items += [menu.MenuItem('Auto Slide Show', auto_slideshow, dir, eventhandler, type = 'show')]
     
     number = 0
 
@@ -235,9 +238,41 @@ def slideshow(arg=None, menuw=None):
     playlist = arg
 
     global playlist_lines
+    playlist_lines = []
 
     playlist_lines = read_playlist ( playlist, 0 )
     iview.total_slides = len ( playlist_lines )
+    iview.slide_num = 0
+
+    if iview.total_slides > 0:
+        iview.view ( playlist_lines[0][0], 0, playlist_lines, 1 )
+        # Need to check if the alarmm signal is already in use!!!
+        signal.signal ( signal.SIGALRM, view_handler )
+        signal.alarm ( playlist_lines[0][2] )
+
+
+#  Create a slideshow from a directory of images
+#
+#  Dynamiclly build a playlist and start a slide show using it
+#  The playlist will not contain any captions and it will use the
+#  default delay value between images.
+
+def auto_slideshow(arg=None, menuw=None):
+    dir = arg
+
+    global playlist_lines
+    playlist_lines = []
+
+    files = util.match_files(dir, config.SUFFIX_IMAGE_FILES)
+    for file in files:
+        tmp_list = []
+        tmp_list.append(os.path.join(os.path.abspath(dir), file))
+        tmp_list.append("")
+        tmp_list.append(5)
+        playlist_lines.append(tmp_list)
+
+    iview.total_slides = len ( playlist_lines )
+    iview.slide_num = 0
 
     if iview.total_slides > 0:
         iview.view ( playlist_lines[0][0], 0, playlist_lines, 1 )

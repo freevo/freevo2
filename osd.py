@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2002/11/15 02:11:38  krister
+# Applied Bob Pauwes latest image slideshow patches.
+#
 # Revision 1.47  2002/11/08 21:23:58  dischi
 # I don't understand, but sometimes out of nowhere it crashes. So try
 # and except should prevent that.
@@ -484,7 +487,8 @@ class OSD:
         if not pygame.display.get_init():
             return None
         image = self._getbitmap(filename)
-        if not image: return 0,0
+        if not image:
+            return 0, 0
         return image.get_size()
 
 

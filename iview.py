@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/11/15 02:11:37  krister
+# Applied Bob Pauwes latest image slideshow patches.
+#
 # Revision 1.19  2002/11/14 05:23:41  krister
 # Added Bob Pauwe's image bugfix patch.
 #
@@ -133,9 +136,13 @@ class ImageViewer:
 
         rc.app = self.eventhandler
 
-
         width, height = osd.bitmapsize(filename)
 
+        # Image load problem?
+        if width == 0 or height == 0:
+	    skin.PopupBox('Cannot load image %s!' % filename)
+            return
+            
         # Bounding box default values
         bbx = bby = bbw = bbh = 0
 

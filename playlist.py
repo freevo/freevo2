@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/15 02:11:38  krister
+# Applied Bob Pauwes latest image slideshow patches.
+#
 # Revision 1.2  2002/11/14 04:38:47  krister
 # Added Bob Pauwe's image slideshow patches.
 #
@@ -131,7 +134,7 @@ def read_ssr(ssrname):
                 ss_delay += [5]
             tmp_list.append(ss_name[0])
             tmp_list.append(ss_caption[0])
-            tmp_list.append(ss_delay[0])
+            tmp_list.append(int(ss_delay[0]))
             out_lines.append(tmp_list)
 
     return out_lines
