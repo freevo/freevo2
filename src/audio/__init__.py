@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/01/10 13:16:15  dischi
+# remove self.fxd_file, not needed anymore
+#
 # Revision 1.18  2004/01/09 19:04:11  dischi
 # new vfs.listdir parameter
 #
@@ -159,11 +162,10 @@ class PluginInterface(plugin.MimetypePlugin):
         a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
 
         a.name     = fxd.getattr(node, 'title', a.name)
-        a.fxd_file = fxd.getattr(None, 'filename', '')
         a.image    = fxd.childcontent(node, 'cover-img')
         a.url      = fxd.childcontent(node, 'url')
         if a.image:
-            a.image = vfs.join(vfs.dirname(a.fxd_file), a.image)
+            a.image = vfs.join(vfs.dirname(fxd.filename), a.image)
 
         a.mplayer_options  = fxd.childcontent(node, 'mplayer_options')
         if fxd.get_children(node, 'player'):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/01/10 13:16:15  dischi
+# remove self.fxd_file, not needed anymore
+#
 # Revision 1.15  2004/01/06 19:31:18  dischi
 # add repeat support
 #
@@ -184,10 +187,9 @@ class PluginInterface(plugin.MimetypePlugin):
         pl.autoplay = True
 
         pl.name     = fxd.getattr(node, 'title')
-        pl.fxd_file = fxd.getattr(None, 'filename', '')
         pl.image    = fxd.childcontent(node, 'cover-img')
         if pl.image:
-            pl.image = vfs.join(vfs.dirname(pl.fxd_file), pl.image)
+            pl.image = vfs.join(vfs.dirname(fxd.filename), pl.image)
 
 
         # background music

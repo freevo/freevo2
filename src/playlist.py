@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/01/10 13:16:14  dischi
+# remove self.fxd_file, not needed anymore
+#
 # Revision 1.54  2004/01/06 19:31:18  dischi
 # add repeat support
 #
@@ -587,10 +590,9 @@ class Mimetype(plugin.MimetypePlugin):
                       repeat=fxd.getattr(node, 'repeat', 0))
 
         pl.name     = fxd.getattr(node, 'title')
-        pl.fxd_file = fxd.getattr(None, 'filename', '')
         pl.image    = fxd.childcontent(node, 'cover-img')
         if pl.image:
-            pl.image = vfs.join(vfs.dirname(pl.fxd_file), pl.image)
+            pl.image = vfs.join(vfs.dirname(fxd.filename), pl.image)
 
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
         fxd.getattr(None, 'items', []).append(pl)
