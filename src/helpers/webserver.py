@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/24 00:26:44  rshortt
+# Upgrade the Twisted reactor.
+#
 # Revision 1.11  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -46,7 +49,7 @@ import sys, os
 
 import config
 
-from twisted.internet import app
+from twisted.internet import reactor
 from twisted.web import static, server, vhost, script
 from twisted.python import log
 import twisted.web.rewrite as rewrite
@@ -86,9 +89,8 @@ def main():
     else:
         site = server.Site(rewriter)
     
-    application = app.Application('web')
-    application.listenTCP(config.WWW_PORT, site)
-    application.run(save=0)
+    reactor.listenTCP(config.WWW_PORT, site)
+    reactor.run()
 
     
 if __name__ == '__main__':
