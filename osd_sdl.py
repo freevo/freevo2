@@ -304,6 +304,9 @@ class OSD:
 
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0):
+
+        print 'drawstring "%s"' % string
+        
         if fgcolor == None:
             fgcolor = self.default_fg_color
         if font == None:
@@ -323,8 +326,25 @@ class OSD:
             ren = f.render(string, 1, self._sdlcol(fgcolor))
         else:
             ren = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
-        
+
         self.screen.blit(ren, (x, y))
+
+
+    # Return a (width, height) tuple for the given string, font, size
+    def stringsize(self, string, font=None, ptsize=0):
+        if not ptsize:
+            ptsize = config.OSD_DEFAULT_FONTSIZE
+
+        ptsize = int(ptsize * 1.3333)  # XXX The osd_sdl.py fonts are smaller,
+        # I think that is because the osd_server screenres is 100 dpi, and here
+        # it is 75.
+
+        f = self._getfont(font, ptsize)
+
+        if string:
+            return f.size(string)
+        else:
+            return (0, 0)
         
 
     def update(self):
@@ -362,7 +382,7 @@ class OSD:
             print 'SDL image load problem!'
             return None
 
-        # 30 deep FIFO for images
+        # FIFO for images
         self.bitmapcache.append((filename, image))
         if len(self.bitmapcache) > 30:
             del self.bitmapcache[0]
