@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/12/06 13:46:47  dischi
+# return nothing if there is no length (e.g. webradio)
+#
 # Revision 1.34  2003/11/30 14:34:29  dischi
 # but the skin parsing (e.g. outicon) in Item to avoid duplicate code
 #
@@ -243,6 +246,8 @@ class Item:
                     length = int(self.length)
                 except:
                     return ''
+            if length == 0:
+                return ''
             if length / 3600:
                 return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
             else:
