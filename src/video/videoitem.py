@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2003/07/20 17:46:59  dischi
+# special handling if there is a DVD_PLAYER plugin
+#
 # Revision 1.64  2003/07/19 11:45:11  dischi
 # moved mmpython parsing to VideoItem
 #
@@ -358,8 +361,11 @@ class VideoItem(Item):
         # submenu of a such a menu already
         if not self.filename or self.filename == '0':
             if self.mode == 'dvd':
-                items += [( self.dvdnav, 'DVD Menu (experimental)' )]
-                items = [( self.dvd_vcd_title_menu, 'DVD title list' )] + items
+                title_list = ( self.dvd_vcd_title_menu, 'DVD title list' )
+                if plugin.getbyname(plugin.DVD_PLAYER):
+                    items = [ items[0], title_list ] + items[1:]
+                else:
+                    items = [ title_list ] + items
             if self.mode == 'vcd':
                 items = [( self.dvd_vcd_title_menu, 'VCD title list' )] + items
             for m in self.subitems:
@@ -414,6 +420,11 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
+        if self.filename == '0' and self.mode == 'dvd' and \
+               plugin.getbyname(plugin.DVD_PLAYER):
+            plugin.getbyname(plugin.DVD_PLAYER).play(self)
+            return
+        
         if self.subitems:
             self.current_subitem = self.subitems[0]
             # Pass along the options, without loosing the subitem's own
