@@ -24,7 +24,6 @@
 #endif
 
 import skin,audio.player,plugin
-import sqlite
 import config
 from event import *
 from util.dbutil import *
