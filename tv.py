@@ -114,7 +114,7 @@ def get_tunerid(channel_id):
     
    
 def eventhandler(event):
-    print 'TV %s' % event
+    #print 'TV %s' % event
     
     if event == rc.EXIT or event == rc.MENU:
         rc.app = None
