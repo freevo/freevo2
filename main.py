@@ -7,7 +7,7 @@
 import sys, socket, random, time, os
 import traceback
 
-if 1:
+if 0:
     # Redirect stdout and stderr to log files, timestamp them
     sys.stderr = open('./log_main_err', 'a', 0)
     sys.stderr.write('\n\n' + time.ctime(time.time()) + '\n')
@@ -76,12 +76,8 @@ def getcmd():
     items += [menu.MenuItem('TV', tv.main_menu, 'tv')]
     items += [menu.MenuItem('MOVIES', movie.main_menu)]
     items += [menu.MenuItem('MUSIC', mp3.main_menu)]
-    items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []))]
+    items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []))]  # XXX Add DVD title handling
     items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
-
-    # DVD with menu navigation doesn't work that well yet in mplayer, but
-    # it probably will soon...
-    #items += [menu.MenuItem('DVD nav', movie.play_movie, ('dvdnav', '1', []))]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     
