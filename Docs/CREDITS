@@ -56,3 +56,12 @@ o Joystick driver
 Jens Oberender <j.obi@troja.net>
 o DXR3 support
 
+Andrew Drummond <adrummond@candw.ky>
+o MAME support
+
+Alex Polite <m2@plusseven.com>
+o XMMS audio playback support
+o Music playlists support
+
+Per Wigren <wigren@home.se>
+o Various contribs and patches for TV listings
