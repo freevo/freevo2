@@ -17,7 +17,7 @@ DEPEND=">=dev-python/pygame-1.5.6
 	>=dev-python/pyxml-0.8.3
 	>=dev-python/twisted-1.2.0
 	>=media-libs/libsdl-1.2.7
-	>=dev-python/mmpython-0.4.3
+	>=dev-python/mmpython-0.4.5
 	matrox? ( >=media-video/matroxset-0.3 )
 	>=media-video/mplayer-1.0_pre4
 	>=sys-apps/sed-4
