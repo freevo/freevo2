@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2002/11/18 13:36:44  krister
+# Applied Rob Shortt's patch for starting in fullscreen under X11.
+#
 # Revision 1.94  2002/11/17 02:30:17  krister
 # Re-added the radio station example URL. Fixed a playlist handling bug.
 #
@@ -141,6 +144,8 @@ DEV_MIXER           = '/dev/mixer'    # mixer device
 RANDOM_PLAYLIST     = 1               # Random playlist in all music folders
 RECURSIVE_PLAYLIST  = 0               # Random playlist in all music folders 
                                       # including all files below the current folder
+
+START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or xv.
 
 #
 # Physical ROM drives, multiple ones can be specified

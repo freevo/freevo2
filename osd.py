@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2002/11/18 13:36:45  krister
+# Applied Rob Shortt's patch for starting in fullscreen under X11.
+#
 # Revision 1.49  2002/11/17 02:29:49  krister
 # Added more debug stuff.
 #
@@ -314,6 +317,10 @@ class OSD:
             pass # Ok, we didn't have the mixer module anyways
 
         self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
+
+        if ((config.CONF.display == 'x11' or config.CONF.display == 'xv') 
+            and config.START_FULLSCREEN_X == 1):
+            pygame.display.toggle_fullscreen()
 
         help = ['z = Toggle Fullscreen']
         help += ['Arrow Keys = Move']
