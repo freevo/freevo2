@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/11/22 21:23:55  dischi
+# fix dvd title playing
+#
 # Revision 1.22  2003/11/22 15:57:47  dischi
 # cleanup
 #
@@ -203,7 +206,7 @@ class Xine:
         self.max_subtitle = 0
         self.current_subtitle = -1
 
-        if item.mode == 'dvd':
+        if item.mode == 'dvd' and item.url == 'dvd://':
             for track in item.info['tracks']:
                 self.max_audio = max(self.max_audio, len(track['audio']))
 
