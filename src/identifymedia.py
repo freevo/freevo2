@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/09 18:56:18  dischi
+# Make the autostart work again. If you close a cd tray while you are at the
+# main menu, the disc will be autostart (show dir or play dvd)
+#
 # Revision 1.4  2002/12/30 15:56:11  dischi
 # store label in the videoitem
 #
@@ -266,7 +270,8 @@ class Identify_Thread(threading.Thread):
                 if DEBUG:
                     print 'MEDIA: Status=%s' % media.drive_status
                     print 'Posting IDENTIFY_MEDIA event'
-                self.last_media = media
+                if last_status:
+                    self.last_media = media
                 rclient.post_event(rclient.IDENTIFY_MEDIA)
             else:
                 if DEBUG > 1:

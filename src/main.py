@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/09 18:56:19  dischi
+# Make the autostart work again. If you close a cd tray while you are at the
+# main menu, the disc will be autostart (show dir or play dvd)
+#
 # Revision 1.5  2003/01/02 19:57:34  dischi
 # Delete LD_PRELOAD after freevo is running to avoid problems with
 # programs freevo will start (e.g. shutdown with gentoo linux)
@@ -154,19 +158,20 @@ def eventhandler(event = None, menuw=None, arg=None):
     """Automatically perform actions depending on the event, e.g. play DVD
     """
 
-    print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
-
-    return FALSE
-
     global im_thread
-    if event == rc.IDENTIFY_MEDIA and im_thread and im_thread.last_media:
-        media = im_thread.last_media
 
+    # if we are at the main menu and there is an IDENTIFY_MEDIA event,
+    # try to autorun the media
+    if event == rc.IDENTIFY_MEDIA and im_thread and im_thread.last_media and \
+       menuw and len(menuw.menustack):
+        media = im_thread.last_media
         if media.info and media.info.actions():
-            media.info.actions()[0][0]
+            media.info.actions()[0][0](menuw=menuw)
         else:
             menuw.refresh()
+        return TRUE
 
+    print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
     
 #
 # Setup the main menu and handle events (remote control, etc)
@@ -284,7 +289,7 @@ class RemovableMedia:
             if notify:
                 skin.PopupBox('Ejecting disc in drive %s' % self.drivename)
                 osd.update()
-            os.system('eject %s' % self.mountdir)
+            os.system('eject %s' % self.devicename)
             self.tray_open = 1
             rc.post_event(rc.REFRESH_SCREEN)
         
@@ -296,7 +301,7 @@ class RemovableMedia:
 
             # close the tray, identifymedia does the rest,
             # including refresh screen
-            os.system('eject -t %s' % self.mountdir)
+            os.system('eject -t %s' % self.devicename)
             self.tray_open = 0
     
     def mount(self):
