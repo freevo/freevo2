@@ -149,6 +149,7 @@ import gui
 import util
 import util.mediainfo
 import plugin
+import mcomm
 
 from cleanup import shutdown
 from mainmenu import MainMenu
@@ -222,6 +223,18 @@ class Splashscreen(gui.Area):
         del self.engine
 
 
+class RPCHandler(mcomm.RPCServer):
+    """
+    Handle some basic rpc commands.
+    """
+    def __rpc_status__(self, addr, val):
+        """
+        Send status on rpc status request.
+        """
+        idle = eventhandler.idle_time()
+        status = { 'idle': idle }
+        return mcomm.RPCReturn(status)
+
 
 def signal_handler(sig, frame):
     """
@@ -253,6 +266,9 @@ try:
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'),
                           plugin.get_number()-1)
+    # laod mbus interface
+    rpc = RPCHandler()
+    # load plugins
     plugin.init(splash.progress)
 
     # Fire up splashscreen and load the cache

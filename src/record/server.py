@@ -423,7 +423,8 @@ class RecordServer(RPCServer):
                   self.parse_parameter(val, ( unicode, unicode, int, int, int,
                                               dict ) )
         # fix description encoding
-        if info.has_key('description') and info['description'].__class__ == str:
+        if info.has_key('description') and \
+               info['description'].__class__ == str:
             info['description'] = Unicode(info['description'], 'UTF-8')
 
         log.info('recording.add: %s' % String(name))
@@ -524,3 +525,27 @@ class RecordServer(RPCServer):
         for f in self.favorites:
             ret.append(f.long_list())
         return RPCReturn(ret)
+
+
+    def __rpc_status__(self, addr, val):
+        """
+        Send status on rpc status request.
+        """
+        status = {}
+        ctime = time.time()
+
+        # find currently running recordings
+        rec = filter(lambda r: r.status == RECORDING, self.recordings)
+        if rec:
+            # something is recording, add busy time of first recording
+            busy = rec[0].stop + rec[0].stop_padding - ctime
+            status['busy'] = max(1, int(busy / 60) + 1)
+
+        # find next scheduled recordings for wakeup
+        rec = filter(lambda r: r.status == SCHEDULED, self.recordings)
+        if rec:
+            # set wakeup time
+            status['wakeup'] = rec[0].start - rec[0].start_padding
+
+        # return results
+        return RPCReturn(status)
