@@ -16,7 +16,6 @@
 # Todo:      
 # Add a status bar showing progress
 # Parse the output of cdparanoia and lame to determine status of rip, mp3 conversion
-# Add more flexibilty in adding id3 (id3v2) tags
 # Add ogg encoding
 # For encoding parameters, make choices dynamic/selectable from menu instead of only local_conf.py
 # maybe just use local_conf.py parameters as defaults.
@@ -27,6 +26,13 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/01 20:28:29  outlyer
+# Two things:
+#     o Major code cleanup, removed lots of commented out stuff, changed
+#         most of the commands being called
+#     o Made mp3 the default in the ripping menu (i.e. the top item rather
+#         than wav.
+#
 # Revision 1.7  2003/07/01 19:56:29  outlyer
 # Use util.tagmp3() function by default, since we can choose the tag version.
 # Well, it's not in the configuration yet, but soon enough.
@@ -168,7 +174,6 @@ class main_backup_thread(threading.Thread):
             self.cd_backup_threaded(self.device, rip_format='wav')        
     
     def cd_backup_threaded(self, device, rip_format='mp3'):  
-        if DEBUG: print 'cd_backup_threaded function, rip_format = %s' %rip_format   
         rip_format = rip_format
         album = 'default_album'
         artist = 'default_artist'
@@ -179,10 +184,6 @@ class main_backup_thread(threading.Thread):
         # Get the artist, album and song_names	
         (artist, album, genre, song_names) = self.get_formatted_cd_info(device)
                
-        if DEBUG: print 'artist = %s' %artist        
-        if DEBUG: print 'album = %s' %album
-        if DEBUG: print 'genre = %s' %genre
-        
         dir_audio = config.AUDIO_BACKUP_DIR
         
         user_rip_path_prefs = {  'artist': artist,
@@ -193,14 +194,8 @@ class main_backup_thread(threading.Thread):
         
         # Get everything up to the last "/"
         if len(path_list) != 0:
-            if DEBUG: print 'path_list != 0'
             for i in range (0, len(path_list)-1 ):
                 path_head +=  '/' + path_list[i]
-            if DEBUG: print 'This is path_head : %s' %path_head                     
-        
-        # path_tail_temp is everything to the right of the last '/' which is the last
-        # element in path_list.
-        if DEBUG: print 'len(path_list)=%i' %len(path_list)
         path_tail_temp = '/' + path_list[len(path_list)-1]
         
         # If no directory structure preferences were given use default dir structure
@@ -210,19 +205,15 @@ class main_backup_thread(threading.Thread):
         else:
             path_temp  =  dir_audio + path_head
             pathname = path_temp % user_rip_path_prefs
-            if DEBUG: print 'This is path_temp : %s' %path_temp                        
-            if DEBUG: print 'This is pathname : %s' %pathname
              
         try: 
             os.makedirs(pathname, 0777)
         except:
              if DEBUG: print 'Directory %s already exists' %pathname
-             # pass
+             pass
       
-        if DEBUG: print 'Starting cd_backup_wav'
         cdparanoia_command = []
         length=len(song_names)
-        if DEBUG: print 'Length of songnames = %s' %length 
 
         for i in range (0, len(song_names)):
             # Keep track of track# 
@@ -246,50 +237,39 @@ class main_backup_thread(threading.Thread):
                                                  'song': song_names[i] }
                                                                                              
             path_tail = path_tail_temp % user_rip_path_prefs 
-            if DEBUG: print 'path_tail %s' % path_tail                                                
-            if DEBUG: print 'Before Command = %s' %cdparanoia_command
-            if DEBUG: print 'stri(i)= %s' %i
             
             # If rip_format is mp3, then copy the file to /temp/track_being_ripped.wav
-            if rip_format=='mp3' or rip_format== 'MP3':
+
+            if string.upper(rip_format) == 'MP3':
                 pathname_cdparanoia = '/tmp'
                 path_tail_cdparanoia   = '/track_being_ripped'
+           
             # Otherwise if it's going to be a .wav  just use the the users preferred directory and filename.
             # i.e. don't bother putting into /tmp directory, just use directory and filename of final destination.    
+
             else: 
                 pathname_cdparanoia = pathname
                 path_tail_cdparanoia   = path_tail
                             
             # Build the cdparanoia command to be run
-            # cdparanoia_command = '/usr/local/freevo/runtime/apps/cdparanoia -s '  \
-            cdparanoia_command = config.CDPAR_CMD + ' -s '  \
-                                                + str(i+1) \
-                                                +' "'  \
-                                                + pathname_cdparanoia  \
-                                                + path_tail_cdparanoia \
-                                                + '.wav"' \
 
-            if DEBUG: print 'cdparanoia:  %s' %cdparanoia_command
+            cdparanoia_command = '%s -s %s "%s%s.wav"' % (config.CDPAR_CMD, str(i+1), 
+                pathname_cdparanoia, path_tail_cdparanoia)
+
+            if DEBUG: print 'cdparanoia:  %s' % cdparanoia_command
     
             # Have the OS execute the CD Paranoia rip command            
             os.system(cdparanoia_command)
              
             # Build the cdparanoia command to be run if mp3 format is selected
-            if DEBUG: print 'rip_format = %s' %rip_format
-            if rip_format=='mp3' or rip_format== 'MP3':
             
-                lame_command =  config.LAME_CMD + ' --nohist -h ' \
-                                          + config.CD_RIP_LAME_OPTS \
-                                          + ' \"' \
-                                          + pathname_cdparanoia \
-                                          + path_tail_cdparanoia \
-                                          + '.wav\"' \
-                                          + ' \"'  \
-                                          + pathname \
-                                          + path_tail \
-                                          + '.mp3\"' \
-                                          
-                if DEBUG: 'lame:= %s' %lame_command                          
+            if string.upper(rip_format) == 'MP3':
+           
+                lame_command = '%s --nohist -h %s "%s%s.wav" "%s%s.mp3"' % (config.LAME_CMD,
+                    config.CD_RIP_LAME_OPTS, pathname_cdparanoia, path_tail_cdparanoia,
+                    pathname, path_tail)
+
+                if DEBUG: 'lame: %s' %lame_command                          
                 os.system(lame_command)
                
                 util.tagmp3(pathname+path_tail+'.mp3', title=song_names[i], artist=artist, album=album, track=track, 
@@ -297,92 +277,47 @@ class main_backup_thread(threading.Thread):
                     
                 # Remove the .wav file.
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
-                if DEBUG: print 'rm_command = os.unlink(%s)' % rm_command
-                os.unlink(rm_command)
+                if os.path.exists (rm_command): os.unlink(rm_command)
         
         # Flash a popup window indicating copying is done
         time_taken = time.time() - begin + 300
         min = int(time_taken/60)
         sec = int(time_taken%60)
         popup_string="Finished Copying CD in %im%is" % (min,sec)
-        pop = AlertBox(text=popup_string)
-        pop.show()
+        #pop = AlertBox(text=popup_string)
+        #pop.show()
+        # Disabled because if the popup happens when you're listening to music,
+        # you can no longer do anything in Freevo.
 
     def get_formatted_cd_info(self, device):
         cd_info = mmpython.parse(device)
-        """
-        These are the attribues/info available from mmpython/audioinfo.py
-        Attributes of cd_info:
-        title: The Hits
-        artist: Garth Brooks
-        type: audio cd
-        url: file:///dev/scd0
-        id: 290f9412_18
-    
-        Attributes of cd_info.track:
-        title: That Summer
-        artist: Garth Brooks
-        samplerate: 44.1
-        length: 288
-        codec: PCM
-        trackno: 17
-        trackof: 18
-        album: The Hits
-        genre: blues
-
-MEDIACORE = ['title', 'caption', 'comment', 'artist', 'size', 'type', 'subtype',
-             'date', 'keywords', 'country', 'language', 'url']
-AUDIOCORE = ['channels', 'samplerate', 'length', 'encoder', 'codec', 'samplebits',
-             'bitrate', 'language']
-MUSICCORE = ['trackno', 'trackof', 'album', 'genre']        
-        """
-        
         """
         # Get the Artist's name(could be more than one) and Album name 
         # Also, get rid of the space at the end of the Artists name, and before the Album name
         # Artist name and album are returned as "Artist / Album"
         # -note the "space slash space" between Artist and Album
-        artist_album = re.split(" \\/ ", cd_info)
-        artist =''                    
-        album =''
-
-        if (cd_info != ''):
-            # Is there more than one Artist on this CD?
-            artist_album_length = len(artist_album)
-            if  artist_album_length > 1:
-                for  i in range (0, len(artist_album) - 1):
-                    # Are we at the last Artist on the album
-                    if (i == (len(artist_album) - 2)):
-                        artist += artist_album[i]                   
-                    else :
-                        artist += artist_album[i] + '-'
-                # The album is the last element in the list       
-                album = artist_album[len(artist_album)-1]
-            # If there is only 1 Artist, then the list is only 2 elements
-            elif (artist_album_length == 1 ):
-                artist = artist_album[0]
-                album = artist_album[1]       
         """            
-        if DEBUG: print 'cd_info.title : %s' %cd_info.title
+        
         # Check if CDDB data failed -is there a better way to do this?
         # Give some defaults with a timestamp to uniqueify artist and album names.
         # So that subsequent CDs with no CDDB data found don't overwrite each other.
         if ((cd_info.title == None) and (cd_info.artist == None)):
+
             print 'Error: No CDDB data returned from MMPYTHON'
-            # Creates a string which looks like "28-Jun-03-10:16am"
-            # http://www.python.org/doc/current/lib/module-time.html
             current_time = time.strftime('%d-%b-%y-%I:%M%P')
+            
             print 'The current time is: %s' %current_time
             
             artist ='Unknown Artist ' + current_time + ' - RENAME'
             album ='Unknown CD Album ' + current_time +  ' - RENAME'
             genre ='Other'
-            # Flash a popup window indicating copying is done
+           
+           # Flash a popup window indicating copying is done
             popup_string="CD info not found!\nMust manually rename files\nwhen finished ripping"
-            pop = PopupBox(text=popup_string)
-            pop.show()
+
+            pop = AlertBox(text=popup_string)
             time.sleep(7)
-            pop.destroy()
+
         # If  valid data was returned from mmpython/CDDB
         else:
             album   = self.replace_special_char(cd_info.title, '-')
@@ -390,16 +325,9 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
             genre    = self.replace_special_char(cd_info.tracks[0].genre, '-')
 
         song_names = []                        
-        if DEBUG: print 'About to print all tracks info'
         for track in cd_info.tracks:
-            if DEBUG: print 'track = %s' %track
             song_names.append(self.replace_special_char(track.title, '-'))
             
-        if DEBUG: print 'album_temp : %s'  %album
-        if DEBUG: print 'artist_temp   : %s'  %artist
-        if DEBUG: print 'genre_temp  : %s'  %genre
-        for song in song_names:
-            if DEBUG: print 'song_name : %s' %song
         return [artist, album, genre, song_names]                
     
     # This function gets rid of the slash, '/', in a string, and replaces it  with join_string    
@@ -428,18 +356,6 @@ MUSICCORE = ['trackno', 'trackof', 'album', 'genre']
     def replace_special_char(self, string, repl='-'):
         # Regular Expression Special Chars =  . ^ $ * + ? { [ ] \ | ( )
         special_chars = [ '\"',  '\`', '\\\\', '/','~' ]
-        
-        """
-        special_chars = [ '~', '!', '@', '\\$', '%', \
-                                '\\*', '\\|', ':',  \
-                                 '\"', '\\?',  '\`', '\\\\',  \
-                                  ';', "\'", '/' ]
-        """                                  
-                                # '~', '!', '@', '# ', '\\$', '%', '\\^', '&', \
-                                # '\\*', '\\(', '\\)', '\\[', '\\]', '\\+', '\\|', '\\{', '}', ':',  \
-                                 # '\"', '<', '>', '\\?',  '\`', '=', '\\\\',  \
-                                 # ';', "\'", '/' ]                                  
-                                  
         new_string = string
         num = 0
        
@@ -486,22 +402,13 @@ class PluginInterface(plugin.ItemPlugin):
 
     def create_backup_items(self, arg, menuw):   
         items = []
-        items += [menu.MenuItem('Backup CD to hard drive in .wav format',
-                                self.cd_backup_wav, arg=arg)]
 
-        items += [menu.MenuItem('Backup CD to hard drive in .mp3 format',
+        items += [menu.MenuItem('Backup CD to hard drive in mp3 format',
                                 self.cd_backup_mp3, arg=arg)]
 
-        """                            
-        items += [menu.MenuItem('TBD-Burn MP3s onto CD in regular CD-Audio format)',
-                                cd_backup_mp3,2)]
+        items += [menu.MenuItem('Backup CD to hard drive in wav format',
+                                self.cd_backup_wav, arg=arg)]
 
-        items += [menu.MenuItem('TBD-Organize Files',
-                                cd_backup_mp3,2)]
-
-        items += [menu.MenuItem('TBD-Backup DVD to Hard Drive',
-                                cd_backup_mp3,2)]
-        """
         backupmenu = menu.Menu('CD Backup', items, reload_func=self.create_backup_menu)
         rc.app(None)
         return backupmenu
@@ -515,57 +422,3 @@ class PluginInterface(plugin.ItemPlugin):
         device = arg
         rip_thread = main_backup_thread(device=device, rip_format='mp3')        
         rip_thread.start()
-                                    
-        
-             
-"""
-ID3 Tag Info for ripping to MP3
-
-       ID3 tag options:
-
-       --tt title
-              audio/song title (max 30 chars for version 1 tag)
-
-       --ta artist
-              audio/song artist (max 30 chars for version 1 tag)
-
-       --tl album
-              audio/song album (max 30 chars for version 1 tag)
-
-       --ty year
-              audio/song year of issue (1 to 9999)
-
-       --tc comment
-              user-defined  text (max 30 chars for v1 tag, 28 for
-              v1.1)
-
-       --tn track
-              audio/song track number (1  to  255,  creates  v1.1
-              tag)
-
-       --tg genre
-              audio/song genre (name or number in list)
-
-       --add-id3v2
-              force addition of version 2 tag
-
-       --id3v1-only
-              add only a version 1 tag
-
-       --id3v2-only
-              add only a version 2 tag
-
-       --space-id3v1
-              pad version 1 tag with spaces instead of nulls
-
-       --pad-id3v2
-              pad version 2 tag with extra 128 bytes
-
-       --genre-list
-              print alphabetically sorted ID3 genre list and exit
-
-
-"""        
-
-
-
