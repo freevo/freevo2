@@ -28,6 +28,11 @@ from stat import *;
 version = utils.version;
 maintainer = utils.maintainer;
 
+# Constants
+ID3_ANY = 0;
+ID3_V1  = 1;
+ID3_V2  = 2;
+
 #######################################################################
 class TagException:
    msg = "";
@@ -102,6 +107,7 @@ class TagHeader:
       if not (major == 2 and (minor == 3 or minor == 4)):
          raise TagException("ID3 v" + str(major) + "." + str(minor) +\
                             " is not supported.");
+
 
       # The first 3 bits of the next byte are flags.
       (self.unsync,
@@ -367,9 +373,13 @@ class Tag:
    # or an aleady opened file object.  In the latter case, the file object 
    # is not closed by the Tag object.
    #
-   # Converts all ID3v1 data into ID3v2 frames.
+   # By default, both ID3 v2 and v1 tags are parsed in that order.
+   # If a v2 tag is found then a v1 parse is not performed.  This behavior
+   # can be refined by passing ID3_V1 or ID3_V2 as the second argument.
+   #
+   # Converts all ID3v1 data into ID3v2 frames internally.
    # May throw IOError, or TagException if parsing fails.
-   def link(self, f):
+   def link(self, f, v = ID3_ANY):
       if isinstance(f, file):
          self.fileName = f.name;
       elif isinstance(f, str):
@@ -380,12 +390,16 @@ class Tag:
 
       TRACE_MSG("Linking File: " + self.fileName);
       self.frames.clear();
-      try: 
-          if self.__loadV2Tag(f):
-              return 1
-      except TagException:
-          if self.__loadV1Tag(f):
-	      return 1
+      if v == ID3_ANY:
+         if self.__loadV2Tag(f) or self.__loadV1Tag(f):
+            return 1;
+      elif v == ID3_V2:
+         if self.__loadV2Tag(f):
+            return 1;
+      elif v == ID3_V1:
+         if self.__loadV1Tag(f):
+            return 1;
+	 
       return 0;
 
    #######################################################################
@@ -473,7 +487,7 @@ class Tag:
          # Header is definitely there so at least one frame *must* follow.
          self.paddingSize = self.frames.parse(fp, self.header);
       except TagException:
-         #f.close();
+         f.close();
          raise;
 
       if closeFile:
@@ -839,7 +853,7 @@ class Mp3AudioFile:
    # Number of seconds required to play the audio file.
    playTime       = None;
 
-   def __init__(self, fileName):
+   def __init__(self, fileName, tagVersion = ID3_ANY):
       self.playTime = None;
       self.fileName = fileName;
       mp3Match = re.compile(".*\.mp3$");
@@ -850,7 +864,7 @@ class Mp3AudioFile:
 
       # Create ID3 tag.
       tag = Tag();
-      hasTag = tag.link(f);
+      hasTag = tag.link(f, tagVersion);
       if not hasTag:
          tag = None;
 
