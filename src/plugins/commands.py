@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/03 18:08:14  dischi
+# oops
+#
 # Revision 1.9  2003/11/03 18:04:43  dischi
 # cleanup, only show dialog when needed, image support
 #
@@ -237,7 +240,6 @@ class CommandItem(Item):
 
 
     def getCommandOutput(self, command, outputfile, erroutputfile):
-        osd.get_singleton().show_mouse = True
         child = popen2.Popen3(command, 1) # capture stdout and stderr from command
         child.tochild.close()             # don't need to talk to child
         outfile = child.fromchild 
