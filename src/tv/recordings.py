@@ -24,7 +24,7 @@ def add_favorite(prog):
         mod = []
         if prog.mod == 'ANY' or 1: # FIXME: add real mod
             mod.append('00:00-23:59')
-        return server.favorite_add(prog.title, channel, 0, days, mod, False)
+        return server.favorite_add(prog.title, channel, 50, days, mod, False)
     except mcomm.MException, e:
         print e
         return False, 'Internal server error'
@@ -43,7 +43,7 @@ def schedule_recording(prog):
     # if prog['subtitle']:
     #     info['subtitle'] = prog['subtitle']
     try:
-        return server.recording_add(prog['title'], prog['channel'], 0,
+        return server.recording_add(prog['title'], prog['channel'], 1000,
                                     prog['start'], prog['stop'], info)
     except mcomm.MException, e:
         print e

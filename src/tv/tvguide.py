@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/11/12 20:40:07  dischi
+# some tv crash fixes and cleanup
+#
 # Revision 1.56  2004/11/04 19:57:00  dischi
 # deactivate coming up for now
 #
@@ -166,14 +169,12 @@ class TVGuide(MenuApplication):
             traceback.print_exc()
             return False
 
-        self.current_time = time.time()
-
+        self.current_time = int(time.time())
         # stop_time = self.current_time + hours_per_page * 60 * 60
         stop_time = self.current_time + 3*3600
         channels.import_programs(self.current_time-3*3600, stop_time)
 
         self.channel      = channels.get()
-        print 'RLS: on channel %s' % self.channel.name
         self.selected     = self.channel.get(self.current_time)[0]
 
         self.channel_list = channels
@@ -325,11 +326,11 @@ class TVGuide(MenuApplication):
         elif event == TV_SHOW_CHANNEL:
             _debug_('show channel')
             items = []
-            for prog in self.channel.get(time.time(), time.time() + 10*24*60*60)[:-1]:
+            for prog in self.channel.get(time.time(), -1):
                 items.append(prog)
             cmenu = menu.Menu(self.channel.name, items)
             # FIXME: the percent values need to be calculated
-            cmenu.table = (15, 15, 70)
+            #cmenu.table = (15, 15, 70)
             self.menuw.pushmenu(cmenu)
 
         elif event == TV_START_RECORDING:

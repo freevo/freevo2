@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/11/12 20:40:07  dischi
+# some tv crash fixes and cleanup
+#
 # Revision 1.46  2004/11/07 16:38:53  dischi
 # adjustments to recordserver, needs much cleanup
 #
@@ -91,26 +94,23 @@ class ProgramItem(Item):
     def __init__(self, title, start, stop, subtitle='', description='',
                  id=None, channel_id=None, context='guide', skin_type='video',
                  parent=None):
-        if parent:
-            Item.__init__(self, parent, skin_type=skin_type)
-        else:
-            Item.__init__(self, skin_type=skin_type)
+        Item.__init__(self, parent, skin_type=skin_type)
 
         # TODO: deal with context 'guide' or 'scheduled' (find a different way)
         self.context = context
 
-        self.title = self.info['title'] = title
+        self.title = title
         # self.info['title'] = title
-        self.start = self.info['start'] = start
-        self.stop = self.info['stop'] = stop
+        self.start = start
+        self.stop = stop
         
         # FIXME: after self.info['channel'] is fixed further below remove it
         #        from here.
-        self.info['channel'] = self.channel_id = channel_id
+        self.channel_id = channel_id
         self.info['subtitle'] = subtitle
         self.info['description'] = description
         self.info['id'] = id
-        self.name = '%d\t%s' % (self.info['start'], self.title)
+        self.name = self.title
 
         self.valid = 1
 # we probably don't need the valid attribute anymore
@@ -131,10 +131,10 @@ class ProgramItem(Item):
         # FIXME: fix tv_util.get_chan_displayname() or do it another way
         # self.info['channel'] = tv_util.get_chan_displayname(channel_id)
 
-        self.start_str = time.strftime(config.TV_DATETIMEFORMAT,
-                                       time.localtime(self.start))
-        self.stop_str = time.strftime(config.TV_DATETIMEFORMAT,
-                                      time.localtime(self.stop))
+#         self.start_str = time.strftime(config.TV_DATETIMEFORMAT,
+#                                        time.localtime(self.start))
+#         self.stop_str = time.strftime(config.TV_DATETIMEFORMAT,
+#                                       time.localtime(self.stop))
 
         # TODO: add category support (from epgdb)
         self.categories = ''
@@ -185,6 +185,11 @@ class ProgramItem(Item):
             if not hasattr(other, attr):
                 return 1
 
+#         if self.title == other.title and \
+#            self.start == other.start and \
+#            self.stop  == other.stop:
+#             print self.channel_id, other.channel_id, self.title
+               
         return self.title != other.title or \
                self.start != other.start or \
                self.stop  != other.stop or \
