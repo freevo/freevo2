@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/09/21 13:32:10  dischi
+# fix smart disc naming
+#
 # Revision 1.32  2003/09/20 15:08:26  dischi
 # some adjustments to the missing testfiles
 #
@@ -624,16 +627,14 @@ class Identify_Thread(threading.Thread):
                         if not xml_file:
                             xml_file = tvinfo[3]
                         
-                elif not show_name and config.COVER_DIR:
-                    if os.path.isfile(config.COVER_DIR+\
-                                      os.path.splitext(os.path.basename(movie))[0]+'.png'):
-                        image = config.COVER_DIR+\
-                                os.path.splitext(os.path.basename(movie))[0]+'.png'
-                    elif os.path.isfile(config.COVER_DIR+\
-                                        os.path.splitext(os.path.basename(movie))[0]+'.jpg'):
-                        image = config.COVER_DIR+\
-                                os.path.splitext(os.path.basename(movie))[0]+'.jpg'
+                elif (not show_name) and len(mplayer_files) == 1:
+                    movie = mplayer_files[0]
+                    if config.COVER_DIR:
+                        base = os.path.splitext(os.path.basename(movie))[0]
+                        base = os.path.join(config.COVER_DIR, base)
+                        image = util.getimage(base, image)
                     title = os.path.splitext(os.path.basename(movie))[0]
+
             # nothing found, give up: return the label
             if not title:
                 title = label
