@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/03/27 20:10:56  dischi
+# Fix endless loop on empty directories (and added a messages)
+#
 # Revision 1.33  2003/03/23 19:44:04  dischi
 # added debug
 #
@@ -716,6 +719,10 @@ class Skin_Area:
         writes a text ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
+
+        if not text:
+            return
+        
         if x == -1: x = content.x
         if y == -1: y = content.y
 

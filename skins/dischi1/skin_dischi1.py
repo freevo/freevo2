@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/03/27 20:11:00  dischi
+# Fix endless loop on empty directories (and added a messages)
+#
 # Revision 1.42  2003/03/23 21:40:31  dischi
 # small bugfixes for loading a new skin
 #
@@ -231,6 +234,8 @@ class Title_Area(Skin_Area):
 
         if content.type == 'menu':
             text = menu.heading
+        elif len(menu.choices) == 0:
+            text = ''
         elif content.type == 'short item':
             if menu.selected.type == 'video' and menu.selected.tv_show:
                 sn = menu.selected.show_name
@@ -254,6 +259,8 @@ class Title_Area(Skin_Area):
 
         if content.type == 'menu':
             text = menu.heading
+        elif len(menu.choices) == 0:
+            text = ''
         elif content.type == 'short item':
             if menu.selected.type == 'video' and menu.selected.tv_show:
                 sn = menu.selected.show_name
@@ -584,7 +591,6 @@ class Skin:
 
         osd.update()
         self.force_redraw = FALSE
-
 
 
             

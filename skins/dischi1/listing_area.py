@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/03/27 20:10:59  dischi
+# Fix endless loop on empty directories (and added a messages)
+#
 # Revision 1.16  2003/03/23 21:40:31  dischi
 # small bugfixes for loading a new skin
 #
@@ -110,6 +113,10 @@ class Listing_Area(Skin_Area):
         get the geometry of the items. How many items per row/col, spaces
         between each item, etc
         """
+
+        # hack for empty directories
+        if not len(menu.choices):
+            return self.last_get_items_geometry[1]
 
         # store the old values in case we are called by ItemsPerMenuPage
         backup = ( self.area_val, self.layout)
@@ -251,6 +258,10 @@ class Listing_Area(Skin_Area):
               self.get_items_geometry(settings, menu, self.display_style)
 
 
+        if not len(menu.choices):
+            val = content.types['default']
+            self.write_text('This directory is empty', content.font, content)
+            
         if content.align == 'center':
             item_x0 = content.x + (content.width - cols * hspace) / 2
         else:
