@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.120  2004/08/26 15:26:49  dischi
+# add code to do some memory debugging
+#
 # Revision 1.119  2004/08/23 01:27:04  rshortt
 # -Add input_name (TODO: autodetect that) and passthrough for TVCard.
 #
@@ -288,7 +291,14 @@ def _debug_function_(s, level=1):
     print s
 
             
+def _mem_debug_function_(type, name='', level=1):
+    if MEMORY_DEBUG < level:
+        return
+    print '<mem> %s: %s' % (type, name)
+
+
 __builtin__.__dict__['_debug_']= _debug_function_
+__builtin__.__dict__['_mem_debug_']= _mem_debug_function_
 
 
 #

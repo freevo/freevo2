@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2004/08/26 15:26:49  dischi
+# add code to do some memory debugging
+#
 # Revision 1.78  2004/08/24 19:23:36  dischi
 # more theme updates and design cleanups
 #
@@ -445,3 +448,17 @@ class Item:
         else:
             r = self.__getitem__(attr)
             return Unicode(r)
+
+
+    def delete(self):
+        """
+        callback when this item is deleted from the menu
+        """
+        self.parent = None
+        
+        
+    def __del__(self):
+        """
+        delete function of memory debugging
+        """
+        _mem_debug_('item', self.name)

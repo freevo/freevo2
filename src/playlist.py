@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.76  2004/08/26 15:26:49  dischi
+# add code to do some memory debugging
+#
 # Revision 1.75  2004/08/23 20:36:42  dischi
 # rework application handling
 #
@@ -493,6 +496,14 @@ class Playlist(Item):
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
 
+
+    def delete(self):
+        """
+        callback when this item is deleted from the menu
+        """
+        Item.delete(self)
+        self.playlist = []
+        
 
     
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.142  2004/08/26 15:26:49  dischi
+# add code to do some memory debugging
+#
 # Revision 1.141  2004/08/24 19:23:36  dischi
 # more theme updates and design cleanups
 #
@@ -19,30 +22,6 @@
 #
 # Revision 1.139  2004/08/14 15:10:20  dischi
 # do not use skin.py
-#
-# Revision 1.138  2004/08/05 17:38:54  dischi
-# changes to adjust to the new menu code
-#
-# Revision 1.137  2004/08/01 10:56:46  dischi
-# deactivate password checking, InputBox is broken
-#
-# Revision 1.136  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.135  2004/07/25 19:47:37  dischi
-# use application and not rc.app
-#
-# Revision 1.134  2004/07/24 12:24:02  dischi
-# reflect gui changes
-#
-# Revision 1.133  2004/07/23 19:43:59  dischi
-# move most of the settings code out of the skin engine
-#
-# Revision 1.132  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.131  2004/06/10 09:19:12  dischi
-# only remove start strings => 10
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -791,8 +770,8 @@ class DirItem(Playlist):
 
             menuw.pushmenu(item_menu)
 
-            dirwatcher.cwd(menuw, self, item_menu, self.dir)
-            self.menu  = item_menu
+            self.menu  = util.weakref(item_menu)
+            dirwatcher.cwd(menuw, self, self.menu, self.dir)
             self.menuw = menuw
 
 
@@ -806,6 +785,23 @@ class DirItem(Playlist):
 
         # we changed the menu, don't build a new one
         return None
+
+
+    def delete(self):
+        """
+        delete function for this item
+        """
+        Playlist.delete(self)
+        self.play_items = []
+        self.dir_items  = []
+        self.pl_items   = []
+        
+
+    def __del__(self):
+        """
+        delete function of memory debugging
+        """
+        _mem_debug_('dir ', self.name, 2)
 
 
     # ======================================================================
