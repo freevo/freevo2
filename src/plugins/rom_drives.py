@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/09/19 16:04:37  outlyer
+# Ugly, ugly change to work around a crash.
+#
 # Revision 1.29  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -297,7 +300,12 @@ class RemovableMedia:
                     s = ioctl(fd, CDROMEJECT)
                 os.close(fd)
             except:
-                traceback.print_exc()
+                try:
+                    traceback.print_exc()
+                except IOError:
+                    # believe it or not, this sometimes causes an IOError if
+                    # you've got a music track playing in the background (detached)
+                    pass
                 # maybe we need to close the fd if ioctl fails, maybe
                 # open fails and there is no fd
                 try:
