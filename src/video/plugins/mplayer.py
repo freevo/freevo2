@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/05/31 17:15:20  dischi
+# support strange config.MPLAYER_AO_DEV
+#
 # Revision 1.67  2004/05/02 08:55:52  dischi
 # dvd as .iso support
 #
@@ -244,7 +247,7 @@ class MPlayer:
         # Build the MPlayer command
         command = [ '--prio=%s' % config.MPLAYER_NICE, config.MPLAYER_CMD ] + \
                   config.MPLAYER_ARGS_DEF.split(' ') + \
-                  [ '-slave', '-ao', config.MPLAYER_AO_DEV ]
+                  [ '-slave', '-ao'] + config.MPLAYER_AO_DEV.split(' ')
 
         additional_args = []
 
