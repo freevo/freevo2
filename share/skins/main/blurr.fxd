@@ -690,8 +690,12 @@
                         <text width="100" align="right" font="player info">Track:</text>
                         <goto_pos x="10" mode="relative"/>
                         <text font="player info" expression="trackno"/>
-                        <newline/>
                     </if>
+                    <if expression="trackof">
+                            <text font="info value">/</text>
+                            <text font="info value" expression="trackof"/>
+                    </if>
+                    <newline/>
                     <goto_pos y="15" mode="relative"/>
                     <if expression="length">
                         <text width="100" align="right" font="player info">Length:</text>
