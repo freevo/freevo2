@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/14 18:08:46  dischi
+# use a working font
+#
 # Revision 1.4  2003/11/22 21:06:41  outlyer
 # Merge of the new version of the pymetar library from upstream.
 #
@@ -385,7 +388,7 @@ class weather(IdleBarPlugin):
 
     def draw(self, (type, object), x, osd):
         temp,icon = self.checkweather()
-        font  = osd.get_font('weather')
+        font  = osd.get_font('small0')
         osd.draw_image(os.path.join(config.ICON_DIR, 'weather/' + icon),
                         (x, osd.y + 15, -1, -1))
         temp = '%s°' % temp
