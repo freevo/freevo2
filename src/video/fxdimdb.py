@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/20 16:09:19  dischi
+# & -> &amp;
+#
 # Revision 1.2  2003/07/18 19:48:24  dischi
 # support for datadir
 #
@@ -246,7 +249,6 @@ class FxdImdb:
             raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
 
         if not os.path.isdir(os.path.dirname(self.fxdfile)):
-            print self.fxdfile
             if os.path.dirname(self.fxdfile):
                 os.makedirs(os.path.dirname(self.fxdfile))
             
@@ -752,7 +754,6 @@ class FxdImdb:
         """return a valid XML string"""
         
         try:
-            # s = unicode(string.replace(line, "&", "&amp;"), 'latin-1')
             s = unicode(line, 'latin-1')
             while s[-1] == ' ':
                 s = s[:-1]
@@ -760,6 +761,7 @@ class FxdImdb:
                 s = s[5:]
             if s[-4:] == '#34;':
                 s = s[:-5]
+            s = s.replace("&", "&amp;")
             return s
         except:
             return line
