@@ -16,6 +16,17 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/08/02 15:32:18  outlyer
+# Small changes to fix the badly broken VBR parser that was in audioinfo.py
+#  o Moved class into mp3_id3.py since audioinfo.py is/should be a wrapper
+#    around various tag implementations
+#  o Used brand new VBR-compatible class that doesn't show the many, many
+#    problems I had with the previous class.
+#
+# Note, this adds a new class to mp3_id3.py called mp3header. Maybe we should
+# rename mp3_id3.py to another filename, but I don't want to lose our CVS
+# history.
+#
 # Revision 1.6  2002/08/01 00:38:26  outlyer
 # More VBR fixes.
 #
@@ -216,11 +227,12 @@ class AudioInfo:
           Returns: 1 if success
         """
         id3 = mp3_id3.ID3( file )
-        tmp = mp3info( file )
+        m =  mp3_id3.mp3header( file)
+	s,b = m.info()
 
         self.album  = id3.album
         self.artist = id3.artist
-        self.length = (tmp['MM']*60)+tmp['SS']
+        self.length = s
         self.title  = id3.title
         if not self.title:
             self.title = ''
@@ -287,233 +299,7 @@ class AudioInfo:
 
 
 
-t_bitrate = [
-  [
-    [0,32,48,56,64,80,96,112,128,144,160,176,192,224,256],
-    [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160],
-    [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160]
-    ],
-  [
-    [0,32,64,96,128,160,192,224,256,288,320,352,384,416,448],
-    [0,32,48,56,64,80,96,112,128,160,192,224,256,320,384],
-    [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320]
-    ]
-  ]
-        
-t_sampling_freq = [
-  [22050, 24000, 16000],
-  [44100, 48000, 32000]
-  ]
-
-frequency_tbl = {0:22050,1:24000,2:16000,3:44100,4:48000,5:32000,6:64000}
-
-
-def getword(fp, off):
-    fp.seek(off, 0)
-    word = fp.read(4)
-    return word
-
-def get_l4 (s):
-    return reduce (lambda a,b: ((a<<8) + b), map (long, map (ord, s)))
-
-def get_xing_header (f):
-    where = f.tell()
-    try:
-        f.seek(0)
-        b = f.read(8192)
-        i = string.find (b, 'Xing')
-        if i > 0:
-            # 32-bit fields; "Xing", flags, frames, bytes, 100 toc
-            i = i + 4
-            flags	= get_l4 (b[i:i+4]); i = i + 4
-            frames	= get_l4 (b[i:i+4]); i = i + 4
-            bytes	= get_l4 (b[i:i+4]); i = i + 4
-            return flags, frames, bytes
-        else:
-            return None
-    finally:
-        f.seek (where)
-
-MPG_MD_STEREO           = 0
-MPG_MD_JOINT_STEREO     = 1
-MPG_MD_DUAL_CHANNEL     = 2
-MPG_MD_MONO             = 3
-
-def get_newhead (word):
-  word = get_l4 (word)
-  if (word & (1<<20)):
-    if (word & (1<<19)):
-      lsf = 0
-    else:
-      lsf = 1
-    mpeg25 = 0
-  else:
-    lsf = 1
-    mpeg25 = 1
-  lay = 4 - ((word>>17)&3)
-  if mpeg25:
-    sampling_frequency = 6 + ((word>>10) & 3)
-  else:
-    sampling_frequency = ((word>>10)&3) + (lsf * 3)
-  error_protection 	= ((word>>16)&1) ^ 1
-  bitrate_index 	= (word>>12) & 0xf
-  padding 		= ((word >> 9) & 0x1)
-  extension 		= ((word >> 8) & 0x1)
-  mode	 		= ((word >> 6) & 0x3)
-  mode_ext 		= ((word >> 4) & 0x3)
-  copyright 		= ((word >> 3) & 0x1)
-  original 		= ((word >> 2) & 0x1)
-  emphasis 		= word & 0x3
-
-  if mode == MPG_MD_MONO:
-    stereo = 1
-  else:
-    stereo = 2
-
-
-  return locals()
-  import pprint
-  pprint.pprint (locals())
-  
-def get_head(word):
-    if len(word) != 4:
-        return {}
-    
-    l = ord(word[0])<<24|ord(word[1])<<16|ord(word[2])<<8|ord(word[3])
-
-    id             = (l>>19) & 1
-    layer          = (l>>17) & 3
-    protection_bit = (l>>16) & 1
-    bitrate_index  = (l>>12) & 15
-    sampling_freq  = (l>>10) & 3
-    padding_bit    = (l>>9) & 1
-    private_bit    = (l>>8) & 1
-    mode           = (l>>6) & 3
-    mode_extension = (l>>4) & 3
-    copyright      = (l>>3) & 1
-    original       = (l>>2) & 1
-    emphasis       = (l>>0) & 1
-    version_index  = (l>>19) & 3
-    bytes          = l
-
-
-    try:
-        bitrate = t_bitrate[id][3-layer][bitrate_index]
-    except IndexError:
-        bitrate = 0
-
-    try:
-        fs = t_sampling_freq[id][sampling_freq]
-    except IndexError:
-        fs = 0
-
-    return vars()
-
-
-def is_mp3(h):
-    #if h['bytes'] == -1: return 0
-    if not (h['bitrate_index'] == 0 or \
-            h['version_index'] == 1 or \
-            ((h['bytes'] & 0xFFE00000) != 0xFFE00000) or \
-            (not h['fs']) or \
-            (not h['bitrate'])):
-        return 1
-    return 0
-
-def get_v2head(fp):
-    fp.seek(0,0)
-    word = fp.read(3)
-    if word != "ID3": return 0
-
-    bytes = fp.read(2)
-    major_version = ord(bytes[0])
-    minor_version = ord(bytes[1])
-
-    version = "ID3v2.%d.%d" % (major_version, minor_version)
-    bytes = fp.read(1)
-    unsync = (ord(bytes)>>7) & 1
-    ext_header = (ord(bytes)>>6) & 1
-    experimental = (ord(bytes)>>5) & 1
-
-    bytes = fp.read(4)
-    tagsize = 0
-
-    for i in range(4):
-        tagsize = tagsize + ord(bytes[3-i])*128*i
-
-    if ext_header:
-        ext_header_size = ext_header_size + 10
-        bytes = fp.read(4)
-
-    return vars()
-
 def mp3info(fn):
-    off = 0
-    eof = 0
-    h   = 0
-    i   = 0
-    tot = 4096
-
-    if os.stat(fn)[6] == 0:
-        return {}
-
-    fp   = open(fn)
-    word = getword(fp, off)
-
-    if off==0:
-        id3v2 = get_v2head(fp)
-        if id3v2:
-            off  = off + id3v2['tagsize']
-            tot  = tot + off
-            word = getword(fp, off)
-
-    nh   = get_newhead( word )
-
-    while 1:
-        h = get_head(word)
-        if not h: break
-        off=off+1
-        word = getword(fp, off)
-        if off>tot: 
-            print "BAD FILE", fn, os.stat(fn)[6]
-            #os.unlink(fn)
-            return {}
-
-        if is_mp3(h): break
-
-
-    fp.seek(0, 2)
-    eof = fp.tell()
-
-    try:
-        fp.seek(-128, 2)
-    except IOError, reason:
-        return {}
-
-	vbr = 0
-    xh = get_xing_header (fp)
-    if xh:
-    	# Override the bitrate if a Xing header is present
-        flags, xing_frames, xing_bytes = xh
-	if DEBUG: 
-		print "Flags: "+ flags
-		print "Xing Frames: " + xing_frames
-		print "Xing Byttes: " + xing_bytes
-	if (flags & 0x08):
-		if DEBUG:
-			print "Sampling Index: " + nh['sampling_frequency']
-		tpf = float([0,384,1152,1152,576][int(nh['lay'])])
-		tpf = tpf / ([44100, 48000, 32000, 22050, 24000, 16000, 22050, 12000, 8000, 44100][int(nh['sampling_frequency'])] << nh['lsf'])
-		h['bitrate'] = (xing_bytes * 8.) / (tpf * xing_frames * 1000)
-		if DEBUG: 
-			print "VBR: " + h['bitrate']
-
-    if h['id']:
-        h['mean_frame_size'] = (144000. * h['bitrate']) / h['fs']
-    else:
-        h['mean_frame_size'] = (72000. * h['bitrate']) / h['fs']
-
-    h['layer'] = h['mode']
     h['freq_idx'] = 3*h['id'] + h['sampling_freq']
 
     h['length'] = ((1.0*eof-off) / h['mean_frame_size']) * ((115200./2)*(1.+h['id']))/(1.0*h['fs'])
