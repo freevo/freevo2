@@ -7,7 +7,7 @@
 
 CFLAGS = -O2 -Wall `freetype-config --cflags`
 LIBS = -lm -lpng -lz `freetype-config --libs`
-XLIBS = -L/usr/X11/lib -lX11 
+XLIBS = -L/usr/X11R6/lib -lX11 
 
 all: osds_fb
 
