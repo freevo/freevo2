@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/12 15:56:58  dischi
+# fix crash
+#
 # Revision 1.23  2004/02/12 12:18:41  dischi
 # fix bug when freevo crashes for rom drives
 #
@@ -241,9 +244,9 @@ class Cache:
         objects = {}
         for filename in os.listdir(directory):
             try:
+                key       = filename
                 fullname  = os.path.join(directory, filename)
                 timestamp = os.stat(fullname)[stat.ST_MTIME]
-                key       = filename
 
                 info = self.find(filename, directory, fullname)
             except KeyError:
@@ -256,6 +259,10 @@ class Cache:
                 if callback:
                     callback()
             except (IOError, OSError):
+                try:
+                    timestamp
+                except:
+                    timestamp = 0
                 info = {}
             
             objects[key] = (info, timestamp)
