@@ -52,7 +52,7 @@ class OSD:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._send('clearscreen;' + str(self.COL_BLACK))
         self.default_fg_color = self.COL_BLACK
-        self.default_bg_color = self.COL_SKY_BLUE
+        self.default_bg_color = self.COL_WHITE
         self.width = 768                # XXX hardcoded, fix
         self.height = 576               # XXX hardcoded, fix
 

@@ -208,7 +208,7 @@ udpserver (int port)
   
   ioctl (rcv_fd, FIONBIO, &on);
      
-  osd_clearscreen (0x006d9bff);
+  osd_clearscreen (0xffffffff);
   osd_drawstring ("skins/fonts/RUBTTS__.TTF", 64,
                   "Waiting for client...",
                   50, 250, COL_BLACK, &tmp);

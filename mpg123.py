@@ -104,6 +104,8 @@ class MPG123:
 	    # use the standard imghdr function to check if
 	    # it's a real png, and not a lying one :)
 	    if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
+	    	# Draw border for image
+		osd.drawbox(int(logox),80,(int(logox) + int(w)),80 + int(h),width=6,color=0x000000)
 	    	osd.drawbitmap(cover_logo,logox,80)
 
             osd.drawstring('Title: %s' % id.title, 30, 80)
