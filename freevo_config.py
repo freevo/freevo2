@@ -61,6 +61,21 @@
 FREEVO_CONF_VERSION = 1.0
 LOCAL_CONF_VERSION  = 1.0
 
+# NOW check if freevo.conf is up-to-date. An older version may break the next
+# steps
+
+if int(str(CONF.version).split('.')[0]) != \
+   int(str(FREEVO_CONF_VERSION).split('.')[0]):
+    print '\nERROR: The version informations in freevo_config.py doesn\'t'
+    print 'match the version in %s.' % freevoconf
+    print 'please rerun configure to generate a new freevo.conf'
+    sys.exit(1)
+
+if int(str(CONF.version).split('.')[1]) != \
+   int(str(FREEVO_CONF_VERSION).split('.')[1]):
+    print 'WARNING: freevo_config.py was changed, please rerun ./configure'
+    
+
 # ======================================================================
 # General freevo settings:
 # ======================================================================
