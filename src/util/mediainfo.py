@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/15 15:30:52  dischi
+# improved item with track storage
+#
 # Revision 1.28  2004/02/14 13:05:04  dischi
 # do not call skin.get_singleton() anymore
 #
@@ -216,10 +219,6 @@ class Cache:
         dirname  = filename[:filename.rfind('/')]
         filename = filename[filename.rfind('/')+1:]
 
-#         print dirname
-#         print dirname.__class__
-#         print self.current_cachedir
-#         print self.current_cachedir.__class__
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
 
@@ -280,10 +279,6 @@ class MMCache(Cache):
         list of one of those above. This makes the caching much faster
         """
         ret = {}
-        if hasattr(object, 'tracks'):
-            # do not simplifiy dvds on disc/vcds cue/bin
-            return object
-        
         for k in object.keys:
             if not k in self.uncachable_keys and getattr(object,k) != None:
                 value = getattr(object,k)
@@ -299,12 +294,19 @@ class MMCache(Cache):
                 ret[k] = []
                 for o in getattr(object, k):
                     ret[k].append(self.simplify(o))
+
         if hasattr(object, 'subtitles') and object.subtitles:
             # add subtitles for AVCORE
             ret['subtitles'] = object.subtitles
+
         if hasattr(object, 'mime'):
             # mimetype may be good to have :-)
             ret['mime'] = object.mime
+
+        # something with tracks (e.g. dvd on disc)
+        if hasattr(object, 'tracks'):
+            ret['tracks'] = object['tracks']
+                
         return ret
 
     
@@ -315,13 +317,28 @@ class MMCache(Cache):
         info = mmpython.Factory().create(filename)
         if info:
             info = self.simplify(info)
-            info['title:filename'] = Unicode(util.getname(filename))
+            name = util.getname(filename)
+            if name == name.upper() and info.has_key('type') and \
+                   info['type'] in ('DVD', 'VCD'):
+                name = util.getname(filename.lower())
+            info['title:filename'] = name
+
             if info.has_key('video'):
                 for video in info['video']:
                     for variable in ('width', 'height', 'length', 'aspect'):
                         if video.has_key(variable) and not \
                            (info.has_key(variable) and info[variable]):
                             info[variable] = video[variable]
+
+            if info.has_key('tracks') and info['tracks'] and not info.has_key('length'):
+                info['length'] = 0
+                for track in info['tracks']:
+                    if track.has_key('length'):
+                        info['length'] += track['length']
+                if info['tracks'][0].has_key('length') and \
+                   info['tracks'][0]['length'] * len(info['tracks']) == info['length']:
+                    # badly masted dvd
+                    info['length'] = info['tracks'][0]['length']
             return info
         return {}
 
