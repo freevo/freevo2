@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2003/06/22 10:15:16  gsbarbieri
+# Fixes some bugs introduced in the last commit (Sorry, but as I don't use TV, sometimes I forgot to test :( )
+#
 # Revision 1.98  2003/06/22 09:57:13  gsbarbieri
 # Feature to change display_style to a text one when all images are equal.
 #
@@ -333,7 +336,7 @@ class Skin:
         if menu:            
             if  menu.force_skin_layout != -1:
                 return menu.force_skin_layout
-            else:
+            elif menu.choices:
                 different = 0
                 last = menu.choices[ 0 ].image
                 for i in menu.choices:
@@ -472,6 +475,7 @@ class Skin:
         if self.plugin_refresh == None:
             self.plugin_refresh = plugin.get('daemon_draw')
 
+        menu = None
         if type == 'menu':
             menuw = object
             
