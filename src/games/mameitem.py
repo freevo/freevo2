@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/01 05:06:40  outlyer
+# Fixed a missing import as pointed out by Paul de Bruin
+#
 # Revision 1.9  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -49,6 +52,7 @@ import re
 import config
 import util
 import game
+import rc
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
