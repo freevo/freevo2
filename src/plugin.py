@@ -1,43 +1,20 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # plugin.py - Plugin interface
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes: This file handles the Freevo plugin interface
-# Todo:  Maybe split plugin class definitions into an extra file
+# This file is the basic plugin interface for Freevo. It defines simple plugin
+# base classes functions to add or remove a plugin. On init it will load all
+# plugins for the given application.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.80  2004/12/18 18:08:39  dischi
-# add 'database()' function to mimetypes
-#
-# Revision 1.79  2004/12/18 13:41:28  dischi
-# call notifier.step() on init
-#
-# Revision 1.78  2004/11/21 11:12:06  dischi
-# some logging updates
-#
-# Revision 1.77  2004/10/09 16:24:54  dischi
-# add function to return number of plugins, activate callback change
-#
-# Revision 1.76  2004/10/08 20:18:17  dischi
-# new eventhandler <-> plugin interface
-#
-# Revision 1.75  2004/10/06 19:16:29  dischi
-# o rename __variable__ to _variable
-# o notifier support
-# o use 80 chars/line max
-#
-# Revision 1.74  2004/09/27 18:41:06  dischi
-# add input plugin class
-#
-# Revision 1.73  2004/08/29 18:38:15  dischi
-# make cache helper work again
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -54,29 +31,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
-import os, sys
-import gettext
+# python imports
+import os
 import copy
+import logging
 
 import notifier
 
+# freevo imports
+import config
 import cleanup
 from event import Event
-
-import config
 import eventhandler
-import notifier
 
-import logging
+
+# get logging object
 log = logging.getLogger('config')
 
-
-if float(sys.version[0:3]) < 2.3:
-    True  = 1
-    False = 0
 
 #
 # Some basic plugins known to Freevo.
@@ -95,7 +68,8 @@ class Plugin:
         for var, val, desc in self.config():
             if not hasattr(config, var):
                 setattr(config, var, val)
-            
+
+
     def config(self):
         """
         return a list of config variables this plugin needs to be set in
@@ -104,20 +78,6 @@ class Plugin:
         """
         return []
 
-    def translation(self, application):
-        """
-        Loads the gettext translation for this plugin (only this class).
-        This can be used in plugins who are not inside the Freevo distribution.
-        After loading the translation, gettext can be used by self._() instead
-        of the global _().
-        """
-        try:
-            self._ = gettext.translation(application,
-                                         os.environ['FREEVO_LOCALE'],
-                                         fallback=1).gettext
-        except:
-            self._ = lambda m: m
-
 
     def shutdown(self):
         """
@@ -125,7 +85,8 @@ class Plugin:
         """
         pass
 
-    
+
+
 class MainMenuPlugin(Plugin):
     """
     Plugin class for plugins to add something to the main menu
@@ -141,6 +102,7 @@ class MainMenuPlugin(Plugin):
         return []
 
 
+
 class ItemPlugin(Plugin):
     """
     Plugin class to add something to the item action list
@@ -150,7 +112,7 @@ class ItemPlugin(Plugin):
     now (each item type must support it directly). If the function returns
     True, the event won't be passed to other eventhandlers and also not to
     the item itself.
-    
+
     def eventhandler(self, item, event, menuw=None):
     """
     def __init__(self):
@@ -164,7 +126,7 @@ class ItemPlugin(Plugin):
         """
         return []
 
-    
+
 class DaemonPlugin(Plugin):
     """
     Plugin class for daemon objects who will be activate in the
@@ -195,7 +157,7 @@ class DaemonPlugin(Plugin):
         self.poll()
         return True
 
-        
+
 class MimetypePlugin(Plugin):
     """
     Plugin class for mimetypes handled in a directory/playlist.
@@ -214,7 +176,7 @@ class MimetypePlugin(Plugin):
         """
         return []
 
-    
+
     def get(self, parent, files):
         """
         return a list of items based on the files
@@ -227,7 +189,7 @@ class MimetypePlugin(Plugin):
         return how many items will be build on files
         """
         return len(self.find_matches(files, self.suffix()))
-            
+
 
     def dirinfo(self, diritem):
         """
@@ -249,7 +211,7 @@ class MimetypePlugin(Plugin):
         """
         return None
 
-    
+
 class InputPlugin(Plugin):
     """
     Plugin for input devices such as keyboard and lirc. A plugin of this
@@ -338,7 +300,7 @@ def remove(id):
                 return
 
     # remove by name
-    r = [] 
+    r = []
     for p in copy.copy(_all_plugins):
         if p[0] == id:
             _all_plugins.remove(p)
@@ -366,7 +328,7 @@ def is_active(name, arg=None):
             if arg == p[3]:
                 return p
     return False
-                
+
 
 def get_number():
     global _all_plugins
@@ -380,7 +342,7 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
     global _all_plugins
     global _initialized
     global _plugin_basedir
-    
+
     _initialized = True
     _plugin_basedir = os.environ['FREEVO_PYTHON']
 
@@ -410,7 +372,7 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
 
 
     # sort plugins in extra function (exec doesn't like to be
-    # in the same function is 'lambda' 
+    # in the same function is 'lambda'
     _sort_plugins()
 
 
@@ -422,7 +384,7 @@ def init_special_plugin(id):
     global _all_plugins
     global _initialized
     global _plugin_basedir
-    
+
     _plugin_basedir = os.environ['FREEVO_PYTHON']
 
     try:
@@ -435,11 +397,11 @@ def init_special_plugin(id):
             _load_plugin(name, type, level, args, number)
             del _all_plugins[i]
             break
-        
+
     # sort plugins in extra function (exec doesn't like to be
-    # in the same function is 'lambda' 
+    # in the same function is 'lambda'
     _sort_plugins()
-    
+
 
 
 def get(type):
@@ -478,7 +440,7 @@ def mimetype(display_type=None):
             ret.append(p)
     return ret
 
-        
+
 def getbyname(name, multiple_choises=0):
     """
     get a plugin by it's name
@@ -524,7 +486,7 @@ def get_callbacks(name):
         _callbacks[name] = []
     return _callbacks[name]
 
-    
+
 def event(name, arg=None):
     """
     create plugin event
@@ -567,7 +529,7 @@ def _add_to_ptl(type, object):
     if not _plugin_type_list.has_key(type):
         _plugin_type_list[type] = []
     _plugin_type_list[type].append(object)
-    
+
 
 
 def _find_plugin_file(filename):
@@ -602,14 +564,14 @@ def _find_plugin_file(filename):
 
     return None, None
 
-        
+
 
 def _load_plugin(name, type, level, args, number):
     """
     load the plugin and add it to the lists
     """
-    
-    
+
+
     global _plugin_type_list
     global _named_plugins
     global _plugin_basedir
@@ -637,7 +599,7 @@ def _load_plugin(name, type, level, args, number):
         else:
             log.critical('can\'t locate plugin %s' % name)
             return
-        
+
     try:
         if not isinstance(name, Plugin):
             log.debug('loading %s as plugin %s' % (module, object))
@@ -660,11 +622,12 @@ def _load_plugin(name, type, level, args, number):
                     reason = 'unknown\nThe plugin neither called __init__ '\
                              'nor set a reason why\nPlease contact the plugin'\
                              'author or the freevo list'
-                log.warning('plugin %s deactivated\n  reason: %s' % (name, reason))
+                log.warning('plugin %s deactivated\n  reason: %s' % \
+                            (name, reason))
                 return
         else:
             p = name
-            
+
         p._number = number
         p._level = level
 
@@ -682,7 +645,7 @@ def _load_plugin(name, type, level, args, number):
         if p._type:
             _add_to_ptl(p._type, p)
 
-        else: 
+        else:
             if isinstance(p, DaemonPlugin):
                 if hasattr(p, 'poll'):
                     notifier.addTimer( p.poll_interval,
@@ -693,9 +656,10 @@ def _load_plugin(name, type, level, args, number):
                             eventhandler.register(p, e)
                     else:
                         if p.event_listener:
-                            eventhandler.register(p, eventhandler.GENERIC_HANDLER)
+                            handler = eventhandler.GENERIC_HANDLER
                         else:
-                            eventhandler.register(p, eventhandler.EVENT_LISTENER)
+                            handler = eventhandler.EVENT_LISTENER
+                        eventhandler.register(p, handler)
 
             if isinstance(p, MainMenuPlugin):
                 _add_to_ptl('mainmenu%s' % special, p)
@@ -710,7 +674,7 @@ def _load_plugin(name, type, level, args, number):
 
         # register shutdown handler
         cleanup.register( p.shutdown )
-                
+
         if p.plugin_name:
             _named_plugins[p.plugin_name] = p
 
