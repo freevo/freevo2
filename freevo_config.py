@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2002/09/04 04:09:10  krister
+# Added the movie suffix *.M2V which is for SVCDs.
+#
 # Revision 1.58  2002/09/04 03:59:11  krister
 # Removed the obsolete ENABLE_TV and ENABLE_IMAGES options, they're in the skin now.
 #
@@ -171,6 +174,7 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[oO][gG][mM]',
                          '/*.[vV][oO][bB]',
                          '/*.[aA][sS][fF]',
+                         '/*.[mM][2][vV]',
                          '/*.[mM][oO][vV]']
 
 
