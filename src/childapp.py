@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/10/29 18:16:41  dischi
+# moved killall to this file
+#
 # Revision 1.63  2004/10/06 19:24:00  dischi
 # switch from rc.py to pyNotifier
 #
@@ -73,6 +76,7 @@ import threading, thread
 import signal
 import copy
 import popen2
+import glob
 
 import notifier
 
@@ -85,6 +89,37 @@ import util
 from event import *
 
 watcher = None
+
+
+def killall(appname, sig=9):
+    """
+    kills all applications with the string <appname> in their commandline.
+
+    The <sig> parameter indicates the signal to use.
+    This implementation uses the /proc filesystem, it might be Linux-dependent.
+    """
+
+    unify_name = re.compile('[^A-Za-z0-9]').sub
+    appname = unify_name('', appname)
+
+    cmdline_filenames = glob.glob('/proc/[0-9]*/cmdline')
+
+    for cmdline_filename in cmdline_filenames:
+        try:
+            fd = vfs.open(cmdline_filename)
+            cmdline = fd.read()
+            fd.close()
+        except IOError:
+            continue
+        if unify_name('', cmdline).find(appname) != -1:
+            # Found one, kill it
+            pid = int(cmdline_filename.split('/')[2])
+            try:
+                os.kill(pid, sig)
+            except:
+                pass
+    return
+
 
 class Instance:
     """
@@ -236,7 +271,7 @@ class Instance:
             return False
         # child needs some assistance with dying ...
         try:
-            util.killall( self.binary, signal )
+            killall( self.binary, signal )
         except OSError:
             pass
 
