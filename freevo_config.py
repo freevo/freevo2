@@ -535,15 +535,15 @@ VIDEO_SHOW_DATA_DIR = None
 # are played wih MPlayer.
 # 
 VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
-                               'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
-                               'mp4', 'viv', 'nuv', 'mov' ]
+                         'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
+                         'mp4', 'viv', 'nuv', 'mov' ]
 
 #
 # The list of filename suffixes that are used to match the files that
 # are played wih Xine.
 # 
 VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
-                            'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue' ]
+                      'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue' ]
 
 #
 # Prefered video player
@@ -620,30 +620,13 @@ IMAGE_SUFFIX = [ 'jpg','gif','png', 'jpeg','bmp','tiff','psd' ]
 IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
 
-# XXX Set this to 0 to select the new style blending controls
-if 1:
-    # Speed for blending one picture into the new one. Set it to 0 to
-    # disable, or to 25, 10, 5 too make the blend slower.
+# The number of blend steps between images, 0 to disable blending
+IMAGEVIEWER_BLEND_STEPS = 5
     
-    IMAGEVIEWER_BLEND_SPEED = 50
-    # XXX New style blend settings.
-    # The number of blend steps between images.
-    IMAGEVIEWER_BLEND_STEPS = 0
-    
-    # Total time in seconds for blending from one image to the next
-    IMAGEVIEWER_BLEND_TIME = 0
-else:
-    # Speed for blending one picture into the new one. Set it to 0 to
-    # disable, or to 25, 10, 5 too make the blend slower.
-    
-    IMAGEVIEWER_BLEND_SPEED = 0
-    # XXX New style blend settings.
-    # The number of blend steps between images.
-    IMAGEVIEWER_BLEND_STEPS = 4
-    
-    # Total time in seconds for blending from one image to the next
-    IMAGEVIEWER_BLEND_TIME = 0.75
-    
+# Total time in seconds for blending from one image to the next
+IMAGEVIEWER_BLEND_TIME = 0.5
+
+
 # ======================================================================
 # Freevo games settings:
 # ======================================================================
