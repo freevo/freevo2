@@ -67,7 +67,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         path = self.path
         if os.path.splitext(path)[1]:
             for htdocs in self.server.htdocs:
-                path = os.path.abspath(htdocs + path)
+                path = os.path.abspath(htdocs + self.path)
                 if not path.startswith(htdocs):
                     print 'Sandbox violation: %s' % path
                     self.send_error(404, "File not found")
@@ -93,7 +93,6 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.writefd(f)
-            print f.tell()
             return None
             
         if os.path.isdir(self.server.scripts[0] + path):
@@ -233,23 +232,3 @@ class Server:
         # request/response on the incoming connexion
         self.handler(conn, addr, self)
         return True
-
-
-
-
-
-### FREEVO SPECIFIC STUFF ###
-
-if __name__=="__main__":
-    import config
-
-    # init notifier
-    notifier.init( notifier.GENERIC )
-
-    # launch the server on port 8080
-    Server('', config.WWW_PORT, RequestHandler, ['src/www', 'www'],
-           [os.path.abspath('src/www/htdocs')])
-    print "HTTPServer running on port %s" % str(config.WWW_PORT)
-
-    # loop
-    notifier.loop()

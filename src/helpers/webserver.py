@@ -11,17 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.12  2004/07/24 00:26:44  rshortt
-# Upgrade the Twisted reactor.
+# Revision 1.13  2004/12/18 19:05:07  dischi
+# make the webserver work again
 #
-# Revision 1.11  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.10  2004/07/09 16:20:54  outlyer
-# Remove the request logging for 0-level debug. Exceptions will still be
-# logged, but standard requests will not.
-#
-# (i.e. this removes the Apache-style access logging for DEBUG = 0)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -44,66 +36,22 @@
 #
 # ----------------------------------------------------------------------- */
 
-
-import sys, os
-
+import os
+import notifier
 import config
 
-from twisted.internet import reactor
-from twisted.web import static, server, vhost, script
-from twisted.python import log
-import twisted.web.rewrite as rewrite
+from www.server import Server, RequestHandler
 
+# init notifier
+notifier.init( notifier.GENERIC )
 
-if len(sys.argv)>1 and sys.argv[1] == '--help':
-    print 'start or stop the internal webserver'
-    print 'usage freevo webserver [ start | stop ]'
-    sys.exit(0)
+cgi_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../www'))
+htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
+            os.path.join(config.DOC_DIR, 'html') ]
 
-def helpimagesrewrite(request):
-    if request.postpath and request.postpath[0]=='help' and request.postpath[1]=='images':
-        request.postpath.pop(0) 
-        request.path = '/'+'/'.join(request.prepath+request.postpath)
-    if request.postpath and request.postpath[0]=='help' and request.postpath[1]=='styles':
-        request.postpath.pop(0) 
-        request.path = '/'+'/'.join(request.prepath+request.postpath)
+# launch the server on port 8080
+Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)
+print "HTTPServer running on port %s" % str(config.WWW_PORT)
 
-def main():
-    # the start and stop stuff will be handled from the freevo script
-
-    logfile = '%s/webserver-%s.log' % (config.LOGDIR, os.getuid())
-    log.startLogging(open(logfile, 'a'))
-
-    if os.path.isdir(os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')):
-        docRoot = os.path.join(os.environ['FREEVO_PYTHON'], 'www/htdocs')
-    else:
-        docRoot = os.path.join(config.SHARE_DIR, 'htdocs')
-
-    root = static.File(docRoot)
-    root.processors = { '.rpy': script.ResourceScript, }
-    
-    root.putChild('vhost', vhost.VHostMonsterResource())
-    rewriter =  rewrite.RewriterResource(root, helpimagesrewrite)
-    if (config.DEBUG == 0):
-        site = server.Site(rewriter, logPath='/dev/null')
-    else:
-        site = server.Site(rewriter)
-    
-    reactor.listenTCP(config.WWW_PORT, site)
-    reactor.run()
-
-    
-if __name__ == '__main__':
-    import traceback
-    import time
-    while 1:
-        try:
-            start = time.time()
-            main()
-            break
-        except:
-            traceback.print_exc()
-            if start + 10 > time.time():
-                print 'server problem, sleeping 1 min'
-                time.sleep(60)
-
+# loop
+notifier.loop()
