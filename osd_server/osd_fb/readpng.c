@@ -76,6 +76,9 @@ int read_png (char *file_name, uint8 **ppBitmap,
       png_set_strip_16 (png_ptr);
    }
 
+   /* Change opacity to transparency */
+   png_set_invert_alpha (png_ptr);
+
    /* Extract multiple pixels with bit depths of 1, 2, and 4 from a single
     * byte into separate bytes (useful for paletted and grayscale images).
     */
@@ -106,8 +109,10 @@ int read_png (char *file_name, uint8 **ppBitmap,
    if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS)) {
       png_set_tRNS_to_alpha (png_ptr);
    }
-
-   screen_gamma = 2.2;  /* A good guess for a PC monitors in a dimly
+   
+   png_set_bgr(png_ptr);
+   
+    screen_gamma = 2.2;  /* A good guess for a PC monitors in a dimly
                            lit room */
 
    /* Tell libpng to handle the gamma conversion for you.  The final call
@@ -128,7 +133,7 @@ int read_png (char *file_name, uint8 **ppBitmap,
    }
    
    /* swap the RGBA or GA data to ARGB or AG (or BGRA to ABGR) */
-   png_set_swap_alpha (png_ptr);
+   /*  png_set_swap_alpha (png_ptr); */
 
 #if 0
    /* Add filler (or alpha) byte (before/after each RGB triplet) */
