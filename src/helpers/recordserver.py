@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/01/08 17:38:59  outlyer
+# Write an FXD file with some of the XMLTV info for recorded programs. I just
+# wrote this and it's fairly simple, but please make sure it works on your end.
+# I plan to remove the hardcoded stuff ASAP, but I wanted to get it out there
+# for people to try.
+#
 # Revision 1.20  2003/11/30 16:30:58  rshortt
 # Convert some tv variables to new format (TV_).
 #
@@ -790,6 +796,22 @@ class RecordServer(xmlrpc.XMLRPC):
     #################################################################
 
 
+    def create_fxd(self,rec_prog):
+        from util.fxdimdb import FxdImdb, makeVideo
+        fxd = FxdImdb()
+        fxd.setFxdFile(config.TV_RECORD_DIR + '/' + rec_prog.filename)
+        video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + '.mpeg')
+        fxd.setVideo(video)
+        fxd.info['tagline'] = rec_prog.sub_title
+        fxd.info['plot'] = rec_prog.desc
+        fxd.info['runtime'] = None
+        fxd.info['year'] = time.strftime('%m-%d %I:%M', time.localtime(rec_prog.start))
+        fxd.title = rec_prog.title
+        fxd.writeFxd()
+        # Maybe we should call util.videothumb.snapshot to make a snapshot too, but
+        # we'd have to do it after a few minutes of recording
+            
+
     def startMinuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
         if DEBUG: log.debug('top of the minute in %s seconds' % next_minute)
@@ -802,6 +824,7 @@ class RecordServer(xmlrpc.XMLRPC):
         if rec_prog:
             self.record_app = plugin.getbyname('RECORD')
             self.record_app.Record(rec_prog)
+            self.create_fxd(rec_prog)
             
 
     def eventNotice(self):
