@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/10 21:05:42  dischi
+# set the type (like all the other items do)
+#
 # Revision 1.6  2003/01/10 11:43:32  dischi
 # Added patch from Matthieu Weber for Ogg/Vorbis files which contains an
 # artist/title/album text which is not pure ASCII (7 bits).
@@ -88,7 +91,8 @@ class AudioItem(Item):
         self.drawall    = 1
         self.filename   = file
         self.name       = util.getname(self.filename)
-
+        self.type       = 'audio'
+        
         # variables only for AudioItem
         self.title      = ''
         self.album      = ''
