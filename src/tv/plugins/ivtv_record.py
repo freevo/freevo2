@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/13 13:06:07  rshortt
+# Only use these plugins if we started the record_server.
+#
 # Revision 1.8  2003/07/14 11:44:42  rshortt
 # Add some init and print methods to Videodev and IVTV.
 #
@@ -70,7 +73,7 @@ import tv_util, ivtv
 import childapp 
 import plugin 
 
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
@@ -82,13 +85,18 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
 
-        print 'ACTIVATING IVTV RECORD PLUGIN'
         plugin.register(Recorder(), 'RECORD')
 
 
 class Recorder:
 
     def __init__(self):
+        # Disable this plugin if not loaded by record_server.
+        if string.find(sys.argv[0], 'record_server') == -1:
+            return
+
+        if DEBUG: print 'ACTIVATING IVTV RECORD PLUGIN'
+
         self.thread = Record_Thread()
         self.thread.setDaemon(1)
         self.thread.mode = 'idle'

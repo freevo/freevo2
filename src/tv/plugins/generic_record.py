@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/13 13:06:07  rshortt
+# Only use these plugins if we started the record_server.
+#
 # Revision 1.4  2003/07/31 22:04:45  rshortt
 # Make sure the recording goes into config.DIR_RECORD.
 #
@@ -57,7 +60,7 @@ import tv_util
 import childapp 
 import plugin 
 
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
@@ -67,13 +70,18 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         plugin.Plugin.__init__(self)
 
-        print 'ACTIVATING RECORD PLUGIN'
         plugin.register(Recorder(), 'RECORD')
 
 
 class Recorder:
 
     def __init__(self):
+        # Disable this plugin if not loaded by record_server.
+        if string.find(sys.argv[0], 'record_server') == -1:
+            return
+
+        if DEBUG: print 'ACTIVATING GENERIC RECORD PLUGIN'
+
         self.thread = Record_Thread()
         self.thread.setDaemon(1)
         self.thread.mode = 'idle'
