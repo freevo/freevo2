@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/21 13:00:06  dischi
+# mainmenu plugins can also have global eventhandlers
+#
 # Revision 1.9  2003/04/20 20:58:49  dischi
 # scan for plugins and print them
 #
@@ -246,7 +249,14 @@ def init():
             for p in ptl['daemon']:
                 if hasattr(p, type):
                     ptl['daemon_%s' % type].append(p)
-                   
+
+    for mtype in ( '', '_video', '_audio', '_image', '_games' ):
+        if ptl.has_key('mainmenu%s' % mtype):
+            for p in ptl['mainmenu%s' % mtype]:
+                if hasattr(p, 'eventhandler'):
+                    ptl['daemon_eventhandler'].append(p)
+                
+            
 #                
 # get the plugin list 'type'
 #
