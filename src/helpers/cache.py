@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/04 17:20:44  dischi
+# support for generating video thumbnails
+#
 # Revision 1.12  2004/01/03 17:42:03  dischi
 # o OVERLAY_DIR is now used everytime
 # o added support to delete old cachefile in the overlay dir
@@ -95,6 +98,12 @@ def delete_old_files():
 
     print 'deleting old cachefiles...'
     num = 0
+    for file in util.match_files_recursively(config.OVERLAY_DIR, ['png']):
+        if file.endswith('.fvt.png'):
+            if not os.path.isfile(file[len(config.OVERLAY_DIR):-8]):
+                os.unlink(file)
+                num += 1
+
     for file in util.match_files_recursively(config.OVERLAY_DIR, ['raw']):
         if not vfs.isfile(file[len(config.OVERLAY_DIR):-4]):
             os.unlink(file)
@@ -185,8 +194,10 @@ def cache_thumbnails():
             pass
         if not os.path.isdir(d):
             continue
-        files += util.match_files_recursively(d, config.IMAGE_SUFFIX)
+        files += util.match_files_recursively(d, config.IMAGE_SUFFIX) + \
+                 util.match_files_recursively(vfs.getoverlay(d), config.IMAGE_SUFFIX)
 
+    files = util.misc.unique(files)
     for filename in copy.copy(files):
         sinfo = os.stat(filename)
         thumb = vfs.getoverlay(filename + '.raw')
@@ -217,17 +228,19 @@ def cache_thumbnails():
 
         if not image:
             continue
-        
-        if image.size[0] > 300 and image.size[1] > 300:
-            image.thumbnail((300,300), Image.ANTIALIAS)
 
-        if image.mode == 'P':
-            image = image.convert('RGB')
+        try:
+            if image.size[0] > 300 and image.size[1] > 300:
+                image.thumbnail((300,300), Image.ANTIALIAS)
 
-        # save for future use
-        data = (image.tostring(), image.size, image.mode)
-        util.save_pickle(data, thumb)
+            if image.mode == 'P':
+                image = image.convert('RGB')
 
+            # save for future use
+            data = (image.tostring(), image.size, image.mode)
+            util.save_pickle(data, thumb)
+        except:
+            print 'error caching image %s' % filename
 
 
 if __name__ == "__main__":
@@ -236,12 +249,41 @@ if __name__ == "__main__":
         print 'freevo cache helper to delete unused cache entries and to'
         print 'cache all files in your data directories.'
         print
-        print 'usage freevo cache [--rebuild]'
+        print 'usage "freevo cache [--rebuild]"'
         print 'If the --rebuild option is given, Freevo will delete the cache first'
         print 'to rebuild the cache from start. Caches from discs won\'t be affected'
         print
+        print 'or "freevo cache --thumbnail [ --recursive ] dir"'
+        print 'This will create thumbnails of your _video_ files'
+        print
+        print 'WARNING:'
+        print 'Caching needs a lot free space in OVERLAY_DIR. The space is also'
+        print 'needed when Freevo generates the files during runtime. Image'
+        print 'caching is the worst. So make sure you have several hundred MB'
+        print 'free! OVERLAY_DIR is set to %s' % config.OVERLAY_DIR
+        print
+        print 'It may be possible to turn off image caching in future versions'
+        print 'of Freevo (but this will slow things down).'
+        print
         sys.exit(0)
 
+    if len(sys.argv)>1 and sys.argv[1] == '--thumbnail':
+        import util.videothumb
+        if sys.argv[2] == '--recursive':
+            dirname = os.path.abspath(sys.argv[3])
+            files = util.match_files_recursively(dirname, config.VIDEO_SUFFIX)
+        else:
+            dirname = os.path.abspath(sys.argv[2])
+            files = util.match_files(dirname, config.VIDEO_SUFFIX)
+            
+        print 'creating video thumbnails....'
+        for filename in files:
+            print '  %4d/%-4d %s' % (files.index(filename)+1, len(files),
+                                     os.path.basename(filename))
+            util.videothumb.snapshot(filename, update=False)
+        print
+        sys.exit(0)
+        
     delete_old_files()
 
     for type in 'VIDEO', 'AUDIO', 'IMAGE':
