@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/05 21:13:36  dischi
+# make it possible that menu itself has title and subtitle
+#
 # Revision 1.4  2004/01/04 18:39:41  dischi
 # take a look at the parent name when building a short name
 #
@@ -136,7 +139,13 @@ class Title_Area(Skin_Area):
                 pass
 
         if not text:
-            text = self.infoitem.name
+            if hasattr(self.infoitem, 'name'):
+                text = self.infoitem.name
+            else:
+                if content.type == 'short item' and hasattr(menu, 'subtitle'):
+                    text = menu.subtitle
+                elif hasattr(menu, 'title'):
+                    text = menu.title
 
         self.text = text
         self.drawstring(text, content.font, content, height=-1, mode='hard')
