@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/15 19:26:55  rshortt
+# The channel number portion of TV_CHANNELS entries is handled as a string,
+# this is especially important for some European channels ie: E8.
+#
 # Revision 1.2  2003/10/14 02:44:11  rshortt
 # Adding an option for tv_grab to use tv_sort on the listings and also to
 # update your favorites schedule.
@@ -92,8 +96,8 @@ if QUERY:
     print
     print 'TV_CHANNELS = ['
     for c in chanlist[:-1]:
-        print '    ( \'%s\', \'%s\', %s ), ' % c
-    print '    ( \'%s\', \'%s\', %s ) ] ' % chanlist[-1]
+        print '    ( \'%s\', \'%s\', \'%s\' ), ' % c
+    print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % chanlist[-1]
     sys.exit(0)
 
 print 'caching data, this may take a while'
