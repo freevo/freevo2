@@ -938,7 +938,7 @@ if CONF.display == 'dxr3' and CONF.fbxine:
     
 if CONF.display == 'x11' and CONF.xine:
     XINE_VO_DEV  = 'xv'
-    XINE_COMMAND = '%s -pq -g -B --geometry %sx%s+0+0 --no-splash' % \
+    XINE_COMMAND = '%s --hide-gui -pq -g -B --geometry %sx%s+0+0 --no-splash' % \
                    (CONF.xine, CONF.width, CONF.height)
 
 XINE_ARGS_DEF = '--no-lirc --post=pp:quality=10,expand'
