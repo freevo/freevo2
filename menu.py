@@ -234,15 +234,20 @@ class MenuWidget:
      
         # Create the list of navigation items (nav_items)
         nav_items = []
-        items_per_page = skin.ItemsPerMenuPage(menu)
-        if menu.page_start + items_per_page < len(menu.choices):
-            nav_items += [self.next_page]
-        if menu.page_start != 0:
-            nav_items += [self.prev_page]
-        if len(self.menustack) >= 3:
+
+        if skin.SubMenuVisible(menu):
+            items_per_page = skin.ItemsPerMenuPage(menu)
+            if menu.page_start + items_per_page < len(menu.choices):
+                nav_items += [self.next_page]
+            if menu.page_start != 0:
+                nav_items += [self.prev_page]
+            if len(self.menustack) >= 3:
+                nav_items += [self.back_menu]
+            if len(self.menustack) >= 2:
+                nav_items += [self.main_menu]
+
+        elif len(menu_items) == 0:
             nav_items += [self.back_menu]
-        if len(self.menustack) >= 2:
-            nav_items += [self.main_menu]
 
         self.menu_items = menu_items
         self.nav_items = nav_items

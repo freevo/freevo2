@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2002/11/01 20:05:11  dischi
+# Make it possible to set deactivate the submenu. Just put
+# <submenu visible="no"> in the xml file. If there are no "normal" menu
+# items the submenu item BACK will be displayed to have at least one
+# item to select.
+#
 # Revision 1.57  2002/10/30 16:34:25  outlyer
 # Don't crash if show_name[0][-1] is undefined.
 #
@@ -302,6 +308,19 @@ class Skin:
 
         return n_items
         
+
+
+    def SubMenuVisible(self, menu):
+        if not menu:
+            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            return TRUE
+
+        # find the correct structures, I hope we don't need this
+        # for the main menu ...
+        if menu.skin_settings:
+            return menu.skin_settings.menu_default.submenu.visible
+        else:
+            return self.settings.menu_default.submenu.visible
 
 
     def PopupBox(self, text=None, icon=None):
