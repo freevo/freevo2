@@ -14,7 +14,7 @@
       <item pos="3" name="Images"   action="imenu.main_menu" arg="" 
 	visible="yes" icon="icons/64x64/images.png"  />
       <item pos="4" name="Video Games" action="videogame.main_menu" arg="" 
-	visible="no" icon="icons/mame.png"  />
+	visible="no" icon="icons/64x64/videogame.png"  />
       <item pos="5" name="Shutdown" action="shutdown" arg="" 
 	visible="yes" icon="icons/64x64/shutdown.png"  />
     </main>
