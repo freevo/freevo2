@@ -16,9 +16,6 @@
 # goto the matrox_g400 dir
 cd `dirname $0`
 
-./fbset/fbset -fb /dev/fb0 > /dev/null 2> /dev/null
-./fbset/fbset -fb /dev/fb1 > /dev/null 2> /dev/null
-
 # disconnect both heads
 ./matroxset/matroxset -f /dev/fb0 -m 0 > /dev/null 2> /dev/null
 ./matroxset/matroxset -f /dev/fb1 -m 0 > /dev/null 2> /dev/null
@@ -33,7 +30,7 @@ cd `dirname $0`
 # a matrox dual-head card.
 #
 
-./fbset/fbset -db fbset.db -fb /dev/fb0 "ntsc-800x600" > /dev/null 2> /dev/null
+/usr/sbin/fbset -db fbset.db -fb /dev/fb0 "ntsc-800x600" > /dev/null 2> /dev/null
 
 #
 # Set up a regular VGA monitor on vga connector 1. 
@@ -42,4 +39,4 @@ cd `dirname $0`
 # hardware graphics acceleration is used for connector 2 after running 
 # this script. That means that it'll be hard to run a decent X11 
 # session.
-./fbset/fbset -db fbset.db -fb /dev/fb1 "640x480-60" > /dev/null 2> /dev/null
+/usr/sbin/fbset -db fbset.db -fb /dev/fb1 "640x480-60" > /dev/null 2> /dev/null

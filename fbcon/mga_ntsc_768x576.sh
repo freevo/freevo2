@@ -13,7 +13,7 @@
 # I'm only using a TV on vga-connector 2
 # /Krister
 
-# goto the matrox_g400 dir
+# Goto the fbcon dir
 cd `dirname $0`
 
 # disconnect both heads
@@ -29,7 +29,7 @@ cd `dirname $0`
 # The following is a modeline for setting up NTSC on the TV output (vga 2) on 
 # a matrox dual-head card.
 
-./fbset/fbset -db fbset.db -fb /dev/fb0 "ntsc-768x576" > /dev/null 2> /dev/null
+/usr/sbin/fbset -db fbset.db -fb /dev/fb0 "ntsc-768x576" > /dev/null 2> /dev/null
 
 # Set up a regular VGA monitor on vga connector 1. 
 #
@@ -37,4 +37,4 @@ cd `dirname $0`
 # hardware graphics acceleration is used for connector 2 after running 
 # this script. That means that it'll be hard to run a decent X11 
 # session.
-./fbset/fbset -db fbset.db -fb /dev/fb1 "640x480-60" > /dev/null 2> /dev/null
+/usr/sbin/fbset -db fbset.db -fb /dev/fb1 "640x480-60" > /dev/null 2> /dev/null
