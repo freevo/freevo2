@@ -40,6 +40,7 @@ import notifier
 # freevo imports
 import config
 import menu
+import plugin
 from item import Item
 from gui import AlertBox
 
@@ -103,10 +104,10 @@ class ProgramItem(Item):
         if not isinstance(other, (ProgramItem, pyepg.Program)):
             return 1
 
-        return self.title != other.title or \
+        return Unicode(self.title) != Unicode(other.title) or \
                self.start != other.start or \
                self.stop  != other.stop or \
-               self.channel != other.channel
+               Unicode(self.channel) != Unicode(other.channel)
 
 
     def __getitem__(self, key):
@@ -212,7 +213,10 @@ class ProgramItem(Item):
 
 
     def watch_channel(self, arg=None, menuw=None):
-        AlertBox(text='Not implemented yet').show()
+        p = self.channel.player(self.channel)
+        if p:
+            app, device, uri = p
+            app.play(self.channel.id, device, uri)
 
 
     def watch_recording(self, arg=None, menuw=None):
