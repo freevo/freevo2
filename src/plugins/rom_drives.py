@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/02/07 19:03:01  dischi
+# handle bad disc like blank once
+#
 # Revision 1.54  2004/02/05 20:47:33  dischi
 # fix audio disc info
 #
@@ -444,6 +447,11 @@ class Identify_Thread(threading.Thread):
         # if there is a disc, the tray can't be open
         media.tray_open = False
         disc_info = util.mediainfo.disc_info(media)
+        if not disc_info:
+            # bad disc, e.g. blank disc.
+            os.close(fd)
+            return
+            
         data = disc_info.mmdata
         
         # try to set the speed

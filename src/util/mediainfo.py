@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/07 19:03:01  dischi
+# handle bad disc like blank once
+#
 # Revision 1.18  2004/02/05 20:39:12  dischi
 # check mmpython cache version
 #
@@ -559,6 +562,10 @@ def disc_info(media):
     return mmpython disc information for the media
     """
     type, id  = cdrom_disc_id(media.devicename)
+    if not id:
+        # bad disc, e.g. blank disc
+        return {}
+    
     cachedir  = os.path.join(config.OVERLAY_DIR, 'disc/metadata')
     cachefile = os.path.join(cachedir, id + '.mmpython')
     
