@@ -85,7 +85,7 @@ def check_info(dirinfo):
             break
     else:
         # no changes in all subdirs, looks good
-        if dirinfo['length'] != None:
+        if dirinfo['length'] != None and 0:
             # Since 'length' is not None and the info is stored with mtime,
             # no changes in here. Do not parse everything again
             return False
@@ -106,7 +106,7 @@ def check_info(dirinfo):
             continue
         check_info(item)
         for type in ('artist', 'album', 'year'):
-            exec('%s = strcmp(dirinfo[type], %s)' % (type, type))
+            exec('%s = strcmp(item[type], %s)' % (type, type))
         length += item['length']
 
     use_tracks = True
@@ -131,7 +131,7 @@ def check_info(dirinfo):
         return True
 
     for type in ('artist', 'album', 'year'):
-        if eval(type):
+        if eval(type) not in ( '', VARIOUS ):
             dirinfo.store_with_mtime(type, eval(type))
 
     if not dirinfo['coverscan']:
@@ -145,8 +145,10 @@ def strcmp(s1, s2):
     Compare the given strings. If one is empty, return the other. If both are
     equal, return the string. If they are different, return VARIOUS.
     """
-    s1 = Unicode(s1)
-    s2 = Unicode(s2)
+    if s1 != None:
+        s1 = Unicode(s1)
+    if s2 != None:
+        s2 = Unicode(s2)
 
     if not s1 or not s2:
         return s1 or s2
