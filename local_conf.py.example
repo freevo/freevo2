@@ -172,6 +172,12 @@ LOCAL_CONF_VERSION  = 3.5
 #
 # AUDIO_FORMAT_STRING = '%(t)s'
 
+#
+# Use media id tags to generate the name of the item. This should be
+# 1 all the time and only be disabled in directories with broken tags
+#
+# USE_MEDIAID_TAG_NAMES = 1
+
 # ======================================================================
 # Freevo movie settings:
 # ======================================================================

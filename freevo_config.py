@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 3.5
+LOCAL_CONF_VERSION  = 3.6
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -151,7 +151,9 @@ LOCAL_CONF_CHANGES = [
     (3.5,
      '''Added xine support (see xine section in freevo_config.py),
      MPLAYER_AUTOCROP for 16:9 tv sets, ONLY_SCAN_DATADIR to make freevo start
-     faster and TVGUIDE_HOURS_PER_PAGE customize the tv guide''')]
+     faster and TVGUIDE_HOURS_PER_PAGE customize the tv guide'''),
+    (3.6,
+     '''Added USE_MEDIAID_TAG_NAMES as directory based variable''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -377,6 +379,12 @@ FORCE_SKIN_LAYOUT = -1
 # This is the default - track name only
 #
 AUDIO_FORMAT_STRING = '%(t)s'
+
+#
+# Use media id tags to generate the name of the item. This should be
+# 1 all the time and only be disabled in directories with broken tags
+#
+USE_MEDIAID_TAG_NAMES = 1
 
 # ======================================================================
 # Freevo cache dir:
