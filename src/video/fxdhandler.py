@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/19 20:20:35  dischi
+# fix missing url problem
+#
 # Revision 1.13  2004/01/17 20:30:19  dischi
 # use new metainfo
 #
@@ -203,6 +206,7 @@ def parse_movie(fxd, node):
         # only one file, this is directly for the item
         id, url, item.media_id, item.mplayer_options, player, is_playlist = \
             parse_video_child(fxd, video[0], dirname)
+        item.set_url(url, info=False)
         if player:
             item.force_player = player
         if is_playlist:
