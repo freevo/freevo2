@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/10/15 21:25:16  dischi
+# use copy.deepcopy instead of copy.copy. Saves lots of
+# if copy-content: xxx = copy.copy(xxx)
+#
 # Revision 1.5  2002/10/15 19:57:57  dischi
 # Added extended menu support
 #
@@ -352,7 +356,7 @@ class XMLSkin:
     #
     # parse <items>
     #
-    def parseItems(self, node, data, copy_content):
+    def parseItems(self, node, data):
         data.x = self.attr_int(node, "x", data.x, self.scale)
         data.y = self.attr_int(node, "y", data.y, self.scale)
         data.height = self.attr_int(node, "height", data.height, self.scale)
@@ -364,73 +368,51 @@ class XMLSkin:
 
                 if type == "all":
                     # default content, override all settings for pl and dir:
-                    if copy_content:
-                        data.default = copy.copy(data.default)
-                        data.dir = copy.copy(data.dir)
-                        data.pl = copy.copy(data.pl)
-
                     self.parse_node(subnode, data.default)
                     self.parse_node(subnode, data.dir)
                     self.parse_node(subnode, data.pl)
 
                 elif type == 'dir':
-                    if copy_content: data.dir = copy.copy(data.dir)
                     self.parse_node(subnode, data.dir)
 
                 elif type == 'playlist':
-                    if copy_content: data.pl = copy.copy(data.pl)
                     self.parse_node(subnode, data.pl)
         
 
     #
     # read the skin informations for menu
     #
-    def read_menu(self, file, menu_node, menu, copy_content = 0):
+    def read_menu(self, file, menu_node, menu):
         for node in menu_node.children:
             if node.name == u'background':
-                if copy_content: menu.background = copy.copy(menu.background)
                 self.parse_node(node, menu.background, os.path.dirname(file))
 
             if node.name == u'logo':
-                if copy_content: menu.logo = copy.copy(menu.logo)
                 self.parse_node(node, menu.logo, os.path.dirname(file))
 
             elif node.name == u'title':
-                if copy_content: menu.title = copy.copy(menu.title)
                 self.parse_node(node, menu.title)
 
             elif node.name == u'items':
-                if copy_content: menu.items = copy.copy(menu.items)
-                self.parseItems(node, menu.items, copy_content)
+                self.parseItems(node, menu.items)
                 
             elif node.name == u'covers':
                 for subnode in node.children:
                     type = self.attr_str(subnode, "type", "")
 
                     if type == u'all':
-                        if copy_content:
-                            menu.cover_movie = copy.copy(menu.cover_movie)
-                            menu.cover_music = copy.copy(menu.cover_music)
-                            menu.cover_image = copy.copy(menu.cover_image)
                         self.parse_node(subnode, menu.cover_movie)
                         self.parse_node(subnode, menu.cover_music)
                         self.parse_node(subnode, menu.cover_image)
 
                     if type == u'movie':
-                        if copy_content:
-                            menu.cover_movie = copy.copy(menu.cover_movie)
                         self.parse_node(subnode, menu.cover_movie)
                     if type == u'music':
-                        if copy_content:
-                            menu.cover_music = copy.copy(menu.cover_music)
                         self.parse_node(subnode, menu.cover_music)
                     if type == u'image':
-                        if copy_content:
-                            menu.cover_image = copy.copy(menu.cover_image)
                         self.parse_node(subnode, menu.cover_image)
 
             elif node.name == u'submenu':
-                if copy_content: menu.submenu = copy.copy(menu.submenu)
                 self.parse_node(node, menu.submenu)
 
 
@@ -438,43 +420,36 @@ class XMLSkin:
     # read the skin informations for the mp3 player
     #
     def read_mp3(self, file, menu_node, copy_content):
-        if copy_content: self.mp3 = copy.copy(self.mp3)
+        if copy_content: self.mp3 = copy.deepcopy(self.mp3)
 
         for node in menu_node.children:
             if node.name == u'background':
-                if copy_content: self.mp3.background = copy.copy(self.mp3.background)
                 self.parse_node(node, self.mp3.background, os.path.dirname(file))
 
             elif node.name == u'title':
-                if copy_content: self.mp3.title = copy.copy(self.mp3.title)
                 self.parse_node(node, self.mp3.title)
 
             elif node.name == u'cover':
-                if copy_content: self.mp3.cover = copy.copy(self.mp3.cover)
                 self.parse_node(node, self.mp3.cover)
 
             elif node.name == u'progressbar':
-                if copy_content: self.mp3.progressbar = copy.copy(self.mp3.progressbar)
                 self.parse_node(node, self.mp3.progressbar)
 
             elif node.name == u'fileinfo':
-                if copy_content: self.mp3.info = copy.copy(self.mp3.info)
                 self.parse_node(node, self.mp3.info)
 
             elif node.name == u'logo':
-                if copy_content: self.mp3.logo = copy.copy(self.mp3.logo)
                 self.parse_node(node, self.mp3.logo, os.path.dirname(file))
 
     #
     # read the skin informations for a popup
     #
     def read_popup(self, file, popup_node, copy_content):
-        if copy_content: self.popup = copy.copy(self.popup)
+        if copy_content: self.popup = copy.deepcopy(self.popup)
         self.parse_node(popup_node, self.popup, os.path.dirname(file))
 
         for node in popup_node.children:
             if node.name == u'message':
-                if copy_content: self.popup.message = copy.copy(self.popup.message)
                 self.parse_node(node, self.popup.message)
 
 
@@ -505,34 +480,25 @@ class XMLSkin:
         self.parse_node(node, data)
         for subnode in node.children:
             if subnode.name == u'expand':
-                data.expand = copy.copy(data.expand)
                 self.parse_node(subnode, data.expand)
             elif subnode.name == u'head':
-                data.head = copy.copy(data.head)
                 self.parse_node(subnode, data.head)
             elif subnode.name == u'border':
-                data.border_size = copy.copy(data.border_size)
                 data.border_size = self.attr_int(subnode,'size', data.border_size)
-                data.border_color = copy.copy(data.border_color)
                 data.border_color = self.attr_hex(subnode,'color', data.border_color)
             elif subnode.name == u'spacing':
                 data.spacing = self.attr_int(subnode,'value', data.spacing, self.scale)
             elif subnode.name == u'channel_width':
-                data.channel_width = copy.copy(data.channel_width)
                 data.channel_width = self.attr_int(subnode,'value', data.channel_width, self.scale)
             elif subnode.name == u'indicator':
                 for sub_subnode in subnode.children:
                     if sub_subnode.name == u'left':
-                        data.left_arrow = copy.copy(data.left_arrow)
                         data.left_arrow = self.attr_str(sub_subnode,'image', data.left_arrow)
                     if sub_subnode.name == u'right':
-                        data.right_arrow = copy.copy(data.right_arrow)
                         data.right_arrow = self.attr_str(sub_subnode,'image', data.right_arrow)
                     if sub_subnode.name == u'down':
-                        data.down_arrow = copy.copy(data.down_arrow)
                         data.down_arrow = self.attr_str(sub_subnode,'image', data.down_arrow)
                     if sub_subnode.name == u'up':
-                        data.up_arrow = copy.copy(data.up_arrow)
                         data.up_arrow = self.attr_str(sub_subnode,'image', data.up_arrow)
                         
 
@@ -547,28 +513,20 @@ class XMLSkin:
         if not 'tv' in self.e_menu:
             self.e_menu[emn] = XML_extendedmenu() 
         else:
-            if copy_content: self.e_menu = copy.copy(self.e_menu)
+            if copy_content: self.e_menu = copy.deepcopy(self.e_menu)
 
         for node in menu_node.children:
             if node.name == u'background':
-                if copy_content:
-                    self.e_menu[emn].background = copy.copy(self.e_menu[emn].background)
                 self.parse_node(node, self.e_menu[emn].background, os.path.dirname(file))
             elif node.name == u'logo':
-                if copy_content: self.e_menu[emn].logo = copy.copy(self.e_menu[emn].logo)
                 self.parse_node(node, self.e_menu[emn].logo, os.path.dirname(file))
             elif node.name == u'header':
-                if copy_content: self.e_menu[emn].header = copy.copy(self.e_menu[emn].header)
                 self.parse_node(node, self.e_menu[emn].header)
             elif node.name == u'view':
-                if copy_content: self.e_menu[emn].view = copy.copy(self.e_menu[emn].view)
                 self.parse_node(node, self.e_menu[emn].view)
             elif node.name == u'info':
-                if copy_content: self.e_menu[emn].info = copy.copy(self.e_menu[emn].info)
                 self.parse_node(node, self.e_menu[emn].info)
             elif node.name == u'listing':
-                if copy_content: self.e_menu[emn].listing = \
-                   copy.copy(self.e_menu[emn].listing)
                 self.parse_listingnode(node, self.e_menu[emn].listing)
 
 
@@ -599,15 +557,12 @@ class XMLSkin:
                             type = self.attr_str(node, "type", "all")
                             if type == "all":
                                 if copy_content:
-                                    self.menu_default = copy.copy(self.menu_default)
-                                    self.menu_main = copy.copy(self.menu_main)
-                                    self.menu_tv = copy.copy(self.menu_tv)
-                                self.read_menu(file, node, self.menu_default, \
-                                               copy_content)
-                                self.read_menu(file, node, self.menu_main, \
-                                               copy_content)
-                                self.read_menu(file, node, self.menu_tv, \
-                                               copy_content)
+                                    self.menu_default = copy.deepcopy(self.menu_default)
+                                    self.menu_main = copy.deepcopy(self.menu_main)
+                                    self.menu_tv = copy.deepcopy(self.menu_tv)
+                                self.read_menu(file, node, self.menu_default)
+                                self.read_menu(file, node, self.menu_main)
+                                self.read_menu(file, node, self.menu_tv)
 
                             if type == "main":
                                 self.read_menu(file, node, self.menu_main)
