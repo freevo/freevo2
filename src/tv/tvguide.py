@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/06/20 14:07:58  dischi
+# remove upsoon on changes
+#
 # Revision 1.32  2004/06/20 12:40:07  dischi
 # better handling of very long programs
 #
@@ -126,6 +129,10 @@ class TVGuide(Item):
         if not force and self.last_update + 60 > time.time():
             return
 
+        upsoon = '%s/upsoon' % (config.FREEVO_CACHEDIR)
+        if os.path.isfile(upsoon):
+            os.unlink(upsoon)
+            
         _debug_('update schedule')
         self.last_update = time.time()
         self.scheduled_programs = []
