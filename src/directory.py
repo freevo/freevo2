@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.129  2004/06/06 07:19:47  dischi
+# fix crash if dir does not exist
+#
 # Revision 1.128  2004/05/29 12:32:57  dischi
 # use advanced sort for audio items (by trackno)
 #
@@ -374,7 +377,11 @@ class DirItem(Playlist):
             self.autovars += [ ( 'num_%s_timestamp' % name, 0 ),
                                ( 'num_%s_items' % name, 0 ) ]
             
-        timestamp     = os.stat(self.dir)[stat.ST_MTIME]
+        try:
+            timestamp     = os.stat(self.dir)[stat.ST_MTIME]
+        except OSError:
+            return
+        
         num_timestamp = self.info['num_%s_timestamp' % name]
 
         if not num_timestamp or num_timestamp < timestamp:
@@ -562,7 +569,10 @@ class DirItem(Playlist):
                 del self.menu.skin_default_no_images
             if hasattr(self.menu, 'skin_force_text_view'):
                 del self.menu.skin_force_text_view
-
+        elif not os.path.exists(self.dir):
+	    AlertBox(text=_('Directory does not exist')).show()
+            return
+        
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
