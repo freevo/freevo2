@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/11/08 10:00:59  dischi
+# fix cd playback
+#
 # Revision 1.6  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -134,7 +137,8 @@ class Xine:
 
         self.item      = item
         self.playerGUI = playerGUI
-
+        add_args       = ''
+        
         if item.url:
             filename = item.url
         else:
@@ -143,8 +147,11 @@ class Xine:
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        
-        command = '%s "%s"' % (self.command, filename)
+        if filename.startswith('cdda://'):
+            filename = filename.replace('//', '/')
+            add_args += ' cfg:/input.cdda_device:%s' % item.media.devicename
+            
+        command = '%s %s "%s"' % (self.command, add_args, filename)
         _debug_('Xine.play(): Starting thread, cmd=%s' % command)
 
         self.thread.start(XineApp, (command, item, self.refresh))
