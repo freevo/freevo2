@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.115  2004/08/13 00:30:28  rshortt
+# Try to maintain FreeBSD support.
+#
 # Revision 1.114  2004/08/12 16:52:49  rshortt
 # Work on autodetecting tv cards.
 #
@@ -344,6 +347,8 @@ class TVCard:
         self.adev = None
         self.norm = string.upper(CONF.tv)
         self.chanlist = CONF.chanlist
+        self.input = 0
+        self.driver = 'unknown'
 
         
 class IVTVCard(TVCard):
@@ -382,6 +387,15 @@ TV_SETTINGS = TVSettings()
 tvn = 0
 ivtvn = 0
 for i in range(10):
+    if os.uname()[0] == 'FreeBSD':
+        if os.path.exists('/dev/bktr%s' % i):
+            key = 'tv%s' % i
+            TV_SETTINGS[key] = TVCard
+            TV_SETTINGS[key].driver = 'bsdbt848'
+            TV_SETTINGS[key].input = 1
+
+        continue
+
     if os.path.isdir('/dev/dvb/adapter%s' % i):
         TV_SETTINGS['dvb%s' % i] = DVBCard
 
