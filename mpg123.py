@@ -69,7 +69,11 @@ class MPG123:
         self.thread.start()
 
 
-    def play(self, filename, playlist):
+    def play(self, filename, playlist, repeat=0):
+
+        # Repeat playlist setting
+        self.repeat = repeat
+        
         self.filename = filename
         self.playlist = playlist
         
@@ -120,11 +124,19 @@ class MPG123:
         elif event == rc.PLAY_END or event == rc.RIGHT:
             print 'got end of song'
             self.stop()
-            # Go to the next song in the list
             pos = self.playlist.index(self.filename)
-            pos = (pos+1) % len(self.playlist)
-            filename = self.playlist[pos]
-            self.play(filename, self.playlist)
+            last_file = (pos == len(self.playlist)-1)
+            
+            # Don't continue if at the end of the list
+            if self.playlist == [] or (last_file and not self.repeat):
+                self.stop()
+                rc.app = None
+                menuwidget.refresh()
+            else:
+                # Go to the next song in the list
+                pos = (pos+1) % len(self.playlist)
+                filename = self.playlist[pos]
+                self.play(filename, self.playlist)
             
 
 class MPG123App(childapp.ChildApp):
