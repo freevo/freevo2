@@ -1,37 +1,23 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # bmovl.py - Bmovl output display over mplayer
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Note: This output plugin is work in progress
+# This file defines a Freevo display using mplayer and the bmovl filter.
+# It is based on bmovlcanvas from mevas and adds the basic functions Freevo
+# needs. When used as primary display, a background mplayer will be started.
+# The fifo communication is wrapped around a non blocking version for
+# pyNotifier.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.7  2004/12/05 13:01:10  dischi
-# delete old tv variables, rename some and fix detection
-#
-# Revision 1.6  2004/11/20 18:23:01  dischi
-# use python logger module for debug
-#
-# Revision 1.5  2004/10/06 19:14:36  dischi
-# use new childapp interface
-#
-# Revision 1.4  2004/08/23 20:33:39  dischi
-# smaller bugfixes, restart has some problems
-#
-# Revision 1.3  2004/08/23 14:29:46  dischi
-# displays have information about animation support now
-#
-# Revision 1.2  2004/08/23 12:36:50  dischi
-# cleanup, add doc
-#
-#
-# -----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,20 +33,24 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+__all__ = [ 'Display' ]
 
 # python imports
-import os
+import logging
 
 # mevas imports
-import mevas
 from mevas.displays.bmovlcanvas import BmovlCanvas
 
 # freevo imports
 import config
+import util.popen
+import util.fsocket
 
-import logging
+# the logging object
 log = logging.getLogger('gui')
+
 
 class Display(BmovlCanvas):
     """
@@ -69,19 +59,14 @@ class Display(BmovlCanvas):
     def __init__(self, size, default=False):
         self.animation_possible = False
         self.start_video = default
+        self.running = True
         if default:
-            print
-            print 'Activating skin bmovl output'
-            print 'THIS IS A TEST, DO NOT USE ANYTHING EXCEPT MENUS'
-            print
-            self.mplayer_args = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
-                                "expand=%s:%s,bmovl=1:0:/tmp/bmovl-%s "\
-                                "-loop 0 -font /usr/share/mplayer/fonts/"\
-                                "font-arial-28-iso-8859-2/font.desc" % \
-                                ( config.CONF.width, config.CONF.width,
-                                  config.CONF.height, os.getpid() )
-            if not os.path.exists('/tmp/bmovl-%s' % os.getpid()):
-                os.mkfifo('/tmp/bmovl-%s' % os.getpid())
+            self.cmd = [ config.MPLAYER_CMD, "-loop", "0", "-vf",
+                         "scale=%s:-2,expand=%s:%s,bmovl=1:0:%s"\
+                         % ( config.CONF.width, config.CONF.width,
+                             config.CONF.height, self.get_fname() ),
+                         '-vo', config.MPLAYER_VO_DEV, '-ao', 'null',
+                         config.OSD_BACKGROUND_VIDEO ]
             self.child = None
             self.restart()
         BmovlCanvas.__init__(self, size)
@@ -92,15 +77,39 @@ class Display(BmovlCanvas):
         Restart the display. This will restart the background video to
         make the canvas work.
         """
+        if not self.running:
+            self.thaw()
+            self.running = True
         if self.start_video and not self.child:
-            import childapp
-            arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
-                  [config.OSD_BACKGROUND_VIDEO]
-            self.child = childapp.Instance( arg, stop_osd = 0 )
+            self.child = util.popen.Process( self.cmd )
+            self.child.stdout.close()
+            self.child.stderr.close()
             if hasattr(self, 'fifo') and not self.fifo:
-                self.fifo = os.open('/tmp/bmovl-%s' % os.getpid(), os.O_WRONLY)
+                # this is a previous working display
+		self.open_fifo()
                 log.info('rebuild bmovl')
                 self.rebuild()
+
+
+    def open_fifo(self):
+        """
+        Create and open the fifo and create notifier aware fd wrapper
+        """
+        BmovlCanvas.open_fifo(self)
+        self.nbsocket = util.fsocket.Socket(self.fifo)
+        self.send = self.nbsocket.write
+
+
+    def close_fifo(self):
+        """
+        Close and remove the fifo
+        """
+        if self.nbsocket:
+            self.nbsocket.close()
+            self.nbsocket = None
+            self.send = None
+        BmovlCanvas.close_fifo(self)
+        
 
     def stop(self):
         """
@@ -109,14 +118,12 @@ class Display(BmovlCanvas):
         if self.start_video and self.child:
             self.child.stop('quit')
             self.child = None
-        if not self.fifo:
-            return
-        try:
-            os.close(self.fifo)
-        except (IOError, OSError):
-            print 'IOError on bmovl.fifo'
-        self.fifo = None
-        
+        self.close_fifo()
+        if self.running:
+            self.freeze()
+            self.running = False
+
+
     def hide(self):
         """
         Hide the display. This results in shutting down the
@@ -131,5 +138,3 @@ class Display(BmovlCanvas):
         video again.
         """
         self.restart()
-
-
