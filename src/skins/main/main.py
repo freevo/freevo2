@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/10/31 17:00:20  dischi
+# splashscreen for bsd
+#
 # Revision 1.16  2003/10/14 17:57:32  dischi
 # more debug
 #
@@ -282,7 +285,10 @@ class Splashscreen(BlankScreen):
         x1 -= 20
 
         if not self.initialized:
-            image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.png'))
+            if os.uname()[0] == 'FreeBSD':
+                image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen-bsd.png'))
+            else:
+                image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.png'))
             if image:
                 image = pygame.transform.scale(image, (x1-x0, y1-y0))
                 osd.drawbitmap(image, x0, y0)
