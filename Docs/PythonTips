@@ -17,6 +17,9 @@ o Use tabnanny.py in the python lib to check for potential tab problems.
 o Use 'python -t -Wall::PendingDeprecationWarning main.py' to 
   check for potential problems.
 
+o Do not use names of builtin functions:
+  o dir, filter, TBD
+
 o PyChecker TBD
 
 o Strings: Use single-quotes in general (less visual clutter IMHO):
