@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/07 15:44:29  dischi
+# add em.MENU_CHANGE_STYLE to toggle styles
+#
 # Revision 1.14  2003/09/05 02:59:09  rshortt
 # Merging in the changes from the new_record branch.  The tvguide now uses
 # record_client.py to talk to record_server and no longer uses freevo_record.lst
@@ -102,6 +105,43 @@ class TVGuide(gui.GUIObject):
     def eventhandler(self, event):
         if DEBUG: print 'TVGUIDE EVENT is %s' % event
 
+        if event == em.MENU_CHANGE_STYLE:
+            if skin.ToggleDisplayStyle('tv'):
+                start_time    = self.start_time
+                stop_time     = self.stop_time
+                start_channel = self.start_channel
+                selected      = self.selected
+
+                self.n_items, hours_per_page = skin.items_per_page(('tv', self))
+
+                before = -1
+                after  = -1
+                for c in self.guide.chan_list:
+                    if before >= 0 and after == -1:
+                        before += 1
+                    if after >= 0:
+                        after += 1
+                    if c.id == start_channel:
+                        before = 0
+                    if c.id == selected.channel_id:
+                        after = 0
+                    
+                if self.n_items <= before:
+                    start_channel = selected.channel_id
+
+                if after < self.n_items:
+                    up = min(self.n_items -after, len(self.guide.chan_list)) - 1
+                    for i in range(len(self.guide.chan_list) - up):
+                        if self.guide.chan_list[i+up].id == start_channel:
+                            start_channel = self.guide.chan_list[i].id
+                            break
+                    
+                stop_time = start_time + hours_per_page * 60 * 60
+
+                self.n_cols  = (stop_time - start_time) / 60 / self.col_time
+                self.rebuild(start_time, stop_time, start_channel, selected)
+                self.menuw.refresh()
+            
         if event == em.MENU_UP:
             self.event_UP()
             self.menuw.refresh()
