@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/10/20 06:30:01  krister
+# Fixed TV guide listing, draw border after icons.
+#
 # Revision 1.4  2002/10/19 15:09:55  dischi
 # added alpha mask support
 #
@@ -216,8 +219,10 @@ class Skin_TV:
             y1 = int(y_contents + (i-1) * (float(h_contents) / items_per_page))
 
             # draw the channel name/logo/id
-            DrawBox(conf_x, y0, conf_x+val.label.width, y1,
-                    val.label.bgcolor, 1, val.border_color)
+
+            # Background color
+            osd.drawbox(conf_x, y0, conf_x+val.label.width, y1,
+                        width=-1, color=val.label.bgcolor)
 
             # Logo
             channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
@@ -235,6 +240,10 @@ class Skin_TV:
             DrawTextFramed(to_listing[i].displayname, val.label,
                            conf_x + val.spacing + padding, y0 + val.spacing,
                            val.label.width - 2 * val.spacing - padding, str_h)
+
+            # Border is drawn afterwards to delineate the icons
+            osd.drawbox(conf_x, y0, conf_x+val.label.width, y1, width=1,
+                        color=val.border_color)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
