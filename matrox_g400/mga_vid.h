@@ -15,17 +15,7 @@
 #ifndef __LINUX_MGAVID_H
 #define __LINUX_MGAVID_H
 
-#include <inttypes.h>
-
-typedef struct mga_vid_geomconfig_s
-{
-  uint32_t src_width;
-  uint32_t src_height;
-  uint32_t dest_width;
-  uint32_t dest_height;
-  uint32_t x_org;
-  uint32_t y_org;
-} mga_vid_geomconfig_t;
+//#include <inttypes.h>
 
 typedef struct mga_vid_config_s
 {
@@ -53,11 +43,19 @@ uint32_t num_frames;
 #define MGA_VID_FORMAT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
 #define MGA_VID_FORMAT_UYVY (('U'<<24)|('Y'<<16)|('V'<<8)|'Y')
 
-#define MGA_VID_CONFIG     _IOR('J', 1, mga_vid_config_t)
-#define MGA_VID_ON         _IO ('J', 2)
-#define MGA_VID_OFF        _IO ('J', 3)
-#define MGA_VID_FSEL       _IOR('J', 4, int)
-#define MGA_VID_GEOMCONFIG _IOR ('J', 5, mga_vid_geomconfig_t)
+#define MGA_VID_CONFIG    _IOR('J', 1, mga_vid_config_t)
+#define MGA_VID_ON        _IO ('J', 2)
+#define MGA_VID_OFF       _IO ('J', 3)
+#define MGA_VID_FSEL _IOR('J', 4, int)
+#define MGA_VID_GET_LUMA _IOR('J', 5, int)
+#define MGA_VID_SET_LUMA _IOR('J', 6, int)
+
+/* The following ioctl was added so that the _physical_ address of the
+ * BES buffer can be obtained. This is needed when doing overlays from
+ * a Video4Linux1 video capture card such as WinTV.
+ * krister-freevo@kmlager.com
+ */
+#define MGA_VID_GET_BESADDR _IOR('J', 42, int)
 
 #define MGA_G200 0x1234
 #define MGA_G400 0x5678
