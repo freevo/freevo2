@@ -10,6 +10,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/09/06 13:29:00  gsbarbieri
+# PopupBox and derivates now support you to choose mode (soft/hard) and
+# alignment (vertical/horizontal).
+#
 # Revision 1.26  2003/09/05 15:59:20  outlyer
 # Use StringTypes instead of "StringType" since StringTypes includes unicode,
 # which TV listings are sometimes in (like mine)
@@ -85,6 +89,11 @@ class PopupBox(Container):
     border    Border
     bd_color  Border color (Color)
     bd_width  Border width Integer
+    text_prop A dict of 3 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+                 align_v = text vertical alignment
+                 align_h = text horizontal alignment
+                 mode    = hard (break at chars); soft (break at words)
     
     Trying to make a standard popup/dialog box for various usages.
     """
@@ -92,12 +101,16 @@ class PopupBox(Container):
     def __init__(self, parent='osd', text=' ', handler=None, left=None, 
                  top=None, width=0, height=0, bg_color=None, fg_color=None,
                  icon=None, border=None, bd_color=None, bd_width=None,
-                 vertical_expansion=1):
+                 vertical_expansion=1, text_prop=None):
 
         self.handler = handler
         Container.__init__(self, 'frame', left, top, width, height, bg_color, 
                            fg_color, None, None, border, bd_color, bd_width,
                            vertical_expansion)
+
+        text_prop = text_prop or { 'align_h': 'left',
+                                   'align_v': 'top',
+                                   'mode'   : 'soft' }
 
         if not parent or parent == 'osd':
             parent = self.osd.app_list[0]
@@ -143,7 +156,8 @@ class PopupBox(Container):
             self.top  = self.osd.height/2 - self.height/2
 
         if type(text) in StringTypes:
-            self.label = Label(text, self, Align.CENTER, Align.CENTER)
+            self.label = Label(text, self, Align.CENTER, Align.CENTER,
+                               text_prop=text_prop )
         else:
             raise TypeError, text
 

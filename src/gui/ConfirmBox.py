@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/06 13:29:00  gsbarbieri
+# PopupBox and derivates now support you to choose mode (soft/hard) and
+# alignment (vertical/horizontal).
+#
 # Revision 1.17  2003/07/20 09:46:11  dischi
 # Some default width fixes to match the current new default font. It would
 # be great if a box without width and height could be as big as needed
@@ -128,16 +132,21 @@ class ConfirmBox(PopupBox):
     border    Border
     bd_color  Border color (Color)
     bd_width  Border width Integer
+    text_prop A dict of 3 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+                 align_v = text vertical alignment
+                 align_h = text horizontal alignment
+                 mode    = hard (break at chars); soft (break at words)
     """
 
     def __init__(self, parent='osd', text=" ", handler=None, default_choice=0, 
                  left=None, top=None, width=400, height=150, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
-                 bd_width=None, vertical_expansion=1):
+                 bd_width=None, vertical_expansion=1, text_prop=None):
 
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width,
-                          vertical_expansion)
+                          vertical_expansion, text_prop=text_prop)
 
 
         # XXX: It may be nice if we could choose between

@@ -9,6 +9,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/06 13:29:00  gsbarbieri
+# PopupBox and derivates now support you to choose mode (soft/hard) and
+# alignment (vertical/horizontal).
+#
 # Revision 1.18  2003/09/05 15:59:20  outlyer
 # Use StringTypes instead of "StringType" since StringTypes includes unicode,
 # which TV listings are sometimes in (like mine)
@@ -141,6 +145,11 @@ class Label(GUIObject):
     align   Integer, h_align of text. Label.CENTER, Label.RIGHT,
             Label, LEFT
     parent  GUIObject, Reference to object containing this label.
+    text_prop A dict of 3 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+                 align_v = text vertical alignment
+                 align_h = text horizontal alignment
+                 mode    = hard (break at chars); soft (break at words)
     
     Displays a single line of text. Really it maintains a surface with a
     rendered text. If text is updated text is rerendered and reblitted to
@@ -151,7 +160,7 @@ class Label(GUIObject):
     """
     
     def __init__(self, text=None, parent=None, h_align=None, v_align=None, 
-                 width=-1, height=-1):
+                 width=-1, height=-1, text_prop=None):
 
         GUIObject.__init__(self, width=width, height=height)
 
@@ -174,6 +183,11 @@ class Label(GUIObject):
         self.v_margin = 0
         self.h_margin = 0
         self.set_background_color(None)
+        self.text_prop = text_prop or { 'align_h': 'left',
+                                        'align_v': 'top',
+                                        'mode'   : 'hard' }
+
+
 
         if parent:
             (state, filename, size, color) = parent.get_font()
@@ -255,10 +269,13 @@ class Label(GUIObject):
 
 
     def get_rendered_size(self):
+        align_h = self.text_prop.setdefault( 'align_h', 'left' )
+        align_v = self.text_prop.setdefault( 'align_v', 'top' )
+        mode    = self.text_prop.setdefault( 'mode', 'hard' )
         data = self.osd.drawstringframed(self.text, 0, 0, self.width, self.height,
                                          self.osd.getfont(self.font_name, self.font_size),
-                                         fgcolor=None, bgcolor=None, align_h='left',
-                                         align_v='top', mode='hard', layer='')[1]
+                                         fgcolor=None, bgcolor=None, align_h=align_h,
+                                         align_v=align_v, mode=mode, layer='')[1]
 
 
         (ret_x0,ret_y0, ret_x1, ret_y1) = data
@@ -305,11 +322,15 @@ class Label(GUIObject):
         self.surface = self.parent.surface.subsurface((self.left, self.top, self.width, self.height))
         if DEBUG: print '       surface=%s' % self.surface
 
+        align_h = self.text_prop[ 'align_h' ]
+        align_v = self.text_prop[ 'align_v' ]
+        mode    = self.text_prop[ 'mode' ]
+
         (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
                      self.osd.drawstringframed(self.text, 0, 0, self.width, self.height,
                                                self.osd.getfont(font, size), fgcolor=fgc,
-                                               bgcolor=None, align_h='left',
-                                               align_v='top', mode='hard',
+                                               bgcolor=None, align_h=align_h,
+                                               align_v=align_v, mode=mode,
                                                layer=self.surface)
 
         if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,

@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2003/09/06 13:29:00  gsbarbieri
+# PopupBox and derivates now support you to choose mode (soft/hard) and
+# alignment (vertical/horizontal).
+#
 # Revision 1.85  2003/09/01 14:02:16  outlyer
 # Another warning. Make sure we use int where it's required.
 #
@@ -724,6 +728,7 @@ class OSD:
                 return (ellipses_size, ellipses, string)
         else:
             ellipses_size = 0
+            ellipses = ''
 
         data = None
         while(TRUE):
@@ -817,13 +822,13 @@ class OSD:
             (w, s, r) = self.__drawstringframed_line__(string, width, font, hard,
                                                        current_ellipses, ' ')
             if s == '' and not hard:
-                # nothing fits? Try to break words at ' -_'
+                # nothing fits? Try to break words at ' -_' and no ellipses
                 (w, s, r) = self.__drawstringframed_line__(string, width, font, hard,
-                                                           ellipses, ' -_')
+                                                           None, ' -_')
                 if s == '':
                     # still nothing? Use the 'hard' way
                     (w, s, r) = self.__drawstringframed_line__(string, width, font,
-                                                               'hard', ellipses, ' ')
+                                                               'hard', None, ' ')
             string = r.strip()
 
             lines.append((w, s))

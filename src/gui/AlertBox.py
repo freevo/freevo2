@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/06 13:29:00  gsbarbieri
+# PopupBox and derivates now support you to choose mode (soft/hard) and
+# alignment (vertical/horizontal).
+#
 # Revision 1.17  2003/09/01 18:52:05  dischi
 # set default height and width to 0 == new Popup detection code
 #
@@ -135,16 +139,21 @@ class AlertBox(PopupBox):
     border    Border
     bd_color  Border color (Color)
     bd_width  Border width Integer
+    text_prop A dict of 3 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+                 align_v = text vertical alignment
+                 align_h = text horizontal alignment
+                 mode    = hard (break at chars); soft (break at words)
     """
 
     def __init__(self, parent='osd', text=" ", handler=None, left=None, 
                  top=None, width=0, height=0, bg_color=None, fg_color=None,
                  icon=None, border=None, bd_color=None, bd_width=None,
-                 vertical_expansion=1):
+                 vertical_expansion=1, text_prop=None):
 
         PopupBox.__init__(self, parent, text, handler, left, top, width, height,
                           bg_color, fg_color, icon, border, bd_color, bd_width,
-                          vertical_expansion)
+                          vertical_expansion, text_prop=text_prop )
 
         b1 = Button('OK')
         b1.toggle_selected()

@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/06 13:29:00  gsbarbieri
+# PopupBox and derivates now support you to choose mode (soft/hard) and
+# alignment (vertical/horizontal).
+#
 # Revision 1.11  2003/06/07 11:31:07  dischi
 # bugfix
 #
@@ -106,15 +110,21 @@ class InputBox(PopupBox):
     border    Border
     bd_color  Border color (Color)
     bd_width  Border width Integer
+    text_prop A dict of 3 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+                 align_v = text vertical alignment
+                 align_h = text horizontal alignment
+                 mode    = hard (break at chars); soft (break at words)
     """
 
         
     def __init__(self, parent='osd', text=" ", handler=None, left=None, top=None, 
                  width=300, height=160, bg_color=None, fg_color=None, icon=None,
-                 border=None, bd_color=None, bd_width=None):
+                 border=None, bd_color=None, bd_width=None, text_prop=None):
 
         PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+                          bg_color, fg_color, icon, border, bd_color, bd_width,
+                          text_prop=text_prop)
 
         self.lbg = LetterBoxGroup()
         self.add_child(self.lbg)
