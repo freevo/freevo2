@@ -317,7 +317,7 @@ class TvlistingArea(Area):
 
         # selected program:
         selected_prog = menu.selected
-        all_channels = menu.channel_list.get_all()
+        all_channels = config.TV_ALL_CHANNELS.get_all()
 
         start_channel = all_channels.index(menu.channel) / num_rows * num_rows
 
