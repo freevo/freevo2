@@ -46,6 +46,18 @@
 	      color="0xff000000" radius="8"/>
 	  </mask>
 	</cover>
+	<cover type="music" y="112" spacing="50" border_size="0">
+	  <mask>
+	    <rectangle x="528" y="102" width="220" height="220" 
+	      color="0xff000000" radius="8"/>
+	  </mask>
+	</cover>
+	<cover type="image" y="112" spacing="50" border_size="0">
+	  <mask>
+	    <rectangle x="528" y="102" width="220" height="180" 
+	      color="0xff000000" radius="8"/>
+	  </mask>
+	</cover>
       </covers>
 
       <submenu x="40" y="500">
@@ -75,6 +87,15 @@
 	</item>
       </items>
     </menu>
+
+    <!-- Settings for a popup box -->
+    <popup mask="" bgcolor="0xaa000000" radius="15" spacing="20">
+
+      <message x="100" y="100" width="600" height="400">
+	<font name="bluehigh" size="18" color="0xffffff" align="center"/>
+	<shadow visible="no"/>
+      </message>
+    </popup>
 
   </skin>
   
