@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/12/09 19:43:22  dischi
+# subtitle file and audio file support
+#
 # Revision 1.46  2003/12/07 19:40:30  dischi
 # convert OVERSCAN variable names
 #
@@ -284,6 +287,16 @@ class MPlayer:
                 command = command + [ '-vop' , 'crop=%s:%s:%s:%s' % (x2-x1, y2-y1, x1, y1) ]
             
             child.wait()
+
+        if item.subtitle_file:
+            d, f = util.resolve_media_mountdir(item.subtitle_file)
+            util.mount(d)
+            command += ['-sub', f]
+
+        if self.audio_file:
+            d, f = util.resolve_media_mountdir(self.audio_file)
+            util.mount(d)
+            command += ['-audiofile', f]
 
         self.plugins = plugin.get('mplayer_video')
 
