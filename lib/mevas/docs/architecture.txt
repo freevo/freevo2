@@ -1,0 +1,178 @@
+The Canvas System
+=================
+
+NOTE: some of this stuff is obsolete.  UPDATE ME!
+
+
+A canvas offers a convenient way to render elements to some display.
+What makes a canvas especially nice is that an interface can be designed
+by adding objects to the canvas, and the display can be easily updated
+by modifying only the object on the canvas that needs to be changed.
+
+Think of a canvas as a big piece of velcro with the prickly side up.
+Your objects are other pieces of velcro with pictures drawn on them.
+You can stick any picture on the canvas, and layer more pictures on top
+of those pictures.  If you want to, for example, move a picture, you
+just pick it up and move it.
+
+The canvas library is designed to be abstracted enough so that different
+displays can be supported.  There are several objects in the hierarchy:
+
+
+                       CanvasObject
+                          /    \
+                         /      \
+            CanvasContainer    CanvasImage
+                       /          \   
+                      /            \
+                  Canvas         CanvasText
+                    / \
+                   /   \
+        MPlayerCanvas   \
+                         \
+                     BitmapCanvas
+                        /    \
+                       /      \
+               PygameCanvas  Pyimlib2Canvas 
+
+
+  * CanvasObject: this is the base class for all objects in the canvas
+    system.  An object expects to be on a canvas somewhere, and knows
+    some things about itself: where it is on the canvas in three
+    dimensions (x,y position plus z-index, or "layer"); whether or not
+    it's visible; its alpha value; who its parent is; etc.
+
+    CanvasObjects don't know how to paint themselves because this is
+    display-specific.  They can only ask that the canvas they belong to
+    paints them.  So, when you tell a canvas object to update, it
+    then tells its canvas, "I'm dirty, paint me!"
+
+
+  * CanvasImage, derived from CanvasObject: the primitive for all objects 
+    visible on the canvas.  Images are what we actually see on the canvas.  
+    Anything visible on the canvas is going to be either a CanvasImage or 
+    an object derived from it.
+
+    Images support image operations, like scaling, cropping, rotating, 
+    and compositing, as well as all the operations that a basic canvas 
+    object supports.  You can crop an image, which is a method specifically
+    implemented by CanvasImage, or you can move it, which is an operation
+    implemented by its base class CanvasObject.
+
+
+  * CanvasText, derived from CanvasImage: CanvasImages have an operation
+    to render text over an image, so CanvasText is essentially a
+    convenience class: it adds no new functionality that CanvasImage
+    doesn't already provide, but makes handling text much nicer.
+
+    CanvasText objects know 3 extra things: a font (and size), the color,
+    and the actual text they represent.
+
+
+  * CanvasContainer, derived from CanvasObject: containers hold
+    any number of canvas objects, which can be images, text, or other
+    containers.
+
+    CanvasObjects expect to have parents, but not children.  A
+    CanvasContainer provides an object which can have children.
+    Children are rendered relative to their container.  For example,
+    if you create a container, move it to position (100,100), then add
+    a CanvasImage child, move it to position (10,10), and then add the
+    container to the canvas at position (0,0), when the canvas is drawn,
+    the image will appear at absolute coordinates (110,110).
+
+    All other attributes are relative to their parent as well, including
+    zindex and alpha.  If, in the above example, the image object has an
+    alpha of 128, and then container has an alpha of 128, when the image
+    is rendered to the canvas, it will be drawn with an alpha of 64.
+
+    Containers also have the ability to be converted (or collapsed) into
+    a single image.  This is like sticking your velcro pictures on the
+    canvas and then making a photocopy of it: it's more convenient to
+    carry around (it's just one piece of paper), but then you lose the 
+    ability to manipulate any of the objects in it.  This might be desirable 
+    for performance reasons: if you have a container with many children,
+    it will take longer to render than just a single image.  If you have
+    no need to manipulate any of the child objects once you've created
+    the layout you want, you might as well collapse the container into
+    an image.
+
+
+  * Canvas, derived from CanvasContainer: a canvas is just a special
+    instance of a container.  Objects can have several containers
+    in their ancestry, but only one canvas, which is always the top-most
+    ancestor.  A canvas is the thing responsible for actually rendering
+    an object to some display.  Therefore, Canvas itself is considered
+    a protocol and is intended to be derived to implement a canvas on
+    a specific display.
+
+    Canvases have the ability to be frozen and thawed.  When a canvas
+    is frozen, child updates should be queued but not visible until
+    the moment the canvas is thawed.
+
+
+  * MPlayerCanvas, derived from Canvas: this is the canvas that implements
+    rendering to an MPlayer overlay using the bmovl2 filter.  The canvas
+    accesses an mplayer.Overlay object which implements the methods to
+    speak bmovl2 with MPlayer.  MPlayer must be patched with the
+    bmovl2 patch available at http://sault.org/mebox/
+
+
+
+It should be possible to implement canvases for other displays such as
+X11 by deriving Canvas and implementing the necessary functionality.
+So long as all display is done using the canvas system, the interface
+should be fairly portable.  In this way, MeBox is not tied inseparably
+to MPlayer and bmovl2.
+
+Image operations for the canvas use Imlib2.  It would be possible to
+use other libraries by providing a thin wrapper around them in order
+to implement the same methods as pyimlib2.  (Alternatively, the canvas
+code itself could be updated to use the new image library.)  Imlib2 was
+chosen for its speed and flexibility.
+
+Changes made to canvas objects are not reflected on the display until
+the update() method is called.  When the object is modified (it is
+moved, text is changed, the image is altered, etc.) the object is marked
+as dirty but it is not repainted until update() is invoked.  update() is
+defined by CanvasObject, so individual objects can be updated, or
+container objects can be updated, thereby updating all their children
+which require it.  And because Canvas is just a special instance of a
+container, calling update() on the canvas itself will behave in the same
+way: all of the dirty objects in the canvas get repainted.
+
+It's helpful to understand what "repainted" really means in the context
+of an MPlayerCanvas.  bmovl2 works by remembering bitmaps and blitting
+them to MPlayer's video buffer for _every frame_ of the video being
+played.  For this reason, bmovl2 must be very efficient at alpha
+compositing.  With MPlayerCanvas, "painting" means "synchronizing the
+object's canvas state with the display" but it really has two contexts:
+copying image data, or modifying bmovl2 attributes.  Moving an image
+only requires issuing a MOVE command to bmovl2; it is not necessary
+to resend the image data to bmovl2.  However, if the image itself has
+been modified, cropped for example, then the new image data will be
+sent to bmovl2, either via shared memory or over the fifo.  The canvas
+abstracts this distinction away and you're left with only "painting,"
+however it's helpful to understand what happens behind the scenes.
+
+It might sound like I'm interchangeably using the terms "update" and
+"paint" but there's actually a subtle distinction: when an object is
+updated, it asks the canvas to paint it.  So, "paint" is something the
+canvas does, but "update" is something an object can do.  Objects are
+never directly painted; you just invoke the update method and let the
+canvas take care of the rest.
+
+Canvases may be frozen (via the freeze method).  When a canvas is
+frozen, no painting must occur until it is thawed.  When frozen,
+child objects which ask to be painted are queued, and then repainted all
+at once when the canvas is thawed (via the thaw method).
+
+Canvases are usually inherently frozen because painting only occurs when
+the update() method is explicitly invoked.  Providing freeze/thaw
+functionality to a canvas is mainly a convenience, and can help
+simplify implementation of interface elements (such as a widget set)
+built on top of the canvas.
+
+Documentation for the individual methods for each of the above classes
+can be found in the source code.  Examples can be found in the examples/
+directory.

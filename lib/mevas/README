@@ -1,0 +1,67 @@
+MeBox Canvas System
+===================
+
+NOTE: some of the stuff in this README is obsolete.
+
+
+About
+-----
+
+This code was written as part of a larger project of mine called MeBox.  You
+can read about it, and also more about the canvas system, at:
+
+	http://sault.org/mebox/
+
+The canvas essentially provides a simple way to manipulate images.  The main
+feature of this canvas system is its ability to render on top of MPlayer's
+video buffer with full alpha compositing using bmovl2.
+
+bmovl2 is an MPlayer video filter which accepts commands via a FIFO from a
+separate process.  It borrows the basic approach from the original bmovl
+filter, but it has been rewritten to allow for the features provided by this
+canvas.
+
+An overview of the canvas architecture can be found in README.canvas.  The
+file src/canvas.py also has some amount of documentation as part of the
+comments.  You can find a few examples in the examples/ directory; they
+should be fairly self explanatory, although unless the MPlayer binary you've
+compiled with the patches is in /usr/local/bin/mplayer, you'll have to edit
+the example scripts and update MPLAYER_CMD to point to the correct binary.
+
+bmovl2 is reasonably efficient but it still requires a fairly fast machine,
+especially given that the video is scaled/expanded to the canvas size.
+Performance is pretty good on my Athlon 1400, and you have some control
+with CPU usage based on the number of images on the canvas and their sizes,
+but nevertheless you'll probably want at least a 1GHz CPU to do anything
+useful.
+
+
+Requirements
+------------
+
+To run the examples, you will need to patch MPlayer.  The patch can be
+found in the patches/ directory; it is diffed against CVS from the date
+indicated in its filename.
+
+The canvas and image modules expect pyimlib2.  Pyimlib2 can be downloaded
+at:
+	http://sault.org/mebox/downloads.php
+
+Pyimlib2 is also, as you may have guessed, very alpha software.
+
+One gotcha about the examples: keyboard input must be done at the console
+window where you run the examples, NOT the MPlayer window.  So if, for
+example, in the osddemo you hit 'o' and think, "Hrmm, this just looks like
+MPlayer's regular OSD" it's because you're pressing the key with the video
+window focused, not the console window. :) 
+
+
+License
+-------
+
+This code is released under the GNU GPL version 2.  Read it here:
+
+	http://www.gnu.org/licenses/gpl.html
+
+
+  - Jason Tackaberry <tack@sault.org>

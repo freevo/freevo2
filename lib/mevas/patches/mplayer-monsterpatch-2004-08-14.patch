@@ -1,0 +1,1941 @@
+--- main.orig/libmpcodecs/vf_bmovl2.c	1969-12-31 19:00:00.000000000 -0500
++++ main/libmpcodecs/vf_bmovl2.c	2004-08-14 14:03:55.466954768 -0400
+@@ -0,0 +1,980 @@
++/* vf_bmovl2.c - BitMap OVerLay Video Filter for MPlayer -
++ *               Extra Tasty Crispy Version
++ * (C) 2004 Jason Tackaberry <tack@sault.org>
++ * Licenced under the GNU General Public License
++ *
++ * Portions of code taken from vf_bmovl.c which is
++ *       (C) 2002 Per Wigren <wigren@home.se>
++ *
++ * Use MPlayer as a framebuffer to read bitmaps and commands from a FIFO
++ * and display them in the window.  This is an enhancement of the original
++ * bmovl.
++ *
++ * See DOCS/tech/vf_bmovl2.txt for details.
++ */
++
++#ifndef HAVE_NO_POSIX_SELECT
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <errno.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <sys/param.h>
++#include <sys/time.h>
++#include <fcntl.h>
++#include "mp_image.h"
++#include "vf.h"
++#include "img_format.h"
++#include "../config.h"
++
++//#include <sys/ipc.h>
++//#include <sys/shm.h>
++//#include <sys/sem.h>
++#include <sys/mman.h>
++
++#include "../mp_msg.h"
++#include "../libvo/fastmemcpy.h"
++#include "../libvo/video_out.h"
++#include "../input/input.h"
++#include "../osdep/timer.h"
++
++#define FALSE 0
++#define TRUE !FALSE
++
++#define rgb2y(R,G,B)  ( (( 263*R + 516*G + 100*B) >> 10) + 16  )
++#define rgb2u(R,G,B)  ( ((-152*R - 298*G + 450*B) >> 10) + 128 )
++#define rgb2v(R,G,B)  ( (( 450*R - 376*G -  73*B) >> 10) + 128 )
++
++#define CMD_RAWIMG        0x100
++#define CMD_ALPHA         0x101
++#define CMD_VISIBLE       0x102
++#define CMD_MOVE          0x103
++#define CMD_ZINDEX        0x104
++#define CMD_DELETE        0x105
++
++void stopwatch(int n)
++{
++        static struct timeval t[100], last_t[100];
++        struct timezone tz;
++        gettimeofday(&t[n], &tz);
++        if (last_t[n].tv_sec != 0) {
++                printf("@@@ Stopwatch: id: %d took %ld usec\n", n, (t[n].tv_sec - last_t[n].tv_sec) * 1000000
++                        + ((t[n].tv_usec - last_t[n].tv_usec)));
++                memset(&last_t[n], 0, sizeof(last_t[n]));
++        } else {
++                last_t[n].tv_sec = t[n].tv_sec;
++                last_t[n].tv_usec = t[n].tv_usec;
++        }
++}
++
++struct bmovl2_image {
++	unsigned char *buffer, *y, *u, *v, *a, *uva;
++	int left, top, w, h, zindex, alpha, visible, persist;
++	char id[100], *syncbyte;
++	struct bmovl2_image *next;
++};
++
++struct vf_priv_s {
++	struct bmovl2_image *image;
++	int stream_fd;
++	char fifo_fname[PATH_MAX];
++	int mpi_width, mpi_height;
++};
++
++/* Keep track of bmovl2 instances for two reasons:
++     1. Image layers should be able to survive a loadfile, so when the
++        bmovl2 filter is initialized, we first check to see if we have
++        an existing filter listening on the specified fifo and use that
++        instead.
++     2. When the movie is paused, we still want to be able to update the
++        overlays, so vf_bmovl2_pause_update() needs to be able to find
++        the bmovl2 instances.
++*/
++vf_instance_t** vf_bmovl2 = NULL;
++static struct vf_priv_s **vf_bmovl2_priv = NULL;
++static mp_image_t* pause_mpi = NULL, *last_mpi = NULL;
++static int pause_state = 0, num_instances = 0;
++
++// Keep track of last update timestamp; we update the overlay about 50 times 
++// second. 
++static double last_update_time = 0.0;
++
++
++static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s *priv);
++static int put_image(struct vf_instance_s* vf, mp_image_t* mpi);
++static int handle_commands(struct vf_priv_s* priv);
++static int handle_commands_and_put_image(struct vf_instance_s* vf, mp_image_t* mpi);
++
++static struct bmovl2_image *
++find_image_by_id(struct bmovl2_image *img, char *id)
++{
++	while (img) {
++		if (!strcmp(img->id, id))
++			return img;
++		img = img->next;
++	}
++	return 0;
++}
++
++static struct bmovl2_image *
++remove_image(struct bmovl2_image *first, struct bmovl2_image *img)
++{
++	struct bmovl2_image *tmp = first, *prev = 0;
++	while (tmp) {
++		if (tmp == img) {
++			if (prev) prev->next = tmp->next;
++				else first = tmp->next;
++				break;
++			}
++			prev = tmp;
++			tmp = prev->next;
++		}
++	return first;
++}
++
++static struct bmovl2_image *
++insert_image_by_zindex(struct bmovl2_image *first, struct bmovl2_image *img)
++{
++	struct bmovl2_image *tmp = first, *prev = 0;
++	if (!first) {
++		img->next = 0;
++		return img;
++	}
++	while (tmp) {
++		if (img->zindex <= tmp->zindex) {
++			img->next = tmp;
++			if (prev) prev->next = img;
++			else first = img;
++			break;
++		} else if (tmp->next == NULL) {
++			img->next = 0;
++			tmp->next = img;
++			break;
++		}
++		prev = tmp;
++		tmp = prev->next;
++	}
++	return first;
++}
++void
++free_image_data(struct bmovl2_image *img)
++{
++	if (!img || !img->buffer)
++		return;
++
++	if (!img->persist) {
++		free(img->buffer);
++	} else {
++		free(img->a);
++		free(img->uva);
++		munmap(img->buffer, img->w * img->h + (img->w * img->h / 4 * 2) + 1);
++	}
++}
++
++static inline void 
++copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) 
++{
++	if (mpi->flags&MP_IMGFLAG_PLANAR) {
++		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h, 
++		           dmpi->stride[0],mpi->stride[0]);
++		memcpy_pic(dmpi->planes[1], mpi->planes[1], mpi->chroma_width, 
++		           mpi->chroma_height, dmpi->stride[1], mpi->stride[1]);
++		memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->chroma_width, 
++		           mpi->chroma_height, dmpi->stride[2], mpi->stride[2]);
++	} else  {
++		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w*(dmpi->bpp/8), 
++		           mpi->h, dmpi->stride[0], mpi->stride[0]); 
++	}
++}
++
++
++int
++should_update()
++{
++	struct timeval curtime;
++	struct timezone tz;
++	double time;
++
++	gettimeofday(&curtime, &tz);
++	time = curtime.tv_sec + (curtime.tv_usec/(1000.0*1000));
++
++	// Updates about 30 times a second.
++	if (time - last_update_time > 0.01700) {
++		last_update_time = time;
++		return 1;
++	}
++	return 0;
++}
++
++void 
++vf_bmovl2_pause_update(vo_functions_t *video_out) 
++{
++	int i,  do_put_image = 0;
++	struct vf_instance_s *p;
++	struct bmovl2_image *img;
++
++	if (!vf_bmovl2 || !should_update())
++		return;
++	
++	for (i = 0, p = vf_bmovl2[i]; p != NULL; p = vf_bmovl2[++i]) {
++		if (handle_commands(p->priv))
++			do_put_image = 1;
++/*
++		for (img = p->priv->image; img != NULL; img = img->next) {
++			if (img->persist && *img->syncbyte == 24)
++				do_put_image = 1;
++		}
++*/
++	}
++
++	if (do_put_image && last_mpi) {
++		put_image(vf_bmovl2[num_instances - 1], last_mpi);
++		video_out->flip_page();
++	}
++}
++
++
++static int
++query_format(struct vf_instance_s* vf, unsigned int fmt)
++{
++	if (fmt == IMGFMT_YV12) 
++		return VFCAP_CSP_SUPPORTED;
++	return 0;
++}
++
++
++static int
++config(struct vf_instance_s* vf, int width, int height, 
++       int d_width, int d_height, unsigned int flags, unsigned int outfmt)
++{
++	vf->priv->mpi_width = width;
++	vf->priv->mpi_height = height;
++	return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
++}
++
++static int
++check_fifo(int fd)
++{
++	struct timeval tv;
++	fd_set fdset;
++
++	FD_ZERO(&fdset);
++	FD_SET(fd, &fdset);
++	tv.tv_sec = tv.tv_usec = 0; 
++	return select(fd + 1, &fdset, NULL, NULL, &tv);
++}
++
++
++static int
++read_cmd(int fd, char *cmd, char *args)
++{
++	char *p = cmd, *start = cmd, maxlen = 20;
++	*args = 0;
++	while (read(fd, p, 1)) {
++		if (*p == ' ' && start == cmd) { 
++			*p = 0; 
++			p = start = args; 
++			maxlen = 100;
++		} 
++		else if (*p == '\n' || p - start > maxlen) { *p = 0; return TRUE; }
++		else p++;
++	}
++	return FALSE;
++}
++
++
++static void
++convert_rgba_to_yv12a(unsigned char *imgbuf, char *format, 
++                      struct bmovl2_image *img)
++{
++	int buf_y, buf_x, bpp, r_pos, g_pos, b_pos, a_pos, i, stride,
++	    w = img->w, h = img->h;
++	unsigned char *y_ptr, *u_ptr, *v_ptr, *a_ptr, *src_ptr, 
++	              r, g, b, a, Ar, Ab, Ag;
++
++	bpp = strlen(format);
++	for (i = 0; i < bpp; i++) {
++		switch (format[i]) {
++			case 'R': r_pos = i; break;
++			case 'G': g_pos = i; break;
++			case 'B': b_pos = i; break;
++			case 'A': a_pos = i; break;
++		}
++	}
++
++	y_ptr = img->y; u_ptr = img->u; v_ptr = img->v; a_ptr = img->a;
++	stride = w*bpp;
++	printf("@@@ converting format %s %d %d, stride=%d\n", format, w, h, stride);
++	for (src_ptr = imgbuf; src_ptr < imgbuf + stride*h; src_ptr += bpp) {
++		r = *(src_ptr+r_pos);   g = *(src_ptr+g_pos);
++		b = *(src_ptr+b_pos);   
++		a = (bpp == 4) ? *(src_ptr+a_pos) : 0xFF;
++		*(y_ptr++) = rgb2y(r, g, b);
++		*(a_ptr++) = a;
++    }
++
++	/* Calculate chroma planes.
++	 * This macro nonsense is to handle the case where the image's
++	 * width is odd.  We don't want to put the "if image is odd"
++	 * comparison in the inner loop since that's pointlessly slow.
++	 * Given a block of 2x2 pixels:
++	 *    A  B
++	 *    C  D
++	 * We calculate the chroma values by averaging the RGB values between
++	 * A and C.  This follows MPEG2 spec, and it may not be correct in
++	 * all cases but it's a good default.
++	 */
++
++#define LOOP_START(expr) { \
++    for (src_ptr = imgbuf + stride; src_ptr < imgbuf-bpp+stride*h; src_ptr+=bpp) { \
++		Ar = *(src_ptr-stride+r_pos); Ag = *(src_ptr-stride+g_pos); \
++		Ab = *(src_ptr-stride+b_pos);  \
++		r = *(src_ptr+r_pos);   g = *(src_ptr+g_pos); b = *(src_ptr+b_pos); \
++		r=(r+Ar)>>1; g = (g+Ag)>>1; b = (b+Ab)>>1; \
++		*(u_ptr++) = rgb2u(r, g, b); \
++		*(v_ptr++) = rgb2v(r, g, b); \
++		src_ptr+=bpp; \
++		expr; \
++	} }
++
++	if (w&1)
++		LOOP_START( if ( (src_ptr-imgbuf) % stride == 0)
++					src_ptr += stride+bpp )
++	else
++		LOOP_START( if ( ((src_ptr+bpp)-imgbuf) % stride == 0) src_ptr += stride )
++}
++
++
++void precompute_chroma_alpha(struct bmovl2_image *img)
++{
++	int buf_x, buf_y, w = img->w, h = img->h;
++	unsigned char *ptr = img->uva;
++
++	/* Precompute the alpha */
++	for (buf_y = 1; buf_y < h; buf_y += 2) {
++		for (buf_x = 1; buf_x < w; buf_x += 2) {
++			unsigned char A = img->a[(buf_y - 1) * w + (buf_x - 1)],
++			              C = img->a[buf_y * w + (buf_x - 1)];
++			*(ptr++) = (A + C) >> 1;
++		}
++	}
++}
++
++
++
++static int
++handle_commands(struct vf_priv_s* priv)
++{
++	int atom_level = 0, res, command;
++	char cmd[20], args[100];
++
++	do {
++//		printf("Check fifo\n");
++		res = check_fifo(priv->stream_fd);
++		if (res == 0) {
++			if (atom_level > 0)
++				usec_sleep(100);
++			else
++				return FALSE;
++		} else if(res < 0) {
++			mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl2: Error %d in fifo: %s\n\n", errno, strerror(errno));
++			return FALSE;
++		}
++
++		// If we're here it means there's a command in the fifo
++		if(!read_cmd(priv->stream_fd, cmd, args)) {
++			mp_msg(MSGT_VFILTER, MSGL_ERR, "\nvf_bmovl2: Error reading commands: %s\n\n", strerror(errno));
++			return FALSE;
++		}
++
++		command = 0;
++		if (strncmp(cmd, "ZINDEX", 6) == 0) command = CMD_ZINDEX;
++		if (strncmp(cmd, "MOVE", 4) == 0) command = CMD_MOVE;
++		if (strncmp(cmd, "ALPHA", 5) == 0) command = CMD_ALPHA;
++		if (strncmp(cmd, "VISIBLE", 7) == 0) command = CMD_VISIBLE;
++		if (strncmp(cmd, "DELETE", 6) == 0) command = CMD_DELETE;
++		if (strncmp(cmd, "RAWIMG", 6) == 0) command = CMD_RAWIMG;
++		if (strncmp(cmd, "ATOM", 4) == 0) atom_level++;
++		if (strncmp(cmd, "ENDATOM", 7) == 0) { atom_level--; continue; }
++
++		switch (command) {
++
++			case CMD_ZINDEX: {   // ZINDEX img_id zindex
++				int zindex;
++				char id[101];
++				struct bmovl2_image *img;
++				sscanf(args, "%100s %d", id, &zindex);
++				img = find_image_by_id(priv->image, id);
++				if (!img)
++					break;
++				img->zindex = zindex;
++				if (priv->image == NULL || priv->image->next == NULL)
++					break;
++				priv->image = remove_image(priv->image, img);
++				priv->image = insert_image_by_zindex(priv->image, img);
++				break;
++			}
++
++			case CMD_MOVE: {   // MOVE img_id x y
++				char id[101];
++				int x, y;
++				struct bmovl2_image *img;
++				sscanf(args, "%100s %d %d", id, &x, &y);
++				img = find_image_by_id(priv->image, id);
++				if (!img)
++					break;
++				img->left = x;
++				img->top = y;
++				break;
++			}
++
++			case CMD_ALPHA: {   // ALPHA img_id alpha
++				int alpha;
++				char id[101];
++				struct bmovl2_image *img;
++				sscanf(args, "%100s %d", id, &alpha);
++				img = find_image_by_id(priv->image, id);
++				if (!img)
++					break;
++				img->alpha = alpha;
++				break;
++			}
++
++			case CMD_VISIBLE: {   // VISIBLE img_id flag
++				char id[101];
++				int visible;
++				struct bmovl2_image *img;
++				sscanf(args, "%100s %d", id, &visible);
++				img = find_image_by_id(priv->image, id);
++				if (!img)
++					break;
++				img->visible = visible;
++				break;
++			}
++
++			case CMD_DELETE: {   // DELETE img_id
++				char id[101];
++				struct bmovl2_image *img;
++				sscanf(args, "%100s", id);
++				img = find_image_by_id(priv->image, id);
++				if (!img)
++					break;
++				priv->image = remove_image(priv->image, img);
++				free_image_data(img);
++				free(img);
++				break;
++			}
++
++			case CMD_RAWIMG: { // RAWIMG img_id format w h reset
++				char format[6], *imgbuf, id[101], shmem_name[101] = {};
++				int w = 0, h = 0, reset = 0, bpp = 0, i, bufsize = 0,
++				    fd, pos, bytes, persist = 0;
++				struct bmovl2_image *img;
++				int buf_x, buf_y;
++					  
++				sscanf(args, "%100s %5s %d %d %d %100s %d", id, format, &w, &h, &reset, &shmem_name, &persist);
++
++				/* Determine how big the image buffer should be for the given
++				   format. */
++				if (!strncmp(format, "YV12A", 5)) {
++					bufsize = w * h * 2 + (w * h / 4 * 2);
++					// For YV12/YV12A, bpp=4 means YV12A, and bpp=3 means YV12.
++					bpp = 4;
++				}
++				else if (!strncmp(format, "YV12", 4)) {
++					bufsize = w * h + (w * h / 4 * 2);
++					bpp = 3;
++				}
++				// RGB/RGBA format
++				else {
++					bpp = strlen(format);
++					if (bpp != 3 && bpp != 4) {
++						mp_msg(MSGT_VFILTER, MSGL_ERR, "\nvf_bmovl2: CMD_RAWIMG: invalid image format (%s)\n", format);
++						break;
++					}
++					bufsize = w * h * bpp;
++				}
++				if (persist && strcmp(format, "YV12") != 0) {
++					mp_msg(MSGT_VFILTER, MSGL_ERR, "\nvf_bmovl2: CMD_RAWIMG: shmem persist invalid for RGB/A\n");
++					persist = 0;
++				}
++
++				/* Try to read image from shmem given shmem_name. */
++				if (shmem_name[0] != '0') {
++					if (persist) bufsize++;
++					fd = shm_open(shmem_name, O_RDWR, 0777);
++					if (fd == -1) {
++						mp_msg(MSGT_VFILTER, MSGL_ERR, "\nvf_bmovl2: CMD_RAWIMG: unable to open shmem (%s)\n", shmem_name);
++						break;
++					}
++					imgbuf = mmap(0, bufsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++					close(fd);
++					if (!imgbuf) {
++						mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl2: CMD_RAWIMG: couldn't mmap %d bytes from shmem (%s)\n", bufsize);
++						break;
++					}
++					//printf("@@@ NEW SHM (key %s) %x %d\n", shmem_name, imgbuf, bufsize);
++				} 
++
++				/* Otherwise read the image data from the fifo */
++				else {
++					imgbuf = malloc(bufsize);
++					if(!imgbuf) {
++						mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl2: CMD_RAWIMG: couldn't allocate temp buffer (%d bytes)\n", bufsize);
++						break;
++					}
++					bytes = read(priv->stream_fd, imgbuf, bufsize);
++					if (bytes != bufsize) {
++						mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl2: CMD_RAWIMG: image too short (got %d bytes)\n", bytes);
++						free(imgbuf);
++						break;
++					}
++				}
++
++
++				img = find_image_by_id(priv->image, id);
++				if (!img) {
++					img = (struct bmovl2_image *)malloc(sizeof(struct bmovl2_image));
++					memset(img, 0, sizeof(struct bmovl2_image));
++					img->visible = TRUE;
++					if (bpp != 4)
++						// set the layer alpha to 256 to disable alpha blending.
++						img->alpha = 256;
++					else
++						img->alpha = 255; 
++					strcpy(img->id, id);
++					// Insert this image in the list ordered by zindex
++					priv->image = insert_image_by_zindex(priv->image, img);
++				}
++				else
++					free_image_data(img);
++
++				// Allocate memory for new image if necessary.
++				if (!persist) {
++					img->buffer = malloc(w * h * 2 + (w * h / 4 * 3));
++					img->y   = &img->buffer[0];
++					img->u   = &img->buffer[w * h];
++					img->v   = &img->buffer[w * h + (w * h / 4)];
++					img->a   = &img->buffer[w * h + (w * h / 4 * 2)];
++					img->uva = &img->buffer[w * h * 2 + (w * h / 4 * 2)];
++				} else {
++					img->buffer = imgbuf;
++					img->y   = &img->buffer[0];
++					img->u   = &img->buffer[w * h];
++					img->v   = &img->buffer[w * h + (w * h / 4)];
++					img->syncbyte = &img->buffer[w * h + (w * h / 4 * 2)];
++					img->a = malloc(w * h);
++					img->uva = malloc(w * h / 4);
++				}
++
++				img->w   = w;
++				img->h   = h;
++				img->persist = persist;
++
++				if (!strncmp(format, "YV12A", 5)) {
++					memcpy(img->buffer, imgbuf, w * h * 2 + (w * h / 4 * 2));
++				} else if (!strncmp(format, "YV12", 4))  {
++					if (!persist) memcpy(img->buffer, imgbuf, w * h + (w * h / 4 * 2));
++				} else {
++					// Convert an RGBA image to YV12A
++					stopwatch(1);
++					convert_rgba_to_yv12a(imgbuf, format, img);
++					stopwatch(1);
++				} // if not yv12
++
++				if (bpp != 4) {
++					memset(img->a, 255, w * h);
++					memset(img->uva, 255, w * h / 4);
++				} else
++					precompute_chroma_alpha(img);
++
++				if (reset) {
++					img->visible = TRUE;
++					img->alpha = 255; 
++					img->left = img->top = 0; 
++					if (img->zindex != 0) {
++						img->zindex = 0;
++						// Reinsert this image since z-index has been reset
++						priv->image = remove_image(priv->image, img);
++						priv->image = insert_image_by_zindex(priv->image, img);
++					}
++				}
++				
++				if (shmem_name[0] != '0') {
++					if (!persist) {
++						munmap(imgbuf, bufsize);
++						shm_unlink(shmem_name);
++					}
++				} 
++				else
++					free(imgbuf);
++				break;
++			}
++		}
++	} while (atom_level > 0);
++	return 1;
++}
++
++static inline char
++multiply_alpha(unsigned char r, unsigned char a)
++{
++	int temp = (r * a) + 0x80;
++	return ((temp + (temp >> 8)) >> 8);
++}
++
++static inline char
++blend_byte(unsigned char dst, unsigned char src, unsigned char alpha, 
++           int layer_alpha)
++{
++	unsigned char a = (layer_alpha != 255) ? alpha * layer_alpha >> 8 : alpha;
++	return (multiply_alpha(dst, 255 - a) + multiply_alpha(src, a));
++}
++
++static unsigned char layer_alpha_array[8] = {0,0,0,0,0,0,0,0};
++
++static inline void 
++blend_byte_8(unsigned char *dst, unsigned char *src, 
++             unsigned char *alpha, int layer_alpha)
++{
++#ifndef HAVE_MMX
++	int i;
++	for (i = 0; i < 8; i++) {
++		dst[i] = blend_byte(dst[i], src[i], alpha[i], layer_alpha);
++	}
++#else
++	static unsigned char d[8] = {255,255,255,255, 255,255,255,255};
++	static unsigned char round[8] = {0x80, 0, 0x80, 0, 0x80, 0, 0x80, 0};
++
++	// Here's proof that infinite monkeys really can write Shakespeare.
++	asm volatile(
++		"movq %1, %%mm0\n\t"           // %mm0 = mpi
++		"movq %%mm0, %%mm1\n\t"        // %mm1 = mpi
++		"movq %3, %%mm5\n\t"           // %mm5 = alpha
++		"movq %4, %%mm2\n\t"           // %mm2 = 255's
++		"movq %6, %%mm4\n\t"           // %mm4 = round
++
++		"pxor %%mm7, %%mm7\n\t"        // zero out %mm7
++
++		// Modify alpha from image with layer alpha
++		"movl %7, %%eax\n\t"          // %eax = layer alpha
++		"cmpl $255, %%eax\n\t"        // don't apply layer alpha if it's 100% opaque
++		"je 42f\n\t"
++		"movq %%mm5, %%mm6\n\t"       // %mm6 = %mm5 = alpha
++		"punpcklbw %%mm7, %%mm5\n\t"  // %mm5 = low dword of alpha
++		"punpckhbw %%mm7, %%mm6\n\t"  // %mm6 = hi dword of alpha
++		"movq %5, %%mm3\n\t"          // %mm3 = layer alpha
++		"pmullw %%mm3, %%mm5\n\t"     // alpha * layer_alpha
++		"pmullw %%mm3, %%mm6\n\t"
++		"psrlw $8, %%mm5\n\t"         // Divide by 256
++		"psrlw $8, %%mm6\n\t"
++		"packuswb %%mm6, %%mm5\n\t"   // Pack back into %mm5
++		"42: \n\t"
++
++		// Do (255-alpha) * mpi
++		"psubw %%mm5, %%mm2\n\t"      // %mm2 = 255 - alpha
++		"punpcklbw %%mm7, %%mm0\n\t"  // %mm0 = low dword of mpi
++		"punpckhbw %%mm7, %%mm1\n\t"  // %mm1 = hi dword of mpi
++		"movq %%mm2, %%mm3\n\t"
++		"punpcklbw %%mm7, %%mm2\n\t"  // %mm0 = low dword of 255-a
++		"punpckhbw %%mm7, %%mm3\n\t"  // %mm1 = hi dword of 255-a
++		"pmullw %%mm2, %%mm0\n\t"     // (255-a) * mpi = (r*a)
++		"pmullw %%mm3, %%mm1\n\t"
++		// approximate division by 255
++		"paddw %%mm4, %%mm0\n\t"      // (r*a) + 0x80
++		"paddw %%mm4, %%mm1\n\t"
++		"movq %%mm0, %%mm2\n\t"       // temp = (r*a) + 0x80
++		"movq %%mm1, %%mm3\n\t"
++		"psrlw $8, %%mm0\n\t"         // temp >> 8
++		"psrlw $8, %%mm1\n\t"
++		"paddw %%mm2, %%mm0\n\t"      // temp + (temp >> 8)
++		"paddw %%mm3, %%mm1\n\t"
++		"psrlw $8, %%mm0\n\t"         // (temp+(temp>>8))>>8
++		"psrlw $8, %%mm1\n\t"
++
++		// Now do alpha*img -- can't touch %mm0 and %mm1
++		"movq %2, %%mm2\n\t"          // %mm2 = src image
++		"movq %%mm2, %%mm3\n\t"       // %mm3 = src image
++		"punpcklbw %%mm7, %%mm2\n\t"  // %mm2 = low dword of srcimg
++		"punpckhbw %%mm7, %%mm3\n\t"  // %mm3 = hi dword of srcimg
++		"movq %%mm5, %%mm6\n\t"
++		"punpcklbw %%mm7, %%mm5\n\t"  // %mm5 = low dword of alpha
++		"punpckhbw %%mm7, %%mm6\n\t"  // %mm6 = hi dword of alpha
++		"pmullw %%mm5, %%mm2\n\t"     // alpha * srcimg = (r * a)
++		"pmullw %%mm6, %%mm3\n\t"
++		// approximate division by 255
++		"paddw %%mm4, %%mm2\n\t"      // (r*a) + 0x80
++		"paddw %%mm4, %%mm3\n\t"
++		"movq %%mm2, %%mm4\n\t"       // temp = (r*a) + 0x80
++		"movq %%mm3, %%mm5\n\t"
++		"psrlw $8, %%mm2\n\t"         // temp >> 8
++		"psrlw $8, %%mm3\n\t"
++		"paddw %%mm4, %%mm2\n\t"      // temp + (temp >> 8)
++		"paddw %%mm5, %%mm3\n\t"
++		"psrlw $8, %%mm2\n\t"         // (temp+(temp>>8))>>8
++		"psrlw $8, %%mm3\n\t"
++
++		// Add the two together
++		"paddw %%mm2, %%mm0\n\t"
++		"paddw %%mm3, %%mm1\n\t"
++		// Pack into bytes
++		"packuswb %%mm1, %%mm0\n\t"
++		"movq %%mm0, %0\n\t"
++		"emms\n\t"
++	: "=m" (((uint64_t *)dst)[0]) 
++	: "m" (((uint64_t *)dst)[0]), "m" (((uint64_t*)src)[0]), 
++	  "m" (((uint64_t *)alpha)[0]), "m" (((uint64_t *)d)[0]), 
++	  "m" (((uint64_t *)layer_alpha_array)[0]), "m" (((uint64_t *)round)[0]),
++	  "m" ((uint64_t *)layer_alpha) 
++	: "%eax");
++#endif
++}
++
++#define check_bounds() \
++	if (xpos + left >= vf->priv->mpi_width) break; \
++	if (xpos + left < 0) continue; \
++	if (ypos + top >= vf->priv->mpi_height || xpos + left >= vf->priv->mpi_width || \
++	    ypos + top < 0 || xpos + left < 0) continue;
++	
++static int
++put_image(struct vf_instance_s* vf, mp_image_t* mpi) 
++{
++	mp_image_t *dmpi = mpi;
++	int ypos, xpos, top, left;
++	struct bmovl2_image *img;
++
++	// Remember last mp image when the video gets paused.  Only the first 
++	// bmovl2 instance in the filter chain will copy the mpimage otherwise
++	// we will end up overlaying the same thing twice.
++	if (pause_state != 2 && vf == vf_bmovl2[num_instances-1]) {
++		last_mpi = mpi;
++		// When paused, make sure we don't copy the mpi for the same reasons
++		// as above.
++		if (pause_state) 
++			pause_state = 2;
++	}
++//	fprintf(stderr, "@@@ put_image %s %x==%x pause_state=%d\n", vf->priv->fifo_fname, vf, vf_bmovl2[num_instances-1], pause_state);
++/*
++	if (pause_state != 2) {
++		pause_state = 2;
++		pause_mpi = vf_get_image(vf, mpi->imgfmt, MP_IMGTYPE_IP,
++							MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
++							mpi->w, mpi->h);
++		fprintf(stderr, "@@@ copying pause_mpi=%x (mpi=%x)\n", pause_mpi, mpi);
++		copy_mpi(pause_mpi, mpi);
++	}
++*/
++	struct timeval zzz;
++	struct timezone tz;
++	gettimeofday(&zzz, &tz);
++//	printf("put_image %d %d\n", zzz.tv_sec, zzz.tv_usec);
++	int c = 0;
++	for (img = vf->priv->image; img != NULL; img = img->next) {
++		if (img->visible == FALSE || img->alpha == 0)
++			continue;
++		c++;
++		// Don't bother if the image isn't even on screen
++		if (img->top >= vf->priv->mpi_height ||
++		    img->left >= vf->priv->mpi_width ||
++		    img->left + img->w < 0 || img->top + img->h < 0)
++				continue;
++
++		// Only create the dmpi if we need to.
++		if (dmpi == mpi) {
++			dmpi = vf_get_image(vf->next, mpi->imgfmt, MP_IMGTYPE_TEMP,
++							MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
++							mpi->w, mpi->h);
++			copy_mpi(dmpi, mpi);
++		}
++
++		top = img->top;
++		left = img->left;
++#ifdef HAVE_MMX
++		// Set this up here rather than in the inner loop -- it shaves about
++		// 2% CPU usage off my Athlon 1400, surprisingly.
++		layer_alpha_array[0] = layer_alpha_array[2] = layer_alpha_array[4] =
++		layer_alpha_array[6] = img->alpha;
++#endif
++
++		// Blend Y channel
++		for(ypos = 0; ypos < img->h; ypos++) {
++			if (ypos + top >= vf->priv->mpi_height) break;
++			if (ypos + top < 0) continue;
++			for (xpos = 0; xpos < img->w; xpos+=1) {
++				int img_pos, alpha, mpi_pos;
++
++				check_bounds();
++
++				img_pos = ypos * (img->w) + xpos;
++				mpi_pos = (ypos + top) * dmpi->stride[0] + (xpos + left);
++
++				if (xpos + 8 >= img->w || xpos + left + 8 >= vf->priv->mpi_width) {
++					// Less than 8 bytes left, so do them one at a time
++					alpha = img->a[img_pos];
++					if (alpha == 0)
++						continue;
++					if (img->alpha == -1)
++						dmpi->planes[0][mpi_pos] = img->y[img_pos];
++					else
++						dmpi->planes[0][mpi_pos] = blend_byte(dmpi->planes[0][mpi_pos], img->y[img_pos],
++										alpha, img->alpha);
++				
++				} else {
++					// Do a chunk of 8 bytes
++					if (img->alpha ==  256)
++						memcpy(&dmpi->planes[0][mpi_pos], &img->y[img_pos], 8);
++					else
++						blend_byte_8(&dmpi->planes[0][mpi_pos], &img->y[img_pos],
++										&img->a[img_pos], img->alpha);
++					xpos += 7;
++
++				}
++			} // xpos
++		} // ypos
++
++		// Blend U/V channels
++		for(ypos = 1; ypos < img->h; ypos+=2) {
++			if (ypos + top >= vf->priv->mpi_height) break;
++			if (ypos + top < 0) continue;
++			for (xpos = 1; xpos < img->w; xpos+=2) {
++				int img_pos, alpha, mpi_pos;
++
++				check_bounds();
++
++				img_pos = (ypos >> 1) * (img->w >> 1) + (xpos >> 1);
++				mpi_pos = ((ypos + top) >> 1) * dmpi->stride[1] + ((xpos + left) >> 1);
++				if (xpos + 16 >= img->w || xpos + left + 16 >= vf->priv->mpi_width) {
++					// Less than 8 bytes left, so do them one at a time
++					alpha = img->uva[img_pos];
++					if (img->alpha == 256) {
++						dmpi->planes[1][mpi_pos] = img->u[img_pos];
++						dmpi->planes[2][mpi_pos] = img->v[img_pos];
++					} else {
++						dmpi->planes[1][mpi_pos] = blend_byte(dmpi->planes[1][mpi_pos], img->u[img_pos],
++										alpha, img->alpha);
++						dmpi->planes[2][mpi_pos] = blend_byte(dmpi->planes[2][mpi_pos], img->v[img_pos],
++										alpha, img->alpha);
++					}
++				
++				} else{
++					// Do a chunk of 8 bytes
++					if (img->alpha == 256) {
++						memcpy(&dmpi->planes[1][mpi_pos], &img->u[img_pos], 8);
++						memcpy(&dmpi->planes[2][mpi_pos], &img->v[img_pos], 8);
++					} else {
++						blend_byte_8(&dmpi->planes[1][mpi_pos], &img->u[img_pos],
++										&img->uva[img_pos], img->alpha);
++						blend_byte_8(&dmpi->planes[2][mpi_pos], &img->v[img_pos],
++										&img->uva[img_pos], img->alpha);
++					}
++					xpos += 14;
++				}
++
++			} // xpos
++		} // ypos
++		if (img->persist)
++			*img->syncbyte = 42;
++	}
++//	fprintf(stderr, "@@@ bmovl2 painted %d images\n", c);
++	return vf_next_put_image(vf, dmpi);
++}
++		
++static int
++handle_commands_and_put_image(struct vf_instance_s* vf, mp_image_t* mpi) 
++{
++	handle_commands(vf->priv);
++	return put_image(vf, mpi);
++}
++
++static void **
++grow_array(void **old_array, int old_size, int diff)
++{
++	void **tmp = (void **)malloc(sizeof(void *) * (old_size + diff));
++	memset(tmp, 0, sizeof(void *) * (old_size + diff));
++	memmove(tmp, old_array, sizeof(void *) * old_size);
++	if (old_array)
++		free(old_array);
++	return tmp;
++}
++
++static int
++vf_open(vf_instance_t* vf, char* args)
++{
++	char filename[PATH_MAX];
++	int i = 0;
++
++	vf->config = config;
++	vf->put_image = handle_commands_and_put_image;
++	vf->query_format = query_format;
++	vf->uninit = NULL;  // persistent
++
++	if(!args || sscanf(args, "%s", filename) < 1 ) {
++		mp_msg(MSGT_VFILTER, MSGL_ERR, "vf_bmovl2: missing fifo filename argument.\n");
++		return FALSE;
++	}
++
++	/* Check to see if we've already initialized a filter with this fifo.  If
++	 * we have, then we reuse the private data, which allows image layers to
++	 * survive a loadfile or a loop.
++	 */
++	if (vf_bmovl2_priv) {
++		struct vf_priv_s *p;
++		for (i = 0, p = vf_bmovl2_priv[i]; p != NULL; p = vf_bmovl2_priv[++i]) {
++			if (!strcmp(p->fifo_fname, filename)) {
++				vf->priv = p;
++				vf_bmovl2[i] = vf;
++				return TRUE;
++			}
++		}
++	}
++
++	// New filter, so create and initialize the private data
++	vf->priv = malloc(sizeof(struct vf_priv_s));
++	vf->priv->image = 0;
++	vf->priv->stream_fd = open(filename, O_RDWR);
++	fcntl(vf->priv->stream_fd, F_SETFL, O_NONBLOCK);
++	strcpy(vf->priv->fifo_fname, filename);
++	if (vf->priv->stream_fd < 0)
++		mp_msg(MSGT_VFILTER, MSGL_WARN, "vf_bmovl2: Error! Couldn't open FIFO %s: %s\n", 
++		       filename, strerror(errno));
++
++	mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter, vf->priv);
++
++	// Grow the arrays and keep track of the private data, as well as the instance
++	// structs, used for handling the pause loop.
++	vf_bmovl2_priv = (struct vf_priv_s **)grow_array((void **)vf_bmovl2_priv, i, 2);
++	vf_bmovl2_priv[i] = vf->priv;
++	vf_bmovl2 = (vf_instance_t **)grow_array((void **)vf_bmovl2, i, 2);
++	vf_bmovl2[i] = vf;
++	num_instances = i + 1;
++	return TRUE;
++}
++
++static int 
++cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) 
++{
++	// Track the pause state.  When the video gets paused, the next
++	// iteration of put_image will grab the mpi and save it.
++	if (vf_bmovl2[0]->priv != priv)
++		return 0;
++
++	if (cmd->id == MP_CMD_PAUSE) {
++		pause_state = !pause_state;
++	}
++	return 0;
++}
++
++vf_info_t vf_info_bmovl2 = {
++	"Read and manipulate bitmapped images from a FIFO, "
++	"overlaying them on the video window.",
++	"bmovl2",
++	"Jason Tackaberry",
++	"",
++	vf_open,
++	NULL
++};
++
++#endif
++// vim: ts=3
+--- main.orig/mplayer.c	2004-08-12 18:33:21.000000000 -0400
++++ main/mplayer.c	2004-08-14 14:03:55.470954160 -0400
+@@ -226,6 +226,8 @@
+ static off_t step_sec=0;
+ static int loop_times=-1;
+ static int loop_seek=0;
++extern float ringbuffer_end_pos;
++extern float ringbuffer_seek_pos;
+ 
+ // A/V sync:
+        int autosync=0; // 30 might be a good default value.
+@@ -314,7 +316,7 @@
+ 
+ static stream_t* stream=NULL;
+ static demuxer_t *demuxer=NULL;
+-static sh_audio_t *sh_audio=NULL;
++static sh_audio_t *sh_audio=NULL, *sh_audio_save=NULL;
+ static sh_video_t *sh_video=NULL;
+ 
+ char* current_module=NULL; // for debugging
+@@ -343,6 +345,9 @@
+ static char* menu_root = "main";
+ #endif
+ 
++#ifndef HAVE_NO_POSIX_SELECT
++extern void vf_bmovl2_pause_update(vo_functions_t*);
++#endif
+ 
+ #ifdef HAVE_RTC
+ static int nortc;
+@@ -2227,6 +2232,9 @@
+ 	current_module="sleep_rtc";
+         while (time_frame > 0.000) {
+ 	    unsigned long rtc_ts;
++#ifndef HAVE_NO_POSIX_SELECT
++            vf_bmovl2_pause_update(video_out);
++#endif
+ 	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
+ 		    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC read error: %s\n", strerror(errno));
+     	    time_frame-=GetRelativeTime();
+@@ -2261,7 +2269,11 @@
+ 	if(vo_config_count) video_out->check_events();
+ 
+         current_module="flip_page";
+-        if (!frame_time_remaining) {
++	// When seeking in pause, this section gets passed over twice:
++	// once with osd_function == OSD_FFW, and the other with OSD_PAUSE.
++	// We only want to flip the page once, so we do this on the second
++	// pass (since it's more accurate).
++        if (!frame_time_remaining && (!sh_audio_save || osd_function == OSD_PAUSE)) {
+          if(blit_frame){
+ 	   unsigned int t2=GetTimer();
+ 	   double tt;
+@@ -2430,7 +2442,7 @@
+     }
+   }
+ #endif
+-
++pause:
+   if(osd_function==OSD_PAUSE){
+     mp_cmd_t* cmd;
+       if(!quiet) {
+@@ -2446,7 +2458,7 @@
+       if (audio_out && sh_audio)
+          audio_out->pause();	// pause audio, keep data if possible
+ 
+-      while( (cmd = mp_input_get_cmd(20,1)) == NULL) {
++      while( (cmd = mp_input_get_cmd(3,1)) == NULL) {
+ 	     if(sh_video && video_out && vo_config_count) video_out->check_events();
+ #ifdef HAVE_NEW_GUI
+              if(use_gui){
+@@ -2459,9 +2471,31 @@
+ 	     if(vf_menu)
+ 	       vf_menu_pause_update(vf_menu);
+ #endif
+-             usec_sleep(20000);
++#ifndef HAVE_NO_POSIX_SELECT
++             vf_bmovl2_pause_update(video_out);
++#endif
++             usec_sleep(1000);
+          }
+-      mp_cmd_free(cmd);
++	switch (cmd->id) {
++            case MP_CMD_SEEK:
++                GetRelativeTime(); 
++            case MP_CMD_MOVE:
++            case MP_CMD_RINGBUFFER_SET:
++            case MP_CMD_LOADFILE:
++                 mp_input_queue_cmd(cmd);
++                goto handle_cmd;
++		break;
++
++            default:
++               mp_cmd_free(cmd);
++	}
++      if (sh_audio_save) {
++          sh_audio = sh_audio_save;
++          sh_audio_save = NULL;
++ //         demux_seek(demuxer,0,0);
++//          if(audio_out)
++ //              audio_out->reset();
++      }
+          osd_function=OSD_PLAY;
+       if (audio_out && sh_audio)
+         audio_out->resume();	// resume audio
+@@ -2523,6 +2557,7 @@
+ 
+   current_module="key_events";
+ 
++handle_cmd:
+ {
+   mp_cmd_t* cmd;
+   int brk_cmd = 0;
+@@ -2530,6 +2565,8 @@
+     switch(cmd->id) {
+     case MP_CMD_SEEK : {
+       int v,abs;
++      if (osd_function == OSD_PAUSE) 
++         mp_input_queue_cmd(mp_input_parse_cmd("PAUSE"));
+       osd_show_percentage = 25;
+       v = cmd->args[0].v.i;
+       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+@@ -2566,6 +2603,9 @@
+       if(sh_audio) sh_audio->delay+= v;
+     } break;
+     case MP_CMD_PAUSE : {
++      if (sh_audio) { 
++         sh_audio_save = sh_audio; sh_audio=NULL; 
++      }
+       osd_function=OSD_PAUSE;
+       brk_cmd = 1;
+     } break;
+@@ -2710,6 +2750,10 @@
+       play_tree_iter_step(playtree_iter,0,0);
+       eof = PT_NEXT_SRC;
+       brk_cmd = 1;
++      ringbuffer_seek_pos = ringbuffer_end_pos = 0.0;
++      if (sh_audio_save) { sh_audio = sh_audio_save; sh_audio_save = NULL; }
++      if (osd_function == OSD_PAUSE) osd_function=OSD_PLAY;
++//      if (osd_function == OSD_PAUSE) goto pause;
+     } break;
+     case MP_CMD_LOADLIST : {
+       play_tree_t* e = parse_playlist_file(cmd->args[0].v.s);
+@@ -3165,6 +3209,18 @@
+ 	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
+     } break;
+ 
++    case MP_CMD_RINGBUFFER_SET: {
++      int type = cmd->args[0].v.i;
++      if (type == 0)
++          ringbuffer_end_pos = cmd->args[1].v.f;
++      else if (type == 1) 
++          ringbuffer_seek_pos = cmd->args[1].v.f;
++      else
++          fprintf(stderr, "@@@ unknown RINGBUFFER_SET cmd=%d\n", type);
++//      fprintf(stderr, "Ringbuffer results (cmd %d): end_pos=%f seek_pos=%f\n", type, ringbuffer_end_pos, ringbuffer_seek_pos);
++      if (osd_function == OSD_PAUSE) goto pause;
++    } break;
++
+ #ifdef USE_DVDNAV
+     case MP_CMD_DVDNAV_EVENT: {
+       dvdnav_priv_t * dvdnav_priv = (dvdnav_priv_t*)(stream->priv);
+--- main.orig/Makefile	2004-08-12 08:36:07.000000000 -0400
++++ main/Makefile	2004-08-14 14:04:04.718548312 -0400
+@@ -32,7 +32,7 @@
+ 
+ VO_LIBS = $(AA_LIB) $(X_LIB) $(SDL_LIB) $(GGI_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(CACA_LIB)
+ AO_LIBS = $(ARTS_LIB) $(ESD_LIB) $(JACK_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
+-CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(THEORA_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(DECORE_LIB) $(XVID_LIB) $(DTS_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB)
++CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(THEORA_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(DECORE_LIB) $(XVID_LIB) $(DTS_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB) -lrt
+ COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(DVDREAD_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB) $(FONTCONFIG_LIB) $(ENCA_LIB)
+ 
+ CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) $(X11_INC) $(FRIBIDI_INC) $(DVB_INC) $(XVID_INC) $(FONTCONFIG_INC) $(CACA_INC) # -Wall
+--- main.orig/libmpcodecs/vf.c	2004-05-31 11:07:58.000000000 -0400
++++ main/libmpcodecs/vf.c	2004-08-14 14:03:55.472953856 -0400
+@@ -23,6 +23,7 @@
+ extern vf_info_t vf_info_rectangle;
+ #ifndef HAVE_NO_POSIX_SELECT
+ extern vf_info_t vf_info_bmovl;
++extern vf_info_t vf_info_bmovl2;
+ #endif
+ extern vf_info_t vf_info_crop;
+ extern vf_info_t vf_info_expand;
+@@ -97,6 +98,7 @@
+     &vf_info_rectangle,
+ #ifndef HAVE_NO_POSIX_SELECT
+     &vf_info_bmovl,
++    &vf_info_bmovl2,
+ #endif
+     &vf_info_crop,
+     &vf_info_expand,
+--- main.orig/libmpcodecs/Makefile	2004-07-15 16:36:04.000000000 -0400
++++ main/libmpcodecs/Makefile	2004-08-14 14:03:55.473953704 -0400
+@@ -14,7 +14,7 @@
+ VIDEO_SRCS_OPT=vd_realvid.c vd_ffmpeg.c vd_dshow.c vd_dmo.c vd_vfw.c vd_vfwex.c vd_odivx.c vd_divx4.c vd_zrmjpeg.c vd_xanim.c vd_xvid.c vd_xvid4.c vd_libdv.c vd_qtvideo.c vd_theora.c
+ VIDEO_SRCS=dec_video.c vd.c $(VIDEO_SRCS_NAT) $(VIDEO_SRCS_LIB) $(VIDEO_SRCS_OPT)
+ 
+-VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_scale.c vf_format.c vf_noformat.c vf_yuy2.c vf_flip.c vf_rgb2bgr.c vf_rotate.c vf_mirror.c vf_palette.c vf_lavc.c vf_dvbscale.c vf_cropdetect.c vf_test.c vf_noise.c vf_yvu9.c vf_rectangle.c vf_lavcdeint.c vf_eq.c vf_eq2.c vf_halfpack.c vf_dint.c vf_1bpp.c vf_bmovl.c vf_2xsai.c vf_unsharp.c vf_swapuv.c vf_il.c vf_boxblur.c vf_sab.c vf_smartblur.c vf_perspective.c vf_down3dright.c vf_field.c vf_denoise3d.c vf_hqdn3d.c vf_detc.c vf_telecine.c vf_tfields.c vf_ivtc.c vf_ilpack.c vf_dsize.c vf_decimate.c vf_softpulldown.c vf_tinterlace.c vf_pullup.c pullup.c vf_framestep.c vf_tile.c vf_delogo.c vf_fil.c vf_hue.c vf_spp.c vf_yuvcsp.c vf_filmdint.c vf_kerndeint.c vf_rgbtest.c vf_qp.c vf_phase.c vf_divtc.c vf_harddup.c vf_softskip.c
++VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_scale.c vf_format.c vf_noformat.c vf_yuy2.c vf_flip.c vf_rgb2bgr.c vf_rotate.c vf_mirror.c vf_palette.c vf_lavc.c vf_dvbscale.c vf_cropdetect.c vf_test.c vf_noise.c vf_yvu9.c vf_rectangle.c vf_lavcdeint.c vf_eq.c vf_eq2.c vf_halfpack.c vf_dint.c vf_1bpp.c vf_bmovl.c vf_bmovl2.c vf_2xsai.c vf_unsharp.c vf_swapuv.c vf_il.c vf_boxblur.c vf_sab.c vf_smartblur.c vf_perspective.c vf_down3dright.c vf_field.c vf_denoise3d.c vf_hqdn3d.c vf_detc.c vf_telecine.c vf_tfields.c vf_ivtc.c vf_ilpack.c vf_dsize.c vf_decimate.c vf_softpulldown.c vf_tinterlace.c vf_pullup.c pullup.c vf_framestep.c vf_tile.c vf_delogo.c vf_fil.c vf_hue.c vf_spp.c vf_yuvcsp.c vf_filmdint.c vf_kerndeint.c vf_rgbtest.c vf_qp.c vf_phase.c vf_divtc.c vf_harddup.c vf_softskip.c
+ ifeq ($(HAVE_FFPOSTPROCESS),yes)
+ VFILTER_SRCS += vf_pp.c
+ endif
+--- main.orig/libvo/video_out.c	2004-07-29 10:59:00.000000000 -0400
++++ main/libvo/video_out.c	2004-08-14 14:03:55.473953704 -0400
+@@ -87,6 +87,7 @@
+ extern vo_functions_t video_out_aa;
+ extern vo_functions_t video_out_caca;
+ extern vo_functions_t video_out_mpegpes;
++extern vo_functions_t video_out_bmovl2;
+ extern vo_functions_t video_out_yuv4mpeg;
+ #ifdef HAVE_DIRECTX
+ extern vo_functions_t video_out_directx;
+@@ -218,6 +219,7 @@
+         &video_out_pgm,
+         &video_out_md5,
+ 	&video_out_mpegpes,
++	&video_out_bmovl2,
+ 	&video_out_yuv4mpeg,
+ #ifdef HAVE_VESA
+ 	&video_out_vesa,
+--- main.orig/libvo/vo_bmovl2.c	1969-12-31 19:00:00.000000000 -0500
++++ main/libvo/vo_bmovl2.c	2004-08-14 14:03:55.474953552 -0400
+@@ -0,0 +1,179 @@
++#include "config.h"
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/mman.h>
++#include <fcntl.h>
++#include <unistd.h>
++
++#include "mp_msg.h"
++
++#include "config.h"
++#include "video_out.h"
++#include "video_out_internal.h"
++#include <linux/ioctl.h>
++
++static vo_info_t info = 
++{
++	"bmovl2 protocol",
++	"bmovl2",
++	"Jason Tackaberry",
++	""
++};
++
++static int bmovl2_fd, shm_fd;
++unsigned char *imgbuf;
++static mp_image_t *last_mpi = 0;
++
++LIBVO_EXTERN (bmovl2)
++
++static int int_pause;
++static uint32_t draw_image(mp_image_t *mpi);
++
++static uint32_t
++config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
++{
++	printf("config %d,%d %d,%d\n", s_width, s_height, width, height);
++	return 0;
++}
++
++static uint32_t preinit(const char *arg){
++	if (!arg || !strstr(arg, "fifo=")) {
++		printf("Specify fifo, eg: -vo bmovl2:fifo=/tmp/mplayer.fifo\n");
++		exit(1);
++	}
++	char *fifo = arg + 5;
++	bmovl2_fd = open(fifo, O_WRONLY);
++//	fcntl(bmovl2_fd, F_SETFL, O_NONBLOCK);
++	printf("preinit %s %d\n", fifo, bmovl2_fd);
++    return 0;
++}
++
++
++static void draw_osd(void)
++{
++//	printf("draw_osd\n");
++}
++
++static uint32_t draw_frame(uint8_t * src[])
++{
++	printf("draw_frame\n");
++    return 0;
++}
++
++static void flip_page (void)
++{
++//	printf("flip_page\n");
++}
++
++static void draw_last_frame (void)
++{
++	if (last_mpi != 0)
++		draw_image(last_mpi);
++}
++
++static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,int y0)
++{
++//	printf("draw_slice\n");
++    return 0;
++}
++
++
++static uint32_t
++query_format(uint32_t format)
++{
++	printf("query_format\n");
++    if(format==IMGFMT_YV12) return VFCAP_CSP_SUPPORTED;
++    return 0;
++}
++
++static void
++uninit(void)
++{
++	char cmd[100];
++	printf("uninit\n");
++	sprintf(cmd, "ENDATOM\nDELETE mpimg\n");
++	write(bmovl2_fd, cmd, strlen(cmd));
++	fsync(bmovl2_fd);
++	close(bmovl2_fd);
++}
++
++
++static void check_events(void)
++{
++//	printf("check_events\n");
++}
++
++
++static uint32_t draw_image(mp_image_t *mpi)
++{
++	int w = mpi->stride[0], h = mpi->h;
++	int size = w * h + (w * h / 4 * 2) + 1, first = 0;
++	unsigned char *buf, cmd[100], shm_id[100];
++
++	static int _ctr=0;
++
++	last_mpi = mpi;
++	sprintf(shm_id, "mpimg");
++//	sprintf(shm_id, "mpimg%d", _ctr++);
++//	if (_ctr == 10) _ctr=0;
++
++//	printf("draw_image %d %d %d\n",  w, h, size);
++	if (shm_fd == 0) {
++		shm_fd = shm_open(shm_id, O_RDWR | O_CREAT, 0777);
++		if (shm_fd == -1) {
++			printf("SHMOPEN FAIL!\n");
++			return -1;
++		}
++		ftruncate(shm_fd, size);
++		imgbuf = mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
++		fprintf(stderr, "@@@ open shmem %s\n", shm_id);
++		first = 1;
++	}
++	if (!first) write(bmovl2_fd, "ATOM\n", 5);
++
++	imgbuf[size-1] = 24;
++	memcpy(&imgbuf[0], mpi->planes[0], w * h);
++	memcpy(&imgbuf[0 + w * h], mpi->planes[1], w * h / 4);
++	memcpy(&imgbuf[0 + w * h + (w * h / 4)], mpi->planes[2], w * h / 4);
++	if (first) {
++		sprintf(cmd, "RAWIMG mpimg YV12 %d %d 0 %s 1\nALPHA mping 256\n", w, h, shm_id);
++		if (write(bmovl2_fd, cmd, strlen(cmd)) <= 0) {
++			printf("WRITE failed!\n");
++		}
++	}
++	else write(bmovl2_fd, "ENDATOM\n", 9);
++	while (imgbuf[size-1] != 42) {
++//		printf("control: %d\n", imgbuf[size-1]);
++		usec_sleep(1);
++	}
++
++//	close(shm_fd);
++//	munmap(imgbuf, size);
++//	shm_unlink("mpimg");
++}
++
++static uint32_t control(uint32_t request, void *data, ...)
++{
++  switch (request) {
++  
++  case VOCTRL_DUPLICATE_FRAME:
++  {
++    // flip_page();
++    draw_last_frame();
++    return VO_TRUE;
++  }
++
++	case VOCTRL_DRAW_IMAGE:
++		return draw_image(data);
++
++  case VOCTRL_QUERY_FORMAT:
++    return query_format(*((uint32_t*)data));
++  }
++  return VO_NOTIMPL;
++}
++
++// vim: ts=4
+--- main.orig/libvo/Makefile	2004-06-24 09:54:08.000000000 -0400
++++ main/libvo/Makefile	2004-08-14 14:03:55.474953552 -0400
+@@ -3,7 +3,7 @@
+ 
+ LIBNAME = libvo.a
+ 
+-SRCS=geometry.c aspect.c aclib.c osd.c font_load.c gtf.c spuenc.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c vo_yuv4mpeg.c $(OPTIONAL_SRCS) sub.c font_load_ft.c
++SRCS=geometry.c aspect.c aclib.c vo_bmovl2.c osd.c font_load.c gtf.c spuenc.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c vo_yuv4mpeg.c $(OPTIONAL_SRCS) sub.c font_load_ft.c
+ OBJS=$(SRCS:.c=.o)
+ 
+ ifeq ($(VIDIX),yes)
+--- main.orig/DOCS/tech/vf_bmovl2.txt	1969-12-31 19:00:00.000000000 -0500
++++ main/DOCS/tech/vf_bmovl2.txt	2004-08-14 14:03:55.475953400 -0400
+@@ -0,0 +1,174 @@
++vf_bmovl2 - BitMap OVerLay Video Filter -- version 2
++====================================================
++
++Introduction
++------------
++
++bmovl2 is an MMX-optimized filter that allows you to feed any number of
++images (bitmaps) to MPlayer via a fifo, and instruct MPlayer how to
++render these images over top the video window.  Each image sits on its
++own layer, which you may manipulate using simple commands, such as
++moving the image on the layer, changing the layer's z-index, toggling
++visibility, or adjusting the layer's alpha value.
++
++This filter takes one argument: the filename of the fifo from which
++to read commands.  For example:
++
++	mplayer video.avi -vf bmovl2=/tmp/mplayer.fifo
++
++Each layer is referenced by an arbitrary string identifier of up to 100
++characters.  Images are sent to MPlayer via the fifo with the designated
++identifer and placed on a new layer in the foreground.  Subsequent
++commands to manipulate layers take the layer's id as an argument.
++
++There is a one-to-one mapping between images and layers.  You may
++change the order (z-index) of layers, effectively moving an image in 
++front of or behind another.  You may chain bmovl2 filters together.
++Instances of bmovl2 filters are independent, therefore layers of
++one instance will always be higher (over top) layers of previous
++instances in the filter chain.
++
++bmovl2 allows you to group multiple commands into a single atomic
++operation, which are guaranteed to be evaluated and executed before
++the next frame.  This allows you to smoothly perform transition
++effects, such as a window sliding across the screen and fading in
++or out.
++
++bmovl2 continues to read from the fifo even when the movie is paused.
++This allows for an externally controlled menu system that is accessible
++in MPlayer at all times.
++
++
++Command Protocol
++----------------
++
++The protocol used to control bmovl2 via the fifo is fairly straight-
++forward and defined below.  Each command specification takes the form:
++
++	COMMAND arg1 arg2 ...
++
++Where COMMAND is the case-sensitive name of the command, followed by
++its arguments, followed by single new-line (\n).  Each argument is 
++separated by a single space, and all arguments for a given command 
++are mandatory.  Arguments are also case-sensitive.
++
++The commands are:
++
++RAWIMG id format w h reset shmem_id
++   - Stores an image in a new layer with the given id.  Format can be
++     any combination of either RGBA or RGB.  For example, these are
++     all valid formats: RGBA, RBGA, ARGB, ABGR, RGB, GBR, etc.  Format
++     may also be YV12A, which specifies a planar YUV bitmap with an
++     8bpp alpha plane.  w and h are the width and height of the image.
++     reset specifies whether or not to reset the other data associated
++     with this layer id if a layer with this id already exists.  These
++     values are: x and y coordinates, alpha level, visibility, and
++     z-index.  If reset is 1, these values are reset, otherwise they
++     are unchanged.  If shmem_id is non-zero, it specifies a shared
++     memory object name from which to read the image data.  (The
++     shared memory object is opened with shm_open and mapped with
++     mmap.)  
++   - New layers are initialized with these defaults: visible, located at
++     coordinates (0,0), full alpha (255), and zindex of 0.
++   - This command is followed by w*h*bpp bytes of data on the fifo
++     unless shmem_id is non-zero.   If format is a combination of
++     letters RGB, then bpp is 3; if format is a combination of RGBA or
++     it is YV12A, bpp is 4.  If shmem_id is non-zero, do not send the
++     image data over the fifo.  bmovl2 will attempt to open the shared
++     memory object specified by shmem_id and read the data from there.
++     bmovl2 will unlink the shared memory object once it has been
++     read.
++   - bmovl2 interally stores all bitmaps as YV12A (planar 4:2:0
++     plus 8bpp alpha channel).  When sending a large amount of
++     RGB data to bmovl2 between video frames (either as large bitmaps
++     or several bitmaps), there may be a visible lag depending on
++     the speed of the processor.  Sending the data was YV12A will
++     improve responsiveness, and sending bmovl2 YV12A data via
++     mmap is about as good as it gets.
++
++VISIBLE id visibility
++   - Sets visibility of the specified layer referenced by id.  Visibility 
++     is 0 to hide, or 1 to show.
++
++MOVE id x y
++   - Move the layer with id to coordinates x, y.  Coordinates can
++     be negative, and result in part of the image being moved off
++     screen.
++
++ALPHA id alpha
++   - Sets the transparency of the layer to alpha, where 0 <= alpha <=
++     256, 0 being fully transparent, 255 being fully opaque, and 256
++     disables all alpha blending.  (When alpha is 255, the alpha
++     channel if the bitmap is still blended, but when it is 256, the
++     alpha channel is ignored and can therefore be blitted faster to
++     the video buffer.) This value is multiplied with the alpha
++     channel of each individual pixel in the image.  So if a pixel has
++     an alpha of 100 and the layer has an alpha of 128 (as set by this
++     command), the resulting pixel will have an alpha of 50.
++   - Specifying an alpha of 0 is functionally equivalent to setting
++     its visibility to 0, except that toggling visibility will
++     preserve the layer's alpha level.
++   - If you have a rectangular image with a fully opaque alpha
++     channel (a background image, for example), setting its alpha
++     to 256 will improve performance because the alpha blending
++     computations are bypassed, while appearing the same as an alpha 
++     of 255.
++
++DELETE id
++   - Delete the layer referenced by id and free all memory allocated by
++     the image on that layer.
++
++ZINDEX id zindex
++   - Sets the z-index of the specified layer.  The z-index is an
++     arbitrary integer.  The lower the z-index, the closer to the
++     background (i.e. movie) the layer is displayed.  Z-index can be
++     negative, so a z-index of -1 will always appear underneath new
++     layers.  New layers are initialized with a z-index of 0.
++
++ATOM
++   - Indicates that the operations that follow until an ENDATOM command
++     is reached are atomic -- that is, they will be all be
++     evaluated before the next frame is drawn.  This allows you to, for
++     example, move a layer to a new position and change its alpha
++     channel in between frames.  Mplayer waits until it receives
++     ENDATOM, so make sure there is little delay between ATOM and
++     ENDATOM.  (That is, it must be less than 1/fps of a second where
++     fps is the frame rate of the video.  This of course ignores
++     the time MPlayer requires to decode and render the frame.)
++
++ENDATOM
++   - End the list of operations and render the frame (or more
++     accurately, pass control to the next video filter).
++
++
++Example
++-------
++
++Here is a simple example in Python that uses the Python Imaging Library 
++(PIL, available at http://www.pythonware.com/products/pil/).
++
++Assume you have created a fifo in /tmp/mplayer.fifo, and have called
++MPlayer like so:
++
++	mplayer movie.avi -vf bmovl2=/tmp/mplayer.fifo
++
++This code will load the image specified on the command line, and send it
++to MPlayer over the fifo, causing it to render at coordinates (50,50)
++with an overall alpha value of 50% (or 128).  Hit the enter key, and the
++image (with the id "foobar") will get relocated to (200,200).
++
++   import sys, Image, os
++
++   fifo = os.open("/tmp/mplayer.fifo", os.O_RDWR, os.O_NONBLOCK)
++   img = Image.open(sys.argv[1])
++   data = "ATOM\n"
++   data += "RAWIMG foobar %s %d %d 1 0\n" % (img.mode, img.size[0], img.size[1])
++   data += img.tostring()
++   data += "MOVE foobar 50 50\n"
++   data += "ALPHA foobar 128\n"
++   data += "ENDATOM\n"
++   os.write(fifo, data)
++
++   print "Hit enter, and the image will move to (200,200)"
++   sys.stdin.readline()
++   os.write(fifo, "MOVE foobar 200 200\n")
+--- main.orig/DOCS/man/en/mplayer.1	2004-08-14 13:06:29.000000000 -0400
++++ main/DOCS/man/en/mplayer.1	2004-08-14 14:03:55.480952640 -0400
+@@ -3989,6 +3989,14 @@
+ .RE
+ .PD 1
+ .TP
++.B bmovl2=<fifo>
++bmovl2 is an MMX-optimized filter that allows you to feed any number of
++images (bitmaps) to MPlayer via a fifo, and instruct MPlayer how to render
++these images over top the video window in real-time.
++
++For information about the command protocol, which is an enhancement of the
++original bmovl, read DOCS/tech/vf_bmovl2.txt
++.TP
+ .B framestep=I|[i]step
+ Renders only every nth frame or every Intra (key) frame.
+ .sp 1
+--- main.orig/input/input.h	2004-07-17 08:47:12.000000000 -0400
++++ main/input/input.h	2004-08-14 14:03:55.480952640 -0400
+@@ -55,6 +55,10 @@
+ #define MP_CMD_VO_ONTOP 51
+ #define MP_CMD_SUB_SELECT 52
+ 
++#define MP_CMD_RINGBUFFER_SET 100
++#define MP_CMD_MOVE 101
++#define MP_CMD_PP 102
++
+ #define MP_CMD_GUI_EVENTS       5000
+ #define MP_CMD_GUI_LOADFILE     5001
+ #define MP_CMD_GUI_LOADSUBTITLE 5002
+--- main.orig/input/input.c	2004-08-03 08:21:14.000000000 -0400
++++ main/input/input.c	2004-08-14 14:03:55.481952488 -0400
+@@ -81,6 +81,7 @@
+   { MP_CMD_SUB_SELECT, "sub_select", 0, { {-1,{0}} } },
+   { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
+   { MP_CMD_GET_TIME_LENGTH, "get_time_length", 0, { {-1,{0}} } },
++  { MP_CMD_RINGBUFFER_SET, "ringbuffer_set",2,  { { MP_CMD_ARG_INT ,{0}}, {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
+ #ifdef USE_TV
+   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
+   { MP_CMD_TV_STEP_NORM, "tv_step_norm",0, { {-1,{0}} }  },
+@@ -133,6 +134,8 @@
+  
+   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", 0, { {-1,{0}} } },
+   { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", 0, { {-1,{0}} } },
++  { MP_CMD_MOVE, "move", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
++  { MP_CMD_PP, "pp", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
+   
+   { 0, NULL, 0, {} }
+ };
+--- main.orig/libmpdemux/demux_mpg.c	2004-08-07 10:20:28.000000000 -0400
++++ main/libmpdemux/demux_mpg.c	2004-08-14 14:03:55.483952184 -0400
+@@ -17,6 +17,8 @@
+ //#define MAX_PS_PACKETSIZE 2048
+ #define MAX_PS_PACKETSIZE (224*1024)
+ 
++float ringbuffer_end_pos = 0.0;
++float ringbuffer_seek_pos = 0.0;
+ static int mpeg_pts_error=0;
+ 
+ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
+@@ -340,10 +342,24 @@
+     }
+ #endif
+   }
++    if (demux->video->pts >= ringbuffer_end_pos - 0.3 && demux->video->pts <= ringbuffer_end_pos && ringbuffer_end_pos != 0) { 
++//	fprintf(stderr, "RINGBUFFER: pos is at end of buffer, sleeping (endpos=%f, pts=%f, ret=%d).\n", ringbuffer_end_pos, demux->video->pts, ret);
++	demux->stream->eof = 0;
++	usec_sleep(1000000);
++	ringbuffer_end_pos += 1;
++	ret=0;
++    }
+ } while(ret!=1);
+   mp_dbg(MSGT_DEMUX,MSGL_DBG2,"demux: %d bad bytes skipped\n",skipped);
+   if(demux->stream->eof){
+     mp_msg(MSGT_DEMUX,MSGL_V,"MPEG Stream reached EOF\n");
++    if (ringbuffer_end_pos > demux->video->pts) {
++//    if (ringbuffer_end_pos != 0) {
++//            fprintf(stderr, "RINGBUFFER: buffer has wrapped, resetting stream (endpos=%f, pts=%f)\n", ringbuffer_end_pos, demux->video->pts);
++	    stream_seek(demux->stream, 0);
++	    stream_reset(demux->stream);
++            return 1;
++    }
+     return 0;
+   }
+   return 1;
+@@ -377,11 +393,17 @@
+ 	    if(newpos<demuxer->movi_start) newpos=demuxer->movi_start;
+ 	}
+ 
++        if (ringbuffer_seek_pos != -1) {
++	    newpos = (off_t)ringbuffer_seek_pos;
++            ringbuffer_seek_pos = -1;
++        }
++	
+ #ifdef _LARGEFILE_SOURCE
+         newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */
+ #else
+         newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
+ #endif
++
+         stream_seek(demuxer->stream,newpos);
+ 
+         // re-sync video:
+@@ -407,6 +429,11 @@
+           if(i==0x1B3 || i==0x1B8) break; // found it!
+           if(!i || !skip_video_packet(d_video)) break; // EOF?
+         }
++        if (ringbuffer_end_pos != 0) {
++            // FIXME: make this not suck.
++            // Output seek results right away for quicker user feedback.
++            fprintf(stderr, "SEEK RESULTS: requested=%f, actual=%f (audio %f)\n", rel_seek_secs, d_video->pts, d_audio->pts);
++        }
+ }
+ 
+ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
+--- main.orig/libmpdemux/demux_ts.c	2004-06-18 16:02:05.000000000 -0400
++++ main/libmpdemux/demux_ts.c	2004-08-14 14:03:55.484952032 -0400
+@@ -54,6 +54,8 @@
+ int ts_keep_broken=0;
+ off_t ts_probe = TS_MAX_PROBE_SIZE;
+ extern char *dvdsub_lang, *audio_lang;	//for -alang
++extern float ringbuffer_end_pos, ringbuffer_seek_pos;
++
+ 
+ typedef enum
+ {
+@@ -1657,6 +1659,15 @@
+ 
+ 		if(stream_eof(stream))
+ 		{
++			if (ringbuffer_end_pos > demuxer->video->pts)
++			{
++				stream_seek(stream, 0);
++				stream_reset(stream);
++				demuxer->filepos = 0;
++				fprintf(stderr, "RINGBUFFER TS: buffer has wrapped, resetting stream (endpos=%f, pts=%f)\n", ringbuffer_end_pos, demuxer->video->pts);
++				return 1; //continue;
++			}
++
+ 			if(! probe)
+ 			{
+ 				ts_dump_streams(priv);
+@@ -2066,6 +2077,12 @@
+ 					continue;
+ 			}
+ 		}
++		if (demuxer->video->pts >= ringbuffer_end_pos - 0.3 && demuxer->video->pts <= ringbuffer_end_pos && ringbuffer_end_pos != 0) 
++		{
++			stream->eof = 0;
++			usec_sleep(1000000);
++			ringbuffer_end_pos += 1;
++		}
+ 	}
+ 
+ 	return 0;
+@@ -2158,6 +2175,11 @@
+ 	if(newpos < demuxer->movi_start)
+   		newpos = demuxer->movi_start;	//begininng of stream
+ 
++	if (ringbuffer_seek_pos != -1) {
++		newpos = (off_t)ringbuffer_seek_pos;
++		ringbuffer_seek_pos = -1;
++	}
++
+ #ifdef _LARGEFILE_SOURCE
+ 	newpos &= ~((long long) (STREAM_BUFFER_SIZE - 1));  /* sector boundary */
+ #else
+@@ -2203,6 +2225,11 @@
+ 
+ 		if(!i || !skip_video_packet(d_video)) break; // EOF?
+ 	}
++	if (ringbuffer_end_pos != 0) {
++		// Output seek results right away for quicker user feedback.
++		fprintf(stderr, "SEEK RESULTS: (TS) requested=%f, actual=%f (audio %f)\n", rel_seek_secs, d_video->pts, d_audio->pts);
++	}
++
+ }
+ 
+ 
+--- main.orig/libmpcodecs/vf_pp.c	2003-08-31 18:18:27.000000000 -0400
++++ main/libmpcodecs/vf_pp.c	2004-08-14 14:03:55.485951880 -0400
+@@ -14,6 +14,7 @@
+ 
+ #include "img_format.h"
+ #include "mp_image.h"
++#include "../input/input.h"
+ #include "vf.h"
+ 
+ #ifdef USE_LIBAVCODEC
+@@ -27,7 +28,7 @@
+ #endif
+ 
+ struct vf_priv_s {
+-    int pp;
++    int pp, active;
+     pp_mode_t *ppMode[PP_QUALITY_MAX+1];
+     void *context;
+     unsigned int outfmt;
+@@ -111,6 +112,8 @@
+ }
+ 
+ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
++    if (!vf->priv->active)
++       return vf_next_put_image(vf,mpi);
+     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
+ 	// no DR, so get a new image! hope we'll get DR buffer:
+ 	vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+@@ -151,6 +154,14 @@
+     0
+ };
+ 
++static int
++cmd_filter(mp_cmd_t* cmd, int paused, struct vf_instance_s * vf)
++{
++	if (cmd->id == MP_CMD_PP)
++		vf->priv->active = cmd->args[0].v.i;
++	return 0;
++}
++
+ static int open(vf_instance_t *vf, char* args){
+     char *endptr, *name;
+     int i;
+@@ -211,6 +222,9 @@
+ #endif
+     
+     vf->priv->pp=PP_QUALITY_MAX;
++    vf->priv->active=1;
++    mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter, vf);
++
+     return 1;
+ }
+ 
+--- main.orig/libmpcodecs/vf_scale.c	2004-05-14 17:08:53.000000000 -0400
++++ main/libmpcodecs/vf_scale.c	2004-08-14 14:03:55.485951880 -0400
+@@ -13,6 +13,7 @@
+ 
+ #include "../libvo/fastmemcpy.h"
+ #include "../postproc/swscale.h"
++#include "../input/input.h"
+ #include "vf_scale.h"
+ 
+ #include "m_option.h"
+@@ -28,6 +29,11 @@
+     unsigned char* palette;
+     int interlaced;
+     int query_format_cache[64];
++
++    // save config parameters for dynamic scaling
++    int cfg_width, cfg_height, cfg_d_width, cfg_d_height, vo_flags;
++    unsigned int  cfg_flags, cfg_outfmt, best;
++
+ } vf_priv_dflt = {
+   -1,-1,
+   0,
+@@ -115,6 +121,13 @@
+ 	mp_msg(MSGT_VFILTER,MSGL_WARN,"SwScale: no supported outfmt found :(\n");
+ 	return 0;
+     }
++
++    if (vf->priv->cfg_width == -1) {
++	fprintf(stderr, "\n\n\n\n*******Initializng\n");
++       vf->priv->cfg_width = width; vf->priv->cfg_height = height;
++       vf->priv->cfg_d_width = d_width; vf->priv->cfg_d_height = d_height;
++       vf->priv->cfg_flags = flags; vf->priv->cfg_outfmt = outfmt;
++    }
+     
+     vo_flags=vf->next->query_format(vf->next,best);
+     
+@@ -421,6 +434,19 @@
+     free(vf->priv);
+ }
+ 
++static int
++cmd_filter(mp_cmd_t* cmd, int paused, struct vf_instance_s * vf)
++{
++	if (cmd->id == MP_CMD_MOVE && cmd->nargs == 4) {
++		struct vf_priv_s *p = vf->priv;
++
++		p->w = cmd->args[2].v.i;
++		p->h = cmd->args[3].v.i;
++		config(vf, p->cfg_width, p->cfg_height, p->cfg_d_width, p->cfg_d_height, p->cfg_flags, p->cfg_outfmt);
++	}
++	return 0;
++}
++
+ static int open(vf_instance_t *vf, char* args){
+     vf->config=config;
+     vf->start_slice=start_slice;
+@@ -440,6 +466,7 @@
+     vf->priv->param=0;
+     vf->priv->palette=NULL;
+     } // if(!vf->priv)
++    vf->priv->cfg_width=-1;
+     if(args) sscanf(args, "%d:%d:%d:%d",
+     &vf->priv->w,
+     &vf->priv->h,
+@@ -448,6 +475,7 @@
+     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
+     vf->priv->w,
+     vf->priv->h);
++    mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter, vf);
+     
+     return 1;
+ }
+--- main.orig/libmpcodecs/vf_expand.c	2003-06-19 14:26:13.000000000 -0400
++++ main/libmpcodecs/vf_expand.c	2004-08-14 14:03:55.486951728 -0400
+@@ -9,6 +9,7 @@
+ 
+ #include "img_format.h"
+ #include "mp_image.h"
++#include "../input/input.h"
+ #include "vf.h"
+ 
+ #include "../libvo/fastmemcpy.h"
+@@ -28,6 +29,10 @@
+     int exp_x,exp_y;
+     int osd;
+     unsigned char* fb_ptr;
++
++    // save config parameters for dynamic reposition
++    int cfg_width, cfg_height, cfg_d_width, cfg_d_height;
++    unsigned int  cfg_flags, cfg_outfmt;
+ } vf_priv_dflt = {
+   -1,-1,
+   -1,-1,
+@@ -161,6 +166,11 @@
+         int width, int height, int d_width, int d_height,
+ 	unsigned int flags, unsigned int outfmt){
+     if (outfmt == IMGFMT_IF09) return 0;
++
++    // save config parameters for dynamic reposition
++    vf->priv->cfg_width = width; vf->priv->cfg_height = height;
++    vf->priv->cfg_d_width = d_width; vf->priv->cfg_d_height = d_height;
++    vf->priv->cfg_flags = flags; vf->priv->cfg_outfmt = outfmt;
+     // calculate the missing parameters:
+ #if 0
+     if(vf->priv->exp_w<width) vf->priv->exp_w=width;
+@@ -327,6 +337,22 @@
+     return vf_next_control(vf,request,data);
+ }
+ 
++static int
++cmd_filter(mp_cmd_t* cmd, int paused, struct vf_instance_s * vf)
++{
++        if (cmd->id == MP_CMD_MOVE) {
++                struct vf_priv_s *p = vf->priv;
++                                                                                                                                   
++                p->exp_x = cmd->args[0].v.i;
++                p->exp_y = cmd->args[1].v.i;
++                config(vf, p->cfg_width, p->cfg_height, p->cfg_d_width, p->cfg_d_height, p->cfg_flags, p->cfg_outfmt);
++                fprintf(stderr, "vf_expand (%x): cmd id=%d, x=%d, y=%d\n", vf, cmd->id, p->exp_x, p->exp_y);
++                                                                                                                                   
++        }
++        return 0;
++}
++
++
+ static int open(vf_instance_t *vf, char* args){
+     vf->config=config;
+     vf->control=control;
+@@ -355,6 +381,7 @@
+     vf->priv->exp_x,
+     vf->priv->exp_y,
+     vf->priv->osd);
++    mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter, vf);
+     return 1;
+ }
+ 
