@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2004/01/06 19:27:03  dischi
+# use new mtime function to avoid crash
+#
 # Revision 1.87  2004/01/05 15:21:04  outlyer
 # I am seeing OSErrors not IOErrors for this, so we can just watch for both
 #
@@ -841,7 +844,6 @@ class Dirwatcher(plugin.DaemonPlugin):
         self.menuw         = None
         self.item_menu     = None
         self.dir           = None
-        self.overlay       = None
         self.files         = None
         self.poll_interval = 100
 
@@ -853,13 +855,11 @@ class Dirwatcher(plugin.DaemonPlugin):
         self.item      = item
         self.item_menu = item_menu
         self.dir       = dir
-        self.overlay   = vfs.getoverlay(dir)
         self.files     = files
         try:
             self.last_time = item.__dirwatcher_last_time__
         except AttributeError:
-            self.last_time = max(os.stat(self.dir)[stat.ST_MTIME],
-                                 os.stat(self.overlay)[stat.ST_MTIME])
+            self.last_time = vfs.mtime(self.dir)
             self.item.__dirwatcher_last_time__ = self.last_time
         
 
@@ -868,8 +868,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             return
         try:
             if config.DIRECTORY_USE_STAT_FOR_CHANGES and \
-                   os.stat(self.dir)[stat.ST_MTIME] <= self.last_time and \
-                   os.stat(self.overlay)[stat.ST_MTIME] <= self.last_time:
+                   vfs.mtime(self.dir) <= self.last_time:
                 return True
         except (OSError, IOError):
             # the directory is gone
@@ -907,8 +906,7 @@ class Dirwatcher(plugin.DaemonPlugin):
         if config.DIRECTORY_USE_STAT_FOR_CHANGES or new_files or del_files:
             _debug_('directory has changed')
             self.item.build(menuw=self.menuw, arg='update')
-            self.last_time = max(os.stat(self.dir)[stat.ST_MTIME],
-                                 os.stat(self.overlay)[stat.ST_MTIME])
+            self.last_time = vfs.mtime(self.dir)
             self.item.__dirwatcher_last_time__ = self.last_time
                     
 
