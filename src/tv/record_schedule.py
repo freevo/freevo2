@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/20 21:05:06  outlyer
+# Use icons instead of printing "Recording now" since that takes up a lot of
+# space and can't be seen on shows with titles
+#
 # Revision 1.4  2003/06/02 21:29:21  outlyer
 # Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
 # "Recorded Shows" which makes a lot more sense then where it was before, which was
@@ -179,14 +183,16 @@ class ScheduleEdit(Item):
     	    line = line[ line.rfind('/') +1: line.find('.avi')]
             #line = line[ line.rfind('/') +1: line.find('.mpg')]
     	    line = line.replace('_',' ')
-    
+            line = line.replace(',','\t\t ')
+   
+            recicon = 'skins/icons/blurr/recordinglater.png'
             #skip multiple occurences of the same thing
             if oldline != line and line != '':
                 itemline = line
                 if recordingflag:
-    	            itemline += ' (currently recording)'
+    	            recicon = 'skins/icons/blurr/recordingnow.png'
     	        if arg == 0:                
-    	            items += [ menu.MenuItem(itemline)]
+    	            items += [ menu.MenuItem(itemline, icon=recicon)]
     	        elif arg == 1:
     	            items += [ menu.MenuItem(itemline, self.delete_selection,itemline)]
         fd.close()
