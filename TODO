@@ -4,6 +4,13 @@ Todo list for Freevo
 $Id$
 
 
+Before next release:
+--------------------
+o change the skin XML file DTD
+o check for nice/mplayer/jpegtran in ./configure
+
+
+
 Short-term
 ----------
 o Better movie XML file mplayer options
