@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/09 16:42:13  outlyer
+# Don't shut down the display if using mga since it breaks the framebuffer
+# config. Please retest with x11, I know mga works but I don't have an x11
+# system to use.
+#
+# (Note that none of the changes I made should have any effect on x11, but
+# who knows)
+#
 # Revision 1.5  2003/06/09 16:32:23  outlyer
 # A bugfix and support for mga output via Tvtime.
 #
@@ -187,8 +195,6 @@ class TVTime:
                 
             # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
             # Most of these options are only available in tvtime ver >= 0.9.8
-
-            # config.CONF.display
 
             command = 'tvtime -D %s -k -I %s -n %s -d %s -f %s -c %s' % (config.CONF.display,
                                                                    w,
@@ -436,9 +442,10 @@ class TVTime_Thread(threading.Thread):
                 
             elif self.mode == 'play':
                 # X11 cannot handle two fullscreen windows, so shut down the window.
-                if DEBUG:
-                    print "Stopping Display for tvtime"
-                osd.stopdisplay()			
+                if config.CONF.display == 'x11': 
+                    if DEBUG:
+                        print "Stopping Display for tvtime/x11"
+                    osd.stopdisplay()			
                 if DEBUG:
                     print 'TVTime_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -453,9 +460,11 @@ class TVTime_Thread(threading.Thread):
                 self.app.kill()
 
                 # Ok, we can use the OSD again.
-                osd.restartdisplay()
+                if config.CONF.display == 'x11':
+                    if DEBUG:
+                        print "Display now back online"
+                    osd.restartdisplay()
                 osd.update()
-                print "Display back online"
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
