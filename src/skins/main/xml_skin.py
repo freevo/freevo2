@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/24 19:12:31  gsbarbieri
+# Added:
+#   * support for different icons in main menu (final part)
+#   * BOX_UNDER_ICON, that is, in text listings, if you have an icon you may
+#     set this to 1 so the selection box (<item type="* selected"><rectangle>)
+#     will be under the icon too. Not changed freevo_config.py version
+#     because I still don't know if it should stay there.
+#
 # Revision 1.7  2003/08/24 16:36:25  dischi
 # add support for y=max-... in listing area arrows
 #
@@ -291,6 +299,7 @@ XML_types = {
     'image'    : ('str', 0),    
     'name'     : ('font',  0),
     'visible'  : ('visible', 0),
+    'icon'     : ('str', 0),    
 }
 
 class XML_data:
@@ -523,7 +532,7 @@ class XML_content(XML_data):
                 type = attr_str(subnode, "type", '')
                 if type and not self.types.has_key(type):
                     self.types[type] = XML_data(('font', 'align', 'valign', 'height',
-                                                 'width', 'image'))
+                                                 'width', 'icon' ))
                     self.types[type].rectangle = None
                     self.types[type].cdata = ''
                 if type:

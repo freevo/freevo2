@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/24 19:12:31  gsbarbieri
+# Added:
+#   * support for different icons in main menu (final part)
+#   * BOX_UNDER_ICON, that is, in text listings, if you have an icon you may
+#     set this to 1 so the selection box (<item type="* selected"><rectangle>)
+#     will be under the icon too. Not changed freevo_config.py version
+#     because I still don't know if it should stay there.
+#
 # Revision 1.5  2003/08/24 16:36:25  dischi
 # add support for y=max-... in listing area arrows
 #
@@ -50,14 +58,15 @@ import copy
 
 from area import Skin_Area
 from skin_utils import *
-
+import config
 
 TRUE  = 1
 FALSE = 0
 
+BOX_UNDER_ICON = config.SKIN_BOX_UNDER_ICON
 
 class Listing_Area(Skin_Area):
-    """
+    """88
     this call defines the listing area
     """
 
@@ -249,26 +258,32 @@ class Listing_Area(Skin_Area):
             
         last_tvs = ('', 0)
         all_tvs  = TRUE
-        
-        for choice in menuw.menu_items:
-            if choice == menu.selected:
-                if content.types.has_key( '%s selected' % choice.type ):
-                    val = content.types[ '%s selected' % choice.type ]
-                else:
-                    val = content.types[ 'selected' ]
-            else:
-                if content.types.has_key( choice.type ):
-                    val = content.types[ choice.type ]
-                else:
-                    val = content.types['default']
 
+                
+        for choice in menuw.menu_items:
+            if content.types.has_key( '%s selected' % choice.type ):
+                s_val = content.types[ '%s selected' % choice.type ]
+            else:
+                s_val = content.types[ 'selected' ]
+
+            if content.types.has_key( choice.type ):
+                n_val = content.types[ choice.type ]
+            else:
+                n_val = content.types['default']
+                
+
+            if choice == menu.selected:
+                val = s_val
+            else:
+                val = n_val
+                
             text = choice.name
             if not text:
                 text = "unknown"
 
             type_image = None
-            if hasattr( val, 'image' ):
-                type_image = val.image
+            if hasattr( val, 'icon' ):
+                type_image = val.icon
                 
             if not choice.icon and not type_image:
                 if choice.type == 'playlist':
@@ -283,21 +298,53 @@ class Listing_Area(Skin_Area):
                 y0 = item_y0
                 icon_x = 0
                 image = None
-                if choice.icon:
+                align = val.align or content.align
+                
+                if choice != menu.selected and hasattr( choice, 'outicon' ) and \
+                       choice.outicon:
+                    image = self.load_image(choice.outicon, (vspace-content.spacing,
+                                                          vspace-content.spacing))                    
+                elif choice.icon:
                     image = self.load_image(choice.icon, (vspace-content.spacing,
                                                           vspace-content.spacing))
                 if not image and type_image:
                     image = self.load_image( settings.icon_dir + '/' + type_image,
                                              ( vspace-content.spacing,
                                                vspace-content.spacing ) )
+                x_icon = 0
                 if image:
-                    self.draw_image(image, (x0, y0))
+                    mx = x0
                     icon_x = vspace
+                    x_icon = icon_x
+                    if align == 'right':
+                        # know how many pixels to offset (dammed negative and max+X
+                        # values in (x,y,width) from skin!)
+                        r1 = r2 = None
+                        if s_val.rectangle:
+                            r1 = self.get_item_rectangle(s_val.rectangle,
+                                                         width, s_val.font.h)[2]
+                        if n_val.rectangle:
+                            r2 = self.get_item_rectangle(n_val.rectangle,
+                                                         width, n_val.font.h)[2]
+                        min_rx = 0
+                        max_rw = width
+                        if r1:
+                            min_rx = min( min_rx, r1.x )
+                            max_rw = max( max_rw, r1.width )
+                        if r2:
+                            min_rx = min( min_rx, r2.x )
+                            max_rw = max( max_rw, r2.width )
+
+                        mx = x0 + width + hskip + ( max_rw + min_rx - width ) - icon_x 
+                        x_icon = 0
+                    self.draw_image(image, (mx, y0))
 
                 if val.rectangle:
                     r = self.get_item_rectangle(val.rectangle, width, val.font.h)[2]
-                    self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
-                                      r.width - icon_x, r.height, r)
+                    self.drawroundbox(x0 + hskip + r.x + x_icon - BOX_UNDER_ICON * x_icon,
+                                      y0 + vskip + r.y,
+                                      r.width - icon_x + BOX_UNDER_ICON * icon_x,
+                                      r.height, r)
 
                 # special handling for tv shows
                 if choice.type == 'video' and hasattr(choice,'tv_show') and \
@@ -338,7 +385,7 @@ class Listing_Area(Skin_Area):
                     else:
                         text = '%s %sx' % (sn[0], sn[1])
 
-                self.write_text(text, val.font, content, x=x0 + hskip + icon_x,
+                self.write_text(text, val.font, content, x=x0 + hskip + x_icon,
                                 y=y0 + vskip, width=width-icon_x, height=-1,
                                 align_h=val.align, mode='hard')
 
