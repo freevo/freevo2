@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/10/30 18:46:33  dischi
+# only redraw when needed, fix typo
+#
 # Revision 1.5  2004/10/09 16:21:29  dischi
 # make Progessbar not depend on popup box settings
 #
@@ -71,12 +74,12 @@ class Progressbar(CanvasContainer):
         self.bar_color   = bar_color
         self.bar_bgcolor = bar_bgcolor
         self.radius      = radius
-
         self.bar         = None
         
         rect = Rectangle((0,0), size, bgcolor, border_size, border_color,
                          self.radius)
         self.add_child(rect)
+        self.__last_position = None
         self.__draw()
         
 
@@ -85,15 +88,20 @@ class Progressbar(CanvasContainer):
         if not self.max_value:
             return
 
+        position = min((self.bar_position * 100) / self.max_value, 100)
+        width = ((self.get_size()[0]) * position ) / 100
+
+        if self.__last_position == width:
+            return
+        self.__last_position = width
+
         if self.bar:
             self.remove_child(self.bar)
             
-        position = min((self.bar_position * 100) / self.max_value, 100)
-        width = ((self.get_size()[0]) * position ) / 100
         if width > self.border_size * 2:
             rect = Rectangle((self.border_size,self.border_size),
-                             (width-self.border_size,
-                              self.get_size()[1]-self.border_size),
+                             (width-self.border_size*2,
+                              self.get_size()[1]-self.border_size*2),
                              self.bar_bgcolor, self.bar_size, self.bar_color,
                              self.radius)
             self.add_child(rect)
@@ -112,6 +120,6 @@ class Progressbar(CanvasContainer):
 
 
     def set_bar_position(self, position):
-        self.bar_position = bar_position
+        self.bar_position = position
         self.__draw()
         
