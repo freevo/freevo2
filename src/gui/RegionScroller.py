@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/30 18:19:53  rshortt
+# Adding self to the other GetPopupBoxStyle calls.
+#
 # Revision 1.6  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -113,7 +116,7 @@ class RegionScroller(GUIObject):
         self.skin = skin.get_singleton()
 
         (BLAH, BLAH, BLAH, BLAH,
-         button_default, BLAH) = self.skin.GetPopupBoxStyle()
+         button_default, BLAH) = self.skin.GetPopupBoxStyle(self)
 
         if not self.bd_color: 
             if button_default.rectangle.color:

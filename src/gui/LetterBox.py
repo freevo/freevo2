@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/30 18:19:53  rshortt
+# Adding self to the other GetPopupBoxStyle calls.
+#
 # Revision 1.6  2003/03/30 17:21:17  rshortt
 # New classes: PasswordInputBox, PasswordLetterBox.
 # PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
@@ -131,7 +134,7 @@ class LetterBox(GUIObject):
 
         (BLAH, BLAH, BLAH, BLAH,
          button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle()
+         self.skin.GetPopupBoxStyle(self)
 
         if not self.bg_color:
             if button_default.rectangle.bgcolor:

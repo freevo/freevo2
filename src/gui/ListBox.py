@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/30 18:19:53  rshortt
+# Adding self to the other GetPopupBoxStyle calls.
+#
 # Revision 1.7  2003/03/24 00:37:06  rshortt
 # OptionBox now uses skin properties.
 #
@@ -124,7 +127,7 @@ class ListBox(RegionScroller):
     
         (BLAH, BLAH, BLAH, BLAH,
          button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle()
+         self.skin.GetPopupBoxStyle(self)
     
         # I am commenting a lot of this out until I get alpha
         # transparencies working correctly.

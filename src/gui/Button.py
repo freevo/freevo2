@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/30 18:19:53  rshortt
+# Adding self to the other GetPopupBoxStyle calls.
+#
 # Revision 1.5  2003/03/23 23:19:39  rshortt
 # When selected these objects now use skin properties as well.
 #
@@ -107,7 +110,7 @@ class Button(GUIObject):
 
         (BLAH, BLAH, BLAH, BLAH,
          button_default, button_selected) = \
-         self.skin.GetPopupBoxStyle()
+         self.skin.GetPopupBoxStyle(self)
 
         if not self.bg_color:
             if button_default.rectangle.bgcolor:
