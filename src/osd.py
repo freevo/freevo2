@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.136  2004/02/11 14:23:33  dischi
+# search system for fonts
+#
 # Revision 1.135  2004/02/07 11:50:57  dischi
 # fix geometry calculation for border fonts
 #
@@ -288,43 +291,56 @@ class OSDFont:
             w += self.charsize(c)
         return w
 
+    def __loadfont__(self, filename, ptsize):
+        if os.path.isfile(filename):
+            try:
+                return pygame.font.Font(filename, ptsize)
+            except (RuntimeError, IOError):
+                return None
+        return None
+    
+        
     def __getfont__(self, filename, ptsize):
         ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
 
-        _debug_('Loading font "%s"' % filename,2)
-        try:
-            font = pygame.font.Font(filename, ptsize)
-        except (RuntimeError, IOError):
-            _debug_('Couldnt load font "%s"' % os.path.basename(filename).lower())
-                
-            # Are there any alternate fonts defined?
-            if not 'OSD_FONT_ALIASES' in dir(config):
-                print 'No font aliases defined!'
-                raise # Nope
-                
-            # Ok, see if there is an alternate font to use
+        _debug_('Loading font "%s"' % filename, 2)
+        font   = self.__loadfont__(filename, ptsize)
+        if not font:
+            
+            # search OSD_EXTRA_FONT_PATH for this font
             fontname = os.path.basename(filename).lower()
+            for path in config.OSD_EXTRA_FONT_PATH:
+                fname = os.path.join(path, fontname)
+                font  = self.__loadfont__(fname, ptsize)
+                if font:
+                    break
+                font  = self.__loadfont__(fname.replace('_bold', 'bd'), ptsize)
+                if font:
+                    break
+                
+        if not font:
+            _debug_('Couldnt load font "%s"' % os.path.basename(filename).lower())
+
+            # Ok, see if there is an alternate font to use
             if fontname in config.OSD_FONT_ALIASES:
                 alt_fname = os.path.join(config.FONT_DIR, config.OSD_FONT_ALIASES[fontname])
                 _debug_('trying alternate: %s' % os.path.basename(alt_fname).lower())
-                try:
-                    font = pygame.font.Font(alt_fname, ptsize)
-                except (RuntimeError, IOError):
-                    print 'Couldnt load alternate font "%s"' % alt_fname
-                    raise
-            else:
-                global font_warning
-                if not fontname in font_warning:
-                    print 'WARNING: No alternate found in the alias list!'
-                    print 'Falling back to default font, this may look very ugly'
-                    font_warning.append(fontname)
-                try:
-                    font = pygame.font.Font(config.OSD_DEFAULT_FONTNAME, ptsize)
-                except (RuntimeError, IOError):
-                    print 'Couldnt load font "%s"' % config.OSD_DEFAULT_FONTNAME
-                    raise
-        f = Font(filename, ptsize, font)
-        return f.font
+                font = self.__loadfont__(alt_fname, ptsize)
+
+        if not font:
+            # not good
+            global font_warning
+            if not fontname in font_warning:
+                print 'WARNING: No alternate found in the alias list!'
+                print 'Falling back to default font, this may look very ugly'
+                font_warning.append(fontname)
+            font = self.__loadfont__(config.OSD_DEFAULT_FONTNAME, ptsize)
+
+        if not font:
+            print 'Couldnt load font "%s"' % config.OSD_DEFAULT_FONTNAME
+            raise
+
+        return font
 
         
 
