@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/08/24 19:23:37  dischi
+# more theme updates and design cleanups
+#
 # Revision 1.11  2004/08/24 16:42:42  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -76,8 +79,8 @@ class Window(CanvasContainer):
             y  = self._display_height/2 - height/2
             self.center_on_screen = True
 
-        self.content_layout    = gui.theme.popup.content
-        self.background_layout = gui.theme.popup.background
+        self.content_layout    = gui.get_theme().popup.content
+        self.background_layout = gui.get_theme().popup.background
 
         self.set_size((width, height))
         self.set_pos((x, y))

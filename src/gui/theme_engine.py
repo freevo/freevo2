@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/24 19:23:37  dischi
+# more theme updates and design cleanups
+#
 # Revision 1.1  2004/08/24 16:42:40  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -36,6 +39,8 @@
 #
 # -----------------------------------------------------------------------
 
+# list of functions this module provides
+__all__ = [ 'get_theme', 'set_theme', 'get_font', 'get_image', 'get_icon' ]
 
 # some python stuff
 import os
@@ -48,13 +53,92 @@ import util
 import plugin
 import font
 
-# XML support
-from xml.utils import qp_xml
-
-geometry = (config.CONF.width, config.CONF.height)
-
 
 FXD_FORMAT_VERSION = 2
+
+
+# -------------- Interface for Freevo ---------------------------------------
+
+current_theme = None
+
+def get_theme():
+    """
+    get current fxd theme
+    """
+    return current_theme
+
+
+def set_theme(new):
+    """
+    set current fxd theme
+    """
+    global current_theme
+    if new == current_theme:
+        # new and old theme are the same,
+        # don't do anything
+        return current_theme
+    if isinstance(new, str):
+        # new theme is only a string, load the theme file
+        # based on the current theme
+        _debug_('loading new theme %s', new)
+        filename = new
+        if new and vfs.isfile(vfs.join(new, 'folder.fxd')):
+            new = vfs.abspath(os.path.join(new, 'folder.fxd'))
+        elif new and vfs.isfile(new):
+            new = vfs.abspath(new)
+        theme = copy.copy(current_theme)
+        try:
+            theme.load(new)
+            theme.prepare()
+        except:
+            _debug_('XML file corrupt:', 0)
+            traceback.print_exc()
+            theme = copy.copy(current_theme)
+        theme.filename = new
+        current_theme = theme
+    else:
+        # set the global theme variable
+        current_theme = new
+    # notify other parts of Freevo about the theme change
+    # FIXME: this is a bad piece of code because it imports
+    # event and eventhandler here. We can do it at the beginning
+    # because eventhandler needs gui (bad code style, I know)
+    import eventhandler
+    import event
+    eventhandler.get_singleton().notify(event.Event(event.THEME_CHANGE))
+    # return new theme in case the new one was given to this
+    # function as string and the caller wants the object
+    return current_theme
+
+
+def get_font(name):
+    """
+    Get the font with the given name. If the font is not found,
+    the default font will be returned
+    """
+    return current_theme.get_font(name)
+
+
+def get_image(name):
+    """
+    Get the image filename with the given name. If no image is found
+    this function will return None.
+    """
+    return current_theme.get_image(name)
+
+
+def get_icon(name):
+    """
+    Get the icon filename with the given name. This function will
+    search the icon in the theme icon directory. If no icon is found
+    this function will return None.
+    """
+    return current_theme.get_icon(name)
+
+
+
+
+# -------------- Private classes and functions ------------------------------
 
 #
 # Help functions
@@ -1192,66 +1276,48 @@ class FXDSettings:
 
 
 
-
-
-def load(filename, base=None):
-    """
-    load new settings file, if base is set, inherit from base and
-    add the new settings
-    """
-    if base:
-        _debug_('load additional skin info: %s' % filename)
-        if filename and vfs.isfile(vfs.join(filename, 'folder.fxd')):
-            filename = vfs.abspath(os.path.join(filename, 'folder.fxd'))
-        elif filename and vfs.isfile(filename):
-            filename = vfs.abspath(filename)
-        settings = copy.copy(base)
-        try:
-            settings.load(filename)
-            settings.prepare()
-        except:
-            _debug_('XML file corrupt:', 0)
-            traceback.print_exc()
-            settings = copy.copy(base)
-    else:
-        try:
-            settings = FXDSettings(filename)
-            settings.prepare()
-        except:
-            _debug_('XML file corrupt:', 0)
-            traceback.print_exc()
-            return None
-    settings.filename = filename
-    return settings
-    
-
 def set_base_fxd(name):
     """
-    set the basic skin fxd file and store it
+    Set the basic skin fxd file and store it
     """
     config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
     _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
         
-    # try to find the skin xml file
-    settings = load(name)
-    if not settings:
-        print "skin not found, using fallback skin"
-        settings = load('basic.fxd')
+    try:
+        # try to load the new skin
+        settings = FXDSettings(name)
+    except:
+        # something went wrong, print trace and load the
+        # default skin (basic.fxd). This skin works
+        # (if not, Freevo is broken)
+        traceback.print_exc()
+        _debug_('XML file %s corrupt, using default skin' % name, 0)
+        settings = FXDSettings('basic.fxd')
 
+    # search for personal skin settings additions
+    # (this feature needs more doc outside this file)
     for dir in config.cfgfilepath:
         local_skin = '%s/local_skin.fxd' % dir
         if os.path.isfile(local_skin):
             _debug_('Skin: Add local config %s to skin' % local_skin,2)
             settings.load(local_skin)
             break
+
+    # prepare the skin for usage
     settings.prepare()
     return settings
 
 
-def init():
-    # init basic settings
-    f = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
-    storage = util.read_pickle(f)
+
+def init_module():
+    """
+    On startup, Freevo will search for the theme the user used
+    the last time, loads it and sets 'current_theme' for access
+    from the public functions at the top of this file
+    """
+    global current_theme
+    cachefile = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
+    storage = util.read_pickle(cachefile)
     if storage:
         if not config.SKIN_XML_FILE:
             config.SKIN_XML_FILE = storage['SKIN_XML_FILE']
@@ -1261,7 +1327,10 @@ def init():
         if not config.SKIN_XML_FILE:
             config.SKIN_XML_FILE = config.SKIN_DEFAULT_XML_FILE
         storage = {}
-    # load the fxd file
-    return set_base_fxd(config.SKIN_XML_FILE)
+    # load the fxd file at set current_theme
+    current_theme = set_base_fxd(config.SKIN_XML_FILE)
+    current_theme.filename = config.SKIN_XML_FILE
 
 
+
+init_module()

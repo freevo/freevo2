@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2004/08/24 19:23:36  dischi
+# more theme updates and design cleanups
+#
 # Revision 1.77  2004/08/24 16:42:39  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -178,16 +181,17 @@ class Item:
         self.fxd_file = None
 
         if skin_type:
-            skin_info = gui.theme.mainmenu.items
-            imagedir  = gui.theme.mainmenu.imagedir
+            theme     = gui.get_theme()
+            skin_info = theme.mainmenu.items
+            imagedir  = theme.mainmenu.imagedir
             if skin_info.has_key(skin_type):
                 skin_info  = skin_info[skin_type]
                 self.name  = _(skin_info.name)
                 self.image = skin_info.image
                 if skin_info.icon:
-                    self.icon = os.path.join(gui.theme.icon_dir, skin_info.icon)
+                    self.icon = os.path.join(theme.icon_dir, skin_info.icon)
                 if skin_info.outicon:
-                    self.outicon = os.path.join(gui.theme.icon_dir, skin_info.outicon)
+                    self.outicon = os.path.join(theme.icon_dir, skin_info.outicon)
             if not self.image and imagedir:
                 self.image = util.getimage(os.path.join(imagedir, skin_type))
         

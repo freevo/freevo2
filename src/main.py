@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.142  2004/08/24 19:23:36  dischi
+# more theme updates and design cleanups
+#
 # Revision 1.141  2004/08/24 16:42:39  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -441,7 +444,7 @@ try:
     import gui
     
     # prepare the skin
-    gui.theme.prepare()
+    gui.get_theme().prepare()
 
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'))
@@ -475,7 +478,7 @@ try:
     splash.hide()
     
     # prepare again, now that all plugins are loaded
-    gui.theme.prepare()
+    gui.get_theme().prepare()
 
     # start menu
     MainMenu().getcmd()

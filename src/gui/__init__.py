@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/08/24 19:23:37  dischi
+# more theme updates and design cleanups
+#
 # Revision 1.26  2004/08/24 16:42:40  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -64,6 +67,9 @@ from mevas import CanvasContainer
 # Display engine control module
 import displays
 
+# Image load library
+import imagelib
+
 # The animation module
 import animation
 
@@ -80,7 +86,6 @@ def set_display(name, size):
     set a new output display
     """
     global display
-    print 'kill animation'
     animation.render().killall()
     display = displays.set_display(name, size)
     width   = display.width
@@ -115,64 +120,16 @@ else:
     height  = 0
 
 
+from areas import AreaHandler as _AreaHandler
+
 def AreaHandler(type, area_list):
     """
     return the area object
     """
-    import areas
-    import imagelib
-    return areas.AreaHandler(type, area_list, get_theme, display, imagelib)
+    return _AreaHandler(type, area_list, get_theme, display, imagelib)
 
 
-import theme_engine
-theme = theme_engine.init()
-
-def get_theme():
-    """
-    get current fxd theme
-    """
-    return theme
-
-
-def set_theme(new):
-    """
-    set current fxd theme
-    """
-    global theme
-    if new == theme:
-        # new and old theme are the same,
-        # don't do anything
-        return theme
-    if isinstance(new, str):
-        # new theme is only a string, load the theme file
-        # based on the current theme
-        _debug_('loading new theme %s', new)
-        theme = theme_engine.load(new, theme)
-    else:
-        # set the global theme variable
-        theme = new
-    # notify other parts of Freevo about the theme change
-    # FIXME: this is a bad piece of code because it imports
-    # event and eventhandler here. We can do it at the beginning
-    # because eventhandler needs gui (bad code style, I know)
-    import eventhandler
-    import event
-    eventhandler.get_singleton().notify(event.Event(event.THEME_CHANGE))
-    # return new theme in case the new one was given to this
-    # function as string and the caller wants the object
-    return theme
-
-
-def get_font(name):
-    return theme.get_font(name)
-
-
-def get_image(name):
-    return theme.get_image(name)
-
-
-def get_icon(name):
-    return theme.get_icon(name)
+from theme_engine import *
 
 
 

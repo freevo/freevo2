@@ -2,13 +2,14 @@ import sys
 import os
 import stat
 import traceback
+import Image     # PIL
+import ImageFile # from PIL
 
 import mevas
 
 import config
 import util
-import Image     # PIL
-import ImageFile # from PIL
+import theme_engine
 
 def resizebitmap(image, width=None, height=None):
     image_w, image_h = image.width, image.height
@@ -43,10 +44,8 @@ def load(url, size=None, cache=False, vfs_save=False):
         width, height = size
         
     if url.find('/') == -1 and url.find('.') == -1:
-        # this looks like a 'settings' image
-        # FIXME: bad gui import
-        import gui
-        surl = gui.get_image(url)
+        # this looks like a 'theme' image
+        surl = theme_engine.get_theme().get_image(url)
         if surl:
             url = surl
     if cache:
