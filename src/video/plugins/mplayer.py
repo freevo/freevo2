@@ -20,11 +20,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.26  2003/09/23 13:47:48  outlyer
-# Remove this for now...
-#
-# Revision 1.25  2003/09/23 13:39:51  outlyer
-# Remove more informational chatter.
+# Revision 1.27  2003/10/01 20:39:34  dischi
+# bmovl support
 #
 # Revision 1.24  2003/09/20 17:03:20  dischi
 # draw status while connecting and caching for network files
@@ -86,6 +83,8 @@ import re
 
 import osd
 osd = osd.get_singleton()
+import skin
+import pygame
 
 # contains an initialized MPlayer() object
 mplayer = None
@@ -109,7 +108,7 @@ class PluginInterface(plugin.Plugin):
         if data:
             data = re.search( "^MPlayer (?P<version>\S+)", data )
             if data:                
-                _debug_("MPlayer version is: %s" % data.group( "version" ),2)
+                _debug_("MPlayer version is: %s" % data.group( "version" ))
                 data = data.group( "version" )
                 if data[ 0 ] == "1":
                     mplayer_version = 1.0
@@ -117,7 +116,7 @@ class PluginInterface(plugin.Plugin):
                     mplayer_version = 0.9
                 elif data[ 0 : 7 ] == "dev-CVS":
                     mplayer_version = 9999
-                _debug_("MPlayer version set to: %s" % mplayer_version,2)
+                _debug_("MPlayer version set to: %s" % mplayer_version)
                     
         child.wait()
         mplayer = util.SynchronizedObject(MPlayer(mplayer_version))
@@ -164,7 +163,7 @@ class MPlayer:
 
         self.mode = mode   # setting global var to mode.
 
-        _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename),2)
+        _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename))
 
         if mode == 'file' and not os.path.isfile(filename) and not network_play:
             # This event allows the videoitem which contains subitems to
@@ -232,6 +231,9 @@ class MPlayer:
         elif mpl.find(' -framedrop ') == -1 and mpl.find(' -framedrop ') == -1:
             mpl += (' ' + config.MPLAYER_SOFTWARE_SCALER )
             
+        if os.path.exists('/tmp/bmovl'):
+            mpl += ' -vf bmovl=1:0:/tmp/bmovl'
+
         command = mpl + ' "' + filename + '"'
 
         if config.MPLAYER_AUTOCROP and command.find('crop=') == -1:
@@ -264,23 +266,124 @@ class MPlayer:
 
         self.file = item
 
+        self.bmovl = None
         self.thread.start(MPlayerApp, (command, item, network_play))
 
         self.item  = item
 
-        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command,2)
+        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
         rc.app(self)
 
+        # bmovl support?
+        if os.path.exists('/tmp/bmovl'):
+            # show warning until this code is stable
+            print 'Found /tmp/bmovl, activating experimental bmovl support'
+            self.bmovl = os.open('/tmp/bmovl', os.O_WRONLY)
+            self.osd_visible = False
         return None
     
 
+    def update_osd(self):
+        """
+        bmovl: update elapsed time and current time
+        """
+        s = self.osd_bg.convert()
+        length = self.item.elapsed
+        pos = osd.drawstringframed('%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
+                                                      length % 60),
+                                   10, 10, osd.width / 2, -1, self.osd_font.font,
+                                   self.osd_font.color, layer=s)
+
+        length = self.item.getattr('length')
+        if length:
+            pos = osd.drawstringframed(length, 10, pos[1][3]+5, osd.width / 2, -1,
+                                       self.osd_font.font, self.osd_font.color,
+                                       layer=s)
+        
+        clock = time.strftime('%a %I:%M %P')
+        osd.drawstringframed(clock, s.get_width()-10-self.osd_font.font.stringsize(clock),
+                             10, osd.width / 2, -1, self.osd_font.font,
+                             self.osd_font.color, layer=s)
+
+        os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
+                 (s.get_width(), s.get_height(), 0, osd.height-s.get_height(), 0, 0))
+        os.write(self.bmovl, pygame.image.tostring(s, 'RGBA'))
+
+    
+    def show_osd(self):
+        """
+        bmovl: init bmovl osd and show it
+        """
+        _debug_('show osd')
+
+        if not self.item.elapsed:
+            _debug_('not ready')
+            return
+        
+        height = config.OVERSCAN_Y + 100
+        if not skin.get_singleton().settings.images.has_key('background'):
+            _debug_('no background')
+            return
+        
+        bg = osd.loadbitmap(skin.get_singleton().settings.images['background'])
+        bg = pygame.transform.scale(bg, (osd.width, osd.height))
+
+        font = skin.get_singleton().GetFont('title')
+        font_tagline = skin.get_singleton().GetFont('info tagline')
+        
+        topbar = bg.subsurface((0,0,osd.width,height)).convert()
+        osd.drawbox(0, height-1, osd.width, height-1, width=1, color=0x000000, layer=topbar)
+
+        title   = self.item.name
+        tagline = self.item.getattr('tagline')
+
+        if self.item.tv_show:
+            show    = config.TV_SHOW_REGEXP_SPLIT(self.item.name)
+            title   = show[0] + " " + show[1] + "x" + show[2]
+            tagline = show[3]
+        
+        pos = osd.drawstringframed(title, 10, 10, osd.width-config.OVERSCAN_X-130,
+                                   -1, font.font, font.color, layer=topbar)
+        if tagline:
+            osd.drawstringframed(tagline, 10, pos[1][3]+5,
+                                 osd.width-config.OVERSCAN_X-130, -1,
+                                 font_tagline.font, font_tagline.color, layer=topbar)
+
+        if self.item.image:
+            image = pygame.transform.scale(osd.loadbitmap(self.item.image), (65, 90))
+            topbar.blit(image, (osd.width-config.OVERSCAN_X-100, config.OVERSCAN_Y+5))
+
+        os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
+                 (topbar.get_width(), topbar.get_height(), 0, 0, 0, 1))
+        os.write(self.bmovl, pygame.image.tostring(topbar, 'RGBA'))
+
+        self.osd_bg   = bg.subsurface((0,osd.height-height,osd.width,height)).convert()
+        osd.drawbox(0, 0, osd.width, 0, width=1, color=0x000000, layer=self.osd_bg)
+        self.osd_font = skin.get_singleton().GetFont('clock')
+
+        self.update_osd()
+        self.thread.app.refresh = self.update_osd
+        os.write(self.bmovl, 'SHOW\n')
+
+
+    def hide_osd(self):
+        """
+        bmovl: hide osd
+        """
+        _debug_('hide')
+        self.thread.app.refresh = None
+        os.write(self.bmovl, 'HIDE\n')
+        
+        
     def stop(self):
         """
         Stop mplayer and set thread to idle
         """
         self.thread.stop('quit\n')
         rc.app(None)
-
+        if self.bmovl:
+            os.close(self.bmovl)
+            self.bmovl = None
 
 
     def eventhandler(self, event, menuw=None):
@@ -329,6 +432,14 @@ class MPlayer:
         if event in ( PLAY_END, USER_END ):
             self.stop()
             return self.item.eventhandler(event)
+
+        if event == TOGGLE_OSD and self.bmovl:
+            if self.osd_visible:
+                self.hide_osd()
+            else:
+                self.show_osd()
+            self.osd_visible = not self.osd_visible
+            return True
 
         try:
             if event == VIDEO_SEND_MPLAYER_CMD:
@@ -428,7 +539,7 @@ class MPlayerApp(childapp.ChildApp):
         childapp.ChildApp.__init__(self, app)
         self.exit_type = None
         self.osdfont = osd.getfont(config.OSD_DEFAULT_FONTNAME, config.OSD_DEFAULT_FONTSIZE)
-                
+        self.refresh = None
         
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -477,8 +588,11 @@ class MPlayerApp(childapp.ChildApp):
         if line.find("A:") == 0:
             m = self.RE_TIME(line) # Convert decimal
             if hasattr(m,'group'):
+                t = self.item.elapsed
                 self.item.elapsed = int(m.group(1))+1
-
+                if t != self.item.elapsed and self.refresh:
+                    self.refresh()
+                    
         elif line.find("Exiting...") == 0:
             m = self.RE_EXIT(line)
             if m:
