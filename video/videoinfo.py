@@ -22,21 +22,24 @@ from menu import Info
 
 
 class VideoInfo(Info):
-    def __init__(self, files):
+    def __init__(self, files, calling_info = None):
         Info.__init__(self)
         self.type  = 'video'            # fix value
         self.mode  = 'file'             # file, dvd or vcd
-        self.files = files
 
         if isinstance(files, list):
             file = files[0]
+            self.files = files
         elif not files:
             file = "unknown"
+            self.files = ( file, )
         else:
             file = files
+            self.files = ( file, )
             
         self.xml_file = None
-
+        self.calling_info = calling_info
+        
         self.name    = os.path.splitext(os.path.basename(file))[0]
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
@@ -78,36 +81,37 @@ class VideoInfo(Info):
         self.action = self.play
         self.video_player = mplayer.get_singleton()
 
+        
+
     # ------------------------------------------------------------------------
     # actions:
 
     def play(self, arg=None, menuw=None):
         print "now playing %s" % self.files
 
-        if isinstance(self.files, list):
-            self.current_file = self.files[0]
-        else:
-            self.current_file = self.files
-
+        self.current_file = self.files[0]
         self.video_player.play(self.current_file, self.mplayer_options, self)
 
         
-    def eventhandler(self, event):
+    def eventhandler(self, event, menuw=None):
         print "event %s for %s" % (event , self.name)
 
         # PLAY_END: do have have to play another file?
         if event == rc.PLAY_END:
-            if isinstance(self.files, list):
-                pos = self.files.index(self.current_file)
-                if pos < len(self.files)-1:
-                    self.current_file = self.files[pos+1]
-                    print "playing next file"
-                    self.video_player.play(self.current_file, self.mplayer_options, self)
-                    return TRUE
+            pos = self.files.index(self.current_file)
+            if pos < len(self.files)-1:
+                self.current_file = self.files[pos+1]
+                print "playing next file"
+                self.video_player.play(self.current_file, self.mplayer_options, self)
+                return TRUE
 
             menuwidget = menu.get_singleton()
             menuwidget.refresh()
             return TRUE
+
+        # give the event to the next eventhandler in the list
+        if self.calling_info:
+            return self.calling_info.eventhandler(event, menuw)
             
         return FALSE
         

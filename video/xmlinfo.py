@@ -18,7 +18,7 @@ FALSE = 0
 #
 # parse <video> tag    
 #
-def xml_parseVideo(video_node, dir):
+def xml_parseVideo(video_node, dir, duplicate_check):
     playlist = []
     mode = 'file'
     mplayer_options = ""
@@ -37,6 +37,11 @@ def xml_parseVideo(video_node, dir):
                     filename = file_nodes.textof()
                     if filename.find('://') == -1:
                         filename = os.path.join(dir, filename)
+
+                    for i in range(len(duplicate_check)):
+                        if (unicode(duplicate_check[i], 'latin1', 'ignore') == filename):
+                            del duplicate_check[i]
+                            break
                     playlist += [filename]
 
         # XXX fix this to merge all -vop arguments into one
@@ -81,7 +86,7 @@ def xml_parseInfo(info_node, i):
 #
 # parse a XML movie file
 #
-def parseMovieFile(file):
+def parseMovieFile(file, calling_info, duplicate_check):
     dir = os.path.dirname(file)
     movies = []
     
@@ -99,9 +104,10 @@ def parseMovieFile(file):
 
             for node in c.children:
                 if node.name == u'video':
-                    minfo = xml_parseVideo(node, dir)
+                    minfo = xml_parseVideo(node, dir, duplicate_check)
 
             if minfo:
+                minfo.calling_info = calling_info
                 for node in c.children:
                     if node.name == u'title':
                         minfo.name = node.textof().encode('latin-1')
