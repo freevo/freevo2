@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/11/28 20:08:58  dischi
+# renamed some config variables
+#
 # Revision 1.22  2003/11/15 17:24:31  dischi
 # i18n patches from Davin Sagnol
 #
@@ -133,7 +136,7 @@ class ProgramDisplay(PopupBox):
                           vertical_expansion=vertical_expansion)
 
         if not height:
-            self.height  = self.osd.height - (2 * config.OVERSCAN_Y) - 100
+            self.height  = self.osd.height - (2 * config.OSD_OVERSCAN_Y) - 100
 
         self.v_spacing = 15
         self.h_margin = 20

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/11/28 20:08:57  dischi
+# renamed some config variables
+#
 # Revision 1.40  2003/11/23 17:03:43  dischi
 # Removed fxd handling from AudioItem and created a new FXDHandler class
 # in __init__.py to let the directory handle the fxd files. The format
@@ -242,6 +245,6 @@ class AudioItem(Item):
     	               'f'  : self.name }
 
         if self.parent and hasattr(self.parent, 'AUDIO_FORMAT_STRING'):
-            return self.parent.AUDIO_FORMAT_STRING % song_info
-        return config.AUDIO_FORMAT_STRING % song_info
+            return self.parent.DIRECTORY_AUDIO_FORMAT_STRING % song_info
+        return config.DIRECTORY_AUDIO_FORMAT_STRING % song_info
         

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/11/28 20:08:56  dischi
+# renamed some config variables
+#
 # Revision 1.32  2003/10/28 19:32:36  dischi
 # do not inherit watermark images
 #
@@ -74,7 +77,7 @@ class Item:
 
         use_info_title = 1
         try:
-            use_info_title = parent.USE_MEDIAID_TAG_NAMES
+            use_info_title = parent.DIRECTORY_USE_MEDIAID_TAG_NAMES
         except:
             pass
         

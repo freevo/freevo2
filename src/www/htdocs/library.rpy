@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/11/28 20:08:59  dischi
+# renamed some config variables
+#
 # Revision 1.16  2003/11/28 19:31:52  dischi
 # renamed some config variables
 #
@@ -130,9 +133,9 @@ class LibraryResource(FreevoResource):
         if media == 'images':
             suffixes.extend(config.IMAGE_SUFFIX)
         if media == 'movies':
-            suffixes.extend(config.SUFFIX_VIDEO_FILES)
+            suffixes.extend(config.VIDEO_SUFFIX)
         if media == 'rectv':
-            suffixes.extend(config.SUFFIX_VIDEO_FILES)
+            suffixes.extend(config.VIDEO_SUFFIX)
         return suffixes
 
     def get_dirlist(self, media):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/11/28 20:08:57  dischi
+# renamed some config variables
+#
 # Revision 1.33  2003/11/23 19:48:59  krister
 # Added optional new blend settings (nr of steps and total time), must be enabled explicitly in freevo_config
 #
@@ -390,7 +393,7 @@ class ImageViewer(GUIObject):
 	
 	# Now sort the text into lines of length line_length
         line = 0
-	if config.OVERSCAN_X:
+	if config.OSD_OVERSCAN_X:
 	    line_length = 35
 	else:
 	    line_length = 60
@@ -415,15 +418,15 @@ class ImageViewer(GUIObject):
                     prt_line[line] += '   ' + textstr
 
         # Create a black box for text
-        osd.drawbox(config.OVERSCAN_X,
-                    osd.height - (config.OVERSCAN_X + 25 + (len(prt_line) * 30)),
+        osd.drawbox(config.OSD_OVERSCAN_X,
+                    osd.height - (config.OSD_OVERSCAN_X + 25 + (len(prt_line) * 30)),
                     osd.width, osd.height, width=-1, 
                     color=((60 << 24) | osd.COL_BLACK), layer=layer)
 
 	# Now print the Text
         for line in range(len(prt_line)):
-            h=osd.height - (40 + config.OVERSCAN_Y + ((len(prt_line) - line - 1) * 30))
-            osd.drawstring(prt_line[line], 15 + config.OVERSCAN_X, h,
+            h=osd.height - (40 + config.OSD_OVERSCAN_Y + ((len(prt_line) - line - 1) * 30))
+            osd.drawstring(prt_line[line], 15 + config.OSD_OVERSCAN_X, h,
                            fgcolor=osd.COL_ORANGE, layer=layer)
 
 

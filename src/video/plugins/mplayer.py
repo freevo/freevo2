@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/11/28 20:08:59  dischi
+# renamed some config variables
+#
 # Revision 1.42  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -100,8 +103,8 @@ class PluginInterface(plugin.Plugin):
         plugin.register(mplayer, plugin.VIDEO_PLAYER, True)
 
         for i in config.VIDEO_MPLAYER_SUFFIX:
-            if not i in config.SUFFIX_VIDEO_FILES:
-                config.SUFFIX_VIDEO_FILES.append(i)
+            if not i in config.VIDEO_SUFFIX:
+                config.VIDEO_SUFFIX.append(i)
 
 
 class MPlayer:

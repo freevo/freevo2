@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/28 20:08:57  dischi
+# renamed some config variables
+#
 # Revision 1.11  2003/11/22 12:24:39  dischi
 # add delete to directories
 #
@@ -128,8 +131,8 @@ class PluginInterface(plugin.ItemPlugin):
         _debug_('Deleting fxd for %s' % self.item.filename)
         if self.item.type == 'video' and hasattr(self.item, 'fxd_file') and \
                os.path.isfile(self.item.fxd_file) and \
-               ((not config.TV_SHOW_DATA_DIR) or \
-                (self.item.fxd_file.find(config.TV_SHOW_DATA_DIR) != 0)):
+               ((not config.VIDEO_SHOW_DATA_DIR) or \
+                (self.item.fxd_file.find(config.VIDEO_SHOW_DATA_DIR) != 0)):
             self.safe_unlink(self.item.fxd_file)
 
     def delete_file(self):

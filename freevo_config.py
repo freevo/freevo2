@@ -250,6 +250,10 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
+ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
+                         # For standalone boxes.
+
+
 #
 # see src/event.py for a list of all possible events. You can add more keybindings
 # by adding them to the correct hash. E.g. pressing 1 should send 'contrast -100'
@@ -405,6 +409,7 @@ plugin_record = plugin.activate('tv.generic_record')
 # plugin.activate('joy')
 
 
+
 # ======================================================================
 # Freevo directory settings:
 # ======================================================================
@@ -448,23 +453,23 @@ DIRECTORY_AUTOPLAY_SINGLE_ITEM = 1
 # Force the skin to a specific layout number. -1 == no force. The layout
 # toggle with DISPLAY will be disabled
 #
-FORCE_SKIN_LAYOUT = -1
+DIRECTORY_FORCE_SKIN_LAYOUT = -1
 
 #
 # Formatstring for the audio item names, possible strings:
 # a = artist, n = tracknumber, t = title, y = year, f = filename
 #
 # This will show the title and the track number 
-# AUDIO_FORMAT_STRING = '%(n)s - %(t)s'
+# DIRECTORY_AUDIO_FORMAT_STRING = '%(n)s - %(t)s'
 # This is the default - track name only
 #
-AUDIO_FORMAT_STRING = '%(t)s'
+DIRECTORY_AUDIO_FORMAT_STRING = '%(t)s'
 
 #
 # Use media id tags to generate the name of the item. This should be
 # 1 all the time and only be disabled in directories with broken tags
 #
-USE_MEDIAID_TAG_NAMES = 1
+DIRECTORY_USE_MEDIAID_TAG_NAMES = 1
 
 #
 # The next varibales are a list of types in which the feature should be
@@ -544,18 +549,12 @@ if not os.path.isdir(FREEVO_CACHEDIR):
 VIDEO_ITEMS = None
 
 #
-# This is where recorded video is written.
-#
-# XXX the path doesn't work from the www cgi scripts!
-TV_RECORD_DIR = None
-
-#
 # Directory containing images for tv shows. A tv show maches the regular
-# expression TV_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
+# expression VIDEO_SHOW_REGEXP, e.g. "Name 3x10 - Title". If an image
 # name.(png|jpg) (lowercase) is in this directory, it will be taken as cover
 # image
 #
-TV_SHOW_DATA_DIR = None
+VIDEO_SHOW_DATA_DIR = None
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -578,7 +577,7 @@ VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
 VIDEO_PREFERED_PLAYER = 'mplayer'
 
 #
-# Only scan OVERLAY_DIR and TV_SHOW_DATA_DIR for fxd files containing
+# Only scan OVERLAY_DIR and VIDEO_SHOW_DATA_DIR for fxd files containing
 # informations about a disc. If you only have the fxd files for discs in
 # one of this directories (and subdirectories), set this to 1, it will
 # speed up startup, 0 may be needed if you have fxd files with disc links
@@ -722,7 +721,7 @@ GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
 GAMES_MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 # ======================================================================
-# freevo OSD section:
+# freevo SKIN section:
 # ======================================================================
 
 #
@@ -760,8 +759,10 @@ SKIN_FORCE_TEXTVIEW_STYLE = 1
 SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 
 
-ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
-                         # For standalone boxes.
+
+# ======================================================================
+# freevo OSD section:
+# ======================================================================
 
 #
 # OSD default font. It is only used for debug/error stuff, not regular skinning.
@@ -774,8 +775,8 @@ OSD_DEFAULT_FONTSIZE = 18
 OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
 
 OSD_SDL_EXEC_AFTER_STARTUP = ""
-OVERSCAN_X = 0
-OVERSCAN_Y = 0
+OSD_OVERSCAN_X = 0
+OSD_OVERSCAN_Y = 0
 
 # Exec a script after the osd startup. Matrox G400 users who wants to
 # use the framebuffer and have a PAL tv may set this to
@@ -783,16 +784,16 @@ OVERSCAN_Y = 0
 if CONF.display == 'mga':
     OSD_SDL_EXEC_AFTER_STARTUP='%s %s %s' % (os.path.join(CONTRIB_DIR, 'fbcon/mgafb'),
                                              CONF.tv, CONF.geometry)
-    OVERSCAN_X = 20
-    OVERSCAN_Y = 10
+    OSD_OVERSCAN_X = 20
+    OSD_OVERSCAN_Y = 10
 
 if CONF.display == 'dfbmga':
-    OVERSCAN_X = 50
-    OVERSCAN_Y = 50
+    OSD_OVERSCAN_X = 50
+    OSD_OVERSCAN_Y = 50
 
 if CONF.display == 'dxr3':
-    OVERSCAN_X = 65
-    OVERSCAN_Y = 45
+    OSD_OVERSCAN_X = 65
+    OSD_OVERSCAN_Y = 45
     
 # Exec a script on the osd close.
 OSD_SDL_EXEC_AFTER_CLOSE = ""
@@ -970,6 +971,12 @@ if XINE_COMMAND:
 # ======================================================================
 # TV:
 # ======================================================================
+
+#
+# This is where recorded video is written.
+#
+# XXX the path doesn't work from the www cgi scripts!
+TV_RECORD_DIR = None
 
 #
 # Watching TV
@@ -1260,8 +1267,6 @@ XMLTV_DAYS = 3
 # Builtin WWW server settings
 # ======================================================================
 
-# XXX THIS IS WORK IN PROGRESS! 
-#
 # To activate the build in web server, please activate the www plugin
 # in your local_conf.py:
 #
@@ -1305,8 +1310,7 @@ WWW_JAVASCRIPT = 'scripts/display_prog-head.js'
 # Config for xml support in the movie browser
 # the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
 #
-SUFFIX_VIDEO_DEF_FILES = [ 'fxd' ]
-TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
+VIDEO_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 
 
 #

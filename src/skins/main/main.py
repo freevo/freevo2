@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/11/28 20:08:58  dischi
+# renamed some config variables
+#
 # Revision 1.19  2003/11/22 20:34:23  dischi
 # use new vfs
 #
@@ -190,10 +193,10 @@ class Plugin_Area(Skin_Area):
     def __init__(self, parent, screen):
         Skin_Area.__init__(self, 'plugin', screen)
         self.plugins = None
-        self.x = config.OVERSCAN_X
-        self.y = config.OVERSCAN_Y
-        self.width   = osd.width  - 2 * config.OVERSCAN_X
-        self.height  = osd.height - 2 * config.OVERSCAN_Y
+        self.x = config.OSD_OVERSCAN_X
+        self.y = config.OSD_OVERSCAN_Y
+        self.width   = osd.width  - 2 * config.OSD_OVERSCAN_X
+        self.height  = osd.height - 2 * config.OSD_OVERSCAN_Y
         
     def get_font(self, name):
         try:
@@ -294,11 +297,11 @@ class BlankScreen(Skin_Area):
 
 
     def update_content(self):
-        y0 = config.OVERSCAN_Y
+        y0 = config.OSD_OVERSCAN_Y
         if self.allow_plugins and self.has_idlebar:
             y0 += 70
-        self.draw(config.OVERSCAN_X, y0, osd.width - config.OVERSCAN_X,
-                  osd.height - config.OVERSCAN_Y)
+        self.draw(config.OSD_OVERSCAN_X, y0, osd.width - config.OSD_OVERSCAN_X,
+                  osd.height - config.OSD_OVERSCAN_Y)
 
             
     def draw_background(self):

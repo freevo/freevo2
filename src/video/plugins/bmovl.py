@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/28 20:08:58  dischi
+# renamed some config variables
+#
 # Revision 1.3  2003/11/19 05:41:30  krister
 # Spelling fixes, usage note
 #
@@ -140,7 +143,7 @@ class PluginInterface(plugin.Plugin):
         """
         _debug_('show osd')
 
-        height = config.OVERSCAN_Y + 60
+        height = config.OSD_OVERSCAN_Y + 60
         if not skin.get_singleton().settings.images.has_key('background'):
             _debug_('no background')
             return
@@ -167,7 +170,7 @@ class PluginInterface(plugin.Plugin):
         height += 40
         x0      = config.OVERSCAN_X+10
         y0      = self.bmovl.height + 5 - height
-        width   = self.bmovl.width - 2 * config.OVERSCAN_X
+        width   = self.bmovl.width - 2 * config.OSD_OVERSCAN_X
         
         self.bmovl.drawbox(0, self.bmovl.height + 1 - height, self.bmovl.width,
                            self.bmovl.height + 1 - height, width=1, color=0x000000)
@@ -182,7 +185,7 @@ class PluginInterface(plugin.Plugin):
         tagline = self.item.getattr('tagline')
 
         if self.item.tv_show:
-            show    = config.TV_SHOW_REGEXP_SPLIT(self.item.name)
+            show    = config.VIDEO_SHOW_REGEXP_SPLIT(self.item.name)
             title   = show[0] + " " + show[1] + "x" + show[2]
             tagline = show[3]
         

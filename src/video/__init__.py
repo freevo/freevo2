@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/11/28 20:08:58  dischi
+# renamed some config variables
+#
 # Revision 1.15  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -74,7 +77,7 @@ def cwd(parent, files):
     """
     items = []
 
-    for file in util.find_matches(files, config.SUFFIX_VIDEO_FILES):
+    for file in util.find_matches(files, config.VIDEO_SUFFIX):
         x = VideoItem(file, parent)
         if parent.media:
             file_id = parent.media.id + file[len(os.path.join(parent.media.mountdir,"")):]
@@ -97,14 +100,14 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     for item in current_items:
 
         # remove 'normal' files
-        for file in util.find_matches(del_files, config.SUFFIX_VIDEO_FILES):
+        for file in util.find_matches(del_files, config.VIDEO_SUFFIX):
             if item.type == 'video' and item.filename == file and not \
                item in del_items:
                 del_items += [ item ]
                 del_files.remove(file)
 
     # add new 'normal' files
-    for file in util.find_matches(new_files, config.SUFFIX_VIDEO_FILES):
+    for file in util.find_matches(new_files, config.VIDEO_SUFFIX):
         new_items += [ VideoItem(file, parent) ]
         new_files.remove(file)
 
@@ -158,9 +161,8 @@ def hash_fxd_movie_database():
         for fo in info.files_options:
             discset_informations[fo['file-id']] = fo['mplayer-options']
 
-    if config.TV_SHOW_DATA_DIR:
-        files = util.recursefolders(config.TV_SHOW_DATA_DIR,1,
-                                    '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1)
+    if config.VIDEO_SHOW_DATA_DIR:
+        files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
         for info in fxditem.getitems(None, files, display_type='video'):
             k = vfs.splitext(vfs.basename(info.xml_file))[0]
             tv_show_informations[k] = (info.image, info.info, info.mplayer_options,

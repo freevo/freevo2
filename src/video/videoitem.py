@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2003/11/28 20:08:58  dischi
+# renamed some config variables
+#
 # Revision 1.98  2003/11/25 19:01:37  dischi
 # remove the callback stuff from fxd, it was to complicated
 #
@@ -144,14 +147,14 @@ class VideoItem(Item):
             self.name     = util.getname(filename)
 
         # find image for tv show and build new title
-        if config.TV_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
-               config.TV_SHOW_DATA_DIR:
+        if config.VIDEO_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
+               config.VIDEO_SHOW_DATA_DIR:
 
-            show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
+            show_name = config.VIDEO_SHOW_REGEXP_SPLIT(self.name)
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
                 self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
                             " - " + show_name[3]
-                self.image = util.getimage((config.TV_SHOW_DATA_DIR + \
+                self.image = util.getimage((config.VIDEO_SHOW_DATA_DIR + \
                                             show_name[0].lower()), self.image)
 
                 from video import tv_show_informations
@@ -169,7 +172,7 @@ class VideoItem(Item):
                 self.show_name = show_name
 
         # find image for this file
-        # check for episode in TV_SHOW_DATA_DIR
+        # check for episode in VIDEO_SHOW_DATA_DIR
         self.image = util.getimage(os.path.splitext(filename)[0], self.image)
 
         if parent and hasattr(self.parent, 'xml_file') and not self.xml_file:

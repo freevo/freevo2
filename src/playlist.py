@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/11/28 20:08:56  dischi
+# renamed some config variables
+#
 # Revision 1.34  2003/11/28 19:26:36  dischi
 # renamed some config variables
 #
@@ -84,7 +87,7 @@ class Playlist(Item):
                 # skip files that don't exist
                 if util.match_suffix(line, config.AUDIO_SUFFIX):
                     self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-                elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
+                elif util.match_suffix(line, config.VIDEO_SUFFIX):
                     self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
             
 
@@ -117,7 +120,7 @@ class Playlist(Item):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if util.match_suffix(line, config.AUDIO_SUFFIX):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-            elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
+            elif util.match_suffix(line, config.VIDEO_SUFFIX):
                 self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
             
 

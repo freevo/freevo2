@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/11/28 20:08:58  dischi
+# renamed some config variables
+#
 # Revision 1.13  2003/11/22 12:02:12  dischi
 # make the skin blankscreen a real plugin area
 #
@@ -730,10 +733,10 @@ class Skin_Area:
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
                 if bg.label == 'background':
-                    bg.x -= config.OVERSCAN_X
-                    bg.y -= config.OVERSCAN_Y
-                    bg.width  += 2 * config.OVERSCAN_X
-                    bg.height += 2 * config.OVERSCAN_Y
+                    bg.x -= config.OSD_OVERSCAN_X
+                    bg.y -= config.OSD_OVERSCAN_Y
+                    bg.width  += 2 * config.OSD_OVERSCAN_X
+                    bg.height += 2 * config.OSD_OVERSCAN_Y
 
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image

@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/28 20:08:57  dischi
+# renamed some config variables
+#
 # Revision 1.4  2003/11/21 11:45:02  dischi
 # render option for appliactions (not perfect)
 #
@@ -100,12 +103,12 @@ class PluginInterface(plugin.DaemonPlugin):
         w = font.font.stringsize(self.message)
 
         if type == 'osd':
-            x = config.OVERSCAN_X
-            y = config.OVERSCAN_Y
+            x = config.OSD_OVERSCAN_X
+            y = config.OSD_OVERSCAN_Y
 
-            renderer.drawstringframed(self.message, config.OVERSCAN_X,
-                                      config.OVERSCAN_Y + 10,
-                                      renderer.width - 2 * config.OVERSCAN_X, -1,
+            renderer.drawstringframed(self.message, config.OSD_OVERSCAN_X,
+                                      config.OSD_OVERSCAN_Y + 10,
+                                      renderer.width - 2 * config.OSD_OVERSCAN_X, -1,
                                       font.font, fgcolor=0xffffff, bgcolor=0xa0000000,
                                       align_h='right', mode='hard')
 

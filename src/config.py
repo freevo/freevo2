@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/11/28 20:08:54  dischi
+# renamed some config variables
+#
 # Revision 1.76  2003/11/28 19:26:36  dischi
 # renamed some config variables
 #
@@ -47,7 +50,7 @@
 # config changes for the use new vfs
 #
 # Revision 1.69  2003/11/21 17:55:09  dischi
-# new SUFFIX_VIDEO_FILES layout
+# new VIDEO_SUFFIX layout
 #
 # Revision 1.68  2003/11/09 22:34:17  rshortt
 # We need True/False defs a bit higher up.
@@ -534,12 +537,12 @@ OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 # set list of video files to []
 # (fill be filled from the plugins) 
 #
-SUFFIX_VIDEO_FILES = []
+VIDEO_SUFFIX = []
 
 if HELPER:
     for s in VIDEO_MPLAYER_SUFFIX + VIDEO_XINE_SUFFIX:
-        if not s in SUFFIX_VIDEO_FILES:
-            SUFFIX_VIDEO_FILES.append(s)
+        if not s in VIDEO_SUFFIX:
+            VIDEO_SUFFIX.append(s)
             
 #
 # set data dirs
@@ -570,8 +573,8 @@ if not TV_RECORD_DIR:
         print 'remove the tv plugin. Autoset variable to %s.' % TV_RECORD_DIR
         print
         
-if not TV_SHOW_DATA_DIR and not HELPER:
-    print 'Error: TV_SHOW_DATA_DIR not found'
+if not VIDEO_SHOW_DATA_DIR and not HELPER:
+    print 'Error: VIDEO_SHOW_DATA_DIR not found'
     
 #
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
@@ -781,8 +784,8 @@ if TV_CHANNELS == None and plugin.is_active('tv'):
 #
 # compile the regexp
 #
-TV_SHOW_REGEXP_MATCH = re.compile("^.*" + TV_SHOW_REGEXP).match
-TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").split
+VIDEO_SHOW_REGEXP_MATCH = re.compile("^.*" + VIDEO_SHOW_REGEXP).match
+VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + VIDEO_SHOW_REGEXP + "[\.\- ]*").split
 
 
 #

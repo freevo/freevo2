@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2003/11/28 20:08:55  dischi
+# renamed some config variables
+#
 # Revision 1.66  2003/11/28 19:26:36  dischi
 # renamed some config variables
 #
@@ -114,20 +117,20 @@ all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Don\'t show directory if only one item exists and auto-select ' \
                     'the item.')),
 
-                 ('FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
+                 ('DIRECTORY_FORCE_SKIN_LAYOUT', _('Force Skin Layout'),
                   _('Force skin to a specific layout. This option doesn\'t work with ' \
                     'all skins and the result may differ based on the skin.')),
 
                  ('DIRECTORY_SMART_SORT', _('Directory Smart Sort'),
                   _('Use a smarter way to sort the items.')),
 
-                 ('USE_MEDIAID_TAG_NAMES', _('Use MediaID Tag Names'),
+                 ('DIRECTORY_USE_MEDIAID_TAG_NAMES', _('Use MediaID Tag Names'),
                   _('Use the names from the media files tags as display name.')),
 
                  ('DIRECTORY_REVERSE_SORT', _('Directory Reverse Sort'),
                   _('Show the items in the list in reverse order.')),
 
-                 ('AUDIO_FORMAT_STRING', '', ''),
+                 ('DIRECTORY_AUDIO_FORMAT_STRING', '', ''),
 
                  ('DIRECTORY_CREATE_PLAYLIST', _('Directory Create Playlist'),
                   _('Handle the directory as playlist. After one file is played, the next '\
@@ -236,8 +239,8 @@ class DirItem(Playlist):
                     image = vfs.join(directory, covers[0])
             self.image = image
 
-        if not self.image and config.TV_SHOW_DATA_DIR:
-            self.image = util.getimage(vfs.join(config.TV_SHOW_DATA_DIR,
+        if not self.image and config.VIDEO_SHOW_DATA_DIR:
+            self.image = util.getimage(vfs.join(config.VIDEO_SHOW_DATA_DIR,
                                                     vfs.basename(directory).lower()))
 
             if video.tv_show_informations.has_key(vfs.basename(directory).lower()):
@@ -411,7 +414,7 @@ class DirItem(Playlist):
         if self.display_type == 'audio':
             suffix = config.AUDIO_SUFFIX
         elif self.display_type == 'video':
-            suffix = config.SUFFIX_VIDEO_FILES
+            suffix = config.VIDEO_SUFFIX
 
         display_type = self.display_type
         if self.display_type == 'tv':
@@ -686,7 +689,7 @@ class DirItem(Playlist):
         else:
             item_menu = menu_module.Menu(title, items, reload_func=self.reload,
                                          item_types = self.display_type,
-                                         force_skin_layout = self.FORCE_SKIN_LAYOUT)
+                                         force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.xml_file:
                 item_menu.skin_settings = skin.LoadSettings(self.xml_file)
@@ -886,7 +889,7 @@ class DirItem(Playlist):
         # get the max value for toggle
         max = 1
 
-        # for FORCE_SKIN_LAYOUT max = number of styles in the menu
+        # for DIRECTORY_FORCE_SKIN_LAYOUT max = number of styles in the menu
         if arg == 'FORCE_SKIN_LAYOUT':
             if self.display_type and skin.settings.menu.has_key(self.display_type):
                 area = skin.settings.menu[self.display_type]

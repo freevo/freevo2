@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/11/28 20:08:57  dischi
+# renamed some config variables
+#
 # Revision 1.43  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -589,7 +592,7 @@ class Identify_Thread(threading.Thread):
             for t in data.tracks:
                 if t and t['url']:
                     file = t['url'][len(media.devicename)+6:].replace(':', '/')
-                    if util.match_suffix(file, config.SUFFIX_VIDEO_FILES):
+                    if util.match_suffix(file, config.VIDEO_SUFFIX):
                         mplayer_files.append(file)
                     if util.match_suffix(file, config.AUDIO_SUFFIX):
                         mp3_files.append(file)
@@ -602,7 +605,7 @@ class Identify_Thread(threading.Thread):
             util.mount(media.mountdir, force=True)
 
             # Check for movies/audio/images on the disc
-            mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)
+            mplayer_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
             mp3_files = util.match_files(media.mountdir, config.AUDIO_SUFFIX)
             image_files = util.match_files(media.mountdir, config.IMAGE_SUFFIX)
 
@@ -630,8 +633,8 @@ class Identify_Thread(threading.Thread):
                 mplayer_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
                 for movie in mplayer_files:
-                    if config.TV_SHOW_REGEXP_MATCH(movie):
-                        show = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(movie))
+                    if config.VIDEO_SHOW_REGEXP_MATCH(movie):
+                        show = config.VIDEO_SHOW_REGEXP_SPLIT(os.path.basename(movie))
 
                         if show_name and show_name != show[0]:
                             the_same = 0
@@ -650,11 +653,11 @@ class Identify_Thread(threading.Thread):
                             start_ep = end_ep
                         volumes += show[1] + "x" + show[2]
 
-                if show_name and the_same and config.TV_SHOW_DATA_DIR:
+                if show_name and the_same and config.VIDEO_SHOW_DATA_DIR:
                     if end_ep > 0:
                         volumes = '%dx%02d - %dx%02d' % (start_ep / 100, start_ep % 100,
                                                          end_ep / 100, end_ep % 100)
-                    k = config.TV_SHOW_DATA_DIR + show_name
+                    k = config.VIDEO_SHOW_DATA_DIR + show_name
                     if os.path.isfile((k + ".png").lower()):
                         image = (k + ".png").lower()
                     elif os.path.isfile((k + ".jpg").lower()):
