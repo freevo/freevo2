@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/10/19 14:03:25  dischi
+# external i18n support for plugins
+#
 # Revision 1.45  2003/09/21 16:46:27  dischi
 # typo
 #
@@ -55,6 +58,8 @@
 
 import os, sys
 import traceback
+import gettext
+
 from event import Event
 
 DEBUG = 0
@@ -84,6 +89,20 @@ class Plugin:
             
     def config(self):
         return []
+
+    def translation(self, application):
+        """
+        Loads the gettext translation for this plugin (only this class).
+        This can be used in plugins who are not inside the Freevo distribution.
+        After loading the translation, gettext can be used by self._() instead
+        of the global _().
+        """
+        try:
+            self._ = gettext.translation(application, os.environ['FREEVO_LOCALE'],
+                                         fallback=1).gettext
+        except:
+            self._ = lambda m: m
+
         
 class MainMenuPlugin(Plugin):
     """

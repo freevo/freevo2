@@ -9,30 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/10/19 14:03:25  dischi
+# external i18n support for plugins
+#
 # Revision 1.30  2003/10/17 18:48:37  dischi
 # every item has a description now
-#
-# Revision 1.29  2003/10/04 18:37:28  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.28  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.27  2003/08/30 18:49:44  dischi
-# small fix
-#
-# Revision 1.26  2003/08/30 17:03:02  dischi
-# support for eventhandler in ItemPlugins
-#
-# Revision 1.25  2003/08/30 15:18:09  dischi
-# also react on STOP
-#
-# Revision 1.24  2003/08/23 18:34:38  dischi
-# do not use info[title] when parent has USE_MEDIAID_TAG_NAMES = 0
-#
-# Revision 1.23  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -56,16 +37,22 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+import os
+import gettext
 
-import event as em
+from event import *
 import plugin
 
-#
-# Item class. Inherits from MenuItem and is a template for other info items
-# like VideoItem, AudioItem and ImageItem
-#
 class Item:
+    """
+    Item class. This is the base class for all items in the menu. It's a template
+    for MenuItem and for other info items like VideoItem, AudioItem and ImageItem
+    """
     def __init__(self, parent = None, info = None):
+        """
+        Init the item. Sets all needed variables, if parent is given also inherit
+        some settings from there. Set self.info to info if given.
+        """
         self.image = None               # imagefile
         
         self.type   = None              # type: e.g. video, audio, dir, playlist
@@ -118,9 +105,14 @@ class Item:
             self.handle_type = parent.handle_type
             self.xml_file = parent.xml_file
             self.media = parent.media
+            if hasattr(parent, '_'):
+                self._ = parent._
 
 
     def copy(self, obj):
+        """
+        copy all known attributes from 'obj'
+        """
         if not self.image:
             self.image = obj.image
         if not self.name:
@@ -138,17 +130,41 @@ class Item:
         self.info      = obj.info
         
 
-    # returns a list of possible actions on this item. The first
-    # one is autoselected by pressing SELECT
+    def translation(self, application):
+        """
+        Loads the gettext translation for this item (and all it's children).
+        This can be used in plugins who are not inside the Freevo distribution.
+        After loading the translation, gettext can be used by self._() instead
+        of the global _().
+        """
+        try:
+            self._ = gettext.translation(application, os.environ['FREEVO_LOCALE'],
+                                         fallback=1).gettext
+        except:
+            self._ = lambda m: m
+
+
     def actions(self):
+        """
+        returns a list of possible actions on this item. The first
+        one is autoselected by pressing SELECT
+        """
         return None
 
+
     def __call__(self, arg=None, menuw=None):
+        """
+        call first action in the actions() list
+        """
         if self.actions():
             return self.actions()[0][0](arg=arg, menuw=menuw)
         
-    # eventhandler for this item
+
     def eventhandler(self, event, menuw=None):
+        """
+        simple eventhandler for an item
+        """
+        
         if not menuw:
             menuw = self.menuw
 
@@ -161,7 +177,7 @@ class Item:
             return self.parent.eventhandler(event, menuw)
 
         else:
-            if event in (em.STOP, em.PLAY_END, em.USER_END) and menuw:
+            if event in (STOP, PLAY_END, USER_END) and menuw:
                 if menuw.visible:
                     menuw.refresh()
                 else:
@@ -170,7 +186,11 @@ class Item:
 
         return False
 
+
     def plugin_eventhandler(self, event, menuw=None):
+        """
+        eventhandler for special pligins for this item
+        """
         if not hasattr(self, '__plugin_eventhandler__'):
             self.__plugin_eventhandler__ = []
             for p in plugin.get('item') + plugin.get('item_%s' % self.type):
