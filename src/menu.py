@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/03 19:15:13  dischi
+# Give all menu callback functions the parameter arg
+#
 # Revision 1.2  2002/11/25 02:17:54  krister
 # Minor bugfixes. Synced to changes made in the main tree.
 #
@@ -202,7 +205,15 @@ class MenuWidget:
                 util.umount(media.mountdir)
     
         skin.DrawMenu(self)
-        
+
+
+    def make_submenu(self, menu_name, actions):
+        items = []
+        for function, title in actions:
+            items += [ MenuItem(title, function) ]
+        s = Menu(menu_name, items)
+        self.pushmenu(s)
+            
         
     def eventhandler(self, event):
         menu = self.menustack[-1]
@@ -271,6 +282,14 @@ class MenuWidget:
                 else:
                     action( menuw=self )
 
+        elif event == rc.K0:
+            try:
+                actions = menu.selected.actions()
+                if len(actions) > 1:
+                    self.make_submenu(menu.selected.name, actions)
+            except:
+                pass
+            
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
         else:

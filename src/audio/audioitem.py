@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/03 19:15:18  dischi
+# Give all menu callback functions the parameter arg
+#
 # Revision 1.3  2002/11/28 19:56:12  dischi
 # Added copy function
 #
@@ -273,7 +276,7 @@ class AudioItem(Item):
         return [ ( self.play, 'Play' ) ]
 
 
-    def play(self, menuw=None):
+    def play(self, arg=None, menuw=None):
         """
         Start playing the item
         """
@@ -281,7 +284,7 @@ class AudioItem(Item):
         self.audio_player.play(self)
 
 
-    def stop(self, menuw=None):
+    def stop(self, arg=None, menuw=None):
         """
         Stop the current playing
         """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/03 19:15:17  dischi
+# Give all menu callback functions the parameter arg
+#
 # Revision 1.3  2002/11/28 19:56:12  dischi
 # Added copy function
 #
@@ -240,7 +243,7 @@ class Playlist(Item):
                  ( self.play, 'Play' ) ]
 
 
-    def browse(self, menuw=None):
+    def browse(self, arg=None, menuw=None):
         moviemenu = menu.Menu(self.name, self.playlist)
         menuw.pushmenu(moviemenu)
         
