@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/19 20:24:51  dischi
+# remove unneeded try except blocks
+#
 # Revision 1.2  2003/12/07 16:04:50  dischi
 # speed up
 #
@@ -53,8 +56,6 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import config
-
 class ObjectCache:
     '''Provides a cache for objects indexed by a string. It should
     be slow for a large number of objects, since searching takes
@@ -71,25 +72,23 @@ class ObjectCache:
 
 
     def __getitem__(self, key):
-        try:
-            del self.lru[self.lru.index(key)]
-            self.lru.append(key)
-            return self.cache[key]
-        except:
+        if not key in self.cache:
             return None
+        
+        del self.lru[self.lru.index(key)]
+        self.lru.append(key)
+        return self.cache[key]
+
 
     def __setitem__(self, key, object):
-        try:
-            # Do we need to delete the oldest item?
-            if len(self.cache) > self.cachesize:
-                # Yes
-                lru_key = self.lru[0]
-                del self.cache[lru_key]
-                del self.lru[0]
-            self.cache[key] = object
-            self.lru.append(key)
-        except:
-            pass
+        # Do we need to delete the oldest item?
+        if len(self.cache) > self.cachesize:
+            # Yes
+            lru_key = self.lru[0]
+            del self.cache[lru_key]
+            del self.lru[0]
+        self.cache[key] = object
+        self.lru.append(key)
         
 
     def __delitem__(self, key):
