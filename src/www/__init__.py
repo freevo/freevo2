@@ -1,22 +1,16 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# __init__.py - web init function
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# __init__.py - webserver plugin to start the server inside Freevo
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-#
-# Todo:        
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.9  2004/07/10 12:33:43  dischi
-# header cleanup
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Fisrt Version: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -33,28 +27,33 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
+# python imports
+import logging
 
+# freevo imports
 import os
 import config
-import sys
 import plugin
 
-class PluginInterface(plugin.DaemonPlugin):
-    def __init__(self):
-        if config.CONF.display in ('dxr3', 'directfb', 'dfbmga'):
-            print 'For some strange reason, the starting of the webserver inside'
-            print 'Freevo messes up with the DXR3 and directfb output. The webserver'
-            print 'plugin will be disabled. Start it from outside Freevo with'
-            print 'freevo webserver [start|stop]'
-            self.reason = 'dxr3 or directfb output'
-            return
-        plugin.DaemonPlugin.__init__(self)
-        self.pid = None
-        os.system('%s webserver start' % os.environ['FREEVO_SCRIPT'])
+# get logging object
+log = logging.getLogger('www')
 
-    def shutdown(self):
-        # print 'WEBSERVER::shutdown: pid=%s' % self.pid
-        print 'Stopping webserver plugin.'
-        os.system('%s webserver stop' % os.environ['FREEVO_SCRIPT'])
+
+class PluginInterface(plugin.Plugin):
+    """
+    webserver plugin
+    """
+    def __init__(self):
+        """
+        Start the webserver
+        """
+        from www.server import Server, RequestHandler
+        cgi_dir = os.path.join(os.path.dirname(__file__), '../www')
+        cgi_dir = os.path.abspath(cgi_dir)
+        htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
+                    os.path.join(config.DOC_DIR, 'html') ]
+        # launch the server
+        Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)
+        log.info("HTTPServer running on port %s" % str(config.WWW_PORT))
