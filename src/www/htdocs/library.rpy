@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/07/03 00:41:08  mikeruelle
+# fix recording highlighting to match new function output
+#
 # Revision 1.26  2004/06/09 01:53:09  rshortt
 # Small cleanup.
 #
@@ -383,7 +386,7 @@ class LibraryResource(FreevoResource):
                     for prog in progl:
                         try:
                             if prog.isRecording == TRUE:
-                                recordingprogram = tv_util.getProgFilename(prog)
+                                recordingprogram = os.path.basename(tv_util.getProgFilename(prog))
                                 recordingprogram = string.replace(recordingprogram, ' ', '_')
                                 break
                         except:
@@ -392,7 +395,6 @@ class LibraryResource(FreevoResource):
                 else:
                     fv.res += '<h4>The recording server is down, recording information is unavailable.</h4>'
             
-
                 #generate our favorites regular expression
                 favre = ''
                 (result, favorites) = ri.getFavorites()
