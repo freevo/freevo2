@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 21:41:10  dischi
+# start some unicode fixes, still not working every time
+#
 # Revision 1.13  2004/02/23 08:22:10  gsbarbieri
 # i18n: help translators job.
 #
@@ -59,8 +62,9 @@ import config
 import time, sys, socket, traceback, string
 import xmlrpclib
 from twisted.persisted import marmalade
+import epg_types
 
-TRUE = 1
+TRUE  = 1
 FALSE = 0
 
 server_string = 'http://%s:%s/' % \
@@ -68,10 +72,24 @@ server_string = 'http://%s:%s/' % \
 
 server = xmlrpclib.Server(server_string)
 
+def jellyToXML(object):
+    if isinstance(object, epg_types.TvProgram):
+        return marmalade.jellyToXML(object.decode())
+    elif isinstance(object, unicode):
+        return marmalade.jellyToXML(String(object))
+    return marmalade.jellyToXML(object)
+
+
+def unjellyFromXML(object):
+    object = marmalade.unjellyFromXML(object)
+    if isinstance(object, epg_types.TvProgram):
+        return object.encode()
+    return object
+
 
 def returnFromJelly(status, response):
     if status:
-        return (status, marmalade.unjellyFromXML(response))
+        return (status, unjellyFromXML(response))
     else:
         return (status, response)
    
@@ -79,7 +97,8 @@ def returnFromJelly(status, response):
 def getScheduledRecordings():
     try: 
         (status, message) = server.getScheduledRecordings()
-    except:
+    except Exception, e:
+        print e
         return (FALSE, 'record_client: '+_('connection error'))
 
     return returnFromJelly(status, message)
@@ -111,7 +130,7 @@ def scheduleRecording(prog=None):
         return (FALSE, _('ERROR')+': '+_('cannot record it if it is over'))
         
     try:
-        (status, message) = server.scheduleRecording(marmalade.jellyToXML(prog))
+        (status, message) = server.scheduleRecording(jellyToXML(prog))
     except:
         traceback.print_exc()
         return (FALSE, 'record_client: '+_('connection error'))
@@ -124,7 +143,7 @@ def removeScheduledRecording(prog=None):
         return (FLASE, _('no program'))
 
     try:
-        (status, message) = server.removeScheduledRecording(marmalade.jellyToXML(prog))
+        (status, message) = server.removeScheduledRecording(jellyToXML(prog))
     except:
         return (FALSE, 'record_client: '+_('connection error'))
 
@@ -152,8 +171,7 @@ def isProgScheduled(prog, schedule=None):
         return (FALSE, _('program not scheduled'))
     else:
         try:
-            (status, message) = server.isProgScheduled(marmalade.jellyToXML(prog), 
-                                                       schedule)
+            (status, message) = server.isProgScheduled(jellyToXML(prog), schedule)
         except:
             return (FALSE, 'record_client: '+_('connection error'))
 
@@ -173,7 +191,9 @@ def findProg(chan, start):
 def findMatches(find=None):
     try:
         (status, response) = server.findMatches(find)
-    except:
+    except Exception, e:
+        print 'Search error for \'%s\'' % find
+        print e
         return (FALSE, 'record_client: '+_('connection error'))
 
     return returnFromJelly(status, response)
@@ -191,8 +211,8 @@ def addFavorite(name, prog, exactchan, exactdow, exacttod):
 def addEditedFavorite(name, title, chan, dow, mod, priority):
     try:
         (status, message) = \
-            server.addEditedFavorite(marmalade.jellyToXML(name), \
-            marmalade.jellyToXML(title), chan, dow, mod, priority)
+            server.addEditedFavorite(jellyToXML(name), \
+            jellyToXML(title), chan, dow, mod, priority)
     except:
         return (FALSE, 'record_client: '+_('connection error'))
 
@@ -248,8 +268,7 @@ def adjustPriority(favname, mod):
 
 def isProgAFavorite(prog, favs):
     try:
-        (status, message) = server.isProgAFavorite(marmalade.jellyToXML(prog), 
-                                                   marmalade.jellyToXML(favs))
+        (status, message) = server.isProgAFavorite(jellyToXML(prog), jellyToXML(favs))
     except:
         return (FALSE, 'record_client: '+_('connection error'))
 

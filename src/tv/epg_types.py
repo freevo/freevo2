@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/23 21:41:10  dischi
+# start some unicode fixes, still not working every time
+#
 # Revision 1.15  2004/02/23 20:05:36  dischi
 # increase EPG_VERSION because of the unicode fixes
 #
@@ -66,6 +69,7 @@
 
 
 import sys
+import copy
 import time, os, string
 import config
 
@@ -89,14 +93,14 @@ cache_last_time = 0
 class TvProgram:
 
     channel_id = ''
-    title = ''
-    desc = ''
-    sub_title = ''
-    start = 0.0
-    stop = 0.0
-    ratings = {}
+    title      = ''
+    desc       = ''
+    sub_title  = ''
+    start      = 0.0
+    stop       = 0.0
+    ratings    = {}
     categories = []
-    scheduled = False
+    scheduled  = False
 
     def __str__(self):
         bt = time.localtime(self.start)   # Beginning time tuple
@@ -137,6 +141,27 @@ class TvProgram:
         return ''
 
 
+    def decode(self):
+        """
+        Decode all internal strings from Unicode to String
+        """
+        ret = copy.copy(self)
+        for var in dir(ret):
+            if not var.startswith('_') and isinstance(getattr(ret, var), unicode):
+                setattr(ret, var, String(getattr(ret, var)))
+        return ret
+    
+
+    def encode(self):
+        """
+        Encode all internal strings from String to Unicode
+        """
+        ret = copy.copy(self)
+        for var in dir(ret):
+            if not var.startswith('_') and isinstance(getattr(ret, var), str):
+                setattr(ret, var, Unicode(getattr(ret, var)))
+        return ret
+    
 
 class TvChannel:
     id = ''

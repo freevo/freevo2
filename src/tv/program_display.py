@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/23 21:41:10  dischi
+# start some unicode fixes, still not working every time
+#
 # Revision 1.28  2004/02/23 08:22:10  gsbarbieri
 # i18n: help translators job.
 #
@@ -48,7 +51,6 @@ import tv.record_client as record_client
 import event as em
 
 from item import Item
-from gui.PopupBox  import *
 from gui.AlertBox  import *
 
 DEBUG = config.DEBUG
@@ -109,7 +111,6 @@ class ProgramItem(Item):
 
         program_menu = menu.Menu(_('Program Menu'), items, 
                                  item_types = 'tv program menu')
-        rc.app(None)
         program_menu.infoitem = self
         menuw.pushmenu(program_menu)
         menuw.refresh()
@@ -124,7 +125,7 @@ class ProgramItem(Item):
 	#      into a util module or record_client itself.
         _debug_(String('searching for: %s' % self.prog.title))
 
-        pop = PopupBox(text=_('Searching, please wait...'))
+        pop = AlertBox(text=_('Searching, please wait...'))
         pop.show()
 
         items = []
@@ -147,7 +148,6 @@ class ProgramItem(Item):
 
         search_menu = menu.Menu(_( 'Search Results' ), items,
                                 item_types = 'tv program menu')
-        rc.app(None)
         menuw.pushmenu(search_menu)
         menuw.refresh()
 

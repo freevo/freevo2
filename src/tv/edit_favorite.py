@@ -9,12 +9,14 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/23 21:41:10  dischi
+# start some unicode fixes, still not working every time
+#
 # Revision 1.10  2004/02/23 08:22:10  gsbarbieri
 # i18n: help translators job.
 #
 # Revision 1.9  2004/02/19 04:57:57  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+# Support i18n.
 #
 # Revision 1.8  2004/02/18 21:55:11  dischi
 # update to new gui code
@@ -37,7 +39,6 @@
 #
 # Revision 1.2  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
-#
 #
 #-----------------------------------------------------------------------
 #
@@ -104,13 +105,6 @@ class EditFavorite(PopupBox):
         else:
             context = 'guide'
 
-        #print 'DEBUG::subject: %s' % dir(subject)
-        #print 'DEBUG::subject::__module__ %s' % subject.__module__
-        #if isinstance(subject, tv.record_types.Favorite):
-        #    print 'DEBUG::subject: FUCK'
-        #    self.fav = subject
-        #    self.oldname = self.fav.name
-        #elif isinstance(subject, TvProgram):
         if isinstance(subject, TvProgram):
             (result, favs) = record_client.getFavorites()
             if result:
@@ -247,7 +241,6 @@ class EditFavorite(PopupBox):
                     text=_('Remove Failed')+(': %s' % msg)).show()
 
     def eventhandler(self, event, menuw=None):
-        #print 'SELECTED CHILD: %s' % self.get_selected_child()
 
         if self.get_selected_child() == self.name_input:
             if event == em.INPUT_LEFT:
@@ -285,7 +278,6 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event == em.INPUT_ENTER:
                 if self.chan_box.selected or self.chan_box.list.is_visible():
-                    #if DEBUG: print '  Want to toggle_box'
                     self.chan_box.toggle_box()
                     self.draw()
             elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):

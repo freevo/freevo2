@@ -9,13 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/02/23 21:41:10  dischi
+# start some unicode fixes, still not working every time
+#
 # Revision 1.45  2004/02/22 06:22:16  gsbarbieri
 # Handle info in unicode (don't need to convert to string anymore).
 # People envolved to Record & Favorites, please test it and ensure it works.
 #
 # Revision 1.44  2004/02/19 04:57:57  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+# Support i18n.
 #
 # Revision 1.43  2004/02/09 20:14:06  dischi
 # add verbose flag
@@ -29,83 +31,6 @@
 # Revision 1.40  2003/12/31 16:08:08  rshortt
 # Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
 # (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
-#
-# Revision 1.39  2003/11/16 17:38:48  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.38  2003/10/26 17:40:52  dischi
-# small fix
-#
-# Revision 1.37  2003/10/03 16:46:13  dischi
-# moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.36  2003/09/23 13:31:24  outlyer
-# More FreeBSD patches from Lars
-#
-# Revision 1.35  2003/09/08 19:37:11  rshortt
-# Made helper 'updateguide'.  This can be used as './freevo updateguide' in
-# place of './freevo execute src/tv/epg_xmltv.py' to greate the program guide.
-#
-# Revision 1.34  2003/09/07 13:36:09  dischi
-# use ignore not replace for encode error handling
-#
-# Revision 1.33  2003/09/07 13:03:12  mikeruelle
-# Remove rating for now. System is optional, need code to store ratings in tuple
-#
-# Revision 1.32  2003/09/06 11:19:45  dischi
-# o use str.encode() with 'replace' and not our own function
-# o only cache the data from channels we want (major speed enhancement)
-#
-# Revision 1.31  2003/09/05 20:10:36  dischi
-# use util.encode to encode strings
-#
-# Revision 1.30  2003/09/05 03:32:15  rshortt
-# Updating to use the tv. namespace.
-#
-# Revision 1.29  2003/09/03 21:07:50  dischi
-# Make sure the user can write the file. It may happen that the user has
-# no permission at all (try except is protecting us here), but maybe he
-# has write access to the directory, but not the file itself. So remove
-# it first and than write. Please check other parts of Freevo for that
-# problem!
-#
-# Revision 1.28  2003/08/28 18:11:36  dischi
-# use util.py pickle function now and remove the uid from filename
-#
-# Revision 1.27  2003/08/24 19:08:38  mikeruelle
-# populate the rating and categories entries for TvProgram objects.
-#
-# Revision 1.26  2003/08/24 18:15:59  outlyer
-# Use the "best" Python pickle available. Starting in Python 2.3 this is
-# a defined constant, so we'll use the constant; older versions of Python
-# will continue to use the binary format.
-#
-# Revision 1.25  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.8  2003/02/14 16:45:16  outlyer
-# Ugly hack to work around missing stop times. This is a slight improvement
-# over my patch from yesterday, because it "guesses" the stop time of the shows.
-#
-# Logic:
-#
-# Since the only shows missing stop dates are those which appear to end at
-# midnight, we insert a stop date of midnight for those shows missing a stop
-# date.
-#
-# This is not perfect. If you have a better solution, I'll be the first one to
-# put it in. Hopefully, this'll be fixed in XMLTV at some point and this hack
-# won't be necessary.
-#
-# Revision 1.7  2003/02/13 01:48:02  outlyer
-# A workaround for the issue which has arisen with zap2it TV listings wherein
-# the stop date has to be guessed by XMLTV and sometimes isn't guessed properly.
-# This is an imperfect workaround, but it allows the guide to work.
-#
-# I should stress imperfect, because there is a nested exception which is so
-# ugly, it hurts to look at it. I don't know the internals of the xmltv.py
-# library well enough to do a proper fix but I will try. As I said, at least
-#  the guide works now.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -135,14 +60,10 @@ import os
 import traceback
 import calendar
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
-
-# Various utilities
 import util
 
 # Use the alternate strptime module which seems to handle time zones
-#
 # XXX Remove when we are ready to require Python 2.3
 if float(sys.version[0:3]) < 2.3:
     import strptime
@@ -157,29 +78,18 @@ import tv.xmltv as xmltv
 # tv.py module.
 import tv.epg_types as epg_types
 
-
-# Set to 1 for debug output
-DEBUG = config.DEBUG
-
-TRUE = 1
-FALSE = 0
-
 EPG_TIME_EXC = _('Time conversion error')
 
 
 cached_guide = None
 
-def myversion():
-    version = 'XMLTV Parser 1.2.4\n'
-    version += 'Module Author: Aubin Paul\n'
-    version += 'Uses xmltv Python parser by James Oakley\n'
-    return version
 
-
-# Get a TV guide from memory cache, file cache or raw XMLTV file.
-# Tries to return at least the channels from the config file if there
-# is no other data
 def get_guide(popup=None, verbose=True):
+    """
+    Get a TV guide from memory cache, file cache or raw XMLTV file.
+    Tries to return at least the channels from the config file if there
+    is no other data
+    """
     global cached_guide
 
     # Can we use the cached version (if same as the file)?
@@ -190,12 +100,12 @@ def get_guide(popup=None, verbose=True):
         # No, is there a pickled version ("file cache") in a file?
         pname = '%s/TV.xml.pickled' % config.FREEVO_CACHEDIR
         
-        got_cached_guide = FALSE
+        got_cached_guide = False
         if (os.path.isfile(config.XMLTV_FILE) and
             os.path.isfile(pname) and (os.path.getmtime(pname) >
                                        os.path.getmtime(config.XMLTV_FILE))):
-            if DEBUG and verbose:
-                print 'XMLTV, reading cached file (%s)' % pname
+            if verbose:
+                _debug_('XMLTV, reading cached file (%s)' % pname)
 
             if popup:
                 popup.show()
@@ -210,24 +120,24 @@ def get_guide(popup=None, verbose=True):
                 epg_ver = cached_guide.EPG_VERSION
             except AttributeError:
                 if verbose:
-                    print String(_('EPG does not have a version number, must be reloaded'))
+                    _debug_('EPG does not have a version number, must be reloaded')
                     print dir(cached_guide)
 
             if epg_ver != epg_types.EPG_VERSION:
                 if verbose:
-                    print ((String(_('EPG version number %s is stale (new is %s), must be reloaded'))) % (epg_ver, epg_types.EPG_VERSION))
+                    _debug_('EPG version missmatch, must be reloaded')
 
             elif cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE):
                 # Hmmm, weird, there is a pickled file newer than the TV.xml
                 # file, but the timestamp in it does not match the TV.xml
                 # timestamp. We need to reload!
                 if verbose:
-                    print String(_('EPG: Pickled file timestamp mismatch, reloading!'))
+                    _debug_('EPG: Pickled file timestamp mismatch, reloading!')
                 
             else:
-                if DEBUG and verbose:
-                    print 'XMLTV, got cached guide (version %s).' % epg_ver
-                got_cached_guide = TRUE
+                if verbose:
+                    _debug_('XMLTV, got cached guide (version %s).' % epg_ver)
+                got_cached_guide = True
 
         if not got_cached_guide:
             # Need to reload the guide
@@ -235,10 +145,10 @@ def get_guide(popup=None, verbose=True):
             if popup:
                 popup.show()
                 
-            if DEBUG and verbose:
-                print 'XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE
+            if verbose:
+                _debug_('XMLTV, trying to read raw file (%s)' % config.XMLTV_FILE)
             try:    
-                cached_guide = load_guide()
+                cached_guide = load_guide(verbose)
 	    except:
 	    	# Don't violently crash on a incomplete or empty TV.xml please.
 	    	cached_guide = None
@@ -260,49 +170,28 @@ def get_guide(popup=None, verbose=True):
     return cached_guide
 
 
-# Load a guide from the raw XMLTV file using the xmltv.py support lib.
-#
-# Returns a TvGuide or None if an error occurred
-def load_guide():
+def load_guide(verbose=True):
+    """
+    Load a guide from the raw XMLTV file using the xmltv.py support lib.
+    Returns a TvGuide or None if an error occurred
+    """
     # Create a new guide
     guide = epg_types.TvGuide()
 
     # Is there a file to read from?
     if os.path.isfile(config.XMLTV_FILE):
         gotfile = 1
-
-        if 0:
-            # XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.
-
-            # Read the current file
-            print 'XMLTV: XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.'
-            fd = open(config.XMLTV_FILE)
-            data_8bit = fd.read()
-            fd.close()
-
-            # Translate to 7-bit data, replacing 8-bit chars with spaces
-            table = ''.join(map(lambda v:chr(v), (range(0,127) + [32] * 128)))
-            data_7bit = data_8bit.translate(table)
-
-            # Write to the file
-            try:
-                if os.path.isfile(config.XMLTV_FILE):
-                    os.unlink(config.XMLTV_FILE)
-                fd = open(config.XMLTV_FILE, 'w')
-                fd.write(data_7bit)
-                fd.close()
-            except IOError:
-                print 'unable to save %s' % config.XMLTV_FILE
-        
         guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
     else:
-        if DEBUG: print 'XMLTV file (%s) missing!' % config.XMLTV_FILE
+        _debug_('XMLTV file (%s) missing!' % config.XMLTV_FILE)
         gotfile = 0
 
     # Add the channels that are in the config list, or all if the
     # list is empty
     if config.TV_CHANNELS:
-        if DEBUG: print 'epg_xmltv.py: Only adding channels in list'
+        if verbose:
+            _debug_('epg_xmltv.py: Only adding channels in list')
+
         for data in config.TV_CHANNELS:
             (id, disp, tunerid) = data[:3]
             c = epg_types.TvChannel()
@@ -316,8 +205,11 @@ def load_guide():
                 for (days, start_time, stop_time) in data[3:4]:
                     c.times.append((days, int(start_time), int(stop_time)))
             guide.AddChannel(c)
+
+
     else: # Add all channels in the XMLTV file
-        if DEBUG: print 'epg_xmltv.py: Adding all channels'
+        if verbose:
+            _debug_('epg_xmltv.py: Adding all channels')
         xmltv_channels = None
         if gotfile:
             # Don't read the channel info unless we have to, takes a long time!
@@ -348,8 +240,8 @@ def load_guide():
 
     xmltv_programs = None
     if gotfile:
-        if DEBUG:
-            print 'reading xmltv data'
+        if verbose:
+            _debug_('reading xmltv data')
         f = util.gzopen(config.XMLTV_FILE)
         xmltv_programs = xmltv.read_programmes(f)
         f.close()
@@ -363,19 +255,19 @@ def load_guide():
     for chan in guide.chan_dict:
         needed_ids.append(chan)
 
-    if DEBUG:
-        print 'creating guide for %s' % needed_ids
+    if verbose:
+        _debug_('creating guide for %s' % needed_ids)
 
     for p in xmltv_programs:
         if not p['channel'] in needed_ids:
             continue
         prog = epg_types.TvProgram()
         prog.channel_id = p['channel']
-        prog.title = p['title'][0][0]
+        prog.title = Unicode(p['title'][0][0])
         if p.has_key('category'):
              prog.categories = [ cat[0] for cat in p['category'] ]
         if p.has_key('desc'):
-            prog.desc = util.format_text(p['desc'][0][0])
+            prog.desc = Unicode(util.format_text(p['desc'][0][0]))
         if p.has_key('sub-title'):
             prog.sub_title = p['sub-title'][0][0]
         try:
@@ -389,18 +281,18 @@ def load_guide():
             continue
         guide.AddProgram(prog)
 
-    guide.Sort()  # Sort the programs in time order
-    
+    guide.Sort()
     return guide
 
 
-#    
-# Convert a timestring to UTC (=GMT) seconds.
-#
-# The format is either one of these two:
-# '20020702100000 CDT'
-# '200209080000 +0100'
 def timestr2secs_utc(timestr):
+    """
+    Convert a timestring to UTC (=GMT) seconds.
+
+    The format is either one of these two:
+    '20020702100000 CDT'
+    '200209080000 +0100'
+    """
     # This is either something like 'EDT', or '+1'
     try:
         tval, tz = timestr.split()
@@ -410,6 +302,7 @@ def timestr2secs_utc(timestr):
 
     if tz == 'CET':
         tz='+1'
+
     # Is it the '+1' format?
     if tz[0] == '+' or tz[0] == '-':
         tmTuple = ( int(tval[0:4]), int(tval[4:6]), int(tval[6:8]), 
@@ -442,67 +335,3 @@ def timestr2secs_utc(timestr):
             timestr = timestr.replace('EST', '')
             secs    = time.mktime(strptime.strptime(timestr, xmltv.date_format))
     return secs
-
-
-def find_favorites():
-
-    import string
-    import tvgrep
-    import re
-
-    SEASONPASS='/var/cache/freevo/recording/watchlist'
-    if os.path.isfile(SEASONPASS):
-        m = open(SEASONPASS,'r')
-        for show in m.readlines():
-            show = string.replace(show.strip(),' ','\ ')
-            ARG = '.*' + show + '*.'
-            REGEXP = re.compile(ARG,re.IGNORECASE)
-            for a in guide.GetPrograms():
-                for b in a.programs:
-                    if REGEXP.match(b.title):
-                        print tvgrep.make_schedule(b)
-
-
-def main():
-    sys.stdout = sys.__stdout__
-    # Remove a pickled file (if any) if we're trying to list all channels
-    if not config.TV_CHANNELS:
-        if os.path.isfile('%s/TV.xml.pickled' % config.FREEVO_CACHEDIR):
-            os.remove('%s/TV.xml.pickled' % config.FREEVO_CACHEDIR)
-
-    print
-    print 'Getting the TV Guide, this can take a couple of minutes...'
-    print
-    guide = get_guide()
-
-    #print "Finding favourites"
-    #find_favorites()
-        
-    # No args means just pickle the guide, for use with cron-jobs
-    # after getting a new guide.
-    if len(sys.argv) == 1:
-        sys.exit(0)
-
-    if sys.argv[1] == 'config':
-        # Print a list hopefully suitable for using as the config.TV_CHANNELS
-        for chan in guide.chan_list:
-            id = chan.id
-            disp = chan.displayname
-            num = chan.tunerid
-            print "    ('%s', '%s', '%s')," % (id, disp, num)
-    else:
-        # Just dump some data
-        print '\nXML TV Guide Listing:'
-        print guide
-
-        print '\nChannel list:'
-
-        # Print all programs that are currently playing
-        now = time.time()
-        progs = guide.GetPrograms(now, now)
-        for prog in progs:
-            print prog
-
-
-if __name__ == '__main__':
-    main()
