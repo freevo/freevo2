@@ -25,6 +25,32 @@ tasks = []
 
 
 #
+# Check if an application can be found in the user's path. The function
+# returns 1 if the file 'appname' can be found anywhere in the path.
+#
+def check_application(appname):
+    if os.path.isabs(appname):
+        if os.path.isfile(appname):
+            return 1
+        else:
+            return 0
+
+    if appname[0] == '.':
+        if os.path.isfile(appname):
+            return 1
+        else:
+            return 0
+       
+    path = os.path.expandvars('$PATH').split(':')
+    for dir in path:
+        fname = os.path.join(dir, appname)
+        if os.path.isfile(fname):
+            return 1
+
+    return 0
+
+    
+#
 # This class is an abstraction for the applications that are spawned and then
 # checked regularly to see that they are alive.
 #
@@ -32,6 +58,11 @@ class task:
 
     # Spawn the application
     def __init__(self, app_args):
+        # First check if the application can be located in the path
+        app = app_args.exec_name
+        if not check_application(app):
+            print 'PANIC: Cannot find the app "%s" anywhere!' % app
+            
         self.appname = app_args.app_name
         self.application = app_args.exec_name
         self.app_args = [self.application] + app_args.exec_args
@@ -44,16 +75,23 @@ class task:
     def respawn(self):
         pid, exitstat = os.waitpid(self.pid, os.WNOHANG)
         if pid != 0:
-            if DEBUG: print 'Task %s exited, stat 0x%04x' % (self.appname, exitstat)
+            if DEBUG:
+                print 'Task %s exited, stat 0x%04x.' % (self.appname, exitstat)
+                print ' Delaying before respawn...'
+            time.sleep(3.0)
 
             self.pid = os.spawnv(os.P_NOWAIT, self.application, self.app_args)
-            print 'Respawned "%s", pid %s' % (' '.join(self.app_args), self.pid)
+            #print 'Respawned "%s", pid %s' % (' '.join(self.app_args), self.pid)
+            print 'Respawned "%s", pid %s' % (self.app_args, self.pid)
 
 
     # kill -9 application
     def kill(self):
         if self.pid:
-            os.kill(self.pid, signal.SIGTERM)
+            try:
+                os.kill(self.pid, signal.SIGTERM)
+            except OSError:
+                pass  # Task was already killed
 
         if DEBUG: print 'Killed %s, pid %s' % (self.appname, self.pid)
 
