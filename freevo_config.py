@@ -801,7 +801,8 @@ VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtim
            'keyint=30 ' +                  # Keyframe every 10 secs, change?
            '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
-           '-ffourcc divx '                # Force 'divx' ident, better compat.
+           '-ffourcc divx ' +              # Force 'divx' ident, better compat.
+           '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
            '-o %(filename)s.avi ')                   # Filled in by Freevo
 
 # XXX Not used yet

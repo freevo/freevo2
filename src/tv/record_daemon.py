@@ -65,14 +65,6 @@ class ScheduleItem:
     def make_cmd(self):
         '''Build the command line for this recording.'''
 
-        # How many seconds are left to record?
-        len_secs = int(self.length_secs - (time.time() - self.start_time))
-
-        # Make sure this recording ends before the next one might start
-        len_secs -= 30
-
-        cmd = self.cmd + (' -v -endpos %s' % len_secs)
-
         if DEBUG: 
             cmd += ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
         else: 
