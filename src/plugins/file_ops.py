@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/14 13:03:32  dischi
+# o make it possible to turn off the menu item for delete image/info
+# o use new menu delete_submenu function
+#
 # Revision 1.17  2004/01/31 13:15:14  dischi
 # only add the plugin if the parent is a dir
 #
@@ -20,51 +24,6 @@
 #
 # Revision 1.14  2004/01/04 11:17:38  dischi
 # make it possible to delete only the image
-#
-# Revision 1.13  2003/12/29 22:28:13  dischi
-# move to new Item attributes
-#
-# Revision 1.12  2003/11/28 20:08:57  dischi
-# renamed some config variables
-#
-# Revision 1.11  2003/11/22 12:24:39  dischi
-# add delete to directories
-#
-# Revision 1.10  2003/10/23 23:05:24  outlyer
-# Remove some debug.
-#
-# Revision 1.9  2003/10/21 21:17:42  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.8  2003/10/07 19:46:07  outlyer
-# Make it possible to delete playlists. I can't see how this change could
-# ever break anything, but as with the plugin, it's optional if this change
-# should be in the next release.
-#
-# Not being able to delete a playlist seems like a bug to me.
-#
-# Revision 1.7  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.6  2003/09/20 15:46:48  dischi
-# fxd and imdb patches from Eirik Meland
-#
-# Revision 1.5  2003/09/20 15:08:26  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.4  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.3  2003/09/03 18:03:06  dischi
-# fix crash in DEBUG
-#
-# Revision 1.2  2003/08/31 17:18:33  dischi
-# exception handling
-#
-# Revision 1.1  2003/08/31 17:14:21  dischi
-# Move delete file from VideoItem into a global plugin. Now it's also
-# possible to remove audio and image files.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -99,6 +58,11 @@ class PluginInterface(plugin.ItemPlugin):
     """
     small plugin to delete files
     """
+    def config(self):
+        return [ ('FILE_OPS_ALLOW_DELETE_IMAGE', True,
+                  'Add delete image to the menu.'),
+	         ('FILE_OPS_ALLOW_DELETE_INFO', True,
+                  'Add delete info to the menu.') ]
 
     def actions(self, item):
         """
@@ -115,9 +79,9 @@ class PluginInterface(plugin.ItemPlugin):
         if hasattr(item, 'files') and item.files:
             if item.files.delete_possible():
                 items.append((self.confirm_delete, _('Delete'), 'delete'))
-            if item.files.fxd_file:
+            if item.files.fxd_file and config.FILE_OPS_ALLOW_DELETE_INFO:
                 items.append((self.confirm_info_delete, _('Delete info'), 'delete_info'))
-            if item.files.image:
+            if item.files.image and config.FILE_OPS_ALLOW_DELETE_IMAGE:
                 items.append((self.confirm_image_delete, _('Delete image'), 'delete_image'))
         return items
 
@@ -146,13 +110,13 @@ class PluginInterface(plugin.ItemPlugin):
     def delete_file(self):
         self.item.files.delete()
         if self.menuw:
-            self.menuw.back_one_menu(arg='reload')
+            self.menuw.delete_submenu(True, True)
 
     def delete_info(self):
         self.safe_unlink(self.item.files.image)
         self.safe_unlink(self.item.files.fxd_file)
         if self.menuw:
-            self.menuw.back_one_menu(arg='reload')
+            self.menuw.delete_submenu(True, True)
 
     def delete_image(self):
         self.safe_unlink(self.item.files.image)
@@ -161,4 +125,4 @@ class PluginInterface(plugin.ItemPlugin):
         else:
             self.item.image = None
         if self.menuw:
-            self.menuw.back_one_menu(arg='reload')
+            self.menuw.delete_submenu(True, True)
