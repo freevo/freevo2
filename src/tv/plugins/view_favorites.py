@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/03/13 03:28:06  rshortt
+# More favorites support... almost there!
+#
 # Revision 1.1  2004/02/24 04:40:16  rshortt
 # Make 'View Favorites' a menu based plugin, still incomplete.
 #
@@ -42,6 +45,7 @@ import tv.record_client as record_client
 
 from item import Item
 from tv.program_display import FavoriteItem
+from gui.AlertBox import AlertBox
 
 
 class ViewFavoritesItem(Item):
@@ -69,6 +73,7 @@ class ViewFavoritesItem(Item):
             favorites = favorites.values()
             favorites.sort(f)
             for fav in favorites:
+                print 'FAV: name=%s mod=%s' % (fav.name, fav.mod)
                 items.append(FavoriteItem(self, fav))
 
         else:

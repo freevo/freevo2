@@ -620,6 +620,21 @@
                         <text font="info value" expression="title" mode="soft" />
                         <newline/>
                     </if>
+                    <if expression="channel">
+	                <text font="info value" mode="soft">Channel: </text>
+                        <text font="info value" expression="channel" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="dow">
+	                <text font="info value" mode="soft">Day: </text>
+                        <text font="info value" expression="dow" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="mod">
+	                <text font="info value" mode="soft">Time: </text>
+                        <text font="info value" expression="mod" mode="soft" />
+                        <newline/>
+                    </if>
                 </item>
             </content>
         </layout>

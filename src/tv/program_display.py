@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/03/13 03:28:06  rshortt
+# More favorites support... almost there!
+#
 # Revision 1.32  2004/02/24 05:08:11  rshortt
 # Differentiate between name and title.
 #
@@ -63,7 +66,8 @@ import tv.record_client as record_client
 import event as em
 
 from item import Item
-from gui.AlertBox  import *
+from gui.AlertBox import AlertBox
+from gui.InputBox import InputBox
 
 DEBUG = config.DEBUG
 
@@ -219,8 +223,10 @@ class FavoriteItem(Item):
     def __init__(self, parent, fav):
         Item.__init__(self, parent, skin_type='video')
         self.fav   = fav
-        self.name  = fav.name
+        self.name  = self.origname = fav.name
         self.title = fav.title
+
+        self.week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun'))
 
         if fav.channel == 'ANY':
             self.channel = _('ANY CHANNEL')
@@ -229,12 +235,14 @@ class FavoriteItem(Item):
         if fav.dow == 'ANY':
             self.dow = _('ANY DAY')
         else:
-            week_days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun'))
-            self.dow = week_days[int(fav.dow)]
+            self.dow = self.week_days[int(fav.dow)]
         if fav.mod == 'ANY':
             self.mod = _('ANY TIME')
         else:
             self.mod = strftime(config.TV_TIMEFORMAT, gmtime(float(fav.mod * 60)))
+
+        # needed by the inputbox handler
+        self.menuw = None
 
 
     def actions(self):
@@ -256,7 +264,7 @@ class FavoriteItem(Item):
                 items.append(menu.MenuItem(_('Modify priority'), 
                                            action=self.mod_priority))
 
-        items.append(menu.MenuItem(_('Save changes'), action=self.mod_time))
+        items.append(menu.MenuItem(_('Save changes'), action=self.save_changes))
         items.append(menu.MenuItem(_('Remove favorite'), action=self.rem_favorite))
 
         favorite_menu = menu.Menu(_('Favorite Menu'), items, 
@@ -267,23 +275,126 @@ class FavoriteItem(Item):
 
 
     def mod_name(self, arg=None, menuw=None):
-        pass
+        self.menuw = menuw
+        InputBox(text=_('Alter Name'), handler=self.alter_name).show()
+
+
+    def alter_name(self, name):
+        if name:
+            self.name = self.fav.name = name
+
+        self.menuw.refresh()
 
 
     def mod_channel(self, arg=None, menuw=None):
-        pass
+        items = []
+
+        items.append(menu.MenuItem('ANY CHANNEL', action=self.alter_prop,
+                     arg=('channel', 'ANY')))
+
+        for chanline in config.TV_CHANNELS:
+            items.append(menu.MenuItem(chanline[1], action=self.alter_prop,
+                         arg=('channel', chanline[1])))
+
+        favorite_menu = menu.Menu(_('Modify Channel'), items, 
+                                  item_types = 'tv favorite menu')
+        favorite_menu.infoitem = self
+        menuw.pushmenu(favorite_menu)
+        menuw.refresh()
+
+
+    def alter_prop(self, arg=(None,None), menuw=None):
+        (prop, val) = arg
+        print 'FAV: prop=%s' % prop
+        print 'FAV: val=%s' % val
+
+        if prop == 'channel':
+            if val == 'ANY':
+                self.channel = 'ANY CHANNEL'
+                self.fav.channel = 'ANY'
+            else:
+                self.channel = val
+                self.fav.channel = val
+
+        elif prop == 'dow':
+            if val == 'ANY':
+                self.dow = 'ANY DAY'
+                self.fav.dow = 'ANY'
+            else:
+                self.dow = self.week_days[val]
+                self.fav.dow = val
+
+        elif prop == 'mod':
+            if val == 'ANY':
+                self.mod = 'ANY TIME'
+                self.fav.mod = 'ANY'
+            else:
+                # self.mod = tv_util.minToTOD(val)
+                self.mod = strftime(config.TV_TIMEFORMAT, 
+                                    gmtime(float(val * 60)))
+                self.fav.mod = val
+
+        if menuw:  
+            menuw.back_one_menu(arg='reload')
 
 
     def mod_day(self, arg=None, menuw=None):
-        pass
+        items = []
+
+        items.append(menu.MenuItem('ANY DAY', action=self.alter_prop,
+                     arg=('dow', 'ANY')))
+
+        for i in range(len(self.week_days)):
+            items.append(menu.MenuItem(self.week_days[i], action=self.alter_prop,
+                         arg=('dow', i)))
+
+        favorite_menu = menu.Menu(_('Modify Day'), items, 
+                                  item_types = 'tv favorite menu')
+        favorite_menu.infoitem = self
+        menuw.pushmenu(favorite_menu)
+        menuw.refresh()
 
 
     def mod_time(self, arg=None, menuw=None):
-        pass
+        items = []
+
+        items.append(menu.MenuItem('ANY TIME', action=self.alter_prop,
+                     arg=('mod', 'ANY')))
+
+        for i in range(48):
+            mod = i * 30 
+            items.append(menu.MenuItem(strftime(config.TV_TIMEFORMAT, 
+                                                gmtime(float(mod * 60))), 
+                                       action=self.alter_prop,
+                                       arg=('mod', mod)))
+
+        favorite_menu = menu.Menu(_('Modify Time'), items, 
+                                  item_types = 'tv favorite menu')
+        favorite_menu.infoitem = self
+        menuw.pushmenu(favorite_menu)
+        menuw.refresh()
+
+
+    def save_changes(self, arg=None, menuw=None):
+        (result, msg) = record_client.removeFavorite(self.origname)
+        if result:
+            (result, msg) = record_client.addEditedFavorite(self.fav.name, 
+                                                            self.fav.title, 
+                                                            self.fav.channel, 
+                                                            self.fav.dow, 
+                                                            self.fav.mod, 
+                                                            self.fav.priority)
+            if not result:
+                AlertBox(text=_('Save Failed, favorite was lost')+(': %s' % msg)).show()
+            elif menuw:  
+                menuw.back_one_menu(arg='reload')
+
+        else:
+            AlertBox(text=_('Save Failed')+(': %s' % msg)).show()
 
 
     def rem_favorite(self, arg=None, menuw=None):
-        (result, msg) = record_client.removeFavorite(self.fav.name)
+        (result, msg) = record_client.removeFavorite(self.origname)
         if result:
             # then menu back one which should show an updated list if we
             # were viewing favorites or back to the program display
