@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/04/23 10:41:05  dischi
+# fixed item plugin list
+#
 # Revision 1.14  2003/04/22 19:33:35  dischi
 # o Added TV has plugin name
 # o support for remove by name
@@ -212,6 +215,7 @@ def init():
     for name, type, level, args, number in all_plugins:
         module = name[:name.rfind('.')]
 
+        # locate the plugin
         if os.path.isfile('src/plugins/%s.py' % module):
             module  = 'plugins.%s' % module
             object  = 'plugins.%s' % name
@@ -242,6 +246,7 @@ def init():
 
             p._number = number
 
+            # set the correct type
             if type:
                 p._type  = type
             elif special:
@@ -252,14 +257,7 @@ def init():
             if p._type:
                 if not ptl.has_key(p._type):
                     ptl[p._type] = []
-                type = ptl[p._type]
-
-                for i in range(len(type)):
-                    if type[i]._level > p._level:
-                        type.insert(i, p)
-                        break
-                else:
-                    type.append(p)
+                type = ptl[p._type].append(p)
 
             if p.plugin_name:
                 named_plugins[p.plugin_name] = p
@@ -269,6 +267,8 @@ def init():
             print 'failed to load plugin %s' % name
             traceback.print_exc()
 
+    # sort the daemon plugins in different lists based on the
+    # callbacks they have
     if ptl.has_key('daemon'):
         for type in ('poll', 'draw', 'eventhandler' ):
             ptl['daemon_%s' % type] = []
@@ -277,11 +277,23 @@ def init():
                     ptl['daemon_%s' % type].append(p)
 
     for mtype in ( '', '_video', '_audio', '_image', '_games' ):
+        # add mainmenu plugins to 'daemon_eventhandler' if they have one
         if ptl.has_key('mainmenu%s' % mtype):
             for p in ptl['mainmenu%s' % mtype]:
                 if hasattr(p, 'eventhandler'):
                     ptl['daemon_eventhandler'].append(p)
-                
+
+        # add 'item' to all types of items
+        if ptl.has_key('item') and mtype:
+            if not ptl.has_key('item%s' % mtype):
+                ptl['item%s' % mtype] = []
+            for p in ptl['item']:
+                ptl['item%s' % mtype].append(p)
+
+        # sort plugins in extra function (exec doesn't like to be
+        # in the same function is 'lambda' 
+        sort_plugins()
+
             
 def get(type):
     """
@@ -343,6 +355,15 @@ plugin_number = 0
 
 ptl           = {}
 named_plugins = {}
+
+
+def sort_plugins():
+    """
+    sort all plugin lists based on the level
+    """
+    global ptl
+    for key in ptl:
+        ptl[key].sort(lambda l, o: cmp(l._level, o._level))
 
 
 #
