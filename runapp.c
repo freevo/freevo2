@@ -202,7 +202,6 @@ main (int ac, char *av[])
     pPreloads = get_preload_str ("./runtime/preloads");
     LOG ("Setting LD_PRELOAD = '%s'", pPreloads);
 
-    setenv ("LD_LIBRARY_PATH", "./runtime/dll", 1);
     setenv ("LD_PRELOAD", pPreloads, 1);
     
   }
