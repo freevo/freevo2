@@ -209,8 +209,9 @@ START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or
 # Format [ ('mountdir1', 'devicename1', 'displayed name1'),
 #          ('mountdir2', 'devicename2', 'displayed name2'), ...]
 #
-# Leave empty to autodetect drives in during startup from /etc/fstab
-ROM_DRIVES = []
+# Set to None to autodetect drives in during startup from /etc/fstab,
+# set to [] to disable rom drive support at all
+ROM_DRIVES = None
 
 # hide discs from the wrong menu (e.g. VCDs in audio menu) and empty discs
 HIDE_UNUSABLE_DISCS = 1               

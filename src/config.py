@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2003/10/22 19:08:33  dischi
+# make it possible to deactivate rom drive support
+#
 # Revision 1.63  2003/10/19 11:17:37  dischi
 # move gettext into config so that everything has _()
 #
@@ -547,7 +550,7 @@ if not MOVIE_DATA_DIR and not HELPER:
 #
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 #
-if not ROM_DRIVES:
+if ROM_DRIVES == None:
     if os.path.isfile('/etc/fstab'):        
         re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/[am]?cd[0-9]+[a-z]?)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_cdrec     = re.compile( '^(/dev/cdrecorder[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
