@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.4  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -46,9 +49,6 @@ import pygame
 import config
 from Container      import Container
 from LayoutManagers import FlowLayout
-
-DEBUG = config.DEBUG
-
 
 class Panel(Container):
     """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.10  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -83,8 +86,6 @@ from Label          import *
 from types          import *
 
 import event as em
-
-DEBUG = 0
 
 
 class scrolldemo(PopupBox):

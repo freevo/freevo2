@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.19  2003/09/24 18:21:27  outlyer
 # Fix assignment to None. I screwed up the first time I did it, but this
 # should be correct.
@@ -118,9 +121,6 @@ from types     import *
 
 import event as em
 
-DEBUG = 0
-
-
 class RegionScroller(Container):
     """
     left      x coordinate. Integer
@@ -215,7 +215,7 @@ class RegionScroller(Container):
 
 
     def scroll(self, direction):
-        if DEBUG: print 'scrolldir: direction="%s"' % direction
+        _debug_('scrolldir: direction="%s"' % direction, 2)
 
         if direction == em.INPUT_RIGHT:
             new_x = self.v_x + self.x_scroll_interval
@@ -237,7 +237,8 @@ class RegionScroller(Container):
             if new_y < 0:
                 new_y = 0
             self.v_y = new_y
-        if DEBUG: self.print_stuff()
+        if config.DEBUG > 1:
+            self.print_stuff()
 
 
     def set_surface(self, surface):
@@ -298,7 +299,7 @@ class RegionScroller(Container):
         """
         GUIObject.set_position(self, left, top)
         if isinstance(self.border, Border):
-            if DEBUG: print "updating borders set_postion as well"
+            _debug_("updating borders set_postion as well", 2)
             self.border.set_position(left, top)
 
         # if self.show_h_scrollbar:

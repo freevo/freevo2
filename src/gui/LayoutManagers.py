@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.13  2003/09/07 11:16:16  dischi
 # add option to center the container on screen
 #
@@ -85,8 +88,6 @@ from Scrollbar import *
 from GUIObject import *
 from Label     import *
 
-DEBUG = 0
-
 
 class LayoutManager:
 
@@ -131,18 +132,18 @@ class FlowLayout(LayoutManager):
         num_children = len(self.container.children)
         for i in range(num_children):
             child = self.container.children[i]
-            if DEBUG: print 'FlowLayout: container="%s"' % self.container
-            if DEBUG: print '            child="%s"' % child
-            if DEBUG: print '            child is %sx%s' % (child.width,child.height)
+            _debug_('FlowLayout: container="%s"' % self.container, 2)
+            _debug_('            child="%s"' % child, 2)
+            _debug_('            child is %sx%s' % (child.width,child.height), 2)
 
             if not child.is_visible():
-                if DEBUG: print '            skipping something invisible'
+                _debug_('            skipping something invisible', 2)
                 continue
             if isinstance(child, Border):
-                if DEBUG: print '            skipping border'
+                _debug_('            skipping border', 2)
                 continue
             if isinstance(child, Scrollbar):
-                if DEBUG: print '            skipping scrollbar'
+                _debug_('            skipping scrollbar', 2)
                 continue
 
             x = next_x
@@ -151,7 +152,7 @@ class FlowLayout(LayoutManager):
             next = self.get_next_child(i)
 
             if child.width == -1:
-                if DEBUG: print '            child width not set'
+                _debug_('            child width not set', 2)
                 # if next and next.h_align == Align.RIGHT and next.width > 0:
                 #     if DEBUG: print '            next align is RIGHT'
                 #     child.width = self.container.width - \
@@ -162,7 +163,7 @@ class FlowLayout(LayoutManager):
                 #                   self.container.h_margin - x
                 child.width = self.container.width - \
                               2 * self.container.h_margin
-                if DEBUG: print '            child width set to %s' % child.width
+                _debug_('            child width set to %s' % child.width, 2)
 
 
             if child.height == -1 and isinstance(child, Label):
@@ -171,20 +172,18 @@ class FlowLayout(LayoutManager):
                 else:
                     child.height = self.container.height - \
                                    self.container.v_margin - y
-                if DEBUG: print '            child was %sx%s' % (child.width,child.height)
+                _debug_('            child was %sx%s' % (child.width,child.height), 2)
                 child.get_rendered_size()
-                if DEBUG: print '            child now %sx%s' % (child.width,child.height)
+                _debug_('            child now %sx%s' % (child.width,child.height), 2)
         
             end = x + child.width + self.container.h_margin 
-            if DEBUG: print '            end is %s' % end
-
-            if DEBUG: print '            child row len is %s' % len(self.table[row])
-            if DEBUG: print '            child h_align is %s' % child.h_align
+            _debug_('            end is %s' % end, 2)
+            _debug_('            child row len is %s' % len(self.table[row]), 2)
+            _debug_('            child h_align is %s' % child.h_align, 2)
 
             if end > self.container.width or \
                (len(self.table[row]) and (child.h_align == Align.LEFT or \
                                           child.h_align == Align.CENTER)):
-                if DEBUG: print '            new row'
                 row += 1
                 self.table.append([])
                 x = self.container.h_margin
@@ -193,23 +192,21 @@ class FlowLayout(LayoutManager):
 
             if child.height > line_height:
                 line_height = child.height
-                if DEBUG: print '            line_height now %s' % line_height
 
             if y + child.height > \
                self.container.height - self.container.v_margin:
                 if self.container.vertical_expansion:
                     self.container.height = y + child.height + \
                                             self.container.v_margin
-                    if DEBUG: 
-                        print 'LAYOUT:  fit me in! (%s) - %s' % \
-                                     (self.container.height, self)
+                    _debug_('LAYOUT:  fit me in! (%s) - %s' % \
+                            (self.container.height, self), 2)
                 else:
                     break
 
             next_x = x + child.width + self.container.h_spacing
             next_y = y
                 
-            if DEBUG: print '            position="%s,%s"' % (x, y)
+            _debug_('            position="%s,%s"' % (x, y), 2)
             child.set_position(x, y)
             self.table[row].append(child)
 
@@ -235,7 +232,7 @@ class FlowLayout(LayoutManager):
                     x_offset = self.container.width / 2 - \
                                (child.left + child.width / 2)
                     child.left += x_offset
-                    if DEBUG: print '            moved right by %s' % x_offset
+                    _debug_('            moved right by %s' % x_offset, 2)
 
                 if child.h_align == Align.LEFT:
                     pass
@@ -246,7 +243,7 @@ class FlowLayout(LayoutManager):
                     y_offset = self.container.height / 2 - \
                                (child.top + child.height / 2)
                     child.top += y_offset 
-                    if DEBUG: print '            moved down by %s' % y_offset
+                    _debug_('            moved down by %s' % y_offset, 2)
 
                 # If there is really just one visible child inside this
                 # container then we are done.
@@ -274,13 +271,13 @@ class FlowLayout(LayoutManager):
 
                 for child in row:
                     child.left += x_offset 
-                    if DEBUG: print '            moved right by %s' % x_offset
+                    _debug_('            moved right by %s' % x_offset, 2)
 
             elif len(row) == 1 and row[0].h_align == Align.CENTER:
                 x_offset = self.container.width / 2 - \
                            (row[0].left + row[0].width / 2)
                 row[0].left += x_offset
-                if DEBUG: print '            moved right by %s' % x_offset
+                _debug_('            moved right by %s' % x_offset, 2)
 
 
         if len(self.table) > 1:

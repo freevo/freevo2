@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.19  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -125,8 +128,6 @@ from Border    import *
 from Label     import *
 from types     import *
 
-DEBUG = 0
-
 import event as em
 
 class AlertBox(PopupBox):
@@ -165,10 +166,10 @@ class AlertBox(PopupBox):
 
 
     def eventhandler(self, event):
-        if DEBUG: print 'AlertBox: EVENT = %s for %s' % (event, self)
+        _debug_('AlertBox: EVENT = %s for %s' % (event, self))
 
         if event in (em.INPUT_ENTER, em.INPUT_EXIT):
-            if DEBUG: print 'HIT OK'
+            _debug_('HIT OK')
             self.destroy()
             if self.handler:
                 self.handler()

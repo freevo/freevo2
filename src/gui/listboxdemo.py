@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.11  2003/07/13 19:28:58  rshortt
 # Bugfix.
 #
@@ -87,9 +90,6 @@ from Label          import *
 from types          import *
 
 import event as em
-
-DEBUG = 0
-
 
 class listboxdemo(PopupBox):
     """

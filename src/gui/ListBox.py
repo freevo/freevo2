@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.18  2003/09/13 10:32:55  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -104,9 +107,6 @@ from ListItem       import *
 from types          import * 
 import pygame
 
-DEBUG = 0
-
-
 class ListBox(RegionScroller):
     """
     left      x coordinate. Integer
@@ -161,7 +161,7 @@ class ListBox(RegionScroller):
 
 
     def scroll(self, direction):
-        if DEBUG: print 'listbox scroll: direction="%s"' % direction
+        _debug_('listbox scroll: direction="%s"' % direction, 2)
 
         if direction in (em.INPUT_RIGHT, em.INPUT_LEFT):
             return RegionScroller.scroll(self, direction)
@@ -301,10 +301,10 @@ class ListBox(RegionScroller):
 
 
     def eventhandler(self, event):
-        if DEBUG: print 'ListBox::eventhandler: event=%s' % event
+        _debug_('ListBox::eventhandler: event=%s' % event, 2)
 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
-            if DEBUG: print 'ListBox::eventhandler: should scroll' 
+            _debug_('ListBox::eventhandler: should scroll', 2)
             self.scroll(event)
             self.parent.draw()
             self.osd.update(self.parent.get_rect())

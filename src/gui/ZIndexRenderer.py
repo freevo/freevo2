@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.9  2003/07/12 10:11:34  dischi
 # load osd only when needed
 #
@@ -97,11 +100,10 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
+import config
 import osd
 import pygame
 
-
-DEBUG = 0
 
 _singleton = None
 
@@ -208,7 +210,7 @@ class ZIndexRenderer:
                 if o.bg_surface:
                     # osd.putsurface(o.bg_surface, o.left, o.top)
                     # osd.update()
-                    if DEBUG:
+                    if config.DEBUG > 1:
                         o.bg_image = o.bg_surface.convert()
                         iname = '/tmp/last-hide.bmp' 
                         pygame.image.save( o.bg_image, iname )
@@ -248,7 +250,7 @@ class ZIndexRenderer:
             if o == object:
                 # o.bg_surface = osd.getsurface(o.left, o.top, 
                 #                               o.width, o.height)
-                if DEBUG:
+                if config.DEBUG > 1:
                     o.bg_image = o.bg_surface.convert()
                     iname = '/tmp/bg1-%s.bmp' % xx
                     pygame.image.save( o.bg_image, iname )

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.1  2003/09/01 18:52:55  dischi
 # Add progressbar and box with progressbar
 #
@@ -43,8 +46,6 @@ from Progressbar import *
 from Border      import *
 from Label       import *
 from types       import *
-
-DEBUG = 0
 
 import event as em
 

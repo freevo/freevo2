@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.34  2003/09/14 09:15:08  dischi
 # removed debug
 #
@@ -92,8 +95,6 @@ from Border    import *
 from Label     import *
 from types     import *
 
-DEBUG = 0
-
 import rc
 import event as em
 
@@ -138,7 +139,7 @@ class PopupBox(Container):
 
         parent.add_child(self)
 
-        if DEBUG: print 'set focus to %s' % self
+        _debug_('set focus to %s' % self, 2)
         self.osd.add_app(self)
 
         self.event_context = 'input'
@@ -259,7 +260,7 @@ class PopupBox(Container):
         The actual internal draw function.
 
         """
-        if DEBUG: print 'PopupBox::_draw %s' % self
+        _debug_('PopupBox::_draw %s' % self, 2)
 
         if not self.width or not self.height:
             raise TypeError, 'Not all needed variables set.'
@@ -285,16 +286,14 @@ class PopupBox(Container):
         Erasing us from the canvas without deleting the object.
         """
 
-        if DEBUG: print "  Inside PopupBox._erase..."
+        _debug_("  Inside PopupBox._erase...", 2)
         # Only update the part of screen we're at.
         self.osd.screen.blit(self.bg_surface, self.get_position(),
                         self.get_rect())
         
         if self.border:
-            if DEBUG: print "    Has border, doing border erase."
+            _debug_("    Has border, doing border erase.", 2)
             self.border._erase()
-
-        if DEBUG: print "    ...", self
 
 
     def refresh(self):
@@ -306,9 +305,9 @@ class PopupBox(Container):
 
         
     def eventhandler(self, event):
-        if DEBUG: print 'PopupBox: event = %s' % event
+        _debug_('PopupBox: event = %s' % event, 2)
 
-        elif event == em.INPUT_EXIT:
+        if event == em.INPUT_EXIT:
             self.destroy()
         else:
             return self.parent.eventhandler(event)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.12  2003/09/13 10:32:56  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -85,9 +88,6 @@ from Border    import *
 from Button    import *
 from Label     import * 
 from types     import * 
-
-DEBUG = 0
-
 
 class ListItem(Button):
     """

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.4  2003/09/05 15:59:20  outlyer
 # Use StringTypes instead of "StringType" since StringTypes includes unicode,
 # which TV listings are sometimes in (like mine)
@@ -55,9 +58,6 @@
 
 import config
 from GUIObject import GUIObject
-
-DEBUG = config.DEBUG
-
 
 class Image(GUIObject):
 

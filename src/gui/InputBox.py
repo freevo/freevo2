@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.12  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
@@ -91,8 +94,6 @@ from Border         import *
 from Label          import *
 from LetterBoxGroup import *
 from types          import *
-
-DEBUG = 0
 
 import event as em
 

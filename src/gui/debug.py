@@ -32,8 +32,6 @@ from pygame.locals  import *
 
 import util
 
-DEBUG = 1
-
 # ======================================================================
 # XXX These functions are here for debug.. I'll remove them in time.
 # ======================================================================

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.2  2003/09/13 10:32:56  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -48,9 +51,6 @@ from Color      import *
 from Border     import *
 from Label      import * 
 from types      import * 
-
-DEBUG = 0
-
 
 class Progressbar(Container):
     """

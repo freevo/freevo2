@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.12  2003/06/02 03:28:41  rshortt
 # Fixes for event changes.
 #
@@ -85,8 +88,6 @@ import event as em
 
 from GUIObject import Align
 from Button import Button
-
-DEBUG = 0
 
 
 class LetterBox(Button):

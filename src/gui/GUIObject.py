@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.29  2003/10/08 03:14:51  outlyer
 # Make sure get_size() always returns int
 #
@@ -106,8 +109,6 @@ import ZIndexRenderer
 
 from Color import *
 
-DEBUG = 0
-
 class GUIObject:
     """
     Common parent class of all GUI objects. You can override this to make
@@ -146,7 +147,7 @@ class GUIObject:
 
         self.event_context = None
 
-        if DEBUG: print "inside GUIOBJECT INIT"
+        _debug_("inside GUIOBJECT INIT", 2)
 
         # XXX: skin settings
         # This if/else should be removed when the new skin is in place.
@@ -347,12 +348,12 @@ class GUIObject:
 
 
     def get_selected_child(self):
-        if DEBUG: print 'GSC: %s' % self
+        _debug_('GSC: %s' % self)
         for child in self.children:
             if not child.is_visible(): continue
-            if DEBUG: print '     child: %s' % child
+            _debug_('     child: %s' % child, 2)
             if child.selected == 1:
-                if DEBUG: print '     selected'
+                _debug_('     selected', 2)
                 return child
             else:
                 selected = child.get_selected_child()
@@ -383,7 +384,7 @@ class GUIObject:
 
 
     def draw(self, surface=None):
-        if DEBUG: print 'GUIObject::draw %s' % self
+        _debug_('GUIObject::draw %s' % self, 2)
 
         if self.is_visible() == 0: return FALSE
 
@@ -425,7 +426,7 @@ class GUIObject:
 
     def bg_replace(self):
         if not self.bg_surface: return
-        if DEBUG: print 'GUIObject::draw: have bg_surface'
+        _debug_('GUIObject::draw: have bg_surface', 2)
 
         if self.parent.surface:
             p = self.parent.surface
@@ -466,19 +467,18 @@ class GUIObject:
     def destroy(self):
         self.visible = 0
 
-        if DEBUG:
+        if config.DEBUG > 1:
             if self.bg_image:
                 iname = '/tmp/bg-%s-%s.bmp' % (self.left, self.top)
                 pygame.image.save( self.bg_image, iname )
-
-        if DEBUG: print 'GUIObject.destroy(): %s' % self
+            print 'GUIObject.destroy(): %s' % self
 
         if self.children:
             while self.children:
                 child = self.children[0]
                 child.destroy() # the child will remove itself from children
                 
-        if DEBUG: print 'parent: %s' % self.parent
+        _debug_('parent: %s' % self.parent, 2)
         if self.parent:
             self.parent.children.remove(self)
 

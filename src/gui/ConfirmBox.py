@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.20  2003/09/13 10:34:19  dischi
 # map EXIT to close the box
 #
@@ -120,8 +123,6 @@ from Border    import *
 from Label     import *
 from types     import *
 
-DEBUG = 0
-
 import event as em
 
 class ConfirmBox(PopupBox):
@@ -170,7 +171,7 @@ class ConfirmBox(PopupBox):
 
 
     def eventhandler(self, event):
-        if DEBUG: print 'ConfirmBox: EVENT = %s' % event
+        _debug_('ConfirmBox: EVENT = %s' % event, 2)
 
         if event in (em.INPUT_LEFT, em.INPUT_RIGHT):
             self.b0.toggle_selected()
@@ -184,7 +185,7 @@ class ConfirmBox(PopupBox):
 
         elif event == em.INPUT_ENTER:
             if self.b0.selected:
-                if DEBUG: print 'HIT OK'
+                _debug_('HIT OK', 2)
                 self.destroy()
                 if self.handler: self.handler()
             else:

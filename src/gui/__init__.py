@@ -19,6 +19,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.8  2003/05/02 01:09:03  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -90,11 +93,10 @@ __version__ = "$Revision$"
 __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
-DEBUG = 0
-
 import sys
 import os.path
-    
+import config
+
 from gui.Border            import *
 from gui.Color             import *
 from gui.GUIObject         import *
@@ -118,8 +120,5 @@ from gui.listboxdemo       import *
 from gui.optiondemo        import *
 
 
-if DEBUG:
+if config.DEBUG > 1:
     from gui.debug import *
-    
-
-

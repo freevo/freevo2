@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.21  2003/09/13 10:32:55  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -141,9 +144,6 @@ import pygame
 
 from GUIObject import *
 
-DEBUG = 0
-
-
 class Label(GUIObject):
     """
     text    String, text to display
@@ -236,9 +236,9 @@ class Label(GUIObject):
         Sets the font of label.
         Uses _getfont in osd, and the fontcache in osd.
         """
-        if DEBUG: print 'LABEL: state=%s' % state
-        if DEBUG: print 'LABEL: font=%s' % font
-        if DEBUG: print 'LABEL: size=%s' % size
+        _debug_('LABEL: state=%s' % state, 2)
+        _debug_('LABEL: font=%s' % font, 2)
+        _debug_('LABEL: size=%s' % size, 2)
 
         if type(font) in StringTypes and type(size) is IntType:
             if self.surface: self.surface = None
@@ -300,8 +300,8 @@ class Label(GUIObject):
 
 
     def render(self):
-        if DEBUG: print 'Label::_draw %s' % self
-        if DEBUG: print '       text=%s' % self.text
+        _debug_('Label::_draw %s' % self, 2)
+        _debug_('       text=%s' % self.text, 2)
 
         if not self.font: raise TypeError, 'Oops, no font.'
         if not self.text: raise TypeError, 'Oops, no text.'
@@ -311,24 +311,18 @@ class Label(GUIObject):
             return
 
         if self.parent.selected: 
-            if DEBUG: print '       SELECTED'
             fgc = self.selected_fg_color.get_color_trgb()
             font = self.selected_font_name
             size = self.selected_font_size
         else:
-            if DEBUG: print '       NOT SELECTED'
             fgc = self.fg_color.get_color_trgb()
             font = self.font_name
             size = self.font_size
-
-        if DEBUG: print '       fgc=%s' % fgc
 
         (pw, ph) = self.parent.get_size()
         if self.width > pw: self.width = pw
         if self.height > ph: self.height = ph
         self.surface = self.parent.surface.subsurface((self.left, self.top, self.width, self.height))
-        if DEBUG: print '       surface=%s' % self.surface
-
         align_h = self.text_prop[ 'align_h' ]
         align_v = self.text_prop[ 'align_v' ]
         mode    = self.text_prop[ 'mode' ]
@@ -340,8 +334,6 @@ class Label(GUIObject):
                                                align_v=align_v, mode=mode,
                                                layer=self.surface)
 
-        if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,
-                                                   return_x1,return_y1)
         # LABEL: ,71,17,294,43
         self.width = return_x1 - return_x0
         # self.width = return_x1
@@ -350,18 +342,18 @@ class Label(GUIObject):
         # self.height = self.surface.get_height()
         # self.height = return_y1 
 
-        if DEBUG: print '       parent="%s"' % self.parent
-        if DEBUG: print '       self.surface="%s"' % self.surface
-        if DEBUG: print '       surface.rect: %s' % self.surface.get_rect()
-        if DEBUG: print '       self.rect: %s,%s,%s,%s' % self.get_rect()
-        if DEBUG: print '       parent.surface="%s"' % self.parent.surface
-        if DEBUG: print '       position="%s,%s"' % self.get_position()
+        _debug_('       parent="%s"' % self.parent, 2)
+        _debug_('       self.surface="%s"' % self.surface, 2)
+        _debug_('       surface.rect: %s' % self.surface.get_rect(), 2)
+        _debug_('       self.rect: %s,%s,%s,%s' % self.get_rect(), 2)
+        _debug_('       parent.surface="%s"' % self.parent.surface, 2)
+        _debug_('       position="%s,%s"' % self.get_position(), 2)
 
 
     def _draw(self):
         self.render()
 
-        if DEBUG: print '       draw position="%s,%s"' % self.get_position()
+        _debug_('       draw position="%s,%s"' % self.get_position(), 2)
         self.blit_parent()
         
  

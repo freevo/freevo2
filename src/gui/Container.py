@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.6  2003/09/01 18:48:36  dischi
 # fix typo
 #
@@ -58,8 +61,6 @@ from LayoutManagers import GridLayout
 from LayoutManagers import BorderLayout
 from Color import Color
 from Border import Border
-
-DEBUG = config.DEBUG
 
 
 class Container(GUIObject):
@@ -173,7 +174,7 @@ class Container(GUIObject):
 
 
     def _draw(self):
-        if DEBUG: print 'Container::draw %s' % self
+        _debug_('Container::draw %s' % self, 2)
 
         for child in self.children:
             child.draw()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.15  2003/09/13 10:32:55  dischi
 # fix a font problem and cleanup some unneeded stuff
 #
@@ -89,9 +92,6 @@ from Color      import *
 from Border     import *
 from Label      import * 
 from types      import * 
-
-DEBUG = 0
-
 
 class Button(Container):
     """
@@ -215,7 +215,7 @@ class Button(Container):
         
     def set_text(self, text):
 
-        if DEBUG: print "Button::set_text: text=%s" % text
+        _debug_("Button::set_text: text=%s" % text, 2)
         if type(text) in StringTypes:
             self.text = text
         else:

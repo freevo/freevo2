@@ -7,6 +7,9 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.7  2003/09/01 18:50:04  dischi
 # fix pygame bug by drawing more than one 1 pixel rec
 #
@@ -78,11 +81,9 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 
 
 import pygame
+import config
 
 from GUIObject import *
-
-DEBUG = 0
-
 
 class Border(GUIObject):
     """
@@ -176,8 +177,8 @@ class Border(GUIObject):
 
         Todo: Implement what to do for other borders than flat.
         """
-        if DEBUG: print "  Inside Border.draw..."
-        if DEBUG: print "  Border type: ", self.style
+        _debug_("  Inside Border.draw...", 2)
+        _debug_("  Border type: ", self.style, 2)
 
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
@@ -188,8 +189,8 @@ class Border(GUIObject):
                 self.rect = pygame.draw.rect(self.parent.surface, c, 
                                              (i, i, w-2*i, h-2*i), 1)
                                              
-        if DEBUG: print 'Border: x=%s, y=%s, w=%s, h=%s' % \
-           (self.left, self.top, self.width, self.height)
+        _debug_('Border: x=%s, y=%s, w=%s, h=%s' % \
+                (self.left, self.top, self.width, self.height), 2)
 
         # if self.style == self.BORDER_SHADOW:
         #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,
@@ -212,14 +213,15 @@ class Border(GUIObject):
         # XXX Hm.. pygame.draw.rect draws border outside bounding box.
         # XXX Making hack to fix, but should be done proper.
 
-        if DEBUG: print "    Inside Border erase."
+        _debug_("    Inside Border erase.", 2)
         x,y,w,h = self.get_erase_rect()
         
-        if DEBUG: print " Thick: ", self.thickness
-        if DEBUG: print " Width: ", w
+        _debug_(" Thick: %s" % self.thickness, 2)
+        _debug_(" Width: %s" % w, 2)
         self.osd.screen.blit(self.parent.bg_image, (x,y), (x,y,w,h))
-        if DEBUG: save_image(self)
-        if DEBUG: print "    Waiting at bottom of border erase"
-        if DEBUG: self.osd.update()
-        if DEBUG: wait_loop()
+        if config.DEBUG > 1:
+            save_image(self)
+            _debug_("    Waiting at bottom of border erase", 2)
+            self.osd.update()
+            wait_loop()
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.12  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -85,8 +88,6 @@ from Container          import Container
 from LayoutManagers     import LayoutManager
 from LetterBox          import * 
 from PasswordLetterBox  import * 
-
-DEBUG = 0
 
 
 class LetterBoxGroup(Container):

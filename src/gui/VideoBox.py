@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/12 10:56:19  dischi
+# change debug to use _debug_ and set level to 2
+#
 # Revision 1.1  2003/07/14 19:39:01  rshortt
 # A new class for having a small video preview window.  It doesn't work yet!
 #
@@ -37,9 +40,6 @@ import config
 from gui.GUIObject      import *
 from gui.Color import Color
 from gui.Border import Border
-
-DEBUG = config.DEBUG
-
 
 class VideoBox(GUIObject):
     """
@@ -77,7 +77,7 @@ class VideoBox(GUIObject):
 
 
     def _draw(self):
-        if DEBUG: print 'VideoBox::_draw %s' % self
+        _debug_('VideoBox::_draw %s' % self, 2)
             
         if not self.width or not self.height:
             raise TypeError, 'Not all needed variables set.'
