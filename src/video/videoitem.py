@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.124  2004/02/12 12:28:38  dischi
+# prevent a crash
+#
 # Revision 1.123  2004/02/06 19:28:51  dischi
 # fix/cleanup dvd on hd handling
 #
@@ -505,7 +508,7 @@ class VideoItem(Item):
         if error:
             # If we are a subitem we don't show any error message before
             # having tried all the subitems
-            if self.parent.subitems:
+            if hasattr(self.parent, 'subitems') and self.parent.subitems:
                 return error
             else:
                 AlertBox(text=error).show()
