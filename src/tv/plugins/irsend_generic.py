@@ -12,6 +12,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/02 22:22:14  outlyer
+# For most cable boxes/satellite boxes, just punching in the channel isn't
+# enough, you typically have to press 'enter' or 'select' afterwards. You
+# can specify the NAME of the key to press after sending the command using
+# enterkey.
+#
 # Revision 1.2  2003/11/25 16:32:33  rshortt
 # Make plugin_external_tuner work again.
 #
@@ -64,10 +70,11 @@ class PluginInterface(plugin.Plugin):
     with in lircd.conf.
     """
 
-    def __init__(self, command):
+    def __init__(self, command, enterkey=None):
         plugin.Plugin.__init__(self)
 
         self.command = command
+        self.enterkey = enterkey
 
         plugin.register(self, 'EXTERNAL_TUNER')
 
@@ -81,6 +88,10 @@ class PluginInterface(plugin.Plugin):
             chan_args += chan[i] + ' '
 
         self.transmitSignal(chan_args)
+        if self.enterkey:
+            # Sometimes you need to send a "ENTER" or a "SELECT"
+            # after keying in a code. 
+            self.transmitSignal(self.enterkey)
 
 
     def transmitButton(self, button):
