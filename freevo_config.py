@@ -629,7 +629,7 @@ TVTIME_CMD = CONF.tvtime
 LAME_CMD = CONF.lame
 CDPAR_CMD = CONF.cdparanoia
 CD_RIP_PN_PREF = '%(artist)s/%(album)s/%(song)s'
-CD_RIP_LAME_OPTS = '--preset=standard'
+CD_RIP_LAME_OPTS = '--preset standard'
 CD_RIP_ID3_TAG_OPTS = '--tt %(song)s  --ta %(artist)s --tl %(album)s --tn %(track)s' 
 
 # ======================================================================
