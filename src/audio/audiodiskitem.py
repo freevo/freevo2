@@ -122,11 +122,11 @@ class AudioDiskItem(Playlist):
             for i in query_info:
                  print "ID: %s Category: %s Title: %s" % \
                        (i['disc_id'], i['category'], i['title'])
-            media.info = None  # XXX Need to handle this case too
+            # XXX Need to handle this case too
             return []
         else:
             print "failure getting disc info, status %i" % query_stat
-            media.info = None
+            #self.media.info = None   # XXX ???
 
         play_items = []
         for i in range(0, self.disc_id[1]):
