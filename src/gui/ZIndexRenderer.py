@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/03 00:43:34  rshortt
+# DEBUG shouldn't be set to 1 automaticly since I write a bmp to /tmp
+#
 # Revision 1.4  2003/03/02 20:11:36  rshortt
 # Started fixing up ZIndexRenderer.py.  Working on update_hide() and
 # update_show(), commented out the old code for now.  show() and hide() on
@@ -79,7 +82,7 @@ import pygame
 
 osd = osd.get_singleton()
 
-DEBUG = 1
+DEBUG = 0
 
 _singleton = None
 
