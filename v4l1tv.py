@@ -1,8 +1,9 @@
 #
 # v4l1tv.py
 #
-# This is the Freevo v4l1tv module. 
+# This is the Freevo v4l1tv module.
 #
+# $Id$
 
 import sys
 import random
@@ -72,7 +73,7 @@ class V4L1TV:
     def __init__(self):
         self.thread = V4L1TV_Thread()
         self.thread.start()
-        self.channel_pos = 0    # XXX Need to set this when starting
+        self.channel_pos = 0
         
 
     def play(self, mode, channel=None):
@@ -88,7 +89,7 @@ class V4L1TV:
             inital_channel = '"' + config.TV_SETTINGS + ' ' + channel_name + '"'
             command = config.WATCH_TV_APP + ' ' + inital_channel
         elif mode == 'vcr':
-            command = config.WATCH_TV_APP + ' "' + config.VCR_SETTINGS + ' 2"'  # XXX 2 is ad-hoc!
+            command = config.WATCH_TV_APP + ' "' + config.VCR_SETTINGS + ' 2"'  # Channel isn't used
         else:
             outfile = time.strftime("0_rec_%Y-%m-%d_%H%M%S.avi", time.localtime())
             outfile = config.DIR_RECORD + '/' + outfile

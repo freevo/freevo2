@@ -3,6 +3,7 @@
 #
 # This is the Freevo MPlayer module. 
 #
+# $Id$
 
 import sys
 import random
@@ -102,7 +103,7 @@ class MPlayer:
         self.playlist = playlist
         self.mode = mode
         
-        if mode == 'video' and not os.path.isfile(filename):   # XXX Add symlinks
+        if mode == 'video' and not os.path.isfile(filename):
             osd.clearscreen()
             osd.drawstring('xxx', 'File "%s" not found!' % filename, 30, 280)
             time.sleep(2.0)

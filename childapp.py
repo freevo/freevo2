@@ -5,9 +5,7 @@
 # well as capturing the output (both stdout and stderr) which is sent
 # to callback functions.
 #
-# XXX If a child app is started from a thread, all signals will be blocked!
-# XXX Start the app from the main thread instead in this case.
-#
+# $Id$
 
 import sys
 import random
