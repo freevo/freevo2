@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 15:01:08  dischi
+# small fix
+#
 # Revision 1.2  2003/04/12 19:58:09  dischi
 # small bugfix
 #
@@ -69,6 +72,8 @@ def format_image(settings, item, width, height, force=0):
         return cimage
 
     image = None
+    imagefile = None
+    
     if item.image:
         image = load_imagecache['thumb://%s' % item.image]
         if not image:
