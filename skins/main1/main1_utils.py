@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/10/20 09:19:12  dischi
+# bugfix
+#
 # Revision 1.4  2002/10/19 15:09:55  dischi
 # added alpha mask support
 #
@@ -74,7 +77,7 @@ def DrawText(text, settings, x=-1, y=-1, align='', layer=None):
 
 
 # Draws a text inside a frame based on the settings in the XML file
-def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard'):
+def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard', layer=None):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
 
@@ -85,10 +88,12 @@ def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard')
         osd.drawstringframed(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                              width, height, settings.shadow_color, None,
                              font=settings.font, ptsize=settings.size,
-                             align_h=settings.align, align_v=settings.valign, mode=mode)
+                             align_h=settings.align, align_v=settings.valign, mode=mode,
+                             layer=layer)
     osd.drawstringframed(text, x, y, width, height, settings.color, None,
                          font=settings.font, ptsize=settings.size,
-                         align_h=settings.align, align_v=settings.valign, mode=mode)
+                         align_h=settings.align, align_v=settings.valign, mode=mode,
+                         layer=layer)
 
 
 def InitScreen(settings, masks, cover_visible = 0):

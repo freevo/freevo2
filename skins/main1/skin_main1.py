@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/10/20 09:19:12  dischi
+# bugfix
+#
 # Revision 1.43  2002/10/19 17:10:51  dischi
 # some small bugfixes
 #
@@ -482,8 +485,6 @@ class Skin:
         # now find the correct menu:
         if len(menuw.menustack) == 1:
             val = val.menu_main
-        elif menu.heading.find('TV MENU') != -1:
-            val = val.menu_tv
         else:
             val = val.menu_default
             
@@ -539,18 +540,30 @@ class Skin:
         # Draw the menu choices for the meta selection
         x0 = val.submenu.x
         y0 = val.submenu.y
+
+        s_w, s_h = osd.stringsize("Ajg", font=val.submenu.selection.font,
+                                  ptsize=val.submenu.selection.size)
+        w, h = osd.stringsize("Ajg", font=val.submenu.font, ptsize=val.submenu.size)
+
+        h = max(h, s_h)
         
         for item in menuw.nav_items:
             if menu.selected == item:
                 osd.drawroundbox(x0, y0, x0 + val.submenu.selection.length, 
-                                 y0 + val.submenu.selection.size*1.5,
+                                 y0 + h,
                                  color=val.submenu.selection.bgcolor,
                                  radius=val.submenu.selection.radius, layer=layer)
                 
-                DrawText(item.name, val.submenu.selection, x=x0+10, y=y0+3, layer=layer)
+                DrawTextFramed(item.name, val.submenu.selection,
+                               x0+val.submenu.selection.spacing, y0,
+                               x0 + val.submenu.selection.length-\
+                               2*val.submenu.selection.spacing, 
+                               y0 + h, layer=layer)
                 
             else:
-                DrawText(item.name, val.submenu, x=x0+10, y=y0+3, layer=layer)
+                DrawTextFramed(item.name, val.submenu, x0+val.submenu.spacing, y0,
+                               x0 + val.submenu.selection.length-2*val.submenu.spacing, 
+                               y0 + h, layer=layer)
             x0 += 190
 
         ShowScreen(layer)
