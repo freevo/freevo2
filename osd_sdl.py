@@ -125,7 +125,7 @@ def get_singleton():
 
     # One-time init
     if _singleton == None:
-        _singleton = OSD()
+        _singleton = SynchronizedObject(OSD())
         
     return _singleton
 
@@ -136,7 +136,7 @@ class Font:
     ptsize = 0
     font = None
 
-    
+
 class OSD:
 
     _started = 0
@@ -305,7 +305,7 @@ class OSD:
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0):
 
-        print 'drawstring "%s"' % string
+        print 'drawstring (%d;%d) "%s"' % (x, y, string)
         
         if fgcolor == None:
             fgcolor = self.default_fg_color
@@ -322,6 +322,7 @@ class OSD:
         f = self._getfont(font, ptsize)
 
         # Render string with anti-aliasing
+        string = string[:50] # XXX TEST
         if bgcolor == None:
             ren = f.render(string, 1, self._sdlcol(fgcolor))
         else:
@@ -377,7 +378,9 @@ class OSD:
                 return image
 
         try:
-            image = pygame.image.load(filename).convert_alpha()  # XXX Cannot load everything
+            print 'Trying to load file "%s"' % filename
+            tmp = pygame.image.load(filename)  # XXX Cannot load everything
+            image = tmp.convert_alpha()  # XXX Cannot load everything
         except:
             print 'SDL image load problem!'
             return None
@@ -450,4 +453,64 @@ class OSD:
 if __name__ == '__main__':
     osd = OSD()
     osd.clearscreen()
+
+
+
+#
+# synchronized objects and methods.
+# By André Bjärby
+# From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/65202
+# 
+from types import *
+def _get_method_names (obj):
+    if type(obj) == InstanceType:
+        return _get_method_names(obj.__class__)
+    
+    elif type(obj) == ClassType:
+        result = []
+        for name, func in obj.__dict__.items():
+            if type(func) == FunctionType:
+                result.append((name, func))
+
+        for base in obj.__bases__:
+            result.extend(_get_method_names(base))
+
+        return result
+
+
+class _SynchronizedMethod:
+
+    def __init__ (self, method, obj, lock):
+        self.__method = method
+        self.__obj = obj
+        self.__lock = lock
+
+    def __call__ (self, *args, **kwargs):
+        self.__lock.acquire()
+        try:
+            #print 'Calling method %s from obj %s' % (self.__method, self.__obj)
+            return self.__method(self.__obj, *args, **kwargs)
+        finally:
+            self.__lock.release()
+
+
+class SynchronizedObject:
+    
+    def __init__ (self, obj, ignore=[], lock=None):
+        import threading
+
+        self.__methods = {}
+        self.__obj = obj
+        lock = lock and lock or threading.RLock()
+        for name, method in _get_method_names(obj):
+            if not name in ignore:
+                self.__methods[name] = _SynchronizedMethod(method, obj, lock)
+
+    def __getattr__ (self, name):
+        try:
+            return self.__methods[name]
+        except KeyError:
+            return getattr(self.__obj, name)
+
+
 
