@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2003/11/29 11:40:24  dischi
+# remove singleton(), menuw is passed to all objects
+#
 # Revision 1.66  2003/10/12 11:01:19  dischi
 # Don't show black screen between selecting and playing an audio file
 #
@@ -65,33 +68,20 @@
 import config
 import plugin
 
-from item import Item
-
 # Various utilities
 import util
 
 # The skin class
 import skin
 
+# eventnames
 from event import *
 
-from gui.GUIObject import *
-from gui.AlertBox import AlertBox
+# Item
+from item import Item
 
-
-
-# Module variable that contains an initialized MenuWidget() object
-_singleton = None
-
-def get_singleton():
-    global _singleton
-
-    # One-time init
-    if _singleton == None:
-        _singleton = MenuWidget()
-        
-    return _singleton
-
+# GUI objects
+from gui import GUIObject, AlertBox
 
 
 
