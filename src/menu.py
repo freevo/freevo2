@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2004/01/09 19:49:53  dischi
+# only add to skin when not helper
+#
 # Revision 1.76  2004/01/04 13:06:02  dischi
 # MENU_CALL_ITEM_ACTION also checks the item itself
 #
@@ -78,8 +81,6 @@ from item import Item
 from gui import GUIObject, AlertBox
 
 skin = skin.get_singleton()
-skin.register('menu', ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'))
-
 
 class MenuItem(Item):
     """
@@ -681,4 +682,9 @@ class MenuWidget(GUIObject):
 
         if not menu.choices:
             menu.selected = self.all_items[0]
+
+
+if __freevo_app__ == 'main':
+    areas = ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin')
+    skin.register('menu', areas)
 
