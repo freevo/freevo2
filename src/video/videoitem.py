@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2004/01/01 16:41:30  mikeruelle
+# fix dvd crash
+#
 # Revision 1.106  2004/01/01 16:15:45  dischi
 # make sure we have a player even for classes inheriting from videoitem
 #
@@ -497,7 +500,7 @@ class VideoItem(Item):
             if self.info.has_key('tracks'):
                 i.info = self.info.tracks[title-1]
             i.info_type = 'track'
-            i.set_url(self.url + title, False)
+            i.set_url(self.url + str(title), False)
             i.name = _('Play Title %s') % title
             items += [i]
 
