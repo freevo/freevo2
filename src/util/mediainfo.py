@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/31 16:36:34  dischi
+# simplify mmpython data to speed up caching
+#
 # Revision 1.10  2004/01/30 20:41:02  dischi
 # some debug added at level 2
 #
@@ -212,12 +215,6 @@ class Cache:
             except (IOError, OSError):
                 pass
             
-            if info:
-                for k in self.uncachable_keys:
-                    if info.has_key(k):
-                        del info[k]
-                if hasattr(info, '_tables'):
-                    del info._tables
             objects[key] = (info, timestamp)
 
         self.current_objects   = objects
@@ -287,18 +284,46 @@ class MMCache(Cache):
     """
     def __init__(self):
         Cache.__init__(self, 'mmpython.cache')
-        self.uncachable_keys = [ 'thumbnail' ]
+        self.uncachable_keys = [ 'thumbnail', 'url' ]
 
 
+    def simplify(self, object):
+        """
+        mmpython has huge objects to cashe, we don't them
+        This function simplifies them to be only string, intger, dict or
+        list of one of those above. This makes the caching much faster
+        """
+        ret = {}
+        for k in object.keys:
+            if not k in self.uncachable_keys and getattr(object,k) != None:
+                ret[k] = getattr(object,k)
+
+        for k in  ( 'video', 'audio'):
+            # if it's an AVCORE obejct, also simplify video and audio
+            # lists to string and it
+            if hasattr(object, k):
+                ret[k] = []
+                for o in getattr(object, k):
+                    ret[k].append(self.simplify(o))
+        if hasattr(object, 'subtitles'):
+            # add subtitles for AVCORE
+            ret['subtitles'] = object.subtitles
+        return ret
+
+    
     def create(self, filename):
-        return mmpython.Factory().create(filename, ext_only=True)
+        info = mmpython.Factory().create(filename, ext_only=True)
+        if info:
+            return self.simplify(info)
+        return {}
+
 
     def update_needed(self, filename, timestamp):
         return timestamp != os.stat(filename)[stat.ST_MTIME]
 
         
     def update(self, filename, info):
-        return mmpython.Factory().create(filename, ext_only=True)
+        return self.create(filename)
 
 
 
@@ -336,13 +361,15 @@ class Info:
     def __init__(self, filename, mmdata, metadata):
         self.filename  = filename
         self.disc      = False
-        self.mmdata    = {}
-        self.metadata  = {}
         self.variables = {}
         if mmdata:
             self.mmdata    = mmdata
+        else:
+            self.mmdata    = {}
         if metadata:
             self.metadata  = metadata
+        else:
+            self.metadata  = {}
         self.dicts     = ( self.mmdata, self.variables, self.metadata )
 
         
@@ -358,8 +385,6 @@ class Info:
                     result = val
                 if result != None and result != '':
                     return result
-        if self.mmdata and hasattr(self.mmdata, key):
-            return getattr(self.mmdata, key)
         return result
 
         
@@ -377,8 +402,6 @@ class Info:
         for var in self.dicts:
             if var and var.has_key(key):
                 return True
-        if self.mmdata and hasattr(self.mmdata, key):
-            return True
         return False
 
 
@@ -429,12 +452,6 @@ class Info:
         """
         return self.variables
 
-
-    def mediainfo(self):
-        """
-        return mmpython metadata
-        """
-        return mmdata
     
 
 # Interface to the rest of Freevo:
