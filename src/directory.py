@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2004/02/02 19:40:53  dischi
+# include overlay in listdir
+#
 # Revision 1.107  2004/02/01 17:09:26  dischi
 # o add menuw to playlist for whole directory to show it when selected
 # o support for dirconfig in mimetype plugins
@@ -550,7 +553,7 @@ class DirItem(Playlist):
         if config.OSD_BUSYICON_TIMER:
             osd.get_singleton().busyicon.wait(config.OSD_BUSYICON_TIMER[0])
         
-        files       = vfs.listdir(self.dir)
+        files       = vfs.listdir(self.dir, include_overlay=True)
         num_changes = mediainfo.check_cache(self.dir)
             
         pop = None
