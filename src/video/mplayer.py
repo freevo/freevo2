@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/12/18 05:00:31  krister
+# DVD language config re-added.
+#
 # Revision 1.6  2002/12/11 20:46:43  dischi
 # mplayer can check the mov by itself now (0.90-rc1)
 #
@@ -156,10 +159,15 @@ class MPlayer:
             default_args = config.MPLAYER_ARGS_MPG
         elif mode == 'dvdnav':
             default_args = config.MPLAYER_ARGS_DVDNAV
+            default_args += ' -alang %s' % config.DVD_LANG_PREF
         elif mode == 'vcd':
             default_args = config.MPLAYER_ARGS_VCD % filename  # Filename is VCD chapter
         elif mode == 'dvd':
             default_args = config.MPLAYER_ARGS_DVD % filename  # Filename is DVD title
+            default_args += ' -alang %s' % config.DVD_LANG_PREF
+            if config.DVD_SUBTITLE_PREF:
+                # Only use if defined since it will always turn on subtitles if defined
+                default_args += ' -slang %s' % config.DVD_SUBTITLE_PREF
         else:
             print "Don't know what do play!"
             print "What is:      " + str(filename)
