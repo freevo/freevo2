@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/03 17:42:03  dischi
+# o OVERLAY_DIR is now used everytime
+# o added support to delete old cachefile in the overlay dir
+# o remove unneeded subdirs in the overlay dir
+#
 # Revision 1.11  2003/12/31 16:43:28  dischi
 # also cache thumbnails for config.OVERLAY_DIR_STORE_THUMBNAILS:
 #
@@ -76,7 +81,8 @@ def delete_old_files():
     if os.path.isdir(d):
         del_list.append(d)
 
-    del_list += util.match_files(os.path.join(config.FREEVO_CACHEDIR, 'thumbnails'), ['jpg',])
+    del_list += util.match_files(os.path.join(config.FREEVO_CACHEDIR, 'thumbnails'),
+                                 ['jpg', 'raw'])
 
     for f in del_list:
         if os.path.isdir(f):
@@ -87,38 +93,31 @@ def delete_old_files():
     print
 
 
-def delete_old_thumbails():
-    print 'deleting thumbnails not accessed in the last 60 days...'
+    print 'deleting old cachefiles...'
     num = 0
-    for file in util.match_files(os.path.join(config.FREEVO_CACHEDIR,
-                                              'thumbnails'), ['raw',]):
-        sinfo = os.stat(file)
-        last = max(sinfo[stat.ST_ATIME], sinfo[stat.ST_MTIME])
-        diff = int(time.time()) - last
-        days = diff / (60 * 60 * 24)
-        if days > 60:                   # older than 2 month
+    for file in util.match_files_recursively(config.OVERLAY_DIR, ['raw']):
+        if not vfs.isfile(file[len(config.OVERLAY_DIR):-4]):
             os.unlink(file)
             num += 1
     print '  deleted %s file(s)' % num
     print
 
 
-def delete_old_mmpython_cache():
     print 'deleting cache for directories not existing anymore...'
-    mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
-    if not os.path.isdir(mmcache):
-        return
-    
-    files = ([ os.path.join(mmcache, fname) for fname in os.listdir(mmcache) ])
-    for f in files:
-        data = util.read_pickle(f)
-        if data and data[1] and data[1].keys():
-            key = data[1].keys()[0]
-            if key.find('/') > 0:
-                d = os.path.dirname(key[key.find('/'):])
-                if not os.path.isdir(d):
-                    print '  deleting cachefile for %s' % d
-                    os.unlink(f)
+    subdirs = util.get_subdirs_recursively(config.OVERLAY_DIR)
+    subdirs.reverse()
+    for file in subdirs:
+        if not os.path.isdir(file[len(config.OVERLAY_DIR):]) and not \
+               file.startswith(config.OVERLAY_DIR + '/disc'):
+            if os.path.isfile(os.path.join(file, 'mmpython')):
+                os.unlink(os.path.join(file, 'mmpython'))
+            if not os.listdir(file):
+                os.rmdir(file)
+            else:
+                print 'WARNING:'
+                print 'directory %s doesn\'t exists anymore,' % file[len(config.OVERLAY_DIR):]
+                print 'but cachdir %s still contains files.' % file
+                print
     print
 
     
@@ -139,20 +138,15 @@ def cache_directories(rebuild=True):
     mmpython.mediainfo.DEBUG = 0
     mmpython.factory.DEBUG   = 0
 
-    if config.OVERLAY_DIR_STORE_MMPYTHON_DATA and mmpython.object_cache and \
-           hasattr(mmpython.object_cache, 'md5_cachedir'):
+    if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
         _debug_('use OVERLAY_DIR for mmpython cache')
         mmpython.object_cache.md5_cachedir = False
         mmpython.object_cache.cachedir     = config.OVERLAY_DIR
 
     if rebuild:
         print 'deleting cache files'
-        if config.OVERLAY_DIR_STORE_MMPYTHON_DATA:
-            print 'XXX FIXME: code not written yet'
-        else:
-            for f in ([ os.path.join(mmcache, fname) for fname in os.listdir(mmcache) ]):
-                if os.path.isfile(f):
-                    os.unlink(f)
+        print 'XXX FIXME: code not written yet'
+
 
     all_dirs = []
     print 'caching directories...'
@@ -177,7 +171,6 @@ def cache_directories(rebuild=True):
 
 
 def cache_thumbnails():
-    from mmpython.image import EXIF as exif
     import cStringIO
     import stat
     import Image
@@ -217,32 +210,23 @@ def cache_thumbnails():
         except OSError:
             pass
 
-        f=open(filename, 'rb')
-        tags=exif.process_file(f)
-        f.close()
-
         try:
-            if tags.has_key('JPEGThumbnail'):
-                image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
-            else:
-                # convert with Imaging
-                image = Image.open(filename)
+            image = Image.open(filename)
         except:
+            continue
+
+        if not image:
             continue
         
         if image.size[0] > 300 and image.size[1] > 300:
-            image.thumbnail((300,300))
+            image.thumbnail((300,300), Image.ANTIALIAS)
 
         if image.mode == 'P':
             image = image.convert('RGB')
 
         # save for future use
-        if config.OVERLAY_DIR_STORE_THUMBNAILS:
-            data = (image.tostring(), image.size, image.mode)
-            util.save_pickle(data, thumb)
-        else:
-            data = (filename, image.tostring(), image.size, image.mode)
-            util.save_pickle(data, thumb)
+        data = (image.tostring(), image.size, image.mode)
+        util.save_pickle(data, thumb)
 
 
 
@@ -259,13 +243,18 @@ if __name__ == "__main__":
         sys.exit(0)
 
     delete_old_files()
-    delete_old_thumbails()
+
+    for type in 'VIDEO', 'AUDIO', 'IMAGE':
+        for d in copy.copy(getattr(config, '%s_ITEMS' % type)):
+            if not isinstance(d, str):
+                d = d[1]
+            if d == '/':
+                print '%s_ITEMS contains root directory, skipped.' % type
+                setattr(config, '%s_ITEMS' % type, [])
 
     if len(sys.argv)>1 and sys.argv[1] == '--rebuild':
         cache_directories(1)
     else:
-        delete_old_mmpython_cache()
         cache_directories(0)
 
-    if config.OVERLAY_DIR_STORE_THUMBNAILS:
-        cache_thumbnails()
+    cache_thumbnails()
