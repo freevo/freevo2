@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/07/11 10:26:49  dischi
+# sort items before checking because of auto-join
+#
 # Revision 1.33  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -94,7 +97,10 @@ class PluginInterface(plugin.MimetypePlugin):
         """
         items = []
 
-        all_files    = util.find_matches(files, config.VIDEO_SUFFIX)
+        all_files = util.find_matches(files, config.VIDEO_SUFFIX)
+        # sort all files to make sure 1 is before 2 for auto-join
+        all_files.sort(lambda l, o: cmp(l.upper(), o.upper()))
+
         hidden_files = []
 
         for file in all_files:
