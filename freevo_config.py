@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2002/08/19 05:50:39  krister
+# Added helptext for configuring the TV.
+#
 # Revision 1.51  2002/08/19 02:15:44  krister
 # Added settings for TV viewing/recording.
 #
@@ -303,14 +306,23 @@ MPLAYER_ARGS_DVDNAV  = ''
 #
 # Watching TV
 #
-# XXX You must change this to fit your local conditions! Check out the
-# file matrox_g400/frequencies.[ch] for possible choices.
+# XXX You must change this to fit your local conditions!
+#
+# TV/VCR_SETTINGS = 'NORM INPUT CHANLIST'
+#
+# NORM: ntsc, pal, secam
+# INPUT: television, composite1
+# CHANLIST: One of the following:
+#
+# us-bcast, us-cable, us-cable-hrc, japan-bcast, japan-cable, europe-west,
+# europe-east, italy, newzealand, australia, ireland, france, china-bcast,
+# southafrica, argentina, canada-cable
 #
 TV_SETTINGS = 'ntsc television us-cable'
 VCR_SETTINGS = 'ntsc composite1 us-cable'
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
-# 768x576 for PAL. Set lower if you have a slow computer
+# 768x576 for PAL. Set lower if you have a slow computer!
 TV_VIEW_SIZE = (640, 480)
 TV_REC_SIZE = (320, 240)   # Default for slower computers
 
