@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/08/04 07:01:26  tcwan
+# Updated spec files and Makefile for 1.3.4.
+#
 # Revision 1.36  2003/08/03 14:14:16  dischi
 # fix
 #
@@ -171,7 +174,7 @@ distclean:
 	$(MAKE) -C fbcon distclean
 
 release: clean
-	cd ..; tar czvf freevo-src-`cat freevo/VERSION`-`date +%Y%m%d`.tar.gz \
+	cd ..; tar czvf freevo-src-`cat freevo/VERSION`-`date +%Y%m%d`.tgz \
 	  --exclude CVS --exclude .cvsignore freevo
 
 
