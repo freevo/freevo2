@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/18 15:51:57  dischi
+# Add ao device to mplayer options (like video/mplayer.py does)
+#
 # Revision 1.2  2003/01/11 10:55:56  dischi
 # Call refresh with reload=1 when the menu was disabled during playback
 #
@@ -136,7 +139,8 @@ class MPlayer:
             # Don't include demuxer for network files
             demux = ''
 
-        command = '%s -vo null %s "%s"' % (mpl, demux, filename)
+        command = '%s -vo null -ao %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
+                                                  demux, filename)
                 
         self.item = item
 
