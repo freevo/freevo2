@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/18 09:32:40  dischi
+# add var scheduled to TvProgram
+#
 # Revision 1.11  2003/09/07 13:36:43  dischi
 # bugfix for German tv movie listing
 #
@@ -84,7 +87,7 @@ class TvProgram:
     stop = 0.0
     ratings = {}
     categories = []
-
+    scheduled = False
 
     def __str__(self):
         bt = time.localtime(self.start)   # Beginning time tuple
