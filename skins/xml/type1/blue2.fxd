@@ -36,7 +36,7 @@
       </listing>
 
       <view layout="view0" x="590" y="160" width="200" height="300"/>
-      <info layout="info" x="40" y="410" width="760" height="170"/>
+      <info layout="info" x="40" y="410" width="750" height="170"/>
     </menuset>
 
     <!-- The "video menu with info" is like the audio one, except a different -->
@@ -70,7 +70,7 @@
       </listing>
 
       <view layout="view0" x="545" y="150" width="200" height="290"/>
-      <info layout="video info" x="10" y="160" width="480" height="490"/>
+      <info layout="video info" x="10" y="160" width="460" height="430"/>
     </menuset>
 
     <layout label="title1">
