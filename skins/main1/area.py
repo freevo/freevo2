@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/07/12 21:25:54  dischi
+# better skin_force_text_view
+#
 # Revision 1.15  2003/07/12 17:16:30  dischi
 # created a special area for plugins to draw
 #
@@ -481,9 +484,23 @@ class Skin_Area:
                     return
             except:
                 pass
-            menu.skin_force_text_view = FALSE
-            self.use_text_view = FALSE
+
+            for i in menu.choices:
+                if i.type == 'dir':
+                    # directory with few items and folder:
+                    self.use_text_view = FALSE
+                    return
+                    
+                if image and i.image != image:
+                    menu.skin_force_text_view = FALSE
+                    self.use_text_view = FALSE
+                    return
+                image = i.image
+
+            menu.skin_force_text_view = TRUE
+            self.use_text_view = TRUE
             return
+
         for i in menu.choices:
             if i.type == 'dir':
                 folder += 1
