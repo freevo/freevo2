@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2002/09/21 10:08:53  dischi
+# Added the function PopupBox. This function is identical with
+# osd.popup_box, but drawing a popup box should be part of the skin.
+#
 # Revision 1.22  2002/09/20 19:18:59  dischi
 # o added ItemsPerMenuPage and adapted some stuff that it works
 # o integrated the tv show alignment from dischi1 (testfiles needed to show
@@ -204,6 +208,34 @@ class Skin:
                 return n_items
 
         return n_items
+        
+
+
+    def PopupBox(self, text=None, icon=None):
+        """
+        Trying to make a standard popup/dialog box for various usages.
+        Currently it just draws itself in the middle of the screen.
+
+        Arguments: Text, the text to print.
+        Returns:   None
+        Todo:      Should be able to calculate size of box to draw.
+                   Maybe be able to set size manually as well.
+                   It'd look nice to have an icon drawn for some events
+                   such as ejects.
+        """
+        start_x = osd.width/2 - 180
+        start_y = osd.height/2 - 30
+        end_x   = osd.width/2 + 180
+        end_y   = osd.height/2 + 30
+
+        # XXX This is a hack to get a border around a white box to look
+        # XXX nicer.
+        osd.drawbox(start_x-2, start_y-2, end_x+2, end_y+2, width=2,
+                    color=osd.COL_BLACK)
+        osd.drawbox(start_x, start_y, end_x, end_y, width=-1,
+                    color=((60 << 24) | osd.COL_WHITE))
+        osd.drawstring(text, start_x+20, start_y+10,
+                       fgcolor=osd.COL_BLACK, bgcolor=osd.COL_WHITE)
         
 
 
