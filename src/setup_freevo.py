@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/21 03:09:16  gsbarbieri
+# This file doesn't use gettext( ... unicode=True ), so we don't need String().
+#
 # Revision 1.13  2004/02/19 04:57:56  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -136,7 +139,7 @@ The default is "--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-cable"
 Please report bugs to <freevo-users@lists.sourceforge.net>.
 ''')
 
-    print String( usage )
+    print usage
     
     
 class Struct:
@@ -213,7 +216,7 @@ def check_program(conf, name, variable, necessary, sysfirst=1, verbose=1):
         search_dirs = search_dirs_runtime + os.environ['PATH'].split(':')
         
     if verbose:
-        print String(_('checking for %-13s')) % (name+'...'),
+        print _('checking for %-13s') % (name+'...'),
 
     for dirname in search_dirs:
         filename = os.path.join(dirname, name)
@@ -226,15 +229,15 @@ def check_program(conf, name, variable, necessary, sysfirst=1, verbose=1):
         if necessary:
             print
             print "********************************************************************"
-            print String(_('ERROR: can\'t find %s')) % name
-            print String(_('Please install the application respectively put it in your path.'))
-            print String(_('Freevo won\'t work without it.'))
+            print _('ERROR: can\'t find %s') % name
+            print _('Please install the application respectively put it in your path.')
+            print _('Freevo won\'t work without it.')
             print "********************************************************************"
             print
             print
             sys.exit(1)
         elif verbose:
-            print String(_('not found (deactivated)'))
+            print _('not found (deactivated)')
 
 
 
@@ -297,7 +300,7 @@ if __name__ == '__main__':
             sys.exit(0)
 
 
-    print String(_('System path first=%s')) % ( [_('No'), _('Yes')][sysfirst])
+    print _('System path first=%s') % ( [_('No'), _('Yes')][sysfirst])
 
     for program, valname, needed in EXTERNAL_PROGRAMS:
         check_program(conf, program, valname, needed, sysfirst)
@@ -313,7 +316,7 @@ if __name__ == '__main__':
 
     print
     print
-    print String(_('Settings:'))
+    print _('Settings:')
     print '  %20s = %s' % ('geometry', conf.geometry)
     print '  %20s = %s' % ('display', conf.display)
     print '  %20s = %s' % ('tv', conf.tv)
