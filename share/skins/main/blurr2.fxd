@@ -20,9 +20,9 @@
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
       <view x="20" y="100" width="300" height="300"/> 
-      <listing layout="listing" x="330" y="110" width="440" height="430">
-	<image filename="up.png" label="uparrow" x="770" y="110"/>
-	<image filename="down.png" label="downarrow" x="770" y="max-32"/>
+      <listing layout="listing" x="330" y="110" width="430" height="460">
+	<image filename="up.png" label="uparrow" x="760" y="110"/>
+	<image filename="down.png" label="downarrow" x="760" y="max-32"/>
       </listing>
     </menuset>
 
@@ -47,7 +47,7 @@
       <screen layout="screen" x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
       <info layout="tv info" x="10" y="80" width="760" height="115"/>
-      <listing layout="tv listing" x="10" y="220" width="750" height="320">
+      <listing layout="tv listing" x="10" y="220" width="750" height="350">
 	<image x="765" y="220" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
 	<image x="765" y="max-32" width="32" height="32" label="downarrow" 
@@ -85,8 +85,8 @@
       
     <menuset label="audio" inherits="normal text style">
       <screen layout="audio screen"/>
-      <view layout="view" x="15" y="90" width="280" height="280" align="center"/>
-      <info layout="audio info" x="28" y="370" width="273" height="150"/>
+      <view layout="view" x="15" y="90" width="280" height="300" align="center"/>
+      <info layout="audio info" x="28" y="370" width="273" height="190"/>
     </menuset>
       
     <menuset label="image" inherits="normal text style">
@@ -156,8 +156,8 @@
 	<image image="background" x="0" y="0" label="background"/>
 	<image filename="watermarks/music.png" x="435" y="230" width="370"
 	  height="380"/>
-          <rectangle size="0" bgcolor="0x80000000" radius="10" x="15" y="90"
-                width="290" height="450"/>
+          <rectangle size="0" bgcolor="0x80000000" radius="10" x="12" y="87"
+                width="290" height="475"/>
       </background>
     </layout>
 
