@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/18 23:52:20  mikeruelle
+# reflect dischi's changes
+#
 # Revision 1.9  2004/02/15 03:09:28  mikeruelle
 # make things a little more xml like
 #
@@ -71,8 +74,9 @@ import fxditem
 
 from event import *
 from item import Item
-from gui import RegionScroller, ListBox, PopupBox, Align
-
+from gui.ListBox import ListBox
+from gui.RegionScroller import RegionScroller
+from gui.PopupBox import PopupBox
 
 def islog(name):
     f = open(os.path.join(config.LOGDIR,'command-std%s.log' % name))
@@ -106,11 +110,9 @@ class LogScroll(PopupBox):
         self.file = file
         self.filetext = open(self.file, 'rb').read()
 
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height,
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+        PopupBox.__init__(self, text, handler, top, left, width, height,
+                          icon, None, None, parent)
 
-
-        self.set_h_align(Align.CENTER)
         myfont = self.osd.getfont(config.OSD_DEFAULT_FONTNAME, config.OSD_DEFAULT_FONTSIZE)
         surf_w = myfont.stringsize('AAAAAAAAAA'*8) 
         data = self.osd.drawstringframed(self.filetext, 0, 0, surf_w, 1000000,
@@ -160,10 +162,10 @@ class CommandOptions(PopupBox):
         if not text:
             text = _('Command finished')
         
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height,
-                          bg_color, fg_color, icon, border, bd_color, bd_width,
-                          vertical_expansion)
-        
+        #PopupBox.__init__(self, text, handler=handler, x=top, y=left, width=width, height=height)
+        PopupBox.__init__(self, text, handler, top, left, width, height,
+                          icon, vertical_expansion, None, parent)
+
         items_height = 40
         self.num_shown_items = 3
         self.results = ListBox(width=(self.width-2*self.h_margin),
@@ -171,7 +173,6 @@ class CommandOptions(PopupBox):
                                show_v_scrollbar=0)
         self.results.y_scroll_interval = self.results.items_height = items_height
         
-        self.results.set_h_align(Align.CENTER)
         self.add_child(self.results)
         self.results.add_item(text=_('OK'), value='ok')
         if islog('err'):

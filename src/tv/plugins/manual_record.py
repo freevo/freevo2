@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/02/18 23:57:05  mikeruelle
+# reflect dischi's changes
+#
 # Revision 1.1  2004/02/13 05:13:09  mikeruelle
 # first shot, it works, but is slow to show.
 #
@@ -103,7 +106,7 @@ class ManualRecord(PopupBox):
     
     def __init__(self, parent=None, left=None, top=None, width=500, height=350):
         self.errormsg = ''
-        PopupBox.__init__(self, text=_('Manual Record'), left=left, top=top, 
+        PopupBox.__init__(self, text=_('Manual Record'), x=left, y=top, 
 	                  width=width, height=height)
 
         self.v_spacing = 15
