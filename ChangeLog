@@ -11,6 +11,8 @@ Release 1.3.x (2003-??-??):
  * Merged latest xmltv parsing support
  * Preliminary FreeBSD support from Lars Eggert
  * xine support for audio playback (needs xine-ui cvs)
+ * Support for FLAC encoding, tagging and playback (needs xine)
+ * Many fixes for Python 2.3 warnings
  * bugfixes and better error handling
  
 
