@@ -77,12 +77,6 @@ o Compile Freevo
       o cd ..
       o python setup.py build
       o (as root): python setup.py install
-  o Python Checksum Library (Tested with 1.6.1)
-    o http://www.azstarnet.com/~donut/programs/fchksum/python-fchksum-1.6.1.tar.gz
-      o tar xvzf python-fchksum-1.6.1.tar.gz
-      o cd python-fchksum-1.6.1
-      o python setup.py build
-      o (as root): python setup.py install
   o Test the remote using the lirc application irw, and using the 
     remote_control_lirc.py Freevo application (optional)
   o Test the X11 OSD test driver

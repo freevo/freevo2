@@ -20,12 +20,6 @@ try:
 except ImportError:
 	print "Python Imaging library is missing."
 
-print "Checking for Python fChecksum Library:"
-try:
-	import fchksum
-except ImportError:
-	print "Python Checksum module is missing."
-
 # Build everything
 if len(sys.argv) > 1:
 	if sys.argv[1] == 'x11':

@@ -13,6 +13,7 @@ import string, popen2, fcntl, select, struct
 import time
 import threading
 import fcntl
+import md5
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -73,6 +74,26 @@ def log(str):
     fp.write(str + '\n')
     write_lock.release()
 
+# Helper function for the md5 routine; we don't want to
+# write filenames that aren't in lower ascii so we uhm,
+# hexify them.
+def hexify(str):
+	hexStr = string.hexdigits
+	r = ''
+	for ch in str:
+		i = ord(ch)
+		r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
+	return r
+
+# Python's bundled MD5 class only acts on strings, so
+# we have to calculate it in this loop
+def md5file(file):
+	m = md5.new()
+	f = open(file, 'r')
+	for line in f.readlines():
+		m.update(line)
+	f.close()
+	return hexify(m.digest())
     
 # Simple Python Imaging routine to return image size
 # and return a default if the Imaging library is not
@@ -87,12 +108,11 @@ def pngsize(file):
 
 def resize(file,x0=25,y0=25):
 	import Image
-	import fchksum   # Since the filenames are not unique we need
-			 # to cache them by content, not name.
+	# Since the filenames are not unique we need
+	# to cache them by content, not name.
 	# Cache the thumbnails
 	# thumbnail file is checksum.png
-	#mythumb = config.FREEVO_CACHEDIR + os.path.basename(file) + '.resize'
-	mythumb = config.FREEVO_CACHEDIR + os.path.basename(fchksum.fcrc32t(file)[0]) + '.png'
+	mythumb = config.FREEVO_CACHEDIR + os.path.basename(md5file(file)) + '.png'
 	if os.path.isfile(mythumb):
 		return mythumb
 	else:
