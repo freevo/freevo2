@@ -126,7 +126,7 @@ class RecordServer(RPCServer):
         """
         notifier.removeTimer(self.check_timer)
         self.check_timer = None
-        
+
         ctime = time.time()
         # remove informations older than one week
         self.recordings = filter(lambda r: r.start > ctime - 60*60*24*7,
@@ -152,7 +152,7 @@ class RecordServer(RPCServer):
                 r.status   = CONFLICT
                 print 'no recorder for recording'
                 print r
-                
+
         conflict.resolve(next_recordings)
 
         # print current schedule
@@ -174,7 +174,7 @@ class RecordServer(RPCServer):
         for p in recorder.plugins:
             p.schedule(filter(lambda x: x.recorder[0] == p, next_recordings),
                        self)
-            
+
         print 'checking took %s seconds' % \
               (float(int((time.time() - ctime) * 100)) / 100)
 
@@ -185,7 +185,7 @@ class RecordServer(RPCServer):
             self.check_recordings()
         return False
 
-    
+
     def check_favorites(self):
         """
         Check favorites against the database and add them to the list of
@@ -309,7 +309,6 @@ class RecordServer(RPCServer):
         result: ( id name channel priority start stop status padding info )
         """
         id = self.parse_parameter(val, ( int, ))
-        print 'recording.describe: %s' % id
         for r in self.recordings:
             if r.id == id:
                 return RPCReturn(r.long_list())
@@ -409,3 +408,13 @@ class RecordServer(RPCServer):
         self.favorites.append(f)
         self.fav_id += 1
         return self.__rpc_favorite_update__()
+
+
+    def __rpc_favorite_list__(self, addr, val):
+        """
+        """
+        self.parse_parameter(val, () )
+        ret = []
+        for f in self.favorites:
+            ret.append(f.long_list())
+        return RPCReturn(ret)
