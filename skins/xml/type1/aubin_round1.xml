@@ -6,17 +6,17 @@
     <!-- Settings for a normal menu -->
 <main>
     <item pos="0" name="         Watch TV"       action="tv.tv.main_menu"  arg="" 
-      visible="yes" icon="skins/images/aubin/tv_watermark.png" />
+      visible="yes" icon="" image="skins/images/aubin/tv_watermark.png" />
     <item pos="1" name="      Watch a Movie" action="MediaMenu().main_menu" arg="video" 
-      visible="yes" icon="skins/images/aubin/movie_watermark.png"  />
+      visible="yes" icon="" image="skins/images/aubin/movie_watermark.png"  />
     <item pos="2" name="     Listen to Music"   action="MediaMenu().main_menu" arg="audio" 
-      visible="yes" icon="skins/images/aubin/music_watermark.png" />
+      visible="yes" icon="" image="skins/images/aubin/music_watermark.png" />
     <item pos="3" name="     Look at Pictures"   action="MediaMenu().main_menu" arg="image" 
-      visible="yes" icon="skins/images/aubin/image_watermark.png" />
+      visible="yes" icon="" image="skins/images/aubin/image_watermark.png" />
     <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
-      visible="no" icon="" />
+      visible="no" icon="" image="" />
     <item pos="5" name="         Shutdown" action="ShutdownItem" arg="" 
-      visible="no" icon="skins/images/aubin/shutdown_watermark.png" />
+      visible="no" icon="" image="skins/images/aubin/shutdown_watermark.png" />
 </main>
 
     <menu type="all">
@@ -34,7 +34,7 @@
 	<logo visible="no"/>
 	  <font name="Arial_Bold" size="16"/>
 	  <shadow visible="no"/> 
-	  <selection visible="yes" bgcolor="0xaa000000" radius="15" spacing="18" border_color="0xffffff" border="2">
+	  <selection visible="yes" bgcolor="0xaa000000" radius="15" spacing="18">
 	    <font name="Arial_Bold" size="16"/>
 	    <shadow visible="no" color="0x000000" x="1" y="1"/>
 	  </selection>
@@ -50,20 +50,19 @@
           </mask>
         </cover>
 
-	<cover type="music" visible="yes" x="50" y="215" width="200"
+	<cover type="music" visible="yes" x="50" y="115" width="200"
           height="200" border_color="0x000000" border_size="1">
         <mask>
-          <rectangle x="40" y="205" width="220" height="220" 
+          <rectangle x="40" y="105" width="220" height="320" 
             color="0x80000000" radius="10"/>
           </mask>
         </cover>
-
       </covers>
 
 
       <submenu x="30" y="530" visible="no">
 	<font name="Arial_Bold" size="20" color="0xffffff"/>
-	<selection length="154" bgcolor="0x80000000" radius="10" border_size="2" border_color="0xffffff">
+	<selection length="154" bgcolor="0x80000000" radius="10">
            <font name="Arial_Bold" size="20" color="0xffffff"/>
            <shadow visible="no" color="0x000000" x="2" y="2"/>
         </selection>
@@ -81,7 +80,6 @@
         <background mask="skins/images/aubin/image_watermark.png"/>
     </menu>
 
-
     <!-- Override some settings for the main menu -->
     <menu type="main">
       <background mask=""/>
@@ -91,8 +89,7 @@
 	<item type="all">
 	  <font name="Arial_Bold" size="18" color="0xffffff"/>
 	  <shadow visible="no" color="0x000000" x="1" y="1"/>
-
-	  <selection bgcolor="0xaa000000" border_size="2" border_color="0xffffff">
+	  <selection bgcolor="0xaa000000">
 	    <font name="Arial_Bold" size="18" color="0xffffff"/>
 	    <shadow visible="no" color="0xaa000000" x="3" y="3"/>
 	  </selection>
@@ -100,6 +97,16 @@
       </items>
     </menu>
 
+
+    <menu type="main">
+    <covers>
+            <cover type="image" visible="yes" x="1" y="1" width="768"
+            height="576" border_size="0">
+        <m6sk/>
+        </cover>
+      </covers>
+    </menu>
+      
     <mp3>
         <background image="skins/images/aubin/blurr.jpg"/>
     </mp3>
