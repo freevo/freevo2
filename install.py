@@ -40,6 +40,6 @@ else:
 print "Building Freevo Binaries (buildops='%s')..." % buildops
 os.system('make %s > /dev/null' % buildops)
 print
-print "Done. Now you can type make install to put the binaries"
-print "into /usr/local/freevo or run them from here\n"
+print 'Done. Now you can type "make install" as root to put the binaries'
+print 'into /usr/local/freevo or run them from here\n'
 
