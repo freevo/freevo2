@@ -16,7 +16,7 @@
 # $Id$
 #
 
-import sys, os, time
+import sys, os, time, re
 import movie_xml
 
 
@@ -136,3 +136,10 @@ else:
 MOVIE_INFORMATIONS = {} 
 
 movie_xml.hash_xml_database()
+
+#
+# compile the regexp
+#
+TV_SHOW_REGEXP_MATCH = re.compile("^.*" + TV_SHOW_REGEXP).match
+TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").split
+

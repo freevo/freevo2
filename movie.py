@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2002/08/12 12:42:17  dischi
+# cosmetic changes
+#
 # Revision 1.22  2002/08/11 09:32:59  dischi
 # If the movie title is a tv show (regexp TV_SHOW_REGEXP_MATCH) add \t
 # between name, number and title for a nice alignment with the new SDL
@@ -84,11 +87,6 @@ rc = rc.get_singleton()
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-# compile the regexp
-TV_SHOW_REGEXP_MATCH = re.compile("^.*" + config.TV_SHOW_REGEXP).match
-TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + config.TV_SHOW_REGEXP + "[\.\- ]*").split
-
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -236,8 +234,8 @@ def cwd(arg=None, menuw=None):
         image = None
 
         # find image for tv show and build new title
-        if TV_SHOW_REGEXP_MATCH(title):
-            show_name = TV_SHOW_REGEXP_SPLIT(os.path.basename(title))
+        if config.TV_SHOW_REGEXP_MATCH(title):
+            show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(title))
             title = show_name[0] + "\t" + show_name[1] + "x" + show_name[2] + "\t-\t" + \
                     show_name[3] 
 
