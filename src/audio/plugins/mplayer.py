@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/10/08 03:24:47  outlyer
+# Try the 'double-quit' here as well. Seems to result in a faster shutdown of
+# mplayer.
+#
 # Revision 1.20  2003/09/20 08:56:24  dischi
 # fix the refresh bug the way it is handled for xine
 #
@@ -167,6 +171,7 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
+        self.thread.app.write('quit\n')
         self.thread.stop('quit\n')
 
 
