@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.124  2004/03/02 20:29:34  dischi
+# support for show all files in directory
+#
 # Revision 1.123  2004/02/27 21:38:16  dischi
 # remove debug
 #
@@ -145,7 +148,7 @@ class DirItem(Playlist):
     """
     def __init__(self, directory, parent, name = '', display_type = None,
                  add_args = None, create_metainfo=True):
-        self.autovars = [ ('num_dir_items', 0) ]
+        self.autovars = [ ('num_dir_items', 0), ('show_all_items', False) ]
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
         self.menu  = None
@@ -171,6 +174,14 @@ class DirItem(Playlist):
 
         self.add_args = add_args
 
+        if self.parent and hasattr(parent, 'skin_display_type'):
+            self.skin_display_type = parent.skin_display_type
+        else:
+            self.skin_display_type = parent.display_type
+
+        if self['show_all_items']:
+            self.display_type = None
+            
         # set tv to video now
         if self.display_type == 'tv':
             display_type = 'video'
@@ -648,7 +659,7 @@ class DirItem(Playlist):
                 d = DirItem(filename, self, display_type = self.display_type)
                 self.dir_items.append(d)
 
-        # remove same begiing from all play_items
+        # remove same beginning from all play_items
         substr = ''
         if len(self.play_items) > 4 and len(self.play_items[0].name) > 5:
             substr = self.play_items[0].name[:-5].lower()
@@ -771,7 +782,7 @@ class DirItem(Playlist):
         else:
             # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
-                                  item_types = self.display_type,
+                                  item_types = self.skin_display_type,
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.skin_fxd:
@@ -892,7 +903,31 @@ class DirItem(Playlist):
         menuw.menustack[-1].selected = item
         menuw.refresh(reload=1)
             
-    
+
+    def configure_set_display_type(self, arg=None, menuw=None):
+        """
+        change display type from specific to all
+        """
+        if self.display_type:
+            self['show_all_items'] = True
+            self.display_type = None
+            name = u'\tICON_RIGHT_ON_' + _('on')
+        else:
+            self['show_all_items'] = False
+            self.display_type = self.parent.display_type
+            name = u'\tICON_RIGHT_OFF_' + _('off')
+
+        # create new item with updated name
+        item = copy.copy(menuw.menustack[-1].selected)
+        item.name = item.name[:item.name.find(u'\t')]  + name
+
+        # rebuild menu
+        menuw.menustack[-1].choices[menuw.menustack[-1].choices.\
+                                    index(menuw.menustack[-1].selected)] = item
+        menuw.menustack[-1].selected = item
+        menuw.refresh(reload=1)
+
+        
     def configure(self, arg=None, menuw=None):
         """
         show the configure dialog for folder specific settings in folder.fxd
@@ -905,6 +940,18 @@ class DirItem(Playlist):
             mi = menu.MenuItem(name, self.configure_set_var, i)
             mi.description = descr
             items.append(mi)
+
+        if self.parent and self.parent.display_type:
+            if self.display_type:
+                name = u'\tICON_RIGHT_OFF_' + _('off')
+            else:
+                name = u'\tICON_RIGHT_ON_' + _('on')
+
+            mi = menu.MenuItem(_('Show all kinds of items') + name,
+                               self.configure_set_display_type)
+            mi.description = _('Show video, audio and image items in this directory')
+            items.append(mi)
+            
         m = menu.Menu(_('Configure'), items)
         m.table = (80, 20)
         m.back_one_menu = 2
