@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/11 14:44:25  dischi
+# removed memory leak
+#
 # Revision 1.2  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -37,6 +40,7 @@
 #
 # ----------------------------------------------------------------------- */
 
+import config
 from base import BaseAnimation
 
 import pygame, random
@@ -49,7 +53,7 @@ class Transition(BaseAnimation):
     """
     image        = None
     finished     = False  # flag for finished animation
-
+    
     surf_blend1  = None
     surf_blend2  = None
 
@@ -61,16 +65,18 @@ class Transition(BaseAnimation):
         @mode: effect to use
         @direction: vertical/horizontal
         """
-
         BaseAnimation.__init__(self, surf1.get_rect(), fps, bg_update=False)
 
         self.steps     = fps
         self.mode      = mode
         self.direction = direction
 
-        self.drawfuncs = { 0: self.draw_blend_alpha,
-                           1: self.draw_wipe,
-                           2: self.draw_wipe_alpha }
+        # WARNING: self.drawfuncs should not contain links to it's member
+        # functions because this results in circular dependencies and the
+        # Python garbage collector won't work
+        self.drawfuncs = { 0: 'draw_blend_alpha',
+                           1: 'draw_wipe',
+                           2: 'draw_wipe_alpha' }
 
         self.surf_blend1 = surf1.convert()
         self.surf_blend2 = surf2.convert()
@@ -125,7 +131,7 @@ class Transition(BaseAnimation):
         if self.finished:
             return
 
-        self.drawfuncs[self.mode]()
+        getattr(self, self.drawfuncs[self.mode])()
 
 
     def draw_wipe(self):
