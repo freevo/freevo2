@@ -16,7 +16,7 @@ o Download and install the following dependencies (see below for details):
   o freetype2, libpng, libz, Python >=2.1, PyXML, Python Image Library
 o Update freevo_config.py to suit your system (optional)
 o This will check the dependencies and make the X11 version:
-  o ./configure --osd=x11
+  o ./configure --osd=x11 ; make
 o Run Freevo:
   o ./freevo
   o You must use the remote control xterm window for keyboard input!
@@ -53,7 +53,7 @@ o Compile and install the needed external apps. MPlayer and mpg321/mpg123
       o Start the daemon
 
 o Compile Freevo
-  o ./configure --osd=fb
+  o ./configure --osd=fb ; make
     o Use "./configure --help" for more information
   o Requires freetype 2 (2.0.9 is preferred for now)
     o http://prdownloads.sourceforge.net/freetype/freetype-2.0.9.tar.gz?download
