@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.125  2004/03/04 05:10:06  rshortt
+# Bugfix.  I think this is the desired behaviour.
+#
 # Revision 1.124  2004/03/02 20:29:34  dischi
 # support for show all files in directory
 #
@@ -176,8 +179,10 @@ class DirItem(Playlist):
 
         if self.parent and hasattr(parent, 'skin_display_type'):
             self.skin_display_type = parent.skin_display_type
-        else:
+        elif parent:
             self.skin_display_type = parent.display_type
+        else:
+            self.skin_display_type = display_type
 
         if self['show_all_items']:
             self.display_type = None
