@@ -41,7 +41,12 @@ if test -a $RT_DIR/freevo_rt ; then
         echo Found a lirc device, starting the remote control daemon
         $RT_DIR/freevo_rt rc_client/remote.py --remote=lirc &> /dev/null &
     fi
-    
+
+    # XXX Uncomment the command below to enable joystick input. 
+    # XXX It has not been tested! Please send in testreports!
+    # If JOY_DEV is 0 then joy.py just exits.
+    #$RT_DIR/freevo_rt rc_client/joy.py &> /dev/null &
+
     # Start the main freevo application
     $RT_DIR/freevo_rt main.py $*
 
@@ -71,6 +76,11 @@ if test -S /dev/lircd ; then
     echo Found a lirc device, starting the remote control daemon
     python rc_client/remote.py --remote=lirc &> /dev/null &
 fi
+
+# XXX Uncomment the command below to enable joystick input. 
+# XXX It has not been tested! Please send in testreports!
+# If JOY_DEV is 0 then joy.py just exits.
+# python rc_client/joy.py &> /dev/null &
 
 # Start the main freevo application
 python main.py $*

@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2002/08/30 02:29:53  krister
+# Added joystick support from Dan Eriksen. Untested!
+#
 # Revision 1.54  2002/08/22 04:46:03  krister
 # Select between the freevo_apps mplayer and a generic one from the path.
 #
@@ -503,5 +506,24 @@ RC_CMDS = {
     'eject'       : 'EJECT'
     }
 
-
-
+# XXX This is experimental, please send in testreports!
+# XXX If you want to use it you need to uncomment a line
+# XXX in the "freevo" start-script!
+# 
+#
+# Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
+# Supports as many buttons as your controller has,
+# but make sure there is a corresponding entry in your config
+# FYI: new kernels use /dev/input/jsX, but joy.py will fall back on /dev/jsX
+#
+JOY_DEV = 0
+JOY_CMDS = {
+    'up'             : 'UP',
+    'down'           : 'DOWN',
+    'left'           : 'LEFT',
+    'right'          : 'RIGHT',
+    'button 1'       : 'PLAY',
+    'button 2'       : 'PAUSE',
+    'button 3'       : 'STOP',
+    'button 4'       : 'ENTER',
+    }
