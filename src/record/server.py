@@ -83,7 +83,7 @@ class RecordServer(RPCServer):
         # db access to match favorites
         self.epgdb = pyepg.get_epg(EPGDB)
         # file to load / save the recordings and favorites
-        self.fxdfile = sysconfig.cachefile('recordserver.fxd')
+        self.fxdfile = sysconfig.datafile('recordserver.fxd')
         # get list of best recorder for each channel
         self.best_recorder = {}
         for p in recorder.plugins:
@@ -208,6 +208,13 @@ class RecordServer(RPCServer):
                     continue
                 print '  added %s: %s (%s)' % (String(channel),
                                                String(title), start)
+                if f.url:
+                    # add url template to recording
+                    try:
+                        r.url = f.url
+                        r.resolve_url()
+                    except Exception, e:
+                        print 'Error setting recording url:', e
                 self.recordings.append(r)
                 self.rec_id += 1
                 if f.once:

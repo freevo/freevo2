@@ -32,6 +32,7 @@
 
 import time
 import copy
+import re
 
 import config
 import util.fxdparser as fxdparser
@@ -103,6 +104,23 @@ class Recording:
                self.stop, self.status, self.start_padding, self.stop_padding, \
                info
 
+
+    def resolve_url(self):
+        t = time.strftime('%Y %m %d %H:%M', time.localtime(self.start))
+        year, month, day, hour_min = t.split(' ')
+        options = { 'title'    : self.name,
+                    'year'     : year,
+                    'month'    : month,
+                    'day'      : day,
+                    'time'     : hour_min,
+                    'subtitle' : self.subtitle }
+        for pattern in re.findall('%\([a-z]*\)', self.url):
+            if not pattern[2:-1] in options:
+                options[pattern[2:-1]] = pattern
+        url = re.sub('%\([a-z]*\)', lambda x: x.group(0)+'s', self.url)
+        url = url % options
+        self.url = 'file:' + url.rstrip(' -_:') + '.suffix'
+    
 
     def parse_fxd(self, parser, node):
         """

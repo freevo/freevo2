@@ -51,6 +51,7 @@ class Favorite:
         self.priority = priority
         self.days     = days
         self.times    = []
+        self.url      = ''
         self.once     = once
         for t in times:
             m = _time_re.match(t).groups()
@@ -79,7 +80,7 @@ class Favorite:
         """
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
-            for var in ('name', 'channel'):
+            for var in ('name', 'url'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
             if child.name == 'once':
@@ -142,7 +143,7 @@ class Favorite:
         Dump informations about the favorite in a fxd file node.
         """
         node = fxdparser.XMLnode('favorite', [ ('id', self.id ) ] )
-        for var in ('name', 'priority'):
+        for var in ('name', 'priority', 'url'):
             subnode = fxdparser.XMLnode(var, [], getattr(self, var) )
             fxd.add(subnode, node)
         for var in ('channels', 'days'):

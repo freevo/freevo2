@@ -9,6 +9,8 @@ class PluginInterface(generic.PluginInterface):
         self.device = config.TV_SETTINGS[device]
         generic.PluginInterface.__init__(self)
 
+        self.suffix = '.ts'
+
         if self.device.type == 'DVB-T':
             rating = 10
         elif self.device.type == 'DVB-C':

@@ -90,7 +90,8 @@ class PluginInterface(Plugin):
         self.recordings = []
         # timer for next recording
         self.rec_timer = None
-
+        # suffix for filename
+        self.suffix = config.TV_RECORDFILE_SUFFIX
 
     def get_cmd(self, rec):
         """
@@ -205,9 +206,15 @@ class PluginInterface(Plugin):
                     filename += letter
                 elif filename and filename[-1] != '_':
                     filename += '_'
-            filename = filename.rstrip(' -_:') + config.TV_RECORDFILE_SUFFIX
+            filename = filename.rstrip(' -_:') + self.suffix
             rec.url = 'file:' + os.path.join(config.TV_RECORD_DIR, filename)
-
+        else:
+            # check filename
+            if rec.url.startswith('file:'):
+                rec.url = os.path.join(config.TV_RECORD_DIR, rec.url[5:])
+                if rec.url.endswith('.suffix'):
+                    rec.url = os.path.splitext(rec.url)[0] + self.suffix
+                rec.url = 'file:' + rec.url
         # get the cmd for the childapp
         cmd = self.get_cmd(rec)
         self.item = rec
