@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/09 06:36:53  outlyer
+# Fix a crash; I don't know if Python 2.2 is more forgiving about the types,
+# but 2.3 was pretty upset when it thought it wasn't getting a float()
+#
 # Revision 1.6  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
@@ -146,7 +150,7 @@ class ViewFavorites(PopupBox):
                 if fav.mod == 'ANY':
                     mod = 'any time'
                 else:
-                    mod = strftime(config.TV_TIMEFORMAT, gmtime(fav.mod * 60))
+                    mod = strftime(config.TV_TIMEFORMAT, gmtime(float(fav.mod * 60)))
                 self.results.add_item(text='%s: %s (%s, %s, %s)' % \
                                         (fav.name, 
                                          fav.title,
