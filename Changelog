@@ -13,6 +13,7 @@ o Added image display to main menu. JPEG/PNG are supported at
   the moment, more will be added later. Images can be rotated.
   Exif files (jpg with digital camera info) are supported, including 
   thumbnails which are displayed when using the file browser.
+o Changed the installation to use a "configure" script
 
 Internal:
 o Changed v4l1_to_mga to use /dev/video instead of /dev/video0. Also
