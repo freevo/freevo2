@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/09 21:38:37  rshortt
+# In MenuWidget call child.draw() now instead of child._draw().
+#
 # Revision 1.20  2003/03/02 21:33:55  dischi
 # Don't act on DISPLAY for the main menu
 #
@@ -365,7 +368,7 @@ class MenuWidget(GUIObject):
 
         # Draw any child UI objects
         for child in self.children:
-            child._draw()
+            child.draw()
 
 
     def make_submenu(self, menu_name, actions, item):
