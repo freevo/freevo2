@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/19 09:08:14  dischi
+# support for changing the working directory before exec, some cleanup changes
+#
 # Revision 1.3  2003/10/18 21:34:19  rshortt
 # recordserver now handles events like main.
 #
@@ -49,6 +52,7 @@ import popen2
 import os
 import time
 import thread
+import types
 
 import config
 import rc
@@ -58,19 +62,47 @@ class child_handler:
     child   = ''
 
 
-def Popen3(program):
+class Popen4(popen2.Popen3):
+    """
+    Like popen2.Popen3 but without the capturestderr and the bufsize parameter.
+    A new optional parameter is cwd, the child will change the working directory
+    after fork and before exec.
+    """
+    def __init__(self, cmd, cwd=None):
+        self._cwd = cwd
+        popen2.Popen3.__init__(self, cmd, 1, 100)
+        
+    def _run_child(self, cmd):
+        if self._cwd:
+            os.chdir(self._cwd)
+        if isinstance(cmd, types.StringTypes):
+            cmd = ['/bin/sh', '-c', cmd]
+        for i in range(3, popen2.MAXFD):
+            try:
+                os.close(i)
+            except:
+                pass
+        try:
+            os.execvp(cmd[0], cmd)
+        finally:
+            os._exit(1)
+    
 
+def Popen3(cmd, cwd = None):
+    """
+    Wrapper for the thread problem. It looks like the class Popen4
+    """
     # do not use this for helpers
     if config.HELPER and not config.IS_RECORDSERVER:
-        return popen2.Popen3(program, 1, 100)
+        return Popen4(cmd, cwd=cwd)
 
     # do not use this for the main thread
     if traceback.extract_stack()[0][0].find('thread') == -1:
-        return popen2.Popen3(program, 1, 100)
+        return Popen4(cmd, cwd=cwd)
         
     childapp = child_handler()
     
-    rc.post_event(Event(OS_EVENT_POPEN2, (childapp, program)))
+    rc.post_event(Event(OS_EVENT_POPEN2, (childapp, cmd)))
     while(childapp.child == ''):
         time.sleep(0.01)
     
@@ -83,6 +115,9 @@ wait_lock   = thread.allocate_lock()
 
 
 def waitpid(pid=0):
+    """
+    waitpid wrapper
+    """
     global dead_childs
     if pid == 0:
         _debug_('main checking childs', 2)
