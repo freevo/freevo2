@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 15:02:07  dischi
+# fall back to text view
+#
 # Revision 1.2  2003/04/20 13:49:00  dischi
 # some special tv show handling
 #
@@ -81,6 +84,7 @@ class Listing_Area(Skin_Area):
         if menu.force_skin_layout != -1:
             self.display_style = menu.force_skin_layout
 
+        self.scan_for_text_view(menu)
         self.init_vars(settings, menu.item_types)
 
         content   = self.calc_geometry(self.layout.content, copy_object=TRUE)

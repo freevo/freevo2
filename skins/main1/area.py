@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/20 15:02:07  dischi
+# fall back to text view
+#
 # Revision 1.2  2003/04/19 21:25:38  dischi
 # don't load buggy skins
 #
@@ -299,6 +302,7 @@ class Skin_Area:
             else:
                 self.infoitem  = self.menu.selected
             item_type  = self.menu.item_types
+            self.scan_for_text_view(self.menu)
         elif widget_type == 'tv':
             self.menuw = obj
             self.menu  = obj
@@ -430,6 +434,31 @@ class Skin_Area:
         self.screen.draw(self.objects)
 
 
+    def scan_for_text_view(self, menu):
+        """
+        scan if we have to fall back to text view. This will be done if some
+        items have images and all images are the same. And the number of items
+        must be greater 5. With that the skin will fall back to text view for
+        e.g. mp3s inside a folder with cover file
+        """
+        if hasattr(menu, '_skin_force_text_view'):
+            self.use_text_view = menu._skin_force_text_view
+            return
+        image = None
+        if len(menu.choices) < 5:
+            menu._skin_force_text_view = FALSE
+            self.use_text_view = FALSE
+            return
+        for i in menu.choices:
+            if image and i.image != image:
+                menu._skin_force_text_view = FALSE
+                self.use_text_view = FALSE
+                return
+            image = i.image
+        menu._skin_force_text_view = image
+        self.use_text_view = image
+
+    
     def calc_geometry(self, object, copy_object=0):
         """
         calculate the real values of the object (e.g. content) based
@@ -539,13 +568,14 @@ class Skin_Area:
                 except IndexError:
                     print 'index error for %s %s' % (self.display_style, widget_type)
                     raise
-                
-            # get image or text view
-            # FIXME: select text if necessary
-            if area[0]:
+
+            if area[0] and (not self.use_text_view):
                 area = area[0]
-            else:
+            elif area[1]: 
                 area = area[1]
+            else:
+                print 'want to fall back, but no text view defined'
+                area = area[0]
 
         try:
             area = eval('area.%s' % self.area_name)
