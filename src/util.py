@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/06/08 05:43:25  outlyer
+# Moved 'image-viewer-thumb.jpg' into the thumbnails part of the cachedir
+# to keep it clean.
+#
 # Revision 1.27  2003/05/28 17:58:47  dischi
 # moved freespace and totalspace from df.py to util.py
 #
@@ -297,7 +301,7 @@ def getExifThumbnail(file, x0=0, y0=0):
     tags=exif.process_file(f)
     
     if tags.has_key('JPEGThumbnail'):
-        thumb_name='%s/image-viewer-thumb.jpg' % config.FREEVO_CACHEDIR
+        thumb_name='%s/thumbnails/image-viewer-thumb.jpg' % config.FREEVO_CACHEDIR
         image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
         if x0 >0 :
             image.resize((x0, y0), Image.BICUBIC)
