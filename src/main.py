@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.62  2003/08/20 22:29:37  gsbarbieri
 # UPPER CASE TEXT IS UGLY! :)
 #
@@ -217,7 +220,7 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     # Shutdown any daemon plugins that need it.
     plugin.shutdown()
 
-    os.system('./runapp ./freevo stop')
+    os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
     while 1:
@@ -302,15 +305,13 @@ class MainMenu(Item):
 
 def signal_handler(sig, frame):
     import plugin
-
-    if sig == signal.SIGTERM:
+    if sig in (signal.SIGTERM, signal.SIGINT):
         osd.clearscreen(color=osd.COL_BLACK)
         osd.shutdown() # SDL must be shutdown to restore video modes etc
 
         # Shutdown any daemon plugins that need it.
         plugin.shutdown()
-
-        os.system('./runapp ./freevo stop')
+        os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
 
 #
@@ -322,6 +323,7 @@ def main_func():
     plugin.init()
     
     signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
 
     main = MainMenu()
     main.getcmd()

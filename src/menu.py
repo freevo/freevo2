@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.57  2003/08/15 19:25:14  dischi
 # search all the share stuff in $FREEVO_SHARE now
 #
@@ -345,7 +348,7 @@ class MenuWidget(GUIObject):
 
         for i in items:
             try:
-                if not i.image and item.image.find('images/watermarks/'):
+                if not i.image and item.image.find('images/watermarks/') == -1:
                     i.image = item.image
             except:
                 pass

@@ -3,7 +3,7 @@ to kick off recording of TV programs in the background.
 
 Set up crontab:
 
-* * * * *       ( cd /usr/local/freevo ; ./freevo execute src/tv/record_daemon.py )
+* * * * *       ( cd /usr/local/freevo ; freevo execute src/tv/record_daemon.py )
 
 This assumes that freevo is installed in /usr/local/freevo!
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.10  2003/05/28 17:24:23  dischi
 # fixed bug when child is dead
 #
@@ -62,7 +65,15 @@ class ChildApp:
         # Start the child app through 'runapp' which will unblock signals and
         # sets the priority.
 
-        start_str = './runapp ' + app
+        prio = 0
+        if app.find('--prio=') == 0 and not config.RUNAPP:
+            try:
+                prio = int(app[7:app.find(' ')])
+            except:
+                pass
+            app = app[app.find(' ')+1:]
+
+        start_str = '%s %s' % (config.RUNAPP, app)
         
         self.child = popen2.Popen3(start_str, 1, 100) 
         self.outfile = self.child.fromchild 
@@ -77,12 +88,16 @@ class ChildApp:
         self.t2.setDaemon(1)
         self.t2.start()
 
-
+        if prio and config.CONF.renice:
+            os.system('%s %s -p %s 2>/dev/null >/dev/null' % \
+                      (config.CONF.renice, prio, self.child.pid))
+            
         if DEBUG:
             print 'self.t1.isAlive()=%s, self.t2.isAlive()=%s' % (self.t1.isAlive(),
                                                                   self.t2.isAlive())
             time.sleep(0.1)
-            print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % (self.child.pid, start_str, self.child.poll())
+            print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % \
+                  (self.child.pid, start_str, self.child.poll())
             
 
     # Write a string to the app. 
@@ -90,7 +105,7 @@ class ChildApp:
         try:
             self.infile.write(line)
             self.infile.flush()
-        except IOError:
+        except (IOError, ValueError):
             pass
         
 
@@ -230,40 +245,3 @@ class Rec(ChildApp):
 
     def stderr_cb(self, line):
         print 'stderr data: "%s"' % line
-
-
-    
-if __name__ == '__main__':
-
-    #cmd = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Television -m -r '
-    #cmd += '22050 -w 320 -h 240 -ab 80 -vg 300 -vb 800 -H 50 -o tst3.avi'
-    #cmd = './matrox_g400/v4l1_to_mga ntsc television us-cable 2'
-    #cmd = '/usr/local/bin/mplayer -vo null -ao oss:/dev/dsp0 testfiles/Music/ThomasRusiak-Hiphopper.mp3'
-    cmd = '/usr/bin/nice -0 mplayer -vo xv -ao oss:/dev/dsp -nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs -demuxer 17 "/hdc/krister_mp3/mp3/(216)_sweet_-_ballroom_blitz-idm.mp3"'
-    
-    Test_Thread(cmd).start()
-
-    while 1:
-        time.sleep(1)
-    
-    app = Rec(cmd)
-    
-    print 'Started app'
-
-    chan = 3
-    while 1:
-        s = raw_input('Cmd>')
-        if s.strip() == '':
-            print 'Alive = %s' % app.isAlive()
-        elif s.strip() == 'k':
-            app.kill(signal.SIGINT)
-            print 'Sent INT'
-        elif s.strip() == 'q':
-            sys.exit(0)
-        elif s.strip() == 'n':
-            app.write('ntsc television us-cable %s\n' % chan)
-            chan += 1
-            print 'Wrote to app'
-            
-            
-        

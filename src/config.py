@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.40  2003/08/20 22:46:39  gsbarbieri
 # Optimized and added cdrom[0-9]* to regexp, so it works in RH9
 #
@@ -38,59 +41,6 @@
 # Added a new command line parameter -fs (Fullscreen). This will start Freevo
 # in a new xsession (even if one is running). Freevo will get _all_ keys
 # and there are no problems with other applications when switching fullscreen
-#
-# Revision 1.35  2003/08/04 18:36:49  dischi
-# o use FREEVO_HOME if defined to find freevo_config.py
-# o check if main is called. If not be very quite and don't log to file
-#
-# Revision 1.34  2003/08/01 17:54:05  dischi
-# xine support and cleanups.
-# o xine support and configuration in freevo_config.py
-# o cleanup in setup_freevo: use one variable to store all needed
-#   programs
-# o config.py uses setup_freevo to search for missing programs at startup
-#
-# Revision 1.33  2003/07/30 14:04:38  outlyer
-# I don't think we use $CACHEDIR/audio anymore... if anyone needs it, I'll
-# uncomment it, else I'll delete it.
-#
-# Revision 1.32  2003/07/03 04:19:31  outlyer
-# Updated cdbackup with Rich's new Ogg patch; also changed some variables,
-# and added oggenc to setup and configuration.
-#
-# Revision 1.31  2003/07/02 20:00:42  dischi
-# added defaults for ripping tools
-#
-# Revision 1.30  2003/06/30 20:26:18  outlyer
-# Make freevo a lot less noisy; by default, print warnings and errors;
-# if DEBUG is enabled, THEN we print more.
-#
-# Revision 1.29  2003/06/27 15:24:39  dischi
-# small fix
-#
-# Revision 1.28  2003/06/20 18:18:23  dischi
-# add comment about the xmame change to force the user to rerun setup
-#
-# Revision 1.27  2003/05/11 17:33:22  dischi
-# small bugfix
-#
-# Revision 1.26  2003/04/24 19:55:44  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.25  2003/04/24 11:46:29  dischi
-# fixed 'to many open files' bug
-#
-# Revision 1.24  2003/04/20 17:36:49  dischi
-# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
-# images like before, but also fxd files for the tv show with global
-# informations (plot/tagline/etc) and mplayer options.
-#
-# Revision 1.23  2003/04/18 15:01:36  dischi
-# support more types of plugins and removed the old item plugin support
-#
-# Revision 1.22  2003/04/06 21:12:54  dischi
-# o Switched to the new main skin
-# o some cleanups (removed unneeded inports)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -118,37 +68,12 @@
 import sys, os, time, re
 import setup_freevo
 
-if sys.argv[0].find('src/main.py') == -1:
-    HELPER=1
-else:
-    HELPER=0
-
-
-if not 'FREEVO_STARTDIR' in os.environ:
-    print 'WARNING: FREEVO_STARTDIR is not set!'
-    os.environ['FREEVO_STARTDIR'] = os.environ['PWD']
-    
-# Send debug to stdout as well as to the logfile?
-DEBUG_STDOUT = 1
-
-# Debug all modules?
-# 0 = Debug output off
-# 1 = Some debug output
-# A higher number will generate more detailed output from some modules.
-DEBUG = 0
-
-
-if os.path.isdir('/var/log/freevo'):
-    LOGDIR = '/var/log/freevo'
-else:
-    LOGDIR = '/tmp/freevo'
-    if not os.path.isdir(LOGDIR):
-        os.makedirs(LOGDIR)
-
-
 # Logging class. Logs stuff on stdout and /tmp/freevo.log
 class Logger:
-
+    """
+    Class to create a logger object which will send messages to stdout
+    and log them into a logfile
+    """
     def __init__(self, logtype='(unknown)'):
         self.lineno = 1
         self.logtype = logtype
@@ -175,17 +100,6 @@ class Logger:
 
         return
 
-        # XXX Work in progress...
-        lines = msg.split('\n')
-        ts = time.asctime(time.localtime(time.time()))
-        for line in lines:
-            logmsg = '%d: %-20s (%s): %s\n' % (self.lineno, self.logtype, ts, line)
-            self.lineno += 1
-            self.fp.write(logmsg)
-            self.fp.flush()
-            sys.__stdout__.write(logmsg)    # Original stdout
-            sys.__stdout__.flush()
-
 
     def flush():
         pass
@@ -195,36 +109,11 @@ class Logger:
         pass
     
 
-#
-# Redirect stdout and stderr to stdout and /tmp/freevo.log
-#
-if not HELPER:
-    sys.stdout = Logger(sys.argv[0] + ':stdin')
-    sys.stderr = Logger(sys.argv[0] + ':stderr')
-
-
-#
-# Config file handling
-#
-cfgfilepath = [ os.environ['FREEVO_STARTDIR'],
-                os.path.expanduser('~/.freevo'),
-                '/etc/freevo',
-                '.' ]
-
-class Struct:
-    pass
-
-# Default settings
-# These will be overwritten by the contents of 'freevo.conf'
-CONF = Struct()
-CONF.geometry = '800x600'
-CONF.width, CONF.height = 800, 600
-CONF.display = 'x11'
-CONF.tv = 'ntsc'
-CONF.chanlist = 'us-cable'
-CONF.version = 0
 
 def print_config_changes(conf_version, file_version, changelist):
+    """
+    print changes made between version on the screen
+    """
     ver_old = float(file_version)
     ver_new = float(conf_version)
     if ver_old == ver_new:
@@ -243,30 +132,67 @@ def print_config_changes(conf_version, file_version, changelist):
     print
             
     
-def read_config(filename, conf):
-    if DEBUG: print 'Reading config file %s' % filename
-
-    c = open(filename)
-    for line in c.readlines():
-        vals = line.strip().split()
-        if DEBUG: print 'Cfg file data: "%s"' % line.strip()
-        try:
-            name, val = vals[0], vals[2]
-        except:
-            print 'Error parsing config file data "%s"' % line.strip()
-            continue
-        conf.__dict__[name] = val
-
-    c.close()
-    w, h = conf.geometry.split('x')
-    conf.width, conf.height = int(w), int(h)
         
 
+if sys.argv[0].find('main.py') == -1:
+    HELPER=1
+else:
+    HELPER=0
+
+
+# Send debug to stdout as well as to the logfile?
+DEBUG_STDOUT = 1
+
+# Debug all modules?
+# 0 = Debug output off
+# 1 = Some debug output
+# A higher number will generate more detailed output from some modules.
+DEBUG = 0
+
+
+if os.path.isdir('/var/log/freevo'):
+    LOGDIR = '/var/log/freevo'
+else:
+    LOGDIR = '/tmp/freevo'
+    if not os.path.isdir(LOGDIR):
+        os.makedirs(LOGDIR)
+
+
+
+#
+# Redirect stdout and stderr to stdout and /tmp/freevo.log
+#
+if not HELPER:
+    sys.stdout = Logger(sys.argv[0] + ':stdin')
+    sys.stderr = Logger(sys.argv[0] + ':stderr')
+
+
+#
+# Config file handling
+#
+cfgfilepath = [ '.', os.path.expanduser('~/.freevo'), '/etc/freevo' ]
+
+
+# Default settings
+# These will be overwritten by the contents of 'freevo.conf'
+CONF = setup_freevo.Struct()
+CONF.geometry = '800x600'
+CONF.width, CONF.height = 800, 600
+CONF.display = 'x11'
+CONF.tv = 'ntsc'
+CONF.chanlist = 'us-cable'
+CONF.version = 0
+
+# Read the environment set by the start script
 SHARE_DIR = os.environ['FREEVO_SHARE']
+CONTRIB_DIR = os.environ['FREEVO_CONTRIB']
 SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
 ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
 IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
 FONT_DIR  = os.path.join(SHARE_DIR, 'fonts')
+
+RUNAPP = os.environ['RUNAPP']
+
 
 # Check that freevo_config.py is not found in the config file dirs
 for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
@@ -280,9 +206,27 @@ for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
 for dir in cfgfilepath:
     freevoconf = dir + '/freevo.conf'
     if os.path.isfile(freevoconf):
-        if DEBUG: print 'Loading configure settings: %s' % freevoconf
-        read_config(freevoconf, CONF)
+        if DEBUG:
+            print 'Loading configure settings: %s' % freevoconf
+
+        c = open(freevoconf)
+        for line in c.readlines():
+            vals = line.strip().split()
+            if DEBUG: print 'Cfg file data: "%s"' % line.strip()
+            try:
+                name, val = vals[0], vals[2]
+            except:
+                print 'Error parsing config file data "%s"' % line.strip()
+                continue
+            CONF.__dict__[name] = val
+
+        c.close()
+        w, h = CONF.geometry.split('x')
+        CONF.width, CONF.height = int(w), int(h)
         break
+else:
+    print 'Error: freevo.conf not found. Please run freevo setup first'
+    sys.exit(1)
 
 # search missing programs at runtime
 for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
@@ -291,18 +235,22 @@ for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
     if not hasattr(CONF, valname) or not getattr(CONF, valname):
         setattr(CONF, valname, '')
 
+# fall back to x11 if display is mga or fb and DISPLAY ist set
+if CONF.display in ('mga', 'fbcon') and os.environ.has_key('DISPLAY') and \
+   os.environ['DISPLAY']:
+   print 'Warning: display is set to %s, but the environment has DISPLAY set' % CONF.display
+   print 'this could mess up your X display, setting display to x11.'
+   print 'If you really want to do this, start \'DISPLAY="" freevo\''
+   CONF.display='x11'
+   
 # Load freevo_config.py:
-if os.environ.has_key('FREEVO_HOME'):
-    cfgfilename = os.path.join(os.environ['FREEVO_HOME'], 'freevo_config.py')
-else:
-    cfgfilename = './freevo_config.py'
-
-if os.path.isfile(cfgfilename):
-    if DEBUG: print 'Loading cfg: %s' % cfgfilename
-    execfile(cfgfilename, globals(), locals())
+if os.path.isfile(os.environ['FREEVO_CONFIG']):
+    if DEBUG:
+        print 'Loading cfg: %s' % os.environ['FREEVO_CONFIG']
+    execfile(os.environ['FREEVO_CONFIG'], globals(), locals())
     
 else:
-    print "\nERROR: can't find freevo_config.py"
+    print "\nERROR: %s: no such file" % os.environ['FREEVO_CONFIG']
     sys.exit(1)
 
 
@@ -340,6 +288,7 @@ for dirname in cfgfilepath:
 
 else:
     print 'No overrides loaded'
+
     
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
     START_FULLSCREEN_X = 1
@@ -410,20 +359,7 @@ if not ROM_DRIVES:
                         print 'ROM_DRIVES: Auto-detected and added "%s"' % (ROM_DRIVES[-1], )
         fd_fstab.close()
                 
-#
-# The runtime version of MPlayer/MEncoder are patched to disable DVD
-# protection override (a.k.a decss) by using the flag
-# "-nodvdprotection-override". This flag is used by default if the runtime version
-# of MPlayer is used to play DVDs, since it is illegal (TBC) to use it in some
-# countries. You can modify the program to use the protection override,
-# but only if you're 100% sure that it is legal in your jurisdiction!
-#
-if CONF.mplayer.find('runtime/apps/mplayer') != -1 and MPLAYER_DVD_PROTECTION:
-    print
-    print 'WARNING: DVD protection override disabled! You will not be able to play',
-    print 'protected DVDs!'
-    print
-    MPLAYER_ARGS['dvd'] += ' -nodvdprotection-override'
+
 
 #
 # List of objects representing removable media, e.g. CD-ROMs,

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.27  2003/08/20 21:26:36  dischi
 # use $FREEVO_PYTHON if set to find the plugins
 #
@@ -212,11 +215,7 @@ def init():
     global __plugin_basedir__
     
     __initialized__ = TRUE
-
-    if os.environ.has_key('FREEVO_PYTHON') and os.environ['FREEVO_PYTHON']:
-        __plugin_basedir__ = os.environ['FREEVO_PYTHON']
-    else:
-        __plugin_basedir__ ='src'
+    __plugin_basedir__ = os.environ['FREEVO_PYTHON']
 
     for name, type, level, args, number in __all_plugins__:
         __load_plugin__(name, type, level, args, number)

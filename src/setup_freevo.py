@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.2  2003/08/20 19:00:02  dischi
 # removed sdl and added dga
 #
@@ -65,7 +68,8 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("zsnes", "snes", 0 ),
                      ("lame", "lame",0),
                      ("cdparanoia","cdparanoia",0),
-                     ("oggenc","oggenc",0))
+                     ("oggenc","oggenc",0),
+                     ("renice","renice",0))
     
 
 # Help text

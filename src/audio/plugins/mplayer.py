@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.11  2003/08/17 17:16:44  dischi
 # cache less for urls to save time
 #
@@ -196,6 +199,7 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
+        self.thread.app.write('quit\n')
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         self.thread.item = None

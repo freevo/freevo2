@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/08/22 17:51:29  dischi
+# Some changes to make freevo work when installed into the system
+#
 # Revision 1.10  2003/08/20 19:01:16  dischi
 # added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
 #
@@ -360,7 +363,7 @@ class MPlayer:
 
         if config.MPLAYER_AUTOCROP and command.find('crop=') == -1:
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
-            child = popen2.Popen3(vop_append('./runapp %s -ao null -vo null ' \
+            child = popen2.Popen3(vop_append('%s -ao null -vo null ' \
                                              '-ss 60 -frames 20 -vop cropdetect' % \
                                              command), 1, 100)
             exp = re.compile('^.*-vop crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*')
@@ -405,6 +408,7 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
+        self.thread.app.write('quit\n')
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
         self.thread.item = None
