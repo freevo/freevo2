@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2003/09/10 19:05:05  dischi
+# move osd keybindings into the config file
+#
 # Revision 1.87  2003/09/07 11:19:16  dischi
 # add name and ptsize to OSDFont
 #
@@ -179,52 +182,6 @@ F10     Screenshot
 L       Subtitle
 """
 
-
-cmds_sdl = {
-    K_F1          : 'SLEEP',
-    K_HOME        : 'MENU',
-    K_g           : 'GUIDE',
-    K_ESCAPE      : 'EXIT',
-    K_UP          : 'UP',
-    K_DOWN        : 'DOWN',
-    K_LEFT        : 'LEFT',
-    K_RIGHT       : 'RIGHT',
-    K_SPACE       : 'SELECT',
-    K_RETURN      : 'SELECT',
-    K_F2          : 'POWER',
-    K_F3          : 'MUTE',
-    K_KP_MINUS    : 'VOL-',
-    K_n           : 'VOL-',
-    K_KP_PLUS     : 'VOL+',
-    K_m           : 'VOL+',
-    K_c           : 'CH+',
-    K_v           : 'CH-',
-    K_1           : '1',
-    K_2           : '2',
-    K_3           : '3',
-    K_4           : '4',
-    K_5           : '5',
-    K_6           : '6',
-    K_7           : '7',
-    K_8           : '8',
-    K_9           : '9',
-    K_0           : '0',
-    K_d           : 'DISPLAY',
-    K_e           : 'ENTER',
-    K_UNDERSCORE  : 'PREV_CH',
-    K_o           : 'PIP_ONOFF',
-    K_w           : 'PIP_SWAP',
-    K_i           : 'PIP_MOVE',
-    K_F4          : 'TV_VCR',
-    K_r           : 'REW',
-    K_p           : 'PLAY',
-    K_f           : 'FFWD',
-    K_u           : 'PAUSE',
-    K_s           : 'STOP',
-    K_F6          : 'REC',
-    K_PERIOD      : 'EJECT',
-    K_l           : 'SUBTITLE'
-    }
 
 # Module variable that contains an initialized OSD() object
 _singleton = None
@@ -501,11 +458,11 @@ class OSD:
                     pygame.image.save(self.screen,
                                       '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
                     self._screenshotnum += 1
-                elif event.key in cmds_sdl.keys():
+                elif event.key in config.KEYMAP.keys():
                     # Turn off the helpscreen if it was on
                     if self._help:
                         self._helpscreen()
-                    return cmds_sdl[event.key]
+                    return config.KEYMAP[event.key]
 
     
     def shutdown(self):
