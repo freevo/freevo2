@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/12 00:11:39  gsbarbieri
+# Fixed the TV Guide.
+# Added the date to the Guide, it's at left-top corner of the listing
+#
 # Revision 1.2  2003/04/24 19:57:53  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -42,7 +46,7 @@ import copy
 
 import time
 import config
-
+import math
 from area import Skin_Area, Geometry
 from skin_utils import *
 
@@ -176,23 +180,59 @@ class TVListing_Area(Skin_Area):
             if rightarrow:
                 rightarrow_size = (rightarrow.get_width(), rightarrow.get_height())
 
-        x_contents = content.x + label_width + content.spacing
-        w_contents = content.width - label_width - content.spacing
 
-        for i in range(n_cols):
-            x0 = int(x_contents + (float(w_contents) / n_cols) * i)
-            x1 = int(x_contents + (float(w_contents) / n_cols) * (i+1))
-            ty0 = content.y
+        x_contents = content.x + content.spacing
+        y_contents = content.y + content.spacing
+        
+        w_contents = content.width  - 2 * content.spacing
+        h_contents = content.height - 2 * content.spacing
 
-            ig = Geometry(0, 0, x1-x0+1, head_h)
+        # Print the Date of the current list page
+        dateformat = config.TV_DATEFORMAT
+        if not dateformat:
+            dateformat = '%e-%b'
+
+        r = Geometry( 0, 0, label_width, font_h )
+        if label_val.rectangle:
+            r = self.get_item_rectangle( label_val.rectangle, label_width, head_h )[ 2 ]
+            pad_x = 0
+            pad_y = 0
+            if r.x < 0: pad_x = -1 * r.x
+            if r.y < 0: pad_y = -1 * r.y
+        self.drawroundbox( x_contents, y_contents,
+                           r.width+1, head_h+1, r )
+        self.write_text( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
+                         head_font, content,
+                         x=( x_contents + pad_x ), y=( y_contents + pad_y ),
+                         width=( r.width - 2 * pad_x ), height=-1,
+                         align_v='center', align_h=head_val.align )
+
+        x_contents += r.width
+        y_contents += r.height
+        w_contents -= r.width
+        h_contents -= r.width
+
+        # 1 sec = x pixels
+        prop_1sec = float(w_contents) / float(n_cols * col_time * 60)
+
+        # Print the time at the table's top
+        x0 = x_contents
+        col_size = prop_1sec * 1800 # 30 minutes
+        ty0 = y_contents - r.height
+        for i in range( n_cols ):
+            ig = Geometry( 0, 0, col_size, head_h )
             if head_val.rectangle:
-                ig, r = self.fit_item_in_rectangle(head_val.rectangle, x1-x0+1, head_h)
-                self.drawroundbox(x0+r.x, ty0+r.y, r.width, r.height, r)
-                
-            self.write_text(time.strftime("%H:%M",time.localtime(to_listing[0][i+1])),
-                            head_font, content, x=x0+ig.x,
-                            y=ty0+ig.y, width=ig.width, height=-1,
-                            align_v='center', align_h = head_val.align)
+                ig, r = self.fit_item_in_rectangle( head_val.rectangle, col_size, head_h )
+
+            self.drawroundbox( math.floor(x0), ty0,
+                               math.floor( col_size + x0 ) - math.floor( x0 ) + 1, head_h + 1, r )
+
+            self.write_text( time.strftime( "%H:%M", time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
+                             head_font, content,
+                             x=( x0 + ig.x ), y=( ty0 + ig.y ),
+                             width=ig.width, height=-1,
+                             align_v='center', align_h=head_val.align)
+            x0 += col_size
 
         # define start and stop time
         date = time.strftime("%x", time.localtime())
@@ -200,12 +240,9 @@ class TVListing_Area(Skin_Area):
         stop_time = to_listing[0][-1]
         stop_time += (col_time*60)
 
-        # 1 sec = x pixels
-        prop_1sec = float(w_contents) / float(n_cols * col_time * 60)
-
         # selected program:
         selected_prog = to_listing[1]
-
+        
         for i in range(2,len(to_listing)):
             ty0 = y0
             tx0 = content.x
@@ -213,15 +250,13 @@ class TVListing_Area(Skin_Area):
             logo_geo = [ tx0, ty0, label_width, font_h ]
             
             if label_val.rectangle:
-                r = self.get_item_rectangle(label_val.rectangle,
-                                            label_txt_width, font_h)[2]
-
+                r = self.get_item_rectangle(label_val.rectangle, label_width, font_h)[2]
                 if r.x < 0:
                     tx0 -= r.x
                 if r.y < 0:
                     ty0 -= r.y
                             
-                self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width, r.height, r)
+                self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, r.height, r)
                 
                 logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
                             r.height-2*r.size ]
@@ -240,7 +275,7 @@ class TVListing_Area(Skin_Area):
 
             else:
                 self.write_text(to_listing[i].displayname, label_font, content,
-                                x=tx0, y=ty0, width=label_width, height=font_h)
+                                x=tx0, y=ty0, width=r.width+2*r.x, height=font_h)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
