@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2003/11/21 17:55:09  dischi
+# new SUFFIX_VIDEO_FILES layout
+#
 # Revision 1.68  2003/11/09 22:34:17  rshortt
 # We need True/False defs a bit higher up.
 #
@@ -502,6 +505,11 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
 #
 OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 
+#
+# set list of video files to []
+# (fill be filled from the plugins) 
+#
+SUFFIX_VIDEO_FILES = []
 
 #
 # set data dirs

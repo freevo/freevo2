@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 4.00
+LOCAL_CONF_VERSION  = 4.01
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -140,7 +140,11 @@ LOCAL_CONF_CHANGES = [
      DIRECTORY_ADD_RANDOM_PLAYLIST and DIRECTORY_AUTOPLAY_ITEMS. The directory
      updated now uses stat, set DIRECTORY_USE_STAT_FOR_CHANGES = 0 if you have
      problems with it. Also new: IMAGEVIEWER_BLEND_SPEED to control blending
-     one image to the next in the image viewer.''')]
+     one image to the next in the image viewer.'''),
+    (4.01,
+     '''Removed SUFFIX_VIDEO_FILES and replaced it with SUFFIX_VIDEO_MPLAYER_FILES
+     and SUFFIX_VIDEO_XINE_FILES. Use PREFERED_VIDEO_PLAYER to choose a prefered
+     player.''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -504,9 +508,21 @@ COVER_DIR = None
 # The list of filename suffixes that are used to match the files that
 # are played wih MPlayer.
 # 
-SUFFIX_VIDEO_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
-                       'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
-                       'mp4', 'viv', 'nuv', 'mov' ]
+SUFFIX_VIDEO_MPLAYER_FILES = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
+                               'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
+                               'mp4', 'viv', 'nuv', 'mov' ]
+
+#
+# The list of filename suffixes that are used to match the files that
+# are played wih Xine.
+# 
+SUFFIX_VIDEO_XINE_FILES = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
+                            'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue' ]
+
+#
+# Prefered video player
+#
+PREFERED_VIDEO_PLAYER = 'mplayer'
 
 #
 # Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
