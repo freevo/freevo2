@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/20 17:39:00  dischi
+# set \\PLAY\ to play item
+#
 # Revision 1.11  2003/06/07 11:30:02  dischi
 # Readded INPUT_[0-9] event args (why were they gone, we need them).
 # Also added MENU_CALL_ITEM_ACTION to call an action directly
@@ -267,6 +270,7 @@ MENU_EVENTS = {
     'MENU'      : MENU_GOTO_MAINMENU,
     'EXIT'      : MENU_BACK_ONE_MENU,
     'SELECT'    : MENU_SELECT,
+    'PLAY'      : MENU_PLAY_ITEM,
     'ENTER'     : MENU_SUBMENU,
     'DISPLAY'   : MENU_CHANGE_STYLE,
     'EJECT'     : EJECT,
