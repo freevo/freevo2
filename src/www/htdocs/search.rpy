@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/12 23:26:10  rshortt
+# small bugfix
+#
 # Revision 1.3  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -120,13 +123,13 @@ class SearchResource(FreevoResource):
             fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
 
             if status == 'scheduled':
-                cell = '<a href="record.cgi?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
+                cell = '<a href="record.rpy?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
             elif status == 'recording':
-                cell = '<a href="record.cgi?chan=%s&start=%s">Record</a>' % (prog.channel_id, prog.start)
+                cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
             else:
-                cell = '<a href="record.cgi?chan=%s&start=%s">Record</a>' % (prog.channel_id, prog.start)
+                cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
 
-            cell += ' | <a href="edit_favorite.cgi?chan=%s&start=%s&action=add">New favorite</a>' % (prog.channel_id, prog.start)
+            cell += ' | <a href="edit_favorite.rpy?chan=%s&start=%s&action=add">New favorite</a>' % (prog.channel_id, prog.start)
             fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
 
             fv.tableRowClose()
