@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2003/12/30 22:31:44  dischi
+# OVERLAY_DIRS needs specific format for speedup
+#
 # Revision 1.83  2003/12/30 15:27:47  dischi
 # reset OVERLAY_DIR usage if OVERLAY_DIR is not set
 #
@@ -873,6 +876,12 @@ if OVERLAY_DIR_STORE_MMPYTHON_DATA and not OVERLAY_DIR:
     print 'OVERLAY_DIR not set, use normal mmpython cache'
     OVERLAY_DIR_STORE_MMPYTHON_DATA = False
 
+# Make sure OVERLAY_DIR doesn't ends with a slash
+# With that, we don't need to use os.path.join, normal string
+# concat is much faster
+if OVERLAY_DIR and OVERLAY_DIR.endswith('/'):
+    OVERLAY_DIR = OVERLAY_DIR[:-1]
+    
 #
 # delete LD_PRELOAD for all helpers, main.py does it after
 # starting the display
