@@ -440,6 +440,7 @@ PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
 	
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	get_raw_bytes("BGRA", pysurf->surf->pixels);
+	Py_INCREF(Py_None);
 	return Py_None;
 #else
 	return PyErr_SetString(PyExc_ValueError, "pygame support missing"), (PyObject*)NULL;
