@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/23 19:25:46  dischi
+# some scaling fixes
+#
 # Revision 1.3  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -124,23 +127,26 @@ def format_image(settings, item, width, height, force=0):
     if type and len(type) > 4:
         type = type[:5]
         
-    if type == 'audio' and not force:
+    i_w, i_h = image.get_size()
+    aspect = max(float(i_h)/i_w, float(i_w)/i_h)
+    keep_geo = 0
+
+    if type == 'audio' and aspect < 1.3:
+        # this is an audio cover
         m = min(height, width)
-        height = m
-        width  = m
-
-    elif image:
-        i_w, i_h = image.get_size()
-        if type == 'video' and not force and i_w < i_h:
-            # aspect 7:5
-            i_w = 5
-            i_h = 7
-
-        if int(float(width * i_h) / i_w) > height:
-            width = int(float(height * i_w) / i_h)
-        else:
-            height = int(float(width * i_h) / i_w)
-
+        i_w = m
+        i_h = m
+        
+    elif type == 'video' and aspect > 1.3:
+        # video cover, set aspect 7:5
+        i_w = 5
+        i_h = 7
+        
+    if int(float(width * i_h) / i_w) > height:
+        width =  int(float(height * i_w) / i_h)
+    else:
+        height = int(float(width * i_h) / i_w)
+        
     cimage = pygame.transform.scale(image, (width, height))
     cimage.set_alpha(cimage.get_alpha(), RLEACCEL)
     format_imagecache[cname] = cimage, width, height
