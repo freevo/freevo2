@@ -45,9 +45,11 @@ FALSE = 0
 
 # maxinum number of days we can record
 MAXDAYS = 7
-#minimum amount of time it would take cron to pick us up in seconds
-#by default it is two minutes since the cron runs every minute
-MINCRONPICKUP = 120
+
+# minimum amount of time it would take cron to pick us up in seconds
+# by default it is one minute  plus a few seconds since the cron job
+# runs every minute and to allow for processing time.
+MINCRONPICKUP = 70
 
 form = cgi.FieldStorage()
 curtime_epoch = time.time()
@@ -84,7 +86,9 @@ if action:
         # so we don't record for more then maxdays (maxdays day * 24hr/day * 60 min/hr * 60 sec/min)
         if abs(stoptime - starttime) < (MAXDAYS * 86400): 
             if starttime < stoptime:
-                if starttime > curtime_epoch + MINCRONPICKUP:
+                if stoptime < curtime_epoch + MINCRONPICKUP:
+                    errormsg = "Sorry, the stop time does not give enough time for cron to pickup the change.  Please set it to record for a few minutes longer."
+                else:
                     # assign attributes to object
                     prog = epg_types.TvProgram()
                     prog.channel_id = chan
@@ -101,8 +105,6 @@ if action:
                     # redirect to record.cgi to show new program in schedule
                     sys.stdout = so
                     print "Location: record.cgi\n\n"
-                else:
-                    errormsg = "start time does not give enough time for cron to pickup change. please set to record two minutes or more after current time."
             else:
                 errormsg = "start time is not before stop time." 
         else:
@@ -154,7 +156,7 @@ if errormsg or not action:
     minuteselect = '<select name="%s" %s >'
     iter=0
     while iter < 60:
-        if (curtime[4] + 5 - (curtime[4] % 5)) == iter:
+        if (curtime[4] - (curtime[4] % 5)) == iter:
             minuteselect = minuteselect + '<option selected value="'+str(iter)+'">'+str(iter)+"\n"
         else:
             minuteselect = minuteselect + '<option value="'+str(iter)+'">'+str(iter)+"\n"
