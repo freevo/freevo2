@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/10/08 20:19:55  dischi
+# fix poll intervall
+#
 # Revision 1.10  2004/10/03 15:55:25  dischi
 # adjust to new popup code
 #
@@ -72,7 +75,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
         self.devices = util.list_usb_devices()
-        self.poll_interval = 100
+        self.poll_interval = 1000
 
 
     def config(self):
