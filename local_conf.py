@@ -22,10 +22,12 @@
 # -----------------------------------------------------------------------
 #endif
 
+
+# Version information for the two config files. When the major version
+# of the config file doesn't match, Freevo won't start. If the minor version
+# is different, there will be only a warning
+
 CONFIG_VERSION = 3.5
-
-MPLAYER_AO_DEV        = 'oss:/dev/em8300_ma'
-
 
 # How Freevo finds the config files (freevo.conf, local_conf.py, local_skin.xml)
 # ==============================================================================
@@ -112,47 +114,60 @@ MPLAYER_AO_DEV        = 'oss:/dev/em8300_ma'
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = [ ('Incoming TV Shows', '/home/dmeyer/video/incoming'), \
-               ('Trailer', '/home/dmeyer/video/Trailer'),
-               ('Test', '/home/dmeyer/video/Series'),
-               ('Current Movies', '/home/dmeyer/video/movie'),
-               ('Misc Movies/Shows', '/home/dmeyer/video/misc'),
-               ('All Movies/Shows on Disc', '/home/dmeyer/video') ] + DIR_MOVIES
+#DIR_MOVIES = [ ('Test Movies', 'testfiles/Movies') ]
 
-DIR_AUDIO = [ ('Music Collection', '/local/mp3/') ] + DIR_AUDIO
+#
+# This is where recorded video is written.
+#
+#DIR_RECORD = './testfiles/Movies/Recorded'
 
-DIR_IMAGES = [ ('My Photos', '/home/dmeyer/images') ] + DIR_IMAGES
 
-TV_SHOW_DATA_DIR = "/home/dmeyer/etc/tv-show-images/"
-MOVIE_DATA_DIR   = '/home/dmeyer/etc/movie-data/'
+# ======================================================================
+# Freevo audio settings:
+# ======================================================================
 
-TV_CHANNELS = [
-    ('ard.szing.at','ARD','0') ,
-    ('cnn.szing.at','CNN','0') ,
-    ('kabel-1.szing.at','KABEL 1','0') ,
-    ('n-tv.szing.at','N-TV','0') ,
-    ('nord-3.szing.at','NORD 3','0') ,
-    ('pro-7.szing.at','PRO 7','0') ,
-    ('rtl-2.szing.at','RTL 2','0') ,
-    ('rtl.szing.at','RTL','0') ,
-    ('sat.1.szing.at','SAT.1','0') ,
-    ('super-rtl.szing.at','SUPER RTL','0') ,
-    ('zdf.szing.at','ZDF','0') ]
+#
+# Where the Audio (mp3, ogg) files can be found.
+# Format: [ ('Title1', 'directory1', 'mplayer options'),
+#           ('Title2', 'directory2'), ... ]
+# The 'mplayer options' field can be omitted.
+#
+#DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 
-MPLAYER_AO_HWAC3_DEV = 'oss:/dev/em8300_ma-0'
-MPLAYER_USE_WID      = 0
 
-MPLAYER_ARGS_DEF = ('-nobps -monitoraspect 4:3 -nolirc -screenw %s -screenh %s ' %
-                    (CONF.width, CONF.height))
+# ======================================================================
+# Freevo image viewer settings:
+# ======================================================================
 
-CONTROL_ALL_AUDIO = 0
-MAJOR_AUDIO_CTRL  = 'None'
+#
+# Where the image files can be found.
+#
+#DIR_IMAGES = [ ('Test Images', './testfiles/Images'),
+#               ('Test Show',  'testfiles/Images/CA_Coast.ssr') ]
 
-ROM_SPEED = 16
+# ======================================================================
+# MPlayer section:
+# ======================================================================
 
-RC_MPLAYER_CMDS = {
-    'SUB'         : ( 'sub_visibility', 'Toggle subtitle visibility' )
-}
+# Set to 1 to log mplayer output to ./mplayer_stdout.log and
+# ./mplayer_stderr.log
+#MPLAYER_DEBUG = 0
+
+#MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
+
+#DVD_LANG_PREF        = 'en,se,no'      # Order of preferred languages on DVD.
+#MPLAYER_USE_WID      = 1
+
+#
+# The runtime version of MPlayer/MEncoder are patched to disable DVD
+# protection override (a.k.a decss) by using the flag
+# "-nodvdprotection-override". This flag is set by default if the runtime version
+# of MPlayer is used to play DVDs, since it is illegal (TBC) to use it in some
+# countries. You can modify the program to use the protection override,
+# but only if you're 100% sure that it is legal in your jurisdiction!
+#
+#MPLAYER_DVD_PROTECTION = 1
+
 
 # ======================================================================
 # TV:
@@ -214,21 +229,6 @@ RC_MPLAYER_CMDS = {
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
 #TV_VIEW_SIZE = (640, 480)
-
-#
-# FREQUENCY_TABLE - This is only used when Freevo changes the channel natively.
-# This is only the case if you are using V4L2 and any of the following plugins:
-# timeshift, ivtv_record, ivtv_basic_tv.
-# For the standard frequancy tables see src/tv/freq.py.  To add your own just
-# replace tuner_id in the following example with a valid tuner id (ie: '5' or
-# 'BBC1') and a frequency in KHz.  You may have as many entries as you like,
-# anything here will simply override a coresponding entry in your standard
-# frequency table and you can also have entries here that are not present i
-# there.
-# FREQUENCY_TABLE = {
-#     'tuner_id'   :    55250,
-# }
-
 
 #
 # TV Channels. This list contains a mapping from the displayed channel name
@@ -381,59 +381,4 @@ RC_MPLAYER_CMDS = {
 # WWW_USERS = { "user1" : "changeme", 
 #            "optional" : "changeme2" }
 #
-
-OVERSCAN_X = 0 # 20
-OVERSCAN_Y = 10
-
-#OSD_SKIN = 'skins/dischi1/skin_dischi1.py'
-
-#SKIN_XML_FILE = 'blue_round2'
-SKIN_XML_FILE = 'blue'
-# SKIN_XML_FILE = 'info'
-SKIN_XML_FILE = 'noia'
-#SKIN_XML_FILE = 'barbieri'
-
-#plugin.remove(plugin_tv)
-plugin.remove('tv.mplayer')
-plugin.activate('tv.tvtime')
-
-plugin.activate('idlebar.interface')
-
-plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
-plugin.activate('idlebar.tv',      level=20)
-plugin.activate('idlebar.weather', level=30, args=('EDDW',))
-plugin.activate('idlebar.clock',   level=50)
-plugin.activate('idlebar.cdstatus',   level=20)
-plugin.activate('idlebar.holidays',   level=20)
-
-
-plugin.activate('video.mover', args=('/home/dmeyer/video/incoming',
-                                     '/home/dmeyer/video/Series'))
-
-plugin.activate('usb')
-plugin.activate('image.camera', args=('Finepix', '04cb:0100', '/mnt/camera'))
-
-plugin.activate('df')
-
-EVENTS['menu']['1'] = Event(MENU_CALL_ITEM_ACTION, arg='imdb_search_or_cover_search')
-EVENTS['video']['1'] = Event(VIDEO_SEND_MPLAYER_CMD, arg='sub_visibility')
-
-#plugin.activate('www')
-WWW_USERS = { 'dmeyer' : 'online' }
-plugin.activate('audio.coversearch')
-MPLAYER_SOFTWARE_SCALER = '-xy %s -sws 2 -vop scale:-1:-1:-1:100' % CONF.width
-
-IMDB_REMOVE_FROM_SEARCHSTRING = ('the', 'a', 'dvdrip', 'dvd', 'proper', 'sharereactor')
-
-#OVERSCAN_X = 20
-#OVERSCAN_Y = 20
-MPLAYER_VO_DEV = 'x11'
-
-plugin.activate('video.xine')
-
-EVENTS['dvd']['LANG']  = VIDEO_NEXT_AUDIOLANG
-#EVENTS['dvd']['MENU']  = DVDNAV_MENU
-EVENTS['dvd']['TITLE'] = DVDNAV_TITLEMENU
-
-EVENTS['dvd']['1'] = VIDEO_NEXT_AUDIOLANG
 
