@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/06 09:22:06  krister
+# Added a python killall() function instead of the shell call.
+#
 # Revision 1.7  2003/02/04 16:28:37  outlyer
 # Replaced proc_mount with os.ismount to be somewhat cross-platform.
 #
@@ -68,6 +71,8 @@ import time
 import threading
 import fcntl
 import md5
+import commands
+
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -367,3 +372,36 @@ def getname(file):
     if name[-1] == '_':
         name = name[:-1]
     return name
+
+
+def killall(appname, sig=9):
+    '''kills all applications with the string <appname> in their commandline.
+
+    The <sig> parameter indicates the signal to use.
+    This implementation uses the /proc filesystem, it might be Linux-dependent.
+    '''
+
+    cmdline_filenames = glob.glob('/proc/[0-9]*/cmdline')
+
+    for cmdline_filename in cmdline_filenames:
+
+        try:
+            fd = open(cmdline_filename)
+            cmdline = fd.read()
+            fd.close()
+        except IOError:
+            continue
+
+        cmdline_args = cmdline.split('\x00')
+
+        for cmdline_arg in cmdline_args:
+            if cmdline_arg.find(appname) != -1:
+                # Found one, kill it
+                pid = int(cmdline_filename.split('/')[2])
+                if config.DEBUG:
+                    a = sig, pid, ' '.join(cmdline_args)
+                    print 'killall: Sending signal %s to pid %s ("%s")' % a
+                os.kill(pid, sig)
+                break # Done with this process, go on to the next one
+
+    return

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/06 09:22:06  krister
+# Added a python killall() function instead of the shell call.
+#
 # Revision 1.8  2003/02/04 13:12:03  dischi
 # removed some debug
 #
@@ -130,7 +133,7 @@ im_thread = None
 
 def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     """
-    function to shut down freevo or the hole system
+    function to shut down freevo or the whole system
     """
     osd.clearscreen(color=osd.COL_BLACK)
     osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
@@ -159,8 +162,9 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     #
     
     # XXX kludge to shutdown the runtime version (no linker)
-    os.system('killall -9 freevo_python 2&> /dev/null') 
-    os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
+    util.killall('freevo_python')
+    util.killall('freevo_loader')
+    util.killall('freevo_xwin')
     # XXX Kludge to shutdown if started with "python main.py"
     os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
 
@@ -394,8 +398,9 @@ def signal_handler(sig, frame):
         osd.shutdown() # SDL must be shutdown to restore video modes etc
 
         # XXX kludge to shutdown the runtime version (no linker)
-        os.system('killall -9 freevo_python 2&> /dev/null') 
-        os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
+        util.killall('freevo_python')
+        util.killall('freevo_loader')
+        util.killall('freevo_xwin')
         # XXX Kludge to shutdown if started with "python main.py"
         os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
 
@@ -422,15 +427,6 @@ def main_func():
     # legacy code!
     del config.ROM_DRIVES   # XXX Remove later
     
-    # Make sure there's no mplayer process lying around.
-    #os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
-                                                  # my mplayer command is actually
-                                                  # nice --10 mplayer, to run mplayer
-                                                  # with higher priority, but won't be
-                                                  # killed by this. 
-                                                  # If I'm the only one, add this:
-                                                  # ...-9 %s... ' % config.MPLAYER_CMD)
-
     signal.signal(signal.SIGTERM, signal_handler)
 
     # Start identifymedia thread
