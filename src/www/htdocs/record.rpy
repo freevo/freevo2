@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/03/04 15:23:36  rshortt
+# I am pretty sure we should have %b %d in here, the configurable timestamp doesn't really fit in here.
+#
 # Revision 1.13  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -201,8 +204,8 @@ class RecordResource(FreevoResource):
                 pass
 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(time.strftime(config.TV_TIMEFORMAT, time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
-            fv.tableCell(time.strftime(config.TV_TIMEFORMAT, time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
 
             chan = tv_util.get_chan_displayname(prog.channel_id)
             if not chan: chan = _('UNKNOWN')
