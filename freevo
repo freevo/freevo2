@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2004/02/06 18:01:21  dischi
+# fix bug with helper softlinks
+#
 # Revision 1.108  2004/01/26 19:33:17  dischi
 # python 2.2 has no True/False
 #
@@ -251,6 +254,8 @@ def start(name, arg, bg, store=1):
 
 
 freevo_script = os.path.abspath(sys.argv[0])
+if os.path.islink(freevo_script):
+    freevo_script = os.readlink(freevo_script)
 
 if os.path.isdir(os.path.join(os.path.dirname(freevo_script), 'src/plugins')):
     #
@@ -323,7 +328,7 @@ else:
 # now check what and how we should start freevo
 bg    = 0 # start in background
 proc  = [ os.path.abspath(os.path.join(freevo_python, 'main.py')) ]
-name  = os.path.splitext(os.path.basename(freevo_script))[0]
+name  = os.path.splitext(os.path.basename(os.path.abspath(sys.argv[0])))[0]
 check = 1 # check running instance
 
 if len(sys.argv) > 1:
@@ -384,7 +389,7 @@ elif arg == 'runapp':
     proc       = sys.argv[3:]
     check      = 0
 
-elif arg and not arg.startswith('-'):
+elif arg and name == 'freevo' and not arg.startswith('-'):
     # start a helper. arg is the name of the script in
     # the helpers directory
     name     = arg
@@ -413,7 +418,6 @@ else:
     # arg for freevo
     proc += sys.argv[1:]
     
-
 
 if name != 'freevo':
     proc = [ os.path.join(freevo_python, 'helpers', name + '.py') ] +  sys.argv[1:]
