@@ -521,13 +521,13 @@
 			<text font="tv title" expression="title"/>
 			<newline/>
 		    </if>
-		    <if expression="sub_title">
-			<text font="tv subtitle" expression="sub_title"/>
+		    <if expression="subtitle">
+			<text font="tv subtitle" expression="subtitle"/>
 			<newline/>
 		    </if>
-		    <if expression="desc">
+		    <if expression="description">
 			<text font="tv description" height="max" mode="soft" 
-			    expression="desc"/>
+			    expression="description"/>
 			<newline/>
 		    </if>
 		</item>
@@ -541,14 +541,26 @@
 			<text font="tv title" width="max" expression="title"/>
 		    </if>
 		    <newline/>
-		    <if expression="sub_title">
+		    <if expression="subtitle">
 			<text font="info tagline">"</text>
-			<text font="info tagline" expression="sub_title"/>
+			<text font="info tagline" expression="subtitle"/>
 			<text font="info tagline">"</text>
 			<newline/>
 		    </if>
-		    <if expression="desc">
-			<text font="info plot" height="60" mode="soft" expression="desc"/>
+		    <if expression="description">
+			<text font="info plot" height="60" mode="soft" expression="description"/>
+			<newline/>
+		    </if>
+		    <if expression="categories">
+			<text font="info plot" height="60" mode="soft" expression="categories"/>
+			<newline/>
+		    </if>
+		    <if expression="advisories">
+			<text font="info plot" height="60" mode="soft" expression="advisories"/>
+			<newline/>
+		    </if>
+		    <if expression="ratings">
+			<text font="info plot" height="60" mode="soft" expression="ratings"/>
 			<newline/>
 		    </if>
 		    <goto_pos y="140" mode="absolute"/> 

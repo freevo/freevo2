@@ -615,14 +615,14 @@
                     </if>
 	            <text font="tv time" width="max" align="right" expression="time"/>
                     <newline/>
-                    <if expression="sub_title">
+                    <if expression="subtitle">
                         <text font="info tagline">"</text>
-                        <text font="info tagline" expression="sub_title"/>
+                        <text font="info tagline" expression="subtitle"/>
                         <text font="info tagline">"</text>
                         <newline/>
                     </if>
-                    <if expression="desc">
-                        <text font="info plot" height="max" mode="soft" expression="desc"/>
+                    <if expression="description">
+                        <text font="info plot" height="max" mode="soft" expression="description"/>
                         <newline/>
                     </if>
                 </item>
