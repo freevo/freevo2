@@ -5,21 +5,16 @@
 # $Id$
 #
 # Notes:
-# Perhaps we should move the filetype specific stuff (like the one for vob)
-# into the config files...
-#
-# i.e.
-#
-# MP_CUSTOM = {
-#     '.vob' = '-ac hwac3 ...',
-#     '.rm'  = '-forceidx',
-#     ...
-#     }
-#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/11/04 17:53:23  dischi
+# Removed the unstable bmovl part from mplayer.py and made it a plugin.
+# Even if we are in a code freeze, this is a major cleanup to put the
+# unstable stuff in a plugin to prevent mplayer from crashing because of
+# bmovl.
+#
 # Revision 1.37  2003/11/01 20:51:49  dischi
 # fix bug in delay
 #
@@ -48,35 +43,6 @@
 # Revision 1.30  2003/10/04 14:38:10  dischi
 # Try to auto-correct av sync problems. Set MPLAYER_SET_AUDIO_DELAY to
 # enable it. You need mmpython > 0.2 to make it work.
-#
-# Revision 1.29  2003/10/02 10:24:33  dischi
-# bmovl update
-#
-# Revision 1.28  2003/10/01 22:30:10  dischi
-# some bmovl fixes, you must use software scale with expand to make it work
-#
-# Revision 1.27  2003/10/01 20:39:34  dischi
-# bmovl support
-#
-# Revision 1.24  2003/09/20 17:03:20  dischi
-# draw status while connecting and caching for network files
-#
-# Revision 1.23  2003/09/19 22:09:15  dischi
-# use new childapp thread function
-#
-# Revision 1.22  2003/09/18 17:09:54  gsbarbieri
-# Faster version detection + handle for CVS versions.
-#
-# Revision 1.21  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.20  2003/09/03 17:54:38  dischi
-# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
-# doesn't exist anymore.
-#
-# Revision 1.19  2003/09/02 19:10:22  dischi
-# Basic mplayer version detection. Convert -vop to -vf if cvs or 1.0pre1
-# is used
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -117,11 +83,7 @@ import plugin
 import re
 
 import osd
-from osd import OSD
 osd = osd.get_singleton()
-
-import skin
-import pygame
 
 class PluginInterface(plugin.Plugin):
     """
@@ -157,48 +119,6 @@ class PluginInterface(plugin.Plugin):
         plugin.register(mplayer, plugin.VIDEO_PLAYER)
 
 
-class OSDbmovl(OSD):
-    """
-    an OSD class for bmovl
-    """
-    def __init__(self, width, height):
-        self.width  = width
-        self.height = height
-        self.depth  = 32
-        self.screen = pygame.Surface((width, height), SRCALPHA)
-
-        # clear surface
-        self.screen.fill((0,0,0,0))
-
-        self.bmovl  = os.open('/tmp/bmovl', os.O_WRONLY)
-
-
-    def close(self):
-        os.close(self.bmovl)
-
-        
-    def show(self):
-        os.write(self.bmovl, 'SHOW\n')
-        
-
-    def hide(self):
-        os.write(self.bmovl, 'HIDE\n')
-        
-
-    def clearscreen(self, color=None):
-        self.screen.fill((0,0,0,0))
-        os.write(self.bmovl, 'CLEAR %s %s %s %s' % (self.width, self.height, 0, 0))
-
-        
-    def update(self, rect):
-        _debug_('update bmovl')
-        update = self.screen.subsurface(rect)
-        os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
-                 (update.get_width(), update.get_height(), rect[0], rect[1], 0, 0))
-        os.write(self.bmovl, pygame.image.tostring(update, 'RGBA'))
-
-
-        
 class MPlayer:
     """
     the main class to control mplayer
@@ -234,8 +154,7 @@ class MPlayer:
             network_play = 0
            
         self.filename = filename
-
-        self.mode = mode   # setting global var to mode.
+        self.mode     = mode
 
         _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename))
 
@@ -297,6 +216,7 @@ class MPlayer:
         mpl += (' -v -vo ' + config.MPLAYER_VO_DEV + config.MPLAYER_VO_DEV_OPTS + \
                 ' ' + config.MPLAYER_ARGS[mode])
 
+        # make the options a list
         mpl = mpl.split(' ') + [ filename ] + additional_args.split(' ')
 
         if options:
@@ -307,10 +227,8 @@ class MPlayer:
             mpl.remove('-nosws')
         elif not '-framedrop' in mpl:
             mpl += config.MPLAYER_SOFTWARE_SCALER.split(' ')
-            
-        if os.path.exists('/tmp/bmovl') and config.MPLAYER_SOFTWARE_SCALER:
-            mpl += ('-vf', 'bmovl=1:0:/tmp/bmovl')
 
+        # correct avi delay based on mmpython settings
         if config.MPLAYER_SET_AUDIO_DELAY and item.info.has_key('delay') and \
                item.info['delay'] > 0:
             mpl += ('-mc', str(int(item.info['delay'])+1), '-delay',
@@ -321,6 +239,7 @@ class MPlayer:
         while '' in command:
             command.remove('')
 
+        # autocrop
         if config.MPLAYER_AUTOCROP and str(' ').join(command).find('crop=') == -1:
             _debug_('starting autocrop')
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
@@ -344,15 +263,18 @@ class MPlayer:
             
             child.wait()
 
+        self.file        = item
+        self.item        = item
+
+        self.plugins = plugin.get('mplayer_video')
+
+        for p in self.plugins:
+            command = p.play(command, self)
+            
         command=self.vop_append(command)
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
-
-        self.file        = item
-        self.osd_visible = False
-        self.item        = item
-        self.bmovl       = None
 
         rc.app(self)
 
@@ -362,92 +284,14 @@ class MPlayer:
         return None
     
 
-    def show_osd(self):
-        """
-        bmovl: init bmovl osd and show it
-        """
-        _debug_('show osd')
-
-        height = config.OVERSCAN_Y + 60
-        if not skin.get_singleton().settings.images.has_key('background'):
-            _debug_('no background')
-            return
-        
-        bg = self.bmovl.loadbitmap(skin.get_singleton().settings.images['background'])
-        bg = pygame.transform.scale(bg, (self.bmovl.width, self.bmovl.height))
-
-        self.bmovl.screen.blit(bg, (0,0))
-
-        # bar at the top:
-        self.bmovl.drawbox(0, height-1, osd.width, height-1, width=1, color=0x000000)
-
-        clock       = time.strftime('%a %I:%M %P')
-        clock_font  = skin.get_singleton().GetFont('clock')
-        clock_width = clock_font.font.stringsize(clock)
-        
-        self.bmovl.drawstringframed(clock, self.bmovl.width-config.OVERSCAN_X-10-clock_width,
-                                    config.OVERSCAN_Y+10, clock_width, -1,
-                                    clock_font.font, clock_font.color)
-
-        self.bmovl.update((0, 0, self.bmovl.width, height))
-
-        # bar at the bottom
-        height += 40
-        x0      = config.OVERSCAN_X+10
-        y0      = self.bmovl.height + 5 - height
-        width   = self.bmovl.width - 2 * config.OVERSCAN_X
-        
-        self.bmovl.drawbox(0, self.bmovl.height + 1 - height, self.bmovl.width,
-                           self.bmovl.height + 1 - height, width=1, color=0x000000)
-
-        if self.item.image:
-            image = pygame.transform.scale(self.bmovl.loadbitmap(self.item.image), (65, 90))
-            self.bmovl.screen.blit(image, (x0, y0))
-            x0    += image.get_width() + 10
-            width -= image.get_width() + 10
-            
-        title   = self.item.name
-        tagline = self.item.getattr('tagline')
-
-        if self.item.tv_show:
-            show    = config.TV_SHOW_REGEXP_SPLIT(self.item.name)
-            title   = show[0] + " " + show[1] + "x" + show[2]
-            tagline = show[3]
-        
-        title_font   = skin.get_singleton().GetFont('title')
-        tagline_font = skin.get_singleton().GetFont('info tagline')
-
-        pos = self.bmovl.drawstringframed(title, x0, y0, width, -1, title_font.font,
-                                          title_font.color)
-        if tagline:
-            self.bmovl.drawstringframed(tagline, x0, pos[1][3]+5, width, -1,
-                                        tagline_font.font, tagline_font.color)
-            
-        self.bmovl.update((0, self.bmovl.height-height, self.bmovl.width, height))
-
-        # and show it
-        self.bmovl.show()
-
-
-    def hide_osd(self):
-        """
-        bmovl: hide osd
-        """
-        _debug_('hide')
-        self.thread.app.refresh = None
-        self.bmovl.clearscreen()
-        self.bmovl.hide()
-        
-        
     def stop(self):
         """
         Stop mplayer and set thread to idle
         """
         self.thread.stop('quit\n')
         rc.app(None)
-        if self.bmovl:
-            self.bmovl.close()
-            self.bmovl = None
+        for p in self.plugins:
+            command = p.stop()
 
 
     def eventhandler(self, event, menuw=None):
@@ -455,6 +299,10 @@ class MPlayer:
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+
+        for p in self.plugins:
+            if p.eventhandler(event):
+                return True
 
         if event == VIDEO_MANUAL_SEEK:
             self.seek = 0
@@ -497,16 +345,6 @@ class MPlayer:
             self.stop()
             return self.item.eventhandler(event)
 
-        if event == TOGGLE_OSD and self.bmovl:
-            if self.osd_visible:
-                self.thread.app.write('osd 1\n')
-                self.hide_osd()
-            else:
-                self.show_osd()
-                self.thread.app.write('osd 3\n')
-            self.osd_visible = not self.osd_visible
-            return True
-
         try:
             if event == VIDEO_SEND_MPLAYER_CMD:
                 self.thread.app.write('%s\n' % event.arg)
@@ -536,11 +374,13 @@ class MPlayer:
         _debug_('seek timeout')
         self.seek = 0
         rc.set_context('video')
+
         
     def reset_seek_timeout(self):
         self.seek_timer.cancel()
         self.seek_timer = threading.Timer(config.MPLAYER_SEEK_TIMEOUT, self.reset_seek)
         self.seek_timer.start()
+
         
     def vop_append(self, command):
         """
@@ -604,24 +444,24 @@ class MPlayerApp(childapp.ChildApp):
         self.RE_EXIT      = re.compile("^Exiting\.\.\. \((.*)\)$").match
         self.item         = item
         self.mplayer      = mplayer
+        self.exit_type    = None
         self.osdfont      = osd.getfont(config.OSD_DEFAULT_FONTNAME,
                                         config.OSD_DEFAULT_FONTSIZE)
 
+        # check for mplayer plugins
+        self.stdout_plugins  = []
+        self.elapsed_plugins = []
+        for p in plugin.get('mplayer_video'):
+            if hasattr(p, 'stdout'):
+                self.stdout_plugins.append(p)
+            if hasattr(p, 'elapsed'):
+                self.elapsed_plugins.append(p)
+
+        # init the child (== start the threads)
         childapp.ChildApp.__init__(self, app)
 
-        self.exit_type = None
 
-        self.use_bmovl = False
-        pos = 0
-        if '-vop' in app:
-            pos = app.index('-vop')
-        if '-vf' in app:
-            pos = app.index('-vf')
-        if pos and app[pos+1].find('/tmp/bmovl') > 0:
-            print 'Found /tmp/bmovl, activating experimental bmovl support'
-            self.use_bmovl = True
-
-        
+                
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
         # down properly and releases all resources before it gets
@@ -645,12 +485,16 @@ class MPlayerApp(childapp.ChildApp):
                         
 
     def stdout_cb(self, line):
+        """
+        parse the stdout of the mplayer process
+        """
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stdout.write(line + '\n')
             except ValueError:
-                pass # File closed
+                pass
 
+        # show connection status for network play
         if self.network_play:
             if line.find('Opening audio decoder') == 0:
                 osd.clearscreen(osd.COL_BLACK)
@@ -661,37 +505,33 @@ class MPlayerApp(childapp.ChildApp):
                 if line.find('Connecting to server') == 0:
                     line = 'Connecting to server'
                 osd.clearscreen(osd.COL_BLACK)
-                osd.drawstringframed(line, config.OVERSCAN_X, config.OVERSCAN_Y,
-                                     osd.width - 2 * config.OVERSCAN_X, -1, self.osdfont,
-                                     osd.COL_WHITE)
+                osd.drawstringframed(line, config.OVERSCAN_X+10, config.OVERSCAN_Y+10,
+                                     osd.width - 2 * (config.OVERSCAN_X+10), -1,
+                                     self.osdfont, osd.COL_WHITE)
                 osd.update()
 
-        # experimental for bmovl, may crash
-        try:
-            if line.find('SwScaler:') ==0 and line.find(' -> ') > 0 and \
-                   line[line.find(' -> '):].find('x') > 0 and self.use_bmovl:
-                width, height = line[line.find(' -> ')+4:].split('x')
-                self.mplayer.bmovl = OSDbmovl(int(width), int(height))
-                self.use_bmovl = False
-            if line.find('Expand: ') == 0 and self.use_bmovl:
-                width, height = line[7:line.find(',')].split('x')
-                self.mplayer.bmovl = OSDbmovl(int(width), int(height))
-                self.use_bmovl = False
-        except:
-            pass
-        
+
+        # current elapsed time
         if line.find("A:") == 0:
-            m = self.RE_TIME(line) # Convert decimal
+            m = self.RE_TIME(line)
             if hasattr(m,'group'):
                 self.item.elapsed = int(m.group(1))+1
-                    
+                for p in self.elapsed_plugins:
+                    p.elapsed(self.item.elapsed)
+
+
+        # exit status
         elif line.find("Exiting...") == 0:
             m = self.RE_EXIT(line)
             if m:
                 self.exit_type = m.group(1)
 
+
         # this is the first start of the movie, parse infos
         elif not self.item.elapsed:
+            for p in self.stdout_plugins:
+                p.stdout(line)
+                
             if self.check_audio:
                 if line.find('MPEG: No audio stream found -> no sound') == 0:
                     # OK, audio is broken, restart without -alang
@@ -706,9 +546,16 @@ class MPlayerApp(childapp.ChildApp):
                     self.check_audio = 0
 
 
+
     def stderr_cb(self, line):
+        """
+        parse the stderr of the mplayer process
+        """
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stderr.write(line + '\n')
             except ValueError:
                 pass # File closed
+
+        for p in self.stdout_plugins:
+            p.stdout(line)
