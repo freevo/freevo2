@@ -84,6 +84,17 @@ if [ "$1" = "execute" ] ; then
     shift 1
     APP=`basename $1`
     PID_FILE=$PID_DIR/freevo-$APP.pid
+
+    # Exit if there is one already running
+    if [ -f $PID_FILE ] ; then
+        PID=`cat $PID_FILE`
+        RUNNING=`ps -ef | grep $PID | grep -v grep`
+        if ! [ "$RUNNING" = "" ] ; then
+          echo "Freevo's $APP is already running as process $PID."
+          exit 0
+        fi
+    fi
+
     trap './freevo stop $APP' 1 2 15
     ./runapp python $@ &
     echo PID is $!
@@ -105,9 +116,20 @@ if [ "$1" = "stop" ] ; then
     exit 0
 fi
 
-# Start the main freevo application
+# Exit if there is a Freevo still running
 PID_FILE=$PID_DIR/freevo-main.pid
+if [ -f $PID_FILE ] ; then
+    PID=`cat $PID_FILE`
+    RUNNING=`ps -ef | grep $PID | grep -v grep`
+    if ! [ "$RUNNING" = "" ] ; then
+      echo "Freevo is already running as process $PID."
+      exit 0
+    fi
+fi
+
 trap './freevo stop' 1 2 15
+
+# Start the main freevo application
 ./runapp python src/main.py $@ &
 echo $! > $PID_FILE
 wait `cat $PID_FILE`
