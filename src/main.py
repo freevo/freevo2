@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2003/08/05 17:24:59  dischi
+# use config.DEBUG for mmpython debug
+#
 # Revision 1.56  2003/08/04 20:38:59  dischi
 # Notice the user that pre-caching is missing
 #
@@ -416,8 +419,8 @@ if __name__ == "__main__":
     if not os.path.isdir(mmcache):
         os.mkdir(mmcache)
     mmpython.use_cache(mmcache)
-    mmpython.mediainfo.DEBUG = 0
-    mmpython.factory.DEBUG = 0
+    mmpython.mediainfo.DEBUG = DEBUG
+    mmpython.factory.DEBUG = DEBUG
 
     if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
         print '\nWARNING: no pre-cached data'
