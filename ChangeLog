@@ -4,7 +4,7 @@ Freevo Changelog
 $Id$
 
 
-Release 1.2.6 (2002-XX-XX):
+Release 1.2.6 (2002-10-12):
 ---------------------------
 Features, bugfixes:
 o Fixed a bug for configuring TV for other than NTSC.
@@ -26,9 +26,10 @@ o Skin improvements
 o Configure now checks for external programs
 o Bugfix for 8-bit chars in bitmap filenames by Alex Polite 
 o Added Per Wigren's app for fetching Swedish and Norwegian TV listings
-  in contrib/PerWigren.
+  in contrib/PerWigren. (The newer version of XMLTV also supports Swedish
+  and Norwegian listings now.)	
 o Added Per Wigren's patch for different TV stations on the same channel
-  at different times of the week and/or day.	
+  at different times of the week and/or day.
 o Added Alex Polite's patch for using XMMS for playing and visualizing 
   music.
 o Added Alex Polite's patch for recursive playlists
