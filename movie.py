@@ -11,6 +11,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2002/09/12 08:36:59  dischi
+# Show identified title instead of the disc label for non
+# right-now-playable discs.
+#
 # Revision 1.29  2002/09/08 18:26:03  krister
 # Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
 #
@@ -283,15 +287,24 @@ def main_menu_generate():
 
     for media in config.REMOVABLE_MEDIA:
         if media.info:
+
+            # Right now we only display the title if we have one and
+            # the title contains the name of the drive for unknown
+            # discs. Should we display more infos even on known discs?
+
+            # a) the label like it is
+            # b) Drive x: label
+            # c) Drive x: type label
+
             (type, label, image, play_options) = media.info
             # Is this media playable as is?
             if play_options:
+
                 m = menu.MenuItem(label, play_movie, play_options,
                                   eventhandler, media)
             elif type != None:
                 # Just data files
-                m = menu.MenuItem('Drive ' + media.drivename, cwd, dir,
-                                  eventhandler, media)
+                m = menu.MenuItem(label, cwd, media.mountdir, eventhandler, media)
             m.setImage(('movie', image))
         else:
             m = menu.MenuItem('Drive %s (no disc)' % media.drivename, None,
