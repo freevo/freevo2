@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2003/11/24 19:23:49  dischi
+# remove all fxd item stuff, it's in fxditem now
+#
 # Revision 1.64  2003/11/23 19:21:55  dischi
 # some cleanup
 #
@@ -66,7 +69,6 @@
 import os
 import traceback
 import re
-import codecs
 import stat
 import copy
 import rc
@@ -77,14 +79,17 @@ import util
 import menu as menu_module
 import skin
 import plugin
+
+# make this easier like
+# load on startup
 import video
 import audio
 import image
 import games
 
 from item import Item
+import fxditem
 from playlist import Playlist, RandomPlaylist
-from video.xml_parser import parseMovieFile
 from event import *
 
 import gui.PasswordInputBox as PasswordInputBox
@@ -232,8 +237,8 @@ class DirItem(Playlist):
             self.image = util.getimage(vfs.join(config.TV_SHOW_DATA_DIR,
                                                     vfs.basename(directory).lower()))
 
-            if config.TV_SHOW_INFORMATIONS.has_key(vfs.basename(directory).lower()):
-                tvinfo = config.TV_SHOW_INFORMATIONS[vfs.basename(directory).lower()]
+            if video.tv_show_informations.has_key(vfs.basename(directory).lower()):
+                tvinfo = video.tv_show_informations[vfs.basename(directory).lower()]
                 self.info = tvinfo[1]
                 if not self.image:
                     self.image = tvinfo[0]
@@ -286,24 +291,11 @@ class DirItem(Playlist):
 
         # read attributes
         if set_all:
-            if node.attrs.has_key(('', 'title')):
-                self.name = node.attrs[('', 'title')].encode(config.LOCALE)
+            self.name = fxd.getattr(node, 'title', self.name)
 
-            if node.attrs.has_key(('', 'cover-img')):
-                image = node.attrs[('', 'cover-img')].encode(config.LOCALE)
-                if image and vfs.isfile(vfs.join(self.dir, image)):
-                    self.image = vfs.join(self.dir, image)
-
-            if node.attrs.has_key(('', 'import')):
-                import_xml = node.attrs[('', 'import')].encode(config.LOCALE)
-                if vfs.isfile(vfs.join(self.dir, import_xml + '.fxd')):
-                    info = parseMovieFile(vfs.join(self.dir, import_xml + '.fxd'), self, [])
-                    if info:
-                        self.name      = info[0].name
-                        self.image     = info[0].image
-                        self.info_type = info[0].type
-                        for key in info[0].info:
-                            self.info[key] = info[0].info[key]
+            image = fxd.childcontent(node, 'cover-img')
+            if image and vfs.isfile(vfs.join(self.dir, image)):
+                self.image = vfs.join(self.dir, image)
 
             # parse <info> tag
             fxd.parse_info(fxd.get_children(node, 'info', 1), self,
@@ -446,38 +438,6 @@ class DirItem(Playlist):
     
 
 
-    def fxd_handler(self, fxd_files, duplicate_check, display_type):
-        """
-        return a list of items that belong to a fxd files
-        """
-        items = []
-        for fxd_file in fxd_files:
-            try:
-                # create a basic fxd parser
-                parser = util.fxdparser.FXD(fxd_file)
-
-                # create an object that can parse the special infos
-                # from the fxd
-                handler = []
-                for t in possible_display_types:
-                    if not display_type or display_type == t and \
-                           hasattr(eval(t), 'FXDHandler'):
-                        h = eval(t).FXDHandler(parser, fxd_file, self, duplicate_check)
-                        handler.append(h)
-
-                # start the parsing
-                parser.parse()
-
-                # get this informations back
-                for h in handler:
-                    items += h.items
-
-            except:
-                print "fxd file %s corrupt" % fxd_file
-                traceback.print_exc()
-        return items
-    
-        
     def cwd(self, arg=None, menuw=None):
         """
         browse directory
@@ -608,29 +568,17 @@ class DirItem(Playlist):
 
 
         # 
-        # PHASE II: parse fxd files
+        # PHASE II: add normal files
         #
 
-        fxd_files = util.find_matches(files, ['fxd'])
-        for d in copy.copy(files):
-            if vfs.isdir(d) and vfs.isfile(vfs.join(d, vfs.basename(d) + '.fxd')):
-                fxd_files.append(vfs.join(d, vfs.basename(d) + '.fxd'))
-                files.remove(d)
-
-        play_items += self.fxd_handler(fxd_files, files, display_type)
-
-
-        # 
-        # PHASE III: add normal files
-        #
-
+        play_items += fxditem.cwd(self, files)
         for t in possible_display_types:
             if not display_type or display_type == t:
                 play_items += eval(t).cwd(self, files)
 
 
         # 
-        # PHASE IV: sort play items
+        # PHASE III: sort play items
         #
 
         if self.DIRECTORY_SORT_BY_DATE:
@@ -652,7 +600,7 @@ class DirItem(Playlist):
 
 
         # 
-        # PHASE V: add subdirs
+        # PHASE IV: add subdirs
         #
 
         dir_items = []
@@ -671,7 +619,7 @@ class DirItem(Playlist):
             
 
         # 
-        # PHASE VI: add playlists
+        # PHASE V: add playlists
         #
 
         pl_items = []
@@ -689,7 +637,7 @@ class DirItem(Playlist):
 
 
         # 
-        # PHASE VII: finalize
+        # PHASE VI: finalize
         #
 
         # all items together
@@ -720,7 +668,7 @@ class DirItem(Playlist):
                 self.media.mount()
 
         # 
-        # PHASE VIII: action!
+        # PHASE VII: action!
         #
 
         # autoplay
@@ -777,33 +725,9 @@ class DirItem(Playlist):
             display_type = 'video'
 
 
-        # a fxd files may be removed, 'free' covered files
-        for fxd_file in util.find_matches(del_files, ['fxd']):
-            for i in self.play_items:
-                if i.xml_file == fxd_file and hasattr(i, '_fxd_covered_'):
-                    for covered in i._fxd_covered_:
-                        if not covered in del_files:
-                            new_files.append(covered)
-                    del_items.append(i)
-                    del_files.remove(fxd_file)
+        # check fxd files
+        fxditem.update(self, new_files, del_files, new_items, del_items, self.play_items)
 
-            
-        # a new fxd file may cover items
-        fxd_files = util.find_matches(new_files, ['fxd'])
-        if fxd_files:
-            for f in fxd_files:
-                new_files.remove(f)
-            copy_all = copy.copy(all_files)
-            new_items += self.fxd_handler(fxd_files, copy_all, display_type)
-            for f in all_files:
-                if not f in copy_all:
-                    # covered by fxd now
-                    if not f in new_files:
-                        del_files.append(f)
-                    else:
-                        new_files.remove(f)
-
-                    
         # check modules if they know something about the deleted/new files
         for t in possible_display_types:
             if not display_type or display_type == t:
