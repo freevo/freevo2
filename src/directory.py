@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.143  2004/09/25 05:04:01  rshortt
+# Ignore lost+found directories.
+#
 # Revision 1.142  2004/08/26 15:26:49  dischi
 # add code to do some memory debugging
 #
@@ -629,6 +632,9 @@ class DirItem(Playlist):
 
         # normal DirItems
         for filename in files:
+            if os.path.split(filename)[1] in ['lost+found',]:
+                continue
+
             if os.path.isdir(filename):
                 d = DirItem(filename, self, display_type = self.display_type)
                 self.dir_items.append(d)
