@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/15 04:03:03  krister
+# Joakim Berglunds patch for finding music/movie cover pics.
+#
 # Revision 1.13  2003/02/12 10:28:28  dischi
 # Added new xml file support. The old xml files won't work, you need to
 # convert them.
@@ -149,6 +152,12 @@ class VideoItem(Item):
                 self.image = (config.TV_SHOW_IMAGES + show_name[0] + ".jpg").lower()
 
         # find image for this file
+        # First check in COVER_DIR
+        if os.path.isfile(config.COVER_DIR+self.name+'.png'):
+            self.image = config.COVER_DIR+self.name+'.png'
+        elif os.path.isfile(config.COVER_DIR+self.name+'.jpg'):
+            self.image = config.COVER_DIR+self.name+'.jpg'
+        # Then check for episode in TV_SHOW_IMAGES
         if os.path.isfile(os.path.splitext(filename)[0] + ".png"):
             self.image = os.path.splitext(filename)[0] + ".png"
         elif os.path.isfile(os.path.splitext(filename)[0] + ".jpg"):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/02/15 04:03:02  krister
+# Joakim Berglunds patch for finding music/movie cover pics.
+#
 # Revision 1.28  2003/02/15 03:31:59  krister
 # Joakim Berglunds patch for disabling audio random playlists.
 #
@@ -268,6 +271,12 @@ class DirItem(Playlist):
         self.dir          = dir
         self.display_type = display_type
 
+        # set directory variables to default
+	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
+                         'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
+                         'AUDIO_RANDOM_PLAYLIST')
+        for v in all_variables:
+            setattr(self, v, eval('config.%s' % v))
 
         if name:
             self.name = name
@@ -278,7 +287,18 @@ class DirItem(Playlist):
                 self.name = '[' + os.path.basename(dir) + ']'
         else:
             self.name = '[' + os.path.basename(dir) + ']'
-        
+
+        # Check for cover in COVER_DIR
+        if os.path.isfile(config.COVER_DIR+os.path.basename(dir)+'.png'):
+            self.image = config.COVER_DIR+os.path.basename(dir)+'.png'
+            if self.display_type:
+                self.handle_type = self.display_type
+        if os.path.isfile(config.COVER_DIR+os.path.basename(dir)+'.jpg'):
+            self.image = config.COVER_DIR+os.path.basename(dir)+'.jpg'
+            if self.display_type:
+                self.handle_type = self.display_type
+
+        # Check for a cover in current dir, overide COVER_DIR if needed
         if os.path.isfile(dir+'/cover.png'): 
             self.image = dir+'/cover.png'
             if self.display_type:
@@ -290,13 +310,6 @@ class DirItem(Playlist):
             
         if os.path.isfile(dir+'/skin.xml'): 
             self.xml_file = dir+'/skin.xml'
-
-
-        # set directory variables to default
-        all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
-                         'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'AUDIO_RANDOM_PLAYLIST')
-        for v in all_variables:
-            setattr(self, v, eval('config.%s' % v))
 
         # set variables to values in xml file
         if self.xml_file and os.path.isfile(self.xml_file):

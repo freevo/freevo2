@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/02/15 04:03:02  krister
+# Joakim Berglunds patch for finding music/movie cover pics.
+#
 # Revision 1.12  2003/02/12 10:28:28  dischi
 # Added new xml file support. The old xml files won't work, you need to
 # convert them.
@@ -228,6 +231,9 @@ class Identify_Thread(threading.Thread):
                 media.info.name = title
                 media.info.mode = mediatype[2]
                 media.info.media = media
+
+                if os.path.isfile(config.COVER_DIR+label+'.jpg'):
+                    media.info.image = config.COVER_DIR+label+'.jpg'
                 return
 
 
@@ -268,7 +274,12 @@ class Identify_Thread(threading.Thread):
                     elif os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".jpg").lower()):
                         image = (config.TV_SHOW_IMAGES + show_name + ".jpg").lower()
                     title = show_name + ' ('+ volumes + ')'
-
+                elif not show_name:
+                    if os.path.isfile(config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.png'):
+                        image = config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.png'
+                    elif os.path.isfile(config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.jpg'):
+                        image = config.COVER_DIR+os.path.splitext(os.path.basename(movie))[0]+'.jpg'
+                    title = os.path.splitext(os.path.basename(movie))[0]
             # nothing found, give up: return the label
             if not title:
                 title = label

@@ -170,6 +170,13 @@ MOVIE_DATA_DIR = 'movie-data/'
 TV_SHOW_IMAGES = "testfiles/tv-show-images/"
 
 #
+# Directory for cover images for CD/VCD/DVD and music CDs or when you can't
+# add a cover image to the dir you want. Not for replacing the normal
+# cover file function.
+#
+COVER_DIR = 'testfiles/Covers/'
+
+#
 # The list of filename suffixes that are used to match the files that
 # are played wih MPlayer.
 # 

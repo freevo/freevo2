@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/15 04:03:02  krister
+# Joakim Berglunds patch for finding music/movie cover pics.
+#
 # Revision 1.10  2003/02/10 16:29:03  dischi
 # small bugfix
 #
@@ -148,11 +151,19 @@ class AudioItem(Item):
         # Only draw the cover if the file exists. We'll
         # use the standard imghdr function to check if
         # it's a real png, and not a lying one :)
+
+        # Check for cover in COVER_DIR
+        if os.path.isfile(config.COVER_DIR+os.path.basename(file)+'.png'):
+            self.image = config.COVER_DIR+os.path.basename(file)+'.png'
+        elif os.path.isfile(config.COVER_DIR+os.path.basename(file)+'.jpg'):
+            self.image = config.COVER_DIR+os.path.basename(file)+'.jpg'
+
+        # Check for cover in local dir
         if os.path.isfile(cover_logo+'png') and imghdr.what(cover_logo+'png'):
             self.image = cover_logo+'png'
         elif os.path.isfile(cover_logo+'jpg') and imghdr.what(cover_logo+'jpg'):
             self.image = cover_logo+'jpg'
-            
+
         # Allow per mp3 covers. As per Chris' request ;)
         if os.path.isfile(os.path.splitext(file)[0] + '.png'):
             self.image = os.path.splitext(file)[0] + '.png'
