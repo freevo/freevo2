@@ -48,7 +48,7 @@
 import os,string,fnmatch,sys
 
 # The DB stuff
-import sqlite
+# import sqlite
 
 # Metadata tools
 import mmpython
