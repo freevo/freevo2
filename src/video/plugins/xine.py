@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/08/25 12:51:46  dischi
+# moved Application for eventhandler into extra dir for future templates
+#
 # Revision 1.50  2004/08/23 20:36:44  dischi
 # rework application handling
 #
@@ -59,7 +62,7 @@ import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
 
-from eventhandler import Application
+from application import Application
 
 from event import *
 import plugin

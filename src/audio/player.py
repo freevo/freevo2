@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/08/25 12:51:44  dischi
+# moved Application for eventhandler into extra dir for future templates
+#
 # Revision 1.27  2004/08/23 20:36:43  dischi
 # rework application handling
 #
@@ -49,7 +52,7 @@ import gui
 import plugin
 
 from event import *
-from eventhandler import Application
+from application import Application
 
 _player_ = None
 

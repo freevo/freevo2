@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/25 12:51:45  dischi
+# moved Application for eventhandler into extra dir for future templates
+#
 # Revision 1.2  2004/08/22 20:12:12  dischi
 # class application doesn't change the display (screen) type anymore
 #
@@ -56,7 +59,7 @@ import util
 import plugin
 
 from event import *
-from eventhandler import Application
+from application import Application
 
 
 class TVPlayer(Application):

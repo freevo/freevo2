@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.107  2004/08/25 12:51:20  dischi
+# moved Application for eventhandler into extra dir for future templates
+#
 # Revision 1.106  2004/08/24 16:42:39  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -83,7 +86,7 @@ import util
 
 from event import *
 from item import Item
-from eventhandler import Application
+from application import Application
 
 import gui
 from gui import AlertBox

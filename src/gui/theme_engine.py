@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/25 12:51:44  dischi
+# moved Application for eventhandler into extra dir for future templates
+#
 # Revision 1.2  2004/08/24 19:23:37  dischi
 # more theme updates and design cleanups
 #
@@ -52,6 +55,9 @@ import util
 
 import plugin
 import font
+
+import eventhandler
+from event import Event, THEME_CHANGE
 
 
 FXD_FORMAT_VERSION = 2
@@ -100,12 +106,7 @@ def set_theme(new):
         # set the global theme variable
         current_theme = new
     # notify other parts of Freevo about the theme change
-    # FIXME: this is a bad piece of code because it imports
-    # event and eventhandler here. We can do it at the beginning
-    # because eventhandler needs gui (bad code style, I know)
-    import eventhandler
-    import event
-    eventhandler.get_singleton().notify(event.Event(event.THEME_CHANGE))
+    eventhandler.get_singleton().notify(Event(THEME_CHANGE))
     # return new theme in case the new one was given to this
     # function as string and the caller wants the object
     return current_theme
