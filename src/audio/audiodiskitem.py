@@ -107,6 +107,9 @@ class AudioDiskItem(Playlist):
         """
         make a menu item for each file in the directory
         """
+        # Problems with disc id:
+        # [2114541066, 10, 150, 17220, 36170, 54412, 68800, 91162, 112110, 129230, 141320, 165100, 2392]
+        # Returns multiple results
         (query_stat, query_info) = CDDB.query(self.disc_id)
         
         if query_stat == 200:
@@ -114,12 +117,13 @@ class AudioDiskItem(Playlist):
             (read_stat, read_info) = CDDB.read(query_info['category'], query_info['disc_id'])
             if read_stat != 210:
                 print "failure getting track info, status: %i" % read_stat
-        
         elif query_stat == 210 or query_stat == 211:
             print "multiple matches found! Matches are:"
             for i in query_info:
                  print "ID: %s Category: %s Title: %s" % \
                        (i['disc_id'], i['category'], i['title'])
+            media.info = None  # XXX Need to handle this case too
+            return []
         else:
             print "failure getting disc info, status %i" % query_stat
             media.info = None
@@ -129,7 +133,7 @@ class AudioDiskItem(Playlist):
             if query_stat == 200 and read_stat == 210:
                 title = "%.02d: %s" % (i+1, read_info['TTITLE' + `i`])
             else:
-                title = "%.02d: Unknown Title" % i+1
+                title = "%.02d: Unknown Title" % (i+1)
             item = AudioItem('cdda://%d' % i, self, None, title)
             play_items.append(item)
 
