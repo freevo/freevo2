@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/04/10 16:36:17  dischi
+# small fix
+#
 # Revision 1.17  2003/04/06 21:12:56  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -376,7 +379,7 @@ class AudioItem(Item):
             self.menuw = menuw
 
         if self.menuw.visible:
-            menuw.hide()
+            self.menuw.hide()
 
         error = self.audio_player.play(self)
 
