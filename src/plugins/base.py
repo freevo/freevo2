@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/29 20:47:44  dischi
+# make it possible to bypass confirmation of shutdown
+#
 # Revision 1.8  2003/10/29 03:37:46  krister
 # Added confirmation of shutdown. Do we need an option to disable this?
 #
@@ -68,12 +71,18 @@ class ShutdownItem(Item):
     """
     Item for shutdown
     """
+    menuw = None
+
     def actions(self):
         """
         return a list of actions for this item
         """
-        items = [ (self.confirm_freevo, _('Shutdown Freevo') ),
-                  (self.confirm_system, _('Shutdown system') ) ]
+        if config.CONFIRM_SHUTDOWN:
+            items = [ (self.confirm_freevo, _('Shutdown Freevo') ),
+                      (self.confirm_system, _('Shutdown system') ) ]
+        else:
+            items = [ (self.shutdown_freevo, _('Shutdown Freevo') ),
+                      (self.shutdown_system, _('Shutdown system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
             items.reverse()
         return items
@@ -97,19 +106,23 @@ class ShutdownItem(Item):
         ConfirmBox(text=what, handler=self.shutdown_system, default_choice=1).show()
         
 
-    def shutdown_freevo(self):
+    def shutdown_freevo(self, arg=None, menuw=None):
         """
         shutdown freevo, don't shutdown the system
         """
         import main
+        if not self.menuw:
+            self.menuw = menuw
         main.shutdown(menuw=self.menuw, arg=False)
 
         
-    def shutdown_system(self):
+    def shutdown_system(self, arg=None, menuw=None):
         """
         shutdown the complete system
         """
         import main
+        if not self.menuw:
+            self.menuw = menuw
         main.shutdown(menuw=self.menuw, arg=True)
         
         

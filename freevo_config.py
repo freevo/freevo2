@@ -202,6 +202,8 @@ DEV_MIXER           = '/dev/mixer'    # mixer device
 
 START_FULLSCREEN_X  = 0               # Start in fullscreen mode if using x11 or xv.
 
+CONFIRM_SHUTDOWN    = 1               # ask before shutdown
+
 #
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
