@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/10/23 17:57:23  dischi
+# add kill() function to kill the thread
+#
 # Revision 1.35  2003/10/22 17:22:36  dischi
 # better stop() exception handling
 #
@@ -410,7 +413,18 @@ class ChildThread(threading.Thread):
             util.popen3.waitpid()
             time.sleep(0.1)
 
-    
+
+    def kill(self):
+        try:
+            self.stop()
+        except OSError:
+            pass
+        self.mode = 'kill'
+        self.mode_flag.set()
+        while self.mode != 'killed':
+            pass
+        
+
     def run(self):
         global freevo_shutdown
         while 1:
@@ -418,6 +432,10 @@ class ChildThread(threading.Thread):
                 self.mode_flag.wait()
                 self.mode_flag.clear()
 
+            elif self.mode == 'kill':
+                self.mode = 'killed'
+                return
+            
             elif self.mode == 'play':
 
                 if self.stop_osd and config.STOP_OSD_WHEN_PLAYING:
