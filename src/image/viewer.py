@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/08/22 20:16:52  dischi
+# update to new mevas based gui code
+#
 # Revision 1.60  2004/08/05 17:31:59  dischi
 # remove bad hack
 #
@@ -50,10 +53,11 @@ import util
 import rc
 import plugin
 import gui
+import gui.imagelib as imagelib
 
 from event import *
 from eventhandler import Application
-from gui.animation import render, Move
+import gui.animation as animation
 
 
 _singleton = None
@@ -115,30 +119,31 @@ class ImageViewer(Application):
         else:
             self.evt_context = 'image'
 
-        swidth        = gui.get_screen().width
-        sheight       = gui.get_screen().height
+        self.screen = gui.get_display()
+        swidth  = self.screen.width
+        sheight = self.screen.height
+
         filename      = item.filename
-        screen        = gui.get_screen()
         self.fileitem = item
 
         self.show()
 
         if not self.last_image[0]:
-            screen.update()
+            self.screen.update()
 
         # only load new image when the image changed
         if self.filename == filename and self.zoom == zoom and \
            self.rotation == rotation and len(filename) > 0:
             # same image, only update the osd and the timer
             self.drawosd()
-            screen.update()
+            self.screen.update()
             return
         
         self.filename = filename
         self.rotation = rotation
             
         if filename and len(filename) > 0:
-            image = gui.get_renderer().loadbitmap(filename, cache=self.bitmapcache)
+            image = imagelib.load(filename, cache=self.bitmapcache)
         else:
             # Using Container-Image
             image = item.loadimage()
@@ -153,11 +158,11 @@ class ImageViewer(Application):
             #                                 config.OSD_DEFAULT_FONTSIZE),
             #                fgcolor=self.osd.COL_ORANGE,
             #                align_h='center', align_v='center', mode='soft')
-            # gui.get_screen.add('content', txt)
-            # gui.get_screen.update()
+            # gui.get_display.add('content', txt)
+            # gui.get_display.update()
             return
         
-        width, height = image.get_size()
+        width, height = image.width, image.height
             
         # Bounding box default values
         bbx = bby = bbw = bbh = 0
@@ -264,33 +269,53 @@ class ImageViewer(Application):
             bbx += zoom[1]
             bby += zoom[2]
 
-        # FIXME: bring back animation 
-        # if (last_image and self.last_image[0] != item and
-        #     config.IMAGEVIEWER_BLEND_MODE != None):
-        #     screen = self.osd.screen.convert()
-        #     screen.fill((0,0,0,0))
-        #     screen.blit(self.osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
-        #                                 rotation = self.rotation).convert(), (x, y))
-        #     # update the OSD
-        #     self.drawosd(layer=screen)
+        image = image.copy()
+        # get bounding box
+        if bbw and bbh and (bbw != swidth or bbh != sheight):
+            image.crop((bbx, bby), (bbw, bbh))
+
+        # scale to fit
+        if scale != 1 and scale != 0:
+            image.scale((int(float(image.width) * scale),
+                         int(float(image.height) * scale)))
+            
+        # rotate
+        if self.rotation:
+            image.rotate(self.rotation)
+
+        image = gui.Image(image, (x, y))
+
+
+        if (last_image and self.last_image[0] != item and
+            config.IMAGEVIEWER_BLEND_MODE != None):
+            self.screen.add_child(image)
+
+            if 0:
+                import time
+                t1 = time.time()
+
+            frames = 20
+            a = animation.Transition([self.last_image[1]], [image], frames,
+                                     (swidth, sheight))
+            a.start()
+            while a.running():
+                animation.render().update()
+
+            if 0:
+                t2 = time.time()
+                print "Animation took", t2-t1, " - frames", frames, \
+                      " - %.2f fps" % (frames/(t2-t1))
+
+            if self.last_image[1]:
+                self.last_image[1].unparent()
+
+        else:
+            if self.last_image[1]:
+                self.last_image[1].unparent()
+            self.screen.add_child(image)
         
-        #     blend = Transition(self.osd.screen, screen, config.IMAGEVIEWER_BLEND_MODE)
-        #     blend.start()
-        #     while not blend.finished:
-        #         rc.poll()
-        #     blend.remove()
-        # else:
-
-        image = gui.get_renderer().zoombitmap(image, scale, bbx, bby, bbw, bbh,
-                                              rotation = self.rotation)
-        image = gui.Image(x, y, x+image.get_size()[0], y+image.get_size()[1], image)
-
-        if self.last_image[1]:
-            screen.remove(self.last_image[1])
-        screen.add(image)
-
         self.drawosd()
-        screen.update()
+        self.screen.update()
         
         # start timer
         if self.fileitem.duration:
@@ -320,7 +345,8 @@ class ImageViewer(Application):
         """
         cache the next image (most likely we need this)
         """
-        gui.get_renderer().loadbitmap(fileitem.filename, cache=self.bitmapcache)
+        if fileitem.filename and len(fileitem.filename) > 0:
+            imagelib.load(fileitem.filename, cache=self.bitmapcache)
         
 
     def signalhandler(self):
@@ -349,16 +375,15 @@ class ImageViewer(Application):
         
         if event == STOP:
             _debug_('event == STOP: clear image viewer')
-            screen = gui.get_screen()
             if self.last_image[1]:
-                screen.remove(self.last_image[1])
+                self.last_image[1].unparent()
             self.last_image = (None, None)
 
             if self.osd_text:
-                screen.remove(self.osd_text)
+                self.osd_text.unparent()
                 self.osd_text = None
             if self.osd_box:
-                screen.remove(self.osd_box)
+                self.osd_box.unparent()
                 self.osd_box = None
 
             self.destroy()
@@ -390,7 +415,7 @@ class ImageViewer(Application):
         if event == TOGGLE_OSD:
             self.osd_mode = (self.osd_mode + 1) % (len(config.IMAGEVIEWER_OSD) + 1)
             self.drawosd()
-            gui.get_screen().update()
+            self.screen.update()
             return True
 
         # zoom to one third of the image
@@ -424,7 +449,6 @@ class ImageViewer(Application):
                 os.system(cmd)
                 os.system('mv /tmp/freevo-iview %s' % self.filename)
                 self.rotation = 0
-                gui.get_renderer().bitmapcache.__delitem__(self.filename)
             return True                
 
         return self.fileitem.eventhandler(event)
@@ -434,12 +458,11 @@ class ImageViewer(Application):
         """
         draw the image osd
         """
-        screen = gui.get_screen()
         newosd = True
         
         # remove old osd text:
         if self.osd_text:
-            screen.remove(self.osd_text)
+            self.osd_text.unparent()
             self.osd_text = None
             newosd = False
 
@@ -447,13 +470,10 @@ class ImageViewer(Application):
         if not self.osd_mode:
             # remove old osd bar:
             if self.osd_box:
-                screen.remove(self.osd_box)
+                self.osd_box.unparent()
                 self.osd_box = None
             plugin.getbyname('idlebar').hide()
             return
-
-        swidth  = gui.get_screen().width
-        sheight = gui.get_screen().height
 
         osdstring = u''
         for strtag in config.IMAGEVIEWER_OSD[self.osd_mode-1]:
@@ -467,47 +487,60 @@ class ImageViewer(Application):
         else:
             osdstring = osdstring[1:]
             
-        self.osd_text = gui.Text(config.OSD_OVERSCAN_X + 10, config.OSD_OVERSCAN_Y + 10,
-                                 screen.width - config.OSD_OVERSCAN_X - 10,
-                                 screen.height - config.OSD_OVERSCAN_Y -10,
-                                 osdstring, gui.get_font('default'),
-                                 screen.height - 2 * config.OSD_OVERSCAN_Y - 20,
-                                 'left', 'bottom', mode='soft')
+        self.osd_text = gui.Textbox(osdstring,
+                                    (config.OSD_OVERSCAN_X + 10, config.OSD_OVERSCAN_Y + 10),
+                                    (self.screen.width - 2 * config.OSD_OVERSCAN_X - 20,
+                                     self.screen.height - 2 * config.OSD_OVERSCAN_Y - 20),
+                                    gui.get_font('default'), 'left', 'bottom', mode='soft')
+        self.osd_text.set_zindex(2)
+        self.screen.add_child(self.osd_text)
 
-        rect = self.osd_text.calculate()[1]
-        if rect[1] > screen.height - config.OSD_OVERSCAN_Y - 100:
-            # text too small, enhance it
-            self.osd_text.y1 = screen.height - config.OSD_OVERSCAN_Y - 100
-            self.osd_text.align_v = 'top'
-            self.osd_text.modified()
-        else:
-            # fit in rect to avoid complete redraw
-            self.osd_text.set_position(rect[0], rect[1], rect[2], rect[3])
+        rect = self.osd_text.get_size()
 
-        rect = self.osd_text.calculate()[1]
-
+        if rect[1] < 100:
+            # text too small, set to a minimum position
+            self.osd_text.set_pos((self.osd_text.get_pos()[0], self.screen.height - \
+                                   config.OSD_OVERSCAN_Y - 100))
+            rect = rect[0], 100
+            
         # now draw a box around the osd
-        r = gui.Rectangle(-2, rect[1] - 10, screen.width+2, screen.height+2,
-                          0xaa000000, 2, 0xffffff, 1)
+        if self.osd_box:
+            # check if the old one is ok for us
+            if self.osd_box.get_size()[1] == rect[1] + 20:
+                # perfect match, no need to redraw
+                return
+            self.osd_box.unparent()
 
-        if r != self.osd_box:
-            if self.osd_box:
-                screen.remove(self.osd_box)
-            self.osd_box = r
-            self.osd_box.layer = 1
-            screen.add(self.osd_box)
 
-        self.osd_text.layer = 2
-        screen.add(self.osd_text)
+        # build a new rectangle.
+        pos  = (0, self.osd_text.get_pos()[1] - 10)
+        size = (self.screen.width, rect[1] + 20)
+        background = imagelib.load('background', (self.screen.width, self.screen.height))
+        if background:
+            background.crop(pos, size)
+            self.osd_box = gui.Image(background, pos)
+            self.osd_box.set_alpha(230)
+        if not background:
+            self.osd_box = gui.Rectangle(pos, size, 0xaa000000)
 
+        self.osd_box.set_zindex(1)
+        self.screen.add_child(self.osd_box)
+        
         # FIXME: better integration, just a performance test
         if newosd:
-            plugin.getbyname('idlebar').show()
+            # show the idlebar but not update the screen now
+            plugin.getbyname('idlebar').show(False)
+
             _debug_('Test code: animate the osd input')
-            max_height = self.osd_box.height
+
+            move_y = self.osd_box.get_size()[1]
 
             for o in (self.osd_box, self.osd_text):
-                o.set_position(o.x1, o.y1 + max_height, o.x2, o.y2 + max_height)
-            r = render.get_singleton()
-            m = Move((self.osd_box, self.osd_text), 'vertical', 4, max_height)
-            m.start()
+                x, y = o.get_pos()
+                _debug_('hide %s at %s' % (o, y + move_y))
+                o.set_pos((x, y + move_y))
+
+            a = animation.Move([self.osd_box, self.osd_text], animation.VERTICAL, 20, -move_y)
+            a.start()
+            while a.running():
+                animation.render().update()
