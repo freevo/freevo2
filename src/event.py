@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/11/09 16:03:09  dischi
+# add step size in VOL+- an arg
+#
 # Revision 1.29  2003/11/09 12:01:25  dischi
 # add subtitle selection and osd info support for xine
 #
@@ -128,10 +131,17 @@ class Event:
 # Default actions Freevo knows
 #
 
-MIXER_VOLUP            = Event('MIXER_VOLUP')
-MIXER_VOLDOWN          = Event('MIXER_VOLDOWN')
+MIXER_VOLUP            = Event('MIXER_VOLUP', arg=5)
+MIXER_VOLDOWN          = Event('MIXER_VOLDOWN', arg=5)
 MIXER_MUTE             = Event('MIXER_MUTE')
-                       
+
+# To change the step size, but the following code in your
+# local.conf (setting VOL+ step size to 2)
+#
+# for k in EVENTS:
+#     EVENTS[k]['VOL+'] = Event('MIXER_VOLUP', arg=1)
+
+
 PLAYLIST_NEXT          = Event('PLAYLIST_NEXT')
 PLAYLIST_PREV          = Event('PLAYLIST_PREV')
                        

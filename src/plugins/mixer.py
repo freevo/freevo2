@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/09 16:04:09  dischi
+# add step size in VOL+- an arg
+#
 # Revision 1.11  2003/10/20 19:37:39  dischi
 # better exception handling for ioctl
 #
@@ -135,18 +138,19 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         # Handle volume control
         if event == em.MIXER_VOLUP:
-            print "Got VOLUP"
+            _debug_('Got VOLUP %s' % event.arg)
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                self.incMainVolume()
+                self.incMainVolume(event.arg)
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                self.incPcmVolume()
+                self.incPcmVolume(event.arg)
             return True
         
         elif event == em.MIXER_VOLDOWN:
+            _debug_('Got VOLDOWN %s' % event.arg)
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                self.decMainVolume()
+                self.decMainVolume(event.arg)
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                self.decPcmVolume()
+                self.decPcmVolume(event.arg)
             return True
 
         elif event == em.MIXER_MUTE:
@@ -188,13 +192,13 @@ class PluginInterface(plugin.DaemonPlugin):
         self.mainVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
-    def incMainVolume(self):
-        self.mainVolume += 5
+    def incMainVolume(self, step=5):
+        self.mainVolume += step
         if self.mainVolume > 100: self.mainVolume = 100
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
-    def decMainVolume(self):
-        self.mainVolume -= 5
+    def decMainVolume(self, step=5):
+        self.mainVolume -= step
         if self.mainVolume < 0: self.mainVolume = 0
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
@@ -205,13 +209,13 @@ class PluginInterface(plugin.DaemonPlugin):
         self.pcmVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_PCM, volume)
 
-    def incPcmVolume(self):
-        self.pcmVolume += 5
+    def incPcmVolume(self, step=5):
+        self.pcmVolume += step
         if self.pcmVolume > 100: self.pcmvolume = 100
         self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
 
-    def decPcmVolume(self):
-        self.pcmVolume -= 5
+    def decPcmVolume(self, step=5):
+        self.pcmVolume -= step
         if self.pcmVolume < 0: self.pcmVolume = 0
         self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
     
@@ -241,15 +245,15 @@ class PluginInterface(plugin.DaemonPlugin):
     def getIgainVolume(self):
         return self.igainVolume
 
-    def decIgainVolume(self):
-        self.igainVolume -= 5
+    def decIgainVolume(self, step=5):
+        self.igainVolume -= step
         if self.igainVolume < 0: self.igainVolume = 0
-        os.system('aumix -i-5 > /dev/null 2>&1 &')
+        os.system('aumix -i-%s > /dev/null 2>&1 &' % step)
         
-    def incIgainVolume(self):
-        self.igainVolume += 5
+    def incIgainVolume(self, step=5):
+        self.igainVolume += step
         if self.igainVolume > 100: self.igainVolume = 100
-        os.system('aumix -i+5 > /dev/null 2>&1 &')
+        os.system('aumix -i+%s > /dev/null 2>&1 &' % step)
         
     def setOgainVolume(self, volume):
         """For Ogain on SB Live Cards"""
