@@ -14,6 +14,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/09/30 02:19:44  rshortt
+# -remove duplicates from util.ioctl
+# -clean up keycode ioclts
+# -add convenience functions for:
+#   -requesting exclusive access to a device
+#   -get the name of a device (use for autodetection)
+#   -get and set keycodes
+#   -get keymap
+#
 # Revision 1.2  2004/09/27 18:40:34  dischi
 # reworked input handling again
 #
@@ -44,43 +53,10 @@
 # ----------------------------------------------------------------------- */
 
 import struct
+import fcntl
 
-_IOC_NRBITS = 8
-_IOC_TYPEBITS = 8
-_IOC_SIZEBITS = 14
-_IOC_DIRBITS = 2
+from util.ioctl import *
 
-_IOC_NRMASK = ((1 << _IOC_NRBITS)-1)
-_IOC_TYPEMASK = ((1 << _IOC_TYPEBITS)-1)
-_IOC_SIZEMASK = ((1 << _IOC_SIZEBITS)-1)
-_IOC_DIRMASK = ((1 << _IOC_DIRBITS)-1)
-
-_IOC_NRSHIFT = 0
-_IOC_TYPESHIFT = (_IOC_NRSHIFT+_IOC_NRBITS)
-_IOC_SIZESHIFT = (_IOC_TYPESHIFT+_IOC_TYPEBITS)
-_IOC_DIRSHIFT = (_IOC_SIZESHIFT+_IOC_SIZEBITS)
-
-# Direction bits.
-_IOC_NONE = 0
-_IOC_WRITE = 1
-_IOC_READ = 2
-
-def _IOC(dir,type,nr,size):
-    return (((dir)  << _IOC_DIRSHIFT) | \
-           (ord(type) << _IOC_TYPESHIFT) | \
-           ((nr)   << _IOC_NRSHIFT) | \
-           ((size) << _IOC_SIZESHIFT))
-
-def IO(type,nr): return _IOC(_IOC_NONE,(type),(nr),0)
-def IOR(type,nr,size): return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
-def IOW(type,nr,size): return _IOC(_IOC_WRITE,(type),(nr),struct.calcsize(size))
-def IOWR(type,nr,size): return _IOC(_IOC_READ|_IOC_WRITE,(type),(nr),struct.calcsize(size))
-
-# used to decode ioctl numbers..
-def IOC_DIR(nr): return (((nr) >> _IOC_DIRSHIFT) & _IOC_DIRMASK)
-def IOC_TYPE(nr): return (((nr) >> _IOC_TYPESHIFT) & _IOC_TYPEMASK)
-def IOC_NR(nr): return (((nr) >> _IOC_NRSHIFT) & _IOC_NRMASK)
-def IOC_SIZE(nr): return (((nr) >> _IOC_SIZESHIFT) & _IOC_SIZEMASK)
 
 #struct input_event {
 #struct timeval time;
@@ -115,13 +91,9 @@ EVIOCGVERSION_NO = IOR('E', 0x01, EVIOCGVERSION_ST)# get driver version
 EVIOCGID_ST = '4H' # struct input_id
 EVIOCGID = IOR('E', 0x02, EVIOCGID_ST) # get device ID 
 
-EVIOCGKEYCODE_ST = '2i'
-EVIOCGKEYCODE_NO = IOR('E', 0x04, EVIOCGKEYCODE_ST) # get keycode 
-# EVIOCGKEYCODE = IOR('E', 0x04, int[2]) # get keycode 
-
-EVIOCSKEYCODE_ST = '2i'
-EVIOCSKEYCODE_NO = IOW('E', 0x04, EVIOCSKEYCODE_ST) # set keycode 
-# EVIOCSKEYCODE = IOW('E', 0x04, int[2]) # set keycode 
+KEYCODE_ST = '2i'
+EVIOCGKEYCODE_NO = IOR('E', 0x04, KEYCODE_ST) # get keycode 
+EVIOCSKEYCODE_NO = IOW('E', 0x04, KEYCODE_ST) # set keycode 
 
 EVIOCGNAME_ST = '32s'
 EVIOCGNAME_NO = IOR('E', 0x06, EVIOCGNAME_ST)# get device name 
@@ -156,7 +128,7 @@ EVIOCGSND_NO = IOR('E', 0x1a, EVIOCGSND_ST)# get all sounds status
 # EVIOCGEFFECTS = IOR('E', 0x84, int)# Report number of effects playable at the same time 
 
 EVIOCGRAB_ST = 'i'
-EVIOCGRAB = IOW('E', 0x90, EVIOCGRAB_ST)# Grab/Release device 
+EVIOCGRAB_NO = IOW('E', 0x90, EVIOCGRAB_ST)# Grab/Release device 
 # EVIOCGRAB = IOW('E', 0x90, int)# Grab/Release device 
 
 
@@ -1062,3 +1034,58 @@ INPUT_DEVICE_ID_MATCH_FFBIT = 0x800
 #
 ##endif
 ##endif
+
+
+#####################################################################
+##
+## Place all convenience functions below here.
+##
+
+def exclusive_access(devfd):
+    r = fcntl.ioctl(devfd, long(EVIOCGRAB_NO), struct.pack( "i", 0))        
+    res = struct.unpack(EVIOCGRAB_ST, r)
+    return res 
+
+
+def get_name(devfd):
+    r = fcntl.ioctl(devfd, long(EVIOCGNAME_NO), struct.pack( EVIOCGNAME_ST, ''))        
+    res = struct.unpack(EVIOCGNAME_ST, r)
+    return res 
+
+
+def get_keycode(devfd, scancode):
+    try:
+        r = fcntl.ioctl(devfd, long(EVIOCGKEYCODE_NO), 
+                        struct.pack( KEYCODE_ST, int(scancode),KEY_RESERVED))        
+    except IOError:
+        return -1
+
+    (scancode, keycode) = struct.unpack(KEYCODE_ST, r)
+    return keycode
+
+
+def set_keycode(devfd, scancode, keycode):
+    try:
+        r = fcntl.ioctl(devfd, long(EVIOCSKEYCODE_NO), 
+                        struct.pack( KEYCODE_ST, int(scancode),int(keycode)))        
+    except IOError:
+        return False
+
+    return True
+
+
+def get_keymap(devfd):
+    keymap = {}
+    
+    for i in range(65536):
+        k = get_keycode(devfd,i)
+        if k == -1:
+            break
+        elif k == KEY_RESERVED:
+            continue
+        
+        # print '%d code: %x' % (i, k)
+        keymap[i] = k
+
+    return keymap
+
