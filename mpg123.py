@@ -113,6 +113,9 @@ class MPG123:
             self.stop()
             rc.app = None
             menuwidget.refresh()
+	elif event == rc.PAUSE:
+	    self.thread.app.write('PAUSE')
+	    print "PAUSE"
         elif event == rc.FFWD:
             self.thread.app.write('JUMP +200')
         elif event == rc.REW:
