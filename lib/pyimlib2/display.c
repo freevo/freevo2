@@ -89,8 +89,9 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
     }
   } while ( XPending( self->display ) );
   
-  Py_INCREF( Py_None );
-  return Py_None;
+  /* always return true as this function is used as a callback for pyNotifier */
+  Py_INCREF( Py_True );
+  return Py_True;
 }	
 
 PyMethodDef Display_PyObject_methods[] = {

@@ -12,6 +12,8 @@
 #include "image.h"
 #include "rawformats.h"
 #include "font.h"
+#include "config.h"
+
 #ifdef USE_IMLIB2_DISPLAY
 #include "display.h"
 #endif
