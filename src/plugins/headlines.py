@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2005/01/09 17:35:53  dischi
+# make headlines work again (thanks to Eric Bus)
+#
 # Revision 1.24  2005/01/08 15:09:26  dischi
 # replace read_pickle and save_pickle with util.cache functions
 #
@@ -76,16 +79,14 @@ import urllib
 
 #freevo modules
 import config, menu, plugin, util
-from gui import PopupBox
+import gui
 from item import Item
-import eventhandler
 
-#get the singletons so we get skin info and access the osd
+from mainmenu import MainMenuItem
+from application import MenuApplication
 
-# skin.register('headlines', ('screen', 'title', 'info'))
-              
-#check every 30 minutes
-MAX_HEADLINE_AGE = 1800
+import logging
+log = logging.getLogger()
 
 
 class PluginInterface(plugin.MainMenuPlugin):
@@ -103,46 +104,66 @@ class PluginInterface(plugin.MainMenuPlugin):
     """
     # make an init func that creates the cache dir if it don't exist
     def __init__(self):
-        self.reason = config.REDESIGN_BROKEN
-        return
+        if not hasattr(config, 'MAX_HEADLINE_AGE'):
+            #check every 30 minutes
+            config.MAX_HEADLINE_AGE = 1800
+    
         if not hasattr(config, 'HEADLINES_LOCATIONS'):
             self.reason = 'HEADLINES_LOCATIONS not defined'
             return
+            
         plugin.MainMenuPlugin.__init__(self)
-        
-    def config(self):
-        return [('HEADLINES_LOCATIONS',
-                 [ ("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"),
-                   ("Freshmeat", "http://freshmeat.net/backend/fm.rdf") ],
-                 'where to get the news')]
+
+
+#
+# TODO: Is this used at all?
+#
+#    def config(self):
+#        return [('HEADLINES_LOCATIONS',
+#                 [ ("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"),
+#                   ("Freshmeat", "http://freshmeat.net/backend/fm.rdf") ],
+#                 'where to get the news')]
+
 
     def items(self, parent):
         return [ HeadlinesMainMenuItem(parent) ]
 
 
-class ShowHeadlineDetails:
+class ShowHeadlineDetails(MenuApplication):
     """
     Screen to show the details of the headline items
     """
-    def __init__(self, (item, menuw)):
-        self.menuw = menuw
-        self.menuw.hide(clear=False)
-        eventhandler.append(self)
-        skin.draw('headlines', item)
+    def __init__(self, (item,menuw)):
+        self.item = item
+        MenuApplication.__init__(self, 'headlines', 'menu', False)
+        
+        
+    def start(self, parent):
+        self.engine = gui.AreaHandler('headlines', ('screen','title','info'))
+        self.parent = parent
+        
+        return True
 
+
+    def show(self):
+        self.engine.draw(self)
+        MenuApplication.show(self)
+        
 
     def eventhandler(self, event, menuw=None):
-        """
-        eventhandler
-        """
-        if event in ('MENU_SELECT', 'MENU_BACK_ONE_MENU'):
-            eventhandler.remove(self)
-            self.menuw.show()
+        if MenuApplication.eventhandler(self, event):
             return True
-        
+            
         return False
-
         
+        
+    def __getitem__(self, key):
+        if key == 'description':
+            return self.item.description
+        
+        return None
+        
+
 class HeadlinesSiteItem(Item):
     """
     Item for the menu for one rss feed
@@ -161,59 +182,103 @@ class HeadlinesSiteItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.getheadlines , _('Show Sites Headlines') ) ]
+        items = [ ( self.get_headlines , _('Show Sites Headlines') ) ]
         return items
 
     
-    def getsiteheadlines(self):
+    def get_site_headlines(self):
         headlines = []
         pfile = os.path.join(self.cachedir, 'headlines-%i' % self.location_index)
         if (os.path.isfile(pfile) == 0 or \
-            (abs(time.time() - os.path.getmtime(pfile)) > MAX_HEADLINE_AGE)):
-            #print 'Fresh Headlines'
-            headlines = self.fetchheadlinesfromurl()
+            (abs(time.time() - os.path.getmtime(pfile)) > config.MAX_HEADLINE_AGE)):
+            log.info('Fresh Headlines')
+            headlines = self.fetch_headlines_from_url()
         else:
-            #print 'Cache Headlines'
+            log.info('Cache Headlines')
             headlines = util.cache.load(pfile)
         return headlines
 
 
-    def fetchheadlinesfromurl(self):
+    def parse_rss_feed(self, doc, headlines):
+        """
+        parses a rss 0.9, 1.0 or 2.0 feed
+        """
+        items = doc.getElementsByTagName('item')
+        for item in items:
+            title = ''
+            link  = ''
+            description = ''
+                
+            if item.hasChildNodes():
+                for c in item.childNodes:
+                    if c.localName == 'title':
+                        title = c.firstChild.data
+                    if c.localName == 'link':
+                        link = c.firstChild.data
+                    if c.localName == 'description':
+                        description = c.firstChild.data
+
+            if title:
+                headlines.append((title, link, description))
+    
+    
+    def parse_atom_feed(self, doc, headlines):
+        """
+        parses an atom feed
+        """
+        items = doc.getElementsByTagName('entry')
+        for item in items:
+            title = ''
+            link  = ''
+            description = ''
+                
+            if item.hasChildNodes():
+                for c in item.childNodes:
+                    if c.localName == 'title':
+                        title = c.firstChild.data
+                    if c.localName == 'link':
+                        link = c.getAttribute('href')
+                    if c.localName == 'summary':
+                        description = c.firstChild.data
+
+            if title:
+                headlines.append((title, link, description))
+
+
+    def fetch_headlines_from_url(self):
         headlines = []
+
         # create Reader object
         reader = Sax2.Reader()
 
-        popup = PopupBox(text=_('Fetching headlines...'))
+        popup = gui.PopupBox(text=_('Fetching headlines...'))
         popup.show()
 
         # parse the document
         try:
-            myfile=urllib.urlopen(self.url)
+            myfile = urllib.urlopen(self.url)
             doc = reader.fromStream(myfile)
-            items = doc.getElementsByTagName('item')
-            for item in items:
-                title = ''
-                link  = ''
-                description = ''
-                
-                if item.hasChildNodes():
-                    for c in item.childNodes:
-                        if c.localName == 'title':
-                            title = c.firstChild.data
-                        if c.localName == 'link':
-                            link = c.firstChild.data
-                        if c.localName == 'description':
-                            description = c.firstChild.data
-                if title:
-                    headlines.append((title, link, description))
+            
+            rootName = doc.documentElement.tagName
+            if rootName == 'rss':
+                self.parse_rss_feed(doc, headlines)
+            elif rootName == 'feed':
+                self.parse_atom_feed(doc, headlines)
+            else:
+                popup.destroy()
+                gui.AlertBox(text=_('Unsupported RSS feed')).show()
+                log.error('unsupported RSS feed with rootNode %s' % rootName)
+                return None
 
         except:
-            #unreachable or url error
-            print 'HEADLINES ERROR: could not open %s' % self.url
-            pass
+            # unreachable or url error
+            popup.destroy()
+            gui.AlertBox(text=_('Freevo could not fetch the requested headlines')).show()
+            log.error('could not open %s' % self.url)
+            return None
 
-        #write the file
-        if len(headlines) > 0:
+        # write the file
+        if headlines and len(headlines) > 0:
             pfile = os.path.join(self.cachedir, 'headlines-%i' % self.location_index)
             util.cache.save(pfile, headlines)
 
@@ -222,15 +287,23 @@ class HeadlinesSiteItem(Item):
 
 
     def show_details(self, arg=None, menuw=None):
-        ShowHeadlineDetails(arg)
+        det = ShowHeadlineDetails(arg)
+        if det.start(self):
+            menuw.pushmenu(det)
+            menuw.refresh()
 
 
-    def getheadlines(self, arg=None, menuw=None):
+    def get_headlines(self, arg=None, menuw=None):
         headlines = [] 
         rawheadlines = []
-        rawheadlines = self.getsiteheadlines()
+        rawheadlines = self.get_site_headlines()
+
+        # only show this menu when we have headlines
+        if rawheadlines == None:
+            return
+        
         for title, link, description in rawheadlines:
-            mi = menu.MenuItem('%s' % title, self.show_details, 0)
+            mi = menu.MenuItem(title, self.show_details)
             mi.arg = (mi, menuw)
             mi.link = link
 
@@ -239,30 +312,29 @@ class HeadlinesSiteItem(Item):
             description = description.replace('<p>', '\n').replace('<br>', '\n')
             description = description.replace('<p>', '\n').replace('<br/>', '\n')
             description = description + '\n \n \nLink: ' + link
-            description = util.htmlenties2txt(description)
+#            description = util.htmlenties2txt(description)
 
             mi.description = re.sub('<.*?>', '', description)
 
             headlines.append(mi)
 
-
-        if (len(headlines) == 0):
-            headlines += [menu.MenuItem(_('No Headlines found'), menuw.goto_prev_page, 0)]
+    	if len(headlines) == 0:
+            headlines += [menu.MenuItem(_('No Headlines found'), menuw.back_one_menu, 0)]
 
         headlines_menu = menu.Menu(_('Headlines'), headlines)
-        eventhandler.remove(self)
         menuw.pushmenu(headlines_menu)
         menuw.refresh()
 
 
-class HeadlinesMainMenuItem(Item):
+class HeadlinesMainMenuItem(MainMenuItem):
     """
-    this is the item for the main menu and creates the list
+    This is the item for the main menu and creates the list
     of Headlines Sites in a submenu.
     """
     def __init__(self, parent):
-        Item.__init__(self, parent, skin_type='headlines')
-        self.name = _('Headlines')
+        MainMenuItem.__init__( self, _('Headlines'), type='main',
+                               parent=parent, skin_type='headlines')
+
 
     def actions(self):
         """
@@ -271,17 +343,21 @@ class HeadlinesMainMenuItem(Item):
         items = [ ( self.create_locations_menu , _('Headlines Sites' )) ]
         return items
  
+ 
     def create_locations_menu(self, arg=None, menuw=None):
         headlines_sites = []
+        
         for location in config.HEADLINES_LOCATIONS:
             headlines_site_item = HeadlinesSiteItem(self)
             headlines_site_item.name = location[0]
             headlines_site_item.url = location[1]
             headlines_site_item.location_index = config.HEADLINES_LOCATIONS.index(location)
             headlines_sites += [ headlines_site_item ]
+            
         if (len(headlines_sites) == 0):
             headlines_sites += [menu.MenuItem(_('No Headlines Sites found'),
                                               menuw.goto_prev_page, 0)]
+                                              
         headlines_site_menu = menu.Menu(_('Headlines Sites'), headlines_sites)
         menuw.pushmenu(headlines_site_menu)
         menuw.refresh()
