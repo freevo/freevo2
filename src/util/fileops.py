@@ -34,6 +34,7 @@
 
 
 # python imports
+import sys
 import os
 import statvfs
 import string
@@ -47,8 +48,12 @@ import logging
 import sysconfig
 import misc
 import vfs
-import popen
 
+if sys.argv[0] != 'setup.py':
+    # do not import popen for 'python setup.py install'
+    # FIXME: there should be a better way to handle this
+    import popen
+    
 # get logging object
 log = logging.getLogger()
 
