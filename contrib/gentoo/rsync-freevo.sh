@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# rsync-freevo.sh 
+# rsync-freevo
 #
 #   <dmeyer@tzi.de>
 # $Id$
@@ -14,7 +14,7 @@ if [ "$PORTDIR_OVERLAY" = "" ]; then
 fi
 
 cd /tmp
-wget http://www.tzi.de/~dmeyer/freevo/ebuild.tgz
+wget http://freevo.sourceforge.net/gentoo/ebuild.tgz
 
 if [ '!' -e ebuild.tgz ]; then
     echo download failed
@@ -34,4 +34,4 @@ cd media-video
 tar -zxvf /tmp/ebuild.tgz
 rm /tmp/ebuild.tgz
 
-# end of rsync-freevo.sh 
+# end of rsync-freevo

@@ -2,7 +2,7 @@ DESCRIPTION="Freevo"
 FREEVO_INSTALL_DIR="${D}/opt/freevo"
 
 
-SRC_URI="http://www.tzi.de/~dmeyer/freevo/${P}.tgz"
+SRC_URI="mirror://sourceforge/freevo/freevo-src-${PV}.tgz"
 
 LICENSE="GPL-2"
 
@@ -15,12 +15,12 @@ DEPEND=">=dev-python/pygame-1.5.3
 	>=dev-python/PyXML-0.7.1
 	>=media-libs/libsdl-1.2.4
 	>=media-video/mplayer-0.90_rc2
-	=freevo_runtime-1.1
+	>=freevo_runtime-1.1
 	ogg? (>=media-libs/pyvorbis-1.1)"
 
 
 src_unpack() {
-	unpack ${P}.tgz
+	unpack freevo-src-${PV}.tgz
 }
 
 src_compile() {
@@ -31,20 +31,15 @@ src_compile() {
 }
 
 src_install() {
+        rm -rf runtime
+
+	make PREFIX=$FREEVO_INSTALL_DIR \
+	    LOGDIR={D}/var/log/freevo \
+	    CACHEDIR={D}/var/cache/freevo install
+
 	install -d ${D}/etc/freevo
 	install freevo_config.py freevo.conf ${D}/etc/freevo
 	rm freevo_config.py freevo.conf
-
-	install -d $FREEVO_INSTALL_DIR
-	cp -r * $FREEVO_INSTALL_DIR
-
-	# install -d ${D}/usr/bin
-	# install ${FILESDIR}/freevo ${D}/usr/bin
-	# install ${FILESDIR}/freevo $FREEVO_INSTALL_DIR
-
-	install -m 0777 -d ${D}/var/log/freevo
-	install -m 0777 -d ${D}/var/cache/freevo
-	install -m 0777 -d ${D}/var/cache/xmltv
 }
 
 pkg_postinst() {

@@ -6,42 +6,71 @@
 # $Id$
 
 
-fname=freevo_snapshot-`date +%Y%m%d`
+version=`echo $1 | sed 's/[-]/_/g'`
+tag=REL-`echo $1 | sed 's/[\.-]/_/g' | sed 'y/prerc/PRERC/'` 
+echo src name: freevo-$version and freevo-src-$version
+echo cvs tag:  $tag
 
-sudo cp `dirname $0`/freevo.ebuild \
-    /usr/local/portage/media-video/freevo_snapshot/$fname.ebuild
+read
 
 cd `dirname $0`/../../
-echo cvs update
-cvs update -dP
 
-cd ..
-echo copy directory to /tmp
-cp -r freevo /tmp/$fname
+function cvs_update {
+    echo cvs update
+    cvs update -dP
+}
 
-echo remove some files and change owner
-find /tmp/$fname -type d -name CVS | xargs rm -rf
-sudo chown -R root.root /tmp/$fname
+function cvs_tag {
+    echo setting new cvs tag
+    cvs tag $tag
+}
 
-cd /tmp/
-echo making tgz
-sudo tar -zcvf /usr/portage/distfiles/$fname.tgz $fname
+function pack {
+    cd ..
+    sudo rm -rf /tmp/freevo-$version
+    echo copy directory to /tmp
+    cp -r freevo /tmp/freevo-$version
 
-echo remove tmp dir
-sudo rm -rf $fname
+    echo cleaning up
+    cd /tmp/freevo-$version
+    make clean
+    rm freevo.conf*
+    find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
+    find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
+    find /tmp/freevo-$version -name '.#*'       | xargs rm -rf
+    sudo chown -R root.root /tmp/freevo-$version
 
-cd /usr/local/portage/media-video/freevo_snapshot
-sudo chown -R root.root .
-sudo ebuild $fname.ebuild digest 
+    cd /tmp/
+    echo making tgz
+    sudo tar -zcvf /usr/portage/distfiles/freevo-src-$version.tgz freevo-$version
 
-scp /usr/portage/distfiles/$fname.tgz riemen:www/freevo
-sudo rm /usr/portage/distfiles/$fname.tgz
+    echo remove tmp dir
+    sudo rm -rf freevo-$version
+}
 
-cd ..
-tar -zcvf /tmp/ebuild.tgz freevo_snapshot freevo_runtime
+function ebuild {
+    sudo cp `dirname $0`/freevo.ebuild \
+	/usr/local/portage/media-video/freevo/freevo-$version.ebuild
 
-scp /tmp/ebuild.tgz riemen:www/freevo
-rm /tmp/ebuild.tgz
+    cd /usr/local/portage/media-video/freevo
+    sudo rm -f files/digest-freevo-$version
+    sudo chown -R root.root .
+    sudo ebuild freevo-$version.ebuild digest 
+
+    cd ..
+    tar -zcvf /tmp/ebuild.tgz freevo freevo_runtime
+    scp -r /tmp/ebuild.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
+    rm /tmp/ebuild.tgz
+}
+
+function sf_upload {
+    # not working
+    cd /usr/portage/distfiles/
+    curl -T freevo-src-$version.tgz \
+	ftp://anonymous:dmeyer_tzi.de@upload.sourceforge.net/incoming
+}
+
+eval $2
 
 
 # end of ebuild-snapshot.sh 
