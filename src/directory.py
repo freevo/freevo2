@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/10/02 18:47:18  dischi
+# use new util class to write the fxd file
+#
 # Revision 1.39  2003/10/01 18:56:56  dischi
 # add configure option to write a folder.fxd
 #
@@ -288,32 +291,41 @@ class DirItem(Playlist):
         save the modified fxd file
         """
         self.xml_file = os.path.join(self.dir, 'folder.fxd')
-        try:
-            f = open(self.xml_file)
-            data = f.readlines()
-            f.close()
-        except:
-            data = ('<?xml version="1.0" ?>\n', '<freevo>\n', '  <folder>\n',
-                    '  </folder>\n', '</freevo>\n')
-        
-        try:
-            if os.path.isfile(self.xml_file):
-                os.unlink(self.xml_file)
-            f = codecs.open(self.xml_file , 'w', encoding='utf-8')
-        except IOError, error:
-            return 0 
 
-        for line in data:
-            if line.find('<setvar') != -1:
-                continue
-            f.write(line)
-            if line.find('<folder') != -1:
-                for v in self.modified_vars:
-                    for i in range(line.find('<')):
-                        f.write(' '),
-                    f.write('  <setvar name="%s" val="%s"/>\n' % \
-                            (v.lower(), getattr(self, v)))
-        f.close()
+        try:
+            fxd = util.FXDtree(self.xml_file)
+        except:
+            return 0
+
+        folder_elem = None
+        for node in fxd.tree.children:
+            if node.name == 'folder':
+                folder_elem = node
+                folder_elem.first_cdata = None
+                folder_elem.following_cdata = None
+                break
+        else:
+            folder_elem = util.XMLnode('folder')
+            fxd.add(folder_elem, pos=0)
+
+        del_items = []
+        for child in folder_elem.children:
+            if child.name == 'setvar':
+                del_items.append(child)
+
+        # remove old setvar items
+        for child in del_items:
+            folder_elem.children.remove(child)
+
+        for v in self.modified_vars:
+            n = util.XMLnode('setvar', (('name', v.lower()), ('val', getattr(self, v))))
+            fxd.add(n, folder_elem, 0)
+
+        try:
+            fxd.save()
+        except IndexError:
+            return 0
+        
         return 1 
 
 
@@ -798,8 +810,8 @@ class DirItem(Playlist):
             name = str(i + '\t').replace('_', ' ').capitalize()
             if i in self.modified_vars:
                 if i == 'FORCE_SKIN_LAYOUT':
-                    item.name += str(getattr(self, i))
-                if getattr(self, i):
+                    name += str(getattr(self, i))
+                elif getattr(self, i):
                     name += 'on'
                 else:
                     name += 'off'
