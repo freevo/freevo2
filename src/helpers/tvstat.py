@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/19 02:18:22  rshortt
+# Changes for moving TV cards autodetection into system.
+#
 # Revision 1.3  2004/11/13 15:58:01  dischi
 # more dvb info
 #
@@ -44,7 +47,14 @@
 
 import time, string, sys
 
-import config, tv.v4l2, tv.ivtv
+import config
+import system
+import tv.v4l2
+import tv.ivtv
+
+from system.tvcards import TVCard, IVTVCard, DVBCard
+
+system.detect('tvcards')
 
 
 def main():
@@ -53,15 +63,15 @@ def main():
         print '\n*** %s ***' % key
         v4l2 = None
 
-        if isinstance(card, config.IVTVCard):
+        if isinstance(card, IVTVCard):
             v4l2 = tv.ivtv.IVTV(key)
             print 'vdev: %s' % v4l2.settings.vdev
 
-        elif isinstance(card, config.TVCard):
+        elif isinstance(card, TVCard):
             v4l2 = tv.v4l2.Videodev(key)
             print 'vdev: %s' % v4l2.settings.vdev
 
-        elif isinstance(card, config.DVBCard):
+        elif isinstance(card, DVBCard):
             print 'adapter: %s' % card.adapter
             print 'Card: %s' % card.name
             print 'Type: %s' % card.type
