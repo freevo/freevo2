@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/03/13 22:30:02  dischi
+# better string transformation
+#
 # Revision 1.15  2004/02/28 21:04:17  dischi
 # unicode fixes
 #
@@ -87,11 +90,18 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
         
         return string
 
+
     def String(string, encoding=config.encoding):
         if string.__class__ == unicode:
             return string.encode(encoding, 'replace')
+        if string.__class__ != str:
+            try:
+                return str(string)
+            except:
+                return unicode(string).encode(encoding, 'replace')
         return string
 
+    
     import vfs
     from misc import *
     from fileops import *
