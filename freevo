@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2004/01/10 18:24:17  dischi
+# fix uid storage for execute and runapp calls
+#
 # Revision 1.105  2004/01/10 16:53:48  dischi
 # better shutdown
 #
@@ -211,19 +214,20 @@ def stop(name, arg):
 
 
 
-def start(name, arg, bg):
+def start(name, arg, bg, store=True):
     """
     start a process
     """
     uid = os.fork()
     if uid:
-        try:
-            f = open('/var/run/' + name, 'w')
-        except (OSError, IOError):
-            f = open('/tmp/' + name + '%s-.pid' % os.getuid(), 'w')
+        if store:
+            try:
+                f = open('/var/run/' + name, 'w')
+            except (OSError, IOError):
+                f = open('/tmp/' + name + '%s-.pid' % os.getuid(), 'w')
 
-        f.write(str(uid)+'\n')
-        f.close()
+            f.write(str(uid)+'\n')
+            f.close()
 
         if not bg:
             try:
@@ -234,7 +238,7 @@ def start(name, arg, bg):
                     os.waitpid(uid, 0)
                 except KeyboardInterrupt:
                     pass
-                if os.path.isfile(f.name):
+                if store and os.path.isfile(f.name):
                     os.unlink(f.name)
     else:
         os.execvp(arg[0], arg)
@@ -311,9 +315,10 @@ else:
 
 
 # now check what and how we should start freevo
-bg   = 0 # start in background
-proc = [ os.path.abspath(os.path.join(freevo_python, 'main.py')) ]
-name = os.path.splitext(os.path.basename(freevo_script))[0]
+bg    = 0 # start in background
+proc  = [ os.path.abspath(os.path.join(freevo_python, 'main.py')) ]
+name  = os.path.splitext(os.path.basename(freevo_script))[0]
+check = True # check running instance
 
 if len(sys.argv) > 1:
     arg = sys.argv[1]
@@ -353,8 +358,8 @@ elif arg == '-fs':
     
 elif arg == 'execute':
     # execute a python script
-    proc = sys.argv[2:]
-
+    proc  = sys.argv[2:]
+    check = False
 
 elif arg == 'setup':
     # run setup
@@ -371,7 +376,7 @@ elif arg == 'runapp':
     # with the rest as args
     python[-1] = sys.argv[2]
     proc       = sys.argv[3:]
-
+    check      = False
 
 elif arg and not arg.startswith('-'):
     # start a helper. arg is the name of the script in
@@ -410,7 +415,7 @@ if name != 'freevo':
         print 'can\'t find helper %s' % name
         sys.exit(1)
 
-if getpid(name, python + proc)[1]:
+if getpid(name, python + proc)[1] and check:
     if name != 'freevo':
         print '%s still running, run \'freevo %s stop\' to stop' % (name, name)
     else:
@@ -420,4 +425,4 @@ if getpid(name, python + proc)[1]:
 if python[0].find('python') != -1:
     python = [ python[0] , '-OO' ] + python[1:]
 
-start(name, python + proc , bg)
+start(name, python + proc , bg, check)
