@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/09/05 18:29:58  dischi
+# fix walk
+#
 # Revision 1.48  2003/09/03 21:02:46  dischi
 # make sure we can save the data
 #
@@ -612,7 +615,7 @@ def rmrf(top=None):
     Pure python version of 'rm -rf'
     """
     if not top == '/' and not top == '' and not top == ' ' and top:
-        for root, dirs, files in os.walk(top, topdown=False):
+        for root, dirs, files in os.path.walk(top, topdown=False):
             for name in files:
                 os.remove(os.path.join(root, name))
             for name in dirs:
