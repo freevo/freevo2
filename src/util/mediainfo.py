@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/05/20 15:53:49  dischi
+# prevent a crash
+#
 # Revision 1.43  2004/05/02 11:46:13  dischi
 # make it possible to turn off image caching
 #
@@ -247,8 +250,12 @@ class Cache:
         """
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
-        self.current_objects[filename] = (info, os.stat(fullname)[stat.ST_MTIME])
-        self.cache_modified = True
+        try:
+            self.current_objects[filename] = (info, os.stat(fullname)[stat.ST_MTIME])
+            self.cache_modified = True
+        except OSError:
+            # key, the file is gone now
+            pass
         
         
     def get(self, filename, create=True):
