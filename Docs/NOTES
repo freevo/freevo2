@@ -62,7 +62,6 @@ cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co main
 cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
 cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
 
-rm -rf main/libavcodec   
 mv ffmpeg/libavcodec main
 rm -rf ffmpeg
 
@@ -73,7 +72,7 @@ Latest config (20020716)
   --with-extralibdir=/usr/local/lib
 
 20020815:
-./configure --enable-tv-v4l --enable-mga --enable-xmga --enable-runtime-cpudetection
+./configure --enable-tv-v4l --enable-mga --enable-xmga --enable-runtime-cpudetection --enable-static --enable-largefiles --disable-lirc 
 
 mga_vid driver:
 mknod /dev/mga_vid c 178 0
