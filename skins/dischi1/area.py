@@ -37,6 +37,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/02 21:56:36  dischi
+# Redraw bugfix for items that turn invisible
+#
 # Revision 1.9  2003/03/02 21:35:19  dischi
 # Don't print the warning when the area is invisible
 #
@@ -199,13 +202,14 @@ class Skin_Area:
         area = self.area_val
 
         # maybe we are NOW invisible
-        if visible and not area.visible:
+        if visible and not area.visible and old_area:
             for rect in self.content_alpha:
                 self.alpha_bg.blit(self.background, (rect[0], rect[1]), rect)
                 self.alpha_bg.blit(self.alpha, (rect[0], rect[1]), rect)
+
             self.content_alpha = []
-            osd.screen.blit(self.alpha_bg, (area.x, area.y),
-                            (area.x, area.y, area.width, area.height))
+            osd.screen.blit(self.alpha_bg, old_area.pos(self.name),
+                            old_area.rect(self.name))
 
         if not area.visible:
             return
@@ -368,6 +372,9 @@ class Skin_Area:
         if not settings.layout.has_key(area.layout):
             if self.area_val.visible:
                 print '*** layout <%s> not found' % area.layout
+            elif self.layout and self.layout.visible:
+                self.layout = None
+                return TRUE
             return FALSE
 
         old_layout = self.layout
