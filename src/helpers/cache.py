@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/05 20:39:11  dischi
+# check mmpython cache version
+#
 # Revision 1.17  2004/02/01 17:50:43  dischi
 # fix, it deleted all infos on caching :-)
 #
@@ -78,7 +81,7 @@ def delete_old_files_1():
     sys.__stdout__.flush()
     del_list = []
 
-    for name in ('image-viewer-thumb.jpg', 'thumbnails', 'audio'):
+    for name in ('image-viewer-thumb.jpg', 'thumbnails', 'audio', 'mmpython'):
         if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, name)):
             del_list.append(os.path.join(config.FREEVO_CACHEDIR, name))
 
@@ -138,17 +141,48 @@ def delete_old_files_2():
     print 'done'
     
 
-def cache_directories(rebuild=True):
+def cache_directories(rebuild):
     """
     cache all directories with mmpython
+    rebuild:
+    0   no rebuild
+    1   rebuild all files on disc
+    2   like 1, but also delete discinfo data
     """
     import util.mediainfo
+    try:
+        import mmpython.version
+
+        info = None
+        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
+        if os.path.isfile(cachefile):
+            info = util.read_pickle(cachefile)
+        if not info:
+            print
+            print 'Unable to detect last complete rebuild, forcing rebuild'
+            rebuild         = 2
+            complete_update = int(time.time())
+        else:
+            mmchanged, part_update, complete_update = info
+    except ImportError:
+        print
+        print 'Error: unable to read mmpython version information'
+        print 'Please update mmpython to the latest release or if you use'
+        print 'Freevo CVS versions, please also use mmpython CVS.'
+        print
+        print 'Some functions in Freevo may not work or even crash!'
+        print
+        print
 
     if rebuild:
         print 'deleting cache files..................................',
         sys.__stdout__.flush()
         for f in util.recursefolders(config.OVERLAY_DIR,1,'mmpython.cache',1):
             os.unlink(f)
+        if rebuild == 2:
+            for f in util.match_files(config.OVERLAY_DIR + '/disc/metadata', ['mmpython']):
+                os.unlink(f)
+                print f
         print 'done'
 
     print
@@ -160,6 +194,14 @@ def cache_directories(rebuild=True):
     util.mediainfo.cache_recursive(all_dirs, verbose=True)
     print
 
+    try:
+        import mmpython.version
+        util.save_pickle((mmpython.version.CHANGED, int(time.time()), complete_update),
+                         cachefile)
+        print 
+    except ImportError:
+        pass
+    
 
 def cache_thumbnails():
     """
@@ -318,10 +360,6 @@ if __name__ == "__main__":
     create_metadata()
     cache_thumbnails()
 
-import time
-f = open(os.path.join(config.OVERLAY_DIR, 'cachetime'), 'w')
-f.write(str(long(time.time())))
-f.close()
-
 # close db
 util.mediainfo.sync()
+

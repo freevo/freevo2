@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/05 20:39:12  dischi
+# check mmpython cache version
+#
 # Revision 1.17  2004/02/05 19:26:42  dischi
 # fix unicode handling
 #
@@ -620,3 +623,29 @@ def load_cache(dirname):
     mmpython_cache.load_cache(dirname)
     meta_cache.load_cache(dirname)
     
+
+
+# some checking when starting Freevo
+if __freevo_app__ == 'main':
+    try:
+        import mmpython.version
+
+        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
+        info = util.read_pickle(cachefile)
+        if not info:
+            print
+            print 'Error: can\'t detect last cache rebuild'
+            print 'Please run \'freevo cache\''
+            print
+        else:
+            mmchanged, part_update, complete_update = info
+            # future checks here
+    except:
+        print
+        print 'Error: unable to read mmpython version information'
+        print 'Please update mmpython to the latest release or if you use'
+        print 'Freevo CVS versions, please also use mmpython CVS.'
+        print
+        print 'Some functions in Freevo may not work or even crash!'
+        print
+        print

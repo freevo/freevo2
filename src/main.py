@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2004/02/05 20:39:11  dischi
+# check mmpython cache version
+#
 # Revision 1.111  2004/02/01 17:11:51  dischi
 # make it possible to load cachefiles on startup
 #
@@ -347,13 +350,6 @@ else:
         print
     f.close()
     
-# if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
-#     mmpython.object_cache.md5_cachedir = False
-#     mmpython.object_cache.cachedir     = config.OVERLAY_DIR
-# else:
-#     print '\nWARNING'
-#     print 'Your mmpython version is too old. Freevo may crash later. Please'
-#     print 'update mmpython to mmpython cvs'
 
 os.umask(config.UMASK)
 
