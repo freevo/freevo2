@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/30 19:17:27  rshortt
+# Removing the old header, it was being printed too.
+#
 # Revision 1.7  2003/05/22 21:33:24  outlyer
 # Lots of cosmetic changes:
 #
@@ -83,12 +86,6 @@ class SearchResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader('Search Results', 'styles/main.css')
-            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-            fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-            fv.tableCell('Search Results', 'class="heading" align="left"')
-            fv.tableRowClose()
-            fv.tableClose()
             fv.res += '<h4>ERROR: recording server is unavailable</h4>'
             fv.printSearchForm()
             fv.printLinks()
@@ -107,13 +104,6 @@ class SearchResource(FreevoResource):
                 rec_progs = recordings.getProgramList()
 
         fv.printHeader('Search Results', 'styles/main.css')
-
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
-        fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('<img src="images/logo_200x100.png" />', 'align="left"')
-        fv.tableCell('Search Results', 'class="heading" align="left"')
-        fv.tableRowClose()
-        fv.tableClose()
 
         if not got_matches: 
             fv.res += '<h3>No matches</h3>'
