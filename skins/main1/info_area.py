@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/09 20:31:34  gsbarbieri
+# Fixed a problem with item.getattr( len(attr) )
+#
 # Revision 1.10  2003/07/09 07:26:38  gsbarbieri
 # Fixed a small bug when updating the info_area contents
 #
@@ -265,7 +268,7 @@ class Info_Area(Skin_Area):
                         if exp:
                             exp = eval( exp )
                             if exp:
-                                list[ i ].text = exp
+                                list[ i ].text = str( exp )
                     except:
                         print "ERROR: Parsing XML in info_area:"
                         print "could not evaluate: '%s'" % ( exp )
