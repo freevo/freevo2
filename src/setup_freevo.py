@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/08/22 18:03:27  dischi
+# write freevo.conf to /etc/freevo or ~/.freevo
+#
 # Revision 1.3  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
 #
@@ -151,16 +154,23 @@ def check_config(conf):
 
 def create_config(conf):
     
-    print 'Creating freevo.conf...',
-
-    fd = open('freevo.conf', 'w')
+    outfile='/etc/freevo/freevo.conf'
+    try:
+        fd = open(outfile, 'w')
+    except:
+        if not os.path.isdir(os.path.expanduser('~/.freevo')):
+            os.mkdir(os.path.expanduser('~/.freevo'))
+        outfile=os.path.expanduser('~/.freevo/freevo.conf')
+        fd = open(outfile, 'w')
+        
     for val in dir(conf):
         if val[0:2] == '__': continue
 
         # Some Python magic to get all members of the struct
         fd.write('%s = %s\n' % (val, conf.__dict__[val]))
         
-    print 'done'
+    print
+    print 'wrote %s' % outfile
 
 
 def check_program(conf, name, variable, necessary, sysfirst=1, verbose=1):
@@ -282,14 +292,6 @@ if __name__ == '__main__':
 
     # Build everything
     create_config(conf)
-
     print
-    print 'Now you can type "freevo" to run freevo if you have the full '
-    print 'binary release.'
-    print
-    print 'Please read the manual on how to build the CVS/src Freevo version.'
-    print
-    print 'Do "make install" as root to install the binaries in /usr/local/freevo'
-    print
-
+    
     sys.exit()
