@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/13 07:47:25  krister
+# Bugfixes for image errors.
+#
 # Revision 1.11  2003/02/08 23:31:40  gsbarbieri
 # hanged the Image menu to ExtendedMenu.
 #
@@ -77,7 +80,10 @@
 
 import os.path
 import Image
-import signal, os, fcntl
+import signal
+import os
+import fcntl
+import time
 
 import config # Configuration file. 
 import menu   # The menu widget class
@@ -152,9 +158,15 @@ class ImageViewer:
         else:
             # Using Container-Image
             image = item.loadimage( )
+
         if not image:
-            skin.PopupBox('Cannot load image %s!' % filename)
+            osd.clearscreen(color=osd.COL_BLACK)
+            osd.drawstring('Image error on "%s"' % filename, osd.width/2, osd.height/2,
+                           fgcolor=osd.COL_ORANGE, align='center')
+            # update the OSD
+            osd.update()
             return
+        
 	width, height = image.get_size()
             
         # Bounding box default values

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/13 07:47:25  krister
+# Bugfixes for image errors.
+#
 # Revision 1.11  2003/02/12 10:38:51  dischi
 # Added a patch to make the current menu system work with the new
 # main1_image.py to have an extended menu for images
@@ -83,7 +86,7 @@ import threading
 import fcntl
 import md5
 import commands
-
+import Image # PIL
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -253,34 +256,40 @@ def md5file(filename):
     
 
 # Simple Python Imaging routine to return image size
-# and return a default if the Imaging library is not
-# installed.
-def pngsize(file):
-    if not os.path.isfile(file):
-        return 200,200
-    import Image
-    image = Image.open(file)
-    width, height = image.size
-    return width,height
+# and return a default if and error occurs.
+def pngsize(filename):
+    if not os.path.isfile(filename):
+        return (200, 200)
+
+    try:
+        image = Image.open(filename)
+        width, height = image.size
+        return (width, height)
+    except IOError:
+        print 'Cannot open image file "%s"' % filename
+        return (200, 200)
 
 
-def resize(file, x0=25, y0=25):
-        import Image
+def resize(filename, x0=25, y0=25):
 
-        if not os.path.isfile(file):
-            return ''
+    if not os.path.isfile(filename):
+        return ''
         
-        # Since the filenames are not unique we need
-        # to cache them by content, not name.
-        mythumb = (config.FREEVO_CACHEDIR + '/' +
-                   os.path.basename(md5file(file)) + '-%s-%s.png' % (x0, y0))
-        if os.path.isfile(mythumb):
-                return mythumb
-        else:
-                im = Image.open(file)
-                im_res = im.resize((x0,y0), Image.BICUBIC)
-                im_res.save(mythumb,'PNG')
-                return mythumb
+    # Since the filenames are not unique we need
+    # to cache them by content, not name.
+    mythumb = (config.FREEVO_CACHEDIR + '/' +
+               os.path.basename(md5file(filename)) + '-%s-%s.png' % (x0, y0))
+    if os.path.isfile(mythumb):
+        return mythumb
+    else:
+        try:
+            im = Image.open(filename)
+        except IOError:
+            return ''
+        im_res = im.resize((x0,y0), Image.BICUBIC)
+        im_res.save(mythumb, 'PNG')
+        return mythumb
+    
 
 def getExifThumbnail(file, x0=0, y0=0):
     import Image
