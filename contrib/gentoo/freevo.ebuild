@@ -3,6 +3,8 @@ FREEVO_INSTALL_DIR="${D}/opt/freevo"
 
 IUSE="dxr3 matrox"
 
+FPV=${PV}
+PV=`echo ${PV} | sed 's/_\(pre[0-9]\)/-\1/'`
 SRC_URI="mirror://sourceforge/freevo/freevo-src-${PV}.tgz"
 
 LICENSE="GPL-2"
@@ -22,6 +24,7 @@ DEPEND=">=dev-python/pygame-1.5.3
 
 src_unpack() {
 	unpack freevo-src-${PV}.tgz
+	ln -s freevo-${PV} freevo-${FPV}
 }
 
 src_compile() {
@@ -32,8 +35,8 @@ src_compile() {
 	/bin/ls -l /etc/localtime | grep Europe >/dev/null 2>/dev/null && \
 	    myconf="$myconf --tv=pal"
 
-	./configure ${myconf} || die
 	emake || make || die
+	./freevo setup ${myconf} || die
 }
 
 src_install() {

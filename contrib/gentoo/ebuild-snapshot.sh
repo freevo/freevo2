@@ -6,10 +6,10 @@
 # $Id$
 
 
-version=`echo $1 | sed 's/-/_/g' | sed 's/_r[0-9]//'`
+version=`echo $1 | sed 's/-bla/_/g' | sed 's/_r[0-9]//'`
 ebuild_version=`echo $1 | sed 's/-/_/g' | sed 's/_\(r[0-9]\)/-\1/'`
-tag=REL-`echo $1 | sed 's/[\.-]/_/g' | sed 'y/prerc/PRERC/'` 
-echo src name: freevo-$version and freevo-src-$version
+tag=REL-`echo $1 | sed 's/\./_/g' | sed 'y/prerc/PRERC/'` 
+echo src name: freevo-$ebuild_version and freevo-src-$version
 echo ebuild: freevo-$ebuild_version
 echo cvs tag:  $tag
 
@@ -27,12 +27,7 @@ function cvs_tag {
     cvs tag $tag
 }
 
-function pack {
-    cd ..
-    sudo rm -rf /tmp/freevo-$version
-    echo copy directory to /tmp
-    cp -r freevo /tmp/freevo-$version
-
+function cleanup_and_pack {
     echo cleaning up
     cd /tmp/freevo-$version
     make clean
@@ -50,10 +45,27 @@ function pack {
     sudo rm -rf freevo-$version
 }
 
-function ebuild {
-    sudo cp `dirname $0`/freevo.ebuild \
-	/usr/local/portage/media-video/freevo/freevo-$ebuild_version.ebuild
+function pack {
+    cd ..
+    sudo rm -rf /tmp/freevo-$version
+    echo copy directory to /tmp
+    cp -r freevo /tmp/freevo-$version
+    cleanup_and_pack
+}
 
+function pack_tag {
+    cd /tmp
+    sudo rm -rf freevo-$version
+    mkdir freevo-$version
+    cd freevo-$version
+    cp -r /home/dmeyer/src/freevo/CVS .
+    cvs update -r $tag -dP
+    cleanup_and_pack
+}
+
+function ebuild {
+    sudo cp /home/dmeyer/src/freevo/contrib/gentoo/freevo.ebuild \
+	/usr/local/portage/media-video/freevo/freevo-$ebuild_version.ebuild
     cd /usr/local/portage/media-video/freevo
     sudo rm -f files/digest-freevo-$version
     sudo chown -R root.root .
@@ -61,10 +73,22 @@ function ebuild {
 }
 
 function ebuild_upload {
+    sudo rm -rf /tmp/ebuild*
     cd /usr/local/portage/media-video
 
-    tar -zcvf /tmp/ebuild.tgz freevo freevo_runtime
-    scp -r /tmp/ebuild.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
+    tar -zcvf /tmp/ebuild-devel.tgz freevo freevo_runtime >/dev/null
+    cd /tmp
+    sudo rm -rf freevo freevo-runtime
+    tar -zxvf ebuild-devel.tgz >/dev/null
+    for i in freevo/*pre*; do
+	sed 's/KEYWORDS="x86"/KEYWORDS="~x86"/' $i > /tmp/$$
+	mv /tmp/$$ $i
+	touch $i
+    done
+    tar -zcvf ebuild.tgz freevo freevo_runtime >/dev/null
+    rm -rf freevo freevo-runtime
+
+    scp -r /tmp/ebuild*.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
     rm /tmp/ebuild.tgz
 }
 
