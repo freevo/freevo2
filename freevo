@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2004/01/26 19:33:17  dischi
+# python 2.2 has no True/False
+#
 # Revision 1.107  2004/01/10 20:45:50  mikeruelle
 # can not start freevo -fs without this change
 #
@@ -217,7 +220,7 @@ def stop(name, arg):
 
 
 
-def start(name, arg, bg, store=True):
+def start(name, arg, bg, store=1):
     """
     start a process
     """
@@ -321,7 +324,7 @@ else:
 bg    = 0 # start in background
 proc  = [ os.path.abspath(os.path.join(freevo_python, 'main.py')) ]
 name  = os.path.splitext(os.path.basename(freevo_script))[0]
-check = True # check running instance
+check = 1 # check running instance
 
 if len(sys.argv) > 1:
     arg = sys.argv[1]
@@ -362,7 +365,7 @@ elif arg == '-fs':
 elif arg == 'execute':
     # execute a python script
     proc  = sys.argv[2:]
-    check = False
+    check = 0
 
 elif arg == 'setup':
     # run setup
@@ -379,7 +382,7 @@ elif arg == 'runapp':
     # with the rest as args
     python[-1] = sys.argv[2]
     proc       = sys.argv[3:]
-    check      = False
+    check      = 0
 
 elif arg and not arg.startswith('-'):
     # start a helper. arg is the name of the script in
