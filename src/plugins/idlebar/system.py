@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/08 18:45:23  dischi
+# do not use font.font.stringsize, there is no border calculated, use font.stringsize
+#
 # Revision 1.7  2004/02/01 20:29:38  rshortt
 # Use small0 instead of weather font.
 #
@@ -153,14 +156,14 @@ class procstats(IdleBarPlugin):
         widthcpu = 0
 
         if self.drawCpu == 1:
-            widthcpu = font.font.stringsize(self.currentCpu)
+            widthcpu = font.stringsize(self.currentCpu)
             osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
                           (x, osd.y + 7, -1, -1))    
             osd.write_text(self.currentCpu, font, None, x + 15, osd.y + 55 - font.h,
                            widthcpu, font.h, 'left', 'top')
 
         if self.drawMem == 1:
-            widthmem = font.font.stringsize(self.currentMem)
+            widthmem = font.stringsize(self.currentMem)
 
             osd.draw_image(os.path.join(config.ICON_DIR, 'misc/memory.png'),
                           (x + 15 + widthcpu, osd.y + 7, -1, -1))
@@ -334,9 +337,9 @@ class sensors(IdleBarPlugin):
             font.color = 0xffffff
         
         cputemp = self.cpu.temp()        
-        widthcpu = font.font.stringsize(cputemp)
+        widthcpu = font.stringsize(cputemp)
         osd.draw_image(os.path.join(config.ICON_DIR, 'misc/cpu.png'),
-                       (x, osd.y + 8, -1, -1))    
+                       (x, osd.y + 8, -1, -1))
         osd.write_text(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
                        'left', 'top')
         widthcpu = max(widthcpu, 32) + 10
@@ -344,7 +347,7 @@ class sensors(IdleBarPlugin):
         if self.case:
             casetemp = self.case.temp()
             
-            widthcase = font.font.stringsize(casetemp)
+            widthcase = font.stringsize(casetemp)
             osd.draw_image(os.path.join(config.ICON_DIR, 'misc/case.png'),
                                         (x + 15 + widthcpu, osd.y + 7, -1, -1))
             osd.write_text(casetemp, font, None, x + 40 + widthcpu,
@@ -354,7 +357,7 @@ class sensors(IdleBarPlugin):
 
         if self.ram:
             text = self.getRamStat()
-            widthram = font.font.stringsize(text)
+            widthram = font.stringsize(text)
             if casetemp:
                 img_width = x + 15 + widthcpu + widthcase + 15
             else:

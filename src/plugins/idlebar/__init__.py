@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/08 18:45:23  dischi
+# do not use font.font.stringsize, there is no border calculated, use font.stringsize
+#
 # Revision 1.10  2004/01/31 14:41:55  dischi
 # make it possible that the detachbar draws inside the idlebar
 #
@@ -190,7 +193,7 @@ class clock(IdleBarPlugin):
         pad_x = 10
         idlebar_height = 60
         
-        w = font.font.stringsize( clock )
+        w = font.stringsize( clock )
         h = font.font.height
         if h > idlebar_height:
             h = idlebar_height
@@ -411,7 +414,7 @@ class weather(IdleBarPlugin):
         osd.draw_image(os.path.join(config.ICON_DIR, 'weather/' + icon),
                         (x, osd.y + 15, -1, -1))
         temp = '%s°' % temp
-        width = font.font.stringsize(temp)
+        width = font.stringsize(temp)
         osd.write_text(temp, font, None, x + 15, osd.y + 55 - font.h, width, font.h,
                        'left', 'top')
         return width + 15

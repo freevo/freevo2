@@ -69,7 +69,7 @@ class MultiMail(IdleBarPlugin):
             image_width = osd.draw_image(self.MAILIMAGE, (x, osd.y + 2, -1, -1))[0]
             font  = osd.get_font('weather')
             unread_str = '%3s' % self.unread
-            text_width = font.font.stringsize(unread_str)
+            text_width = font.stringsize(unread_str)
             osd.write_text(unread_str, font, None, x, osd.y + 55 - font.h, text_width, font.h, 'left', 'top')
             display_width = max(image_width, text_width)
         else:
