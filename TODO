@@ -8,13 +8,13 @@ Short-term
 ----------
 o Add rcs id to all files!
 o Channel guide layout
-o Add load/display bitmaps to osd
-  o Check out http://bytesex.org/fbi.html
 o Add view related bitmap to mp3/movie lists/playing
   Paul Aubin:
   Put a .jpg file in the directory called cover.jpg,
   and for the movies, a movie_filename.jpg and show the cover art.
 o A switch to turn off the EPG altogether if no listings are available.
+o Make the EPG handling more modular
+o Add xmltv to the EPG
 o Installation instructions, clean up config stuff
   Paul Aubin:
   2) The lirc stuff is tricky. I'm used to an lircrc file, as I imagine
@@ -33,6 +33,7 @@ o Installation instructions, clean up config stuff
 
    4) Lots of hard coded things within the application root that probably
      don't need to be there (fbset, matroxset)
+   5) Add debian packaging
 o Proper logging to a file of errors and debug info
 o Use btaudio for audio recording from the video card
 o Add page numbers to the menus, i.e. "Page 3/14"
