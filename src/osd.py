@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2003/08/16 12:10:55  dischi
+# this does not work on mga framebuffer
+#
 # Revision 1.79  2003/08/15 19:25:15  dischi
 # search all the share stuff in $FREEVO_SHARE now
 #
@@ -372,8 +375,7 @@ class OSD:
             self.depth = 32
             
         self.screen = pygame.display.set_mode((self.width, self.height),
-                                              self.hw | DOUBLEBUF,
-                                              self.depth)
+                                              self.hw, self.depth)
 
         self.depth = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
@@ -1009,6 +1011,7 @@ class OSD:
         """
         if not pygame.display.get_init():
             return None
+
         if rect:
             try:
                 pygame.display.update(rect)
