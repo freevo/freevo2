@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/05/02 09:21:57  dischi
+# better python code
+#
 # Revision 1.9  2004/02/09 20:04:33  dischi
 # better error handling
 #
@@ -175,7 +178,7 @@ if __name__ == "__main__":
     # store the correct thumbnail
     captures = glob.glob('000000??.png')
     if captures:
-        capture = captures[-1:][0]
+        capture = captures[-1]
         try:
             shutil.copy(capture, imagefile)
         except:
