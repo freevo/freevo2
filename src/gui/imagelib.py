@@ -69,7 +69,8 @@ def load(url, size=None, cache=False, vfs_save=False):
             key = 'scaled://%s-%s-%s' % (url, width, height)
         else:
             key = url
-
+        key += os.stat(url)[stat.ST_MTIME]
+        
         s = cache[key]
         if s:
             return s
@@ -147,8 +148,9 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         except:
             type = item.type
 
-    key = '%s-%s-%s-%s-%s-%s-%s' % (icon_dir, item.image, type,
-                                    item.type, width, height, force)
+    key = '%s-%s-%s-%s-%s-%s-%s-%s' % (icon_dir, item.image, type,
+                                       item.type, width, height, force,
+                                       os.stat(item.image)[stat.ST_MTIME])
 
     if item['rotation']:
         key = '%s-%s' % (key, item['rotation'])
