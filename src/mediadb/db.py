@@ -50,7 +50,8 @@ import parser
 # get logging object
 log = logging.getLogger('mediadb')
 
-VERSION = 2.4
+# internal format version
+VERSION = 0.1
 
 class CacheList:
     def __init__(self):
@@ -352,7 +353,7 @@ class Cache:
         """
         return 'mediadb.db.Cache for %s' % self.dirname
 
-        
+
 class FileCache:
     """
     Cache for one file

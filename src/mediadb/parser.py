@@ -14,18 +14,17 @@ import util.vfs as vfs
 # list of external parser
 _parser = []
 
-def _init():
+def init():
     """
     Init the parser module
     """
-    d = os.path.dirname(__file__)
-    for f in os.listdir(d):
+    for f in os.listdir(os.path.dirname(__file__)):
         if f.endswith('_parser.py'):
             exec('import %s' % f[:-3])
             _parser.append(eval(f[:-3]))
 
 
-def _simplify(object):
+def simplify(object):
     """
     mmpython has huge objects to cache, we don't need them.
     This function simplifies them to be only string, integer, dict or
@@ -46,13 +45,13 @@ def _simplify(object):
         if hasattr(object, k) and getattr(object, k):
             ret[k] = []
             for o in getattr(object, k):
-                ret[k].append(_simplify(o))
+                ret[k].append(simplify(o))
 
     if hasattr(object, 'tracks') and object.tracks:
         # read track informations for dvd
         ret['tracks'] = []
         for o in object.tracks:
-            track = _simplify(o)
+            track = simplify(o)
             if not track.has_key('audio'):
                 track['audio'] = []
             if not track.has_key('subtitles'):
@@ -65,39 +64,10 @@ def _simplify(object):
 
     return ret
 
-def _parse_fxd_node(node):
-    """
-    Parse a fxd node.
-    """
-    children = []
-    for c in node.children:
-        children.append(_parse_fxd_node(c))
-    return (node.name, node.attrs, children, node.textof(), node.first_cdata,
-            node.following_cdata)
-
-
-def _parse_fxd(filename):
-    """
-    Parse a fxd file.
-    """
-    data = util.fxdparser.FXDtree(filename, False)
-    if data.tree.name != 'freevo':
-        return {}
-    is_skin_fxd = False
-    for node in data.tree.children:
-        if node.name == 'skin':
-            is_skin_fxd = True
-            break
-    tree = []
-    for node in data.tree.children:
-        tree.append(_parse_fxd_node(node))
-    return is_skin_fxd, tree
-
-
-# regexp for filenames used in _getname
+# regexp for filenames used in getname
 _FILENAME_REGEXP = re.compile("^(.*?)_(.)(.*)$")
 
-def _getname(file):
+def getname(file):
     """
     make a nicer display name from file
     """
@@ -138,16 +108,14 @@ def parse(filename, object):
     """
     Add additional informations to filename, object.
     """
-    if not _parser:
-        _init()
     mminfo = None
     if not object['ext'] in [ 'xml', 'fxd' ]:
         mminfo = mmpython.parse(filename)
-    title = _getname(filename)
+    title = getname(filename)
     object['title:filename'] = title
     if mminfo:
         # store mmpython data as pickle for faster loading
-        object['mminfo'] = cPickle.dumps(_simplify(mminfo),
+        object['mminfo'] = cPickle.dumps(simplify(mminfo),
                                          pickle.HIGHEST_PROTOCOL)
         if mminfo.title:
             object['title'] = mminfo.title
@@ -158,11 +126,6 @@ def parse(filename, object):
         object['title'] = title
     else:
         object['title'] = title
-
-    if filename.endswith('.fxd'):
-        # store fxd tree as pickle for faster loading
-        object['fxd'] = cPickle.dumps(_parse_fxd(filename),
-                                      pickle.HIGHEST_PROTOCOL)
 
     if os.path.isdir(filename):
         object['isdir'] = True
@@ -202,12 +165,10 @@ def parse(filename, object):
         p.parse(filename, object, mminfo)
 
 
-def cache():
+def cache(listing):
     """
     Function for the 'cache' helper.
     """
-    if not _parser:
-        _init()
     for p in _parser:
-        p.cache()
+        p.cache(listing)
         

@@ -1,26 +1,55 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# audio_parser.py - parser for audio metadata
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+# python imports
 import sys
 import os
 import stat
 import md5
 
-import config
-import util
-
+# mediadb imports
 from listing import Listing, FileListing
 
-# 
+#
 # Interface
 #
 
-def cache():
+def cache(listing):
     """
     Function for the 'cache' helper.
     """
     print 'creating audio metadata...............................',
     sys.__stdout__.flush()
-    for dir in config.AUDIO_ITEMS:
-        if os.path.isdir(dir[1]):
-            AudioParser(dir[1], rescan=True)
+    for item in listing:
+        check_info(item)
     print 'done'
 
 
@@ -31,151 +60,146 @@ def parse(filename, object, mminfo):
     pass
 
 
-# 
+#
 # Internal helper functions and classes
 #
 
-_VARIOUS = u'__various__'
+VARIOUS = u'__various__'
 
-class AudioParser:
+def check_info(dirinfo):
+    """
+    Parse additional information recursive over the given listing. The function
+    will try to find 'length', 'artist', 'album' and 'year'.
+    """
+    listing = Listing(dirinfo.filename)
+    if listing.num_changes:
+        listing.update()
 
-    def __init__(self, dirname, force=False, rescan=False):
-        self.artist  = ''
-        self.album   = ''
-        self.year    = ''
-        self.length  = 0
-        self.changed = False
-        self.force   = force
+    # check if an update is needed
+    for item in listing.get_dir():
+        if os.path.islink(item.filename):
+            # ignore softlinks
+            continue
+        if check_info(item):
+            # yes, something changed
+            break
+    else:
+        # no changes in all subdirs, looks good
+        if dirinfo['length'] != None:
+            # Since 'length' is not None and the info is stored with mtime,
+            # no changes in here. Do not parse everything again
+            return False
 
-        cachefile    = vfs.getoverlay(os.path.join(dirname, '..', 'freevo.cache'))
-        subdirs      = util.getdirnames(dirname, softlinks=False)
-        filelist     = None
+    # get a new listing again
+    listing = Listing(dirinfo.filename)
 
-        parent = FileListing( [ dirname ] )
-        if parent.num_changes:
-            parent.update()
-        dirinfo = parent.get_by_name(os.path.basename(dirname))
-            
-        if not rescan:
-            for subdir in subdirs:
-                d = AudioParser(subdir, rescan)
-                if d.changed:
-                    break
+    # variables to scan
+    length = 0
+    artist = ''
+    album  = ''
+    year   = ''
 
-            else:
-                # no changes in all subdirs, looks good
-                if os.path.isfile(cachefile) and \
-                       os.stat(dirname)[stat.ST_MTIME] <= os.stat(cachefile)[stat.ST_MTIME]:
-                    # and no changes in here. Do not parse everything again
-                    if force:
-                        # forces? We need to load our current values
-                        for type in ('artist', 'album', 'year', 'length'):
-                            if info.has_key(type):
-                                setattr(self, type, info[type])
-                    return
+    # scan all subdirs
+    for item in listing.get_dir():
+        if os.path.islink(item.filename):
+            # ignore softlinks
+            continue
+        check_info(item)
+        for type in ('artist', 'album', 'year'):
+            exec('%s = strcmp(dirinfo[type], %s)' % (type, type))
+        length += item['length']
 
-        if not filelist:
-            filelist = util.match_files(dirname, config.AUDIO_SUFFIX)
-            
-        if not filelist and not subdirs:
-            # no files in here? We are done
-            return
-        
-        # ok, something changed here, too bad :-(
-        self.changed = True
-        self.force   = False
+    use_tracks = True
 
-        # scan all subdirs
-        for subdir in subdirs:
-            d = AudioParser(subdir, force=True, rescan=rescan)
-            for type in ('artist', 'album', 'year'):
-                setattr(self, type, self.strcmp(getattr(self, type), getattr(d, type)))
-            self.length += d.length
+    for item in listing:
+        try:
+            for type in ('artist', 'album'):
+                exec('%s = strcmp(%s, item[type])' % (type, type))
+            year = strcmp(year, item['date'])
+            if item['length']:
+                length += int(item['length'])
+            use_tracks = use_tracks and item['trackno']
+        except OSError:
+            pass
 
-        # cache dir first
-        listing = Listing(dirname)
-        if listing.num_changes:
-            listing.update()
-            
-        use_tracks = True
+    if use_tracks and (dirinfo['album'] or dirinfo['artist']):
+        dirinfo.store_with_mtime('audio_advanced_sort', True)
 
-        for data in listing.match_suffix(config.AUDIO_SUFFIX):
-            try:
-                for type in ('artist', 'album'):
-                    setattr(self, type, self.strcmp(getattr(self, type), data[type]))
-                self.year = self.strcmp(self.year, data['date'])
-                if data['length']:
-                    self.length += int(data['length'])
-                use_tracks = use_tracks and data['trackno']
-            except OSError:
-                pass
+    dirinfo.store_with_mtime('length', length)
 
-        if use_tracks and (self.album or self.artist):
-            dirinfo.store_with_mtime('audio_advanced_sort', True)
+    if not length:
+        return True
 
-        if not self.length:
-            return
+    for type in ('artist', 'album', 'year'):
+        if eval(type):
+            dirinfo.store_with_mtime(type, eval(type))
 
-        for type in ('artist', 'album', 'year', 'length'):
-            if getattr(self, type):
-                dirinfo.store_with_mtime(type, getattr(self, type))
-
-        modtime = os.stat(dirname)[stat.ST_MTIME]
-        if not dirinfo['coverscan'] or dirinfo['coverscan'] != modtime:
-            dirinfo.store('coverscan', modtime)
-            self.extract_image(dirname)
-
-            
-    def strcmp(self, s1, s2):
-        s1 = Unicode(s1)
-        s2 = Unicode(s2)
-        
-        if not s1 or not s2:
-            return s1 or s2
-        if s1 == _VARIOUS or s2 == _VARIOUS:
-            return _VARIOUS
-
-        if s1.replace(u' ', u'').lower() == s2.replace(u' ', u'').lower():
-            return s1
-        return _VARIOUS
+    if not dirinfo['coverscan']:
+        dirinfo.store_with_mtime('coverscan', True)
+        extract_image(listing)
+    return True
 
 
-    def get_md5(self, obj):
-        m = md5.new()
-        if isinstance(obj,file):     # file
-            for line in obj.readlines():
-                m.update(line)
-            return m.digest()
-        else:                        # str
-            m.update(obj)
-            return m.digest()
+def strcmp(s1, s2):
+    """
+    Compare the given strings. If one is empty, return the other. If both are
+    equal, return the string. If they are different, return VARIOUS.
+    """
+    s1 = Unicode(s1)
+    s2 = Unicode(s2)
+
+    if not s1 or not s2:
+        return s1 or s2
+    if s1 == VARIOUS or s2 == VARIOUS:
+        return VARIOUS
+
+    if s1.replace(u' ', u'').lower() == s2.replace(u' ', u'').lower():
+        return s1
+    return VARIOUS
 
 
-    def extract_image(self, path):
-        for i in util.match_files(path, ['mp3']):
-            try:
-                id3 = eyeD3.Mp3AudioFile( i )
-            except:
-                continue
-            myname = vfs.getoverlay(os.path.join(path, 'cover.jpg'))
-            if id3.tag:
-                images = id3.tag.getImages();
-                for img in images:
-                    if vfs.isfile(myname) and (self.get_md5(vfs.open(myname,'rb')) == \
-                                               self.get_md5(img.imageData)):
-                        # Image already there and has identical md5, skip
-                        pass 
-                    elif not vfs.isfile(myname):
-                        f = vfs.open(myname, "wb")
-                        f.write(img.imageData)
-                        f.flush()
-                        f.close()
-                    else:
-                        # image exists, but sums are different, write a unique cover
-                        iname = os.path.splitext(os.path.basename(i))[0]+'.jpg'
-                        myname = vfs.getoverlay(os.path.join(path, iname))
-                        f = vfs.open(myname, "wb")
-                        f.write(img.imageData)
-                        f.flush()
-                        f.close()
+def get_md5(obj):
+    """
+    Get md5 checksum of the given object (string or file)
+    """
+    m = md5.new()
+    if isinstance(obj,file):
+        for line in obj.readlines():
+            m.update(line)
+        return m.digest()
+    else:
+        m.update(obj)
+        return m.digest()
 
+
+def extract_image(listing):
+    """
+    Extract image from mp3 files in listing.
+    """
+    for item in listing.match_suffix(['mp3']):
+        try:
+            id3 = eyeD3.Mp3AudioFile( item.filename )
+        except:
+            continue
+        myname = vfs.getoverlay(os.path.join(path, 'cover.jpg'))
+        if id3.tag:
+            images = id3.tag.getImages();
+            for img in images:
+                if vfs.isfile(myname) and (get_md5(vfs.open(myname,'rb')) == \
+                                           get_md5(img.imageData)):
+                    # Image already there and has identical md5, skip
+                    pass
+                elif not vfs.isfile(myname):
+                    f = vfs.open(myname, "wb")
+                    f.write(img.imageData)
+                    f.flush()
+                    f.close()
+                else:
+                    # image exists, but sums are different, write a unique
+                    # cover
+                    iname = os.path.splitext(os.path.basename(i))[0]+'.jpg'
+                    myname = vfs.getoverlay(os.path.join(path, iname))
+                    f = vfs.open(myname, "wb")
+                    f.write(img.imageData)
+                    f.flush()
+                    f.close()

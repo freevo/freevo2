@@ -10,7 +10,7 @@ def parse(filename, object, mminfo):
         object['type'] = 'dvd'
 
 
-def cache():
+def cache(listing):
     """
     Function for the 'cache' helper.
     """

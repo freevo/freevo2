@@ -50,10 +50,13 @@ import sysconfig
 from db import Cache, FileCache, save
 from item import ItemInfo
 from listing import Listing, FileListing
+from parser import cache, init
 
 # get logging object
 log = logging.getLogger('mediadb')
 
+# init parsing module
+init()
 
 def disc_info(media, force=False):
     """
@@ -73,29 +76,14 @@ def disc_info(media, force=False):
 
 
 #
-# FIXME: the following functions will be removed in the future
+# FIXME: the following function will be removed in the future
 # also missing the attribute mmdata used by videoitem.py
 #
 
 def get(filename):
-    # used by directory.py, item.py, videoitem.py and extendedmeta.py
+    # used by directory.py, item.py
     log.warning('get simple info %s', filename)
     listing = FileListing( [ filename ] )
     if listing.num_changes:
         listing.update()
     return listing.get_by_name(os.path.basename(filename))
-
-
-def del_cache():
-    # used by cache.py
-    log.error('del_cache not defined anymore')
-
-
-def set(filename, key, value):
-    # used by extendedmeta.py
-    log.error('set not defined anymore')
-
-
-def cache_dir(dirname, callback=None):
-    # used by cache.py, extendedmeta.py
-    log.error('cache_dir not defined anymore')

@@ -120,7 +120,10 @@ class Listing:
             else:
                 self.visible.append(v)
         return ret
-        
+
+    def __iter__(self):
+        return self.visible.__iter__()
+    
 
 class FileListing(Listing):
     def __init__(self, files):
