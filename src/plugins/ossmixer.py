@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/23 13:52:10  outlyer
+# We probably don't need to see the volume controls for every media play.
+#
 # Revision 1.3  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -146,7 +149,7 @@ class PluginInterface(plugin.DaemonPlugin):
     def _setVolume(self, device, volume):
         if self.mixfd and (self.mixfd.controls() & (1 << device)):
             # Don't do anything if there is no control
-            _debug_('Volume = %d' % volume)
+            _debug_('Volume = %d' % volume, 2)
             if volume < 0: volume = 0
             if volume > 100: volume = 100
             self.mixfd.set(device, (volume,volume))
