@@ -24,7 +24,7 @@ matroxset -f /dev/fb0 -m 3
 matroxset 1
 
 # set the 768x576 output
-fbset -fb /dev/fb0 -left 23 -right -5 -upper 39 -lower 10 -hslen 46 -vslen 4 \
+fbset -fb /dev/fb0 -depth 32 -left 23 -right -5 -upper 39 -lower 10 -hslen 46 -vslen 4 \
 	-xres 768 -yres 576 -vxres 768 -vyres 576 -depth 32 -laced false -bcast true
 
 
