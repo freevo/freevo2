@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2003/10/04 17:55:14  dischi
+# small fixes
+#
 # Revision 1.58  2003/09/26 10:02:26  dischi
 # no auto debug to file to keep Aubin from changing all debugs to 2
 #
@@ -274,7 +277,7 @@ for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
 for dirname in cfgfilepath:
     freevoconf = dirname + '/freevo.conf'
     if os.path.isfile(freevoconf):
-        _debug_('Loading configure settings: %s' % freevoconf, 1)
+        _debug_('Loading configure settings: %s' % freevoconf)
 
         c = open(freevoconf)
         for line in c.readlines():
@@ -339,7 +342,7 @@ elif CONF.display == 'dxr3':
 # Load freevo_config.py:
 #
 if os.path.isfile(os.environ['FREEVO_CONFIG']):
-    _debug_('Loading cfg: %s' % os.environ['FREEVO_CONFIG'], 1)
+    _debug_('Loading cfg: %s' % os.environ['FREEVO_CONFIG'])
     execfile(os.environ['FREEVO_CONFIG'], globals(), locals())
     
 else:
@@ -455,12 +458,12 @@ if not DIR_GAMES:
         print
 
 if not DIR_RECORD:
-    DIR_RECORD = '/tmp/'
+    DIR_RECORD = DIR_MOVIES[0][1]
     if not HELPER and plugin.is_active('tv'):
         print
         print 'Error: DIR_RECORD not set'
         print 'Please set DIR_RECORD to the directory, where recordings should be stored or'
-        print 'remove the tv plugin. Autoset variable to /tmp.'
+        print 'remove the tv plugin. Autoset variable to %s.' % DIR_RECORD
         print
         
 if not TV_SHOW_DATA_DIR and not HELPER:
@@ -669,7 +672,7 @@ def detect_channels():
         return chanlist
          
 
-if TV_CHANNELS == None:
+if TV_CHANNELS == None and plugin.is_active('tv'):
     # auto detect them
     TV_CHANNELS = detect_channels()
 
