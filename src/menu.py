@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/06/29 19:52:58  dischi
+# small fix
+#
 # Revision 1.50  2003/06/07 11:30:27  dischi
 # support for MENU_CALL_ITEM_ACTION
 #
@@ -134,7 +137,8 @@ class MenuItem(Item):
         return [ ( self.select, '' ) ]
 
     def select(self, arg=None, menuw=None):
-        self.function(arg=self.arg, menuw=menuw)
+        if self.function:
+            self.function(arg=self.arg, menuw=menuw)
 
 
 
