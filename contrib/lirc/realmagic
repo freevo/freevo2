@@ -101,7 +101,7 @@ end
 begin
     prog = freevo
     button = NEXT
-    config = NEXT
+    config = CH+
 end
 begin
     prog = freevo
@@ -121,7 +121,7 @@ end
 begin
     prog = freevo
     button = PREV
-    config = PREV
+    config = CH-
 end
 begin
     prog = freevo
