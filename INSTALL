@@ -89,3 +89,32 @@ o Create a boot-script that will start Freevo when Linux is booting.
   o boot/freevo_dep contains code to load lirc, mga_vid, etc. This must
     be done before freevo is started, but can be done in other ways than
     using the freevo_dep script.
+
+
+Kernel configuration
+--------------------
+
+Use this for configuration of a kernel for Video4Linux+G400 support. You
+probably have to add support for your particular Video4Linux device as 
+well.
+
+--- KERNEL CONFIG ---
+Multimedia devices --->
+  [Y] Video For Linux
+  Video For Linux --->
+    [Y] V4L information in proc filesystem
+
+Console drivers --->
+  [Y] VGA text console
+  [Y/M] MDA text console (dual-headed)
+  Frame-buffer support --->
+    [Y] Support for frame buffer devices
+        [Y/M] Matrox acceleration
+           [Y] Millenium I/II support   
+           [Y] Mystique support
+           [Y] G100/G200/G400/G450/G550 support
+               [Y/M] Matrox I2C support
+               [Y/M] G400 second head support
+           [Y] Multihead support
+--- KERNEL CONFIG ---
+
