@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/05/29 19:06:26  dischi
+# move some code from main to rc, create main class
+#
 # Revision 1.32  2004/05/20 18:26:27  dischi
 # patch from Viggo
 #
@@ -108,7 +111,21 @@ def set_context(context):
 
 def callback(function, *arg):
     get_singleton().one_time_callbacks.append((function, arg))
-    
+
+
+def register(object):
+    """
+    register an object to the main loop
+    """
+    get_singleton().register(object)
+
+
+def unregister(object):
+    """
+    unregister an object from the main loop
+    """
+    get_singleton().unregister(object)
+
 
 # --------------------------------------------------------------------------------
 
@@ -305,7 +322,7 @@ class RemoteControl:
         self.queue                    = []
         self.event_callback           = None
         self.one_time_callbacks       = []
-        
+        self.poll_objects             = []
 
     def set_app(self, app, context):
         self.app     = app
@@ -347,17 +364,51 @@ class RemoteControl:
             print 'send button event BUTTON arg=%s' % key
         return Event(BUTTON, arg=key)
 
-    
+
+    def register(self, object):
+        """
+        register an object to the main loop
+        """
+        if not object in self.poll_objects:
+            self.poll_objects.append(object)
+
+        
+    def unregister(self, object):
+        """
+        unregister an object from the main loop
+        """
+        if object in self.poll_objects:
+            self.poll_objects.remove(object)
+
+        
     def poll(self):
+        """
+        main loop
+        """
+        # run all registered callbacks
         while len(self.one_time_callbacks) > 0:
             callback, arg = self.one_time_callbacks.pop(0)
             callback(*arg)
-        
+
+        # run all registered objects having a poll() function
+        # using poll_counter and poll_interval (if given)
+        for p in self.poll_objects:
+            if hasattr(p, 'poll_counter'):
+                if not (self.app and p.poll_menu_only):
+                    p.poll_counter += 1
+                    if p.poll_counter == p.poll_interval:
+                        p.poll_counter = 0
+                        p.poll()
+            else:
+                p.poll()
+
+        # search for events in the queue
         if len(self.queue):
             ret = self.queue[0]
             del self.queue[0]
             return ret
 
+        # search all input objects for new events
         for i in self.inputs:
             e = i.poll(self)
             if e:

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.122  2004/05/29 19:06:26  dischi
+# move some code from main to rc, create main class
+#
 # Revision 1.121  2004/05/09 14:18:20  dischi
 # remove comments
 #
@@ -21,30 +24,6 @@
 #
 # Revision 1.118  2004/02/27 20:12:16  dischi
 # reworked rc.py to make several classes
-#
-# Revision 1.117  2004/02/23 19:27:07  dischi
-# fix mmpython init
-#
-# Revision 1.116  2004/02/14 13:05:03  dischi
-# do not call skin.get_singleton() anymore
-#
-# Revision 1.115  2004/02/12 17:16:35  dischi
-# again, fix watermark problem
-#
-# Revision 1.114  2004/02/12 16:26:57  dischi
-# fix watermark problem once and for all
-#
-# Revision 1.113  2004/02/11 11:09:40  dischi
-# cachetime checking not working right now
-#
-# Revision 1.112  2004/02/05 20:39:11  dischi
-# check mmpython cache version
-#
-# Revision 1.111  2004/02/01 17:11:51  dischi
-# make it possible to load cachefiles on startup
-#
-# Revision 1.110  2004/01/25 14:54:31  dischi
-# save parent after skin change
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -232,6 +211,7 @@ class Splashscreen(skin.Area):
         self.bar_position = skin.Rectange(bgcolor=0xa0000000L)
         self.text         = text
 
+
     def update_content(self):
         """
         there is no content in this area
@@ -257,6 +237,99 @@ class Splashscreen(skin.Area):
         """
         self.pos = pos
         skin.draw('splashscreen', None)
+
+
+
+
+class MainTread:
+    """
+    The main thread or loop of freevo
+    """
+    def __init__(self):
+        """
+        get the list of plugins wanting events
+        """
+        self.eventhandler_plugins  = []
+        self.eventlistener_plugins = []
+
+        for p in plugin.get('daemon_eventhandler'):
+            if hasattr(p, 'event_listener') and p.event_listener:
+                self.eventlistener_plugins.append(p)
+            else:
+                self.eventhandler_plugins.append(p)
+
+        
+    def eventhandler(self, event):
+        """
+        event handling function for the main loop
+        """
+        if event == OS_EVENT_POPEN2:
+            _debug_('popen2 %s' % event.arg[1])
+            event.arg[0].child = util.popen3.Popen3(event.arg[1])
+            return
+
+        _debug_('handling event %s' % str(event), 2)
+
+        for p in self.eventlistener_plugins:
+            p.eventhandler(event=event)
+
+        if event == FUNCTION_CALL:
+            event.arg()
+
+        elif event.handler:
+            event.handler(event=event)
+
+        # Send events to either the current app or the menu handler
+        elif rc_object.app:
+            if not rc_object.app(event):
+                for p in self.eventhandler_plugins:
+                    if p.eventhandler(event=event):
+                        break
+                else:
+                    _debug_('no eventhandler for event %s' % event, 2)
+
+        else:
+            app = osd.focused_app()
+            if app:
+                try:
+                    if config.TIME_DEBUG:
+                        t1 = time.clock()
+                    app.eventhandler(event)
+                    if config.TIME_DEBUG:
+                        print time.clock() - t1
+
+                except SystemExit:
+                    raise SystemExit
+
+                except:
+                    if config.FREEVO_EVENTHANDLER_SANDBOX:
+                        traceback.print_exc()
+                        from gui import AlertBox
+                        pop = AlertBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
+                                              'look at the logfile and report the bug to ' \
+                                              'the Freevo mailing list. The state of '\
+                                              'Freevo may be corrupt now and this error '\
+                                              'could cause more errors until you restart '\
+                                              'Freevo.\n\nLogfile: %s\n\n') % \
+                                       (event, sys.stdout.logfile),
+                                       width=osd.width-2*config.OSD_OVERSCAN_X-50)
+                        pop.show()
+                    else:
+                        raise 
+            else:
+                _debug_('no target for events given')
+
+
+    def run(self):
+        """
+        the real main loop
+        """
+        while 1:
+            event = rc_object.poll()
+            if event:
+                self.eventhandler(event)
+            else:
+                osd.sleep(0.01)
 
 
 
@@ -293,7 +366,6 @@ def tracefunc(frame, event, arg, _indent=[0]):
         _indent[0] -= 1
 
     return tracefunc
-
 
 
 
@@ -344,10 +416,10 @@ if len(sys.argv) >= 2:
 
 
 
-os.umask(config.UMASK)
-
-# start
 try:
+    # set the umask
+    os.umask(config.UMASK)
+
     # signal handler
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
@@ -396,95 +468,9 @@ try:
     # start menu
     MainMenu().getcmd()
 
-    poll_plugins = plugin.get('daemon_poll')
-    eventhandler_plugins  = []
-    eventlistener_plugins = []
-
-    for p in plugin.get('daemon_eventhandler'):
-        if hasattr(p, 'event_listener') and p.event_listener:
-            eventlistener_plugins.append(p)
-        else:
-            eventhandler_plugins.append(p)
-    
     # Kick off the main menu loop
     _debug_('Main loop starting...',2)
-
-    from childapp import running_children
-
-    while 1:
-        # Get next command
-        while 1:
-
-            event = rc_object.poll()
-
-            if event:
-                if event == OS_EVENT_POPEN2:
-                    _debug_('popen2 %s' % event.arg[1])
-                    event.arg[0].child = util.popen3.Popen3(event.arg[1])
-                else:
-                    _debug_('handling event %s' % str(event), 2)
-                    break
-
-            for p in poll_plugins:
-                if not (rc_object.app and p.poll_menu_only):
-                    p.poll_counter += 1
-                    if p.poll_counter == p.poll_interval:
-                        p.poll_counter = 0
-                        p.poll()
-
-            for child in running_children:
-                child.poll()
-
-            osd.sleep(0.01)
-
-
-        for p in eventlistener_plugins:
-            p.eventhandler(event=event)
-
-        if event == FUNCTION_CALL:
-            event.arg()
-
-        elif event.handler:
-            event.handler(event=event)
-            
-        # Send events to either the current app or the menu handler
-        elif rc_object.app:
-            if not rc_object.app(event):
-                for p in eventhandler_plugins:
-                    if p.eventhandler(event=event):
-                        break
-                else:
-                    _debug_('no eventhandler for event %s' % event, 2)
-
-        else:
-            app = osd.focused_app()
-            if app:
-                try:
-                    if config.TIME_DEBUG:
-                        t1 = time.clock()
-                    app.eventhandler(event)
-                    if config.TIME_DEBUG:
-                        print time.clock() - t1
-                except SystemExit:
-                    raise SystemExit
-                except:
-                    if config.FREEVO_EVENTHANDLER_SANDBOX:
-                        traceback.print_exc()
-                        from gui import AlertBox
-                        pop = AlertBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
-                                              'look at the logfile and report the bug to ' \
-                                              'the Freevo mailing list. The state of '\
-                                              'Freevo may be corrupt now and this error '\
-                                              'could cause more errors until you restart '\
-                                              'Freevo.\n\nLogfile: %s\n\n') % \
-                                       (event, sys.stdout.logfile),
-                                       width=osd.width-2*config.OSD_OVERSCAN_X-50)
-                        pop.show()
-                    else:
-                        raise 
-            else:
-                _debug_('no target for events given')
-
+    MainTread().run()
 
 
 except KeyboardInterrupt:
