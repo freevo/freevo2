@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/06/12 00:37:12  gsbarbieri
+# Some bug fixes
+#
 # Revision 1.41  2003/06/12 00:09:43  gsbarbieri
 # Fixed some bugs
 #
@@ -994,13 +997,13 @@ class OSD:
 
             char_size, char_height = self.stringsize(char, font, ptsize)
 
-            if ((occupied_size + char_size) < width) and (char != '\n'):
+            if ((occupied_size + char_size) <= width) and (char != '\n'):
 
                 occupied_size += char_size
                 lines[line_number] += char
                 
             else:
-                if (occupied_height + char_height) < height:
+                if (occupied_height + char_height) <= height:
                     # we can add one more line
                     occupied_height += word_height                    
                     line_number += 1
@@ -1019,7 +1022,7 @@ class OSD:
                     j = 1
                     len_line = len(lines[line_number])
                     for j in range(len_line):
-                        if (occupied_size + ellipses_size) < width:
+                        if (occupied_size + ellipses_size) <= width:
                             break
                         char_size = self.charsize(lines[line_number][len_line-j-1],
                                                   font, ptsize)[0]
@@ -1029,7 +1032,7 @@ class OSD:
                     if ellipses:
                         while ellipses and \
                                   (occupied_size + self.stringsize(ellipses, font, ptsize)[0]) \
-                                  >= width:
+                                  > width:
                               ellipses = ellipses[:-1]
                         lines[line_number] += ellipses
 
