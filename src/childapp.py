@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/12/13 14:34:43  outlyer
+# Make this clear; we are using stop_osd to figure out if we're playing
+# video or not. It's got nothing to do with stopping the actual OSD :)
+#
 # Revision 1.47  2003/12/13 14:29:45  outlyer
 # The purpose of checking for "stop_osd" is to figure out if it's a video
 # file; it's not to do with the config variable, because we need to post
@@ -553,9 +557,9 @@ class ChildApp2(ChildApp):
         global running_children
         running_children.append(self)
 
-
-        print "STOP_OSD: " + str(stop_osd)
-        if stop_osd == 2:
+        self.is_video = 0                       # Be more explicit
+        if stop_osd == 2: 
+            self.is_video = 1
             rc.post_event(Event(VIDEO_START))
             stop_osd = config.OSD_STOP_WHEN_PLAYING
 
@@ -597,7 +601,7 @@ class ChildApp2(ChildApp):
         if self.stop_osd:
             osd.restart()
 
-        if stop_osd:       # Implies a video file
+        if self.is_video:
             rc.post_event(Event(VIDEO_END))
 
         
