@@ -109,12 +109,12 @@ WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 #
 # Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
 #
-DIR_MP3 = [ ('Main', './testfiles/Music') ]
+DIR_MP3 = [ ('Test Music', './testfiles/Music') ]
 
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = [ ('Main', './testfiles/Movies') ]
+DIR_MOVIES = [ ('Test Movies', './testfiles/Movies') ]
 
 #
 # This is where recorded video is written.
