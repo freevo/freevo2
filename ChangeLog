@@ -4,6 +4,11 @@ Freevo Changelog
 $Id$
 
 
+Release 1.3.1 (2002-xx-xx):
+---------------------------
+o Fixed a bug in the image viewer.
+
+	
 Release 1.3.0 (2002-11-13):
 ---------------------------
 o Added a font alias list in freevo_config to substitute missing non-free

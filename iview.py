@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2002/11/16 20:26:04  krister
+# Applied Bob Pauwe's patch for a bug in the image viewer.
+#
 # Revision 1.20  2002/11/15 02:11:37  krister
 # Applied Bob Pauwes latest image slideshow patches.
 #
@@ -232,7 +235,7 @@ class ImageViewer:
         osd.drawbitmap(filename, x, y, scale, bbx, bby, bbw, bbh,
                        rotation = self.rotation)
 
-        # This is where we add a caption.  Only if playist is ! empty
+        # This is where we add a caption.  Only if playlist is empty
         # May need to check the caption too?
         if self.mode > 0 and self.playlist[self.number][1]:
             osd.drawstring(self.playlist[self.number][1], 10, 
@@ -349,8 +352,8 @@ class ImageViewer:
                 osd.update()
             else:
                 # Redraw without the OSD
-                self.view(self.filename, self.number, self.mode,
-                          self.playlist, zoom=self.zoom, rotation = self.rotation)
+                self.view(self.filename, self.number, self.playlist,
+                          self.mode, zoom=self.zoom, rotation = self.rotation)
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
