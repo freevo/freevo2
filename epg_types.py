@@ -102,9 +102,9 @@ class TvGuide:
     # The return value is a list of channels (TvChannel)
     def GetPrograms(self, start = None, stop = None, chanids = None):
         if start == None:
-            start = 0.0
+            start = 0
         if stop == None:
-            stop = 2**31-1   # Year 2038
+            stop = 2147483647   # Year 2038
 
         channels = []
         for chan in self.chan_list:
