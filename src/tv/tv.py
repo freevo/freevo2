@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/07/13 19:46:21  rshortt
+# Move the work portion of get_friendly_channel() into tv_util.
+#
 # Revision 1.14  2003/06/29 15:01:31  outlyer
 # Display the channel's friendly (display name) in the tuner popupbox.
 #
@@ -74,6 +77,8 @@ import menu
 # sends commands to
 import rc
 
+import tv_util
+
 # The Electronic Program Guide
 import epg_xmltv as epg
 
@@ -111,14 +116,12 @@ def get_tunerid(channel_id):
     return None
 
 def get_friendly_channel(channel_id):
-    channel_name = None
-    for vals in config.TV_CHANNELS:
-        tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
-        if tv_channel_id == channel_id:
-            return tv_display_name
+    channel_name = tv_util.get_chan_displayname(channel_id)
 
-    AlertBox(text='Could not find TV channel %s' % channel_id).show()
-    return None
+    if not channel_name: 
+        AlertBox(text='Could not find TV channel %s' % channel_id).show()
+
+    return channel_name
 
 
 def start_tv(mode=None, channel_id=None):
