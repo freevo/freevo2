@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/08/14 09:28:37  tfmalt
+#  o Updated all files using skin to create a skin object with the new
+#    get_singleton function. Please tell or add yourself if I forgot a
+#    place.
+#
 # Revision 1.10  2002/08/12 19:46:51  dischi
 # iview now gets the image size from the osd.py or osd_sdl.py.
 # Deactivated the use of osd.zoombitmap for osd_sdl, it doesn't speed up
@@ -78,22 +83,17 @@ import rc
 
 import exif
 
-# Create the remote control object
-rc = rc.get_singleton()
 
+DEBUG = 1  # Set to 1 for debug output
 
-# Set to 1 for debug output
-DEBUG = 1
-
-TRUE = 1
+TRUE  = 1
 FALSE = 0
 
-# Create the OSD object
-osd = osd.get_singleton()
 
-# Create the MenuWidget object
-menuwidget = menu.get_singleton()
-
+osd        = osd.get_singleton()  # Create the OSD object
+rc         = rc.get_singleton()   # Create the remote control object
+menuwidget = menu.get_singleton() # Create the MenuWidget object
+skin       = skin.get_singleton() # The skin object.
 
 # Module variable that contains an initialized ImageViewer() object
 _singleton = None

@@ -16,6 +16,11 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/08/14 09:28:37  tfmalt
+#  o Updated all files using skin to create a skin object with the new
+#    get_singleton function. Please tell or add yourself if I forgot a
+#    place.
+#
 # Revision 1.9  2002/08/03 18:10:52  dischi
 # Patch from Thomas Malt:
 # Discovered some bugs and got rid of them:
@@ -104,6 +109,8 @@ import skin
 import imghdr
 
 DEBUG=1
+
+skin = skin.get_singleton()
 
 class AudioInfo:
     """

@@ -216,7 +216,7 @@ class OSD:
                 self._helpscreen()
             elif event.key == K_z:
                 pygame.display.toggle_fullscreen()
-            elif event.key in cmds_sdl:
+            elif event.key in cmds_sdl.keys():
                 # Turn off the helpscreen if it was on
                 if self._help:
                     self._helpscreen()

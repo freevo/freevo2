@@ -4,6 +4,11 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2002/08/14 09:28:37  tfmalt
+#  o Updated all files using skin to create a skin object with the new
+#    get_singleton function. Please tell or add yourself if I forgot a
+#    place.
+#
 # Revision 1.51  2002/08/14 07:47:18  dischi
 # freevo_main_quiet is now default
 #
@@ -90,11 +95,9 @@ DEBUG = 1 # Set to 1 for debug output
 TRUE  = 1
 FALSE = 0
 
+mplayer = mplayer.get_singleton() # Create the mplayer object
+skin    = skin.get_singleton()
 
-# Create the mplayer object
-mplayer = mplayer.get_singleton()
-
-###############################################################################
 
 # Set up the mixer
 # XXX Doing stuff to select correct device to manipulate.

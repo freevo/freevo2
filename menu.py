@@ -21,12 +21,10 @@ import osd
 # sends commands to
 import rc
 
-# Create the remote control object
-rc = rc.get_singleton()
 
-# Create the OSD object
-osd = osd.get_singleton()
-
+rc   = rc.get_singleton()   # Create the remote control object
+osd  = osd.get_singleton()  # Create the OSD object
+skin = skin.get_singleton() # Crate the skin object.
 
 # Module variable that contains an initialized MenuWidget() object
 _singleton = None

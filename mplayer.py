@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2002/08/14 09:28:37  tfmalt
+#  o Updated all files using skin to create a skin object with the new
+#    get_singleton function. Please tell or add yourself if I forgot a
+#    place.
+#
 # Revision 1.28  2002/08/14 04:11:39  krister
 # Made the new X11 mplayer control feature resolution independent.
 #
@@ -123,6 +128,7 @@ osd        = osd.get_singleton()
 rc         = rc.get_singleton()
 menuwidget = menu.get_singleton()
 mixer      = mixer.get_singleton()
+skin       = skin.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
 _singleton = None

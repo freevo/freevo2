@@ -28,7 +28,7 @@ import rc
 from xml.utils import qp_xml
 
 # Set to 1 for debug output
-DEBUG = 0
+DEBUG = 1
 
 TRUE = 1
 FALSE = 0
@@ -210,7 +210,7 @@ class XMLSkin:
 class Skin:
 
     # OSD XML specifiaction
-    OSD_XML_DEFINITIONS = 'skins/krister1/768x576.xml'
+    OSD_XML_DEFINITIONS = 'skins/malt1/768x576.xml'
 
     settings = XMLSkin()
     settings.load(OSD_XML_DEFINITIONS)
@@ -219,6 +219,7 @@ class Skin:
 
 
     def __init__(self):
+        if DEBUG: print "Loading Malt 1 skin!"
         # Push main menu items
         pass
 
