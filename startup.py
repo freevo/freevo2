@@ -183,8 +183,9 @@ if __name__ == "__main__":
     # This is used to load my new version of the OSD module without messing around in the source
     # too much...
     if 'OSD_SDL' in dir(config):
-        # Add the OSD server and remote control client applications
-        task_args += [ freevo, remote ]
+        # Do not use the regular remote control app and OSD server, they're both replaced by the
+        # SDL OSD server!
+        task_args += [ freevo ]
     else:
         # Add the OSD server and remote control client applications
         task_args += [ freevo, osd, remote ]
