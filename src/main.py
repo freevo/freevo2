@@ -128,11 +128,12 @@ except ImportError:
 #
 try:
     import mbus
-    if mbus.VERSION < '0.8.0':
+    if mbus.VERSION < '0.8.1':
         raise ImportError('found version %s', mbus.VERSION)
-except:
-    print 'Error: This version of Freevo requires pyMbus >= 0.8.0'
+except Exception, e:
+    print 'Error: This version of Freevo requires pyMbus >= 0.8.1'
     print 'To download and install pyMbus to ./site-packages run \'make\''
+    print e
     print
     sys.exit(0)
     

@@ -63,6 +63,7 @@ import notifier
 import mbus
 
 # freevo imports
+import sysconfig
 import config
 
 
@@ -172,12 +173,12 @@ class RemoteEntity:
                 var = args[a]
             else:
                 var = a
-            if var.__class__ == unicode:
-                var = String(var)
+            if var.__class__ == str:
+                var = Unicode(var)
             if var.__class__ in (list, tuple, dict):
                 var = self.__build_args(var)
             if is_dict:
-                ret.append((String(a), var))
+                ret.append((Unicode(a), var))
             else:
                 ret.append(var)
         return ret
@@ -225,7 +226,7 @@ class RemoteEntity:
         # normal return handling
         if status[1] == 'OK':
             return True, args
-        return False, args
+        return False, status[2]
 
 
     def __eq__(self, obj):
@@ -247,7 +248,8 @@ class RPCServer:
         """
         Register all callbacks
         """
-        add_callback = instance(mbus_instance).addRPCCallback
+        self.mbus_instance = instance(mbus_instance)
+        add_callback = self.mbus_instance.addRPCCallback
         for f in dir(self):
             if f.startswith('__rpc_'):
                 cmdname = 'home-theatre.' + f[6:-2].replace('_', '.')
@@ -260,10 +262,22 @@ class RPCServer:
         """
         ret = []
         for i in range(len(val)):
+            print pattern[i]
             if pattern[i] == str:
-                ret.append(String(val[i]))
+                ret.append(unicode(val[i], 'UTF8').\
+                           encode(sysconfig.ENCODING, 'replace'))
             elif pattern[i] == unicode:
-                ret.append(Unicode(val[i]))
+                ret.append(unicode(val[i], 'UTF8'))
+            elif pattern[i] == bool:
+                print 'check', val[i]
+                if val[i] in ( 'TRUE', 'True', 'true', '1', 1,
+                               'YES', 'Yes', 'yes'):
+                    ret.append(True)
+                if val[i] in ( 'FALSE', 'False', 'false', '0', 0,
+                               'No', 'No', 'no'):
+                    ret.append(True)
+                else:
+                    raise AttributeError('%s is no bool' % String(val[i]))
             elif pattern[i].__class__ in (list, tuple):
                 ret.append(self.__check_list(val[i], pattern[i]))
             else:
