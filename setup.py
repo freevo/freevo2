@@ -11,8 +11,6 @@
 # o add more needed libs to 'libs'
 # o fix fbcon stuff in freevo_config.py. It looks for contrib/fbcon but
 #   installed the scripts are somewhere else
-# o fix some hardcoded stuff in freevo, like calling freevo as ./freevo.
-#   Same for runapp (./runapp) and possible other stuff
 # o test it on more platforms than mine
 
 
@@ -78,17 +76,17 @@ if len(sys.argv) > 1 and sys.argv[1].lower() == 'install':
             print 'please download it from %s and install it' % url
             sys.exit(1)
             
-    # compile runapp
-    if os.environ.has_key('LOGDIR') and os.environ['LOGDIR']:
-        logdir='"%s"' % os.environ['LOGDIR']
-    else:
-        logdir='"/var/log/freevo"'
-    print 'building runapp'
-    os.system('gcc -O2 -Wall -static -o runapp runapp.c '
-              '-DRUNAPP_LOGDIR=\\"%s\\" -DDEBUG' % logdir)
-    # bad hack, this is no script, but it is compiled and
-    # ready to install now
-    scripts.append('runapp')
+#     # compile runapp
+#     if os.environ.has_key('LOGDIR') and os.environ['LOGDIR']:
+#         logdir='"%s"' % os.environ['LOGDIR']
+#     else:
+#         logdir='"/var/log/freevo"'
+#     print 'building runapp'
+#     os.system('gcc -O2 -Wall -static -o runapp runapp.c '
+#               '-DRUNAPP_LOGDIR=\\"%s\\" -DDEBUG' % logdir)
+#     # bad hack, this is no script, but it is compiled and
+#     # ready to install now
+#     scripts.append('runapp')
 
 
 # now start the python magic
