@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/08/18 21:19:09  tfmalt
+# o Cleaned up a little bit. Removed unneeded imports.
+#
 # Revision 1.11  2002/08/14 09:28:37  tfmalt
 #  o Updated all files using skin to create a skin object with the new
 #    get_singleton function. Please tell or add yourself if I forgot a
@@ -54,40 +57,17 @@
 # -----------------------------------------------------------------------
 #endif
 
-
-import sys
-import random
-import time, os, glob, imghdr
-import string, popen2, fcntl, select, struct
+import os.path
 import Image
 
-
-# Configuration file. Determines where to look for image files, etc
-import config
-
-# Various utilities
-import util
-
-# The menu widget class
-import menu
-
-# The skin class
-import skin
-
-# The OSD class, used to communicate with the OSD daemon
-import osd
-
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
-
+import config # Configuration file. 
+import menu   # The menu widget class
+import skin   # The skin class
+import osd    # The OSD class, used to communicate with the OSD daemon
+import rc     # The RemoteControl class.
 import exif
 
-
 DEBUG = 1  # Set to 1 for debug output
-
-TRUE  = 1
-FALSE = 0
 
 
 osd        = osd.get_singleton()  # Create the OSD object
