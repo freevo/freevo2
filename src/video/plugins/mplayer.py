@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/03 17:54:38  dischi
+# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
+# doesn't exist anymore.
+#
 # Revision 1.19  2003/09/02 19:10:22  dischi
 # Basic mplayer version detection. Convert -vop to -vf if cvs or 1.0pre1
 # is used
@@ -449,9 +453,8 @@ class MPlayerApp(childapp.ChildApp):
 
     def __init__(self, app, item):
         if config.MPLAYER_DEBUG:
-            startdir = os.environ['FREEVO_STARTDIR']
-            fname_out = os.path.join(startdir, 'mplayer_stdout.log')
-            fname_err = os.path.join(startdir, 'mplayer_stderr.log')
+            fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
+            fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
             try:
                 self.log_stdout = open(fname_out, 'a')
                 self.log_stderr = open(fname_err, 'a')

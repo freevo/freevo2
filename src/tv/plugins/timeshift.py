@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/03 17:54:38  dischi
+# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
+# doesn't exist anymore.
+#
 # Revision 1.11  2003/09/01 19:46:03  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -308,9 +312,8 @@ class MPlayerApp(childapp.ChildApp):
 
     def __init__(self, app):
         if config.MPLAYER_DEBUG:
-            startdir = os.environ['FREEVO_STARTDIR']
-            fname_out = os.path.join(startdir, 'mplayer_stdout.log')
-            fname_err = os.path.join(startdir, 'mplayer_stderr.log')
+            fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
+            fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
             try:
                 self.log_stdout = open(fname_out, 'a')
                 self.log_stderr = open(fname_err, 'a')

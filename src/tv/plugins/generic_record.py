@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/03 17:54:38  dischi
+# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
+# doesn't exist anymore.
+#
 # Revision 1.6  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -98,9 +102,8 @@ class RecordApp(childapp.ChildApp):
 
     def __init__(self, app):
         if DEBUG: 
-            startdir = os.environ['FREEVO_STARTDIR']
-            fname_out = os.path.join(startdir, 'recorder_stdout.log')
-            fname_err = os.path.join(startdir, 'recorder_stderr.log')
+            fname_out = os.path.join(config.LOGDIR, 'recorder_stdout.log')
+            fname_err = os.path.join(config.LOGDIR, 'recorder_stderr.log')
             try:
                 self.log_stdout = open(fname_out, 'a')
                 self.log_stderr = open(fname_err, 'a')

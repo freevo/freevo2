@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2003/09/03 17:54:38  dischi
+# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
+# doesn't exist anymore.
+#
 # Revision 1.68  2003/09/02 18:39:30  dischi
 # turn of x blanking
 #
@@ -375,8 +379,7 @@ if __name__ == "__main__":
         config.START_FULLSCREEN_X = 1
         
     if len(sys.argv) >= 2 and sys.argv[1] == '--trace':
-        tracefd = open(os.path.join(os.environ['FREEVO_STARTDIR'],
-                                    'trace.txt'), 'w')
+        tracefd = open(os.path.join(config.LOGDIR, 'trace.txt'), 'w')
         sys.settrace(tracefunc)
 
     if len(sys.argv) >= 2 and sys.argv[1] == '--doc':
