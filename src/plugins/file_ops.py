@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/01/09 21:11:45  dischi
+# crash on debug: item may have no url
+#
 # Revision 1.14  2004/01/04 11:17:38  dischi
 # make it possible to delete only the image
 #
@@ -130,20 +133,17 @@ class PluginInterface(plugin.ItemPlugin):
             print 'can\'t delete %s' % filename
         
     def delete_file(self):
-        _debug_('Deleting %s' % self.item.url)
         self.item.files.delete()
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
 
     def delete_info(self):
-        _debug_('Deleting info for %s' % self.item.url)
         self.safe_unlink(self.item.files.image)
         self.safe_unlink(self.item.files.fxd_file)
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
 
     def delete_image(self):
-        _debug_('Deleting image for %s' % self.item.url)
         self.safe_unlink(self.item.files.image)
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
