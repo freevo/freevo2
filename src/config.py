@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2003/10/18 10:44:54  dischi
+# bugfix to detect if we are (web|record)server or not
+#
 # Revision 1.60  2003/10/08 03:29:21  outlyer
 # Just move all FutureWarnings to config. This removes all the silly hex
 # constant warnings.
@@ -174,9 +177,9 @@ IS_WEBSERVER    = 0
 
 if sys.argv[0].find('main.py') == -1:
     HELPER=1
-elif sys.argv[0].find('recordserver.py') == -1:
+elif sys.argv[0].find('recordserver.py') != -1:
     IS_RECORDSERVER = 1
-elif sys.argv[0].find('webserver.py') == -1:
+elif sys.argv[0].find('webserver.py') != -1:
     IS_WEBSERVER = 1
 
 
