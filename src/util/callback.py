@@ -48,7 +48,7 @@ class Callback:
         self.kwargs = kwargs
 
         if _callbacks.has_key(name):
-            notifier.removeTimer()
+            notifier.removeTimer(_callbacks[name])
         self.timer = notifier.addTimer(timer, self)
         _callbacks[name] = self.timer
 
