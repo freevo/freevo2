@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/24 04:40:23  rshortt
+# Make 'View Favorites' a menu based plugin, still incomplete.
+#
 # Revision 1.14  2004/02/23 03:51:22  rshortt
 # Remove scheduled recordings because it is now a plugin.  Also comment out
 # view favorites because it is next as well as search because search is now
@@ -80,9 +83,7 @@ from gui.AlertBox import AlertBox
 from gui.PopupBox import PopupBox
 
 import tv.program_display
-# , tv.program_search, tv.view_favorites
 
-# Set to 1 for debug output
 DEBUG = config.DEBUG
 
 TRUE = 1
@@ -129,14 +130,12 @@ class TVMenu(Item):
         items = []
         if config.TV_CHANNELS:
             items.append(menu.MenuItem(_('TV Guide'), action=self.start_tvguide))
-        if 0:
-            items.append(menu.MenuItem(_('View VCR Input'), action=self.start_vcr))
+
         items.append(DirItem(config.TV_RECORD_DIR, None, name = _('Recorded Shows'),
                              display_type='tv'))
 
         # XXX: these are becomming plugins
         # items.append(menu.MenuItem(_('Search Guide'), action=self.show_search))
-        # items.append(menu.MenuItem('View Favorites', action=self.show_favorites))
 
         plugins_list = plugin.get('mainmenu_tv')
         for p in plugins_list:
@@ -147,16 +146,6 @@ class TVMenu(Item):
 
     def show_search(self, arg, menuw):
         tv.program_search.ProgramSearch().show()
-        return
-
-
-    def show_favorites(self, arg, menuw):
-        tv.view_favorites.ViewFavorites().show()
-        return
-
-
-    def view_schedule(self, arg, menuw):
-        tv.program_display.ScheduledRecordings().show()
         return
 
 
@@ -190,6 +179,3 @@ class TVMenu(Item):
         TVGuide(self.get_start_time(), start_tv, menuw)
 
 
-    def start_vcr(self, arg, menuw):
-        _debug_('tvmenu: mode=vcr')
-        plugin.getbyname(plugin.TV).Play('vcr', None)
