@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/10/18 08:13:35  dischi
+# add recursive _not_ random playlist
+#
 # Revision 1.28  2003/10/17 18:50:10  dischi
 # random playlist can now be non-recursive, too
 #
@@ -330,7 +333,7 @@ class Playlist(Item):
 
 
 class RandomPlaylist(Playlist):
-    def __init__(self, playlist, parent, add_args = None, recursive = True):
+    def __init__(self, playlist, parent, add_args = None, recursive = True, random = True):
         Item.__init__(self, parent)
         self.type     = 'playlist'
 
@@ -340,13 +343,18 @@ class RandomPlaylist(Playlist):
         self.autoplay     = True
         self.unplayed     = playlist
         self.recursive    = recursive
+        self.random       = random
+
         
     def actions(self):
         return [ ( self.play, _('Play') ) ]
 
 
     def play_next(self, arg=None, menuw=None):
-        element = random.choice(self.unplayed)
+        if self.random:
+            element = random.choice(self.unplayed)
+        else:
+            element = self.unplayed[0]
         self.unplayed.remove(element)
         if not callable(element):
             # try to get the item for this file

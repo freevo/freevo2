@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2003/10/18 08:13:35  dischi
+# add recursive _not_ random playlist
+#
 # Revision 1.50  2003/10/17 18:50:45  dischi
 # add description to configure menu and make random playlist for video, too
 #
@@ -435,7 +438,9 @@ class DirItem(Playlist):
             items += [ ( RandomPlaylist((self.dir, suffix), self, recursive=False),
                          _('Random play all items')),
                        ( RandomPlaylist((self.dir, suffix), self),
-                         _('Recursive random play all items')) ]
+                         _('Recursive random play all items')), 
+                       ( RandomPlaylist((self.dir, suffix), self, random = False),
+                         _('Recursive play all items')) ]
         
         items.append((self.configure, _('Configure directory'), 'configure'))
         return items
