@@ -5,10 +5,7 @@
 # $Id$
 #
 # This plugin will use mplayer with the dumpstream option for recording the
-# program. For DVB-T it can also use tzap for recording. And when tzap is
-# used and replex is found in the path, the plugin will pipe the tzap output
-# through replex to transform the mpeg-ts to mpeg2. Mplayer can seek much
-# better in mpeg2 files.
+# program. For DVB-T it can also use tzap for recording.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -77,24 +74,18 @@ class PluginInterface(Recorder):
             rating = rating or 10
         else:
             rating = rating or 9
-	
+
         if not self.program_file:
 	    self.program = 'mplayer'
 	    self.program_file = config.CONF.mplayer
-	
+
 	self.configfile = find_file_in_path( 'channels.conf', pathes )
 	if not self.configfile:
 	    self.reason = 'no channels configuration found'
 	    return
 
         Recorder.__init__(self)
-        self.replex = find_file_in_path( 'replex' )
-
-        if self.replex:
-            log.info('using replex')
-            self.suffix = '.mpg'
-        else:
-            self.suffix = '.ts'
+        self.suffix = '.ts'
 
         channels = []
         for c in self.device.channels:
@@ -103,7 +94,7 @@ class PluginInterface(Recorder):
         # activate the plugin
         self.activate()
 
-        
+
     def get_cmd(self, rec):
         """
         Return a command for recording.
@@ -114,58 +105,19 @@ class PluginInterface(Recorder):
         else:
             filename = rec.url
 
-        if self.replex:
-            # use replex to transform ts to mpeg
-            self.record_fifo = '/tmp/record-%s-%s-%s' % \
-                               (self.device.number, os.getpid(),
-                                int(time.time()))
-            # create replex fifo
-            if os.path.exists(self.record_fifo):
-                os.unlink(self.record_fifo)
-            os.mkfifo(self.record_fifo)
-
-            # start replex program
-            self.replex_child = Process([ self.replex, '-x', '-k', '-t', 'DVD',
-                                          '--of', filename, self.record_fifo ])
-            # set filename for the real recorder to fifo
-            filename = self.record_fifo
-            
         if self.program == 'mplayer':
             # use mplayer -dumpstream
             return [ self.program_file, '-dumpstream', '-dumpfile',
                      filename, 'dvb://' + String(channel) ]
-        
+
         elif self.program == 'tzap':
             # use tzap
 	    return [ self.program_file, '-o', filename, '-c', self.configfile,
 	             '-a', self.device.number, String( channel ) ]
 
-    
+
     def get_channel_list(self):
         """
         Return list of possible channels for this plugin.
         """
         return [ self.channels ]
-
-
-    def stop_replex(self):
-        # stop replex child
-        self.replex_child.stop()
-        self.replex_child = None
-
-        
-    def stopped(self, child):
-        """
-        Callback when the recording has stopped
-        """
-        Recorder.stopped(self, child)
-        if self.program == 'tzap' and self.replex:
-            # cleanup for tzap + replex
-            if self.record_fifo:
-                # clean up the fifo
-                if os.path.exists(self.record_fifo):
-                    os.unlink(self.record_fifo)
-                self.record_fifo = None
-            if self.replex_child:
-                call_later(self.stop_replex)
-                
