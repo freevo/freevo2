@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/11/26 12:17:57  dischi
+# re-added bin album.xml support
+#
 # Revision 1.3  2002/11/24 19:10:19  dischi
 # Added mame support to the new code. Since the hole new code is
 # experimental, mame is activated by default. Change local_skin.xml
@@ -63,6 +66,9 @@ from image.imageitem import ImageItem
 from games.mameitem import MameItem
 
 from playlist import Playlist
+
+# Add support for bins album files
+from image import bins
 
 TRUE  = 1
 FALSE = 0
@@ -194,6 +200,8 @@ class DirItem(Playlist):
         
         if name:
             self.name = name
+	elif os.path.isfile(dir + '/album.xml'):
+	    self.name = '[' + bins.get_album_title(dir) + ']'
         else:
             self.name = '[' + os.path.basename(dir) + ']'
         
