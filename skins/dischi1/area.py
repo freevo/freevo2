@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/03/05 22:14:06  dischi
+# Bugfix: one enhancement doesn't work right
+#
 # Revision 1.15  2003/03/05 21:57:02  dischi
 # Added audio player. The info area is empty right now, but this skin
 # can player audio files
@@ -190,9 +193,10 @@ class Screen:
             # and redraw all items
             for o in self.drawlist['background']:
                 if o[0] == 'image':
-                    # redraw only the changed parts of the image
-                    for x0, y0, x1, y1 in self.updatelist['background']:
-                        self.s_bg.blit(o[1], (x0, y0), (x0-o[2], y0-o[3], x1-x0, y1-y0))
+                    # redraw only the changed parts of the image (BROKEN)
+                    # for x0, y0, x1, y1 in self.updatelist['background']:
+                    # self.s_bg.blit(o[1], (x0, y0), (x0-o[2], y0-o[3], x1-x0, y1-y0))
+                    self.s_bg.blit(o[1], o[2:])
 
                 elif o[0] == 'rectangle':
                     x1, y1, x2, y2, color, border_size, border_color, radius = o[1:]
