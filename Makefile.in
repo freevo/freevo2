@@ -6,7 +6,7 @@
 
 CC=gcc
 
-SUBDIRS = matrox_g400 rc_client osd_server
+SUBDIRS = matrox_g400 rc_client osd_server plugins/cddb
 
 all: subdirs runapp
 
@@ -24,10 +24,6 @@ osds_sdl:
 
 runapp:
 	$(CC) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
-
-cdrom.so:
-	$(CC) -DNDEBUG -g -O3 -Wall -Wstrict-prototypes -fPIC -I/usr/include/python2.2 -c cdrommodule.c -o cdrommodule.o
-	$(CC) -shared cdrommodule.o -o cdrom.so
 
 subdirs: $(SUBDIRS)
 
