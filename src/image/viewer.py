@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/03 13:11:47  dischi
+# New osd patch from John M Cooper and some cleanups by displaying it
+# from me
+#
 # Revision 1.4  2002/12/02 18:25:33  dischi
 # Added bins/exif patch from John M Cooper
 #
@@ -304,76 +308,120 @@ class ImageViewer:
         if not self.osd_mode: return
 
         elif self.osd_mode == 1:
-            # This is where we add a caption.  Only if playlist is empty
+	    # This is where we add a caption.  Only if playlist is empty
             # May need to check the caption too?
-	    osdstring = []
+	    if not self.fileitem.binsdesc.has_key('title'):
+	        osdstring = ["Title: " + self.fileitem.name]
+	    else:
+                osdstring = []
+	    # Here we set up the tags that we want to put in the display
+	    # Using the following fields
+            # 0 - Title - Goes befor the field
+            # 1 - ExifTag - Field to look for in Exif strings
+            # 2 - BinsTag - Field to look for in Bins Strings
+            # 3 - Priority - BINS or EXIF which should we use.
+            tags_check = [['Title: ','NOTAG','title','BINS'],
+                          ['Description: ','NOTAG','description','BINS']
+                         ]
 
-	    # Use the bins caption if it exists
-            if self.fileitem.binsdesc.has_key('title'):
-                osdstring.append('Title: ' + self.fileitem.binsdesc['title'])
-            elif self.fileitem.name:
-	        osdstring = [self.fileitem.name]
-            else:
-	        osdstring = ['No Title']
-
-            if self.fileitem.binsdesc.has_key('description'):
-                osdstring.append('Description: ' + self.fileitem.binsdesc['description'])
 
 
         elif self.osd_mode == 2:    
-	    osdstring = ['No Exif info available']
-	    # Grab the exif tags from the image we alread have them from
-	    # the bins file XXX Should this be done in the image item stage?
-            f = open(self.filename, 'r')
-            tags = exif.process_file(f)
-
-	   # create an array with Exif tags, Bins tags, and line Number
-	    exif_tags = [ ['Date:','Image DateTime','DateTime',0],
-	                  ['W:','EXIF ExifImageWidth','ExifImageWidth',0],
-			  ['H:','EXIF ExifImageLength','ExifImageLength',0],
-			  ['Exp:','EXIF ExposureTime','ExposureTime',1],
-                          ['F/','EXIF FNumber','FNumber',1],
-			  ['FL:','EXIF FocalLength','FocalLength',1],
-			  ['ISO:','EXIF ISOSpeedRatings','ISOSpeedRatings',1],
-			  ['Meter:','EXIF MeteringMode','MeteringMode',1],
-			  ['Light:','EXIF LightSource','LightSource',1],
-			  ['Flash:','EXIF Flash','Flash',1],
-			  ['Make:','Image Make','Make',2],
-			  ['Model:','Image Model','Model',2],
-			  ['Software:','Image Software','Software',3]
+           # This is where we add a caption.  Only if playlist is empty
+	   # create an array with Exif tags as above
+	   osdstring = []
+           tags_check = [ ['Date:','Image DateTime','DateTime','EXIF'],
+	                  ['W:','EXIF ExifImageWidth','ExifImageWidth','EXIF'],
+			  ['H:','EXIF ExifImageLength','ExifImageLength','EXIF'],
+			  ['Exp:','EXIF ExposureTime','ExposureTime','EXIF'],
+                          ['F/','EXIF FNumber','FNumber','EXIF'],
+			  ['FL:','EXIF FocalLength','FocalLength','EXIF'],
+			  ['ISO:','EXIF ISOSpeedRatings','ISOSpeedRatings','EXIF'],
+			  ['Meter:','EXIF MeteringMode','MeteringMode','EXIF'],
+			  ['Light:','EXIF LightSource','LightSource','EXIF'],
+			  ['Flash:','EXIF Flash','Flash','EXIF'],
+			  ['Make:','Image Make','Make','EXIF'],
+			  ['Model:','Image Model','Model','EXIF'],
+			  ['Software:','Image Software','Software','EXIF']
 			 ]
-	    # You must set this up for each line
-            osdstring = ['','','',''] 
-
-            for exiftag in exif_tags:
-	        line = exiftag[3]
-		exifname = exiftag[1]
-		binsname = exiftag[2]
-		exiftitle = exiftag[0]
-		exifstr=''
-	        if tags.has_key(exifname):
-		    exifstr = '%s %s' % (exiftitle,tags[exifname])
-	        elif self.fileitem.binsexif.has_key(binsname):
-		    exifstr = '%s %s' % (exiftitle, 
-		                         self.fileitem.binsexif[binsname])
-		osdstring[line] = '%s %s' % (osdstring[line],exifstr)
 
 
+	# Grab the exif tags from the image we alread have them from
+	# the bins file XXX Should this be done in the image item stage?
+        f = open(self.filename, 'r')
+        tags = exif.process_file(f)
 
-        # Now print the string on screen
-	# Remove Blank line
-	for line in range(len(osdstring)):
-	    if osdstring[line] == '':
-	        del osdstring[line]
-		
-        # Reverse the list
-        osdstring.reverse()
+
+        for strtag in tags_check:
+            exifname = strtag[1]
+            binsname = strtag[2]
+            exiftitle = strtag[0]
+            priority = strtag[3]
+            exifstr = ''
+            binsstr = ''
+
+            # grab the Exif tag if it exists
+            if tags.has_key(exifname):
+                exifstr = '%s %s' % (exiftitle,tags[exifname])
+            # Grab the bins exif tag if it exists
+            if self.fileitem.binsexif.has_key(binsname):
+                binsstr = '%s %s' % (exiftitle, 
+                      self.fileitem.binsexif[binsname])
+            # Grab the bins desc if it exists and overwrite 
+            # the bins exif version
+	    if self.fileitem.binsdesc.has_key(binsname):
+                binsstr = '%s %s' % (exiftitle, 
+                      self.fileitem.binsdesc[binsname])
+
+            if priority == 'BINS':
+               if binsstr != '':
+                   osdstring.append(binsstr)
+               elif exifstr != '':
+                   osdstring.append(exifstr)
+            if priority == 'EXIF':
+               if exifstr != '':
+                   osdstring.append(exifstr)
+               elif binsstr != '':
+                   osdstring.append(binsstr)
+
+
+
+
+	# If after all that there is nothing then tell the users that
+	if osdstring == []:
+	    osdstring = ['No information available']
+	
+	# Now sort the text into lines of length line_length
+        line = 0
+        line_length = 80 
+        prt_line = ['']
+
+        for textstr in osdstring:
+            if len(textstr) > line_length:
+                # This is to big so just print it for now but wrap later
+                if prt_line[line] == '':
+                    prt_line[line] = textstr
+                else:
+                    prt_line.append(textstr)
+                    line += 1
+            elif len(textstr + '   ' + prt_line[line] )  > line_length:
+                # Too long for one line so print the last and then new
+                line += 1
+                prt_line.append(textstr)
+            else:
+                if prt_line[line] == '':
+                    prt_line[line] = textstr
+                else:
+                    prt_line[line] += '   ' + textstr
+
         # Create a black box for text
-        osd.drawbox(0, osd.height - (25 + (len(osdstring) * 30)),
+        osd.drawbox(0, osd.height - (25 + (len(prt_line) * 30)),
                 osd.width, osd.height, width=-1, 
                 color=((60 << 24) | osd.COL_BLACK))
-	
 
-        for line in range(len(osdstring)):
-            h=osd.height - (50 + ( line * 30))
-            osd.drawstring(osdstring[line], 10, h, fgcolor=osd.COL_ORANGE)
+	# Now print the Text
+        for line in range(len(prt_line)):
+            h=osd.height - (50 + ( (len(prt_line) - line - 1) * 30))
+            osd.drawstring(prt_line[line], 10, h, fgcolor=osd.COL_ORANGE)
+
+
