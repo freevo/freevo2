@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2002/12/21 17:26:52  dischi
+# Added dfbmga support. This includes configure option, some special
+# settings for mplayer and extra overscan variables
+#
 # Revision 1.22  2002/12/09 14:23:53  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
 #
@@ -72,7 +76,7 @@ Configure Freevo for your specific environment.
                                   WIDTHxHEIGHT can be 800x600, 768x576 or 640x480
 
    --display=DISP               set the display
-                                  DISP can be xv, x11, fbdev, dxr3, mga or sdl
+                                  DISP can be xv, x11, fbdev, dxr3, mga, dfbmga or sdl
                                   
    --tv=NORM                    set the TV standard
                                   NORM can be ntsc, pal or secam
@@ -140,6 +144,15 @@ def main():
     check_program(conf, "ssnes9x", "snes", 0)
     check_program(conf, "zsnes", "snes", 0)
 
+    check_config(conf)
+
+    # set geometry for display/tv combinations without a choice
+    if conf.display == 'dfbmga':
+        if conf.tv == 'ntsc':
+            conf.geometry = '720x480'
+        else:
+            conf.geometry = '720x576'
+
     print
     print
     print 'Settings:'
@@ -148,7 +161,6 @@ def main():
     print '  %20s = %s' % ('tv', conf.tv)
     print '  %20s = %s' % ('chanlist', conf.chanlist)
 
-    check_config(conf)
 
     # Build everything
     create_config(conf)
@@ -163,7 +175,7 @@ def main():
     sys.exit()
 
 vals_geometry = ['800x600', '768x576', '640x480']
-vals_display = ['xv', 'x11', 'fbdev', 'mga', 'dxr3', 'sdl']
+vals_display = ['xv', 'x11', 'fbdev', 'dfbmga', 'mga', 'dxr3', 'sdl']
 vals_tv = ['ntsc', 'pal', 'secam']
 vals_chanlist = ['us-bcast', 'us-cable', 'us-cable-hrc',
                  'japan-bcast', 'japan-cable', 'europe-west',

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2002/12/21 17:26:52  dischi
+# Added dfbmga support. This includes configure option, some special
+# settings for mplayer and extra overscan variables
+#
 # Revision 1.70  2002/12/20 15:43:47  dischi
 # The skin files are geometry independed now. They can be used for every
 # resolution (e.g. 720x576 and 720x480)
@@ -125,13 +129,13 @@ class Skin:
 
     # try to find the skin xml file
     
-    if not settings.load(config.SKIN_XML_FILE, (osd.width, osd.height)):
+    if not settings.load(config.SKIN_XML_FILE):
         print "skin not found, using fallback skin"
-        settings.load("%s/grey1.xml" % XML_SKIN_DIRECTORY, (osd.width, osd.height))
+        settings.load("%s/grey1.xml" % XML_SKIN_DIRECTORY)
         
     if os.path.isfile("local_skin.xml"):
         if DEBUG: print 'Skin: Add local config to skin'
-        settings.load("local_skin.xml", (osd.width, osd.height))
+        settings.load("local_skin.xml")
 
     hold = 0
 
@@ -157,11 +161,11 @@ class Skin:
     def LoadSettings(self, dir):
         if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
             settings = copy.copy(self.settings)
-            settings.load(os.path.join(dir, "skin.xml"), (osd.width, osd.height), 1)
+            settings.load(os.path.join(dir, "skin.xml"), 1)
             return settings
         elif dir and os.path.isfile(dir):
             settings = copy.copy(self.settings)
-            settings.load(dir, (osd.width, osd.height), 1)
+            settings.load(dir, 1)
             return settings
         return None
 

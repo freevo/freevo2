@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/21 17:26:52  dischi
+# Added dfbmga support. This includes configure option, some special
+# settings for mplayer and extra overscan variables
+#
 # Revision 1.3  2002/12/12 11:45:02  dischi
 # Moved all icons to skins/icons
 #
@@ -222,6 +226,9 @@ class OSD:
 
         if config.CONF.display== 'dxr3':
             os.environ['SDL_VIDEODRIVER'] = 'dxr3'
+
+        if config.CONF.display == 'dfbmga':
+            os.environ['SDL_VIDEODRIVER'] = 'directfb'
 
         # Initialize the PyGame modules.
         pygame.init()

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2002/12/21 17:26:52  dischi
+# Added dfbmga support. This includes configure option, some special
+# settings for mplayer and extra overscan variables
+#
 # Revision 1.7  2002/12/18 05:00:31  krister
 # DVD language config re-added.
 #
@@ -429,9 +433,8 @@ class MPlayer_Thread(threading.Thread):
 
                 # The DXR3 device cannot be shared between our SDL session
                 # and MPlayer.
-                if (osd.sdl_driver == 'dxr3'):
-                    if DEBUG:
-		        print "Stopping Display for Video Playback on DXR3"
+                if (osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga'):
+                    print "Stopping Display for Video Playback"
                     osd.stopdisplay()
                 
                 if DEBUG:
@@ -444,14 +447,14 @@ class MPlayer_Thread(threading.Thread):
 
                 self.app.kill()
 
+                if self.mode == 'play':
+                    rc.post_event(rc.PLAY_END)
+
                 # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3':
+                if osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga':
                     osd.restartdisplay()
 		    osd.update()
 		    print "Display back online"
-
-                if self.mode == 'play':
-                    rc.post_event(rc.PLAY_END)
 
                 self.mode = 'idle'
                 

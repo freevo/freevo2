@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2002/12/21 17:26:52  dischi
+# Added dfbmga support. This includes configure option, some special
+# settings for mplayer and extra overscan variables
+#
 # Revision 1.99  2002/12/09 14:23:52  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
 #
@@ -356,7 +360,13 @@ OSD_SDL_EXEC_AFTER_STARTUP = ""
 if CONF.display == 'mga':
     OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_%s_%s.sh' % (CONF.tv, CONF.geometry)
 
+OVERSCAN_X = 0
+OVERSCAN_Y = 0
 
+if CONF.display == 'dfbmga':
+    OVERSCAN_X = 30
+    OVERSCAN_Y = 30
+    
 # ======================================================================
 # MPlayer section:
 # ======================================================================
@@ -383,8 +393,11 @@ MPLAYER_NICE         = -20             # Priority of mplayer process. 0 is uncha
                                        # <0 is higher prio, >0 lower prio.
                                        # prio <0 has no effect unless run as root.
 
-MPLAYER_ARGS_DEF     = ('-nobps -framedrop -nolirc -screenw %s -screenh %s -fs' %
-                        (CONF.width, CONF.height))
+if CONF.display == 'dfbmga':
+    MPLAYER_ARGS_DEF     = '-nobps -nolirc -autoq 100 -fs -vsync -double'
+else:
+    MPLAYER_ARGS_DEF     = ('-nobps -nolirc -autoq 100 -screenw %s -screenh %s -fs' %
+                            (CONF.width, CONF.height))
 
 MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
