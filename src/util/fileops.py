@@ -48,6 +48,7 @@ import logging
 import sysconfig
 import misc
 import vfs
+import popen
 
 # get logging object
 log = logging.getLogger()
