@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/12/13 18:18:02  dischi
+# allow slideshows with relative path, fix background music
+#
 # Revision 1.11  2003/12/13 14:46:58  outlyer
 # Fix the example XML
 #
@@ -54,6 +57,8 @@
 #
 # ----------------------------------------------------------------------- */
 #endif
+
+import os
 
 # Add support for bins album files
 from mmpython.image import bins
@@ -154,7 +159,8 @@ class PluginInterface(plugin.MimetypePlugin):
           </slideshow>
         </freevo>
         """
-        items = []
+        items    = []
+        dirname  = os.path.dirname(fxd.getattr(None, 'filename', ''))
         children = fxd.get_children(node, 'files')
         if children:
             children = children[0].children
@@ -162,15 +168,16 @@ class PluginInterface(plugin.MimetypePlugin):
         for child in children:
             try:
                 citems = []
+                fname  = os.path.join(dirname, fxd.gettext(child))
                 if child.name == 'directory':
                     if fxd.getattr(child, 'recursive', 0):
-                        f = util.match_files_recursively(fxd.gettext(child), self.suffix())
+                        f = util.match_files_recursively(fname, self.suffix())
                     else:
-                        f = util.match_files(fxd.gettext(child), self.suffix())
+                        f = util.match_files(fname, self.suffix())
                     citems = self.get(None, f)
 
                 elif child.name == 'file':
-                    citems = self.get(None, [ fxd.gettext(child) ])
+                    citems = self.get(None, [ fname ])
 
                 duration = fxd.getattr(child, 'duration', 0)
                 if duration:
@@ -206,19 +213,21 @@ class PluginInterface(plugin.MimetypePlugin):
 
         for child in children:
             try:
+                fname  = os.path.join(dirname, fxd.gettext(child))
                 if child.name == 'directory':
                     if fxd.getattr(child, 'recursive', 0):
-                        files += util.match_files_recursively(fxd.gettext(child), suffix)
+                        files += util.match_files_recursively(fname, suffix)
                     else:
-                        files += util.match_files(fxd.gettext(child), suffix)
+                        files += util.match_files(fname, suffix)
                 elif child.name == 'file':
-                    files.append(fxd.gettext(child))
+                    files.append(fname)
             except OSError, e:
                 print 'playlist error:'
                 print e
 
         if files:
-            pl.background_playlist = Playlist(playlist=files, random = random)
+            pl.background_playlist = Playlist(playlist=files, random = random,
+                                              display_type='audio')
 
         # add item to list
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
