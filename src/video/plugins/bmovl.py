@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/04 17:57:50  dischi
+# add doc
+#
 # Revision 1.1  2003/11/04 17:53:23  dischi
 # Removed the unstable bmovl part from mplayer.py and made it a plugin.
 # Even if we are in a code freeze, this is a major cleanup to put the
@@ -97,11 +100,28 @@ class OSDbmovl(OSD):
 
 
 class PluginInterface(plugin.Plugin):
+    """
+    bmovl plugin fro mplayer
+
+    This plugin makes the OSD look much better in mplayer. It uses bmovl to show
+    images from Freevo inside mplayer.
+
+    This plugin is in an early development and may crash mplayer.
+    To activate, you need to create a fifo /tmp/bmovl.
+    """
+
     def __init__(self):
+        """
+        normal plugin init, but sets _type to 'mplayer_video'
+        """
         plugin.Plugin.__init__(self)
         self._type = 'mplayer_video'
+
         
     def play(self, command, player):
+        """
+        called before playing is started to add some stuff to the command line
+        """
         self.item = player.item
         self.player = player
         self.osd_visible = False
@@ -189,12 +209,18 @@ class PluginInterface(plugin.Plugin):
         
         
     def stop(self):
+        """
+        stop bmovl
+        """
         if self.bmovl:
             self.bmovl.close()
             self.bmovl = None
 
         
     def eventhandler(self, event):
+        """
+        eventhandler to do our own osd toggle
+        """
         if event == TOGGLE_OSD and self.bmovl:
             if self.osd_visible:
                 self.player.thread.app.write('osd 1\n')
@@ -207,6 +233,9 @@ class PluginInterface(plugin.Plugin):
 
 
     def stdout(self, line):
+        """
+        get information from mplayer stdout
+        """
         if self.bmovl:
             return
 
