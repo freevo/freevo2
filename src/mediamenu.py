@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/02/23 09:24:31  dischi
+# Activate extended menu in the (VIDEO|AUDIO|IMAGE|GAMES) menu, too
+#
 # Revision 1.35  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
 #
@@ -240,7 +243,7 @@ class MediaMenu(Item):
         else:
             title = 'MEDIA'
         item_menu = menu_module.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
-                                     umount_all=1)
+                                     item_types = self.display_type, umount_all=1)
         menuw.pushmenu(item_menu)
 
 
