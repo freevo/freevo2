@@ -10,6 +10,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/16 14:40:33  outlyer
+# (Don't you love it when your neighbours make enough noise to wake you up
+# early on your day off)
+#
+# Just some fixes from the code I commited last night.
+#
+# o Use the proper db instead of my test db
+# o use md5
+# o Remove some unnecessary 'print'
+# o remove mp3.py and smartimage.py as they are both merged into extendedmeta
+# o Remove musicsqlimport as it's all being done in extendedadd.py now.
+#
 # Revision 1.1  2004/01/16 08:14:04  outlyer
 # Forgot to commit this earlier. This is:
 #
@@ -92,7 +104,7 @@ class MetaDatabase:
     """ Class for working with the database """
     def __init__(self):
         # Private Variables
-        DATABASE = os.path.join(config.FREEVO_CACHEDIR, 'freevo1.sqlite')
+        DATABASE = os.path.join(config.FREEVO_CACHEDIR, 'freevo.sqlite')
         self.db = sqlite.connect(DATABASE)
         self.cursor = self.db.cursor()
 

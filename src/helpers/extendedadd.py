@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #if 0 /*
 # -----------------------------------------------------------------------
-# musicsqlimport.py - import all music files into sql database
+# extendedadd.py - import all music files into sql database
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -10,7 +10,6 @@
 # Todo:        
 #
 # -----------------------------------------------------------------------
-# $Log$
 # Revision 1.1  2004/01/16 08:14:04  outlyer
 # Forgot to commit this earlier. This is:
 #
@@ -21,15 +20,6 @@
 #               command-line. Since the data is already used in blurr2, and
 #               the info skins, it's nice to have.
 #
-# Revision 1.5  2004/01/11 11:13:50  dischi
-# make it a valid python file
-#
-# Revision 1.4  2004/01/09 16:36:21  outlyer
-# Adding this back in... going to work on sqlite a little (music only at
-# first)
-#
-# Revision 1.2  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
 #
 #
 # -----------------------------------------------------------------------
@@ -65,7 +55,7 @@ import mmpython
 
 import config, util
 
-from util.extendedmeta import addPathDB, AudioParser, extract_image
+from util.extendedmeta import AddExtendedMeta
 
 if __name__ == '__main__':
     if len(sys.argv)>1 and sys.argv[1] == '--help':

@@ -1,7 +1,7 @@
 #if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# extendedmeta.py - database wrapper
+# extendedmeta.py - Extended Metadata Reader/Cacher
 # -----------------------------------------------------------------------
 # $Id: extendedmeta.py,v #
 #
@@ -10,6 +10,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/16 14:40:33  outlyer
+# (Don't you love it when your neighbours make enough noise to wake you up
+# early on your day off)
+#
+# Just some fixes from the code I commited last night.
+#
+# o Use the proper db instead of my test db
+# o use md5
+# o Remove some unnecessary 'print'
+# o remove mp3.py and smartimage.py as they are both merged into extendedmeta
+# o Remove musicsqlimport as it's all being done in extendedadd.py now.
+#
 # Revision 1.1  2004/01/16 08:14:04  outlyer
 # Forgot to commit this earlier. This is:
 #
@@ -44,7 +56,7 @@
 #endif
 
 # The basics
-import os,string,fnmatch,sys
+import os,string,fnmatch,sys,md5
 
 # The DB stuff
 import sqlite
@@ -91,8 +103,6 @@ def make_query(filename,dirtitle):
     return SQL
 
 def addPathDB(path='/media/Music',dirtitle=config.AUDIO_ITEMS[0][0],type='*.mp3'):
-
-    print "Adding %s to %s ..." % (path, dirtitle)
 
     # Get some stuff ready
     count = 0
