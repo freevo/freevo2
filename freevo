@@ -13,19 +13,29 @@ fi
 
 # First check if the runtime is installed
 if test -a freevo_rt/freevo_rt ; then
-    echo Found the runtime, will use it.
+
     # Prevent the linker from using other libraries than the ones
     # in freevo_rt
     export LD_PRELOAD=`cat freevo_rt/preloads`
-    # Execute using the runtime
-    #freevo_rt/ld-linux.so.2 freevo_rt/freevo_rt main.py $*
+
+    # Execute using the runtime:
+    echo "Using the Freevo runtime (./freevo_rt)"
+    
+    # Start the lirc remote control app if the device is present
+    if test -S /dev/lircd ; then
+        echo Found a lirc device, starting the remote control daemon
+        freevo_rt/freevo_rt rc_client/remote.py --remote=lirc /dev/null 2> /dev/null &
+    fi
+    
+    # Start the main freevo application
     freevo_rt/freevo_rt main.py $*
-    # Make sure all children are killed
+
+    # Freevo exited, make sure all children are killed
     sleep 1
     killall -9 freevo_rt/ld-linux.so.2
     exit
 fi
 
-echo Runtime not found, starting using Python.
+echo Runtime not found, starting using Python and the startup control task.
 
 python startup.py $*
