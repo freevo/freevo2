@@ -35,6 +35,7 @@ cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
 
 rm -rf main/libavcodec   
 mv ffmpeg/libavcodec main
+rm -rf ffmpeg
 
 cp /usr/local/include/dvdnav/* /usr/local/include
 
