@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/11/20 19:35:45  rshortt
+# Typo bugfix.
+#
 # Revision 1.41  2004/11/20 18:23:00  dischi
 # use python logger module for debug
 #
@@ -224,7 +227,7 @@ class PluginInterface(plugin.ItemPlugin):
                                _('Rip the CD to the hard drive'),
                                _('Get CDs available for ripping')) ]
         except:
-            log.error( 'Item is not an Audio CD' ))
+            log.error( 'Item is not an Audio CD' )
         return []
 
 
