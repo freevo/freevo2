@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/09 07:17:58  krister
+# Quick fix for a bug where XML crashes on 8-bit chars. Need a proper fix!
+#
 # Revision 1.3  2002/12/03 05:13:04  krister
 # Changed so that the EPG can be run standalone again. Disabled mplayer process killing, not good on a multiuser machine.
 #
@@ -157,6 +160,24 @@ def load_guide():
     # Is there a file to read from?
     if os.path.isfile(config.XMLTV_FILE):
         gotfile = 1
+
+        # XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.
+
+        # Read the current file
+        print 'XMLTV: XXX Hack to fix a bug where qp_xml barfs on 8-bit chars.'
+        fd = open(config.XMLTV_FILE)
+        data_8bit = fd.read()
+        fd.close()
+        
+        # Translate to 7-bit data, replacing 8-bit chars with spaces
+        table = ''.join(map(lambda v:chr(v), (range(0,127) + [32] * 128)))
+        data_7bit = data_8bit.translate(table)
+        
+        # Write to the file
+        fd = open(config.XMLTV_FILE, 'w')
+        fd.write(data_7bit)
+        fd.close()
+        
         guide.timestamp = os.path.getmtime(config.XMLTV_FILE)
     else:
         if DEBUG: print 'XMLTV file (%s) missing!' % config.XMLTV_FILE
