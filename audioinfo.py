@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/10/24 06:11:45  krister
+# Changed debug levels for less output. Don't display length in DrawMP3 if not valid.
+#
 # Revision 1.17  2002/10/24 05:47:43  krister
 # Added exception checking for errors in the mp3id module. Fixed the elapsed timer so it is still updated even if the song length is not known.
 #
@@ -143,8 +146,9 @@ import eyed3
 import skin
 import imghdr
 import traceback
+import config
 
-DEBUG=1
+DEBUG = config.DEBUG
 
 skin = skin.get_singleton()
 
@@ -176,17 +180,17 @@ class AudioInfo:
         # XXX This is really not a very smart way to do it. We should be
         # XXX able to handle files with messed up extentions.
         if self.is_ogg():
-            if DEBUG: print "Got ogg..."
+            if DEBUG > 1: print "Got ogg..."
             self.set_info_ogg(self.filename)
 
         elif self.is_mp3():
-            if DEBUG: print "Got mp3..."
+            if DEBUG > 1: print "Got mp3..."
             self.set_info_mp3(self.filename)
         else:
-            if DEBUG: print "Got something else..."
+            if DEBUG > 1: print "Got something else..."
 
         temp = self.get_cover_image(self.filename)
-        if DEBUG:
+        if DEBUG > 1:
             try:
                 print "DEBUG:"
                 print "  Album: " + str(self.album)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2002/10/24 06:11:45  krister
+# Changed debug levels for less output. Don't display length in DrawMP3 if not valid.
+#
 # Revision 1.47  2002/10/24 05:28:40  outlyer
 # Modified to match the new stuff included in the audioinfo library. We can
 # now show the track number for an id3v2.x track, and we truncate the title,
@@ -660,10 +663,11 @@ class Skin:
                 DrawText('Track: ', iv, x=left, y=top, align='right')
                 DrawText('%s ' % info.track, iv, x=left, y=top)
 
-            top += spacing
-            DrawText('Length: ', iv, x=left, y=top, align='right')
-            DrawText('%d:%02d ' % (int(info.length / 60), int(info.length % 60)), \
-                          iv, x=left, y=top)
+            if info.length > 0:
+                top += spacing
+                DrawText('Length: ', iv, x=left, y=top, align='right')
+                DrawText('%d:%02d ' % (int(info.length / 60), int(info.length % 60)), \
+                         iv, x=left, y=top)
 
             top += spacing
             DrawText('Time: ', iv, x=left, y=top, align='right')

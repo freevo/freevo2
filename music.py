@@ -13,6 +13,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2002/10/24 06:11:45  krister
+# Changed debug levels for less output. Don't display length in DrawMP3 if not valid.
+#
 # Revision 1.22  2002/10/24 06:03:52  krister
 # Fixed popup box mania
 #
@@ -313,7 +316,7 @@ def parse_entry(arg=None, menuw=None):
         playlists = util.match_files(mdir, config.SUFFIX_AUDIO_PLAYLISTS)
         files     = util.match_files(mdir, config.SUFFIX_AUDIO_FILES)
 
-        if DEBUG:
+        if DEBUG > 1:
             print 'music:parse_entry(): d="%s"' % dirnames
             print 'music:parse_entry(): p="%s"' % playlists
             print 'music:parse_entry(): f="%s"' % files
@@ -371,7 +374,7 @@ def parse_entry(arg=None, menuw=None):
 
         # check if all files have the same artist
         for fname in files:
-            if DEBUG:
+            if DEBUG > 1:
                 print 'music: getting info for "%s"' % fname
             a = AudioInfo(fname)
             if a.artist and artist == None:
