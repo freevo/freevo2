@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/12/04 01:25:28  rshortt
+# Add --query-exclude for help generating TV_CHANNELS_EXCLUDE.  Update location
+# of EPGDB.
+#
 # Revision 1.13  2004/11/06 17:56:21  dischi
 # Current status of the recordserver:
 # o add/delete/modify/list recordings
@@ -69,10 +73,11 @@ import os
 import shutil
 
 import config
+import sysconfig
 import mcomm
 
 import pyepg
-epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
+epg = pyepg.get_epg(sysconfig.datafile('epgdb'))
 
 
 def usage():
@@ -81,6 +86,7 @@ def usage():
     print 'usage: freevo tv_grab [ --query ]'
     print 'options:'
     print '  --query:  print a list of all stations. The list can be used to set TV_CHANNELS'
+    print '  --query-exclude:  print a list of channels for use with TV_CHANNELS_EXCLUDE'
     sys.exit(0)
 
 
@@ -112,7 +118,7 @@ def grab():
         print 'Loading data into epgdb, this may take a while'
 
         shutil.move(xmltvtmp, config.XMLTV_FILE)
-        epg.add_data_xmltv(config.XMLTV_FILE)
+        epg.add_data_xmltv(config.XMLTV_FILE, config.TV_CHANNELS_EXCLUDE)
 
 
 if __name__ == '__main__':
@@ -121,21 +127,36 @@ if __name__ == '__main__':
         usage()
     
     if len(sys.argv)>1 and sys.argv[1] == '--query':
-        print
-        print 'searching for station information'
-
-        chanlist = config.detect_channels()
+        chanlist = epg.get_channels()
 
         print
-        print 'Possible list of tv channels. If you want to change the station'
-        print 'id, copy the next statement into your local_conf.py and edit it.'
-        print 'You can also remove lines or resort them'
+        print 'Possible list of tv channels. If you want to change the name or '
+        print 'acess id copy the next statement into your local_conf.py and '
+        print 'edit it.'
         print
         print 'TV_CHANNELS = ['
         for c in chanlist[:-1]:
-            print '    ( \'%s\', \'%s\', \'%s\' ), ' % c
-        print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % chanlist[-1]
+            print '    ( \'%s\', \'%s\', \'%s\' ), ' % (c['id'], c['call_sign'], c['tuner_id'])
+        print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % \
+              (chanlist[-1]['id'], chanlist[-1]['call_sign'], chanlist[-1]['tuner_id'])
         sys.exit(0)
+
+    if len(sys.argv)>1 and sys.argv[1] == '--query-exclude':
+        chanlist = epg.get_channels()
+
+        print
+        print 'Possible list of tv channels to exclude from Freevo.  Any '
+        print 'channel ids found in this list will be ignored.  Below is a '
+        print 'sample containing ALL of the channels available from the EPG.  '
+        print 'If you copy this as is you will see no channels in Freevo at '
+        print 'all.'
+        print
+        print 'TV_CHANNELS_EXCLUDE = ['
+        for c in chanlist[:-1]:
+            print '    \'%s\',' % c['id']
+        print '    \'%s\', ] ' % chanlist[-1]['id']
+        sys.exit(0)
+
 
     grab()
 
