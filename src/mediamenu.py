@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/12/31 04:02:18  krister
+# Bugfix for mismatched variable names.
+#
 # Revision 1.13  2002/12/22 12:59:34  dischi
 # Added function sort() to (audio|video|games|image) item to set the sort
 # mode. Default is alphabetical based on the name. For mp3s and images
@@ -298,9 +301,10 @@ class DirItem(Playlist):
                 self.media = media
 
         try:
-            files = [ os.path.join(self.dir, fname) for fname in os.listdir(self.dir) ]
+            files = ([ os.path.join(self.dir, fname)
+                       for fname in os.listdir(self.dir) ])
         except OSError:
-            print 'util:match_files(): Got error on dir = "%s"' % dirname
+            print 'util:match_files(): Got error on dir = "%s"' % self.dir
             return
             
 
