@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/21 10:19:03  dischi
+# small osd fix
+#
 # Revision 1.5  2003/06/18 20:50:09  outlyer
 # Highlight shows that are scheduled. This code isn't done yet, but it works.
 # There are some areas where it could be slow for large lists (like it does a
@@ -356,11 +359,13 @@ class TVListing_Area(Skin_Area):
                         
                     if flag_left:
                         tx0 += leftarrow_size[0]
+                        ig.width -= leftarrow_size[0]
                         if tx0 < tx1:
                             self.draw_image(leftarrow, (tx0-leftarrow_size[0], ty0 + ig.y +\
                                                         (ig.height-leftarrow_size[1])/2))
                     if flag_right:
                         tx1 -= rightarrow_size[0]
+                        ig.width -= rightarrow_size[0]
                         if tx0 < tx1:
                             self.draw_image(rightarrow, (tx1, ty0 + ig.y + \
                                                          (ig.height-rightarrow_size[1])/2))
