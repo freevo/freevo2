@@ -135,7 +135,8 @@ class RecordServer(RPCServer):
         # get first recording to check
         rec = recordings[0]
         # search epg for that recording
-        results = pyepg.search(rec.name, rec.channel)
+        results = pyepg.search(rec.name, rec.channel, search_subtitle=False, 
+                               search_description=False, exact_match=True)
         epginfo = None
         for p in results:
             # check all results
@@ -305,7 +306,8 @@ class RecordServer(RPCServer):
 
         update = []
         for f in copy.copy(self.favorites):
-            for p in pyepg.search(f.name):
+            for p in pyepg.search(f.name, search_subtitle=False, 
+                                  search_description=False, exact_match=True):
                 if not f.match(p.title, p.channel.id, p.start):
                     continue
                 r = Recording(self.rec_id, p.title, p.channel.id, f.priority,
