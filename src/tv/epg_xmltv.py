@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/09/06 11:19:45  dischi
+# o use str.encode() with 'replace' and not our own function
+# o only cache the data from channels we want (major speed enhancement)
+#
 # Revision 1.31  2003/09/05 20:10:36  dischi
 # use util.encode to encode strings
 #
@@ -277,7 +281,7 @@ def load_guide():
             return None     # No
         
         for chan in xmltv_channels:
-            id = util.encode(chan['id'], 'Latin-1')
+            id = chan['id'].encode('Latin-1', 'replace')
             c = epg_types.TvChannel()
             c.id = id
             if ' ' in id:
@@ -292,28 +296,40 @@ def load_guide():
 
     xmltv_programs = None
     if gotfile:
+        if DEBUG or 1:
+            print 'reading xmltv data'
         xmltv_programs = xmltv.read_programmes(util.gzopen(config.XMLTV_FILE))
     
     # Was the guide read successfully?
     if not xmltv_programs:
         return guide    # Return the guide, it has the channels at least...
 
+
+    needed_ids = []
+    for chan in guide.chan_dict:
+        needed_ids.append(chan)
+
+    if DEBUG or 1:
+        print 'creating guide for %s' % needed_ids
+
     for p in xmltv_programs:
+        if not p['channel'].encode('Latin-1', 'replace') in needed_ids:
+            continue
         prog = epg_types.TvProgram()
-        prog.channel_id = util.encode(p['channel'], 'Latin-1')
-        prog.title = util.encode(p['title'][0][0], 'Latin-1')
+        prog.channel_id = p['channel'].encode('Latin-1', 'replace')
+        prog.title = p['title'][0][0].encode('Latin-1', 'replace')
         if p.has_key('rating'):
             try:
                 for darating in p['rating']:
-                    prog.ratings[util.encode(darating['system'], 'Latin-1')] = util.encode(darating['value'], 'Latin-1')
+                    prog.ratings[darating['system'].encode('Latin-1', 'replace')] = darating['value'].encode('Latin-1', 'replace')
             except KeyError:
                 pass
         if p.has_key('category'):
-             prog.categories = [ util.encode(cat[0], 'Latin-1') for cat in p['category'] ]
+             prog.categories = [ cat[0].encode('Latin-1', 'replace') for cat in p['category'] ]
         if p.has_key('desc'):
-            prog.desc = util.format_text(util.encode(p['desc'][0][0], 'Latin-1'))
+            prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1', 'replace'))
         if p.has_key('sub-title'):
-            prog.sub_title = util.encode(p['sub-title'][0][0], 'Latin-1')
+            prog.sub_title = p['sub-title'][0][0].encode('Latin-1', 'replace')
         try:
             prog.start = timestr2secs_utc(p['start'])
             try:
