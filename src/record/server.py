@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/10/18 01:27:37  rshortt
+# Some changes I had laying around.
+#
 # Revision 1.6  2004/08/23 01:33:16  rshortt
 # Changes for new TV_SETTINGS:
 # -Support multiple recordings on different devices (ie: ivtv0 and dvb0).
@@ -217,19 +220,13 @@ class RecordServer(xmlrpc.XMLRPC):
                 prog = saved_prog
                 break
             
-        try:
-            recording = prog.isRecording
-        except Exception, e:
-            print e
-            recording = FALSE
 
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.removeProgram(prog, tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
         now = time.time()
 
-        # if prog.start <= now and prog.stop >= now and recording:
-        if recording:
+        if prog in self.current_recordings.values():
             _debug_('stopping current recording')
             self.stop_record(prog)
        
@@ -322,6 +319,7 @@ class RecordServer(xmlrpc.XMLRPC):
         progs = sr.getProgramList()
 
         currently_recording = None
+        # for p in self.current_rcordings.values()
         for prog in progs.values():
             try:
                 recording = prog.isRecording
@@ -400,7 +398,7 @@ class RecordServer(xmlrpc.XMLRPC):
             # If the program is over remove the entry.
             if ( prog.stop + config.TV_RECORD_PADDING) < now:
                 _debug_('found a program to clean')
-                cleaned = TRUE
+                cleaned = True
                 del progs[tv_util.getKey(prog)]
 
         if rec_prog or cleaned:
@@ -440,6 +438,9 @@ class RecordServer(xmlrpc.XMLRPC):
 
         if post_to:
             eh.post(Event('RECORD', arg=(prog, which)))
+        else:
+            # TODO: instead of removing it retry later.
+            self.removeScheduledRecording(prog)
 
 
     def stop_record(self, prog):
