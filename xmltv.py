@@ -34,8 +34,9 @@ from xml.utils import qp_xml
 import string
 
 
-# The date format used in XMLTV
-date_format = '%Y%m%d%H%M%S %Z'
+# The date formats used in XMLTV
+date_format_tz = '%Y%m%d%H%M%S %Z'
+date_format_notz = '%Y%m%d%H%M'
 
 # The locale for dictionary keys. Leaving them in Unicode screws up the
 # XMLRPC marshaller
