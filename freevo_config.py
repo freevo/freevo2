@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2002/09/07 06:15:30  krister
+# Added wav-files to the list of music-formats.
+#
 # Revision 1.61  2002/09/04 19:24:51  dischi
 # Added a 3rd parameter to ROM_DRIVES: mountpoint, device, name. I also
 # named the drives CD-1 and CD-2 to avoid missunderstandings about the
@@ -201,7 +204,8 @@ DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 # are played as audio. They are used as the argument to glob.glob()
 # 
 SUFFIX_AUDIO_FILES     = [ '/*.[mM][pP]3',
-                           '/*.[oO][gG][gG]' ]
+                           '/*.[oO][gG][gG]',
+                           '/*.[wW][aA][vV]' ]
 SUFFIX_AUDIO_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 
 
