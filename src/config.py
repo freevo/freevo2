@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2004/06/09 17:08:45  rshortt
+# Attempt to sort channels properly (numericly, if possible).
+#
 # Revision 1.105  2004/04/12 14:58:38  dischi
 # prevent crash for bad TV.xml
 #
@@ -825,6 +828,9 @@ def detect_channels():
             id = a['id'].encode(LOCALE, 'ignore')
 
             chanlist += [(id,display_name,tunerid)]
+
+        f = lambda a, b: cmp(int(a[2]), int(b[2]))
+        chanlist.sort(f)
 
         try:
             if os.path.isfile(pname):
