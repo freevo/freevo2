@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/05/06 10:36:46  dischi
+# Added OSD_SDL_EXEC_AFTER_CLOSE patch from Petri Damstén
+#
 # Revision 1.38  2003/04/27 17:36:20  dischi
 # enhance image loading with Imaging fallback
 #
@@ -370,6 +373,11 @@ class OSD:
     
     def shutdown(self):
         pygame.quit()
+        if config.OSD_SDL_EXEC_AFTER_CLOSE:
+            if os.path.isfile(config.OSD_SDL_EXEC_AFTER_CLOSE):
+                os.system(config.OSD_SDL_EXEC_AFTER_CLOSE)
+            else:
+                print "ERROR: %s: no such file" % config.OSD_SDL_EXEC_AFTER_CLOSE
 
     def restartdisplay(self):
         pygame.display.init()

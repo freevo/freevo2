@@ -500,6 +500,12 @@ if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
     OVERSCAN_X = 50
     OVERSCAN_Y = 50
 
+# Exec a script on the osd close.
+OSD_SDL_EXEC_AFTER_CLOSE = ""
+
+if CONF.display == 'mga':
+    OSD_SDL_EXEC_AFTER_CLOSE='./fbcon/mga_restore.sh'
+
 
 # ======================================================================
 # Remote control section
