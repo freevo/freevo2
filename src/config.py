@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2004/04/11 18:51:59  mikeruelle
+# do dir processing for games too. fixes annoying crashes due to trailing slashes
+#
 # Revision 1.103  2004/03/21 10:01:18  dischi
 # FREEVO_LOCALE is used somewhere else
 #
@@ -584,7 +587,19 @@ for type in ('video', 'audio', 'image', 'games'):
         if type == 'video':
             VIDEO_ONLY_SCAN_DATADIR = True
 
-    elif type != 'games':
+    elif type == 'games':
+        abs = []
+        for d in x:
+            pos = d[1].find(':')
+            if pos == -1:
+                abs.append((d[0], os.path.abspath(d[1]), d[2]))
+            else:
+                if pos > d[1].find('/'):                        
+                    abs.append((d[0], os.path.abspath(d[1]), d[2]))
+                else:
+                    abs.append((d[0], d[1][0:pos+1] + os.path.abspath(d[1][pos+1:]), d[2]))
+        exec ('%s = abs' % n)
+    else:
         # The algorithm doesn't work for GAMES_ITEMS, so we leave it out
         abs = []
         for d in x:
