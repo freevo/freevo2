@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2003/07/12 15:50:46  dischi
+# get alignment size from rendered layer
+#
 # Revision 1.66  2003/07/12 14:30:14  outlyer
 # Changed to Vera for default font.
 #
@@ -800,16 +803,8 @@ class OSD:
         for w, l in lines:
             if not l:
                 continue
-            if align_h == 'left' or align_h == 'justified' or not align_h:
-                x0 = x
-            elif align_h == 'right':
-                x0 = x + (width - w)
-            elif align_h == 'center':
-                x0 = x + int((width-w)/2)
-            else:
-                #print 'what align_h is that: %s' % align_h
-                x0 = x
 
+            x0 = x
             if layer != '':
                 try:
                     # render the string. Ignore all the helper functions for that
@@ -817,7 +812,12 @@ class OSD:
                     # in here. But we don't use the cache, but since the skin only
                     # redraws changed areas, it doesn't matter and saves the time
                     # when searching the cache
-                    layer.blit(font.font.render(l, 1, self._sdlcol(fgcolor)), (x0, y0))
+                    render = font.font.render(l, 1, self._sdlcol(fgcolor))
+                    if align_h == 'right':
+                        x0 = x + width - render.get_size()[0]
+                    elif align_h == 'center':
+                        x0 = x + int((width - render.get_size()[0]) / 2)
+                    layer.blit(render, (x0, y0))
                 except:
                     print "Render failed, skipping..."    
             if x0 < min_x:
