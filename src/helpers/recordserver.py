@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/06 15:12:53  rshortt
+# Now using plugin.init_special_plugin() to load the recording plugin.
+#
 # Revision 1.4  2003/09/05 20:27:18  rshortt
 # Changing the filename again for consistencies sake.
 #
@@ -90,19 +93,8 @@ appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 logfile = '%s/internal-%s-%s.log' % (config.LOGDIR, appname, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
+plugin.init_special_plugin(config.plugin_record)
 
-def load_plugin(id):
-    for name, type, level, args, number in plugin.__all_plugins__:
-        if number == int(id):
-            if DEBUG: print 'loading %s' % name
-            plugin.__plugin_basedir__ = os.environ['FREEVO_PYTHON']
-            plugin.__load_plugin__(name, type, level, args, number)
-            return
-
-load_plugin(config.plugin_record)
-
-
-## Note: config.RECORD_SCHEDULE is an xml file.
 
 class RecordServer(xmlrpc.XMLRPC):
 
