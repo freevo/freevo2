@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/19 21:24:59  dischi
+# small changes at the plugin interface
+#
 # Revision 1.5  2003/04/18 15:01:37  dischi
 # support more types of plugins and removed the old item plugin support
 #
@@ -50,6 +53,7 @@
 
 
 import os
+import traceback
 
 TRUE  = 1
 FALSE = 0
@@ -83,24 +87,18 @@ class DaemonPlugin(Plugin):
     """
     Plugin class for daemon objects who will be activae in the
     background while Freevo is running
+
+    A DaemonPlugin can have the following functions:
+    def poll(self):
+        this function will be called every 0.1 seconds
+    def draw(self):
+        this function will be caleed to update the screen
+    def eventhandler(self, event):
+        events no one else wants will be passed to this functions
     """
     def __init__(self):
         Plugin.__init__(self)
         self._type   = 'daemon'
-
-    def poll(self):
-        """
-        This function will be called every 0.1 seconds
-        """
-        pass
-
-    def refresh(self):
-        """
-        This function will be called after a screen redraw from skin
-        """
-        pass
-    
-
 
 
 
@@ -165,6 +163,9 @@ def init():
             module  = 'plugins.%s' % module
             object  = 'plugins.%s' % name
             special = None
+        elif os.path.isfile('src/%s.py' % module):
+            object  = name
+            special = None
         elif os.path.isfile('src/%s/plugins/%s.py' % (module, name[name.rfind('.')+1:])):
             special = module
             module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
@@ -201,16 +202,17 @@ def init():
             else:
                 type.append(p)
 
-#         except ImportError:
-#             print 'failed to import plugin %s' % name
-            
-#         except AttributeError:
-#             print 'failed to load plugin %s' % name
+        except:
+            print 'failed to load plugin %s' % name
+            traceback.print_exc()
 
-        except TypeError:
-            print 'wrong number of parameter for %s' % name
-
-
+    if ptl.has_key('daemon'):
+        for type in ('poll', 'draw', 'eventhandler' ):
+            ptl['daemon_%s' % type] = []
+            for p in ptl['daemon']:
+                if hasattr(p, type):
+                    ptl['daemon_%s' % type].append(p)
+                   
 #                
 # get the plugin list 'type'
 #
@@ -221,3 +223,18 @@ def get(type):
         ptl[type] = []
 
     return ptl[type]
+
+#
+# create plugin event
+#
+def event(name):
+    return 'PLUGIN_EVENT %s' % name
+
+#
+# plugin event parsing
+#
+def isevent(event):
+    if event[:12] == 'PLUGIN_EVENT':
+        return event[13:]
+    else:
+        return None

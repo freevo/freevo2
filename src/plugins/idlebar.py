@@ -7,12 +7,12 @@
 # Notes:
 #   To activate the idle bar, put the following in your local_config.py
 #
-#   plugin.activate('idlebar.interface', 'daemon', 10, None)
+#   plugin.activate('idlebar.interface')
 #   
-#   plugin.activate('idlebar.mail',    'idlebar', 10, ('/var/spool/mail/dmeyer', ))
-#   plugin.activate('idlebar.tv',      'idlebar', 20, None)
-#   plugin.activate('idlebar.weather', 'idlebar', 30, None)
-#   plugin.activate('idlebar.clock',   'idlebar', 50, None)
+#   plugin.activate('idlebar.mail',    level=10, args=('/var/spool/mail/dmeyer', ))
+#   plugin.activate('idlebar.tv',      level=20)
+#   plugin.activate('idlebar.weather', level=30)
+#   plugin.activate('idlebar.clock',   level=50)
 #   
 #
 #
@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/19 21:25:00  dischi
+# small changes at the plugin interface
+#
 # Revision 1.2  2003/04/18 10:22:07  dischi
 # You can now remove plugins from the list and plugins know the list
 # they belong to (can be overwritten). level and args are optional.
@@ -81,7 +84,7 @@ class interface(plugin.DaemonPlugin):
         self.plugins = None
 
         
-    def refresh(self):
+    def draw(self):
         if not self.toolbar_surface:
             osd.drawbox(0,0,osd.width,75,color=0x80000000,width=-1)
             self.toolbar_surface = osd.getsurface(0,0,osd.width,75)
@@ -99,7 +102,7 @@ class interface(plugin.DaemonPlugin):
     def poll(self):
         self.idlecount = self.idlecount + 1
         if (self.idlecount%self.interval) == 0:
-            self.refresh()
+            self.draw()
             self.idlecount = 0
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2003/04/19 21:24:59  dischi
+# small changes at the plugin interface
+#
 # Revision 1.91  2003/04/18 10:22:08  dischi
 # You can now remove plugins from the list and plugins know the list
 # they belong to (can be overwritten). level and args are optional.
@@ -243,14 +246,16 @@ class Skin:
             settings = self.xml_cache[cname]
             if not settings:
                 settings = copy.copy(self.settings)
-                settings.load(file, copy_content, clear=TRUE)
+                if not settings.load(file, copy_content, clear=TRUE):
+                    return None
                 self.xml_cache[cname] = settings
         else:
             cname = '%s%s' % (file, os.stat(file)[stat.ST_MTIME])
             settings = self.xml_cache[cname]
             if not settings:
                 settings = xml_skin.XMLSkin()
-                settings.load(file, copy_content, clear=TRUE)
+                if not settings.load(file, copy_content, clear=TRUE):
+                    return None
                 self.xml_cache[cname] = settings
 
         return settings
@@ -419,7 +424,7 @@ class Skin:
         """
 
         if self.plugin_refresh == None:
-            self.plugin_refresh = plugin.get('daemon')
+            self.plugin_refresh = plugin.get('daemon_draw')
 
         if type == 'menu':
             menuw = object
@@ -480,7 +485,7 @@ class Skin:
 
 
         for p in self.plugin_refresh:
-            p.refresh()
+            p.draw()
 
             
         osd.update()
