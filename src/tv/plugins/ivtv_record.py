@@ -10,6 +10,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/10/15 12:49:53  rshortt
+# Patch from Eirik Meland that stops recording when you remove a recording
+# program from the recording schedule.  There exists a race condition where
+# removing a recording right before it starts recording the entry in the
+# schedule will go away but recording will start anyways.  We should figure
+# out a good way to eliminate this.
+#
+# A similar method should be created for the generic_record.py plugin.
+#
 # Revision 1.13  2003/09/14 03:22:47  outlyer
 # Move some output into 'DEBUG:'
 #
@@ -150,6 +159,8 @@ class Record_Thread(threading.Thread):
                 while time.time() < stop:
                     buf = v_in.read(CHUNKSIZE)
                     v_out.write(buf)
+                    if self.mode == 'stop':
+                        break
 
                 v_in.close()
                 v_out.close()

@@ -6,6 +6,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/10/15 12:49:53  rshortt
+# Patch from Eirik Meland that stops recording when you remove a recording
+# program from the recording schedule.  There exists a race condition where
+# removing a recording right before it starts recording the entry in the
+# schedule will go away but recording will start anyways.  We should figure
+# out a good way to eliminate this.
+#
+# A similar method should be created for the generic_record.py plugin.
+#
 # Revision 1.10  2003/10/13 12:49:46  rshortt
 # Fixed a bad return in findMatches when there was no search string.
 #
@@ -188,6 +197,14 @@ class RecordServer(xmlrpc.XMLRPC):
         scheduledRecordings = self.getScheduledRecordings()
         scheduledRecordings.removeProgram(prog, tv.tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
+        now = time.time()
+        try:
+            recording = prog.isRecording
+        except:
+            recording = FALSE
+
+        if prog.start <= now and prog.stop >= now and recording:
+            plugin.getbyname('RECORD').Stop()
        
         return (TRUE, 'recording removed')
    
