@@ -23,7 +23,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	mkdir `pwd`/Docs/howto
+	mkdir `pwd`/Docs/howto || true
 	-python2.3 setup.py clean
 	rm -f `find . | grep freevo.mo`
 	rm -rf `pwd`/Docs/howto 
@@ -49,7 +49,7 @@ install: build
 	mkdir -p `pwd`/debian/freevo/usr/share/freevo/init/ || true
 	cp `pwd`/boot/webserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
 	cp `pwd`/boot/recordserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
-	echo 'FREEVO_HOME="/usr/bin"'	>	`pwd`/debian/freevo/etc/freevo/
+	echo 'FREEVO_HOME="/usr/bin"'	>	`pwd`/debian/freevo/etc/freevo/boot_config
     
 # Build architecture-independent files here.
 binary-indep: build install
@@ -68,6 +68,7 @@ binary-arch: build install
 	dh_installdocs $(doclist)
 	dh_installmenu
 	dh_installchangelogs 
+	db_installdebconf
 	dh_python
 	dh_link
 	dh_strip

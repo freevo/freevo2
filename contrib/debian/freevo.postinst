@@ -1,14 +1,37 @@
-#!/bin/sh
-#
+#!/bin/sh -e
 
+action="$1"
 CONFIG_FILE=/etc/freevo/local_conf.py
 SYSTEM_CONF=/etc/freevo/freevo.conf
 LIRCRC=/etc/freevo/lircrc
 
+. /usr/share/debconf/confmodule
+db_version 2.0
+
+
+write_freevoconf() {
+    db_get freevo/display
+    display="$RET"
+    db_get freevo/geometry
+    geometry="$RET"
+    db_get freevo/norm
+    norm="$RET"
+    db_get freevo/chanlist
+    chanlist="$RET"
+    freevo setup --geometry="$geometry" --display="$display" --tv="$norm" --chanlist="$chanlist" --sysfirst > /dev/null
+
+}
+
 case "$1" in
     configure)
         if [ ! -f $CONFIG_FILE ] ; then cp /usr/share/doc/freevo/local_conf.py.example $CONFIG_FILE; fi
-        if [ ! -f $SYSTEM_CONF ] ; then echo "Make sure you run 'freevo setup' after the package is installed"; fi
+        if [ ! -f $SYSTEM_CONF ] ; then 
+            echo "No configuration file found, using debconf answers"
+            write_freevoconf
+            echo "If your system changes, you can reconfigure freevo by typing:"
+            echo "dpkg-reconfigure freevo"
+            echo "(as root)"
+            fi
         if [ ! -f $LIRCRC ];       then echo "Make sure you run 'freevo makelircrc' after the package is installed"; fi
     ;;
 esac
