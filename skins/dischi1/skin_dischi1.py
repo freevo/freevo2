@@ -1,95 +1,21 @@
 #if 0
 # -----------------------------------------------------------------------
-# skin_main.py - Freevo main skin no 1
+# skin_dischi1.py - Freevo skin from Dischi
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:   This is the default skin
+# Notes:   This is the dischi1 skin
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/10/12 19:00:55  dischi
+# deactivated the movie box since we don't have informations for this
+# right now.
+#
 # Revision 1.12  2002/10/12 18:45:25  dischi
 # New skin, Work in progress
 #
-# Revision 1.3  2002/10/08 20:37:30  outlyer
-# Updated to use my fancy popup box; since I updated the TV code to use
-# the skin.Popup, all the popups look the same per skin.
-#
-# Revision 1.2  2002/10/08 15:25:29  outlyer
-# Moved the logo to the upper left corner; looks cleaner and doesn't
-# interfere with the menus
-#
-# Revision 1.1  2002/10/07 04:39:44  outlyer
-# Continuing to fix the stupid mistake I made.
-#
-# Revision 1.1  2002/10/07 04:33:55  outlyer
-# Crap. I think I just overwrote the default skin because I forgot to rename my skin to
-# skin_aubin1. I'll revert in a second. Argh.
-#
-# Revision 1.36  2002/10/07 04:16:35  outlyer
-# The rough draft of the skin I showed some screenshots of. It uses the images
-# I just added to create some nice alpha masking. You'll also need a bunch of
-# things which I can't commit if you want to get the exact look:
-# 1. Arial_Bold.ttf - get it from a Windows box, or if you have the Truetype font
-# package from Microsoft
-# 2. the MythTV background - get it from them; they won't let us use it.
-#
-# There will also be a seperate XML file which I'll commit in a minute.
-#
-# Revision 1.35  2002/10/06 14:35:19  dischi
-# log message cleanup and removed a debug message
-#
-# Revision 1.34  2002/10/05 18:16:37  dischi
-# Don't copy settings, we want to override it
-#
-# Revision 1.33  2002/10/05 18:10:56  dischi
-# Added support for a local_skin.xml file. See Docs/documentation.html
-# section 4.1 for details. An example is also included.
-#
-# Revision 1.32  2002/10/05 17:25:45  dischi
-# Added ability to display shadows for title as well (deactivated in the
-# xml file)
-#
-# Revision 1.31  2002/09/27 08:43:38  dischi
-# removed 2 debugs again, this makes no sense.
-#
-# Revision 1.30  2002/09/27 08:39:10  dischi
-# More debug for error location
-#
-# Revision 1.29  2002/09/26 09:20:58  dischi
-# Fixed (?) bug when using freevo_runtime. Krister, can you take a look
-# at that?
-#
-# Revision 1.28  2002/09/25 18:53:43  dischi
-# Added border around the cover image (set by the xml file border_size
-# and border_color)
-#
-# Revision 1.27  2002/09/24 02:17:00  gsbarbieri
-# In DrawMP3 changed the layout, now the labels ('Title: ', 'Author: ', ...) are right aligned.
-#
-# Revision 1.26  2002/09/23 19:01:06  dischi
-# o Added alignment from the xml file for fonts
-# o Added PopupBox from gui classes (looks better)
-# o cleanup: improved DrawText(...) and now the code looks much
-#   better, also alignment works for all texts
-#
-# Revision 1.25  2002/09/23 18:16:48  dischi
-# removed shadow mode
-#
-# Revision 1.24  2002/09/22 09:54:31  dischi
-# XML cleanup. Please take a look at the new skin files to see the new
-# structure. The 640x480 skin is also workin now, only one small bug
-# in the submenu (seems there is something hardcoded).
-#
-# Revision 1.23  2002/09/21 10:08:53  dischi
-# Added the function PopupBox. This function is identical with
-# osd.popup_box, but drawing a popup box should be part of the skin.
-#
-# Revision 1.22  2002/09/20 19:18:59  dischi
-# o added ItemsPerMenuPage and adapted some stuff that it works
-# o integrated the tv show alignment from dischi1 (testfiles needed to show
-#   that feature)
 #
 #
 # -----------------------------------------------------------------------
@@ -135,16 +61,7 @@ import osd,pygame
 # XXX Krister, please change this to 1 and start freevo with and
 # without the runtime. Very strange.
 
-SHOW_FREEVO_RUNTIME_BUG=0
-
-if not SHOW_FREEVO_RUNTIME_BUG:
-    sys.path.append(os.path.abspath('./gui'))
-    from Color import Color
-    from PopupBox import PopupBox
-    from Label import Label
-    
-else:
-    import gui
+import gui
 
     
 # The RemoteControl class, sets up a UDP daemon that the remote control client
@@ -339,7 +256,8 @@ class Skin:
                         osd.drawbitmap(util.resize(image, val.cover_movie.width, \
                                                    val.cover_movie.height),\
                                        val.cover_movie.x, val.cover_movie.y)
-			osd.drawbitmap('skins/images/moviebox.png',-1,-1)
+                        # deactivate it until we have the info for this
+			# osd.drawbitmap('skins/images/moviebox.png',-1,-1)
                         i_val = val.cover_movie
 
                 elif type == 'music' and val.cover_music.visible:
