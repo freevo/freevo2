@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2003/12/30 15:29:04  dischi
+# support for OVERLAY_DIR_STORE_THUMBNAILS
+#
 # Revision 1.111  2003/12/07 14:48:49  dischi
 # clean up the busy icon
 #
@@ -26,7 +29,8 @@
 # move objectcache to util
 #
 # Revision 1.106  2003/11/23 19:48:59  krister
-# Added optional new blend settings (nr of steps and total time), must be enabled explicitly in freevo_config
+# Added optional new blend settings (nr of steps and total time), must be
+# enabled explicitly in freevo_config
 #
 # Revision 1.105  2003/11/23 18:44:37  krister
 # Fixed blending bug where the final update contained a shadow of the previous image.
@@ -1138,38 +1142,46 @@ class OSD:
             if thumbnail:
                 sinfo = os.stat(filename)
                 if sinfo[stat.ST_SIZE] > 10000:
-                    m = md5.new(filename)
-                    thumb = os.path.join('%s/thumbnails/%s.raw' % \
-                                         (config.FREEVO_CACHEDIR,
-                                          util.hexify(m.digest())))
+                    if config.OVERLAY_DIR_STORE_THUMBNAILS:
+                        thumb = vfs.getoverlay(filename + '.raw')
+                    else:
+                        thumb = os.path.join('%s/thumbnails/%s.raw' % \
+                                             (config.FREEVO_CACHEDIR,
+                                              util.hexify(md5.new(filename).digest())))
                     data = None
-                    if os.path.isfile(thumb):
-                        tinfo = os.stat(thumb)
-                        if tinfo[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-                            data = util.read_pickle(thumb)
-
+                    if os.path.isfile(thumb) and \
+                           os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                        data = util.read_pickle(thumb)
+                            
                     if not data:
                         f=open(filename, 'rb')
                         tags=exif.process_file(f)
                         f.close()
-                        
+
                         if tags.has_key('JPEGThumbnail'):
                             image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
                         else:
                             # convert with Imaging, pygame doesn't work
                             image = Image.open(filename)
 
-                        image.thumbnail((300,300))
+                        if image.size[0] > 300 and image.size[1] > 300:
+                            image.thumbnail((300,300))
 
                         if image.mode == 'P':
                             image = image.convert('RGB')
 
                         # save for future use
-                        data = (filename, image.tostring(), image.size, image.mode)
-                        util.save_pickle(data, thumb)
-
+                        if config.OVERLAY_DIR_STORE_THUMBNAILS:
+                            data = (image.tostring(), image.size, image.mode)
+                            util.save_pickle(data, thumb)
+                        else:
+                            data = (filename, image.tostring(), image.size, image.mode)
+                            util.save_pickle(data, thumb)
+                            
+                    if not config.OVERLAY_DIR_STORE_THUMBNAILS:
+                        data = data[1:]
                     # convert to pygame image
-                    image = pygame.image.fromstring(data[1], data[2], data[3])
+                    image = pygame.image.fromstring(data[0], data[1], data[2])
 
             try:
                 if not image:

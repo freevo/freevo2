@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/12/30 15:28:34  dischi
+# support for OVERLAY_DIR_STORE_THUMBNAILS
+#
 # Revision 1.8  2003/12/12 19:11:20  dischi
 # rewrote find_matches. It's not 100% correct because it doesn't use splitext
 # anymore, but it's _much_ faster now.
@@ -35,7 +38,6 @@
 #
 # Revision 1.1  2003/10/11 11:20:11  dischi
 # move util.py into a directory and split it into two files
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -417,10 +419,11 @@ def read_pickle(file):
         except:
             data = pickle.load(f)
         f.close()
-        try:
-            os.utime(file, None)
-        except OSError:
-            _debug_('can change access time for %s' % file)
+        if not config.OVERLAY_DIR_STORE_THUMBNAILS:
+            try:
+                os.utime(file, None)
+            except OSError:
+                _debug_('can change access time for %s' % file)
         return data
     except:
         return None
