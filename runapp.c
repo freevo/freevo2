@@ -23,8 +23,13 @@
 #include <sched.h>
 #include <time.h>
 #include <errno.h>
+#ifdef __FreeBSD__
+#include <unistd.h>
+#include <sys/imgact_aout.h>
+#define N_MAGIC(x) N_GETMAGIC(x)
+#else
 #include <linux/a.out.h>
-
+#endif
 
 #define LOG(str, args...) {                                             \
   static char tmp1[1000];                                               \
