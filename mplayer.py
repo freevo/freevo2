@@ -75,7 +75,19 @@ class MPlayer:
     def play(self, mode, filename, playlist):
 
         if mode == 'video':
+
+            # Mplayer command and standard arguments
             mpl = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_MPG
+            
+            # Some files needs special arguments to mplayer, they can be
+            # put in a <filename>.mplayer options file. The <filename>
+            # includes the suffix (.avi, etc)!
+            # The arguments in the options file are added at the end of the
+            # regular mplayer arguments.
+            if os.path.isfile(filename + '.mplayer'):
+                mpl += (' ' + open(filename + '.mplayer').read().strip())
+                if DEBUG: print 'Read options, mpl = "%s"' % mpl
+                
             command = mpl + ' "' + filename + '"'
         elif mode == 'dvdnav':
             command = config.MPLAYER_CMD + ' ' + config.MPLAYER_ARGS_DVDNAV
