@@ -30,8 +30,6 @@ from pygame.locals import *
 # Set to 1 for debug output
 DEBUG = 0
 
-print 'XXXXXX LOADING TEST OSD'
-
 help_text = """
 F1      SLEEP
 HOME    MENU
@@ -362,7 +360,6 @@ class OSD:
                 # Move to front of FIFO
                 del self.stringcache[i]
                 self.stringcache.append((csurf, cstring, cfont, cfgcolor, cbgcolor))
-                print 'STRING: Found "%s"' % string
                 return csurf
 
         # Render string with anti-aliasing
@@ -371,8 +368,6 @@ class OSD:
         else:
             surf = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
 
-        print 'STRING: missing "%s"' % string
-        
         # Store the surface in the FIFO
         self.stringcache.append((surf, string, f, fgcolor, bgcolor))
         if len(self.stringcache) > 100:
