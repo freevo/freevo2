@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2003/12/30 15:34:02  dischi
+# o move the shutdown function to plugins/shutdown
+# o merge the two parts of the main function
+#
 # Revision 1.99  2003/12/10 19:01:29  dischi
 # changes to the new Event.handler and Childapp2
 #
@@ -63,7 +67,6 @@ import traceback
 import signal
 
 
-
 # i18n support
 
 # First load the xml module. It's not needed here but it will mess
@@ -109,6 +112,7 @@ import rc      # The RemoteControl class.
 
 from item import Item
 from event import *
+from plugins.shutdown import shutdown
 
 
 # Create the remote control object
@@ -120,95 +124,6 @@ osd = osd.get_singleton()
 # Create the skin object
 skin = skin.get_singleton()
 
-
-
-def shutdown(menuw=None, arg=None, allow_sys_shutdown=True, exit=False):
-    """
-    function to shut down freevo or the whole system
-    """
-    if not osd.active:
-        # this function is called from the signal handler, but
-        # we are dead already.
-        sys.exit(0)
-
-    import plugin
-    import childapp
-    osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstringframed(_('shutting down...'), 0, 0, osd.width, osd.height,
-                         osd.getfont(config.OSD_DEFAULT_FONTNAME,
-                                     config.OSD_DEFAULT_FONTSIZE),
-                         fgcolor=osd.COL_ORANGE, align_h='center', align_v='center')
-    osd.update()
-
-    time.sleep(0.5)
-
-    if arg == None:
-        sys_shutdown = allow_sys_shutdown and 'ENABLE_SHUTDOWN_SYS' in dir(config)
-    else:
-        sys_shutdown = arg
-
-    # XXX temporary kludge so it won't break on old config files
-    if sys_shutdown:  
-        if config.ENABLE_SHUTDOWN_SYS:
-            # shutdown dual head for mga
-            if config.CONF.display == 'mga':
-                os.system('%s runapp matroxset -f /dev/fb1 -m 0' % \
-                          os.environ['FREEVO_SCRIPT'])
-                time.sleep(1)
-                os.system('%s runapp matroxset -f /dev/fb0 -m 1' % \
-                          os.environ['FREEVO_SCRIPT'])
-                time.sleep(1)
-
-            plugin.shutdown()
-            childapp.shutdown()
-            osd.shutdown()
-
-            os.system(config.SHUTDOWN_SYS_CMD)
-            # let freevo be killed by init, looks nicer for mga
-            while 1:
-                time.sleep(1)
-            return
-
-    #
-    # Exit Freevo
-    #
-    
-    # Shutdown any daemon plugins that need it.
-    plugin.shutdown()
-
-    # Shutdown all children still running
-    childapp.shutdown()
-
-    # SDL must be shutdown to restore video modes etc
-    osd.clearscreen(color=osd.COL_BLACK)
-    osd.shutdown()
-
-    if exit:
-        # realy exit, we are called by the signal handler
-        sys.exit(0)
-
-    os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
-
-    # Just wait until we're dead. SDL cannot be polled here anyway.
-    while 1:
-        time.sleep(1)
-        
-
-
-def get_main_menu(parent):
-    """
-    function to get the items on the main menu based on the settings
-    in the skin
-    """
-
-    import plugin
-
-    items = []
-    for p in plugin.get('mainmenu'):
-        items += p.items(parent)
-        
-    return items
-    
 
 class SkinSelectItem(Item):
     """
@@ -227,13 +142,19 @@ class SkinSelectItem(Item):
         """
         Load the new skin and rebuild the main menu
         """
+        import plugin
         skin.settings = skin.load(self.skin, copy_content = False)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
-        menuw.menustack[0].choices = get_main_menu(self.parent)
+
+        menuw.menustack[0].choices = []
+        for p in plugin.get('mainmenu'):
+            menuw.menustack[0].choices += p.items(parent)
+
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
         menuw.back_one_menu()
 
         
+
 class MainMenu(Item):
     """
     this class handles the main menu
@@ -242,8 +163,11 @@ class MainMenu(Item):
         """
         Setup the main menu and handle events (remote control, etc)
         """
+        import plugin
         menuw = menu.MenuWidget()
-        items = get_main_menu(self)
+        items = []
+        for p in plugin.get('mainmenu'):
+            items += p.items(self)
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         menuw.pushmenu(mainmenu)
@@ -313,14 +237,125 @@ class Splashscreen(skin.Area):
 
 
 def signal_handler(sig, frame):
+    """
+    the signal handler to shut down freevo
+    """
     if sig in (signal.SIGTERM, signal.SIGINT):
-        shutdown(allow_sys_shutdown=0, exit=True)
+        shutdown(exit=True)
+
+
+
+def tracefunc(frame, event, arg, _indent=[0]):
+    """
+    function to trace everything inside freevo for debugging
+    """
+    if event == 'call':
+        filename = frame.f_code.co_filename
+        funcname = frame.f_code.co_name
+        lineno = frame.f_code.co_firstlineno
+        if 'self' in frame.f_locals:
+            try:
+                classinst = frame.f_locals['self']
+                classname = repr(classinst).split()[0].split('(')[0][1:]
+                funcname = '%s.%s' % (classname, funcname)
+            except:
+                pass
+        here = '%s:%s:%s()' % (filename, lineno, funcname)
+        _indent[0] += 1
+        tracefd.write('%4s %s%s\n' % (_indent[0], ' ' * _indent[0], here))
+        tracefd.flush()
+    elif event == 'return':
+        _indent[0] -= 1
+
+    return tracefunc
+
+
+
 
 
 #
-# Main init
+# Freevo main function
 #
-def main_func():
+
+# parse arguments
+if len(sys.argv) >= 2:
+
+    # force fullscreen mode
+    # deactivate screen blanking and set osd to fullscreen
+    if sys.argv[1] == '-force-fs':
+        os.system('xset -dpms s off')
+        config.START_FULLSCREEN_X = 1
+
+    # activate a trace function
+    if sys.argv[1] == '-trace':
+        tracefd = open(os.path.join(config.LOGDIR, 'trace.txt'), 'w')
+        sys.settrace(tracefunc)
+        config.DEBUG = 2
+
+    # create api doc for Freevo and move it to Docs/api
+    if sys.argv[1] == '-doc':
+        import pydoc
+        import re
+        for file in util.match_files_recursively('src/', ['py' ]):
+            # doesn't work for everything :-(
+            if file not in ( 'src/tv/record_server.py', ) and \
+                   file.find('src/www') == -1 and \
+                   file.find('src/helpers') == -1:
+                file = re.sub('/', '.', file)
+                try:
+                    pydoc.writedoc(file[4:-3])
+                except:
+                    pass
+        try:
+            os.mkdir('Docs/api')
+        except:
+            pass
+        for file in util.match_files('.', ['html', ]):
+            print 'moving %s' % file
+            os.rename(file, 'Docs/api/%s' % file)
+        print
+        print 'wrote api doc to \'Docs/api\''
+        shutdown(exit=True)
+
+
+
+# setup mmpython
+mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
+if not os.path.isdir(mmcache):
+    os.mkdir(mmcache)
+
+mmpython.use_cache(mmcache)
+if config.DEBUG > 2:
+    mmpython.mediainfo.DEBUG = config.DEBUG
+    mmpython.factory.DEBUG   = config.DEBUG
+else:
+    mmpython.mediainfo.DEBUG = 0
+    mmpython.factory.DEBUG   = 0
+
+mmpython.USE_NETWORK = config.USE_NETWORK
+
+if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
+    print '\nWARNING: no pre-cached data'
+    print 'Freevo will cache each directory when you first enter it. This can'
+    print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
+    print 'up usage of freevo'
+    print
+
+if config.OVERLAY_DIR_STORE_MMPYTHON_DATA and mmpython.object_cache and \
+       hasattr(mmpython.object_cache, 'md5_cachedir'):
+    _debug_('use OVERLAY_DIR for mmpython cache')
+    mmpython.object_cache.md5_cachedir = False
+    mmpython.object_cache.cachedir     = config.OVERLAY_DIR
+
+
+os.umask(config.UMASK)
+
+# start
+try:
+    # signal handler
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     # load the fxditem to make sure it's the first in the
     # mimetypes list
     import fxditem
@@ -339,10 +374,6 @@ def main_func():
 
     # prepare again, now that all plugins are loaded
     skin.prepare()
-
-    # signal handler
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
 
     # start menu
     MainMenu().getcmd()
@@ -414,11 +445,11 @@ def main_func():
                 try:
                     app.eventhandler(event)
                 except SystemExit:
-                    return
+                    raise SystemExit
                 except:
                     if config.FREEVO_EVENTHANDLER_SANDBOX:
                         traceback.print_exc()
-                        from gui.AlertBox import AlertBox
+                        from gui import AlertBox
                         pop = AlertBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
                                               'look at the logfile and report the bug to ' \
                                               'the Freevo mailing list. The state of '\
@@ -432,137 +463,45 @@ def main_func():
                         raise 
             else:
                 _debug_('no target for events given')
-                
-#
-# Main function
-#
-if __name__ == "__main__":
-
-    def tracefunc(frame, event, arg, _indent=[0]):
-        if event == 'call':
-            filename = frame.f_code.co_filename
-            funcname = frame.f_code.co_name
-            lineno = frame.f_code.co_firstlineno
-            if 'self' in frame.f_locals:
-                try:
-                    classinst = frame.f_locals['self']
-                    classname = repr(classinst).split()[0].split('(')[0][1:]
-                    funcname = '%s.%s' % (classname, funcname)
-                except:
-                    pass
-            here = '%s:%s:%s()' % (filename, lineno, funcname)
-            _indent[0] += 1
-            tracefd.write('%4s %s%s\n' % (_indent[0], ' ' * _indent[0], here))
-            tracefd.flush()
-        elif event == 'return':
-            _indent[0] -= 1
-
-        return tracefunc
 
 
-    if len(sys.argv) >= 2:
 
-        if sys.argv[1] == '-force-fs':
-            os.system('xset -dpms s off')
-            config.START_FULLSCREEN_X = 1
+except KeyboardInterrupt:
+    print 'Shutdown by keyboard interrupt'
+    # Shutdown the application
+    shutdown()
 
-        
-        if sys.argv[1] == '-trace':
-            tracefd = open(os.path.join(config.LOGDIR, 'trace.txt'), 'w')
-            sys.settrace(tracefunc)
-            config.DEBUG = 2
+except SystemExit:
+    sys.exit(0)
 
-        
-        if sys.argv[1] == '-doc':
-            import pydoc
-            import re
-            for file in util.match_files_recursively('src/', ['py' ]):
-                # doesn't work for everything :-(
-                if file not in ( 'src/tv/record_server.py', ) and \
-                       file.find('src/www') == -1 and \
-                       file.find('src/helpers') == -1:
-                    file = re.sub('/', '.', file)
-                    try:
-                        pydoc.writedoc(file[4:-3])
-                    except:
-                        pass
-            try:
-                os.mkdir('Docs/api')
-            except:
-                pass
-            for file in util.match_files('.', ['html', ]):
-                print 'moving %s' % file
-                os.rename(file, 'Docs/api/%s' % file)
-            print
-            print 'wrote api doc to \'Docs/api\''
-            shutdown(allow_sys_shutdown=False, exit=True)
-
-
-            
-    # setup mmpython
-    mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
-    if not os.path.isdir(mmcache):
-        os.mkdir(mmcache)
-
-    mmpython.use_cache(mmcache)
-    if config.DEBUG > 2:
-        mmpython.mediainfo.DEBUG = config.DEBUG
-        mmpython.factory.DEBUG   = config.DEBUG
-    else:
-        mmpython.mediainfo.DEBUG = 0
-        mmpython.factory.DEBUG   = 0
-        
-    mmpython.USE_NETWORK = config.USE_NETWORK
-    
-    if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
-        print '\nWARNING: no pre-cached data'
-        print 'Freevo will cache each directory when you first enter it. This can'
-        print 'be slow. Start "./freevo cache" to pre-cache all directories to speed'
-        print 'up usage of freevo'
-        print
-
-
-    # start
+except:
+    print 'Crash!'
     try:
-        main_func()
-    except KeyboardInterrupt:
-        print 'Shutdown by keyboard interrupt'
-        # Shutdown the application
-        shutdown(allow_sys_shutdown=0)
+        tb = sys.exc_info()[2]
+        fname, lineno, funcname, text = traceback.extract_tb(tb)[-1]
 
-    except SystemExit:
-        sys.exit(0)
+        if config.FREEVO_EVENTHANDLER_SANDBOX:
+            secs = 5
+        else:
+            secs = 1
+        for i in range(secs, 0, -1):
+            osd.clearscreen(color=osd.COL_BLACK)
+            osd.drawstring(_('Freevo crashed!'), 70, 70, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(_('Filename: %s') % fname, 70, 130, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(_('Lineno: %s') % lineno, 70, 160, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(_('Function: %s') % funcname, 70, 190, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(_('Text: %s') % text, 70, 220, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(str(sys.exc_info()[1]), 70, 280, fgcolor=osd.COL_ORANGE)
+            osd.drawstring(_('Please see the logfiles for more info'), 70, 350,
+                           fgcolor=osd.COL_ORANGE)
+            osd.drawstring(_('Exit in %s seconds') % i, 70, 410, fgcolor=osd.COL_ORANGE)
+            osd.update()
+            time.sleep(1)
 
     except:
-        print 'Crash!'
-        try:
-            tb = sys.exc_info()[2]
-            fname, lineno, funcname, text = traceback.extract_tb(tb)[-1]
-            
-            for i in range(1, 0, -1):
-                osd.clearscreen(color=osd.COL_BLACK)
-                osd.drawstring(_('Freevo crashed!'), 70, 70,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring(_('Filename: %s') % fname, 70, 130,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring(_('Lineno: %s') % lineno, 70, 160,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring(_('Function: %s') % funcname, 70, 190,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring(_('Text: %s') % text, 70, 220,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.drawstring(_('Please see the logfiles for more info'), 70, 280,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                
-                osd.drawstring(_('Exit in %s seconds') % i, 70, 340,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-                osd.update()
-                time.sleep(1)
+        pass
+    traceback.print_exc()
 
-        except:
-            pass
-        traceback.print_exc()
-
-        # Shutdown the application, but not the system even if that is
-        # enabled
-        shutdown(allow_sys_shutdown=0)
+    # Shutdown the application, but not the system even if that is
+    # enabled
+    shutdown()
