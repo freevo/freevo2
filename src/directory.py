@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/12/10 13:14:24  rshortt
+# Fix a typo.
+#
 # Revision 1.74  2003/12/08 20:37:33  dischi
 # merged Playlist and RandomPlaylist into one class
 #
@@ -438,7 +441,7 @@ class DirItem(Playlist):
 	    print 'password protected dir'
             self.arg   = arg
             self.menuw = menuw
-	    pb = PasswordInputBox(text=_('Enter Password'), handler=self.pass_cmp_cp)
+	    pb = PasswordInputBox(text=_('Enter Password'), handler=self.pass_cmp_cb)
 	    pb.show()
 	else:
 	    self.build(arg=arg, menuw=menuw)
