@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/24 18:28:39  mikeruelle
+# add space to store ratings and categories
+#
 # Revision 1.8  2003/08/24 17:08:15  dischi
 # added attr date and use config formatstrings
 #
@@ -73,6 +76,8 @@ class TvProgram:
     sub_title = ''
     start = 0.0
     stop = 0.0
+    ratings = {}
+    categories = []
 
 
     def __str__(self):
