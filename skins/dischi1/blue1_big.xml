@@ -323,11 +323,11 @@
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
       <title visible="no"/>
-      <view layout="player view" visible="no">
-	<area x="430" y="200" width="420" height="360"/> 
+      <view layout="tv view" visible="no">
+	<area x="10" y="10" width="420" height="190"/> 
       </view>
-      <info layout="player info" visible="no">
-	<area x="-50" y="80" width="550" height="300"/> 
+      <info layout="tv info" visible="yes">
+	<area x="10" y="10" width="420" height="190"/> 
       </info>
       <listing layout="tv listing" visible="yes">
 	<area x="10" y="220" width="780" height="370"/> 
@@ -340,7 +340,7 @@
       </background>
     </layout>
 
-    <!-- default listing area -->
+    <!-- tv listing area -->
     <layout label="tv listing">
       <content x="10" type="text" spacing="0">
 
@@ -367,6 +367,21 @@
       </content>
     </layout>
 
+    <!-- tv listing area -->
+    <layout label="tv info">
+      <background>
+	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
+      </background>
+      <content x="10" y="10" height="max-20" width="max-20" type="text"
+	spacing="10" font="white">
+	<item type="default">
+	  @title@
+
+	  @desc@
+	  Test
+	</item>
+      </content>
+    </layout>
 
   </skin>
 </freevo>

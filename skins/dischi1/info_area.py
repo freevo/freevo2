@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/11 20:26:48  dischi
+# Added tv info area. After that day of work, I needed to do something
+# that has a result
+#
 # Revision 1.3  2003/03/07 17:28:18  dischi
 # small fixes
 #
@@ -85,7 +89,7 @@ class Info_Area(Skin_Area):
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
         item      = self.item
 
-        if content.types.has_key(item.type):
+        if hasattr(item, 'type') and content.types.has_key(item.type):
             val = content.types[item.type]
         else:
             val = content.types['default']
@@ -145,29 +149,33 @@ class Info_Area(Skin_Area):
                         self.auto_update += [ ( autoupdate, len(table[0]) - 1) ]
                 else:
                     table[0] += [ line ]
-                    table[1] += [ ' ' ]
+                    table[1] += [ '' ]
 
         x0 = content.x
 
         y_spacing = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] * 1.1
             
-        for col in table:
-            w = 0
-            txt = ''
+        w = 0
+        for row in table[0]:
+            w = max(w, osd.stringsize(row, font=font.name, ptsize=font.size)[0])
+            if x0 + w > content.x + content.width:
+                w = content.x + content.width - x0
 
-            for row in col:
-                w = max(w, osd.stringsize(row, font=font.name, ptsize=font.size)[0])
-                if x0 + w > content.x + content.width:
-                    w = content.x + content.width - x0
-
-            y0 = content.y
-            for row in col:
-                if row:
-                    self.write_text(row, font, content, x=x0, y=y0, width= w + 10,
+        y0 = content.y
+        for i in range(0,len(table[0])):
+            if table[0][i] and not table[1][i]:
+                rec = self.write_text(table[0][i], font, content, x=x0, y=y0, width=w,
+                                      height=content.height + content.y - y0, mode='soft')
+                y0 += rec[3]-rec[1]
+            else:
+                if table[0][i]:
+                    self.write_text(table[0][i], font, content, x=x0, y=y0, width=w,
+                                    height=-1, mode='hard')
+                if table[1][i]:
+                    self.write_text(table[1][i], font, content, x=x0+w+content.spacing, y=y0,
+                                    width=content.width - w - content.spacing,
                                     height=-1, mode='hard')
                 y0 += y_spacing
-                
-            x0 += w + content.spacing
 
         self.last_item = self.item
         self.table = table
