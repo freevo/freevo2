@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/22 22:20:06  dischi
+# fixed table handling
+#
 # Revision 1.9  2003/03/18 09:37:00  dischi
 # Added viewitem and infoitem to the menu to set an item which image/info
 # to take (only for the new skin)
@@ -151,15 +154,17 @@ class Info_Area(Skin_Area):
         y_spacing = font.h * 1.1
             
         w = 0
-        for row in table[0]:
-            w = max(w, osd.stringsize(row, font=font.name, ptsize=font.size)[0])
-            if x0 + w > content.x + content.width:
-                w = content.x + content.width - x0
+        for i in range(0,len(table[0])):
+            if table[1][i]:
+                w = max(w, osd.stringsize(table[0][i], font=font.name, ptsize=font.size)[0])
+                if x0 + w > content.x + content.width:
+                    w = content.x + content.width - x0
 
         y0 = content.y
         for i in range(0,len(table[0])):
             if table[0][i] and not table[1][i]:
-                rec = self.write_text(table[0][i], font, content, x=x0, y=y0, width=w,
+                rec = self.write_text(table[0][i], font, content, x=x0, y=y0,
+                                      width=content.width,
                                       height=content.height + content.y - y0, mode='soft',
                                       return_area = TRUE)
                 y0 += rec[3]-rec[1]
