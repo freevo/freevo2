@@ -8,6 +8,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/13 16:13:23  rshortt
+# Added updateFavoritesSchedule to the interface and make it accessable through
+# the command-line of record_client.py.
+#
 # Revision 1.3  2003/05/13 01:20:22  rshortt
 # Bugfixes.
 #
@@ -429,7 +433,6 @@ class RecordServer(xmlrpc.XMLRPC):
     
     
     def isProgAFavorite(self, prog, favs=None):
-      
         if not favs:
             (status, favs) = self.getFavorites()
     
@@ -448,7 +451,6 @@ class RecordServer(xmlrpc.XMLRPC):
                             return (TRUE, fav.name)
                         elif abs(int(fav.mod) - int(min_of_day)) <= 8:
                             return (TRUE, fav.name)
-                            
     
         # if we get this far prog is not a favorite
         return (FALSE, 'not a favorite')
@@ -505,6 +507,10 @@ class RecordServer(xmlrpc.XMLRPC):
         scheduledRecordings = self.getScheduledRecordings()
     
         (status, favs) = self.getFavorites()
+
+        if not len(favs):
+            return (FALSE, 'there are no favorites to update')
+       
     
         # Then remove all scheduled favorites in that timeframe to
         # make up for schedule changes.
@@ -527,6 +533,8 @@ class RecordServer(xmlrpc.XMLRPC):
                 if isFav:
                     prog.isFavorite = favorite
                     self.scheduleRecording(prog)
+
+        return (TRUE, 'favorites schedule updated')
     
 
     #################################################################
@@ -668,6 +676,12 @@ class RecordServer(xmlrpc.XMLRPC):
         (status, response) = self.addFavoriteToSchedule(fav)
 
         return (status, 'RecordServer::addFavoriteToSchedule: %s' % response)
+
+
+    def xmlrpc_updateFavoritesSchedule(self):
+        (status, response) = self.updateFavoritesSchedule()
+
+        return (status, 'RecordServer::updateFavoritesSchedule: %s' % response)
 
 
     #################################################################

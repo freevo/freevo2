@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/13 16:13:24  rshortt
+# Added updateFavoritesSchedule to the interface and make it accessable through
+# the command-line of record_client.py.
+#
 # Revision 1.3  2003/05/13 01:20:22  rshortt
 # Bugfixes.
 #
@@ -58,7 +62,7 @@
 
 import config
 
-import time
+import time, sys
 import xmlrpclib
 from twisted.persisted import marmalade
 
@@ -201,5 +205,21 @@ def addFavoriteToSchedule(fav):
     (status, message) = server.addFavoriteToSchedule(fav)
     return (status, message) 
 
-# print getScheduledRecordings()
-# print findProg('ATV', '123')
+
+def updateFavoritesSchedule():
+    (status, message) = server.updateFavoritesSchedule()
+    return (status, message) 
+
+
+if __name__ == '__main__':
+    if len(sys.argv) >= 2: 
+        function = sys.argv[1]
+    else:
+        function = 'none'
+
+
+    if function == "updateFavoritesSchedule":
+        (result, response) = updateFavoritesSchedule()
+        print response
+
+
