@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/06/24 08:37:20  dischi
+# add speed warning
+#
 # Revision 1.17  2004/05/31 10:43:20  dischi
 # redraw not only in main, redraw when skin is active
 #
@@ -392,6 +395,12 @@ class weather(IdleBarPlugin):
         self.TEMPUNITS = units
         self.METARCODE = zone
         self.WEATHERCACHE = config.FREEVO_CACHEDIR + '/weather'
+        print
+        print 'WARNING: the idlebar.weather plugin downloads new weather'
+        print 'information inside the main loop. This bug makes all menu'
+        print 'actions _very_ slow. Consider not using this plugin for higher'
+        print 'speed.'
+        print
 
 
     def checkweather(self):
