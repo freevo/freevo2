@@ -129,7 +129,7 @@ class Skin(skin_test1.Skin):
                     if type == 'photo':
                         image = util.getExifThumbnail(image, 200, 150)
                     else:
-                        image = util.resize(image, 200, 280)
+                        if image != None: image = util.resize(image, 200, 280)
 
 		if choice.icon != None and choice.popup:
 			(w, h) = util.pngsize(choice.icon)
