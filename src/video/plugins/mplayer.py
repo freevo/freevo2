@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/06 20:21:10  outlyer
+# Removed more debug statements and extraneous log messages.
+#
 # Revision 1.3  2003/07/01 21:47:35  outlyer
 # Made a check to see if file exists before unlinking.
 #
@@ -408,12 +411,12 @@ class MPlayer:
                 self.seek_timer.cancel()
                 self.seek *= 60
                 self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
-                print "seek "+str(self.seek)+" 2\n"
+                if DEBUG: print "seek "+str(self.seek)+" 2\n"
                 self.seek = 0
                 return TRUE
 
             elif event == INPUT_QUIT:
-                print 'seek stopped'
+                if DEBUG: print 'seek stopped'
                 self.seek_timer.cancel()
                 self.seek = 0
                 return TRUE
@@ -441,7 +444,6 @@ class MPlayer:
             handle.write(str(self.item.elapsed))
             handle.write('\n')
             handle.close()
-            print "Added bookmark at position " + str(self.item.elapsed)
             return TRUE
 
         if event in ( STOP, PLAY_END, USER_END, DVD_PROTECTED ):
@@ -497,7 +499,7 @@ class MPlayer:
 
     
     def reset_seek(self):
-        print 'seek timeout'
+        if DEBUG: print 'seek timeout'
         self.seek = 0
         rc.set_context('video')
         
@@ -537,7 +539,6 @@ class MPlayerParser:
                 rc.post_event(Event('AUDIO_ERROR_START_AGAIN'))
                 
         if self.RE_START(line):
-            print 'data parsing done'
             if self.check_audio == 1:
                 # audio seems to be ok
                 self.item.mplayer_audio_broken = FALSE
@@ -659,11 +660,9 @@ class MPlayer_Thread(threading.Thread):
                 # and MPlayer.
                 if (osd.sdl_driver == 'dxr3' or \
                     config.CONF.display == 'dfbmga'):
-                    print "Stopping Display for Video Playback"
+                    if DEBUG: print "Stopping Display for Video Playback"
                     osd.stopdisplay()
                
-                os.system('/usr/sbin/matroxcolor')
-
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -687,10 +686,8 @@ class MPlayer_Thread(threading.Thread):
                 if osd.sdl_driver == 'dxr3' or config.CONF.display == 'dfbmga':
                     osd.restartdisplay()
 		    osd.update()
-		    print "Display back online"
+		    if DEBUG: print "Display back online"
                 
-                os.system('/usr/sbin/undomatroxcolor')
-
                 self.mode = 'idle'
                 
             else:
