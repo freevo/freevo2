@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/14 19:20:59  dischi
+# fix future warning
+#
 # Revision 1.3  2004/11/13 16:07:54  dischi
 # fix ioctl future warning for now
 #
@@ -64,25 +67,31 @@ _IOC_NONE = 0
 _IOC_WRITE = 1
 _IOC_READ = 2
 
+def unsiged(x):
+    if x > sys.maxint:
+        return int(~(-x % sys.maxint) - 1)
+    return int(x)
+
+def lshift(x, y):
+    return unsiged(long(x) << y)
+
 def _IOC(dir,type,nr,size):
-    # FIXME: this is a very bad hack to avoid the future warning for
-    # the next python version. The real code is nd = dir << _IOC_DIRSHIFT
-    # but for dir > 1 this shifts the first 1 bit to position 32 which will
-    # result in an overflow with sign changing. And I have no idea if this is
-    # working in 2.4 or if it works on other machines than i386
-    if dir == 1:
-        nd = dir << _IOC_DIRSHIFT
-    if dir == 2:
-        nd = -2147483648
-    if dir == 3:
-        nd = -1073741824
-    return (nd | (ord(type) << _IOC_TYPESHIFT) | 
+    # Note: this functions uses lshift to avoid future warnings. It
+    # may not work every time and is more or less a bad hack
+    return (lshift(dir, _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT) | 
             (nr << _IOC_NRSHIFT) | (size << _IOC_SIZESHIFT))
 
-def IO(type,nr): return _IOC(_IOC_NONE,(type),(nr),0)
-def IOR(type,nr,size): return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
-def IOW(type,nr,size): return _IOC(_IOC_WRITE,(type),(nr),struct.calcsize(size))
-def IOWR(type,nr,size): return _IOC(_IOC_READ|_IOC_WRITE,(type),(nr),struct.calcsize(size))
+def IO(type,nr):
+    return _IOC(_IOC_NONE,(type),(nr),0)
+
+def IOR(type,nr,size):
+    return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
+
+def IOW(type,nr,size):
+    return _IOC(_IOC_WRITE,(type),(nr),struct.calcsize(size))
+
+def IOWR(type,nr,size):
+    return _IOC(_IOC_READ|_IOC_WRITE,(type),(nr),struct.calcsize(size))
 
 # used to decode ioctl numbers..
 def IOC_DIR(nr): return (((nr) >> _IOC_DIRSHIFT) & _IOC_DIRMASK)
