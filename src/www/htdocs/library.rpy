@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/07 03:20:22  rshortt
+# Make the favorites match use the newer file naming scheme (s/ /_/g).
+#
 # Revision 1.7  2003/07/01 21:47:35  outlyer
 # Made a check to see if file exists before unlinking.
 #
@@ -181,6 +184,7 @@ class LibraryResource(FreevoResource):
         if favs:
             favtitles = [ fav.title for fav in favs ]
             favre = string.join(favtitles, '|') # no I am not a packers fan
+            favre = string.replace(favre, ' ', '_')
 
         # loop over directory here
         items = util.match_files(config.DIR_RECORD, config.SUFFIX_VIDEO_FILES)
