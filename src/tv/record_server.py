@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/20 23:43:58  rshortt
+# Improve search using regex.
+#
 # Revision 1.5  2003/05/14 00:04:54  rshortt
 # Better error handling.
 #
@@ -53,9 +56,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, string
-import random
-import time, os, string
+import sys, string, random, time, os, re
 
 from twisted.web import xmlrpc, server
 from twisted.internet.app import Application
@@ -235,13 +236,15 @@ class RecordServer(xmlrpc.XMLRPC):
 
         self.updateGuide()
 
+        pattern = '.*' + find + '\ *'
+        regex = re.compile(pattern, re.IGNORECASE)
         now = time.time()
+
         for ch in guide.chan_list:
             for prog in ch.programs:
                 if prog.stop < now:
                     continue
-                # XXX TODO: use regular expresions instead.
-                if string.find(prog.title, find) != -1 or string.find(prog.desc, find) != -1:
+                if regex.match(prog.title) or regex.match(prog.desc):
                     log.debug('PROGRAM MATCH: %s' % prog)
                     matches.append(prog)
 
