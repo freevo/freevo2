@@ -111,9 +111,38 @@ class RecordServer(RPCServer):
         for r in self.recordings:
             ret.append(r.short_list())
         for c in self.clients:
-            print 'send update', c
+            log.info('send update to %s' % c)
             self.mbus_instance.send_event(c, 'record.list.update', ret)
 
+        
+    def __check_epg(self):
+        """
+        Update the recording list with the epg
+        """
+        ctime = time.time()
+        to_check = (CONFLICT, SCHEDULED, RECORDING)
+        next_recordings = filter(lambda r: r.stop + r.stop_padding > ctime \
+                                 and r.status in to_check, self.recordings)
+
+        # check if the show is still in the db or maybe moved
+        for r in next_recordings:
+            results = pyepg.search(r.name, r.channel)
+            for p in results:
+                if p.start == r.start and p.stop == r.stop:
+                    break
+            else:
+                # try to find it
+                for p in results:
+                    if r.start - 20 * 60 < p.start < r.start + 20 * 60:
+                        # found it again
+                        r.start = p.start
+                        r.stop = p.stop
+                        log.info('changed schedule\n%s' % r)
+                        break
+                else:
+                    log.info('unable to find recording in epg:\n%s' % r)
+        return True
+    
         
     def check_recordings(self):
         """
@@ -152,6 +181,25 @@ class RecordServer(RPCServer):
         to_check = (CONFLICT, SCHEDULED, RECORDING)
         next_recordings = filter(lambda r: r.stop + r.stop_padding > ctime \
                                  and r.status in to_check, self.recordings)
+
+        # check if the show is still in the db or maybe moved
+        for r in next_recordings:
+            results = pyepg.search(r.name, r.channel)
+            for p in results:
+                if p.start == r.start and p.stop == r.stop:
+                    break
+            else:
+                # try to find it
+                for p in results:
+                    if r.start - 20 * 60 < p.start < r.start + 20 * 60:
+                        # found it again
+                        log.info('changed schedule\n%s' % r)
+                        r.start = p.start
+                        r.stop = p.stop
+                        break
+                else:
+                    log.info('unable to find recording in epg:\n%s' % r)
+                    
         for r in next_recordings:
             try:
                 r.recorder = self.best_recorder[r.channel]
@@ -204,6 +252,8 @@ class RecordServer(RPCServer):
         recordings
         """
         log.info('recordserver.check_favorites')
+        # check epg if something changed
+        self.__check_epg()
         for f in copy.copy(self.favorites):
             for p in pyepg.search(f.name):
                 if not f.match(p.title, p.channel.id, p.start):
@@ -372,9 +422,14 @@ class RecordServer(RPCServer):
             name, channel, priority, start, stop, info = \
                   self.parse_parameter(val, ( unicode, unicode, int, int, int,
                                               dict ) )
+        # fix description encoding
+        if info.has_key('description') and info['description'].__class__ == str:
+            info['description'] = Unicode(info['description'], 'UTF-8')
+
         log.info('recording.add: %s' % String(name))
         r = Recording(self.rec_id, name, channel, priority, start, stop,
                       info = info)
+
         if r in self.recordings:
             r = self.recordings[self.recordings.index(r)]
             if r.status == DELETED:
