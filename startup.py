@@ -20,6 +20,10 @@ DEBUG = 0
 # Can be a float.
 POLL_DELAY = 0.2
 
+task_args = []
+tasks = []
+
+
 #
 # This class is an abstraction for the applications that are spawned and then
 # checked regularly to see that they are alive.
@@ -38,8 +42,10 @@ class task:
 
     # Check if the application is still alive, respawn if needed
     def respawn(self):
-        if os.waitpid(self.pid, os.WNOHANG)[0] != 0:
-            if DEBUG: print 'Task %s exited' % self.appname
+        pid, exitstat = os.waitpid(self.pid, os.WNOHANG)
+        if pid != 0:
+            if DEBUG: print 'Task %s exited, stat 0x%04x' % (self.appname, exitstat)
+
             self.pid = os.spawnv(os.P_NOWAIT, self.application, self.app_args)
             print 'Respawned "%s", pid %s' % (' '.join(self.app_args), self.pid)
 
@@ -97,13 +103,12 @@ freevo_main_quiet = ('freevo', 'sh',
                      [ '-c', 'python ./main.py '
                        '--videotools=%(videotools)s > /dev/null'])
 
-task_args = []
-tasks = []
-
 #
 # Handle CTRL-C signals from Unix. Kill all apps and exit.
 #
 def ctrlc_handler(signum, frame):
+    global tasks
+    
     print 'CTRL-C pressed! Shutting down...'
 
     # Kill off all subtasks
