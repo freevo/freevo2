@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/09/25 05:20:15  rshortt
+# Move the default keymap into src/gui/displays/sdl.py at least until it goes
+# into a plugin and there is a magical new Freevo keymap that hasn't been
+# thought up yet.
+#
+# Also removed a duplicate SUBTITLE entry from one of the dicts.
+#
 # Revision 1.53  2004/09/15 19:37:42  dischi
 # add control toggle key
 #
@@ -399,7 +406,6 @@ DVD_EVENTS = {
     'GUIDE'     : DVDNAV_TITLEMENU,
     'MENU'      : DVDNAV_MENU,
     'LANG'      : VIDEO_NEXT_AUDIOLANG,
-    'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
     'ANGLE'     : VIDEO_NEXT_ANGLE,
     'CH+'       : NEXT,
     'CH-'       : PREV
@@ -519,58 +525,6 @@ GLOBAL_EVENTS = {
     'TOGGLE_CONTROL'   : TOGGLE_CONTROL
     }
     
-
-import pygame.locals as key
-
-DEFAULT_KEYMAP = {
-    key.K_F1          : 'SLEEP',
-    key.K_HOME        : 'MENU',
-    key.K_g           : 'GUIDE',
-    key.K_ESCAPE      : 'EXIT',
-    key.K_UP          : 'UP',
-    key.K_DOWN        : 'DOWN',
-    key.K_LEFT        : 'LEFT',
-    key.K_RIGHT       : 'RIGHT',
-    key.K_SPACE       : 'SELECT',
-    key.K_RETURN      : 'SELECT',
-    key.K_F2          : 'POWER',
-    key.K_F3          : 'MUTE',
-    key.K_KP_MINUS    : 'VOL-',
-    key.K_n           : 'VOL-',
-    key.K_KP_PLUS     : 'VOL+',
-    key.K_m           : 'VOL+',
-    key.K_c           : 'CH+',
-    key.K_v           : 'CH-',
-    key.K_1           : '1',
-    key.K_2           : '2',
-    key.K_3           : '3',
-    key.K_4           : '4',
-    key.K_5           : '5',
-    key.K_6           : '6',
-    key.K_7           : '7',
-    key.K_8           : '8',
-    key.K_9           : '9',
-    key.K_0           : '0',
-    key.K_d           : 'DISPLAY',
-    key.K_e           : 'ENTER',
-    key.K_UNDERSCORE  : 'PREV_CH',
-    key.K_o           : 'PIP_ONOFF',
-    key.K_w           : 'PIP_SWAP',
-    key.K_i           : 'PIP_MOVE',
-    key.K_j           : 'TOGGLE_CONTROL',
-    key.K_F4          : 'TV_VCR',
-    key.K_r           : 'REW',
-    key.K_p           : 'PLAY',
-    key.K_f           : 'FFWD',
-    key.K_u           : 'PAUSE',
-    key.K_s           : 'STOP',
-    key.K_F6          : 'REC',
-    key.K_PERIOD      : 'EJECT',
-    key.K_l           : 'SUBTITLE',
-    key.K_a           : 'LANG'
-    }
-
-
 
 #
 # Internal events, don't map any button on them
