@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/08/21 20:54:44  gsbarbieri
+#    *ROM media just shows up when needed, ie: audiocd is not displayed in
+# video main menu.
+#    * ROM media is able to use variants, subtitles and more.
+#    * When media is not present, ask for it and wait until media is
+# identified. A better solution is to force identify media and BLOCK until
+# it's done.
+#
 # Revision 1.10  2003/08/20 22:45:15  gsbarbieri
 # Capitalize (MOVIE|IMAGE|VIDEO|...). UPPERCASE IS UGLY!
 #
@@ -84,6 +92,16 @@ FALSE = 0
 
 import plugin
 
+import plugins
+# Types that will be displayed when in 'key' display_type
+# Use this to avoid displaying empty cdroms, audiocd in video menu, ...
+dir_types = {
+    'audio': [ 'dir', 'audiocd' ],
+    'video': [ 'dir', 'video', 'vcd', 'dvd' ],
+    'image': [ 'dir' ],
+    'mame' : [ 'dir' ],
+    }
+
 #
 # Plugin interface to integrate the MediaMenu into Freevo
 #
@@ -132,12 +150,22 @@ class MediaMenu(Item):
         items = copy.copy(self.normal_items)
 
         if self.display_type:
-            plugins = plugin.get('mainmenu_%s' % self.display_type)
+            plugins_list = plugin.get('mainmenu_%s' % self.display_type)
         else:
-            plugins = []
+            plugins_list = []
 
-        for p in plugins:
-            items += p.items(self)
+        dir_type = dir_types.get( self.display_type, [ ] )
+        
+        for p in plugins_list:
+            
+            if isinstance( p, plugins.rom_drives.rom_items ):
+                # do not show empty rom drives and media from other menus
+                l = p.items( self )
+                for i in l:
+                    if i.type and i.type in dir_type:
+                        items += [ i ]
+            else:
+                items += p.items( self )
 
         return items
 
@@ -215,7 +243,12 @@ class MediaMenu(Item):
             sel = menu.choices.index(menu.selected)
             menuw.menustack[1].choices = self.main_menu_generate()
             if not menu.selected in menu.choices:
-                menu.selected = menu.choices[sel]
+                if len( menu.choices ) > sel:
+                    menu.selected = menu.choices[sel]
+                elif menu.choices:
+                    menu.selected = menu.choices[ -1 ]
+                else:
+                    menu.selected = None
 
             if menu == menuw.menustack[-1] and not rc.app():
                 menuw.init_page()

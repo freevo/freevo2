@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/08/21 20:54:44  gsbarbieri
+#    *ROM media just shows up when needed, ie: audiocd is not displayed in
+# video main menu.
+#    * ROM media is able to use variants, subtitles and more.
+#    * When media is not present, ask for it and wait until media is
+# identified. A better solution is to force identify media and BLOCK until
+# it's done.
+#
 # Revision 1.18  2003/08/20 21:51:34  outlyer
 # Use Python 'touch' rather than system call
 #
@@ -145,7 +153,7 @@ class autostart(plugin.DaemonPlugin):
         EJECT event
         """
         global im_thread
-        
+
         # if we are at the main menu and there is an IDENTIFY_MEDIA event,
         # try to autorun the media
         if plugin.isevent(event) == 'IDENTIFY_MEDIA' and im_thread.last_media and \
@@ -614,7 +622,7 @@ class Identify_Thread(threading.Thread):
                 media.videoinfo.info = more_info
             if xml_file:
                 media.videoinfo.xml_file = xml_file
-            
+                
         media.info.media = media
         return
 

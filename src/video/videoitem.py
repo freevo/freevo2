@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/08/21 20:54:44  gsbarbieri
+#    *ROM media just shows up when needed, ie: audiocd is not displayed in
+# video main menu.
+#    * ROM media is able to use variants, subtitles and more.
+#    * When media is not present, ask for it and wait until media is
+# identified. A better solution is to force identify media and BLOCK until
+# it's done.
+#
 # Revision 1.72  2003/08/20 20:47:02  outlyer
 # Fixed the bookmark file "parser" I don't know what happened, but it was
 # completely broken for AVI files (or any file without options in local_conf)
@@ -330,6 +338,18 @@ class VideoItem(Item):
             self.label             = obj.label
             self.tv_show           = obj.tv_show
             self.id                = obj.id
+            
+            self.variants          = obj.variants
+            self.subitems          = obj.subitems
+            self.files_options     = obj.files_options
+            self.current_subitem   = obj.current_subitem
+            self.bookmarkfile      = obj.bookmarkfile
+            self.subtitle_file     = obj.subtitle_file
+            self.audio_file        = obj.audio_file
+            self.filename          = obj.filename
+
+
+
 
     def getattr(self, attr):
         """
@@ -397,6 +417,7 @@ class VideoItem(Item):
  
         if self.filename and self.mode == 'file' and not self.media:
             items += [ (self.confirm_delete, 'Delete file') ]
+
 
         if self.variants:
             items = [ (self.show_variants, 'Show variants') ] + items
@@ -493,9 +514,37 @@ class VideoItem(Item):
                 if mountdir:
                     util.mount(mountdir)
                 else:
-                    # TODO: prompt for the right media
-                    AlertBox(text = 'Media not found for file %s' % (file)).show()
-                    rc.post_event(em.PLAY_END)
+                    
+                    def do_tryagain():                        
+                        # TODO: force to identify media instead of wait
+                        box = PopupBox( text="Wait while detecting media..." )
+                        box.show()
+                        l=1
+                        for i in range( 1 ): # 10 times
+                            
+                            for media in config.REMOVABLE_MEDIA:
+                                # media has no id? maybe identifying... wait
+                                if not media.id:
+                                    time.sleep( 2 )
+                                if media.id == self.media_id:
+                                    # we found it! Stop looping
+                                    l=0
+                                    break
+                                
+                            if not l:
+                                break
+                        box.destroy()
+                                                    
+                        self.play( arg, menuw )
+                    # do_tryagain()
+                        
+                    
+                    ConfirmBox( text=('Media not found for file "%s".\n'+
+                                      'Please insert the media.') % file,
+                                handler=do_tryagain ).show()
+                    
+                    rc.post_event( em.PLAY_END )
+
                     return
 
             elif self.media:
@@ -583,7 +632,13 @@ class VideoItem(Item):
         if self.menuw.visible:
             self.menuw.hide()
 
-        error = self.video_player.play(file, mplayer_options, self)
+        if not self.video_player:            
+            self.video_player = plugin.getbyname(plugin.VIDEO_PLAYER)
+            
+        if self.video_player:
+            error = self.video_player.play(file, mplayer_options, self)
+        else:
+            error = "No video player avaiable!"
 
         if error:
             AlertBox(text=error).show()

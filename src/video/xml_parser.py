@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/08/21 20:54:45  gsbarbieri
+#    *ROM media just shows up when needed, ie: audiocd is not displayed in
+# video main menu.
+#    * ROM media is able to use variants, subtitles and more.
+#    * When media is not present, ask for it and wait until media is
+# identified. A better solution is to force identify media and BLOCK until
+# it's done.
+#
 # Revision 1.30  2003/08/03 10:11:37  dischi
 # remove debug
 #
@@ -610,7 +618,7 @@ def parseMovieFile(file, parent, duplicate_check):
                 mitem = make_videoitem(video, variants[0])
             else:
                 mitem = make_videoitem(video, None)
-            mitem.parent = parent
+
             mitem.name = title
             mitem.image = image
             mitem.xml_file = file
