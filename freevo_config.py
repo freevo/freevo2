@@ -214,6 +214,7 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 EVENTS = {
     'menu'    : MENU_EVENTS,
     'input'   : INPUT_EVENTS,
+    'tv'      : TV_EVENTS,
     'video'   : VIDEO_EVENTS,
     'audio'   : AUDIO_EVENTS,
     'games'   : GAMES_EVENTS,
