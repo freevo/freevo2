@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/11 17:38:59  mikeruelle
+# fix a snes crash
+#
 # Revision 1.10  2003/09/05 20:48:35  mikeruelle
 # new game system
 #
@@ -282,7 +285,7 @@ class SnesItem(Item):
         return [ ( self.play, 'Play' ) ]
     
 
-    def play(self, menuw=None):
+    def play(self, arg=None, menuw=None):
         self.parent.current_item = self
 
         if not self.menuw:
