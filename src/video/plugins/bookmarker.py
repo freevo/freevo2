@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/11 20:12:29  dischi
+# use new mmpython mpeg seek feature
+#
 # Revision 1.9  2004/01/17 20:30:19  dischi
 # use new metainfo
 #
@@ -52,6 +55,7 @@
 #endif
 
 import os, time, copy
+import mmpython
 
 import plugin
 import config
@@ -83,10 +87,15 @@ class PluginInterface(plugin.ItemPlugin):
         """
         resume playback
         """
-        t = max(0, self.item['autobookmark_resume'] - 10)
+        t    = max(0, self.item['autobookmark_resume'] - 10)
+        info = mmpython.parse(self.item.filename)
+        if hasattr(info, 'seek') and t:
+            arg='-sb %s' % info.seek(t)
+        else:
+            arg='-ss %s' % t
         if menuw:
             menuw.back_one_menu()
-        self.item.play(menuw=menuw, arg='-ss %s' % t)
+        self.item.play(menuw=menuw, arg=arg)
 
         
     def bookmark_menu(self,arg=None, menuw=None):
