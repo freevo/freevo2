@@ -138,12 +138,14 @@ o Checkout the entire module:
 o Check for your local changes compared to the CVS server:
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo diff
 
-o Sync with CVS server:
+o Sync with CVS server:  (IMPORTANT!)
+  o You should always use "cvs update" immediately before "cvs commit", 
+    otherwise other's changes could be overwritten.
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo update
 
 o Update Changelog, BUGS, README!
 
-o Commit changes to the CVS server:
+o Commit changes to the CVS server:  (UPDATE first!)
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo \
     commit -m "Comment... " [file...]
 
@@ -158,6 +160,11 @@ o Test CVS latest version using anonymous export
   cd freevo
   make x11
   ./freevo
+
+o Release checklist:
+  o Test it!
+  o Update changelog, including the release date
+  o Update TODO
 
 o Tag a release/checkpoint:
   cvs -z3 -d:ext:SF_USERNAME@cvs.freevo.sourceforge.net:/cvsroot/freevo tag REL-1_2_0
@@ -222,7 +229,7 @@ o Upload to the real path
 File release notes:
 
 
-Quick test (using only X11): tar xvzf freevo-XXX.tgz ; cd freevo-XXX ; make x11 ; freevo
+Quick test (using only X11): tar xvzf freevo-XXX.tgz ; cd freevo-XXX ; python install.py make x11 ; freevo
 
 
 This release has the following features:
@@ -237,9 +244,7 @@ displayed when selecting channels.
 
 * View movies/DVDs using MPlayer (a separate application which is not included).
 
-* Play MP3 using mpg123 (a separate application which is not included).
-
-* Record TV to DivX using NVrec (a separate application which is not included).
+* Play MP3 using mpg321/mpg123 (a separate application which is not included).
 
 
 There is _not_ any support as of now (but it is planned) for:
