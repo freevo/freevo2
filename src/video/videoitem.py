@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2003/08/03 13:46:04  dischi
+# fix tv show detection
+#
 # Revision 1.69  2003/08/02 10:09:52  dischi
 # Don't add 'Settings' with a submenu to the list of actions, add the
 # settings directly (max 4 items, mostly 1)
@@ -246,26 +249,27 @@ class VideoItem(Item):
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(self.name):
             show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
-            self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
-                         " - " + show_name[3] 
+            if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
+                self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
+                             " - " + show_name[3] 
+                if os.path.isfile((config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()):
+                    self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()
+                elif os.path.isfile((config.TV_SHOW_DATA_DIR + \
+                                     show_name[0] + ".jpg").lower()):
+                    self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".jpg").lower()
 
-            if os.path.isfile((config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()):
-                self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".png").lower()
-            elif os.path.isfile((config.TV_SHOW_DATA_DIR + show_name[0] + ".jpg").lower()):
-                self.image = (config.TV_SHOW_DATA_DIR + show_name[0] + ".jpg").lower()
+                if config.TV_SHOW_INFORMATIONS.has_key(show_name[0].lower()):
+                    tvinfo = config.TV_SHOW_INFORMATIONS[show_name[0].lower()]
+                    for i in tvinfo[1]:
+                        self.info[i] = tvinfo[1][i]
+                    if not self.image:
+                        self.image = tvinfo[0]
+                    if not self.xml_file:
+                        self.xml_file = tvinfo[3]
+                    self.mplayer_options = tvinfo[2]
 
-            if config.TV_SHOW_INFORMATIONS.has_key(show_name[0].lower()):
-                tvinfo = config.TV_SHOW_INFORMATIONS[show_name[0].lower()]
-                for i in tvinfo[1]:
-                    self.info[i] = tvinfo[1][i]
-                if not self.image:
-                    self.image = tvinfo[0]
-                if not self.xml_file:
-                    self.xml_file = tvinfo[3]
-                self.mplayer_options = tvinfo[2]
-                
-            self.tv_show = TRUE
-            self.show_name = show_name
+                self.tv_show = TRUE
+                self.show_name = show_name
             
         # find image for this file
         # First check in COVER_DIR
