@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/04/27 17:59:06  dischi
+# better plugin poll() handling
+#
 # Revision 1.41  2003/04/24 19:55:48  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -271,14 +274,22 @@ def main_func():
             event = rc_object.poll()
             if event:
                 break
-            if not rc_object.func:
-                for p in poll_plugins:
-                    p.poll()
+
+            for p in poll_plugins:
+                if not (rc_object.app and p.poll_menu_only):
+                    p.poll_counter += 1
+                    if p.poll_counter == p.poll_interval:
+                        p.poll_counter = 0
+                        p.poll()
+
             time.sleep(0.1)
 
-        if not rc_object.func:
-            for p in poll_plugins:
-                p.poll()
+        for p in poll_plugins:
+            if not (rc_object.app and p.poll_menu_only):
+                p.poll_counter += 1
+                if p.poll_counter == p.poll_interval:
+                    p.poll_counter = 0
+                    p.poll()
 
         # Send events to either the current app or the menu handler
         used = FALSE

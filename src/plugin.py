@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/04/27 17:59:07  dischi
+# better plugin poll() handling
+#
 # Revision 1.17  2003/04/24 19:55:53  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -132,7 +135,7 @@ class DaemonPlugin(Plugin):
 
     A DaemonPlugin can have the following functions:
     def poll(self):
-        this function will be called every 0.1 seconds
+        this function will be called every poll_intervall*0.1 seconds
     def draw(self):
         this function will be caleed to update the screen
     def eventhandler(self, event):
@@ -141,7 +144,9 @@ class DaemonPlugin(Plugin):
     def __init__(self):
         Plugin.__init__(self)
         self._type   = 'daemon'
-
+        self.poll_counter   = 0         # poll counter, don't change this
+        self.poll_interval  = 1         # poll every x*0.1 seconds
+        self.poll_menu_only = TRUE      # poll only when menu is active
 
 
 #
