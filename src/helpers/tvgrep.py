@@ -1,16 +1,45 @@
 #!/usr/bin/env python
+#if 0 /*
+# -----------------------------------------------------------------------
+# tvgrep.py - grep through the pickle files
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+#
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.1  2003/08/23 09:09:18  dischi
+# moved some helpers to src/helpers
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
 import sys,os,time
 import string,re
 import cPickle as pickle
-
-# Horrible, horrible hack to work on command-line
-# Need to figure out how to make config be quiet.
-STARTDIR='/usr/local/freevo'
-os.environ['FREEVO_STARTDIR'] = STARTDIR
-sys.path.append(STARTDIR)
-sys.path.append(STARTDIR + '/src')
-sys.path.append(STARTDIR + '/src/tv')
-
 import config
 
 sys.stdout = sys.__stdout__
@@ -81,10 +110,13 @@ def make_schedule (b=None):
                    'seconds'  : len_secs,
                    'timecode' : timecode_format }
    
-    scheduleline = start_time + "," + str(len_secs) + "," + config.VCR_CMD % cl_options + "," + b.channel_id
+    scheduleline = start_time + "," + str(len_secs) + "," + \
+                   config.VCR_CMD % cl_options + "," + b.channel_id
     return scheduleline
 
     #return config.VCR_CMD % cl_options
+
+
 
 # Using this is about a million times faster than using XMLTV natively.
 #
@@ -101,8 +133,11 @@ if (len(sys.argv) > 2) and ((sys.argv[1] == '-listing') or (sys.argv[1] == '-sch
     ARG = '.*' + pattern + '*.'
     REGEXP = re.compile(ARG,re.IGNORECASE)
 else:
-    print "Usage: " + str(sys.argv[0]) + " [-listing | -schedule] [TV PROGRAM]"
-    sys.exit(1)
+    print "Usage: freevo tvgrep [-listing | -schedule] [TV PROGRAM]"
+    print "This script greps the pickled data for tv informations"
+    print "Using this is about a million times faster than using XMLTV natively."
+    
+    sys.exit(0)
 
 # Ugly too, but this works for now. 
 

@@ -1,13 +1,48 @@
 #!/usr/bin/env python
+#if 0 /*
+# -----------------------------------------------------------------------
+# makeplaylist.py - create a playlist from the sqlite database
+# -----------------------------------------------------------------------
+# $Id$
 #
+# Notes:
 # A little program to demonstrate what can be done with sqlite
 # It only outputs static playlists in .m3u format now, but you can
 # see what can be done.
 #
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.1  2003/08/23 09:09:18  dischi
+# moved some helpers to src/helpers
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
+
+
 import sqlite
 import os, sys
-sys.path.append('./src/')
-sys.path.append('./helpers/')
 import config, util
 import musicsqlimport as fdb
 
@@ -27,13 +62,13 @@ queries =  [('Favourite Songs (Most Played)',topten),
 
 if __name__ == '__main__':
     if not fdb.check_db():
-        print "Database missing or empty, please run ./helpers/musicsqlimport.py"
+        print "Database missing or empty, please run 'freevo musicsqlimport'"
         print "before running this program"
         sys.exit(1)
     
-    if not len(sys.argv) > 1:
+    if not len(sys.argv) > 1 or sys.argv[1] == '--help':
         print 'Usage: '
-        print '\t%s <query type> <number of songs> <output m3u file>' % sys.argv[0]
+        print '\tfreevo makeplaylist <query type> <number of songs> <output m3u file>'
         print
         print '\tThe following queries are available.'
         print

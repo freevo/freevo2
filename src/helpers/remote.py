@@ -1,29 +1,19 @@
 #! /usr/bin/env python
-
 #if 0 /*
 # -----------------------------------------------------------------------
 # FreevoRemote.py - a small tkinter example remote program
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: very basic layout. need ENABLE_NETWORK_REMOTE = 1 in you local_conf.py
+# Notes: very basic layout.
+#        need ENABLE_NETWORK_REMOTE = 1 in you local_conf.py
 # Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/06/24 22:59:38  outlyer
-# I think this is the last bit of cleanup.
+# Revision 1.1  2003/08/23 09:09:18  dischi
+# moved some helpers to src/helpers
 #
-# o Moved FreevoRemote "Network" client into helpers
-# o Removed old remote code. I think pylirc is working for everyone.
-#
-# Revision 1.1  2003/05/06 00:05:12  rshortt
-# Network remote control app posted by Mike Ruelle.
-#
-#
-# Revision 1.1  2003/05/05 14:30:10  mikeruelle
-# A small example program to use the remote control via UDP socket available in
-# Freevo. Useful if you remote lacks many buttons.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -47,13 +37,29 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-from Tkinter import *
 import sys
 import socket
 
+def usage():
+        print 'a small tkinter example remote program'
+        print 'You need to set ENABLE_NETWORK_REMOTE = 1 in you local_conf.py'
+        print
+        print 'this script has no options (yet)'
+        print
+        sys.exit(0)
+
+try:
+    from Tkinter import *
+except:
+    print 'Warning: Tkinter not found. This script won\'t work.'
+    print 
+    usage()
+
+
 panels = [ ['1','2','3'], ['4','5','6'], ['7','8','9'], ['ENTER','0','EXIT'],
-           ['MENU','UP','GUIDE'], ['LEFT','SELECT','RIGHT'], ['DISPLAY','DOWN','SUBTITLE'],
-           ['CH+','VOL+','PIP_ONOFF'], ['CH-','VOL-','PIP_SWAP'], ['PREV_CH','MUTE','PIP_MOVE'],
+           ['MENU','UP','GUIDE'], ['LEFT','SELECT','RIGHT'],
+           ['DISPLAY','DOWN','SUBTITLE'], ['CH+','VOL+','PIP_ONOFF'],
+           ['CH-','VOL-','PIP_SWAP'], ['PREV_CH','MUTE','PIP_MOVE'],
            ['PLAY','PAUSE','REC'], ['REW','STOP','FFWD'], ['EJECT','SLEEP','TV_VCR'] ]
 
 # the big remote. can possibly be embedded in other stuff.
@@ -97,6 +103,8 @@ class FreevoRemote(Frame):
         sockobj.close()
         
 if __name__ == '__main__': 
+    if len(sys.argv)>1 and sys.argv[1] == '--help':
+        usage()
     root = FreevoRemote()
     root.master.title('Freevo Remote')
     if len(sys.argv) > 1:
