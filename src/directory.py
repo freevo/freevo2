@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/08/13 17:33:17  dischi
+# add "please wait" message for rom drives every time
+#
 # Revision 1.24  2003/08/05 17:27:13  dischi
 # changed debug
 #
@@ -370,7 +373,7 @@ class DirItem(Playlist):
             num_changes = mmpython.check_cache(mmpython_dir)
             
         pop = None
-        if num_changes > 10:
+        if (num_changes > 10) or (num_changes and self.media):
             if self.media:
                 pop = PopupBox(text='Scanning disc, be patient...')
             else:
