@@ -188,17 +188,17 @@
           <if expression="display_type == 'audio' and artist">
             <text font="info tagline" expression="artist"/>
             <newline/>
-            <if expression="album">
-              <text font="info value" height="max" expression="album" mode="soft" />
-              <newline/>
-            </if>
-            <if expression="year">
-              <text font="info value" expression="year"/>
-              <newline/>
-            </if>
-            <if expression="length">
-              <text font="info value" expression="length"/>
-            </if>
+          </if>
+          <if expression="display_type == 'audio' and album">
+            <text font="info value" height="max" expression="album" mode="soft" />
+            <newline/>
+          </if>
+          <if expression="display_type == 'audio' and year">
+            <text font="info value" expression="year"/>
+            <newline/>
+          </if>
+          <if expression="display_type == 'audio' and length">
+            <text font="info value" expression="length"/>
           </if>
           </item>
           <item type="audio">
