@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/18 04:15:27  krister
+# Added jpegtran to the runtime build.
+#
 # Revision 1.6  2003/02/07 05:06:32  krister
 # Added execute flag for pygphoto.so
 #
@@ -67,7 +70,7 @@ all:
 # Python programs in lib/ have their execute flag removed since
 # RPM building chokes on them.
 copy: 	python_copy mplayer_copy mplayer_fonts_copy cdparanoia_copy \
-	lame_copy pygphoto_copy copy_libdeps
+	lame_copy pygphoto_copy jpegtran_copy copy_libdeps
 	find lib -name "*.so" -exec strip {} \;
 	find dll -name "*.so*" -exec strip {} \;
 	find apps -perm +111 -type f -exec strip {} \;
@@ -177,3 +180,12 @@ pygphoto_copy:
 	@echo Copying pygphoto
 	cp -a src/pygphoto.so lib/python2.2/site-packages/
 	chmod ugo+x lib/python2.2/site-packages/pygphoto.so
+
+################################################################################
+#
+# jpegtran. comes from the libjpeg v6b library.
+#
+################################################################################
+jpegtran_copy:
+	@echo Copying jpegtran
+	cp -a /usr/local/bin/jpegtran apps/
