@@ -1,5 +1,5 @@
 import socket
-import Rendezvous
+from util import Rendezvous
 import time
 import plugin
 from freevo.version import __version__
