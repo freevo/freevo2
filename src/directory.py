@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/09/21 13:17:49  dischi
+# make it possible to change between video, audio, image and games view
+#
 # Revision 1.37  2003/09/20 15:21:08  dischi
 # bugfix
 #
@@ -95,7 +98,7 @@ from video.xml_parser import parseMovieFile
 
 import mmpython
 
-import event as em
+from event import *
 
 from item import Item
 
@@ -119,23 +122,26 @@ all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
                  'AUDIO_FORMAT_STRING','DIRECTORY_SMART_SORT',
                  'USE_MEDIAID_TAG_NAMES')
 
+possible_display_types = [ ]
+
 
 class DirItem(Playlist):
     """
     class for handling directories
     """
-    def __init__(self, dir, parent, name = '', display_type = None, add_args = None):
+    def __init__(self, directory, parent, name = '', display_type = None, add_args = None):
         Item.__init__(self, parent)
         self.type = 'dir'
         self.menuw = None
-
+        self.menu  = None
+        
         # variables only for Playlist
         self.current_item = 0
         self.playlist = []
         self.autoplay = FALSE
 
         # variables only for DirItem
-        self.dir          = os.path.abspath(dir)
+        self.dir          = os.path.abspath(directory)
         self.display_type = display_type
         self.info         = {}
         self.mountpoint   = None
@@ -148,23 +154,23 @@ class DirItem(Playlist):
 
         if name:
             self.name = name
-	elif os.path.isfile(dir + '/album.xml'):
+	elif os.path.isfile(directory + '/album.xml'):
             try:
-                self.name = bins.get_bins_desc(dir)['desc']['title']
+                self.name = bins.get_bins_desc(directory)['desc']['title']
             except:
-                self.name = os.path.basename(dir)
+                self.name = os.path.basename(directory)
         else:
-            self.name = os.path.basename(dir)
+            self.name = os.path.basename(directory)
 
         # Check for cover in COVER_DIR
         if config.COVER_DIR:
-            image = util.getimage(config.COVER_DIR+os.path.basename(dir))
+            image = util.getimage(config.COVER_DIR+os.path.basename(directory))
             if image:
                 self.image = image
                 self.handle_type = self.display_type
 
         # Check for a cover in current dir, overide COVER_DIR if needed
-        image = util.getimage(dir+'/cover')
+        image = util.getimage(directory+'/cover')
         if image:
             self.image = image
             self.handle_type = self.display_type
@@ -181,34 +187,34 @@ class DirItem(Playlist):
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
             try:
-                files = os.listdir(dir)
+                files = os.listdir(directory)
             except OSError:
                 print "oops, os.listdir() error"
                 traceback.print_exc()
             images = filter(image_filter, files)
             image = None
             if len(images) == 1:
-                image = os.path.join(dir, images[0])
+                image = os.path.join(directory, images[0])
             elif len(images) > 1:
                 covers = filter(cover_filter, images)
                 if covers:
-                    image = os.path.join(dir, covers[0])
+                    image = os.path.join(directory, covers[0])
             self.image = image
 
         if not self.image and config.TV_SHOW_DATA_DIR:
             self.image = util.getimage(os.path.join(config.TV_SHOW_DATA_DIR,
-                                                    os.path.basename(dir).lower()))
+                                                    os.path.basename(directory).lower()))
 
-            if config.TV_SHOW_INFORMATIONS.has_key(os.path.basename(dir).lower()):
-                tvinfo = config.TV_SHOW_INFORMATIONS[os.path.basename(dir).lower()]
+            if config.TV_SHOW_INFORMATIONS.has_key(os.path.basename(directory).lower()):
+                tvinfo = config.TV_SHOW_INFORMATIONS[os.path.basename(directory).lower()]
                 self.info = tvinfo[1]
                 if not self.image:
                     self.image = tvinfo[0]
                 if not self.xml_file:
                     self.xml_file = tvinfo[3]
 
-        if os.path.isfile(dir+'/folder.fxd'): 
-            self.xml_file = dir+'/folder.fxd'
+        if os.path.isfile(directory+'/folder.fxd'): 
+            self.xml_file = directory+'/folder.fxd'
 
         if self.xml_file:
             self.set_xml_file(self.xml_file)
@@ -418,7 +424,6 @@ class DirItem(Playlist):
         except OSError:
             print 'util:match_files(): Got error on dir = "%s"' % self.dir
             return
-            
 
         # build play_items for video, audio, image, games
         # the interface functions must remove the files they cover, they
@@ -454,7 +459,7 @@ class DirItem(Playlist):
                 self.media.cached = TRUE
 
         play_items = []
-        for t in ( 'video', 'audio', 'image', 'games' ):
+        for t in possible_display_types:
             if not self.display_type or self.display_type == t:
                 play_items += eval(t + '.cwd(self, files)')
 
@@ -589,7 +594,7 @@ class DirItem(Playlist):
         self.all_files = all_files
 
         # check modules if they know something about the deleted/new files
-        for t in ( 'video', 'audio', 'image', 'games' ):
+        for t in possible_display_types:
             if not self.display_type or self.display_type == t:
                 eval(t + '.update')(self, new_files, del_files, \
                                               new_items, del_items, \
@@ -710,6 +715,29 @@ class DirItem(Playlist):
         rc.post_event('MENU_REBUILD')
 
 
+    # eventhandler for this item
+    def eventhandler(self, event, menuw=None):
+        if event == DIRECTORY_CHANGE_DISPLAY_TYPE and menuw.menustack[-1] == self.menu:
+            try:
+                pos = possible_display_types.index(self.display_type)
+                type = possible_display_types[(pos+1) % len(possible_display_types)]
+
+                menuw.delete_menu(allow_reload = False)
+
+                newdir = DirItem(self.dir, self.parent, self.name, type, self.add_args)
+                newdir.DIRECTORY_AUTOPLAY_SINGLE_ITEM = False
+                newdir.cwd(menuw=menuw)
+
+                menuw.menustack[-2].selected = newdir
+                pos = menuw.menustack[-2].choices.index(self)
+                menuw.menustack[-2].choices[pos] = newdir
+                rc.post_event(Event(OSD_MESSAGE, arg='%s view' % type))
+                return True
+            except IndexError:
+                pass
+        
+        Playlist.eventhandler(self, event, menuw)
+        
 
 # ======================================================================
 
@@ -751,7 +779,7 @@ class DirwatcherThread(threading.Thread):
             print 'DirwatcherThread: unable to read directory %s' % self.dir
 
             # send EXIT to go one menu up:
-            rc.post_event(em.MENU_BACK_ONE_MENU)
+            rc.post_event(MENU_BACK_ONE_MENU)
             self.lock.release()
             return
         

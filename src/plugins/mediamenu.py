@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/21 13:19:13  dischi
+# make it possible to change between video, audio, image and games view
+#
 # Revision 1.20  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -80,7 +83,7 @@ import rc
 import event as em
 
 from item import Item
-from directory import DirItem
+import directory
 
 import plugin
 import plugins.rom_drives
@@ -96,6 +99,8 @@ class PluginInterface(plugin.MainMenuPlugin):
     def __init__(self, type=None, force_text_view=FALSE):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type
+        if type and not type in directory.possible_display_types:
+            directory.possible_display_types.append(type)
         self.force_text_view = force_text_view
         
     def items(self, parent):
@@ -202,14 +207,16 @@ class MediaMenu(Item):
                     add_args = d[2:]
                 else:
                     add_args = None
-                d = DirItem(dir, self, name = t,
-                            display_type = self.display_type, add_args = add_args)
+                d = directory.DirItem(dir, self, name = t,
+                                      display_type = self.display_type,
+                                      add_args = add_args)
                 self.normal_items += [ d ]
             except:
                 traceback.print_exc()
 
 
-        item_menu = menu_module.Menu('%s Main Menu' % title.capitalize(), self.main_menu_generate(),
+        item_menu = menu_module.Menu('%s Main Menu' % title.capitalize(),
+                                     self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1,
                                      reload_func = self.reload)
         item_menu._skin_force_text_view = force_text_view
