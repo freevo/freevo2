@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2002/08/14 04:11:39  krister
+# Made the new X11 mplayer control feature resolution independent.
+#
 # Revision 1.27  2002/08/13 04:36:44  krister
 # Started adding testcode for controlling the MPlayer window under X11 (SDL).
 #
@@ -202,13 +205,14 @@ class MPlayer:
             if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':
                 if DEBUG: print 'Got freevo_xwin and x11'
                 os.system('rm -f /tmp/freevo.wid')
-                os.system('./freevo_xwin  0 0 1280 1024 > /tmp/freevo.wid &')
+                os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
+                          (osd.width, osd.height))
                 time.sleep(1)
                 if os.path.isfile('/tmp/freevo.wid'):
                     if DEBUG: print 'Got freevo.wid'
                     try:
                         wid = int(open('/tmp/freevo.wid').read().strip(), 16)
-                        mpl += ' -wid 0x%08x -xy 1280 ' % wid
+                        mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
                         if DEBUG: print 'Got WID = 0x%08x' % wid
                     except:
                         pass
