@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/02/21 18:43:50  outlyer
+# Fixed the spelling from Enablind to Enabled :) Also commented out the
+# code Krister added to prove a point. Consider it proven...
+#
+# I should mention that the idle tool does work fine on other skins, especially
+# since it has no configuration information elsewhere.
+#
 # Revision 1.20  2003/02/21 16:25:10  dischi
 # main items can have images
 #
@@ -324,12 +331,12 @@ def getcmd():
 
     # XXX TEST CODE
     if config.SKIN_XML_FILE.find('aubin_round') != -1:
-        print 'Enablind the IdleTool'
+        print 'Enabled the IdleTool'
         m = idle.IdleTool()
     else:
         m = None
     m and m.refresh()
-    sleep_ctr = 0
+    #sleep_ctr = 0
     while 1:
         
         # Get next command
@@ -340,8 +347,8 @@ def getcmd():
             event = rc.poll()
             if event: break
             if not rc.app: m and m.poll()
-            print '*' * 50, 'sleeping.... (%s)' % sleep_ctr
-            sleep_ctr += 1
+            #print '*' * 50, 'sleeping.... (%s)' % sleep_ctr
+            #sleep_ctr += 1
             time.sleep(0.1)
 
 
