@@ -1,11 +1,16 @@
+import os
 import socket
 import cStringIO
+import fcntl
 import notifier
 
 class Socket:
     def __init__(self, socket):
         self.socket     = socket
-        self.socket.setblocking(0)
+        if isinstance(self.socket, int):
+            fcntl.fcntl(self.socket, fcntl.F_SETFL, os.O_NONBLOCK)
+        else:
+            self.socket.setblocking(0)
         self.closed     = False
         self.__read_nf  = False
         self.__write_nf = False
@@ -18,6 +23,8 @@ class Socket:
         """
         Send data to the client
         """
+        if self.closed:
+            return
         if not self.__write_nf:
             notifier.addSocket(self.socket, self.__write_socket,
                                notifier.IO_OUT)
@@ -28,6 +35,14 @@ class Socket:
         self.out_buffer.seek(pos, 0)
 
 
+    def flush(self):
+        """
+        Flush the output
+        """
+        while self.__write_nf:
+            notifier.step(True, False)
+
+            
     def writefd(self, fd):
         """
         Send content of fd. This function is a hack. The content will
@@ -45,7 +60,11 @@ class Socket:
         """
         close everything
         """
-        self.socket.close()
+        self.closed = True
+        if isinstance(self.socket, int):
+            os.close(self.socket)
+        else:
+            self.socket.close()
         self.out_buffer.close()
         self.in_buffer.close()
         if self.out_fd:
@@ -57,8 +76,10 @@ class Socket:
 
         
     def close(self):
+        if self.closed:
+            return
         self.closed = True
-        if not self.out_buffer.getvalue():
+        if self.out_buffer.getvalue():
             # if need no more sending:
             self.__close()
         
@@ -75,7 +96,10 @@ class Socket:
 
 
     def __read_socket(self, s):
-        data = self.socket.recv(1000)
+        if isinstance(self.socket, int):
+            data = os.read(self.socket, 1000)
+        else:
+            data = self.socket.recv(1000)
         if len(data) == 0:
             self.closed = True
         else:
@@ -88,7 +112,8 @@ class Socket:
             self.__read_nf = False
             notifier.removeSocket(self.socket)
             self.__callback(self)
-            return False
+            # FIXME: True? It's a notifier bug here!
+            return True
         return True
 
 
@@ -105,14 +130,20 @@ class Socket:
                 self.__close()
             return False
         try:
-            self.socket.send(data)
+            if isinstance(self.socket, int):
+                os.write(self.socket, data)
+            else:
+                self.socket.send(data)
             return True
         except socket.error, e:
             # This function has called because it is possible to send.
             # If it still doesn't work, the connection is broken
             self.__close()
             return False
-        
-
+        except OSError:
+            # fd closed
+            self.__close()
+            return False
+            
     def readline(self, *args, **kwargs):
         return self.in_buffer.readline(*args, **kwargs)
