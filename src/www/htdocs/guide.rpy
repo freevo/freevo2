@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/06 17:53:58  mikeruelle
+# plugin in the genre page if we have categories
+#
 # Revision 1.12  2003/09/06 17:16:55  gsbarbieri
 # Make programs have same width and some enhancements to the CSS.
 #
@@ -88,6 +91,7 @@ from www.web_types import HTMLResource, FreevoResource
 from twisted.web.woven import page
 
 import tv.tv_util
+import util
 import config 
 import tv.epg_xmltv 
 import tv.record_client as ri
@@ -100,6 +104,25 @@ FALSE = 0
 
 
 class GuideResource(FreevoResource):
+
+    def makecategorybox(self, chanlist):
+        allcategories = []
+        for chan in chanlist:
+            for prog in chan.programs:
+                if prog.categories:
+                    allcategories.extend(prog.categories)
+        if allcategories:
+            allcategories=util.unique(allcategories)
+            allcategories.sort()
+        else:
+            return ''
+        retval = '<select name="category">' + "\n"
+        for cat in allcategories:
+            retval += '<option value="%s" ' % cat
+            retval += '>%s' % cat
+            retval += "\n"
+        retval += '</select>' + "\n"
+        return retval
 
     def maketimejumpboxday(self, gstart):
         retval='<select name="day">\n'
@@ -184,6 +207,9 @@ class GuideResource(FreevoResource):
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="Change"></form>', 'class="guidehead"')
+        categorybox =  self.makecategorybox(guide.chan_list)
+        if categorybox:
+            fv.tableCell('<form action="genre.rpy">Show&nbsp;Category:&nbsp;'+categorybox+'<input type=submit value="Change"></form>', 'class="guidehead"')
         fv.tableRowClose()
         fv.tableClose()
 
