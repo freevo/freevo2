@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/02/12 10:38:51  dischi
+# Added a patch to make the current menu system work with the new
+# main1_image.py to have an extended menu for images
+#
 # Revision 1.26  2003/02/12 06:33:21  krister
 # Cosmetic changes.
 #
@@ -436,7 +440,8 @@ class DirItem(Playlist):
            self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
             items[0].actions()[0][0](menuw=menuw)
         else:
-            item_menu = menu_module.Menu(title, items, reload_func=self.reload)
+            item_menu = menu_module.Menu(title, items, reload_func=self.reload,
+                                         item_types = self.display_type)
             if self.xml_file:
                 item_menu.skin_settings = skin.LoadSettings(self.xml_file)
 

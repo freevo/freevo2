@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/12 10:38:51  dischi
+# Added a patch to make the current menu system work with the new
+# main1_image.py to have an extended menu for images
+#
 # Revision 1.11  2003/02/03 04:38:35  krister
 # Made pygame init explicit to avoid mixer problems.
 #
@@ -80,6 +84,7 @@ from types import *
 import urllib
 import urlparse
 import objectcache
+import util
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -400,6 +405,9 @@ class OSD:
     # Zooms a Surface. It gets a Pygame Surface which is rotated and scaled according
     # to the parameters.
     def zoomsurface(self, image, scaling=None, bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
+        if not image:
+            return None
+        
         if bbx or bby or bbw or bbh:
             imbb = pygame.Surface((bbw, bbh), 0, 32)
             imbb.blit(image, (0, 0), (bbx, bby, bbw, bbh))
@@ -1294,21 +1302,36 @@ class OSD:
         return f.font
 
         
-    def _getbitmap(self, filename):
+    def _getbitmap(self, url):
+        # EXIF parser
+        from image import exif
+        import cStringIO
+        
         if not pygame.display.get_init():
             return None
-                    
+
+        if url[:8] == 'thumb://':
+            filename = url[8:]
+        else:
+            filename = url
+            
         if not os.path.isfile(filename):
             print 'Bitmap file "%s" doesnt exist!' % filename
             return None
             
-        image = self.bitmapcache[filename]
+        image = self.bitmapcache[url]
         if image:
             return image
         
         try:
             if DEBUG >= 3:
                 print 'Trying to load file "%s"' % filename
+
+            if url[:8] == 'thumb://':
+                tmp = util.getExifThumbnail(filename)
+                if tmp:
+                    filename = tmp
+                    
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
             image = tmp.convert_alpha()  # XXX Cannot load everything
         except pygame.error, e:
@@ -1319,9 +1342,10 @@ class OSD:
             return None
 
         # Update cache
-        self.bitmapcache[filename] = image
+        self.bitmapcache[url] = image
 
         return image
+
         
     def _helpscreen(self):
         if not pygame.display.get_init():

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/12 10:38:51  dischi
+# Added a patch to make the current menu system work with the new
+# main1_image.py to have an extended menu for images
+#
 # Revision 1.11  2003/02/09 07:08:00  krister
 # Display a popup error box if there is no action defined for a menu entry (i.e. DVD not identified yet)
 #
@@ -142,7 +146,7 @@ class MenuItem:
 class Menu:
 
     def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0,
-                 reload_func = None):
+                 reload_func = None, item_types = None):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
@@ -159,7 +163,9 @@ class Menu:
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
         self.reload_func = reload_func  
-
+        self.item_types = item_types
+        self.display_style = skin.GetDisplayStyle()
+        
 
     def delete_item(self, item):
         pos = self.choices.index(item)
@@ -183,8 +189,9 @@ class Menu:
             sel_pos = 0
             
         self.choices.insert(pos, item)
-        
-        items_per_page = skin.ItemsPerMenuPage(self)
+
+        rows, cols = skin.ItemsPerMenuPage(self)
+        items_per_page = rows*cols
         if sel_pos >= self.page_start + items_per_page - 1:
             self.previous_page_start.append(self.page_start)
             self.page_start += items_per_page
@@ -200,8 +207,9 @@ class MenuWidget:
         self.next_page = MenuItem('Next Page', self.goto_next_page)
         self.back_menu = MenuItem('Back', self.back_one_menu)
         self.main_menu = MenuItem('Main', self.goto_main_menu)
-
-
+        self.rows = 0
+        self.cols = 0
+        
     def delete_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
@@ -219,6 +227,9 @@ class MenuWidget:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
 
+            if skin.GetDisplayStyle() != menu.display_style:
+                self.rebuild_page()
+                
             if menu.reload_func:
                 reload = menu.reload_func()
                 if reload:
@@ -241,22 +252,39 @@ class MenuWidget:
     
     def goto_prev_page(self, arg=None, menuw=None):
         menu = self.menustack[-1]
-        if menu.page_start != 0:
-            menu.page_start = menu.previous_page_start.pop()
-        self.init_page()
-        menu.selected = self.all_items[0]
-        self.refresh()
+
+        if self.cols == 1:
+            if menu.page_start != 0:
+                menu.page_start = menu.previous_page_start.pop()
+            self.init_page()
+            menu.selected = self.all_items[0]
+        else:
+            if menu.page_start - self.cols >= 0:
+                menu.page_start -= self.cols
+                self.init_page()
+
+        if arg != 'no_refresh':
+            self.refresh()
 
     
     def goto_next_page(self, arg=None, menuw=None):
         menu = self.menustack[-1]
-        items_per_page = skin.ItemsPerMenuPage(menu)
-        if menu.page_start +  items_per_page < len(menu.choices):
-            menu.previous_page_start.append(menu.page_start)
-            menu.page_start += items_per_page
-        self.init_page()
-        menu.selected = self.menu_items[-1]
-        self.refresh()
+        self.rows, self.cols = skin.ItemsPerMenuPage(menu)
+        items_per_page = self.rows*self.cols
+
+        if self.cols == 1:
+            if menu.page_start + items_per_page < len(menu.choices):
+                menu.previous_page_start.append(menu.page_start)
+                menu.page_start += items_per_page
+                self.init_page()
+                menu.selected = self.menu_items[-1]
+        else:
+            if menu.page_start + self.cols * self.rows < len(menu.choices):
+                menu.page_start += self.cols * (self.rows-1)
+                self.init_page()
+            
+        if arg != 'no_refresh':
+            self.refresh()
     
     
     def pushmenu(self, menu):
@@ -293,49 +321,75 @@ class MenuWidget:
         
     def eventhandler(self, event):
         menu = self.menustack[-1]
+
         if event == rc.UP:
             curr_selected = self.all_items.index(menu.selected)
-            curr_selected = max(curr_selected-1, 0)
+            if curr_selected-self.cols < 0 and self.cols > 1:
+                self.goto_prev_page(arg='no_refresh')
+                curr_selected = self.all_items.index(menu.selected)
+            curr_selected = max(curr_selected-self.cols, 0)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
+
         elif event == rc.DOWN:
             curr_selected = self.all_items.index(menu.selected)
-            curr_selected = min(curr_selected+1, len(self.all_items)-1)
+            if curr_selected+self.cols > len(self.all_items)-1 and self.cols > 1:
+                self.goto_next_page(arg='no_refresh')
+                curr_selected = self.all_items.index(menu.selected)
+            curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
+
         elif event == rc.LEFT or event == rc.CHUP:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
             
-            curr_selected = self.all_items.index(menu.selected)
-
-            # Move to the previous page if the current position is at the
-            # top of the list, otherwise move to the top of the list.
-            if curr_selected == 0:
-                self.goto_prev_page()
-            else:
-                curr_selected = 0
+            if event == rc.LEFT and self.cols > 1:
+                curr_selected = self.all_items.index(menu.selected)
+                curr_selected = max(curr_selected-1, 0)
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
+
+            else:
+                curr_selected = self.all_items.index(menu.selected)
+
+                # Move to the previous page if the current position is at the
+                # top of the list, otherwise move to the top of the list.
+                if curr_selected == 0:
+                    self.goto_prev_page()
+                else:
+                    curr_selected = 0
+                    menu.selected = self.all_items[curr_selected]
+                    self.refresh()
+
         elif event == rc.RIGHT or event == rc.CHDOWN:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
-            
-            curr_selected = self.all_items.index(menu.selected)
-            bottom_index = self.menu_items.index(self.menu_items[-1])
-            
-            # Move to the next page if the current position is at the
-            # bottom of the list, otherwise move to the bottom of the list.
-            if curr_selected >= bottom_index:
-                self.goto_next_page()
-            else:
-                curr_selected = bottom_index
+
+            if event == rc.RIGHT and self.cols > 1:
+                curr_selected = self.all_items.index(menu.selected)
+                curr_selected = min(curr_selected+1, len(self.all_items)-1)
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
+
+            else:
+                curr_selected = self.all_items.index(menu.selected)
+                bottom_index = self.menu_items.index(self.menu_items[-1])
+
+                # Move to the next page if the current position is at the
+                # bottom of the list, otherwise move to the bottom of the list.
+                if curr_selected >= bottom_index:
+                    self.goto_next_page()
+                else:
+                    curr_selected = bottom_index
+                    menu.selected = self.all_items[curr_selected]
+                    self.refresh()
+
         elif event == rc.MENU:
             self.goto_main_menu()
+
         elif event == rc.EXIT:
             self.back_one_menu()
 
@@ -374,6 +428,12 @@ class MenuWidget:
             except:
                 pass
             
+        elif event == rc.DISPLAY:
+            # did the menu change?
+            if skin.ToggleDisplayStyle(menu):
+                self.rebuild_page()
+                self.refresh()
+                
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
 
@@ -392,6 +452,31 @@ class MenuWidget:
         return 0
 
 
+    def rebuild_page(self):
+        menu = self.menustack[-1]
+       
+        if not menu:
+            return
+
+        # recalc everything!
+        current = menu.selected
+        pos = menu.choices.index(current)
+
+        menu.previous_page_start = []
+        menu.previous_page_start.append(0)
+        menu.page_start = 0
+
+        rows, cols = skin.ItemsPerMenuPage(menu)
+        items_per_page = rows*cols
+
+        while pos >= menu.page_start + items_per_page:
+            self.goto_next_page(arg='no_refresh')
+
+        menu.selected = current
+        self.init_page()
+        menu.display_style = skin.GetDisplayStyle()
+        
+
     def init_page(self):
 
         menu = self.menustack[-1]
@@ -402,14 +487,18 @@ class MenuWidget:
         # Create the list of main selection items (menu_items)
         menu_items = []
         first = menu.page_start
-        for choice in menu.choices[first : first+skin.ItemsPerMenuPage(menu)]:
+        self.rows, self.cols = skin.ItemsPerMenuPage(menu)
+        
+        for choice in menu.choices[first : first+(self.rows*self.cols)]:
             menu_items += [choice]
      
         # Create the list of navigation items (nav_items)
         nav_items = []
 
-        if skin.SubMenuVisible(menu):
-            items_per_page = skin.ItemsPerMenuPage(menu)
+        self.rows, self.cols = skin.ItemsPerMenuPage(menu)
+
+        if skin.SubMenuVisible(menu) and self.cols == 1:
+            items_per_page = self.rows * self.cols
             if menu.page_start + items_per_page < len(menu.choices):
                 nav_items += [self.next_page]
             if menu.page_start != 0:

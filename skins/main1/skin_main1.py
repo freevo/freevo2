@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2003/02/12 10:38:51  dischi
+# Added a patch to make the current menu system work with the new
+# main1_image.py to have an extended menu for images
+#
 # Revision 1.76  2003/02/11 06:53:00  krister
 # Fixed small bugs.
 #
@@ -168,6 +172,7 @@ class Skin:
     def __init__(self):
         self.tv = main1_tv.Skin_TV()
         self.image = main1_image.Skin_Image()
+        self.extended_menu = FALSE
         pass
 
 
@@ -196,16 +201,38 @@ class Skin:
         return None
 
 
+    # Got DISPLAY event from menu
+    def ToggleDisplayStyle(self, menu):
+        if menu.item_types and menu.item_types in self.settings.e_menu and \
+           hasattr(self, menu.item_types):
+            self.extended_menu = not self.extended_menu
+            return TRUE
+        return FALSE
+
+    def GetDisplayStyle(self):
+        return self.extended_menu
+    
     def ItemsPerMenuPage(self, menu):
-        
+
         if not menu:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
-            return
+            return (0,0)
 
         # hack for the main menu to fit all in one screen
         if not menu.packrows:
-            return 5
+            return (5,1)
         
+        if menu.item_types and menu.item_types in self.settings.e_menu and \
+           hasattr(self, menu.item_types) and self.extended_menu:
+        
+            if menu.skin_settings:
+                val = menu.skin_settings.e_menu[menu.item_types]
+            else:
+                val = self.settings.e_menu[menu.item_types]
+
+            return (eval('self.%s.getRows(val)' % menu.item_types),
+                    eval('self.%s.getCols(val)' % menu.item_types))
+
         # find the correct structures, I hope we don't need this
         # for the main menu ...
         if menu.skin_settings:
@@ -245,9 +272,9 @@ class Skin:
             if used_height < val.items.height:
                 n_items+=1
             else:
-                return n_items
+                return (n_items, 1)
 
-        return n_items
+        return (n_items, 1)
         
 
 
@@ -567,6 +594,18 @@ class Skin:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
 
+        if menu.item_types and menu.item_types in self.settings.e_menu and \
+           hasattr(self, menu.item_types) and menuw.menu_items and self.extended_menu:
+
+            if menu.skin_settings:
+                val = menu.skin_settings
+            else:
+                val = self.settings
+
+            eval('self.%s(menuw, val)' % menu.item_types)
+            osd.update()
+            return
+
         # find the correct structures:
         if menu.skin_settings:
             val = menu.skin_settings
@@ -578,7 +617,8 @@ class Skin:
             val = val.menu_main
         else:
             val = val.menu_default
-            
+
+
         image_x, image_val, image_file = self.DrawMenu_Cover(menuw, val)
 
         if image_val:
@@ -840,46 +880,6 @@ class Skin:
     def DrawTVGuide_Listing(self, to_listing):
         if 'tv' in self.settings.e_menu:
             return self.tv.DrawTVGuide_Listing(to_listing, self.settings.e_menu['tv'])
-
-    # Image Browser:
-
-    def DrawImage(self):
-        if 'image' in self.settings.e_menu:
-            self.image.DrawImage(self.settings.e_menu['image'])
-        
-    def DrawImage_Clear(self):
-        if 'image' in self.settings.e_menu:
-            self.image.DrawImage_Clear(self.settings.e_menu['image'])
-
-    def DrawImage_getExpand(self):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_getExpand(self.settings.e_menu['image'])
-
-    def DrawImage_setExpand(self, expand):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_setExpand(expand, self.settings.e_menu['image'])
-
-    def DrawImage_View(self, to_view):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_View(to_view, self.settings.e_menu['image'])
-
-    def DrawImage_Info(self, to_info):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_Info(to_info, self.settings.e_menu['image'])
-                         
-    def DrawImage_getCols(self):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_getCols(self.settings.e_menu['image'])
-
-    def DrawImage_getRows(self):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_getRows(self.settings.e_menu['image'])
-
-    def DrawImage_Listing(self, to_listing):
-        if 'image' in self.settings.e_menu:
-            return self.image.DrawImage_Listing(to_listing, self.settings.e_menu['image'])
-
-
 
 
     def format_track (self, array):

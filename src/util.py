@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/12 10:38:51  dischi
+# Added a patch to make the current menu system work with the new
+# main1_image.py to have an extended menu for images
+#
 # Revision 1.10  2003/02/12 10:28:28  dischi
 # Added new xml file support. The old xml files won't work, you need to
 # convert them.
@@ -280,6 +284,7 @@ def resize(file, x0=25, y0=25):
 
 def getExifThumbnail(file, x0=0, y0=0):
     import Image
+    import cStringIO
 
     # EXIF parser
     from image import exif
@@ -289,13 +294,17 @@ def getExifThumbnail(file, x0=0, y0=0):
     
     if tags.has_key('JPEGThumbnail'):
         thumb_name='%s/image-viewer-thumb.jpg' % config.FREEVO_CACHEDIR
-        open(thumb_name, 'wb').write(tags['JPEGThumbnail'])
+        image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
         if x0 >0 :
-            return resize(thumb_name, x0, y0)
+            image.resize((x0, y0), Image.BICUBIC)
+
+        image.save(thumb_name)
         return thumb_name
         
     if tags.has_key('TIFFThumbnail'):
         print "TIFF thumbnail not supported yet"
+
+    return None
 
     
 def recursefolders(root, recurse=0, pattern='*', return_folders=0):

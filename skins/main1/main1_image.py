@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/12 10:38:51  dischi
+# Added a patch to make the current menu system work with the new
+# main1_image.py to have an extended menu for images
+#
 # Revision 1.2  2003/02/09 07:04:22  krister
 # Some fixes for broken pics, and pics that SDL cannot handle.
 #
@@ -63,18 +67,30 @@ class Skin_Image:
 
     imagebrowser_expand = 0
 
-    def DrawImage(self, settings):
-        self.DrawImage_Clear(settings)
+    def __call__(self, menuw, settings):
+        menu = menuw.menustack[-1]
+        settings = settings.e_menu[menu.item_types]
 
+        up = menu.page_start            # 0 if first page
+        if menu.page_start + (self.getCols(settings) * self.getRows(settings)) > \
+           len(menu.choices):
+            down = 0
+        else:
+            down = 1
+        
+        self.Clear(settings)
+        self.Listing((menu.selected, menuw.menu_items, (up, down)), settings)
+        self.View(menu.selected, settings)
+        self.Info(menu.selected, settings)
 
-    def DrawImage_Clear(self, settings):
+    def Clear(self, settings):
         InitScreen(settings, (settings.background.mask, ))
 
         # Show title
         DrawTextFramed('Image Browser', settings.header)
 
-    def DrawImage_getFormatedImage(self, filename, w, h, i_orientation=None):
-        image = osd.loadbitmap(filename)
+    def getFormatedImage(self, filename, w, h, i_orientation=None):
+        image = osd.loadbitmap('thumb://%s' % filename)
 
         if not image:
             return None
@@ -121,31 +137,32 @@ class Skin_Image:
         return image
 
 
-    def DrawImage_getExpand(self, settings):
+    def getExpand(self, settings):
         return self.imagebrowser_expand
 
-    def DrawImage_setExpand(self, expand, settings):
+    def setExpand(self, expand, settings):
         self.imagebrowser_expand = expand
 
-    def DrawImage_View(self, to_view, settings):
+    def View(self, item, settings):
         val = settings.view
 
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
 
-        if to_view != None:
+        if item:
             orientation = None
-            if to_view[0] == 'image':
-                filename = to_view[1]
-                orientation = to_view[2]
-            elif to_view[0] == 'dir':
+            if item.type == 'image':
+                filename = item.filename
+                if 'Orientation' in item.binsexif:
+                    orientation = item.binsexif['Orientation']
+            elif item.type == 'dir':
                 filename = val.img['dir']
-            elif to_view[0] == 'playlist':
+            elif item.type == 'playlist':
                 filename = val.img['playlist']
             
-            preview = self.DrawImage_getFormatedImage(filename,
-                                                      val.width - 2*val.spacing,
-                                                      val.height - 2*val.spacing, orientation)
+            preview = self.getFormatedImage(filename, val.width - 2*val.spacing,
+                                            val.height - 2*val.spacing,
+                                            orientation)
             if not preview:
                 return
             
@@ -157,11 +174,11 @@ class Skin_Image:
             osd.drawsurface(preview, x, y)
 
 
-    def DrawImage_Info(self, to_info, settings):
+    def Info(self, item, settings):
         val = settings.info
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
-        if to_info:
+        if item:
             str_w, str_h = osd.stringsize('Ajg', val.font, val.size)
 
             x = val.x + val.spacing
@@ -169,34 +186,32 @@ class Skin_Image:
             w = val.width - val.spacing
             h = str_h
             
-            if to_info[0] == 'image':
-                DrawTextFramed('Image: %s' %  to_info[1], val, x, y, w, h)
+            if item.type == 'image':
+                DrawTextFramed('Image: %s' %  item.name, val, x, y, w, h)
                 y += str_h
-                DrawTextFramed('Path: %s' %  to_info[2], val, x, y, w, h)
-                y += str_h
-                if u'title' in to_info[3]:
-                    DrawTextFramed('Title: %s' %  to_info[3]['title'], val, x, y, w, h)
+                if u'title' in item.binsdesc:
+                    DrawTextFramed('Title: %s' %  item.binsdesc['title'], val, x, y, w, h)
                     y += str_h
-                if u'description' in to_info[3]:
-                    DrawTextFramed('Description: %s' % to_info[3]['description'], val, x, y, w, h)
+                if u'description' in item.binsdesc:
+                    DrawTextFramed('Description: %s' % item.binsdesc['description'],
+                                   val, x, y, w, h)
                     y += str_h
                                 
-            elif to_info[0] == 'dir':
-                DrawTextFramed('Folder: %s' %  to_info[1], val, x, y, w, h)
+            elif item.type == 'dir':
+                DrawTextFramed('Folder: %s' %  item.name[1:-1], val, x, y, w, h)
                 y += str_h
-                DrawTextFramed('Path: %s' %  to_info[2], val, x, y, w, h)
+                DrawTextFramed('Path: %s' %  item.dir, val, x, y, w, h)
                 
 
-            elif to_info[0] == 'playlist':
-                DrawTextFramed('Slideshow: %s' %  to_info[1], val, x, y, w, h)
+            elif item.type == 'playlist':
+                DrawTextFramed('Slideshow: %s' %  item.name, val, x, y, w, h)
                 y += str_h
-                DrawTextFramed('Path: %s' %  to_info[2], val, x, y, w, h)
-                y += str_h
-                DrawTextFramed('There are %d images in this slideshow' %  len(to_info[2]), val, x, y, w, h)
+                DrawTextFramed('There are %d images in this slideshow' %
+                               len(item.playlist), val, x, y, w, h)
                 
 
 
-    def DrawImage_getCols(self, settings):
+    def getCols(self, settings):
         val = settings.listing
         image_height = 100
         image_width = 160
@@ -205,7 +220,7 @@ class Skin_Image:
         return int(items)
 
 
-    def DrawImage_getRows(self, settings):
+    def getRows(self, settings):
         val = settings.listing
         image_height = 100
         image_width = 160
@@ -217,12 +232,13 @@ class Skin_Image:
         str_h = max ( str_h_selection, str_h_normal )
 
         
-        items = math.floor(float(val.height - val.spacing) / ( image_height + str_h + val.spacing ))
+        items = math.floor(float(val.height - val.spacing) / \
+                           ( image_height + str_h + val.spacing ))
         return int(items)
 
-    def DrawImage_EmptyDir(self, settings):
+    def EmptyDir(self, settings):
         val = settings.listing
-        if self.DrawImage_getExpand(settings) == 0:
+        if self.getExpand(settings) == 0:
             conf_x = val.x
             conf_y = val.y
             conf_w = val.width
@@ -239,10 +255,10 @@ class Skin_Image:
                         width=val.border_size, color=val.border_color)
         
 
-    def DrawImage_Listing(self, to_listing, settings):
+    def Listing(self, to_listing, settings):
         val = settings.listing 
 
-        if self.DrawImage_getExpand(settings) == 0:
+        if self.getExpand(settings) == 0:
             conf_x = val.x
             conf_y = val.y
             conf_w = val.width
@@ -256,9 +272,9 @@ class Skin_Image:
         image_width = 160
         image_height = 100
 
-        dir_preview = self.DrawImage_getFormatedImage(val.img['dir'],
+        dir_preview = self.getFormatedImage(val.img['dir'],
                                                       image_width, image_height)
-        pl_preview = self.DrawImage_getFormatedImage(val.img['playlist'],
+        pl_preview = self.getFormatedImage(val.img['playlist'],
                                                      image_width, image_height)
 
         str_w_selection, str_h_selection = \
@@ -268,8 +284,8 @@ class Skin_Image:
         str_h = max( str_h_normal, str_h_selection )
 
 
-        n_cols = self.DrawImage_getCols(settings)
-        n_rows = self.DrawImage_getRows(settings)
+        n_cols = self.getCols(settings)
+        n_rows = self.getRows(settings)
 
         spacing_x = int((conf_w - ( image_width * n_cols )) / (n_cols+1))
         spacing_y = int((conf_h - ( (image_height + str_h) * n_rows )) / (n_rows+1))
@@ -277,51 +293,60 @@ class Skin_Image:
         y0 = conf_y + spacing_y
 
         if not to_listing:
-            self.DrawImage_EmptyDir(settings)
+            self.EmptyDir(settings)
             return
 
-        for row in to_listing[1]:
-            x0 = conf_x + spacing_x
+        cols = self.getCols(settings)
+        rows = self.getRows(settings)
 
-            for i in row:
-                preview = None
-                text = None
+        item_pos = 0
+        for i in to_listing[1]:
+            preview = None
+            text = None
 
-                if i.type == 'dir':
-                    preview = dir_preview
-                    text = i.name
-                elif i.type == 'image':
-                    orientation = None
-                    if 'Orientation' in i.binsexif:
-                        orientation = i.binsexif['Orientation']
+            if i.type == 'dir':
+                preview = dir_preview
+                text = i.name
+
+            elif i.type == 'image':
+                orientation = None
+                if 'Orientation' in i.binsexif:
+                    orientation = i.binsexif['Orientation']
                         
-                    preview = self.DrawImage_getFormatedImage(i.filename, image_width, image_height,
-                                                              orientation)
-                    text = i.name
-                elif i.type == 'playlist':
-                    preview = pl_preview
-                    text = i.name
+                preview = self.getFormatedImage(i.filename, image_width,
+                                                          image_height, orientation)
+                text = i.name
+
+            elif i.type == 'playlist':
+                preview = pl_preview
+                text = i.name
                     
-                cur_val = val
-                if i == to_listing[0]:
-                    cur_val = val.selection
-                    pad = val.spacing
-                    drawroundbox(x0 - pad, y0 - pad,
-                                 x0 + image_width + pad, y0 + image_height + str_h + pad,
-                                 cur_val.bgcolor, 1, cur_val.border_color, radius=cur_val.radius)
+            cur_val = val
+
+            if i == to_listing[0]:
+                cur_val = val.selection
+                pad = val.spacing
+                drawroundbox(x0 - pad, y0 - pad,
+                             x0 + image_width + pad, y0 + image_height + str_h + pad,
+                             cur_val.bgcolor, 1, cur_val.border_color, radius=cur_val.radius)
                     
 
-                if preview:
-                    i_w, i_h = preview.get_size()
-                    cx = x0 + (image_width - i_w) / 2
-                    ch = y0 + (image_height - i_h) /2
-                    osd.drawsurface(preview, cx, ch)
-                if text:
-                    DrawTextFramed(text, cur_val, x0, y0 + image_height, image_width, str_h)
+            if preview:
+                i_w, i_h = preview.get_size()
+                cx = x0 + (image_width - i_w) / 2
+                ch = y0 + (image_height - i_h) /2
+                osd.drawsurface(preview, cx, ch)
+            if text:
+                DrawTextFramed(text, cur_val, x0, y0 + image_height, image_width, str_h)
                     
-                x0 = x0 + image_width + spacing_x
+            x0 = x0 + image_width + spacing_x
 
-            y0 = y0 + image_height + str_h + spacing_y
+            item_pos += 1
+            if item_pos >= cols:
+                item_pos = 0
+                y0 = y0 + image_height + str_h + spacing_y
+                x0 = conf_x + spacing_x
+
 
 
         # draw a border around the contents
@@ -333,9 +358,11 @@ class Skin_Image:
         up, down = to_listing[2]
         if up:
             w, h = osd.bitmapsize(val.indicator['up'])
-            osd.drawbitmap(val.indicator['up'], conf_x + conf_w - w - val.spacing, conf_y - h / 2)
+            osd.drawbitmap(val.indicator['up'], conf_x + conf_w - w - val.spacing,
+                           conf_y - h / 2)
             
         if down:
             w, h = osd.bitmapsize(val.indicator['down'])
-            osd.drawbitmap(val.indicator['down'], conf_x + conf_w - w - val.spacing, conf_y + conf_h - h / 2)
+            osd.drawbitmap(val.indicator['down'], conf_x + conf_w - w - val.spacing,
+                           conf_y + conf_h - h / 2)
             
