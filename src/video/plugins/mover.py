@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/10 13:23:09  dischi
+# use item.files to move
+#
 # Revision 1.6  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -138,18 +141,7 @@ class PluginInterface(plugin.ItemPlugin):
             _debug_("%s is not a dir" % local_to_dir)
             return
 
-        # move file
-        os.system('mv "%s" "%s"' % (self.item.filename, local_to_dir))
-
-        # move fxd file
-        if hasattr(self.item, 'fxd_file'):
-            os.system('mv "%s" "%s"' % (self.item.fxd_file, local_to_dir))
-
-        # move picture(s)
-        base = os.path.splitext(self.item.filename)[0]
-        for suffix in ('jpg', 'png'):
-            file = base + '.' + suffix
-            if os.path.isfile(file):
-                os.system('mv "%s" "%s"' % (file, local_to_dir))
+        if self.items.files:
+            self.items.files.move(local_to_dir)
 
         menuw.delete_menu(menuw=menuw)
