@@ -8,6 +8,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/08/31 17:20:18  dischi
+# button REC now stores the image with current rotation. This only works
+# with jpg and all additional informations (EXIF header from carmeras)
+# are preserved.
+#
 # Revision 1.13  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -299,7 +304,16 @@ class ImageViewer:
                 self.view(self.filename, self.playlist.index(self.filename),
                           self.playlist, zoom=0, rotation = self.rotation)
                 
-
+        # save the image with the current rotation
+        if event == rc.REC:
+            if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
+                cmd = 'jpegtran -copy all -rotate %s -outfile /tmp/freevo-iview %s' \
+                      % ((self.rotation + 180) % 360, self.filename)
+                os.system(cmd)
+                os.system('mv /tmp/freevo-iview %s' % self.filename)
+                self.rotation = 0
+                osd._deletefromcache(self.filename)
+                    
     def drawosd(self):
 
         if not self.osd: return
