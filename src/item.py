@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/12/30 22:31:09  dischi
+# speedup
+#
 # Revision 1.38  2003/12/30 15:33:01  dischi
 # remove unneeded copy function, make id a function
 #
@@ -223,12 +226,14 @@ class Item:
             if os.path.isfile(self.filename):
                 self.files.append(self.filename)
                 self.dirname = os.path.dirname(self.filename)
-                self.image   = util.getimage(self.dirname+'/cover', self.image)
 
                 image = util.getimage(self.filename[:self.filename.rfind('.')])
                 if image:
                     self.image = image
                     self.files.image = image
+                elif self.parent and self.parent.type != 'dir':
+                    self.image = util.getimage(self.dirname+'/cover', self.image)
+
             else:
                 self.filename = ''
                 self.url      = ''
