@@ -329,7 +329,7 @@
 	  <if expression="plot">
 	     <text font="info plot" 
 	           width="max-40" height="max"
-	           mode="soft" align="left"
+	           mode="soft" align="justified"
 		   expression="plot" />
              <newline />
 	  </if>
