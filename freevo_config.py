@@ -283,6 +283,7 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
 #
 EVENTS = {
     'menu'    : MENU_EVENTS,
+    'tvmenu'  : TVMENU_EVENTS,
     'input'   : INPUT_EVENTS,
     'tv'      : TV_EVENTS,
     'video'   : VIDEO_EVENTS,

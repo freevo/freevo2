@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2004/02/25 17:44:30  dischi
+# add special event mapping for tvmenu
+#
 # Revision 1.89  2004/02/23 21:45:09  dischi
 # refresh fix
 #
@@ -39,21 +42,6 @@
 #
 # This was asked in freevo-devel because it improve usability and it really
 # does, since you just have to use arrows (UP/DOWN,LEFT/RIGHT) to navigate.
-#
-# Revision 1.80  2004/01/19 20:26:41  dischi
-# free image viewer cache on menuw.show()
-#
-# Revision 1.79  2004/01/10 13:15:25  dischi
-# use new skin_fxd attribute in item to load skin updates
-#
-# Revision 1.78  2004/01/09 21:06:17  dischi
-# better skin_settings support. All the item variables need a cleanup/sort
-#
-# Revision 1.77  2004/01/09 19:49:53  dischi
-# only add to skin when not helper
-#
-# Revision 1.76  2004/01/04 13:06:02  dischi
-# MENU_CALL_ITEM_ACTION also checks the item itself
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -161,7 +149,7 @@ class Menu:
 
         # How many menus to go back when 'BACK_ONE_MENU' is called
         self.back_one_menu = 1
-
+        
 
     def items_per_page(self):
         """
@@ -185,6 +173,7 @@ class MenuWidget(GUIObject):
         self.eventhandler_plugins = None
         self.event_context  = 'menu'
         self.show_callbacks = []
+
         
     def show(self):
         if not self.visible:
@@ -192,12 +181,15 @@ class MenuWidget(GUIObject):
             self.refresh(reload=1)
             for callback in copy.copy(self.show_callbacks):
                 callback()
+        rc.app(None)
+
                 
     def hide(self, clear=True):
         if self.visible:
             self.visible = 0
             if clear:
                 skin.clear(osd_update=clear)
+
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         if len(self.menustack) > 1:
@@ -680,9 +672,8 @@ class MenuWidget(GUIObject):
         
 
     def init_page(self):
-
+        
         menu = self.menustack[-1]
-       
         if not menu:
             return
 
@@ -708,6 +699,10 @@ class MenuWidget(GUIObject):
 
         if not menu.choices:
             menu.selected = self.all_items[0]
+
+        # make sure we are in context 'menu'
+        rc.set_context(self.event_context)
+
 
 
 # register menu to the skin

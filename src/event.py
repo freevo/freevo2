@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/02/25 17:44:13  dischi
+# add special event mapping for tvmenu
+#
 # Revision 1.40  2004/02/13 18:32:57  dischi
 # add event to toggle playlist repeat
 #
@@ -317,6 +320,22 @@ MENU_EVENTS = {
     'ENTER'     : MENU_SUBMENU,
     'DISPLAY'   : MENU_CHANGE_STYLE,
     'EJECT'     : EJECT,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
+    } 
+
+TVMENU_EVENTS = {
+    'LEFT'      : MENU_LEFT,
+    'RIGHT'     : MENU_RIGHT,
+    'UP'        : MENU_UP,
+    'DOWN'      : MENU_DOWN,
+    'CH+'       : MENU_PAGEUP,
+    'CH-'       : MENU_PAGEDOWN,
+    'MENU'      : MENU_GOTO_MAINMENU,
+    'EXIT'      : MENU_BACK_ONE_MENU,
+    'SELECT'    : MENU_SELECT,
+    'DISPLAY'   : MENU_CHANGE_STYLE,
     'REC'       : TV_START_RECORDING,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/02/25 17:44:30  dischi
+# add special event mapping for tvmenu
+#
 # Revision 1.26  2004/02/23 21:51:15  dischi
 # fix unicode problem
 #
@@ -89,6 +92,7 @@ import os
 import time
 
 import gui.GUIObject
+import rc
 
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
@@ -260,7 +264,7 @@ class TVGuide(Item):
     def show(self):
         if not self.visible:
             self.visible = 1
-            self.menuw.refresh()
+            self.refresh()
 
             
     def hide(self):
@@ -270,6 +274,7 @@ class TVGuide(Item):
         
 
     def refresh(self):
+        rc.set_context('tvmenu')
         self.update_schedules(force=True)
         self.menuw.refresh()
 
