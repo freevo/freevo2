@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/06/06 06:41:47  dischi
+# delete cache on mmpython update
+#
 # Revision 1.34  2004/05/12 20:07:01  dischi
 # do not delete raw files for discs
 #
@@ -177,11 +180,7 @@ def cache_directories(rebuild):
     if rebuild:
         print 'deleting cache files..................................',
         sys.__stdout__.flush()
-        for f in util.recursefolders(config.OVERLAY_DIR,1,'mmpython.cache',1):
-            os.unlink(f)
-        if rebuild == 2:
-            for f in util.match_files(config.OVERLAY_DIR + '/disc/metadata', ['mmpython']):
-                os.unlink(f)
+        mediainfo.del_cache()
         print 'done'
 
     all_dirs = []

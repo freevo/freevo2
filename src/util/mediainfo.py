@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/06/06 06:41:47  dischi
+# delete cache on mmpython update
+#
 # Revision 1.46  2004/05/31 15:58:26  dischi
 # do not cache bad info
 #
@@ -726,7 +729,15 @@ def load_cache(dirname):
     meta_cache.load_cache(dirname)
     
 
-
+def del_cache():
+    """
+    delete all cache files because mmpython got updated
+    """
+    for f in util.recursefolders(config.OVERLAY_DIR,1,'mmpython.cache',1):
+        os.unlink(f)
+    for f in util.match_files(config.OVERLAY_DIR + '/disc/metadata', ['mmpython']):
+        os.unlink(f)
+    
 
 #
 # setup mmpython
@@ -757,6 +768,7 @@ if __freevo_app__ == 'main':
             print 'Error: can\'t detect last cache rebuild'
             print 'Please run \'freevo cache\''
             print
+            del_cache()
         else:
             if len(info) == 3:
                 mmchanged, part_update, complete_update = info
@@ -769,11 +781,15 @@ if __freevo_app__ == 'main':
                 print 'Warning: Freevo cache helper/informations updated.'
                 print 'Please rerun \'freevo cache\' to speed up Freevo'
                 print
+                del_cache()
+                
             elif mmpython.version.CHANGED > mmchanged:
                 print
                 print 'Warning: mmpython as changed.'
                 print 'Please rerun \'freevo cache\' to get the latest updates'
                 print
+                del_cache()
+
             elif (int(time.time()) - part_update) / (3600 * 24) > 7:
                 print
                 print 'Warning: cache is older than 7 days'
