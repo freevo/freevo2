@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/19 17:15:15  outlyer
+# The idletool needs to know what function we're running so it doesn't try
+# to draw when a movie is playing, however, if music is playing, it can still
+# draw the information, so we need to distinguish between 'video' and 'audio'
+#
+# The rc.func will contain the function being used (i.e. 'video' 'audio' etc.)
+#
+# Currently, this does nothing, so ignore it.
+#
 # Revision 1.5  2003/02/19 08:08:30  krister
 # Applied Aubins new pylirc code after testing it (seems to work with keyboard at least), and adding the pylircmodule to the runtime build environment (not required for keyboard operation).
 #
@@ -160,6 +169,7 @@ class RemoteControl:
                 print 'WARNING: Could not initialize PyLirc!'
                 self.pylirc = 0
         self.app = None
+        self.func = None
         self.queue = []
         
     def post_event(self, event):
