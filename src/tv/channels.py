@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/25 09:34:07  krister
+# Changed the frequency returned to be kHz instead of a scaled value
+#
 # Revision 1.8  2003/11/24 17:16:40  rshortt
 # Bugfixes.
 #
@@ -190,11 +193,6 @@ class FreevoChannels:
                 print 'USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
                       (chan, freq)
 
-        # XXX: add code here for TUNER_LOW capability, the last time that I
-        #      half-heartedly tried this it din't work as expected.
-        freq *= 16
-        freq /= 1000
-
         if app:
             if app_cmd:
                 self.appSend(app, app_cmd)
@@ -204,6 +202,12 @@ class FreevoChannels:
                 # or provide it on the command line.
                 return freq
         else:
+            # XXX: add code here for TUNER_LOW capability, the last time that I
+            #      half-heartedly tried this it din't work as expected.
+            # XXX Moved here by Krister, only return actual values
+            freq *= 16
+            freq /= 1000
+
             # Lets set the freq ourselves using the V4L device.
             try:
                 vd = tv.v4l2.Videodev(vg.vdev)
