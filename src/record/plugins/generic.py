@@ -97,15 +97,9 @@ class PluginInterface(Plugin):
         Build the command to record. A class which inherits from the plugin
         should override this function.
         """
-        # FIXME
+        # FIXME, get the current data
         frequency = 0 
-
-        # FIXME:
-        tunerid = rec.channel
-        for c in config.TV_CHANNELS:
-            if tunerid == c[0] or tunerid == c[1]:
-                tunerid = c[2]
-                break
+        tunerid   = rec.channel
             
         duration = rec.stop - rec.start
         if rec.url.startswith('file:'):

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.128  2004/11/13 15:57:11  dischi
+# add possible dvb or tv channel settings to TV_SETTINGS
+#
 # Revision 1.127  2004/10/28 19:34:30  dischi
 # adjust to various changes in util
 #
@@ -88,6 +91,7 @@ import version
 import input
 import sysconfig
 import logging
+import util.ioctl as ioctl
 
 # if float(sys.version[0:3]) >= 2.3:
 #     import warnings
@@ -396,7 +400,25 @@ class DVBCard:
     def __init__(self, number):
         self.adapter = '/dev/dvb/adapter' + number
         _debug_('register dvb device %s' % self.adapter)
-
+        INFO_ST = '128s10i'
+        val = ioctl.pack( INFO_ST, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
+        devfd = os.open(self.adapter + '/frontend0', os.O_TRUNC)
+        r = ioctl.ioctl(devfd, ioctl.IOR('o', 61, INFO_ST), val)
+        os.close(devfd)
+        val = ioctl.unpack( INFO_ST, r )
+        name = val[0]
+        if val[1] == 0:
+            self.type = 'DVB-S'
+        elif val[1] == 1:
+            self.type = 'DVB-C'
+        elif val[1] == 2:
+            self.type = 'DVB-T'
+        else:
+            self.type = 'unknown (%s)' % val[1]
+        if name.find('\0') > 0:
+            name = name[:name.find('\0')]
+        self.name = name
+        
 TV_SETTINGS = TVSettings()
 
 
@@ -850,3 +872,24 @@ REDESIGN_BROKEN   = 'not working while gui redesign'
 REDESIGN_FIXME    = 'not working since gui redesign, feel free to fix this'
 REDESIGN_UNKNOWN  = 'plugin may be broken after gui redesign, please check'
 
+device_re = re.compile('^((dvb|tv|ivtv)([0-9])?:)?(.*)')
+
+# add all possible channels to the cards
+for card in TV_SETTINGS:
+    channels = {}
+    for c in TV_CHANNELS:
+        for freq in c[2:]:
+            device, type, number, freq = device_re.match(String(freq)).groups()
+            if number and device[:-1] != card:
+                continue
+            if type and not card.startswith(type):
+                continue
+            try:
+                freq = int(freq)
+                if card.startswith('dvb'):
+                    continue
+            except ValueError:
+                if not card.startswith('dvb'):
+                    continue
+            channels[c[0]] = freq
+    TV_SETTINGS[card].channels = channels

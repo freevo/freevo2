@@ -4,38 +4,31 @@ import generic
 
 class PluginInterface(generic.PluginInterface):
 
-    def __init__(self):
-        self.name = 'dvb0'
+    def __init__(self, device='dvb0'):
+        self.name = device
+        self.device = config.TV_SETTINGS[device]
         generic.PluginInterface.__init__(self)
 
+        if self.device.type == 'DVB-T':
+            rating = 10
+        elif self.device.type == 'DVB-C':
+            rating = 20 
+        else:
+            rating = 15 
         channels = []
-        f = open(os.path.expanduser('~/.mplayer/channels.conf'))
-        for l in f.readlines():
-            dvbname = l[:l.find(':')]
-            for c in config.TV_CHANNELS:
-                if c[2] == dvbname:
-                    channels.append([c[0]])
-        self.channels = [ 'dvb0', 10, channels ]
+        for c in self.device.channels:
+            channels.append([c])
+        self.channels = [ device, rating, channels ]
 
-
+        
     def get_cmd(self, rec):
-        # FIXME
-        frequency = 0 
-
-        # FIXME:
-        tunerid = rec.channel
-        for c in config.TV_CHANNELS:
-            if tunerid == c[0] or tunerid == c[1]:
-                tunerid = c[2]
-                break
-
+        channel = self.device.channels[rec.channel]
         if rec.url.startswith('file:'):
             filename = rec.url[5:]
         else:
             filename = rec.url
-
         return [ config.CONF.mplayer, '-dumpstream', '-dumpfile',
-                 filename, 'dvb://' + String(tunerid) ]
+                 filename, 'dvb://' + String(channel) ]
 
     
     def get_channel_list(self):

@@ -30,15 +30,7 @@
 #
 # -----------------------------------------------------------------------------
 
-# python imports
-import time
-import os
-
-# notifier
-import notifier
-
 # freevo imports
-import config
 import plugin
 
 # list of possible plugins

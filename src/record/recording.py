@@ -137,10 +137,13 @@ class Recording:
         if len(name) > 23:
             name = name[:20] + u'...'
         name = u'"' + name + u'"'
+        status = self.status
+        if status == 'scheduled':
+            status = self.recorder[0].name
         return '%3d %10s %-25s %4d %s-%s %s' % \
                (self.id, String(channel), String(name),
                 self.priority, _int2time(self.start)[4:],
-                _int2time(self.stop)[9:], self.status)
+                _int2time(self.stop)[9:], status)
 
 
     def __fxd__(self, fxd):

@@ -108,11 +108,6 @@ class Favorite:
         """
         if name != self.name:
             return False
-        # FIXME: correct channel in db
-        for c in config.TV_CHANNELS:
-            if c[0] == channel:
-                channel = c[1]
-                break
         if not channel in self.channels:
             return False
         timestruct = time.localtime(start)
