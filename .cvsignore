@@ -1,1 +1,1 @@
-*.pyc log.txt runapp Makefile *.so *.o freevo_rt configure_conf.py
+*.pyc log.txt runapp Makefile *.so *.o freevo_rt configure_conf.py freevo_xwin
