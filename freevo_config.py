@@ -907,6 +907,12 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
 WWW_PORT = 8080
 
 #
+# Web server host addres to bind to.  If set to localhost you will
+# only be able to access it from the same machine. 
+#
+WWW_VHOST = 'localhost'
+
+#
 # Allowed IP addresses list. Set to [] to allow all addresses.
 #
 WWW_IP_ALLOW = ['127.0.0.1']

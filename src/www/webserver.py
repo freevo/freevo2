@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/12 16:46:18  rshortt
+# The webserver now binds to a particular host address, localhost is the default
+# so if left unchanged you will only be able to access it from the same machine (unless maybe someone does some DNS tricks).
+#
 # Revision 1.5  2003/05/11 23:00:03  rshortt
 # Fix logging and doc root.
 #
@@ -66,8 +70,14 @@ root.processors = {
             '.rpy': script.ResourceScript,
 }
 
-root.putChild('vhost', vhost.VHostMonsterResource())
-site = server.Site(root)
+default = static.Data('text/html', '')
+default.putChild('vhost', vhost.VHostMonsterResource())
+
+resource = vhost.NameVirtualHost()
+resource.default = default
+resource.addHost(config.WWW_VHOST, root)
+
+site = server.Site(resource)
 application = app.Application('web')
 application.listenTCP(config.WWW_PORT, site)
 
