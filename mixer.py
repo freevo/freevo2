@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/08/03 20:18:15  krister
+# Changed popen() to system() since the app can hang if there it tries to use stdin/stdout. Changed parenthesis whitespace. XXX the external app aumix is hardcoded, and it does not exist on SuSE!
+#
 # Revision 1.5  2002/08/03 18:17:53  dischi
 # Patch from Thomas Malt:
 # - Added get, set, inc and dec functions for Pcm, Igain, Ogain
@@ -41,7 +44,7 @@
 import fcntl
 import struct
 import config
-import os     # popen is used to manipulate the mixer for SB Live cards.
+import os     # system() is used to manipulate the mixer for SB Live cards.
 
 # Set to 1 for debug output
 DEBUG = 0
@@ -117,19 +120,19 @@ class Mixer:
         if self.mainVolume < 0: self.mainVolume = 0
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
 
-    def getPcmVolume( self ):
+    def getPcmVolume(self):
         return( self.pcmVolume )
     
     def setPcmVolume(self, volume):
         self.pcmVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_PCM, volume)
 
-    def incPcmVolume( self ):
+    def incPcmVolume(self):
         self.pcmVolume += 5
         if self.pcmVolume > 100: self.pcmvolume = 100
         self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
 
-    def decPcmVolume( self ):
+    def decPcmVolume(self):
         self.pcmVolume -= 5
         if self.pcmVolume < 0: self.pcmVolume = 0
         self._setVolume( self.SOUND_MIXER_WRITE_PCM, self.pcmVolume )
@@ -138,39 +141,40 @@ class Mixer:
         self.lineinVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_LINE, volume)
 
-    def getLineinVolume( self ):
+    def getLineinVolume(self):
         return self.lineinVolume
        
     def setMicVolume(self, volume):
         self.micVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_MIC, volume)
 
-    def setIgainVolume( self, volume ):
+    def setIgainVolume(self, volume):
         """For Igain (input from TV etc) on emu10k cards"""
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.igainVolume = volume
-        os.popen( 'aumix -i' + str(volume) )
+        os.system('aumix -i%s' % volume)
 
-    def getIgainVolume( self ):
+    def getIgainVolume(self):
         return self.igainVolume
 
-    def decIgainVolume( self ):
+    def decIgainVolume(self):
         self.igainVolume -= 5
         if self.igainVolume < 0: self.igainVolume = 0
-        os.popen( 'aumix -i-5' )
+        os.system('aumix -i-5')
         
-    def incIgainVolume( self ):
+    def incIgainVolume(self):
         self.igainVolume += 5
         if self.igainVolume > 100: self.igainVolume = 100
-        os.popen( 'aumix -i+5' )
+        os.system('aumix -i+5')
         
-    def setOgainVolume( self, volume ):
+    def setOgainVolume(self, volume):
         """For Ogain on SB Live Cards"""
         if volume > 100: volume = 100 
         elif volume < 0: volume = 0
         self.ogainVolume = volume
-        os.popen( 'aumix -o' + str(volume) ) 
+        os.system('aumix -o%s' % volume)
+
 
 # Simple test...
 if __name__ == '__main__':
