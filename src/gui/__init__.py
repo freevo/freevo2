@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/08/01 10:38:14  dischi
+# better access to various submodules
+#
 # Revision 1.20  2004/07/27 11:15:52  dischi
 # do not start the gui for helpers
 #
@@ -43,7 +46,11 @@
 #
 # ----------------------------------------------------------------------
 
+import copy
+
 import config
+import event
+import eventhandler
 
 # basic objects
 from widgets.image import Image
@@ -58,9 +65,11 @@ _keyboard = None
 if hasattr(config, 'BMOVL_OSD_VIDEO'):
     import backends.bmovl
     backend = backends.bmovl
+    default = 'bmovl'
 else:
     import backends.sdl
     backend = backends.sdl
+    default = 'sdl'
 
     
 def get_keyboard():
@@ -80,7 +89,7 @@ def get_renderer():
     """
     global _renderer
     if not _renderer:
-        _renderer = backend.Renderer()
+        _renderer = backend.get_renderer()
     return _renderer
 
 
@@ -90,7 +99,7 @@ def get_screen():
     """
     global _screen
     if not _screen:
-        _screen = backend.Screen(get_renderer())
+        _screen = backend.get_screen(get_renderer())
     return _screen
 
 
@@ -106,12 +115,54 @@ def get_skin():
     return _skin
 
     
+def get_areas():
+    """
+    return the area object
+    """
+    global _skin
+    if not _skin:
+        import areas
+        _skin = areas.AreaHandler(get_settings())
+        _skin.set_screen(get_screen())
+    return _skin
 
+    
 def get_settings():
     """
     get current fxd settings
     """
     return settings.settings
+
+
+def set_screen(name):
+    """
+    set a new screen backend
+    """
+    if name == 'default':
+        global default
+        name = default
+        
+    global _screen
+    global _renderer
+    global backend
+    old_screen = get_screen()
+
+    # import new backend
+    module = 'backends.%s' % name
+    exec('import %s' % module)
+    backend = eval(module)
+
+    _screen    = None
+    _renderer  = None
+    new_screen = get_screen()
+
+    if old_screen != new_screen:
+        _debug_('move all objects to new backend')
+        for o in copy.copy(old_screen.get_objects()):
+            print 'move %s (%s)' % (o, o.layer)
+            old_screen.remove(o)
+            new_screen.add(o)
+        old_screen.update()
 
 
 
@@ -142,6 +193,7 @@ def get_image(name):
 
 def get_icon(name):
     return settings.settings.get_icon(name)
+
 
 
 # High level widgets
