@@ -7,7 +7,7 @@ import util
 # XML support
 from xml.utils import qp_xml
 
-from videoinfo import VideoInfo
+from videoitem import VideoItem
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -55,7 +55,7 @@ def xml_parseVideo(video_node, dir, duplicate_check):
             except KeyError:
                 pass
 
-    mi = VideoInfo(playlist)
+    mi = VideoItem(playlist)
     mi.mode = mode
     mi.mplayer_options = mplayer_options
     return mi
@@ -86,7 +86,7 @@ def xml_parseInfo(info_node, i):
 #
 # parse a XML movie file
 #
-def parseMovieFile(file, calling_info, duplicate_check):
+def parseMovieFile(file, parent, duplicate_check):
     dir = os.path.dirname(file)
     movies = []
     
@@ -100,44 +100,41 @@ def parseMovieFile(file, calling_info, duplicate_check):
 
     for c in box.children:
         if c.name == 'movie':
-            mpinfo = None
+            mitem = None
 
             for node in c.children:
                 if node.name == u'video':
-                    minfo = xml_parseVideo(node, dir, duplicate_check)
+                    mitem = xml_parseVideo(node, dir, duplicate_check)
 
-            if minfo:
-                minfo.calling_info = calling_info
+            if mitem:
+                mitem.parent = parent
                 for node in c.children:
                     if node.name == u'title':
-                        minfo.name = node.textof().encode('latin-1')
+                        mitem.name = node.textof().encode('latin-1')
                     elif node.name == u'cover' and \
                          os.path.isfile(os.path.join(dir,node.textof())):
-                        minfo.image = os.path.join(dir, node.textof())
+                        mitem.image = os.path.join(dir, node.textof())
                     elif node.name == u'id':
-                        minfo.rom_id += [node.textof()]
+                        mitem.rom_id += [node.textof()]
                     elif node.name == u'label':
-                        minfo.label += [node.textof()]
-                    elif node.name == u'info':
-                        xml_parseInfo(node, minfo)
+                        mitem.rom_label += [node.textof()]
+                    elif node.name == u'item':
+                        xml_parseInfo(node, mitem)
                         
-                minfo.xml_file = file
-                movies += [ minfo ]
+                mitem.xml_file = file
+                movies += [ mitem ]
 
     return movies
 
 
 # --------------------------------------------------------------------------------------
 
-    
 #
 # hash all XML movie files
 #
 def hash_xml_database():
     config.MOVIE_INFORMATIONS_ID    = {}
     config.MOVIE_INFORMATIONS_LABEL = []
-
-    return
 
     if os.path.exists("/tmp/freevo-rebuild-database"):
         os.system('rm -f /tmp/freevo-rebuild-database')
@@ -146,7 +143,21 @@ def hash_xml_database():
 
     for name,dir in config.DIR_MOVIES:
         for file in util.recursefolders(dir,1,'*.xml',1):
-            info = parse(file, os.path.dirname(file),[])
+            infolist = parseMovieFile(file, os.path.dirname(file),[])
+            for info in infolist:
+                if info.rom_id:
+                    for i in info.rom_id:
+                        if len(i) > 16:
+                            i = i[0:16]
+                        config.MOVIE_INFORMATIONS_ID[i] = info
+                if info.rom_label:
+                    for l in info.rom_label:
+                        l_re = re.compile(l)
+                        config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
+                
+    for file in util.recursefolders(config.MOVIE_DATA_DIR,1,'*.xml',1):
+        infolist = parseMovieFile(file, os.path.dirname(file),[])
+        for info in infolist:
             if info.rom_id:
                 for i in info.rom_id:
                     if len(i) > 16:
@@ -156,17 +167,5 @@ def hash_xml_database():
                 for l in info.rom_label:
                     l_re = re.compile(l)
                     config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
-                
-    for file in util.recursefolders(config.MOVIE_DATA_DIR,1,'*.xml',1):
-        info = parse(file, os.path.dirname(file),[])
-        if info.rom_id:
-            for i in info.rom_id:
-                if len(i) > 16:
-                    i = i[0:16]
-                config.MOVIE_INFORMATIONS_ID[i] = info
-        if info.rom_label:
-            for l in info.rom_label:
-                l_re = re.compile(l)
-                config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
 
     if DEBUG: print 'done'

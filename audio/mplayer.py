@@ -9,14 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2002/11/23 19:24:01  dischi
+# Revision 1.1  2002/11/23 19:24:02  dischi
 # New version of the code cleanup, not working right now, wait for more
 # checkins in some minutes please
-#
-# Revision 1.1  2002/11/20 20:23:23  dischi
-# The new video module can now actually play the movie. Support for single file
-# movies and also splitted movies. ROM_DRIVE and movie configure support is
-# still missing. Give it a try :-)
 #
 #
 # -----------------------------------------------------------------------
@@ -85,6 +80,17 @@ def get_singleton():
         
     return _singleton
 
+def get_demuxer(filename):
+    DEMUXER_MP3 = 17
+    DEMUXER_OGG = 18
+    rest, extension     = os.path.splitext(filename)
+    if string.lower(extension) == '.mp3':
+        return "-demuxer " + str(DEMUXER_MP3)
+    if string.lower(extension) == '.ogg':
+        return "-demuxer " + str(DEMUXER_OGG)
+    else:
+        return ''
+
 
 class MPlayer:
 
@@ -92,11 +98,9 @@ class MPlayer:
         self.thread = MPlayer_Thread()
         self.thread.start()
         self.mode = None
-
                          
-    def play(self, filename, options, fileinfo):
-
-        mode = fileinfo.mode
+    def play(self, item):
+        filename = item.filename
 
         # Is the file streamed over the network?
         if filename.find('://') != -1:
@@ -104,81 +108,29 @@ class MPlayer:
             network_play = 1
         else:
             network_play = 0
-            
-        self.mode = mode   # setting global var to mode.
 
-        if DEBUG:
-            print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
-
-        if mode == 'file' and not os.path.isfile(filename) and not network_play:
+        if not os.path.isfile(filename) and not network_play:
 	    skin.PopupBox('%s\nnot found!' % os.path.basename(filename))
             time.sleep(2.0) 
             menuwidget.refresh()
-            # XXX We should really use return more.
+            # XXX We should really use return more. And this escape should
+            # XXX probably be put at start of the function.
             return 0
        
-
         # Build the MPlayer command
         mpl = '--prio=%s %s %s' % (config.MPLAYER_NICE,
                                    config.MPLAYER_CMD,
                                    config.MPLAYER_ARGS_DEF)
 
-        # XXX find a way to enable this for AVIs with ac3, too
-        if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
-           and config.MPLAYER_AO_HWAC3_DEV:
-            mpl += ' -ao %s -ac hwac3' % config.MPLAYER_AO_HWAC3_DEV
+        if not network_play:
+            demux = ' %s ' % get_demuxer(filename)
         else:
-            mpl += ' -ao %s' % config.MPLAYER_AO_DEV
+            # Don't include demuxer for network files
+            demux = ''
 
-
-        if mode == 'file':
-            default_args = config.MPLAYER_ARGS_MPG
-        elif mode == 'dvdnav':
-            default_args = config.MPLAYER_ARGS_DVDNAV
-        elif mode == 'vcd':
-            default_args = config.MPLAYER_ARGS_VCD % filename  # Filename is VCD chapter
-        elif mode == 'dvd':
-            default_args = config.MPLAYER_ARGS_DVD % filename  # Filename is DVD title
-        else:
-            print "Don't know what do play!"
-            print "What is:      " + str(filename)
-            print "What is mode: " + mode
-            print "What is:      " + mpl
-            return
-
-
-
-            
-        # Mplayer command and standard arguments
-        mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV)
-            
-        # XXX Some testcode by Krister:
-        if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and \
-           config.MPLAYER_USE_WID:
-            if DEBUG: print 'Got freevo_xwin and x11'
-            os.system('rm -f /tmp/freevo.wid')
-            os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
-                      (osd.width, osd.height))
-            time.sleep(1)
-            if os.path.isfile('/tmp/freevo.wid'):
-                if DEBUG: print 'Got freevo.wid'
-                try:
-                    wid = int(open('/tmp/freevo.wid').read().strip(), 16)
-                    mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
-                    if DEBUG: print 'Got WID = 0x%08x' % wid
-                except:
-                    pass
-
-
-        if mode == 'file':
-            command = mpl + ' "' + filename + '"'
-        else:
-            command = mpl
-
-        if options:
-            command += ' ' + options[0]
+        command = '%s -vo null %s "%s"' % (mpl, demux, filename)
                 
-        self.file = fileinfo
+        self.item = item
 
         # XXX A better place for the major part of this code would be
         # XXX mixer.py
@@ -193,109 +145,78 @@ class MPlayer:
         mixer.setIgainVolume(0) # SB Live input from TV Card.
         # This should _really_ be set to zero when playing other audio.
 
-        # clear the screen for mplayer
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.update()
+        self.thread.item = item
+
+        if self.thread.item.valid:
+            item.drawall = 1
+            skin.DrawMP3(self.item) 
+            self.item.drawall = 0
+        else:
+            # Invalid file, show an error and survive.
+            skin.PopupBox('Invalid audio file')
+            time.sleep(3.0)
+            menuwidget.refresh()
+            return
 
         self.thread.play_mode = self.mode
-        self.thread.fileinfo  = fileinfo
-        self.fileinfo  = fileinfo
-        
+
         if DEBUG:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
             
         self.thread.mode    = 'play'
-
         self.thread.command = command
         self.thread.mode_flag.set()
-        self.rc_prev_app = rc.app
         rc.app = self.eventhandler
 
     def stop(self):
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
+        rc.app = None
+        self.thread.item = None
         while self.thread.mode == 'stop':
             time.sleep(0.3)
 
-
     def eventhandler(self, event):
-        if event == rc.STOP or event == rc.SELECT:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('S')
-            else:
-                self.stop()
-                self.thread.fileinfo = None
-                rc.app = self.rc_prev_app
-                menuwidget.refresh()
-            return TRUE
-        
-        if event == rc.PLAY_END:
-            self.stop()
-            rc.app = self.rc_prev_app   # mix this
-            return self.fileinfo.eventhandler(event)
-            
+        if event == rc.EXIT or event == rc.STOP:
+            self.thread.item = None
+            self.stop ()
+            rc.app = None
+            menuwidget.refresh()
 
-        if event == rc.MENU:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('M')
-                return TRUE
-
-        if event == rc.DISPLAY:
-            self.thread.cmd( 'info' )
-            return TRUE
-
-        if event == rc.PAUSE or event == rc.PLAY:
+        elif event == rc.PAUSE:
             self.thread.cmd('pause')
-            return TRUE
 
-        if event == rc.FFWD:
+        elif event == rc.FFWD:
             self.thread.cmd('skip_forward')
-            return TRUE
 
-        if event == rc.UP:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('K')
-                return TRUE
+        elif event == rc.RIGHT:
+            self.thread.cmd('skip_forward2')
 
-        if event == rc.REW:
+        elif event == rc.REW:
             self.thread.cmd('skip_back')
-            return TRUE
 
-        if event == rc.DOWN:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('J')
-                return TRUE
+        elif event == rc.LEFT:
+            self.thread.cmd('skip_back2')
 
-        if event == rc.LEFT:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('H')
-            else:
-                self.thread.cmd('skip_back2')
-            return TRUE
+        elif event == rc.PLAY_END:
+            self.stop()
+            rc.app = None
+            return self.item.eventhandler(event)
 
-        if event == rc.RIGHT:
-            if self.mode == 'dvdnav':
-                self.thread.app.write('L')
-            else:
-                self.thread.cmd('skip_forward2')
-            return TRUE
+        elif event == rc.VOLUP:
+            print "Got VOLUP in mplayer!"
 
-        # nothing found? Try the eventhandler of the object who called us
-        return self.fileinfo.eventhandler(event)
-
+        else:
+            return self.item.eventhandler(event)
+            
             
 # ======================================================================
-
-RE_AUDIO = re.compile("^\[open\] audio stream: [0-9] audio format:"+\
-                      "(.*)aid: ([0-9]*)").match
-RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
-                         "([a-z][a-z])").match
-RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
-
 class MPlayerApp(childapp.ChildApp):
-    def __init__(self, app, fileinfo):
-        self.fileinfo = fileinfo
+    def __init__(self, app, item):
+        self.item = item
+        self.current_playtime = 0
         childapp.ChildApp.__init__(self, app)
+        self.RE_TIME = re.compile("^A: +([0-9]+)\.").match
 
 
     def kill(self):
@@ -304,24 +225,6 @@ class MPlayerApp(childapp.ChildApp):
         # reaped by childapp.kill().wait()
         childapp.ChildApp.kill(self, signal.SIGINT)
 
-        # XXX Krister testcode for proper X11 video
-        if DEBUG: print 'Killing mplayer'
-        os.system('killall -9 freevo_xwin 2&> /dev/null')
-        os.system('rm -f /tmp/freevo.wid')
-
-
-
-    def parse(self, str):
-        m = RE_AUDIO(str)
-        if m:
-            self.fileinfo.available_audio_tracks += [ (m.group(2), m.group(1)) ]
-        m = RE_SUBTITLE(str)
-        if m:
-            self.fileinfo.available_subtitles += [ (m.group(1), m.group(2)) ]
-        m = RE_CHAPTER(str)
-        if m:
-            self.fileinfo.available_chapters = int(m.group(1))
-        
 
     def stdout_cb(self, str):
 
@@ -331,11 +234,12 @@ class MPlayerApp(childapp.ChildApp):
             fd.close()
                      
         if str.find("A:") == 0:
-            self.fileinfo.current_playtime = str
-
-        # this is the first start of the movie, parse infos
-        elif not self.fileinfo.current_playtime:
-            self.parse(str)
+            m = self.RE_TIME(str)
+            if m:
+                self.item.current_playtime = int(m.group(1))
+                if self.item.current_playtime != self.current_playtime:
+                    self.item.draw()
+                self.current_playtime = self.item.current_playtime
 
 
     def stderr_cb(self, str):
@@ -357,8 +261,7 @@ class MPlayer_Thread(threading.Thread):
         self.mode_flag = threading.Event()
         self.command   = ''
         self.app       = None
-        self.fileinfo  = None
-
+        self.item      = None
         
     def run(self):
         while 1:
@@ -368,28 +271,17 @@ class MPlayer_Thread(threading.Thread):
 
             elif self.mode == 'play':
 
-                # The DXR3 device cannot be shared between our SDL session
-                # and MPlayer.
-                if (osd.sdl_driver == 'dxr3'):
-                    if DEBUG:
-		        print "Stopping Display for Video Playback on DXR3"
-                    osd.stopdisplay()
-                
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
-                self.app = MPlayerApp(self.command, self.fileinfo)
+                self.app = MPlayerApp(self.command, self.item)
 
+                # XXX Bad hack: store the value to seek to in the childapp
+                # XXX to seek forward to this position
                 while self.mode == 'play' and self.app.isAlive():
                     time.sleep(0.1)
 
                 self.app.kill()
-
-                # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3':
-                    osd.restartdisplay()
-		    osd.update()
-		    print "Display back online"
 
                 if self.mode == 'play':
                     rc.post_event(rc.PLAY_END)
@@ -401,7 +293,7 @@ class MPlayer_Thread(threading.Thread):
 
 
     def cmd(self, command):
-        #print "In cmd going to do: " + command
+        print "In cmd going to do: " + command
         str = ''
         if command == 'info':
             str = mplayerKey('INFO')
@@ -426,7 +318,7 @@ class MPlayer_Thread(threading.Thread):
         elif command == 'skip_back3':
             str = mplayerKey('PAGEDOWN')
 
-        #print "In cmd going to write: " + str
+        print "In cmd going to write: " + str
         self.app.write(str) 
 
 
@@ -460,5 +352,3 @@ def mplayerKey(rcCommand):
     key = mplayerKeys.get(rcCommand, '')
 
     return key
-
-
