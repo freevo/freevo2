@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/07/12 19:13:25  rshortt
+# Need to set the plugin level in the plugin object.
+#
 # Revision 1.23  2003/07/12 17:17:45  dischi
 # update doc
 #
@@ -327,6 +330,7 @@ def __load_plugin__(name, type, level, args, number):
             p = eval('%s()' % object)
 
         p._number = number
+        p._level = level
 
         if type:
             special = type
