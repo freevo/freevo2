@@ -389,7 +389,7 @@ class Instance(mbus.Guides):
         """
         Small errorhandler for debugging mbus
         """
-        print 'mcomm error:', error
+        log.error(error)
 
 
     def register_entity_notification(self, func):
