@@ -126,6 +126,9 @@ class RecordServer(RPCServer):
 
         # check if the show is still in the db or maybe moved
         for r in next_recordings:
+            if r.status == RECORDING:
+                # do not move a current running recording
+                continue
             results = pyepg.search(r.name, r.channel)
             for p in results:
                 if p.start == r.start and p.stop == r.stop:
