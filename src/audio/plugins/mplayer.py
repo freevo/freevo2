@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/20 08:56:24  dischi
+# fix the refresh bug the way it is handled for xine
+#
 # Revision 1.19  2003/09/20 01:55:04  mikeruelle
 # fix refresh issue
 #
@@ -156,7 +159,7 @@ class MPlayer:
 
         _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
             
-        self.thread.start(MPlayerApp, (command, item))
+        self.thread.start(MPlayerApp, (command, item, self.refresh))
         return None
     
 
@@ -212,7 +215,7 @@ class MPlayerApp(childapp.ChildApp):
     class controlling the in and output from the mplayer process
     """
 
-    def __init__(self, (app, item)):
+    def __init__(self, (app, item, refresh)):
         if config.MPLAYER_DEBUG:
             fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
             fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
@@ -234,7 +237,7 @@ class MPlayerApp(childapp.ChildApp):
         childapp.ChildApp.__init__(self, app)
         self.RE_TIME = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
-              
+        self.refresh = refresh
 
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -284,8 +287,7 @@ class MPlayerApp(childapp.ChildApp):
                     self.item.elapsed = int(m.group(1))
 
             if self.item.elapsed != self.elapsed:
-	        mplayer = plugin.getbyname(plugin.AUDIO_PLAYER)
-                mplayer.refresh()
+                self.refresh()
             self.elapsed = self.item.elapsed
 
 
