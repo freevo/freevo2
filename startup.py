@@ -88,9 +88,10 @@ remote_quiet = ('remote', 'sh',
 osd_fb_quiet = ('osd_fb', 'sh', ['-c',
                                  './osd_server/osds_fb > /dev/null'])
 
-# The X11 framebuffer driver
-osd_x11 = ('osd_x11', 'sh', ['-c',
-                             './osd_server/osds_x11'])
+# The X11 framebuffer driver, debug output to /tmp/freevo_osdx11.log
+osd_x11 = ('osd_x11',
+           'sh', ['-c',
+                  './osd_server/osds_x11 > %s/internal-osdx11.log' % config.LOGDIR])
 
 # The SDL framebuffer driver
 osd_sdl = ('osd_sdl', 'sh', ['-c',
