@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/03/31 20:44:52  dischi
+# shorten time between pop.destroy and menu drawing
+#
 # Revision 1.7  2003/03/30 16:50:20  dischi
 # pass xml_file definition to submenus
 #
@@ -175,11 +178,10 @@ def main_menu_generate(item):
     return items
 
         
-def main_menu(item, menuw, xml_file):
+def get_main_menu(item, menuw, xml_file):
     global current_xml_file
     current_xml_file = xml_file
-    moviemenu = menu.Menu('CONFIG MENU', main_menu_generate(item), xml_file=xml_file)
-    menuw.pushmenu(moviemenu)
+    return menu.Menu('CONFIG MENU', main_menu_generate(item), xml_file=xml_file)
     
 
 ###########################

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/03/31 20:44:53  dischi
+# shorten time between pop.destroy and menu drawing
+#
 # Revision 1.30  2003/03/31 20:37:33  dischi
 # added parent to gui popup box
 #
@@ -507,8 +510,6 @@ class VideoItem(Item):
             else:
                 pop = PopupBox(menuw, 'Scanning disc, be patient...',
                                icon='skins/icons/misc/cdrom_mount.png')
-                menuw.add_child(pop)
-                pop.osd.focused_app = pop
                 pop.show()
 
                 
@@ -571,9 +572,6 @@ class VideoItem(Item):
             if not done or not found:
                 self.num_titles = 100 # XXX Kludge
 
-        if pop and config.NEW_SKIN:
-            pop.destroy()
-
         #
         # Done scanning the disc, set up the menu.
         #
@@ -582,6 +580,8 @@ class VideoItem(Item):
         if self.num_titles == 1:
             file = copy.copy(self)
             file.filename = '1'
+            if pop and config.NEW_SKIN:
+                pop.destroy()
             file.play(menuw = menuw)
             return
 
@@ -594,12 +594,16 @@ class VideoItem(Item):
             items += [file]
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
-        menuw.pushmenu(moviemenu)
 
+        if pop and config.NEW_SKIN:
+            pop.destroy()
+
+        menuw.pushmenu(moviemenu)
         return
 
 
     def settings(self, arg=None, menuw=None):
+        pop = None
         if (self.mode == 'dvd' or self.mode == 'vcd') and not self.available_audio_tracks:
             
             # Use the uid to make a user-unique filename
@@ -645,11 +649,11 @@ class VideoItem(Item):
             for line in open('/tmp/mplayer_dvd_%s.log' % uid).readlines():
                 p.parse(line)
 
-            if config.NEW_SKIN:
-                pop.destroy()
-
             
-        configure.main_menu(self, menuw, self.xml_file)
+        confmenu = configure.get_main_menu(self, menuw, self.xml_file)
+        if pop:
+            pop.destroy()
+        menuw.pushmenu(confmenu)
         
 
     def eventhandler(self, event, menuw=None):
