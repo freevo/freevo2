@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2002/08/05 00:50:33  tfmalt
+# o Split eventhandler into eventhandler_audio and eventhandler. This should
+#   make the code easier to maintain.
+# o Added start of eventhandling which manipulates the audio GUI (draw a
+#   volume meter when changing the volume etc.)
+#
 # Revision 1.22  2002/08/05 00:33:37  outlyer
 # Removed some debugging code I put in.
 #
@@ -192,16 +198,18 @@ class MPlayer:
         elif mode == 'audio':
             command = mpl + " " + get_demuxer(filename) + ' "' + filename + '"'
 
-
         else:
             mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -alang ' + config.DVD_LANG_PREF)
             if config.DVD_SUBTITLE_PREF:
                 mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
-            command = mpl % filename  # Filename is DVD chapter
+            print "What is:      " + str(filename)
+            print "What is mode: " + mode
+            print "What is:      " + mpl
+            command = mpl % str(filename)  # Filename is DVD chapter
             
 
 
-        self.filename = filename
+        self.filename = filename 
         self.playlist = playlist
 
         # XXX A better place for the major part of this code would be
@@ -233,7 +241,10 @@ class MPlayer:
         self.thread.mode    = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
-        rc.app = self.eventhandler
+        if(mode == 'audio'):
+            rc.app = self.eventhandler_audio
+        else:
+            rc.app = self.eventhandler
         
     def stop(self):
         # self.thread.audioinfo = None
@@ -243,15 +254,91 @@ class MPlayer:
             time.sleep(0.3)
 
 
+    def eventhandler_audio(self, event):
+        if self.mode != 'audio':
+            # XXX It might be good to throw exception here.
+            if DEBUG: print "Oops.. got not audio mode in audio eventhandler"
+            return 0
+        
+        if event == rc.STOP or event == rc.SELECT:
+            # XXX Not sure if I want stop and select to be the same.
+            self.thread.audioinfo = None
+            self.stop ()
+            rc.app = None
+            menuwidget.refresh()
+        elif event == rc.MENU:
+            # XXX What to do with audio on menu
+            pass
+        elif event == rc.DISPLAY:
+            # XXX What to do? 
+            pass
+        elif event == rc.PAUSE:
+            self.thread.audioinfo.toggle_pause()
+            self.thread.cmd('pause')
+        elif event == rc.FFWD:
+            # XXX this is kinda silly to hardcode.. let's hope mplayer
+            # XXX Doesn't change it's spec soon :)
+            self.thread.cmd('skip_forward')
+            self.thread.audioinfo.ffwd(10)
+        elif event == rc.UP:
+            # XXX this is kinda silly to hardcode.. let's hope mplayer
+            # XXX Doesn't change it's spec soon :)
+            self.thread.cmd('skip_forward2')
+            self.thread.audioinfo.ffwd( 60 )
+        elif event == rc.REW:
+            # XXX this is kinda silly to hardcode.. let's hope mplayer
+            # XXX Doesn't change it's spec soon :)
+            self.thread.audioinfo.rwd( 10 )
+            self.thread.cmd('skip_back')
+        elif event == rc.DOWN:
+            # XXX this is kinda silly to hardcode.. let's hope mplayer
+            # XXX Doesn't change it's spec soon :)
+            self.thread.audioinfo.rwd( 60 )
+            self.thread.cmd('skip_back2')
+        elif event == rc.LEFT:
+            self.stop()
+            if self.playlist == []:
+                rc.app = None
+                menuwidget.refresh()
+            else:
+                # Go to the previous movie in the list
+                pos = self.playlist.index(self.filename)
+                pos = (pos-1) % len(self.playlist)
+                filename = self.playlist[pos]
+                self.play(self.mode, filename, self.playlist, self.repeat,
+                          self.mplayer_options)
+        elif event == rc.PLAY_END or event == rc.RIGHT:
+            self.stop()
+            if self.playlist == []:
+                rc.app = None
+                menuwidget.refresh()
+            else:
+                pos = self.playlist.index(self.filename)
+                last_file = (pos == len(self.playlist)-1)
+                
+                # Don't continue if at the end of the list
+                if self.playlist == [] or (last_file and not self.repeat):
+                    rc.app = None
+                    menuwidget.refresh()
+                else:
+                    # Go to the next song in the list
+                    pos = (pos+1) % len(self.playlist)
+                    filename = self.playlist[pos]
+                    self.play( self.mode, filename, self.playlist,
+                               self.repeat, self.mplayer_options )
+        elif event == rc.VOLUP:
+            print "Got VOLUP in mplayer!"
+            # osd.popup_box('Volume shall come here')
+            # osd.update()
+            # time.sleep(1.0)
+            # self.thread.audioinfo.drawall = 1
+            # time.sleep(0.2)
+            # self.thread.audioinfo.drawall = 0
+                   
     def eventhandler(self, event):
         if event == rc.STOP or event == rc.SELECT:
             if self.mode == 'dvdnav':
                 self.thread.app.write('S')
-	    elif self.mode == 'audio':
-	    	self.thread.audioinfo = None
-		self.stop ()
-		rc.app = None
-		menuwidget.refresh()
             else:
                 self.stop()
                 rc.app = None
@@ -261,38 +348,20 @@ class MPlayer:
         elif event == rc.DISPLAY:
             self.thread.cmd( 'info' )
         elif event == rc.PAUSE or event == rc.PLAY:
-            if self.mode == 'audio':
-                self.thread.audioinfo.toggle_pause()
             self.thread.cmd('pause')
         elif event == rc.FFWD:
-            if self.mode == 'audio':
-                # XXX this is kinda silly to hardcode.. let's hope mplayer
-                # XXX Doesn't change it's spec soon :)
-                self.thread.audioinfo.ffwd( 10 )
             self.thread.cmd('skip_forward')
         elif event == rc.UP:
             if self.mode == 'dvdnav':
                 self.thread.app.write('K')
             else:
-                if self.mode == 'audio':
-                    # XXX this is kinda silly to hardcode.. let's hope mplayer
-                    # XXX Doesn't change it's spec soon :)
-                    self.thread.audioinfo.ffwd( 60 )
                 self.thread.cmd('skip_forward2')
         elif event == rc.REW:
-            if self.mode == 'audio':
-                # XXX this is kinda silly to hardcode.. let's hope mplayer
-                # XXX Doesn't change it's spec soon :)
-                self.thread.audioinfo.rwd( 10 )
             self.thread.cmd('skip_back')
         elif event == rc.DOWN:
             if self.mode == 'dvdnav':
                 self.thread.app.write('J')
             else:
-                if self.mode == 'audio':
-                    # XXX this is kinda silly to hardcode.. let's hope mplayer
-                    # XXX Doesn't change it's spec soon :)
-                    self.thread.audioinfo.rwd( 60 )
                 self.thread.cmd('skip_back2')
         elif event == rc.LEFT:
             if self.mode == 'dvdnav':
