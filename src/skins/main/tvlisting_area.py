@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/04 23:01:10  outlyer
+# Remove some debugging Dischi left in... but the good news is the @*!
+# bug is fixed!
+#
+# You people have stood in my way long enough! I'm going to clown college.
+#
+# Yes, I'm happy about it.
+#
 # Revision 1.16  2004/02/04 19:04:49  dischi
 # o fix item rectange calculation
 # o remove bad log message
@@ -132,13 +140,9 @@ class TVListing_Area(Skin_Area):
             r = self.get_item_rectangle(label_val.rectangle, 20, label_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
         if default_val.rectangle:
-            print default_val.font.h
-            print
             r = self.get_item_rectangle(default_val.rectangle, 20, default_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
         if selected_val.rectangle:
-            print selected_val.font.h
-            print
             r = self.get_item_rectangle(selected_val.rectangle, 20, selected_val.font.h)[2]
             item_h = max(item_h, r.height + content.spacing)
             
