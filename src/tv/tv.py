@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/08/20 22:29:37  gsbarbieri
+# UPPER CASE TEXT IS UGLY! :)
+#
 # Revision 1.16  2003/08/03 11:10:26  dischi
 # Added TVGUIDE_HOURS_PER_PAGE
 #
@@ -149,7 +152,7 @@ class TVMenu(Item):
                   DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
                           display_type='tv'),
                   menu.MenuItem('Scheduled Recordings',action=self.view_schedule)       ]
-        menuw.pushmenu(menu.Menu('TV MAIN MENU', items, item_types = 'tv'))
+        menuw.pushmenu(menu.Menu('TV Main Menu', items, item_types = 'tv'))
 
 
     def get_start_time(self):

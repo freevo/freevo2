@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/20 22:29:37  gsbarbieri
+# UPPER CASE TEXT IS UGLY! :)
+#
 # Revision 1.8  2003/07/06 19:40:01  dischi
 # fix menu title
 #
@@ -171,7 +174,7 @@ class MediaMenu(Item):
                 traceback.print_exc()
 
 
-        item_menu = menu_module.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
+        item_menu = menu_module.Menu('%s Main Menu' % title, self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1,
                                      reload_func = self.reload)
         item_menu._skin_force_text_view = force_text_view

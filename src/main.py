@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2003/08/20 22:29:37  gsbarbieri
+# UPPER CASE TEXT IS UGLY! :)
+#
 # Revision 1.61  2003/08/16 12:55:06  dischi
 # wait when shutdown
 #
@@ -273,7 +276,7 @@ class MainMenu(Item):
         
         items = get_main_menu(self)
 
-        mainmenu = menu.Menu('FREEVO MAIN MENU', items, item_types='main', umount_all = 1)
+        mainmenu = menu.Menu('Freevo Main Menu', items, item_types='main', umount_all = 1)
         menuwidget.pushmenu(mainmenu)
         osd.add_app(menuwidget)
 
