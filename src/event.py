@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/29 03:28:22  outlyer
+# Fix seeking in video too...
+#
 # Revision 1.4  2003/05/28 19:54:23  outlyer
 # REW/FFWD were reversed (REW was going forward, FFWD was going backwards)
 #
@@ -289,8 +292,8 @@ VIDEO_EVENTS = {
     'CH-'       : PLAYLIST_NEXT,
     'LEFT'      : Event(SEEK, arg=-60),
     'RIGHT'     : Event(SEEK, arg=60),
-    'REW'       : Event(SEEK, arg=10),
-    'FFWD'      : Event(SEEK, arg=-10),
+    'REW'       : Event(SEEK, arg=-10),
+    'FFWD'      : Event(SEEK, arg=10),
     'MENU'      : MENU,
     'DISPLAY'   : TOGGLE_OSD,
     'REC'       : STORE_BOOKMARK,
