@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/26 18:12:13  dischi
+# make sure we create valid sizes
+#
 # Revision 1.5  2004/08/26 15:30:06  dischi
 # bug fix for very small sizes
 #
@@ -101,6 +104,11 @@ class Text(CanvasImage):
             self._calculate_vars()
         except Exception, e:
             _debug_(e, 0)
+
+        if stringsize == 0:
+            CanvasImage.__init__(self, (1, 1))
+            return
+            
         CanvasImage.__init__(self, (stringsize, font.height))
 
         if self.bgcolor:
