@@ -51,7 +51,7 @@ def grab_xmltv():
         print 'No program found to grab the listings. Please set XMLTV_GRABBER'
         print 'in local.conf.py to the grabber you need'
         print
-        usage()
+        sys.exit(0)
 
     print 'Grabbing listings using XMLTV.'
     xmltvtmp = '/tmp/TV.xml.tmp'
