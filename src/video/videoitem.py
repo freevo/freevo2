@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2003/07/20 20:43:29  dischi
+# small bugfix for xine
+#
 # Revision 1.65  2003/07/20 17:46:59  dischi
 # special handling if there is a DVD_PLAYER plugin
 #
@@ -420,8 +423,8 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
-        if self.filename == '0' and self.mode == 'dvd' and \
-               plugin.getbyname(plugin.DVD_PLAYER):
+        if (not self.filename or self.filename == '0') and \
+               self.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER):
             plugin.getbyname(plugin.DVD_PLAYER).play(self)
             return
         
