@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/07/30 14:04:38  outlyer
+# I don't think we use $CACHEDIR/audio anymore... if anyone needs it, I'll
+# uncomment it, else I'll delete it.
+#
 # Revision 1.32  2003/07/03 04:19:31  outlyer
 # Updated cdbackup with Rich's new Ogg patch; also changed some variables,
 # and added oggenc to setup and configuration.
@@ -409,8 +413,8 @@ if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
     os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
              stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
 
-if not os.path.isdir('%s/audio/' % FREEVO_CACHEDIR):
-    import stat
-    os.mkdir('%s/audio/' % FREEVO_CACHEDIR,
-             stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
+#if not os.path.isdir('%s/audio/' % FREEVO_CACHEDIR):
+#    import stat
+#    os.mkdir('%s/audio/' % FREEVO_CACHEDIR,
+#             stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
 
