@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/05 17:04:57  dischi
+# catch exceptions
+#
 # Revision 1.13  2003/06/29 20:43:30  dischi
 # o mmpython support
 # o mplayer is now a plugin
@@ -130,10 +133,18 @@ class PluginInterface(plugin.ItemPlugin):
         
         name = self.imdb_get_disc_searchstring(self.item)
         items = []
-        for id,name,year,type in helpers.imdb.search(name):
-            items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
-                                     self.imdb_create_fxd_disc, (id, year)) ]
-        moviemenu = menu.Menu('IMDB QUERY', items)
+        try:
+            for id,name,year,type in helpers.imdb.search(name):
+                items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                                         self.imdb_create_fxd_disc, (id, year)) ]
+            moviemenu = menu.Menu('IMDB QUERY', items)
+        except:
+            box.destroy()
+            box = PopupBox(text='Unknown error while connecting to IMDB')
+            box.show()
+            time.sleep(2)
+            box.destroy()
+            return
 
         box.destroy()
         menuw.pushmenu(moviemenu)
@@ -193,10 +204,19 @@ class PluginInterface(plugin.ItemPlugin):
                 name += '%s ' % p
 
         items = []
-        for id,name,year,type in helpers.imdb.search(name):
-            items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
-                                     self.imdb_create_fxd, (id, year)) ]
 
+        try:
+            for id,name,year,type in helpers.imdb.search(name):
+                items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                                         self.imdb_create_fxd, (id, year)) ]
+        except:
+            box.destroy()
+            box = PopupBox(text='Unknown error while connecting to IMDB')
+            box.show()
+            time.sleep(2)
+            box.destroy()
+            return
+        
         box.destroy()
         if len(items) == 1:
             self.imdb_create_fxd(arg=items[0].arg, menuw=menuw)
