@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/10/20 13:36:07  outlyer
+# Remove the double-quit
+#
 # Revision 1.21  2003/10/08 03:24:47  outlyer
 # Try the 'double-quit' here as well. Seems to result in a faster shutdown of
 # mplayer.
@@ -171,7 +174,6 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
-        self.thread.app.write('quit\n')
         self.thread.stop('quit\n')
 
 
