@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2004/03/19 21:03:39  dischi
+# fix tvguide context bug
+#
 # Revision 1.91  2004/03/14 19:43:27  dischi
 # make it possible to create a submenu inside a plugin
 #
@@ -178,6 +181,15 @@ class MenuWidget(GUIObject):
         self.show_callbacks = []
 
         
+    def get_event_context(self):
+        """
+        return the event context
+        """
+        if self.menustack and hasattr(self.menustack[-1], 'event_context'):
+            return self.menustack[-1].event_context
+        return self.event_context
+
+
     def show(self):
         if not self.visible:
             self.visible = 1

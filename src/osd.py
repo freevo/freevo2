@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.151  2004/03/19 21:03:39  dischi
+# fix tvguide context bug
+#
 # Revision 1.150  2004/03/14 17:46:24  dischi
 # fix update for some cards
 #
@@ -465,8 +468,8 @@ class OSD:
             self.app_list.remove(app)
         if _times and hasattr(self.focused_app(), 'event_context'):
             _debug_('app is %s' % self.focused_app(),2)
-            _debug_('Setting context to %s' % self.focused_app().event_context,2)
-            rc.set_context(self.focused_app().event_context)
+            _debug_('Setting context to %s' % self.focused_app().get_event_context(),2)
+            rc.set_context(self.focused_app().get_event_context())
 
 
     def _cb(self, map=True):

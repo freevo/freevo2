@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/03/19 21:03:40  dischi
+# fix tvguide context bug
+#
 # Revision 1.28  2004/03/08 19:15:14  dischi
 # fix popup input focus
 #
@@ -145,6 +148,7 @@ class TVGuide(Item):
         self.update_schedules(force=True)
         
         self.rebuild(start_time, stop_time, guide.chan_list[0].id, selected)
+        self.event_context = 'tvmenu'
         menuw.pushmenu(self)
 
 
@@ -279,7 +283,7 @@ class TVGuide(Item):
     def refresh(self):
         self.update_schedules(force=True)
         if not self.menuw.children:
-            rc.set_context('tvmenu')
+            rc.set_context(self.event_context)
             self.menuw.refresh()
 
 

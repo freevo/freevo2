@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/03/19 21:03:40  dischi
+# fix tvguide context bug
+#
 # Revision 1.36  2004/03/13 22:30:58  dischi
 # fix crash on debug
 #
@@ -135,6 +138,13 @@ class GUIObject:
 
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.NONE)
+
+
+    def get_event_context(self):
+        """
+        return the event context for that gui widget
+        """
+        return self.event_context
 
 
     def get_rect(self):
