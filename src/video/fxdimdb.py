@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/27 19:24:08  dischi
+# smarter search
+#
 # Revision 1.7  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -154,7 +157,8 @@ class FxdImdb:
         url = 'http://us.imdb.com/Tsearch?title=%s&restrict=Movies+and+TV' % \
               urllib.quote(name)
         req = urllib2.Request(url, txdata, txheaders)
-    
+        searchstring = name
+        
         try:
             response = urllib2.urlopen(req)
         except urllib2.HTTPError, error:
@@ -172,7 +176,7 @@ class FxdImdb:
             data = self.parsedata(response)
             self.imdb_id_list = [ ( m.group(1), data[0], data[1]['year'], '' ) ]
             return self.imdb_id_list
-        
+
         for line in response.read().split("\n"):
             m = regexp_type.match(line)
             if m:
@@ -194,14 +198,31 @@ class FxdImdb:
                 if year.find(')') > 0:
                     year = year[:year.find(')')]
     
-                for i in range(len(self.imdb_id_list)):
-                    if self.imdb_id_list == id:
-                        self.imdb_id_list = ( id , name, year, type )
+                for i in self.imdb_id_list:
+                    if i[0] == id:
                         break
                 else:
                     self.imdb_id_list += [ ( id , name, year, type ) ]
         
         response.close()
+        if len(self.imdb_id_list) > 20:
+            # too much results, check if there are stupid results in the
+            # list
+            words = []
+            
+            # make a list of all words (no numbers) in the search string
+            for p in re.split('[\._ -]', searchstring):
+                if p and not p[0] in '0123456789':
+                    words.append(p)
+
+            # at least one word has to be in the result
+            new_list = []
+            for result in self.imdb_id_list:
+                for search_word in words:
+                    if result[1].lower().find(search_word.lower()) != -1:
+                        new_list.append(result)
+            self.imdb_id_list = new_list
+
         return self.imdb_id_list
     
     
@@ -391,18 +412,17 @@ class FxdImdb:
         name  = re.sub('([a-z])([A-Z])', point_maker, name)
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
-        
+
         if label == TRUE:
             for r in config.IMDB_REMOVE_FROM_LABEL:
                 name  = re.sub(r, '', name)
-        
+                
         parts = re.split('[\._ -]', name)
-        
         name = ''
         for p in parts:
-            if not p.lower() in config.IMDB_REMOVE_FROM_SEARCHSTRING:
+            if not p.lower() in config.IMDB_REMOVE_FROM_SEARCHSTRING and \
+                   not re.search(p, '[A-Za-z]'):
                 name += '%s ' % p
-
         return self.searchImdb(name)
 
         
