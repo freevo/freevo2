@@ -117,6 +117,37 @@ FREEVO_CONF_CHANGES = [
      '''Changed xmame_SDL to just xmame'''), ]
 
 LOCAL_CONF_CHANGES = [
+    (1.1,
+     '''ROM_DRIVES are autodetected if left empty.
+    Added AUDIO_RANDOM_PLAYLIST (default on).
+    Added COVER_DIR for covers for files on CDs etc.
+    Added AUDIO_COVER_REGEXP for selection of covers for music files.
+    Changed MPlayer default args.
+    Changed TV_SETTINGS to /dev/video0.'''),
+    (2.0,
+     '''Remote control config has changed from Freevo Python files to the
+     standard Lirc program config files, see freevo_config.py for
+     more info.'''),
+    (2.1,
+     '''Added MPLAYER_ARGS_AUDIOCD for audio cd playback settings.'''),
+    (3.0,
+     '''New skin engine. The new engine has no automatic TV overscan support,
+     you need to set OVERSCAN_X and OVERSCAN_Y. There are also new variables
+     for this engine: MAIN_MENU_ITEMS and FORCE_SKIN_LAYOUT. The games menu
+     will be activated automaticly if setup.py found mame or snes'''),
+    (3.1,
+     '''Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory now can
+     also contain fxd files with gloabl informations and mplayer options'''),
+    (3.2,
+     '''Removed MPLAYER_ARGS_* and added a hash MPLAYER_ARGS to set args for
+     all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
+     the software scaler for fast CPUs'''),
+    (3.3,
+     '''Added AUDIO_FORMAT_STRING to customize the audio item title generation'''),
+    (3.4,
+     '''Removed RC_MPLAYER_CMDS for video and audio. Set special handling (and
+     other key mappings with the variable EVENTS. See event.py for possible
+     events'''),
     (3.5,
      '''Added xine support (see xine section in freevo_config.py),
      MPLAYER_AUTOCROP for 16:9 tv sets, ONLY_SCAN_DATADIR to make freevo start
@@ -144,7 +175,11 @@ LOCAL_CONF_CHANGES = [
     (4.01,
      '''Removed SUFFIX_VIDEO_FILES and replaced it with SUFFIX_VIDEO_MPLAYER_FILES
      and SUFFIX_VIDEO_XINE_FILES. Use PREFERED_VIDEO_PLAYER to choose a prefered
-     player.''')]
+     player.'''),
+    (4.02,
+     '''Added CHILDAPP_DEBUG to debug all kinds of childapps. MPLAYER_DEBUG will be
+     removed soon. Renamed PREFERED_VIDEO_PLAYER to VIDEO_PREFERED_PLAYER and added
+     AUDIO_PREFERED_PLAYER.''']
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -239,6 +274,11 @@ KEYMAP = DEFAULT_KEYMAP
 # has no network and stop Freevo from trying to use it.
 #
 USE_NETWORK = 1
+
+#
+# store output of started processes for debug
+#
+CHILDAPP_DEBUG = 0
 
 # ======================================================================
 # Plugins:
@@ -522,7 +562,7 @@ SUFFIX_VIDEO_XINE_FILES = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
 #
 # Prefered video player
 #
-PREFERED_VIDEO_PLAYER = 'mplayer'
+VIDEO_PREFERED_PLAYER = 'mplayer'
 
 #
 # Only scan MOVIE_DATA_DIR and TV_SHOW_DATA_DIR for fxd files containing
@@ -559,6 +599,11 @@ SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 # not back.jpg nor cover-b.jpg
 #
 AUDIO_COVER_REGEXP = 'front|-f'
+
+#
+# Prefered audio player
+#
+AUDIO_PREFERED_PLAYER = 'mplayer'
 
 
 # ======================================================================
