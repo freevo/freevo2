@@ -1,9 +1,49 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
+# bmovl.py - Bmovl output display over mplayer
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Note: This output plugin is work in progress
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2004/08/23 12:36:50  dischi
+# cleanup, add doc
+#
+#
+# -----------------------------------------------------------------------
+#
+# Freevo - A Home Theater PC framework
+#
+# Copyright (C) 2002 Krister Lagerstrom, et al.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------
+
+# mevas imports
 import mevas
 from mevas.displays.bmovlcanvas import BmovlCanvas
 
 import config
 
 class Display(BmovlCanvas):
+    """
+    Display class for bmovl output over mplayer
+    """
     def __init__(self, size, default=False):
         self.start_video = default
         if default:
@@ -21,23 +61,41 @@ class Display(BmovlCanvas):
             self.restart()
         BmovlCanvas.__init__(self, size)
 
+
     def restart(self):
+        """
+        Restart the display. This will restart the background video to
+        make the canvas work.
+        """
         if self.start_video and not self.child:
             import childapp
             arg = [config.MPLAYER_CMD] + self.mplayer_args.split(' ') + \
-                  [config.BMOVL_OSD_VIDEO]
+                  [config.OSD_BACKGROUND_VIDEO]
             self.child = childapp.ChildApp2(arg)
             
+
     def stop(self):
+        """
+        Stop the mplayer process
+        """
         if self.start_video and self.child:
             self.child.stop('quit')
             self.child = None
             
+
     def hide(self):
+        """
+        Hide the display. This results in shutting down the
+        background video
+        """
         self.stop()
 
 
     def show(self):
+        """
+        Show the display. This results in starting the background
+        video again.
+        """
         self.restart()
 
 

@@ -1,26 +1,101 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
+# sdl.py - SDL output display
+# -----------------------------------------------------------------------
+# $Id$
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2004/08/23 12:36:50  dischi
+# cleanup, add doc
+#
+#
+# -----------------------------------------------------------------------
+#
+# Freevo - A Home Theater PC framework
+#
+# Copyright (C) 2002 Krister Lagerstrom, et al.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------
+
+# basic python imports
 import time
 import pygame
 from pygame.locals import *
 
+# mevas imports
 from mevas.displays.pygamecanvas import PygameCanvas
 
-import rc
+# Freevo imports
 import config
+import rc
+
 
 class Display(PygameCanvas):
+    """
+    Display class for SDL output
+    """
     def __init__(self, size, default=False):
         PygameCanvas.__init__(self, size)
         self.mousehidetime = time.time()
         rc.get_singleton().inputs.append(rc.Keyboard(self.poll))
-            
+        self.running = True
+
+        
     def hide(self):
-        _debug_('hide SDL')
-        pass
+        """
+        Hide the output display. In most cases this does nothing since
+        a simple window doesn't matter. If OSD_STOP_WHEN_PLAYING the
+        ygame display will be shut down.
+        """
+        _debug_('hide SDL display')
+        if config.OSD_STOP_WHEN_PLAYING:
+            self.stop()
+
 
     def show(self):
-        _debug_('show SDL')
-        pass
+        """
+        Show the output window again if it is not visible
+        """
+        _debug_('show SDL display')
+        if config.OSD_STOP_WHEN_PLAYING:
+            self.restart()
 
+
+    def stop(self):
+        """
+        Stop the display
+        """
+        if self.running:
+            pygame.display.quit()
+            self.freeze()
+            self.running = False
+
+        
+    def restart(self):
+        """
+        Restart the display if it is currently stopped
+        """
+        if not self.running:
+            self._screen  = pygame.display.set_mode(size, 0, 32)
+            self.thaw()
+            self.running = True
+
+        
     def poll(self, map=True):
         """
         callback for SDL event
