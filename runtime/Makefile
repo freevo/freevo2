@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/04/21 19:31:37  rshortt
+# Add mplayer and ffmpeg.
+#
 # Revision 1.15  2003/04/20 13:53:38  rshortt
 # Added a build of DirectFB.
 #
@@ -182,9 +185,9 @@ python_copy:
 mplayer_copy:
 	@echo Copying mplayer/mencoder
 	-mkdir -p apps/mplayer
-	cp $(COPY_BASE)/MPlayer/bin/{mplayer,mencoder} ./apps/mplayer/
-	# cp $(COPY_BASE)/MPlayer/bin/README ./apps/mplayer/README.mplayer
-	# cp $(COPY_BASE)/MPlayer/bin/etc/{codecs.conf,input.conf} ./apps/mplayer/
+	cp $(PREFIX)/MPlayer/bin/{mplayer,mencoder} ./apps/mplayer/
+	# cp $(PREFIX)/MPlayer/bin/README ./apps/mplayer/README.mplayer
+	# cp $(PREFIX)/MPlayer/bin/etc/{codecs.conf,input.conf} ./apps/mplayer/
 
 
 ################################################################################
@@ -195,7 +198,7 @@ mplayer_copy:
 mplayer_fonts_copy:
 	@echo Copying mplayer fonts
 	-mkdir -p apps/mplayer/font
-	cp $(COPY_BASE)/MPlayer/fonts/* apps/mplayer/font
+	cp $(COPY_BASE)/MPlayer/font/* apps/mplayer/font
 
 
 ################################################################################
@@ -228,7 +231,7 @@ jpegtran_copy:
 	cp -a $(COPY_BASE)/bin/jpegtran apps/
 
 
-build_all_pkg: build_packageconfig build_libusb build_python build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_jpeg build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_png build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_zlib build_mp1e build_dxr3 build_directfb
+build_all_pkg: build_packageconfig build_libusb build_python build_jpeg build_png build_zlib build_ffmpeg build_dxr3 build_directfb build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_mp1e build_mplayer get_mplayer_fonts
 
 
 
@@ -615,7 +618,7 @@ build_sdl: PACKAGE_GET=$(SDL_GET)
 build_sdl: EXT=tar.gz
 build_sdl: TAR=$(TAR1)
 build_sdl: BUILDCMDS=
-build_sdl: CFG=$(CFGFLAGS)
+build_sdl: CFG="$(CFGFLAGS) --enable-video-dxr3 --enable-video-directfb"
 build_sdl:
 	@ . build_functions ;\
 	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
@@ -753,3 +756,40 @@ build_directfb:
 	                $(PACKAGE) $(CFG) $(BUILDCMDS)
 
 
+build_ffmpeg: PACKAGE=$(FFMPEG)
+build_ffmpeg: PACKAGE_GET=$(FFMPEG_GET)
+build_ffmpeg: EXT=tar.gz
+build_ffmpeg: TAR=$(TAR1)
+build_ffmpeg: BUILDCMDS=
+build_ffmpeg: CFG="$(CFGFLAGS)"
+build_ffmpeg:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+build_mplayer: PACKAGE=$(MPLAYER)
+build_mplayer: PACKAGE_GET=$(MPLAYER_GET)
+build_mplayer: EXT=tar.gz
+build_mplayer: TAR=$(TAR1)
+build_mplayer: BUILDCMDS=
+build_mplayer: CFG="--prefix=$(PREFIX)/MPlayer --enable-tv-v4l --enable-mga --enable-xmga --enable-runtime-cpudetection --enable-largefiles --disable-lirc --disable-svga --disable-arts --enable-directfb --enable-dxr3 --disable-xvid --disable-divx4linux --disable-gif --disable-gl --datadir=./apps/mplayer --confdir=./apps/mplayer"
+build_mplayer:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                $(PACKAGE) $(CFG) $(BUILDCMDS)
+
+
+get_mplayer_fonts: PACKAGE=$(MFONTS)
+get_mplayer_fonts: PACKAGE_GET=$(MFONTS_GET)
+get_mplayer_fonts: EXT=tar.bz2
+get_mplayer_fonts: TAR=$(TAR2)
+get_mplayer_fonts: BUILDCMDS="mkdir -p ../build/MPlayer; mv font-arial-18-iso-8859-1 ../build/MPlayer/font; rm ../build/MPlayer/font/runme"
+get_mplayer_fonts: CFG="$(CFGFLAGS)"
+get_mplayer_fonts:
+	@ . build_functions ;\
+	  get_package $(PACKAGE) $(PACKAGE_GET) $(EXT) ;\
+	  build_package $(COPY_BASE) $(TAR) $(EXT) $(PACKAGE) \
+	                . $(CFG) $(BUILDCMDS)

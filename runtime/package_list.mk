@@ -127,3 +127,13 @@ DXR3_GET=http://dxr3.sourceforge.net/download/$(DXR3).tar.gz
 
 DIRECTFB=DirectFB-20030420
 DIRECTFB_GET=http://ettin.danicar.net/$(DIRECTFB).tar.gz
+
+FFMPEG=ffmpeg-0.4.6-fixed
+# FFMPEG_GET=http://unc.dl.sourceforge.net/sourceforge/ffmpeg/$(FFMPEG).tar.gz
+FFMPEG_GET=http://ettin.danicar.net/$(FFMPEG).tar.gz
+
+MPLAYER=MPlayer-0.90-freevo
+MPLAYER_GET=http://ettin.danicar.net/$(MPLAYER).tar.gz
+
+MFONTS=font-arial-iso-8859-1
+MFONTS_GET=http://www1.mplayerhq.hu/MPlayer/releases/fonts/$(MFONTS).tar.bz2
