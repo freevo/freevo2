@@ -45,7 +45,8 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 clean:
-	-rm -f *.pyc *.o log_main_out log_main_err log.txt runapp cdrom.so cdrommodule.o
+	-rm -f *.pyc */*.pyc */*/*.pyc */*/*/*.pyc *.o log_main_out 
+	-rm -f log_main_err log.txt runapp cdrom.so cdrommodule.o
 	cd matrox_g400 ; make clean
 	cd rc_client ; make clean
 	cd osd_server ; make clean
