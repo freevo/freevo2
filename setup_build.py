@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/09/01 05:15:16  krister
+# Cosmetic changes.
+#
 # Revision 1.14  2002/08/30 02:30:21  krister
 # Added an SDL option for the display. Untested!
 #
@@ -55,7 +58,7 @@ import getopt
 
 
 # Help text
-usage = """\
+usage = '''\
 Usage: ./configure [OPTION]...
 Configure Freevo for your specific environment.
 
@@ -79,7 +82,7 @@ Configure Freevo for your specific environment.
 
 The default is "--geometry=800x600 --display=x11 --tv=ntsc --chanlist=us-cable"
 Please report bugs to <freevo-users@lists.sourceforge.net>.
-"""
+'''
 
 def print_usage():
     print usage
