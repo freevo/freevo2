@@ -26,9 +26,10 @@ o Initial implementation
 o osd server and bulk of code and libraries
 o and more...
 
-Aubin Paul <aubin@debian.org>:
+Aubin Paul <aubin@outlyer.org>:
 o Testing, ideas, shell programming
 o XMLTV integration and mp3 player fixes
+o MP3 Tag support and error checking
 o and more...
 
 Dirk Meyer <dmeyer@tzi.de>:
@@ -65,3 +66,6 @@ o Music playlists support
 
 Per Wigren <wigren@home.se>
 o Various contribs and patches for TV listings
+
+Travis Shirk <travis@pobox.com>
+o ID3v2.x support
