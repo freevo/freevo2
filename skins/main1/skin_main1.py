@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2002/10/24 20:20:50  dischi
+# Set height to -1 (font height) to avoid non showing because of the
+# fixed height. If no one is working on the width=500 thing I will fix
+# that this weekend.
+#
 # Revision 1.48  2002/10/24 06:11:45  krister
 # Changed debug levels for less output. Don't display length in DrawMP3 if not valid.
 #
@@ -637,17 +642,17 @@ class Skin:
 
             top = iv.y
             DrawText('Title: ', iv, x=left, y=top, align='right')
-            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=500, height=35, mode='soft')
+            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=500, height=-1, mode='soft')
 
             if info.artist:
                 top += spacing
                 DrawText('Artist: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=500,height=35, mode='soft')
+                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=500,height=-1, mode='soft')
 
             if info.album:
                 top += spacing
                 DrawText('Album: ', iv, x=left, y=top, align='right')
-                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=500,height=35, mode='soft')
+                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=500,height=-1, mode='soft')
 
             if info.year:
                 top += spacing
