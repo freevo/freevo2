@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/03/13 17:31:01  rshortt
+# Fix the menu index.
+#
 # Revision 1.3  2004/03/13 17:12:49  rshortt
 # Refresh the list of scheduled recordings when we reload the menu.
 #
@@ -85,7 +88,7 @@ class ScheduledRecordingsItem(Item):
     def reload(self):
         menuw = self.menuw
 
-        menu = menuw.menustack[1]
+        menu = menuw.menustack[-1]
 
         sel = menu.choices.index(menu.selected)
         new_choices = self.get_items()
