@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/11 11:06:56  dischi
+# 2.6.x kernel fixes
+#
 # Revision 1.10  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -222,6 +225,9 @@ class sensors(IdleBarPlugin):
             if self.k6 :
                 file = os.path.join( self.senspath, 'temp_input' + self.sensor[-1] )
                 fhot = os.path.join( self.senspath, 'temp_max' + self.sensor[-1] )
+                if not os.path.exists(file):
+                    file = os.path.join( self.senspath, 'temp' + self.sensor[-1] + '_input')
+                    fhot = os.path.join( self.senspath, 'temp' + self.sensor[-1] + '_max')
                 f = open(fhot)
                 hotdata = f.read()
                 f.close()
@@ -261,6 +267,8 @@ class sensors(IdleBarPlugin):
                     testpath = os.path.join(self.k6path , senspath)
                     for pos_sensors in os.listdir(testpath):
                         if pos_sensors == "temp_input1":
+                            return testpath
+                        if pos_sensors == "temp1_input":
                             return testpath
                             
             if not os.path.exists(self.initpath):
