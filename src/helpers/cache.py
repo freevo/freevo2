@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/04/18 08:14:31  dischi
+# fix crash for bad paths
+#
 # Revision 1.31  2004/03/22 11:04:51  dischi
 # improve caching
 #
@@ -254,6 +257,10 @@ def create_metadata():
         if os.path.isdir(dir[1]):
             pl  += util.match_files_recursively(dir[1], playlist.mimetype.suffix())
             fxd += util.match_files_recursively(dir[1], fxditem.mimetype.suffix())
+        elif isinstance(dir, list) or isinstance(dir, tuple):
+            print
+            print 'bad path: %s   ' % dir[1] ,
+            sys.__stdout__.flush()
         elif util.match_suffix(dir, playlist.mimetype.suffix()):
             pl.append(dir)
         elif util.match_suffix(dir, fxditem.mimetype.suffix()):
