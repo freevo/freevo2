@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2002/10/25 20:11:14  dischi
+# Added support for screenshots instead of cover for the movie browser.
+# For covers is width < height, for screenshots not and to scale them
+# looks odd. So if width > height, it's a screenshot. Keep the ratio
+# and scale it to the width from the xml file. Than check for round
+# boxes alpha masks in this section and when they are around the cover
+# shorten the height of the boxes, too.
+#
 # Revision 1.53  2002/10/24 22:16:50  outlyer
 # We're now using the width field in the fileinfo tag of the XML to decide
 # how wide to write the MP3 data on the screen. This removes the hardcoded
@@ -371,9 +379,34 @@ class Skin:
                 elif type == 'movie' and val.cover_movie.visible:
                     image_x = val.cover_movie.x-val.cover_movie.spacing
                     if menu.selected == item:
-                        i_file = util.resize(image, val.cover_movie.width, \
-                                             val.cover_movie.height)
-                        i_val = val.cover_movie
+                        w, h = util.pngsize(image)
+
+                        # this is no cover image, it's seems to be
+                        # a screenshot of the movie, don't scale this
+                        # to the cover sizes
+                        if w > h:
+                            scale = float(val.cover_movie.width) / w
+                            i_file = util.resize(image, val.cover_movie.width,
+                                                 h*scale)
+                            i_val = copy.deepcopy(val.cover_movie)
+                            i_val.height = h*scale
+
+                            # check all round masks if they are around the image
+                            # and shorten the width of those who are to fit
+                            # the new size
+                            if isinstance(i_val.mask, list):
+                                for m in i_val.mask:
+                                    if m.x <= i_val.x and m.y <= i_val.y and \
+                                       m.width >= i_val.width and \
+                                       m.height >= i_val.height:
+                                        m.height -= val.cover_movie.height-h*scale
+                                
+
+                        # normal cover
+                        else:
+                            i_file = util.resize(image, val.cover_movie.width, \
+                                                 val.cover_movie.height)
+                            i_val = val.cover_movie
 
                 elif type == 'music' and val.cover_music.visible:
                     image_x = val.cover_music.x-val.cover_music.spacing
