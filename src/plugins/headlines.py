@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/30 17:21:22  mikeruelle
+# add some default news sites
+#
 # Revision 1.6  2003/09/21 16:47:15  dischi
 # use utils html2txt function now
 #
@@ -98,6 +101,9 @@ class PluginInterface(plugin.MainMenuPlugin):
             return
         plugin.MainMenuPlugin.__init__(self)
         
+    def config(self):
+        return [('HEADLINES_LOCATIONS', [ ("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"), ("Freshmeat", "http://freshmeat.net/backend/fm.rdf") ], 'where to get the news')]
+
     def items(self, parent):
         menu_items = skin.settings.mainmenu.items
 
