@@ -44,10 +44,13 @@ log = logging.getLogger('record')
 from types import *
 
 class Recording:
+    """
+    A recording object from the recordserver.
+    """
     def __init__(self, *args):
         self.update(*args)
 
-        
+
     def update(self, id, channel, priority, start, stop, status):
         self.id = id
         self.channel = channel
@@ -74,8 +77,12 @@ class Recording:
     def __str__(self):
         return String(self.__unicode__())
 
-        
+
 class Recordings:
+    """
+    Handling of recordings from the recordserver. The object will auto sync
+    with the recordserver to keep the list up to date.
+    """
     def __init__(self):
         self.last_update = time.time()
         self.__recordings = {}
@@ -117,7 +124,7 @@ class Recordings:
             self.__recordings['%s-%s-%s' % (l[1], l[3], l[4])] = Recording(*l)
         log.info('got recording list')
         self.__request_description()
-        
+
 
     def __list_update(self, result):
         log.info('got recording list update')
@@ -131,8 +138,8 @@ class Recordings:
                 self.__recordings[key] = Recording(*l)
         self.__request_description()
         return True
-    
-        
+
+
     def __describe_callback(self, result):
         try:
             status, rec = result[0][1:]
@@ -142,7 +149,7 @@ class Recordings:
             log.error(str(status))
             return
         self.last_update = time.time()
-        description = {} 
+        description = {}
         description['title'] = Unicode(rec[1], 'UTF-8')
         description['start_padding'] = rec[7]
         description['stop_padding'] = rec[8]
@@ -176,8 +183,8 @@ class Recordings:
                 self.comingup += u'%s\n' % Unicode(rec)
             if rec.status == RECORDING:
                 self.running += u'%s\n' % Unicode(rec)
-        
-        
+
+
     def get(self, channel, start, stop):
         key = '%s-%s-%s' % (channel, start, stop)
         if key in self.__recordings:
@@ -225,7 +232,15 @@ class Recordings:
 
 
 class Favorite:
-    def __init__(self, id, title, channels, priority, day, time, one_shot):
+    """
+    A favorite object from the recordserver.
+    """
+    def __init__(self, id, title, channels, priority, day, time, one_shot,
+                 substring):
+        """
+        The init function creates the object. The parameters are the complete
+        list of the favorite.list rpc return.
+        """
         self.id = id
         self.titel = title
         self.channels = channels
@@ -233,10 +248,15 @@ class Favorite:
         self.day = day
         self.time = time
         self.one_shot = one_shot
+        self.substring = substring
         self.description = {}
 
 
 class Favorites:
+    """
+    Handling of favorites from the recordserver. The object will auto sync with
+    the recordserver to keep the list up to date.
+    """
     def __init__(self):
         self.last_update = time.time()
         self.__favorites = []
@@ -271,7 +291,7 @@ class Favorites:
         for l in listing:
             self.__favorites.append(Favorite(*l))
         log.info('got favorite list')
-        
+
 
     def add(self, prog):
         if not self.server:
@@ -300,5 +320,6 @@ class Favorites:
             return False, 'Internal client error'
 
 
+# the two objects handling recordings and favorites
 recordings = Recordings()
 favorites  = Favorites()
