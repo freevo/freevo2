@@ -3,8 +3,20 @@
 # PopupBox - A dialog box for freevo.
 #-----------------------------------------------------------------------
 # $Id$
+#
+# Todo: o Add sanitychecking on all arguments.
+#       o Add actual support for icons, not just brag about it.
+#       o Start using the OSD imagecache for rectangles.
+#
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/08/18 21:57:00  tfmalt
+# o Added margin handling.
+# o Added support for Icons in popupboxes.
+# o Addes support for vertical and horizontal alignment.
+# o Added a ton more errorhandling.
+# o Let Labels draw themselves independently.
+#
 # Revision 1.1  2002/08/15 22:45:42  tfmalt
 # o Inital commit of Freevo GUI library. Files are put in directory 'gui'
 #   under Freevo.
@@ -49,6 +61,10 @@ from GUIObject import *
 from Color     import *
 from Border    import *
 from Label     import *
+from types     import *
+
+DEBUG = 1
+# from debug import *
 
 osd = osd_sdl.get_singleton()
 
@@ -79,6 +95,8 @@ class PopupBox(GUIObject):
         self.icon     = None
         self.border   = None
         self.label    = None
+        self.h_margin = 10
+        self.v_margin = 10
         self.bd_color = Color(osd.default_fg_color) # Border color
 
         GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
@@ -91,8 +109,15 @@ class PopupBox(GUIObject):
         if not self.bg_color: Color(osd.default_bg_color)
         if not self.fg_color: Color(osd.default_fg_color)
         
-        if text:     self.text   = text
-        if icon:     self.icon   = icon
+        if type(text) is StringType:
+            if text: self.set_text(text)
+        elif not text:
+            self.text = None
+        else:
+            raise TypeError, text
+        
+        if icon:
+            self.set_icon(icon)
 
         if bd_color:
             # XXX Do I really need to handle bd_color here? Can't I just
@@ -107,21 +132,7 @@ class PopupBox(GUIObject):
                 self.border = border # Do sanity checking inside border
             else:
                 self.border = Border(self, border, bd_color, bd_width)
-
-        if type(text) is StringType:
-            self.label = Label( text )
-            # These values can also be maipulated by the user through
-            # get_font and set_font functions.
-            self.label.set_font( config.OSD_DEFAULT_FONTNAME,
-                                 config.OSD_DEFAULT_FONTSIZE )
-
-            # XXX Set the background color to none so it is transparent.
-            self.label.set_background_color( None )
-            
-        if DEBUG: print "Text: ", text
-        if DEBUG: print "Icon: ", icon
-        
-        
+                
                 
     def get_text(self):
         """
@@ -136,24 +147,71 @@ class PopupBox(GUIObject):
         """
         text  Text to display.
         
-        Set text to display
+        Set text to display. If a Label is not not instanced a Label object
+        is created.
 
-        Arguments: text
-          Returns: None
         """
+        if DEBUG: print "Text: ", text
         # XXX Hm.. I should try to do more intelligent parsing and quessing
         # XXX here.
-        self.text = text
+        if type(text) is StringType:
+            self.text = text
+        else:
+            raise TypeError, type(text)
+
         if not self.label:
             self.label = Label(text)
+            self.label.set_parent(self)
+            # These values can also be maipulated by the user through
+            # get_font and set_font functions.
+            self.label.set_font( config.OSD_DEFAULT_FONTNAME,
+                                 config.OSD_DEFAULT_FONTSIZE )
+            # XXX Set the background color to none so it is transparent.
+            self.label.set_background_color(None)
+            self.label.set_h_margin(self.h_margin)
+            self.label.set_v_margin(self.v_margin)
         else:
             self.label.set_text(text)
+
+
+    def set_h_align(self, align=None):
+        """
+        Sets the h_align of text.
+
+        This value is stored in Label class.
+        """
+        if self.label: self.label.set_h_align(align)
+
+
+    def get_h_align(self):
+        """
+        Returns the h_align of text.
+
+        This value is stored in the Label class.
+        """
+        if self.label: return self.label.get_h_align()
+
+
+    def get_v_align(self):
+        """
+        Returns the alignment of the text.
+        """
+        if self.label: return self.label.get_v_align()
+
+        
+    def set_v_align(self, align=None):
+        """
+        Sets the alignment of the text.
+        """
+        if self.label: return self.label.set_v_align()
+
 
     def get_font(self):
         """
         Does not return OSD.Font object, but the filename and size as list.
         """
         return (self.label.font.filename, self.label.font.ptsize)
+
 
     def set_font(self, file, size):
         """
@@ -165,6 +223,40 @@ class PopupBox(GUIObject):
             self.label.set_font(file, size)
         else:
             raise TypeError, file
+
+
+    def get_icon(self):
+        """
+        Returns the icon of the popupbox (if set).
+        """
+        return self.icon
+
+
+    def set_icon(self, image):
+        """
+        Set the icon of the popupbox.
+        Also scales the icon to fit the size of the box.
+        
+        Can either be a string with filename or a pygame Surface object.
+        """
+        if type(image) is StringType:
+            self.icon = pygame.image.load(image).convert_alpha()
+        else:
+            self.icon = image
+
+        bx,by = self.get_size()
+        ix,iy = self.icon.get_size()
+        
+        aspect = (ix/iy)
+
+        if(bx > by):
+            iy = by-(self.v_margin*2)
+            ix = iy*aspect
+        else:
+            ix = bx-(self.h_margin*2)
+            iy = ix/aspect
+        
+        self.icon = pygame.transform.scale(self.icon, (ix, iy))
 
     def set_border(self, bs):
         """
@@ -181,33 +273,36 @@ class PopupBox(GUIObject):
             self.border = None
         else:
             self.border = Border(self, bs)
-
+            
+    def set_position(self, left, top):
+        """
+        Overrides the original in GUIBorder to update the border as well.
+        """
+        GUIObject.set_position(self, left, top)
+        if isinstance(self.border, Border):
+            if DEBUG: print "updating borders set_postion as well"
+            self.border.set_position(left, top)
         
     def _draw(self):
         """
         The actual internal draw function.
 
-        Arguments: None
-          Returns: None
-           Throws: TypeError
         """
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
 
         c   = self.bg_color.get_color_sdl()
+        a   = self.bg_color.get_alpha()
         box = pygame.Surface(self.get_size(), 0, 32)
         box.fill(c)
-
-        s = self.label.surface
-        if not s:
-            s = self.label._draw()
-        if not s:
-            raise TypeError, 'No label surface'
-        
-        box.blit( s,(10,10) )
-        x,y = self.get_position()
+        box.set_alpha(a)
 
         osd.screen.blit(box, self.get_position())
+        
+        if self.icon:
+            ix,iy = self.get_position()
+            osd.screen.blit(self.icon, (ix+self.h_margin,iy+self.v_margin)) 
+        if self.label:  self.label._draw()
         if self.border: self.border._draw()
     
 
@@ -225,7 +320,5 @@ class PopupBox(GUIObject):
             if DEBUG: print "    Has border, doing border erase."
             self.border._erase()
 
-        if DEBUG: osd.update()
         if DEBUG: print "    ...", self
-        if DEBUG: wait_loop()
 
