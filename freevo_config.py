@@ -545,31 +545,33 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 # 
 
 DIR_GAMES = [ ('Test Games', './testfiles/Mame') ]
+# NEW GAMES SYSTEM :
+# =================
+# The DIR_GAMES structure is now build as follows :
+# <NAME>, <FOLDER>, [<TYPE>, <COMMAND_PATH>, <COMMAND_ARGS>, <IMAGE_PATH>, \
+# <FILE_SUFFIX_FOR_GENERIC>]
+# where :
+#              - <TYPE> : Internal game types (MAME or SNES) or
+#                         generic one (GENERIC)
+#              - <COMMAND_PATH> : Emulator command
+#              - <COMMAND_ARGS> : Arguments for the emulator
+#              - <IMAGE_PATH>   : Optionnal path to the picture
+#              - <FILE_SUFFIX_FOR_GENERIC> : If the folder use the GENERIC
+#                                            type, then you must specify here
+#                                        the file suffix used by the emulator
+# DIR_GAMES = [ ('MAME',       '/home/media/games/xmame/roms',     ('MAME', '/usr/local/bin/xmame.SDL', '-fullscreen -modenumber 6', '/home/media/games/xmame/shots', None) ),
+#    ('SUPER NINTENDO', '/home/media/games/snes/roms',      ('SNES', '/usr/local/bin/zsnes',     '-m -r 3 -k 100 -cs -u', '', None )),
+#    ('MEGADRIVE',      '/home/media/games/megadrive/roms', ('GENESIS', '/usr/local/bin/generator-svgalib', '', '', '' )) ]
+ 
+DIR_GAMES = [ ('Test MAME Games',       './testfiles/Mame',     ('MAME', conf.XMAME, '-nosound -fullscreen -modenumber 6', './testfiles/Mame', None) ) ]
 
+# are used for the Mame arcade emulator.
 #
-# The list of filename suffixes that are used to match the files that
-# are used for the Mame arcade emulator. 
-# 
-SUFFIX_MAME_FILES = [ 'zip' ]
-SUFFIX_SNES_FILES = [ 'smc', 'fig' ]
-
-MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
-
-MAME_CMD         = CONF.xmame
-SNES_CMD         = CONF.snes
-
-MAME_SHOTS = './testfiles/Mame'
-
 GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
-                              # <0 is higher prio, >0 lower prio. 
+                              # <0 is higher prio, >0 lower prio.
                               # prio <0 has no effect unless run as root.
-
-# XXX Removed '-ef 1', doesn't work on my older version of mame...  /Krister
-MAME_ARGS_DEF     = ('-nosound -fullscreen -modenumber 6 ')
-
-# This example is a set of arguments for zsnes.
-SNES_ARGS_DEF     = ("-m -r 3 -k 100 -1 3 -2 3 -cs -t")
-
+ 
+MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 
 # ======================================================================
 # freevo OSD section:
