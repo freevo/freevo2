@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/12 12:18:41  dischi
+# fix bug when freevo crashes for rom drives
+#
 # Revision 1.22  2004/02/11 20:14:08  dischi
 # small fix
 #
@@ -136,10 +139,10 @@ class Cache:
         """
         return the cache filename for that directory/device
         """
-        cachefile = vfs.getoverlay(os.path.join(dirname, self.filename))
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        return cachefile
+        cachefile = vfs.getoverlay(dirname)
+        if not os.path.exists(cachefile):
+            os.makedirs(cachefile)
+        return os.path.join(cachefile, self.filename)
             
 
     def fileDB_need_update(self, dirname):
@@ -665,7 +668,7 @@ if __freevo_app__ == 'main':
             else:
                 mmchanged, freevo_changed, part_update, complete_update = info
             # let's warn about some updates
-            if freevo_changed < 1:
+            if freevo_changed < 2:
                 print
                 print 'Warning: Freevo cache helper updated.'
                 print 'Please rerun \'freevo cache\' to speed up Freevo'
