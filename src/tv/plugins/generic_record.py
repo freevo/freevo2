@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 02:04:03  rshortt
+# cleanup
+#
 # Revision 1.1  2003/05/11 22:36:33  rshortt
 # A plugin to record tv.  Used by record_server.py.
 #
@@ -83,10 +86,8 @@ class Recorder:
         self.thread.mode_flag.set()
         
         print('Recorder::Record: %s' % self.rec_command)
-        # self.thread.run()
         
         
-    # can probably remove Stop()
     def Stop(self):
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
@@ -105,7 +106,7 @@ class RecordApp(childapp.ChildApp):
             except IOError:
                 print
                 print (('ERROR: Cannot open "%s" and "%s" for ' +
-                        'TVTime logging!') % (fname_out, fname_err))
+                        'record logging!') % (fname_out, fname_err))
                 print 'Please set DEBUG=0 or '
                 print 'start Freevo from a directory that is writeable!'
                 print
