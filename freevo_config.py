@@ -464,8 +464,9 @@ plugin.activate('video.mplayer')
 plugin.activate('audio.mplayer')
 
 # make it possible to detach the player
-plugin.activate('audio.detach', level=20)
-plugin.activate('audio.detachbar')
+#  argument tells the plugin to show the 
+#  detachbar
+plugin.activate('audio.detach', args=(True,))
 
 # use mplayer for tv
 # to use tvtime, put the following two lines in your local_conf.py:
