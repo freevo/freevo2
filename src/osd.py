@@ -10,121 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.102  2003/10/28 18:15:19  dischi
-# bugfix
+# Revision 1.103  2003/11/21 11:42:06  dischi
+# bgcolor support for drawstringframed
 #
-# Revision 1.101  2003/10/27 20:37:59  dischi
-# add active variable
-#
-# Revision 1.100  2003/10/26 17:59:15  dischi
-# typo
-#
-# Revision 1.99  2003/10/20 19:25:15  dischi
-# show more than one newline as free space
-#
-# Revision 1.98  2003/10/18 13:05:39  dischi
-# also search share dir for images
-#
-# Revision 1.97  2003/10/18 09:42:13  dischi
-# don't start osd for helpers
-#
-# Revision 1.96  2003/10/04 18:37:28  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.95  2003/10/03 16:46:13  dischi
-# moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.94  2003/09/24 18:28:32  outlyer
-# Remove excessive chatter from osd, and fix bit shift in v4l2
-#
-# Revision 1.93  2003/09/23 13:37:51  outlyer
-# Move some informational debug messages into a higher level so they are not
-# shown by default.
-#
-# Revision 1.92  2003/09/19 22:06:50  dischi
-# add stop and restart as global osd functions
-#
-# Revision 1.91  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.90  2003/09/14 11:10:57  dischi
-# fix return values for bad parameter
-#
-# Revision 1.89  2003/09/13 10:08:21  dischi
-# i18n support
-#
-# Revision 1.88  2003/09/10 19:05:05  dischi
-# move osd keybindings into the config file
-#
-# Revision 1.87  2003/09/07 11:19:16  dischi
-# add name and ptsize to OSDFont
-#
-# Revision 1.86  2003/09/06 13:29:00  gsbarbieri
-# PopupBox and derivates now support you to choose mode (soft/hard) and
-# alignment (vertical/horizontal).
-#
-# Revision 1.85  2003/09/01 14:02:16  outlyer
-# Another warning. Make sure we use int where it's required.
-#
-# Revision 1.84  2003/08/26 20:19:25  outlyer
-# Found the cause of the hang when initializing Freevo; Freevo was hanging
-# on the set_mode call in Pygame, and it turns out it was simply because we didn't
-# do anything to tty0 which is where Freevo was running when called over a remote
-# shell.
-#
-# Revision 1.83  2003/08/24 10:17:11  dischi
-# fallback to default font when the font is not found (bad but better than crash)
-#
-# Revision 1.82  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.81  2003/08/23 09:19:01  dischi
-# merged blanking helper into osd.py
-#
-# Revision 1.79  2003/08/15 19:25:15  dischi
-# search all the share stuff in $FREEVO_SHARE now
-#
-# Revision 1.78  2003/08/06 19:35:55  dischi
-# included vtrelease directly into freevo
-#
-# Revision 1.77  2003/08/05 17:41:45  dischi
-# handle empty strings in stringsize
-#
-# Revision 1.76  2003/08/05 17:25:34  dischi
-# better error handling for missing SDL_VIDEODRIVER
-#
-# Revision 1.74  2003/07/30 15:13:01  outlyer
-# Add encoding to remove some warnings from Python 2.3. Has no effect on
-# Python < 2.3
-#
-# Revision 1.73  2003/07/19 19:16:05  dischi
-# support for loading an image which is already an Imaging object
-#
-# Revision 1.69  2003/07/13 19:35:44  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
-#
-# Revision 1.66  2003/07/12 14:30:14  outlyer
-# Changed to Vera for default font.
-#
-# Revision 1.64  2003/07/07 16:24:16  dischi
-# More cleanups:
-# o drawstringframed now needs an OSDFont object as font info. This
-#   avoids searching the cache.
-# o drawstring now uses drawstringframed, removed all the older stuff
-#
-# Revision 1.56  2003/07/03 23:07:51  dischi
-# convert 8 bit images (e.g. gif) to rgb, pygame cannot handle 8 bit
-#
-# Revision 1.52  2003/07/02 20:02:54  dischi
-# Speed improvements:
-# o thumbanils are now stored as pickled raw bitmaps to improve loading
-#   speed, exif parser is now taken from mmpython
-# o split drawstringframed into a calculating an a drawing part to speed
-#   up the info area
-# removed old unneeded code
-# changed docs
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -888,6 +776,10 @@ class OSD:
                         x0 = x + width - render.get_size()[0]
                     elif align_h == 'center':
                         x0 = x + int((width - render.get_size()[0]) / 2)
+                    if bgcolor:
+                        self.drawbox(x0, y0, x0+render.get_size()[0],
+                                     y0+render.get_size()[1], color=bgcolor, fill=1,
+                                     layer=layer)
                     layer.blit(render, (x0, y0))
                 except:
                     print "Render failed, skipping..."    
