@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/09/19 22:09:15  dischi
+# use new childapp thread function
+#
 # Revision 1.22  2003/09/18 17:09:54  gsbarbieri
 # Faster version detection + handle for CVS versions.
 #
@@ -33,30 +36,6 @@
 # Revision 1.19  2003/09/02 19:10:22  dischi
 # Basic mplayer version detection. Convert -vop to -vf if cvs or 1.0pre1
 # is used
-#
-# Revision 1.18  2003/09/01 19:46:03  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.17  2003/09/01 16:41:37  dischi
-# send PLAY_START event
-#
-# Revision 1.16  2003/08/30 17:05:42  dischi
-# remove bookmark support, add support for ItemPlugin eventhandler
-#
-# Revision 1.15  2003/08/24 19:24:19  gsbarbieri
-# Fix problem: exiting mplayer from playing ROM files hang freevo
-#
-# Revision 1.14  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.13  2003/08/23 10:08:14  dischi
-# remove dbdnav stuff, use xine for that
-#
-# Revision 1.12  2003/08/23 10:07:18  dischi
-# restore the context
-#
-# Revision 1.11  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -88,7 +67,6 @@ import traceback, popen2
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
 
 from event import *
@@ -97,33 +75,29 @@ import plugin
 # RegExp
 import re
 
-# Setting up the default objects:
-osd        = osd.get_singleton()
-
 # contains an initialized MPlayer() object
 mplayer = None
 
-mplayer_version = 0
-
 class PluginInterface(plugin.Plugin):
     """
-    Mplayer plugin for the video player. Use mplayer to play all video
-    files.
+    Mplayer plugin for the video player.
+
+    With this plugin Freevo can play all video files defined in
+    SUFFIX_VIDEO_FILES. This is the default video player for Freevo.
     """
     def __init__(self):
         global mplayer
-        global mplayer_version
-        
+
+        mplayer_version = 0
         # create the mplayer object
         plugin.Plugin.__init__(self)
 
-        child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100 )
+        child = popen2.Popen3( "%s -v" % config.MPLAYER_CMD, 1, 100)
         data = child.fromchild.readline() # Just need the first line
         if data:
             data = re.search( "^MPlayer (?P<version>\S+)", data )
             if data:                
-                if DEBUG:
-                    print "MPlayer version is: %s" % data.group( "version" )
+                _debug_("MPlayer version is: %s" % data.group( "version" ))
                 data = data.group( "version" )
                 if data[ 0 ] == "1":
                     mplayer_version = 1.0
@@ -131,39 +105,13 @@ class PluginInterface(plugin.Plugin):
                     mplayer_version = 0.9
                 elif data[ 0 : 7 ] == "dev-CVS":
                     mplayer_version = 9999
+                _debug_("MPlayer version set to: %s" % mplayer_version)
                     
         child.wait()
-        mplayer = util.SynchronizedObject(MPlayer())
+        mplayer = util.SynchronizedObject(MPlayer(mplayer_version))
 
         # register it as the object to play audio
         plugin.register(mplayer, plugin.VIDEO_PLAYER)
-
-
-def vop_append(command):
-    """
-    Change a mplayer command to support more than one -vop
-    parameter. This function will grep all -vop parameter from
-    the command and add it at the end as one vop argument
-    """
-    global mplayer_version
-    ret = ''
-    vop = ''
-    next_is_vop = FALSE
-    
-    for arg in command.split(' '):
-        if next_is_vop:
-            vop += ',%s' % arg
-            next_is_vop = FALSE
-        elif (arg == '-vop' or arg == '-vf'):
-            next_is_vop=TRUE
-        else:
-            ret += '%s ' % arg
-
-    if vop:
-        if mplayer_version >= 1:
-            return '%s -vf %s' % (ret,vop[1:])
-        return '%s -vop %s' % (ret,vop[1:])
-    return ret
 
 
 class MPlayer:
@@ -171,19 +119,21 @@ class MPlayer:
     the main class to control mplayer
     """
     
-    def __init__(self):
-        self.thread = MPlayer_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
+    def __init__(self, version):
+        self.thread = childapp.ChildThread()
+        self.thread.stop_osd = True
+
         self.mode = None
         self.filename = None
         self.app_mode = 'video'
+        self.version = version
         self.seek = 0
         self.seek_timer = threading.Timer(0, self.reset_seek)
-                         
+
+        
     def play(self, filename, options, item, mode = None):
         """
-        play a audioitem with mplayer
+        play a videoitem with mplayer
         """
 
         self.parameter = (filename, options, item, mode)
@@ -274,9 +224,9 @@ class MPlayer:
 
         if config.MPLAYER_AUTOCROP and command.find('crop=') == -1:
             (x1, y1, x2, y2) = (1000, 1000, 0, 0)
-            child = popen2.Popen3(vop_append('%s -ao null -vo null ' \
-                                             '-ss 60 -frames 20 -vop cropdetect' % \
-                                             command), 1, 100)
+            child = popen2.Popen3(self.vop_append('%s -ao null -vo null ' \
+                                                  '-ss 60 -frames 20 -vop cropdetect' % \
+                                                  command), 1, 100)
             exp = re.compile('^.*-vop crop=([0-9]*):([0-9]*):([0-9]*):([0-9]*).*')
             while(1):
                 data = child.fromchild.readline()
@@ -295,23 +245,20 @@ class MPlayer:
             child.wait()
 
 
-        command=vop_append(command)
+        command=self.vop_append(command)
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
         self.file = item
-        self.thread.play_mode = self.mode
-        self.thread.item  = item
+
+        self.thread.start(MPlayerApp, (command, item))
+
         self.item  = item
 
         _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
         rc.app(self)
 
-        self.thread.mode    = 'play'
-        self.thread.command = command
-        self.thread.mode_flag.set()
-        print command
         return None
     
 
@@ -319,13 +266,10 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
-        self.thread.app.write('quit\n')
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-        self.thread.item = None
+        self.thread.stop('quit\n')
         rc.app(None)
-        while self.thread.mode == 'stop':
-            time.sleep(0.3)
+
+
 
     def eventhandler(self, event, menuw=None):
         """
@@ -336,13 +280,13 @@ class MPlayer:
         if event == VIDEO_MANUAL_SEEK:
             self.seek = 0
             rc.set_context('input')
-            return TRUE
+            return True
         
         if event.context == 'input':
             if event in INPUT_ALL_NUMBERS:
                 self.reset_seek_timeout()
                 self.seek = self.seek * 10 + int(event);
-                return TRUE
+                return True
             
             elif event == INPUT_ENTER:
                 self.seek_timer.cancel()
@@ -351,14 +295,14 @@ class MPlayer:
                 _debug_("seek "+str(self.seek)+" 2\n")
                 self.seek = 0
                 rc.set_context('video')
-                return TRUE
+                return True
 
             elif event == INPUT_EXIT:
                 _debug_('seek stopped')
                 self.seek_timer.cancel()
                 self.seek = 0
                 rc.set_context('video')
-                return TRUE
+                return True
 
         if event == STOP:
             self.stop()
@@ -368,7 +312,7 @@ class MPlayer:
             self.stop()
             self.play(self.parameter[0], self.parameter[1], self.parameter[2],
                       self.parameter[3])
-            return TRUE
+            return True
         
         if event in ( PLAY_END, USER_END ):
             self.stop()
@@ -377,23 +321,23 @@ class MPlayer:
         try:
             if event == VIDEO_SEND_MPLAYER_CMD:
                 self.thread.app.write('%s\n' % event.arg)
-                return TRUE
+                return True
 
             if event == TOGGLE_OSD:
                 self.thread.app.write('osd\n')
-                return TRUE
+                return True
 
             if event == PAUSE or event == PLAY:
                 self.thread.app.write('pause\n')
-                return TRUE
+                return True
 
             if event == SEEK:
                 self.thread.app.write('seek %s\n' % event.arg)
-                return TRUE
+                return True
         except:
             print 'Exception while sending command to mplayer:'
             traceback.print_exc()
-            return TRUE
+            return True
         
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
@@ -409,74 +353,68 @@ class MPlayer:
         self.seek_timer = threading.Timer(config.MPLAYER_SEEK_TIMEOUT, self.reset_seek)
         self.seek_timer.start()
         
+    def vop_append(self, command):
+        """
+        Change a mplayer command to support more than one -vop
+        parameter. This function will grep all -vop parameter from
+        the command and add it at the end as one vop argument
+        """
+        ret = ''
+        vop = ''
+        next_is_vop = False
+    
+        for arg in command.split(' '):
+            if next_is_vop:
+                vop += ',%s' % arg
+                next_is_vop = False
+            elif (arg == '-vop' or arg == '-vf'):
+                next_is_vop=True
+            else:
+                ret += '%s ' % arg
+
+        if vop:
+            if self.version >= 1:
+                return '%s -vf %s' % (ret,vop[1:])
+            return '%s -vop %s' % (ret,vop[1:])
+        return ret
+
+
 
 # ======================================================================
-
-class MPlayerParser:
-    """
-    class to parse the mplayer output and store some information
-    in the videoitem
-    """
-    
-    def __init__(self, item):
-        self.item = item
-        self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
-        self.RE_START = re.compile("^Starting playback\.\.\.").match
-
-        # DVD items also store mplayer_audio_broken to check if you can
-        # start them with -alang or not
-        if hasattr(item, 'mplayer_audio_broken') or item.mode != 'dvd':
-            self.check_audio = 0
-        else:
-            self.check_audio = 1
-            
-        
-    def parse(self, line):
-        if self.check_audio:
-            if line.find('MPEG: No audio stream found -> no sound') == 0:
-                # OK, audio is broken, restart without -alang
-                self.check_audio = 2
-                self.item.mplayer_audio_broken = TRUE
-                rc.post_event(Event('AUDIO_ERROR_START_AGAIN'))
-                
-        if self.RE_START(line):
-            if self.check_audio == 1:
-                # audio seems to be ok
-                self.item.mplayer_audio_broken = FALSE
-            self.check_audio = 0
-                
-    def end_type(self, str):
-        m = self.RE_EXIT(str)
-        if m: return m.group(1)
-        
 
 class MPlayerApp(childapp.ChildApp):
     """
     class controlling the in and output from the mplayer process
     """
 
-    def __init__(self, app, item):
+    def __init__(self, (app, item)):
         if config.MPLAYER_DEBUG:
             fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
             fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
             try:
-                self.log_stdout = open(fname_out, 'a')
-                self.log_stderr = open(fname_err, 'a')
+                self.log_stdout = open(fname_out, 'w')
+                self.log_stderr = open(fname_err, 'w')
+                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
             except IOError:
                 print
                 print (('ERROR: Cannot open "%s" and "%s" for ' +
                         'MPlayer logging!') % (fname_out, fname_err))
-                print 'Please set MPLAYER_DEBUG=0 in local_conf.py, or '
-                print 'start Freevo from a directory that is writeable!'
-                print
-            else:
-                print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
+                config.MPLAYER_DEBUG = 0
+                
+        # DVD items also store mplayer_audio_broken to check if you can
+        # start them with -alang or not
+        if hasattr(item, 'mplayer_audio_broken') or item.mode != 'dvd':
+            self.check_audio = 0
+        else:
+            self.check_audio = 1
 
         self.RE_TIME = re.compile("^A: *([0-9]+)").match
+        self.RE_START = re.compile("^Starting playback\.\.\.").match
+        self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
         self.item = item
-        self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)
         self.exit_type = None
+
         
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -489,8 +427,18 @@ class MPlayerApp(childapp.ChildApp):
             self.log_stdout.close()
             self.log_stderr.close()
 
-    def stdout_cb(self, line):
 
+    def stopped(self):
+        if self.exit_type == "End of file":
+            rc.post_event(PLAY_END)
+        elif self.exit_type == "Quit":
+            rc.post_event(USER_END)
+        else:
+            print 'error while playing file'
+            rc.post_event(PLAY_END)
+                        
+
+    def stdout_cb(self, line):
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stdout.write(line + '\n')
@@ -503,86 +451,29 @@ class MPlayerApp(childapp.ChildApp):
                 self.item.elapsed = int(m.group(1))+1
 
         elif line.find("Exiting...") == 0:
-            self.exit_type = self.parser.end_type(line)
+            m = self.RE_EXIT(line)
+            if m:
+                self.exit_type = m.group(1)
 
         # this is the first start of the movie, parse infos
         elif not self.item.elapsed:
-            self.parser.parse(line)
+            if self.check_audio:
+                if line.find('MPEG: No audio stream found -> no sound') == 0:
+                    # OK, audio is broken, restart without -alang
+                    self.check_audio = 2
+                    self.item.mplayer_audio_broken = True
+                    rc.post_event(Event('AUDIO_ERROR_START_AGAIN'))
+                
+                if self.RE_START(line):
+                    if self.check_audio == 1:
+                        # audio seems to be ok
+                        self.item.mplayer_audio_broken = False
+                    self.check_audio = 0
 
 
     def stderr_cb(self, line):
-        if line.find('The DVD is protected') != -1:
-            print
-            print 'WARNING: You are trying to play a protected (CSS) DVD!'
-            print 'DVD protection is normally enabled, please see the docs'
-            print 'for more information.'
-            print
-            rc.post_event(DVD_PROTECTED)
-            
         if config.MPLAYER_DEBUG:
             try:
                 self.log_stderr.write(line + '\n')
             except ValueError:
                 pass # File closed
-                     
-
-# ======================================================================
-
-class MPlayer_Thread(threading.Thread):
-    """
-    Thread to wait for a mplayer command to play
-    """
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.play_mode = ''
-        self.mode      = 'idle'
-        self.mode_flag = threading.Event()
-        self.command   = ''
-        self.app       = None
-        self.item  = None
-
-        
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-
-            elif self.mode == 'play':
-
-                if config.STOP_OSD_WHEN_PLAYING:
-                    osd.stopdisplay()			
-               
-                rc.post_event(Event(PLAY_START, arg=self.item))
-
-                _debug_('MPlayer_Thread.run(): Started, cmd=%s' % self.command)
-                    
-                self.app = MPlayerApp(self.command, self.item)
-
-                while self.mode == 'play' and self.app.isAlive():
-                    time.sleep(0.1)
-
-                self.app.kill()
-
-                if self.mode == 'play':
-                    if self.app.exit_type == "End of file":
-                        rc.post_event(PLAY_END)
-                    elif self.app.exit_type == "Quit":
-                        rc.post_event(USER_END)
-                    else:
-                        print 'error while playing file'
-                        rc.post_event(PLAY_END)
-                        
-                # Ok, we can use the OSD again.
-                if config.STOP_OSD_WHEN_PLAYING:
-                    osd.restartdisplay()
-                    osd.update()
-                
-                self.mode = 'idle'
-                
-            else:
-                self.mode = 'idle'
-
-

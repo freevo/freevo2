@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/19 22:09:16  dischi
+# use new childapp thread function
+#
 # Revision 1.17  2003/09/15 20:06:42  dischi
 # cdda url handling repaired and only stop on playing player
 #
@@ -62,22 +65,12 @@ import plugin
 from event import *
 
 
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
-
-# contains an initialized MPlayer() object
-mplayer = None
-
-
 class PluginInterface(plugin.Plugin):
     """
     Mplayer plugin for the audio player. Use mplayer to play all audio
     files.
     """
     def __init__(self):
-        global mplayer
         # create the mplayer object
         plugin.Plugin.__init__(self)
         mplayer = util.SynchronizedObject(MPlayer())
@@ -92,9 +85,7 @@ class MPlayer:
     """
     
     def __init__(self):
-        self.thread = MPlayer_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
+        self.thread = childapp.ChildThread()
         self.mode = None
         self.app_mode = 'audio'
 
@@ -155,19 +146,14 @@ class MPlayer:
             plugin.getbyname('MIXER').reset()
 
         self.item = item
-        self.thread.item = item
 
-        if not self.thread.item.valid:
+        if not self.item.valid:
             # Invalid file, show an error and survive.
             return _('Invalid audio file')
 
-        self.thread.play_mode = self.mode
-
         _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
             
-        self.thread.mode    = 'play'
-        self.thread.command = command
-        self.thread.mode_flag.set()
+        self.thread.start(MPlayerApp, (command, item))
         return None
     
 
@@ -175,21 +161,17 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
-        if self.mode == 'play':
-            self.thread.app.write('quit\n')
-            self.thread.mode = 'stop'
-            self.thread.mode_flag.set()
-            self.thread.item = None
-            while self.thread.mode == 'stop':
-                time.sleep(0.3)
+        self.thread.stop('quit\n')
 
 
     def is_playing(self):
         return self.thread.mode != 'idle'
 
+
     def refresh(self):
         self.playerGUI.refresh()
         
+
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for mplayer control. If an event is not bound in this
@@ -201,7 +183,7 @@ class MPlayer:
             
         if event == AUDIO_SEND_MPLAYER_CMD:
             self.thread.app.write('%s\n' % event.arg)
-            return TRUE
+            return True
 
         if event in ( STOP, PLAY_END, USER_END ):
             self.playerGUI.stop()
@@ -209,11 +191,11 @@ class MPlayer:
 
         elif event == PAUSE or event == PLAY:
             self.thread.app.write('pause\n')
-            return TRUE
+            return True
 
         elif event == SEEK:
             self.thread.app.write('seek %s\n' % event.arg)
-            return TRUE
+            return True
 
         else:
             # everything else: give event to the items eventhandler
@@ -227,7 +209,7 @@ class MPlayerApp(childapp.ChildApp):
     class controlling the in and output from the mplayer process
     """
 
-    def __init__(self, app, item):
+    def __init__(self, (app, item)):
         if config.MPLAYER_DEBUG:
             fname_out = os.path.join(config.LOGDIR, 'mplayer_stdout.log')
             fname_err = os.path.join(config.LOGDIR, 'mplayer_stderr.log')
@@ -250,6 +232,7 @@ class MPlayerApp(childapp.ChildApp):
         self.RE_TIME = re.compile("^A: *([0-9]+)").match
 	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
               
+
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
         # down properly and releases all resources before it gets
@@ -259,6 +242,11 @@ class MPlayerApp(childapp.ChildApp):
             self.log_stdout.close()
             self.log_stderr.close()
 
+
+    def stopped(self):
+        rc.post_event(AUDIO_PLAY_END)
+
+        
     def stdout_cb(self, line):
         if config.MPLAYER_DEBUG:
             try:
@@ -304,48 +292,3 @@ class MPlayerApp(childapp.ChildApp):
                 self.log_stderr.write(line + '\n')
             except ValueError:
                 pass # File closed
-                     
-
-# ======================================================================
-
-class MPlayer_Thread(threading.Thread):
-    """
-    Thread to wait for a mplayer command to play
-    """
-    
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.play_mode = ''
-        self.mode      = 'idle'
-        self.mode_flag = threading.Event()
-        self.command   = ''
-        self.app       = None
-        self.item      = None
-
-        
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-
-            elif self.mode == 'play':
-
-                if DEBUG:
-                    print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
-                    
-                self.app = MPlayerApp(self.command, self.item)
-
-                while self.mode == 'play' and self.app.isAlive():
-                    time.sleep(0.1)
-
-                self.app.kill()
-
-                if self.mode == 'play':
-                    rc.post_event(AUDIO_PLAY_END)
-
-                self.mode = 'idle'
-                
-            else:
-                self.mode = 'idle'

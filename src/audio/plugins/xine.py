@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/19 22:09:16  dischi
+# use new childapp thread function
+#
 # Revision 1.4  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -46,7 +49,7 @@
 
 
 import time, os
-import threading, signal
+import signal
 import popen2, re
 
 import config     # Configuration handler. reads config file.
@@ -57,28 +60,13 @@ import rc         # The RemoteControl class.
 from event import *
 import plugin
 
-# RegExp
-import re
-
-DEBUG = config.DEBUG
-
-TRUE  = 1
-FALSE = 0
-
-# contains an initialized Xine() object
-xine = None
 
 class PluginInterface(plugin.Plugin):
     """
     Xine plugin for the video player.
     """
     def __init__(self):
-        global xine
-
         plugin.Plugin.__init__(self)
-
-        if xine:
-            return
 
         try:
             config.CONF.fbxine
@@ -118,15 +106,15 @@ class PluginInterface(plugin.Plugin):
         plugin.register(xine, plugin.AUDIO_PLAYER)
 
 
+# ======================================================================
+
 class Xine:
     """
     the main class to control xine
     """
     
     def __init__(self, version):
-        self.thread = Xine_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
+        self.thread = childapp.ChildThread()
         self.mode = None
         self.xine_version = version
         self.app_mode = 'audio'
@@ -141,28 +129,22 @@ class Xine:
         play an audio file with xine
         """
 
+        self.item      = item
+        self.playerGUI = playerGUI
+
         if item.url:
             filename = item.url
         else:
             filename = item.filename
 
-        self.playerGUI = playerGUI
-        
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        self.item = item
-        self.thread.item = item
         
-        command = self.command
-        
-        if DEBUG:
-            print 'Xine.play(): Starting thread, cmd=%s' % command
+        command = '%s "%s"' % (self.command, filename)
+        _debug_('Xine.play(): Starting thread, cmd=%s' % command)
 
-        self.thread.mode    = 'play'
-        self.thread.command = '%s "%s"' % (command, filename)
-        self.thread.mode_flag.set()
-        return None
+        self.thread.start(XineApp, (command, item, self.refresh))
     
 
     def is_playing(self):
@@ -177,11 +159,7 @@ class Xine:
         """
         Stop xine and set thread to idle
         """
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-        self.thread.item = None
-        while self.thread.mode == 'stop':
-            time.sleep(0.3)
+        self.thread.stop('quit\n')
             
 
     def eventhandler(self, event, menuw=None):
@@ -189,23 +167,18 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
+        if event == AUDIO_PLAY_END:
+            event = PLAY_END
+
         if event in ( PLAY_END, USER_END ):
-            self.stop()
+            self.playerGUI.stop()
             return self.item.eventhandler(event)
 
         if event == PAUSE or event == PLAY:
             self.thread.app.write('pause\n')
-            return TRUE
+            return True
 
         if event == STOP:
-            self.thread.app.write('quit\n')
-            for i in range(10):
-                if self.thread.mode == 'idle':
-                    break
-                time.sleep(0.3)
-            else:
-                # sometimes xine refuses to die
-                self.stop()
             self.playerGUI.stop()
             return self.item.eventhandler(event)
 
@@ -223,7 +196,7 @@ class Xine:
             else:
                 pos = 30
             self.thread.app.write('%s%s\n' % (action, pos))
-            return TRUE
+            return True
 
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
@@ -237,18 +210,14 @@ class XineApp(childapp.ChildApp):
     class controlling the in and output from the xine process
     """
 
-    def __init__(self, app, item):
+    def __init__(self, (app, item, refresh)):
         self.item = item
         childapp.ChildApp.__init__(self, app)
-        self.exit_type = None
         self.elapsed = 0
+        self.refresh = refresh
 
-
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure Xine shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        childapp.ChildApp.kill(self, signal.SIGINT)
+    def stopped(self):
+        rc.post_event(AUDIO_PLAY_END)
 
 
     def stdout_cb(self, line):
@@ -256,56 +225,5 @@ class XineApp(childapp.ChildApp):
             self.item.elapsed = int(line[6:])
 
             if self.item.elapsed != self.elapsed:
-                xine.refresh()
+                self.refresh()
             self.elapsed = self.item.elapsed
-
-
-# ======================================================================
-
-class Xine_Thread(threading.Thread):
-    """
-    Thread to wait for a xine command to play
-    """
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.mode      = 'idle'
-        self.mode_flag = threading.Event()
-        self.command   = ''
-        self.app       = None
-        self.item  = None
-
-        
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-
-            elif self.mode == 'play':
-                if DEBUG:
-                    print 'Xine_Thread.run(): Started, cmd=%s' % self.command
-                    
-                self.app = XineApp(self.command, self.item)
-
-                while self.mode == 'play' and self.app.isAlive():
-                    time.sleep(0.1)
-
-                self.app.kill()
-
-                if self.mode == 'play':
-                    if self.app.exit_type == "End of file":
-                        rc.post_event(PLAY_END)
-                    elif self.app.exit_type == "Quit":
-                        rc.post_event(USER_END)
-                    else:
-                        rc.post_event(PLAY_END)
-                        
-                if DEBUG:
-                    print 'Xine_Thread.run(): Stopped'
-
-                self.mode = 'idle'
-                
-            else:
-                self.mode = 'idle'

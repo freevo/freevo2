@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/19 22:09:16  dischi
+# use new childapp thread function
+#
 # Revision 1.16  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -44,10 +47,6 @@
 #
 # Revision 1.12  2003/08/28 03:46:13  outlyer
 # Support for Chapter-by-chapter navigation in DVDs using the CH+ and CH- keys.
-#
-# Revision 1.11  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -73,35 +72,24 @@
 
 
 import time, os
-import threading, signal
+import signal
 import popen2, re
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
-import skin
 
 from event import *
 import plugin
 
-# RegExp
-import re
-
-# contains an initialized Xine() object
-xine = None
 
 class PluginInterface(plugin.Plugin):
     """
     Xine plugin for the video player.
     """
-    def __init__(self, dvd=TRUE, vcd=FALSE):
-        global xine
-
+    def __init__(self):
         plugin.Plugin.__init__(self)
-
-        if xine:
-            return
 
         try:
             config.XINE_COMMAND
@@ -158,11 +146,12 @@ class Xine:
     """
     
     def __init__(self, type, version):
-        self.thread = Xine_Thread()
-        self.thread.setDaemon(1)
-        self.thread.start()
-        self.mode = None
-        self.app_mode = ''
+        # start the thread
+        self.thread = childapp.ChildThread()
+        self.thread.stop_osd = True
+
+        self.mode         = None
+        self.app_mode     = ''
         self.xine_type    = type
         self.xine_version = version
 
@@ -183,18 +172,12 @@ class Xine:
         """
 
         self.app_mode = item.mode       # dvd or vcd keymap
+        self.item     = item
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        self.item = item
-        self.thread.item = item
-        
-        rc.app(self)
-
         command = self.command
-
-        _debug_('Xine.play(): Starting thread, cmd=%s' % command)
 
         if item.deinterlace:
             if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
@@ -210,13 +193,15 @@ class Xine:
             for track in item.info['tracks']:
                 self.max_audio = max(self.max_audio, len(track['audio']))
 
-        skin.get_singleton().clear()
-        self.thread.mode    = 'play'
         if item.mode == 'dvd':
-            self.thread.command = '%s dvd://' % command
+            command = '%s dvd://' % command
         else:
-            self.thread.command = '%s vcdx:/%s:' % (command, item.media.devicename)
-        self.thread.mode_flag.set()
+            command = '%s vcdx:/%s:' % (command, item.media.devicename)
+
+        _debug_('Xine.play(): Starting thread, cmd=%s' % command)
+
+        rc.app(self)
+        self.thread.start(childapp.ChildApp, command)
         return None
     
 
@@ -224,13 +209,8 @@ class Xine:
         """
         Stop xine and set thread to idle
         """
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-        self.thread.item = None
+        self.thread.stop('quit\n')
         rc.app(None)
-
-        while self.thread.mode == 'stop':
-            time.sleep(0.3)
             
 
     def eventhandler(self, event, menuw=None):
@@ -244,22 +224,15 @@ class Xine:
 
         # fallback for older versions of xine
         if self.xine_version < 922:
-            return TRUE
+            return True
         
         if event == PAUSE or event == PLAY:
             self.thread.app.write('pause\n')
-            return TRUE
+            return True
 
         if event == STOP:
-            self.thread.app.write('quit\n')
-            for i in range(10):
-                if self.thread.mode == 'idle':
-                    break
-                time.sleep(0.3)
-            else:
-                # sometimes xine refuses to die
-                self.stop()
-            return TRUE
+            self.stop()
+            return self.item.eventhandler(event)
 
         if event == SEEK:
             pos = int(event.arg)
@@ -275,44 +248,44 @@ class Xine:
             else:
                 pos = 30
             self.thread.app.write('%s%s\n' % (action, pos))
-            return TRUE
+            return True
 
         # DVD NAVIGATION
         if event == DVDNAV_LEFT:
             self.thread.app.write('EventLeft\n')
-            return TRUE
+            return True
             
         if event == DVDNAV_RIGHT:
             self.thread.app.write('EventRight\n')
-            return TRUE
+            return True
             
         if event == DVDNAV_UP:
             self.thread.app.write('EventUp\n')
-            return TRUE
+            return True
             
         if event == DVDNAV_DOWN:
             self.thread.app.write('EventDown\n')
-            return TRUE
+            return True
             
         if event == DVDNAV_SELECT:
             self.thread.app.write('EventSelect\n')
-            return TRUE
+            return True
             
         if event == DVDNAV_TITLEMENU:
             self.thread.app.write('TitleMenu\n')
-            return TRUE
+            return True
             
         if event == DVDNAV_MENU:
             self.thread.app.write('Menu\n')
-            return TRUE
+            return True
 
         if event == NEXT:
             self.thread.app.write('EventNext\n')
-            return TRUE
+            return True
 
         if event == PREV:
             self.thread.app.write('EventPrior\n')
-            return TRUE
+            return True
 
 
         # VCD NAVIGATION
@@ -320,11 +293,11 @@ class Xine:
             self.thread.app.write('Number%s\n' % event.arg)
             time.sleep(0.1)
             self.thread.app.write('EventSelect\n')
-            return TRUE
+            return True
         
         if event == MENU:
             self.thread.app.write('TitleMenu\n')
-            return TRUE
+            return True
 
 
         if event == VIDEO_NEXT_AUDIOLANG and self.max_audio:
@@ -342,86 +315,7 @@ class Xine:
                     self.thread.app.write('AudioChannelPrior\n')
                     time.sleep(0.1)
                 self.current_audio = -1
-            return TRUE
+            return True
             
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
-
-        
-
-# ======================================================================
-
-class XineApp(childapp.ChildApp):
-    """
-    class controlling the in and output from the xine process
-    """
-
-    def __init__(self, app, item):
-        self.item = item
-        childapp.ChildApp.__init__(self, app)
-        self.exit_type = None
-        
-    def kill(self):
-        # Use SIGINT instead of SIGKILL to make sure Xine shuts
-        # down properly and releases all resources before it gets
-        # reaped by childapp.kill().wait()
-        childapp.ChildApp.kill(self, signal.SIGINT)
-
-
-# ======================================================================
-
-class Xine_Thread(threading.Thread):
-    """
-    Thread to wait for a xine command to play
-    """
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.mode      = 'idle'
-        self.mode_flag = threading.Event()
-        self.command   = ''
-        self.app       = None
-        self.item  = None
-
-        
-    def run(self):
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-
-            elif self.mode == 'play':
-                if config.STOP_OSD_WHEN_PLAYING:
-                    osd.stopdisplay()			
-
-                rc.post_event(Event(PLAY_START, arg=self.item))
-
-                _debug_('Xine_Thread.run(): Started, cmd=%s' % self.command)
-                    
-                self.app = XineApp(self.command, self.item)
-
-                while self.mode == 'play' and self.app.isAlive():
-                    time.sleep(0.1)
-
-                self.app.kill()
-
-                if self.mode == 'play':
-                    if self.app.exit_type == "End of file":
-                        rc.post_event(PLAY_END)
-                    elif self.app.exit_type == "Quit":
-                        rc.post_event(USER_END)
-                    else:
-                        rc.post_event(PLAY_END)
-                        
-                _debug_('Xine_Thread.run(): Stopped')
-
-                if config.STOP_OSD_WHEN_PLAYING:
-                    osd.restartdisplay()
-                    osd.update()
-
-                self.mode = 'idle'
-                skin.get_singleton().redraw()
-                
-            else:
-                self.mode = 'idle'
