@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/04/11 06:51:17  dischi
+# unicode patch
+#
 # Revision 1.15  2004/03/12 03:05:50  outlyer
 # Use the episode title where available.
 #
@@ -146,7 +149,7 @@ class RecordResource(FreevoResource):
                 if start == '%s' % what.start and chan == '%s' % what.channel_id:
                     prog = what
 
-            print 'want to remove prog: %s' % prog
+            print 'want to remove prog: %s' % String(prog)
             ri.removeScheduledRecording(prog)
         elif action == 'add':
             (status, prog) = ri.findProg(chan, start)
@@ -162,13 +165,13 @@ class RecordResource(FreevoResource):
                           '</b>'
                           )
                            )+\
-                      ( ' <i>(%s)</i>' % prog ) ] )
+                      ( ' <i>(%s)</i>' % String(prog) ) ] )
 
                 return String(fv.res)
 
             
             print 'RESULT: %s' % status
-            print 'PROG: %s' % prog
+            print 'PROG: %s' % String(prog)
             ri.scheduleRecording(prog)
 
 

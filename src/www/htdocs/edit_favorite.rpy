@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/04/11 06:51:17  dischi
+# unicode patch
+#
 # Revision 1.15  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -153,11 +156,11 @@ class EditFavoriteResource(FreevoResource):
                                               time.localtime(int(start))) + \
                           '</b>'
                          )
-                        ) + (' <i>(%s)</i>' % prog) ] )
+                        ) + (' <i>(%s)</i>' % String(prog)) ] )
                 return String(fv.res)
 
             if prog:
-                print 'PROG: %s' % prog
+                print 'PROG: %s' % String(prog)
 
             priority = num_favorites + 1
 
