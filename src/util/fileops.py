@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/07/04 08:04:21  dischi
+# handle PIL exception
+#
 # Revision 1.23  2004/06/29 18:08:56  dischi
 # use vfs.open to make sure we can write
 #
@@ -517,20 +520,26 @@ def create_thumbnail(filename, thumbnail=None):
                     print e
                 return None
         
-    if image.size[0] > 255 or image.size[1] > 255:
-        image.thumbnail((255,255), Image.ANTIALIAS)
+    try:
+        if image.size[0] > 255 or image.size[1] > 255:
+            image.thumbnail((255,255), Image.ANTIALIAS)
 
-    if image.mode == 'P':
-        image = image.convert('RGB')
+        if image.mode == 'P':
+            image = image.convert('RGB')
 
-    data = (image.tostring(), image.size, image.mode)
+        data = (image.tostring(), image.size, image.mode)
 
-    f = vfs.open(thumb, 'w')
-    f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
-    f.write(data[0])
-    f.close()
-    return data
-
+        f = vfs.open(thumb, 'w')
+        f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
+        f.write(data[0])
+        f.close()
+        return data
+    except Exception, e:
+        print 'error caching image %s' % filename
+        if config.DEBUG:
+            print e
+        return None
+        
 
 def cache_image(filename, thumbnail=None, use_exif=False):
     """
