@@ -47,6 +47,7 @@ import config
 import math
 from area import Area
 from gui import Rectangle
+from record.client import recordings
 
 import logging
 log = logging.getLogger('gui')
@@ -386,10 +387,12 @@ class TvlistingArea(Area):
 
                     if prg == selected_prog:
                         val = selected_val
-#                     elif prg.scheduled:
-#                         val = scheduled_val
                     else:
-                        val = default_val
+                        rs = recordings.get(prg.channel.id, prg.start, prg.stop)
+                        if rs and rs.status in ('scheduled', 'recordings', 'saved'):
+                            val = scheduled_val
+                        else:
+                            val = default_val
 
                     font = val.font
 
