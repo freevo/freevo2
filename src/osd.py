@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/07/18 16:51:03  rshortt
+# Removing xv and dga from the valid display types.  x11 should cover all
+# X related -vo options for mplayer.
+#
 # Revision 1.71  2003/07/14 19:34:07  rshortt
 # Adding dgs to the list of supported display types.
 #
@@ -385,9 +389,7 @@ class OSD:
         self.depth = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
         
-        if (config.CONF.display == 'x11' or config.CONF.display == 'xv' \
-            or config.CONF.display == 'dga' ) \
-           and config.START_FULLSCREEN_X == 1:
+        if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             self.toggle_fullscreen()
 
         help = ['z = Toggle Fullscreen']
