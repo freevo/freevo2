@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/07/03 04:19:31  outlyer
+# Updated cdbackup with Rich's new Ogg patch; also changed some variables,
+# and added oggenc to setup and configuration.
+#
 # Revision 1.31  2003/07/02 20:00:42  dischi
 # added defaults for ripping tools
 #
@@ -189,6 +193,7 @@ CONF.snes = ''
 CONF.version = 0
 CONF.tvtime = ''
 CONF.lame = ''
+CONF.oggenc = ''
 CONF.cdparanoia = ''
 
 class MainMenuItem:

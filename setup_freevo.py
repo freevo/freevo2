@@ -12,6 +12,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/03 04:19:30  outlyer
+# Updated cdbackup with Rich's new Ogg patch; also changed some variables,
+# and added oggenc to setup and configuration.
+#
 # Revision 1.7  2003/07/01 02:46:33  outlyer
 # Added lame and cdparanoia
 #
@@ -176,6 +180,7 @@ def main():
     check_program(conf, "zsnes", "snes", 0, sysfirst)
     check_program(conf, "lame", "lame",0,sysfirst)
     check_program(conf, "cdparanoia","cdparanoia",0,sysfirst)
+    check_program(conf, "oggenc","oggenc",0,sysfirst)
 
     check_config(conf)
 

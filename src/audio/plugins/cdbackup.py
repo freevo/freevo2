@@ -16,7 +16,6 @@
 # Todo:      
 # Add a status bar showing progress
 # Parse the output of cdparanoia and lame to determine status of rip, mp3 conversion
-# Add ogg encoding
 # For encoding parameters, make choices dynamic/selectable from menu instead of only local_conf.py
 # maybe just use local_conf.py parameters as defaults.
 # Be able to stop ripping once it's started.
@@ -25,7 +24,16 @@
 # add a hourglass or some other notification that its loading.
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
+#
 # $Log$
+# Revision 1.9  2003/07/03 04:19:31  outlyer
+# Updated cdbackup with Rich's new Ogg patch; also changed some variables,
+# and added oggenc to setup and configuration.
+#
+#
+# Revision 1.9  2003/07/03 21:12:58  cornejo
+# Added capability to rip to Ogg format.
+#
 # Revision 1.8  2003/07/01 20:28:29  outlyer
 # Two things:
 #     o Major code cleanup, removed lots of commented out stuff, changed
@@ -170,8 +178,11 @@ class main_backup_thread(threading.Thread):
     def run(self, rip_format='mp3'):        
         if self.rip_format == 'mp3' :
             self.cd_backup_threaded(self.device, rip_format='mp3')
-        else:
+        elif self.rip_format == 'ogg' :
+            self.cd_backup_threaded(self.device, rip_format='ogg')                      
+        elif self.rip_format == 'wav' :
             self.cd_backup_threaded(self.device, rip_format='wav')        
+          
     
     def cd_backup_threaded(self, device, rip_format='mp3'):  
         rip_format = rip_format
@@ -238,9 +249,9 @@ class main_backup_thread(threading.Thread):
                                                                                              
             path_tail = path_tail_temp % user_rip_path_prefs 
             
-            # If rip_format is mp3, then copy the file to /temp/track_being_ripped.wav
+            # If rip_format is mp3 or ogg, then copy the file to /temp/track_being_ripped.wav
 
-            if string.upper(rip_format) == 'MP3':
+            if (string.upper(rip_format) == 'MP3') or (string.upper(rip_format) == 'OGG'):
                 pathname_cdparanoia = '/tmp'
                 path_tail_cdparanoia   = '/track_being_ripped'
            
@@ -261,7 +272,7 @@ class main_backup_thread(threading.Thread):
             # Have the OS execute the CD Paranoia rip command            
             os.system(cdparanoia_command)
              
-            # Build the cdparanoia command to be run if mp3 format is selected
+            # Build the lame command to be run if mp3 format is selected
             
             if string.upper(rip_format) == 'MP3':
            
@@ -278,6 +289,22 @@ class main_backup_thread(threading.Thread):
                 # Remove the .wav file.
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
                 if os.path.exists (rm_command): os.unlink(rm_command)
+
+            # Build the oggenc command to be run if ogg format is selected                
+                                
+            elif string.upper(rip_format) == 'OGG':
+                oggenc_command = \
+                    '%s %s -a "%s" -G "%s" -N "%s" -t "%s" -l "%s" "%s%s.wav" -o "%s%s.ogg"' % \
+                    (config.OGG_CMD, config.CD_RIP_OGG_OPTS, 
+                    artist, genre, track, song_names[i], album,
+                    pathname_cdparanoia, path_tail_cdparanoia, pathname, path_tail)
+
+                if DEBUG: 'oggenc_command: %s' %oggenc_command                          
+                os.system(oggenc_command)
+                    
+                # Remove the .wav file.
+                rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
+                if os.path.exists (rm_command): os.unlink(rm_command)                
         
         # Flash a popup window indicating copying is done
         time_taken = time.time() - begin + 300
@@ -291,14 +318,8 @@ class main_backup_thread(threading.Thread):
 
     def get_formatted_cd_info(self, device):
         cd_info = mmpython.parse(device)
-        """
-        # Get the Artist's name(could be more than one) and Album name 
-        # Also, get rid of the space at the end of the Artists name, and before the Album name
-        # Artist name and album are returned as "Artist / Album"
-        # -note the "space slash space" between Artist and Album
-        """            
         
-        # Check if CDDB data failed -is there a better way to do this?
+        # Check if getting CDDB data failed -is there a better way to do this?
         # Give some defaults with a timestamp to uniqueify artist and album names.
         # So that subsequent CDs with no CDDB data found don't overwrite each other.
         if ((cd_info.title == None) and (cd_info.artist == None)):
@@ -405,7 +426,10 @@ class PluginInterface(plugin.ItemPlugin):
 
         items += [menu.MenuItem('Backup CD to hard drive in mp3 format',
                                 self.cd_backup_mp3, arg=arg)]
-
+        
+        items += [menu.MenuItem('Backup CD to hard drive in Ogg format',
+                                self.cd_backup_ogg, arg=arg)]
+                                
         items += [menu.MenuItem('Backup CD to hard drive in wav format',
                                 self.cd_backup_wav, arg=arg)]
 
@@ -422,3 +446,9 @@ class PluginInterface(plugin.ItemPlugin):
         device = arg
         rip_thread = main_backup_thread(device=device, rip_format='mp3')        
         rip_thread.start()
+
+    def cd_backup_ogg(self, arg,  menuw=None):            
+        device = arg
+        rip_thread = main_backup_thread(device=device, rip_format='ogg')        
+        rip_thread.start()
+        
