@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/14 16:14:02  dischi
+# fix imdb redirect
+#
 # Revision 1.10  2003/09/03 18:00:24  dischi
 # use mmpython to get the disc label
 #
@@ -176,14 +179,17 @@ class FxdImdb:
         regexp_type  = re.compile('<H2><A NAME=.*>(.*)</A></H2>')
         
         type = ''
-    
+
         m = re.match('http://.*imdb.com/Title\?([0-9]*)', response.geturl())
+        if not m:
+            m = re.match('http://.*imdb.com/title/tt([0-9]*)', response.geturl())
         if m:
             data = self.parsedata(response)
             self.imdb_id_list = [ ( m.group(1), data[0], data[1]['year'], '' ) ]
             return self.imdb_id_list
 
         for line in response.read().split("\n"):
+            print line
             m = regexp_type.match(line)
             if m:
                 type = m.group(1)
