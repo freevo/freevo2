@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/11/04 19:57:00  dischi
+# deactivate coming up for now
+#
 # Revision 1.55  2004/10/23 14:35:02  rshortt
 # Get smaller amounts of data at a time to improve speed and make our list
 # of programs more realtime.  Also remove import of ProgramItem because we
@@ -232,7 +235,7 @@ class TVGuide(MenuApplication):
             print e
             return
         
-        util.misc.comingup(None, (got_schedule, schedule))
+        # util.misc.comingup(None, (got_schedule, schedule))
 
         if got_schedule:
             l = schedule.getProgramList()
