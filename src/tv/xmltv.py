@@ -336,11 +336,11 @@ def _node_to_programme(node):
         programme[attr.encode(locale, 'ignore')] = node.attrs[(u'', attr)]
     if (u'', u'stop') in node.attrs:
         programme[u'stop'.encode(locale, 'ignore')] = node.attrs[(u'', u'stop')]
-    else:
+    #else:
         # Sigh. Make show zero-length. This will allow the show to appear in
         # searches, but it won't be seen in a grid, if the grid is drawn to
         # scale
-        programme[u'stop'.encode(locale, 'ignore')] = node.attrs[(u'', u'start')]
+        #programme[u'stop'.encode(locale, 'ignore')] = node.attrs[(u'', u'start')]
     return programme
 
 def _node_to_channel(node):
