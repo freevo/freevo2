@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/02/25 05:31:47  krister
+# Made CD audio playing use -cdrom-device for mplayer.
+#
 # Revision 1.17  2003/02/19 06:42:57  krister
 # Thomas Schuppels latest CDDA fixes. I changed some info formatting, made it possible to play unknown disks, added MPlayer 1MB caching (important) of CD tracks.
 #
@@ -175,9 +178,12 @@ class Identify_Thread(threading.Thread):
             try:
                 cdrom = DiscID.open(media.devicename)
                 disc_id = DiscID.disc_id(cdrom)
-                media.info = AudioDiskItem(disc_id, None, 'nix')
+                media.info = AudioDiskItem(disc_id, parent=None, name='',
+                                           devicename=media.devicename,
+                                           display_type='audio')
                 (query_stat, query_info) = CDDB.query(disc_id)
 
+                media.info.handle_type = 'audio'
                 if query_stat == 200:
                     media.info.title = query_info['title']
 
@@ -277,8 +283,6 @@ class Identify_Thread(threading.Thread):
                 if os.path.isfile(config.COVER_DIR+label+'.jpg'):
                     media.info.image = config.COVER_DIR+label+'.jpg'
                 return
-
-
         
         # Check for movies/audio/images on the disc
         mplayer_files = util.match_files(media.mountdir, config.SUFFIX_VIDEO_FILES)

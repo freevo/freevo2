@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/02/25 05:31:48  krister
+# Made CD audio playing use -cdrom-device for mplayer.
+#
 # Revision 1.37  2003/02/24 05:17:18  krister
 # Fixed a bug in the update function.
 #
@@ -211,7 +214,7 @@ class MediaMenu(Item):
                 # mode, deactivate it
                 if media.info.type == 'video' and self.display_type != 'video':
                     m = Item(self)
-                    m.type = 'video'
+                    m.type = media.info.type
                     m.copy(media.info)
                     m.media = media
                     items += [ m ]
