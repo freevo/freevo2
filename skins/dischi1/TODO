@@ -1,0 +1,21 @@
+no indicators for tv items and UP/DOWN for more items than you see
+
+DISPLAY can only toggle between two styles
+
+No fallback to text view if all images are the same
+
+No grey skin
+
+Some tag names are the same as in the movie definitions. I will
+change the area names from e.g. title to titlearea to have _one_
+clean DTD for all our xml files.
+
+The skin.xml files will be renamed to folder.fxd
+
+All skins will be renamed from xml to fxd
+
+No "this directory is empty" handling yet (you only see nothing)
+
+blue1_round will get an image listing, too
+
+Finish integration of Robs new gui stuff
