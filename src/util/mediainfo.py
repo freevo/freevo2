@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/01 18:24:01  dischi
+# fix crash on update
+#
 # Revision 1.12  2004/02/01 17:05:53  dischi
 # make it possible to keep all cachefiles in memory
 #
@@ -263,7 +266,7 @@ class Cache:
                 if not self.update_needed(fullname, t):
                     return obj
                 else:
-                    self.update(fullname, obj)
+                    info = self.update(fullname, obj)
             except KeyError:
                 info = self.create(fullname)
             except (IOError, OSError):
