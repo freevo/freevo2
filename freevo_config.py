@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2002/09/29 19:57:59  dischi
+# Added SHUTDOWN_SYS_CMD to freevo_config to set the shutdown command
+#
 # Revision 1.69  2002/09/25 18:43:07  dischi
 # Oops, I broke it
 #
@@ -98,6 +101,9 @@ DEV_MIXER           = '/dev/mixer'    # mixer device
 ROM_DRIVES = [ ('/mnt/cdrom', '/dev/cdrom', 'CD-1'),
                ('/mnt/dvd', '/dev/dvd', 'CD-2') ]
 
+
+SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if you
+                                      # don't have the permissions to shutdown
 
 # ======================================================================
 # Freevo movie settings:

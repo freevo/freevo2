@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2002/09/29 19:57:59  dischi
+# Added SHUTDOWN_SYS_CMD to freevo_config to set the shutdown command
+#
 # Revision 1.68  2002/09/21 10:12:11  dischi
 # Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
 # skin.
@@ -199,7 +202,7 @@ def shutdown(menuw=None, arg=None):
     # XXX temporary kludge so it won't break on old config files
     if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
         if config.ENABLE_SHUTDOWN_SYS:
-            os.system("shutdown -h now")
+            os.system(config.SHUTDOWN_SYS_CMD)
             # let freevo be killed by init, looks nicer if the picture
             # vanishes just before matroxset kills the tv out
             return
@@ -208,7 +211,7 @@ def shutdown(menuw=None, arg=None):
     # Here are some different ways of exiting freevo for the
     # different ways that it could have been started.
     #
-
+    
     # XXX kludge to shutdown the runtime version (no linker)
     os.system('killall -9 freevo_rt 2&> /dev/null') 
     os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
