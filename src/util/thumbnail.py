@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/09/15 21:07:39  dischi
+# Check for maybe missing vfs dir
+#
 # Revision 1.1  2004/09/07 18:52:51  dischi
 # move thumbnail to extra file
 #
@@ -126,7 +129,8 @@ def create(filename):
     """
     Create a thumbnail for the given filename in the vfs.
     """
-    print 'create', filename
+    if not os.path.isdir(os.path.dirname(vfs.getoverlay(filename))):
+        os.makedirs(os.path.dirname(vfs.getoverlay(filename)))
     if filename.endswith('.jpg'):
         thumb = vfs.getoverlay(filename[:-3] + 'thumb.jpg')
         try:
