@@ -153,6 +153,6 @@ if __name__ == "__main__":
     except:
         print 'Crash!'
         traceback.print_exc()
-        time.sleep(1)
+        time.sleep(5)
 
 
