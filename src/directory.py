@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2004/01/18 16:50:34  dischi
+# watcher improvements
+#
 # Revision 1.96  2004/01/17 21:29:01  dischi
 # bugfix
 #
@@ -32,30 +35,6 @@
 #
 # Ideally, we need a different way to have "default" information in an info
 # area, as opposed to putting it in the item.
-#
-# Revision 1.92  2004/01/10 13:19:05  dischi
-# split usage of xml_file to folder_fxd and skin_fxd
-#
-# Revision 1.91  2004/01/09 21:06:10  dischi
-# better skin_settings support. All the item variables need a cleanup/sort
-#
-# Revision 1.90  2004/01/09 19:04:11  dischi
-# new vfs.listdir parameter
-#
-# Revision 1.87  2004/01/05 15:21:04  outlyer
-# I am seeing OSErrors not IOErrors for this, so we can just watch for both
-#
-# Revision 1.84  2004/01/04 10:24:12  dischi
-# inherit config variables from parent if possible
-#
-# Revision 1.83  2004/01/03 17:39:45  dischi
-# Remove the update function fro the MimetypePlugin and inside DirItem.
-# Now all items are rebuild as default, because the old style didn't
-# support adding images to items during display and now it's also
-# possible to change a fxd file and the directory will update.
-#
-# Revision 1.81  2004/01/01 17:42:23  dischi
-# add FileInformation
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -187,17 +166,14 @@ class DirItem(Playlist):
         image = util.getimage(os.path.join(directory, 'cover'))
         if image:
             self.image       = image
-            self.handle_type = self.display_type
             
         # Check mimetype plugins if they want to add something
         for p in plugin.mimetype(display_type):
             p.dirinfo(self)
             
+        self.folder_fxd = directory+'/folder.fxd'
         if vfs.isfile(directory+'/folder.fxd'): 
-            self.folder_fxd = directory+'/folder.fxd'
             self.set_fxd_file(self.folder_fxd)
-        else:
-            self.folder_fxd = ''
             
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
@@ -362,32 +338,38 @@ class DirItem(Playlist):
 
         items = [ ( self.cwd, _('Browse directory')) ]
 
-        has_files = False
-        has_dirs  = False
+        timestamp     = os.stat(self.dir)[stat.ST_MTIME]
+        num_timestamp = self.info['num_timestamp']
 
-        for f in os.listdir(self.dir):
-            if not has_files and os.path.isfile(os.path.join(self.dir,f)):
-                has_files = True
-            if not has_dirs and os.path.isdir(os.path.join(self.dir,f)) and \
-                   not f in ('CVS', '.xvpics', '.thumbnails', '.pics'):
-                has_dirs = True
-            if has_dirs and has_files:
-                break
-
-        if has_files:
+        if num_timestamp == timestamp:
+            num_subdirs   = self.info['num_subdirs']
+            num_files     = self.info['num_files']
+            
+        else:
+            num_subdirs = 0
+            num_files   = 0
+            for f in vfs.listdir(self.dir):
+                if os.path.isdir(f):
+                    num_subdirs += 1
+                if os.path.isfile(f):
+                    num_files += 1
+            self.store_info('num_subdirs', num_subdirs)
+            self.store_info('num_files', num_files)
+            self.store_info('num_timestamp', timestamp)
+            
+        if num_files:
             items.append((self.play, _('Play all files in directory')))
 
-        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not has_dirs:
+        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not num_subdirs:
             items.reverse()
 
-        if has_files:
+        if num_files:
             items.append((self.play_random, _('Random play all items')))
-        if has_dirs:
+        if num_subdirs:
             items += [ (self.play_random_recursive, _('Recursive random play all items')),
                        (self.play_recursive, _('Recursive play all items')) ]
 
-        if self.folder_fxd.endswith('folder.fxd'):
-            items.append((self.configure, _('Configure directory'), 'configure'))
+        items.append((self.configure, _('Configure directory'), 'configure'))
 
         if self.media:
             self.media.umount()
@@ -663,7 +645,7 @@ class DirItem(Playlist):
                     if items:
                         self.menu.selected = items[pos]
 
-            self.menuw.init_page()
+            self.menuw.rebuild_page()
             self.menuw.refresh()
                 
 
@@ -689,7 +671,7 @@ class DirItem(Playlist):
             if menuw:
                 menuw.pushmenu(item_menu)
 
-            dirwatcher.cwd(menuw, self, item_menu, self.dir, self.all_files)
+            dirwatcher.cwd(menuw, self, item_menu, self.dir)
             self.menu  = item_menu
             self.menuw = menuw
         return items
@@ -699,7 +681,7 @@ class DirItem(Playlist):
         """
         called when we return to this menu
         """
-        dirwatcher.cwd(self.menuw, self, self.menu, self.dir, self.all_files)
+        dirwatcher.cwd(self.menuw, self, self.menu, self.dir)
         dirwatcher.scan()
 
         # we changed the menu, don't build a new one
@@ -834,25 +816,42 @@ class Dirwatcher(plugin.DaemonPlugin):
         plugin.register(self, 'Dirwatcher')
 
 
-    def cwd(self, menuw, item, item_menu, dir, files):
+    def listoverlay(self):
+        """
+        Get listing of overlay dir for change checking. 
+        Do not count *.cache, directories and *.raw (except videofiles.raw)
+        """
+        ret = []
+        for f in os.listdir(vfs.getoverlay(self.dir)):
+            if f.endswith('.raw'):
+                if f[f[:-4].rfind('.')+1:-4].lower() in config.VIDEO_SUFFIX:
+                    ret.append(f)
+            else:
+                if not f.endswith('.cache')  and not \
+                   os.path.isdir(os.path.join(self.dir, f)):
+                    ret.append(f)
+        return ret
+    
+        
+    def cwd(self, menuw, item, item_menu, dir):
         self.menuw     = menuw
         self.item      = item
         self.item_menu = item_menu
         self.dir       = dir
-        self.files     = files
         try:
             self.last_time = item.__dirwatcher_last_time__
+            self.files     = item.__dirwatcher_last_files__
         except AttributeError:
             self.last_time = vfs.mtime(self.dir)
+            self.files     = self.listoverlay()
             self.item.__dirwatcher_last_time__ = self.last_time
-        
+
 
     def scan(self, force=False):
         if not self.dir:
             return
         try:
-            if config.DIRECTORY_USE_STAT_FOR_CHANGES and \
-                   vfs.mtime(self.dir) <= self.last_time:
+            if vfs.mtime(self.dir) <= self.last_time:
                 return True
         except (OSError, IOError):
             # the directory is gone
@@ -862,37 +861,31 @@ class Dirwatcher(plugin.DaemonPlugin):
             rc.post_event(MENU_BACK_ONE_MENU)
             self.dir = None
             return
-        
 
-        if not config.DIRECTORY_USE_STAT_FOR_CHANGES:
-            try:
-                files = vfs.listdir(self.dir, False, include_overlay=True)
-            except OSError:
-                # the directory is gone
-                _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
-
-                # send EXIT to go one menu up:
-                rc.post_event(MENU_BACK_ONE_MENU)
-                self.dir = None
-                return
-
-            new_files = []
-            del_files = []
-            for f in files:
-                if not f in self.files:
-                    new_files.append(f)
+        changed = False
+        if os.stat(self.dir)[stat.ST_MTIME] <= self.last_time:
+            # changes are in overlay dir, just check for new/deleted files,
+            _debug_('overlay change')
+            new_files = self.listoverlay()
             for f in self.files:
-                if not f in files:
-                    del_files.append(f)
-            self.files = files
+                if not f in new_files:
+                    changed = True
+                    break
+            else:
+                for f in new_files:
+                    if not f in self.files:
+                        changed = True
+                        break
+        else:
+            changed = True
 
-
-        if config.DIRECTORY_USE_STAT_FOR_CHANGES or new_files or del_files:
+        if changed:
             _debug_('directory has changed')
             self.item.build(menuw=self.menuw, arg='update')
             self.last_time = vfs.mtime(self.dir)
-            self.item.__dirwatcher_last_time__ = self.last_time
-                    
+            self.item.__dirwatcher_last_time__  = self.last_time
+            self.files = self.listoverlay()
+            self.item.__dirwatcher_last_files__ = self.files
 
     
     def poll(self):
