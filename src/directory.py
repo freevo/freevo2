@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.126  2004/03/13 22:35:52  dischi
+# more debug, will be removed later
+#
 # Revision 1.125  2004/03/04 05:10:06  rshortt
 # Bugfix.  I think this is the desired behaviour.
 #
@@ -418,6 +421,7 @@ class DirItem(Playlist):
         num_timestamp = self.info['num_%s_timestamp' % name]
 
         if not num_timestamp or num_timestamp < timestamp:
+            _debug_('create metainfo for %s', self.dir)
             need_umount = False
             if self.media:
                 need_umount = not self.media.is_mounted()
