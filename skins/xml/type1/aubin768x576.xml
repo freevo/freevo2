@@ -30,7 +30,7 @@
     <!-- Settings for a normal menu -->
     <menu>
 
-      <bgbitmap>../../images/background.png</bgbitmap>
+      <bgbitmap>../../images/aubin_bg2.png</bgbitmap>
 
       <title visible="no" x="384" y="18">
 	<font name="Arial_Bold" size="34" color="0x000000" align="center"/>
@@ -87,7 +87,7 @@
       <title visible="no" x="384" y="15">
 	<font name="Arial_Bold" size="38" color="0xffffff" align="center"/>
       </title>
-      <bgbitmap>../../images/background.png</bgbitmap>
+      <bgbitmap>../../images/aubin_bg2.png</bgbitmap>
       <font name="Arial_Bold" size="18" color="0xffffff"/>
       <shadow visible="no" color="0x000000" x="1" y="1"/>
       <progressbar visible="no" x="0" y="490" width="768" height="5"      
