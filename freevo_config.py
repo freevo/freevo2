@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2002/10/16 18:04:28  krister
+# Made it easier to use epg_xmltv.py to generate the list of channels for freevo_config.py.
+#
 # Revision 1.80  2002/10/16 04:58:16  krister
 # Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
 #
@@ -360,8 +363,8 @@ TV_REC_OUTFMT = 'yuy2'
 #
 # TV Channels. This list contains a mapping from the displayed channel name
 # to the actual channel name as used by the TV watching application.
-# The display name is taken from the XMLTV names, and the TV application
-# names can be found in matrox_g400/frequencies.c
+# The display name must match the names from the XMLTV guide,
+# and the TV channel name must be what the tuner expects (usually a number).
 #
 # The TV menu is supposed to be supported by the XMLTV application for
 # up to date listings, but can be used without it to just display
@@ -373,7 +376,13 @@ TV_REC_OUTFMT = 'yuy2'
 #
 # Format: [('xmltv channel id', 'freevo display name', 'tv channel name'), ...]
 #
-# Use "TV_CHANNELS = None" to get all channels when running epg_xmltv.py standalone!
+# If you want to generate a list of all the channels in the XMLTV guide in
+# this format you can run the following command:
+#    "freevo execute epg_xmltv.py config"
+# You must have an XMLTV listing in /tmp/TV.xml before running it, and
+# TV_CHANNELS below must be set to None. The output contains guesses for the
+# displayed name and TV channel name. You can edit this list, delete lines,
+# reorder it, etc. For instance, put all your favorite channels first.
 #
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
@@ -471,7 +480,6 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
                ('102 Station 2b', 'Station 2b', '102', ('67', '0000', '2359')),
                ('103 Station 3a', 'Station 3a', '103', ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
                ('103 Station 3b', 'Station 3b', '103', ('1234567', '1600', '2159'))]
-
 
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know

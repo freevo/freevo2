@@ -207,25 +207,38 @@ def timestr2secs_utc(str):
 
 
 if __name__ == '__main__':
+    # Remove a pickled file (if any) if we're trying to list all channels
+    if not config.TV_CHANNELS:
+        if os.path.isfile('/tmp/TV.xml.pickled'):
+            os.remove('/tmp/TV.xml.pickled')
+
+    print
+    print 'Getting the TV Guide, this can take a couple of minutes...'
+    print
     guide = get_guide()
 
+    # No args means just pickle the guide, for use with cron-jobs
+    # after getting a new guide.
     if len(sys.argv) == 1:
         sys.exit(0)
-        
-    print '\nXML TV Guide Listing:'
-    print guide
 
-    print '\nChannel list:'
-    
-    # Print a list hopefully suitable for using as the config.TV_CHANNELS
-    for chan in guide.chan_list:
-        id = chan.id
-        disp = chan.displayname
-        num = chan.tunerid
-        print "    ('%s', '%s', '%s')," % (id, disp, num)
+    if sys.argv[1] == 'config':
+        # Print a list hopefully suitable for using as the config.TV_CHANNELS
+        for chan in guide.chan_list:
+            id = chan.id
+            disp = chan.displayname
+            num = chan.tunerid
+            print "    ('%s', '%s', '%s')," % (id, disp, num)
+    else:
+        # Just dump some data
+        print '\nXML TV Guide Listing:'
+        print guide
 
-    # Print all programs that are currently playing
-    now = time.time()
-    progs = guide.GetPrograms(now, now)
-    for prog in progs:
-        print prog
+        print '\nChannel list:'
+
+        # Print all programs that are currently playing
+        now = time.time()
+        progs = guide.GetPrograms(now, now)
+        for prog in progs:
+            print prog
+
