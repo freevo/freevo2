@@ -219,6 +219,35 @@ class CanvasContainer(CanvasObject):
 
 		return left, top
 
+	def _get_drawing_rect(self):
+		"""
+		This function returns the values were something is drawn
+		in this container
+		"""
+		x1 = y1 = 10000
+		x2 = y2 = 0
+		for child in self.children:
+			if isinstance(child, CanvasContainer):
+				r = child._get_drawing_rect()
+				if not r:
+					continue
+				child_x1, child_y1, child_x2, child_y2 = r
+			else:
+				child_x1, child_y1 = child.get_pos()
+				w, h = child.get_size()
+				child_x2 = child_x1 + w
+				child_y2 = child_y1 + h
+
+			x1 = min(x1, child_x1)
+			y1 = min(y1, child_y1)
+			x2 = max(x2, child_x2)
+			y2 = max(y2, child_y2)
+		if x2 == 0 or y2 == 0:
+			# nothing visible
+			return None
+		x, y = self.get_pos()
+		return x+x1, y+y1, x+x2, y+y2
+
 	def render_to_image(self):
 		img = self._get_backing_store()[0]
 		if self.alpha != 255:
@@ -469,15 +498,6 @@ class CanvasContainer(CanvasObject):
 			dirty_rects = [ reduce(lambda x,y: rect.union(x,y), dirty_rects) ]
 		else:
 			dirty_rects = rect.optimize_for_rendering(dirty_rects)
-		# Broken code.
-		#if self.has_canvas():
-		#	print "PRE CLIP", dirty_rects
-		#	canvas_width, canvas_height = self.get_canvas().get_size()
-		#	dirty_rects = rect.offset_list(dirty_rects, (left, top))
-		#	dirty_rects = rect.clip_list( dirty_rects, ((0, 0), (canvas_width, canvas_height)) )
-		#	dirty_rects = rect.offset_list(dirty_rects, (-left, -top))
-		#	print "POST CLIP", left, top, dirty_rects
-
 
 		# STEP 2
 		# ======
@@ -497,8 +517,6 @@ class CanvasContainer(CanvasObject):
 			# still valid, and they are relative to the container's new 
 			# dimensions. 
 
-			# FIXME: if clip == True, limit backing store image size to 
-			# canvas size.
 			if self._backing_store and (width, height) != self._backing_store.size:
 				bs_width, bs_height = self._backing_store.size
 				old_offset_x, old_offset_y = self._backing_store_info["offset"]
@@ -549,21 +567,27 @@ class CanvasContainer(CanvasObject):
 				# ignore this child, it is empty
 				continue
 				
-			if isinstance(child, CanvasContainer):
-				child_offset_x, child_offset_y = child._get_child_min_pos()
-			else:
-				child_offset_x = child_offset_y = 0
-
 			# Use the backing store position if it exists.
 			if hasattr(child, "_backing_store_info") and "pos" in child._backing_store_info:
 				child_x, child_y = child._backing_store_info["pos"]
 			else:
 				child_x, child_y = child.get_pos()
 
+			if isinstance(child, CanvasContainer):
+				r = child._get_drawing_rect()
+				if not r:
+					# ignore this child, it is empty
+					continue
+				child_size = (r[0]+r[2], r[1]+r[3])
+				geometry = ((r[0], r[1]), child_size)
+				child_offset_y = r[1] - child_y
+			else:
+				geometry = ((child_x, child_y), child_size)
+
 			# Get all regions this child intersects with.
 			intersects = []
 			for r in dirty_rects:
-				intersect = rect.intersect( ((child_x + child_offset_x, child_y + child_offset_y), child_size ), r)
+				intersect = rect.intersect( geometry, r)
 				if intersect != rect.empty:
 					intersects.append(intersect)
 
@@ -590,7 +614,7 @@ class CanvasContainer(CanvasObject):
 			for r in draw_regions:
 				rx, ry = r[0]
 				dst_x, dst_y = rx - offset_x, ry - offset_y
-				src_x, src_y = rx - child_offset_x - child_x, ry - child_offset_y - child_y
+				src_x, src_y = rx - child_x, ry - child_y
 				src_w, src_h = dst_w, dst_h = r[1]
 				# Draw random colored rectangles over updated regions: useful for debugging.
 				#c = map(lambda x: int(random.random()*127)+127, range(3))
