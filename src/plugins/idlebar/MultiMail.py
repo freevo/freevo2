@@ -30,7 +30,11 @@ import config
 import imaplib
 import poplib
 import mailbox
+import threading
+import time
+
 from plugins.idlebar import IdleBarPlugin
+
 
 class MultiMail(IdleBarPlugin):
     """
@@ -46,21 +50,21 @@ class MultiMail(IdleBarPlugin):
         IdleBarPlugin.__init__(self)
         self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_dimmed.png')
         self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_active_small.png')
-        self.FREQUENCY = 10
-        self.skip = 0
+        self.FREQUENCY = 20 # seconds between checks
         self.unread = 0
-
+        self.bg_thread = threading.Thread(target=self._bg_function, name='MultiMail Thread')
+        self.bg_thread.setDaemon(1)
+        self.bg_thread.start() # Run self._bg_function() in a separate thread
+        
+    def _bg_function(self):
+        while 1:
+            self.unread = self.checkmail()
+            time.sleep(self.FREQUENCY)
+        
     def checkmail(self):
         return 0
 
     def draw(self, (type, object), x, osd):
-        print 'imap called'
-        if self.skip == 0:
-            self.skip = self.FREQUENCY
-            print 'checking mail'
-            self.unread = self.checkmail()
-        else:
-            self.skip -= 1
         if self.unread > 0:
             image_width = osd.draw_image(self.MAILIMAGE, (x, osd.y + 2, -1, -1))[0]
             font  = osd.get_font('weather')
@@ -74,12 +78,12 @@ class MultiMail(IdleBarPlugin):
 
 class Imap(MultiMail):
     def __init__(self, username, password, host, port=143, folder="INBOX"):
-        MultiMail.__init__(self)
         self.USERNAME = username
         self.PASSWORD = password
         self.HOST = host
         self.PORT = port
         self.FOLDER = folder
+        MultiMail.__init__(self)
         
     def checkmail(self):
         try:
@@ -90,15 +94,16 @@ class Imap(MultiMail):
             imap.logout
             return unread            
         except:
+            _debug_('IMAP exception')
             return 0
         
 class Pop3(MultiMail):        
     def __init__(self, username, password, host, port=110):
-        MultiMail.__init__(self)    
         self.USERNAME = username
         self.PASSWORD = password
         self.HOST = host
         self.PORT = port
+        MultiMail.__init__(self)    
 
     def checkmail(self):
         try:
@@ -113,8 +118,8 @@ class Pop3(MultiMail):
       
 class Mbox(MultiMail):
     def __init__(self, mailbox):
-        MultiMail.__init__(self)    
         self.MAILBOX = mailbox
+        MultiMail.__init__(self)    
 
     def checkmail(self):
         if os.path.isfile(self.MAILBOX):
