@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.51 2003/09/26	TC Wan (tcwan at cs dot usm dot my)
+Version 0.52 2003/09/29	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -28,7 +28,7 @@ python 			python-2.2.2 (comes with RH 9)
 			[should work ok?]
 			python-2.3 http://www.python.org
 			[RPM binary named python2.3 (!)]
-			[Most python packages need tweaking of spec file, possibly patches and recompilation]
+			[If you intend to use python 2.3, you'll have to patch/recompile most of the other python modules]
 			# python2.3-2.3-3pydotorg.src.rpm
 			# python2.3-2.3-3pydotorg.i386.rpm
 			# python2.3-devel-2.3-3pydotorg.i386.rpm
@@ -88,10 +88,10 @@ python-imaging / PIL 	http://dag.wieers.com/home-made/apt/	tcl, tk (comes with R
 			[PIL-1.1.4 RPMs available from freevo downloads]	*No tcl, tk dependencies*
 
 python-fchksum		http://www.dakotacom.net/~donut/programs/fchksum.html
-			[python-fchksum1.7.1 RPMs available from freevo downloads]
+			[python-fchksum-1.7.1 RPMs available from freevo downloads]
 
 CDDB / cddb-py		http://sourceforge.net/projects/cddb-py/
-			[1.4, RPMs available from freevo downloads]
+			[CDDB Incorporated into mmpython RPM package]
 
 libexif			http://freshrpms.net/
 			# libexif-0.5.10-1.fr.src.rpm
