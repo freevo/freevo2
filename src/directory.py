@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/08/24 14:08:58  dischi
+# add import to folder.fxd options
+#
 # Revision 1.29  2003/08/24 10:39:04  dischi
 # fix a bug that the folder.fxd was not loaded anymore
 #
@@ -67,6 +70,8 @@ import video
 import audio
 import image
 import games
+from video.xml_parser import parseMovieFile
+
 import mmpython
 
 import event as em
@@ -245,6 +250,21 @@ class DirItem(Playlist):
             except KeyError:
                 pass
 
+            try:
+                import_xml = node.attrs[('', 'import')].encode('latin-1')
+                if os.path.isfile(os.path.join(self.dir, import_xml + '.fxd')):
+                    info = parseMovieFile(os.path.join(self.dir, import_xml + '.fxd'),
+                                          self, [])
+                    if info:
+                        self.name      = info[0].name
+                        self.image     = info[0].image
+                        self.info_type = info[0].type
+                        for key in info[0].info:
+                            self.info[key] = info[0].info[key]
+                            
+            except KeyError:
+                pass
+            
         for child in node.children:
             # set directory variables
             if child.name == 'setvar':
