@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/25 18:15:57  dischi
+# interface updates
+#
 # Revision 1.2  2004/07/24 17:49:06  dischi
 # interface cleanup
 #
@@ -164,7 +167,6 @@ class Renderer:
         self.active = True
 
         # some functions from pygame
-        self.Surface = pygame.Surface
         self.polygon = pygame.draw.polygon
 
         pygame.time.delay(10)   # pygame.time.get_ticks don't seem to
@@ -230,6 +232,7 @@ class Renderer:
         """
         clean the complete screen
         """
+        _debug_('someone called clear')
         if not pygame.display.get_init():
             return None
 
@@ -237,7 +240,7 @@ class Renderer:
             color = self.default_bg_color
         self.screen.fill(self._sdlcol(color))
         
-    
+
     def loadbitmap(self, url, cache=False, width=None, height=None, vfs_save=False):
         """
         Load a bitmap and return the pygame image object.
@@ -481,7 +484,7 @@ class Renderer:
 
         THIS FUNCTION IS DEPRECATED
         """
-        from gui.base import Text
+        from gui.widgets.text import Text
         t = Text(x, y, x+width, y+height, string, font, height, align_h, align_v, mode,
                  ellipses, dim, fgcolor, bgcolor)
         t.layer = layer

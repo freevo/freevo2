@@ -11,6 +11,7 @@ class Screen:
         self.layer['content'] = Layer('content', self.renderer)
         self.layer['alpha']   = Layer('alpha', self.renderer, True)
         self.layer['bg']      = Layer('bg', self.renderer)
+        self.layer['widget']  = Layer('widget', self.renderer, True)
         self.complete_bg      = self.renderer.screen.convert()
 
         self.width  = self.renderer.width
@@ -21,8 +22,7 @@ class Screen:
         """
         Clear the complete screen
         """
-        for l in self.layer:
-            self.layer[l].clear()
+        _debug_('someone called clear')
         self.layer['bg'].add_to_update_rect(0, 0, 800, 600)
 
 
@@ -38,6 +38,8 @@ class Screen:
         """
         Remove an object from the screen
         """
+        if layer == None:
+            return self.special_layer.remove(object)
         return self.layer[layer].remove(object)
 
 
@@ -75,6 +77,15 @@ class Screen:
             content.blit(self.complete_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
         rect = content.draw()[1]
+
+
+        widget = self.layer['widget']
+        update_area = widget.expand_update_rect(update_area)
+
+        for x0, y0, x1, y1 in update_area:
+            widget.blit(self.complete_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
+
+        rect = widget.draw()[1]
 
         for x0, y0, x1, y1 in update_area:
             self.renderer.screenblit(content.screen, (x0, y0), (x0, y0, x1-x0, y1-y0))

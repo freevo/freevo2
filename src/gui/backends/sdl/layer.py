@@ -6,7 +6,7 @@ class Layer:
     This is a layer implementation for pygame. You can add objects from
     basic.py to it and they will be drawn.
     """
-    def __init__(self, name, renderer, alpha=False):
+    def __init__(self, name, renderer, alpha=False, width=None, height=None):
         self.name     = name
         self.renderer = renderer
         self.alpha    = alpha
@@ -23,9 +23,23 @@ class Layer:
 
         self.update_rect = []
         self.objects     = []
-        self.width       = self.renderer.width
-        self.height      = self.renderer.height
-        
+
+        if width:
+            self.width = width
+        else:
+            self.width = self.renderer.width
+
+        if height:
+            self.height = height
+        else:
+            self.height = self.renderer.height
+
+        self.x1 = 0
+        self.y1 = 0
+
+        self.x2 = self.width
+        self.y2 = self.height
+
 
     def __str__(self):
         """
@@ -96,11 +110,19 @@ class Layer:
         x0, x1 = min(x0, x1), max(x0, x1)
         y0, y1 = min(y0, y1), max(y0, y1)
 
-        x = x0
-        y = y0
         w = x1 - x0
         h = y1 - y0
 
+        if self.alpha:
+            x = x0
+            y = y0
+            box = self.screen
+        else:
+            x = 0
+            y = 0
+            box = pygame.Surface((w, h)).convert_alpha()
+            box.fill((0,0,0,0))
+            
         bc = self.renderer._sdlcol(border_color)
         c  = self.renderer._sdlcol(color)
 
@@ -109,12 +131,12 @@ class Layer:
         
         if border_size:
             if radius >= 1:
-                self.__drawcircle__(self.screen, bc, x+radius, y+radius, radius)
-                self.__drawcircle__(self.screen, bc, x+w-radius, y+radius, radius)
-                self.__drawcircle__(self.screen, bc, x+radius, y+h-radius, radius)
-                self.__drawcircle__(self.screen, bc, x+w-radius, y+h-radius, radius)
-                pygame.draw.rect(self.screen, bc, (x+radius, y, w-2*radius, h))
-            pygame.draw.rect(self.screen, bc, (x, y+radius, w, h-2*radius))
+                self.__drawcircle__(box, bc, x+radius, y+radius, radius)
+                self.__drawcircle__(box, bc, x+w-radius, y+radius, radius)
+                self.__drawcircle__(box, bc, x+radius, y+h-radius, radius)
+                self.__drawcircle__(box, bc, x+w-radius, y+h-radius, radius)
+                pygame.draw.rect(box, bc, (x+radius, y, w-2*radius, h))
+            pygame.draw.rect(box, bc, (x, y+radius, w, h-2*radius))
         
             x += border_size
             y += border_size
@@ -123,13 +145,15 @@ class Layer:
             radius -= min(0, border_size)
         
         if radius >= 1:
-            self.__drawcircle__(self.screen, c, x+radius, y+radius, radius)
-            self.__drawcircle__(self.screen, c, x+w-radius, y+radius, radius)
-            self.__drawcircle__(self.screen, c, x+radius, y+h-radius, radius)
-            self.__drawcircle__(self.screen, c, x+w-radius, y+h-radius, radius)
-            pygame.draw.rect(self.screen, c, (x+radius, y, w-2*radius, h))
-        pygame.draw.rect(self.screen, c, (x, y+radius, w, h-2*radius))
+            self.__drawcircle__(box, c, x+radius, y+radius, radius)
+            self.__drawcircle__(box, c, x+w-radius, y+radius, radius)
+            self.__drawcircle__(box, c, x+radius, y+h-radius, radius)
+            self.__drawcircle__(box, c, x+w-radius, y+h-radius, radius)
+            pygame.draw.rect(box, c, (x+radius, y, w-2*radius, h))
+        pygame.draw.rect(box, c, (x, y+radius, w, h-2*radius))
 
+        if not self.alpha:
+            self.screen.blit(box, (x0, y0))
 
 
     def in_update(self, x1, y1, x2, y2, update_area, full=False):
@@ -186,13 +210,35 @@ class Layer:
         self.objects.remove(object)
         object.layer = None
         self.add_to_update_rect(object.x1, object.y1, object.x2, object.y2)
+
+        # FIXME: bad hack for background layer
+        if self.name == 'bg' and not self.objects:
+            # cleanup please
+            self.screen.fill((0,0,0))
+            self.update_rect = [ (0, 0, self.width, self.height) ]
         return True
 
 
+    def set_position(self, object, x1, y1, x2, y2):
+        """
+        Move or resize the object. The old and new position will be redrawn
+        """
+        self.add_to_update_rect(object.x1, object.y1, object.x2, object.y2)
+        self.add_to_update_rect(x1, y1, x2, y2)
+        
+        
+    def modified(self, object):
+        """
+        An object has been modified and needs a redraw
+        """
+        self.add_to_update_rect(object.x1, object.y1, object.x2, object.y2)
+
+        
     def clear(self):
         """
         Clear this layer
         """
+        _debug_('someone called clear')
         self.update_rect = []
         self.objects     = []
         if self.alpha:
@@ -213,7 +259,7 @@ class Layer:
         for x0, y0, x1, y1 in self.update_rect:
             rect = ( min(x0, rect[0]), min(y0, rect[1]),
                      max(x1, rect[2]), max(y1, rect[3]))
-            
+
         self.objects.sort(lambda  l, o: cmp(l.position, o.position))
         for o in self.objects:
             if self.in_update(o.x1, o.y1, o.x2, o.y2, self.update_rect):
