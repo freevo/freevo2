@@ -218,6 +218,7 @@ EVENTS = {
     'input'   : INPUT_EVENTS,
     'tv'      : TV_EVENTS,
     'video'   : VIDEO_EVENTS,
+    'dvd'     : DVD_EVENTS,
     'audio'   : AUDIO_EVENTS,
     'games'   : GAMES_EVENTS,
     'image'   : IMAGE_EVENTS
@@ -532,7 +533,7 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 # XML file for the skin
 #
-SKIN_XML_FILE = 'blue_round1'
+SKIN_XML_FILE = 'noia'
 
 #
 # Start the new skin with a specific layout. Default is 0, DISPLAY toggles
@@ -566,10 +567,14 @@ if CONF.display == 'mga':
     OVERSCAN_X = 20
     OVERSCAN_Y = 20
 
-if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
+if CONF.display == 'dfbmga':
     OVERSCAN_X = 50
     OVERSCAN_Y = 50
 
+if CONF.display == 'dxr3':
+    OVERSCAN_X = 65
+    OVERSCAN_Y = 45
+    
 # Exec a script on the osd close.
 OSD_SDL_EXEC_AFTER_CLOSE = ""
 
