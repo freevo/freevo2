@@ -471,12 +471,13 @@ class Image:
 	
 class Display:
 	def __init__(self, (w, h), dither = True, blend = False):
-		self._display = _Imlib2.new_display(w, h)
+		self.__dict__[ '_display' ] = _Imlib2.new_display(w, h)
 		self.size = (w, h)
 		self.width = w
 		self.height = h
 		self.blend = blend
 		self.dither = dither
+
 
 	def render(self, image, dst_pos = (0, 0), src_pos = (0, 0),
 	          src_size = (-1, -1), dither = None, blend = None):
@@ -488,6 +489,20 @@ class Display:
 		if not isinstance(image, Image):
 			raise ValueError, image
 		return self._display.render(image._image, dst_pos, src_pos, src_size,  dither, blend)
+
+	def __setattr__( self, key, value ):
+		if key == 'callback':
+			return setattr( self.__dict__[ '_display' ],
+					key, value )
+		else:
+			self.__dict__[ key ] = value
+
+	def __getattr__( self, key ):
+		if key in ( 'callback', 'socket', 'update', 'flush' ):
+			return getattr( self.__dict__[ '_display' ], key )
+		else:
+			return self.__dict__[ key ]
+
 
 class Font:
 	def __init__(self, fontdesc, color=(255,255,255,255)):

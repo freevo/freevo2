@@ -12,7 +12,7 @@ PyTypeObject Display_PyObject_Type = {
 	(destructor)Display_PyObject__dealloc, /* tp_dealloc */
     0,                         /*tp_print*/
 	(getattrfunc)Display_PyObject__getattr, /* tp_getattr */
-    0,                         /*tp_setattr*/
+	(setattrfunc)Display_PyObject__setattr, /* tp_setattr */
     0,                         /*tp_compare*/
     0,                         /*tp_repr*/
     0,                         /*tp_as_number*/
@@ -69,22 +69,68 @@ PyObject *Display_PyObject__render(PyObject *self, PyObject *args)
 	return Py_None;
 }
 
+PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
+{
+  XEvent ev;
+  
+  do {
+    XNextEvent( self->display, &ev );
+
+    if ( ( ev.type == KeyPress ) && PyCallable_Check( self->callback ) ) {
+      PyEval_CallObject( self->callback, 
+			 Py_BuildValue( "(i)", ev.xkey.keycode ) );
+    } else if ( ev.type == Expose ) {
+      /* do something */
+    }
+  } while ( XPending( self->display ) );
+  
+  Py_INCREF( Py_None );
+  return Py_None;
+}	
+
 PyMethodDef Display_PyObject_methods[] = {
 	{ "render", Display_PyObject__render, METH_VARARGS },
+	{ "update", Display_PyObject__update, METH_VARARGS },
 	{ NULL, NULL }
 };
 
 PyObject *Display_PyObject__getattr(Display_PyObject *self, char *name)
 {
-	return Py_FindMethod(Display_PyObject_methods, (PyObject *)self, name);
+  if ( ! strcmp( name, "socket" ) )
+    return Py_BuildValue( "i", ConnectionNumber( self->display ) );
+  if ( ! strcmp(name,  "callback" ) )
+    return Py_BuildValue( "O", self->callback );
+
+  return Py_FindMethod(Display_PyObject_methods, (PyObject *)self, name);
 }
 
+int Display_PyObject__setattr( Display_PyObject *self, char *name,
+			       PyObject * value )
+{
+  if ( ! strcmp(name,  "callback" ) ) {
+    if ( ! PyCallable_Check( value ) ) {
+      PyErr_SetString( PyExc_TypeError, "callback must be callable" );
+      return -1;
+    }
+      
+    Py_DECREF( self->callback );
+    self->callback = value;
+    Py_INCREF( self->callback );
+
+    return 0;
+  }
+
+  ( void )PyErr_Format( PyExc_ValueError, "unknown: %s\n", name );
+  return -1;
+}
 
 PyObject *display_new(int w, int h)
 {
+/*   XGrabKeyboard( self->display, self->window, True, */
+/* 		 GrabModeAsync, GrabModeAsync, CurrentTime ); */
+
 	Display_PyObject *o;
 	int screen;
-	XEvent ev;
 
 	o = PyObject_NEW(Display_PyObject, &Display_PyObject_Type);
 	o->display = XOpenDisplay(NULL);
@@ -97,14 +143,14 @@ PyObject *display_new(int w, int h)
 	o->window = XCreateSimpleWindow(o->display, 
 			DefaultRootWindow(o->display),
 			0, 0, w, h, 0, 0, 0);
-
-	XSelectInput(o->display, o->window, ButtonPressMask | ButtonReleaseMask | 
-                PointerMotionMask | ExposureMask);
+	Py_INCREF(Py_None);
+	o->callback = Py_None;
+	
+	XSelectInput( o->display, o->window, ExposureMask | KeyPressMask );
 	XMapWindow(o->display, o->window);
-
-	do {
-		XNextEvent(o->display, &ev);
-	} while (XPending(o->display));
+	
+	if ( XPending( o->display ) )
+	  Display_PyObject__update( o, NULL );
 
 	return (PyObject *)o;
 }
