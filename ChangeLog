@@ -15,6 +15,7 @@ Release 1.3.2 (TBD):
   * FreevoWeb channel selection when recording	
   * Identify media now return correct titles again
   * Network access when using the runtime
+  * TV recording bug	
  * CD Audio playing (w. CDDB) by Thomas Schüppel 
  * Use "freevo setup" instead of "./configure" to set up Freevo
  * New display mode for the image browser, with nice thumbnails etc
@@ -25,7 +26,10 @@ Release 1.3.2 (TBD):
  * Updated MPlayer to CVS200302132230
  * Changed remote control to use regular lirc files instead of special
    Freevo Python files.	
- 
+ * Some Windows playlists can now be used if they have relative paths. 
+ * Various updates and fixes for the web interface.
+ * Added CVS update to the latest alpha in the Makefile (cvsup)	
+
 	
 Release 1.3.1 (2003-02-12):
 ---------------------------
