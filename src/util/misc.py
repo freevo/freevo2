@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/08/27 14:27:31  dischi
+# prevent crash for bad files
+#
 # Revision 1.44  2004/07/11 19:33:35  dischi
 # make mass storage only storage to cover all forms
 #
@@ -188,6 +191,12 @@ def getname(file, skip_ext=True):
         name = file[file.rfind('/')+1:file.rfind('.')]
     else:
         name = file[file.rfind('/')+1:]
+    if not name:
+        # Strange, it is a dot file, return the complete
+        # filename, I don't know what to do here. This should
+        # never happen
+        return Unicode(file)
+    
     name = name[0].upper() + name[1:]
     
     while file.find('_') > 0 and FILENAME_REGEXP.match(name):
