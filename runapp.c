@@ -349,6 +349,7 @@ get_preload_str (char *pFilename)
 static void
 log_init (void)
 {
+#ifdef DEBUG
   char logfile[256];
   time_t t;
 
@@ -370,12 +371,14 @@ log_init (void)
   LOG ("\n\n***********************************************************\n");
   t = time ((time_t *) NULL);
   LOG ("Started on %s", ctime (&t));
+#endif
 }
 
 
 static void
 log_write (char *pBuf)
 {
+#ifdef DEBUG
   if (log_fp == (FILE *) NULL) {
     return;
   }
@@ -385,7 +388,7 @@ log_write (char *pBuf)
 
   /* Done */
   return;
-    
+#endif 
 }
 
 

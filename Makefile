@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/07/01 01:50:47  outlyer
+# Added two additional targets for runapp:
+#
+# * runapp-debug - a dynamically linked runapp with logging
+# * runapp-light - a dynamically linked runapp without logging
+#
+# The default target 'runapp' is still logging and static.
+#
 # Revision 1.32  2003/04/28 07:54:23  tcwan
 # Changed 'make release' to exclude .cvsignore files
 #
@@ -110,7 +118,17 @@ python_compile: runapp
 	./runapp python setup_freevo.py --compile=$(OPTIMIZE),$(PREFIX)
 
 runapp: runapp.c
-	$(CC) $(CFLAGS) -static -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
+	$(CC) $(CFLAGS) -static -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" -DDEBUG
+	strip runapp
+
+runapp-debug: runapp.c
+	rm -f runapp
+	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" -DDEBUG
+	strip runapp
+
+runapp-light: runapp.c
+	rm -f runapp
+	$(CC) $(CFLAGS) -o runapp runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
 	strip runapp
 
 freevo_xwin: freevo_xwin.c
