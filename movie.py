@@ -11,6 +11,14 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2002/09/22 18:14:57  dischi
+# Renamed dvd_vcd_menu_generate to dvd_vcd_handler with more
+# intelligence: count the number of mpg files _and_ the number of
+# tracks. If there is only on track, build no menu and play the
+# track. If there are two tracks and only one file, than the first track
+# is the VCD menu, action is play track 2. If there is one track more
+# than files, don't show track one in the menu, it's the VCD menu.
+#
 # Revision 1.39  2002/09/21 10:12:11  dischi
 # Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
 # skin.
@@ -138,17 +146,17 @@ def play_movie(arg=None, menuw=None):
 
     if len(arg) > 3:
         play_options = arg[3]
-
+        
     print 'playmovie: Got arg=%s, filename="%s"' % (arg, filename)
 
     # Is the file on a removable media? If so it needs to be mounted.
     for media in config.REMOVABLE_MEDIA:
         if filename.find(media.mountdir) == 0:
             if mode == 'dvd':
-                dvd_vcd_menu_generate(media, 'dvd', menuw)
+                dvd_vcd_handler(media, 'dvd', menuw)
                 return
             if mode == 'vcd' or mode == 'svcd':
-                dvd_vcd_menu_generate(media, 'vcd', menuw)
+                dvd_vcd_handler(media, 'vcd', menuw)
                 return
             else:
                 util.mount(media.mountdir)
@@ -171,7 +179,7 @@ def play_vcd(arg=None, menuw=None):
 #
 # Generate special menu for DVD/VCD/SVCD content
 #
-def dvd_vcd_menu_generate(media, type, menuw):
+def dvd_vcd_handler(media, type, menuw):
 
     # Figure out the number of titles on this disc
     skin.PopupBox('Scanning disc, be patient...', icon='icons/cdrom_mount.png')
@@ -179,7 +187,7 @@ def dvd_vcd_menu_generate(media, type, menuw):
     os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
 
     cmd = ('%s -ao null -nolirc -vo null -frames 0 %s -cdrom-device %s ' +
-           '1 2>&1 > /tmp/mplayer_dvd.log')
+           '2>&1 > /tmp/mplayer_dvd.log')
 
     if type == 'dvd':
         #mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 2> &1 > /tmp/mplayer_dvd.log
@@ -204,7 +212,10 @@ def dvd_vcd_menu_generate(media, type, menuw):
         if os.path.isfile('/tmp/mplayer_dvd_done'):
             done = 1
             break
+
     found = 0
+    num_files = 0
+
     if done and type == 'dvd':
         # Look for 'There are NNN titles on this DVD'
         lines = open('/tmp/mplayer_dvd.log').readlines()
@@ -223,9 +234,47 @@ def dvd_vcd_menu_generate(media, type, menuw):
                 num_titles = int(line[6:8])
                 found = 1
 
+        # Count the files on the VCD
+        util.mount(media.mountdir)
+        for dir in ('/mpegav/', '/MPEG2/', '/mpeg2/'):
+            num_files += len(util.match_files(media.mountdir + dir,
+                                              [ '*.[mM][pP][gG]',
+                                                '*.[dD][aA][tT]' ]))
+        util.umount(media.mountdir)
+        
     if not done or not found:
         num_titles = 100 # XXX Kludge
 
+    # Now let's see what we can do now:
+    
+    # only one track, play it
+    if num_titles == 1:
+        play_function('1 -cdrom-device %s' % media.devicename)
+        return
+    
+    # two tracks and only one file, play 2
+    if num_titles == 2 and num_files == 1:
+        play_function('2 -cdrom-device %s' % media.devicename)
+        return
+    
+    # one track more than files, track 1 is menu, ignore it
+    # mplayer can play some menus by playing all tracks, but IMHO it's
+    # better not to show the disc menu here as playable track
+    if num_titles == num_files + 1:
+        items = []
+        for title in range(2,num_titles+1):
+            m = menu.MenuItem('Play Title %s' % (title - 1), play_function,
+                              '%s -cdrom-device %s' % (title, media.devicename), 
+                              dvd_menu_eventhandler, media)
+            m.setImage(('movie', media.info.image))
+            items += [m]
+
+        label = media.info.label
+        moviemenu = menu.Menu(label, items, xml_file = media.info.xml_file, umount_all = 1)
+        menuw.pushmenu(moviemenu)
+        return
+    
+    # build a normal menu
     items = []
     for title in range(1,num_titles+1):
         m = menu.MenuItem('Play Title %s' % title, play_function,
@@ -325,9 +374,9 @@ def main_menu_generate():
 
             # Is this media playable as is?
             if media.info.play_options:
-
                 m = menu.MenuItem(media.info.label, play_movie, media.info.play_options,
                                   eventhandler, media)
+
             elif media.info.type != None:
                 # Just data files
                 m = menu.MenuItem(media.info.label, cwd, media.mountdir, eventhandler, media)
