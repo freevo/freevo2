@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/02/11 20:14:08  dischi
+# small fix
+#
 # Revision 1.21  2004/02/08 19:55:52  dischi
 # bugfix
 #
@@ -372,7 +375,8 @@ class MMCache(Cache):
             if info.has_key('video'):
                 for video in info['video']:
                     for variable in ('width', 'height', 'length', 'aspect'):
-                        if video.has_key(variable):
+                        if video.has_key(variable) and not \
+                           (info.has_key(variable) and info['variable']):
                             info[variable] = video[variable]
             return info
         return {}
