@@ -48,18 +48,22 @@ import config
 import util.popen
 import util.fsocket
 
+# display imports
+from display import Display as Base
+
 # the logging object
 log = logging.getLogger('gui')
 
 
-class Display(BmovlCanvas):
+class Display(BmovlCanvas, Base):
     """
     Display class for bmovl output over mplayer
     """
     def __init__(self, size, default=False, fifo = None):
+        Base.__init__(self)
         self.animation_possible = False
         self.start_video = default
-        self.running = True
+
         if default:
             self.cmd = [ config.MPLAYER_CMD, "-loop", "0", "-vf",
                          "scale=%s:-2,expand=%s:%s,bmovl=1:0:%s"\
@@ -77,9 +81,7 @@ class Display(BmovlCanvas):
         Restart the display. This will restart the background video to
         make the canvas work.
         """
-        if not self.running:
-            self.thaw()
-            self.running = True
+        Base.restart(self)
         if self.start_video and not self.child:
             self.child = util.popen.Process( self.cmd )
             self.child.stdout.close()
@@ -110,7 +112,7 @@ class Display(BmovlCanvas):
             self.send = None
             self.fifo = None
         BmovlCanvas.close_fifo(self)
-        
+
 
     def stop(self):
         """
@@ -120,9 +122,7 @@ class Display(BmovlCanvas):
             self.child.stop('quit')
             self.child = None
         self.close_fifo()
-        if self.running:
-            self.freeze()
-            self.running = False
+        Base.stop(self)
 
 
     def hide(self):

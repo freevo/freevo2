@@ -1,10 +1,12 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# sdl.py - SDL output display
+# display.py - Template for Freevo displays
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file defines a Freevo display based on pygame (SDL)
+# This file defines a Freevo a basic template for Freevo displays. The display
+# can't be used, a real display needs to inherit from this class and a mevas
+# based display.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -31,48 +33,55 @@
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [ 'Display' ]
-
-# python imports
-import pygame
-import os
-
-# mevas imports
-from mevas.displays.pygamecanvas import PygameCanvas
-
 # Freevo imports
 import config
-import plugin
 
-# display imports
-from display import Display as Base
+class Display:
+    """
+    Template for Freevo based displays. A real display needs to inherit
+    from this class and a mevas display.
+    """
+    def __init__(self):
+        self.__running = True
+        self.animation_possible = True
 
-class Display(PygameCanvas, Base):
-    """
-    Display class for SDL output
-    """
-    def __init__(self, size, default=False):
-        PygameCanvas.__init__(self, size)
-        Base.__init__(self)
-        plugin.activate('input.sdl')
-        if config.GUI_SDL_EXEC_AFTER_STARTUP:
-            os.system(config.GUI_SDL_EXEC_AFTER_STARTUP)
+
+    def hide(self):
+        """
+        Hide the output display. In most cases this does nothing since
+        a simple window doesn't matter. If GUI_STOP_WHEN_PLAYING the
+        ygame display will be shut down.
+        """
+        if config.GUI_STOP_WHEN_PLAYING:
+            self.stop()
+
+
+    def show(self):
+        """
+        Show the output window again if it is not visible
+        """
+        if config.GUI_STOP_WHEN_PLAYING:
+            self.restart()
 
 
     def stop(self):
         """
-        Stop the display
+        Stop the running display
         """
-        if Base.stop(self):
-            pygame.display.quit()
-            if config.GUI_SDL_EXEC_AFTER_CLOSE:
-                os.system(config.GUI_SDL_EXEC_AFTER_CLOSE)
+        if not self.__running:
+            return False
+        self.freeze()
+        self.__running = False
+        return True
 
-
+        
     def restart(self):
         """
-        Restart the display if it is currently stopped
+        Restart a stopped display
         """
-        if Base.restart(self):
-            size = (self.width, self.height)
-            self._screen  = pygame.display.set_mode(size, 0, 32)
+        if self.__running:
+            return False
+        
+        self.thaw()
+        self.__running = True
+        return True

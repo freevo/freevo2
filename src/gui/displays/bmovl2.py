@@ -1,37 +1,24 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # bmovl2.py - Bmovl2 output display over mplayer
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Note: This output plugin is work in progress
+# This file defines a Freevo display using mplayer and the bmovl2 filter.
+# It is based on bmovl2 and mplayercanvas from mevas and adds the basic
+# functions Freevo needs. When used as primary display, a background mplayer
+# will be started.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.9  2004/12/31 11:57:41  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
+# Note: this display may not work right now
 #
-# Revision 1.8  2004/11/20 18:23:01  dischi
-# use python logger module for debug
-#
-# Revision 1.7  2004/10/06 19:14:36  dischi
-# use new childapp interface
-#
-# Revision 1.6  2004/08/26 19:05:10  dischi
-# fix bmovl2 output
-#
-# Revision 1.5  2004/08/23 14:29:46  dischi
-# displays have information about animation support now
-#
-# Revision 1.4  2004/08/23 12:36:50  dischi
-# cleanup, add doc
-#
-#
-# -----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,10 +34,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-# basic python imports
+__all__ = [ 'Display' ]
+
+# python imports
 import time
+import logging
 
 # mevas imports
 import mevas
@@ -60,14 +50,19 @@ from mevas.bmovl2 import MPlayerOverlay
 # Freevo imports
 import config
 
-import logging
+# display imports
+from display import Display as Base
+
+# the logging object
 log = logging.getLogger('gui')
 
-class Display(MPlayerCanvas):
+
+class Display(MPlayerCanvas, Base):
     """
     Display class for bmovl2 output over mplayer
     """
     def __init__(self, size, default=False):
+        Base.__init__(self)
         self.start_video = default
         self.animation_possible = True
         MPlayerCanvas.__init__(self, size)
@@ -77,14 +72,16 @@ class Display(MPlayerCanvas):
             print 'THIS IS A TEST, DO NOT USE ANYTHING EXCEPT MENUS'
             print
             self.mplayer_overlay = MPlayerOverlay()
-            self.mplayer_args = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
+            self.mplayer_args = "-sws 2 -vf scale=%s:-2,"\
                                 "expand=%s:%s,bmovl2=%s "\
                                 "-loop 0 -font /usr/share/mplayer/fonts/"\
                                 "font-arial-28-iso-8859-2/font.desc" % \
                                 ( config.CONF.width, config.CONF.width,
-                                  config.CONF.height, self.mplayer_overlay.fifo_fname )
+                                  config.CONF.height,
+                                  self.mplayer_overlay.fifo_fname )
             self.child = None
             self.show()
+
 
     def restart(self):
         """
@@ -104,7 +101,8 @@ class Display(MPlayerCanvas):
                     break
             self.set_overlay(self.mplayer_overlay)
             self.rebuild()
-            
+
+
     def stop(self):
         """
         Stop the mplayer process
@@ -113,7 +111,8 @@ class Display(MPlayerCanvas):
         if self.start_video and self.child:
             self.child.stop('quit')
             self.child = None
-            
+
+
     def hide(self):
         """
         Hide the display. This results in shutting down the

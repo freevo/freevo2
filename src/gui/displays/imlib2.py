@@ -1,31 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # imlib2.py - Imlib2 output display
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Note: This output plugin is work in progress
-#
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.5  2004/10/07 16:05:27  dischi
-# add X11 expose event to imlib2
-#
-# Revision 1.4  2004/10/06 19:20:57  dischi
-# add keyboard input plugin
-#
-# Revision 1.3  2004/08/23 14:29:46  dischi
-# displays have information about animation support now
-#
-# Revision 1.2  2004/08/23 12:36:50  dischi
-# cleanup, add doc
-#
-#
-# -----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# First Edition: Andreas Büsching <crunchy@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,35 +27,35 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'Display' ]
+
+# python imports
 import plugin
 
 # mevas imports
-import mevas
 from mevas.displays.imlib2canvas import Imlib2Canvas
 
+# display imports
+from display import Display as Base
 
-class Display(Imlib2Canvas):
+
+class Display(Imlib2Canvas, Base):
+    """
+    Display class for imlib2 x11 output
+    """
     def __init__(self, size, default=False):
         Imlib2Canvas.__init__(self, size)
-        self.animation_possible = True
+        Base.__init__(self)
         plugin.activate( 'input.x11' )
 
         self._display.expose_callback = self.__expose
 
+
     def __expose( self, pos, size ):
+        """
+        Callback for expose events from X11
+        """
         self._display.render( self._backing_store._image, pos, pos, size )
 
-    def hide(self):
-        pass
-
-    def show(self):
-        pass
-
-    def stop(self):
-        pass
-        
-    def restart(self):
-        pass
-        

@@ -1,17 +1,20 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
-# sdl.py - SDL output display
+# ivtv.py - Display for the IVTV OSD interface.
 # -----------------------------------------------------------------------------
 # $Id$
 #
-# This file defines a Freevo display based on pygame (SDL)
+# Support for using IvtvCanvas which will display over the ivtv osd
+# interface.  his is called ivtv_osd because it is also possible to display
+# through the ivtv decoder (MPEG and perhaps YUV)... maybe someone would like
+# another module for that.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# First Edition: Dirk Meyer <dmeyer@tzi.de>
-# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+# First Edition: Rob Shortt <rshortt@users.sf.net>
+# Maintainer:    Rob Shortt <rshortt@users.sf.net>
 #
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
@@ -33,46 +36,20 @@
 
 __all__ = [ 'Display' ]
 
-# python imports
-import pygame
-import os
-
 # mevas imports
-from mevas.displays.pygamecanvas import PygameCanvas
-
-# Freevo imports
-import config
-import plugin
+from mevas.displays.ivtvcanvas import IvtvCanvas
 
 # display imports
 from display import Display as Base
 
-class Display(PygameCanvas, Base):
+
+class Display(IvtvCanvas, Base):
     """
-    Display class for SDL output
+    Display class for OSD output
     """
     def __init__(self, size, default=False):
-        PygameCanvas.__init__(self, size)
+        IvtvCanvas.__init__(self, size)
         Base.__init__(self)
-        plugin.activate('input.sdl')
-        if config.GUI_SDL_EXEC_AFTER_STARTUP:
-            os.system(config.GUI_SDL_EXEC_AFTER_STARTUP)
 
-
-    def stop(self):
-        """
-        Stop the display
-        """
-        if Base.stop(self):
-            pygame.display.quit()
-            if config.GUI_SDL_EXEC_AFTER_CLOSE:
-                os.system(config.GUI_SDL_EXEC_AFTER_CLOSE)
-
-
-    def restart(self):
-        """
-        Restart the display if it is currently stopped
-        """
-        if Base.restart(self):
-            size = (self.width, self.height)
-            self._screen  = pygame.display.set_mode(size, 0, 32)
+        # TODO: someone please see if we can do animations here.
+        self.animation_possible = False

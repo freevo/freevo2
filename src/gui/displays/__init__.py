@@ -1,37 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # display/__init__.py - Interface to the possible display backends
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.7  2004/12/31 11:57:41  dischi
-# renamed SKIN_* and OSD_* variables to GUI_*
-#
-# Revision 1.6  2004/12/19 10:36:31  dischi
-# update bmovl fifo handling
-#
-# Revision 1.5  2004/11/20 18:23:01  dischi
-# use python logger module for debug
-#
-# Revision 1.4  2004/08/24 16:42:41  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.3  2004/08/23 15:54:48  dischi
-# do not move sticky objects to new display
-#
-# Revision 1.2  2004/08/23 12:36:50  dischi
-# cleanup, add doc
-#
-#
-# -----------------------------------------------------------------------
-#
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
 #
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,13 +27,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import copy
+import logging
+
+# freevo imports
 import config
 
-import logging
+# get logging object
 log = logging.getLogger('gui')
 
 # Stack of the current active displays
@@ -67,7 +50,8 @@ def get_display():
     """
     if not display_stack:
         exec('from %s import Display' % config.GUI_DISPLAY.lower())
-        display_stack.append(Display((config.CONF.width, config.CONF.height), True))
+        size = (config.CONF.width, config.CONF.height)
+        display_stack.append(Display(size, True))
     return display_stack[-1]
 
 
@@ -127,9 +111,14 @@ def shutdown():
     """
     shut down all running displays
     """
+    global display_stack
     while display_stack:
         d = display_stack.pop()
         d.stop()
+    # switch to none display
+    from none import Display
+    size = (config.CONF.width, config.CONF.height)
+    display_stack = [ Display(size) ]
 
 
 def active():
@@ -138,4 +127,3 @@ def active():
     active
     """
     return True
-
