@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/12 17:12:32  outlyer
+# Fallback to medium cover if it's available, only if that too is missing, give
+# up.
+#
 # Revision 1.3  2003/06/12 16:47:04  outlyer
 # Tried to make the Amazon search more intelligent.
 #
@@ -119,12 +123,21 @@ class PluginInterface(plugin.ItemPlugin):
         # Grrr I wish Amazon wouldn't return an empty gif (807b)
 
         for i in range(len(cover)):
+            print "Checking Large Cover"
             m = urllib2.urlopen(cover[i].ImageUrlLarge)
             if not (m.info()['Content-Length'] == '807'):
                 items += [ menu.MenuItem('%s' % cover[i].ProductName,
                                      self.cover_create, cover[i].ImageUrlLarge) ]
+                m.close()
             else:
-                print "Image Placeholder for '%s - %s' skipped" % ( artist,album)
+                m.close()
+                # see if a small one is available
+                print "No Large Cover, Checking Small Cover..."
+                n = urllib2.urlopen(cover[i].ImageUrlMedium)
+                if not (n.info()['Content-Length'] == '807'):
+                    items += [ menu.MenuItem('%s [small]' % cover[i].ProductName,
+                                    self.cover_create, cover[i].ImageUrlMedium) ]
+                n.close()
        
             box.destroy()
         if items: 
