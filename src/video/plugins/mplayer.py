@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/01/01 19:37:31  dischi
+# dvd and interlace fixes
+#
 # Revision 1.54  2003/12/29 22:29:09  dischi
 # remove debug
 #
@@ -161,6 +164,8 @@ class MPlayer:
         """
         if item.url in ('dvd://', 'vcd://'):
             return 1
+        if item.mode in ('dvd', 'vcd'):
+            return 2
         if item.mimetype in config.VIDEO_MPLAYER_SUFFIX:
             return 2
         if item.network_play:
@@ -243,9 +248,13 @@ class MPlayer:
         if item.selected_audio:
             additional_args += [ '-aid', item.selected_audio ]
 
-        if item.deinterlace:
+        if self.version >= 1 and item.deinterlace:
+            additional_args += [ '-vf',  'pp=de/fd' ]
+        elif item.deinterlace:
             additional_args += [ '-vop', 'pp=fd' ]
-
+        elif self.version >= 1:
+            additional_args += [ '-vf',  'pp=de' ]
+                
         mode = item.mimetype
         if not config.MPLAYER_ARGS.has_key(mode):
             mode = 'default'
