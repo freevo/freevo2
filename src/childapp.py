@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/10/19 09:07:33  dischi
+# support for a list and no string as app to start
+#
 # Revision 1.31  2003/10/18 17:56:58  dischi
 # more childapp fixes
 #
@@ -53,6 +56,7 @@ import util.popen3
 import threading, thread
 import signal
 import traceback
+import copy
 
 import config
 import osd
@@ -96,24 +100,44 @@ class ChildApp:
             traceback.print_stack()
 
         prio = 0
-        if app.find('--prio=') == 0 and not config.RUNAPP:
-            try:
-                prio = int(app[7:app.find(' ')])
-            except:
-                pass
-            app = app[app.find(' ')+1:]
 
-        if app.find('--prio=') == 0:
-            self.binary = app[app.find(' ')+1:].lstrip()
+        if isinstance(app, str):
+            # app is a string to execute. It will be executed by 'sh -c '
+            # inside the popen code
+            if app.find('--prio=') == 0 and not config.RUNAPP:
+                try:
+                    prio = int(app[7:app.find(' ')])
+                except:
+                    pass
+                app = app[app.find(' ')+1:]
+            if app.find('--prio=') == 0:
+                self.binary = app[app.find(' ')+1:].lstrip()
+            else:
+                self.binary = app.lstrip()
+                
+            start_str = '%s %s' % (config.RUNAPP, app)
+
+
         else:
-            self.binary = app.lstrip()
+            # app is a list
+            if app[0].find('--prio=') == 0 and not config.RUNAPP:
+                try:
+                    prio = int(app[7:app.find(' ')])
+                except:
+                    pass
+                app = copy.copy(app[1:])
 
-        start_str = '%s %s' % (config.RUNAPP, app)
+            self.binary = str(' ').join(app)
 
-        self.child = util.popen3.Popen3(start_str)
+            if config.RUNAPP:
+                start_str = [ config.RUNAPP ] + app
+            else:
+                start_str = app
+            
+        self.child   = util.popen3.Popen3(start_str)
         self.outfile = self.child.fromchild 
         self.errfile = self.child.childerr
-        self.infile = self.child.tochild
+        self.infile  = self.child.tochild
         
         self.t1 = Read_Thread('stdout', self.outfile, self.stdout_cb)
         self.t1.setDaemon(1)
