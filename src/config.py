@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/08/04 18:36:49  dischi
+# o use FREEVO_HOME if defined to find freevo_config.py
+# o check if main is called. If not be very quite and don't log to file
+#
 # Revision 1.34  2003/08/01 17:54:05  dischi
 # xine support and cleanups.
 # o xine support and configuration in freevo_config.py
@@ -97,6 +101,12 @@
 import sys, os, time, re
 import setup_freevo
 
+if sys.argv[0].find('src/main.py') == -1:
+    HELPER=1
+else:
+    HELPER=0
+
+
 if not 'FREEVO_STARTDIR' in os.environ:
     print 'WARNING: FREEVO_STARTDIR is not set!'
     os.environ['FREEVO_STARTDIR'] = os.environ['PWD']
@@ -171,9 +181,9 @@ class Logger:
 #
 # Redirect stdout and stderr to stdout and /tmp/freevo.log
 #
-
-sys.stdout = Logger(sys.argv[0] + ':stdin')
-sys.stderr = Logger(sys.argv[0] + ':stderr')
+if not HELPER:
+    sys.stdout = Logger(sys.argv[0] + ':stdin')
+    sys.stderr = Logger(sys.argv[0] + ':stderr')
 
 
 #
@@ -259,11 +269,15 @@ for program, valname, needed in setup_freevo.EXTERNAL_PROGRAMS:
         setattr(CONF, valname, '')
 
 # Load freevo_config.py:
-cfgfilename = './freevo_config.py'
+if os.environ.has_key('FREEVO_HOME'):
+    cfgfilename = os.path.join(os.environ['FREEVO_HOME'], 'freevo_config.py')
+else:
+    cfgfilename = './freevo_config.py'
+
 if os.path.isfile(cfgfilename):
     if DEBUG: print 'Loading cfg: %s' % cfgfilename
     execfile(cfgfilename, globals(), locals())
-
+    
 else:
     print "\nERROR: can't find freevo_config.py"
     sys.exit(1)
@@ -351,14 +365,16 @@ if not ROM_DRIVES:
             # Weed out duplicates
             for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:
                 if os.path.realpath(rd_devname) == os.path.realpath(devname):
-                    print (('ROM_DRIVES: Auto-detected that %s is the same ' +
-                            'device as %s, skipping') % (devname, rd_devname))
+                    if not HELPER:
+                        print (('ROM_DRIVES: Auto-detected that %s is the same ' +
+                                'device as %s, skipping') % (devname, rd_devname))
                     break
             else:
                 # This was not a duplicate of another device
                 if mntdir and devname and dispname:
                     ROM_DRIVES += [ (mntdir, devname, dispname) ]
-                    print 'ROM_DRIVES: Auto-detected and added "%s"' % (ROM_DRIVES[-1], )
+                    if not HELPER:
+                        print 'ROM_DRIVES: Auto-detected and added "%s"' % (ROM_DRIVES[-1], )
         fd_fstab.close()
                 
 #
