@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/09 16:21:29  dischi
+# make Progessbar not depend on popup box settings
+#
 # Revision 1.4  2004/10/05 19:50:55  dischi
 # Cleanup gui/widgets:
 # o remove unneeded widgets
@@ -50,42 +53,65 @@
 # ----------------------------------------------------------------------- */
 
 
-from mevas.image import CanvasImage
+from mevas.container import CanvasContainer
 from rectangle import Rectangle
 
-class Progressbar(CanvasImage):
+class Progressbar(CanvasContainer):
     """
     """
-    def __init__(self, pos, size, full, style):
-        CanvasImage.__init__(self, size)
+    def __init__(self, pos, size, border_size, border_color, bgcolor, bar_size,
+                 bar_color, bar_bgcolor, radius, max_value):
+        CanvasContainer.__init__(self)
         self.set_pos(pos)
 
         self.bar_position = 0
-        self.full = full
-        self.style = style
+        self.max_value   = max_value
+        self.border_size = border_size
+        self.bar_size    = bar_size
+        self.bar_color   = bar_color
+        self.bar_bgcolor = bar_bgcolor
+        self.radius      = radius
+
+        self.bar         = None
+        
+        rect = Rectangle((0,0), size, bgcolor, border_size, border_color,
+                         self.radius)
+        self.add_child(rect)
         self.__draw()
         
 
     def __draw(self):
-        self.draw_rectangle((0,0), self.get_size(), (0,0,0,0), 1)
-        r = self.style.rectangle
-        self.draw_image(Rectangle((0,0), self.get_size(), None,
-                                  r.size, r.color, r.radius))
-
         # catch division by zero error.
-        if not self.full:
+        if not self.max_value:
             return
-        
-        position = min((self.bar_position * 100) / self.full, 100)
 
+        if self.bar:
+            self.remove_child(self.bar)
+            
+        position = min((self.bar_position * 100) / self.max_value, 100)
         width = ((self.get_size()[0]) * position ) / 100
-        if width > r.size * 2:
-            self.draw_image(Rectangle((0,0), (width, self.get_size()[1]),
-                                      r.bgcolor, r.size, r.color, r.radius))
+        if width > self.border_size * 2:
+            rect = Rectangle((self.border_size,self.border_size),
+                             (width-self.border_size,
+                              self.get_size()[1]-self.border_size),
+                             self.bar_bgcolor, self.bar_size, self.bar_color,
+                             self.radius)
+            self.add_child(rect)
+            self.bar = rect
 
 
     def tick(self):
-        if self.bar_position < self.full:
+        if self.bar_position < self.max_value:
             self.bar_position += 1
         self.__draw()
 
+
+    def set_max_value(self, max_value):
+        self.max_value = max_value
+        self.__draw()
+
+
+    def set_bar_position(self, position):
+        self.bar_position = bar_position
+        self.__draw()
+        
