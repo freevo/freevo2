@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/07/08 14:37:47  dischi
+# prevent crash for bad pickle results
+#
 # Revision 1.50  2004/06/29 18:07:03  dischi
 # reload cache if cache helper runs while running freevo
 #
@@ -21,30 +24,6 @@
 #
 # Revision 1.47  2004/06/06 06:41:47  dischi
 # delete cache on mmpython update
-#
-# Revision 1.46  2004/05/31 15:58:26  dischi
-# do not cache bad info
-#
-# Revision 1.45  2004/05/28 15:53:46  dischi
-# add chapters support
-#
-# Revision 1.44  2004/05/20 15:53:49  dischi
-# prevent a crash
-#
-# Revision 1.43  2004/05/02 11:46:13  dischi
-# make it possible to turn off image caching
-#
-# Revision 1.42  2004/04/11 08:39:54  dischi
-# warn about old cache
-#
-# Revision 1.41  2004/03/28 03:14:53  krister
-# oops
-#
-# Revision 1.40  2004/03/28 02:46:00  krister
-# Fixed a typo
-#
-# Revision 1.39  2004/03/27 17:44:39  krister
-# Fixed divide by zero bug.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -151,6 +130,9 @@ class Cache:
         else:
             if os.path.isfile(cachefile):
                 self.current_objects = util.read_pickle(cachefile)
+                # maybe the cache file is broken and read_pickle returns None
+                if not self.current_objects:
+                    self.current_objects = {}
             else:
                 self.current_objects = {}
             if config.MEDIAINFO_USE_MEMORY:
