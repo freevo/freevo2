@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/07/18 19:45:36  dischi
+# store media from parent in new item
+#
 # Revision 1.21  2003/07/13 12:45:03  dischi
 # fixed getattr when the attr is in info but empty
 #
@@ -134,6 +137,7 @@ class Item:
             self.image = parent.image
             self.handle_type = parent.handle_type
             self.xml_file = parent.xml_file
+            self.media = parent.media
 
 
     def copy(self, obj):
@@ -150,8 +154,8 @@ class Item:
         self.rom_label = obj.rom_label
         self.media     = obj.media
 
-        self.elapsed = obj.elapsed
-        self.info     = obj.info
+        self.elapsed   = obj.elapsed
+        self.info      = obj.info
         
 
     # returns a list of possible actions on this item. The first
