@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/12/05 18:07:55  dischi
+# renaming of XML_xxx variables to Xxx
+#
 # Revision 1.24  2003/12/05 17:30:18  dischi
 # some cleanup
 #
@@ -207,9 +210,9 @@ class Skin:
     main skin class
     """
     
-    class Rectange(xml_skin.XML_rectangle):
+    class Rectange(xml_skin.Rectangle):
         def __init__(self, color=None, bgcolor=None, size=None, radius = None):
-            xml_skin.XML_rectangle.__init__(self)
+            xml_skin.Rectangle.__init__(self)
             if not color == None:
                 self.color = color
             if not bgcolor == None:
@@ -399,18 +402,18 @@ class Skin:
         This function returns style information for drawing a popup box.
 
         return backround, spacing, color, font, button_default, button_selected
-        background is ('image', XML_image) or ('rectangle', XML_rectangle)
+        background is ('image', Image) or ('rectangle', Rectangle)
 
-        XML_image attributes: filename
-        XML_rectangle attributes: color (of the border), size (of the border),
+        Image attributes: filename
+        Rectangle attributes: color (of the border), size (of the border),
            bgcolor (fill color), radius (round box for the border). There are also
            x, y, width and height as attributes, but they may not be needed for the
            popup box
 
         button_default, button_selected are XML_item
-        attributes: font, rectangle (XML_rectangle)
+        attributes: font, rectangle (Rectangle)
 
-        All fonts are XML_font objects
+        All fonts are Font objects
         attributes: name, size, color, shadow
         shadow attributes: visible, color, x, y
         """
@@ -427,9 +430,9 @@ class Skin:
         background = None
 
         for bg in layout.background:
-            if isinstance(bg, xml_skin.XML_image):
+            if isinstance(bg, xml_skin.Image):
                 background = ( 'image', bg)
-            elif isinstance(bg, xml_skin.XML_rectangle):
+            elif isinstance(bg, xml_skin.Rectangle):
                 background = ( 'rectangle', bg)
 
         button_default  = None

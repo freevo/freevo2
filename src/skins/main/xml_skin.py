@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/12/05 18:07:55  dischi
+# renaming of XML_xxx variables to Xxx
+#
 # Revision 1.19  2003/12/03 21:50:44  dischi
 # rework of the loading/selecting
 # o all objects that need a skin need to register what they areas they need
@@ -33,51 +36,6 @@
 #
 # <img> will define FLOAT images, not inline ones. You can simulate inline
 # images with <goto_pos>... Maybe someday, if needed, someone can implement it.
-#
-# Revision 1.14  2003/10/03 16:46:13  dischi
-# moved the encoding type (latin-1) to the config file config.LOCALE
-#
-# Revision 1.13  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.12  2003/09/07 15:43:06  dischi
-# tv guide can now also have different styles
-#
-# Revision 1.11  2003/09/05 18:16:43  dischi
-# parse all named images into self.images
-#
-# Revision 1.10  2003/09/02 19:13:05  dischi
-# move box_under_icon as variable into the skin fxd file
-#
-# Revision 1.9  2003/08/25 18:44:32  dischi
-# Moved HOURS_PER_PAGE into the skin fxd file, default=2
-#
-# Revision 1.8  2003/08/24 19:12:31  gsbarbieri
-# Added:
-#   * support for different icons in main menu (final part)
-#   * BOX_UNDER_ICON, that is, in text listings, if you have an icon you may
-#     set this to 1 so the selection box (<item type="* selected"><rectangle>)
-#     will be under the icon too. Not changed freevo_config.py version
-#     because I still don't know if it should stay there.
-#
-# Revision 1.7  2003/08/24 16:36:25  dischi
-# add support for y=max-... in listing area arrows
-#
-# Revision 1.6  2003/08/24 11:01:59  dischi
-# use round not int after scaling
-#
-# Revision 1.5  2003/08/24 10:04:05  dischi
-# added font_h as variable for y and height settings
-#
-# Revision 1.4  2003/08/24 06:58:18  gsbarbieri
-# Partial support for "out" icons in main menu.
-# The missing part is in listing_area, which have other changes to
-# allow box_under_icon feature (I mailed the list asking for opinions on
-# that)
-#
-# Revision 1.3  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -250,16 +208,6 @@ def search_file(file, search_dirs):
 
         if vfs.isfile(dfile):
             return dfile
-        if vfs.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
-                                        config.CONF.height)):
-            return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
-        if vfs.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
-                                        config.CONF.height)):
-            return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
-        if config.CONF.width == 720 and vfs.isfile("%s_768x576.png" % dfile):
-            return "%s_768x576.png" % dfile
-        if config.CONF.width == 720 and vfs.isfile("%s_768x576.jpg" % dfile):
-            return "%s_768x576.jpg" % dfile
         if vfs.isfile("%s.png" % dfile):
             return "%s.png" % dfile
         if vfs.isfile("%s.jpg" % dfile):
@@ -279,19 +227,19 @@ def search_file(file, search_dirs):
 
 # ======================================================================
 
-class XML_mainmenuitem:
+class MainMenuItem:
     def __init__(self):
-        self.label = ''
-        self.name  = ''
-        self.icon  = ''
-        self.image = ''
+        self.label   = ''
+        self.name    = ''
+        self.icon    = ''
+        self.image   = ''
         self.outicon = ''
 
     def parse(self, node, scale, c_dir=''):
-        self.label = attr_str(node, "label", self.label)
-        self.name  = attr_str(node, "name",  self.name)
-        self.icon  = attr_str(node, "icon",  self.icon)
-        self.image = attr_str(node, "image", self.image)
+        self.label    = attr_str(node, "label", self.label)
+        self.name     = attr_str(node, "name",  self.name)
+        self.icon     = attr_str(node, "icon",  self.icon)
+        self.image    = attr_str(node, "image", self.image)
         self.outicon  = attr_str(node, "outicon",  self.outicon)
 
     def prepare(self, search_dirs, image_names):
@@ -301,14 +249,14 @@ class XML_mainmenuitem:
 
 # ======================================================================
 
-class XML_mainmenu:
+class MainMenu:
     def __init__(self):
         self.items = {}
 
     def parse(self, menu_node, scale, c_dir=''):
         for node in menu_node.children:
             if node.name == u'item':
-                item = XML_mainmenuitem()
+                item = MainMenuItem()
                 item.parse(node, scale, c_dir)
                 self.items[item.label] = item                
 
@@ -408,7 +356,7 @@ class XML_data:
 # ======================================================================
 
 
-class XML_menu:
+class Menu:
     """
     the menu style definitions
     """
@@ -433,14 +381,14 @@ class XML_menu:
 
         
 
-class XML_menuset:
+class MenuSet:
     """
     the complete menu with the areas screen, title, subtitle, view, listing and info in it
     """
     def __init__(self):
         self.content = ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info' )
         for c in self.content:
-            setattr(self, c, XML_area(c))
+            setattr(self, c, Area(c))
 
 
     def parse(self, node, scale, current_dir):
@@ -456,7 +404,7 @@ class XML_menuset:
 
 
 
-class XML_area(XML_data):
+class Area(XML_data):
     """
     area class (inside menu)
     """
@@ -467,11 +415,11 @@ class XML_area(XML_data):
             self.images = {}
         self.x = -1
         self.y = -1
-        self.visible = FALSE
+        self.visible = False
 
     def parse(self, node, scale, current_dir):
         if self.x == -1:
-            self.visible = TRUE
+            self.visible = True
 
         x = self.x
         y = self.y
@@ -491,7 +439,7 @@ class XML_area(XML_data):
                 label = attr_str(subnode, 'label', '')
                 if label:
                     if not label in self.images:
-                        self.images[label] = XML_image()
+                        self.images[label] = Image()
                     x,y = self.images[label].x, self.images[label].y
                     self.images[label].parse(subnode, scale, current_dir)
                     if x != self.images[label].x:
@@ -527,14 +475,14 @@ class XML_area(XML_data):
 
 # ======================================================================
 
-class XML_layout:
+class Layout:
     """
     layout tag
     """
     def __init__(self, label):
         self.label = label
         self.background = ()
-        self.content = XML_content()
+        self.content = Content()
         
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
@@ -542,7 +490,7 @@ class XML_layout:
                 self.background = []
                 for bg in subnode.children:
                     if bg.name in ( 'image', 'rectangle' ):
-                        b = eval('XML_%s()' % bg.name)
+                        b = eval(bg.name.capitalize()+'()')
                         b.parse(bg, scale, current_dir)
                         self.background += [ b ]
             if subnode.name == u'content':
@@ -555,7 +503,7 @@ class XML_layout:
             
 
 
-class XML_content(XML_data):
+class Content(XML_data):
     """
     content inside a layout
     """
@@ -584,24 +532,25 @@ class XML_content(XML_data):
                     delete_fcontent = TRUE
                     for rnode in subnode.children:
                         if rnode.name == u'rectangle':
-                            self.types[type].rectangle = XML_rectangle()
+                            self.types[type].rectangle = Rectangle()
                             self.types[type].rectangle.parse(rnode, scale, current_dir)
-                        elif rnode.name in ( u'if', u'text', u'newline', u'goto_pos', u'img' ):
+                        elif rnode.name in ( u'if', u'text', u'newline',
+                                             u'goto_pos', u'img' ):
                             if (not hasattr( self.types[ type ], 'fcontent' )) or \
                                    delete_fcontent:
                                 self.types[ type ].fcontent = [ ]
                             delete_fcontent = FALSE
                             child = None
                             if rnode.name == u'if':
-                                child = XML_FormatIf()
+                                child = FormatIf()
                             elif rnode.name == u'text':
-                                child = XML_FormatText()
+                                child = FormatText()
                             elif rnode.name == u'newline':
-                                child = XML_FormatNewline()
+                                child = FormatNewline()
                             elif rnode.name == u'goto_pos':
-                                child = XML_FormatGotopos()
+                                child = FormatGotopos()
                             elif rnode.name == u'img':
-                                child = XML_FormatImg()
+                                child = FormatImg()
 
                             self.types[ type ].fcontent += [ child ]
                             self.types[ type ].fcontent[-1].parse(rnode, scale, current_dir)
@@ -643,7 +592,7 @@ class XML_content(XML_data):
 
 # ======================================================================
 # Formating
-class XML_FormatText(XML_data):
+class FormatText(XML_data):
     def __init__( self ):
         XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height' ) )
         self.mode   = 'hard'
@@ -656,8 +605,13 @@ class XML_FormatText(XML_data):
         self.y = 0
         
     def __str__( self ):
-        str = "XML_FormatText( Text: '%s', Expression: '%s', Expression Analized: %s, Mode: %s, Font: %s, Width: %s, Height: %s, x: %s, y: %s ) " % ( self.text, self.expression, self.expression_analized, self.mode, self.font, self.width, self.height, self.x, self.y )
+        str = "FormatText( Text: '%s', Expression: '%s', "+\
+              "Expression Analized: %s, Mode: %s, Font: %s, Width: %s, "+\
+              "Height: %s, x: %s, y: %s ) "
+        str = str % ( self.text, self.expression, self.expression_analized,
+                      self.mode, self.font, self.width, self.height, self.x, self.y )
         return str
+
 
     def parse( self, node, scale, c_dir = '' ):
         XML_data.parse( self, node, scale, c_dir )
@@ -668,13 +622,13 @@ class XML_FormatText(XML_data):
         self.expression = attr_str( node, 'expression', self.expression )
         if self.expression: self.expression = self.expression.strip()
 
+
     def prepare(self, font, color, search_dirs):
         if self.font:
             try:
                 self.font = font[self.font]
             except:
                 print 'can\'t find font %s' % self.font
-                print font
                 self.font = font['default']
         else:
             self.font = font['default']
@@ -682,7 +636,7 @@ class XML_FormatText(XML_data):
     
 
         
-class XML_FormatGotopos(XML_data):
+class FormatGotopos(XML_data):
     def __init__( self ):
         XML_data.__init__( self, ( 'x', 'y' ) )
         self.mode = 'relative'
@@ -697,8 +651,9 @@ class XML_FormatGotopos(XML_data):
         
     def prepare(self, font, color, search_dirs):
         pass
+
     
-class XML_FormatNewline:
+class FormatNewline:
     def __init__( self ):
         pass
 
@@ -708,7 +663,7 @@ class XML_FormatNewline:
     def prepare(self, font, color, search_dirs):
         pass
 
-class XML_FormatImg( XML_data ):
+class FormatImg( XML_data ):
     def __init__( self ):
         XML_data.__init__( self, ( 'x', 'y', 'width', 'height' ) )
         self.x = None
@@ -726,7 +681,7 @@ class XML_FormatImg( XML_data ):
         
 
 
-class XML_FormatIf:
+class FormatIf:
     def __init__( self ):
         self.expression = ''
         self.content = [ ]
@@ -736,15 +691,15 @@ class XML_FormatIf:
         self.expression = attr_str( node, 'expression', self.expression )
         for subnode in node.children:
             if subnode.name == u'if':
-                child = XML_FormatIf()
+                child = FormatIf()
             elif subnode.name == u'text':
-                child = XML_FormatText()
+                child = FormatText()
             elif subnode.name == u'newline':
-                child = XML_FormatNewline()
+                child = FormatNewline()
             elif subnode.name == u'goto_pos':
-                child = XML_FormatGotopos()
+                child = FormatGotopos()
             elif subnode.name == u'img':
-                child = XML_FormatImg()
+                child = FormatImg()
             
             child.parse( subnode, scale, c_dir )
             self.content += [ child ]
@@ -760,7 +715,7 @@ class XML_FormatIf:
 
 # ======================================================================
 
-class XML_image(XML_data):
+class Image(XML_data):
     """
     an image
     """
@@ -785,7 +740,7 @@ class XML_image(XML_data):
 
 
 
-class XML_rectangle(XML_data):
+class Rectangle(XML_data):
     """
     a rectangle
     """
@@ -802,7 +757,7 @@ class XML_rectangle(XML_data):
 
 
 
-class XML_font(XML_data):
+class Font(XML_data):
     """
     font tag
     """
@@ -821,9 +776,10 @@ class XML_font(XML_data):
     def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
         if color.has_key(self.color):
             self.color = color[self.color]
-        self.size = int(float(self.size) * scale)
-        self.font = osd.getfont(self.name, self.size)
-        self.h = self.font.height
+        self.size   = int(float(self.size) * scale)
+        self.font   = osd.getfont(self.name, self.size)
+        self.h      = self.font.height
+        self.height = self.font.height
         if self.shadow.visible:
             if color.has_key(self.shadow.color):
                 self.shadow.color = color[self.shadow.color]
@@ -844,7 +800,7 @@ class AreaSet:
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
             if not self.areas.has_key(subnode.name):
-                self.areas[subnode.name] = XML_area(subnode.name)
+                self.areas[subnode.name] = Area(subnode.name)
                 self.areas[subnode.name].visible = True
             self.areas[subnode.name].parse(subnode, scale, current_dir)
 
@@ -870,7 +826,7 @@ class XMLSkin:
         self._menu = {}
         self._popup = ''
         self._sets = {}
-        self._mainmenu = XML_mainmenu()
+        self._mainmenu = MainMenu()
         self.skin_directories = []
         self.icon_dir = ""
 
@@ -892,7 +848,7 @@ class XMLSkin:
                     self._menu = {}
                     type = 'default'
                     
-                self._menu[type] = XML_menu()
+                self._menu[type] = Menu()
                 self._menu[type].parse(node, scale, c_dir)
 
 
@@ -902,7 +858,7 @@ class XMLSkin:
                 if inherit:
                     self._menuset[label] = copy.deepcopy(self._menuset[inherit])
                 elif not self._menuset.has_key(label):
-                    self._menuset[label] = XML_menuset()
+                    self._menuset[label] = MenuSet()
                 self._menuset[label].parse(node, scale, c_dir)
 
 
@@ -910,7 +866,7 @@ class XMLSkin:
                 label = attr_str(node, 'label', '')
                 if label:
                     if not self._layout.has_key(label):
-                        self._layout[label] = XML_layout(label)
+                        self._layout[label] = Layout(label)
                     self._layout[label].parse(node, scale, c_dir)
                         
 
@@ -918,7 +874,7 @@ class XMLSkin:
                 label = attr_str(node, 'label', '')
                 if label:
                     if not self._font.has_key(label):
-                        self._font[label] = XML_font(label)
+                        self._font[label] = Font(label)
                     self._font[label].parse(node, scale, c_dir)
 
             elif node.name == u'color':
@@ -949,14 +905,14 @@ class XMLSkin:
 
             else:
                 if node.children and node.children[0].name == 'style':
-                    self._sets[node.name] = XML_menu()
+                    self._sets[node.name] = Menu()
                 elif not self._sets.has_key(node.name):
                     self._sets[node.name] = AreaSet()
                 self._sets[node.name].parse(node, scale, c_dir)
 
 
     def prepare(self):
-        self.prepared = TRUE
+        self.prepared = True
         self.menu     = copy.deepcopy(self._menu)
         self.sets     = copy.deepcopy(self._sets)
         
@@ -972,6 +928,7 @@ class XMLSkin:
             
         for l in layout:
             layout[l].prepare(self.font, self._color, search_dirs, self._images)
+
         for menu in self.menu:
             self.menu[menu].prepare(self._menuset, layout)
 
@@ -1014,7 +971,7 @@ class XMLSkin:
         callback for the 'skin' tag
         """
         # get args back
-        (clear, copy_content, file, prepare) = fxd.skin_args
+        (clear, copy_content, file, prepare) = fxd.getattr(None, 'args')
 
         font_scale    = attr_float(node, "fontscale", 1.0)
         file_geometry = attr_str(node, "geometry", '')
@@ -1040,24 +997,23 @@ class XMLSkin:
                 self._menu    = {}
                 self._popup   = ''
                 self._sets    = {}
-                self._mainmenu = XML_mainmenu()
+                self._mainmenu = MainMenu()
                 self.skin_directories = []
-            self.load(include, copy_content, prepare = FALSE)
+            self.load(include, copy_content, prepare=False)
 
         self.parse(node, scale, vfs.dirname(file), copy_content)
         if not vfs.dirname(file) in self.skin_directories:
-            self.skin_directories = [ vfs.dirname(file) ] + \
-                                    self.skin_directories
+            self.skin_directories = [ vfs.dirname(file) ] + self.skin_directories
         if not prepare:
             return
             
         self.font_scale = font_scale
         self.prepare()
-        self.prepared = FALSE
+        self.prepared = False
         return
 
         
-    def load(self, file, copy_content = 0, prepare = TRUE, clear=FALSE):
+    def load(self, file, copy_content=0, prepare=True, clear=False):
         """
         load and parse the skin file
         """
@@ -1078,10 +1034,7 @@ class XMLSkin:
 
         try:
             parser = util.fxdparser.FXD(file)
-
-            # bad hack to give args to the callback
-            parser.skin_args = (clear, copy_content, file, prepare)
-
+            parser.setattr(None, 'args', (clear, copy_content, file, prepare))
             parser.set_handler('skin', self.fxd_callback)
             parser.parse()
             return 1

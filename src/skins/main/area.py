@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/12/05 18:07:55  dischi
+# renaming of XML_xxx variables to Xxx
+#
 # Revision 1.18  2003/12/05 17:30:17  dischi
 # some cleanup
 #
@@ -675,7 +678,7 @@ class Skin_Area:
 
         if self.area_name == 'plugin':
             if not self.area_val:
-                self.area_val = xml_skin.XML_area(self.area_name)
+                self.area_val = xml_skin.Area(self.area_name)
                 self.area_val.visible = TRUE
                 self.area_val.r = (0, 0, osd.width, osd.height)
             return True
@@ -687,7 +690,7 @@ class Skin_Area:
                     area = area.areas[self.area_name]
                 except (KeyError, AttributeError):
                     print 'no skin information for %s:%s' % (widget_type, self.area_name)
-                    area = xml_skin.XML_area(self.area_name)
+                    area = xml_skin.Area(self.area_name)
                     area.visible = False
 
         if (not self.area_val) or area != self.area_val:
@@ -732,7 +735,7 @@ class Skin_Area:
         
         for bg in self.layout.background:
             bg = copy.copy(bg)
-            if isinstance(bg, xml_skin.XML_image) and bg.visible:
+            if isinstance(bg, xml_skin.Image) and bg.visible:
                 self.calc_geometry(bg)
                 imagefile = ''
                 
@@ -766,7 +769,7 @@ class Skin_Area:
                     if image:
                         self.draw_image(image, bg)
                             
-            elif isinstance(bg, xml_skin.XML_rectangle):
+            elif isinstance(bg, xml_skin.Rectangle):
                 self.calc_geometry(bg)
                 self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg)
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/05 18:07:55  dischi
+# renaming of XML_xxx variables to Xxx
+#
 # Revision 1.5  2003/10/21 23:46:21  gsbarbieri
 # Info_Area now support images as
 #    <img src="file" x="1" y="2" width="123" height="456" />
@@ -18,16 +21,6 @@
 #
 # <img> will define FLOAT images, not inline ones. You can simulate inline
 # images with <goto_pos>... Maybe someday, if needed, someone can implement it.
-#
-# Revision 1.4  2003/10/03 10:55:10  dischi
-# i18n fix
-#
-# Revision 1.3  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.2  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -116,7 +109,7 @@ class Info_Area(Skin_Area):
         list = self.return_formatedtext( self.sellist )
 
         for i in list:
-            if isinstance( i, xml_skin.XML_FormatText ):
+            if isinstance( i, xml_skin.FormatText ):
                 if i.y + i.height > self.content.height:
                     break
                 self.write_text( i.text,
@@ -126,7 +119,7 @@ class Info_Area(Skin_Area):
                                  align_v = i.valign, align_h = i.align,
                                  mode = i.mode )
                 
-            elif isinstance( i, xml_skin.XML_FormatImg ):
+            elif isinstance( i, xml_skin.FormatImg ):
                 if i.src:
                     tmp = ( self.content.x + i.x, self.content.y + i.y,
                             i.width, i.height )
@@ -237,7 +230,7 @@ class Info_Area(Skin_Area):
         
         rg = range( len( list ) )
         for i in rg:
-            if isinstance( list[ i ], xml_skin.XML_FormatIf ):
+            if isinstance( list[ i ], xml_skin.FormatIf ):
                 if list[ i ].expression_analized == 0:
                     list[ i ].expression_analized = 1
                     exp = self.get_expression( list[ i ].expression )
@@ -257,7 +250,7 @@ class Info_Area(Skin_Area):
                     
                 continue
             
-            elif isinstance( list[ i ], xml_skin.XML_FormatText ):
+            elif isinstance( list[ i ], xml_skin.FormatText ):
                 exp = None
                 if list[ i ].expression:
                     if list[ i ].expression_analized == 0:
@@ -291,7 +284,7 @@ class Info_Area(Skin_Area):
     def return_formatedtext( self, sel_list ):
         """
         receives a list of indexex of elements to be used and
-        returns a array with XML_FormatText ready to print (with its elements
+        returns a array with FormatText ready to print (with its elements
         x, y, width and height already calculated)
         """
         x, y = 0, 0
@@ -316,7 +309,7 @@ class Info_Area(Skin_Area):
             #
             # Tag: <goto_pos>
             #
-            if isinstance( element, xml_skin.XML_FormatGotopos ):
+            if isinstance( element, xml_skin.FormatGotopos ):
                 # move to pos
                 if element.mode == 'absolute':
                     if element.x != None:
@@ -331,7 +324,7 @@ class Info_Area(Skin_Area):
             #
             # Tag: <img>
             #
-            elif isinstance( element, xml_skin.XML_FormatImg ):
+            elif isinstance( element, xml_skin.FormatImg ):
                 # Image is a float object
                 if element.x == None:
                     element.x = x
@@ -356,14 +349,14 @@ class Info_Area(Skin_Area):
             #
             # Tag: <newline>
             # 
-            elif isinstance( element, xml_skin.XML_FormatNewline ):
+            elif isinstance( element, xml_skin.FormatNewline ):
                 newline = 1 # newline height will be added later
                 x = 0
                 
             #
             # Tag: <text>
             #
-            elif isinstance( element, xml_skin.XML_FormatText ):
+            elif isinstance( element, xml_skin.FormatText ):
                 element = copy.copy( element )
                 # text position is the current position:
                 element.x = x
@@ -429,7 +422,7 @@ class Info_Area(Skin_Area):
                 new_last_newline = len( ret_list )
                 last_line = ret_list[ last_newline : new_last_newline ]
                 for j in last_line:
-                    if isinstance( j, xml_skin.XML_FormatText ):
+                    if isinstance( j, xml_skin.FormatText ):
                         font = j.font
                         if j.text and j.height > newline_height:
                             newline_height = j.height
