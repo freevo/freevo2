@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/11 10:55:56  dischi
+# Call refresh with reload=1 when the menu was disabled during playback
+#
 # Revision 1.7  2003/01/11 10:38:31  dischi
 # store filename in playlist item
 #
@@ -317,7 +320,7 @@ class Playlist(Item):
         if event == rc.PLAY_END:
             self.current_item = None
             menuwidget = menu.get_singleton()
-            menuwidget.refresh()
+            menuwidget.refresh(reload=1)
             return TRUE
             
 
@@ -410,7 +413,7 @@ class RandomPlaylist(Playlist):
                 self.current_item.parent = self.parent
             self.current_item = None
             menuwidget = menu.get_singleton()
-            menuwidget.refresh()
+            menuwidget.refresh(reload=1)
             return TRUE
             
         if event == rc.UP:

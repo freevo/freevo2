@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/01/11 10:55:56  dischi
+# Call refresh with reload=1 when the menu was disabled during playback
+#
 # Revision 1.1  2002/11/24 19:10:19  dischi
 # Added mame support to the new code. Since the hole new code is
 # experimental, mame is activated by default. Change local_skin.xml
@@ -168,7 +171,7 @@ class Mame:
         if event == rc.STOP or event == rc.SELECT:
             self.stop()
             rc.app = None
-            menuwidget.refresh()
+            menuwidget.refresh(reload=1)
         elif event == rc.MENU:
             self.thread.app.write('M')
         elif event == rc.DISPLAY:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/01/11 10:55:56  dischi
+# Call refresh with reload=1 when the menu was disabled during playback
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -195,7 +198,7 @@ class MPlayer:
             self.thread.item = None
             self.stop ()
             rc.app = None
-            menuwidget.refresh()
+            menuwidget.refresh(reload=1)
 
         elif event == rc.PAUSE:
             self.thread.cmd('pause')

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/11 10:55:56  dischi
+# Call refresh with reload=1 when the menu was disabled during playback
+#
 # Revision 1.2  2002/12/22 12:59:34  dischi
 # Added function sort() to (audio|video|games|image) item to set the sort
 # mode. Default is alphabetical based on the name. For mp3s and images
@@ -132,7 +135,7 @@ class SnesItem(Item):
                 self.stop()
                 rc.app = None
                 if not menuw == None:
-                    menuw.refresh()
+                    menuw.refresh(reload=1)
             elif event == rc.MENU:
                 mythread.app.write('M')
             elif event == rc.DISPLAY:

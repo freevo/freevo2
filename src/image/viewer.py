@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/11 10:55:56  dischi
+# Call refresh with reload=1 when the menu was disabled during playback
+#
 # Revision 1.7  2002/12/29 00:06:54  krister
 # Bugfixes, variable names were mismatched.
 #
@@ -240,7 +243,7 @@ class ImageViewer:
         elif event == rc.STOP or event == rc.EXIT:
             rc.app = None
             signal.alarm(0)
-            menuwidget.refresh()
+            menuwidget.refresh(reload=1)
 
         # up and down will stop the slideshow and pass the
         # event to the playlist

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/01/11 10:55:57  dischi
+# Call refresh with reload=1 when the menu was disabled during playback
+#
 # Revision 1.11  2002/12/30 15:07:42  dischi
 # Small but important changes to the remote control. There is a new variable
 # RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
@@ -282,14 +285,14 @@ class MPlayer:
                 self.stop()
                 self.thread.item = None
                 rc.app = None
-                menuwidget.refresh()
+                menuwidget.refresh(reload=1)
             return TRUE
 
         if event == rc.EXIT:
             self.stop()
             self.thread.item = None
             rc.app = None
-            menuwidget.refresh()
+            menuwidget.refresh(reload=1)
             return TRUE
         
         if event == rc.PLAY_END:
