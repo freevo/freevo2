@@ -235,6 +235,18 @@
 	      <goto_pos x="10" mode="relative"/>
 	      <text font="info value" expression="length"/>
 	      <text font="info value"> min.</text>
+	      <newline/>
+	    </if>
+	    <if expression="geometry">
+	      <text width="100" font="info label">Resolution:</text>
+	      <goto_pos x="10" mode="relative"/>
+	      <text font="info value" expression="geometry"/>
+	      <if expression="aspect">
+		<text font="info value"> (</text>
+		<text font="info value" expression="aspect"/>
+		<text font="info value">)</text>
+	      </if>
+	      <newline/>
 	    </if>
 	  </if>
 	</item>
@@ -351,6 +363,18 @@
 	  <goto_pos x="10" mode="relative"/>
 	  <text font="info value" expression="type"/>
 	  <newline/>
+
+	  <if expression="geometry">
+	    <text width="100" align="right" font="info value">Resolution:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="geometry"/>
+	    <if expression="aspect">
+	      <text font="info value"> (</text>
+	      <text font="info value" expression="aspect"/>
+	      <text font="info value">)</text>
+	    </if>
+	    <newline/>
+	  </if>
 
 	  <if expression="copyright">
 	    <text width="100" align="right" font="info value">Copyright:</text>
