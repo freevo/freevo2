@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/03/02 14:34:40  dischi
+# Added functions to show and hide the menuwidget
+#
 # Revision 1.17  2003/02/25 06:34:08  krister
 # Quick fix for the TV recording menu problem. Added makefile target for CVS update.
 #
@@ -238,6 +241,17 @@ class MenuWidget(GUIObject):
         self.main_menu = MenuItem('Main', self.goto_main_menu)
         self.rows = 0
         self.cols = 0
+
+
+    def show(self):
+        if not self.visible:
+            self.visible = 1
+            self.refresh(reload=1)
+
+    def hide(self):
+        if self.visible:
+            self.visible = 0
+            skin.Clear()
         
     def delete_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
