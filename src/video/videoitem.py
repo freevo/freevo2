@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2003/07/02 20:08:36  dischi
+# make variants the default action
+#
 # Revision 1.58  2003/06/29 21:31:55  gsbarbieri
 # subtitle and audio now use the path to files and are quoted.
 #
@@ -302,8 +305,9 @@ class VideoItem(Item):
         items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
         if self.filename and self.mode == 'file' and not self.media:
             items += [ (self.confirm_delete, 'Delete file') ]
+
         if self.variants:
-            items += [ (self.show_variants, 'Show variants') ]
+            items = [ (self.show_variants, 'Show variants') ] + items
 
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
