@@ -865,6 +865,13 @@ IMAGEVIEWER_BLEND_MODE = -1
 
 # TV_CHANNELS = None
 
+# Sometimes we can't control the contents of our XMLTV file and it may contain
+# channels we don't want.  Here you can specify a list of channel_id values
+# to explicitly remove from Freevo.
+
+TV_CHANNELS_EXCLUDE = []
+
+
 #
 # Program to grab xmltv listings. To get a grabber, you need to download
 # xmltv. A possible value for users in the USA is tv_grab_na
@@ -884,6 +891,31 @@ IMAGEVIEWER_BLEND_MODE = -1
 # Number of days the grabber should get
 #
 # XMLTV_DAYS = 3
+
+
+# ======================================================================
+# VDR settings for Freevo plugins and programs that interface to VDR.
+# You can read about VDR at http://www.cadsoft.de/vdr/.
+# ======================================================================
+
+# The directory where the VDR config files can be found.
+# VDR_DIR = '/video'
+
+# If VDR is on another host, which one.
+# VDR_HOST = 'localhost'
+
+# The port (SVDRP) it is listening on.
+# VDR_PORT = 2001
+
+# The EPG filename.
+# VDR_EPG = 'epg.data'
+
+# The configuration file for VDR channels.
+# VDR_CHANNELS = 'channels.conf'
+
+# The property of a channel we are going to access it with.  The options here
+# are 'name', 'sid', and 'rid'.
+# VDR_ACCESS_ID = 'sid'
 
 
 # ======================================================================
