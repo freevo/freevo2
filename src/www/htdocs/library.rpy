@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/23 19:21:29  mikeruelle
+# fixing an error that appends items to DIR_MOVIES when downloading an item
+#
 # Revision 1.11  2003/07/24 11:55:38  rshortt
 # Removed the menu images for now because they are missing and I am not even
 # sure they look all that great (when there).
@@ -111,14 +114,14 @@ class LibraryResource(FreevoResource):
     def get_suffixes (self, media):
         suffixes = []
         if media == 'music':
-            suffixes = config.SUFFIX_AUDIO_FILES
-            suffixes += config.SUFFIX_AUDIO_PLAYLISTS
+            suffixes.extend(config.SUFFIX_AUDIO_FILES)
+            suffixes.extend(config.SUFFIX_AUDIO_PLAYLISTS)
         if media == 'images':
-            suffixes = config.SUFFIX_IMAGE_FILES
+            suffixes.extend(config.SUFFIX_IMAGE_FILES)
         if media == 'movies':
-            suffixes = config.SUFFIX_VIDEO_FILES
+            suffixes.extend(config.SUFFIX_VIDEO_FILES)
         if media == 'rectv':
-            suffixes = config.SUFFIX_VIDEO_FILES
+            suffixes.extend(config.SUFFIX_VIDEO_FILES)
         return suffixes
 
     def get_dirlist(self, media):
@@ -126,23 +129,23 @@ class LibraryResource(FreevoResource):
         dirs2 = []
 
         if media == 'movies':
-            dirs = config.DIR_MOVIES
+            dirs.extend(config.DIR_MOVIES)
         elif media == 'music':
-            dirs = config.DIR_AUDIO
+            dirs.extend(config.DIR_AUDIO)
         elif media == 'rectv':
             dirs = [ ('Recorded TV', config.DIR_RECORD) ]
         elif media == 'images':
-            dirs2 = config.DIR_IMAGES
+            dirs2.extend(config.DIR_IMAGES)
             #strip out ssr files
             for d in dirs2:
                 (title, tdir) = d
                 if os.path.isdir(tdir):
-                    dirs.append(d)            
+                    dirs.append(d)
         elif media == 'download':
-            dirs = config.DIR_MOVIES
-            dirs += config.DIR_AUDIO
-            dirs += [ ('Recorded TV', config.DIR_RECORD) ]
-            dirs2 = config.DIR_IMAGES
+            dirs.extend(config.DIR_MOVIES)
+            dirs.extend(config.DIR_AUDIO)
+            dirs.extend( [ ('Recorded TV', config.DIR_RECORD) ])
+            dirs2.extend(config.DIR_IMAGES)
             #strip out ssr files
             for d in dirs2:
                 (title, tdir) = d
@@ -227,8 +230,6 @@ class LibraryResource(FreevoResource):
             fv.res += '   document.location="' + action_script +'?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
             fv.res += '}' + "\n"
             fv.res += '//--></script>' + "\n"
-            if action_mediatype:
-                fv.res += "\n<!-- " + action_mediatype + " -->\n"
 
         if not action_mediatype:
             fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="85%"')
@@ -297,6 +298,7 @@ class LibraryResource(FreevoResource):
                         try:
                             if prog.isRecording == TRUE:
                                 recordingprogram = tv_util.getProgFilename(prog)
+                                recordingprogram = string.replace(recordingprogram, ' ', '_')
                                 break
                         except:
                             # sorry, have to pass without doing anything.
