@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/03/31 18:59:27  dischi
+# bugfix for going up on the first item in the new skin
+#
 # Revision 1.29  2003/03/30 19:10:32  dischi
 # fixed some navigating bugs
 #
@@ -424,7 +427,8 @@ class MenuWidget(GUIObject):
         if event == rc.UP:
             curr_selected = self.all_items.index(menu.selected)
             if curr_selected-self.cols < 0 and \
-               (self.cols > 1 or config.NEW_SKIN):
+               (self.cols > 1 or config.NEW_SKIN) and \
+               menu.selected != menu.choices[0]:
                 self.goto_prev_page(arg='no_refresh')
                 try:
                     if self.cols == 1:
