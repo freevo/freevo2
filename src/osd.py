@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/07/05 09:08:47  dischi
+# remove old drawstringframed
+#
 # Revision 1.57  2003/07/04 00:46:48  outlyer
 # I think Dischi left a debug line in, I only commented it out in case it's
 # for something else.
@@ -98,9 +101,6 @@ import cStringIO
 DEBUG = config.DEBUG
 TRUE  = 1
 FALSE = 0
-
-USE_NEW_DSF = TRUE
-
 
 
 help_text = """\
@@ -576,6 +576,81 @@ class OSD:
         self.screen.blit(surface, (x, y))
 
 
+    def __drawstringframed_line__(self, string, max_width, font, hard,
+                                  ellipses, word_splitter):
+        """
+        calculate _one_ line for drawstringframed
+        """
+        c = 0                           # num of chars fitting
+        width = 0                       # width needed
+        ls = len(string)
+        space = 0                       # position of last space
+        last_char_size = 0              # width of the last char
+        last_word_size = 0              # width of the last word
+
+        if ellipses:
+            # check the width of the ellipses
+            ellipses_size = font.stringsize(ellipses)
+            if ellipses_size > max_width:
+                # if not even the ellipses fit, we have not enough space
+                # until the text is shorter than the ellipses
+                width = font.stringsize(string)
+                if width <= max_width:
+                    # ok, text fits
+                    return (width, string, '')
+                # ok, only draw the ellipses, shorten them first
+                while(ellipses_size > max_width):
+                    ellipses = ellipses[:-1]
+                    ellipses_size = font.stringsize(ellipses)
+                return (ellipses_size, ellipses, string)
+        else:
+            ellipses_size = 0
+
+        data = None
+        while(TRUE):
+            if width > max_width - ellipses_size and not data:
+                # save this, we will need it when we have not enough space
+                # but first try to fit the text without ellipses
+                data = c, space, width, last_char_size, last_word_size
+            if width > max_width:
+                # ok, that's it. We don't have any space left
+                break
+            if ls == c:
+                # everything fits
+                return (width, string, '')
+            if string[c] == '\n':
+                # linebreak, we have to stop
+                return (width, string[:c], string[c+1:])
+            if not hard and string[c] in word_splitter:
+                # rememeber the last space for mode == 'soft' (not hard)
+                space = c
+                last_word_size = 0
+
+            # add a char
+            last_char_size = font.charsize(string[c])
+            width += last_char_size
+            last_word_size += last_char_size
+            c += 1
+
+        # restore to the pos when the width was one char to big and
+        # incl. ellipses_size
+        c, space, width, last_char_size, last_word_size = data
+
+        if hard:
+            # remove the last char, than it fits
+            c -= 1
+            width -= last_char_size
+
+        else:
+            # go one word back, than it fits
+            c = space
+            width -= last_word_size
+
+        # calc the matching and rest string and return all this
+        return (width, string[:c]+ellipses, string[c:])
+
+            
+
     def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
                          font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
                          layer=None, ellipses='...'):
@@ -598,45 +673,95 @@ class OSD:
         - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
           or 'soft' (based on words)
         """
+        if not string:
+            return [], '', (0,0,0,0)
 
-        if USE_NEW_DSF:
-            return self.new_dsf_calc(string, x, y, width, height, fgcolor, bgcolor,
-                                     font, ptsize, align_h, align_v, mode, ellipses,
-                                     layer)[1:]
+        if font == None:
+            font = config.OSD_DEFAULT_FONTNAME
+        if not ptsize:
+            ptsize = config.OSD_DEFAULT_FONTSIZE
 
-        data = self.dsf_calc(string,x,y,width, height, fgcolor, bgcolor,
-                             font, ptsize, align_h, align_v, mode, ellipses)
-        if layer != '':
-            self.dsf_draw(data[0], layer)
-        return data[1:]
+        font = self.getFontInfo(font, ptsize)
+        line_height = font.height * 1.1
 
+        if height == -1:
+            height = line_height
 
-    def dsf_calc(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                 font=None, ptsize=0, align_h='left', align_v='top', mode='hard',
-                 ellipses='...'):
-        """
-        calls one of the two 'heart' functions of drawstringframed and returns a
-        list (objects to draw, words not drawn, geometry of the text).
-        The objects to draw can be given to dsf_draw to do the drawing
-        """
-        if USE_NEW_DSF:
-            return self.new_dsf_calc(string, x, y, width, height, fgcolor, bgcolor,
-                                     font, ptsize, align_h, align_v, mode, ellipses,
-                                     '')
-        if mode == 'hard':
-            return self._dsf_hard(string,x,y,width, height, fgcolor, bgcolor,
-                                  font, ptsize, align_h, align_v, ellipses)
-        elif mode == 'soft':
-            return self._dsf_soft(string,x,y,width, height, fgcolor, bgcolor,
-                                  font, ptsize, align_h, align_v, ellipses)
+        if width <= 0 or height < line_height:
+            return [], string, (0,0,0,0)
             
-                    
-    def dsf_draw(self, objects, layer):
-        """
-        draws the objects from dsf_calc
-        """
-        for o in objects:
-            o.draw(layer)
+        num_lines_left = int(height / line_height)
+        lines = []
+        current_ellipses = ''
+        hard = mode == 'hard'
+        
+        while(num_lines_left):
+            # calc each line and put the rest into the next
+            if num_lines_left == 1:
+                current_ellipses = ellipses
+            (w, s, r) = self.__drawstringframed_line__(string, width, font, hard,
+                                                       current_ellipses, ' ')
+            if s == '' and not hard:
+                # nothing fits? Try to break words at ' -_'
+                (w, s, r) = self.__drawstringframed_line__(string, width, font, hard,
+                                                           ellipses, ' -_')
+                if s == '':
+                    # still nothing? Use the 'hard' way
+                    (w, s, r) = self.__drawstringframed_line__(string, width, font,
+                                                               'hard', ellipses, ' ')
+            string = r.strip()
+
+            lines.append((w, s))
+            num_lines_left -= 1
+            if not r:
+                # finished, everything fits
+                break
+
+        # calc the height we want to draw (based on different align_v)
+        height_needed = (int(height / line_height) - num_lines_left) * line_height
+        if align_v == 'bottom':
+            y += (height - height_needed)
+        elif align_v == 'center':
+            y += int((height - height_needed)/2)
+
+        y0 = y
+        min_x = 10000
+        max_x = 0
+
+        if not layer and layer != '':
+            layer = self.screen
+
+        for w, l in lines:
+            if align_h == 'left' or align_h == 'justified' or not align_h:
+                x0 = x
+            elif align_h == 'right':
+                x0 = x + (width - w)
+            elif align_h == 'center':
+                x0 = x + int((width-w)/2)
+            else:
+                #print 'what align_h is that: %s' % align_h
+                x0 = x
+
+            if layer != '':
+                try:
+                    # render the string. Ignore all the helper functions for that
+                    # in here, it's faster because he have more information
+                    # in here. But we don't use the cache, but since the skin only
+                    # redraws changed areas, it doesn't matter and saves the time
+                    # when searching the cache
+                    layer.blit(font.font.render(l, 1, self._sdlcol(fgcolor)), (x0, y0))
+                except:
+                    print "Render failed, skipping..."    
+
+            if x0 < min_x:
+                min_x = x0
+            if x0 + w > max_x:
+                max_x = x0 + w
+            y0 += line_height
+
+        return r, (min_x, y, max_x, y+height_needed)
+    
+
 
 
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
@@ -1137,492 +1262,6 @@ class OSD:
 
 
 
-    def _dsf_soft(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                  font=None, ptsize=0, align_h='left', align_v='top', ellipses='...'):
-        """
-        draws a string (text) in a frame. This tries to fit the
-        string in lines, if it can't, it truncates the text,
-        draw the part that fit and returns the other that doesn't.
-        Different from drawstringframedhard from the way it truncates
-        the line. This one breaks based on words, not chars.
-        """
-        return_x0 = 0
-        return_y0 = 0
-        return_x1 = 0
-        return_y1 = 0
-        plain_tab = '   '
-
-        if fgcolor == None:
-            fgcolor = self.default_fg_color
-        if font == None:
-            font = config.OSD_DEFAULT_FONTNAME
-
-        if not ptsize:
-            ptsize = config.OSD_DEFAULT_FONTSIZE
-
-
-        if DEBUG >= 3:
-            print 'FONT: %s %s' % (font, ptsize)        
-
-        #
-        # calculate words per line
-        #
-        MINIMUM_SPACE_BETWEEN_WORDS, tmp = self.stringsize(' ',font,ptsize)
-        line = []
-        s = string.replace('\t',' \t ')
-        s = s.replace('\n',' \n ')
-        s = s.replace('  ',' ')
-        s = re.sub(r'([ ]$)','',s)
-        s = re.sub(r'(^[ ])','',s)
-        if s == '': # string was only a space ' '
-            return ((), s, (0,0,0,0))
-        words = s.split(' ')
-        occupied_size = 0
-        line_number = 0
-        lines = []
-        lines.append([])
-        lines_size = []
-        lines_size.append(0)
-        len_words = len(words)
-        word_size = 0
-        word_height = 0
-        occupied_height = 0
-        next_word_size = 0
-        # First case: height is fewer than the necessary        
-        word_size, word_height = self.stringsize('Agj',font,ptsize)
-        line_height = word_height
-        occupied_height = line_height
-        if height == -1:
-            height = line_height
-        if line_height > height:
-            return ((), string, (0,0,0,0))
-        # Fit words in lines
-        rest_words = ''
-        for word_number in range(len_words):
-            if words[word_number] == '\n' and len(lines[line_number]) > 0:
-                line_number += 1
-                lines.append( [] )
-                lines_size.append( 0 )
-                occupied_size = 0
-                occupied_height += line_height
-                
-            else:
-                if words[word_number] == '\t':
-                    words[word_number] = plain_tab
-                    
-                word_size, word_height = self.stringsize(words[word_number], font,ptsize)
-                # This word fit in this line?                
-                if (occupied_size + word_size) <= width and ( occupied_height ) <= height:
-                    # Yes, add it to this line word's list
-                    lines[line_number].append(words[word_number])
-                    occupied_size += word_size
-                    lines_size[line_number] = occupied_size
-                    if word_number+1 < len_words:
-                        next_word_size = self.stringsize(words[word_number+1],
-                                                         font,ptsize)[0]
-                        
-                    occupied_size += MINIMUM_SPACE_BETWEEN_WORDS
-                    
-                elif ( occupied_height + line_height ) <= height:
-                    # No, but we can add another line
-                    # Is this word larger than the width?
-                    if word_size <= width:
-                        # No, just add it to the line
-                        line_number += 1
-                        lines.append([])
-                        lines[line_number].append(words[word_number])
-                        lines_size.append(word_size)
-                        occupied_size = word_size + MINIMUM_SPACE_BETWEEN_WORDS
-                        occupied_height += line_height
-                        
-                    if word_size > width:
-                        tmp_occupied_size = 0
-                        tmp_size, tmp_height = self.stringsize('-',font,ptsize)
-                        
-                        # Yes, break it
-                        tmp_pieces = words[word_number]
-                        # The chars where we can split words (making it less ugly to read)
-                        tmp_pieces = re.sub(r'(?P<str>[aeiouAEIOU·ÈÌÛ˙¡…Õ”⁄‡ËÏÚ˘¿»Ã“Ÿ„ı√’‰ÎÔˆ¸ƒÀœ÷‹‚ÍÓÙ˚¬ Œ‘€!@#$%\*\(\)\\/\-~`\'"\?\.,\[\]]+)',' \g<str> ',tmp_pieces)
-                        tmp_pieces = tmp_pieces.replace('  ',' ')                     
-                        tmp_pieces = re.sub(r'([ ]$)','',tmp_pieces)
-                        tmp_pieces = re.sub(r'(^[ ])','',tmp_pieces)
-                        pieces = []
-                        tmp_pieces = tmp_pieces.split(' ')
-                        
-                        # check if any pieces still is larger than the width
-                        cache_wt = width - tmp_size
-                        for i in range(len(tmp_pieces)):
-                            next_word_size = self.stringsize(tmp_pieces[i],font,ptsize)[0]
-                            if next_word_size > cache_wt:
-                                cache_rg = range(next_word_size / cache_wt)
-                                for j in cache_rg:
-                                    cache_jwt = ( j - 1 ) * cache_wt
-                                    pieces.append(tmp_pieces[i][cache_jwt:cache_jwt+\
-                                                                cache_wt])
-                                                   
-                            else:
-                                pieces.append(tmp_pieces[i])
-                                
-                        line_number += 1
-                        occupied_height += line_height
-                        lines.append([])
-                        lines[line_number].append('')
-                        lines_size.append(0)
-
-                        for i in range(len(pieces)):
-                            next_word_size = self.stringsize(pieces[i],font,ptsize)[0]
-                            if (next_word_size + tmp_occupied_size) < cache_wt:
-                                # this piece fits this line
-                                lines[line_number][0] += pieces[i]
-                                tmp_occupied_size += next_word_size                                
-                                lines_size[line_number] = tmp_occupied_size
-                                
-                            elif (occupied_height + line_height) <= height:
-                                # we can add another line
-                                while lines_size[ line_number ] + tmp_size > width:
-                                    char = lines[ line_number ][ -1 ][ -1 ]
-                                    char = osd.charsize( char, font, size )[ 0 ]
-                                    lines_size[ line_number ] -= char
-                                    lines[line_number][-1] = lines[line_number][-1][:-1]
-                                    
-                                lines[line_number][0] += '-'
-                                lines_size[line_number] += tmp_size
-                                
-                                lines.append( [] )
-                                line_number += 1
-                                lines[line_number].append(pieces[i])
-                                lines_size.append(tmp_occupied_size)
-                                tmp_occupied_size = next_word_size
-                                occupied_height += line_height
-                                
-                            else:
-                                # No, and we cannot add another line, truncate this text
-                                # and save text that does not fit
-                                next_word_size = self.stringsize('-', font,ptsize)[0]
-                                # We need to remove the last piece to place the '...' ?
-                                if (occupied_size + next_word_size) <= width:
-                                    # No, just add it
-                                    lines[line_number][0] += '-'
-                                    lines_size[line_number] += next_word_size
-                                    
-                                else:
-                                    # Yes, put '-' in the last piece place
-                                    lines[line_number][0][0:-4] += '-'
-                                    tmp_word_size = self.stringsize(lines[line_number][0],
-                                                                    font, ptsize)[0]
-                                    lines_size[line_number] = tmp_word_size  + \
-                                                              MINIMUM_SPACE_BETWEEN_WORDS
-                                # save the text that does not fit.
-                                for tmp in range(word_number, len(pieces)):
-                                    try:
-                                        rest_words += words[tmp]
-                                        if tmp < len_words: rest_words += ' '
-                                    except IndexError:
-                                        continue
-                                    # quit the loop
-                                break
-                        occupied_size = lines_size[line_number]
-                        
-                else:
-                    # No, and we cannot add another line, truncate this text
-                    # and save text that does not fit
-                    next_word_size = self.stringsize(ellipses, font,ptsize)[0]
-                    if ellipses:
-                        # We need to remove the last word to place the '...' ?
-                        if (occupied_size + next_word_size) <= width:
-                            # No, just add it
-                            lines[line_number].append(ellipses)
-                            lines_size[line_number] += next_word_size + \
-                                                       MINIMUM_SPACE_BETWEEN_WORDS
-                            
-                        else:
-                            # Yes, put '...' in the last word place
-                            if len(lines[line_number]) > 0:
-                                lines[line_number][len(lines[line_number])-1] = '...'
-                                
-                            else:
-                                lines[line_number].append('...')
-
-                            tmp_word_size = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)[0]
-                            lines_size[line_number] += next_word_size - tmp_word_size  + \
-                                                       MINIMUM_SPACE_BETWEEN_WORDS
-                    # save the text that does not fit.
-                    for tmp in range(word_number, len_words):
-                        rest_words += words[tmp]                        
-                        if tmp < len_words: rest_words += ' '
-                    # quit the loop
-                    break
-
-        # now draw the string
-        y0 = y
-        if align_v == 'top':
-            y0 = y
-        elif align_v == 'center' or align_v == 'middle':
-            y0 = y + (height - line_height * len(lines)) / 2
-        elif align_v == 'bottom':
-            y0 = y + (height - line_height * len(lines))
-
-
-        if not return_y0:
-            return_y0 = y0
-
-        if DEBUG >= 3:
-            print "osd.drawstringframedsoft():\n\n%s\n" % lines
-
-
-        drawing_objects = []
-
-        if bgcolor != None:
-            drawing_objects.append(self.BoxObject(x,y, x+width, y+height, width=-1,
-                                                  color=bgcolor))
-
-        for line_number in range(len(lines)):
-            x0 = x
-            #print "WORDS: %s" % lines[line_number]
-            spacing = MINIMUM_SPACE_BETWEEN_WORDS
-            
-            if align_h == 'justified':
-                # Calculate the space between words:
-                ## Disconsider the minimum space
-                if len(lines[line_number]) > 1 and line_number + 1 < len( lines ):
-                    lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * \
-                                               (len(lines[line_number]) -1 )
-                    
-                    spacing = (width - lines_size[line_number]) / \
-                              ( len(lines[line_number]) -1 )
-                    
-                elif len( lines ) == 0: # only one line
-                    spacing = (width - lines_size[line_number]) / 2
-                    x0 += spacing
-                
-                    
-                for word in lines[line_number]:
-                    if word:
-                        word_size, word_height = self.stringsize(word, font,ptsize)
-                        drawing_objects.append(self.TextObject(word, x0, y0, fgcolor,
-                                                               None, font, ptsize))
-                        x0 += spacing + word_size 
-                    
-            elif align_h == 'center':
-                x0 = x + (width - lines_size[line_number]) / 2
-                if return_x0 > x0:
-                    return_x0 = x0
-                    
-                for word in lines[line_number]:
-                    if word:
-                        word_size, word_height = self.stringsize(word, font,ptsize)
-                        drawing_objects.append(self.TextObject(word, x0, y0, fgcolor,
-                                                               None, font, ptsize))
-                        x0 += spacing
-                        x0 += word_size
-
-                x0 -= spacing
-                if return_x1 < x0:
-                    return_x1 = x0
-                
-                
-            elif align_h == 'left':
-                for word in lines[line_number]:
-                    if word:
-                        word_size, word_height = self.stringsize(word, font,ptsize)
-                        drawing_objects.append(self.TextObject(word, x0, y0, fgcolor,
-                                                               None, font, ptsize))
-                        x0 += spacing
-                        x0 += word_size
-
-                x0 -= spacing
-                if return_x1 < x0:
-                    return_x1 = x0
-                    
-            elif align_h == 'right':
-                x0 = x + width
-                if return_x0 > x0:
-                    return_x0 = x0
-
-                line_len = len(lines[line_number])
-                rg_line = range( line_len )
-                for word_number in rg_line:
-                    if lines[line_number][word_number]:
-                        pos = line_len - word_number -1
-                        word_size, word_height = \
-                                   self.stringsize(lines[line_number][pos], font,ptsize)
-                        drawing_objects.append(self.TextObject(lines[line_number][pos],
-                                                               x0, y0, fgcolor,
-                                                               None, font, ptsize,
-                                                               'right'))
-                        x0 -= spacing - word_size
-        
-            y0 += line_height
-            
-        # end for            
-        return_y1 = y0
-
-        if align_h == 'justified':
-            return_x0 = x
-            return_x1 = width
-        if align_h == 'left':
-            return_x0 = x
-        if align_h == 'right':
-            return_x1 = x + width
-            
-        return (drawing_objects, rest_words, (return_x0, return_y0,
-                                              return_x1, return_y1))
-
-
-    def _dsf_hard(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                  font=None, ptsize=0, align_h='left', align_v='top',
-                  ellipses='...'):
-
-        """
-        draws a string (text) in a frame. This tries to fit the
-        string in lines, if it can't, it truncates the text,
-        draw the part that fit and returns the other that doesn't.
-        Different from drawstringframedsoft from the way it truncates
-        the line. This one breaks based on chars, not words.
-        """
-        if not pygame.display.get_init():
-            return string
-
-        return_x0 = 0
-        return_y0 = 0
-        return_x1 = 0
-        return_y1 = 0
-        plain_tab = '   '
-
-
-        if DEBUG >= 3:
-            print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, width,
-                                                                     height, string)
-
-        if fgcolor == None:
-            fgcolor = self.default_fg_color
-        if font == None:
-            font = config.OSD_DEFAULT_FONTNAME
-
-        if not ptsize:
-            ptsize = config.OSD_DEFAULT_FONTSIZE
-
-
-        if DEBUG >= 3:
-            print 'FONT: %s %s' % (font, ptsize)        
-
-        occupied_size = 0
-        occupied_height = 0
-        # First case: height is fewer than the necessary        
-        word_height = self.stringsize('Agj',font,ptsize)[1]
-        line_height = word_height
-        occupied_height = line_height
-        if height == -1:
-            height = line_height
-        if line_height > height:
-            return ((), string, (0,0,0,0))
-
-        # Fit chars in lines
-        lines = [ '' ]
-        line_number = 0
-        ellipses_size = self.stringsize(ellipses, font, ptsize)[0]
-        i = 0
-        for i in range(len(string)):
-            char = string[i]
-            if string[i] == '\t':
-                char = plain_tab
-            else:
-                char = string[i]
-
-            char_size, char_height = self.stringsize(char, font, ptsize)
-
-            if ((occupied_size + char_size) <= width) and (char != '\n'):
-                occupied_size += char_size
-                lines[line_number] += char
-
-            else:
-                if (occupied_height + char_height) <= height:
-                    # we can add one more line
-                    occupied_height += word_height                    
-                    line_number += 1
-                    lines += [ '' ]
-                    if char == '\n':
-                        # Linebreak due to CR
-                        occupied_size = 0
-                        
-                    else:
-                        # Linebreak due to the last character didn't fit,
-                        # put it on the next line
-                        occupied_size = char_size
-                        lines[line_number] = char
-                        
-                else:
-                    # we can NOT add more lines :(
-                    # add the ellipses indicating we did truncate
-                    j = 0
-                    len_line = len(lines[line_number])
-                    for j in range(len_line):
-                        if (occupied_size + ellipses_size) <= width:
-                            break
-
-                        # shorten the line again to make space for 'ellipses'
-                        char_size = self.charsize(lines[line_number][len_line-j-1],
-                                                  font, ptsize)[0]
-                        occupied_size -= char_size
-                        
-                    lines[line_number] = lines[line_number][0:len_line-j]
-                    i -= j + 1
-                    occupied_size = self.stringsize( lines[line_number], font, ptsize )[0]
-                    
-                    if ellipses:
-                        while ellipses and \
-                                  (occupied_size + \
-                                   self.stringsize(ellipses, font, ptsize)[0]) > width:
-                            ellipses = ellipses[:-1]
-                        lines[line_number] += ellipses
-                        
-                    break
-
-        rest_words = string[i+1:len(string)]
-            
-        drawing_objects = []
-
-        if bgcolor != None:
-            drawing_objects.append(self.BoxObject(x,y, x+width, y+height, width=-1,
-                                                  color=bgcolor))
-
-        y0 = y
-        if align_v == 'center' or align_v == 'middle':
-            y0 = y + (height - (line_number+1) * word_height)/ 2
-            
-        elif align_v == 'bottom':
-            y0 = y + (height - (line_number+1) * word_height)
-
-        return_y0 = y0
-        return_x0 = return_x1 = x
-        
-        for line in lines:
-            x0 = x
-            line_size, line_heigth = self.stringsize(line, font, ptsize)
-            if align_h == 'center' or align_h == 'justified':
-                x0 = x + (width - line_size) / 2
-                
-            elif align_h == 'right':
-                x0 = x + (width - line_size)
-                
-            drawing_objects.append(self.TextObject(line, x0, y0, fgcolor,
-                                                   None, font, ptsize))
-                
-            y0 += word_height
-            if x0 > return_x0:
-                return_x0 = x0
-                
-            if x0 + line_size > return_x1:
-                return_x1 = x0 + line_size
-
-        return_y1 = y0
-        return (drawing_objects, rest_words, (return_x0,return_y0, return_x1, return_y1))
-
-
-
-
-
-
     # NEW drawstringframed stuff
 
 
@@ -1640,171 +1279,3 @@ class OSD:
 
 
         
-    def dsf_calc_line(self, string, max_width, font, hard, ellipses, word_splitter):
-        """
-        calculate _one_ line for drawstringframed
-        """
-        string = string.strip()
-        c = 0                           # num of chars fitting
-        width = 0                       # width needed
-        ls = len(string)
-        space = 0                       # position of last space
-        last_char_size = 0              # width of the last char
-        last_word_size = 0              # width of the last word
-
-        if ellipses:
-            # check the width of the ellipses
-            ellipses_size = font.stringsize(ellipses)
-            if ellipses_size > max_width:
-                # if not even the ellipses fit, we have not enough space
-                # until the text is shorter than the ellipses
-                width = font.stringsize(string)
-                if width <= max_width:
-                    # ok, text fits
-                    return (width, string, '')
-                # ok, only draw the ellipses, shorten them first
-                while(ellipses_size > max_width):
-                    ellipses = ellipses[:-1]
-                    ellipses_size = font.stringsize(ellipses)
-                return (ellipses_size, ellipses, string)
-        else:
-            ellipses_size = 0
-
-        data = None
-        while(TRUE):
-            if width > max_width - ellipses_size and not data:
-                # save this, we will need it when we have not enough space
-                # but first try to fit the text without ellipses
-                data = c, space, width, last_char_size, last_word_size
-            if width > max_width:
-                # ok, that's it. We don't have any space left
-                break
-            if ls == c:
-                # everything fits
-                return (width, string, '')
-            if string[c] == '\n':
-                # linebreak, we have to stop
-                return (width, string[:c], string[c+1:])
-            if not hard and string[c] in word_splitter:
-                # rememeber the last space for mode == 'soft' (not hard)
-                space = c
-                last_word_size = 0
-
-            # add a char
-            last_char_size = font.charsize(string[c])
-            width += last_char_size
-            last_word_size += last_char_size
-            c += 1
-
-        # restore to the pos when the width was one char to big and
-        # incl. ellipses_size
-        c, space, width, last_char_size, last_word_size = data
-
-        if hard:
-            # remove the last char, than it fits
-            c -= 1
-            width -= last_char_size
-
-        else:
-            # go one word back, than it fits
-            c = space
-            width -= last_word_size
-
-        # calc the matching and rest string and return all this
-        return (width, string[:c]+ellipses, string[c:])
-
-            
-
-    def new_dsf_calc(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
-                     font=None, ptsize=0, align_h='left', align_v='top',
-                     mode='hard', ellipses='...', layer=None):
-        """
-        the new drawstringframed
-        """
-        if not string:
-            return [], '', (0,0,0,0)
-
-        if font == None:
-            font = config.OSD_DEFAULT_FONTNAME
-        if not ptsize:
-            ptsize = config.OSD_DEFAULT_FONTSIZE
-
-        font = self.getFontInfo(font, ptsize)
-        line_height = font.height * 1.1
-
-        if height == -1:
-            height = line_height
-
-        if width <= 0 or height < line_height:
-            return [], string, (0,0,0,0)
-            
-        num_lines_left = int(height / line_height)
-        lines = []
-        current_ellipses = ''
-        hard = mode == 'hard'
-        
-        while(num_lines_left):
-            # calc each line and put the rest into the next
-            if num_lines_left == 1:
-                current_ellipses = ellipses
-            (w, s, r) = self.dsf_calc_line(string, width, font, hard,
-                                           current_ellipses, ' ')
-            if s == '' and not hard:
-                # nothing fits? Try to break words at ' -_'
-                (w, s, r) = self.dsf_calc_line(string, width, font, hard,
-                                               ellipses, ' -_')
-                if s == '':
-                    # still nothing? Use the 'hard' way
-                    (w, s, r) = self.dsf_calc_line(string, width, font, 'hard',
-                                                   ellipses, ' ')
-            string = r
-            lines.append((w, s))
-            num_lines_left -= 1
-            if not r:
-                # finished, everything fits
-                break
-
-        # calc the height we want to draw (based on different align_v)
-        height_needed = (int(height / line_height) - num_lines_left) * line_height
-        if align_v == 'bottom':
-            y += (height - height_needed)
-        elif align_v == 'center':
-            y += int((height - height_needed)/2)
-
-        y0 = y
-        min_x = 10000
-        max_x = 0
-
-        if not layer and layer != '':
-            layer = self.screen
-
-        for w, l in lines:
-            if align_h == 'left' or align_h == 'justified' or not align_h:
-                x0 = x
-            elif align_h == 'right':
-                x0 = x + (width - w)
-            elif align_h == 'center':
-                x0 = x + int((width-w)/2)
-            else:
-                #print 'what align_h is that: %s' % align_h
-                x0 = x
-
-            if layer != '':
-                try:
-                    # render the string. Ignore all the helper functions for that
-                    # in here, it's faster because he have more information
-                    # in here. But we don't use the cache, but since the skin only
-                    # redraws changed areas, it doesn't matter and saves the time
-                    # when searching the cache
-                    layer.blit(font.font.render(l, 1, self._sdlcol(fgcolor)), (x0, y0))
-                except:
-                    print "Render failed, skipping..."    
-
-            if x0 < min_x:
-                min_x = x0
-            if x0 + w > max_x:
-                max_x = x0 + w
-            y0 += line_height
-
-        return [], r, (min_x, y, max_x, y+height_needed)
-    
