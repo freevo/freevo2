@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/06/20 17:38:11  dischi
+# setup mmpython if it is installed
+#
 # Revision 1.47  2003/06/08 18:09:20  dischi
 # add --doc switch to generate api doc in Docs/api
 #
@@ -377,6 +380,15 @@ if __name__ == "__main__":
             os.rename(file, 'Docs/api/%s' % file)
         shutdown(allow_sys_shutdown=0)
 
+    try:
+        import mmpython
+        mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
+        if not os.path.isdir(mmcache):
+            os.mkdir(mmcache)
+        mmpython.use_cache(mmcache)
+    except:
+        pass
+    
     try:
         main_func()
     except KeyboardInterrupt:
