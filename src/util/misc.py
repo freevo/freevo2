@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/02/27 20:08:42  dischi
+# add function to check for identical string beginnings
+#
 # Revision 1.32  2004/02/23 19:59:35  dischi
 # unicode fixes
 #
@@ -31,71 +34,6 @@
 #
 # Revision 1.26  2004/02/07 13:24:21  dischi
 # better directory name building
-#
-# Revision 1.25  2004/02/07 13:07:55  dischi
-# fix unicode/encoding problem with sqlite
-#
-# Revision 1.24  2004/02/07 11:54:29  dischi
-# handle html code as unicode
-#
-# Revision 1.23  2004/02/05 19:26:42  dischi
-# fix unicode handling
-#
-# Revision 1.22  2004/02/05 05:44:26  gsbarbieri
-# Fixes some bugs related to handling unicode internally.
-# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
-#
-# Revision 1.21  2004/02/01 17:06:12  dischi
-# speedup
-#
-# Revision 1.20  2004/01/24 19:00:40  dischi
-# usb storage device support
-#
-# Revision 1.19  2004/01/13 15:18:19  outlyer
-# Check every ten minutes... it's still barely noticeable, but keeps the
-# screen up to date... 30 minutes would work too, but then we'd have to
-# make sure we check at the top of every hour to keep it inline.
-#
-# Revision 1.18  2004/01/11 17:04:15  outlyer
-# Until \t is fixed, this '-' at least provides some indentation to make it
-# easier to read the list. (I used this in the screenshot I took last night)
-#
-# Revision 1.17  2004/01/11 10:56:52  dischi
-# Fixes in comingup:
-# o do not crash when the recordserver is down
-# o show a message when no schedules are set and not nothing
-# o make arg optional (why is it there anyway?)
-#
-# Revision 1.16  2004/01/11 05:59:41  outlyer
-# How overcomplicated could I have made something so simple? This is a little
-# embarassing. I think this "algorithm" is less dumb.
-#
-# Revision 1.12  2004/01/01 16:18:11  dischi
-# fix crash
-#
-# Revision 1.11  2003/12/31 16:43:49  dischi
-# major speed enhancements
-#
-# Revision 1.10  2003/12/30 22:30:50  dischi
-# major speedup in vfs using
-#
-# Revision 1.9  2003/12/29 22:31:56  dischi
-# no need to check image
-#
-# Revision 1.8  2003/12/12 19:20:07  dischi
-# check images
-#
-# Revision 1.7  2003/12/10 19:47:12  dischi
-# remove unneeded imports
-#
-# Revision 1.6  2003/11/23 16:57:36  dischi
-# move xml help stuff to new fxdparser
-#
-# Revision 1.5  2003/11/22 20:34:08  dischi
-# use new vfs
-#
-# Revision 1.4  2003/11/08 23:15:42  outlyer
-# Hyphenated words and abbreviations should be upper case in a title.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -327,6 +265,7 @@ def get_bookmarkfile(filename):
     return myfile
 
 
+
 def format_text(text):
     while len(text) and text[0] in (' ', '\t', '\n'):
         text = text[1:]
@@ -373,6 +312,38 @@ def smartsort(x,y): # A compare function for use in list.sort()
 
     return cmp(m.upper(),n.upper()) # be case insensitive
 
+
+def find_start_string(s1, s2):
+    """
+    Find similar start in both strings
+    """
+    ret = ''
+    tmp = ''
+    while True:
+        if len(s1) < 2 or len(s2) < 2:
+            return ret
+        if s1[0] == s2[0]:
+            tmp += s2[0]
+            if s1[1] in (u' ', u'-', u'_', u',', u':', '.') and \
+               s2[1] in (u' ', u'-', u'_', u',', u':', '.'):
+                ret += tmp + u' '
+                tmp = ''
+            s1 = s1[1:].lstrip(u' -_,:.')
+            s2 = s2[1:].lstrip(u' -_,:.')
+        else:
+            return ret
+
+def remove_start_string(string, start):
+    """
+    remove start from the beginning of string. 
+    """
+    start = start.replace(u' ', '')
+    for i in range(len(start)):
+        string = string[1:].lstrip(' -_,:.')
+            
+    return string[0].upper() + string[1:]
+
+    
 def tagmp3 (filename, title=None, artist=None, album=None, track=None,
             tracktotal=None, year=None):
     """
@@ -482,9 +453,9 @@ def comingup(items=None):
             sub_title = ''
             if m.sub_title:
                 sub_title = u' "' + Unicode(m.sub_title) + u'" '
-            result = result + u"- %s%s at %s\n" % ( Unicode(m.title),
-                                                    Unicode(sub_title),
-                                                    Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
+            result = result + u"- %s%s at %s\n" % \
+                     ( Unicode(m.title), Unicode(sub_title),
+                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
 
     if len(tomorrow) > 0:
         result = result + _('Tomorrow') + u':\n'
@@ -492,9 +463,9 @@ def comingup(items=None):
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + u"- %s%s at %s\n" % ( Unicode(m.title),
-                                                    Unicode(sub_title),
-                                                    Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
+            result = result + u"- %s%s at %s\n" % \
+                     ( Unicode(m.title), Unicode(sub_title),
+                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
            
     if len(later) > 0:
         result = result + _('This Week') + u':\n'
@@ -502,9 +473,9 @@ def comingup(items=None):
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + u"- %s%s at %s\n" % ( Unicode(m.title),
-                                                    Unicode(sub_title),
-                                                    Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
+            result = result + u"- %s%s at %s\n" % \
+                     ( Unicode(m.title), Unicode(sub_title),
+                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
 
     if not result:
         result = _('No recordings are scheduled')
