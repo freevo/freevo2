@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/09/13 18:07:51  dischi
+# Added tag <mplayer_options> inside <video>
+#
 # Revision 1.4  2002/08/18 21:23:29  tfmalt
 # o Added a comment when trying to figure out config.py <-> movie_xml.py
 #   dependencies.
@@ -80,6 +83,8 @@ def parseVideo(dir, mplayer_files, video_node):
         if node.name == u'vcd':
             mode = 'vcd'
             first_file = "1"
+        if node.name == u'mplayer_options':
+            mplayer_options += node.textof()
         if node.name == u'files':
             for file_nodes in node.children:
                 if file_nodes.name == u'filename':
