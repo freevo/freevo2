@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/12/28 18:07:34  dischi
+# fix for missing pyvdr
+#
 # Revision 1.10  2004/12/28 00:35:19  rshortt
 # Further vdr-xine for DVB and df_xine tweaks, still planning on smoothing things
 # over and also add ivtv (input_pvr) support.
@@ -80,7 +83,8 @@ from event import *
 from tv.player import TVPlayer
 
 import pyepg
-from vdr.vdr import VDR
+if config.XINE_USE_VDR:
+    from vdr.vdr import VDR
 
 import logging
 log = logging.getLogger('tv')

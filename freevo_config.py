@@ -1137,6 +1137,7 @@ if XINE_COMMAND:
 if CONF.fbxine:
     plugin.activate('audio.xine')
 
+XINE_USE_VDR = 0
 
 # ======================================================================
 # Freevo TV settings:
