@@ -38,6 +38,9 @@ o Core developer
 Rob Shortt <rob@infointeractive.com>
 o Core developer
 
+Michael Ruelle <mikeruelle@attbi.com>
+o Core developer
+
 Jason Ball <jason.ball@ce.com.au>:
 o SDL support in the OSD
 
@@ -47,7 +50,9 @@ o Ogg Vorbis Tag and Playback support
 
 
 
+
 Occasional contributors:
+------------------------
 
 Dan Eriksen <eriksen@canada.com>
 o 16-bit pixel support for the X11 OSD server
@@ -67,10 +72,10 @@ Per Wigren <wigren@home.se>
 o Various contribs and patches for TV listings
 
 Travis Shirk <travis@pobox.com>
-o ID3v2.x support
+o ID3v2.x support (now in mmpython)
 
 John M Cooper <john.cooper@yourcommunications.co.uk>
-o Bins support
+o Bins support (now in mmpython)
 
 Matthieu Weber <mweber@mit.jyu.fi>
 o DTD and implementation of fxd movie informations
@@ -80,9 +85,25 @@ o v4l2 python interface
 o video channel frequencies
 o timeshift plugin, pyshift modules and mplayer timefhifting patch
 
-Michael Ruelle <mikeruelle@attbi.com>
-o Freevo web interface enhancements
-
 Rob Vandermeulen (rdc@kokosnoot.com)
 o fxdimdb class + rewrite of the plugin & helper
 o the df plugin
+
+
+
+Special Copyright Notice:
+-------------------------
+
+BSD Daemon Copyright 1988 by Marshall Kirk McKusick.
+All Rights Reserved.
+
+Permission to use the daemon may be obtained from:
+	Marshall Kirk McKusick
+	1614 Oxford St
+	Berkeley, CA 94709-1608
+	USA
+or via email at mckusick@mckusick.com
+
+BSD Daemon spash screen artwork adapted from an SVG rendition by
+Sergey Akifyev (asa@gascom.ru), available at
+ftp://ftp.gascom.ru/pub/GNOME2/Bg/beastie.svg.
