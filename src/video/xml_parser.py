@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/10/04 19:51:04  dischi
+# copy info to prevent mmpython from storing the fxd infos in the cache
+#
 # Revision 1.40  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -60,6 +63,7 @@
 import os
 import re
 import traceback
+import copy
 
 import config
 import util
@@ -563,6 +567,10 @@ def parse_movie(node, file, parent, duplicate_check):
     mitem.name = title
     mitem.image = image
     mitem.xml_file = file
+
+    # copy info to prevent mmpython from storing
+    # the fxd infos in the cache
+    mitem.info = copy.copy(mitem.info)
     for i in info:
         mitem.info[i] = info[i]
 
@@ -573,6 +581,10 @@ def parse_movie(node, file, parent, duplicate_check):
         varitem = make_videoitem(video, variant, mitem)
         varitem.name = variant['name']
         varitem.image = image
+
+        # copy info to prevent mmpython from storing
+        # the fxd infos in the cache
+        varitem.info = copy.copy(varitem.info)
         for i in info:
             varitem.info[i] = info[i]
         varitem.xml_file = file
