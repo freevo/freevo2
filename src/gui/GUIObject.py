@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/03/30 18:04:18  dischi
+# do not override parent and use self to get skin informations
+#
 # Revision 1.13  2003/03/30 17:43:44  rshortt
 # Passing self to skin.GetPopupBoxStyle in an attempt to get the skin
 # properties of the current menu in case we are using a menu based skin.
@@ -164,7 +167,8 @@ class GUIObject:
         self.icon           = None
         self.bg_surface     = None
         self.bg_image       = None
-        self.parent         = None
+        if not hasattr(self, 'parent'):
+            self.parent         = None
         self.children       = []
         self.enabled        = 1
         self.selected       = 0
