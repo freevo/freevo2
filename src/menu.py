@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2004/08/05 17:36:13  dischi
+# remove "page" code, the skin takes care of that now
+#
 # Revision 1.100  2004/08/01 10:57:34  dischi
 # make the menu an "Application"
 #
@@ -60,7 +63,6 @@ import copy
 import config
 import plugin
 import util
-import skin
 
 from event import *
 from item import Item
@@ -109,19 +111,19 @@ class Menu:
     """
     a Menu with Items for the MenuWidget
     """
-    def __init__(self, heading, choices, fxd_file=None, umount_all = 0,
+    def __init__(self, heading, choices=[], fxd_file=None, umount_all = 0,
                  reload_func = None, item_types = None, force_skin_layout = -1):
 
         self.heading = heading
-        self.choices = choices          # List of MenuItem:s
+        self.choices = choices             # List of MenuItem:s
         if len(self.choices):
-            self.selected = self.choices[0]
+            self.selected     = self.choices[0]
+            self.selected_pos = 0
         else:
-            self.selected = None
-        self.page_start = 0
-        self.previous_page_start = []
-        self.previous_page_start.append(0)
-        self.umount_all = umount_all    # umount all ROM drives on display?
+            self.selected     = None
+            self.selected_pos = -1
+            
+        self.umount_all    = umount_all    # umount all ROM drives on display?
         self.skin_settings = None
         if fxd_file:
             self.skin_settings = gui.load_settings(fxd_file)
@@ -136,32 +138,93 @@ class Menu:
         self.reload_func       = reload_func  
         self.item_types        = item_types
         self.force_skin_layout = force_skin_layout
-        self.display_style     = skin.get_display_style(self)
 
         # How many menus to go back when 'BACK_ONE_MENU' is called
         self.back_one_menu = 1
+
+        # how many rows and cols does the menu has
+        # (will be changed by the skin code)
+        self.cols = 1
+        self.rows = 1
+
+        
+    def change_selection(self, rel):
+        """
+        select a new item relative to current selected
+        """
+        self.selected_pos = min(max(0, self.selected_pos + rel), len(self.choices) - 1)
+        self.selected = self.choices[self.selected_pos]
+
+
+    def set_selection(self, item):
+        """
+        set the selection to a specific item in the list
+        """
+        if item:
+            self.selected     = item
+            self.selected_pos = self.choices.index(item)
+        else:
+            self.selected     = None
+            self.selected_pos = -1
+
+
+
+class MenuApplication(Application):
+    """
+    An application inside the menu
+    """
+    def __init__(self, name, event_context, fullscreen):
+        Application.__init__(self, name, event_context, fullscreen)
+        self.menuw = None
         
 
-    def items_per_page(self):
+    def eventhandler(self, event):
         """
-        return the number of items per page for this skin
+        Eventhandler for basic menu functions
         """
-        return skin.items_per_page(('menu', self))
-    
+        if not self.menuw:
+            return False
+        if event == MENU_GOTO_MAINMENU:
+            self.destroy()
+            self.menuw.goto_main_menu()
+            return True
+        if event == MENU_BACK_ONE_MENU:
+            self.destroy()
+            self.menuw.back_one_menu()
+            return True
+        return False
+
+
+    def show(self):
+        """
+        show the menu on the screen
+        """
+        Application.show(self)
+
+
+    def refresh(self):
+        """
+        refresh display
+        """
+        pass
 
 
 
+        
 class MenuWidget(Application):
     """
     The MenuWidget handles a stack of Menus
     """
-    def __init__(self):
+    def __init__(self, engine=None):
         Application.__init__(self, 'menu widget', 'menu', False)
         self.menustack = []
-        self.rows      = 0
-        self.cols      = 0
         self.eventhandler_plugins = None
-        self.force_page_rebuild   = False
+        if not engine:
+            engine = gui.get_areas()
+            # register menu to the skin
+            engine.register('menu', ('screen', 'title', 'subtitle', 'view',
+                                     'listing', 'info'))
+        self.engine = engine
         
 
     def get_event_context(self):
@@ -174,16 +237,25 @@ class MenuWidget(Application):
 
 
     def show(self):
+        """
+        show the menu on the screen
+        """
         Application.show(self)
         self.refresh(reload=1)
 
                 
     def hide(self, clear=True):
+        """
+        hide the menu
+        """
         Application.hide(self)
-        skin.clear('menu')
+        self.engine.clear('menu')
             
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
+        """
+        delete last menu from the stack, no redraw
+        """
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
@@ -195,8 +267,6 @@ class MenuWidget(Application):
                 reload = menu.reload_func()
                 if reload:
                     self.menustack[-1] = reload
-                
-            self.init_page()
 
 
     def delete_submenu(self, refresh=True, reload=False, osd_message=''):
@@ -224,24 +294,17 @@ class MenuWidget(Application):
             except:
                 count = -1
 
-            gui.get_screen().prepare_for_move(2)
             self.menustack = self.menustack[:count]
             menu = self.menustack[-1]
 
             if not isinstance(menu, Menu):
-                menu.refresh()
+                self.refresh()
                 return True
             
-            if skin.get_display_style(menu) != menu.display_style:
-                self.rebuild_page()
-                
             if menu.reload_func:
                 reload = menu.reload_func()
                 if reload:
                     self.menustack[-1] = reload
-                self.init_page()
-            else:
-                self.init_page()
 
             if arg == 'reload':
                 self.refresh(reload=1)
@@ -252,62 +315,18 @@ class MenuWidget(Application):
     def goto_main_menu(self, arg=None, menuw=None):
         self.menustack = [self.menustack[0]]
         menu = self.menustack[0]
-        self.init_page()
         self.refresh()
 
     
-    def goto_prev_page(self, arg=None, menuw=None):
-        menu = self.menustack[-1]
-
-        if self.cols == 1:
-            if menu.page_start != 0:
-                menu.page_start = menu.previous_page_start.pop()
-            self.init_page()
-            menu.selected = self.all_items[0]
-        else:
-            if menu.page_start - self.cols >= 0:
-                menu.page_start -= self.cols
-                self.init_page()
-
-        if arg != 'no_refresh':
-            self.refresh()
-
-    
-    def goto_next_page(self, arg=None, menuw=None):
-        menu = self.menustack[-1]
-        self.rows, self.cols = menu.items_per_page()
-        items_per_page = self.rows*self.cols
-
-        if self.cols == 1:
-            down_items = items_per_page - 1
-                
-            if menu.page_start + down_items < len(menu.choices):
-                menu.previous_page_start.append(menu.page_start)
-                menu.page_start += down_items
-                self.init_page()
-                menu.selected = self.menu_items[-1]
-        else:
-            if menu.page_start + self.cols * self.rows < len(menu.choices):
-                if self.rows == 1:
-                    menu.page_start += self.cols
-                else:
-                    menu.page_start += self.cols * (self.rows-1)
-                self.init_page()
-            
-        if arg != 'no_refresh':
-            self.refresh()
-    
-    
     def pushmenu(self, menu):
         gui.get_screen().prepare_for_move(1)
+        if len(self.menustack) > 0 and not isinstance(self.menustack[-1], Menu):
+            _debug_('menu auto-hide %s' % self.menustack[-1])
+            self.menustack[-1].hide()
         self.menustack.append(menu)
-        if isinstance(menu, Menu):
-            menu.page_start = 0
-            self.init_page()
-            menu.selected = self.all_items[0]
-            self.refresh()
-        else:
-            menu.refresh()
+        if not isinstance(menu, Menu):
+            menu.menuw = self
+        self.refresh()
 
 
     def refresh(self, reload=0):
@@ -315,24 +334,19 @@ class MenuWidget(Application):
 
         if not isinstance(menu, Menu):
             if self.visible:
-                skin.draw(menu.type, menu)
+                menu.show()
             return
         
         if self.menustack[-1].umount_all == 1:
             util.umount_all()
                     
-        if reload:
-            if menu.reload_func:
-                reload = menu.reload_func()
-                if reload:
-                    self.menustack[-1] = reload
-            if self.force_page_rebuild:
-                self.force_page_rebuild = False
-                self.rebuild_page()
-            self.init_page()
+        if reload and menu.reload_func:
+            new_menu = menu.reload_func()
+            if new_menu:
+                self.menustack[-1] = new_menu
 
         if self.visible:
-            skin.draw('menu', self, self.menustack[-1])
+            self.engine.draw('menu', self.menustack[-1])
 
 
     def make_submenu(self, menu_name, actions, item):
@@ -363,7 +377,7 @@ class MenuWidget(Application):
     def eventhandler(self, event):
         menu = self.menustack[-1]
 
-        if self.cols == 1 and isinstance(menu, Menu):
+        if isinstance(menu, Menu) and menu.cols == 1:
             if config.MENU_ARROW_NAVIGATION:
                 if event == MENU_LEFT:
                     event = MENU_BACK_ONE_MENU
@@ -387,19 +401,16 @@ class MenuWidget(Application):
             self.back_one_menu()
             return True
 
-        if not isinstance(menu, Menu) and menu.eventhandler(event):
-            return True
-
         if event == 'MENU_REFRESH':
             self.refresh()
             return True
         
         if event == 'MENU_REBUILD':
-            self.init_page()
             self.refresh()
             return True
-        
-        if not self.menu_items:
+
+        # handle empty menus
+        if not menu.choices:
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
                 self.back_one_menu()
                 return True
@@ -411,7 +422,8 @@ class MenuWidget(Application):
                 if p.eventhandler(event=event, menuw=self):
                     return True
             return True
-            
+
+        # handle menu not instance of class Menu
         if not isinstance(menu, Menu):
             if self.eventhandler_plugins == None:
                 self.eventhandler_plugins = plugin.get('daemon_eventhandler')
@@ -424,130 +436,46 @@ class MenuWidget(Application):
             return True
 
         if event == MENU_UP:
-            curr_selected = self.all_items.index(menu.selected)
-            if curr_selected-self.cols < 0 and \
-                   menu.selected != menu.choices[0]:
-                self.goto_prev_page(arg='no_refresh')
-                try:
-                    if self.cols == 1:
-                        curr_selected = self.rows - 1
-                    elif self.rows != 1:
-                        curr_selected = self.all_items.index(menu.selected)
-                    else:
-                        curr_selected+=self.cols
-                except ValueError:
-                    curr_selected += self.cols
-            curr_selected = max(curr_selected-self.cols, 0)
-            menu.selected = self.all_items[curr_selected]
+            menu.change_selection(-menu.cols)
             self.refresh()
             return True
 
 
         if event == MENU_DOWN:
-            curr_selected = self.all_items.index(menu.selected)
-            if curr_selected+self.cols > len(self.all_items)-1 and \
-                   menu.page_start + len(self.all_items) < len(menu.choices):
-
-                self.goto_next_page(arg='no_refresh')
-                try:
-                    if self.cols == 1:
-                        curr_selected = 0
-                    elif self.rows != 1:
-                        curr_selected = self.all_items.index(menu.selected)
-                    else:
-                        curr_selected-=self.cols
-                except ValueError:
-                    curr_selected -= self.cols
-            curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
-            menu.selected = self.all_items[curr_selected]
+            menu.change_selection(menu.cols)
             self.refresh()
             return True
 
 
         if event == MENU_PAGEUP:
-            # Do nothing for an empty file list
-            if not len(self.menu_items):
-                return True
-            
-            curr_selected = self.all_items.index(menu.selected)
-
-            # Move to the previous page if the current position is at the
-            # top of the list, otherwise move to the top of the list.
-            if curr_selected == 0:
-                self.goto_prev_page()
-            else:
-                curr_selected = 0
-                menu.selected = self.all_items[curr_selected]
-                self.refresh()
+            menu.change_selection(-(menu.rows * menu.cols))
+            self.refresh()
             return True
 
 
         if event == MENU_PAGEDOWN:
-            # Do nothing for an empty file list
-            if not len(self.menu_items):
-                return True
-
-            if menu.selected == menu.choices[-1]:
-                return True
-            
-            curr_selected = self.all_items.index(menu.selected)
-            bottom_index = self.menu_items.index(self.menu_items[-1])
-
-            # Move to the next page if the current position is at the
-            # bottom of the list, otherwise move to the bottom of the list.
-            if curr_selected >= bottom_index:
-                self.goto_next_page()
-            else:
-                curr_selected = bottom_index
-                menu.selected = self.all_items[curr_selected]
-                self.refresh()
+            menu.change_selection(menu.rows * menu.cols)
+            self.refresh()
             return True
 
 
         if event == MENU_LEFT:
-            # Do nothing for an empty file list
-            if not len(self.menu_items):
-                return True
-
-            curr_selected = self.all_items.index(menu.selected)
-            if curr_selected == 0:
-                self.goto_prev_page(arg='no_refresh')
-                try:
-                    curr_selected = self.all_items.index(menu.selected)
-                    if self.rows == 1:
-                        curr_selected = len(self.all_items)
-                except ValueError:
-                    curr_selected += self.cols
-            curr_selected = max(curr_selected-1, 0)
-            menu.selected = self.all_items[curr_selected]
+            menu.change_selection(-1)
             self.refresh()
             return True
         
 
         if event == MENU_RIGHT:
-            # Do nothing for an empty file list
-            if not len(self.menu_items):
-                return True
-
-            curr_selected = self.all_items.index(menu.selected)
-            if curr_selected == len(self.all_items)-1:
-                self.goto_next_page(arg='no_refresh')
-                try:
-                    curr_selected = self.all_items.index(menu.selected)
-                    if self.rows == 1:
-                        curr_selected -= 1
-                except ValueError:
-                    curr_selected -= self.cols
-
-            curr_selected = min(curr_selected+1, len(self.all_items)-1)
-            menu.selected = self.all_items[curr_selected]
+            menu.change_selection(1)
             self.refresh()
             return True
 
 
         if event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
             menu.selected.play(menuw=self)
+            self.refresh()
             return True
+
         
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
             action = None
@@ -627,10 +555,8 @@ class MenuWidget(Application):
                     
         if event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
-            if skin.toggle_display_style(menu):
-                self.rebuild_page()
-                self.refresh()
-                return True
+            self.engine.toggle_display_style(menu)
+            self.refresh()
                 
         if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
             if menu.selected.eventhandler(event = event, menuw=self):
@@ -644,61 +570,3 @@ class MenuWidget(Application):
         return False
 
 
-
-    def rebuild_page(self):
-        menu = self.menustack[-1]
-       
-        if not menu:
-            return
-
-        # recalc everything!
-        current = menu.selected
-        pos = menu.choices.index(current)
-
-        menu.previous_page_start = []
-        menu.previous_page_start.append(0)
-        menu.page_start = 0
-
-        rows, cols = menu.items_per_page()
-        items_per_page = rows*cols
-
-        while pos >= menu.page_start + items_per_page:
-            self.goto_next_page(arg='no_refresh')
-
-        menu.selected = current
-        self.init_page()
-        menu.display_style = skin.get_display_style(menu)
-        
-
-    def init_page(self):
-        
-        menu = self.menustack[-1]
-        if not menu:
-            return
-
-        # Create the list of main selection items (menu_items)
-        menu_items           = []
-        first                = menu.page_start
-        self.rows, self.cols = menu.items_per_page()
-        
-        for choice in menu.choices[first : first+(self.rows*self.cols)]:
-            menu_items.append(choice)
-     
-        self.rows, self.cols = menu.items_per_page()
-
-        self.menu_items = menu_items
-        
-        if len(menu_items) == 0:
-            self.all_items = menu_items + [ MenuItem('Back', self.back_one_menu) ]
-        else:
-            self.all_items = menu_items
-
-        if not menu.selected in self.all_items:
-            menu.selected = self.all_items[0]
-
-        if not menu.choices:
-            menu.selected = self.all_items[0]
-
-
-# register menu to the skin
-skin.register('menu', ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'))
