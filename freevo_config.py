@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2003/01/09 05:04:05  krister
+# Added an option to play all movies in a dir, and generate random playlists for them.
+#
 # Revision 1.104  2003/01/07 07:18:56  krister
 # Added autosync as a default option for MPlayer.
 #
@@ -133,6 +136,12 @@ MOVIE_DATA_DIR = 'movie-data/'
 # (lowercase) is in this directory, it will be taken as cover image
 #
 TV_SHOW_IMAGES = "testfiles/tv-show-images/"
+
+#
+# Should playlists be available for movies, and all movies in a directory
+# be played in succession (unless you press STOP/EXIT)?
+#
+MOVIE_PLAYLISTS = 0
 
 #
 # The list of filename suffixes that are used to match the files that

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/01/09 05:04:06  krister
+# Added an option to play all movies in a dir, and generate random playlists for them.
+#
 # Revision 1.15  2003/01/05 11:48:53  dischi
 # ignore .xvpics directories
 #
@@ -333,12 +336,14 @@ class DirItem(Playlist):
                 items += [ DirItem(dir, self, display_type = self.display_type) ]
 
 
-        # playlists (only active for images and audio)
-        if not self.display_type or self.display_type == 'audio':
+        # playlists (only active for images and audio, video is configurable)
+        if (not self.display_type or self.display_type == 'audio' or
+            (config.MOVIE_PLAYLISTS and self.display_type == 'video')):
             self.playlist = play_items
 
-            for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
-                items += [ Playlist(pl, self) ]
+            if self.display_type != 'video':
+                for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
+                    items += [ Playlist(pl, self) ]
 
             # random playlist
             if len(play_items) > 1 and self.display_type:

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/09 05:04:06  krister
+# Added an option to play all movies in a dir, and generate random playlists for them.
+#
 # Revision 1.5  2003/01/04 16:39:47  dischi
 # Added uid to the name of the logfile to avoid conflicts when running
 # freevo with different users
@@ -69,6 +72,9 @@
 
 import sys, os, time, re
 import traceback
+
+# Fallback for a new option, remove later.
+MOVIE_PLAYLISTS = 0
 
 # Send debug to stdout as well as to the logfile?
 DEBUG_STDOUT = 1
@@ -269,3 +275,4 @@ TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").spli
 #
 
 FREEVO_PLUGINS = {}
+
