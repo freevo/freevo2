@@ -24,6 +24,9 @@ import osd
 # sends commands to
 import rc
 
+# XML support
+from xml.utils import qp_xml
+
 # Set to 1 for debug output
 DEBUG = 0
 
@@ -43,26 +46,175 @@ rc = rc.get_singleton()
 
 # Create the OSD object
 osd = osd.get_singleton()
+# XXX Shouldn't this be moved to the config file?
+OSD_FONT_DIR = 'skins/fonts/'
+OSD_DEFAULT_FONT = 'skins/fonts/SF Arborcrest Medium.ttf'
+#
+# data structures
+#
 
+class XML_data:
+    color = sel_color = 0
+    x = y = height = width = size = sel_length = 0
+    visible = 1
+    text = None
+    font = OSD_DEFAULT_FONT
+    
+    
+class XML_menu:
+    bgbitmap = ''
+    title = XML_data()
+    items = XML_data()
+    cover_movie = XML_data()
+    cover_music = XML_data()
+    cover_image = XML_data()
+    submenu = XML_data()
+    
+class XML_mp3:
+    bgbitmap = ''
+
+class XMLSkin:
+
+
+    menu = XML_menu()
+    mp3  = XML_mp3()
+
+
+    #
+    # Help functions
+    #
+    def attr_int(self, node, attr, default):
+        try:
+            if node.attrs.has_key(('', attr)):
+                return int(node.attrs[('', attr)])
+        except ValueError:
+            pass
+        return default
+
+    def attr_hex(self, node, attr, default):
+        if node.attrs.has_key(('', attr)):
+            return int(node.attrs[('', attr)], 16)
+        return default
+
+    def attr_bool(self, node, attr, default):
+        if node.attrs.has_key(('', attr)):
+            if node.attrs[('', attr)] == "yes":
+                return 1
+            elif node.attrs[('', attr)] == "no":
+                return 0
+        return default
+
+    def attr_font(self, node, attr, default):
+        if node.attrs.has_key(('', attr)):
+            font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.ttf').encode()
+            if not os.path.isfile(font):
+                font = os.path.join(OSD_FONT_DIR, node.attrs[('', attr)] + '.TTF')
+            if not font:
+                print "can find font >%s<" % font
+                font = OSD_DEFAULT_FONT
+            return font
+        return default
+
+
+
+    def parse_node(self, node, data):
+        data.x = self.attr_int(node, "x", data.x)
+        data.y = self.attr_int(node, "y", data.y)
+        data.height = self.attr_int(node, "height", data.height)
+        data.width = self.attr_int(node, "width", data.width)
+        data.visible = self.attr_bool(node, "visible", data.visible)
+
+        for subnode in node.children:
+            if subnode.name == u'font':
+                data.color = self.attr_hex(subnode, "color", data.color)
+                data.size = self.attr_int(subnode, "size", data.size)
+                data.font = self.attr_font(subnode, "name", data.font)
+            if subnode.name == u'selection':
+                data.sel_color = self.attr_hex(subnode, "color", data.sel_color)
+                data.sel_length = self.attr_int(subnode, "length", data.sel_length)
+            if subnode.name == u'text':
+                data.text = subnode.textof()
+
+
+    #
+    # read the skin informations for menu
+    #
+    def read_menu(self, file, menu_node, copy_content):
+        if copy_content: self.menu = copy.copy(self.menu)
+        for node in menu_node.children:
+
+            if node.name == u'bgbitmap':
+                self.menu.bgbitmap = os.path.join(os.path.dirname(file), node.textof())
+
+            elif node.name == u'title':
+                if copy_content: self.menu.title = copy.copy(self.menu.title)
+                self.parse_node(node, self.menu.title)
+
+            elif node.name == u'items':
+                if copy_content: self.menu.items = copy.copy(self.menu.items)
+                self.parse_node(node, self.menu.items)
+
+            elif node.name == u'cover':
+                for subnode in node.children:
+                    if subnode.name == u'movie':
+                        if copy_content:
+                            self.menu.cover_movie = copy.copy(self.menu.cover_movie)
+                        self.parse_node(subnode, self.menu.cover_movie)
+                    if subnode.name == u'music':
+                        if copy_content:
+                            self.menu.cover_music = copy.copy(self.menu.cover_music)
+                        self.parse_node(subnode, self.menu.cover_music)
+                    if subnode.name == u'image':
+                        if copy_content:
+                            self.menu.cover_image = copy.copy(self.menu.cover_image)
+                        self.parse_node(subnode, self.menu.cover_image)
+
+            elif node.name == u'submenu':
+                if copy_content: self.menu.submenu = copy.copy(self.menu.submenu)
+                self.parse_node(node, self.menu.submenu)
+
+
+
+    #
+    # read the skin informations for the mp3 player
+    #
+    def read_mp3(self, file, menu_node, copy_content):
+        if copy_content: self.mp3 = copy.copy(self.mp3)
+        for node in menu_node.children:
+            if node.name == u'bgbitmap':
+                self.mp3.bgbitmap = os.path.join(os.path.dirname(file), node.textof())
+
+
+    #
+    # parse the skin file
+    #
+    def load(self, file, copy_content = 0):
+        try:
+            parser = qp_xml.Parser()
+            box = parser.parse(open(file).read())
+            if box.children[0].name == 'skin':
+                for node in box.children[0].children:
+                    if node.name == u'menu':
+                        self.read_menu(file, node, copy_content)
+                    if node.name == u'mp3':
+                        self.read_mp3(file, node, copy_content)
+        except:
+            print "ERROR: XML file corrupt"
+            
+
+
+###############################################################################
+# Skin main functions
+###############################################################################
 
 class Skin:
 
-    # OSD fonts
-    OSD_FONTNAME = 'skins/fonts/Cultstup.ttf'
-    OSD_FONTSIZE = 14
-    OSD_FONTNAME_HDR = 'skins/fonts/Cultstup.ttf'
-    OSD_FONTSIZE_HDR = 22
-    OSD_FONTNAME_ITEMS = 'skins/fonts/SF Arborcrest Medium.ttf'
-    OSD_FONTSIZE_ITEMS = 15
-    OSD_FONTNAME_BTNS = 'skins/fonts/RUBTTS__.TTF'
-    OSD_FONTSIZE_BTNS = 18
+    # OSD XML specifiaction
+    OSD_XML_DEFINITIONS = 'skins/krister1/768x576.xml'
 
-    # OSD background bitmap. Must be PNG.
-    # Format: (filename, x, y)  x=y=-1 means integer tiling
+    settings = XMLSkin()
+    settings.load(OSD_XML_DEFINITIONS)
 
-    OSD_BGBITMAP = ('skins/images/aubin_bg1.png', -1, -1)
-
-    bgbitmap = OSD_BGBITMAP
     items_per_page = 13
 
 
@@ -83,10 +235,16 @@ class Skin:
 
 
     # Parse XML files with additional settings
+    # TODO: parse also parent directories
     def LoadSettings(self, dir):
+        if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
+            settings = copy.copy(self.settings)
+            settings.load(os.path.join(dir, "skin.xml"), 1)
+            return settings
         return None
 
-    
+
+
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
@@ -98,142 +256,179 @@ class Skin:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
 
-        if self.bgbitmap[0]:
-            apply(osd.drawbitmap, self.bgbitmap)
+        # get the settings
+        if menu.skin_settings:
+            val = menu.skin_settings.menu
+        else:
+            val = self.settings.menu
+
+        if val.bgbitmap[0]:
+            apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
         
         # Menu heading
-        osd.drawstring(menu.heading, 160, 50,
-                       font=self.OSD_FONTNAME_HDR,
-                       ptsize=self.OSD_FONTSIZE_HDR)
+        if val.title.visible:
+            if val.title.text:
+                menu.heading = val.title.text
+            osd.drawstring(menu.heading, osd.width/2, val.title.y, val.title.color,
+                           font=val.title.font,
+                           ptsize=val.title.size, align='center')
 
         # Draw the menu choices for the main selection
-        x0 = 60
-        y0 = 100
-        selection_height = 390
+        if len(menuw.menustack) == 1:
+            is_main = 1 # Is main menu, kludge
+        else:
+            is_main = 0
+
+        if is_main:
+            # Main menu items
+            ptscale = 2.0
+            dx = 150 # Extra x indent, kludge
+            icon_size = 75
+
+            if len(menuw.menu_items) == 5:
+                icon_size = 64
+        else:
+            # Sub menus
+            ptscale = 1.0
+            dx = 0
+            icon_size = 25
+
+        x0 = val.items.x + dx
+        y0 = val.items.y
+        selection_height = val.items.height
+
         if menu.packrows:
             spacing = selection_height / menuw.items_per_page
         else:
-            spacing = selection_height / min(4, max(len(menuw.menu_items),1))
+            spacing = selection_height / max(len(menuw.menu_items),1)
 
         # image to display
         image = None
-
-        # Get max text width of the menu choices
-        max_width = 0
+        
+        fontsize = val.items.size*ptscale
+        
+        # Handle multiple columns in the menu widget.
+        # Only the first column is highlighted, and all columns have
+        # their left edges vertically aligned
+        rows = []
+        maxcols = 0  # Largest number of columns in any row
+        for item in menuw.menu_items:
+            row = item.name.split('\t')
+            rows += [row]
+            maxcols = max(maxcols, len(row))
+            
+        # Determine the width of the widest column string
+        maxwidth = 0
+        for row in rows:
+            w, h = osd.stringsize(row[0], font=val.items.font,
+                                  ptsize=fontsize)
+            maxwidth = max(maxwidth, w)
+            
+        # Draw the menu items, with icons if any
+        row = 0
         for choice in menuw.menu_items:
-            if len(menuw.menustack) == 1:
-                if y0 > 450:
-                    y0 = 100
-                    x0 = 384
-                icon_w = 100
-                ptscale = 2.0
-            else:
-                icon_w = 30
-                ptscale = 1.0
-            fontsize = self.OSD_FONTSIZE_ITEMS*ptscale
+	    if choice.icon != None:
+                icon_x = x0 - icon_size - 10 - 25*is_main
+                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size),
+                               icon_x, y0)
 
-            str_w, str_h = osd.stringsize(choice.name,
-                                          font=self.OSD_FONTNAME_ITEMS,
-                                          ptsize=fontsize)
-
-            max_width = max(max_width, str_w)
-            
-
-        # Draw the menu strings
-        for choice in menuw.menu_items:
-            if len(menuw.menustack) == 1:
-                if y0 > 450:
-                    y0 = 100
-                    x0 = 384
-                icon_w = 100
-                ptscale = 2.0
-            else:
-                icon_w = 30
-                ptscale = 1.0
-            fontsize = self.OSD_FONTSIZE_ITEMS*ptscale
-	    w = 0
-	    h = 0
-	    if choice.icon != None: 
- 		if choice.scale == 1:
-			w,h = util.pngsize(util.resize(choice.icon))
-			osd.drawbitmap(util.resize(choice.icon), x0, y0)
-		else:
-			w,h = util.pngsize(choice.icon)	
-			osd.drawbitmap(choice.icon,x0,y0)
-		# Align the logo based on image size
-	
-
-            
-            str_x = (x0+icon_w)
-            str_y = y0
-            
-            osd.drawstring(choice.name, str_x, y0,
-                           font=self.OSD_FONTNAME_ITEMS,
+            # Draw the selection
+            osd.drawstring(rows[row][0], x0, y0, val.items.color,
+                           font=val.items.font,
                            ptsize=fontsize)
-
-            str_w, str_h = osd.stringsize(choice.name,
-                                          font=self.OSD_FONTNAME_ITEMS,
-                                          ptsize=fontsize)
-
-            if DEBUG: print 'Str "%s", size %d, %d' % (choice.name, str_w, str_h)
             
 	    if menu.selected == choice:
+                osd.drawbox(x0 - 3 - 5*is_main, y0 - 3,
+                            x0 + maxwidth + 3 + 5*is_main,
+                            y0 + fontsize*1.5 + 1 + 2*is_main, width=-1,
+                            color=((160 << 24) | val.items.sel_color))
 
-                osd.drawbox(str_x - 3, str_y, str_x + max_width + fontsize/4,
-                            str_y + str_h + 3, width = -1,
-                            color=((160 << 24) | osd.COL_BLUE))
-
-                if choice.image != None:
-                    (type, image) = choice.image
-                    if type == 'photo':
-                        image = util.getExifThumbnail(image, 200, 150)
-                    else:
-                        if image != None: image = util.resize(image, 200, 280)
-
-		if choice.icon != None and choice.popup:
-			(w, h) = util.pngsize(choice.icon)
-			# Calculate best image placement
-			logox = int(osd.width) - int(w) - 55
-			# Draw border for image
-			osd.drawbox(int(logox), 100, (int(logox) + int(w)), 100 + int(h),
-            			    width=6, color=0x000000)
-			osd.drawbitmap(choice.icon, logox, 100)
+                image = choice.image
 
             y0 += spacing
+            row += 1
+
+        x0 += maxwidth + 8
+        
+        # Draw the additional text columns with vertical alignment
+        for col in range(1, maxcols):
+
+            y0 = val.items.y  # Start over from the top
+            
+            # Determine the width of the widest column string
+            maxwidth = 0
+            for row in rows:
+                if col >= len(row): continue # Not all rows are same length
+                
+                w, h = osd.stringsize(row[col], font=val.items.font,
+                                      ptsize=fontsize)
+                maxwidth = max(maxwidth, w)
+
+            # Draw the column strings for all rows
+            for row in rows:
+                if col < len(row): 
+                    osd.drawstring(row[col], x0, y0, val.items.color,
+                                   font=val.items.font,
+                                   ptsize=fontsize)
+                y0 += spacing
+
+            # Update x for the next column
+            x0 += maxwidth + 8
+
 
         # draw the image
-        if image != None:
-            (w, h) = util.pngsize(image)
-            logox = int(osd.width) - int(w) - 30
-            osd.drawbitmap(image, logox, 100)
+        if image:
+            (type, image) = image
+        if image:
+            if type == 'photo' and val.cover_image.visible:
+                thumb = util.getExifThumbnail(image, val.cover_image.width, \
+                                              val.cover_image.height)
+                if thumb:
+                    osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
+            elif type == 'movie' and val.cover_movie.visible:
+                osd.drawbitmap(\
+                        util.resize(image, val.cover_movie.width, \
+                                    val.cover_movie.height),\
+                        val.cover_movie.x, val.cover_movie.y)
+            elif type == 'music' and val.cover_music.visible:
+                osd.drawbitmap(\
+                        util.resize(image, val.cover_music.width, \
+                                    val.cover_music.height),\
+                        val.cover_music.x, val.cover_music.y)
+            
 
         # Draw the menu choices for the meta selection
-        x0 = 40
-        y0 = 505
+        x0 = val.submenu.x
+        y0 = val.submenu.y
+        
         for item in menuw.nav_items:
-            fontsize = self.OSD_FONTSIZE_BTNS
-            osd.drawstring(item.name, x0, y0,
-                           font=self.OSD_FONTNAME_BTNS,
-                           ptsize=fontsize)
+            osd.drawstring(item.name, x0, y0, val.submenu.color,
+                           font=val.submenu.font,
+                           ptsize=val.submenu.size)
             if menu.selected == item:
-                osd.drawbox(x0 - 4, y0 - 3, x0 + 150, y0 + fontsize*1.5,
+                osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu.sel_length, \
+                            y0 + val.submenu.size*1.5,
                             width=-1,
-                            color=((160 << 24) | osd.COL_BLUE))
+                            color=((160 << 24) | val.submenu.sel_color))
 	    x0 += 190
 
         osd.update()
         
 
+
+
     def DrawMP3(self, info):
+
+        val = self.settings.mp3
 
         left = 170
 
         if info.drawall:
             osd.clearscreen()
 
-            if self.bgbitmap[0]:
-                apply(osd.drawbitmap, self.bgbitmap)
-            
+            if val.bgbitmap[0]:
+                apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
+
 
             # Display the cover image file if it is present
             if info.image:
@@ -272,13 +467,16 @@ class Skin:
 
         else:
             # Erase the portion that will be redrawn
-            osd.drawbitmap(self.bgbitmap[0], left, 300, None, left, 300, 100, 100)
+            if val.bgbitmap[0]:
+                osd.drawbitmap( val.bgbitmap, left, 300, None, left,
+                                300, 100, 100 )
 
-        
-        el_min = int(round(info.elapsed / 60))
-        el_sec = int(round(info.elapsed % 60))
-        rem_min = int(round(info.remain / 60))
-        rem_sec = int(round(info.remain % 60))
+        # XXX I changed this because round rounds up on 3.58 etc. instead
+        # XXX of giving us the desired "round down modulo" effect.
+        el_min  = int(info.elapsed)/60
+        el_sec  = int(info.elapsed)%60
+        rem_min = int(info.remain)/60
+        rem_sec = int(info.remain)%60
 
         osd.drawstring('%s:%02d   ' % (el_min, el_sec), left, 300,
                        osd.default_fg_color)
@@ -296,4 +494,3 @@ class Skin:
         osd.drawbox(34, 441, 34 + pixels, 459, width = -1, color = osd.COL_BLUE)
 
         osd.update()
-    
