@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/23 15:12:24  dischi
+# wait for fade animation to finish
+#
 # Revision 1.4  2004/08/23 14:28:22  dischi
 # fix animation support when changing displays
 #
@@ -71,23 +74,16 @@ class AreaScreen:
         self.visible   = False
         self.width     = 0
         self.height    = 0
-        self.animation = None
         self.frames_per_fade = 3
+
         
-    def stop_animation(self):
-        for l in self.layer:
-            l.set_alpha(255)
-        if not self.visible:
-            for l in self.layer:
-                l.unparent()
-            
     def show(self, canvas):
-        if self.animation:
-            self.animation.remove()
-            self.animation = None
+        """
+        show the layer on the display
+        """
         for l in self.layer:
-            l.set_alpha(255)
             canvas.add_child(l)
+            l.set_alpha(255)
         self.visible = True
         self.canvas  = canvas
         self.width   = canvas.width
@@ -95,9 +91,9 @@ class AreaScreen:
 
 
     def hide(self):
-        if self.animation:
-            self.animation.remove()
-            self.animation = None
+        """
+        hide all layers
+        """
         for l in self.layer:
             l.unparent()
         self.visible = False
@@ -107,33 +103,27 @@ class AreaScreen:
 
 
     def fade_out(self):
+        """
+        fade out layer and hide them
+        """
         if not self.visible:
             return
-        if self.animation:
-            self.animation.remove()
-        self.canvas  = None
-        self.visible = False
-        self.width   = 0
-        self.height  = 0
-        self.animation = animation.Fade(self.layer, self.frames_per_fade,
-                                        255, 0, callback=self.stop_animation)
-        self.animation.start()
-        
+        a = animation.Fade(self.layer, self.frames_per_fade, 255, 0)
+        a.start()
+        a.wait()
+        self.hide()
+
         
     def fade_in(self, canvas):
+        """
+        show layers again and fade them in
+        """
         if not self.visible:
             pass
-        if self.animation:
-            self.animation.remove()
-        for l in self.layer:
-            canvas.add_child(l)
-        self.visible = True
-        self.canvas  = canvas
-        self.width   = canvas.width
-        self.height  = canvas.height
-        self.animation = animation.Fade(self.layer, self.frames_per_fade,
-                                        0, 255, callback=self.stop_animation)
-        self.animation.start()
+        self.show(canvas)
+        a = animation.Fade(self.layer, self.frames_per_fade, 0, 255)
+        a.start()
+        a.wait()
 
         
 class AreaHandler:
@@ -330,8 +320,7 @@ class AreaHandler:
         clean the screen
         """
         _debug_('clear skin (%s)' % self.type)
-        #self.screen.hide()
-        self.screen.fade_out()
+        self.screen.hide()
 
 
     def hide(self):
@@ -359,6 +348,9 @@ class AreaHandler:
         the audio player
         """
         settings = self.settings
+        if not self.visible:
+            return
+        
         if not self.screen.visible and self.visible:
             self.screen.show(self.canvas)
             
