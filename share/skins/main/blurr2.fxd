@@ -647,9 +647,42 @@
         <font label="splashscreen font" name="Arial_Bold" size="20" color="0xffffff"/>
         
         
+                
+        <!-- ********************************************** -->
+        <!-- POPUP -->
+
+
+        <layout label="popup">
+            <background>
+                <rectangle x="5" y="5" size="0" bgcolor="0xa0000000" radius="5"/>
+                <rectangle width="max-5" height="max-5" color="0x000000" size="1" 
+                    bgcolor="0xffffff" radius="5"/>
+                <rectangle x="3" y="3" width="max-11" height="max-11" color="0x000000" 
+	            size="1" bgcolor="widget background" radius="5"/>
+            </background>
+            <content x="8" y="8" width="max-21" height="max-21">
+	        <!-- special button settings -->
+                <item type="button">
+                    <rectangle color="0x000000" bgcolor="widget item background" 
+                        size="2" radius="6"/>
+                </item>
+         	<!-- special settings for selected buttons -->
+                <item type="button selected">
+                    <rectangle color="0x000000" bgcolor="widget selected background" 
+                        size="2" radius="6"/>
+                </item>
+	    </content>
+        </layout>
         
+        <font label="widget" name="Arial_Bold" size="12">
+            <shadow visible="yes" color="0x000000" border="yes"/>
+        </font>
+        <font label="selected widget" name="Arial_Bold" size="12">
+            <shadow visible="yes" color="0x000000" border="yes"/>
+        </font>
         
-        
+
+
         <!-- ********************************************** -->
         <!-- FONT DEFINITIONS -->
         
@@ -687,12 +720,6 @@
         <font label="player" name="Arial_Bold" size="18" color="0xffffff">
             <shadow visible="yes" color="0x000000" border="yes"/>
         </font>
-        <font label="widget" name="Arial_Bold" size="12">
-            <shadow visible="yes" color="0x000000" border="yes"/>
-        </font>
-        <font label="widget selected" name="Arial_Bold" size="12">
-            <shadow visible="yes" color="0x000000" border="yes"/>
-        </font>
         
         
         <!-- info area -->
@@ -701,7 +728,6 @@
         <font label="info label"   name="Arial_Bold" size="14" color="0xffffff"/>
         <font label="info value"   name="Arial_Bold" size="14" color="0xffffff"/>
         
-        <font label="selected widget" name="Arial_Bold" size="16" color="0x164668"/>
         <font label="player title" name="Arial_Bold" size="18" color="0xffffff"/>
         <font label="player artist" name="Arial_Bold" size="16" color="0xffffff"/>
         <font label="player info"   name="Arial_Bold" size="14" color="0xffffff"/>

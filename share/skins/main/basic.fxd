@@ -277,12 +277,22 @@
       <background>
         <rectangle color="0x000000" size="1" bgcolor="widget background"/>
       </background>
-      <content type="text" spacing="10" color="widget text" font="default">
-        <item type="default" font="widget">
-          <rectangle bgcolor="widget item background" size="0"/>
-        </item>
+      <content type="text" spacing="10" color="widget text" font="widget">
+	<!-- basic widget information -->
+        <item type="widget" font="widget">
+          <rectangle color="0xffffff" bgcolor="widget item background"/>
+	</item>
+	<!-- selected widgets -->
         <item type="selected" font="selected widget">
-          <rectangle bgcolor="widget selected background" size="0"/>
+          <rectangle color="0x000000" bgcolor="widget selected background"/>
+	</item>
+	<!-- special button settings -->
+        <item type="button" font="widget">
+          <rectangle color="0x000000" bgcolor="widget item background" size="2"/>
+        </item>
+	<!-- special settings for selected buttons -->
+        <item type="button selected" font="selected widget">
+          <rectangle color="0x000000" bgcolor="widget selected background" size="2"/>
         </item>
       </content>
     </layout>
@@ -293,7 +303,7 @@
     <color label="widget text" value="0xffffff"/>
     <color label="widget background" value="0x001F4A95"/>
     <color label="widget item background" value="0x00164668"/>
-    <color label="widget selected background" value="0x00ffffff"/>
+    <color label="widget selected background" value="0xffffff"/>
 
 
 
