@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/03 21:30:00  dischi
+# minor speed changes
+#
 # Revision 1.5  2003/04/24 19:57:53  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -61,14 +64,15 @@ load_imagecache   = objectcache.ObjectCache(20, desc='load_image')
 
 
 def format_image(settings, item, width, height, force=0):
-    if hasattr(item, 'display_type'):
+    try:
         type = item.display_type
-    else:
+    except:
         type = item.type
 
-    cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
-    if hasattr(item, 'media'):
+    try:
         cname = '%s-%s' % (cname, item.media)
+    except:
+        cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
         
     cimage = format_imagecache[cname]
 
