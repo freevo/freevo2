@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/02/24 19:50:35  dischi
+# change extra area location to skins/plugins
+#
 # Revision 1.43  2004/02/24 19:36:25  dischi
 # add function to change a skin area
 #
@@ -248,11 +251,10 @@ class Skin:
 
     def change_area(self, name, module, object):
         """
-        replace an area with the code from module.object()
+        replace an area with the code from module.object() from skins/plugins
         """
-        print name, module, object
-        exec('import %s' % module)
-        self.areas[name] = eval('%s.%s()' % (module, object))
+        exec('import skins.plugins.%s' % module)
+        self.areas[name] = eval('skins.plugins.%s.%s()' % (module, object))
 
         
     def set_base_fxd(self, name):
