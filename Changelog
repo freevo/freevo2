@@ -13,7 +13,7 @@ o Added a skins directory
 o Added a background bitmap to the main menu
 o Added <movie>.wmv file type to MPlayer
 o Fixed a bug in runapp.c
-o Changed boot/boot.freevo1 to not run /etc/rc.config, it resets the path
+o Updated the boot-scripts
 o Swapped MPlayer next/prev keys
 
 
