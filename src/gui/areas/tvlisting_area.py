@@ -42,10 +42,10 @@ import copy
 import os
 import pyepg
 import gui
-
+import math
 import time
 import config
-import math
+
 from area import Area
 from gui import Rectangle
 from record.client import recordings
@@ -54,7 +54,8 @@ from record.types import *
 import logging
 log = logging.getLogger('gui')
 
-class Geometry:
+
+class _Geometry:
     """
     Simple object with x, y, with, height values
     """
@@ -63,6 +64,10 @@ class Geometry:
         self.y = y
         self.width  = width
         self.height = height
+
+    def __str__(self):
+        return '_Geometry: %s,%s %sx%s' % \
+               (self.x, self.y, self.width, self.height)
 
 
 class TvlistingArea(Area):
@@ -76,10 +81,14 @@ class TvlistingArea(Area):
         self.last_settings = None
         self.last_items_geometry = None
         self.last_start_time = 0
-        self.chan_obj = []
-        self.time_obj = []
         self.last_channels = None
-        self.objects = []
+
+        # objects on the area
+        self.chan_obj   = []
+        self.time_obj   = []
+        self.up_arrow   = None
+        self.down_arrow = None
+        self.objects    = []
         self.background = None
         
 
@@ -153,17 +162,18 @@ class TvlistingArea(Area):
         if r.y < 0:
             r.y, y = 0, -r.y
             height -= y
-        return Geometry(x, y, width, height), r
+        return _Geometry(x, y, width, height), r
 
 
     def clear(self):
         for o in self.objects + self.chan_obj + self.time_obj:
             if o:
                 o.unparent()
-        if self.background:
-            self.background.unparent()
-            self.background = None
-        self.objects = []
+        for o in ('background', 'up_arrow', 'down_arrow'):
+            if getattr(self, o):
+                getattr(self, o).unparent()
+            setattr(self, o, None)
+        self.objects  = []
         self.chan_obj = []
         self.time_obj = []
         self.last_channels = None
@@ -181,17 +191,16 @@ class TvlistingArea(Area):
             timeformat = '%H:%M'
         head_val = self.all_vals[1]
 
-        geo = Geometry( 0, 0, col_size, height )
+        geo = _Geometry( 0, 0, col_size, height )
         if head_val.rectangle:
             geo, rect = self.fit_item_in_rectangle( head_val.rectangle,
                                                     col_size, height, height )
-
+            
         for i in range( n_cols ):
             if head_val.rectangle:
-                self.time_obj.append(self.drawbox( math.floor(x0), y0,
-                                                   math.floor(col_size + x0)- \
-                                                   math.floor( x0 ) + 1,
-                                                   height + 1, rect ))
+                width = int(math.floor(col_size + x0) - math.floor( x0 ) + 1)
+                self.time_obj.append(self.drawbox(int(math.floor(x0)), y0,
+                                                  width, height + 1, rect))
 
             t_str = time.strftime( timeformat,
                                    time.localtime(start_time + col_time*i*60 ))
@@ -327,7 +336,7 @@ class TvlistingArea(Area):
         if not dateformat:
             dateformat = '%e-%b'
 
-        r = Geometry( 0, 0, label_width, font_h )
+        r = _Geometry( 0, 0, label_width, font_h )
         if label_val.rectangle:
             r = self.calc_rectangle( label_val.rectangle, label_width,
                                      head_h )[ 2 ]
@@ -441,7 +450,7 @@ class TvlistingArea(Area):
                     ty0 = y0
 
                     # calc the geometry values
-                    ig = Geometry(0, 0, tx1-tx0+1, item_h)
+                    ig = _Geometry(0, 0, tx1-tx0+1, item_h)
                     if val.rectangle:
                         ig, r = self.fit_item_in_rectangle(val.rectangle,
                                                            tx1-tx0+1,
@@ -483,17 +492,29 @@ class TvlistingArea(Area):
                 log.error(e)
             y0 += item_h - 1
 
-        # print arrow:
         if start_channel > 0 and area.images['uparrow']:
-            ar = self.drawimage(area.images['uparrow'].filename,
-                                area.images['uparrow'])
-            self.objects.append(ar)
+            # up arrow needed
+            if not self.up_arrow:
+                self.up_arrow = self.drawimage(area.images['uparrow'].filename,
+                                               area.images['uparrow'])
+        elif self.up_arrow:
+            # no arrow needed but on the screen, remove it
+            self.up_arrow.unparent()
+            self.up_arrow = None
+
         if len(pyepg.channels) >= start_channel+num_rows and \
                area.images['downarrow']:
-            if isinstance(area.images['downarrow'].y, str):
-                v = copy.copy(area.images['downarrow'])
-                v.y = eval(v.y, {'MAX' : y0})
-            else:
-                v = area.images['downarrow']
-            ar = self.drawimage(area.images['downarrow'].filename, v)
-            self.objects.append(ar)
+            if not self.down_arrow:
+                # down arrow needed
+                if isinstance(area.images['downarrow'].y, str):
+                    v = copy.copy(area.images['downarrow'])
+                    v.y = eval(v.y, {'MAX' : y0})
+                else:
+                    v = area.images['downarrow']
+                fname = area.images['downarrow'].filename
+                self.down_arrow = self.drawimage(fname, v)
+        elif self.down_arrow:
+            # no arrow needed but on the screen, remove it
+            self.down_arrow.unparent()
+            self.down_arrow = None
+            
