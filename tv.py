@@ -32,6 +32,9 @@ import rc
 # The TV application
 import mplayer_tv
 
+# Skin class
+import skin
+
 # The Electronic Program Guide
 import epg_xmltv as epg
 
@@ -56,6 +59,8 @@ mixer = mixer.get_singleton()
 # Set up the TV application
 tvapp = mplayer_tv.get_singleton()
 
+# Set up skin
+skin = skin.get_singleton()
 
 def start_tv(menuw=None, arg=None):
     mode = arg[0]
@@ -68,16 +73,18 @@ def main_menu(arg, menuw):
         start_tv(None, ('record', None))
         return
     
-    osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstring('Getting the program guide', 30, 280,
-                   fgcolor=osd.COL_ORANGE, bgcolor=0xff000000)
-    osd.update()
-    
+    #osd.clearscreen(color=osd.COL_BLACK)
+    #osd.drawstring('Getting the program guide', 30, 280,
+    #               fgcolor=osd.COL_ORANGE, bgcolor=0xff000000)
+    #osd.update()
+   
+    skin.PopupBox('Preparing the program guide')
+
     guide = epg.get_guide()
 
-    osd.drawstring('Done!', 30, 320,
-                   fgcolor=osd.COL_ORANGE, bgcolor=0xff000000)
-    osd.update()
+    #osd.drawstring('Done!', 30, 320,
+    #               fgcolor=osd.COL_ORANGE, bgcolor=0xff000000)
+    #osd.update()
     
     items = []
 
