@@ -10,6 +10,12 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.6  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -313,12 +319,7 @@ class PopupBox(GUIObject):
 
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
-        # if self.bg_surface:
-        #     print 'PB: have bg_surface'
-        #     box = self.bg_surface
-        #     self.osd.putsurface(self.bg_surface, self.left, self.top)
-        # else:
-        #     print 'PB: no bg_surface'
+
         box = pygame.Surface(self.get_size(), 0, 32)
 
         box.fill(c)
@@ -330,12 +331,12 @@ class PopupBox(GUIObject):
             ix,iy = self.get_position()
             self.osd.screen.blit(self.icon, (ix+self.h_margin,iy+self.v_margin)) 
 
-        if self.label:  self.label._draw()
-        if self.border: self.border._draw()
+        if self.label:  self.label.draw()
+        if self.border: self.border.draw()
 
         if self.children:
             for child in self.children:
-                child._draw()
+                child.draw()
 
     
     def _erase(self):

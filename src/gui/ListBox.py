@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.4  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -64,7 +70,7 @@ from types          import *
 from osd import     Font
 import pygame
 
-DEBUG = 1
+DEBUG = 0
 
 
 class ListBox(RegionScroller):
@@ -195,8 +201,8 @@ class ListBox(RegionScroller):
                 if new_select.top < self.v_y:
                     return RegionScroller.scroll(self, direction)
 
-        self._draw()
-        self.osd.update()
+        # self.draw()
+        # self.osd.update()
 
 
     def get_selected_index(self):
@@ -279,7 +285,6 @@ class ListBox(RegionScroller):
         Lets alter the surface then get our superclass to do the draw.
 
         """
-        # if self.is_visible() == 0: return
 
         if not self.width or not self.height or not self.surface:
             raise TypeError, 'Not all needed variables set.'
@@ -289,7 +294,7 @@ class ListBox(RegionScroller):
         for item in self.items:
             item.set_position(x,y)
             y = y + item.height
-            item._draw(self.surface)
+            item.draw(self.surface)
     
         RegionScroller._draw(self)
 
@@ -325,6 +330,8 @@ class ListBox(RegionScroller):
         scrolldirs = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
         if scrolldirs.count(event) > 0:
             self.scroll(event)
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         else:
             return self.parent.eventhandler(event)

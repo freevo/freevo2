@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.3  2003/03/07 00:19:58  rshortt
 # Just a quick fix to take care of redrawing when changing the letter and still
 # seeing the previous letter though the alpha.  I will have to come up with
@@ -61,7 +67,7 @@ from Label     import *
 from types     import * 
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class LetterBox(GUIObject):
@@ -154,7 +160,6 @@ class LetterBox(GUIObject):
             charNext = 0
 
         self.set_text(self.ourChars[charNext])
-        self._draw()
 
 
     def charDown(self):
@@ -165,7 +170,6 @@ class LetterBox(GUIObject):
             charNext = len(self.ourChars)-1
 
         self.set_text(self.ourChars[charNext])
-        self._draw()
 
 
     def cycle_phone_char(self, command):
@@ -185,9 +189,6 @@ class LetterBox(GUIObject):
             else:
                 i = 0
             self.set_text(letters[i])
-
-        self._draw()
-        # self.osd.update_area(self.get_rect())
 
 
     def _draw(self):
@@ -215,8 +216,8 @@ class LetterBox(GUIObject):
 
         self.osd.screen.blit(box, self.get_position())
 
-        if self.label:  self.label._draw()
-        if self.border: self.border._draw()
+        if self.label:  self.label.draw()
+        if self.border: self.border.draw()
 
     
     def get_text(self):

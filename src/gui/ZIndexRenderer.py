@@ -6,6 +6,12 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.6  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -240,7 +246,7 @@ class ZIndexRenderer:
                     o.bg_image = o.bg_surface.convert()
                     iname = '/tmp/bg1-%s.bmp' % xx
                     pygame.image.save( o.bg_image, iname )
-                o._draw()
+                o.draw()
             xx += 1
 
         # xx = 0

@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.3  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -59,7 +65,7 @@ from Label          import *
 from LetterBoxGroup import *
 from types          import *
 
-DEBUG = 1
+DEBUG = 0
 
 
 class InputBox(PopupBox):
@@ -105,34 +111,37 @@ class InputBox(PopupBox):
 
         if event == self.rc.LEFT:
             self.lbg.change_selected_box('left')
-            # self._draw()
-            self.osd.update()
+            self.lbg.draw()
+            self.osd.update(self.lbg.get_rect())
             return
         elif event == self.rc.RIGHT:
             self.lbg.change_selected_box('right')
-            # self._draw()
-            self.osd.update()
+            self.lbg.draw()
+            self.osd.update(self.lbg.get_rect())
             return
         elif event == self.rc.ENTER or event == self.rc.SELECT:
             self.destroy()
             if self.handler: self.handler(self.lbg.get_word())
             return
+        elif event == self.rc.EXIT:
+            self.destroy()
+            return
         elif event == self.rc.UP:
             self.lbg.get_selected_box().charUp()
-            # self._draw()
-            self.osd.update()
+            self.lbg.draw()
+            self.osd.update(self.lbg.get_rect())
             return
         elif event == self.rc.DOWN:
             self.lbg.get_selected_box().charDown()
-            # self._draw()
-            self.osd.update()
+            self.lbg.draw()
+            self.osd.update(self.lbg.get_rect())
             return
         elif [self.rc.K1, self.rc.K2, self.rc.K3, self.rc.K4, self.rc.K5, 
               self.rc.K6, self.rc.K7, self.rc.K8, self.rc.K9, 
               self.rc.K0].count(event) > 0:
             self.lbg.get_selected_box().cycle_phone_char(event)
-            # self._draw()
-            self.osd.update()
+            self.lbg.draw()
+            self.osd.update(self.lbg.get_rect())
             # a,b,c,d = self.lbg.get_selected_box().get_rect()
             # print 'rectangle: %s' % dir(self.lbg.get_selected_box().get_rect())
             # if DEBUG: print 'a: "%s", b: "%s", c: "%s", d: "%s"' % (a,b,c,d)

@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.3  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -58,7 +64,7 @@ from Border    import *
 from Label     import *
 from types     import *
 
-DEBUG = 1
+DEBUG = 0
 
 
 class ConfirmBox(PopupBox):
@@ -120,7 +126,7 @@ class ConfirmBox(PopupBox):
         elif event == self.rc.LEFT or event == self.rc.RIGHT:
             self.b1.toggle_selected()
             self.b2.toggle_selected()
-            self._draw()
+            self.draw()
             self.osd.update(self.get_rect())
             return
         elif event == self.rc.ENTER or event == self.rc.SELECT:

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.5  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -211,8 +217,6 @@ class RegionScroller(GUIObject):
                 new_y = 0
             self.v_y = new_y
         if DEBUG: self.print_stuff()
-        self._draw()
-        self.osd.update()
 
 
     def set_surface(self, surface):
@@ -245,17 +249,17 @@ class RegionScroller(GUIObject):
         self.osd.screen.blit(box, self.get_position())
 
         if self.show_v_scrollbar:
-            if self.v_scrollbar: self.v_scrollbar._draw()
+            if self.v_scrollbar: self.v_scrollbar.draw()
 
         if self.show_h_scrollbar:
-            if self.h_scrollbar: self.h_scrollbar._draw()
+            if self.h_scrollbar: self.h_scrollbar.draw()
 
         if self.show_v_scrollbar and self.show_h_scrollbar:
             self.osd.screen.blit(self.filler,
                              (self.left+self.width-self.v_scrollbar.thickness,
                               self.top+self.height-self.h_scrollbar.thickness))
 
-        if self.border: self.border._draw()
+        if self.border: self.border.draw()
 
     
 
@@ -313,6 +317,8 @@ class RegionScroller(GUIObject):
         scrolldirs = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
         if scrolldirs.count(event) > 0:
             self.scroll(event)
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         else:
             return self.parent.eventhandler(event)

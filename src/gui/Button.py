@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.3  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -59,7 +65,7 @@ from Label      import *
 from types      import * 
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class Button(GUIObject):
@@ -183,8 +189,8 @@ class Button(GUIObject):
 
         self.osd.screen.blit(box, self.get_position())
 
-        if self.label:  self.label._draw()
-        if self.border: self.border._draw()
+        if self.label:  self.label.draw()
+        if self.border: self.border.draw()
 
     
     def get_text(self):

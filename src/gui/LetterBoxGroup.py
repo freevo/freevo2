@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.2  2003/03/05 03:53:34  rshortt
 # More work hooking skin properties into the GUI objects, and also making
 # better use of OOP.
@@ -56,7 +62,7 @@ from LetterBox  import *
 from types      import * 
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class LetterBoxGroup(GUIObject):
@@ -155,9 +161,9 @@ class LetterBoxGroup(GUIObject):
                 boxNext = len(self.boxes)-1
 
         self.boxes[boxNow].toggle_selected()
-        self.boxes[boxNow]._draw()
+        self.boxes[boxNow].draw()
         self.boxes[boxNext].toggle_selected()
-        self.boxes[boxNext]._draw()
+        self.boxes[boxNext].draw()
 
 
     def get_word(self):
@@ -189,9 +195,9 @@ class LetterBoxGroup(GUIObject):
 
         self.osd.screen.blit(box, self.get_position())
 
-        if self.border: self.border._draw()
+        if self.border: self.border.draw()
         for box in self.boxes:
-            box._draw()
+            box.draw()
 
     
     def set_border(self, bs):

@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.1  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
@@ -47,7 +53,7 @@ from Label     import *
 from types     import * 
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class OptionBox(GUIObject):
@@ -128,8 +134,6 @@ class OptionBox(GUIObject):
 
         if self.list.get_selected_index() >= 0:
             self.set_text(self.list.get_selected_item().text)
-
-        self._draw()
         
 
     def add_item(self, text, value=None):
@@ -149,8 +153,6 @@ class OptionBox(GUIObject):
             self.list.visible = 1
             self.selected = 0
 
-        self._draw()
- 
 
     def _draw(self):
         """
@@ -171,7 +173,6 @@ class OptionBox(GUIObject):
         box.fill(c)
         box.set_alpha(a)
 
-        # pygame.draw.polygon(self.surface, (64, 64, 64), [(50,5),(65,5),(58,20)])
         ar_1 = (self.width-18, 5)
         ar_2 = (self.width-8, 5)
         ar_3 = (self.width-13, 20)
@@ -179,10 +180,9 @@ class OptionBox(GUIObject):
 
         self.osd.screen.blit(box, self.get_position())
 
-        if self.border: self.border._draw()
-        if self.list: 
-            self.list._draw()
-        if self.label:  self.label._draw()
+        if self.border: self.border.draw()
+        if self.list:   self.list.draw()
+        if self.label:  self.label.draw()
 
     
     def get_text(self):

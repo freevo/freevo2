@@ -7,6 +7,12 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.9  2003/03/06 19:13:14  dischi
 # Remove the GUI object from the parent when the parent changes
 #
@@ -150,7 +156,7 @@ class GUIObject:
         self.children   = []
         self.enabled    = 1
         self.selected   = 0
-        self.visible    = 0
+        self.visible    = 1
 
         self.left     = left
         self.top      = top
@@ -329,7 +335,7 @@ class GUIObject:
         # self.zir.update_hide(self)
         self.visible = 0
         self.set_position( self.left+x, self.top+y )
-        self._draw()
+        self.draw()
         # self.zir.update_show(self)
         self.visible = 1
 
@@ -359,7 +365,7 @@ class GUIObject:
         # I just figured out that we do not always want to
         # draw here.  If a child gets drawn before the parent
         # its bg_surface will be wrong!
-        # self._draw()
+        # self.draw()
 
 
     def redraw(self):
@@ -378,7 +384,20 @@ class GUIObject:
         pass
 
 
-    def _draw(self):
+    def draw(self, surface=None):
+        if self.is_visible() == 0: return
+
+        if self.bg_surface:
+            if DEBUG: print 'GUIObject::draw: have bg_surface'
+            self.osd.putsurface(self.bg_surface, self.left, self.top)
+
+        if surface:
+            self._draw(surface)
+        else:
+            self._draw()
+
+
+    def _draw(self, surface=None):
         """
         This function should be overriden by those
         objects that inherit this.
@@ -404,7 +423,7 @@ class GUIObject:
         """
         self.children.append(child)
         child.set_parent(self)
-        # child._draw()
+        # child.draw()
 
 
     def get_children(self):

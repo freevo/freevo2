@@ -7,6 +7,12 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.3  2003/02/23 18:21:50  rshortt
 # Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
 #
@@ -160,7 +166,7 @@ class Border(GUIObject):
 
         Todo: Implement what to do for other borders than flat.
         """
-        if DEBUG: print "  Inside Border._draw..."
+        if DEBUG: print "  Inside Border.draw..."
         if DEBUG: print "  Border type: ", self.style
 
         if surface:

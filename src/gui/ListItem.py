@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/09 21:37:06  rshortt
+# Improved drawing.  draw() should now be called instead of _draw(). draw()
+# will check to see if the object is visible as well as replace its bg_surface
+# befire drawing if it is available which will make transparencies redraw
+# correctly instead of having the colour darken on every draw.
+#
 # Revision 1.2  2003/02/24 11:58:28  rshortt
 # Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
 # objects.
@@ -49,7 +55,7 @@ from Label     import *
 from types     import * 
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class ListItem(GUIObject):
@@ -149,12 +155,12 @@ class ListItem(GUIObject):
         # XXX: need to fix support for 'selected label'
         # if self.selected and self.selected_label:  
         #     print 'self.selected and self.selected_label'
-        #     self.selected_label._draw(surface)
-        # else:  self.label._draw(surface)
+        #     self.selected_label.draw(surface)
+        # else:  self.label.draw(surface)
 
-        self.label._draw(surface)
+        self.label.draw(surface)
 
-        if self.border: self.border._draw(surface)
+        if self.border: self.border.draw(surface)
 
     
     def get_text(self):
