@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/12/01 20:09:24  dischi
+# only show deinterlace when it makes sense
+#
 # Revision 1.18  2003/11/21 17:56:50  dischi
 # Plugins now 'rate' if and how good they can play an item. Based on that
 # a good player will be choosen.
@@ -174,7 +177,10 @@ def get_items(item):
         if item.info.has_key('chapters') and item.info['chapters'] > 1:
             items.append(menu.MenuItem(_('Chapter selection'), chapter_selection_menu, item))
 
-    items += [ add_toogle(_('deinterlacing'), item, 'deinterlace') ]
+    if item.mode in ('dvd', 'vcd') or \
+           (item.filename and item.info.has_key('type') and \
+            item.info['type'].lower().find('mpeg') != -1):
+        items += [ add_toogle(_('deinterlacing'), item, 'deinterlace') ]
     return items
 
         
