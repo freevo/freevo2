@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <!-- 
+  this skin is very simple. It's the same as blue2_big.xml,
+  only the fonts are smaller
+   -->
+
+  <skin include="blue2_big" geometry="800x600">
+
+    <!--
+    This skin only redefines the font sizes for each font
+    blue1_big defines, that's it
+    -->
+
+    <font label="grey">
+      <definition size="16"/>
+    </font>
+
+    <font label="white">
+      <definition size="16"/>
+    </font>
+
+    <font label="yellow shadow">
+      <definition name="Arial_Bold" size="16" color="0xffff66"/>
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
+    <font label="grey big">
+      <definition size="30"/>
+    </font>
+
+    <font label="white big">
+      <definition size="30"/>
+    </font>
+
+  </skin>
+</freevo>
