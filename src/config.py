@@ -22,6 +22,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2003/10/18 21:37:53  rshortt
+# Fixing some logic for HELPERS because recordserver and webserver are also
+# helpers.
+#
+# Also adding a VideoGroup class (WIP) that will help in centralizing Freevo's
+# channel list and add support for multiple v4l devices.  I will talk more
+# about this after the 1.4 release.
+#
 # Revision 1.61  2003/10/18 10:44:54  dischi
 # bugfix to detect if we are (web|record)server or not
 #
@@ -113,6 +121,44 @@ class Logger:
         pass
     
 
+class VideoGroup:
+    """
+    vdev:        The video device, such as /dev/video.
+    adev:        The audio device, such as /dev/dsp.
+    input_type:  tuner, composite, svideo, webcam
+    tuner_type:  internal (on a v4l device), or external (cable or sat box)
+    tuner_norm:  NTSC, PAL, SECAM
+    tuner_chanlist:  us-cable, 
+    tuner_chan:  If using input_type=tuner and tuner_type=external set this to
+                 what channel it needs to be to get the signal, usually 3 or 4.
+    recordable:  True or False.  Can you record from this VideoGroup.
+    desc:        A nice description for this VideoGroup.
+    """
+
+    def __init__(self, vdev='/dev/video', adev='/dev/dsp', input_type='tuner',
+                 tuner_norm='NTSC', tuner_chanlist='us-cable', 
+                 tuner_type='internal', tuner_chan=None, external_tuner=None,
+                 et_conf=None, et_device=None, et_remote=None,
+                 recordable=True, desc='Freevo default VideoGroup'):
+
+        # XXX: Put checks in here for supplied values.
+        self.vdev = vdev
+        self.adev = adev
+        self.input_type = input_type
+        self.tuner_type = tuner_type
+        self.tuner_norm = tuner_norm
+        self.tuner_chanlist = tuner_chanlist
+        self.tuner_chan = tuner_chan
+        self.external_tuner = external_tuner
+        self.et_conf = et_conf
+        self.et_device = et_device
+        self.et_remote = et_remote
+        self.recordable = recordable
+        self.desc = desc
+        self.in_use = FALSE
+        self.tuner = None
+
+
 def print_config_changes(conf_version, file_version, changelist):
     """
     print changes made between version on the screen
@@ -177,11 +223,10 @@ IS_WEBSERVER    = 0
 
 if sys.argv[0].find('main.py') == -1:
     HELPER=1
-elif sys.argv[0].find('recordserver.py') != -1:
+if sys.argv[0].find('recordserver.py') != -1:
     IS_RECORDSERVER = 1
 elif sys.argv[0].find('webserver.py') != -1:
     IS_WEBSERVER = 1
-
 
 #
 # Send debug to stdout as well as to the logfile?
