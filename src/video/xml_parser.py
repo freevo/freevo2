@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/07/13 13:11:17  dischi
+# show xml info on variants, too
+#
 # Revision 1.26  2003/07/12 10:12:34  dischi
 # handle the case where mmpython returns no results
 #
@@ -599,6 +602,7 @@ def parseMovieFile(file, parent, duplicate_check):
                 varitem.parent = mitem
                 varitem.name = variant['name']
                 varitem.image = image
+                varitem.info = info
                 varitem.xml_file = file
                 for subitem in varitem.subitems:
                     subitem.xml_file = file

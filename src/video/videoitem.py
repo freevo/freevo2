@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2003/07/13 13:11:17  dischi
+# show xml info on variants, too
+#
 # Revision 1.62  2003/07/07 21:56:24  dischi
 # preserve mmpython info
 #
@@ -388,6 +391,7 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
         m = menu.Menu(self.name, self.variants, reload_func=None, xml_file=self.xml_file)
+        m.item_types = 'video'
         self.menuw.pushmenu(m)
 
 
