@@ -91,7 +91,7 @@ def pngsize(file):
 	width, height = image.size
 	return width,height
 
-def thumb(file):
+def thumb(file,x0=25,y0=25):
 	import Image
 	import fchksum   # Since the filenames are not unique we need
 			 # to cache them by content, not name.
@@ -103,7 +103,7 @@ def thumb(file):
 		return mythumb
 	else:
 		im = Image.open(file)
-		im.thumbnail((25,25))
+		im.thumbnail((x0,y0))
 		im.save(mythumb,'PNG')
 		return mythumb
 		
