@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2003/06/30 20:28:44  outlyer
+# Respect the global DEBUG definition; to enable debugging, you should only
+# need to change DEBUG=1 in config.py
+#
 # Revision 1.101  2003/06/29 20:38:58  dischi
 # switch to the new info area
 #
@@ -101,7 +105,7 @@ import xml_skin
 osd = osd.get_singleton()
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0
