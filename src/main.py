@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.120  2004/04/25 11:23:55  dischi
+# Added support for animations. Most of the code is from Viggo Fredriksen
+#
 # Revision 1.119  2004/04/20 17:33:57  dischi
 # lsdvd check
 #
@@ -429,7 +432,7 @@ try:
             for child in running_children:
                 child.poll()
 
-            time.sleep(0.01)
+            osd.sleep(0.01)
 
 
         for p in eventlistener_plugins:

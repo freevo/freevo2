@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/04/25 11:23:58  dischi
+# Added support for animations. Most of the code is from Viggo Fredriksen
+#
 # Revision 1.15  2004/02/19 04:37:21  gsbarbieri
 # MPlayer Audio Visualization support.
 # Get mpav from http://gsbarbieri.sytes.net/mpav/
@@ -88,6 +91,11 @@ class PluginInterface(plugin.MainMenuPlugin):
         mpav = plugin.getbyname( 'audio.mpav' )
         if mpav:
             mpav.stop_mpav()
+
+        mplvis = plugin.getbyname( 'audio.mplayervis' )
+        if mplvis:
+            mplvis.stop_visual()
+
         gui.hide()
         gui.menuw.show()
 
@@ -123,3 +131,8 @@ class PluginInterface(plugin.MainMenuPlugin):
         mpav = plugin.getbyname( 'audio.mpav' )
         if mpav:
             mpav.start_mpav()
+
+        mplvis = plugin.getbyname( 'audio.mplayervis' )
+        if mplvis:
+            mplvis.stop_visual()
+            mplvis.start_visual()

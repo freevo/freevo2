@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/04/25 11:23:58  dischi
+# Added support for animations. Most of the code is from Viggo Fredriksen
+#
 # Revision 1.42  2004/02/23 08:13:54  gsbarbieri
 # i18n: Help translators job.
 #
@@ -82,6 +85,9 @@ import rc
 
 from gui import GUIObject, AlertBox
 from event import *
+
+import time
+from animation import render, Transition
 
 # Module variable that contains an initialized ImageViewer() object
 _singleton = None
@@ -253,9 +259,12 @@ class ImageViewer(GUIObject):
             self.drawosd(layer=screen)
 
             if config.IMAGEVIEWER_BLEND_STEPS:
-                self.osd.update(blend_surface=screen,
-                                blend_steps=config.IMAGEVIEWER_BLEND_STEPS,
-                                blend_time=config.IMAGEVIEWER_BLEND_TIME)
+                blend = Transition(self.osd.screen.convert(),
+                                   screen.convert() )
+                blend.start()
+                while not blend.finished:
+                    self.osd.sleep(0)
+                blend.remove()
 
         else:
             self.osd.clearscreen(color=self.osd.COL_BLACK)

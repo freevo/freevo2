@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/04/25 11:23:59  dischi
+# Added support for animations. Most of the code is from Viggo Fredriksen
+#
 # Revision 1.10  2004/03/14 17:22:47  dischi
 # seperate ellipses and dim in drawstringframed
 #
@@ -208,7 +211,7 @@ class Screen:
         
         rect = (osd.width, osd.height, 0, 0)
         for u in update_area:
-            osd.screen.blit(layer, (u[0], u[1]), (u[0], u[1], u[2] - u[0], u[3] - u[1]))
+            osd.screenblit(layer, (u[0], u[1]), (u[0], u[1], u[2] - u[0], u[3] - u[1]))
             rect = ( min(u[0], rect[0]), min(u[1], rect[1]),
                      max(u[2], rect[2]), max(u[3], rect[3]))
         rect = (rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1])

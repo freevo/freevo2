@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.152  2004/04/25 11:23:57  dischi
+# Added support for animations. Most of the code is from Viggo Fredriksen
+#
 # Revision 1.151  2004/03/19 21:03:39  dischi
 # fix tvguide context bug
 #
@@ -97,6 +100,9 @@ from pygame.locals import *
 from mmpython.image import EXIF as exif
 import cStringIO
         
+# import animations
+import animation
+
 
 help_text = """\
 h       HELP
@@ -451,6 +457,13 @@ class OSD:
         self.Surface = pygame.Surface
         self.polygon = pygame.draw.polygon
 
+        # starts the render and it's thread
+        self.render = animation.render.get_singleton()
+
+        pygame.time.delay(10)   # pygame.time.get_ticks don't seem to
+                                # work otherwise
+
+
     def focused_app(self):
         if len(self.app_list):
             return self.app_list[-1]
@@ -546,6 +559,9 @@ class OSD:
         """
         stop the display to give other apps the right to use it
         """
+        # stop all animations
+        self.render.suspendall()
+
         # backup the screen
         self.__stop_screen__ = pygame.Surface((self.width, self.height))
         self.__stop_screen__.blit(self.screen, (0,0))
@@ -569,6 +585,9 @@ class OSD:
         if self.fullscreen:
             pygame.display.toggle_fullscreen()
             
+        # restart all animations
+        self.render.restartall()
+
         
     def toggle_fullscreen(self):
         """
@@ -707,13 +726,14 @@ class OSD:
                 pygame.draw.rect(layer, c, (x0+i, y0+i, x1-x0-2*i, y1-y0-2*i), 1)
 
 
-    def getsurface(self, x, y, width, height):
+    def getsurface(self, x=0, y=0, width=0, height=0, rect=None):
         """
         returns a copy of the given area of the current screen
         """
-        s = pygame.Surface((width, height))
-        s.blit(self.screen, (0,0), (x, y, width, height))
-        return s
+        if  rect != None:
+            return self.screen.subsurface(rect).convert()
+        else:
+            return self.screen.subsurface( (x, y, width, height) ).convert()
     
 
     def putsurface(self, surface, x, y):
@@ -721,6 +741,25 @@ class OSD:
         copy a surface to the screen
         """
         self.screen.blit(surface, (x, y))
+
+
+    def screenblit(self, source, destpos, sourcerect=None):
+        """
+        blit the source to the screen
+        """
+        if self.render:
+            r = source.get_rect()
+            w = r[2]
+            h = r[3]
+            if sourcerect:
+                w = sourcerect[2]
+                h = sourcerect[3]
+            self.render.damage( [(destpos[0], destpos[0], w, h)] )
+
+        if sourcerect != None:
+            return self.screen.blit(source, destpos, sourcerect)
+        else:
+            return self.screen.blit(source, destpos)
 
 
     def getfont(self, font, ptsize):
@@ -1246,41 +1285,6 @@ class OSD:
 
         if config.OSD_UPDATE_COMPLETE_REDRAW:
             rect = None
-            
-        # XXX New style blending
-        if blend_surface and blend_steps:
-            blend_last_screen = self.screen.convert()
-            blend_next_screen = blend_surface.convert()
-            blend_surface     = self.screen.convert()
-
-            blend_start_time = time.time()
-            time_step = float(blend_time) / (blend_steps+1) 
-            step_size = 255.0 / (blend_steps+1)
-            blend_alphas = [int(x*step_size) for x in range(1, blend_steps+1)]
-            blend_alphas.append(255) # The last step must be 255
-
-            for i in range(len(blend_alphas)):
-                alpha = blend_alphas[i]
-                #blend_surface.fill((255,0,0,0))
-                #blend_last_screen.set_alpha(255 - alpha)
-                blend_next_screen.set_alpha(alpha)
-                blend_surface.blit(blend_last_screen, (0, 0))
-                blend_surface.blit(blend_next_screen, (0, 0))
-
-                self.screen.blit(blend_surface, (0,0))
-                if plugin.getbyname('osd'):
-                    plugin.getbyname('osd').draw(('osd', None), self)
-                pygame.display.flip()
-                if blend_time:
-                    # At what time does the next frame start?
-                    t_next = blend_start_time + time_step*(i+1)
-                    # How much time left until next frame starts?
-                    now = time.time()
-                    t_rem = t_next - now
-                    # Delay if needed
-                    if t_rem > 0.0:
-                        time.sleep(t_rem)
-            return
 
         if rect and not (stop_busyicon and self.busyicon.rect):
             try:
@@ -1291,10 +1295,23 @@ class OSD:
                 pygame.display.flip()
         else:
             pygame.display.flip()
+
         if stop_busyicon:
             self.busyicon.rect = None
         
 
+    def sleep(self, sleep_time):
+        if self.render.realtime:
+            tick  = pygame.time.get_ticks()
+            start = tick
+            while tick - start < sleep_time * 100:
+                self.render.update(tick)
+                tick = pygame.time.get_ticks()
+        else:
+            self.render.update(pygame.time.get_ticks())
+            time.sleep(sleep_time)
+            
+        
     def _getbitmap(self, url):
         """
         load the bitmap or thumbnail
