@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/01 16:05:40  rshortt
+# Further suport for ivtv based cards.  Now you can set the bitrate to encode at or the stream type to use.
+#
 # Revision 1.2  2003/05/29 12:08:46  rshortt
 # Make sure we close the device when done.
 #
@@ -47,7 +50,7 @@ import threading
 import signal
 
 import config
-import tv_util, v4l2
+import tv_util, ivtv
 import childapp 
 import plugin 
 
@@ -122,7 +125,8 @@ class Record_Thread(threading.Thread):
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
                 v_norm = string.upper(v_norm)
 
-                v = v4l2.Videodev(v_dev)
+                # v = v4l2.Videodev(v_dev)
+                v = ivtv.IVTV(v_dev)
 
                 print 'Setting chanlist to %s' % v_clist
                 v.setchanlist(v_clist)
@@ -159,10 +163,21 @@ class Record_Thread(threading.Thread):
                 print "Width: %i, Height: %i" % (width,height)
                 print "Read Frequency: %i" % v.getfreq()
 
+                codec = v.getCodecInfo()
+                codec.bitrate = config.IVTV_BITRATE
+                codec.bitrate_peak = config.IVTV_BITRATE + 1
+                codec.stream_type = config.IVTV_STREAM_TYPE
+
+                v.setCodecInfo(codec)
+                codec = v.getCodecInfo()
+                print 'CODEC::bitrate: %s' % codec.bitrate
+                print 'CODEC::bitrate_peak: %s' % codec.bitrate_peak
+                print 'CODEC::stream_type: %s' % codec.stream_type
+
                 now = time.time()
                 stop = now + self.prog.rec_duration
 
-                v_in  = open('/dev/video0', 'r')
+                v_in  = open(v_dev, 'r')
                 v_out = open(video_save_file, 'w')
 
                 while time.time() < stop:

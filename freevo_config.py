@@ -760,6 +760,20 @@ TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
 # XXX Not used yet
 TV_REC_OUTFMT = 'yuy2'
 
+
+#
+# Settings for ivtv based cards such as the WinTV PVR-250/350.
+#
+
+# bitrate in bps
+IVTV_BITRATE = 4000000
+
+# stream type
+# Options are: 0 (mpeg2_ps), 1 (mpeg2_ts), 2 (mpeg1), 3 (mpeg2_pes_av),
+#              5 (mpeg2_pes_v), 7 (mpeg2_pes_a), 10 (dvd)
+IVTV_STREAM_TYPE = 0
+
+
 #
 # TV Channels. This list contains a mapping from the displayed channel name
 # to the actual channel name as used by the TV watching application.
