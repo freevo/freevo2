@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/07 11:52:17  dischi
+# always show submenus "with image"
+#
 # Revision 1.30  2004/02/04 19:05:18  dischi
 # o revert rectange calculation
 # o remove bad log message
@@ -306,7 +309,7 @@ class Skin_Area:
         try:
             self.use_text_view = menu.skin_force_text_view
             try:
-                self.use_images      = menu.skin_default_no_images
+                self.use_images      = menu.skin_default_has_images
                 self.use_description = menu.skin_default_has_description
             except:
                 self.use_images      = False
@@ -318,20 +321,23 @@ class Skin_Area:
         image  = None
         folder = 0
 
-        menu.skin_default_no_images       = False
+        menu.skin_default_has_images       = False
         menu.skin_default_has_description = False
 
+        if hasattr(menu, 'is_submenu'):
+            menu.skin_default_has_images = True
+            
         for i in menu.choices:
             if i.image:
-                menu.skin_default_no_images = True
+                menu.skin_default_has_images = True
             if i['description'] or i.type:
                 # have have a description if description is an attribute
                 # or when the item has a type (special skin handling here)
                 menu.skin_default_has_description = True
-            if menu.skin_default_no_images and menu.skin_default_has_description:
+            if menu.skin_default_has_images and menu.skin_default_has_description:
                 break
             
-        self.use_images      = menu.skin_default_no_images
+        self.use_images      = menu.skin_default_has_images
         self.use_description = menu.skin_default_has_description
 
         if len(menu.choices) < 6:
