@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2004/02/02 19:59:38  dischi
+# fixed a crash for tv recorded shows
+#
 # Revision 1.108  2004/02/02 19:40:53  dischi
 # include overlay in listdir
 #
@@ -179,6 +182,10 @@ class DirItem(Playlist):
             add_args = parent.add_args
 
         self.add_args = add_args
+
+        # set tv to video now
+        if self.display_type == 'tv':
+            display_type = 'video'
 
         # set directory variables to default
         global all_variables
