@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2005/01/01 18:48:53  dischi
+# remove debug
+#
 # Revision 1.96  2005/01/01 17:07:32  dischi
 # fix crash
 #
@@ -190,7 +193,7 @@ class MPlayer(Application):
                 # to find the track
                 if hasattr(item, 'mplayer_audio_broken') and \
                        item.mplayer_audio_broken:
-                    print '*** dvd audio broken, try without alang ***'
+                    log.warning('dvd audio broken, try without alang')
                 else:
                     additional_args += [ '-alang', config.DVD_LANG_PREF ]
 
@@ -326,7 +329,7 @@ class MPlayer(Application):
             else:
                 self.fifoname = bmovlcanvas.create_fifo()
                 command += [ '-vf', 'bmovl=1:0:%s' % self.fifoname ]
-                print '-%s-%s-' % (self.fifoname, command[-1])
+
         self.plugins = plugin.get('mplayer_video')
 
         for p in self.plugins:

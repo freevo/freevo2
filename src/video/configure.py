@@ -219,7 +219,6 @@ def get_items(item):
     next_start = 0
     items = []
 
-    print item.subitems
     if item.filename or (item.mode in ('dvd', 'vcd') and \
                          item.player_rating >= 20):
         if item.info.has_key('audio') and len(item.info['audio']) > 1:
