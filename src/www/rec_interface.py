@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/26 03:12:23  rshortt
+# Reduced the minimum amount of time to record for just in case the user is
+# okay with recording for under a minute.
+#
 # Revision 1.3  2003/02/15 17:09:14  krister
 # Bugfixes for channel number when recording, etc.
 #
@@ -271,7 +275,7 @@ def checkToRecord():
             # yeah thats a good idea but make sure its not like 5 mins
 
             duration = int(prog.stop - now - 10)
-            if duration < 60:
+            if duration < 10:
                 return FALSE
             title = '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H%M', time.localtime(prog.start)))
             rec_cmd = '%s %s %s "%s"' % \
