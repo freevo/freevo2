@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/03/31 20:38:07  dischi
+# added xml skin cache
+#
 # Revision 1.46  2003/03/30 18:05:25  dischi
 # give correct skin information to the gui object
 #
@@ -174,6 +177,10 @@ import gui
 # sends commands to
 import rc
 
+import stat
+import os
+import objectcache
+
 # XML parser for skin informations
 sys.path.append('skins/dischi1')
 
@@ -315,6 +322,8 @@ class Skin:
         self.force_redraw = TRUE
         self.last_draw = None
         self.screen = Screen()
+        self.xml_cache = objectcache.ObjectCache(3, desc='xmlskin')
+
         self.area_names = ( 'screen', 'title', 'subtitle', 'listing', 'view', 'info')
         for a in self.area_names:
             setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
@@ -344,20 +353,32 @@ class Skin:
         """
         return an object with new skin settings
         """
-        if copy_content:
-            settings = copy.copy(self.settings)
-        else:
-            settings = xml_skin.XMLSkin()
             
         if dir and os.path.isfile(os.path.join(dir, 'folder.fxd')):
-            settings.load(os.path.join(dir, 'folder.fxd'), copy_content, clear=TRUE)
-            return settings
+            file = os.path.join(dir, 'folder.fxd')
 
         elif dir and os.path.isfile(dir):
-            settings.load(dir, copy_content, clear=TRUE)
-            return settings
-        return None
+            file = dir
+        else:
+            return None
 
+        if copy_content:
+            cname = '%s%s%s' % (str(self.settings), file, os.stat(file)[stat.ST_MTIME])
+            settings = self.xml_cache[cname]
+            if not settings:
+                settings = copy.copy(self.settings)
+                settings.load(file, copy_content, clear=TRUE)
+                self.xml_cache[cname] = settings
+        else:
+            cname = '%s%s' % (file, os.stat(file)[stat.ST_MTIME])
+            settings = self.xml_cache[cname]
+            if not settings:
+                settings = xml_skin.XMLSkin()
+                settings.load(file, copy_content, clear=TRUE)
+                self.xml_cache[cname] = settings
+
+        return settings
+    
 
 
     def GetSkins(self):
