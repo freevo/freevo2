@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/22 20:04:02  dischi
+# when using util, we need to import it ;-) -- my fault
+#
 # Revision 1.6  2003/03/20 15:42:58  dischi
 # use the new text format function
 #
@@ -59,7 +62,7 @@ from xml.sax.handler import feature_namespaces
 import string
 import os
 import re
-
+import util
 
 def normalize_whitespace(text):
     # Remove Redundant whitespace from a string
