@@ -13,6 +13,10 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/23 05:30:28  gsbarbieri
+# Better i18n support. Changed a lot of strings to cooperate with translators
+# and made the menu items (not dirs, audio or video ones!) to use translations.
+#
 # Revision 1.16  2004/02/19 04:57:56  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -93,15 +97,17 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+from menu import MenuItem
 import copy
 import time
 import plugin
 from event import *
 import config
+import util
 try:
     import pylcd
 except:
-    print "ERROR: you need pylcd to run \"lcd\" plugin."
+    print String(_("ERROR")+": "+_("You need pylcd to run \"lcd\" plugin."))
 
 
 # Configuration: (Should move to freevo_conf.py?)
@@ -112,6 +118,8 @@ sep_str_mscroll = "   " # if string > width of lcd add this
 # Some displays (like the CrytstalFontz) do display the \ as a /
 animation_audioplayer_chars = ['-','\\','|','/']
 
+def rjust( s, n ):
+    return s[ : n ].rjust( n )
 
 # menu_info: information to be shown when in menu
 # Structure:
@@ -122,26 +130,26 @@ animation_audioplayer_chars = ['-','\\','|','/']
 # <ATTRIBUTE> is some valid attribute to item.getattr()
 menu_info = {
     "main" : [ ],
-    "audio" : [ ( "length", _( "Length: %s" ) ),
-                ( "artist", _( "Artist: %s" ) ),
-                ( "album", _( "Album: %s" ) ),
-                ( "year", _( "Year: %s" ) ) ],
-    "audiocd" : [ ( "len(tracks)", _( "Tracks: %s" ) ),
-                  ( "artist", _( "Artist: %s" ) ),
-                  ( "album", _( "Album: %s" ) ),
-                  ( "year", _( "Year: %s" ) ) ],
-    "video" : [ ( "length", _( "Length: %s" ) ),
-                ( "geometry", _( "Resolution: %s" ) ),
-                ( "aspect", _( "Aspect: %s" ) ),
-                ( "tagline", _( "Tagline: %s" ) ),
-                ( "plot", _( "Plot: %s" ) ) ],
-    "dir" : [ ( "plot", _( "Plot: %s" ) ),
-              ( "tagline", _( "Tagline: %s" ) ) ],
-    "image" : [ ( "geometry", _( "Geometry: %s" ) ),
-                ( "date", _( "Date: %s" ) ),
-                ( "description", _( "Description: %s" ) ) ],
+    "audio" : [ ( "length", _( "Length" ) + ": %s" ),
+                ( "artist", _( "Artist" ) + ": %s" ),
+                ( "album", _( "Album" )   + ": %s" ),
+                ( "year", _( "Year" )     + ": %s" ) ],
+    "audiocd" : [ ( "len(tracks)", _( "Tracks" ) + ": %s" ),
+                  ( "artist", _( "Artist" ) + ": %s" ),
+                  ( "album", _( "Album" )   + ": %s" ),
+                  ( "year", _( "Year" )     + ": %s" ) ],
+    "video" : [ ( "length", _( "Length" )   + ": %s" ),
+                ( "geometry", _( "Resolution" ) + ": %s" ),
+                ( "aspect", _( "Aspect" ) + ": %s" ),
+                ( "tagline", _( "Tagline" ) + ": %s" ),
+                ( "plot", _( "Plot" ) + ": %s" ) ],
+    "dir" : [ ( "plot", _( "Plot" ) + ": %s" ),
+              ( "tagline", _( "Tagline" ) + ": %s" ) ],
+    "image" : [ ( "geometry", _( "Geometry" ) + ": %s" ),
+                ( "date", _( "Date" ) + ": %s" ),
+                ( "description", _( "Description" ) + ": %s" ) ],
     "playlist" : [ ( "len(playlist)", _( "%s items" ) ) ],
-    "mame" : [ ( "description", _( "Description: %s" ) ) ],
+    "mame" : [ ( "description", _( "Description" ) + ": %s" ) ],
     "unknow" : [ ]
     }
 # menu_strinfo: will be passed to time.strinfo() and added to the end of info (after menu_info)
@@ -205,16 +213,16 @@ layouts = { 4 : # 4 lines display
                 
                 "menu"    :
                 { "title_l"  : ( "string",
-                                 "1 1 '"+ _( "MENU" ) + ": '",
+                                 "1 1 '" + rjust(_( "Menu" ),4) + ": '",
                                  None ),
                   "item_l"   : ( "string",
-                                 "1 2 '" + _( "ITEM" ) + ": '",
+                                 "1 2 '" + rjust(_( "Item" ),4) + ": '",
                                  None ),
                   "type_l"   : ( "string",
-                                 "1 3 '" + _( "TYPE" ) + ": '",
+                                 "1 3 '" + rjust(_( "Type" ),4) + ": '",
                                  None ),
                   "info_l"   : ( "string",
-                                 "1 4 '" + _( "INFO" ) + ": '",
+                                 "1 4 '" + rjust(_( "Information" ),4) + ": '",
                                  None ),                
                   "title_v"  : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -232,13 +240,13 @@ layouts = { 4 : # 4 lines display
                 
                 "audio_player"  :
                 { "music_l"   : ( "string",
-                                  "1 1 '" + _( " MUSIC" ) + ": '",
+                                  "1 1 '" + rjust(_( "Music" ),5) + ": '",
                                   None ),
                   "album_l"   : ( "string",
-                                  "1 2 '" + _( " ALBUM" ) + ": '",
+                                  "1 2 '" + rjust(_( "Album" ),5) + ": '",
                                   None ),
                   "artist_l"  : ( "string",
-                                  "1 3 '" + _( "ARTIST" ) + ": '",
+                                  "1 3 '" + rjust(_( "Artist" ),5) + ": '",
                                   None ),
                   "music_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -270,13 +278,13 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_l"   : ( "string",
-                                  "2 1 '" + _( "VIDEO" ) + ": '",
+                                  "2 1 '" + rjust(_( "Video" ),5) + ": '",
                                   None ),
                   "tag_l"     : ( "string",
-                                  "2 2 '" + _( "  TAG" ) + ": '",
+                                  "2 2 '" + rjust(_( "Tagline" ),5) + ": '",
                                   None ),
                   "genre_l"   : ( "string",
-                                  "1 3 '" + _( "GENRE" ) + ": '",
+                                  "1 3 '" + rjust(_( "Genre" ),5) + ": '",
                                   None ),
                   "video_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -309,16 +317,16 @@ layouts = { 4 : # 4 lines display
                 
                 "tv"            :
                 { "chan_l"   : ( "string",
-                                 "1 1 '" + _( "CHAN" ) + ": '",
+                                 "1 1 '" + rjust(_( "Channel" ),4) + ": '",
                                  None ),
                   "prog_l"   : ( "string",
-                                 "1 2 '" + _( "PROG" ) + ": '",
+                                 "1 2 '" + rjust(_( "Program" ),4) + ": '",
                                  None ),
                   "time_l"  : ( "string",
-                                "1 3 '" + _( "TIME" ) + ": '",
+                                "1 3 '" + rjust(_( "Time" ),4) + ": '",
                                 None ),
                   "desc_l"  : ( "string",
-                                "1 4 '" + _( "DESC" ) + ": '",
+                                "1 4 '" + rjust(_( "Description" ),4) + ": '",
                                 None ),                
                   "chan_v"   : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -564,10 +572,10 @@ layouts = { 4 : # 4 lines display
 
                  "menu":
                  { "title_l"  : ( "string",
-                                 "1 1 '" + _( "MENU" ) + ": '",
+                                 "1 1 '" + rjust(_( "Menu" ),4) + ": '",
                                  None ),
                   "item_l"   : ( "string",
-                                 "1 2 '" + _( "ITEM" ) + ": '",
+                                 "1 2 '" + rjust(_( "Item" ),4) + ": '",
                                  None ),
                    "title_v"  : ( "scroller",
                                   "7 1 %d 1 m 3 \"%s%s\"",
@@ -579,7 +587,7 @@ layouts = { 4 : # 4 lines display
 
                  "audio_player":
                  { "music_l"   : ( "string",
-                                  "1 1 '" + _( "MUSIC" ) + ": '",
+                                  "1 1 '" + rjust(_( "Music" ),5) + ": '",
                                   None ),
                   "music_v"   : ( "scroller",
                                   "8 1 %d 1 m 3 \"%s%s\"",
@@ -606,7 +614,7 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_l"   : ( "string",
-                                  "2 1 '" + _( "VIDEO" ) + ": '",
+                                  "2 1 '" + rjust(_( "Video" ),5) + ": '",
                                   None ),
                   "video_v"   : ( "scroller",
                                   "9 1 %d 1 m 3 \"%s%s\"",
@@ -634,10 +642,10 @@ layouts = { 4 : # 4 lines display
 
                 "tv":
                 { "chan_l"   : ( "string",
-                                 "1 1 '" + _( "CHAN" ) + ": '",
+                                 "1 1 '" + rjust(_( "Channel" ),4) + ": '",
                                  None ),
                   "prog_l"   : ( "string",
-                                 "1 2 '" + _( "PROG" ) + ": '",
+                                 "1 2 '" + rjust(_( "Program" ),4) + ": '",
                                  None ),
                   "chan_v"   : ( "scroller",
                                  "7 1 %d 1 m 3 \"%s%s\"",
@@ -679,7 +687,7 @@ def get_info( item, list ):
 
     return info
 
-
+    
 class PluginInterface( plugin.DaemonPlugin ):
     """
     Display context info in LCD using lcdproc daemon.
@@ -794,6 +802,8 @@ class PluginInterface( plugin.DaemonPlugin ):
         if type == 'menu':   
             menu  = object.menustack[ -1 ]
             title = menu.selected.name
+            if isinstance( menu.selected, MenuItem ):
+                title = _( title )
             typeinfo = menu.selected.type
             info = ""
 
