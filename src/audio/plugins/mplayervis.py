@@ -61,7 +61,7 @@ class mpv_Goom(BaseAnimation):
     def __init__(self, x, y, width, height, coverfile=None):
         self.coverfile = coverfile
 
-        BaseAnimation.__init__(self, (x, y, width, height), fps=40,
+        BaseAnimation.__init__(self, (x, y, width, height), fps=100,
                                bg_update=False, bg_redraw=False)
         pygoom.set_exportfile(mmap_file)
         pygoom.set_resolution(width, height, 0)
@@ -87,8 +87,8 @@ class mpv_Goom(BaseAnimation):
         font = skin.get_font('detachbar')
         w = font.stringsize(message)
         h = font.height
-        x = config.OSD_OVERSCAN_X + 10
-        y = config.OSD_OVERSCAN_Y + 10
+        x = 10
+        y = 10
 
         s = Surface((w,h), 0, 32)
 
@@ -113,21 +113,38 @@ class mpv_Goom(BaseAnimation):
 
         # change the cover if neceserry
         if self.coverfile:
-            self.coversurf = transform.scale(image.load(self.coverfile),
-                                             (self.rect.width, self.rect.height))
+            s = image.load(self.coverfile)
 
-        self.max_blend = 250
-        self.c_timer = time.time()
+            # scale and fit to the rect
+            w, h   = s.get_size()
+            aspect = float(w)/float(h)
 
-        if clear:
-            skin.clear()
+            if aspect < 1.0:
+                w = self.rect.width
+                h = float(w) / aspect
+                x = 0
+                y = (self.rect.height - h) / 2
+            else:
+                h = self.rect.height
+                w = float(h) * aspect
+                y = 0
+                x = (self.rect.width - w)  / 2
+
+            self.coversurf = (transform.scale(s,(w, h)), x, y)
+            self.max_blend = 250
+            self.c_timer   = time.time()
 
 
     def set_fullscreen(self):
-        self.set_resolution(config.OSD_OVERSCAN_X, config.OSD_OVERSCAN_Y,
-                            config.CONF.width-2*config.OSD_OVERSCAN_X,
-                            config.CONF.height-2*config.OSD_OVERSCAN_Y,
-                            1, False)
+        t_h = config.CONF.height-2*config.OSD_OVERSCAN_Y
+        w   = config.CONF.width-2*config.OSD_OVERSCAN_X
+
+        # ~16:9
+        h   = int(9.0*float(w)/16.0)
+        y   = ((t_h-h)/2) + config.OSD_OVERSCAN_Y
+        x   = config.OSD_OVERSCAN_X
+
+        self.set_resolution(x, y, w, h, 0)
         self.max_blend = 80
 
 
@@ -161,8 +178,9 @@ class mpv_Goom(BaseAnimation):
                     self.blend_step = - self.blend_step
 
                 if self.blend > 0:
-                    self.coversurf.set_alpha(self.blend)
-                    gooms.blit(self.coversurf, (0,0))
+                    s, x, y = self.coversurf
+                    s.set_alpha(self.blend)
+                    gooms.blit(s, (x, y))
 
             # draw message
             if self.message:
@@ -177,6 +195,10 @@ class mpv_Goom(BaseAnimation):
             osd.putsurface(gooms, self.rect.left, self.rect.top)
             osd.update(self.rect)
 
+### MODE definitions
+DOCK = 0 # dock ( default )
+FULL = 1 # fullscreen
+NOVI = 2 # no view
 
 class PluginInterface(plugin.Plugin):
     """
@@ -186,87 +208,138 @@ class PluginInterface(plugin.Plugin):
 
     Activate with:
      plugin.activate('audio.mplayervis')
-    """
 
-    start  = False
+    When activated one can change between view-modes
+    with the 0 (zero) button.
+    """
     player = None
     visual = None
-    view   = 0
+    view   = DOCK
     passed_event = False
     detached = False
 
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self._type    = "mplayer_audio"
+        self._type    = 'mplayer_audio'
+        self.app_mode = 'audio'
 
         # Event for changing between viewmodes
-        config.EVENTS['audio']['0'] = TOGGLE_OSD
+        config.EVENTS['audio']['0'] = Event('CHANGE_MODE')
 
-        self.plugin_name = "audio.mplayervis"
+        self.plugin_name = 'audio.mplayervis'
         plugin.register(self, self.plugin_name)
+
+        self.view_func = [self.dock,
+                          self.fullscreen,
+                          self.noview]
 
 
     def play( self, command, player ):
         self.player = player
+        self.item   = player.playerGUI.item
 
         return command + [ "-af", "export=" + mmap_file ]
+
+
+    def toggle_view(self):
+        """
+        Toggle between view modes
+        """
+        self.view += 1
+        if self.view > 2:
+            self.view = DOCK
+
+        if not self.visual:
+            self.start_visual()
+        else:
+            self.view_func[self.view]()
 
 
     def eventhandler( self, event=None, arg=None ):
         """
         eventhandler to simulate hide/show of mpav
         """
-        if self.visual:
-            if event == TOGGLE_OSD and self.view in [0, 1]:
-                if self.view == 1:
-                    self.dock()
 
-                elif self.view == 0:
-                    self.fullscreen()
-
-            elif event == OSD_MESSAGE and self.view == 1:
-                self.visual.set_message(event.arg)
-
-            elif self.player:
-                if self.passed_event:
-                    self.passed_event = False
-                    return False
-                self.passed_event = True
-
-                # XXX Sending MIXER stuff messes up fullscreen
-                if self.view == 1 and event in (STOP, PLAY_END, USER_END, PAUSE,
-                                                AUDIO_SEND_MPLAYER_CMD, PLAY,
-                                                SEEK,PLAYLIST_PREV, PLAYLIST_NEXT ):
-
-                    return self.player.eventhandler(event)
-
-                else:
-                    return self.player.eventhandler(event)
-
+        if event == 'CHANGE_MODE':
+            self.toggle_view()
             return True
 
+        if self.visual and self.view == FULL:
 
-    def check_image(self):
-        if self.player:
-            img = self.player.item.image
+            if event == OSD_MESSAGE:
+                self.visual.set_message(event.arg)
+                return True
 
-        if img:
-            self.visual.set_cover(img)
+            if self.passed_event:
+                self.passed_event = False
+                return False
+
+            self.passed_event = True
+
+            if event != PLAY_END:
+                return self.player.eventhandler(event)
+
+        return False
+
+
+    def item_info(self, fmt=None):
+        """
+        Returns info about the current running song
+        """
+
+        if not fmt:
+            fmt = u'%(a)s : %(l)s  %(n)s.  %(t)s (%(y)s)   [%(s)s]'
+
+        item    = self.item
+        info    = item.info
+        name    = item.name
+        length  = None
+        elapsed = '0'
+
+        if info['title']:
+            name = info['title']
+
+        if item.elapsed:
+            elapsed = '%i:%02i' % (int(item.elapsed/60), int(item.elapsed%60))
+
+        if item.length:
+            length = '%i:%02i' % (int(item.length/60), int(item.length%60))
+
+        song = { 'a' : info['artist'],
+                 'l' : info['album'],
+                 'n' : info['trackno'],
+                 't' : name,
+                 'e' : elapsed,
+                 'i' : item.image,
+                 'y' : info['year'],
+                 's' : length }
+
+        return fmt % song
 
 
     def fullscreen(self):
-        if self.player:
+        if self.player.playerGUI.visible:
             self.player.playerGUI.hide()
 
         self.visual.set_fullscreen()
-
+        self.visual.set_message(self.item_info())
+        skin.clear()
         rc.app(self)
-        rc.set_context('audio')
-        self.view = 1
+
+    def noview(self):
+
+        if rc.app() != self.player.eventhandler:
+            rc.app(self.player)
+
+        if self.visual:
+            self.stop_visual()
+
+        if not self.player.playerGUI.visible:
+            self.player.playerGUI.show()
 
 
     def dock(self):
-        if self.player:
+        if rc.app() != self.player.eventhandler:
             rc.app(self.player)
 
         # get the rect from skin
@@ -289,81 +362,46 @@ class PluginInterface(plugin.Plugin):
         except:
             pass
 
-
-        if self.view == 1:
-            self.player.playerGUI.show()
-            self.visual.set_resolution(x, y, w, h, 0, True)
-
-        else:
-            self.visual.set_resolution(x, y, w, h, 0, False)
-
-        self.view = 0
+        self.visual.set_resolution(x, y, w, h, 0, False)
 
 
-    def detach(self):
-        rc.app(None)
-        self.view = 3
+
+    def start_visual(self):
+        if self.visual or self.view == NOVI:
+            return
+
+        if rc.app() == self.player.eventhandler:
+
+            self.visual = mpv_Goom(300, 300, 150, 150, self.item.image)
+
+            if self.view == FULL:
+                self.visual.set_message(self.item.name, 10)
+
+            self.view_func[self.view]()
+            self.visual.start()
+
+
+    def stop_visual(self):
+        if self.visual:
+            self.visual.remove()
+            self.visual = None
+            pygoom.quit()
+
+
+    def stop(self):
+        self.stop_visual()
 
 
     def stdout(self, line):
         """
         get information from mplayer stdout
+
+        It should be safe to do call start() from here
+        since this is now a callback from main.
         """
         if self.visual:
             return
 
-        try:
-            if line.find( "[export] Memory mapped to file: "+mmap_file ) == 0:
-                self.start = True
-                _debug_( "Detected MPlayer 'export' audio filter! Using MPAV." )
-        except:
-            pass
-
-
-    def elapsed(self, elapsed):
-        # Be sure mplayer started playing, it need to setup mmap first.
-        if self.start and elapsed > 0 and self.player and self.player.playerGUI.visible:
+        if line.find( "[export] Memory mapped to file: " + mmap_file ) == 0:
+            _debug_( "Detected MPlayer 'export' audio filter! Using MPAV." )
             self.start_visual()
-            self.start = False
-
-
-    def start_visual(self):
-        if not self.visual:
-            self.visual = mpv_Goom(300, 300, 150, 150)
-
-            if self.player and self.view == 1:
-                self.visual.set_message(self.player.item.name, 10)
-
-            self.check_image()
-
-            # plain docked in playergui
-            if self.view == 0:
-                self.dock()
-
-            # plain fullscreen
-            elif self.view == 1:
-                self.fullscreen()
-
-            # previously detached
-            elif self.view == 3 and self.player.playerGUI.visible:
-                skin.clear()
-                self.view = 0
-                self.dock()
-
-            render.get_singleton().set_realtime(True)
-            self.visual.start()
-
-    def stop_visual(self):
-        if self.visual:
-            self.visual.remove()
-            render.get_singleton().set_realtime(False)
-            pygoom.quit()
-            self.visual = None
-
-            # XXX this is hackish()
-            if self.view == 3 and self.player.playerGUI.visible:
-                skin.clear()
-
-    def stop(self):
-        self.stop_visual()
-

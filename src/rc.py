@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/05/20 18:26:27  dischi
+# patch from Viggo
+#
 # Revision 1.31  2004/05/09 14:16:16  dischi
 # let the child stdout handled by main
 #
@@ -346,9 +349,8 @@ class RemoteControl:
 
     
     def poll(self):
-        while self.one_time_callbacks:
-            callback, arg = self.one_time_callbacks[0]
-            self.one_time_callbacks.pop()
+        while len(self.one_time_callbacks) > 0:
+            callback, arg = self.one_time_callbacks.pop(0)
             callback(*arg)
         
         if len(self.queue):
