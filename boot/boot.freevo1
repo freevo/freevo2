@@ -8,9 +8,8 @@
 #
 # $Id$
 
-. /etc/rc.config
 #
-# This script schould be run in runlevel 3
+# This script should be run in runlevel 3
 
 ###############################################################################
 # 
