@@ -151,7 +151,7 @@ class _Cache:
             return 0
 
         new = 0
-        for filename in vfs.listdir(directory):
+        for filename in os.listdir(directory):
             fullname  = os.path.join(directory, filename)
             try:
                 info = self.find(filename, directory, fullname)
