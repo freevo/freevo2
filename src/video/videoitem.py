@@ -6,25 +6,13 @@
 #
 # Notes:
 #
-# Bookmark Usage:
-#     1. while watching a movie file, hit the 'record' button and it'll save a
-#     bookmark. There is no visual feedback though.
-#     2. Later, to get back there, choose the actions button in the menu, and it'll
-#     have a list of bookmarks in a submenu, click on one of those to resume from
-#     where you saved.
-#
-#     The bookmarks do work for multiple AVI's together, though the time shown in the
-#     menu will be the time for the individual file, not the aggregate.
-#
-# Bookmark Todo:
-#     For multi-part files (i.e. two AVI's together via an XML file) it would be
-#     nice to be able to choose which one. I added a menu item (commented out now)
-#     until I can figure out how to pass self.play a specific filename.
-#
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/08/30 17:05:41  dischi
+# remove bookmark support, add support for ItemPlugin eventhandler
+#
 # Revision 1.78  2003/08/30 12:21:13  dischi
 # small changes for the changed xml_parser
 #
@@ -61,6 +49,7 @@
 
 import os
 import re
+import md5
 
 import config
 import util
@@ -87,6 +76,7 @@ from item import Item
 import configure
 import plugin
 
+
 class VideoItem(Item):
     def __init__(self, filename, parent, info=None):
         if parent and parent.media:
@@ -109,13 +99,14 @@ class VideoItem(Item):
         self.variants = []              # if this item has variants
         self.subitems = []              # if this item has more than one file/track to play
         self.current_subitem = None
-        self.bookmarkfile = None
 
         self.subtitle_file = {}         # text subtitles
         self.audio_file = {}            # audio dubbing
 
         self.filename = filename
         self.id       = filename
+        self.item_id  = None
+        
         if not self.name:
             self.name     = util.getname(filename)
         self.basename = os.path.basename(os.path.splitext(filename)[0])
@@ -167,10 +158,12 @@ class VideoItem(Item):
         self.selected_audio    = None
         self.num_titles        = 0
         self.deinterlace       = 0
-
+        self.elapsed           = 0
+        
         if parent and hasattr(self.parent, 'xml_file') and not self.xml_file:
             self.xml_file = self.parent.xml_file
-            
+
+        
         
     def copy(self, obj):
         """
@@ -193,7 +186,6 @@ class VideoItem(Item):
             self.subitems          = obj.subitems
             self.files_options     = obj.files_options
             self.current_subitem   = obj.current_subitem
-            self.bookmarkfile      = obj.bookmarkfile
             self.subtitle_file     = obj.subtitle_file
             self.audio_file        = obj.audio_file
             self.filename          = obj.filename
@@ -205,6 +197,25 @@ class VideoItem(Item):
         """
         return the specific attribute as string or an empty string
         """
+        if attr == 'item_id':
+            if self.item_id:
+                return self.item_id
+            
+            if self.media:
+                filename = self.filename[len(self.media.mountdir):]
+                id = 'cd://%s-%s' % (self.media.id, filename)
+            else:
+                id = 'file://%s' % self.filename
+            if self.subitems:
+                for s in self.subitems:
+                    id += s.getattr(attr)
+            if self.variants:
+                for v in self.variants:
+                    id += v.getattr(attr)
+                    
+            self.item_id = util.hexify(md5.new(id).digest())
+            return self.item_id
+        
         if attr in ('length', 'geometry', 'aspect'):
             try:
                 video = self.info.video[0]
@@ -223,7 +234,8 @@ class VideoItem(Item):
             except:
                 pass
         return Item.getattr(self, attr)
-                
+
+    
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
@@ -272,21 +284,6 @@ class VideoItem(Item):
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, 'Show variants') ] + items
 
-        if not self.filename or self.filename == '0':
-            for m in self.subitems:
-                # Allow user to watch one of the subitems instead of always both
-                # XXX Doesn't work
-                #items += [( self.play, 'Play %s' % (os.path.basename(m.filename)))] 
-                if os.path.exists(util.get_bookmarkfile(m.filename)):
-                    myfilename = util.get_bookmarkfile(m.filename)
-                    self.bookmarkfile = myfilename
-                    items += [( self.bookmark_menu, 'Bookmarks')]
-
-        else:
-            if os.path.exists(util.get_bookmarkfile(self.filename)):
-                self.bookmarkfile = util.get_bookmarkfile(self.filename) 
-                items += [( self.bookmark_menu, 'Bookmarks ')] 
-
         return items
 
 
@@ -327,6 +324,8 @@ class VideoItem(Item):
 
         if not self.menuw:
             self.menuw = menuw
+
+        self.plugin_eventhandler(em.PLAY, menuw)
 
         # dvd playback for whole dvd
         if (not self.filename or self.filename == '0') and \
@@ -513,29 +512,6 @@ class VideoItem(Item):
         self.video_player.stop()
 
 
-    def bookmark_menu(self,arg=None, menuw=None):
-        """
-        Bookmark list
-        """
-        bookmarkfile = self.bookmarkfile
-        items = []
-        for line in util.readfile(bookmarkfile):
-            file = copy.copy(self)
-            sec = int(line)
-            hour = int(sec/3600)
-            min = int((sec-(hour*3600))/60)
-            sec = int(sec%60)
-            time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
-            file.name = 'Jump to %s' % (time)
-            if not self.mplayer_options:
-                self.mplayer_options = ''
-            file.mplayer_options = str(self.mplayer_options) +  ' -ss %s' % time
-            items += [file]
-        moviemenu = menu.Menu(self.name, items, xml_file=self.xml_file)
-        menuw.pushmenu(moviemenu)
-        
-        return
-
     def dvd_vcd_title_menu(self, arg=None, menuw=None):
         """
         Generate special menu for DVD/VCD/SVCD content
@@ -580,15 +556,12 @@ class VideoItem(Item):
         """
         eventhandler for this item
         """
-
         # when called from mplayer.py, there is no menuw
         if not menuw:
             menuw = self.menuw
 
-        # DVD protected
-        if event == em.DVD_PROTECTED:
-            AlertBox(text='The DVD is protected, see the docs for more info!').show()
-            event = em.PLAY_END
+        if self.plugin_eventhandler(event, menuw):
+            return TRUE
 
         # PLAY_END: do have have to play another file?
         if self.subitems:

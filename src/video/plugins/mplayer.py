@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/08/30 17:05:42  dischi
+# remove bookmark support, add support for ItemPlugin eventhandler
+#
 # Revision 1.15  2003/08/24 19:24:19  gsbarbieri
 # Fix problem: exiting mplayer from playing ROM files hang freevo
 #
@@ -263,7 +266,7 @@ class MPlayer:
         self.thread.play_mode = self.mode
         self.thread.item  = item
         self.item  = item
-         
+
         if DEBUG:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
         rc.app(self)
@@ -285,7 +288,6 @@ class MPlayer:
         rc.app(None)
         while self.thread.mode == 'stop':
             time.sleep(0.3)
-        rc.post_event( PLAY_END )
 
     def eventhandler(self, event):
         """
@@ -330,18 +332,7 @@ class MPlayer:
                       self.parameter[3])
             return TRUE
         
-        if event == STORE_BOOKMARK:
-            # Bookmark the current time into a file
-            
-            bookmarkfile = util.get_bookmarkfile(self.filename)
-            
-            handle = open(bookmarkfile,'a+') 
-            handle.write(str(self.item.elapsed))
-            handle.write('\n')
-            handle.close()
-            return TRUE
-
-        if event in ( STOP, PLAY_END, USER_END, DVD_PROTECTED ):
+        if event in ( PLAY_END, USER_END ):
             self.stop()
             return self.item.eventhandler(event)
 
