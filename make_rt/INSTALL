@@ -25,7 +25,7 @@ Replace 'HEAD' with a version tag if needed.
 
 NOTE: freevo_rt only works with the SDL OSD, make sure the freevo_config.py
       has 'OSD_SDL = 1'.
-> echo 'OSD_SDL = 1' >> freevo_config.py
+> echo 'OSD_SDL = 1' >> freevo/freevo_config.py
 
 
 Make freevo utils:
