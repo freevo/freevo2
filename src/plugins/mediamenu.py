@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/05 16:11:45  mikeruelle
+# allow games to get its additional args
+#
 # Revision 1.18  2003/08/28 20:52:23  dischi
 # small fix when you want to see all roms
 #
@@ -194,9 +197,13 @@ class MediaMenu(Item):
         # add default items
         for d in dirs:
             try:
-                (t, dir) = d
+                (t, dir) = d[:2]
+                if len(d) > 2:
+                    add_args = d[2:]
+                else:
+                    add_args = None
                 d = DirItem(dir, self, name = t,
-                            display_type = self.display_type)
+                            display_type = self.display_type, add_args = add_args)
                 self.normal_items += [ d ]
             except:
                 traceback.print_exc()
