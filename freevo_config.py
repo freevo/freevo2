@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2002/09/19 10:17:46  dischi
+# Added mp4, viv and nuv to SUFFIX_MPLAYER_FILES
+#
 # Revision 1.65  2002/09/14 16:49:19  dischi
 # Add support for hwac3. If MPLAYER_AO_HWAC3_DEV is set hwac3 will be
 # enabled for DVDs and VOB files
@@ -199,6 +202,9 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
                          '/*.[vV][oO][bB]',
                          '/*.[aA][sS][fF]',
                          '/*.[mM][2][vV]',
+                         '/*.[mM][pP][4]',
+                         '/*.[vV][iI][vV]',
+                         '/*.[nN][uU][vV]',
                          '/*.[mM][oO][vV]']
 
 
