@@ -9,6 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2002/08/05 00:30:05  outlyer
+# Fixed the bug with mplayer detecting MP3 files as Encrypted VOBS. We now
+# force the demuxer for audio files, thereby fixing half of my MP3 collection.
+# Currently we only force demuxers for OGG and MP3 files, but check "demuxer.h"
+# in the mplayer source for a list of others. I don't believe they are
+# necessary though, as only MP3 has so many, many encoders with varying
+# output.
+#
+# While this alleviates the "urgency" of my plugin question, I still think
+# we should come up with a system of some kind.
+#
 # Revision 1.20  2002/08/04 16:49:20  dischi
 # DISPLAY toggles the mplayer OSD
 #
@@ -101,6 +112,17 @@ def get_singleton():
         
     return _singleton
 
+def get_demuxer(filename):
+    DEMUXER_MP3 = 17
+    DEMUXER_OGG = 18
+    rest, extension	= os.path.splitext(filename)
+    if string.lower(extension) == '.mp3':
+	return "-demuxer " + str(DEMUXER_MP3)
+    if string.lower(extension) == '.ogg':
+	return "-demuxer " + str(DEMUXER_OGG)
+    else:
+    	return ''
+
 
 class MPlayer:
 
@@ -124,7 +146,7 @@ class MPlayer:
             # XXX We should really use return more. And this escape should
             # XXX probably be put at start of the function.
             return 0
-        
+       
         # build mplayer comand
         mpl = config.NICE + " -" + config.MPLAYER_NICE + " " + config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + \
 	      ' -ao ' +  config.MPLAYER_AO_DEV + ' ' + config.MPLAYER_ARGS_DEF
@@ -166,7 +188,8 @@ class MPlayer:
 
 
         elif mode == 'audio':
-            command = mpl + ' "' + filename + '"'
+            command = mpl + " " + get_demuxer(filename) + ' "' + filename + '"'
+	    print command
 
 
         else:
