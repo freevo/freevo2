@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/11/02 20:15:51  dischi
+# replace recordserver with mbus test code
+#
 # Revision 1.61  2004/08/05 17:35:40  dischi
 # move recordserver and plugins into extra dir
 #
@@ -43,6 +46,8 @@ import traceback
 import config
 import plugin
 
+import notifier
+
 # change uid
 try:
     if config.TV_RECORD_SERVER_UID and os.getuid() == 0:
@@ -56,17 +61,18 @@ except Exception, e:
 # load record plugins
 plugin.init(exclusive=['record'])
 
-# import recorder server
-import record.server
-
 while 1:
     try:
+        notifier.init( notifier.GENERIC )
+
+        # import recorder server
+        import record.server
         start = time.time()
-        record.server.start()
+        record.server.RecordServer()
+        notifier.loop()
         break
     except:
         traceback.print_exc()
         if start + 10 > time.time():
             print 'server problem, sleeping 1 min'
             time.sleep(60)
-
