@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/01 20:35:58  outlyer
+# Replaced the os.system('rm ...') calls with os.unlink()
+#
 # Revision 1.8  2003/06/23 20:15:25  the_krow
 # Trivial Fix for mplayer command line with the new runtime. Thanks to
 # mikeruelle in irc for the bugfix.
@@ -229,7 +232,7 @@ class MPlayer:
         if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and
             config.MPLAYER_USE_WID):
             if DEBUG: print 'Got freevo_xwin and x11'
-            os.system('rm -f /tmp/freevo.wid')
+            os.unlink('/tmp/freevo.wid')
             os.system('./runapp ./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
                       (osd.width, osd.height))
 
@@ -320,7 +323,7 @@ class MPlayer:
         while self.thread.mode == 'stop':
             time.sleep(0.05)
         print 'stopped %s app' % self.mode
-        os.system('rm -f /tmp/freevo.wid')
+        os.unlink('/tmp/freevo.wid')
 
 
     def eventhandler(self, event):
@@ -404,7 +407,7 @@ class MPlayerApp(childapp.ChildApp):
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         util.killall('freevo_xwin')
-        os.system('rm -f /tmp/freevo.wid')
+        os.unlink('/tmp/freevo.wid')
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
             self.log_stderr.close()

@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/01 20:35:58  outlyer
+# Replaced the os.system('rm ...') calls with os.unlink()
+#
 # Revision 1.1  2003/06/29 20:43:30  dischi
 # o mmpython support
 # o mplayer is now a plugin
@@ -332,7 +335,7 @@ class MPlayer:
         if (os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and 
             config.MPLAYER_USE_WID):
             if DEBUG: print 'Got freevo_xwin and x11'
-            os.system('rm -f /tmp/freevo.wid')
+            os.unlink('/tmp/freevo.wid')
             os.system('./runapp ./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
                       (osd.width, osd.height))
             time.sleep(1)
@@ -580,7 +583,7 @@ class MPlayerApp(childapp.ChildApp):
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
         util.killall('freevo_xwin')
-        os.system('rm -f /tmp/freevo.wid')
+        os.unlink('/tmp/freevo.wid')
 
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
@@ -655,7 +658,9 @@ class MPlayer_Thread(threading.Thread):
                     config.CONF.display == 'dfbmga'):
                     print "Stopping Display for Video Playback"
                     osd.stopdisplay()
-                
+               
+                os.system('/usr/sbin/matroxcolor')
+
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -680,6 +685,8 @@ class MPlayer_Thread(threading.Thread):
                     osd.restartdisplay()
 		    osd.update()
 		    print "Display back online"
+                
+                os.system('/usr/sbin/undomatroxcolor')
 
                 self.mode = 'idle'
                 
