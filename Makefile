@@ -21,7 +21,7 @@ osds_sdl:
 	cd osd_server ; $(MAKE) osds_sdl
 
 runapp:
-	gcc -o runapp runapp.c -DRUNAPP_LOG=\"/var/log/freevo/runapp.log\"
+	gcc -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
 
 subdirs: $(SUBDIRS)
 
@@ -41,8 +41,14 @@ install: all
 	-mv /usr/local/freevo /usr/local/freevo_old_`date +%Y%m%d_%H%M%S`
 	-rm -rf /usr/local/freevo
 	-mkdir /usr/local/freevo
-	-mkdir /var/log/freevo
-	chmod o+w /var/log/freevo
-	-mkdir /var/cache/freevo
-	chmod o+w /var/cache/freevo
+
+	-mkdir -p /var/log/freevo
+	chmod ugo+rwx /var/log/freevo
+
+	-mkdir -p /var/cache/freevo
+	chmod ugo+rwx /var/cache/freevo
+
+	-mkdir -p /var/cache/xmltv/logos
+	chmod -R ugo+rwx /var/cache/xmltv
+
 	cp -r * /usr/local/freevo
