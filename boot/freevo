@@ -15,8 +15,6 @@ DESC=freevo
 
 test -f $DAEMON || exit 0
 
-#set -e
-
 case "$1" in
   start)
         echo -n "Setting up RTC: "
@@ -39,21 +37,11 @@ case "$1" in
 	kill `pgrep -f "python main.py" -d" "` &> /dev/null
         kill `pgrep -f "python rc_client" -d" "` &> /dev/null
 	echo "$NAME."
-	echo -n "Releasing the VT: "
-	$VTRELEASE
-	echo "vtrelease"
         echo -n "Hard kill to be sure: "
         ps aux | grep python | grep main.py | awk '{ print "kill -9 " $2 }' | sh
         echo "kill."
 	;;
-  #reload)
-  #;;
   restart|force-reload)
-	#
-	#	If the "reload" option is implemented, move the "force-reload"
-	#	option to the "reload" entry above. If not, "force-reload" is
-	#	just the same as "restart".
-	#
 	echo "Restarting..."
 	$0 stop
 	sleep 1
@@ -61,7 +49,6 @@ case "$1" in
 	;;
   *)
 	N=/etc/init.d/$NAME
-	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
 	echo "Usage: $N {start|stop|restart|force-reload}" >&2
 	exit 1
 	;;
