@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2004/12/28 18:09:58  dischi
+# add extra Action class for item actions
+#
 # Revision 1.85  2004/11/20 18:22:59  dischi
 # use python logger module for debug
 #
@@ -156,7 +159,27 @@ class FileInformation:
                 except:
                     log.error('can\'t delete %s' % f)
         
-                
+
+class Action:
+    """
+    Action for item.actions()
+    """
+    def __init__(self, name, function=None, arg=None, shortcut=None,
+                 description=None):
+        self.name = name
+        self.function = function
+        self.arg = arg
+        self.shortcut = shortcut
+        self.description = description
+
+
+    def __call__(self, menuw=None):
+        """
+        call the function
+        """
+        if self.function:
+            self.function(arg=self.arg, menuw=menuw)
+        
 
 class Item:
     """

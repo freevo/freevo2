@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2004/12/28 18:09:58  dischi
+# add extra Action class for item actions
+#
 # Revision 1.111  2004/11/20 18:22:59  dischi
 # use python logger module for debug
 #
@@ -60,7 +63,7 @@ import util
 import gui
 
 from event import *
-from item import Item
+from item import Item, Action
 from application import Application
 
 import logging
@@ -94,12 +97,18 @@ class MenuItem(Item):
 
     def select(self, arg=None, menuw=None):
         """
-        call the default acion
+        call the function
         """
         if self.function:
             self.function(arg=self.arg, menuw=menuw)
 
 
+    def __call__(self, menuw=None):
+        """
+        call the function
+        """
+        if self.function:
+            self.function(arg=self.arg, menuw=menuw)
 
 class Menu:
     """
@@ -399,6 +408,10 @@ class MenuWidget(Application):
         for a in actions:
             if isinstance(a, Item):
                 items.append(a)
+            elif isinstance(a, Action):
+                mi = MenuItem(a.name, a.function, a.arg)
+                mi.description = a.description
+                items.append(mi)
             else:
                 items.append(MenuItem(a[1], a[0]))
         theme = None
@@ -512,24 +525,14 @@ class MenuWidget(Application):
 
         
         if event == MENU_SELECT or event == MENU_PLAY_ITEM:
-            action = None
-            arg    = None
-
-            try:
-                action = menu.selected.action
-            except AttributeError:
-                action = menu.selected.actions()
-                if action:
-                    action = action[0]
-                    if isinstance(action, MenuItem):
-                        action = action.function
-                        arg    = action.arg
-                    else:
-                        action = action[0]
-            if not action:
+            actions = menu.selected.actions()
+            if not actions:
                 gui.AlertBox(text=_('No action defined for this choice!')).show()
             else:
-                action( arg=arg, menuw=self )
+                if not isinstance(actions[0], (Item, Action)):
+                    actions[0][0](menuw=self)
+                else:
+                    actions[0](menuw=self)
             return True
 
 
@@ -552,7 +555,7 @@ class MenuWidget(Application):
             
             for p in plugins:
                 for a in p.actions(menu.selected):
-                    if isinstance(a, MenuItem):
+                    if isinstance(a, (MenuItem, Action)):
                         actions.append(a)
                     else:
                         actions.append(a[:2])
@@ -569,7 +572,11 @@ class MenuWidget(Application):
             log.info('calling action %s' % event.arg)
 
             for a in menu.selected.actions():
-                if not isinstance(a, Item) and len(a) > 2 and a[2] == event.arg:
+                if isinstance(a, Action) and a.shortcut == event.arg:
+                    a(menuw=menuw)
+                    return True
+                if not isinstance(a, (Item, Action)) and len(a) > 2 and \
+                       a[2] == event.arg:
                     a[0](arg=None, menuw=self)
                     return True
                 
@@ -580,7 +587,11 @@ class MenuWidget(Application):
 
             for p in plugins:
                 for a in p.actions(menu.selected):
-                    if not isinstance(a, MenuItem) and len(a) > 2 and a[2] == event.arg:
+                    if isinstance(a, Action) and a.shortcut == event.arg:
+                        a(menuw=menuw)
+                        return True
+                    if not isinstance(a, (Item, Action)) and len(a) > 2 and \
+                           a[2] == event.arg:
                         a[0](arg=None, menuw=self)
                         return True
             log.info('action %s not found' % event.arg)
