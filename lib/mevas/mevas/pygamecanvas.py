@@ -27,11 +27,11 @@ class PygameCanvas(BitmapCanvas):
 			data = img.get_raw_data("RGB")
 			# pygame.image.fromstring refuses to read from a buffer :(
 			img = pygame.image.fromstring( str(data), size, "RGB")
-			print "Conversion took", time.time()-t1
+			#print "Conversion took", time.time()-t1
 			self._screen.blit(img, pos)
 
 		pygame.display.update(r)
-		print "Blit", r, "took", time.time()-t0
+		#print "Blit", r, "took", time.time()-t0
 
 
 # vim: ts=4
