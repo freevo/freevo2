@@ -39,16 +39,30 @@ import sys, time
 import traceback
 import signal
 
+#
+# notifier version checking
+#
 try:
     import notifier
-except ImportError:
-    print 'This version of freevo requires pyNotifier 0.2.0rc1 or newer!'
-    print 'You can find the current release at:'
-    print 'http://www.crunchy-home.de/download/'
-    sys.exit( 1 )
-    
-# init notifier
-notifier.init( notifier.GENERIC )
+    if notifier.VERSION < '0.3.0':
+        raise ImportError('found version %s', notifier.VERSION)
+    notifier.init(notifier.GENERIC)
+except Exception, e:
+    print 'Error: This version of Freevo requires pyNotifier >= 0.3.0'
+    print 'To download and install pyNotifier to ./site-packages run \'make\''
+    sys.exit(0)
+
+
+#
+# imlib2 checking
+#
+try:
+    import Imlib2
+except:
+    print 'The python Imlib2 bindings could not be loaded!'
+    print 'To compile pyimlib run \'make\''
+    sys.exit(1)
+
     
 try:
     # i18n support
@@ -56,68 +70,72 @@ try:
     # First load the xml module. It's not needed here but it will mess
     # up with the domain we set (set it from freevo 4Suite). By loading it
     # first, Freevo will override the 4Suite setting to freevo
-    from xml.utils import qp_xml
-    from xml.dom import minidom
+    try:
+        from xml.utils import qp_xml
+        from xml.dom import minidom
+    except ImportError:
+        raise ImportError('No module named pyxml')
     
     # now load other modules to check if all requirements are installed
     import Image
-    try:
-        import twisted
-    except ImportError, e:
-        print e
-
+    import sqlite
+    
     import config
     import system
 
-    try:
-        import Imlib2
-    except:
-        print 'The python Imlib2 bindings could not be loaded!'
-        print 'Maybe you did not install Imlib2.'
-        print 'You can find Imlib2 at: http://enlightenment.org'
-        sys.exit( 1 )
-
     if config.OSD_DISPLAY == 'SDL':
         import pygame
-        import Numeric
 
-    if not config.CONF.lsdvd:
-        print
-        print 'Can\'t find lsdvd. DVD support will be limited and maybe not'
-        print 'all discs are detected. Please install lsdvd, you can get it'
-        print 'from http://acidrip.thirtythreeandathird.net/lsdvd.html'
-        print
-        print 'After installing it, you should run \'freevo cache --rebuild\''
-    else:
-        os.environ['LSDVD'] = config.CONF.lsdvd
-        
-    import mmpython
-
-    
 except ImportError, i:
-    print 'Can\'t find all Python dependencies:'
-    print i
-    if str(i)[-7:] == 'Numeric':
-        print 'You need to recompile pygame after installing Numeric!'
-    print
+    print 'ImportError: %s' % i
     print 'Not all requirements of Freevo are installed on your system.'
     print 'Please check the INSTALL file for more informations.'
     print
     sys.exit(0)
 
 
-# check if mmpython is up to date to avoid bug reports
-# for already fixed bugs
+#
+# checking for lsdvd to be used in mmpython
+#
+if not config.CONF.lsdvd:
+    print
+    print 'Can\'t find lsdvd. DVD support will be limited and maybe not'
+    print 'all discs are detected. Please install lsdvd, you can get it'
+    print 'from http://acidrip.thirtythreeandathird.net/lsdvd.html'
+    print
+    print 'After installing it, you should run \'freevo cache --rebuild\''
+else:
+    os.environ['LSDVD'] = config.CONF.lsdvd
+
+
+#
+# mmpython version checking
+#
 try:
     import mmpython.version
     if mmpython.version.CHANGED < 20040629:
-        raise ImportError
+        raise ImportError('found version %s', mmpython.version.VERSION)
 except ImportError:
-    print 'Error: Installed mmpython version is too old.'
-    print 'Please update mmpython to version 0.4.3 or higher'
+    print 'Error: This version of Freevo requires mmpython >= 0.4.3'
+    print 'You can download the latest release from'
+    print 'http://sourceforge.net/project/showfiles.php?group_id=75590'
     print
     sys.exit(0)
 
+
+#
+# mbus version checking
+#
+try:
+    import mbus
+    if mbus.VERSION < '0.8.0':
+        raise ImportError('found version %s', mbus.VERSION)
+except:
+    print 'Error: This version of Freevo requires pyMbus >= 0.8.0'
+    print 'To download and install pyMbus to ./site-packages run \'make\''
+    print
+    sys.exit(0)
+    
 
 # freevo imports
 import eventhandler
