@@ -27,6 +27,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/03/22 20:08:30  dischi
+# Lots of changes:
+# o blue2_big and blue2_small are gone, it's only blue2 now
+# o Support for up/down arrows in the listing area
+# o a sutitle area for additional title information (see video menu in
+#   blue2 for an example)
+# o some layout changes in blue2 (experimenting with the skin)
+# o the skin searches for images in current dir, skins/images and icon dir
+# o bugfixes
+#
 # Revision 1.29  2003/03/21 19:44:44  dischi
 # only draw images when needed
 #
@@ -578,7 +588,7 @@ class Skin_Area:
         try:
             area = eval('area.%s' % self.area_name)
         except AttributeError:
-            area = xml_skin.XML_area()
+            area = xml_skin.XML_area(self.area_name)
             area.visible = FALSE
             
         if (not self.area_val) or area != self.area_val:
@@ -731,6 +741,9 @@ class Skin_Area:
         draws an image ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
+        if isinstance(image, str):
+            image = pygame.transform.scale(osd.loadbitmap(image), (val.width, val.height))
+            
         if isinstance(val, tuple):
             self.screen.draw('content', ('image', image, val[0], val[1], image.get_width(),
                                          image.get_height()))

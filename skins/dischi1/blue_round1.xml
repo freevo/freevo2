@@ -12,18 +12,20 @@
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
       <!-- screen0 is already defined in blue1_big -->
-      <screen layout="screen0" visible="yes"/>
+      <screen layout="screen0"/>
 
       <!-- 
       title0 is already defined in blue1_big, but there will
       is a new definition of the font from the layout (white big)
       -->
-      <title layout="title0" visible="yes" 
-	x="10" y="10" width="780" height="60"/> 
-      <view layout="view0" visible="yes" 
-	x="545" y="90" width="245" height="450"/> 
-      <listing layout="transparent listing" visible="yes" 
-	x="10" y="130" width="550" height="450"/>
+      <title layout="title0" x="10" y="10" width="780" height="60"/> 
+      <view layout="view0" x="545" y="90" width="245" height="450"/> 
+      <listing layout="transparent listing" x="10" y="130" width="550" height="450">
+	<image x="15" y="135" width="16" height="16" label="uparrow" 
+	  filename="../icons/AquaFusion/up.png"/>
+	<image x="15" y="560" width="16" height="16" label="downarrow" 
+	  filename="../icons/AquaFusion/down.png"/>
+      </listing>
       <info visible="no"/>
     </menuset>
 
@@ -50,7 +52,7 @@
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
-      <content x="20" y="20" width="max-40" height="max-40" type="text"
+      <content x="20" y="25" width="max-40" height="max-50" type="text"
 	spacing="-1">
 	<item type="default" font="white shadow1"/>
 	<item type="selected" font="white shadow1">

@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/22 20:08:31  dischi
+# Lots of changes:
+# o blue2_big and blue2_small are gone, it's only blue2 now
+# o Support for up/down arrows in the listing area
+# o a sutitle area for additional title information (see video menu in
+#   blue2 for an example)
+# o some layout changes in blue2 (experimenting with the skin)
+# o the skin searches for images in current dir, skins/images and icon dir
+# o bugfixes
+#
 # Revision 1.27  2003/03/21 19:50:54  dischi
 # moved some main menu settings from skin to freevo_config.py
 #
@@ -179,35 +189,6 @@ def attr_str(node, attr, default):
     return default
 
 
-def attr_file(node, attr, default, c_dir, guessing=TRUE):
-    """
-    return the attribute as filename. This functions searches for alternative
-    image filenames based on the string
-    """
-    if node.attrs.has_key(('', attr)):
-        file = node.attrs[('', attr)].encode('latin-1')
-        if file and guessing:
-            dfile=os.path.join(c_dir, file)
-            if os.path.isfile(dfile):
-                return dfile
-            if os.path.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
-                                                config.CONF.height)):
-                return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
-            if os.path.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
-                                                config.CONF.height)):
-                return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
-            if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % dfile):
-                return "%s_768x576.png" % dfile
-            if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
-                return "%s_768x576.jpg" % dfile
-            if os.path.isfile("%s.png" % dfile):
-                return "%s.png" % dfile
-            if os.path.isfile("%s.jpg" % dfile):
-                return "%s.jpg" % dfile
-        return file
-    return default
-
-
 def attr_font(node, attr, default):
     """
     return the attribute as font (with full path)
@@ -288,7 +269,7 @@ XML_types = {
     'type'     : ('str',  0),
     'align'    : ('str',  0),
     'valign'   : ('str',  0),
-    'filename' : ('file', 0),
+    'filename' : ('str', 0),
     'name'     : ('font',  0),
     'visible'  : ('visible', 0)
 }
@@ -327,8 +308,6 @@ class XML_data:
 
                 if this_scale:
                     e = 'attr_int(node, "%s", self.%s, %s)' % (c, c, this_scale)
-                elif XML_types[c][0] == 'file':
-                    e = 'attr_file(node, "%s", self.%s, "%s")' % (c, c, current_dir)
                 else:
                     e = 'attr_%s(node, "%s", self.%s)' % (XML_types[c][0], c, c)
                 setattr(self, c, eval(e))
@@ -374,12 +353,12 @@ class XML_menu:
 
 class XML_menuset:
     """
-    the complete menu with the areas screen, title, view, listing and info in it
+    the complete menu with the areas screen, title, subtitle, view, listing and info in it
     """
     def __init__(self):
-        self.content = ( 'screen', 'title', 'view', 'listing', 'info' )
+        self.content = ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info' )
         for c in self.content:
-            setattr(self, c, XML_area())
+            setattr(self, c, XML_area(c))
 
 
     def parse(self, node, scale, current_dir):
@@ -399,12 +378,19 @@ class XML_area(XML_data):
     """
     area class (inside menu)
     """
-    def __init__(self):
+    def __init__(self, name):
         XML_data.__init__(self, ('visible', 'layout', 'x', 'y', 'width', 'height'))
+        self.name = name
+        if name == 'listing':
+            self.images = {}
         self.x = -1
         self.y = -1
+        self.visible = FALSE
 
     def parse(self, node, scale, current_dir):
+        if self.x == -1:
+            self.visible = TRUE
+
         x = self.x
         y = self.y
         XML_data.parse(self, node, scale, current_dir)
@@ -412,6 +398,18 @@ class XML_area(XML_data):
             self.x += config.OVERSCAN_X
         if y != self.y:
             self.y += config.OVERSCAN_Y
+        for subnode in node.children:
+            if subnode.name == u'image' and self.name == 'listing':
+                label = attr_str(subnode, 'label', '')
+                if label:
+                    if not label in self.images:
+                        self.images[label] = XML_image()
+                    x,y = self.images[label].x, self.images[label].y
+                    self.images[label].parse(subnode, scale, current_dir)
+                    if x != self.images[label].x:
+                        self.images[label].x += config.OVERSCAN_X
+                    if y != self.images[label].y:
+                        self.images[label].y += config.OVERSCAN_Y
 
     def prepare(self, layout):
         if self.visible:
@@ -455,10 +453,10 @@ class XML_layout:
             if subnode.name == u'content':
                 self.content.parse(subnode, scale, current_dir)
 
-    def prepare(self, font, color):
+    def prepare(self, font, color, search_dirs):
         self.content.prepare(font, color)
         for b in self.background:
-            b.prepare(color)
+            b.prepare(color, search_dirs)
             
     def __cmp__(self, other):
         return not (self.background == other.background and self.content == other.content)
@@ -501,7 +499,11 @@ class XML_content(XML_data):
 
     def prepare(self, font, color):
         if self.font:
-            self.font = font[self.font]
+            try:
+                self.font = font[self.font]
+            except:
+                print 'can\'t find font %s' % self.font
+                print font
         else:
             self.font = None
 
@@ -525,8 +527,35 @@ class XML_image(XML_data):
     def __init__(self):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
 
-    def prepare(self, color):
-        pass
+    def search_file(self, file, search_dirs):
+        for s_dir in search_dirs:
+            dfile=os.path.join(s_dir, file)
+
+            if os.path.isfile(dfile):
+                return dfile
+            if os.path.isfile("%s_%sx%s.png" % (dfile, config.CONF.width,
+                                                config.CONF.height)):
+                return "%s_%sx%s.png" % (dfile, config.CONF.width, config.CONF.height)
+            if os.path.isfile("%s_%sx%s.jpg" % (dfile, config.CONF.width,
+                                                config.CONF.height)):
+                return "%s_%sx%s.jpg" % (dfile, config.CONF.width, config.CONF.height)
+            if config.CONF.width == 720 and os.path.isfile("%s_768x576.png" % dfile):
+                return "%s_768x576.png" % dfile
+            if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
+                return "%s_768x576.jpg" % dfile
+            if os.path.isfile("%s.png" % dfile):
+                return "%s.png" % dfile
+            if os.path.isfile("%s.jpg" % dfile):
+                return "%s.jpg" % dfile
+
+        print 'can\'t find image %s' % file
+        return ''
+    
+    def prepare(self, color, search_dirs):
+        """
+        try to guess the image localtion
+        """
+        self.filename = self.search_file(self.filename, search_dirs)
     
 
 
@@ -538,7 +567,7 @@ class XML_rectangle(XML_data):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
                                  'bgcolor', 'size', 'radius' ))
 
-    def prepare(self, color):
+    def prepare(self, color, search_dirs=None):
         if color.has_key(self.color):
             self.color = color[seld.color]
         if color.has_key(self.bgcolor):
@@ -562,7 +591,7 @@ class XML_font(XML_data):
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
 
-    def prepare(self, color):
+    def prepare(self, color, search_dirs=None):
         if color.has_key(self.color):
             self.color = color[self.color]
         self.h = osd.stringsize('Ajg', self.name, self.size)[1]
@@ -584,9 +613,9 @@ class XML_player:
     player tag for the audio play skin
     """
     def __init__(self):
-        self.content = ( 'screen', 'title', 'view', 'info' )
+        self.content = ( 'screen', 'title', 'subtitle', 'view', 'info' )
         for c in self.content:
-            setattr(self, c, XML_area())
+            setattr(self, c, XML_area(c))
 
 
     def parse(self, node, scale, current_dir):
@@ -607,9 +636,9 @@ class XML_tv:
     tv tag for the tv menu
     """
     def __init__(self):
-        self.content = ( 'screen', 'title', 'view', 'info', 'listing' )
+        self.content = ( 'screen', 'title', 'subtitle', 'view', 'info', 'listing' )
         for c in self.content:
-            setattr(self, c, XML_area())
+            setattr(self, c, XML_area(c))
 
 
     def parse(self, node, scale, current_dir):
@@ -687,7 +716,6 @@ class XMLSkin:
                     if not self._font.has_key(label):
                         self._font[label] = XML_font(label)
                     self._font[label].parse(node, scale, c_dir)
-                        
 
             if node.name == u'color':
                 label = attr_str(node, 'label', '')
@@ -743,9 +771,17 @@ class XMLSkin:
                     scale = (float(config.CONF.width-2*config.OVERSCAN_X)/float(w),
                              float(config.CONF.height-2*config.OVERSCAN_Y)/float(h))
 
-                    include  = attr_file(freevo_type, "include", "", \
-                                         os.path.dirname(file), guessing = FALSE)
-                    if include:
+                    include  = attr_str(freevo_type, 'include', '')
+
+                    if include and not os.path.isfile(include):
+                        include += '.xml'
+
+                    if include and not os.path.isfile(include):
+                        include = os.path.join(os.path.dirname(file), include)
+                        if not os.path.isfile(include):
+                            print 'can find include %s' % include
+                            
+                    if include and os.path.isfile(include):
                         self.load(include, copy_content, prepare = FALSE)
 
                     self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
@@ -760,17 +796,28 @@ class XMLSkin:
             font        = copy.deepcopy(self._font)
             layout      = copy.deepcopy(self._layout)
 
+            search_dirs = (os.path.dirname(file), 'skins/images', self.icon_dir)
             for f in font:
                 font[f].prepare(self._color)
                 
             for l in layout:
-                layout[l].prepare(font, self._color)
-
+                layout[l].prepare(font, self._color, search_dirs)
             for menu in self.menu:
                 self.menu[menu].prepare(self._menuset, layout)
 
+                # prepare listing area images
+                for s in self.menu[menu].style:
+                    for i in range(2):
+                        if s[i] and hasattr(s[i], 'listing'):
+                            for image in s[i].listing.images:
+                                s[i].listing.images[image].prepare(None, search_dirs)
+                        
+                
             self.player.prepare(layout)
             self.tv.prepare(layout)
+            # prepare listing area images
+            for image in self.tv.listing.images:
+                self.tv.listing.images[image].prepare(None, search_dirs)
 
             self.popup = layout[self._popup]
             return 1

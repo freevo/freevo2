@@ -42,22 +42,22 @@
     <menuset label="normal text style">
 
       <!-- 1. screen: the complete background area -->
-      <screen layout="screen0" visible="yes" 
-	x="0" y="0" width="800" height="600"/>
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
 
       <!-- 2. title: the area where the title of the menu (e.g. directory name -->
       <!-- will be displayed -->
-      <title layout="title0" visible="yes" 
-	x="10" y="10" width="780" height="60"/> 
+      <title layout="title0" x="10" y="10" width="780" height="60"/> 
 
       <!-- 3. view area: the cover image for audio/video, a thumbnail for image -->
-      <view layout="view0" visible="yes" 
-	x="580" y="110" width="200" height="300"/> 
+      <view layout="view0" x="580" y="110" width="200" height="300"/> 
 
       <!-- 4. listing area: the list of all items -->
-      <listing layout="list0" visible="yes" 
-	x="20" y="110" width="540" height="450"/>
-
+      <listing layout="list0" x="45" y="110" width="515" height="470">
+	<image x="10" y="110" width="32" height="32" label="uparrow" 
+	  filename="up.png"/>
+	<image x="10" y="544" width="32" height="32" label="downarrow" 
+	  filename="down.png"/>
+      </listing>
       <!-- 5. info area: additional info. This area is invisible in the default -->
       <!-- menu, it's only visible in the extended menus -->
       <info visible="no"/>
@@ -66,10 +66,8 @@
 
     <!-- Now the main menu -->
     <menuset label="main menu">
-      <screen layout="screen0" visible="yes" 
-	x="0" y="0" width="800" height="600"/>
-      <listing layout="list_main" visible="yes" 
-	x="230" y="120" width="380" height="390"/>
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <listing layout="list_main" x="230" y="120" width="380" height="390"/>
 
       <!-- disables info, view and title area. -->
       <view visible="no"/>
@@ -96,8 +94,8 @@
       <background>
 	<!-- an image with the label background will ignore OVERSCAN settings -->
 	<!-- in freevo to make sure the complete screen is filled -->
-	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
-	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
+	<image filename="aubin_bg2" x="0" y="0" label="background"/>
+	<image filename="logo.png" x="10" y="0" width="200" height="98"/>
       </background>
     </layout>
 
@@ -203,20 +201,17 @@
     -->
     
     <player>
-      <screen layout="player screen" visible="yes" 
-	x="0" y="0" width="800" height="600"/>
+      <screen layout="player screen" x="0" y="0" width="800" height="600"/>
+      <view layout="player view" x="430" y="200" width="420" height="360"/> 
+      <info layout="player info" x="-50" y="80" width="550" height="300"/> 
       <title visible="no"/>
-      <view layout="player view" visible="yes"
-	x="430" y="200" width="420" height="360"/> 
-      <info layout="player info" visible="yes"
-	x="-50" y="80" width="550" height="300"/> 
     </player>
 
     <font label="player" name="Arial_Bold" size="20" color="0xffffff"/>
 
     <layout label="player screen">
       <background>
-	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
+	<image filename="aubin_bg2" x="0" y="0" label="background"/>
       </background>
     </layout>
 
@@ -255,14 +250,15 @@
     -->
     
     <tv>
-      <screen layout="tv screen" visible="yes"
-	x="0" y="0" width="800" height="600"/>
+      <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
+      <info layout="tv info" x="10" y="10" width="780" height="190"/>
+      <listing layout="tv listing" x="10" y="220" width="750" height="370"> 
+	<image x="765" y="220" width="32" height="32" label="uparrow" 
+	  filename="up.png"/>
+	<image x="765" y="544" width="32" height="32" label="downarrow" 
+	  filename="down.png"/>
+      </listing>
       <title visible="no"/>
-      <view visible="no"/>
-      <info layout="tv info" visible="yes" 
-	x="10" y="10" width="780" height="190"/> 
-      <listing layout="tv listing" visible="yes" 
-	x="10" y="220" width="780" height="370"/> 
     </tv>
 
     <font label="tv" name="Arial_Bold" size="20" color="0xffffff"/>
@@ -272,7 +268,7 @@
 
     <layout label="tv screen">
       <background>
-	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
+	<image filename="aubin_bg2" x="0" y="0" label="background"/>
       </background>
     </layout>
 

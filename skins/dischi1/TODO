@@ -1,4 +1,4 @@
-add indicators for tv items and UP/DOWN for more items than you see
+add indicators for tv items
 
 DISPLAY should toggle between more than two styles
 
@@ -15,5 +15,3 @@ No "this directory is empty" handling yet (you only see nothing)
 blue1_round will get an image listing, too
 
 Finish integration of Robs new gui stuff
-
-fix the <mainmenu> stuff

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
   
-  <skin include="blue1_big" geometry="800x600">
+  <skin include="blue1_small" geometry="800x600">
 
     <!-- 
     special settings for audio. The default style is an image based style
@@ -26,38 +26,50 @@
     
     <!-- Now the "audio menu with info" used by audio-->
     <menuset label="audio menu with info">
-      <screen layout="screen0" visible="yes" 
-	x="0" y="0" width="800" height="600"/>
-      <title layout="title1" visible="yes" 
-	x="10" y="10" width="780" height="60"/>
-      <listing layout="audio list" visible="yes" 
-	x="10" y="120" width="540" height="250"/>
-      <view layout="view0" visible="yes" x="590" 
-	y="110" width="200" height="300"/>
-      <info visible="yes" layout="info" 
-	x="10" y="400" width="760" height="190"/>
+      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
+      <title layout="title0" x="10" y="10" width="780" height="60"/>
+      <subtitle layout="title1" x="40" y="100" width="470" height="40"/>
+
+      <listing layout="audio list" x="40" y="140" width="540" height="240">
+	<image label="uparrow" x="5" y="150" width="32" height="32"  
+	  filename="../icons/AquaFusion/up.png"/>
+	<image label="downarrow" x="5" y="348" width="32" height="32"
+	  filename="../icons/AquaFusion/down.png"/>
+      </listing>
+
+      <view layout="view0" x="590" y="170" width="200" height="300"/>
+      <info layout="info" x="40" y="410" width="760" height="170"/>
     </menuset>
 
     <!-- The "video menu with info" is like the audio one, except a different -->
     <!-- listing area label -->
     <menuset label="video menu with info" inherits="audio menu with info">
-      <listing layout="video list" y="90" height="340"/>
-      <info y="410" height="180"/>
+      <listing layout="video list" height="340">
+	<image label="downarrow" y="363"/>
+      </listing>
+      <view y="120"/>
+      <info y="430" height="160"/>
     </menuset>
 
     <menuset label="image menu with info" inherits="audio menu with info">
-      <title layout="title0"/>
-      <listing y="110" height="280" layout="image list"/>
+      <subtitle visible="no"/>
+      <listing y="120" height="330" width="720" layout="image list">
+	<image label="uparrow" y="137"/>
+	<image label="downarrow" y="415"/>
+      </listing>
+      <view visible="no"/>
+      <info y="480" height="110"/>
     </menuset>
 
     <layout label="title1">
-      <content x="210" type="item" font="title" align="center"/>
+      <content type="short item" font="title small" align="left"/>
     </layout>
+
+    <font label="title small" name="Arial_Bold" size="22" color="0xffffff"/>
 
     <!-- info area -->
     <layout label="info">
-      <content x="5" y="15" width="max-10" height="max-10" type="text"
-	spacing="20" font="default">
+      <content x="0" y="0" type="text" spacing="20" font="default">
 	<item type="audio">
 	  Title:   \t@title@
 	  Artist:  \t@artist@
@@ -85,7 +97,7 @@
 
     <!-- listing area for audio with images -->
     <layout label="audio list">
-      <content type="image" spacing="4" align="center" valign="center">
+      <content x="0" y="0" type="image" spacing="-2" align="center" valign="center">
 	<item type="default" width="100" height="100"/>
 	<item type="selected" width="100" height="100">
 	  <rectangle bgcolor="selection" size="0" x="-10" y="-10" width="max+20"
@@ -96,20 +108,20 @@
 
     <!-- listing area for video with images -->
     <layout label="video list">
-      <content type="image" spacing="4" align="center" valign="center">
-	<item type="default" width="100" height="140"/>
-	<item type="selected" width="100" height="140">
-	  <rectangle bgcolor="selection" size="0" x="-10" y="-10" width="max+20"
-	    height="max+20"/>
+      <content type="image" spacing="-2" align="center" valign="center">
+	<item type="default" width="80" height="112"/>
+	<item type="selected" width="87" height="122">
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
+	    height="max+10"/>
 	</item>
       </content>
     </layout>
 
     <!-- listing area for video with images -->
     <layout label="image list">
-      <content type="image+text" spacing="4" align="center" valign="center">
+      <content type="image+text" spacing="-8" align="center" valign="center">
 	<item type="default" width="120" height="90" font="item"/>
-	<item type="selected" width="120" height="90" font="selected">
+	<item type="selected" width="168" height="126" font="selected">
 	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
 	    height="max+10"/>
 	</item>

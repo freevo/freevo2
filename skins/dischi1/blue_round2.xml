@@ -27,7 +27,10 @@
       -->
       <title visible="no"/>
       <view x="20" y="100" width="300" height="300"/> 
-      <listing layout="listing" x="330" y="110" width="460" height="450"/>
+      <listing layout="listing" x="330" y="110" width="460" height="450">
+	<image label="uparrow" x="290" y="110"/>
+	<image label="downarrow" x="290" y="520"/>
+      </listing>
     </menuset>
 
 
@@ -78,20 +81,20 @@
     <!-- background -->
     <layout label="screen0">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
       </background>
     </layout>
 
     <layout label="screen watermark">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
 	<image x="435" y="230" width="370" height="380" label="watermark"/>
       </background>
     </layout>
 
     <layout label="video screen">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
 	<image filename="movie_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -99,7 +102,7 @@
 
     <layout label="audio screen">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
 	<image filename="music_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -107,7 +110,7 @@
 
     <layout label="image screen">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
 	<image filename="image_watermark.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
@@ -164,7 +167,7 @@
 
     <layout label="player screen">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
       </background>
     </layout>
 
@@ -173,7 +176,7 @@
 
     <layout label="tv screen">
       <background>
-	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="aubin/blurr.jpg" x="0" y="0" label="background"/>
       </background>
     </layout>
 

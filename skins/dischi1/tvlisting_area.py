@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/22 20:08:31  dischi
+# Lots of changes:
+# o blue2_big and blue2_small are gone, it's only blue2 now
+# o Support for up/down arrows in the listing area
+# o a sutitle area for additional title information (see video menu in
+#   blue2 for an example)
+# o some layout changes in blue2 (experimenting with the skin)
+# o the skin searches for images in current dir, skins/images and icon dir
+# o bugfixes
+#
 # Revision 1.8  2003/03/20 18:55:46  dischi
 # Correct the rectangle drawing
 #
@@ -367,4 +377,10 @@ class TVListing_Area(Skin_Area):
 
             i += 1
             y0 += item_h - 1
-        return
+
+
+        # print arrow:
+        if menuw.display_up_arrow and area.images['uparrow']:
+            self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
+        if menuw.display_down_arrow and area.images['downarrow']:
+            self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])

@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/03/22 20:08:30  dischi
+# Lots of changes:
+# o blue2_big and blue2_small are gone, it's only blue2 now
+# o Support for up/down arrows in the listing area
+# o a sutitle area for additional title information (see video menu in
+#   blue2 for an example)
+# o some layout changes in blue2 (experimenting with the skin)
+# o the skin searches for images in current dir, skins/images and icon dir
+# o bugfixes
+#
 # Revision 1.12  2003/03/21 19:32:51  dischi
 # small bugfix
 #
@@ -226,8 +236,8 @@ class Listing_Area(Skin_Area):
         cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu, self.display_style)
 
-        x0 = content.x
-        y0 = content.y
+        item_x0 = content.x
+        item_y0 = content.y
 
         current_col = 1
         
@@ -246,6 +256,16 @@ class Listing_Area(Skin_Area):
                     val = content.types[choice.type]
                 else:
                     val = content.types['default']
+
+            if content.align == 'center':
+                x0 = item_x0 + (hspace - val.width) / 2
+            else:
+                x0 = item_x0
+                
+            if content.valign == 'center':
+                y0 = item_y0 + (vspace - val.height) / 2
+            else:
+                y0 = item_y0
                 
             text = choice.name
             if not text:
@@ -309,7 +329,7 @@ class Listing_Area(Skin_Area):
             
                     if content.valign == 'center' and i_h < val.height:
                         addy = (val.height - i_h) / 2
-
+                        
                     if content.valign == 'bottom' and i_h < val.height:
                         addy = val.height - i_h
 
@@ -324,11 +344,16 @@ class Listing_Area(Skin_Area):
                 print 'no support for content type %s' % content.type
 
             if current_col == cols:
-                x0 = content.x
-                y0 += vspace
+                item_x0 = content.x
+                item_y0 += vspace
                 current_col = 1
             else:
-                x0 += hspace
+                item_x0 += hspace
                 current_col += 1
                 
+        # print arrow:
+        if menuw.menu_items[0] != menu.choices[0] and area.images['uparrow']:
+            self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
+        if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
+            self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
         self.last_choices = (menu.selected, copy.copy(menuw.menu_items))

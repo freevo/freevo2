@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/03/22 20:08:30  dischi
+# Lots of changes:
+# o blue2_big and blue2_small are gone, it's only blue2 now
+# o Support for up/down arrows in the listing area
+# o a sutitle area for additional title information (see video menu in
+#   blue2 for an example)
+# o some layout changes in blue2 (experimenting with the skin)
+# o the skin searches for images in current dir, skins/images and icon dir
+# o bugfixes
+#
 # Revision 1.38  2003/03/16 19:36:06  dischi
 # Adjustments to the new xml_parser, added listing type 'image+text' to
 # the listing area and blue2, added grey skin. It only looks like grey1
@@ -209,6 +219,12 @@ class Title_Area(Skin_Area):
 
         if content.type == 'menu':
             text = menu.heading
+        elif content.type == 'short item':
+            if menu.selected.type == 'video' and menu.selected.tv_show:
+                sn = menu.selected.show_name
+                text = sn[1] + "x" + sn[2] + " - " + sn[3] 
+            else:
+                text = menu.selected.name
         else:
             text = menu.selected.name
 
@@ -226,12 +242,26 @@ class Title_Area(Skin_Area):
 
         if content.type == 'menu':
             text = menu.heading
+        elif content.type == 'short item':
+            if menu.selected.type == 'video' and menu.selected.tv_show:
+                sn = menu.selected.show_name
+                text = sn[1] + "x" + sn[2] + " - " + sn[3] 
+            else:
+                text = menu.selected.name
         else:
             text = menu.selected.name
 
         self.text = text
         self.write_text(text, content.font, content, mode='hard')
 
+
+class Subtitle_Area(Title_Area):
+    """
+    in this area the subtitle of the menu is drawn
+    """
+    def __init__(self, parent, screen):
+        Skin_Area.__init__(self, 'subtitle', screen)
+        self.text = ''
 
 
 ###############################################################################
@@ -252,7 +282,7 @@ class Skin:
         self.force_redraw = TRUE
         self.last_draw = None
         self.screen = Screen()
-        self.area_names = ( 'screen', 'title', 'listing', 'view', 'info')
+        self.area_names = ( 'screen', 'title', 'subtitle', 'listing', 'view', 'info')
         for a in self.area_names:
             setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
                                               (a[0].upper(), a[1:])))
