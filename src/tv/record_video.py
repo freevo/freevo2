@@ -9,6 +9,33 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/07 17:13:34  outlyer
+# A bunch of internal changes that should be completely invisible to most
+# people. Mainly, the scheduling routine is now a little more configurable.
+#
+# I use mp1e, some people use lavrec, but as long as the command-line options
+# they take can be expressed in terms of some simple options, you can add support
+# for them without editing the config.
+#
+# for example, I use this:
+# VCR_CMD = ('/usr/bin/schedulerec '+
+#            '%(channel)s %(timecode)s ' +
+#                       '%(filename)s.mpg')
+#
+#
+# I've modified freevo_config so mencoder works as before.
+#
+# ---
+#
+# Other change is adding the Channel ID to the freevo_record.lst file, which is
+# used by my skin (for now) to highlight scheduled shows in red.
+#
+# Last of all, I swapped the filename - time to be time - filename for recording
+# shows, because logically, it'll swap them by recording time which seems to make
+# more sense.
+#
+# Please test this and let me know if it's bad.
+#
 # Revision 1.8  2003/02/27 06:15:14  krister
 # cleanup
 #
@@ -265,26 +292,39 @@ def set_schedule(arg=None, menuw=None):
     # Start timestamp
     ts = recinfo.start_date.selected + ' ' + recinfo.start_time.selected
     start_time_s = time.mktime(time.strptime(ts, '%Y-%m-%d %H:%M'))
-    
+ 
     # Length in seconds
     len_secs = int(recinfo.length.selected) * 60
 
     # Recording filename
     rec_name = recinfo.program_name.selected
-    ts_ch = time.strftime('%Y%m%d_%H%M', time.localtime(start_time_s))
-    ts_ch += '_ch_%s' % tunerid
+    ts_ch = time.strftime('%m-%d_%I:%M_-', time.localtime(start_time_s))
     if rec_name != recinfo.program_name.choices[0]:
         rec_name = ts_ch
     else:
-        rec_name = progname2filename(rec_name) + '_' + ts_ch
+        rec_name = ts_ch + '_' + progname2filename(rec_name)
     rec_name = os.path.join(config.DIR_RECORD, rec_name)
 
+    # Calculate timecode for mp1e and similar encoders
+    temp = len_secs - 1
+    hour = int(temp/3600)
+    minu = int(temp/60)
+    seco = int(temp%60)
+    timecode_format = '%0.2i:%0.2i:%0.2i' % (hour,minu,seco)
+
+    # Flexible command-line options
+    cl_options = { 'channel'  : tunerid,
+                   'filename' : rec_name,
+                   'seconds'  : len_secs,
+                   'timecode' : timecode_format }
+
+
     # Build the commandline. The -frames option is added later by the daemon.
-    sch_cmd = config.VCR_CMD % (tunerid, rec_name)
+    sch_cmd = config.VCR_CMD % cl_options
     print 'SCHEDULE: %s, %s, %s' % (tunerid, time.ctime(start_time_s), rec_name)
     print 'SCHEDULE: %s' % sch_cmd
     
-    record_daemon.schedule_recording(start_time_s, len_secs, sch_cmd)
+    record_daemon.schedule_recording(start_time_s, len_secs, sch_cmd, recinfo.channel)
     
     s = 'Scheduled recording:\n'
     s += 'Channel %s\n' % recinfo.channel

@@ -527,7 +527,7 @@ REC_SCHEDULE = '/tmp/freevo_record.pickle'
 VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
            '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
            ':norm=NTSC' +                  # Change
-           ':channel=%s' +                 # Filled in by Freevo
+           ':channel=%(channel)s' +         # Filled in by Freevo
            ':chanlist=us-cable' +          # Change
            ':width=320:height=240' +       # Change if needed
            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
@@ -543,7 +543,7 @@ VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtim
            '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding
            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
            '-ffourcc divx '                # Force 'divx' ident, better compat.
-           '-o %s.avi ')                   # Filled in by Freevo
+           '-o %(filename)s.avi ')                   # Filled in by Freevo
 
 # XXX Not used yet
 VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
