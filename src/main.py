@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2003/11/16 14:35:08  dischi
+# better help doc when deps are missing
+#
 # Revision 1.88  2003/11/16 10:18:10  dischi
 # add -dpms for xset
 #
@@ -78,11 +81,22 @@ try:
     import pygame
     import twisted
     
-except ImportError:
-    traceback.print_exc()
+except ImportError, i:
+    print 'Can\'t find all Python dependencies:'
+    print i
     print
-    print 'Not all requirements of Freevo are installed on your system'
-    print 'Please check the INSTALL file for more informations'
+    print 'Not all requirements of Freevo are installed on your system.'
+    print 'Please check the INSTALL file for more informations.'
+    print
+    print 'A quick solution is to install the Freevo runtime. This contains'
+    print 'all Python dependencies to run Freevo. Get the current runtime at'
+    print 'http://sourceforge.net/project/showfiles.php?group_id=46652&release_id=194955'
+    print 'After downloading, run \'./freevo install path-to-runtime.tgz\'.'
+    print
+    print 'The runtime doesn\'t contain external applications like mplayer, xine'
+    print 'or tvtime. You need to download and install them, too (all except'
+    print 'mplayer are optional).'
+    print
     sys.exit(0)
 
     
