@@ -19,6 +19,11 @@ if [ "$PORTDIR_OVERLAY" = "" ]; then
     exit 1
 fi
 
+if ! [ -w "$PORTDIR_OVERLAY" ]; then
+    echo unable to write to $PORTDIR_OVERLAY: permission denied
+    exit 1
+fi
+
 cd /tmp
 rm rsync-ChangeLog $file 2>/dev/null
 echo downloading version information
