@@ -1,14 +1,14 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# SWEDISH TRANSLATION FOR FREEVO
+# Copyright (C) 2003 FREEVO
+# Per Wigren <per@wigren.nu, 2003.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Freevo 1.4.0\n"
 "POT-Creation-Date: 2003-10-04 20:35+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2003-10-05 03:15+0100\n"
+"Last-Translator: Per Wigren <per@wigren.nu>\n"
+"Language-Team: Who needs a team? :)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
