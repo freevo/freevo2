@@ -8,3 +8,12 @@ list archive.
 
 http://freevo.sourceforge.net/cgi-bin/moin.cgi/FrontPage
 http://sourceforge.net/mailarchive/forum.php?forum_id=9234
+
+To download the important stuff from the WiKi use httrack:
+
+httrack -O wiki http://freevo.sourceforge.net/cgi-bin/moin.cgi/ \
+	"-*action=*" "-*UserPref*" "-*FindPage*" "-*HelpContents*" \
+	"-*FreevoWikiHelp*" "-*RecentChanges*" "-*TitleIndex*" \
+	"-*WordIndex*" "-*SiteNavigation*" "-*Hilfe*" "-*HelpOn*" \
+	"-*AbandonedPages.html*" "-*Aktuelle_c4nderungen.html*" \
+	"-*AufgegebeneSeiten.html*" "-*BenutzerEinstellungen.html*"
