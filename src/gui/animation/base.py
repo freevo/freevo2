@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/10/12 11:31:58  dischi
+# make animation frame selection timer based
+#
 # Revision 1.8  2004/08/27 14:15:25  dischi
 # split animations into different files
 #
@@ -89,7 +92,7 @@ class BaseAnimation:
         self.delete       = False  # Delete from list on next poll
         self.next_update  = 0      # timestamp for next update
         self.application  = False  # True when it's for app show/hide
-        
+        self.__start_time = 0
 
     def set_fps(self, fps):
         """
@@ -129,16 +132,17 @@ class BaseAnimation:
 
 
     def poll(self, current_time):
-        if 0:
-            self.next_update = 0
+        if not self.__start_time:
+            self.__start_time = current_time
         if self.next_update < current_time:
+            frame = int((current_time - self.__start_time) / self.interval) + 1
             self.next_update = current_time + self.interval
-            self.update()
+            self.update(frame)
             return True
         return False
 
     
-    def update(self):
+    def update(self, frame):
         """
         Overload to do stuff with the surface
         """

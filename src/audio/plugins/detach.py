@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/10/12 11:31:57  dischi
+# make animation frame selection timer based
+#
 # Revision 1.22  2004/09/15 20:46:08  dischi
 # fix audio stop hide() bug
 #
@@ -325,7 +328,7 @@ class DetachbarAnimation(BaseAnimation):
         self.last_elapsed = None
 
 
-    def update(self):
+    def update(self, frame=None):
         """
         update the animation
         """

@@ -8,6 +8,9 @@
 # Todo:  - Much
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/10/12 11:31:57  dischi
+# make animation frame selection timer based
+#
 # Revision 1.12  2004/10/02 11:38:00  dischi
 # update to libvisual
 #
@@ -239,7 +242,7 @@ class libvisualAnimation(BaseAnimation):
         gui.get_display().remove_child(self.image)
 
 
-    def update(self):
+    def update(self, frame=None):
         """
         Update the animation
         """

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/12 11:31:58  dischi
+# make animation frame selection timer based
+#
 # Revision 1.1  2004/08/27 14:15:25  dischi
 # split animations into different files
 #
@@ -48,7 +51,6 @@ class FadeAnimation(BaseAnimation):
         BaseAnimation.__init__(self, fps)
         self.objects     = objects
         self.max_frames  = max(frames, 1)
-        self.frame       = 0
         self.diff        = stop - start
         self.start_alpha = start
         # make sure all objects are visible
@@ -57,17 +59,18 @@ class FadeAnimation(BaseAnimation):
         map(lambda o: o.set_alpha(start), objects)
 
 
-    def update(self):
+    def update(self, frame):
         """
         update the animation
         """
-        self.frame += 1
+        frame = min(self.max_frames, frame)
+
         # calculate the new alpha
-        diff = int(self.frame * (float(self.diff) / self.max_frames))
+        diff = int(frame * (float(self.diff) / self.max_frames))
         alpha = self.start_alpha + diff
         # set new alpha
         map(lambda o: o.set_alpha(alpha), self.objects)
-        if self.frame == self.max_frames:
+        if frame == self.max_frames:
             # remove animation when done
             self.remove()
             if self.start_alpha - self.diff == 0:
@@ -82,6 +85,6 @@ class FadeAnimation(BaseAnimation):
         """
         finish the animation
         """
-        self.frame = self.max_frames - 1
+        self.max_frames = 1
         self.update()
         BaseAnimation.finish(self)

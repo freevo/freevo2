@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/12 11:31:58  dischi
+# make animation frame selection timer based
+#
 # Revision 1.3  2004/08/27 14:15:25  dischi
 # split animations into different files
 #
@@ -52,25 +55,25 @@ class MoveAnimation(BaseAnimation):
         self.orientation = orientation
         self.pixel       = pixel
         self.max_frames  = max(frames, 1)
-        self.frame       = 0
         self.pos         = 0
         # make sure all objects are visible
         map(lambda o: o.show(), objects)
 
 
-    def update(self):
+    def update(self, frame):
         """
         update the animation
         """
-        self.frame += 1
         if not self.max_frames:
             # if there are no frames, remove the
             # animation, it can't run
             self.remove()
             return
 
+        frame = min(self.max_frames, frame)
+
         # calculate the new position
-        new_pos = int(self.frame * (float(self.pixel) / self.max_frames))
+        new_pos = int(frame * (float(self.pixel) / self.max_frames))
         # move objects
         for o in self.objects:
             if self.orientation == VERTICAL:
@@ -80,7 +83,7 @@ class MoveAnimation(BaseAnimation):
         # store new position
         self.pos = new_pos
         # remove animation when done
-        if self.frame == self.max_frames:
+        if frame == self.max_frames:
             self.remove()
 
 
@@ -88,6 +91,6 @@ class MoveAnimation(BaseAnimation):
         """
         finish the animation
         """
-        self.frame = self.max_frames - 1
+        self.max_frames = 1
         self.update()
         BaseAnimation.finish(self)

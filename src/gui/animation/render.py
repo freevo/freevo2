@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/12 11:31:58  dischi
+# make animation frame selection timer based
+#
 # Revision 1.9  2004/10/07 14:04:07  dischi
 # set correct timer for notifier
 #
@@ -115,10 +118,10 @@ class Render:
     def __init__(self, display):
         # set the update handler to wait for osd
         self.display = display
-        self.animations   = []    # all animations
-        self.suspended    = []    # suspended animations
-        self.__timer_id    = None  # timer id
-        
+        self.animations = []    # all animations
+        self.suspended  = []    # suspended animations
+        self.__timer_id = None  # timer id
+
     def update(self):
         """
         This is the draw method for animations
@@ -216,7 +219,7 @@ class Render:
             # first animation, register ourself to the main loop:
             self.__timer_id = notifier.addTimer( 1, self.update )
 
-
+    
     def wait(self, anim_objects=None):
         """
         wait until the given animations are finished
