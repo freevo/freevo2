@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/09 19:37:48  outlyer
+# Inherit config.DEBUG
+#
 # Revision 1.13  2003/11/28 20:23:43  dischi
 # renamed more config variables
 #
@@ -63,7 +66,7 @@ import v4l2	# Video4Linux2 Python Interface
 import pyshift	# Timeshift Interface
 
 # Set to 1 for debug output
-DEBUG = 1
+DEBUG = config.DEBUG
 
 TRUE = 1
 FALSE = 0

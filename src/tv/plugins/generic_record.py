@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/09 19:37:48  outlyer
+# Inherit config.DEBUG
+#
 # Revision 1.13  2003/12/05 02:26:34  rshortt
 # Add some new cl_options: frequency, base_filename, title, and sub-title.
 #
@@ -120,7 +123,7 @@ class Recorder:
         self.thread.command = self.rec_command
         self.thread.mode_flag.set()
         
-        print('Recorder::Record: %s' % self.rec_command)
+        if DEBUG: print('Recorder::Record: %s' % self.rec_command)
         
         
     def Stop(self):
@@ -170,13 +173,13 @@ class Record_Thread(threading.Thread):
 
     def run(self):
         while 1:
-            print('Record_Thread::run: mode=%s' % self.mode)
+            if DEBUG: print('Record_Thread::run: mode=%s' % self.mode)
             if self.mode == 'idle':
                 self.mode_flag.wait()
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
-                print('Record_Thread::run: cmd=%s' % self.command)
+                if DEBUG: print('Record_Thread::run: cmd=%s' % self.command)
 
 		# The FreeBSD bsdbt848 driver does not support the adevice
 		# setting, so we must switch the mixer to the correct record
@@ -193,7 +196,7 @@ class Record_Thread(threading.Thread):
                 while self.mode == 'record' and self.app.isAlive():
                     time.sleep(0.5)
 
-                print('Record_Thread::run: past wait()!!')
+                if DEBUG: print('Record_Thread::run: past wait()!!')
 
                 rc.post_event(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
 
