@@ -178,8 +178,16 @@ if __name__ == "__main__":
             print 'Cannot decode option "%s"' % arg
             usage(sys.argv[0])
 
-    # Add the OSD server and remote control client applications
-    task_args += [ freevo, osd, remote ]
+    # XXX TEST CODE BY KRISTER! This code fragment will load the experimental OSD SDL module
+    # if the symbol OSD_SDL is in the config module namespace, but will work fine if it is not.
+    # This is used to load my new version of the OSD module without messing around in the source
+    # too much...
+    if 'OSD_SDL' in dir(config):
+        # Add the OSD server and remote control client applications
+        task_args += [ freevo, remote ]
+    else:
+        # Add the OSD server and remote control client applications
+        task_args += [ freevo, osd, remote ]
     
     # Set the signal handler for CTRL-C which will shut down Freevo
     signal.signal(signal.SIGINT, ctrlc_handler)

@@ -1,8 +1,8 @@
 #
-# osd.py
+# osd_sdl.py
 #
-# This is the class for using the OSD server. It sends simple text commands
-# over UDP/IP to the OSD server.
+# This is the class for using the SDL OSD functions. It will eventually
+# replace the current osd.py
 #
 # $Id$
 
@@ -11,9 +11,18 @@ import socket, time, sys
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
-# Set to 1 for debug output
-DEBUG = 0
+# The PyGame Python SDL interface.
+# Dependencies: Freetype2, SDL, SDL_ttf, SDL_image, PyGame
+# The PyGame+SDL websites has good install instructions.
+# RPMs are available for most stuff.
 
+import pygame
+from pygame.locals import *
+
+# Set to 1 for debug output
+DEBUG = 1
+
+print 'XXXXXX LOADING TEST OSD'
 
 # Module variable that contains an initialized OSD() object
 _singleton = None
@@ -28,6 +37,13 @@ def get_singleton():
     return _singleton
 
 
+class Font:
+
+    filename = ''
+    ptsize = 0
+    font = None
+
+    
 class OSD:
 
     # The colors
@@ -45,45 +61,41 @@ class OSD:
     COL_MEDIUM_GREEN = 0x54D35D
     COL_DARK_GREEN = 0x038D11
 
-    
-    def __init__(self, host='127.0.0.1', port=config.OSD_PORT):
-        self.host = host
-        self.port = port
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._send('clearscreen;' + str(self.COL_BLACK))
+
+    # XXX width, height from config.OSD_WIDTH etc
+    def __init__(self, width=768, height=576):
+
+        self.fontcache = []
+        
         self.default_fg_color = self.COL_BLACK
         self.default_bg_color = self.COL_WHITE
-        self.width = 768                # XXX hardcoded, fix
-        self.height = 576               # XXX hardcoded, fix
+        self.width = width
+        self.height = height
+
+        pygame.init()
+        self.screen = pygame.display.set_mode((width, height), 0, 32)
+
+        self.clearscreen(self.COL_WHITE)
+        self.update()
 
 
-    def _send(self, str):
-        while 1:
-            try:
-                self.s.sendto(str, (self.host, self.port))
-                break # out of the while 1 loop
-            except:
-                if DEBUG: print 'OSD server (%s:%s) gone, '
-                'trying again in a second...' % (self.host, self.port),
-                #print 'Reason %s' % sys.exc_info()
-                print sys.exc_info()[0]
-                time.sleep(1)
-                
-        
+
+    def _send(arg1, *arg, **args): # XXX remove
+        pass
+
+    
     def shutdown(self):
-        self._send('quit')
+        pass
 
 
     def clearscreen(self, color=None):
         if color == None:
             color = self.default_bg_color
-        args = str(color)
-        self._send('clearscreen;' + args)
-
+        self.screen.fill(self._sdlcol(color))
+        
 
     def setpixel(self, x, y, color):
-        args = str(x) + ';' + str(y) + ';' + str(color)
-        self._send('setpixel;' + args)
+        pass # XXX Not used anywhere
 
 
     # Bitmap buffers in Freevo:
@@ -108,37 +120,36 @@ class OSD:
 
     # Caches a bitmap in the OSD without displaying it.
     def loadbitmap(self, filename):
-        args = filename
-        self._send('loadbitmap;' + args)
-
+        pass # XXX Fix later
+    
 
     # Loads and zooms a bitmap without copying it to the OSD drawing
     # buffer.
     def zoombitmap(self, filename, scaling=None, bbx=0, bby=0, bbw=0, bbh=0):
-        if scaling == None:
-            zoom = 1000
-        else:
-            zoom = int(scaling * 1000)
-            
-        args = [filename, str(bbx), str(bby), str(bbw), str(bbh), str(zoom)]
-        self._send('zoombitmap;' + ';'.join(args))
-
+        pass # XXX Fix later
+    
         
     # Draw a bitmap on the OSD. It is automatically loaded into the cache
     # if not already there. The loadbitmap()/zoombitmap() functions can
     # be used to "pipeline" bitmap loading/drawing.
-    def drawbitmap(self, filename, x=-1, y=-1, scaling=None,
+    def drawbitmap(self, filename, x=0, y=0, scaling=None,   # XXX scale, zoom, tile not supported yet!
                    bbx=0, bby=0, bbw=0, bbh=0):
-        if scaling == None:
-            zoom = 1000
-        else:
-            zoom = int(scaling * 1000)
-            
-        args = [filename, str(x), str(y), str(bbx), str(bby), str(bbw),
-                str(bbh), str(zoom)]
-        self._send('drawbitmap;' + ';'.join(args))
 
-        
+        try:
+            image = pygame.image.load(filename).convert_alpha()  # XXX Cannot load everything
+        except:
+            print 'SDL image load problem!'
+            return
+
+        if scaling:
+            w, h = image.get_size()
+            w = int(w*scaling)
+            h = int(h*scaling)
+            #image = pygame.transform.rotozoom(image, 0, scaling) # XXX incorporate rotation too
+            image = pygame.transform.scale(image, (w, h))
+        self.screen.blit(image, (x, y))
+
+
     def drawline(self, x0, y0, x1, y1, width=None, color=None):
         if width == None:
             width = 1
@@ -152,48 +163,74 @@ class OSD:
 
 
     def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0):
+        print 'drawbox: %s 0x%08x %s' % (width, color, fill)
+        
         if width == None:
             width = 1
 
-        if fill:
-            width = -1   # This means that the box should be filled
+        if width == -1:
+            fill = 1
+            width = 4 # XXX TEST for now!
             
         if color == None:
             color = self.default_fg_color
-            
-        args1 = str(x0) + ';' + str(y0) + ';'
-        args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';'
-        args3 = str(color)
-        self._send('drawbox;' + args1 + args2 + args3)
 
+        r = (x0, y0, x1-x0, y1-y0)
+        #c = self._sdlcol(color)
+        c = (0, 0, 255, 5)
+        if fill:
+            #self.screen.fill(c, r)
+            pygame.draw.rect(self.screen, c, r, width)
+            
         
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0):
         if fgcolor == None:
             fgcolor = self.default_fg_color
-        if bgcolor == None:
-            bgcolor = 0xff000000   # Transparent background
         if font == None:
             font = config.OSD_DEFAULT_FONTNAME
             ptsize = config.OSD_DEFAULT_FONTSIZE
-        # Args: fontfilename;pointsize;string;x;y;fgcol
-        args1 = font + ';' + str(ptsize) + ';' + string + ';'
-        args2 = str(x) + ';' + str(y) + ';' + str(fgcolor)
-        self._send('drawstring;' + args1 + args2)
 
+        f = self._getfont(font, ptsize)
+
+        # Render string with anti-aliasing
+        if bgcolor == None:
+            ren = f.render(string, 1, self._sdlcol(fgcolor))
+        else:
+            ren = f.render(string, 1, self._sdlcol(fgcolor), self._sdlcol(bgcolor))
+        
+        self.screen.blit(ren, (x, y))
+        
 
     def update(self):
-        self._send('update')
+        pygame.display.flip()
 
 
+    def _getfont(self, filename, ptsize):
+        for font in self.fontcache:
+            if font.filename == filename and font.ptsize == ptsize:
+                return font.font
 
-# XXX TEST CODE BY KRISTER! This code fragment will load the experimental OSD SDL module
-# if the symbol OSD_SDL is in the config module namespace, but will work fine if it is not.
-# This is used to load my new version of the OSD module without messing around in the source
-# too much...
-if 'OSD_SDL' in dir(config):
-    from osd_sdl import *
+        font = pygame.font.Font(filename, ptsize)
+        f = Font()
+        f.filename = filename
+        f.ptsize = ptsize
+        f.font = font
+        
+        self.fontcache.append(f)
 
+        return f.font
+
+        
+    # Convert a 32-bit TRGB color to a 4 element tuple for SDL
+    def _sdlcol(self, col):
+        a = 255 - ((col >> 24) & 0xff)
+        r = (col >> 16) & 0xff
+        g = (col >> 8) & 0xff
+        b = (col >> 0) & 0xff
+        c = (r, g, b, a)
+        return c
+            
 
 #
 # Simple test...
