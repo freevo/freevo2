@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/06/22 17:20:16  rshortt
+# Go back to using the system python because it is easier.
+#
 # Revision 1.17  2003/04/22 01:33:35  rshortt
 # Bugfixes.
 #
@@ -95,10 +98,11 @@ TAR1="tar zxvf"
 TAR2="tar jxvf"
 
 PREFIX=$(COPY_BASE)/build
+COPY_BASE=$(PREFIX)
 
 CFGFLAGS="--prefix=$(PREFIX)"
 
-PYBIN=$(PREFIX)/bin/python
+PYBIN=/usr/bin/python
 LIRCLIB=/opt/lirc/lib
 LIRCINC=/opt/lirc/include
 
@@ -163,7 +167,7 @@ python_copy:
 	-rm -rf tmp
 	-mkdir -p lib
 	-mkdir -p apps
-	cp -a $(PREFIX)/lib/python2.2 lib
+	cp -a /usr/lib/python2.2 lib
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
 	rm -rf lib/python2.2/config
@@ -173,11 +177,13 @@ python_copy:
 	-mkdir -p tmp
 	cp -a lib/python2.2/site-packages/{CDDB.py,DiscID.py,Numeric,Numeric.pth} tmp
 	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,aomodule.so} tmp
-	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,pygame} tmp
+	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,pygame,pygphoto.so} tmp
 	cp -a lib/python2.2/site-packages/{pylircmodule.so,fchksum.so} tmp
+	cp -a lib/python2.2/site-packages/{_xmms.so,xmms.py} tmp
+	cp -a lib/python2.2/site-packages/{mmpython,twisted,pyshift.so} tmp
 	rm -rf lib/python2.2/site-packages
 	mv tmp lib/python2.2/site-packages
-	cp -a $(PREFIX)/bin/python2.2 apps/freevo_python
+	cp -a /usr/bin/python2.2 apps/freevo_python
 
 
 ################################################################################
@@ -607,7 +613,7 @@ build_pyxmms: PACKAGE=$(PYXMMS)
 build_pyxmms: PACKAGE_GET=$(PYXMMS_GET)
 build_pyxmms: EXT=tar.gz
 build_pyxmms: TAR=$(TAR1)
-build_pyxmms: BUILDCMDS="echo XMMS support is broken."
+build_pyxmms: BUILDCMDS="$(PYBIN) config_unix.py; $(PYBIN) setup.py build; $(PYBIN) setup.py install"
 build_pyxmms: CFG=$(CFGFLAGS)
 build_pyxmms:
 	@ . build_functions ;\
