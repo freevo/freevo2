@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.116  2004/08/13 00:36:27  rshortt
+# Set the right vdev for BSD.
+#
 # Revision 1.115  2004/08/13 00:30:28  rshortt
 # Try to maintain FreeBSD support.
 #
@@ -391,6 +394,7 @@ for i in range(10):
         if os.path.exists('/dev/bktr%s' % i):
             key = 'tv%s' % i
             TV_SETTINGS[key] = TVCard
+            TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
             TV_SETTINGS[key].driver = 'bsdbt848'
             TV_SETTINGS[key].input = 1
 
