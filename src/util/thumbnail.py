@@ -129,7 +129,7 @@ def create(filename):
             epeg.jpg_thumbnail(filename, thumb, 255, 255)
             return mevas.imagelib.open(thumb)
         except Exception, e:
-            print 'thumbnail.create: %s' % e
+            pass
 
     thumb = vfs.getoverlay(filename + '.raw')
     try:
