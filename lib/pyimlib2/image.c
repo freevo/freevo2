@@ -536,6 +536,14 @@ PyObject *Image_PyObject__getattr(Image_PyObject *self, char *name)
         return Py_BuildValue("s", "BGRA");
     else if (!strcmp(name, "filename"))
         return Py_BuildValue("s", imlib_image_get_filename());
+    else if (!strcmp(name, "raw_data_addr")) {
+        if (self->raw_data)
+	    return Py_BuildValue("l", self->raw_data);
+	else
+	    return Py_BuildValue("l", imlib_image_get_data_for_reading_only());
+    }
+    else if (!strcmp(name, "raw_data_size"))
+        return Py_BuildValue("l", self->raw_data_size);
 
     return Py_FindMethod(Image_PyObject_methods, (PyObject *)self, name);
 }

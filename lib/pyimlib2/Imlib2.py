@@ -111,9 +111,10 @@ class Image:
         self._image = _Imlib2.create(state[0], state[1])
 
 
-    def get_raw_data(self, format = "BGRA"):
+    def get_raw_data(self, format = "BGRA", type = "buffer" ):
         """
-        Returns raw image data as buffer for read only access.
+        Returns raw image data for read only access.
+        
         Please free the raw data later and do not delete the object while
         the data is still needed.
         
@@ -125,8 +126,14 @@ class Image:
               alpha plane.  (YV12A isn't a fourcc notation; I just
               made it up.)
 
-        Returns: A buffer object containing the raw image data.
+        Returns: If type is 'buffer', return a buffer object containing the raw
+                 image data. If type is 'raw', return the pointer and len of the
+                 raw image data.
         """
+        if type == 'raw':
+            # create raw data
+            self._image.get_raw_data(format)
+            return self._image.raw_data_addr, self._image.raw_data_size
         return self._image.get_raw_data(format)
 
 
