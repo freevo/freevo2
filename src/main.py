@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/15 16:45:47  dischi
+# make the shutdown look nicer for mga video
+#
 # Revision 1.27  2003/03/10 07:11:23  outlyer
 # Just some fixes to prevent the idle bar from appearing on top of widescreen
 # video.
@@ -175,20 +178,29 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     osd.update()
 
     time.sleep(0.5)
-    osd.shutdown() # SDL must be shutdown to restore video modes etc
 
     if arg == None:
         sys_shutdown = allow_sys_shutdown and 'ENABLE_SHUTDOWN_SYS' in dir(config)
     else:
         sys_shutdown = arg
-        
+
     # XXX temporary kludge so it won't break on old config files
     if sys_shutdown:  
         if config.ENABLE_SHUTDOWN_SYS:
+            # shutdown dual head for mga
+            if config.CONF.display == 'mga':
+                os.system('./fbcon/matroxset/matroxset -f /dev/fb1 -m 0')
+                time.sleep(1)
+                os.system('./fbcon/matroxset/matroxset -f /dev/fb0 -m 1')
+                time.sleep(1)
+
             os.system(config.SHUTDOWN_SYS_CMD)
-            # let freevo be killed by init, looks nicer if the picture
-            # vanishes just before matroxset kills the tv out
+        
+            # let freevo be killed by init, looks nicer for mga
             return
+
+    # SDL must be shutdown to restore video modes etc
+    osd.shutdown()
 
     #
     # Here are some different ways of exiting freevo for the
