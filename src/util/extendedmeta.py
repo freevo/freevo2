@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/13 17:33:42  dischi
+# no defaults for addPathDB
+#
 # Revision 1.7  2004/02/08 17:37:15  dischi
 # add playlist parser
 #
@@ -120,8 +123,7 @@ def make_query(filename,dirtitle):
     SQL = 'INSERT OR IGNORE INTO music VALUES ' + VALUES
     return SQL
 
-def addPathDB(path='/media/Music',dirtitle=config.AUDIO_ITEMS[0][0],type='*.mp3',
-              verbose=True):
+def addPathDB(path, dirtitle, type='*.mp3', verbose=True):
 
     # Get some stuff ready
     count = 0
