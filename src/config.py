@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/07/02 20:00:42  dischi
+# added defaults for ripping tools
+#
 # Revision 1.30  2003/06/30 20:26:18  outlyer
 # Make freevo a lot less noisy; by default, print warnings and errors;
 # if DEBUG is enabled, THEN we print more.
@@ -185,6 +188,8 @@ CONF.mplayer = ''
 CONF.snes = ''
 CONF.version = 0
 CONF.tvtime = ''
+CONF.lame = ''
+CONF.cdparanoia = ''
 
 class MainMenuItem:
     def __init__(self, label, action, arg):
