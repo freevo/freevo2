@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2003/05/28 15:34:43  dischi
+# fixed seeking bug
+#
 # Revision 1.40  2003/05/28 15:02:02  dischi
 # reactivated seeking by first pressing 0
 #
@@ -409,7 +412,7 @@ class MPlayer:
             return TRUE
 
         if event == SEEK:
-            self.thread.app.write('seek %s\n', event.arg)
+            self.thread.app.write('seek %s\n' % event.arg)
             return TRUE
 
         #if event == rc.UP and self.mode == 'dvdnav':

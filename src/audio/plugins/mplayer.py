@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/28 15:34:43  dischi
+# fixed seeking bug
+#
 # Revision 1.7  2003/05/28 15:02:49  dischi
 # ported detach plugin to new event model and other small fixes
 #
@@ -214,7 +217,7 @@ class MPlayer:
             return TRUE
 
         elif event == SEEK:
-            self.thread.app.write('seek %s\n', event.arg)
+            self.thread.app.write('seek %s\n' % event.arg)
             return TRUE
 
         else:
