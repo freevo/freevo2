@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/02/21 16:24:05  dischi
+# main items can have images
+#
 # Revision 1.27  2003/02/19 14:51:12  dischi
 # removed debug
 #
@@ -556,6 +559,7 @@ class XML_mainmenuitem:
         self.name = ''
         self.visible = 'yes'
         self.icon = ''
+        self.image = ''
         self.pos = 0
         self.action = None
         self.arg = None
@@ -564,6 +568,7 @@ class XML_mainmenuitem:
         self.name = attr_str(node, "name", self.name)
         self.visible = attr_visible(node, "visible", self.visible)
         self.icon = attr_str(node, "icon", self.icon)
+        self.image = attr_str(node, "image", self.image)
         self.pos = attr_int(node, "pos", self.pos)
 
         self.action = attr_str(node,"action", self.action)

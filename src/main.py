@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/02/21 16:25:10  dischi
+# main items can have images
+#
 # Revision 1.19  2003/02/21 06:51:15  krister
 # XXX Debug the event loop, remove later.
 #
@@ -309,7 +312,8 @@ def getcmd():
                 items += [menu.MenuItem(menu_items[i].name, eval(menu_items[i].action),\
                                         menu_items[i].arg, eventhandler,
                                         None, 'main', menu_items[i].icon)]
-
+                if menu_items[i].image:
+                    items[-1].setImage(('image', menu_items[i].image))
     
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
     menuwidget.pushmenu(mainmenu)
