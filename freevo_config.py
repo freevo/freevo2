@@ -157,7 +157,8 @@ LOCAL_CONF_CHANGES = [
      HIDE_UNUSABLE_DISCS to hide discs in the wrong menus and empty drives'''),
     (3.8,
      '''Restructured DIR_GAMES and added XMLTV_GRABBER and XMLTV_DAYS for the
-     tv_grab helper script''')]
+     tv_grab helper script. Also added USE_NETWORK to deactivate everything
+     that needs a network connection.''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -245,6 +246,13 @@ EVENTS = {
 # here, e.g. KEYMAP[K_x] = 'SUBTITLE'. The K_-names are defined by pygame.
 #
 KEYMAP = DEFAULT_KEYMAP
+
+#
+# use resources for the internet to get more informations, like CDDB,
+# IMDB and Amazon cover search. Set this variable to 0 if your computer
+# has no network and stop Freevo from trying to use it.
+#
+USE_NETWORK = 1
 
 # ======================================================================
 # Plugins:

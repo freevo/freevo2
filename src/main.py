@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2003/09/10 19:28:41  dischi
+# add USE_NETWORK
+#
 # Revision 1.70  2003/09/08 14:40:24  mikeruelle
 # need the os to not crash
 #
@@ -408,10 +411,13 @@ if __name__ == "__main__":
     mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
     if not os.path.isdir(mmcache):
         os.mkdir(mmcache)
+
+    # setup mmpython
     mmpython.use_cache(mmcache)
     mmpython.mediainfo.DEBUG = DEBUG
     mmpython.factory.DEBUG = DEBUG
-
+    mmpython.USE_NETWORK = config.USE_NETWORK
+    
     if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
         print '\nWARNING: no pre-cached data'
         print 'Freevo will cache each directory when you first enter it. This can'
