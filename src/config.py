@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/08/20 22:46:39  gsbarbieri
+# Optimized and added cdrom[0-9]* to regexp, so it works in RH9
+#
 # Revision 1.39  2003/08/20 21:25:21  dischi
 # get SHARE_DIR earlier
 #
@@ -346,20 +349,20 @@ OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 if not ROM_DRIVES:
-    if os.path.isfile('/etc/fstab'):
-        RE_CD = '^(/dev/cdrom|/dev/a?cd\dc?)[ \t]+([^ \t]+)[ \t]+'
-        RE_CDREC ='^(/dev/cdrecorder)[ \t]+([^ \t]+)[ \t]+'
-        RE_DVD ='^(/dev/dvd)[ \t]+([^ \t]+)[ \t]+'
-        RE_ISO ='^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660'
-        RE_AUTOMOUNT = '^none[ \t]+([^ \t]+) supermount dev=([^,]+)'
+    if os.path.isfile('/etc/fstab'):        
+        re_cd        = re.compile( '^(/dev/cdrom[0-9]*|/dev/a?cd\dc?[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
+        re_cdrec     = re.compile( '^(/dev/cdrecorder[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
+        re_dvd       = re.compile( '^(/dev/dvd[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
+        re_iso       = re.compile( '^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I )
+        re_automount = re.compile( '^none[ \t]+([^ \t]+) supermount dev=([^,]+)', re.I )
         fd_fstab = open('/etc/fstab')
         for line in fd_fstab:
             # Match on the devices /dev/cdrom, /dev/dvd, and fstype iso9660
-            match_cd = re.compile(RE_CD, re.I).match(line)
-            match_cdrec = re.compile(RE_CDREC, re.I).match(line)
-            match_dvd = re.compile(RE_DVD, re.I).match(line)
-            match_iso = re.compile(RE_ISO, re.I).match(line)
-            match_automount = re.compile(RE_AUTOMOUNT, re.I).match(line)
+            match_cd        = re_cd.match(line)
+            match_cdrec     = re_cdrec.match(line)
+            match_dvd       = re_dvd.match(line)
+            match_iso       = re_iso.match(line)
+            match_automount = re_automount.match(line)
             mntdir = devname = ''
             if match_cd:
                 mntdir = match_cd.group(2)
