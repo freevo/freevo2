@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/10/12 09:49:46  dischi
+# make option how much "one menu" is and go back 2 for configure directory
+#
 # Revision 1.44  2003/10/12 09:42:37  dischi
 # added DIRECTORY_REVERSE_SORT
 #
@@ -841,6 +844,7 @@ class DirItem(Playlist):
             items.append(menu_module.MenuItem(name, self.configure_set_var, i))
         m = menu_module.Menu(_('Configure'), items)
         m.table = (80, 20)
+        m.back_one_menu = 2
         menuw.pushmenu(m)
 
         

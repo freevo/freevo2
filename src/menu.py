@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2003/10/12 09:49:46  dischi
+# make option how much "one menu" is and go back 2 for configure directory
+#
 # Revision 1.64  2003/10/04 18:37:28  dischi
 # i18n changes and True/False usage
 #
@@ -150,6 +153,9 @@ class Menu:
         self.force_skin_layout = force_skin_layout
         self.display_style = self.skin.GetDisplayStyle(self)
 
+        # How many menus to go back when 'BACK_ONE_MENU' is called
+        self.back_one_menu = 1
+
 
     def delete_item(self, item):
         try:
@@ -233,7 +239,12 @@ class MenuWidget(GUIObject):
 
     def back_one_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
-            self.menustack = self.menustack[:-1]
+            try:
+                count = -self.menustack[-1].back_one_menu
+            except:
+                count = -1
+
+            self.menustack = self.menustack[:count]
             menu = self.menustack[-1]
 
             if not isinstance(menu, Menu):
