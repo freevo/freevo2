@@ -147,6 +147,3 @@ def get_media(media):
                 movie_info.name = title
                 return movie_info
     return None
-
-
-update()

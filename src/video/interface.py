@@ -67,7 +67,8 @@ class PluginInterface(plugin.MimetypePlugin):
                                  fxdhandler.parse_movie)
         plugin.register_callback('fxditem', ['video'], 'disc-set',
                                  fxdhandler.parse_disc_set)
-
+        # update the database based on the current mimetypes
+        database.update()
         # activate the mediamenu for video
         level = plugin.is_active('video')[2]
         plugin.activate('mediamenu', level=level, args='video')
@@ -191,4 +192,3 @@ class PluginInterface(plugin.MimetypePlugin):
 
     def database(self):
         return database
-
