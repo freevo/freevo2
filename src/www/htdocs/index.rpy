@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/20 02:24:17  rshortt
+# more tv_util fixes
+#
 # Revision 1.7  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -67,7 +70,7 @@ import sys, time
 import tv.record_client 
 from www.web_types import HTMLResource, FreevoResource
 import util, config
-import tv.tv_util
+import util.tv_util as tv_util
 
 TRUE = 1
 FALSE = 0
@@ -87,7 +90,7 @@ class IndexResource(FreevoResource):
         else:
             fv.res += '<p><font color="white" >The recording server is up and running.</font></p>'
 
-        listexpire = tv.tv_util.when_listings_expire()
+        listexpire = tv_util.when_listings_expire()
         if listexpire == 1:
             fv.res += '<p><font color="red" >Notice: Your listings expire in 1 hour.</font></p>'
         elif listexpire < 12:

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/10/20 02:24:17  rshortt
+# more tv_util fixes
+#
 # Revision 1.18  2003/09/07 18:50:56  dischi
 # make description shorter if it's too long
 #
@@ -106,7 +109,7 @@ import time
 from www.web_types import HTMLResource, FreevoResource
 from twisted.web.woven import page
 
-import tv.tv_util
+import util.tv_util as tv_util
 import util
 import config 
 import tv.epg_xmltv 
@@ -148,7 +151,7 @@ class GuideResource(FreevoResource):
         gstart_t = time.localtime(gstart)
         myt = time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, 
                            myt_t[6], myt_t[7], -1))
-        listh = tv.tv_util.when_listings_expire()
+        listh = tv_util.when_listings_expire()
         if listh == 0:
             return retval + '</select>\n'
         listd = int((listh/24)+2)

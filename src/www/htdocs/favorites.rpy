@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/20 02:24:16  rshortt
+# more tv_util fixes
+#
 # Revision 1.7  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -67,7 +70,7 @@
 import sys, time
 
 import tv.record_client as ri
-import tv.tv_util
+import util.tv_util as tv_util
 
 from www.web_types import HTMLResource, FreevoResource
 
@@ -159,7 +162,7 @@ class FavoritesResource(FreevoResource):
 
             if fav.mod != 'ANY':
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
-                cell = '%s' % tv.tv_util.minToTOD(fav.mod)
+                cell = '%s' % tv_util.minToTOD(fav.mod)
             else:
                 cell = 'ANY'
             fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')

@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/10/20 02:24:17  rshortt
+# more tv_util fixes
+#
 # Revision 1.14  2003/09/05 15:23:02  mikeruelle
 # fearless leader missed a import change
 #
@@ -104,7 +107,7 @@ import sys, os, string, urllib, re
 
 # needed to put these here to suppress its output
 import config, util
-import tv.tv_util
+import util.tv_util as tv_util
 import tv.record_client as ri
 
 from www.web_types import HTMLResource, FreevoResource
@@ -302,7 +305,7 @@ class LibraryResource(FreevoResource):
                     for prog in progl:
                         try:
                             if prog.isRecording == TRUE:
-                                recordingprogram = tv.tv_util.getProgFilename(prog)
+                                recordingprogram = tv_util.getProgFilename(prog)
                                 recordingprogram = string.replace(recordingprogram, ' ', '_')
                                 break
                         except:
@@ -378,7 +381,7 @@ class LibraryResource(FreevoResource):
                     status = 'favorite'
                 fv.tableRowOpen('class="chanrow"')
                 fv.tableCell(file, 'class="'+status+'" align="left" colspan="1"')
-                fv.tableCell(tv.tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
                 if suppressaction == TRUE:
                     fv.tableCell('&nbsp;', 'class="'+status+'" align="center" colspan="1"')
                 else:
