@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/06/07 11:31:07  dischi
+# bugfix
+#
 # Revision 1.10  2003/05/27 17:53:34  dischi
 # Added new event handler module
 #
@@ -118,7 +121,7 @@ class InputBox(PopupBox):
 
 
     def eventhandler(self, event):
-
+        
         if event == em.INPUT_LEFT:
             self.lbg.change_selected_box('left')
             self.draw()
@@ -149,8 +152,6 @@ class InputBox(PopupBox):
         elif event in (em.INPUT_0, em.INPUT_1, em.INPUT_2, em.INPUT_3,
                        em.INPUT_4, em.INPUT_5, em.INPUT_6, em.INPUT_7,
                        em.INPUT_8, em.INPUT_9, em.INPUT_0 ):
-            event = event.name[6:]
-            print event
             self.lbg.get_selected_box().cycle_phone_char(event.arg)
             self.draw()
             self.osd.update(self.get_rect())
