@@ -11,6 +11,8 @@ o Changed remote control cursor left/right behavior in menus, making
 o Added a feature to playing movies where a file can be attached to each
   movie containing special arguments to MPlayer, e.g. aspect etc.
   The file is named <filename>.mplayer.
+o Added freevo/testfiles, it is now the default in config.py and contains
+  some movie/mp3 files for test purposes.
 
 
 Release 1.2.0 (2002-05-12):
