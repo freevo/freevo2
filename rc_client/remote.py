@@ -14,7 +14,9 @@ import string, popen2, fcntl, select
 import traceback
 
 # We need to use stuff from the main directory
-sys.path += [ '..', '.' ]
+sys.path += [ '..', '.','src/']
+
+print sys.path
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
