@@ -1,0 +1,166 @@
+Subject:
+Re: [Freevo-users] Re: thanks for freevo and a potential contrib
+From:
+Andreas Leitner <nozone@sbox.tugraz.at>
+Date:
+14 Sep 2002 14:07:57 +0200
+To:
+freevo-users@lists.sourceforge.net
+Delivered-To:
+krister-freevousers@kmlager.com
+Return-Path:
+<freevo-users-admin@lists.sourceforge.net>
+Received:
+from usw-sf-list2.sourceforge.net (usw-sf-fw2.sourceforge.net [::ffff:216.136.171.252]) by kmlager.com with esmtp; Sat, 14 Sep 2002 07:12:20 -0500
+Received:
+from usw-sf-list1-b.sourceforge.net ([10.3.1.13] helo=usw-sf-list1.sourceforge.net) by usw-sf-list2.sourceforge.net with esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id 17qBjT-0007Kf-00; Sat, 14 Sep 2002 05:09:03 -0700
+Received:
+from viefep11-int.chello.at ([213.46.255.27]) by usw-sf-list1.sourceforge.net with esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id 17qBik-00041Y-00 for <freevo-users@lists.sourceforge.net>; Sat, 14 Sep 2002 05:08:18 -0700
+Received:
+from graz ([212.186.206.250]) by viefep11-int.chello.at (InterMail vM.5.01.05.09 201-253-122-126-109-20020611) with ESMTP id <20020914120758.DWPU16893.viefep11-int.chello.at@graz> for <freevo-users@lists.sourceforge.net>; Sat, 14 Sep 2002 14:07:58 +0200
+Received:
+from wien ([192.168.6.2] helo=localhost.localdomain) by graz with esmtp (Exim 3.35 #1 (Debian)) id 17qBiQ-0003wM-00 for <freevo-users@lists.sourceforge.net>; Sat, 14 Sep 2002 14:07:58 +0200
+In-Reply-To:
+<xt4y9a5lq0k.fsf@riemen.informatik.uni-bremen.de>
+References:
+<1031360817.9998.19.camel@wien> <20020906214938.78e84635.torsten@inetw.net> <20020907093216.GA6929@leitner.dhs.org> <3D7EC7B5.3070108@kmlager.com> <xt4ptvjbn2z.fsf@riemen.informatik.uni-bremen.de> <20020912140402.GA7602@leitner.dhs.org> <xt4fzwfmfhm.fsf@riemen.informatik.uni-bremen.de> <xt4y9a5lq0k.fsf@riemen.informatik.uni-bremen.de>
+X-Mailer:
+Ximian Evolution 1.0.8
+Message-ID:
+<1032005278.8667.3.camel@wien>
+MIME-Version:
+1.0
+Content-Type:
+text/plain; charset=iso-8859-1
+Content-Transfer-Encoding:
+7bit
+Sender:
+freevo-users-admin@lists.sourceforge.net
+Errors-To:
+freevo-users-admin@lists.sourceforge.net
+X-BeenThere:
+freevo-users@lists.sourceforge.net
+X-Mailman-Version:
+2.0.9-sf.net
+Precedence:
+bulk
+Reply-To:
+freevo-users@lists.sourceforge.net
+List-Help:
+<mailto:freevo-users-request@lists.sourceforge.net?subject=help>
+List-Post:
+<mailto:freevo-users@lists.sourceforge.net>
+List-Subscribe:
+<https://lists.sourceforge.net/lists/listinfo/freevo-users>, <mailto:freevo-users-request@lists.sourceforge.net?subject=subscribe>
+List-Id:
+<freevo-users.lists.sourceforge.net>
+List-Unsubscribe:
+<https://lists.sourceforge.net/lists/listinfo/freevo-users>, <mailto:freevo-users-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive:
+<http://sourceforge.net/mailarchive/forum.php?forum=freevo-users>
+X-Original-Date:
+14 Sep 2002 14:07:57 +0200
+
+On Fri, 2002-09-13 at 20:10, Dirk Meyer wrote:
+
+> Dirk Meyer wrote:
+
+> > Andreas Leitner wrote:
+
+> >> Well to be exact. 'aid' is VOB specific. So maybe we should have a
+> >> 'vobs' tag instead of a 'files' tag?
+
+> >
+> > Than maybe, <mplayer_options> will be the tag we should use. All other
+> > things will mess up the xml files (vob, avi, mpg, ..., all different
+> > tags).
+
+> 
+> OK, I just added <mplayer_options> inside the <video> tag. Please try:
+> 
+> <video>
+>   <mplayer_options>-aid=whatever</mplayer_options>
+>   <files>
+>     ...
+>   </files>
+> </video>
+
+
+Thanks alot! I have changed my script to generate mplayer_option tags
+now, here it is: (feel free to add it to contrib or whatever)
+
+--
+#!/usr/bin/perl
+
+# prints various details about a dvdrip config file
+# usage <appname> <dvdrip-config-file-name>
+
+use Data::Dumper;
+use Video::DVDRip::Project;
+
+# fetch filename paramter
+my $filename = shift @ARGV;
+
+my $project = Video::DVDRip::Project->new_from_file (
+                                                                                                         filename => $filename
+                                                                                                         );
+
+my $selected = $project->{'selected_title_nr'};
+my $title = $project->{'content'}{'titles'}{$selected};
+my $audio_channel =
+$project->{'content'}{'titles'}{$selected}{'audio_channel'};
+
+
+print ("<movies>\n");
+print ("\t<movie>\n");
+
+print ("\t<title>");
+print $project->{'name'};
+print ("</title>\n");
+
+print ("\t<video>\n");
+
+print ("\t<mplayer_options>");
+print "-aid ";
+print $audio_channel + 128;
+print ("</mplayer_options\n");
+
+print ("\t<files>\n");
+
+$dir = $project->{vob_dir}."/00".$selected;
+print "\n";
+opendir THISDIR, $dir or die "error opening dir: $!";
+@allfiles = readdir THISDIR;
+foreach $file (@allfiles)
+{
+        if (($file ne ".") && ($file ne ".."))
+        {
+                print ("\t\t<filename>");
+                print $dir."/".$file;
+                print ("</filename>\n");
+        }
+}
+
+print ("\t</files>\n");
+print ("\t</video>\n");
+
+print ("\t</movie>\n");
+print ("</movies>\n");
+--
+
+All it does is, it takes a dvdrip config file and outputs (to stdout)
+the according freevo xml document. With a little bash script like this:
+
+regards,
+Andreas
+
+
+
+-------------------------------------------------------
+This sf.net email is sponsored by:ThinkGeek
+Welcome to geek heaven.
+http://thinkgeek.com/sf
+_______________________________________________
+Freevo-users mailing list
+Freevo-users@lists.sourceforge.net
+https://lists.sourceforge.net/lists/listinfo/freevo-users
