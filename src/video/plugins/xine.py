@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/12/07 16:05:16  dischi
+# fix event context setting
+#
 # Revision 1.57  2004/11/21 10:12:47  dischi
 # improve system detect, use config.detect now
 #
@@ -163,9 +166,9 @@ class Xine(Application):
         play a dvd with xine
         """
         self.item        = item
-        self.evt_context = 'video'
+        self.set_event_context('video')
         if config.EVENTS.has_key(item.mode):
-            self.evt_context = item.mode
+            self.set_event_context(item.mode)
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
@@ -217,7 +220,7 @@ class Xine(Application):
 
         elif item.mimetype == 'cue':
             command.append('vcd://%s' % item.filename)
-            self.evt_context = 'vcd'
+            self.set_event_context('vcd')
             
         else:
             command.append(item.url)
