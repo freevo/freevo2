@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.138  2004/08/05 17:38:54  dischi
+# changes to adjust to the new menu code
+#
 # Revision 1.137  2004/08/01 10:56:46  dischi
 # deactivate password checking, InputBox is broken
 #
@@ -735,22 +738,25 @@ class DirItem(Playlist):
             self.menu.choices = items
 
             if selected_pos != -1:
+                # we had a selection before, try to find it again
                 for i in items:
                     if Unicode(i.id()) == Unicode(selected_id):
-                        self.menu.selected = i
+                        self.menu.set_selection(i)
                         break
                 else:
                     # item is gone now, try to the selection close
                     # to the old item
                     pos = max(0, min(selected_pos-1, len(items)-1))
                     if items:
-                        self.menu.selected = items[pos]
+                        self.menu.set_selection(items[pos])
                     else:
-                        self.menu.selected = None
-            if self.menu.selected and selected_pos != -1:
-                self.menuw.rebuild_page()
+                        self.menu.set_selection(None)
             else:
-                self.menuw.init_page()
+                # nothing was selected, select first item if possible
+                if len(items):
+                    self.menu.set_selection(items[0])
+                else:
+                    self.menu.set_selection(None)
             self.menuw.refresh()
                 
 
