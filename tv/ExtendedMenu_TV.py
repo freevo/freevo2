@@ -39,8 +39,11 @@ class ExtendedMenu_TV(ExtendedMenu.ExtendedMenu):
         self.listing.refresh()
         osd.update()
 
+
     def clear(self):
-        skin.DrawTVGuide_Clear()
+        skin.DrawTVGuide()
+        # skin.DrawTVGuide_Clear()    XXX This doesn't redraw the logo, can't be right?  /Krister
+        
 
     def eventhandler(self, event):
         if event == rc.MENU:
@@ -113,7 +116,7 @@ class ExtendedMenuInfo_TV(ExtendedMenu.ExtendedMenuInfo):
 
 
 class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
-    n_cols  = 3
+    n_cols  = 4
     col_time = 30 # each col represents 30 minutes 
     guide = epg.get_guide()
     last_to_listing = [ None, None, None , None ]
@@ -143,6 +146,7 @@ class ExtendedMenuListing_TV(ExtendedMenu.ExtendedMenuListing):
         n_items = skin.DrawTVGuide_ItemsPerPage()
         n = 0
         for chan in channels:
+            
             if n >= n_items:
                 break
             
