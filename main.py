@@ -131,6 +131,13 @@ def getcmd():
         
         # Get next command
         while 1:
+
+            if 'OSD_SDL' in dir(config):  
+                if '_cb' in dir(osd):
+                    event = osd._cb()
+
+                if event: break
+            
             event = rc.poll()
             if event == rc.NONE:
                 time.sleep(0.1) # give a little time for buffers to fill
