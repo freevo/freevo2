@@ -100,10 +100,7 @@ TV_CHANNELS = ['2', '4', '5', '6', '8', '9', '10', '11', '13',
                '62', '64', '65', '66', '67', '69', 
                '70', '71', '72', '73', '74',
                '75', '99']
-# XXX There might be a bug in this application that could cause problems on some systems,
-# XXX it is disabled while I'm checking into it the next few days (2002-05-09)
-WATCH_TV_APP = '/bin/echo'   # XXX Dummy
-#WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
+WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 
 #
 # Where the MP3 files can be found.
