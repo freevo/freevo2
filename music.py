@@ -14,6 +14,11 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2002/10/20 18:07:40  dischi
+# Added all rom drives with identify media support to the main menu. You
+# can't browse DVD, VCD and SVCD and AUDIO-CD support is still missing,
+# but it works for mp3 cds.
+#
 # Revision 1.17  2002/10/12 22:30:45  krister
 # Removed debug output.
 #
@@ -118,6 +123,100 @@ def play(arg=None, menuw=None):
     musicplayer.play(mode, file, list)
     
 
+#
+# EJECT handling
+#
+def eventhandler(event = None, menuw=None, arg=None):
+
+    global main_menu_selected
+    if event == rc.IDENTIFY_MEDIA:
+        if menuw.menustack[1] == menuw.menustack[-1]:
+            main_menu_selected = menuw.all_items.index(menuw.menustack[1].selected)
+
+        menuw.menustack[1].choices = main_menu_generate()
+
+        menuw.menustack[1].selected = menuw.menustack[1].choices[main_menu_selected]
+
+        if menuw.menustack[1] == menuw.menustack[-1]:
+            menuw.init_page()
+            menuw.refresh()
+
+    if event == rc.EJECT:
+
+        print 'EJECT1: Arg=%s' % arg
+
+        # Was the handler called for a specific drive?
+        if not arg:
+            print 'Arg was none'
+            if not config.REMOVABLE_MEDIA:
+                print 'No removable media defined'
+                return # Do nothing if no media defined
+            # Otherwise open/close the first drive in the list
+            media = config.REMOVABLE_MEDIA[0]
+            print 'Selecting first device'
+        else:
+            media = arg
+
+        print media    
+        print dir(media)
+        media.move_tray(dir='toggle')
+
+    # Done
+    return
+
+
+# ======================================================================
+
+#
+# The Movie module main menu
+#
+def main_menu_generate():
+    items = []    
+
+    for (title, dir) in config.DIR_AUDIO:
+        items += [menu.MenuItem(title, parse_entry, (title, dir), eventhandler,
+                                type = 'dir')]
+
+    for media in config.REMOVABLE_MEDIA:
+        if media.info:
+
+            if not media.info.label:
+                print "WARNING: no title for %s given, setting to default" % media.mountdir
+                media.info.label = media.mountdir
+                
+            if media.info.type:
+                if media.info.type == 'AUDIO-CD':
+                    m = menu.MenuItem('Drive %s (Audio CD)' % media.drivename, None,
+                                      None, eventhandler, media)
+                    print "Audio cd, not implemented yet"
+
+                elif media.info.type == 'DVD' or media.info.type == 'VCD' or \
+                     media.info.type == 'SVCD':
+
+                    m = menu.MenuItem('%s (%s)' % (media.info.label, media.info.type),
+                                      None, None, eventhandler, media)
+                    m.setImage(('movie', media.info.image))
+                    
+                else:
+                    image_type = 'music'
+                    label = media.info.label
+                    
+                    if media.info.type == 'VIDEO':
+                        image_type = 'movie'
+                        label += ' (Video CD)' 
+                    
+                    m = menu.MenuItem(label, parse_entry,
+                                      (label, media.mountdir), eventhandler, media)
+                    m.setImage((image_type, media.info.image))
+                    
+        else:
+            m = menu.MenuItem('Drive %s (no disc)' % media.drivename, None,
+                              None, eventhandler, media)
+        items += [m]
+
+    return items
+
+
 def main_menu(arg=None, menuw=None):
     """
     The music module main menu.
@@ -126,32 +225,9 @@ def main_menu(arg=None, menuw=None):
     Returns:   None
     """
 
-    items = []    
-    for (title, file ) in config.DIR_AUDIO:
-        if os.path.isdir:
-            type = 'dir'
-        elif os.path.isfile:
-            type = 'file'
-        
-        items += [ menu.MenuItem( title, parse_entry, (title, file),
-                                  handle_config, (type, file), type,
-                                  None, None, None ) ]
-                                  
-
-        # XXX has this ever worked ?
-        
-        #     for media in config.REMOVABLE_MEDIA:
-        #         if media.info:
-        #             if mediatype == 'AUDIO':
-        #                 s = 'Drive %s [%s]' % (media.drivename, media.info.label)
-        #                 items += [menu.MenuItem(s, parse_entry,
-        #                                         (media.info.label, media.mountdir),
-        #                                         handle_config, ('dir', media.mountdir),
-        #                                         'dir')]
+    moviemenu = menu.Menu('MUSIC MAIN MENU', main_menu_generate(), umount_all=1)
+    menuw.pushmenu(moviemenu)
             
-    mp3menu = menu.Menu('MUSIC MAIN MENU', items)
-    menuw.pushmenu(mp3menu)
-
 
 
 def parse_entry(arg=None, menuw=None):
@@ -165,10 +241,6 @@ def parse_entry(arg=None, menuw=None):
                Got crash on playlist handling.
     """
     (new_title, mdir) = arg
-
-    if DEBUG:
-        b = os.path.isdir(mdir)
-        print 'music:parse_entry(): title=%s, dir=%s, isdir=%s' % (new_title, mdir, b)
 
     # If the dir is on a removable media it needs to be mounted
     for media in config.REMOVABLE_MEDIA:
@@ -198,7 +270,7 @@ def parse_entry(arg=None, menuw=None):
             create_randomized_playlist(recursive_files, playlist)
             title = 'PL: Random playlist with songs here and below'
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
-                                    handle_config, ('list', playlist), 'list')]
+                                    eventhandler, None, 'list')]
 
             
         for dirname in dirnames:
@@ -207,7 +279,7 @@ def parse_entry(arg=None, menuw=None):
             # XXX Should I do '_' to ' ' translation here and stuff?
             # Yes recursive stupid.
             m = menu.MenuItem( title, parse_entry, (title, dirname),
-                               handle_config, ('dir', dirname), 'dir',
+                               eventhandler, None, 'dir',
                                None, None, None )
             
             if os.path.isfile(dirname+'/cover.png'): 
@@ -222,12 +294,12 @@ def parse_entry(arg=None, menuw=None):
             create_randomized_playlist(files, playlist)
             title = 'PL: Random playlist with all songs here'
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
-                                    handle_config, ('list', playlist), 'list')]
+                                    eventhandler, None, 'list')]
     
         for playlist in playlists:
             title = 'PL: ' + os.path.basename(playlist)[:-4]
             items += [menu.MenuItem(title, make_playlist_menu, playlist,
-                                    handle_config, ('list', playlist), 'list')]
+                                    eventhandler, None, 'list')]
             
         for file in files:
             # XXX Do get title from ID3, Ogg-info here.
@@ -249,33 +321,6 @@ def parse_entry(arg=None, menuw=None):
         play(None, ['audio', mdir, None])
     
 
-
-def handle_config( event=None, menuw=None, arg=None ):
-    """
-    Handles the configuration of directories and files, building
-    play lists and stuff eventually.
-    
-    Arguments: event - event identifier.
-               menuw - menu widget.
-               arg   - argument to event.
-    Returns:   None
-    Authors:   Thomas Malt <thomas@malt.no>
-               dischi
-    Started:   2002-07-26 18:17 tm
-    Changed:   $Date$ $Author$
-    """
-
-    (type, file) = arg
-    
-    print( 'inside handle_config actually. type = ' + type + ' file = ' +
-           file + ' event = ' + event )
-
-    if event == rc.EJECT and config.REMOVABLE_MEDIA:
-        media = config.REMOVABLE_MEDIA[0]  # The default is the first drive in the list
-        media.move_tray(dir='toggle')
-        if media.tray_open == 0:
-            menuw.back_one_menu()
-            main_menu(None, menuw)
 
         
 #
