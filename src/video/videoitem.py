@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2003/09/19 22:10:56  dischi
+# clear osd before playing with xine
+#
 # Revision 1.82  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -309,12 +312,16 @@ class VideoItem(Item):
         # dvd playback for whole dvd
         if (not self.filename or self.filename == '0') and \
                self.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER):
+            if self.menuw.visible:
+                self.menuw.hide()
             plugin.getbyname(plugin.DVD_PLAYER).play(self)
             return
 
         # vcd playback for whole vcd
         if (not self.filename or self.filename == '0') and \
                self.mode == 'vcd' and plugin.getbyname(plugin.VCD_PLAYER):
+            if self.menuw.visible:
+                self.menuw.hide()
             plugin.getbyname(plugin.VCD_PLAYER).play(self)
             return
 
