@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2002/10/02 02:40:55  krister
+# Applied Alex Polite's patch for using XMMS instead of MPlayer for music playing and visualization.
+#
 # Revision 1.71  2002/10/01 01:55:06  krister
 # Changed the TV channel list to contain examples for Per Wigren's patch for multiple TV stations on the same channel on different times.
 #
@@ -162,6 +165,11 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
 # ======================================================================
 
 #
+# The program to play audiofiles. Currently supports MPLAYER and XMMS
+#
+MUSICPLAYER          = 'MPLAYER'   # Must be 'XMMS' or 'MPLAYER'
+
+#
 # Where the Audio (mp3, ogg) files can be found.
 # Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
 #
@@ -271,7 +279,7 @@ if CONF.display == 'mga':
 
 
 # ======================================================================
-# mplayer section:
+# MPlayer section:
 # ======================================================================
 
 if os.path.isfile('../freevo_apps/mplayer/mplayer'):
@@ -302,6 +310,13 @@ MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
 MPLAYER_ARGS_TVVIEW  = '-nocache'
 MPLAYER_ARGS_DVDNAV  = ''
 
+
+# ======================================================================
+# XMMS section:
+# ======================================================================
+
+XMMS_NICE            = '0'
+XMMS_CMD             = 'xmms'
 
 
 # ======================================================================

@@ -29,7 +29,9 @@ o Added Per Wigren's app for fetching Swedish and Norwegian TV listings
   in contrib/PerWigren.
 o Added Per Wigren's patch for different TV stations on the same channel
   at different times of the week and/or day.	
-	
+o Added Alex Polite's patch for using XMMS for playing and visualizing 
+  music.
+
 	
 Release 1.2.5 (2002-08-21):
 ---------------------------

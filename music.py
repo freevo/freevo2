@@ -14,6 +14,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/10/02 02:40:56  krister
+# Applied Alex Polite's patch for using XMMS instead of MPlayer for music playing and visualization.
+#
 # Revision 1.12  2002/09/22 08:50:08  dischi
 # deactivated ROM_DRIVES in main menu (crash!). Someone should make this
 # identifymedia compatible.
@@ -109,11 +112,19 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
-mplayer = mplayer.get_singleton()
+if config.MUSICPLAYER == 'XMMS':
+    import xmmsaudioplayer # Module for running xmms
+    musicplayer = xmmsaudioplayer.AudioPlayer.get_singleton()
+elif config.MUSICPLAYER == 'MPLAYER':
+    musicplayer = mplayer.get_singleton()
+else:
+    raise "Set MUSICPLAYER in freevo_config.py to either XMMS or MPLAYER"
+
 rc      = rc.get_singleton()
 osd     = osd.get_singleton()
 
-def play( arg=None, menuw=None ):
+
+def play(arg=None, menuw=None):
     """
     calls the play function of mplayer to play audio.
 
@@ -134,7 +145,7 @@ def play( arg=None, menuw=None ):
     if not mode:
         mode = 'audio'
         
-    mplayer.play( mode, file, list )
+    musicplayer.play(mode, file, list)
     
 
 def main_menu(arg=None, menuw=None):
