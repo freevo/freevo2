@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/01 12:25:07  dischi
+# store version information and list of depending files
+#
 # Revision 1.22  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -84,6 +87,9 @@ from xml.utils import qp_xml
 osd = osd.get_singleton()
 
 geometry = (config.CONF.width, config.CONF.height)
+
+
+FXD_FORMAT_VERSION = 1
 
 #
 # Help functions
@@ -846,6 +852,8 @@ class XMLSkin:
         self.skindirs  = []
         self.icon_dir  = ""
 
+        self.fxd_files        = []
+
         # variables set by set_var
         self.all_variables    = ('box_under_icon', )
         self.box_under_icon   = 0
@@ -1006,16 +1014,17 @@ class XMLSkin:
 
         if include:
             if clear:
-                self._layout  = {}
-                self._font    = {}
-                self._color   = {}
-                self._images  = {}
-                self._menuset = {}
-                self._menu    = {}
-                self._popup   = ''
-                self._sets    = {}
+                self._layout   = {}
+                self._font     = {}
+                self._color    = {}
+                self._images   = {}
+                self._menuset  = {}
+                self._menu     = {}
+                self._popup    = ''
+                self._sets     = {}
                 self._mainmenu = MainMenu()
-                self.skindirs = []
+                self.skindirs  = []
+                self.fxd_files = []
             self.load(include, copy_content, prepare=False)
 
         self.parse(node, scale, os.path.dirname(file), copy_content)
@@ -1056,6 +1065,7 @@ class XMLSkin:
             parser.setattr(None, 'args', (clear, copy_content, file, prepare))
             parser.set_handler('skin', self.fxd_callback)
             parser.parse()
+            self.fxd_files.append(file)
             return 1
         
         except:
