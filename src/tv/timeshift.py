@@ -1,4 +1,42 @@
-#!/usr/bin/python2.2
+#!/usr/bin/env python
+
+#if 0 /*
+# -----------------------------------------------------------------------
+# timeshift.py - module to handle timeshifting - encoding and viewing
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2003/03/27 03:43:50  rshortt
+# Moved as much information as I could into freevo_config.py.  Also fixed a couple bugs, chanup and chandown were backwards, the channel wasn't getting set when you start to watch tv, and the RESET command for the timeshifter was in lower case.
+#
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2003 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
 
 import fcntl, sys, os, struct
 import threading
@@ -10,6 +48,8 @@ import time
 import tv
 import rc
 from mplayer import MPlayer_Thread
+
+DEBUG = 1
 
 remote = rc.get_singleton()
 
@@ -45,6 +85,12 @@ class Timeshifter:
             channel = config.TV_CHANNELS[pos]
             if channel[2] == tuner_channel:
                 self.tuner_chidx = pos
+                ch_opts = { 'channel'   : tuner_channel,
+                            'norm'      : self.cf_norm,
+                            'freqtable' : self.cf_clist }
+                chan_cmd = config.TV_CHANNEL_PROG % ch_opts
+                if DEBUG: print 'TS: chan_cmd="%s"' % chan_cmd
+                os.system(chan_cmd)
                 return
         print 'ERROR: Cannot find tuner channel "%s" in the TV channel listing' % tuner_channel
         self.tuner_chidx = 0
@@ -80,7 +126,7 @@ class Timeshifter:
         self.tuner_chidx = (self.tuner_chidx-1) % len(config.TV_CHANNELS)
 
     def StartEncoder(self):
-	self.encoderthread.app.write( 'SPAWN mp1e -m3 -c%s -p%s -r14,100\n' % ('/dev/video0','/dev/dsp2') )
+	self.encoderthread.app.write( 'SPAWN %s\n' % config.TIMESHIFT_ENCODE_CMD )
         # Wait some time to ensure the file is created and some initial data contained.
         # Otherwise Mplayer will stop immediately
         time.sleep(1)
@@ -103,14 +149,13 @@ class Timeshifter:
             return TRUE
         elif event == remote.CHUP or event == remote.CHDOWN:
             if event == remote.CHUP:
-                self.TunerPrevChannel()
-            else:
                 self.TunerNextChannel()
+            else:
+                self.TunerPrevChannel()
             new_channel = self.TunerGetChannel()
             self.mplayerthread.app.write('pause\n')
-            #os.spawnlp(os.P_WAIT, 'v4lctl', '--device=%s'%self.encoderthread.capturedev, 'setchannel', new_channel)
-            os.spawnlp(os.P_WAIT, 'chchan','%s %s %s' % (new_channel, self.cf_norm, self.cf_clist))
-            self.encoderthread.app.write('reset\n')
+            self.TunerSetChannel(new_channel)
+            # self.encoderthread.app.write('RESET\n')
             self.mplayerthread.app.write('seek 0 type=2\n')
             return TRUE
         elif event == remote.LEFT:
@@ -195,9 +240,9 @@ class Encoder_Thread(threading.Thread):
         self.mode      = 'idle'
         self.mode_flag = threading.Event()
         cf_norm, cf_input, cf_clist, self.capturedev = config.TV_SETTINGS.split()
-        self.audiodev = '/dev/dsp2'
-        self.timeshiftfile = '/media/Recording/buffer/tsmaster.mpg'
-        self.timeshiftsize = 1024*1024*32
+        self.audiodev = config.AUDIO_INPUT_DEVICE
+        self.timeshiftfile = config.TIMESHIFT_BUFFER
+        self.timeshiftsize = 1024*1024*config.TIMESHIFT_BUFFER_SIZE
         self.command = './timeshifter %s %d' % (self.timeshiftfile, self.timeshiftsize)
         self.app       = None
 
