@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.20  2003/02/19 17:20:21  outlyer
 # Added 'rc.func' to video; probably should add one to the image viewer
 # too so we don't draw over it. Just remember if you set it, you have to
@@ -196,6 +199,7 @@ class MPlayer:
     
     def __init__(self):
         self.thread = MPlayer_Thread()
+        self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
 

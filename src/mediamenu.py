@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.34  2003/02/21 05:27:28  krister
 # Ignore CVS dirs.
 #
@@ -517,6 +520,7 @@ class DirItem(Playlist):
             global dirwatcher_thread
             if not dirwatcher_thread:
                 dirwatcher_thread = DirwatcherThread(menuw)
+                dirwatcher_thread.setDaemon(1)
                 dirwatcher_thread.start()
 
             dirwatcher_thread.cwd(self, item_menu, self.dir, self.all_files)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.7  2003/02/19 06:42:58  krister
 # Thomas Schuppels latest CDDA fixes. I changed some info formatting, made it possible to play unknown disks, added MPlayer 1MB caching (important) of CD tracks.
 #
@@ -115,6 +118,7 @@ class MPlayer:
     
     def __init__(self):
         self.thread = MPlayer_Thread()
+        self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
 

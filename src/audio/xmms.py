@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -138,6 +141,7 @@ class AbstractAudioPlayer(Singleton):
 
     def reset_thread(self):
         self.thread = self.__class__.ThreadClass(self)
+        self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
 

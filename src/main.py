@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.21  2003/02/21 18:43:50  outlyer
 # Fixed the spelling from Enablind to Enabled :) Also commented out the
 # code Krister added to prove a point. Consider it proven...
@@ -513,6 +516,7 @@ def main_func():
     # Start identifymedia thread
     global im_thread
     im_thread = identifymedia.Identify_Thread()
+    im_thread.setDaemon(1)
     im_thread.start()
     
     # scan for plugins

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.2  2003/02/13 05:55:15  krister
 # Rob Shortts bugfix for games.
 #
@@ -80,6 +83,7 @@ class Game:
 
     def __init__(self):
         self.thread = Game_Thread()
+        self.thread.setDaemon(1)
         self.thread.start()
         self.mode = None
                          

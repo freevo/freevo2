@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/22 07:13:19  krister
+# Set all sub threads to daemons so that they die automatically if the main thread dies.
+#
 # Revision 1.6  2003/02/11 04:37:29  krister
 # Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
 #
@@ -113,6 +116,7 @@ class MPlayer:
     
     def __init__(self):
         self.thread = MPlayer_Thread()
+        self.thread.setDaemon(1)
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         
