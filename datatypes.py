@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/11/08 21:28:20  dischi
+# Added support for a movie config dialog. Only usable for dvd right now.
+# See mplayer-devel list for details.
+#
 # Revision 1.3  2002/10/10 09:27:30  dischi
 # added runtime to MovieExtraInformation
 #
@@ -66,7 +70,7 @@ class FileInformation:
         self.mode = mode
         self.file = file
         self.mplayer_options = mplayer_options
-
+        self.mplayer_config = ""
 
 class MovieInformation:
     def __init__(self, title=None, image=None, playlist=None, disc_id=None, \

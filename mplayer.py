@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/11/08 21:28:20  dischi
+# Added support for a movie config dialog. Only usable for dvd right now.
+# See mplayer-devel list for details.
+#
 # Revision 1.44  2002/10/31 21:10:11  dischi
 # mplayer.py doesn't believe the type for a file anymore and checks
 # the type by parsing config.SUFFIX_AUDIO_FILES. This had to be done
@@ -106,6 +110,7 @@ import audioinfo  # This just for ID3 functions and stuff.
 import skin       # Cause audio handling needs skin functions.
 import fnmatch
 
+import movie_config
 from datatypes import *
 
 DEBUG = config.DEBUG
@@ -151,11 +156,15 @@ class MPlayer:
         self.thread.start()
         self.mode = None
                          
-    def play(self, mode, file, playlist, repeat=0):
+    def play(self, mode, file, playlist, repeat=0, start_time = 0):
 
         filename = file
+        mplayer_config = None
         if isinstance(filename, FileInformation):
             mplayer_options = file.mplayer_options
+            if file.mplayer_config:
+                mplayer_config = file.mplayer_config
+                mplayer_options += mplayer_config.to_string()
             mode = file.mode
             filename = filename.file
         else:
@@ -195,6 +204,9 @@ class MPlayer:
                                    config.MPLAYER_CMD,
                                    config.MPLAYER_ARGS_DEF)
 
+        if start_time:
+            mpl += ' -ss %s' % start_time
+            
         # XXX find a way to enable this for AVIs with ac3, too
         if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
            and config.MPLAYER_AO_HWAC3_DEV:
@@ -205,7 +217,7 @@ class MPlayer:
         if mode == 'video':
 
             # Mplayer command and standard arguments
-            mpl += (' ' + config.MPLAYER_ARGS_MPG + ' -vo ' + config.MPLAYER_VO_DEV)
+            mpl += (' ' + config.MPLAYER_ARGS_MPG + ' -v -vo ' + config.MPLAYER_VO_DEV)
             
             # XXX Some testcode by Krister:
             if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and \
@@ -250,10 +262,11 @@ class MPlayer:
             command = '%s -vo null %s "%s"' % (mpl, demux, filename)
             
         elif mode == 'dvd':
-            mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -alang ' + config.DVD_LANG_PREF +
+            mpl += (' ' + config.MPLAYER_ARGS_DVD + ' -v -alang ' + config.DVD_LANG_PREF +
                     ' -vo ' + config.MPLAYER_VO_DEV)
-            if config.DVD_SUBTITLE_PREF:
-                mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
+            # XXX this can be set by the config menu
+            # if config.DVD_SUBTITLE_PREF:
+            #     mpl += (' -slang ' + config.DVD_SUBTITLE_PREF)
             command = mpl % str(filename)  # Filename is DVD chapter
             
         else:
@@ -306,13 +319,14 @@ class MPlayer:
             print 'MPlayer.play(): Starting thread, cmd=%s' % command
             
         self.thread.mode    = 'play'
+        self.thread.mplayer_config = mplayer_config
         self.thread.command = command
         self.thread.mode_flag.set()
         if(mode == 'audio'):
             rc.app = self.eventhandler_audio
         else:
             rc.app = self.eventhandler
-        
+
     def stop(self):
         # self.thread.audioinfo = None
         self.thread.mode = 'stop'
@@ -410,7 +424,15 @@ class MPlayer:
                 rc.app = None
                 menuwidget.refresh()
         elif event == rc.MENU:
-            self.thread.app.write('M')
+            if self.mode == 'dvdnav':
+                self.thread.app.write('M')
+            elif self.mode == 'dvd':
+                mpinfo = self.thread.app.mpinfo
+                self.stop()
+                rc.app = None
+                movie_config.config_main_menu(self.mode, self.file, self.playlist,
+                                              self.repeat, mpinfo)
+
         elif event == rc.DISPLAY:
             self.thread.cmd( 'info' )
         elif event == rc.PAUSE or event == rc.PLAY:
@@ -468,7 +490,13 @@ class MPlayer:
             
 # ======================================================================
 class MPlayerApp(childapp.ChildApp):
-        
+    def __init__(self, app, mpinfo):
+        if mpinfo:
+            self.mpinfo = mpinfo
+        else:
+            self.mpinfo = movie_config.MplayerMovieInfo()
+        childapp.ChildApp.__init__(self, app)
+
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
         # down properly and releases all resources before it gets
@@ -482,8 +510,13 @@ class MPlayerApp(childapp.ChildApp):
         os.system('killall -9 freevo_xwin 2&> /dev/null')
         os.system('rm -f /tmp/freevo.wid')
 
-    # def stdout_cb
+    def stdout_cb(self, str):
+        if str.find("A:") == 0:
+            self.mpinfo.time = str
 
+        # this is the first start of the movie, parse infos
+        elif not self.mpinfo.time:
+            self.mpinfo.parse(str)
 
 # ======================================================================
 class MPlayer_Thread(threading.Thread):
@@ -496,7 +529,8 @@ class MPlayer_Thread(threading.Thread):
         self.command   = ''
         self.app       = None
         self.audioinfo = None              # Added to enable update of GUI
-
+        self.mplayer_config = None
+        
     def run(self):
         while 1:
             if self.mode == 'idle':
@@ -513,8 +547,8 @@ class MPlayer_Thread(threading.Thread):
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
-                self.app = MPlayerApp(self.command)
-                
+                self.app = MPlayerApp(self.command, self.mplayer_config)
+
                 while self.mode == 'play' and self.app.isAlive():
                     # if DEBUG: print "Still running..."
                     if self.audioinfo: 
