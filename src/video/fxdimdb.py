@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/30 12:21:13  dischi
+# small changes for the changed xml_parser
+#
 # Revision 1.8  2003/08/27 19:24:08  dischi
 # smarter search
 #
@@ -82,7 +85,7 @@ import util
 
 
 import config 
-from xml_parser import save_parseMovieFile
+from xml_parser import parseMovieFile
 
 #Constants
 
@@ -277,7 +280,7 @@ class FxdImdb:
         else: self.append = FALSE
 
         if self.append == TRUE and \
-           save_parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
+           parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
             raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
 
         if not os.path.isdir(os.path.dirname(self.fxdfile)):
@@ -339,7 +342,7 @@ class FxdImdb:
                     self.write_movie()
 
             #check fxd 
-            if save_parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
+            if parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
                 raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
                                         "post bugreport, tracebacks and fxd file.""")
         except (IOError, FxdImdb_IO_Error), error:

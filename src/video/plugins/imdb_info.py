@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/30 12:21:13  dischi
+# small changes for the changed xml_parser
+#
 # Revision 1.6  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -76,7 +79,7 @@ class PluginInterface(plugin.ItemPlugin):
             box.show()
             return
 
-        infolist = xml_parser.save_parseMovieFile(file, os.path.dirname(file),[])
+        infolist = xml_parser.parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
             box = AlertBox(icon=info.image, width=550, height=400, text='%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s' % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
             box.show()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/30 12:21:13  dischi
+# small changes for the changed xml_parser
+#
 # Revision 1.8  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -51,17 +54,12 @@ def cwd(parent, files):
     items = []
 
     for file in util.find_matches(files, config.SUFFIX_VIDEO_DEF_FILES):
-        x = xml_parser.save_parseMovieFile(file, parent, files)
+        x = xml_parser.parseMovieFile(file, parent, files)
         if x:
             files.remove(file)
             items += x
 
     for file in util.find_matches(files, config.SUFFIX_VIDEO_FILES):
-        if parent.media:
-            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                     file[len(parent.media.mountdir)+1:])
-        else:
-            url = file
         x = VideoItem(file, parent)
         if parent.media:
             file_id = parent.media.id + file[len(os.path.join(parent.media.mountdir,"")):]
@@ -112,7 +110,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
 
     # add new xml files
     for file in util.find_matches(new_files, config.SUFFIX_VIDEO_DEF_FILES):
-        x = xml_parser.save_parseMovieFile(file, parent, new_files)
+        x = xml_parser.parseMovieFile(file, parent, new_files)
         if x:
             new_files.remove(file)
             new_items += x

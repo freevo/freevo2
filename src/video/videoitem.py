@@ -25,6 +25,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2003/08/30 12:21:13  dischi
+# small changes for the changed xml_parser
+#
 # Revision 1.77  2003/08/23 18:33:03  dischi
 # use util.getimage to get the cover image file
 #
@@ -91,7 +94,6 @@ class VideoItem(Item):
                                      filename[len(parent.media.mountdir)+1:])
         else:
             url = filename
-
         Item.__init__(self, parent, mmpython.parse(url))
 
         # fix values
