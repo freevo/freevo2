@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/08/11 18:07:09  rshortt
+# Use config.LOGDIR.
+#
 # Revision 1.10  2003/08/11 18:01:24  rshortt
 # Further integration of record_server.  Moved config items and plugin info
 # into freevo_config.py.  Also in freevo_config.py I moved FREEVO_CACHEDIR
@@ -113,7 +116,7 @@ TRUE = 1
 FALSE = 0
 
 appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-logfile = '/var/log/freevo/internal-%s-%s.log' % (appname, os.getuid())
+logfile = '%s/internal-%s-%s.log' % (config.LOGDIR, appname, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
 
