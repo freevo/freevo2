@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/15 05:01:31  outlyer
+# Merged Kyle Weston's Schedule Viewer/Editor patch.
+#
+# Please note, it currently only works with recording files ending in '.avi'
+# This is temporary, but as a fix, there is a commented line on line 171,
+# if you use mpgs (like I do) you can enable line 171 and comment out line 170.
+#
+# Since avi is the default, I'm leaving it that way, but I will use mpg myself.
+#
 # Revision 1.9  2003/03/07 17:13:34  outlyer
 # A bunch of internal changes that should be completely invisible to most
 # people. Mainly, the scheduling routine is now a little more configurable.
@@ -118,6 +127,9 @@ import skin
 # Recording daemon
 import record_daemon
 
+# Schedule editor
+import record_schedule
+
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -198,7 +210,7 @@ def main_menu(prog):
     prog_time = time.strftime('%H:%M', time.localtime(prog.start))
     recinfo.start_time.set_selected(prog_time)
     
-    rc.app = None # XXX We'll jump back to the main menu for now, should be the TV menu
+    #rc.app = None # XXX We'll jump back to the main menu for now, should be the TV menu
 
     days = []
     today = time.time()
@@ -240,6 +252,8 @@ def generate_main():
     items += [menu.MenuItem('Schedule recording', set_schedule)]
 
     recmenu = menu.Menu('RECORD CHANNEL %s' % recinfo.channel, items, reload_func=generate_main)
+
+    rc.app = eventhandler
 
     return recmenu
 
@@ -335,3 +349,15 @@ def set_schedule(arg=None, menuw=None):
     skin.PopupBox(s)
     time.sleep(2)
     menuw.refresh()
+
+def eventhandler( event):
+    print 'using record_video event handler'
+    if event == rc.DISPLAY:
+        record_schedule.main_menu()
+    elif event == rc.EXIT or event == rc.MENU:
+        menu.MenuWidget.eventhandler( menuwidget, event )
+        rc.app = None #give control back to the main program
+    else:
+        menu.MenuWidget.eventhandler( menuwidget, event )
+
+
