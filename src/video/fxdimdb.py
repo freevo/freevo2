@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/23 10:39:13  dischi
+# fixed "&" handling
+#
 # Revision 1.4  2003/08/20 21:54:13  outlyer
 # Use my Python version of 'touch'
 #
@@ -764,6 +767,7 @@ class FxdImdb:
     def str2XML(self, line):
         """return a valid XML string"""
         
+        print line
         try:
             s = unicode(line, 'latin-1')
             while s[-1] == ' ':
@@ -772,7 +776,13 @@ class FxdImdb:
                 s = s[5:]
             if s[-4:] == '#34;':
                 s = s[:-5]
+            # replace all & to &amp; ...
             s = s.replace("&", "&amp;")
+
+            # ... but this may be wrong for &#
+            s = s.replace("&amp;#", "&#")
+            print s
+
             return s
         except:
             return line
