@@ -157,6 +157,12 @@
 	valign="center"/>
     </layout>
 
+    <!-- subtitle -->
+    <layout label="subtitle">
+      <content x="170" y="0" type="menu" font="subtitle" align="center"
+	valign="center"/>
+    </layout>
+
     <!-- default listing area -->
     <layout label="listing">
       <content type="text" spacing="2">
@@ -203,6 +209,7 @@
 
     <!-- font used in this layouts -->
     <font label="title area" name="VeraBd.ttf" size="24" color="0xffffff"/>
+    <font label="subtitle" name="VeraBd.ttf" size="18" color="0xffffff"/>
 
     <font label="item" name="VeraBd.ttf" size="16" color="0xdddddd"/>
     <font label="selected" name="VeraBd.ttf" size="16" color="0xffffff"/>
