@@ -796,7 +796,7 @@ MPLAYER_AUTOCROP = 0
 
 XINE_COMMAND = ''
 
-if CONF.display == 'mga' and CONF.fbxine:
+if CONF.display in ('mga', 'fbdev') and CONF.fbxine:
     XINE_VO_DEV  = 'vidixfb'
     XINE_COMMAND = CONF.fbxine
     
