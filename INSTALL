@@ -11,7 +11,8 @@ o Un-tar somewhere. /usr/local is the recommended place for a regular
   installation, but it will run from anywhere, e.g. /tmp
   cd tmp
   tar xvzf freevo-1.2.5.tar.gz
-  tar xvzf freevo-runtime1.tar.gz
+  tar xvzf freevo_runtime1.tar.gz
+  tar xvzf freevo_apps1.tar.gz
   cd freevo
 o Run configure in the Freevo directory. This will create freevo.conf
   which contains settings for your system such as screen size, video devices,

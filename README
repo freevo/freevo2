@@ -4,7 +4,8 @@ Freevo
 $Id$
 
 
-Download freevo-runtime1.tar.gz and follow the instructions in INSTALL!
+Download freevo_runtime1.tar.gz and freevo_apps1.tar.gz,
+and follow the instructions in INSTALL!
 
 
 Freevo is a Linux application that turns a PC with a TV capture card
