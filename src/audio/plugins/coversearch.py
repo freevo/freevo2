@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/03 21:58:40  dischi
+# fixed audiocd handling
+#
 # Revision 1.10  2003/06/29 20:42:14  dischi
 # changes for mmpython support
 #
@@ -128,9 +131,21 @@ class PluginInterface(plugin.ItemPlugin):
 
     def actions(self, item):
         self.item = item
+
+        # don't allow this for items on an audio cd, only on the disc itself
+        if item.type == 'audio' and item.parent.type == 'audiocd':
+            return []
+
+        # don't allow this for items in a playlist
+        if item.type == 'audio' and item.parent.type == 'playlist':
+            return []
+        
         if item.type == 'audio' or item.type == 'audiocd':
             try:
-                if self.item.getattr('artist') and self.item.getattr('album'):
+                # use title for audicds and album for normal data
+                if self.item.getattr('artist') and \
+                   ((self.item.getattr('album') and item.type == 'audio') or \
+                    (self.item.getattr('title') and item.type == 'audiocd')):
                     return [ ( self.cover_search_file, 'Find a cover for this music',
                                'imdb_search_or_cover_search') ]
             except KeyError:
@@ -147,7 +162,11 @@ class PluginInterface(plugin.ItemPlugin):
         box = PopupBox(text='searching Amazon...')
         box.show()
 
-        album = self.item.info['album']
+        if self.item.type == 'audio':
+            album = self.item.info['album']
+        else:
+            album = self.item.info['title']
+
         artist = self.item.info['artist']
 
         amazon.setLicense(self.license) 
