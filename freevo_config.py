@@ -732,7 +732,8 @@ MPLAYER_SEEK_TIMEOUT = 8
 # Xine section:
 # ======================================================================
 
-# You need xine-ui version greater 0.9.21 to use the xine plugin
+# You need xine-ui version greater 0.9.21 to use the all the features
+# of the xine plugin
 
 if CONF.display == 'mga' and CONF.fbxine:
     XINE_VO_DEV  = 'vidixfb'
@@ -744,13 +745,12 @@ if CONF.display == 'dxr3' and CONF.fbxine:
     
 if CONF.display == 'x11' and CONF.xine:
     XINE_VO_DEV  = 'xv'
-    XINE_COMMAND = '%s -g --no-splash -B --geometry %sx%s+0+0' % \
-                   (CONF.xine, CONF.width, CONF.height)
+    XINE_COMMAND = '%s -g -B --geometry %sx%s+0+0' % (CONF.xine, CONF.width, CONF.height)
 
 XINE_AO_DEV = 'oss'                     # alsa or oss
 XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback
 
-# plugin.activate('video.xine')
+plugin.activate('video.xine')
 
 
 # ======================================================================
