@@ -22,14 +22,18 @@
 #
 #   plugin.activate('idlebar.weather', level=30, args=('4-letter code', ))
 #     For weather station codes see: http://www.nws.noaa.gov/tg/siteloc.shtml
-#     plugin.activate('idlebar.clock',   level=50)
-#
+#     You can also set the unit as second parameter in args ('C', 'F', or 'K')
+#   
+#   plugin.activate('idlebar.clock',   level=50)
 #   plugin.activate('idlebar.cdstatus', level=30)
 #   plugin.activate('idlebar.clock',    level=50)
 #   
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/04 19:40:00  dischi
+# add doc
+#
 # Revision 1.26  2003/08/04 04:25:09  gsbarbieri
 # changed interface -> PluginInterface to conform with the plugin usage.
 #
