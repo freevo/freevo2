@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/18 12:09:03  outlyer
+# Oops... shouldn't have committed that
+#
 # Revision 1.4  2003/07/18 03:49:50  outlyer
 # Revert this change, since it was due to the idlebar problem I just fixed.
 #
@@ -400,7 +403,6 @@ class MPlayer_Thread(threading.Thread):
                         print "Stopping Display for Video Playback on DXR3"
                     osd.stopdisplay()			
 
-                os.system('/usr/sbin/matroxcolor')
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -419,8 +421,6 @@ class MPlayer_Thread(threading.Thread):
                     osd.restartdisplay()
                     osd.update()
                     print "Display back online"
-
-                os.system('/usr/sbin/undomatroxcolor')
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
