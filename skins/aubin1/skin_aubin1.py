@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/10/12 23:03:14  outlyer
+# Added a split on '\n' to the skin.PopupBox, so we draw multiple lines for
+# longer entries when a '\n' is found.
+#
 # Revision 1.3  2002/10/08 20:37:30  outlyer
 # Updated to use my fancy popup box; since I updated the TV code to use
 # the skin.Popup, all the popups look the same per skin.
@@ -117,7 +121,7 @@
 # Logging is initialized here, so it should be imported first
 import config
 
-import sys, socket, random, time, os, copy, re
+import sys, socket, random, time, os, copy, re, string
 
 # Various utilities
 import util
@@ -288,11 +292,18 @@ class Skin:
                Maybe I should use one common box item.
         """
        	osd.drawbitmap('skins/images/popup.png',163,232)
-	osd.drawstring(text,384,280,fgcolor=0xffffff,align='center')	
-	
-	
-	osd.update()
-        
+        lines = string.split(text,'\n')
+
+        if len(lines) == 1: origin = 280
+        if len(lines) == 2: origin = 260
+        if len(lines) == 3: origin = 240
+        c = 0
+        for i in lines:
+            loc = origin + c*(20)
+            osd.drawstring(i,384,loc,fgcolor=0xffffff,align='center')
+	    c = c + 1
+
+        osd.update()
 
     # Draws a text based on the settings in the XML file
     def DrawText(self, text, settings, x=-1, y=-1):
