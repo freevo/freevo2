@@ -239,18 +239,19 @@ def cwd(arg=None, menuw=None):
         except:
             print "XML file %s corrupt" % file
         else:
-            if box.children[0].name == 'movie':
-                for node in box.children[0].children:
-                    if node.name == u'title':
-                        title = node.textof()
-                    elif node.name == u'cover' and \
-                         os.path.isfile(os.path.join(dir,node.textof())):
-                        image = os.path.join(dir, node.textof())
-                    elif node.name == u'video':
-                        (mode, first_file, playlist, mplayer_options) = \
-                               XML_parseVideo(dir, mplayer_files, node)
-                    elif node.name == u'info':
-                        XML_parseInfo(node)
+            for c in box.children:
+                if c.name == 'movie':
+                    for node in c.children:
+                        if node.name == u'title':
+                            title = node.textof().encode('latin-1')
+                        elif node.name == u'cover' and \
+                             os.path.isfile(os.path.join(dir,node.textof())):
+                            image = os.path.join(dir, node.textof())
+                        elif node.name == u'video':
+                            (mode, first_file, playlist, mplayer_options) = \
+                                   XML_parseVideo(dir, mplayer_files, node)
+                        elif node.name == u'info':
+                            XML_parseInfo(node)
 
         # only add movies when we have all needed informations
         if title != "" and first_file != "":

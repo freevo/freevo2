@@ -137,18 +137,19 @@ def XML_to_MOVIE_INFORMATIONS(file, info_struct):
     else:
         title = image = ""
         id = []
-        if box.children[0].name == 'movie':
-            for node in box.children[0].children:
-                if node.name == u'title':
-                    title = node.textof()
-                if node.name == u'id':
-                    id += [node.textof()]
-                elif node.name == u'cover' and \
-                     os.path.isfile(os.path.join(os.path.dirname(file),node.textof())):
-                    image = os.path.join(os.path.dirname(file), node.textof())
-        if title and id:
-            for i in id:
-                info_struct += [(title, image, i)]
+        for c in box.children:
+            if c.name == 'movie':
+                for node in c.children:
+                    if node.name == u'title':
+                        title = node.textof().encode('latin-1')
+                    if node.name == u'id':
+                        id += [node.textof()]
+                    elif node.name == u'cover' and \
+                         os.path.isfile(os.path.join(os.path.dirname(file),node.textof())):
+                        image = os.path.join(os.path.dirname(file), node.textof())
+            if title and id:
+                for i in id:
+                    info_struct += [(title, image, i)]
 
 
 MOVIE_INFORMATIONS = []
