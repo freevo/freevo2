@@ -9,48 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/10/01 18:56:56  dischi
+# add configure option to write a folder.fxd
+#
 # Revision 1.38  2003/09/21 13:17:49  dischi
 # make it possible to change between video, audio, image and games view
-#
-# Revision 1.37  2003/09/20 15:21:08  dischi
-# bugfix
-#
-# Revision 1.36  2003/09/20 15:08:25  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.35  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.34  2003/09/13 10:08:21  dischi
-# i18n support
-#
-# Revision 1.33  2003/09/05 16:10:46  mikeruelle
-# add an additional arg so new games system is happy
-#
-# Revision 1.32  2003/09/01 18:55:02  dischi
-# use progressbar when scanning
-#
-# Revision 1.31  2003/08/30 12:19:00  dischi
-# new mmpython cache call to only scan the needed directory
-#
-# Revision 1.30  2003/08/24 14:08:58  dischi
-# add import to folder.fxd options
-#
-# Revision 1.29  2003/08/24 10:39:04  dischi
-# fix a bug that the folder.fxd was not loaded anymore
-#
-# Revision 1.28  2003/08/23 18:35:16  dischi
-# new function to set the xml_file to make it possible to parse it later
-#
-# Revision 1.27  2003/08/23 15:16:18  dischi
-# o more infos in folder.fxd: title, cover-img and content info
-# o totalspace and freespace support for getattr
-#
-# Revision 1.26  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.25  2003/08/13 17:33:17  dischi
-# add "please wait" message for rom drives every time
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -78,13 +41,13 @@
 import os
 import traceback
 import re
+import codecs
 
 import util
 import config
 import menu as menu_module
 import copy
 import rc
-import string
 import skin
 
 from item import Item
@@ -146,11 +109,12 @@ class DirItem(Playlist):
         self.info         = {}
         self.mountpoint   = None
         self.add_args     = add_args
-        
+
         # set directory variables to default
         global all_variables
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
+        self.modified_vars = []
 
         if name:
             self.name = name
@@ -161,6 +125,18 @@ class DirItem(Playlist):
                 self.name = os.path.basename(directory)
         else:
             self.name = os.path.basename(directory)
+
+        
+        # check for image in album.xml
+        if os.path.isfile(directory + '/album.xml'):
+            try:
+                image = bins.get_bins_desc(directory)['desc']['sampleimage']
+                image = os.path.join(directory, image)
+                if os.path.isfile(image):
+                    self.image = image
+                    self.handle_type = self.display_type
+            except:
+                pass
 
         # Check for cover in COVER_DIR
         if config.COVER_DIR:
@@ -249,9 +225,8 @@ class DirItem(Playlist):
         
 	<?xml version="1.0" ?>
 	<freevo>
-	  <folder title="Incoming TV Shows" cover-img="taken.jpg">
+	  <folder title="Incoming TV Shows" cover-img="foo.jpg">
 	    <setvar name="directory_autoplay_single_item" val="0"/>
-	    <!-- <setvar name="force_skin_layout" val="1"/> -->
 	    <info>
 	      <content>Episodes for current tv shows not seen yet</content>
 	    </info>
@@ -299,6 +274,7 @@ class DirItem(Playlist):
                             setattr(self, v, int(child.attrs[('', 'val')]))
                         except ValueError:
                             setattr(self, v, child.attrs[('', 'val')])
+                        self.modified_vars.append(v)
             # get more info
             if child.name == 'info' and set_all:
                 for info in child.children:
@@ -307,6 +283,40 @@ class DirItem(Playlist):
                                                                 encode('latin-1'))
 
         
+    def write_fxd(self):
+        """
+        save the modified fxd file
+        """
+        self.xml_file = os.path.join(self.dir, 'folder.fxd')
+        try:
+            f = open(self.xml_file)
+            data = f.readlines()
+            f.close()
+        except:
+            data = ('<?xml version="1.0" ?>\n', '<freevo>\n', '  <folder>\n',
+                    '  </folder>\n', '</freevo>\n')
+        
+        try:
+            if os.path.isfile(self.xml_file):
+                os.unlink(self.xml_file)
+            f = codecs.open(self.xml_file , 'w', encoding='utf-8')
+        except IOError, error:
+            return 0 
+
+        for line in data:
+            if line.find('<setvar') != -1:
+                continue
+            f.write(line)
+            if line.find('<folder') != -1:
+                for v in self.modified_vars:
+                    for i in range(line.find('<')):
+                        f.write(' '),
+                    f.write('  <setvar name="%s" val="%s"/>\n' % \
+                            (v.lower(), getattr(self, v)))
+        f.close()
+        return 1 
+
+
     def copy(self, obj):
         """
         Special copy value DirItem
@@ -345,18 +355,12 @@ class DirItem(Playlist):
         """
         items = [ ( self.cwd, _('Browse directory') ) ]
 
-        # this doen't work right now because we have no playlist
-        # at this point :-(
-        
-        # if self.playlist and len(self.playlist) > 1:
-        #     items += [ (RandomPlaylist(self.playlist, self),
-        #                 _('Random play all items') ) ]
-
         if ((not self.display_type or self.display_type == 'audio') and
             config.AUDIO_RANDOM_PLAYLIST == 1):
             items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES),
                                        self),
                         _('Recursive random play all items')) ]
+        items.append((self.configure, _('Configure directory'), 'configure'))
         return items
     
 
@@ -370,7 +374,7 @@ class DirItem(Playlist):
 
         # are we on a ROM_DRIVE and have to mount it first?
         for media in config.REMOVABLE_MEDIA:
-            if string.find(self.dir, media.mountdir) == 0:
+            if self.dir.find(media.mountdir) == 0:
                 util.mount(self.dir)
                 self.media = media
 
@@ -456,7 +460,7 @@ class DirItem(Playlist):
         if num_changes > 0:
             mmpython.cache_dir(mmpython_dir, callback=callback)
             if self.media:
-                self.media.cached = TRUE
+                self.media.cached = True
 
         play_items = []
         for t in possible_display_types:
@@ -509,7 +513,7 @@ class DirItem(Playlist):
         if not self.display_type or self.display_type == 'image':
             for file in util.find_matches(files, config.SUFFIX_IMAGE_SSHOW):
                 pl = Playlist(file, self)
-                pl.autoplay = TRUE
+                pl.autoplay = True
                 pl_items += [ pl ]
 
         pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
@@ -524,7 +528,7 @@ class DirItem(Playlist):
             config.AUDIO_RANDOM_PLAYLIST == 1):
             pl = Playlist(play_items, self)
             pl.randomize()
-            pl.autoplay = TRUE
+            pl.autoplay = True
             items += [ pl ]
 
         items += dir_items + pl_items + play_items
@@ -666,7 +670,7 @@ class DirItem(Playlist):
         if not self.display_type or self.display_type == 'image':
             for file in util.find_matches(new_files, config.SUFFIX_IMAGE_SSHOW):
                 pl = Playlist(file, self)
-                pl.autoplay = TRUE
+                pl.autoplay = True
                 new_pl_items += [ pl ]
 
         if new_pl_items:
@@ -686,7 +690,7 @@ class DirItem(Playlist):
             if new_items or del_items:
                 pl = Playlist(self.play_items, self)
                 pl.randomize()
-                pl.autoplay = TRUE
+                pl.autoplay = True
                 items += [ pl ]
 
             # reuse old playlist
@@ -715,6 +719,101 @@ class DirItem(Playlist):
         rc.post_event('MENU_REBUILD')
 
 
+    def configure_set_var(self, arg=None, menuw=None):
+        """
+        Update the variable in arg and change the menu. This function is used by
+        'configure'
+        """
+
+        # get current value, None == no special settings
+        if arg in self.modified_vars:
+            current = getattr(self, arg)
+        else:
+            current = None
+
+        # get the max value for toggle
+        max = 1
+
+        # for FORCE_SKIN_LAYOUT max = number of styles in the menu
+        if arg == 'FORCE_SKIN_LAYOUT':
+            if self.display_type and skin.settings.menu.has_key(self.display_type):
+                area = skin.settings.menu[self.display_type]
+            else:
+                area = skin.settings.menu['default']
+            max = len(area.style) - 1
+
+        # switch from no settings to 0
+        if current == None:
+            self.modified_vars.append(arg)
+            setattr(self, arg, 0)
+
+        # inc variable
+        elif current < max:
+            setattr(self, arg, current+1)
+
+        # back to no special settings
+        elif current == max:
+            setattr(self, arg, getattr(config, arg))
+            self.modified_vars.remove(arg)
+
+        # create new item with updated name
+        item = copy.copy(menuw.menustack[-1].selected)
+        item.name = item.name[:item.name.find('\t') + 1]
+        if arg in self.modified_vars:
+            if arg == 'FORCE_SKIN_LAYOUT':
+                item.name += str(getattr(self, arg))
+            elif getattr(self, arg):
+                item.name += 'on'
+            else:
+                item.name += 'off'
+        else:
+            if arg == 'FORCE_SKIN_LAYOUT':
+                item.name += 'off'
+            else:
+                item.name += 'auto'
+
+        # write folder.fxd
+        if not self.write_fxd():
+            print 'error writing file'
+
+        # rebuild menu
+        menuw.menustack[-1].choices[menuw.menustack[-1].choices.\
+                                    index(menuw.menustack[-1].selected)] = item
+        menuw.menustack[-1].selected = item
+        menuw.refresh(reload=1)
+            
+    
+    def configure(self, arg=None, menuw=None):
+        """
+        show the configure dialog for folder specific settings in folder.fxd
+        """
+        items = []
+        for i in all_variables:
+            if i in ('COVER_DIR', 'AUDIO_FORMAT_STRING'):
+                continue
+            if (self.display_type and not self.display_type == 'audio') and \
+                   i == 'AUDIO_RANDOM_PLAYLIST':
+                continue
+            
+            name = str(i + '\t').replace('_', ' ').capitalize()
+            if i in self.modified_vars:
+                if i == 'FORCE_SKIN_LAYOUT':
+                    item.name += str(getattr(self, i))
+                if getattr(self, i):
+                    name += 'on'
+                else:
+                    name += 'off'
+            else:
+                if i == 'FORCE_SKIN_LAYOUT':
+                    name += 'off'
+                else:
+                    name += 'auto'
+            items.append(menu_module.MenuItem(name, self.configure_set_var, i))
+        m = menu_module.Menu('Configure', items)
+        m.table = (80, 20)
+        menuw.pushmenu(m)
+
+        
     # eventhandler for this item
     def eventhandler(self, event, menuw=None):
         if event == DIRECTORY_CHANGE_DISPLAY_TYPE and menuw.menustack[-1] == self.menu:
