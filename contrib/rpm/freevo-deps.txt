@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.81 2004/06/02	TC Wan (tcwan at cs dot usm dot my)
+Version 0.82 2004/06/02	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -132,6 +132,9 @@ python-sqlite / pysqlite http://dag.wieers.com/home-made/apt/
 													# sqlite-2.8.13-1.1.fc2.dag.i386.rpm 
 													# sqlite-devel-2.8.13-1.1.fc2.dag.i386.rpm
 													# sqlite-2.8.13-1.dag.src.rpm
+
+
+pygoom			[pygoom 0.1 RPMs available from freevo downloads]
 
 
 [Apps-Core]
