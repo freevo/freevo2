@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/12/12 19:11:20  dischi
+# rewrote find_matches. It's not 100% correct because it doesn't use splitext
+# anymore, but it's _much_ faster now.
+#
 # Revision 1.7  2003/12/09 19:42:23  dischi
 # more generic resolve_media_mountdir and arg checking for mount functions
 #
@@ -63,6 +67,7 @@ import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
 import traceback
+import time
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
@@ -233,8 +238,12 @@ def match_files(dirname, suffix_list):
 def find_matches(files, suffix_list):
     """
     return all files in 'files' that match one of the suffixes in 'suffix_list'
+    The correct implementation is
+    filter(lambda x: os.path.splitext(x)[1].lower()[1:] in suffix_list, files)
+    but this one should also work and is _much_ faster. On a Duron 800, Python 2.2
+    and 700 photos 0.01 secs insteat of 0.2.
     """
-    return [ fname for fname in files if match_suffix(fname, suffix_list) ]
+    return filter(lambda x: x[x.rfind('.')+1:].lower() in suffix_list, files)
 
 
 def match_files_recursively_helper(result, dirname, names):
