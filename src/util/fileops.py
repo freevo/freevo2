@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/02 09:24:35  dischi
+# Check for libs and make it possible to install runtime from within
+# freevo
+#
 # Revision 1.2  2003/10/17 17:28:41  dischi
 # bugfix
 #
@@ -46,16 +50,22 @@ import string
 import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
-import misc
+import traceback
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
 else:
     PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
+for t in traceback.extract_stack():
+    if t[0][0].find('install.py'):
+        break
+else:
+    # Configuration file. Determines where to look for AVI/MP3 files, etc
+    import config
 
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
+    # import stuff from util.misc
+    import misc
 
 
 #

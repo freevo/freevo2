@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/02 09:24:35  dischi
+# Check for libs and make it possible to install runtime from within
+# freevo
+#
 # Revision 1.2  2003/10/18 13:04:42  dischi
 # add distutils
 #
@@ -44,6 +48,7 @@ import sys
 # import the stuff from misc and fileops to be compatible
 # with util in only one file
 
-if sys.argv[0].find('setup.py') == -1:
+if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
+    print sys.argv[0]
     from misc import *
     from fileops import *
