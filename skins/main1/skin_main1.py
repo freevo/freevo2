@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2002/08/17 18:37:21  krister
+# Changed to use ../xml/type1/xml_skin.py.
+#
 # Revision 1.12  2002/08/11 08:11:03  dischi
 # moved the XML parsing to an extra file and the file 768x576.xml
 # to the directory skins/xml
@@ -59,8 +62,13 @@ import osd
 import rc
 
 # XML parser for skin informations
+#
+# If you copy the main1 skin and want to change the xml handling too,
+# you can use 'import my_xml_skin as xml_skin' here and remove the
+# sys.path.insert()
+#
+sys.path.append('skins/xml/type1')
 import xml_skin
-
 
 # Set to 1 for debug output
 DEBUG = 1
