@@ -43,14 +43,12 @@ o Test the video4linux driver using xawtv (optional)
     for Matrox G400 Framebuffer using a Video4Linux1 device, it is part
     of Freevo in freevo/matrox_g400/v41l1_to_mga.
 
-o Compile and install the needed external apps. MPlayer and mpg321/mpg123
-  are needed for the core Video/Audio playback functionality, the others
+o Compile and install the needed external apps. MPlayer is required for
+  the core Video/Audio playback functionality, the others
   can be installed as needed.
   o Install MPlayer  (Play movies, DVDs, VideoCDs)
     o Test with the the graphics driver and settings you intend to use.
       Update freevo_config.py, settings called MPLAYER_XXXX
-  o Install mpg321  (play MP3. Alternately, mpg123)
-    o Test audio output with an mp3
   o Install NVrec (record from Video4Linux video in to file)
     o Test recording to a file
     o NVrec support is currently not enabled in Freevo, it is work
@@ -95,6 +93,9 @@ o Compile Freevo
   o Test the MGA G400 OSD framebuffer driver (optional)
     Before you start freevo with the OSD driver change the framebuffer 
     resolution to 768x576.
+
+o Optionally install the Python ogg/vorbis modules for ogg vorbis tag support. 
+  o It can be obtained here: http://www.duke.edu/~ahc4/pyogg/
 
 o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer, optional)
   o It _must_ be used with the matrox_g400/mga_vid.o module,
