@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/07 11:18:27  dischi
+# many optical improvements
+#
 # Revision 1.8  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -55,6 +58,7 @@ from gui.Border         import *
 from gui.Label          import *
 from gui.LetterBoxGroup import *
 from gui.ListBox        import *
+from gui.Button         import *
 
 DEBUG = 0
 
@@ -100,8 +104,8 @@ class ProgramSearch(PopupBox):
         self.lbg = LetterBoxGroup(text=search)
         self.add_child(self.lbg)
 
-        items_height = 40
-        self.num_shown_items = 6
+        items_height = Button('foo').height
+        self.num_shown_items = 8
         self.results = ListBox(width=(self.width-2*self.h_margin),
                                height=self.num_shown_items*items_height,
                                show_v_scrollbar=0)
@@ -113,10 +117,14 @@ class ProgramSearch(PopupBox):
 
         if search:
             self.searchProg(search)
-
+        self.center_on_screen = TRUE
+        
 
     def searchProg(self, find):
         if DEBUG: print 'SEARCHING FOR: %s' % find
+        pop = PopupBox(parent=self, text='Searching, please wait...')
+        pop.show()
+
         (result, matches) = record_client.findMatches(find)
 
         if result:
@@ -144,6 +152,8 @@ class ProgramSearch(PopupBox):
             if space_left > 0:
                 for i in range(space_left):
                     self.results.add_item(text=' ', value=0)
+
+        pop.destroy()
 
 
     def eventhandler(self, event, menuw=None):
