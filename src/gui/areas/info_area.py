@@ -37,13 +37,14 @@ __all__ = [ 'InfoArea' ]
 
 # freevo imports
 import util
+import util.tv_util
 
 # gui imports
 from area import Area
 from gui import InfoText
 
 # function calls to get more info from the skin
-function_calls = { 'comingup': util.comingup }
+function_calls = { 'comingup': util.tv_util.comingup }
 
 class InfoArea(Area):
     """
