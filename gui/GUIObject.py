@@ -7,6 +7,10 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/26 09:20:58  dischi
+# Fixed (?) bug when using freevo_runtime. Krister, can you take a look
+# at that?
+#
 # Revision 1.2  2002/08/18 21:50:51  tfmalt
 # o Added support for handling both lists, tupes and separate values on
 #   functions with coordinates (set_size and set_position)
@@ -62,7 +66,7 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 
 import ZIndexRenderer
 
-from gui.Color import *
+from Color import *
 
 DEBUG = 0
 
