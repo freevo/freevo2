@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2002/08/05 00:33:37  outlyer
+# Removed some debugging code I put in.
+#
 # Revision 1.21  2002/08/05 00:30:05  outlyer
 # Fixed the bug with mplayer detecting MP3 files as Encrypted VOBS. We now
 # force the demuxer for audio files, thereby fixing half of my MP3 collection.
@@ -150,7 +153,6 @@ class MPlayer:
         # build mplayer comand
         mpl = config.NICE + " -" + config.MPLAYER_NICE + " " + config.MPLAYER_CMD + ' -vo ' + config.MPLAYER_VO_DEV + \
 	      ' -ao ' +  config.MPLAYER_AO_DEV + ' ' + config.MPLAYER_ARGS_DEF
-	print mpl
 
         if mode == 'video':
 
@@ -189,7 +191,6 @@ class MPlayer:
 
         elif mode == 'audio':
             command = mpl + " " + get_demuxer(filename) + ' "' + filename + '"'
-	    print command
 
 
         else:
