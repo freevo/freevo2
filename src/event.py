@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/28 19:54:23  outlyer
+# REW/FFWD were reversed (REW was going forward, FFWD was going backwards)
+#
 # Revision 1.3  2003/05/28 17:55:15  dischi
 # fixed mixer button names
 #
@@ -305,8 +308,8 @@ AUDIO_EVENTS = {
     'PAUSE'     : PAUSE,
     'LEFT'      : Event(SEEK, arg=-60),
     'RIGHT'     : Event(SEEK, arg=60),
-    'REW'       : Event(SEEK, arg=10),
-    'FFWD'      : Event(SEEK, arg=-10),
+    'REW'       : Event(SEEK, arg=-10),
+    'FFWD'      : Event(SEEK, arg=10),
     'UP'        : PLAYLIST_PREV,
     'DOWN'      : PLAYLIST_NEXT,
     'CH+'       : PLAYLIST_PREV,
