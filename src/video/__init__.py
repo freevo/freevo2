@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/12/29 22:08:54  dischi
+# move to new Item attributes
+#
 # Revision 1.19  2003/12/09 19:43:01  dischi
 # patch from Matthieu Weber
 #
@@ -161,8 +164,8 @@ class PluginInterface(plugin.MimetypePlugin):
             diritem.info = tvinfo[1]
             if not diritem.image:
                 diritem.image = tvinfo[0]
-            if not diritem.xml_file:
-                diritem.xml_file = tvinfo[3]
+            if not diritem.fxd_file:
+                diritem.fxd_file = tvinfo[3]
 
 def hash_fxd_movie_database():
     """
@@ -204,21 +207,23 @@ def hash_fxd_movie_database():
             files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir), 1, '*.fxd', 1)
 
     for info in fxditem.mimetype.parse(None, files, display_type='video'):
-        for i in info.rom_id:
-            fxd_database['id'][i] = info
-        for l in info.rom_label:
-            fxd_database['label'].append((re.compile(l), info))
-        for fo in info.files_options:
-            discset_informations[fo['file-id']] = fo['mplayer-options']
+        if hasattr(info, '__fxd_rom_info__'):
+            for i in info.__fxd_rom_id__:
+                fxd_database['id'][i] = info
+            for l in info.__fxd_rom_label__:
+                fxd_database['label'].append((re.compile(l), info))
+            for fo in info.__fxd_files_options__:
+                discset_informations[fo['file-id']] = fo['mplayer-options']
 
     if config.VIDEO_SHOW_DATA_DIR:
         files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
         for info in fxditem.mimetype.parse(None, files, display_type='video'):
-            k = vfs.splitext(vfs.basename(info.xml_file))[0]
+            k = vfs.splitext(vfs.basename(info.fxd_file))[0]
             tv_show_informations[k] = (info.image, info.info, info.mplayer_options,
-                                       info.xml_file)
-            for fo in info.files_options:
-                discset_informations[fo['file-id']] = fo['mplayer-options']
+                                       info.fxd_file)
+            if hasattr(info, '__fxd_rom_info__'):
+                for fo in info.__fxd_files_options__:
+                    discset_informations[fo['file-id']] = fo['mplayer-options']
             
     _debug_('done',1)
     return 1

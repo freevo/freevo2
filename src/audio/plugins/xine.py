@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/29 22:09:19  dischi
+# move to new Item attributes
+#
 # Revision 1.12  2003/12/13 14:27:19  outlyer
 # Since ChildApp2 defaults to stopping the OSD, stop_osd=0 needs to be defined
 # here or the audio player will try to stop the display and then try to write
@@ -136,23 +139,17 @@ class Xine:
 
         self.item      = item
         self.playerGUI = playerGUI
-        add_args       = ''
+        add_args       = []
         
-        if item.url:
-            filename = item.url
-        else:
-            filename = item.filename
-
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        if filename.startswith('cdda://'):
-            filename = filename.replace('//', '/')
-            add_args += ' cfg:/input.cdda_device:%s' % item.media.devicename
+        url = item.url
+        if url.startswith('cdda://'):
+            url = url.replace('//', '/')
+            add_args.append('cfg:/input.cdda_device:%s' % item.media.devicename)
             
-        command = '%s %s "%s"' % (self.command, add_args, filename)
-        _debug_('Xine.play(): Starting cmd=%s' % command)
-
+        command = self.command.split(' ') + add_args + [ url ]
         self.app = XineApp(command, self)
     
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/12/29 22:08:54  dischi
+# move to new Item attributes
+#
 # Revision 1.52  2003/12/22 13:27:34  dischi
 # patch for better support of fxd files with more discs from Matthieu Weber
 #
@@ -153,14 +156,12 @@ class MPlayer:
         1 = possible, but not good
         0 = unplayable
         """
-        if item.mode == 'dvd' or item.mode == 'vcd':
-            if not item.filename or item.filename == '0':
-                return 1
+        if item.url in ('dvd://', 'vcd://'):
+            return 1
+        print item.mimetype
+        if item.mimetype in config.VIDEO_MPLAYER_SUFFIX:
             return 2
-        if os.path.splitext(item.filename)[1][1:].lower() in \
-               config.VIDEO_MPLAYER_SUFFIX:
-            return 2
-        if item.mode == 'url':
+        if item.network_play:
             return 1
         return 0
     
@@ -176,7 +177,7 @@ class MPlayer:
         url          = item.url
         self.item    = item
 
-        if mode == 'file' and not network_play:
+        if mode == 'file':
             url = item.url[6:]
 
         if url == 'dvd://':
@@ -194,7 +195,7 @@ class MPlayer:
         except UnicodeError:
             _debug_('MPlayer.play(): [non-ASCII data]')
 
-        if mode == 'file' and not os.path.isfile(url) and not network_play:
+        if mode == 'file' and not os.path.isfile(url):
             # This event allows the videoitem which contains subitems to
             # try to play the next subitem
             return '%s\nnot found' % os.path.basename(url)
@@ -231,7 +232,7 @@ class MPlayer:
         if item.selected_subtitle == -1:
             additional_args += [ '-noautosub' ]
 
-        elif item.selected_subtitle and item.mode == 'file':
+        elif item.selected_subtitle and mode == 'file':
             additional_args += [ '-vobsubid', item.selected_subtitle ]
 
         elif item.selected_subtitle:
@@ -243,7 +244,7 @@ class MPlayer:
         if item.deinterlace:
             additional_args += [ '-vop', 'pp=fd' ]
 
-        mode = item.mime_type
+        mode = item.mimetype
         if not config.MPLAYER_ARGS.has_key(mode):
             mode = 'default'
 

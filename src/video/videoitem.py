@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2003/12/29 22:08:54  dischi
+# move to new Item attributes
+#
 # Revision 1.102  2003/12/22 13:27:34  dischi
 # patch for better support of fxd files with more discs from Matthieu Weber
 #
@@ -24,34 +27,6 @@
 #
 # Revision 1.98  2003/11/25 19:01:37  dischi
 # remove the callback stuff from fxd, it was to complicated
-#
-# Revision 1.97  2003/11/24 19:24:59  dischi
-# move the handler for fxd from xml_parser to fxdhandler
-#
-# Revision 1.96  2003/11/23 17:00:25  dischi
-# small change (the diff is mostly indention) needed for the new xml_parser
-#
-# Revision 1.95  2003/11/22 21:23:29  dischi
-# force scan for dvd/vcd title menu
-#
-# Revision 1.94  2003/11/22 20:35:50  dischi
-# use new vfs
-#
-# Revision 1.93  2003/11/22 15:31:34  dischi
-# renamed config.PREFERED_VIDEO_PLAYER to config.VIDEO_PREFERED_PLAYER
-#
-# Revision 1.92  2003/11/21 17:56:50  dischi
-# Plugins now 'rate' if and how good they can play an item. Based on that
-# a good player will be choosen.
-#
-# Revision 1.91  2003/11/16 17:41:05  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.90  2003/11/09 16:24:30  dischi
-# fix subtitle selection
-#
-# Revision 1.89  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -80,7 +55,6 @@ import re
 import md5
 import time
 import copy
-import mmpython
 
 import config
 import util
@@ -89,56 +63,34 @@ import menu
 import configure
 import plugin
 
-from gui.PopupBox import PopupBox
-from gui.AlertBox import AlertBox
-from gui.ConfirmBox import ConfirmBox
-
-from item import Item
+from gui   import PopupBox, AlertBox, ConfirmBox
+from item  import Item
 from event import *
 
 class VideoItem(Item):
-    def __init__(self, filename, parent, info=None, parse=True):
-        info = None
-        create_from_fxd = False
-        
-        if parse and filename:
-            if parent and parent.media:
-                url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                         filename[len(parent.media.mountdir)+1:])
-            else:
-                url = filename
+    def __init__(self, url, parent, info=None, parse=True):
+        Item.__init__(self, parent)
 
-            info = mmpython.parse(url)
+        self.type        = 'video'
+        self.set_url(url, info=parse)
 
-        Item.__init__(self, parent, info)
+        if info:
+            self.info = info
 
-        # fix values
-        self.type  = 'video'
         self.handle_type = 'video'
-
-        self.mode  = 'file'             # file, dvd or vcd
-        self.media_id = ''              # if media == vcd or dvd
-
-        self.files_options = []         # options for specific files of a
-                                        # disc in a disc-set
 
         self.variants = []              # if this item has variants
         self.subitems = []              # if this item has more than one file/track to play
         self.current_subitem = None
 
-        self.subtitle_file = {}         # text subtitles
-        self.audio_file    = {}         # audio dubbing
+        self.subtitle_file     = {}         # text subtitles
+        self.audio_file        = {}         # audio dubbing
 
-        self.item_id         = None
-        self.mplayer_options = ''
-        self.xml_file        = None
-        self.tv_show         = False
+        self.mplayer_options   = ''
+        self.tv_show           = False
 
-        # variables only for VideoItem
-        self.label = ''
-        
-        self.video_width  = 0
-        self.video_height = 0
+        self.video_width       = 0
+        self.video_height      = 0
 
         self.selected_subtitle = None
         self.selected_audio    = None
@@ -146,21 +98,10 @@ class VideoItem(Item):
         self.deinterlace       = 0
         self.elapsed           = 0
         
-        self.possible_player = []
-
-        self.file_id          = ''
-        if parent and parent.media:
-            self.file_id = parent.media.id + filename[len(os.path.join(parent.media.mountdir,"")):]
-
-        self.filename = filename
-        self.id       = filename
-
-        if not self.name:
-            self.name     = util.getname(filename)
-    
+        self.possible_player   = []
 
         # find image for tv show and build new title
-        if config.VIDEO_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
+        if config.VIDEO_SHOW_REGEXP_MATCH(self.name) and not self.network_play and \
                config.VIDEO_SHOW_DATA_DIR:
 
             show_name = config.VIDEO_SHOW_REGEXP_SPLIT(self.name)
@@ -177,24 +118,29 @@ class VideoItem(Item):
                         self.info[i] = tvinfo[1][i]
                     if not self.image:
                         self.image = tvinfo[0]
-                    if not self.xml_file:
-                        self.xml_file = tvinfo[3]
+                    if not self.fxd_file:
+                        self.fxd_file = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
-                from video import discset_informations
-                if discset_informations.has_key(self.file_id):
-                    self.mplayer_options = discset_informations[self.file_id]
 
                 self.tv_show = True
                 self.show_name = show_name
 
-        # find image for this file
-        # check for episode in VIDEO_SHOW_DATA_DIR
-        self.image = util.getimage(os.path.splitext(filename)[0], self.image)
+        # extra infos in discset_informations
+        if parent and parent.media:
+            fid = parent.media.id + \
+                  self.filename[len(os.path.join(parent.media.mountdir,"")):]
+            from video import discset_informations
+            if discset_informations.has_key(fid):
+                self.mplayer_options = discset_informations[fid]
 
-        if parent and hasattr(self.parent, 'xml_file') and not self.xml_file:
-            self.xml_file = self.parent.xml_file
 
-        self.scan(False)
+        
+    def set_url(self, url, info=True):
+        Item.set_url(self, url, info)
+        if url.startswith('dvd://') or url.startswith('vcd://'):
+            self.network_play = False
+            self.mimetype = self.url[:self.url.find('://')].lower()
+            
         
         
     def copy(self, obj):
@@ -208,26 +154,20 @@ class VideoItem(Item):
             self.num_titles        = obj.num_titles
             self.label             = obj.label
             self.tv_show           = obj.tv_show
-            self.id                = obj.id
             
             self.variants          = obj.variants
             self.subitems          = obj.subitems
-            self.files_options     = obj.files_options
             self.current_subitem   = obj.current_subitem
             self.subtitle_file     = obj.subtitle_file
             self.audio_file        = obj.audio_file
-            self.filename          = obj.filename
 
 
 
-    def getattr(self, attr):
+    def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string
         """
-        if attr == 'item_id':
-            if self.item_id:
-                return self.item_id
-            
+        if key == 'item_id':
             if self.media:
                 filename = self.filename[len(self.media.mountdir):]
                 id = 'cd://%s-%s' % (self.media.id, filename)
@@ -235,32 +175,31 @@ class VideoItem(Item):
                 id = 'file://%s' % self.filename
             if self.subitems:
                 for s in self.subitems:
-                    id += s.getattr(attr)
+                    id += s.getattr(key)
             if self.variants:
                 for v in self.variants:
-                    id += v.getattr(attr)
+                    id += v.getattr(key)
                     
-            self.item_id = util.hexify(md5.new(id).digest())
-            return self.item_id
+            return util.hexify(md5.new(id).digest())
         
-        if attr in ('length', 'geometry', 'aspect'):
+        if key in ('length', 'geometry', 'aspect'):
             try:
                 video = self.info.video[0]
-                if attr == 'length':
+                if key == 'length':
                     length = video.length
                     if length / 3600:
                         return '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
                                                   length % 60)
                     else:
                         return '%d:%02d' % (length / 60, length % 60)
-                if attr == 'geometry':
+                if key == 'geometry':
                     return '%sx%s' % (video.width, video.height)
-                if attr == 'aspect':
-                    aspect = getattr(video, attr)
+                if key == 'aspect':
+                    aspect = getattr(video, key)
                     return aspect[:aspect.find(' ')].replace('/', ':')
             except:
                 pass
-        return Item.getattr(self, attr)
+        return Item.__getitem__(self, key)
 
     
     def sort(self, mode=None):
@@ -275,51 +214,15 @@ class VideoItem(Item):
         return self.name
 
 
-    def scan(self, final=True, force=False):
+    # ------------------------------------------------------------------------
+    # actions:
+
+
+    def actions(self):
         """
-        Scan meta info to add some more varibales. This can't be done in
-        __init__ because sometomes filename and other variables are added
-        later.
+        return a list of possible actions on this item.
         """
-        if not force and hasattr(self, '__final_seetings__'):
-           return
 
-        # don't know if we need this in the future
-        if self.mode in ('dvd', 'vcd'):
-            if not self.filename or self.filename == '0':
-                self.url = '%s://' % self.mode
-            else:
-                self.url = '%s://%s' % (self.mode, self.filename)
-        else:
-            if self.filename.find('://') == -1:
-                file = self.filename
-                if self.media_id:
-                    mountdir, file = util.resolve_media_mountdir(self.media_id,file)
-                    if mountdir:
-                        self.url = 'file://' + file
-                    else:
-                        self.url = 'file://' + self.filename
-                else:
-                    self.url = 'file://' + file
-            else:
-                self.url = self.filename
-
-        self.filetype     = self.mode
-        self.network_play = 0
-
-        if self.mode == 'file':
-            if not self.url.startswith('file://'):
-                self.network_play = 1
-            try:
-                self.mime_type = os.path.splitext(self.filename)[1][1:]
-            except:
-                self.mime_type = 'video'
-        else:
-            self.mime_type = self.mode
-
-        if self.mode == 'url':
-            self.network_play = 1
-            
         self.possible_player = []
         for p in plugin.getbyname(plugin.VIDEO_PLAYER, True):
             rating = p.rate(self) * 10
@@ -334,48 +237,33 @@ class VideoItem(Item):
         self.player        = None
         self.player_rating = 0
 
-        if final:
-            self.__final_seetings__ = True
-
-        
-    # ------------------------------------------------------------------------
-    # actions:
-
-
-    def actions(self):
-        """
-        return a list of possible actions on this item.
-        """
-
-        self.scan()
-        
         if not self.possible_player:
             return []
 
         self.player_rating, self.player = self.possible_player[0]
 
-        items = [ (self.play, _('Play')), ]
-        if not self.filename or self.filename == '0':
-            if self.mode == 'dvd':
-                if self.player_rating >= 20:
-                    items = [ (self.play, _('Play DVD')),
-                              ( self.dvd_vcd_title_menu, _('DVD title list') ) ]
-                else:
-                    items = [ ( self.dvd_vcd_title_menu, _('DVD title list') ),
-                              (self.play, _('Play default track')) ]
+        if self.url == 'dvd://':
+            if self.player_rating >= 20:
+                items = [ (self.play, _('Play DVD')),
+                          ( self.dvd_vcd_title_menu, _('DVD title list') ) ]
+            else:
+                items = [ ( self.dvd_vcd_title_menu, _('DVD title list') ),
+                          (self.play, _('Play default track')) ]
                     
-            elif self.mode == 'vcd':
-                if self.player_rating >= 20:
-                    items = [ (self.play, _('Play VCD')),
-                              ( self.dvd_vcd_title_menu, _('VCD title list') ) ]
-                else:
-                    items = [ ( self.dvd_vcd_title_menu, _('VCD title list') ),
-                              (self.play, _('Play default track')) ]
+        elif self.url == 'vcd://':
+            if self.player_rating >= 20:
+                items = [ (self.play, _('Play VCD')),
+                          ( self.dvd_vcd_title_menu, _('VCD title list') ) ]
+            else:
+                items = [ ( self.dvd_vcd_title_menu, _('VCD title list') ),
+                          (self.play, _('Play default track')) ]
+        else:
+            items = [ (self.play, _('Play')) ]
 
+        if self.network_play:
+            items.append((self.play_max_cache, _('Play with maximum cache')))
 
         items += configure.get_items(self)
-        if self.mode == 'file' and self.filename.find('://') > 0:
-            items.append((self.play_max_cache, _('Play with maximum cache')))
             
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, _('Show variants')) ] + items
@@ -386,7 +274,7 @@ class VideoItem(Item):
     def show_variants(self, arg=None, menuw=None):
         if not self.menuw:
             self.menuw = menuw
-        m = menu.Menu(self.name, self.variants, reload_func=None, xml_file=self.xml_file)
+        m = menu.Menu(self.name, self.variants, reload_func=None, fxd_file=self.fxd_file)
         m.item_types = 'video'
         self.menuw.pushmenu(m)
 
@@ -445,8 +333,6 @@ class VideoItem(Item):
         """
         play the item.
         """
-        self.scan()
-        
         self.player_rating, self.player = self.possible_player[0]
         self.parent.current_item = self
 
@@ -494,7 +380,7 @@ class VideoItem(Item):
             return
 
         # normal plackback of one file
-        if self.mode == "file":
+        if self.url.startswith('file://'):
             file = self.filename
             if self.media_id:
                 mountdir, file = util.resolve_media_mountdir(self.media_id,file)
@@ -508,9 +394,9 @@ class VideoItem(Item):
                     return
 
             elif self.media:
-                util.mount(os.path.dirname(self.filename))
+                util.mount(self.dirname)
 
-        elif self.mode == 'dvd' or self.mode == 'vcd':
+        elif self.url.startswith('dvd://') or self.url.startswith('vcd://'):
             if not self.media:
                 media = util.check_media(self.media_id)
                 if media:
@@ -567,34 +453,32 @@ class VideoItem(Item):
 
         # only one track, play it
         if self.num_titles == 1:
-            file = copy.copy(self)
-            file.filename = '1'
-            file.play(menuw = self.menuw)
+            i=copy.copy(self)
+            i.set_url(self.url + '1', False)
+            i.play(menuw = self.menuw)
             return
 
         # build a menu
         items = []
         for title in range(1,self.num_titles+1):
-            file = copy.copy(self)
+            i = copy.copy(self)
             # copy the attributes from mmpython about this track
             if self.info.has_key('tracks'):
-                file.info = self.info.tracks[title-1]
-            file.info_type = 'track'
-            file.filename = '%s' % title
-            file.name = _('Play Title %s') % title
-            file.scan(force=True)
-            items += [file]
+                i.info = self.info.tracks[title-1]
+            i.info_type = 'track'
+            i.set_url(self.url + title, False)
+            i.name = _('Play Title %s') % title
+            items += [i]
 
-        moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)
+        moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.fxd_file)
         moviemenu.item_types = 'video'
         self.menuw.pushmenu(moviemenu)
-        return
 
 
     def settings(self, arg=None, menuw=None):
         if not self.menuw:
             self.menuw = menuw
-        confmenu = configure.get_menu(self, self.menuw, self.xml_file)
+        confmenu = configure.get_menu(self, self.menuw, self.fxd_file)
         self.menuw.pushmenu(confmenu)
         
 

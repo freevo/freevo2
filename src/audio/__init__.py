@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/12/29 22:09:18  dischi
+# move to new Item attributes
+#
 # Revision 1.14  2003/12/08 15:59:39  mikeruelle
 # change cwd to get
 #
@@ -184,11 +187,11 @@ class PluginInterface(plugin.MimetypePlugin):
         a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
 
         a.name     = fxd.getattr(node, 'title', a.name)
-        a.xml_file = fxd.getattr(None, 'filename', '')
+        a.fxd_file = fxd.getattr(None, 'filename', '')
         a.image    = fxd.childcontent(node, 'cover-img')
         a.url      = fxd.childcontent(node, 'url')
         if a.image:
-            a.image = vfs.join(vfs.dirname(a.xml_file), a.image)
+            a.image = vfs.join(vfs.dirname(a.fxd_file), a.image)
 
         a.mplayer_options  = fxd.childcontent(node, 'mplayer_options')
         if fxd.get_children(node, 'player'):

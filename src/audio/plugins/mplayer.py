@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/12/29 22:09:19  dischi
+# move to new Item attributes
+#
 # Revision 1.30  2003/12/13 14:27:19  outlyer
 # Since ChildApp2 defaults to stopping the OSD, stop_osd=0 needs to be defined
 # here or the audio player will try to stop the display and then try to write
@@ -103,7 +106,7 @@ class MPlayer:
         1 = possible, but not good
         0 = unplayable
         """
-        if item.filename.startswith('cdda://'):
+        if item.url.startswith('cdda://'):
             return 1
         return 2
 
@@ -124,30 +127,21 @@ class MPlayer:
         """
         play a audioitem with mplayer
         """
-        if item.url:
-            filename = item.url
-        else:
-            filename = item.filename
-
         self.playerGUI = playerGUI
-        
-        # Is the file streamed over the network?
-        if filename.find('http://') == 0 or filename.find('https://') == 0 or \
-               filename.find('mms://') == 0 or filename.find('rtsp://') == 0:
-            # Yes, trust the given mode
-            network_play = 1
-        else:
-            network_play = 0
+        filename       = vfs.url2filename(item.url)
 
-        if not os.path.isfile(filename) and filename.find('://') == -1:
-            return _('%s\nnot found!') % filename
+        if filename and not os.path.isfile(filename):
+            return _('%s\nnot found!') % item.url
+            
+        if not filename:
+            filename = item.url
             
         # Build the MPlayer command
         mpl = '--prio=%s %s -slave %s' % (config.MPLAYER_NICE,
                                           config.MPLAYER_CMD,
                                           config.MPLAYER_ARGS_DEF)
 
-        if not network_play:
+        if not item.network_play:
             demux = ' %s ' % self.get_demuxer(filename)
         else:
             # Don't include demuxer for network files
@@ -159,10 +153,10 @@ class MPlayer:
         if hasattr(item, 'is_playlist') and item.is_playlist:
             is_playlist = True
             
-        if network_play and filename.endswith('m3u'):
+        if item.network_play and filename.endswith('m3u'):
             is_playlist = True
 
-        if network_play:
+        if item.network_play:
             extra_opts += ' -cache 100'
 
         if hasattr(item, 'reconnect') and item.reconnect:

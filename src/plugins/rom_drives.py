@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/12/29 22:09:38  dischi
+# move to new Item attributes
+#
 # Revision 1.46  2003/12/14 17:15:19  dischi
 # check if CDROM.py is complete
 #
@@ -441,7 +444,7 @@ class Identify_Thread(threading.Thread):
             return
 
         os.close(fd)
-        image = title = movie_info = more_info = xml_file = None
+        image = title = movie_info = more_info = fxd_file = None
 
         if not data:
             # this should never happen
@@ -491,13 +494,12 @@ class Identify_Thread(threading.Thread):
             if movie_info:
                 media.info = copy.copy(movie_info)
             else:
-                media.info = VideoItem('0', None)
+                media.info = VideoItem('', None)
                 if config.OVERLAY_DIR:
                     media.info.image = util.getimage(os.path.join(config.OVERLAY_DIR,
                                                                   'disc-set', media.id))
-
-            media.info.name = title
-            media.info.mode = data.mime[6:]
+            media.info.name  = title
+            media.info.set_url(data.mime[6:] + '://')
             media.info.media = media
 
             media.type  = data.mime[6:]
@@ -605,8 +607,8 @@ class Identify_Thread(threading.Thread):
                         more_info = tvinfo[1]
                         if not image:
                             image = tvinfo[0]
-                        if not xml_file:
-                            xml_file = tvinfo[3]
+                        if not fxd_file:
+                            fxd_file = tvinfo[3]
                         
                 elif (not show_name) and len(mplayer_files) == 1:
                     movie = mplayer_files[0]
@@ -646,8 +648,8 @@ class Identify_Thread(threading.Thread):
             media.info.image = image
         if more_info:
             media.info.info = more_info
-        if xml_file and not media.info.xml_file:
-            media.info.set_xml_file(xml_file)
+        if fxd_file and not media.info.fxd_file:
+            media.info.set_fxd_file(fxd_file)
             
         if len(mplayer_files) == 1:
             util.mount(media.mountdir)
@@ -665,8 +667,8 @@ class Identify_Thread(threading.Thread):
                 media.videoinfo.image = image
             if more_info:
                 media.videoinfo.info = more_info
-            if xml_file:
-                media.videoinfo.xml_file = xml_file
+            if fxd_file:
+                media.videoinfo.fxd_file = fxd_file
                 
         media.info.media = media
         return

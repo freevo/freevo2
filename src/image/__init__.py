@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/29 22:09:19  dischi
+# move to new Item attributes
+#
 # Revision 1.12  2003/12/13 18:18:02  dischi
 # allow slideshows with relative path, fix background music
 #
@@ -194,10 +197,10 @@ class PluginInterface(plugin.MimetypePlugin):
         pl.autoplay = True
 
         pl.name     = fxd.getattr(node, 'title')
-        pl.xml_file = fxd.getattr(None, 'filename', '')
+        pl.fxd_file = fxd.getattr(None, 'filename', '')
         pl.image    = fxd.childcontent(node, 'cover-img')
         if pl.image:
-            pl.image = vfs.join(vfs.dirname(pl.xml_file), pl.image)
+            pl.image = vfs.join(vfs.dirname(pl.fxd_file), pl.image)
 
 
         # background music

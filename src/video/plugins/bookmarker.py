@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/29 22:08:54  dischi
+# move to new Item attributes
+#
 # Revision 1.6  2003/12/15 03:45:29  outlyer
 # Added onscreen notification of bookmark being added via mplayer's
 # osd_show_text... older versions of mplayer will ignore the command so
@@ -152,7 +155,7 @@ class PluginInterface(plugin.ItemPlugin):
             items.append(file)
 
         if items:
-            moviemenu = menu.Menu(self.item.name, items, xml_file=self.item.xml_file)
+            moviemenu = menu.Menu(self.item.name, items, fxd_file=self.item.fxd_file)
             menuw.pushmenu(moviemenu)
         return
 

@@ -96,8 +96,10 @@ class PluginInterface(plugin.ItemPlugin):
 
     def queue_file(self,arg=None, menuw=None):
         if not self.playlist_handle:
-            self.playlist_handle = open(('%s/%s.m3u' % (self.playlist_folder, time.strftime(self.naming))),'w+')
-        self.playlist_handle.write('%s\n' % self.item.filename)
+            self.playlist_handle = open(('%s/%s.m3u' % (self.playlist_folder,
+                                                        time.strftime(self.naming))),'w+')
+        for f in self.item.files.get():
+            self.playlist_handle.write('%s\n' % f)
         self.playlist_handle.flush()
         rc.post_event(Event(OSD_MESSAGE, arg='Queued Track'))
         return

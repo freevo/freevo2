@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/12/29 22:09:19  dischi
+# move to new Item attributes
+#
 # Revision 1.22  2003/10/28 18:16:26  dischi
 # move amazon.py to util
 #
@@ -173,23 +176,26 @@ class PluginInterface(plugin.ItemPlugin):
                                'imdb_search_or_cover_search') ]
                 else:
                     if config.DEBUG:
-                        print _( "WARNING" ) + ": "+ _( "Plugin 'coversearch' was disabled for this item! " \
-                                                        "'coversearch' needs an item with " \
-                                                        "Artist and Album (if it's a mp3 or ogg) or " \
-                                                        "Title (if it's a cd track) to be able to search. "  \
-                                                        "So you need a file with a ID3 tag (mp3) or an Ogg Info. "  \
-                                                        "Maybe you must fix this file (%s) tag?" ) % item.filename 
+                        print _( "WARNING" ) + ": "+\
+                              _( "Plugin 'coversearch' was disabled for this item! " \
+                                 "'coversearch' needs an item with " \
+                                 "Artist and Album (if it's a mp3 or ogg) or " \
+                                 "Title (if it's a cd track) to be able to search. "  \
+                                 "So you need a file with a ID3 tag (mp3) or an Ogg Info. "  \
+                                 "Maybe you must fix this file (%s) tag?" ) % item.filename 
             except KeyError:
                 if config.DEBUG:
-                    print _( "WARNING" ) + ": " + _( "Plugin 'coversearch' was disabled for this item! " \
-                                                     "'coversearch' needs an item with " \
-                                                     "Artist and Album (if it's a mp3 or ogg) or " \
-                                                     "Title (if it's a cd track) to be able to search. " \
-                                                     "So you need a file with a ID3 tag (mp3) or an Ogg Info. " \
-                                                     "Maybe you must fix this file (%s) tag?" ) % item.filename
+                    print _( "WARNING" ) + ": " +\
+                          _( "Plugin 'coversearch' was disabled for this item! " \
+                             "'coversearch' needs an item with " \
+                             "Artist and Album (if it's a mp3 or ogg) or " \
+                             "Title (if it's a cd track) to be able to search. " \
+                             "So you need a file with a ID3 tag (mp3) or an Ogg Info. " \
+                             "Maybe you must fix this file (%s) tag?" ) % item.filename
             except AttributeError:
                 if config.DEBUG:
-                    print _( "WARNING" ) + ": " + _( "Unknown CD, cover searching is disabled" )
+                    print _( "WARNING" ) + ": " +\
+                          _( "Unknown CD, cover searching is disabled" )
         return []
 
 

@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/12/29 22:08:55  dischi
+# move to new Item attributes
+#
 # Revision 1.32  2003/12/10 19:47:49  dischi
 # make it possible to bypass version checking
 #
@@ -28,34 +31,6 @@
 #
 # Revision 1.29  2003/12/07 08:32:14  dischi
 # make keybindings work for files and urls
-#
-# Revision 1.28  2003/12/06 16:25:45  dischi
-# support for type=url and <playlist> and <player>
-#
-# Revision 1.27  2003/11/30 19:41:57  dischi
-# enhance interlacing, needs xine cvs to work as it should
-#
-# Revision 1.26  2003/11/29 18:37:30  dischi
-# build config.VIDEO_SUFFIX in config on startup
-#
-# Revision 1.25  2003/11/28 20:08:59  dischi
-# renamed some config variables
-#
-# Revision 1.24  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.23  2003/11/22 21:23:55  dischi
-# fix dvd title playing
-#
-# Revision 1.22  2003/11/22 15:57:47  dischi
-# cleanup
-#
-# Revision 1.21  2003/11/21 17:56:50  dischi
-# Plugins now 'rate' if and how good they can play an item. Based on that
-# a good player will be choosen.
-#
-# Revision 1.20  2003/11/09 12:01:00  dischi
-# add subtitle selection and osd info support for xine (needs current xine-ui cvs
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -140,6 +115,7 @@ class PluginInterface(plugin.Plugin):
         plugin.register(Xine(type, config.XINE_VERSION), plugin.VIDEO_PLAYER, True)
 
 
+
 class Xine:
     """
     the main class to control xine
@@ -167,19 +143,16 @@ class Xine:
         1 = possible, but not good
         0 = unplayable
         """
-        if item.mode == 'dvd':
+        if item.url.startswith('dvd://'):
             return 2
-        if item.mode == 'vcd':
-            if self.xine_version > 922:
-                if not item.filename or item.filename == '0':
-                    return 2
-                return 0
-            else:
-                return 0
-        if os.path.splitext(item.filename)[1][1:].lower() in \
-               config.VIDEO_XINE_SUFFIX:
+        if item.url.startswith('vcd://'):
+            if self.xine_version > 922 and item.url == 'vcd://':
+                return 2
+            return 0
+
+        if item.mimetype in config.VIDEO_XINE_SUFFIX:
             return 2
-        if item.mode == 'url':
+        if item.network_play:
             return 1
         return 0
     

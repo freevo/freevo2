@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/12/29 22:08:54  dischi
+# move to new Item attributes
+#
 # Revision 1.29  2003/12/07 19:44:14  dischi
 # bugfix
 #
@@ -116,8 +119,8 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
 
-        if item.type == 'video' and (not item.xml_file or \
-                                     item.xml_file.endswith('folder.fxd')):
+        if item.type == 'video' and (not item.fxd_file or \
+                                     item.fxd_file.endswith('folder.fxd')):
 
             if item.mode == 'file':
                 self.disc_set = False

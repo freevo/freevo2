@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/12/29 22:09:18  dischi
+# move to new Item attributes
+#
 # Revision 1.42  2003/12/12 19:20:46  dischi
 # use util functions to get the image
 #
@@ -58,7 +61,6 @@ import rc
 
 from player import PlayerGUI
 from item import Item
-import mmpython
 
 
 class AudioItem(Item):
@@ -66,25 +68,15 @@ class AudioItem(Item):
     This is the common class to get information about audiofiles.
     """
     
-    def __init__(self, file, parent, name = None, scan = True):
-        if scan:
-            if parent and parent.media:
-                url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                         file[len(parent.media.mountdir)+1:])
-            else:
-                url = file
-            Item.__init__(self, parent, mmpython.parse(url))
-        else:
-            Item.__init__(self, parent)
-            
-        self.filename   = file[:]
-        self.url        = None
+    def __init__(self, url, parent, name=None, scan=True):
+        Item.__init__(self, parent, info=scan)
+
+        self.type       = 'audio'
+        self.set_url(url, info=scan)
+
         if name:
             self.name   = name
-        elif not self.name:
-            self.name   = util.getname(file)
-        self.type       = 'audio'
-        
+
         self.start      = 0
         self.elapsed    = 0
         self.remain     = 0
@@ -92,19 +84,16 @@ class AudioItem(Item):
         self.pause      = 0
 	self.valid	= 1
 
+        self.mplayer_options = ''
+            
         try:
             self.length = self.info['length']
         except:
             self.length = 0
             
-        self.image = util.getimage(os.path.dirname(file)+'/cover', self.image)
-
-        # Allow per mp3 covers. As per Chris' request ;)
-        self.image = util.getimage(file[:file.rfind('.')], self.image)
-
         # Let's try to find if there is any image in the current directory
         # that could be used as a cover
-        if file and not self.image and not file.find('://') != -1:
+        if self.filename and not self.image:
             images = ()
             covers = ()
             files =()
@@ -116,18 +105,18 @@ class AudioItem(Item):
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
             try:
-                files = os.listdir(os.path.dirname(file))
+                files = os.listdir(self.dirname)
             except OSError:
                 print "oops, os.listdir() error"
                 traceback.print_exc()
             images = filter(image_filter, files)
             image = None
             if len(images) == 1:
-                image = os.path.join(os.path.dirname(file), images[0])
+                image = os.path.join(self.dirname, images[0])
             elif len(images) > 1:
                 covers = filter(cover_filter, images)
                 if covers:
-                    image = os.path.join(os.path.dirname(file), covers[0])
+                    image = os.path.join(self.dirname, covers[0])
             self.image = image
 
 
@@ -145,7 +134,8 @@ class AudioItem(Item):
             self.done       = obj.done
             self.pause      = obj.pause
             self.valid	    = obj.valid
-            self.url        = obj.url
+
+            self.mplayer_options = obj.mplayer_options
 
 
 
@@ -154,24 +144,25 @@ class AudioItem(Item):
         Returns the string how to sort this item
         """
         if mode == 'date':
-            return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
-        return self.filename
+            if self.filename:
+                return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
+        return self.url
 
 
-    def getattr(self, attr):
+    def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string
         """
-        if attr  == 'length' and self.length:
+        if key  == 'length' and self.length:
             # maybe the length was wrong
             if self.length < self.elapsed:
                 self.length = self.elapsed
             return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
 
-        if attr  == 'elapsed':
+        if key  == 'elapsed':
             return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
             
-        return Item.getattr(self, attr)
+        return Item.__getitem__(self, key)
 
    
     # ----------------------------------------------------------------------------

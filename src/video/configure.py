@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/12/29 22:08:54  dischi
+# move to new Item attributes
+#
 # Revision 1.19  2003/12/01 20:09:24  dischi
 # only show deinterlace when it makes sense
 #
@@ -59,7 +62,7 @@ import plugin
 import re
 
 
-current_xml_file = None
+current_fxd_file = None
 
 #
 # Dummy for playing the movie
@@ -80,7 +83,7 @@ def audio_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 def audio_selection_menu(arg=None, menuw=None):
-    global current_xml_file
+    global current_fxd_file
     items = []
     for a in arg.info['audio']:
         if not a['id']:
@@ -90,7 +93,7 @@ def audio_selection_menu(arg=None, menuw=None):
         txt = '%s (channels=%s, codec=%s, id=%s)' % (a['language'], a['channels'],
                                                      a['codec'], a['id'])
         items.append(menu.MenuItem(txt, audio_selection, (arg, a['id'])))
-    moviemenu = menu.Menu(_('Audio Menu'), items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('Audio Menu'), items, fxd_file=current_fxd_file)
     menuw.pushmenu(moviemenu)
         
 
@@ -103,13 +106,13 @@ def subtitle_selection(arg=None, menuw=None):
     menuw.back_one_menu()
 
 def subtitle_selection_menu(arg=None, menuw=None):
-    global current_xml_file
+    global current_fxd_file
     items = []
 
     items += [ menu.MenuItem(_('no subtitles'), subtitle_selection, (arg, -1)) ]
     for s in range(len(arg.info['subtitles'])):
         items.append(menu.MenuItem(arg.info['subtitles'][s], subtitle_selection, (arg, s)))
-    moviemenu = menu.Menu(_('Subtitle Menu'), items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('Subtitle Menu'), items, fxd_file=current_fxd_file)
     menuw.pushmenu(moviemenu)
 
         
@@ -122,12 +125,12 @@ def chapter_selection(menuw=None, arg=None):
     play_movie(menuw=menuw, arg=arg)
     
 def chapter_selection_menu(arg=None, menuw=None):
-    global current_xml_file
+    global current_fxd_file
     items = []
     for c in range(1, arg.info['chapters']):
         items += [ menu.MenuItem(_('Play chapter %s') % c, chapter_selection,
                                  (arg, ' -chapter %s' % c)) ]
-    moviemenu = menu.Menu(_('Chapter Menu'), items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('Chapter Menu'), items, fxd_file=current_fxd_file)
     menuw.pushmenu(moviemenu)
 
 
@@ -184,10 +187,10 @@ def get_items(item):
     return items
 
         
-def get_menu(item, menuw, xml_file):
-    global current_xml_file
-    current_xml_file = xml_file
+def get_menu(item, menuw, fxd_file):
+    global current_fxd_file
+    current_fxd_file = fxd_file
 
     items = get_items(item) + [ menu.MenuItem(_('Play'), play_movie, (item, '')) ]
-    return menu.Menu(_('Config Menu'), items, xml_file=xml_file)
+    return menu.Menu(_('Config Menu'), items, fxd_file=fxd_file)
     

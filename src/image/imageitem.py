@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/12/29 22:09:19  dischi
+# move to new Item attributes
+#
 # Revision 1.17  2003/12/10 19:08:43  dischi
 # no need for the eventhandler anymore
 #
@@ -55,33 +58,26 @@ from event import *
 
 
 class ImageItem(Item):
-    def __init__(self, filename, parent, name = None, duration = 0):
-        if parent and parent.media:
-            url = 'cd://%s:%s:%s' % (parent.media.devicename, parent.media.mountdir,
-                                     filename[len(parent.media.mountdir)+1:])
-        else:
-            url = filename
+    def __init__(self, url, parent, name = None, duration = 0):
+        Item.__init__(self, parent, True)
 
-        Item.__init__(self, parent, mmpython.parse(url))
         self.type     = 'image'
-        self.filename = filename
-        self.image    = filename
+        self.set_url(url)
+        
+        self.image    = self.filename
         self.duration = duration
+        self.rotation = 0
         
         # set name
         if name:
             self.name = name
-        elif not self.name:
-            self.name = util.getname(filename)
-
-        self.rotation     = 0
 
         
-    def getattr(self, attr):
+    def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string
         """
-        if attr in [ "geometry" ]:
+        if key in [ "geometry" ]:
             try:
                 image = self.info
                 if attr == 'geometry':
@@ -90,12 +86,12 @@ class ImageItem(Item):
             except:
                 pass
             
-        return Item.getattr(self, attr)
+        return Item.__getitem__(self, key)
         
 
     def copy(self, obj):
         """
-        Special copy value VideoItems
+        Special copy value
         """
         Item.copy(self, obj)
         if obj.type == 'image':
