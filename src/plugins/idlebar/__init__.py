@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/31 14:41:55  dischi
+# make it possible that the detachbar draws inside the idlebar
+#
 # Revision 1.9  2004/01/30 19:14:53  dischi
 # add logo plugin
 #
@@ -125,7 +128,9 @@ class PluginInterface(plugin.DaemonPlugin):
             add_x = p.draw((type, object), x, osd)
             if add_x:
                 x += add_x + 20
+        self.free_space = x
 
+        
     def eventhandler(self, event, menuw=None):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
@@ -193,6 +198,7 @@ class clock(IdleBarPlugin):
                        ( osd.x + osd.width - w -pad_x ),
                        ( osd.y + ( idlebar_height - h ) / 2 ),
                        ( w + 1 ), h , 'right', 'center')
+        self.clock_left_position = osd.x + osd.width - w - pad_x
         return 0
     
 

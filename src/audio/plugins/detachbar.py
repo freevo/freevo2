@@ -146,18 +146,28 @@ class PluginInterface(plugin.DaemonPlugin):
                 origin = self.x
                 width  = self.w
 
-            osd.drawroundbox(origin, self.y, width, osd.height, (0xf0000000L, 1, 0xb0000000L, 10))
+            if not self.idlebar:
+                osd.drawroundbox(origin, self.y, width, osd.height,
+                                 (0xf0000000L, 1, 0xb0000000L, 10))
             
-            if self.image: osd.draw_image(self.image, (origin-5,self.y,50,50))
-
+            if self.image:
+                osd.draw_image(self.image, (origin+5, self.y, 50, 50))
+                    
             y = self.t_y
         
             for r in self.render:
-                osd.write_text( r, font, None, self.t_x, y, self.t_w, self.font_h, 'center', 'center')
+                osd.write_text( r, font, None, self.t_x, y, self.t_w,
+                                self.font_h, 'center', 'center')
                 y+=self.font_h
 
-            progress = '%s/%s' % ( self.formattime(self.player.item.elapsed), self.formattime(self.player.item.length))
-            osd.write_text( progress, font, None, self.t_x, y, self.t_w, self.font_h , 'center', 'center')
+            if self.player.item.length:
+                progress = '%s/%s' % ( self.formattime(self.player.item.elapsed),
+                                       self.formattime(self.player.item.length))
+            else:
+                progress = '%s' % self.formattime(self.player.item.elapsed)
+
+            osd.write_text( progress, font, None, self.t_x, y,
+                            self.t_w, self.font_h , 'center', 'center')
 
         return 0
    
@@ -192,6 +202,21 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         sizecalcs is not necessery on every pass
         """
+        if not hasattr(self, 'idlebar'):
+            self.idlebar = plugin.getbyname('idlebar')
+            if self.idlebar:
+                self.idlebar_max = osd.width + osd.x
+                for p in plugin.get('idlebar'):
+                    if hasattr(p, 'clock_left_position'):
+                        self.idlebar_max = p.clock_left_position
+
+                if self.idlebar_max - self.idlebar.free_space < 250:
+                    _debug_('free space in idlebar to small, using normal detach')
+                    self.idlebar = None
+                    
+            
+        pad_internal = 5 # internal padding for box vs text
+
         if self.calculate:
             self.calculate = False
             self.font_h = font.font.height
@@ -199,7 +224,6 @@ class PluginInterface(plugin.DaemonPlugin):
             total_width = osd.width + 2*osd.x
             total_height = osd.height + 2*osd.y
             pad = 10 # padding for safety (overscan may not be 100% correct)
-            pad_internal = 5 # internal padding for box vs text
             bar_height = self.font_h
             bar_width = 0
     
@@ -213,6 +237,17 @@ class PluginInterface(plugin.DaemonPlugin):
             self.t_y = self.y + pad_internal
             self.t_x = self.x + pad_internal
             self.t_w = bar_width + 5 # incase of shadow
+
+        if self.idlebar:
+            self.y = osd.y + 5
+            self.t_y = self.y
+            if self.image:
+                self.x = self.idlebar.free_space + 70
+            else:
+                self.x = self.idlebar.free_space
+            self.t_x = self.x
+            self.t_w = min(self.t_w, self.idlebar_max - self.x - 30)
+
             
     def setPoll(self,interval):
         """
