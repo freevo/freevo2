@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/03/30 17:42:03  dischi
+# image.fxd is no real skin
+#
 # Revision 1.44  2003/03/30 14:13:23  dischi
 # (listing.py from prev. checkin has the wrong log message)
 # o tvlisting now has left/right items and the label width is taken from the
@@ -364,7 +367,10 @@ class Skin:
             skin = os.path.join(d, os.path.basename(d)+'.fxd')
             if os.path.isfile(skin):
                 skin_files += [ skin ]
-                
+
+        # image is not usable stand alone
+        skin_files.remove('skins/xml/type1/image.fxd')
+        
         for skin in skin_files:
             name  = os.path.splitext(os.path.basename(skin))[0]
             if os.path.isfile('%s.png' % os.path.splitext(skin)[0]):
