@@ -59,11 +59,14 @@
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-FREEVO_CONF_VERSION = 1.0
+FREEVO_CONF_VERSION = 1.1
 LOCAL_CONF_VERSION  = 2.0
 
 # Description of changes in each new version
-FREEVO_CONF_CHANGES = [] # None yet
+FREEVO_CONF_CHANGES = [
+    (1.1,
+     '''Added MPLAYER_ARGS_AUDIOCD for aido cd playback settings.'''),]
+
 LOCAL_CONF_CHANGES = [
     (1.1,
      '''ROM_DRIVES are autodetected if left empty.
@@ -457,6 +460,7 @@ MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
 MPLAYER_ARGS_MPG     = '-cache 5000 '
 MPLAYER_ARGS_TVVIEW  = '-nocache'
 MPLAYER_ARGS_DVDNAV  = '-dvdnav'
+MPLAYER_ARGS_AUDIOCD = '-cache 500 -cdda speed=1'
 MPLAYER_USE_WID      = 1
 
 #
