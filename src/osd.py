@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.97  2003/10/18 09:42:13  dischi
+# don't start osd for helpers
+#
 # Revision 1.96  2003/10/04 18:37:28  dischi
 # i18n changes and True/False usage
 #
@@ -207,6 +210,10 @@ _singleton = None
 def get_singleton():
     global _singleton
 
+    # don't start osd for helpers
+    if config.HELPER:
+        return
+    
     # One-time init
     if _singleton == None:
         _singleton = util.SynchronizedObject(OSD())
