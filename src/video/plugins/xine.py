@@ -17,12 +17,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/06/19 17:21:52  dischi
+# only set app.mode to valid events
+#
 # Revision 1.41  2004/05/02 08:55:52  dischi
 # dvd as .iso support
-#
-# Revision 1.40  2004/02/19 04:57:58  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
 #
 # Revision 1.39  2004/02/06 19:29:06  dischi
 # fix/cleanup dvd on hd handling
@@ -189,9 +188,9 @@ class Xine:
         play a dvd with xine
         """
         self.item     = item
-        self.app_mode = item.mode
-
-        if item.mode in ('file', 'url'):
+        if config.EVENTS.has_key(item.mode):
+            self.app_mode = item.mode
+        else:
              self.app_mode = 'video'
 
         if plugin.getbyname('MIXER'):
