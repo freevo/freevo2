@@ -9,17 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.30  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.29  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.28  2003/09/01 19:46:02  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.27  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
+# Revision 1.31  2003/11/21 11:46:51  dischi
+# blend one image to the next, better rotation support
 #
 #
 # -----------------------------------------------------------------------
@@ -50,12 +41,14 @@ import Image
 import signal
 import os
 import time
+import plugin
 
 import config # Configuration file. 
 import osd    # The OSD class, used to communicate with the OSD daemon
 import event as em
 import objectcache
 import rc
+import pygame
 
 from gui.GUIObject import GUIObject
 from gui.AlertBox import AlertBox
@@ -88,11 +81,11 @@ class ImageViewer(GUIObject):
                            str(em.IMAGE_ZOOM_GRID6):6, str(em.IMAGE_ZOOM_GRID7):7,
                            str(em.IMAGE_ZOOM_GRID8):8, str(em.IMAGE_ZOOM_GRID9):9 }
 
-        self.slideshow = TRUE  # currently in slideshow mode
-        self.alertbox  = None  # AlertBox active
-        self.app_mode  = 'image'
+        self.slideshow   = TRUE  # currently in slideshow mode
+        self.alertbox    = None  # AlertBox active
+        self.app_mode    = 'image'
         self.bitmapcache = objectcache.ObjectCache(3, desc='viewer')
-        
+        self.last_image  = (None, None)
         
     def view(self, item, zoom=0, rotation=0):
         filename = item.filename
@@ -206,6 +199,28 @@ class ImageViewer(GUIObject):
         x = (osd.width - new_w) / 2
         y = (osd.height - new_h) / 2
         
+        last_image = self.last_image[1]
+
+        if last_image and self.last_image[0] != item and config.IMAGEVIEWER_BLEND_SPEED:
+            i1 = osd.zoomsurface(last_image[0], last_image[3], last_image[4],
+                                 last_image[5], last_image[6], last_image[7],
+                                 rotation = last_image[8]).convert()
+            i2 = osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
+                                 rotation = self.rotation).convert()
+            screen = osd.screen.convert()
+            
+            for i in range(1, ((255-config.IMAGEVIEWER_BLEND_SPEED) /
+                               config.IMAGEVIEWER_BLEND_SPEED)):
+                i1.set_alpha(255 - (i * config.IMAGEVIEWER_BLEND_SPEED))
+                i2.set_alpha(i * config.IMAGEVIEWER_BLEND_SPEED)
+                screen.fill((0,0,0,0))
+                screen.blit(i1, (last_image[1], last_image[2]))
+                screen.blit(i2, (x, y))
+                osd.screen.blit(screen, (0,0))
+                if plugin.getbyname('osd'):
+                    plugin.getbyname('osd').draw(('osd', None), osd)
+                osd.update()
+
         osd.clearscreen(color=osd.COL_BLACK)
         osd.drawsurface(image, x, y, scale, bbx, bby, bbw, bbh,
                        rotation = self.rotation)
@@ -213,6 +228,9 @@ class ImageViewer(GUIObject):
         # update the OSD
         self.drawosd()
 
+        if plugin.getbyname('osd'):
+            plugin.getbyname('osd').draw(('osd', None), osd)
+            
         # draw
         osd.update()
 
@@ -221,10 +239,14 @@ class ImageViewer(GUIObject):
             signal.signal(signal.SIGALRM, self.signalhandler)
             signal.alarm(self.fileitem.duration)
 
+        self.last_image  = (item, (image, x, y, scale, bbx, bby, bbw, bbh,
+                                   self.rotation))
         return None
 
 
-    
+    def redraw(self):
+        self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
+        
     def cache(self, fileitem):
         # cache the next image (most likely we need this)
         osd.loadbitmap(fileitem.filename, cache=self.bitmapcache)
@@ -232,6 +254,7 @@ class ImageViewer(GUIObject):
 
     def signalhandler(self, signum, frame):
         if rc.app() == self.eventhandler and self.slideshow:
+            self.last_image  = None, None
             rc.app(None)
             self.eventhandler(em.PLAY_END)
 
@@ -252,6 +275,7 @@ class ImageViewer(GUIObject):
             return TRUE
         
         elif event == em.STOP:
+            self.last_image  = None, None
             rc.app(None)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
@@ -267,37 +291,12 @@ class ImageViewer(GUIObject):
             
         # rotate image
         elif event == em.IMAGE_ROTATE:
-            osd.clearscreen(color=osd.COL_BLACK)
-
             if event.arg == 'left':
                 self.rotation = (self.rotation + 270) % 360
             else:
                 self.rotation = (self.rotation + 90) % 360
-
-
-            image = Image.open(self.filename)
-
-            if self.rotation % 180:
-                height, width = image.size
-            else:
-                width, height = image.size
-
-            scale_x = scale_y = 1.0
-            if width > osd.width: scale_x = float(osd.width) / width
-            if height > osd.height: scale_y = float(osd.height) / height
-
-            scale = min(scale_x, scale_y)
-
-            new_w, new_h = int(scale*width), int(scale*height)
-
-	    self.zoom = 0
-
-            osd.drawbitmap(self.filename, (osd.width-new_w) / 2, (osd.height-new_h) / 2,
-                           scaling=scale, rotation=self.rotation)
-
-            if self.osd_mode:
-                self.drawosd()
-            osd.update()
+            self.fileitem.rotation = self.rotation
+            self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
             return TRUE
 
         # print image information
