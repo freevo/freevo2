@@ -111,7 +111,7 @@ def cwd(arg=None, menuw=None):
         number += 1
 
         
-    imagemenu = menu.Menu('IMAGE MENU', items)
+    imagemenu = menu.Menu('IMAGE MENU', items, dir=dir)
     menuw.pushmenu(imagemenu)
 
 
