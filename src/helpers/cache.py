@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/03/13 22:36:16  dischi
+# do not remove num_ infos we already have
+#
 # Revision 1.28  2004/02/27 20:41:38  dischi
 # better rebuild
 #
@@ -330,11 +333,6 @@ def create_metadata():
 
         # create the DirItems
         d = directory.DirItem(s, None)
-
-        # remove all infos starting with 'num_' to force rebuild
-        for k in copy.copy(d.info.metadata):
-            if k.startswith('num_'):
-                d.info.delete(k)
 
         # rebuild metainfo
         d.create_metainfo()
