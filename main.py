@@ -4,6 +4,11 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2002/10/01 13:46:29  dischi
+# Added signal handler for SIGTERM.
+# Now freevo reacts on "kill [-15] ..." for a controlled shutdown
+# (osd.shutdown to restore the video modes etc.)
+#
 # Revision 1.69  2002/09/29 19:57:59  dischi
 # Added SHUTDOWN_SYS_CMD to freevo_config to set the shutdown command
 #
@@ -147,6 +152,7 @@ import videogame      # The VideoGame Module
 import mame           # The Mame Module
 
 import identifymedia
+import signal
 
 DEBUG = 1 # Set to 1 for debug output
 TRUE  = 1
@@ -426,6 +432,18 @@ class RemovableMedia:
         return
     
 
+def signal_handler(sig, frame):
+    if sig == signal.SIGTERM:
+        osd.clearscreen(color=osd.COL_BLACK)
+        osd.shutdown() # SDL must be shutdown to restore video modes etc
+
+        # XXX kludge to shutdown the runtime version (no linker)
+        os.system('killall -9 freevo_rt 2&> /dev/null') 
+        os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
+        # XXX Kludge to shutdown if started with "python main.py"
+        os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
+
+    
 #
 # Main init
 #
@@ -455,6 +473,8 @@ def main_func():
                                                   # killed by this. 
                                                   # If I'm the only one, add this:
                                                   # ...-9 %s... ' % config.MPLAYER_CMD)
+
+    signal.signal(signal.SIGTERM, signal_handler)
 
     # Start identifymedia thread
     im = identifymedia.Identify_Thread()
