@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/20 22:48:25  gsbarbieri
+# Try-Except to avoid crashes + MAME items handling
+#
 # Revision 1.4  2003/08/04 20:30:33  gsbarbieri
 # Added some clauses to avoid exceptions.
 #
@@ -95,6 +98,7 @@ menu_info = {
                 ( "date", "Date: %s" ),
                 ( "description", "Description: %s" ) ],
     "playlist" : [ ( "len(playlist)", "%s items" ) ],
+    "mame" : [ ( "description", "Description: %s" ) ],
     "unknow" : [ ]
     }
 # menu_strinfo: will be passed to time.strinfo() and added to the end of info (after menu_info)
@@ -106,6 +110,7 @@ menu_strinfo = {
     "image" : None,
     "dir" : None,
     "playlist" : None,
+    "mame" : None,
     "unknow" : None
     }
 
@@ -412,9 +417,9 @@ class PluginInterface( plugin.DaemonPlugin ):
                 typeinfo = menu.selected.getattr( 'type' )
 
             # get info:
-            if menu.selected.type:
+            if menu.selected.type and menu_info.has_key( menu.selected.type ):
                 info = get_info( menu.selected, menu_info[ menu.selected.type ] )
-                if menu_strinfo[ menu.selected.type ]:
+                if menu.strinfo.has_key( menu.selected.type ) and menu_strinfo[ menu.selected.type ]:
                     if info:
                         info += sep_str
                     info += time.strftime( menu_strinfo[ menu.selected.type ] )
