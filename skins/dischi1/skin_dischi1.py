@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/03/05 19:20:47  dischi
+# cleanip
+#
 # Revision 1.29  2003/03/04 22:46:33  dischi
 # VERY fast now (IMHO as fast as we can get it). There are some cleanups
 # necessary, but it's working. area.py only blits the parts of the screen
@@ -443,15 +446,12 @@ class Skin:
             menu.item_types = 'main'
             
         self.screen.clear()
-        for a in self.area_names:
-            area = eval('self.%s_area' % a)
-            area.prepare(settings, menuw, self.force_redraw)
-
-        self.screen.show()
 
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area.draw()
+            area.draw(settings, menuw, self.force_redraw)
+
+        self.screen.show(self.force_redraw)
 
         osd.update()
         self.force_redraw = FALSE
