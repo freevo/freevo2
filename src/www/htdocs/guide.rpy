@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/06 17:16:55  gsbarbieri
+# Make programs have same width and some enhancements to the CSS.
+#
 # Revision 1.11  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -184,7 +187,7 @@ class GuideResource(FreevoResource):
         fv.tableRowClose()
         fv.tableClose()
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1"')
+        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" cols=\"%d\" width="100%%"' % ( n_cols + 1) )
 
         showheader = 0
         for chan in guide.chan_list:
@@ -218,7 +221,7 @@ class GuideResource(FreevoResource):
             c_left = n_cols
 
             if not chan.programs:
-                fv.tableCell('&lt;&lt; NO DATA &gt;&gt;', 'class="program" colspan="%s"' % n_cols)
+                fv.tableCell('&lt;&lt; NO DATA &gt;&gt;', 'class="programnodata" colspan="%s"' % n_cols)
 
             for prog in chan.programs:
                 if prog.stop > mfrguidestart and \
@@ -275,7 +278,11 @@ class GuideResource(FreevoResource):
                         pops += '    </table>\n'
                         pops += '  </div>\n'
                         pops += '</div>\n'
-                        fv.tableCell(cell, 'class="'+status+'" onclick="showPop(\'%s\', this)" colspan="%s"' % (popid, colspan))
+                        style = ''
+                        if colspan == n_cols:
+                            style += 'text-align: center; '
+                        
+                        fv.tableCell(cell, 'class="'+status+'" onclick="showPop(\'%s\', this)" colspan="%s" style="%s"' % (popid, colspan, style))
                         now += INTERVAL*colspan
                         c_left -= colspan
 

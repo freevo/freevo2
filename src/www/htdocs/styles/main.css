@@ -16,7 +16,8 @@ A:visited {
 TD.tablelink { 
     background: #2A577E; 
     color: white; 
-    text-align: left 
+    text-align: left;
+    cursor: pointer;
 }
 
 TD.tablelink:hover { 
@@ -28,7 +29,9 @@ TD.channel {
     background: #0B1C52; 
     color: white; 
     font-weight: bold; 
-    text-align: center 
+    text-align: center;
+    width: 100px;
+    white-space: nowrap;
 }
 
 TD.guidehead { 
@@ -72,12 +75,21 @@ TD.favorite {
 TD.program { 
     background: #2A577E; 
     color: white; 
-    text-align: left 
+    text-align: left;    
+    border: #2a577e 1px solid;
+    cursor: pointer;
 }
 
 TD.program:hover { 
-    background: #638BCA; 
-    color: #000000 
+    background: #638BCA;
+    color: #000000;
+    border: #ffffff 1px solid;
+}
+
+TD.programnodata { 
+    background: #2A577E; 
+    color: #c9c9ff; 
+    text-align: center; 
 }
 
 TR.chanrow { 
