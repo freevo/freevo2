@@ -6,6 +6,7 @@
 # OSD daemon. It then respawns any application that exits until the user
 # presses CTRL-C in this terminal.
 #
+# $Id$
 
 import sys, os, time, signal
 
