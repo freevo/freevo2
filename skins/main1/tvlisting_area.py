@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/06/18 20:50:09  outlyer
+# Highlight shows that are scheduled. This code isn't done yet, but it works.
+# There are some areas where it could be slow for large lists (like it does a
+# scan through a list every button push) but it's acceptable on my system
+# with 25 or so items in the schedule.
+#
 # Revision 1.4  2003/06/18 18:29:13  outlyer
 # Made the timeformat in Freevo's TV Guide configurable, just like the date
 # format. I don't like Military time :)
@@ -158,6 +164,8 @@ class TVListing_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
+        recordingshows = self.check_schedule()
+        recnow = 0
         to_listing = menu.table
 
         n_cols = len(to_listing[0])-1
@@ -208,6 +216,7 @@ class TVListing_Area(Skin_Area):
             if r.y < 0: pad_y = -1 * r.y
         self.drawroundbox( x_contents, y_contents,
                            r.width+1, head_h+1, r )
+
         self.write_text( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
                          head_font, content,
                          x=( x_contents + pad_x ), y=( y_contents + pad_y ),
@@ -284,6 +293,7 @@ class TVListing_Area(Skin_Area):
                 self.write_text(to_listing[i].displayname, label_font, content,
                                 x=tx0, y=ty0, width=r.width+2*r.x, height=font_h)
 
+
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
                     flag_left   = 0
@@ -316,6 +326,17 @@ class TVListing_Area(Skin_Area):
                     else:
                         val = default_val
                         font = default_font
+
+                    # Not at all elegant.
+                    # TODO:
+                    #    * This is going to be SLOW for large schedules
+                    #    * We should have a skin setting for recording background color
+                    #    * I dunno what else.
+                    #   I will work on this soon, but think of this as a proof of concept.
+                    if recordingshows:
+                        for recprogs in recordingshows:
+                            if (prg.channel_id, prg.start, prg.stop) == recprogs:
+                                val = selected_val
 
                     if prg.title == 'This channel has no data loaded':
                         val = copy.copy(val)
@@ -358,3 +379,33 @@ class TVListing_Area(Skin_Area):
             self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
         if menuw.display_down_arrow and area.images['downarrow']:
             self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
+
+    def check_schedule (self):
+
+        SCHEDULE = config.REC_SCHEDULE_FILE
+        if not os.path.isfile(SCHEDULE):
+            return None
+        fd = open(SCHEDULE, 'r')
+        schedule = fd.readlines()
+        fd.close()
+        recordingshows = []
+
+        for s in schedule[1:]:
+            if s[0] == '#':
+                continue
+
+            vals = s.strip().split(',')
+
+            try:
+                start_time = time.mktime(time.strptime(vals[0], '%Y-%m-%d %H:%M:%S'))
+            except ValueError:
+                continue
+            stop_time = start_time+int(vals[1])
+            if (time.localtime()[8]==1): # IF daylight savings time in effect
+                start_time = start_time-3600
+                stop_time = stop_time-3600
+
+            channel_id = vals[3]
+            recordingshows.append((channel_id,start_time,stop_time))
+        
+        return recordingshows
