@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/08/23 18:35:16  dischi
+# new function to set the xml_file to make it possible to parse it later
+#
 # Revision 1.27  2003/08/23 15:16:18  dischi
 # o more infos in folder.fxd: title, cover-img and content info
 # o totalspace and freespace support for getattr
@@ -85,6 +88,12 @@ skin = skin.get_singleton()
 
 dirwatcher_thread = None
 
+all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
+                 'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
+                 'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT',
+                 'AUDIO_FORMAT_STRING','DIRECTORY_SMART_SORT',
+                 'USE_MEDIAID_TAG_NAMES')
+
 
 class DirItem(Playlist):
     """
@@ -107,11 +116,7 @@ class DirItem(Playlist):
         self.mountpoint   = None
         
         # set directory variables to default
-	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
-                         'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
-                         'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT',
-                         'AUDIO_FORMAT_STRING','DIRECTORY_SMART_SORT')
-
+        global all_variables
         for v in all_variables:
             setattr(self, v, eval('config.%s' % v))
 
@@ -178,7 +183,15 @@ class DirItem(Playlist):
         if os.path.isfile(dir+'/folder.fxd'): 
             self.xml_file = dir+'/folder.fxd'
 
-        # set variables to values in xml file
+        if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
+            self.DIRECTORY_SORT_BY_DATE = 0
+
+
+    def set_xml_file(self, file):
+        """
+        Set self.xml_file and parse it
+        """
+        self.xml_file = file
         if self.xml_file and os.path.isfile(self.xml_file):
             try:
                 parser = qp_xml.Parser()
@@ -187,16 +200,14 @@ class DirItem(Playlist):
                 f.close()
                 for node in var_def.children:
                     if node.name == 'folder':
-                        self.fxd_parser(node, all_variables)
+                        self.fxd_parser(node)
             except:
                 print "fxd file %s corrupt" % self.xml_file
                 traceback.print_exc()
 
-        if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
-            self.DIRECTORY_SORT_BY_DATE = 0
 
 
-    def fxd_parser(self, node, all_variables):
+    def fxd_parser(self, node):
         '''
         parse the xml file for directory settings
         
@@ -212,6 +223,7 @@ class DirItem(Playlist):
 	</freevo>
         '''
 
+        global all_variables
         set_all = self.xml_file == self.dir+'/folder.fxd'
         # read attributes
         if set_all:
