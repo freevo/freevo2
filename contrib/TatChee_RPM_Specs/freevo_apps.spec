@@ -1,6 +1,6 @@
-Summary:	Freevo_runtime
-Name:		freevo_runtime
-Version:	3
+Summary:	Freevo_apps
+Name:		freevo_apps
+Version:	1
 Release:	1
 License:	GPL
 Group:		Applications/Multimedia
@@ -8,12 +8,11 @@ Source:		http://freevo.sourceforge.net/%{name}%{version}.tar.gz
 URL:		http://freevo.sourceforge.net/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 
-%define _prefix /usr/local/%{name}%{version}
+%define _prefix /usr/local/%{name}
 
 %description
-This package contains the Freevo runtime. It contains an executable,
-freevo_rt, and dynamic link libraries for running Freevo as well as a copy
-of the standard Python 2.2 libraries.
+This directory contains the Freevo external applications.
+Right now that is only mplayer.
 
 You need the main Freevo package (and possibly the freevo_apps package too)
 in order to run Freevo. It should be installed in "../freevo".
@@ -23,8 +22,8 @@ or the website at http://freevo.sourceforge.net.
 
 
 %prep
-%setup  -n %{name}%{version}
-#%patch -p1
+%setup  -n %{name}
+rm -rf `find . -name CVS`
 
 %build
 rm -rf $RPM_BUILD_ROOT
@@ -41,16 +40,9 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %dir %{_prefix}
-%attr(755,root,root) %{_prefix}/freevo_python
-%attr(755,root,root) %{_prefix}/*.so.*
-%attr(644,root,root) %{_prefix}/preloads
-%attr(644,root,root) %{_prefix}/VERSION
-%attr(755,root,root) %{_prefix}/lib
-%doc ChangeLog COPYING README 
+%attr(755,root,root) %{_prefix}/mplayer
+%doc README 
 
 %changelog
 * Mon Oct 14 2002 TC Wan <tcwan@cs.usm.my>
-- Rebuilt for freevo_runtime3
-
-* Fri Aug 23 2002 TC Wan <tcwan@cs.usm.my>
-- Initial Spec file for RH 7.3. Can't use install macro as it strips the archived code from freevo_rt
+- Initial Spec file for RH 7.3. 
