@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/01/24 07:30:56  krister
+# Create missing folders.
+#
 # Revision 1.1  2003/01/24 07:19:48  krister
 # New runtime
 #
@@ -70,6 +73,7 @@ clean:
 # A python app that checks all libs and apps to find dynamic
 # link lib dependencies. All deps are copied to the dll folder.
 copy_libdeps:
+	-mkdir -p dll
 	python copy_libdeps.py
 
 
@@ -83,7 +87,8 @@ copy_libdeps:
 python_copy:
 	@echo Copying python
 	-rm -rf lib
-	-mkdir lib
+	-mkdir -p lib
+	-mkdir -p apps
 	cp -a /usr/local/lib/python2.2 lib
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
