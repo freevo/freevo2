@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/10/06 18:44:51  dischi
+# move shutdown code from plugin to cleanup.py
+#
 # Revision 1.8  2004/08/23 12:39:30  dischi
 # adjust to new display code
 #
@@ -52,78 +55,7 @@ import config
 from gui import ConfirmBox
 from item import Item
 from plugin import MainMenuPlugin
-
-
-def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
-    """
-    Function to shut down freevo or the whole system. This system will be
-    shut down when argshutdown is True, restarted when argrestart is true,
-    else only Freevo will be stopped.
-    """
-    import plugin
-    import rc
-    import util.mediainfo
-    import gui
-    
-    util.mediainfo.sync()
-    if not gui.displays.active():
-        # this function is called from the signal handler, but
-        # we are dead already.
-        sys.exit(0)
-
-    gui.display.clear()
-    msg = gui.Text(_('shutting down...'), (0, 0), (gui.width, gui.height),
-                   gui.get_font('default'), align_h='center', align_v='center')
-    gui.display.add_child(msg)
-    gui.display.update()
-    time.sleep(0.5)
-
-    if argshutdown or argrestart:  
-        # shutdown dual head for mga
-        if config.CONF.display == 'mga':
-            os.system('%s runapp matroxset -f /dev/fb1 -m 0' % \
-                      os.environ['FREEVO_SCRIPT'])
-            time.sleep(1)
-            os.system('%s runapp matroxset -f /dev/fb0 -m 1' % \
-                      os.environ['FREEVO_SCRIPT'])
-            time.sleep(1)
-
-        plugin.shutdown()
-        rc.shutdown()
-        gui.displays.shutdown()
-
-        if argshutdown and not argrestart:
-            os.system(config.SHUTDOWN_SYS_CMD)
-        elif argrestart and not argshutdown:
-            os.system(config.RESTART_SYS_CMD)
-        # let freevo be killed by init, looks nicer for mga
-        while 1:
-            time.sleep(1)
-        return
-
-    #
-    # Exit Freevo
-    #
-    
-    # Shutdown any daemon plugins that need it.
-    plugin.shutdown()
-
-    # Shutdown all children still running
-    rc.shutdown()
-
-    # Shutdown the display
-    gui.displays.shutdown()
-
-    if exit:
-        # realy exit, we are called by the signal handler
-        sys.exit(0)
-
-    os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
-
-    # Just wait until we're dead. SDL cannot be polled here anyway.
-    while 1:
-        time.sleep(1)
-        
+from cleanup import shutdown
 
 
 class ShutdownItem(Item):
@@ -141,12 +73,12 @@ class ShutdownItem(Item):
         """
         if config.CONFIRM_SHUTDOWN:
             items = [ (self.confirm_freevo, _('Shutdown Freevo') ),
-                          (self.confirm_system, _('Shutdown system') ),
-                          (self.confirm_system_restart, _('Restart system') ) ]
+                      (self.confirm_system, _('Shutdown system') ),
+                      (self.confirm_system_restart, _('Restart system') ) ]
         else:
             items = [ (self.shutdown_freevo, _('Shutdown Freevo') ),
-                          (self.shutdown_system, _('Shutdown system') ),
-                          (self.shutdown_system_restart, _('Restart system') ) ]
+                      (self.shutdown_system, _('Shutdown system') ),
+                      (self.shutdown_system_restart, _('Restart system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
             items = [ items[1], items[0], items[2] ]
 
@@ -159,7 +91,8 @@ class ShutdownItem(Item):
         """
         self.menuw = menuw
         what = _('Do you really want to shut down Freevo?')
-        ConfirmBox(text=what, handler=self.shutdown_freevo, default_choice=1).show()
+        ConfirmBox(text=what, handler=self.shutdown_freevo,
+                   default_choice=1).show()
         
         
     def confirm_system(self, arg=None, menuw=None):
@@ -168,7 +101,8 @@ class ShutdownItem(Item):
         """
         self.menuw = menuw
         what = _('Do you really want to shut down the system?')
-        ConfirmBox(text=what, handler=self.shutdown_system, default_choice=1).show()
+        ConfirmBox(text=what, handler=self.shutdown_system,
+                   default_choice=1).show()
 
     def confirm_system_restart(self, arg=None, menuw=None):
         """
@@ -176,7 +110,8 @@ class ShutdownItem(Item):
         """
         self.menuw = menuw
         what = _('Do you really want to restart the system?')
-        ConfirmBox(text=what, handler=self.shutdown_system_restart, default_choice=1).show()
+        ConfirmBox(text=what, handler=self.shutdown_system_restart,
+                   default_choice=1).show()
 
 
     def shutdown_freevo(self, arg=None, menuw=None):
