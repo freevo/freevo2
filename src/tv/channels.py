@@ -487,10 +487,6 @@ class ChannelList:
         self.channel_list = []
         self.channel_dict = {}
 
-        if not os.path.isfile(EPGDB):
-            print 'No EPGDB found! (%s)' % EPGDB
-            return
-
         try:
             self.epg = get_epg()
         except:
