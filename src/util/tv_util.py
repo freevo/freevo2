@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/05 17:40:26  dischi
+# deactivate some code for now
+#
 # Revision 1.6  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -44,7 +47,7 @@
 import sys, string, re
 import time, os, string
 
-import util, config, tv.epg_xmltv
+import util, config
 
 DEBUG = 0
 
@@ -133,15 +136,20 @@ def get_chan_displayname(channel_id):
         if tv_channel_id == channel_id:
             return tv_display_name
 
-    guide = tv.epg_xmltv.get_guide()
-    c = guide.chan_dict.get(channel_id)
-    if c:
-        return c.displayname
+#     guide = tv.epg_xmltv.get_guide()
+#     c = guide.chan_dict.get(channel_id)
+#     if c:
+#         return c.displayname
     # this shouldn't happen, but just in case
     return 'Unknown'
 
 
 def when_listings_expire():
+
+    # FIXME!!!!!!!!!!!
+    return 0
+
+
     guide = tv.epg_xmltv.get_guide()
     last = 0
     left = 0
