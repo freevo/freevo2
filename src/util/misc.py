@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/07/11 11:46:03  dischi
+# decrease record server calling
+#
 # Revision 1.41  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -393,7 +396,7 @@ def htmlenties2txt(string):
 # Coming Up for TV schedule
 #
 
-def comingup(items=None):
+def comingup(items=None, ScheduledRecordings=None):
     import tv.record_client as ri
     import time
     import codecs
@@ -401,15 +404,18 @@ def comingup(items=None):
     result = u''
 
     cachefile = '%s/upsoon' % (config.FREEVO_CACHEDIR)
-    if (os.path.exists(cachefile) and \
-        (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
-        cache = codecs.open(cachefile,'r', config.encoding)
-        for a in cache.readlines():
-            result = result + a
-        cache.close()
-        return result
+    if not ScheduledRecordings:
+        if (os.path.exists(cachefile) and \
+            (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
+            cache = codecs.open(cachefile,'r', config.encoding)
+            for a in cache.readlines():
+                result = result + a
+            cache.close()
+            return result
 
-    (status, recordings) = ri.getScheduledRecordings()
+        (status, recordings) = ri.getScheduledRecordings()
+    else:
+        (status, recordings) = ScheduledRecordings
 
     if not status:
         result = _('The recordserver is down')

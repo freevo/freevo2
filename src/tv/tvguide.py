@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/07/11 11:46:03  dischi
+# decrease record server calling
+#
 # Revision 1.35  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -49,13 +52,14 @@
 import os
 import time
 
-import gui.GUIObject
+import config
 import rc
+import util
 
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
 
-import config, skin
+import skin
 from event import *
 
 # The Electronic Program Guide
@@ -97,6 +101,7 @@ class TVGuide(Item):
         self.menuw = menuw
         self.visible = True
         self.select_time = start_time
+        self.last_update = 0
         
         self.update_schedules(force=True)
 
@@ -109,6 +114,10 @@ class TVGuide(Item):
         if not force and self.last_update + 60 > time.time():
             return
 
+        # less than one second? Do not belive the force update
+        if self.last_update + 1 > time.time():
+            return
+
         upsoon = '%s/upsoon' % (config.FREEVO_CACHEDIR)
         if os.path.isfile(upsoon):
             os.unlink(upsoon)
@@ -117,6 +126,9 @@ class TVGuide(Item):
         self.last_update = time.time()
         self.scheduled_programs = []
         (got_schedule, schedule) = ri.getScheduledRecordings()
+
+        util.misc.comingup(None, (got_schedule, schedule))
+
         if got_schedule:
             l = schedule.getProgramList()
             for k in l:
