@@ -19,6 +19,7 @@ DEPEND=">=dev-python/pygame-1.5.3
 	>=media-libs/libsdl-1.2.4
 	>=media-video/mplayer-0.90_rc2
 	>=freevo_runtime-1.3.1
+	>=dev-python/python-fchksum-1.6.1
 	ogg? (>=media-libs/pyvorbis-1.1)"
 
 
