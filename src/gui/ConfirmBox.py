@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/07/20 09:46:11  dischi
+# Some default width fixes to match the current new default font. It would
+# be great if a box without width and height could be as big as needed
+# automaticly (with a max width). Right now, the buttons in the ConfirmBox
+# are not at the bottom of the box, that should be fixed.
+#
 # Revision 1.16  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -125,7 +131,7 @@ class ConfirmBox(PopupBox):
     """
 
     def __init__(self, parent='osd', text=" ", handler=None, default_choice=0, 
-                 left=None, top=None, width=300, height=150, bg_color=None, 
+                 left=None, top=None, width=400, height=150, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None, vertical_expansion=1):
 
@@ -137,11 +143,11 @@ class ConfirmBox(PopupBox):
         # XXX: It may be nice if we could choose between
         #      OK/CANCEL and YES/NO
 
-        self.b0 = Button('OK')
+        self.b0 = Button('OK', width=(width-60)/2)
         self.b0.set_h_align(Align.NONE)
         self.add_child(self.b0)
 
-        self.b1 = Button('CANCEL')
+        self.b1 = Button('CANCEL', width=(width-60)/2)
         self.b1.set_h_align(Align.NONE)
         self.add_child(self.b1)
         select = 'self.b%s.toggle_selected()' % default_choice

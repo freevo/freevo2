@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/07/20 09:46:11  dischi
+# Some default width fixes to match the current new default font. It would
+# be great if a box without width and height could be as big as needed
+# automaticly (with a max width). Right now, the buttons in the ConfirmBox
+# are not at the bottom of the box, that should be fixed.
+#
 # Revision 1.15  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -129,7 +135,7 @@ class AlertBox(PopupBox):
     """
 
     def __init__(self, parent='osd', text=" ", handler=None, left=None, 
-                 top=None, width=300, height=150, bg_color=None, fg_color=None,
+                 top=None, width=400, height=150, bg_color=None, fg_color=None,
                  icon=None, border=None, bd_color=None, bd_width=None,
                  vertical_expansion=1):
 

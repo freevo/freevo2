@@ -10,6 +10,12 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/07/20 09:46:11  dischi
+# Some default width fixes to match the current new default font. It would
+# be great if a box without width and height could be as big as needed
+# automaticly (with a max width). Right now, the buttons in the ConfirmBox
+# are not at the bottom of the box, that should be fixed.
+#
 # Revision 1.22  2003/07/13 19:35:44  rshortt
 # Change osd.focused_app to a function that returns the last object in
 # app_list.  Maintaining this list is helpfull for managing 'toplevel'
@@ -132,7 +138,7 @@ class PopupBox(Container):
     """
     
     def __init__(self, parent='osd', text=' ', handler=None, left=None, 
-                 top=None, width=360, height=120, bg_color=None, fg_color=None,
+                 top=None, width=400, height=120, bg_color=None, fg_color=None,
                  icon=None, border=None, bd_color=None, bd_width=None,
                  vertical_expansion=1):
 
