@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/08/22 18:47:06  gsbarbieri
+# - Added more time to retry to check for media.
+# - Corrected a bug when playing variant from CD when the parent is a string
+#   (the base directory). BTW: why that as parent?!
+#
 # Revision 1.73  2003/08/21 20:54:44  gsbarbieri
 #    *ROM media just shows up when needed, ie: audiocd is not displayed in
 # video main menu.
@@ -474,7 +479,7 @@ class VideoItem(Item):
         play the item.
         """
         self.parent.current_item = self
-        
+
         if not self.menuw:
             self.menuw = menuw
 
@@ -520,7 +525,7 @@ class VideoItem(Item):
                         box = PopupBox( text="Wait while detecting media..." )
                         box.show()
                         l=1
-                        for i in range( 1 ): # 10 times
+                        for i in range( 10 ): # 10 times
                             
                             for media in config.REMOVABLE_MEDIA:
                                 # media has no id? maybe identifying... wait
@@ -757,4 +762,6 @@ class VideoItem(Item):
             return TRUE
         
         # give the event to the next eventhandler in the list
+        if isinstance( self.parent, str ):
+            self.parent = None
         return Item.eventhandler(self, event, menuw)
