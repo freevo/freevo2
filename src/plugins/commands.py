@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/03 18:04:43  dischi
+# cleanup, only show dialog when needed, image support
+#
 # Revision 1.8  2003/10/27 20:15:58  mikeruelle
 # make use of outicon
 #
@@ -65,6 +68,7 @@
 #python modules
 import os, popen2, fcntl, select, time
 import pygame
+import osd
 
 #freevo modules
 import config, menu, rc, plugin, skin, util
@@ -82,6 +86,16 @@ from gui.GUIObject import Align
 skin = skin.get_singleton()
 menuwidget = menu.get_singleton()
 
+
+def islog(name):
+    f = open(os.path.join(config.LOGDIR,'command_std%s.log' % name))
+    data = f.readline()
+    if name == 'out':
+        data = f.readline()
+    f.close()
+    return data
+    
+    
 class LogScroll(PopupBox):
     """
     left      x coordinate. Integer
@@ -175,10 +189,14 @@ class CommandOptions(PopupBox):
         self.results.set_h_align(Align.CENTER)
         self.add_child(self.results)
         self.results.add_item(text=_('OK'), value='ok')
-        self.results.add_item(text=_('Show Stderr'), value='err')
-        self.results.add_item(text=_('Show Stdout'), value='out')
+        if islog('err'):
+            self.results.add_item(text=_('Show Stderr'), value='err')
+        if islog('out'):
+            self.results.add_item(text=_('Show Stdout'), value='out')
         self.results.toggle_selected_index(0)
         
+
+
     def eventhandler(self, event, menuw=None):
                                                                                 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
@@ -207,13 +225,19 @@ class CommandOptions(PopupBox):
 # hope to add actions for different ways of running commands
 # and for displaying stdout and stderr of last command run.
 class CommandItem(Item):
-
+    def __init__(self, command, directory):
+        Item.__init__(self)
+        self.name = command
+        self.cmd  = os.path.join(directory, command)
+        self.image = util.getimage(self.cmd)
+        
     def makeNonBlocking(self, fd):
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NDELAY)
 
 
     def getCommandOutput(self, command, outputfile, erroutputfile):
+        osd.get_singleton().show_mouse = True
         child = popen2.Popen3(command, 1) # capture stdout and stderr from command
         child.tochild.close()             # don't need to talk to child
         outfile = child.fromchild 
@@ -233,8 +257,10 @@ class CommandItem(Item):
                 errchunk = errfile.read()
                 if errchunk == '': erreof = 1
                 erroutputfile.write(errchunk)
-            if outeof and erreof: break
+            if outeof and erreof:
+                break
             select.select([],[],[],.1) # give a little time for buffers to fill
+
         err = child.wait()
         if (os.WIFEXITED(err)):
             outputfile.write('process exited with status ' + str(os.WEXITSTATUS(err)))
@@ -260,13 +286,21 @@ class CommandItem(Item):
         popup_string=_("Running Command...")
         pop = PopupBox(text=popup_string)
         pop.show()
-        #print self.cmd
-        myout = open(os.path.join(config.LOGDIR,'command_stdout.log'), 'wb')
-        myerr = open(os.path.join(config.LOGDIR,'command_stderr.log'), 'wb')
+
+        logfile = os.path.join(config.LOGDIR,'command_stdout.log')
+        if os.path.isfile(logfile):
+            os.unlink(logfile)
+        myout = open(logfile, 'wb')
+
+        logfile = os.path.join(config.LOGDIR,'command_stderr.log')
+        if os.path.isfile(logfile):
+            os.unlink(logfile)
+        myerr = open(logfile, 'wb')
+
         status = self.getCommandOutput(self.cmd, myout, myerr)
         myout.close()
         myerr.close()
-        #print status
+
         icon=""
         message=""
         if status:
@@ -276,7 +310,8 @@ class CommandItem(Item):
             icon='ok'
             message=_('Command Completed')
         pop.destroy()
-        CommandOptions(text=message).show()
+        if status or islog('err') or islog('out'):
+            CommandOptions(text=message).show()
         
 
 # this is the item for the main menu and creates the list
@@ -294,13 +329,15 @@ class CommandMainMenuItem(Item):
         commands = os.listdir(config.COMMANDS_DIR)
         commands.sort(lambda l, o: cmp(l.upper(), o.upper()))
         for command in commands:
-            cmd_item = CommandItem()
-            cmd_item.name = command
-            cmd_item.cmd = os.path.join(config.COMMANDS_DIR, command)
+            if os.path.splitext(command)[1] in ('.jpg', '.png'):
+                continue
+            cmd_item = CommandItem(command, config.COMMANDS_DIR)
             command_items += [ cmd_item ]
         if (len(command_items) == 0):
-            command_items += [menu.MenuItem(_('No Commands found'), menuwidget.goto_prev_page, 0)]
-        command_menu = menu.Menu(_('Commands'), command_items, reload_func=menuwidget.goto_main_menu)
+            command_items += [menu.MenuItem(_('No Commands found'),
+                                            menuwidget.goto_prev_page, 0)]
+        command_menu = menu.Menu(_('Commands'), command_items,
+                                 reload_func=menuwidget.goto_main_menu)
         rc.app(None)
         menuwidget.pushmenu(command_menu)
         menuwidget.refresh()
@@ -332,7 +369,8 @@ class PluginInterface(plugin.MainMenuPlugin):
         if menu_items.has_key('commands') and menu_items['commands'].image:
             item.image = menu_items['commands'].image
         if menu_items.has_key('commands') and menu_items['commands'].outicon:
-            item.outicon = os.path.join(skin.settings.icon_dir, menu_items['commands'].outicon)
+            item.outicon = os.path.join(skin.settings.icon_dir,
+                                        menu_items['commands'].outicon)
         item.parent = parent
         return [ item ]
 
