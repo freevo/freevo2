@@ -43,26 +43,26 @@ from gui import AlertBox
 # tv imports
 import recordings
 import favorite
+import channels
 
 class ProgramItem(Item):
     """
     A tv program item for the tv guide and other parts of the tv submenu.
     """
-    def __init__(self, title, start, stop, subtitle='', description='',
-                 id=None, channel = None, parent=None):
+    def __init__(self, program, parent=None):
         Item.__init__(self, parent, skin_type='video')
+        self.program = program
+        self.title = program.title
+        self.name  = program.title
+        self.start = program.start
+        self.stop  = program.stop
 
-        self.title = title
-        self.name  = self.title
-        self.start = start
-        self.stop  = stop
+        self.channel = program.channel
+        self.prog_id = program.id
+        self.info['subtitle'] = program.subtitle
+        self.info['description'] = program.description
 
-        self.channel = channel
-        self.prog_id = id
-        self.info['subtitle'] = subtitle
-        self.info['description'] = description
-
-        key = '%s%s%s' % (channel.chan_id, start, stop)
+        key = '%s%s%s' % (program.channel.chan_id, program.start, program.stop)
         if recordings.recordings.has_key(key):
             self.scheduled = recordings.recordings[key]
         else:
@@ -97,7 +97,7 @@ class ProgramItem(Item):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
         """
-        if not isinstance(other, ProgramItem):
+        if not isinstance(other, (ProgramItem, channels.Program)):
             return 1
 
         return self.title != other.title or \

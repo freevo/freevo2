@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/12/05 17:10:06  dischi
+# start extract channellist to be independed
+#
 # Revision 1.63  2004/12/05 13:01:12  dischi
 # delete old tv variables, rename some and fix detection
 #
@@ -127,6 +130,7 @@ import menu
 from event import *
 from application import MenuApplication
 from item import Item
+from program import ProgramItem
 
 import logging
 log = logging.getLogger('tv')
@@ -154,7 +158,7 @@ class TVGuide(MenuApplication):
         MenuApplication.__init__(self, 'tvguide', 'tvmenu', False)
         self.CHAN_NO_DATA = _('This channel has no data loaded')
         self.last_update  = 0
-        
+
 
     def start(self, parent):
         self.engine = gui.AreaHandler('tv', ('screen', 'title', 'subtitle',
@@ -172,10 +176,12 @@ class TVGuide(MenuApplication):
         self.current_time = int(time.time())
         start_time = self.current_time - 1800
         stop_time  = self.current_time + 3*3600
-        config.TV_CHANNELLIST.import_programs(start_time, stop_time)
 
-        self.channel  = config.TV_CHANNELLIST.get()
-        self.selected = self.channel.get(self.current_time)[0]
+        # current channel is the first one
+        self.channel  = config.TV_CHANNELLIST[0]
+
+        # current program is the current running
+        self.selected = ProgramItem(self.channel.get(self.current_time)[0])
 
         box.destroy()
         return True
@@ -219,27 +225,17 @@ class TVGuide(MenuApplication):
             pass
             
         if event == MENU_UP:
-            config.TV_CHANNELLIST.up()
-            self.channel  = config.TV_CHANNELLIST.get()
-            try:
-                self.selected = self.channel.get(self.current_time)[0]
-            except Exception, e:
-                print e
-                print self.current_time
+            self.channel = config.TV_CHANNELLIST.get(-1, self.channel)
+            self.selected = ProgramItem(self.channel.get(self.current_time)[0])
             self.refresh()
 
         elif event == MENU_DOWN:
-            config.TV_CHANNELLIST.down()
-            self.channel  = config.TV_CHANNELLIST.get()
-            try:
-                self.selected = self.channel.get(self.current_time)[0]
-            except Exception, e:
-                print e
-                print self.current_time
+            self.channel = config.TV_CHANNELLIST.get(1, self.channel)
+            self.selected = ProgramItem(self.channel.get(self.current_time)[0])
             self.refresh()
 
         elif event == MENU_LEFT:
-            self.selected = self.channel.prev(self.selected)
+            self.selected = ProgramItem(self.channel.get_relative(-1, self.selected.program))
             if self.selected.start:
                 self.current_time = self.selected.start + 1
             else:
@@ -247,7 +243,7 @@ class TVGuide(MenuApplication):
             self.refresh()
 
         elif event == MENU_RIGHT:
-            self.selected = self.channel.next(self.selected)
+            self.selected = ProgramItem(self.channel.get_relative(1, self.selected.program))
             if self.selected.start:
                 self.current_time = self.selected.start + 1
             else:
@@ -261,11 +257,7 @@ class TVGuide(MenuApplication):
             pass
 
         elif event == TV_SHOW_CHANNEL:
-            items = []
-            # channel = config.TV_CHANNELLIST.get_settings_by_id(self.chan_id)
-            # for prog in channel.get(time.time(), -1):
-            for prog in self.selected.get(time.time(), -1):
-                items.append(prog)
+            items = self.channel.get(time.time(), -1)
             cmenu = menu.Menu(self.channel.name, items)
             # FIXME: the percent values need to be calculated
             # cmenu.table = (15, 15, 70)

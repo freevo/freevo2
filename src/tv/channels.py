@@ -41,18 +41,13 @@ import logging
 import pyepg
 
 # freevo imports
-import config
 import sysconfig
-import plugin
+import recordings
 
 log = logging.getLogger('tv')
 
-# tv imports
-from program import ProgramItem
-
 EPGDB = sysconfig.datafile('epgdb')
 
-_channels = None
 _epg = None
 
 
@@ -64,121 +59,6 @@ def get_epg():
     if not _epg:
         _epg = pyepg.get_epg(EPGDB)
     return _epg
-
-
-def get_new_epg():
-    """
-    Return a fresh instance of the EPG database.
-    """
-    global _epg
-    _epg = pyepg.get_epg(EPGDB)
-
-    return _epg
-
-
-def get_lockfile(which):
-    """
-    In this function we must figure out which device these settings use
-    because we are allowed to have multiple settings for any particular
-    device, usually for different inputs (tuner, composite, svideo).
-    """
-
-    dev_lock = False
-    settings = config.TV_CARDS.get(which)
-
-    if not settings:
-        log.info('No settings for %s' % which)
-
-    if isinstance(settings, config.DVBCard):
-        dev = settings.adapter
-        dev_lock = True
-
-    elif isinstance(settings, config.TVCard):
-        dev = settings.vdev
-        dev_lock = True
-
-    else:
-        print 'Unknown settings for %s!!  This could cause problems!' % which
-
-    if dev_lock:
-        lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % \
-                   dev.replace(os.sep, '_'))
-    else:
-        lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % which)
-
-    log.info('lockfile for %s is %s' % (which, lockfile))
-    return lockfile
-
-
-def lock_device(which):
-    """
-    """
-
-    lockfile = get_lockfile(which)
-
-    if os.path.exists(lockfile):
-        return False
-
-    else:
-        try:
-            open(lockfile, 'w').close()
-            return True
-        except:
-            print 'ERROR: cannot open lockfile for %s' % which
-            traceback.print_exc()
-            return False
-
-
-def unlock_device(which):
-    """
-    """
-
-    lockfile = get_lockfile(which)
-
-    if os.path.exists(lockfile):
-        try:
-            os.remove(lockfile)
-            return True
-        except:
-            print 'ERROR: cannot remove lockfile for %s' % which
-            traceback.print_exc()
-            return False
-
-    else:
-        return False
-
-
-def is_locked(which):
-    """
-    """
-
-    lockfile = get_lockfile(which)
-
-    if os.path.exists(lockfile):
-        return True
-
-    else:
-        return False
-
-
-def get_actual_channel(channel_id, which):
-    """
-    """
-
-    for chan in get_channels().get_all():
-        if chan.id == channel_id:
-            for u in chan.uri:
-                if u.split(':')[0] == which:
-                    return u.lstrip('%s:' % which)
-
-
-def get_chan_displayname(channel_id):
-
-    for chan in get_channels().get_all():
-        if chan.chan_id == channel_id:
-            return chan.name
-
-    return 'Unknown'
 
 
 def when_listings_expire():
@@ -200,32 +80,32 @@ def when_listings_expire():
     return left
 
 
-def get_dummy_programs(channel, start, stop):
+class Program:
     """
-    Return some default ProgramItems with intervals no longer than a
-    set default.
+    A tv program item for the tv guide and other parts of the tv submenu.
     """
-    default_prog_interval = 30 * 60
-    dummies = []
-    d_start = start
-    d_stop  = 0
+    def __init__(self, title, start, stop, subtitle='', description='',
+                 id=None, channel = None, parent=None):
+        self.title = title
+        self.name  = self.title
+        self.start = start
+        self.stop  = stop
 
-    sec_after_last = start % default_prog_interval
-    sec_until_next = default_prog_interval - sec_after_last
+        self.channel     = channel
+        self.id          = id
+        self.subtitle    = subtitle
+        self.description = description
 
-    while(d_stop < stop):
-        d_stop = d_start + sec_until_next
-        if d_stop > stop:
-            d_stop = stop
+        key = '%s%s%s' % (channel.chan_id, start, stop)
+        if recordings.recordings.has_key(key):
+            self.scheduled = recordings.recordings[key]
+        else:
+            self.scheduled = False
 
-        dummies.append(ProgramItem(u'NO DATA', d_start, d_stop,
-                                   id=-1, channel = channel))
-
-        sec_until_next = default_prog_interval
-        d_start = d_stop
-
-    return dummies
-
+        # TODO: add category support (from epgdb)
+        self.categories = ''
+        # TODO: add ratings support (from epgdb)
+        self.ratings = ''
 
 
 class Channel:
@@ -234,17 +114,10 @@ class Channel:
     epg informations.
     """
     def __init__(self, id, display_name, access_id):
-        self.chan_id  = id
-        self.access_id = ''
-        self.uri      = []
-        self.programs = []
-        self.logo     = ''
-
-        if isinstance(access_id, list) or isinstance(access_id, tuple):
-            for a_id in access_id:
-                self.__add_uri__(a_id)
-        else:
-            self.__add_uri__(access_id)
+        self.chan_id   = id
+        self.access_id = access_id
+        self.programs  = []
+        self.logo      = ''
 
         # XXX Change this to config.TV_CHANNEL_DISPLAY_FORMAT or something as
         # XXX many people won't want to see the access_id.
@@ -252,77 +125,41 @@ class Channel:
         self.name = self.title = display_name
 
 
-    def __add_uri__(self, uri):
-        """
-        Add a URI to the internal list where to find that channel.
-        Also save the access_id because many people, mostly North Americans,
-        like to use it (usually in the display).
-        """
-        if uri.find(':') == -1:
-            self.access_id = uri
-            defaults = []
-            if isinstance(config.TV_DEFAULT_DEVICE, list) or \
-               isinstance(config.TV_DEFAULT_DEVICE, tuple):
-                for s in config.TV_DEFAULT_DEVICE:
-                    defaults.append(s)
-            else:
-                defaults.append(config.TV_DEFAULT_DEVICE)
-
-            for which in defaults:
-                try:
-                    int(which[-1:])
-                except ValueError: 
-                    # This means that TV_DEFAULT_DEVICE does NOT end with
-                    # a number (it is dvb/tv/ivtv) so we add this channel
-                    # to all matching TV_CARDS.
-                    for s in config.TV_CARDS:
-                        if s.find(which) == 0:
-                            self.__add_uri__('%s:%s' % (s, uri))
-                    return
-
-                self.uri.append('%s:%s' % (which, uri))
-        else:
-            self.access_id = uri.split(':')[1]
-            self.uri.append(uri)
-
-
-    def player(self):
-        """
-        return player object for playing this channel
-        """
-        for u in self.uri:
-            device, uri = u.split(':')
-            print device, uri
-            # try all internal URIs
-            for p in plugin.getbyname(plugin.TV, True):
-                print p
-                # FIXME: better handling for rate == 1 or 2
-                if p.rate(self, device, uri):
-                    return p, device, uri
-        return None
-
-
-    def settings(self):
-        """
-        return a dict of settings for this channel
-        """
-        settings = {}
-
-        for u in self.uri:
-            type = u.split(':')[0]
-            settings[type] = config.TV_CARDS.get(type)
-
-        return settings
-
-
     def sort_programs(self):
         f = lambda a, b: cmp(a.start, b.start)
         self.programs.sort(f)
 
 
-    def import_programs(self, start, stop=-1, progs=[]):
+    def __get_dummy_programs(self, start, stop):
         """
-        Get programs from the database to create ProgramItems from then
+        Return some default Program with intervals no longer than a
+        set default.
+        """
+        default_prog_interval = 30 * 60
+        dummies = []
+        d_start = start
+        d_stop  = 0
+
+        sec_after_last = start % default_prog_interval
+        sec_until_next = default_prog_interval - sec_after_last
+
+        while(d_stop < stop):
+            d_stop = d_start + sec_until_next
+            if d_stop > stop:
+                d_stop = stop
+
+            dummies.append(Program(u'NO DATA', d_start, d_stop,
+                                   id=-1, channel = self))
+
+            sec_until_next = default_prog_interval
+            d_start = d_stop
+
+        return dummies
+
+
+    def __import_programs(self, start, stop=-1, progs=[]):
+        """
+        Get programs from the database to create Program from then
         add them to our local list.  If there are gaps between the programs
         we will add dummy programs to fill it (TODO).
         """
@@ -332,9 +169,9 @@ class Channel:
         if not progs:
             progs = get_epg().get_programs(self.chan_id, start, stop)
         for p in progs:
-            i = ProgramItem(p.title, p.start, p.stop, subtitle=p.subtitle,
-                            description=p['description'], id=p.id,
-                            channel=self)
+            i = Program(p.title, p.start, p.stop, subtitle=p.subtitle,
+                        description=p['description'], id=p.id,
+                        channel=self)
             new_progs.append(i)
 
             # TODO: add information about program being recorded which
@@ -343,27 +180,27 @@ class Channel:
 
         l = len(new_progs)
         if not l:
-            dummy_progs = get_dummy_programs(self, start, stop)
+            dummy_progs = self.__get_dummy_programs(start, stop)
         else:
             for p in new_progs:
                 i = new_progs.index(p)
                 if i == 0:
                     # fill gaps before
                     if p.start > start:
-                        n = get_dummy_programs(self, start, p.start)
+                        n = self.__get_dummy_programs(start, p.start)
                         dummy_progs += n
 
                 if i < l-1:
                     # fill gaps between programs
                     next_p = new_progs[i+1]
                     if p.stop < next_p.start:
-                        n = get_dummy_programs(self, p.stop, next_p.start)
+                        n = self.__get_dummy_programs(p.stop, next_p.start)
                         dummy_progs += n
 
                 elif i == l-1:
                     # fill gaps at the end
                     if p.stop < stop:
-                        n = get_dummy_programs(self, p.stop, stop)
+                        n = self.__get_dummy_programs(p.stop, stop)
                         dummy_progs += n
 
         for i in new_progs + dummy_progs:
@@ -383,16 +220,16 @@ class Channel:
             # see if we're missing programs before start
             p = self.programs[0]
             if p.start > start:
-                self.import_programs(start, p.start)
+                self.__import_programs(start, p.start)
             # see if we're missing programs after end
             p = self.programs[-1]
             if stop == -1:
-                self.import_programs(p.stop, stop)
+                self.__import_programs(p.stop, stop)
             else:
                 if p.stop < stop:
-                    self.import_programs(p.stop, stop)
+                    self.__import_programs(p.stop, stop)
         else:
-            self.import_programs(start, stop)
+            self.__import_programs(start, stop)
 
         # return the needed programs
         if stop == 0:
@@ -413,46 +250,21 @@ class Channel:
         raise Exception('bad request: %s-%s' % (start, stop))
 
 
-    def next(self, prog):
-        """
-        return next program after 'prog'
-        """
-        # print 'next: programs len %d' % len(self.programs)
-        # for p in self.programs:
-        #     print 'P: %s' % p
-        # print 'next: at prog %s' % prog
 
-        pos = self.programs.index(prog)
-        # print 'next: at pos %d' % pos
+    def get_relative(self, pos, prog):
+        new_pos = self.programs.index(prog) + pos
+        if new_pos < 0:
+            # requested program before start
+            self.__import_programs(prog.start-3*3600, prog.start)
+            return self.get_relative(pos, prog)
+        if new_pos >= len(self.programs):
+            # requested program after end
+            last = self.programs[-1]
+            self.__import_programs(last.stop, last.stop+3*3600)
+            return self.get_relative(pos, prog)
+        return self.programs[new_pos]
+    
 
-        if pos < len(self.programs)-1:
-            # print 'next: which is less than %d' % (len(self.programs)-1)
-            # return self.programs[pos+1]
-            next_prog = self.programs[pos+1]
-            # print 'next: nex_prog %s' % next_prog
-            return next_prog
-        else:
-            i_start = self.programs[len(self.programs)-1].stop
-            self.import_programs(i_start, i_start+3*3600)
-
-            if self.programs.index(prog) < len(self.programs)-1:
-                return self.programs[pos+1]
-
-        # print 'next: returning prog %s' % prog
-        return prog
-
-
-    def prev(self, prog):
-        """
-        return previous program before 'prog'
-        """
-        pos = self.programs.index(prog)
-        if pos > 0:
-            return self.programs[pos-1]
-        else:
-            i_stop = self.programs[0].start
-            self.import_programs(i_stop-3*3600, i_stop)
-            return self.programs[self.programs.index(prog)-1]
 
 
 class ChannelList:
@@ -463,8 +275,7 @@ class ChannelList:
     things such as the display name.
     """
 
-    def __init__(self):
-        self.selected = 0
+    def __init__(self, TV_CHANNELS=[], TV_CHANNELS_EXCLUDE=[]):
         self.channel_list = []
         self.channel_dict = {}
 
@@ -476,13 +287,13 @@ class ChannelList:
             return
 
         # Check TV_CHANNELS and add them to the list
-        for c in config.TV_CHANNELS:
+        for c in TV_CHANNELS:
             self.add_channel(Channel(c[0], c[1], c[2:]))
 
         # Check the EPGDB for channels. All channels not in the exclude list
         # will be added if not already in the list
         for c in self.epg.get_channels():
-            if String(c['id']) in config.TV_CHANNELS_EXCLUDE:
+            if String(c['id']) in TV_CHANNELS_EXCLUDE:
                 # Skip channels that we explicitly do not want.
                 continue
             if not c['id'] in self.channel_dict.keys():
@@ -490,32 +301,6 @@ class ChannelList:
 
     def sort_channels(self):
         pass
-
-
-    def get_settings_by_id(self, chan_id):
-        """
-        """
-        settings = []
-        chan = self.channel_dict.get(chan_id)
-        if chan:
-            for u in c.uri:
-                which = u.split(':')[0]
-                settings.append(which)
-
-        return settings
-
-
-    def get_settings_by_name(self, chan_name):
-        """
-        """
-        settings = []
-        for c in self.channel_list:
-            if c.name == chan_name:
-                for u in c.uri:
-                    which = u.split(':')[0]
-                    settings.append(which)
-
-        return settings
 
 
     def add_channel(self, channel):
@@ -529,52 +314,19 @@ class ChannelList:
             self.channel_list.append(channel)
 
 
-    def import_programs(self, start, stop=-1):
-        """
-        """
-        e = self.epg.get_programs([], start, stop)
-        for c in self.channel_list:
-            id = c.chan_id
-            c.import_programs(start, stop, filter(lambda x: x[1] == id, e))
-
-
-    def down(self):
-        """
-        go one channel up
-        """
-        self.selected = (self.selected + 1) % len(self.channel_list)
-
-
-    def up(self):
-        """
-        go one channel down
-        """
-        self.selected = (self.selected + len(self.channel_list) - 1) % \
-                         len(self.channel_list)
-
-
-    def set(self, pos):
-        """
-        set channel
-        """
-        self.selected = pos
-
-
-    def get(self, id=None):
-        """
-        return channel with id or whichever is selected
-        """
-
-        if id:
-            chan = self.channel_dict.get(id)
-            if chan: return chan
-
-        return self.channel_list[self.selected]
+    def __getitem__(self, key):
+        return self.channel_list[key]
 
 
     def get_all(self):
-        """
-        return all channels
-        """
         return self.channel_list
+    
 
+    def get(self, pos, start=None):
+        if not start:
+            start = self.channel_list[0]
+        cpos = self.channel_list.index(start)
+        pos  = (cpos + pos) % len(self.channel_list)
+        return self.channel_list[pos]
+    
+        
