@@ -15,8 +15,10 @@ class IdleTool:
     
     def __init__(self):
         self.idlecount = 0
+        #osd.drawbox(0,0,768,75,color=0x80000000,width=-1)
         self.clock_surface = osd.getsurface(525, 25, 225, 50)
         self.mail_surface  = osd.getsurface(25, 25, 225, 50)
+        #self.toolbar_surface = osd.getsurface(0,0,768,75)
         self.MAILBOX = '/var/mail/aubin'
         if not os.path.isfile(self.MAILBOX):
             # Try the mail environment; this might not work if the user runs this
@@ -40,6 +42,7 @@ class IdleTool:
 
 
     def refresh(self):
+        #osd.putsurface(self.toolbar_surface,0,0)
         self.drawclock()
         self.drawmail()
         self.drawtv()
@@ -121,9 +124,5 @@ class IdleTool:
     def poll(self):
         self.idlecount = self.idlecount + 1
         if (self.idlecount%self.interval) == 0:
-            self.drawclock()
-            self.drawmail()
-            self.drawtv()
-            self.drawweather()
-            osd.update()
+            self.refresh()
             self.idlecount = 0
