@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/01/31 01:52:53  mikeruelle
+# at least be able to set another extension manually until we can do this more properly
+#
 # Revision 1.27  2004/01/14 02:28:22  outlyer
 # We do call videothumb in the recording plugins so this note isn't needed.
 #
@@ -827,7 +830,12 @@ class RecordServer(xmlrpc.XMLRPC):
         from util.fxdimdb import FxdImdb, makeVideo
         fxd = FxdImdb()
         fxd.setFxdFile(config.TV_RECORD_DIR + '/' + rec_prog.filename, overwrite = True)
-        video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + '.mpeg')
+
+	fileext = '.mpeg'
+	if hasattr(config, "DEFAULT_REC_EXT") and config.DEFAULT_REC_EXT:
+	    fileext = config.DEFAULT_REC_EXT
+
+        video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + fileext)
         fxd.setVideo(video)
         fxd.info['tagline'] = rec_prog.sub_title
         fxd.info['plot'] = rec_prog.desc
