@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.04
+LOCAL_CONF_VERSION  = 5.05
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -196,7 +196,10 @@ LOCAL_CONF_CHANGES = [
      '''Add UMASK to set umask for files in vfs''' ),
     (5.04,
      '''SKIN_XML_FILE set to nothing as default, SKIN_START_LAYOUT is removed.
-     When SKIN_XML_FILE is not set, the skin will remeber the last settings''') ]
+     When SKIN_XML_FILE is not set, the skin will remember the last settings'''),
+    (5.05,
+     '''Use MMPYTHON_CREATE_MD5_ID with current mmpython cvs to have a second
+     way to generate the disc ids in case they are not unique on your system''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -324,6 +327,12 @@ UMASK = 022
 # suffix for playlist files
 #
 PLAYLIST_SUFFIX = [ 'm3u' ]
+
+#
+# use md5 in mmpython to create unique disc ids. Use this if you have
+# problems with different discs having the same id
+#
+MMPYTHON_CREATE_MD5_ID = 0
 
 # ======================================================================
 # Plugins:
