@@ -4,7 +4,9 @@ recursive-include share *
 recursive-include Docs *
 recursive-include boot *
 recursive-include contrib *
-recursive-include i18n *
+recursive-include i18n *.pot
+recursive-include i18n *.po
+recursive-include i18n *.mo
 
 include BUGS local_conf.py.example setup.py COPYING FAQ README freevo share INSTALL TODO
 include ChangeLog  MANIFEST freevo_config.py
