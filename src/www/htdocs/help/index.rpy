@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/09/23 18:24:07  dischi
+# moved help to a new directory and add more docs
+#
 # Revision 1.2  2003/09/12 22:00:00  dischi
 # add more documentation
 #
@@ -45,16 +48,23 @@ class HelpResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
-        fv.printHeader('Freevo Help', 'styles/main.css')
+        fv.printHeader('Freevo Help', '/styles/main.css')
         fv.res += 'This is the internal Freevo documentation. The documents \
         are in an early stage of development, if you like to help, please \
-        contact the develepers. You find more informations like mailing lists \
-        and the WiKi on the <a href="http://www.freevo.org">Freevo Homepage</a>.'
+        contact the develepers. You find more informations like \
+        the <a href="http://freevo.sourceforge.net/cgi-bin/moin.cgi/FrontPage">\
+        WiKi (online manual)</a> and mailing lists on the \
+        <a href="http://www.freevo.org">Freevo Homepage</a>.\
+        Everyone can edit the WiKi (and we can revert them if someone deletes \
+        informations), feel free to add informations there.'
 
         fv.res += '<p><b>Index</b><ol>'
         
         fv.res += '<li><a href="howto.rpy">Freevo Installation Howto</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=faq">Frequently Asked Questions</a></li>'
         fv.res += '<li><a href="plugins.rpy">Plugin List</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=FxdFiles">FXD files</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=SkinInfo">Skinning Informations</a></li>'
 
         fv.res += '<br><br>'
         fv.printLinks()

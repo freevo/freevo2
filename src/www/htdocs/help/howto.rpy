@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/09/23 18:24:07  dischi
+# moved help to a new directory and add more docs
+#
 # Revision 1.2  2003/09/20 14:11:11  dischi
 # find docs for an installed version
 #
@@ -68,7 +71,7 @@ class HowtoResource(FreevoResource):
             file = 'index.html'
 
         if not self.BASEDIR:
-            fv.printHeader('Freevo Installation HOWTO', 'styles/main.css')
+            fv.printHeader('Freevo Installation HOWTO', '/styles/main.css')
             fv.res += 'ERROR, unable to load freevo_howto html files<br>'
             fv.res += 'If you use a CVS version of Freevo, run "docbook2html '\
                       '-o freevo_howto freevo_howto.sgml" in the Docs directory '\
@@ -89,7 +92,7 @@ class HowtoResource(FreevoResource):
                     pos = 1
                 elif pos == 1:
                     fv.printHeader('Freevo Installation HOWTO: %s' % line[1:line.find('<')],
-                                   'styles/main.css')
+                                   '/styles/main.css')
                     pos = 2
                 elif pos == 2 and line.find('><BODY') == 0:
                     pos = 3
