@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/22 05:27:01  gsbarbieri
+# comingup to support i18n and unicode.
+#
 # Revision 1.29  2004/02/16 17:56:22  dischi
 # helper function for cmp
 #
@@ -447,13 +450,14 @@ def htmlenties2txt(string):
 def comingup(items=None):
     import tv.record_client as ri
     import time
+    import codecs
    
-    result = ''
+    result = u''
 
     cachefile = '%s/upsoon' % (config.FREEVO_CACHEDIR)
     if (os.path.exists(cachefile) and \
         (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
-        cache = open(cachefile,'r')
+        cache = codecs.open(cachefile,'r', config.encoding)
         for a in cache.readlines():
             result = result + a
         cache.close()
@@ -466,7 +470,7 @@ def comingup(items=None):
         return result
 
     progs = recordings.getProgramList()
-
+    
     f = lambda a, b: cmp(a.start, b.start)
     progl = progs.values()
     progl.sort(f)
@@ -483,38 +487,40 @@ def comingup(items=None):
         if time.localtime(what.start)[2] > (time.localtime()[2] + 1):
             later.append(what)
 
-
     if len(today) > 0:
-        result = result + 'Today:\n'
+        result = result + _('Today') + u':\n'
         for m in today:
             sub_title = ''
             if m.sub_title:
-                sub_title = ' "' + m.sub_title + '" '
-            result = result + "- " + str(m.title) + str(sub_title) + " at " + \
-                str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+                sub_title = u' "' + Unicode(m.sub_title) + u'" '
+            result = result + u"- %s%s at %s\n" % ( Unicode(m.title),
+                                                    Unicode(sub_title),
+                                                    Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
 
     if len(tomorrow) > 0:
-        result = result + 'Tomorrow:\n'
+        result = result + _('Tomorrow') + u':\n'
         for m in tomorrow:
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + "- " + str(m.title) + str(sub_title) + " at " + \
-                str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+            result = result + u"- %s%s at %s\n" % ( Unicode(m.title),
+                                                    Unicode(sub_title),
+                                                    Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
            
     if len(later) > 0:
-        result = result + 'This Week:\n'
+        result = result + _('This Week') + u':\n'
         for m in later:
             sub_title = ''
             if m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
-            result = result + "- " + str(m.title) + str(sub_title) + " at " + \
-                str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
+            result = result + u"- %s%s at %s\n" % ( Unicode(m.title),
+                                                    Unicode(sub_title),
+                                                    Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
 
     if not result:
         result = _('No recordings are scheduled')
         
-    cache = open(cachefile,'w')
+    cache = codecs.open(cachefile,'w', config.encoding)
     cache.write(result)
     cache.close()
 
