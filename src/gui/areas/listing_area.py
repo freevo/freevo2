@@ -38,6 +38,7 @@ __all__ = [ 'ListingArea' ]
 
 # python imports
 import copy
+import os
 
 # external modules
 import notifier
