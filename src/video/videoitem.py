@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/04/26 16:46:25  dischi
+# added refresh bugfix from Matthieu Weber
+#
 # Revision 1.46  2003/04/26 16:38:57  dischi
 # added patch from Matthieu Weber for mplayer options in disc
 #
@@ -437,7 +440,6 @@ class VideoItem(Item):
         error = self.video_player.play(file, mplayer_options, self)
 
         if error:
-            self.menuw.show()
             AlertBox(text=error).show()
             rc.post_event(rc.PLAY_END)
 

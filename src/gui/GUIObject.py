@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/04/26 16:46:24  dischi
+# added refresh bugfix from Matthieu Weber
+#
 # Revision 1.18  2003/04/24 19:56:19  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -403,6 +406,8 @@ class GUIObject:
             # self.parent.refresh()
 
         self.hide()
+        if self.parent:
+            self.parent.refresh()
         self.set_parent(None)
 
 
