@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/12 23:34:53  rshortt
+# Added index link.
+#
 # Revision 1.2  2003/05/12 23:02:41  rshortt
 # Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
 # in local_conf.py.  This does not work for directories yet.
@@ -168,6 +171,7 @@ class HTMLResource:
     <center>
     <table border="0" cellpadding="4" cellspacing="1">
       <tr>
+        <td class="tablelink" onClick="document.location=\'index.rpy\'">Home</td>
         <td class="tablelink" onClick="document.location=\'guide.rpy\'">TV Guide</td>
         <td class="tablelink" onClick="document.location=\'record.rpy\'">Scheduled Recordings</td>
         <td class="tablelink" onClick="document.location=\'favorites.rpy\'">Favorites</td>
