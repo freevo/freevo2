@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/12/11 20:46:43  dischi
+# mplayer can check the mov by itself now (0.90-rc1)
+#
 # Revision 1.5  2002/12/03 20:01:53  dischi
 # improved dvdnav support
 #
@@ -164,53 +167,6 @@ class MPlayer:
             print "What is:      " + mpl
             return
 
-
-        # XXX testcode to play mov files
-        if util.match_suffix(filename, [ "mov", ]):
-            # Use the uid to make a user-unique filename
-            uid = os.getuid()
-
-            probe_cmd = config.MPLAYER_CMD + ' -ao null -nolirc -vo null -frames 0 '
-            probe_cmd += '\"%s\" 2> /dev/null > /tmp/mplayer_mov_%s.log' % (filename, uid)
-
-            os.system(probe_cmd + (' ; touch /tmp/mplayer_mov_done_%s' % uid))
-            timeout = time.time() + 5.0
-            while 1:
-                if time.time() >= timeout:
-                    print 'mov reading failed!'
-                    return
-
-                if os.path.isfile('/tmp/mplayer_mov_done_%s' % uid):
-                    break
-
-            lines = open('/tmp/mplayer_mov_%s.log' % uid).readlines()
-            vid   = -1
-            image = ''
-            codec = ''
-            for line in lines:
-                # get vid number
-                if line.find('MOV track #') == 0:
-                    vid = int(line[11])
-                # check if it's not an audio-only track
-                elif line.find('Image size') == 0:
-                    image = line
-                # check if it's not a jpeg still image
-                elif line.find('Fourcc:') == 0 and line.find('Fourcc: jpeg') != 0:
-                    codec = line
-
-                # test
-                elif line.find('----') == 0:
-                    if vid != -1 and image and codec:
-                        break
-                    vid   = -1
-                    image = ''
-                    codec = ''
-
-            if vid == -1:
-                print 'no informations found, let\'s hope it works'
-            else:
-                mpl += ' -vid %s' % vid
-            
         # Mplayer command and standard arguments
         mpl += (' ' + default_args + ' -v -vo ' + config.MPLAYER_VO_DEV)
             
