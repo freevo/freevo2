@@ -17,3 +17,5 @@ o Freevo fails on drives that are not valid devices for freevo_config.ROM_DRIVES
 o The menus do not have the same number of files per page.
 o Some Python modules like PyXMMS, OGG and encodings.py are missing from the 
   runtime.
+o DVD number of titles returns 100 (default) for some disks, why?
+
