@@ -68,7 +68,11 @@ class Plugin(plugin.Plugin):
 
         video = makeVideo('file', 'f1', os.path.basename(filename))
         fxd.setVideo(video)
-        if rec.subtitle:
+        if rec.episode:
+            fxd.info['episode'] = fxd.str2XML(rec.episode)
+            if rec.subtitle:
+                fxd.info['subtitle'] = fxd.str2XML(rec.subtitle)
+        elif rec.subtitle:
             fxd.info['tagline'] = fxd.str2XML(rec.subtitle)
         for i in rec.info:
             fxd.info[i] = fxd.str2XML(rec.info[i])
