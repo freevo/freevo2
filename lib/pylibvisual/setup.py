@@ -78,7 +78,7 @@ visual_ext = Extension('libvisual',
 
 # Setup #########################################################
 setup ( name = 'libvisual',
-        version = '0.2-alpha',
-        description = 'libvisual bindings for Freevo',
+        version = '0.2',
+        description = 'libvisual 0.2.0 bindings for Freevo',
         ext_modules = [visual_ext],
         )

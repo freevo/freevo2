@@ -1,17 +1,18 @@
 /*
  * Basic libvisual functionality module for Freevo.
  * Authored by: Viggo Fredriksen <viggo@katatonic.org> 2004
- * Released under GPL.
+ * Released under LGPL.
  * -----------------------------------------------------------------------------
  * TODO:
  *  - Add morphing for changing between plugins
- *  - Optimize set methods for faster (re)init
  *  - Add support for pyimlib2
+
  * --- What's working right now:
  *  - changing actor on the fly
  *  - changing size on the fly
  *  - changing input actor on the fly
  */
+
 #include "libvisual.h"
 
 /*
@@ -20,16 +21,11 @@
 static void
 bin_dealloc(Visual *self)
 {
-    /* This deallocation is what I have found to be working
-     * best, the examples shows an destroying self->bin,
-     * but I hade some leaks when doing this */
-    visual_actor_destroy(self->actor);
-    visual_video_free(self->video);
-    visual_input_destroy(self->input);
-    visual_bin_free(self->bin);
-    free(self->scrbuf);
+    visual_video_free_buffer( self->video );
+    visual_object_unref( (VisObject*)self->video );
+    visual_object_unref( (VisObject*)self->bin   );
+    visual_quit();
 
-    //self->ob_type->tp_free((PyObject*)self);
     PyMem_DEL(self);
 }
 
@@ -39,79 +35,206 @@ bin_dealloc(Visual *self)
 static int
 bin_init(Visual *self, PyObject *args, PyObject *kwds)
 {
-    /* default values */
-    self->depth = 24;
-    self->input_name = "mplayer";
-    if (!PyArg_ParseTuple(args, "s(ii)|si",
-			  &self->vis_name,   &self->width, &self->height,
-			  &self->input_name )) {
-        PyErr_SetString(PyExc_AttributeError, "wrong parameter");
-        return -1;
-    }
-    
-    /* Create the video container */
-    self->video = visual_video_new();
+    visual_init(NULL, NULL);
+    visual_log_set_verboseness(VISUAL_LOG_VERBOSENESS_NONE);
 
-    /* Create an actor */
-    self->actor = visual_actor_new(self->vis_name);
+    // Default values
+    self->depth         = 24;
+    self->changed_input = 0;
+    self->changed_actor = 0;
+    self->changed_res   = 0;
 
-    /* Realize the actor */
-    visual_actor_realize (self->actor);
+    // Create the video and bin containers
+    self->video = visual_video_new();   
+    self->bin   = visual_bin_new();
 
-    /* Link the video context to the actor */
-    visual_actor_set_video (self->actor, self->video);
-
-    /* Set the depth */
-    VisVideoDepth dpt = visual_video_depth_enum_from_value(self->depth);
-
-    /* Check if the user given depth is sane */
-    if (visual_video_depth_is_sane (dpt) == 0) {
-        PyErr_SetString(PyExc_RuntimeError, "visual_video_depth_is_sane");
-        return -1;
-    }
-
-    visual_video_set_depth (self->video, dpt);
-
-    /* Set dimension */
-    visual_video_set_dimension (self->video, self->width, self->height);
-
-
-    /* Negotiate with video, if needed, the actor will set up and enviroment
-     * for depth transformation and it does all the size negotation stuff */
-    if (visual_actor_video_negotiate (self->actor, 0, FALSE, FALSE) == -1) {
-      PyErr_SetString(PyExc_RuntimeError, "visual_actor_video_negotiate");
-      return -1;
-    }
-    
-    /* Now we know the size, allocate the buffer */
-    self->scrbuf = malloc (self->video->size);
-
-    /* Link the buffer to the video context */
-    visual_video_set_buffer (self->video, self->scrbuf);
-
-
-    /* Create the input plugin */
-    self->input = visual_input_new (self->input_name);
-
-    if (self->input == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "input == NULL");
-        return -1;
-    }
-      
-    /* Create a new bin, a bin is a container for easy
-     * management of an working input, actor, render, output pipeline */
-    self->bin = visual_bin_new ();
-
-    /* Add the actor, input, video to the bin */
-    visual_bin_connect (self->bin, self->actor, self->input);
-    visual_bin_realize (self->bin);
-    visual_bin_sync(self->bin, FALSE);
-
+    visual_bin_set_video(self->bin, self->video);
+    visual_bin_set_depth(self->bin,             VISUAL_VIDEO_DEPTH_24BIT);
+    visual_bin_set_supported_depth(self->bin,   VISUAL_VIDEO_DEPTH_24BIT);
+    visual_video_set_depth (self->video,        VISUAL_VIDEO_DEPTH_24BIT);
     return 0;
 }
 
 
 /* ***** Python Methods *******************************************************/
+
+/*
+ * Set log verbosity
+ */
+static PyObject *
+bin_set_log_verboseness(Visual *self, PyObject *args) {
+    int verbosity = -1;
+
+    if (!PyArg_ParseTuple(args, "i", &verbosity))
+        return (PyObject*) NULL;
+
+    switch(verbosity) {
+        case 0:
+           visual_log_set_verboseness(VISUAL_LOG_VERBOSENESS_NONE);
+           break;
+        case 1:
+           visual_log_set_verboseness(VISUAL_LOG_VERBOSENESS_LOW);
+           break;
+        case 2:
+           visual_log_set_verboseness(VISUAL_LOG_VERBOSENESS_MEDIUM);
+           break;
+        default:
+           visual_log_set_verboseness(VISUAL_LOG_VERBOSENESS_HIGH);
+           break;
+    }
+
+
+    RETURN_NONE;
+}
+
+
+/*
+ * Set next actor
+ */
+static PyObject *
+bin_set_nextactor(Visual *self, PyObject *args) {
+    char* name = NULL;
+
+    if (!PyArg_ParseTuple(args, "s", &name))
+        return (PyObject*) NULL;
+
+    if (visual_actor_valid_by_name(name) == 0)
+        RAISE(PyExc_Exception, "Invalid actor name");
+
+    self->changed_actor = 1;
+    self->actor_name = name;
+
+    RETURN_NONE;
+}
+
+
+
+/*
+ * Set next input
+ */
+static PyObject *
+bin_set_nextinput(Visual *self, PyObject *args) {
+    char* name = NULL;
+
+    if (!PyArg_ParseTuple(args, "s", &name))
+        return (PyObject*) NULL;
+
+    if (visual_input_valid_by_name(name) == 0) {
+        RAISE(PyExc_Exception, "Invalid input name");
+    }
+
+    self->changed_input = 1;
+    self->input_name = name;
+
+    RETURN_NONE;
+}
+
+
+/*
+ * Set next resolution
+ */
+static PyObject *
+bin_set_nextresolution(Visual *self, PyObject *args) {
+    int w = -1;
+    int h = -1;
+
+    /* valid input are width, height */
+    if (!PyArg_ParseTuple(args, "ii", &w, &h))
+        RAISE(PyExc_Exception, "Invalid argumets");
+    self->width = w;
+    self->height = h;
+    self->changed_res = 1;
+
+
+    RETURN_NONE;
+}
+
+
+/*
+ * Syncs all changes
+ */
+static PyObject *
+bin_sync(Visual *self) {
+
+    VisActor* actor = NULL;
+    VisInput* input = NULL;
+    
+
+    if(self->bin == NULL) {
+        RAISE(PyExc_Exception, "Libvisual has not been initialized");
+    }
+
+
+    // resolution has changed
+    if(self->changed_res == 1) {
+        //printf("changing res\n");
+        // Check if the user given depth is sane 
+        VisVideoDepth dpt = visual_video_depth_enum_from_value(self->depth);
+        if (visual_video_depth_is_sane (dpt) == 0)
+           RAISE(PyExc_Exception, "Invalid depth given");
+        visual_video_set_depth (self->video, dpt);
+
+        visual_video_set_dimension (self->video, self->width, self->height);
+    }
+
+    // input has changed
+    if(self->changed_input == 1) {
+        //printf("setting input\n");
+
+        // destroy the object
+        if(self->bin->input != NULL) {
+            //printf("Destroying input\n");
+            visual_object_unref((VisObject*)self->bin->input);        
+        }
+
+        input = visual_input_new(self->input_name);
+        visual_input_realize(input);
+        visual_bin_set_input(self->bin, input);
+    }
+
+    // actor has changed
+    if(self->changed_actor == 1) {
+        //printf("Changing actor\n");
+
+        // destroy the object
+        if(self->bin->actor != NULL) {
+            //printf("Destroying actor\n");
+            visual_object_unref((VisObject*)self->bin->actor);
+        }
+
+        actor = visual_actor_new(self->actor_name);
+        visual_actor_realize(actor);
+        visual_actor_set_video(actor, self->video);
+        visual_bin_set_actor(self->bin, actor);
+    }
+
+
+    // negotiate actor video
+    if(self->changed_actor || self->changed_res) {
+        //printf("negotiate\n");
+        if (visual_actor_video_negotiate (self->bin->actor, 0, FALSE, FALSE) != VISUAL_OK)
+            RAISE(PyExc_Exception, "Actor->video negotiation failed");
+    
+        // TODO: check if this is the correct place
+        if(self->changed_res) {
+             // create the video buffer
+             visual_video_allocate_buffer(self->video);
+        }
+    }
+
+
+    // reset changes
+    self->changed_actor = 0;
+    self->changed_input = 0;
+    self->changed_res   = 0;
+
+    // syncronize the bin
+    visual_bin_sync(self->bin, FALSE);
+ 
+    RETURN_NONE;
+}
+
+
 
 /*
  * Get input plugin names
@@ -140,68 +263,10 @@ bin_get_input_plugins(Visual *self)
 
 
 /*
- * Set input plugin
- */
-static PyObject *
-bin_set_input_plugin(Visual *self, PyObject *args)
-{
-
-    if (!PyArg_ParseTuple(args, "s", &self->input_name))
-        return (PyObject*) NULL;
-    if (visual_input_valid_by_name(self->input_name) == 0)
-        RAISE(PyExc_Exception, "Invalid input name");
-
-    visual_input_destroy(self->input);
-    self->input = visual_input_new(self->input_name);
-
-    /* Add the actor, input, video to the bin */
-    visual_bin_connect (self->bin, self->actor, self->input);
-    visual_bin_realize (self->bin);
-    visual_bin_sync(self->bin, FALSE);
-
-    RETURN_NONE;
-}
-
-
-/*
- * Set visualization plugin
- */
-static PyObject *
-bin_set_visualization_plugin(Visual *self, PyObject *args)
-{
-    if (!PyArg_ParseTuple(args, "s", &self->vis_name))
-        RAISE(PyExc_ValueError, "Wrong parameters");
-    /* check if the actor name is valid */
-    if (visual_input_valid_by_name(self->vis_name) == -1) {
-        RAISE(PyExc_Exception, "Invalid visualization plugin name");
-    }
-
-    /* destroy the old actor */
-    visual_actor_destroy(self->actor);
-
-    /* Create the actor */
-    self->actor = visual_actor_new(self->vis_name);
-
-    /* Realize the actor */
-    visual_actor_realize (self->actor);
-
-    /* Link the video context to the actor */
-    visual_actor_set_video (self->actor, self->video);
-
-    /* negotiate the actor and video */
-    if (visual_actor_video_negotiate (self->actor,0,FALSE,FALSE)==-1)
-        RAISE(PyExc_Exception, "Actor->video negotiation failed");
-
-    visual_bin_sync(self->bin, FALSE);
-
-    RETURN_NONE;
-}
-
-/*
  * Get visualization plugin names
  */
 static PyObject *
-bin_get_visualization_plugins(Visual *self)
+bin_get_actors(Visual *self)
 {
     char* name = NULL;
     PyObject *list = PyList_New(0);
@@ -223,71 +288,6 @@ bin_get_visualization_plugins(Visual *self)
 }
 
 /*
- * Get next visualization plugin name
- * XXX: This have had some problems, but somehow seems to work atm
- */
-static PyObject *
-bin_get_next_visualization_plugin(Visual *self) {
-    char *str;
-    str = visual_actor_get_next_by_name_nogl(self->vis_name);
-    return (PyObject*)Py_BuildValue("s",str);
-}
-
-
-/*
- * Get possible morph plugins
- */
-static PyObject *
-bin_get_morph_plugins(Visual *self)
-{
-    char* name = NULL;
-    PyObject *list = PyList_New(0);
-
-    do {
-        name = visual_morph_get_next_by_name(name);
-
-        if (name != NULL) {
-            PyObject *str = PyString_FromString(name);
-            Py_XINCREF(str);
-            PyList_Append(list, str);
-            Py_XDECREF(str);
-        }
-    } while (name != NULL);
-
-    Py_INCREF(list);
-    return list;
-}
-
-/*
- * Set resolution and depth for the visualization
- */
-static PyObject *
-bin_set_resolution(Visual *self, PyObject *args)
-{
-    /* valid input are width, height, depth or width, height */
-    if (!PyArg_ParseTuple(args, "ii",&self->width,&self->height))
-        return (PyObject*)NULL;
-
-    /* set the new dimensions */
-    visual_video_set_dimension (self->video, self->width, self->height);
-
-    /* negotiate with the actor */
-    if (visual_actor_video_negotiate (self->actor, 0, FALSE, FALSE) == -1)
-        RAISE(PyExc_Exception, "Actor->video negotiation failed");
-
-
-    /* create a new screen buffer */
-    free(self->scrbuf);
-    self->scrbuf = malloc (self->video->size);
-    visual_video_set_buffer (self->video, self->scrbuf);
-
-    /* syncronize */
-    visual_bin_sync (self->bin, FALSE);
-
-    RETURN_NONE;
-}
-
-/*
  * Return the currernt resolution
  */
 static PyObject *
@@ -295,6 +295,7 @@ bin_get_resolution(Visual *self)
 {
     return (PyObject*)Py_BuildValue("ii", self->width, self->height);
 }
+
 
 /*
  * The main polling method
@@ -307,64 +308,26 @@ bin_run(Visual *self, PyObject *args)
      if(visual_bin_run (self->bin) != 0) {
          return RAISE(PyExc_Exception, "Error while updating image");
      }
-#ifndef USE_IMLIB2
-     return PyBuffer_FromMemory(self->scrbuf, self->video->size);
-/*      return PyString_FromStringAndSize(self->scrbuf, self->video->size); */
-#else
-    Image_PyObject *image;
-    Image_PyObject *o;
-    image = imlib_create_image_using_copied_data(self->width, self->height, (DATA32*) self->scrbuf);
-    o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
-    o->image = image;
-    return (PyObject *)o;
-#endif // USE_IMLIB2
+     
+     return PyBuffer_FromMemory(self->video->pixels, self->video->size);
 }
-
-/*
- * Sets morphing on the current
- * playing visualization
- * TODO: Make it work
- */
-static PyObject *
-bin_set_morph(Visual *self, PyObject *args)
-{
-    RETURN_NONE;
-    char *m_name = NULL;
-    visual_bin_sync(self->bin, FALSE);
-
-   if (!PyArg_ParseTuple(args, "s",&m_name))
-        return (PyObject*)NULL;
-
-    visual_bin_set_morph_by_name (self->bin, m_name);
-    visual_bin_switch_set_style (self->bin, VISUAL_SWITCH_STYLE_MORPH);
-    visual_bin_switch_set_automatic (self->bin, TRUE);
-    /* When automatic is set on TRUE this defines in how many
-     * frames the morph should take place */
-    visual_bin_switch_set_steps (self->bin, 10);
-    visual_bin_switch_actor_by_name (self->bin, self->vis_name);
-
-    RETURN_NONE;
-}
-
 
 
 /****** Methodes for the class ************************************************/
 
 static PyMethodDef bin_methods[] =
 {
-{"get_inputs", (PyCFunction)bin_get_input_plugins,         METH_NOARGS },
-{"set_input",  (PyCFunction)bin_set_input_plugin,         METH_VARARGS },
-{"set_actor",  (PyCFunction)bin_set_visualization_plugin, METH_VARARGS },
-{"get_actors", (PyCFunction)bin_get_visualization_plugins, METH_NOARGS },
-{"get_next_actor",(PyCFunction)bin_get_next_visualization_plugin,METH_NOARGS},
-{"get_morphs", (PyCFunction)bin_get_morph_plugins,         METH_NOARGS },
-{"set_size",   (PyCFunction)bin_set_resolution,        METH_VARARGS },
-{"get_size",   (PyCFunction)bin_get_resolution,         METH_NOARGS },
-{"set_morph",  (PyCFunction)bin_set_morph,          METH_VARARGS },
-{"run",        (PyCFunction)bin_run,                 METH_VARARGS },
+{"get_inputs", (PyCFunction)bin_get_input_plugins,          METH_NOARGS },
+{"set_input",  (PyCFunction)bin_set_nextinput,              METH_VARARGS },
+{"set_actor",  (PyCFunction)bin_set_nextactor,              METH_VARARGS },
+{"get_actors", (PyCFunction)bin_get_actors,                 METH_NOARGS },
+{"set_size",   (PyCFunction)bin_set_nextresolution,         METH_VARARGS },
+{"get_size",   (PyCFunction)bin_get_resolution,             METH_NOARGS },
+{"get_frame",  (PyCFunction)bin_run,                        METH_NOARGS },
+{"sync",       (PyCFunction)bin_sync,                       METH_NOARGS },
+{"set_log_verboseness",   (PyCFunction)bin_set_log_verboseness,  METH_VARARGS },
 { NULL }
 };
-
 
 
 static PyTypeObject VisualType =
@@ -440,5 +403,4 @@ initlibvisual(void)
 
     Py_INCREF(&VisualType);
     PyModule_AddObject(m, "bin", (PyObject *)&VisualType);
-    visual_init(NULL, NULL);
 }
