@@ -75,7 +75,14 @@ class RemoteLirc:
         self.lirc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
         # Read directly from the remote control daemon, no translation
-        self.lirc.connect('/dev/lircd')
+        while 1:
+            try:
+                self.lirc.connect('/dev/lircd')
+                break
+            except:
+                print "Couldn't open /dev/lircd, trying again in 10 seconds..."
+                time.sleep(10)
+            
         self.cmds = config.RC_CMDS
 
     def get_cmd(self):
@@ -181,6 +188,10 @@ def print_cmds(cmds):
 def main():
     # Default is simulated remote
     mode = 'sim'
+
+    if DEBUG:
+        print 'remote.py:',
+        print sys.argv
     
     if len(sys.argv) > 1:
         if sys.argv[1] == '--remote=lirc':
