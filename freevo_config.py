@@ -646,14 +646,14 @@ VIDEO_SHOW_DATA_DIR = None
 VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
                          'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
                          'mp4', 'viv', 'nuv', 'mov', 'iso',
-                         'nsv', 'mkv' ]
+                         'nsv', 'mkv', 'ts' ]
 
 #
 # The list of filename suffixes that are used to match the files that
 # are played wih Xine.
 # 
 VIDEO_XINE_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'rm', 'divx', 'ogm',
-                      'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue' ]
+                      'asf', 'm2v', 'm2p', 'mp4', 'mov', 'cue', 'ts' ]
 
 #
 # Preferred video player
