@@ -64,8 +64,7 @@ def make_query(filename,dirtitle):
     
     a = mmpython.parse(filename)
 
-    # You really, really want fchksum for this, it's about twice as fast as raw python.
-    md5 = fchksum.fmd5t(filename)[0]
+    md5 = util.md5file(filename)
 
     # This is ugly, how do I clean it up?
     trackno = -1
