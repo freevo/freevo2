@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/11/19 19:03:29  dischi
+# add get_program_by_id
+#
 # Revision 1.7  2004/11/13 16:10:21  dischi
 # replace compat.py and config.py with a sysconfig variante
 #
@@ -332,8 +335,16 @@ class EPGDB:
         return self.execute('%s order by start' % query)
 
 
+    def get_programs_by_id(self, id):
+        query = 'select * from programs where id="%s"' % id
+        result = self.execute(query)
+        if result:
+            return result[0]
+        return []
+
+
     def remove_program(self, id):
-        query = 'delete from programs where id="%s' % id
+        query = 'delete from programs where id="%s"' % id
 
         # print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
