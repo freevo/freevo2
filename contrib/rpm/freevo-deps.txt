@@ -1,0 +1,173 @@
+Freevo Dependency List
+----------------------
+$Id$
+
+Version 0.4 2003/09/18	TC Wan (tcwan at cs dot usm dot my)
+
+> Contributed by Jorn A Hansen (jornh at person dot dk)
+>
+> It looks like most of the needed RPMs for Redhat based distros are
+> available on a couple of apt-rpm enabled RPM repositories that
+> work together so that their packages don't conflict.
+>
+> http://atrpms.physik.fu-berlin.de/     (ATrpms)
+> http://dag.wieers.com/home-made/apt/   (Dag)
+> http://freshrpms.net/                  (Freshrpms)
+> http://newrpms.sunsite.dk/             (Newrpms)
+>
+> http://atrpms.physik.fu-berlin.de/install.html tells you how to get
+> going with an  /etc/apt/sources.list pointing to these repositories.
+
+[Note: src & devel packages are not required unless you intend to rebuild the packages on your system]
+
+Package			RPM					Sub-dependencies			RPM
+-------			-------------------------------		-----------------------------		-------------------------------------------
+[Runtime - Core]
+================
+python 			python-2.2.2 (comes with RH 9) 
+			[should work ok?]
+			python-2.3 http://www.python.org
+			[RPM binary named python2.3 (!)]
+			[Most python packages need tweaking of spec file, possibly patches and recompilation]
+			# python2.3-2.3-3pydotorg.src.rpm
+			# python2.3-2.3-3pydotorg.i386.rpm
+			# python2.3-devel-2.3-3pydotorg.i386.rpm
+			# python2.3-docs-2.3-3pydotorg.i386.rpm
+			# python2.3-tkinter-2.3-3pydotorg.i386.rpm
+			# python2.3-tools-2.3-3pydotorg.i386.rpm
+
+pygame / python-game	http://dag.wieers.com/home-made/apt/
+			# python-game-1.5.6-0.dag.src.rpm 
+			# python-game-1.5.6-0.dag.rh90.i386.rpm 
+			# python-game-doc-1.5.6-0.dag.rh90.i386.rpm 
+			http://www.pygame.org
+			# pygame-doc-1.5.6-1.noarch.rpm		SDL 1.2.6				http://www.libsdl.org
+			# pygame-1.5.6-1.src.rpm		[Dxr3 support need patches + ffmpeg]	# SDL-1.2.6-1.src.rpm
+			# pygame-1.5.6-1.i386.rpm							# SDL-1.2.6-1.i386.rpm 
+													# SDL-devel-1.2.6-1.i386.rpm
+								SDL_image 1.2.3				http://www.libsdl.org/projects/SDL_image/
+													# SDL_image-1.2.3-1.src.rpm
+													# SDL_image-1.2.3-1.i386.rpm
+													# SDL_image-devel-1.2.3-1.i386.rpm
+								SDL_ttf 2.0.6 (need patches?)		http://www.libsdl.org/projects/SDL_ttf/
+													# SDL_ttf-2.0.6-1.src.rpm
+													# SDL_ttf-2.0.6-1.i386.rpm
+													# SDL_ttf-devel-2.0.6-1.i386.rpm
+								Freetype 2.1.4				RH RawHide Mirror - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
+													# freetype-2.1.4-4.1.src.rpm
+													# freetype-2.1.4-4.1.i386.rpm
+													# freetype-devel-2.1.4-4.1.i386.rpm
+								SDL_mixer 1.2.5				http://www.libsdl.org/projects/SDL_mixer/
+													# SDL_mixer-1.2.5-1.src.rpm
+													# SDL_mixer-1.2.5-1.i386.rpm
+													# SDL_mixer-devel-1.2.5-1.i386.rpm
+								smpeg 0.4.4				http://dag.wieers.com/home-made/apt/
+													# smpeg-0.4.4-0.dag.src.rpm
+													# smpeg-0.4.4-0.dag.rh90.i386.rpm
+													# smpeg-devel-0.4.4-0.dag.rh90.i386.rpm
+								numeric 23.1 (numpy 23.1)		http://dag.wieers.com/home-made/apt/
+													# python-numeric-23.1-0.dag.src.rpm
+													# python-numeric-23.1-0.dag.rh90.i386.rpm
+		
+mmpython		http://www.sf.net/projects/mmpython
+			[mmpython-0.1 RPMs available from freevo downloads]
+
+PyXML / python-xml	PyXML-0.8.3 
+			RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
+			http://pyxml.sourceforge.net/
+
+
+python-mx-base / mx	mx-2.0.3 (comes with RH 9)
+			http://dag.wieers.com/home-made/apt/
+			# python-mx-base-2.0.4-0.dag.src.rpm
+			# python-mx-base-2.0.4-0.dag.rh90.i386.rpm
+
+python-imaging / PIL 	http://dag.wieers.com/home-made/apt/	tcl, tk (comes with RH 9)
+			# python-imaging-1.1.4-0.dag.src.rpm
+			# python-imaging-1.1.4-0.dag.rh90.i386.rpm
+			[PIL-1.1.4 RPMs available from freevo downloads]	*No tcl, tk dependencies*
+
+python-fchksum		http://www.dakotacom.net/~donut/programs/fchksum.html
+			[python-fchksum1.7.1 RPMs available from freevo downloads]
+
+CDDB / cddb-py		http://sourceforge.net/projects/cddb-py/
+			[1.4, RPMs available from freevo downloads]
+
+libexif			http://freshrpms.net/
+			# libexif-0.5.10-1.fr.src.rpm
+			# libexif-0.5.10-1.fr.i386.rpm
+			# libexif-devel-0.5.10-1.fr.i386.rpm
+			
+jpegtran		libjpeg-6b (comes with RH 9)
+
+aumix-2.8		RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
+
+[Runtime - Recording]
+=====================
+
+python-twisted		http://twistedmatrix.com/products/download
+			[1.0.7, RPMs available from freevo downloads]
+
+lame-3.93.1		http://freshrpms.net/ 
+
+oggenc			vorbis-tools-1.0 (comes with RH 9)	libvorbis-1.0 (comes with RH 9)
+								libogg-1.0 (comes with RH 9)
+								libao-0.8.3 (comes with RH 9)
+
+pyogg			http://www.andrewchatham.com/pyogg/	libogg (comes with RH 9)
+			[1.3, RPMs available from freevo downloads]
+
+pyao			http://www.andrewchatham.com/pyogg/	libao (comes with RH 9)
+			[0.82, RPMs available from freevo downloads]
+
+pyvorbis		http://www.andrewchatham.com/pyogg/	pyogg, libogg, libvorbis (comes with RH 9)
+			[1.3, RPMs available from freevo downloads]
+
+cdparanoia		cdparanoia-alpha9.8 (comes with RH 9)
+
+mp1e-1.9.3		http://zapping.sourceforge.net [mp1e-1.9.3 RPMs available from freevo downloads]
+
+ffmpeg-0.4.7		Dag/Freshrpms				imlib2					Freshrpms
+
+
+[Runtime - TV Schedules]
+========================
+xmltv-0.5.16		http://atrpms.physik.fu-berlin.de/name/xmltv/
+			[various, see webpage]			Perl (RH Base)
+
+[Runtime - Optional]
+====================
+lirc-0.6.6		Dag/Freshrpms (Dag looks more modular)
+
+python-pylirc		http://sourceforge.net/projects/pylirc/
+			# pylirc-0.0.4-1.src.rpm		Lirc 0.6.6 (see Apps)
+			# pylirc-0.0.4-1.i386.rpm
+
+pylcd			?
+
+pygphoto		?
+
+pyxmms			?
+
+libgphoto2		http://www.gphoto.org/
+			[2.1.2]
+
+expat			expat-1.95.5 (comes with RH 9)
+swig			swig-1.1p5 (comes with RH 9)
+
+
+[Apps-Core]
+===========
+{need at least xine + tvtime for X11, or mplayer for fbdev}
+tvtime-0.9.10 		http://dag.wieers.com/home-made/apt/
+mplayer-0.90		Freshrpms/ATrpms
+xine-0.9.22		http://freshrpms.net/ 
+
+[Apps-Games]
+============
+xmame-0.72.1		http://freshrpms.net/ 
+zsnes ??		http://newrpms.sunsite.dk/
+
+													# imlib2-1.0.6-fr3.src.rpm
+													# imlib2-1.0.6-fr3.i386.rpm
+													# imlib2-devel-1.0.6-fr3.i386.rpm
