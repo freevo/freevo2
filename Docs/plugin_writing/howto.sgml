@@ -378,7 +378,10 @@
 
     <sect1>
       <title>IdlebarPlugin</title>
-      <para><emphasis>not written yet</emphasis></para>
+      <para>Idlebar plugins are deceptively simple. Only two methods are reccomedded to be implemented. There is the init method which most often calls the parent init and sets any class variables based on arguments to it. The other method is draw. Draw as its name suggests draws in the idlebar area assigned to the plugin.</para>
+      <para>Draw is where most of the action happens. Basically you get a reference to the plugin, the X coordinate to start drawing at, an osd object to use to call all the drawing methods, and a tuple containing a type and object (what do they do? have never seen them used).</para>
+      <para>The most complicated part is probably the drawing methods. Basically we can write text and, draw images. The osd variable actually is the Plugin_Area class which is a skin_area subclass and not the real osd class you would expect. You can look in freevo/src/skins/main/area.py and freevo/src/skins/main/main.py for class definitions and possible methods. The osd variable is also how we get and set the font we wish to use.</para>
+      <para>Here is a full out example:</para>
       <programlisting><inlinegraphic entityref="idlebarpluginex"></inlinegraphic>
       </programlisting>
     </sect1>
