@@ -20,6 +20,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/10/23 21:55:30  outlyer
+# If we run into HTTP problems, don't keep slamming the METAR server, wait
+# for the next update.
+#
 # Revision 1.46  2003/10/20 20:48:21  dischi
 # wrong exception handled
 #
@@ -367,6 +371,9 @@ class weather(IdleBarPlugin):
                     cachefile.close()
                 except IOError:
                     print 'WEATHER: error reading cache. Using fake weather.'
+                    cachefile.write('0' + '\n')
+                    cachefile.write('sun.png' + '\n')
+                    cachefile.close()
                     return '0', 'sun.png'
 
         else:
