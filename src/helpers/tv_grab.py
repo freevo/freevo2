@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/03/28 15:04:42  rshortt
+# Bugfix.
+#
 # Revision 1.5  2004/03/16 01:04:18  rshortt
 # Changes to stop two processes tripping over the creation of the epg pickle file.
 #
@@ -89,7 +92,7 @@ def grab():
             print 'Sorting listings.'
             os.system('%s --output %s %s' % ( config.XMLTV_SORT,
                                               xmltvtmp+'.1',
-                                              config.XMLTV_FILE ))
+                                              xmltvtmp ))
 
             shutil.copyfile(xmltvtmp+'.1', xmltvtmp)
             os.unlink(xmltvtmp+'.1')
