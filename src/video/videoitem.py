@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/03/30 18:04:46  dischi
+# update to new gui interface
+#
 # Revision 1.26  2003/03/30 16:50:20  dischi
 # pass xml_file definition to submenus
 #
@@ -579,10 +582,8 @@ class VideoItem(Item):
                               icon='skins/icons/misc/cdrom_mount.png')
                 osd.update()
             else:
-                pop = PopupBox('Scanning disc, be patient...',
+                pop = PopupBox(menuw, 'Scanning disc, be patient...',
                                icon='skins/icons/misc/cdrom_mount.png')
-                menuw.add_child(pop)
-                pop.osd.focused_app = pop
                 pop.show()
 
 
