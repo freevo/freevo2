@@ -160,11 +160,6 @@ New values: -vop crop=704:352:8:62
 
 Add "-ofps 23.976" if there are a lot of "skip frame!!!" messages (inverse telecine).
 
-Scale and crop a 2.35:1 DVD
-usr/local/bin/mencoder -ovc divx4 -divx4opts br=800:key=300:q=5 \
-  -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=848:336,crop=720:336:0:72 \
-   -o tst.avi -dvd 1 -alang en
-
 Record with NVrec:
 DIVX4rec -F 300000 -norm NTSC -input Composite1 -m -r 22050 -w 320 -h 240 \
 -ab 80 -vg 100 -vb 700 -mixsrc /dev/dsp:line -mixvol /dev/dsp:line:80 -o 
