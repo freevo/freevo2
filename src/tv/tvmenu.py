@@ -29,6 +29,9 @@ skin = skin.get_singleton() # Create the Skin object
 
 DEBUG = config.DEBUG
 
+TRUE = 1
+FALSE = 0
+
 CHAN_NO_DATA = 'This channel has no data loaded'
 
 
@@ -72,6 +75,10 @@ class TVmenu:
         self.start_channel = start_channel
         self.selected      = selected
 
+        self.display_up_arrow   = FALSE
+        self.display_down_arrow = FALSE
+
+
         # table header
         table += [ ['Chan'] ]
         for i in range(self.n_cols):
@@ -88,11 +95,15 @@ class TVmenu:
         n = 0
         for chan in channels:
             if n >= self.n_items:
+                self.display_down_arrow = TRUE
                 break
             
             if start_channel != None and chan.id == start_channel:
                 found_1stchannel = 1            
 
+            if not found_1stchannel:
+                self.display_up_arrow = TRUE
+                
             if found_1stchannel:
                 if not chan.programs:
                     prg = epg_types.TvProgram()
