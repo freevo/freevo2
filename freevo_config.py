@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.02
+LOCAL_CONF_VERSION  = 5.03
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -191,7 +191,11 @@ LOCAL_CONF_CHANGES = [
      '''Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu'''),
     (5.02,
      '''Add XINE_ARGS_DEF to set xine arguments and OSD_BUSYICON_TIMER to show
-     a busy icon when the menu takes too much time building''') ]
+     a busy icon when the menu takes too much time building'''),
+    (5.03,
+     '''Add OVERLAY_DIR_STORE_THUMBNAILS and OVERLAY_DIR_STORE_MMPYTHON_DATA
+     to make it possible to store these metadata in the OVERLAY_DIR. To
+     better support multi user using the same OVERLAY_DIR, set UMASK''' ) ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -308,6 +312,23 @@ CHILDAPP_DEBUG = 0
 OVERLAY_DIR = ''
 
 #
+# use OVERLAY_DIR for storing the thumbnails
+#
+OVERLAY_DIR_STORE_THUMBNAILS = False
+
+#
+# use OVERLAY_DIR for storing mmpython meta data
+#
+OVERLAY_DIR_STORE_MMPYTHON_DATA = True
+
+#
+# umask for all files
+# 022 means only the user has write access. If you share your Freevo
+# installation with different users, set it to 002
+#
+UMASK = 022
+
+#
 # suffix for playlist files
 #
 PLAYLIST_SUFFIX = [ 'm3u' ]
@@ -334,7 +355,7 @@ plugin.activate('tv', level=10)
 plugin.activate('video', level=20)
 plugin.activate('audio', level=30)
 plugin.activate('image', level=40)
-plugin.activate('base.shutdown', level=50)
+plugin.activate('shutdown', level=50)
 
 if CONF.xmame or CONF.snes:
     plugin.activate('games', level=45)
