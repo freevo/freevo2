@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/14 18:49:09  dischi
+# also dump raw fxd at saving
+#
 # Revision 1.8  2004/01/14 18:42:47  dischi
 # add new helper function
 #
@@ -141,6 +144,8 @@ class FXDtree(qp_xml.Parser):
         self._dump_recurse(f, self.tree)
         f.write('\n')
         f.close()
+
+        util.save_pickle(self.tree, vfs.getoverlay(filename + '.raw'))
 
         
     def _dump_recurse(self, f, elem, depth=0):
