@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/02 10:50:40  dischi
+# remove debug
+#
 # Revision 1.3  2003/11/02 09:24:35  dischi
 # Check for libs and make it possible to install runtime from within
 # freevo
@@ -49,6 +52,5 @@ import sys
 # with util in only one file
 
 if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
-    print sys.argv[0]
     from misc import *
     from fileops import *
