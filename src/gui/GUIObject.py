@@ -7,6 +7,11 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/07/13 19:35:44  rshortt
+# Change osd.focused_app to a function that returns the last object in
+# app_list.  Maintaining this list is helpfull for managing 'toplevel'
+# GUIObject based apps (popup types).
+#
 # Revision 1.24  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -395,14 +400,17 @@ class GUIObject:
 
 
     def blit_parent(self):
-        if self.parent.surface:
+        if self.osd.app_list.count(self):
+            p = self.osd.screen
+        elif self.parent.surface:
             p = self.parent.surface
         else:
             p = self.osd.screen
 
-        self.bg_surface = pygame.Surface((self.width, self.height))
-        self.bg_surface.blit(p, (0,0), 
-                             (self.left, self.top, self.width, self.height))
+        if not self.bg_surface:
+            self.bg_surface = pygame.Surface((self.width, self.height))
+            self.bg_surface.blit(p, (0,0), 
+                                 (self.left, self.top, self.width, self.height))
 
         p.blit(self.surface, self.get_position())
 
@@ -465,16 +473,8 @@ class GUIObject:
         if DEBUG: print 'parent: %s' % self.parent
         if self.parent:
             self.parent.children.remove(self)
-            if self.osd.focused_app == self:
-                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
-                                 self.osd.focused_app
-                self.osd.focused_app = self.parent
-                if self.parent.event_context:
-                    rc.set_context(self.parent.event_context) 
-                if DEBUG: print 'GUIObject.destroy(): focused_app=%s' % \
-                                 self.osd.focused_app
-            else:
-                if DEBUG: print 'focus has %s not %s' % (self.osd.focused_app, self)
+
+        self.osd.remove_app(self)
                 
         self.hide()
         if self.parent:

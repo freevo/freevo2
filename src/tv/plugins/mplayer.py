@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/07/13 19:35:44  rshortt
+# Change osd.focused_app to a function that returns the last object in
+# app_list.  Maintaining this list is helpfull for managing 'toplevel'
+# GUIObject based apps (popup types).
+#
 # Revision 1.11  2003/07/11 19:47:09  dischi
 # close file after parsing
 #
@@ -296,8 +301,8 @@ class MPlayer:
         self.prev_app = rc.app()
         rc.app(self)
 
-        if osd.focused_app:
-            osd.focused_app.hide()
+        if osd.focused_app():
+            osd.focused_app().hide()
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -327,8 +332,8 @@ class MPlayer:
         self.thread.mode_flag.set()
 
         rc.app(self.prev_app)
-        if osd.focused_app:
-            osd.focused_app.show()
+        if osd.focused_app():
+            osd.focused_app().show()
 
         while self.thread.mode == 'stop':
             time.sleep(0.05)

@@ -10,6 +10,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/07/13 19:35:44  rshortt
+# Change osd.focused_app to a function that returns the last object in
+# app_list.  Maintaining this list is helpfull for managing 'toplevel'
+# GUIObject based apps (popup types).
+#
 # Revision 1.21  2003/06/25 02:27:39  rshortt
 # Allow 'frame' containers to grow verticly to hold all contents.  Also
 # better control of object's background images.
@@ -138,11 +143,11 @@ class PopupBox(Container):
                            vertical_expansion)
 
         if not parent or parent == 'osd':
-            parent = self.osd.focused_app
+            parent = self.osd.app_list[0]
         parent.add_child(self)
 
         if DEBUG: print 'set focus to %s' % self
-        self.osd.focused_app = self
+        self.osd.add_app(self)
 
         self.event_context = 'input'
         rc.set_context(self.event_context) 

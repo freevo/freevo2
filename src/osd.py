@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2003/07/13 19:35:44  rshortt
+# Change osd.focused_app to a function that returns the last object in
+# app_list.  Maintaining this list is helpfull for managing 'toplevel'
+# GUIObject based apps (popup types).
+#
 # Revision 1.68  2003/07/13 14:13:13  rshortt
 # If osd.update(rect) fails just osd.update().
 #
@@ -119,7 +124,7 @@ import util
 import md5
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
-import config
+import config, rc
 
 # The PyGame Python SDL interface.
 import pygame
@@ -341,7 +346,7 @@ class OSD:
         init the osd
         """
         self.fullscreen = 0 # Keep track of fullscreen state
-        self.focused_app = None
+        self.app_list = []
 
         self.bitmapcache = objectcache.ObjectCache(10, desc='bitmap')
         self.font_info_cache = {}
@@ -408,6 +413,27 @@ class OSD:
         # Remove old screenshots
         os.system('rm -f /tmp/freevo_ss*.bmp')
         self._screenshotnum = 1
+
+
+    def focused_app(self):
+        if len(self.app_list):
+            return self.app_list[-1]
+        else:
+            return None
+
+
+    def add_app(self, app):
+        self.app_list.append(app)
+
+
+    def remove_app(self, app):
+        _times = self.app_list.count(app)
+        for _time in range(_times):
+            self.app_list.remove(app)
+        if _times and hasattr(self.focused_app(), 'event_context'):
+            if DEBUG: print 'app is %s' % self.focused_app()
+            if DEBUG: print 'Setting context to %s' % self.focused_app().event_context
+            rc.set_context(self.focused_app().event_context)
 
 
     def _cb(self):

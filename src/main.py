@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/07/13 19:35:44  rshortt
+# Change osd.focused_app to a function that returns the last object in
+# app_list.  Maintaining this list is helpfull for managing 'toplevel'
+# GUIObject based apps (popup types).
+#
 # Revision 1.52  2003/07/02 20:06:04  dischi
 # turn off more mmpython debug
 #
@@ -244,7 +249,7 @@ class MainMenu(Item):
 
         mainmenu = menu.Menu('FREEVO MAIN MENU', items, item_types='main', umount_all = 1)
         menuwidget.pushmenu(mainmenu)
-        osd.focused_app = menuwidget
+        osd.add_app(menuwidget)
 
     def eventhandler(self, event = None, menuw=None, arg=None):
         """
@@ -339,8 +344,9 @@ def main_func():
                     if DEBUG: print 'no eventhandler for event %s' % event
 
         else:
-            if osd.focused_app:
-                osd.focused_app.eventhandler(event)
+            app = osd.focused_app()
+            if app:
+                app.eventhandler(event)
             else:
                 if DEBUG: print 'no target for events given'
                 
