@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/11/27 19:07:50  dischi
+# add exec before/after support
+#
 # Revision 1.9  2004/09/27 18:43:42  dischi
 # moved input handling to inputs/plugins/sdl.py
 #
@@ -41,6 +44,7 @@
 
 # basic python imports
 import pygame
+import os
 
 # mevas imports
 from mevas.displays.pygamecanvas import PygameCanvas
@@ -58,7 +62,9 @@ class Display(PygameCanvas):
         self.running = True
         self.animation_possible = True
         plugin.activate('input.sdl')
-        
+        if config.OSD_SDL_EXEC_AFTER_STARTUP:
+            print config.OSD_SDL_EXEC_AFTER_STARTUP
+            os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
         
     def hide(self):
         """
@@ -86,7 +92,8 @@ class Display(PygameCanvas):
             pygame.display.quit()
             self.freeze()
             self.running = False
-
+            if config.OSD_SDL_EXEC_AFTER_CLOSE:
+                os.system(config.OSD_SDL_EXEC_AFTER_CLOSE)
         
     def restart(self):
         """
