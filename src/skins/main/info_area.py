@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/13 20:28:35  dischi
+# fix alignment right/center with MAX
+#
 # Revision 1.16  2004/02/12 12:21:36  dischi
 # support "0" as result
 #
@@ -387,7 +390,6 @@ class Info_Area(Skin_Area):
                 r = Geometry( x, y, element.width, element.height)
                 r = self.get_item_rectangle(r, self.content.width - x,
                                             self.content.height - y )[ 2 ]
-
                 if element.height > 0:
                     height = min(r.height, element.height)
                 else:
@@ -404,9 +406,11 @@ class Info_Area(Skin_Area):
                 if isinstance( element.width, int ):
                     if element.width <= 0:
                         element.width = min( m_width, r.width )
-                else:
+                elif element.align == 'left':
                     element.width = min( m_width, r.width )
-
+                else:
+                    element.width = r.width
+                    
                 if isinstance( element.height, int ) or element.height == 'line_height':
                     if element.height <= 0 or element.height == 'line_height':
                         element.height = m_height
