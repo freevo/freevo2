@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/12/14 17:04:40  dischi
+# move SkinObjects to screen.py
+#
 # Revision 1.20  2003/12/06 13:43:02  dischi
 # more cleanup
 #
@@ -95,20 +98,12 @@ import util
 import xml_skin
 import screen
 
+SkinObjects = screen.SkinObjects
+
+
 # Create the OSD object
 osd = osd.get_singleton()
 
-
-class SkinObjects:
-    """
-    object which stores the different types of objects
-    an area wants to draw
-    """
-    def __init__(self):
-        self.bgimages   = []
-        self.rectangles = []
-        self.images     = []
-        self.text       = []
 
 class Geometry:
     """
@@ -241,7 +236,6 @@ class Skin_Area:
         bg_rect = ( osd.width, osd.height, 0, 0 )
         a_rect  = ( osd.width, osd.height, 0, 0 )
         c_rect  = ( osd.width, osd.height, 0, 0 )
-
 
         for b in self.tmp_objects.bgimages:
             try:
