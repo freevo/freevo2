@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/10 19:07:42  dischi
+# no need for the eventhandler anymore
+#
 # Revision 1.9  2003/12/09 20:32:29  dischi
 # fix plugin to match the new player structure
 #
@@ -17,13 +20,6 @@
 #
 # Revision 1.7  2003/09/19 22:10:11  dischi
 # check self.player before using it
-#
-# Revision 1.6  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.5  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -102,11 +98,3 @@ class PluginInterface(plugin.MainMenuPlugin):
         # hide the menu and show the player
         menuw.hide()
         gui.show()
-
-
-    def eventhandler(self, event, menuw=None):
-        gui = audio.player.get()
-        if gui and gui.player.is_playing() and event == AUDIO_PLAY_END:
-            self.player.eventhandler(event=event)
-            return True
-        return False

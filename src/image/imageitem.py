@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/12/10 19:08:43  dischi
+# no need for the eventhandler anymore
+#
 # Revision 1.16  2003/12/07 19:09:24  dischi
 # add <slideshow> fxd support with background music
 #
@@ -138,14 +141,3 @@ class ImageItem(Item):
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()
-
-
-    def eventhandler(self, event, menuw=None):
-        """
-        pass background music event to the correct handler
-        """
-        if event == AUDIO_PLAY_END and hasattr(self.parent, 'background_playlist') \
-           and self.parent.background_playlist:
-            self.parent.background_playlist.eventhandler(PLAY_END)
-        Item.eventhandler(self, event, menuw)
-        
