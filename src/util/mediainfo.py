@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/23 19:27:07  dischi
+# fix mmpython init
+#
 # Revision 1.30  2004/02/16 20:36:42  dischi
 # fix crash
 #
@@ -277,7 +280,7 @@ class MMCache(Cache):
 
     def simplify(self, object):
         """
-        mmpython has huge objects to cashe, we don't them
+        mmpython has huge objects to cache, we don't need them.
         This function simplifies them to be only string, intger, dict or
         list of one of those above. This makes the caching much faster
         """
@@ -642,6 +645,23 @@ def load_cache(dirname):
     mmpython_cache.load_cache(dirname)
     meta_cache.load_cache(dirname)
     
+
+
+
+#
+# setup mmpython
+#
+
+if config.DEBUG > 2:
+    mmpython.mediainfo.DEBUG = config.DEBUG
+    mmpython.factory.DEBUG   = config.DEBUG
+else:
+    mmpython.mediainfo.DEBUG = 0
+    mmpython.factory.DEBUG   = 0
+
+mmpython.USE_NETWORK = config.USE_NETWORK
+mmpython.disc.discinfo.CREATE_MD5_ID = config.MMPYTHON_CREATE_MD5_ID
+
 
 
 # some checking when starting Freevo

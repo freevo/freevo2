@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.117  2004/02/23 19:27:07  dischi
+# fix mmpython init
+#
 # Revision 1.116  2004/02/14 13:05:03  dischi
 # do not call skin.get_singleton() anymore
 #
@@ -317,18 +320,6 @@ if len(sys.argv) >= 2:
         shutdown(exit=True)
 
 
-
-# setup mmpython
-
-if config.DEBUG > 2:
-    mmpython.mediainfo.DEBUG = config.DEBUG
-    mmpython.factory.DEBUG   = config.DEBUG
-else:
-    mmpython.mediainfo.DEBUG = 0
-    mmpython.factory.DEBUG   = 0
-
-mmpython.USE_NETWORK = config.USE_NETWORK
-mmpython.disc.discinfo.CREATE_MD5_ID = config.MMPYTHON_CREATE_MD5_ID
 
 os.umask(config.UMASK)
 
