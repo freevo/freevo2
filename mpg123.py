@@ -79,7 +79,7 @@ class MPG123:
         self.playlist = playlist
         
         if not os.path.isfile(filename):
-            osd.clearscreen()
+            osd.clearscreen(0xffffff)
             osd.drawstring('File "%s" not found!' % filename, 30, 280)
             time.sleep(2.0)
             menuwidget.refresh()
@@ -99,7 +99,12 @@ class MPG123:
 	    # Check size to adjust placemen
 	    (w,h) = util.pngsize(cover_logo)
 	    # Calculate best placement
-	    logox = int(osd.width) - int(w) - 25
+	    logox = int(osd.width) - int(w) - 55
+	    # Only draw the cover if the file exists. We'll
+	    # use the standard imghdr function to check if
+	    # it's a real png, and not a lying one :)
+	    if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
+	    	osd.drawbitmap(cover_logo,logox,80)
 
             osd.drawstring('Title: %s' % id.title, 30, 80)
             osd.drawstring('Artist: %s' % id.artist, 30, 110)
@@ -107,11 +112,6 @@ class MPG123:
             osd.drawstring('Year: %s' % id.year, 30, 170)
 	    osd.drawstring('Track: %s' % id.track, 30, 200)
 
-	    # Only draw the cover if the file exists. We'll
-	    # use the standard imghdr function to check if
-	    # it's a real png, and not a lying one :)
-	    if os.path.isfile(cover_logo) and imghdr.what(cover_logo):
-	    	osd.drawbitmap(cover_logo,logox,80)
         osd.update()
         
         
