@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/08 23:15:42  outlyer
+# Hyphenated words and abbreviations should be upper case in a title.
+#
 # Revision 1.3  2003/10/26 17:57:26  dischi
 # do not use tmp as default
 #
@@ -232,7 +235,7 @@ def title_case(phrase):
 
     s = ''
     for letter in phrase:
-        if s and s[-1] == ' ' or s == '':
+        if s and s[-1] == ' ' or s == '' or s[-1] == '-' or s[-1] == '.':
             s += string.upper(letter)
         elif letter == '_':
                 s += ' '
