@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/01/25 15:37:06  dischi
+# adjust to vfs and amazon changes
+#
 # Revision 1.25  2004/01/16 12:20:16  dischi
 # o catch all exceptions inside amazon.py
 # o add plugin for 'dir' if album and artist are set
@@ -157,12 +160,21 @@ class PluginInterface(plugin.ItemPlugin):
         # don't allow this for items in a playlist
         if item.type == 'audio' and item.parent.type == 'playlist':
             return []
+
+        # do don't call this when we have an image
+        if item.type == 'audiocd' and item.image:
+            return []
+
+        # do don't call this when we have an image
+        if item.type == 'audio' and item.filename and \
+           vfs.isfile(os.path.join(os.path.join(dirname(item.filename), 'cover.jpg'))):
+            return []
         
-        if item.type == 'audio' or item.type == 'audiocd':
+        if item.type in ('audio', 'audiocd', 'dir'):
             try:
                 # use title for audicds and album for normal data
                 if self.item.getattr('artist') and \
-                   ((self.item.getattr('album') and item.type == 'audio') or \
+                   ((self.item.getattr('album') and item.type in ('audio', 'dir')) or \
                     (self.item.getattr('title') and item.type == 'audiocd')):
                     return [ ( self.cover_search_file, _( 'Find a cover for this music' ),
                                'imdb_search_or_cover_search') ]
@@ -188,10 +200,6 @@ class PluginInterface(plugin.ItemPlugin):
                 if config.DEBUG:
                     print _( "WARNING" ) + ": " +\
                           _( "Unknown CD, cover searching is disabled" )
-
-        if item.type == 'dir' and item.getattr('album') and item.getattr('artist'):
-            return [ ( self.cover_search_file, _( 'Find a cover for this music' ),
-                       'imdb_search_or_cover_search') ]
         return []
 
 
@@ -207,7 +215,6 @@ class PluginInterface(plugin.ItemPlugin):
             album = self.item.getattr('title')
 
         artist = self.item.getattr('artist')
-
         search_string = '%s %s' % (artist,album)
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
@@ -216,14 +223,6 @@ class PluginInterface(plugin.ItemPlugin):
             box.destroy()
             dict_tmp = { "artist": str(artist), "album": str(album) }
             box = PopupBox(text=_( 'No matches for %(artist)s - %(album)s' ) % dict_tmp )
-            box.show()
-            time.sleep(2)
-            box.destroy()
-            return
-
-        except amazon.ParseError:
-            box.destroy()
-            box = PopupBox(text=_( 'The cover provider returned bad information.' ) )
             box.show()
             time.sleep(2)
             box.destroy()
@@ -309,7 +308,7 @@ class PluginInterface(plugin.ItemPlugin):
         
         #filename = os.path.splitext(self.item.filename)[0]
         if self.item.type == 'audiocd':
-            filename = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR,
+            filename = '%s/disc/metadata/%s.jpg' % (config.OVERLAY_DIR,
                                                     self.item.info['id'])
         elif self.item.type == 'dir':
             filename = os.path.join(self.item.dir, 'cover.jpg')
@@ -321,6 +320,15 @@ class PluginInterface(plugin.ItemPlugin):
         m.write(fp.read())
         m.close()
         fp.close()
+
+        # try to crop the image to avoid ugly borders
+        try:
+            import Image
+            image = Image.open(filename)
+            width, height = image.size
+            image.crop((2,2,width-4, height-4)).save(filename)
+        except:
+            pass
 
         if self.item.type in ('audiocd', 'dir'):
             self.item.image = filename
