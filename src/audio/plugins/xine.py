@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/08 13:20:26  dischi
+# support for AUDIOCD plugin type
+#
 # Revision 1.7  2003/11/08 10:00:59  dischi
 # fix cd playback
 #
@@ -70,6 +73,8 @@ import plugin
 class PluginInterface(plugin.Plugin):
     """
     Xine plugin for the video player.
+
+    Set AUDIO_XINE_AUDIOCD_ONLY to activate this plugin only for audio cds
     """
     def __init__(self):
         plugin.Plugin.__init__(self)
@@ -109,7 +114,10 @@ class PluginInterface(plugin.Plugin):
         xine = util.SynchronizedObject(Xine(xine_version))
 
         # register it as the object to play
-        plugin.register(xine, plugin.AUDIO_PLAYER)
+        if not (hasattr(config, 'AUDIO_XINE_AUDIOCD_ONLY') and \
+                config.AUDIO_XINE_AUDIOCD_ONLY):
+            plugin.register(xine, plugin.AUDIO_PLAYER)
+        plugin.register(xine, plugin.AUDIOCD_PLAYER)
 
 
 # ======================================================================
