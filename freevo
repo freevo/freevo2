@@ -19,6 +19,9 @@ if test -a freevo_rt/freevo_rt ; then
     export LD_PRELOAD=`cat freevo_rt/preloads`
     # Execute using the runtime
     freevo_rt/ld-linux.so.2 freevo_rt/freevo_rt main.py $*
+    # Make sure all children are killed
+    sleep 1
+    killall -9 freevo_rt/ld-linux.so.2
     exit
 fi
 
