@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.119  2004/01/10 13:14:50  dischi
+# change print to _debug_
+#
 # Revision 1.118  2004/01/04 17:18:15  dischi
 # make it possible that image is already a .raw file
 #
@@ -234,7 +237,7 @@ class OSDFont:
         try:
             font = pygame.font.Font(filename, ptsize)
         except (RuntimeError, IOError):
-            print 'Couldnt load font "%s"' % filename
+            _debug_('Couldnt load font "%s"' % filename)
                 
             # Are there any alternate fonts defined?
             if not 'OSD_FONT_ALIASES' in dir(config):
@@ -245,7 +248,7 @@ class OSDFont:
             fontname = os.path.basename(filename).lower()
             if fontname in config.OSD_FONT_ALIASES:
                 alt_fname = os.path.join(config.FONT_DIR, config.OSD_FONT_ALIASES[fontname])
-                print 'trying alternate: %s' % alt_fname
+                _debug_('trying alternate: %s' % alt_fname)
                 try:
                     font = pygame.font.Font(alt_fname, ptsize)
                 except (RuntimeError, IOError):
