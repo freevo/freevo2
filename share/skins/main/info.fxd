@@ -242,10 +242,10 @@
 	    <goto_pos y="10" mode="relative"/>
 	  </if>
 
-	  <if expression="length">
+	  <if expression="runtime">
 	    <text width="140" align="right" font="info value">Runtime:</text>
 	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="length"/>
+	    <text font="info value" expression="runtime"/>
 	    <newline/>
 	  </if>
 

@@ -197,10 +197,20 @@
     <layout label="video info">
       <content x="0" y="0" type="text" spacing="20" font="default">
 	<item type="video">
-          <if expression="name">
-            <text font="info tagline" width="max" expression="name"/>
-            <newline/>
-          </if>
+	  <if expression="tv_show_name">
+	    <text font="info tagline" expression="tv_show_name"/>
+	    <newline/>
+	    <if expression="tv_show_ep">
+	      <text font="info tagline" expression="tv_show_ep"/>
+	      <newline/>
+	    </if>
+	  </if>
+	  <if expression="not tv_show_name">
+	    <if expression="name">
+	      <text font="info tagline" width="max" expression="name"/>
+	      <newline/>
+	    </if>
+	  </if>
 	  <if expression="tagline">
             <text font="info tagline">"</text>
 	    <text font="info tagline" width="max" expression="tagline"/>
@@ -219,10 +229,9 @@
 	    <text font="info value" expression="year"/>
             <text font="info value">)</text>
 	  </if>
-	  <if expression="length">
+	  <if expression="runtime">
 	    <goto_pos x="30" mode="relative"/>
-	    <text font="info value" expression="length"/>
-            <text font="info value"> min</text>
+	    <text font="info value" expression="runtime"/>
 	    <newline/>
 	  </if>
 	</item>

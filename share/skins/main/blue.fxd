@@ -251,11 +251,10 @@
 	      </if>
 	    </if>
 
-	    <if expression="length">
+	    <if expression="runtime">
 	      <text width="140" font="info label">Runtime:</text>
 	      <goto_pos x="10" mode="relative"/>
-	      <text font="info value" expression="length"/>
-	      <text font="info value"> min.</text>
+	      <text font="info value" expression="runtime"/>
 	      <newline/>
 	    </if>
 	    <text width="140" font="info label">Type:</text>
