@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/09 22:44:16  outlyer
+# All time displays should respect the time format in the user's config.
+#
 # Revision 1.10  2004/02/09 21:23:42  outlyer
 # New web interface...
 #
@@ -99,8 +102,9 @@ class IndexResource(FreevoResource):
 
         fv.printHeader('Welcome', 'styles/main.css',selected='Home')
         fv.res += '<div id="contentmain">\n'
-        fv.res += '<br/><br/><h2>Freevo Web Status as of %s</h2>' % time.strftime('%B %d %H:%M', time.localtime())
-
+        
+        fv.res += '<br/><br/><h2>Freevo Web Status as of %s</h2>' % \
+                time.strftime('%B %d ' + config.TV_TIMEFORMAT, time.localtime())
     
         (server_available, schedule) = tv.record_client.connectionTest()
         if not server_available:
