@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/21 19:44:05  dischi
+# unicode fix
+#
 # Revision 1.8  2004/02/13 17:33:42  dischi
 # no defaults for addPathDB
 #
@@ -235,11 +238,14 @@ class AudioParser:
 
             
     def strcmp(self, s1, s2):
+        s1 = Unicode(s1)
+        s2 = Unicode(s2)
+        
         if not s1 or not s2:
             return s1 or s2
         if s1 == various or s2 == various:
             return various
-        # print 'cmp: %s %s ' % ( s1, s2)
+
         if s1.replace(' ', '').lower() == s2.replace(' ', '').lower():
             return s1
         return various
