@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/10/20 13:36:42  outlyer
+# Remove double-quit
+#
 # Revision 1.34  2003/10/19 09:51:41  dischi
 # move from str command to list, resort some stuff
 #
@@ -434,7 +437,6 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
-        self.thread.app.write('quit\n')
         self.thread.stop('quit\n')
         rc.app(None)
         if self.bmovl:
