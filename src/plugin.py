@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/02/01 17:07:42  dischi
+# add dirconfig for mimetype plugins
+#
 # Revision 1.61  2004/01/31 16:38:49  dischi
 # removed unneeded attr
 #
@@ -227,6 +230,13 @@ class MimetypePlugin(Plugin):
         set informations for a diritem based on the content, etc.
         """
         pass
+
+
+    def dirconfig(self, diritem):
+        """
+        adds configure variables to the directory
+        """
+        return []
 
     
 #
