@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/01/11 10:44:40  dischi
+# o add functions to menu to add or delete an item
+# o the reload_func can return None. If than the old menu will be
+#   reused and not overwritten
+# o refresh has an optional parameter to call the reload_func
+# o the new event rc.REBUILD_SCREEN will call init_page and refresh
+# o if there are no menu.choices, init_page will set menu.selected to
+#   self.all_items[0]
+#
 # Revision 1.7  2003/01/07 20:43:38  dischi
 # Small fixes, the actions get the item as arg
 #
@@ -133,8 +142,39 @@ class Menu:
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
-        self.reload_func = reload_func  # Called when a child menu returns
 
+        # Called when a child menu returns. This function returns a new menu
+        # or None and the old menu will be reused
+        self.reload_func = reload_func  
+
+
+    def delete_item(self, item):
+        pos = self.choices.index(item)
+        self.choices.remove(item)
+
+        if self.selected == item:
+            if self.choices:
+                self.selected = self.choices[max(pos-1,0)]
+            else:
+                self.selected = None
+
+        if len(self.choices) <= self.page_start:
+            if self.page_start != 0:
+                self.page_start = self.previous_page_start.pop()
+            
+
+    def add_item(self, item, pos):
+        try:
+            sel_pos = self.choices.index(self.selected)
+        except:
+            sel_pos = 0
+            
+        self.choices.insert(pos, item)
+        
+        items_per_page = skin.ItemsPerMenuPage(self)
+        if sel_pos >= self.page_start + items_per_page - 1:
+            self.previous_page_start.append(self.page_start)
+            self.page_start += items_per_page
 
 #
 # The MenuWidget handles a stack of Menu:s
@@ -155,7 +195,9 @@ class MenuWidget:
             menu = self.menustack[-1]
 
             if menu.reload_func:
-                self.menustack[-1] = menu.reload_func()
+                reload = menu.reload_func()
+                if reload:
+                    self.menustack[-1] = reload
                 
             self.init_page()
 
@@ -165,9 +207,13 @@ class MenuWidget:
             menu = self.menustack[-1]
 
             if menu.reload_func:
-                menu = self.menustack[-1] = menu.reload_func()
-                self.init_page()
-                menu.selected = self.all_items[0]
+                reload = menu.reload_func()
+                if reload:
+                    self.menustack[-1] = reload
+                    self.init_page()
+                    menu.selected = self.all_items[0]
+                else:
+                    self.init_page()
             else:
                 self.init_page()
 
@@ -208,11 +254,16 @@ class MenuWidget:
         self.refresh()
 
 
-    def refresh(self):
+    def refresh(self, reload=0):
         if self.menustack[-1].umount_all == 1:
             for media in config.REMOVABLE_MEDIA:
                 util.umount(media.mountdir)
-    
+
+        if reload:
+            reload = menu.reload_func()
+            if reload:
+                self.menustack[-1] = reload
+
         skin.DrawMenu(self)
 
 
@@ -307,6 +358,11 @@ class MenuWidget:
             
         elif event == rc.REFRESH_SCREEN:
             self.refresh()
+
+        elif event == rc.REBUILD_SCREEN:
+            self.init_page()
+            self.refresh()
+
         else:
             action = menu.selected.eventhandler
             if action:
@@ -353,3 +409,6 @@ class MenuWidget:
         self.nav_items = nav_items
 
         self.all_items = self.menu_items + self.nav_items
+
+        if not menu.choices:
+            menu.selected = self.all_items[0]
