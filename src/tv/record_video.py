@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/27 06:15:14  krister
+# cleanup
+#
 # Revision 1.7  2003/01/30 02:44:37  krister
 # Moved settings to freevo_config
 #
@@ -264,7 +267,7 @@ def set_schedule(arg=None, menuw=None):
     start_time_s = time.mktime(time.strptime(ts, '%Y-%m-%d %H:%M'))
     
     # Length in seconds
-    len_secs =int(recinfo.length.selected) * 60
+    len_secs = int(recinfo.length.selected) * 60
 
     # Recording filename
     rec_name = recinfo.program_name.selected
