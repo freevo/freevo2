@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/06/30 20:39:22  outlyer
+# Less noise.
+#
 # Revision 1.49  2003/06/29 20:45:14  dischi
 # mmpython support
 #
@@ -289,7 +292,7 @@ def main_func():
     eventhandler_plugins = plugin.get('daemon_eventhandler')
     
     # Kick off the main menu loop
-    print 'Main loop starting...'
+    if config.DEBUG: print 'Main loop starting...'
 
     while 1:
 
