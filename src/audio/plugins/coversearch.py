@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/07 13:24:39  dischi
+# unicode fix
+#
 # Revision 1.27  2004/01/25 20:16:32  dischi
 # typo
 #
@@ -219,13 +222,13 @@ class PluginInterface(plugin.ItemPlugin):
             album = self.item.getattr('title')
 
         artist = self.item.getattr('artist')
-        search_string = '%s %s' % (artist,album)
+        search_string = '%s %s' % (String(artist), String(album))
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
         try:
             cover = amazon.searchByKeyword(search_string , product_line="music")
         except amazon.AmazonError:
             box.destroy()
-            dict_tmp = { "artist": str(artist), "album": str(album) }
+            dict_tmp = { "artist": String(artist), "album": String(album) }
             box = PopupBox(text=_( 'No matches for %(artist)s - %(album)s' ) % dict_tmp )
             box.show()
             time.sleep(2)
