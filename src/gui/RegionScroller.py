@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/19 00:58:18  rshortt
+# Added scrolldemo.py for a better demonstration.  Use my audioitem.py
+# to test.
+#
 # Revision 1.1  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -117,6 +121,11 @@ class RegionScroller(GUIObject):
         fc_a = filler_c.get_alpha()
         self.filler.fill(fc_c)
         self.filler.set_alpha(fc_a)
+
+        if self.show_scrollbars:
+            if self.h_scrollbar: self.h_scrollbar.calculate_position()
+            if self.v_scrollbar: self.v_scrollbar.calculate_position()
+
 
     def get_view_percent(self, orientation):
         if orientation == 'vertical':
@@ -254,7 +263,6 @@ class RegionScroller(GUIObject):
     def eventhandler(self, event):
 
         scrolldirs = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
-
         if scrolldirs.count(event) > 0:
             self.scroll(event)
             return

@@ -19,6 +19,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/19 00:58:18  rshortt
+# Added scrolldemo.py for a better demonstration.  Use my audioitem.py
+# to test.
+#
 # Revision 1.2  2003/02/18 13:40:53  rshortt
 # Reviving the src/gui code, allso adding some new GUI objects.  Event
 # handling will not work untill I make some minor modifications to main.py,
@@ -112,6 +116,7 @@ from gui.RegionScroller import *
 from gui.Scrollbar      import *
 from gui.InputBox       import *
 from gui.exceptions     import *
+from gui.scrolldemo     import *
 
 
 if DEBUG:
