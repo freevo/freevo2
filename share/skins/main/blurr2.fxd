@@ -57,9 +57,9 @@
             <info layout="tv info" x="10" y="80" width="760" height="115"/>
             <listing layout="tv listing" x="10" y="220" width="750" height="350">
                 <image x="765" y="220" width="32" height="32" label="uparrow"
-	  filename="up.png"/>
+	            filename="up.png"/>
                 <image x="765" y="max-32" width="32" height="32" label="downarrow" 
-	  filename="down.png"/>
+	            filename="down.png"/>
                 <image width="16" height="16" label="leftarrow" filename="left.png"/>
                 <image width="16" height="16" label="rightarrow" filename="right.png"/>
             </listing>
@@ -579,14 +579,12 @@
                 <rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
             </background>
             <content x="10" y="10" height="max-20" width="max-20" type="text"
-        spacing="10" font="tv">
+                spacing="10" font="tv">
                 <item type="default">
                     <if expression="title">
                         <text font="tv title" width="550" expression="title"/>
                     </if>
-                    <text font="tv time" valign="right" expression="start"/>
-                    <text font="tv time" valign="right">-</text>
-                    <text font="tv time" valign="right" expression="stop"/>
+	            <text font="tv time" width="max" align="right" expression="time"/>
                     <newline/>
                     <if expression="sub_title">
                         <text font="info tagline">"</text>
