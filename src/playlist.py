@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/26 03:56:24  krister
+# Convert MSDOS filenames to unix slashes
+#
 # Revision 1.10  2003/02/24 04:21:40  krister
 # Mathieu Weber's bugfix for multipart movies
 #
@@ -123,12 +126,12 @@ class Playlist(Item):
 
         (curdir, playlistname) = os.path.split(plsname)
         for line in playlist_lines:
+            line = line.replace('\\', '/') # Fix MSDOS slashes
             if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
             elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
                 self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
             
-
 
     def read_pls(self, plsname):
         """
@@ -155,6 +158,7 @@ class Playlist(Item):
 
         (curdir, playlistname) = os.path.split(plsname)
         for line in playlist_lines:
+            line = line.replace('\\', '/') # Fix MSDOS slashes
             if util.match_suffix(line, config.SUFFIX_AUDIO_FILES):
                 self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
             elif util.match_suffix(line, config.SUFFIX_VIDEO_FILES):
