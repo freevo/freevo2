@@ -22,6 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/11/25 01:08:11  rshortt
+# Added a input_num property to the VideoGroup class because it can vary
+# between OS and cards.  We default to 0 which is common for the tv tuner in
+# Linux.  For BSD this is often 1, for ivtv cards often 4.
+#
 # Revision 1.73  2003/11/24 19:23:07  dischi
 # remove the MOVIE_XXX variables, they are in video/__init__ now
 #
@@ -180,6 +185,7 @@ class VideoGroup:
     vdev:        The video device, such as /dev/video.
     adev:        The audio device, such as /dev/dsp.
     input_type:  tuner, composite, svideo, webcam
+    input_num:   The number of this input according to V4L
     tuner_type:  internal (on a v4l device), or external (cable or sat box)
     tuner_norm:  NTSC, PAL, SECAM
     tuner_chanlist:  us-cable, 
@@ -190,7 +196,7 @@ class VideoGroup:
     """
 
     def __init__(self, vdev='/dev/video', adev='/dev/dsp', input_type='tuner',
-                 tuner_norm='NTSC', tuner_chanlist='us-cable', 
+                 input_num=0, tuner_norm='NTSC', tuner_chanlist='us-cable', 
                  tuner_type='internal', tuner_chan=None,
                  recordable=True, desc='Freevo default VideoGroup'):
 
@@ -198,6 +204,7 @@ class VideoGroup:
         self.vdev = vdev
         self.adev = adev
         self.input_type = input_type
+        self.input_num  = input_num
         self.tuner_type = tuner_type
         self.tuner_norm = string.upper(tuner_norm)
         self.tuner_chanlist = tuner_chanlist
