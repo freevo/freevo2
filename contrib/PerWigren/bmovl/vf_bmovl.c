@@ -6,6 +6,8 @@
  * Use MPlayer as a framebuffer to read bitmaps and commands from a FIFO
  * and display them in the window.
  *
+ * FIXME: INSTRUCTION IS OUT OF DATE!!!
+ *
  * It understands the following format:
  * COMMAND width height xpos ypos alpha clear
  *
@@ -52,21 +54,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include "mp_image.h"
 #include "vf.h"
 #include "img_format.h"
 
 #include "../libvo/fastmemcpy.h"
 
-#define IS_IMG 0x100
+#define IS_RAWIMG	0x100
+#define IS_IMG		0x200
 
-#define NONE   0x000
-#define RGB24  0x101
-#define RGBA32 0x102
-#define BGRA32 0x103
-#define CLEAR  0x004
-#define ALPHA  0x005
+#define NONE		0x000
+#define IMG_RGBA32	0x101
+#define IMG_ABGR32	0x102
+#define IMG_RGB24	0x103
+#define IMG_BGR24	0x104
+#define IMG_PNG		0x201
+#define CMD_CLEAR	0x001
+#define CMD_ALPHA	0x002
 
 #define TRUE  1
 #define FALSE 0
@@ -86,7 +95,6 @@ struct vf_priv_s {
 	struct {
 		unsigned char *y, *u, *v, *a, *oa;
 	} bitmap;
-    FILE* stream;
     int stream_fd;
 	fd_set stream_fdset;
 	int opaque, hidden;
@@ -131,6 +139,43 @@ config(struct vf_instance_s* vf,
 
 
 static int
+_read_cmd(int fd, char *cmd, char *args) {
+	int done=FALSE, pos=0;
+	char tmp;
+
+	while(!done) {
+		if(! read( fd, &tmp, 1 ) ) return FALSE;
+		if( (tmp>='A' && tmp<='Z') || (tmp>='0' && tmp<='9') )
+			cmd[pos]=tmp;
+		else if(tmp == ' ') {
+			cmd[pos]='\0';
+			done=TRUE;
+		}
+		else if(tmp == '\n') {
+			cmd[pos]='\0';
+			args[0]='\0';
+			return TRUE;
+		}
+		if(pos++>20) {
+			cmd[0]='\0';
+			return TRUE;
+		}
+	}
+	done=FALSE; pos=0;
+	while(!done) {
+		if(! read( fd, &tmp, 1 ) ) return FALSE;
+		if( (tmp >= ' ') && (pos<100) ) args[pos]=tmp;
+		else {
+			args[pos]='\0';
+			done=TRUE;
+		}
+		pos++;
+	}
+	return TRUE;
+}
+			
+
+static int
 put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 	int buf_x=0, buf_y=0, buf_pos=0;
 	int xpos=0, ypos=0, pos=0;
@@ -146,75 +191,60 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 	memcpy( dmpi->planes[1], mpi->planes[1], mpi->stride[1] * mpi->chroma_height);
 	memcpy( dmpi->planes[2], mpi->planes[2], mpi->stride[2] * mpi->chroma_height);
 
-
-    if(vf->priv->stream) {
-
+    if(vf->priv->stream_fd >= 0) {
 		struct timeval tv;
 
 		FD_SET( vf->priv->stream_fd, &vf->priv->stream_fdset );
-		tv.tv_sec=0; tv.tv_usec=20;
+		tv.tv_sec=0; tv.tv_usec=0;
 
-		if( select( vf->priv->stream_fd+1, &vf->priv->stream_fdset, NULL, NULL, &tv ) ) {
+		if( select( vf->priv->stream_fd+1, &vf->priv->stream_fdset, NULL, NULL, &tv ) > 0) {
 			// We've got new data from the FIFO
 
-		    if( feof(vf->priv->stream) ) {
-                fprintf(stderr, "\nvf_bmovl: Got feof() on the FIFO\n\n");
-		        clearerr(vf->priv->stream);
-		    } else if( ferror(vf->priv->stream) ) {
-		        fprintf(stderr, "\nvf_bmovl: Error in stream: %s\n", strerror(errno));
-		        fprintf(stderr, "vf_bmovl: Closing down...\n\n");
-				fclose(vf->priv->stream);
-		        vf->priv->stream = NULL;
-				vf->priv->hidden = TRUE;
-				return vf_next_put_image(vf, dmpi);
-		    } else {
-				char cmd[1000];
-				int  imgw,imgh,imgx,imgy,clear,imgalpha,pxsz,command;
-				unsigned char *buffer = NULL;
+			char cmd[20], args[100];
+			int  imgw,imgh,imgx,imgy,clear,imgalpha,pxsz,command;
+			unsigned char *buffer = NULL;
 
-				fscanf( vf->priv->stream, "%s %d %d %d %d %d %d\n",
-                                        cmd, &imgw, &imgh, &imgx, &imgy, &imgalpha, &clear);
-//				printf("\nDEBUG: GOT %s %d %d %d %d %d %d\n\n",
-//                                        cmd, imgw, imgh, imgx, imgy, imgalpha, clear);
+			if(! _read_cmd( vf->priv->stream_fd, cmd, args) ) {
+				fprintf(stderr, "\nvf_bmovl: Error reading commands: %s\n\n", strerror(errno));
+				exit(10);
+			}
+			printf("\nDEBUG: Got: %s+%s\n", cmd, args);
 
-				if     ( strncmp(cmd,"RGBA32",6)==0 ) { pxsz=4; command = RGBA32; }
-				else if( strncmp(cmd,"BGRA32",6)==0 ) { pxsz=4; command = BGRA32; }
-				else if( strncmp(cmd,"RGB24" ,5)==0 ) { pxsz=3; command = RGB24;  }
-				else if( strncmp(cmd,"CLEAR" ,5)==0 ) { pxsz=1; command = CLEAR;  }
-				else if( strncmp(cmd,"ALPHA" ,5)==0 ) { pxsz=1; command = ALPHA;  }
-				else if( strncmp(cmd,"FLUSH" ,5)==0 ) { return vf_next_put_image(vf, dmpi); }
-				else if( strncmp(cmd,"OPAQUE",6)==0 ) {
-					vf->priv->opaque=TRUE;
-					command = NONE;
-				}
-				else if( strncmp(cmd,"SHOW",  4)==0 ) {
-					vf->priv->hidden=FALSE;
-					command = NONE;
-				}
-				else if( strncmp(cmd,"HIDE",  4)==0 ) {
-					vf->priv->hidden=TRUE;
-					command = NONE;
-				}
-				else {
-				    fprintf(stderr, "vf_bmovl: Unsupported command: %s. Ignoring.\n", cmd);
-				    return vf_next_put_image(vf, dmpi);
-				}
+			command=NONE;
+			if     ( strncmp(cmd,"RGBA32",6)==0 ) { pxsz=4; command = IMG_RGBA32; }
+			else if( strncmp(cmd,"ABGR32",6)==0 ) { pxsz=4; command = IMG_ABGR32; }
+			else if( strncmp(cmd,"RGB24" ,5)==0 ) { pxsz=3; command = IMG_RGB24;  }
+			else if( strncmp(cmd,"BGR24" ,5)==0 ) { pxsz=3; command = IMG_BGR24;  }
+			else if( strncmp(cmd,"CLEAR" ,5)==0 ) { pxsz=1; command = CMD_CLEAR;  }
+			else if( strncmp(cmd,"ALPHA" ,5)==0 ) { pxsz=1; command = CMD_ALPHA;  }
+			else if( strncmp(cmd,"OPAQUE",6)==0 ) vf->priv->opaque=TRUE;
+			else if( strncmp(cmd,"SHOW",  4)==0 ) vf->priv->hidden=FALSE;
+			else if( strncmp(cmd,"HIDE",  4)==0 ) vf->priv->hidden=TRUE;
+			else if( strncmp(cmd,"FLUSH" ,5)==0 ) return vf_next_put_image(vf, dmpi);
+			else {
+			    fprintf(stderr, "\nvf_bmovl: Unknown command: '%s'. Ignoring.\n", cmd);
+			    return vf_next_put_image(vf, dmpi);
+			}
 
-				if(command == ALPHA) vf->priv->opaque=FALSE;
+			if(command == CMD_ALPHA) {
+				sscanf( args, "%d %d %d %d %d", &imgw, &imgh, &imgx, &imgy, &imgalpha);
+				printf("\nDEBUG: ALPHA: %d %d %d %d %d\n\n",
+					imgw, imgh, imgx, imgy, imgalpha);
+				if(imgw==0 && imgh==0) vf->priv->opaque=FALSE;
+			}
 
-				if(command & IS_IMG) {
-				    buffer = malloc(imgw*imgh*pxsz +1);
-				    if(!buffer) {
-				    	fprintf(stderr, "\nvf_bmovl: Couldn't allocate temporary buffer! Skipping...\n\n");
-						return vf_next_put_image(vf, dmpi);
-				    }
-				    fread( buffer, (imgw*pxsz), imgh, vf->priv->stream );
-					fscanf( vf->priv->stream, "%c", cmd); // Catch the \n..
-					if( ferror(vf->priv->stream) ) {
-						printf("\nvf_bmovl: ERROR READING DATA: %s\n\n", strerror(errno));
-						exit( 10 );
-					}
-				}
+			if(command & IS_RAWIMG) {
+				sscanf( args, "%d %d %d %d %d %d",
+					&imgw, &imgh, &imgx, &imgy, &imgalpha, &clear);
+				printf("\nDEBUG: RAWIMG: %d %d %d %d %d %d\n\n",
+					imgw, imgh, imgx, imgy, imgalpha, clear);
+
+			    buffer = malloc(imgw*imgh*pxsz);
+			    if(!buffer) {
+			    	fprintf(stderr, "\nvf_bmovl: Couldn't allocate temporary buffer! Skipping...\n\n");
+					return vf_next_put_image(vf, dmpi);
+			    }
+			    printf("Got %d bytes...\n", read( vf->priv->stream_fd, buffer, (imgw*imgh*pxsz) ) );
 
 				if(clear) {
 					memset( vf->priv->bitmap.y,   0, vf->priv->w*vf->priv->h );
@@ -226,104 +256,97 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 					vf->priv->y1 = dmpi->height;
 					vf->priv->x2 = vf->priv->y2 = 0;
 				}
-
 				// Define how much of our bitmap that contains graphics!
 				vf->priv->x1 = MAX( 0, MIN(vf->priv->x1, imgx) );
 				vf->priv->y1 = MAX( 0, MIN(vf->priv->y1, imgy) );
 				vf->priv->x2 = MIN( vf->priv->w, MAX(vf->priv->x2, ( imgx + imgw)) );
 				vf->priv->y2 = MIN( vf->priv->h, MAX(vf->priv->y2, ( imgy + imgh)) );
-				
-				for( buf_y=0 ; (buf_y < imgh) && (buf_y < (vf->priv->h-imgy)) ; buf_y++ ) {
-				    for( buf_x=0 ; (buf_x < (imgw*pxsz)) && (buf_x < ((vf->priv->w+imgx)*pxsz)) ; buf_x += pxsz ) {
-						if(command & IS_IMG) buf_pos = (buf_y * imgw * pxsz) + buf_x;
-						pos = ((buf_y+imgy) * vf->priv->w) + ((buf_x/pxsz)+imgx);
+			}
+			
+			if( command == CMD_CLEAR ) {
+				sscanf( args, "%d %d %d %d", &imgw, &imgh, &imgx, &imgy);
+				printf("\nDEBUG: CLEAR: %d %d %d %d\n\n", imgw, imgh, imgx, imgy);
 
-						switch(command) {
-							case RGBA32:
-								red   = buffer[buf_pos+0];
-								green = buffer[buf_pos+1];
-								blue  = buffer[buf_pos+2];
-
-								vf->priv->bitmap.y[pos]  = rgb2y(red,green,blue);
-								vf->priv->bitmap.a[pos]  = INRANGE((buffer[buf_pos+3]+imgalpha),0,255);
-								vf->priv->bitmap.oa[pos] = buffer[buf_pos+3];
-								if((buf_y%2) && ((buf_x/pxsz)%2)) {
-									pos = ( ((buf_y+imgy)/2) * dmpi->stride[1] ) + (((buf_x/pxsz)+imgx)/2);
-									vf->priv->bitmap.u[pos]  = rgb2u(red,green,blue);
-									vf->priv->bitmap.v[pos]  = rgb2v(red,green,blue);
-								}
-								break;
-							case BGRA32:
-								blue  = buffer[buf_pos+0];
-								green = buffer[buf_pos+1];
-								red   = buffer[buf_pos+2];
-
-								vf->priv->bitmap.y[pos]  = rgb2y(red,green,blue);
-								vf->priv->bitmap.a[pos]  = INRANGE((buffer[buf_pos+3]+imgalpha),0,255);
-								vf->priv->bitmap.oa[pos] = buffer[buf_pos+3];
-								if((buf_y%2) && ((buf_x/pxsz)%2)) {
-									pos = ( ((buf_y+imgy)/2) * dmpi->stride[1] ) + (((buf_x/pxsz)+imgx)/2);
-									vf->priv->bitmap.u[pos]  = rgb2u(red,green,blue);
-									vf->priv->bitmap.v[pos]  = rgb2v(red,green,blue);
-								}
-								break;
-							case RGB24:
-								red   = buffer[buf_pos+0];
-								green = buffer[buf_pos+1];
-								blue  = buffer[buf_pos+2];
-
-								vf->priv->bitmap.y[pos]  = rgb2y(red,green,blue);
-								vf->priv->bitmap.a[pos]  = INRANGE((255+imgalpha),0,255);
-								vf->priv->bitmap.oa[pos] = 255;
-								if((buf_y%2) && ((buf_x/pxsz)%2)) {
-									pos = ( ((buf_y+imgy)/2) * dmpi->stride[1] ) + (((buf_x/pxsz)+imgx)/2);
-									vf->priv->bitmap.u[pos]  = rgb2u(red,green,blue);
-									vf->priv->bitmap.v[pos]  = rgb2v(red,green,blue);
-								}
-			    				break;
-							case CLEAR:
-						        vf->priv->bitmap.y[pos]  = 0;
-						        vf->priv->bitmap.a[pos]  = 0;
-						        vf->priv->bitmap.oa[pos] = 0;
-								if((buf_y%2) && ((buf_x/pxsz)%2)) {
-									pos = ( ((buf_y+imgy)/2) * dmpi->stride[1] ) + (((buf_x/pxsz)+imgx)/2);
-							        vf->priv->bitmap.u[pos]  = 0;
-							        vf->priv->bitmap.v[pos]  = 0;
-								}
-								break;
-							case ALPHA:
-								vf->priv->bitmap.a[pos] = INRANGE((vf->priv->bitmap.oa[pos]+imgalpha),0,255);
-								break;
-							default:
-						   		fprintf(stderr, "vf_bmovl: Internal error!\n");
-								exit( 10 );
-						} // switch
-					} // for buf_x
-				} // for buf_y
-				free (buffer);
-
-				// Recalculate what area contains graphics!
-				if( command == CLEAR ) {
-					if( (imgx <= vf->priv->x1) && ( (imgw+imgx) >= vf->priv->x2) ) {
-						if( (imgy <= vf->priv->y1) && ( (imgy+imgh) >= vf->priv->y1) )
-							vf->priv->y1 = imgy+imgh;
-						if( (imgy <= vf->priv->y2) && ( (imgy+imgh) >= vf->priv->y2) )
-							vf->priv->y2 = imgy;
+				for( ypos=imgy ; (ypos < (imgy+imgh)) && (ypos < vf->priv->y2) ; ypos++ ) {
+					memset( vf->priv->bitmap.y  + (ypos*vf->priv->w) + imgx, 0, imgw );
+					memset( vf->priv->bitmap.a  + (ypos*vf->priv->w) + imgx, 0, imgw );
+					memset( vf->priv->bitmap.oa + (ypos*vf->priv->w) + imgx, 0, imgw );
+					if(ypos%2) {
+						memset( vf->priv->bitmap.u + ((ypos/2)*dmpi->stride[1]) + (imgx/2), 128, imgw/2 );
+						memset( vf->priv->bitmap.v + ((ypos/2)*dmpi->stride[2]) + (imgx/2), 128, imgw/2 );
 					}
-					if( (imgy <= vf->priv->y1) && ( (imgy+imgh) >= vf->priv->y2) ) {
-						if( (imgx <= vf->priv->x1) && ( (imgx+imgw) >= vf->priv->x1) )
-							vf->priv->x1 = imgx+imgw;
-						if( (imgx <= vf->priv->x2) && ( (imgx+imgw) >= vf->priv->x2) )
-							vf->priv->x2 = imgx;
-					}
+				}	// Recalculate area that contains graphics
+				if( (imgx <= vf->priv->x1) && ( (imgw+imgx) >= vf->priv->x2) ) {
+					if( (imgy <= vf->priv->y1) && ( (imgy+imgh) >= vf->priv->y1) )
+						vf->priv->y1 = imgy+imgh;
+					if( (imgy <= vf->priv->y2) && ( (imgy+imgh) >= vf->priv->y2) )
+						vf->priv->y2 = imgy;
 				}
-			} // if feof
-		} // if select
-    } // if stream
+				if( (imgy <= vf->priv->y1) && ( (imgy+imgh) >= vf->priv->y2) ) {
+					if( (imgx <= vf->priv->x1) && ( (imgx+imgw) >= vf->priv->x1) )
+						vf->priv->x1 = imgx+imgw;
+					if( (imgx <= vf->priv->x2) && ( (imgx+imgw) >= vf->priv->x2) )
+						vf->priv->x2 = imgx;
+				}
+				return vf_next_put_image(vf, dmpi);
+			}
+
+			for( buf_y=0 ; (buf_y < imgh) && (buf_y < (vf->priv->h-imgy)) ; buf_y++ ) {
+			    for( buf_x=0 ; (buf_x < (imgw*pxsz)) && (buf_x < ((vf->priv->w+imgx)*pxsz)) ; buf_x += pxsz ) {
+					if(command & IS_RAWIMG) buf_pos = (buf_y * imgw * pxsz) + buf_x;
+					pos = ((buf_y+imgy) * vf->priv->w) + ((buf_x/pxsz)+imgx);
+
+					switch(command) {
+						case IMG_RGBA32:
+							red   = buffer[buf_pos+0];
+							green = buffer[buf_pos+1];
+							blue  = buffer[buf_pos+2];
+							alpha = buffer[buf_pos+3];
+							break;
+						case IMG_ABGR32:
+							alpha = buffer[buf_pos+0];
+							blue  = buffer[buf_pos+1];
+							green = buffer[buf_pos+2];
+							red   = buffer[buf_pos+3];
+							break;
+						case IMG_RGB24:
+							red   = buffer[buf_pos+0];
+							green = buffer[buf_pos+1];
+							blue  = buffer[buf_pos+2];
+							alpha = 0xFF;
+		    				break;
+						case IMG_BGR24:
+							blue  = buffer[buf_pos+0];
+							green = buffer[buf_pos+1];
+							red   = buffer[buf_pos+2];
+							alpha = 0xFF;
+		    				break;
+						case CMD_ALPHA:
+							vf->priv->bitmap.a[pos] = INRANGE((vf->priv->bitmap.oa[pos]+imgalpha),0,255);
+							break;
+						default:
+					   		fprintf(stderr, "vf_bmovl: Internal error!\n");
+							exit( 10 );
+					}
+					if( command & IS_RAWIMG ) {
+						vf->priv->bitmap.y[pos]  = rgb2y(red,green,blue);
+						vf->priv->bitmap.oa[pos] = alpha;
+						vf->priv->bitmap.a[pos]  = INRANGE((alpha+imgalpha),0,255);
+						if((buf_y%2) && ((buf_x/pxsz)%2)) {
+							pos = ( ((buf_y+imgy)/2) * dmpi->stride[1] ) + (((buf_x/pxsz)+imgx)/2);
+							vf->priv->bitmap.u[pos] = rgb2u(red,green,blue);
+							vf->priv->bitmap.v[pos] = rgb2v(red,green,blue);
+						}
+					}
+				} // for buf_x
+			} // for buf_y
+			free (buffer);
+		} else if(errno) fprintf(stderr, "\nvf_bmovl: Error %d in fifo: %s\n\n", errno, strerror(errno));
+    } else vf_next_put_image(vf, dmpi);
 
 	if(vf->priv->hidden) return vf_next_put_image(vf, dmpi);
 
-	if( vf->priv->opaque ) {	// Just copy buffer memory to screen
+	if(vf->priv->opaque) {	// Just copy buffer memory to screen
 		for( ypos=vf->priv->y1 ; ypos < vf->priv->y2 ; ypos++ ) {
 			memcpy( dmpi->planes[0] + (ypos*dmpi->stride[0]) + vf->priv->x1,
 			        vf->priv->bitmap.y + (ypos*vf->priv->w) + vf->priv->x1,
@@ -335,11 +358,9 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 				memcpy( dmpi->planes[2] + ((ypos/2)*dmpi->stride[2]) + (vf->priv->x1/2),
 				        vf->priv->bitmap.v + (((ypos/2)*(vf->priv->w)/2)) + (vf->priv->x1/2),
 				        (vf->priv->x2 - vf->priv->x1)/2 );
-
 			}
 		}
-	} else { 
-		// Blit the bitmap on the videoscreen, pixel for pixel
+	} else { // Blit the bitmap to the videoscreen, pixel for pixel
 	    for( ypos=vf->priv->y1 ; ypos < vf->priv->y2 ; ypos++ ) {
 	        for ( xpos=vf->priv->x1 ; xpos < vf->priv->x2 ; xpos++ ) {
 				pos = (ypos * dmpi->stride[0]) + xpos;
@@ -365,12 +386,12 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			    }
 			} // for xpos
 		} // for ypos
-	} // if !opaque && !hidden
+	} // if !opaque
     return vf_next_put_image(vf, dmpi);
 } // put_image
 
 static int
-open(vf_instance_t* vf, char* args)
+vf_open(vf_instance_t* vf, char* args)
 {
     char filename[1000];
 
@@ -385,13 +406,13 @@ open(vf_instance_t* vf, char* args)
 		exit(5);
     }
 
-    vf->priv->stream = fopen(filename, "r+");
-    if(vf->priv->stream) {
-		vf->priv->stream_fd = fileno( vf->priv->stream );
+    vf->priv->stream_fd = open(filename, O_RDWR);
+    if(vf->priv->stream_fd >= 0) {
 		FD_ZERO( &vf->priv->stream_fdset );
-    } else {
+		printf("vf_bmovl: Opened fifo %s as FD %d\n", filename, vf->priv->stream_fd);
+	} else {
 		fprintf(stderr, "vf_bmovl: Error! Couldn't open FIFO %s: %s\n", filename, strerror(errno));
-		vf->priv->stream = NULL;
+		vf->priv->stream_fd = -1;
     }
 
     return TRUE;
@@ -402,5 +423,5 @@ vf_info_t vf_info_bmovl = {
     "bmovl",
     "Per Wigren",
     "",
-    open
+    vf_open
 };
