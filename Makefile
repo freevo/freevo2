@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/08/01 18:38:00  dischi
+# set optimize to 2 (== -OO)
+#
 # Revision 1.34  2003/07/18 20:03:06  dischi
 # we do not need the audio dir anymore
 #
@@ -106,7 +109,7 @@ XLIBS = -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib \
 XINC = -I/usr/X11R6/include -I/usr/X11/include -I/usr/openwin/include
 
 SUBDIRS  = fbcon
-OPTIMIZE = 0
+OPTIMIZE = 2
 
 PREFIX   = /usr/local/freevo
 LOGDIR   = /var/log/freevo
