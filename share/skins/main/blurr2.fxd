@@ -5,16 +5,17 @@
     <iconset theme="blurr"/>
     <main>
       <item label="tv" name="Watch TV" icon="" 
-	image="watermarks/tv.png"/>
+	image="gant/tv.png"/>
       <item label="video" name="Watch a Movie" icon=""
-	image="watermarks/movie.png"/>
+	image="gant/movie.png"/>
       <item label="audio" name="Listen to Music" icon="" 
-	image="watermarks/music.png"/>
+	image="gant/music.png"/>
       <item label="image" name="Look at Pictures" icon="" 
-	image="watermarks/image.png"/>
-      <item label="games" name="Games" icon="" image=""/>
+	image="gant/image.png"/>
+      <item label="games" name="Games" icon="" image=""
+        image="gant/games.png"/>
       <item label="shutdown" name="Shutdown" icon="" 
-	image="watermarks/shutdown.png" visible="no"/> 
+	image="gant/shutdown.png" visible="no"/> 
     </main>
     
     <!-- Redefine of the type default -->
@@ -157,7 +158,7 @@
 	<image image="background" x="0" y="0" label="background"/>
         <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
                  width="750" height="250"/>
-	<image filename="watermarks/movie.png" x="435" y="230" width="370"
+	<image filename="gant/movie.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
@@ -165,7 +166,7 @@
     <layout label="audio screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="watermarks/music.png" x="435" y="230" width="370"
+	<image filename="gant/music.png" x="435" y="230" width="370"
 	  height="380"/>
           <rectangle size="0" bgcolor="0x80000000" radius="10" x="12" y="87"
                 width="290" height="475"/>
@@ -175,7 +176,7 @@
     <layout label="image screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="watermarks/image.png" x="435" y="230" width="370"
+	<image filename="gant/image.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
@@ -185,7 +186,7 @@
 	<image image="background" x="0" y="0" label="background"/>
         <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
                  width="750" height="250"/>
-	<image filename="watermarks/tv.png" x="435" y="230" width="370"
+	<image filename="gant/tv.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
