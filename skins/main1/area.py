@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/07/02 20:13:30  dischi
+# use now the two parts of drawstringframed
+#
 # Revision 1.7  2003/06/29 20:38:58  dischi
 # switch to the new info area
 #
@@ -227,21 +230,10 @@ class Screen:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     layer.blit(image, (x1, y1))
 
-            for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
-                ellipses in objects.text:
+            for x1, y1, x2, y2, dsf_object in objects.text:
                 if self.in_update(x1, y1, x2, y2, update_area):
                     width = x2 - x1
-                    if font.shadow.visible:
-                        width -= font.shadow.x
-                        osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
-                                             width, height, font.shadow.color, None,
-                                             font=font.name, ptsize=font.size,
-                                             align_h = align_h, align_v = align_v,
-                                             mode=mode, ellipses=ellipses, layer=layer)
-                    osd.drawstringframed(text, x1, y1, width, height, font.color, None,
-                                         font=font.name, ptsize=font.size,
-                                         align_h = align_h, align_v = align_v,
-                                         mode=mode, ellipses=ellipses, layer=layer)
+                    osd.dsf_draw(dsf_object, layer)
 
         for x0, y0, x1, y1 in update_area:
             osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
@@ -685,15 +677,14 @@ class Skin_Area:
             
     # Draws a text inside a frame based on the settings in the XML file
     def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
-                   align_h = None, align_v = None, mode='hard', ellipses='...',
-                   return_area=FALSE):
+                   align_h = None, align_v = None, mode='hard', ellipses='...'):
         """
         writes a text ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
 
         if not text:
-            return
+            return (0,0,0,0)
         
         if x == -1: x = content.x
         if y == -1: y = content.y
@@ -717,17 +708,28 @@ class Skin_Area:
         if height2 == -1:
             height2 = font.h + 2
 
-        if return_area:
-            ret = osd.drawstringframed(text, x, y, width, height, None, None,
-                                       font=font.name, ptsize=font.size,
-                                       align_h = align_h, align_v = align_v,
-                                       mode=mode, ellipses=ellipses, layer=osd.null_layer)
+        if font.shadow.visible:
+            width -= font.shadow.x
 
-        self.tmp_objects.text.append((x, y, x+width+font.shadow.x, y+height2+font.shadow.y,
-                                      text, font, height, align_h, align_v, mode, ellipses ))
+        dsf_info = osd.dsf_calc(text, x, y, width, height, font.color, None,
+                                font=font.name, ptsize=font.size,
+                                align_h = align_h, align_v = align_v,
+                                mode=mode, ellipses=ellipses)
+        if dsf_info[1] == text:
+            # there is nothing to draw
+            return dsf_info[2]
+            
+        if font.shadow.visible:
+            objects = copy.deepcopy(dsf_info[0])
+            for o in objects:
+                o.x += font.shadow.x
+                o.y += font.shadow.y
+                o.fgcolor = font.shadow.color
+            self.tmp_objects.text.append((x+font.shadow.x, y+font.shadow.y,
+                                          x+width, y+height2, objects))
 
-        if return_area:
-            return ret[1]
+        self.tmp_objects.text.append((x, y, x+width, y+height2, dsf_info[0]))
+        return dsf_info[2]
     
 
     def load_image(self, image, val, redraw=TRUE):

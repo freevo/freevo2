@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/07/02 20:13:30  dischi
+# use now the two parts of drawstringframed
+#
 # Revision 1.5  2003/06/29 20:38:58  dischi
 # switch to the new info area
 #
@@ -71,6 +74,9 @@ class Info_Area(Skin_Area):
         if self.layout_content is not self.layout.content:
             return TRUE
 
+        if self.last_item != self.infoitem:
+            return TRUE
+        
         update += self.set_content()    # set self.content
         update += self.set_list(update) # set self.list
 
@@ -88,14 +94,21 @@ class Info_Area(Skin_Area):
         """
         update the info area
         """
-
         if not self.updated: # entered a menu for the first time
             self.set_list(self.set_content())
             self.sellist = self.eval_expressions( self.list )
 
+        self.last_item = self.infoitem
         if not self.list: # nothing to draw
             self.updated = 0
             return
+
+
+        if 1:
+            self.return_formatedtext( self.sellist )
+            self.updated = 0
+            return
+
 
         # get items to be draw
         list = self.return_formatedtext( self.sellist )
@@ -309,18 +322,21 @@ class Info_Area(Skin_Area):
                 element.x = x
                 element.y = y
 
-
                 # Calculate the geometry
                 r = Geometry( x, y, element.width, element.height)
-                r = self.get_item_rectangle( r,
-                                             self.content.width - x,
-                                             self.content.height - y )[ 2 ]
-                size = osd.drawstringframed( element.text, 0, 0,
-                                             r.width-element.font.shadow.x, r.height,
-                                             None, None,
-                                             element.font.name, element.font.size,
-                                             element.align, element.valign,
-                                             element.mode, layer=osd.null_layer )[ 1 ]
+                r = self.get_item_rectangle(r, self.content.width - x,
+                                            self.content.height - y )[ 2 ]
+
+                if element.height > 0:
+                    height = min(r.height, element.height)
+                else:
+                    height = -1
+                    
+                size = self.write_text(element.text, element.font, self.content,
+                                       self.content.x+x, self.content.y+y,
+                                       r.width, height, element.align,
+                                       element.valign, element.mode)
+
                 m_width  = size[ 2 ] - size[ 0 ]
                 m_height = size[ 3 ] - size[ 1 ]
 
@@ -332,15 +348,11 @@ class Info_Area(Skin_Area):
 
                 if isinstance( element.height, int ) or element.height == 'line_height':
                     if element.height <= 0 or element.height == 'line_height':
-                        element.height = osd.stringsize( element.text,
-                                                         element.font.name,
-                                                         element.font.size)[ 1 ]
+                        element.height = m_height
                 else:
                     element.height = min( m_height, r.height )
 
-
                 x += element.width
-
                 ret_list += [ element ]
 
 
@@ -350,7 +362,12 @@ class Info_Area(Skin_Area):
                 newline = 1
                 element.width = self.content.width - element.x
 
+
             # Need to recalculate line height?
+            #
+            # XXX varitical alignment is broekn right now. We need to
+            # XXX use parts of write_text and the dsf functions to do that
+            #
             if newline and ret_list:
                 newline_height = 0
                 # find the tallest string
@@ -367,8 +384,8 @@ class Info_Area(Skin_Area):
                 for j in last_line:
                     j.height = newline_height
                 
-
-        return ret_list
+            
+        return # XXX ret_list
 
 
 
