@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/07 15:43:06  dischi
+# tv guide can now also have different styles
+#
 # Revision 1.5  2003/08/24 16:36:25  dischi
 # add support for y=max-... in listing area arrows
 #
@@ -589,7 +592,11 @@ class Skin_Area:
         if widget_type == 'player':
             area = settings.player
         elif widget_type == 'tv':
-            area = settings.tv
+            try:
+                area = settings.tv.style[self.display_style][1]
+            except:
+                area = settings.tv.style[0][1]
+
         else:
             # get the correct <menu>
             try:
@@ -620,6 +627,8 @@ class Skin_Area:
             else:
                 print 'want to fall back, but no text view defined'
                 area = area[0]
+
+
 
         if self.area_name == 'plugin':
             if not self.area_val:

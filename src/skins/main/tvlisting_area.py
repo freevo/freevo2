@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/07 15:43:06  dischi
+# tv guide can now also have different styles
+#
 # Revision 1.6  2003/08/25 18:44:31  dischi
 # Moved HOURS_PER_PAGE into the skin fxd file, default=2
 #
@@ -81,10 +84,11 @@ class TVListing_Area(Skin_Area):
         return TRUE
 
 
-    def get_items_geometry(self, settings, obj):
+    def get_items_geometry(self, settings, obj, display_style=0):
         if self.last_settings == settings:
             return self.last_items_geometry
         
+        self.display_style = display_style
         self.init_vars(settings, None, widget_type = 'tv')
 
         menuw     = obj

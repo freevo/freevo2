@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/07 15:43:06  dischi
+# tv guide can now also have different styles
+#
 # Revision 1.7  2003/09/05 18:24:40  dischi
 # o create a BlankScreen only with the current background
 # o rewrite Splashscreen which now inherits from BlankScreen and uses
@@ -328,6 +331,7 @@ class Skin:
         skin_engine = self
         
         self.display_style = config.SKIN_START_LAYOUT
+        self.tv_display_style = 0
         self.force_redraw = TRUE
         self.last_draw = None, None
         self.screen = Screen()
@@ -425,6 +429,12 @@ class Skin:
         """
         Toggle display style
         """
+
+        if menu == 'tv':
+            self.tv_display_style = (self.tv_display_style + 1) % \
+                                    len(self.settings.tv.style)
+            return 1
+            
         if menu.force_skin_layout != -1:
             return 0
         
@@ -449,6 +459,8 @@ class Skin:
         """
         return current display style
         """
+        if menu == 'tv':
+            return self.tv_display_style
         if menu:            
             if menu.force_skin_layout != -1:
                 return menu.force_skin_layout
@@ -529,7 +541,8 @@ class Skin:
             return
         
         if type == 'tv':
-            info = self.tvlisting.get_items_geometry(self.settings, object)
+            info = self.tvlisting.get_items_geometry(self.settings, object,
+                                                     self.GetDisplayStyle('tv'))
             return (info[4], info[-1])
 
         if object.skin_settings:
@@ -612,7 +625,7 @@ class Skin:
             if not object.visible:
                 return
             all_areas = self.tv_areas
-            style = 0
+            style = self.GetDisplayStyle('tv')
         elif type == 'player':
             all_areas = self.normal_areas
             style = 0

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/07 15:43:06  dischi
+# tv guide can now also have different styles
+#
 # Revision 1.11  2003/09/05 18:16:43  dischi
 # parse all named images into self.images
 #
@@ -805,28 +808,11 @@ class XML_player:
 # ======================================================================
 
 
-class XML_tv:
+class XML_tv(XML_menu):
     """
     tv tag for the tv menu
     """
-    def __init__(self):
-        self.content = ( 'screen', 'title', 'subtitle', 'view', 'info', 'listing' )
-        for c in self.content:
-            setattr(self, c, XML_area(c))
-
-
-    def parse(self, node, scale, current_dir):
-        for subnode in node.children:
-            for c in self.content:
-                if subnode.name == c:
-                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
-
-    def prepare(self, layout):
-        for c in self.content:
-            eval('self.%s.prepare(layout)' % c)
-
-# ======================================================================
-
+    pass
 
 
 class XMLSkin:
@@ -917,6 +903,7 @@ class XMLSkin:
                 self._player.parse(node, scale, c_dir)
 
             if node.name == u'tv':
+                self._tv = XML_tv()
                 self._tv.parse(node, scale, c_dir)
 
             if node.name == u'setvar':
@@ -958,10 +945,14 @@ class XMLSkin:
                         
                 
         self.player.prepare(layout)
-        self.tv.prepare(layout)
+        self.tv.prepare(self._menuset, layout)
         # prepare listing area images
-        for image in self.tv.listing.images:
-            self.tv.listing.images[image].prepare(None, search_dirs, self._images)
+        for s in self.tv.style:
+            for i in range(2):
+                if s[i] and hasattr(s[i], 'listing'):
+                    for image in s[i].listing.images:
+                        s[i].listing.images[image].prepare(None, search_dirs,
+                                                           self._images)
 
         self.popup = layout[self._popup]
         
