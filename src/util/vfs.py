@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/04 11:54:27  dischi
+# check if directory is not overlay_dir
+#
 # Revision 1.12  2004/01/18 16:47:16  dischi
 # more verbose
 #
@@ -217,7 +220,7 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
             return files
 
         overlay = getoverlay(directory)
-        if overlay and os.path.isdir(overlay):
+        if overlay and overlay != directory and os.path.isdir(overlay):
             for f in ([ overlay + fname for fname in os.listdir(overlay) ]):
                 if not os.path.isdir(f) and not f.endswith('.raw'):
                     files.append(f)
