@@ -56,7 +56,7 @@ class Menu:
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
-        self.bgbitmap = ('', 0, 0)
+        self.bgbitmap = config.OSD_BGBITMAP
         
 
 #

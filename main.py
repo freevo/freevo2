@@ -75,7 +75,6 @@ def getcmd():
     items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
-    mainmenu.bgbitmap = ('skins/test1/mainbg.png', 128, 48)
     menuwidget.pushmenu(mainmenu)
     
     muted = 0

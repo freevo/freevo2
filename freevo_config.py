@@ -78,6 +78,13 @@ OSD_HOST = '127.0.0.1'      # The remote host
 OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
                             # to be changed manually!
 
+# OSD background bitmap. Must be PNG.
+# Format: (filename, x, y)  x=y=-1 means integer tiling
+
+#OSD_BGBITMAP = ('skins/test1/mainbg.png', 128, 48)
+OSD_BGBITMAP = ('skins/test1/mainbg2.png', -1, -1)
+
+# OSD fonts
 OSD_FONTNAME = 'skins/fonts/Cultstup.ttf'
 OSD_FONTSIZE = 14
 OSD_FONTNAME_HDR = 'skins/fonts/Cultstup.ttf'
