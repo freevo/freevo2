@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2003/11/29 18:37:29  dischi
+# build config.VIDEO_SUFFIX in config on startup
+#
 # Revision 1.78  2003/11/28 20:23:43  dischi
 # renamed more config variables
 #
@@ -576,10 +579,15 @@ OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 #
 VIDEO_SUFFIX = []
 
-if HELPER:
-    for s in VIDEO_MPLAYER_SUFFIX + VIDEO_XINE_SUFFIX:
-        if not s in VIDEO_SUFFIX:
-            VIDEO_SUFFIX.append(s)
+for p in plugin.getall():
+    if p.startswith('video'):
+        try:
+            for s in eval('VIDEO_%s_SUFFIX' % p[6:].upper()):
+                if not s in VIDEO_SUFFIX:
+                    VIDEO_SUFFIX.append(s)
+        except:
+            pass
+
             
 #
 # set data dirs

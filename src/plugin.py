@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/11/29 18:37:29  dischi
+# build config.VIDEO_SUFFIX in config on startup
+#
 # Revision 1.52  2003/11/29 11:20:30  dischi
 # doc update, remove AUDIOCD_PLAYER
 #
@@ -311,7 +314,7 @@ def shutdown(plugin_name=None):
         if not plugin_name or p.plugin_name == plugin_name:
             p.shutdown()
 
-            
+ 
 def get(type):
     """
     get the plugin list 'type'
@@ -322,6 +325,17 @@ def get(type):
         __plugin_type_list__[type] = []
 
     return __plugin_type_list__[type]
+
+
+def getall():
+    """
+    return a list of all plugins
+    """
+    global __all_plugins__
+    ret = []
+    for t in __all_plugins__:
+        ret.append(t[0])
+    return ret
 
 
 def getbyname(name, multiple_choises=0):

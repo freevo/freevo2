@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/11/29 18:37:30  dischi
+# build config.VIDEO_SUFFIX in config on startup
+#
 # Revision 1.43  2003/11/28 20:08:59  dischi
 # renamed some config variables
 #
@@ -101,10 +104,6 @@ class PluginInterface(plugin.Plugin):
 
         # register it as the object to play audio
         plugin.register(mplayer, plugin.VIDEO_PLAYER, True)
-
-        for i in config.VIDEO_MPLAYER_SUFFIX:
-            if not i in config.VIDEO_SUFFIX:
-                config.VIDEO_SUFFIX.append(i)
 
 
 class MPlayer:
