@@ -17,8 +17,6 @@ o Add view related bitmap to mp3/movie lists/playing
 o A switch to turn off the EPG altogether if no listings are available.
 o Installation instructions, clean up config stuff
   Paul Aubin:
-  1) A lot of the python paths are hardcoded. I s'//'-ed through and fixed
-     them; though that's mostly because Debian puts python in /usr/bin
   2) The lirc stuff is tricky. I'm used to an lircrc file, as I imagine
      most people are. It wasn't terribly difficult, in all fairness, just
      took a little getting used to.
@@ -35,11 +33,12 @@ o Installation instructions, clean up config stuff
 
    4) Lots of hard coded things within the application root that probably
      don't need to be there (fbset, matroxset)
+o Proper logging to a file of errors and debug info
 o Use btaudio for audio recording from the video card
 o Add page numbers to the menus, i.e. "Page 3/14"
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
 o clean up Docs/Notes
-o Add DVD rip
+o Add DVD backups
   o mencoder works fine with XviD/FFMPEG, but it cannot be started from Freevo yet
 o Add a digital filter to remove 50/60 Hz line-noise from audio line input
   o Is only a problem for connecting line in to a VCR?
@@ -49,10 +48,7 @@ o Website:
   o Add an animated GIF of the system being used instead?
   o Add links to the mailing list
   o Make a sidebar with quick links
-  o Logo
   o New favicon
-o Rename config.py freevo_config.py.
-  o Search for it in /etc/ and ~/.freevo/ before the current dir.
  
 
 Mid-term
@@ -60,9 +56,6 @@ Mid-term
 o Adjustment of saturation, contrast, etc for both TV-in and
   TV-out.
   o Have a menu choice to save the settings to a config file
-o Website:
-  o Logo
-  o Design, graphics. Can copy some stuff from winehq
 o Picture-In-Picture, channelscan
   o Both using one or two WinTV boards
   o Rewrite the TV app to use framegrabbing instead of overlay
