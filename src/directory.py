@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2004/01/03 17:39:45  dischi
+# Remove the update function fro the MimetypePlugin and inside DirItem.
+# Now all items are rebuild as default, because the old style didn't
+# support adding images to items during display and now it's also
+# possible to change a fxd file and the directory will update.
+#
 # Revision 1.82  2004/01/01 19:48:42  dischi
 # fix dir playing
 #
@@ -29,12 +35,6 @@
 # up to the previous directory.
 #
 # (This is identical to the previous 1.4 behaviour)
-#
-# Revision 1.76  2003/12/12 19:59:33  dischi
-# some speed enhancements
-#
-# Revision 1.75  2003/12/10 13:14:24  rshortt
-# Fix a typo.
 #
 # Revision 1.74  2003/12/08 20:37:33  dischi
 # merged Playlist and RandomPlaylist into one class
@@ -463,55 +463,6 @@ class DirItem(Playlist):
             return
 
 
-    def sort_items(self):
-        """
-        sort all items
-        """
-        # sort directories
-        if self.DIRECTORY_SMART_SORT:
-            self.dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
-        else:
-            self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
-
-        # sort playlist
-        self.pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
-
-        # sort normal items
-        if self.DIRECTORY_SORT_BY_DATE:
-            self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
-                                                  o.sort('date').upper()))
-        else:
-            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
-                                                  o.sort().upper()))
-
-        if self.DIRECTORY_REVERSE_SORT:
-            self.dir_items.reverse()
-            self.play_items.reverse()
-            self.pl_items.reverse()
-
-        # delete pl_items if they should not be displayed
-        if self.display_type and not self.display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
-            self.pl_items = []
-
-        # add all playable items to the playlist of the directory
-        # to play one files after the other
-        if not self.display_type or self.display_type in self.DIRECTORY_CREATE_PLAYLIST:
-            self.playlist = self.play_items
-
-
-        # build a list of all items
-        items = self.dir_items + self.pl_items + self.play_items
-
-        # random playlist (only active for audio)
-        if self.display_type and self.display_type in self.DIRECTORY_ADD_RANDOM_PLAYLIST \
-               and len(self.play_items) > 1:
-            pl = Playlist(_('Random playlist'), self.play_items, self, random=True)
-            pl.autoplay = True
-            items = [ pl ] + items
-
-        return items
-    
-
     def build(self, arg=None, menuw=None):
         """
         build the items for the directory
@@ -521,6 +472,14 @@ class DirItem(Playlist):
         self.dir_items  = []
         self.pl_items   = []
 
+        if arg == 'update':
+            if not self.menu.choices:
+                selected_pos = -1
+            else:
+                # store the current selected item
+                selected_id  = self.menu.selected.id()
+                selected_pos = self.menu.choices.index(self.menu.selected)
+                
         if arg and arg.startswith('playlist:'):
             if arg.endswith(':random'):
                 Playlist(playlist = [ (self.dir, 0) ], parent = self,
@@ -587,6 +546,10 @@ class DirItem(Playlist):
             if self.media:
                 self.media.cached = True
 
+        #
+        # build items
+        #
+
         # build play_items, pl_items and dir_items
         for p in plugin.mimetype(display_type):
             if p.files_only:
@@ -607,7 +570,53 @@ class DirItem(Playlist):
                 self.dir_items.append(DirItem(filename, self, display_type =
                                               self.display_type))
 
-        items = self.sort_items()
+        #
+        # sort all items
+        #
+        
+        # sort directories
+        if self.DIRECTORY_SMART_SORT:
+            self.dir_items.sort(lambda l, o: util.smartsort(l.dir,o.dir))
+        else:
+            self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+
+        # sort playlist
+        self.pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+
+        # sort normal items
+        if self.DIRECTORY_SORT_BY_DATE:
+            self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
+                                                  o.sort('date').upper()))
+        else:
+            self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
+                                                  o.sort().upper()))
+
+        if self.DIRECTORY_REVERSE_SORT:
+            self.dir_items.reverse()
+            self.play_items.reverse()
+            self.pl_items.reverse()
+
+        # delete pl_items if they should not be displayed
+        if self.display_type and not self.display_type in self.DIRECTORY_ADD_PLAYLIST_FILES:
+            self.pl_items = []
+
+        # add all playable items to the playlist of the directory
+        # to play one files after the other
+        if not self.display_type or self.display_type in self.DIRECTORY_CREATE_PLAYLIST:
+            self.playlist = self.play_items
+
+
+        # build a list of all items
+        items = self.dir_items + self.pl_items + self.play_items
+
+        # random playlist (only active for audio)
+        if self.display_type and self.display_type in self.DIRECTORY_ADD_RANDOM_PLAYLIST \
+               and len(self.play_items) > 1:
+            pl = Playlist(_('Random playlist'), self.play_items, self, random=True)
+            pl.autoplay = True
+            items = [ pl ] + items
+
+
 
         if pop:
             pop.destroy()
@@ -622,16 +631,43 @@ class DirItem(Playlist):
             # up the next milliseconds
             osd.get_singleton().busyicon.stop()
 
-        # autoplay
-        if len(items) == 1 and items[0].actions() and \
-           self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
+
+        #
+        # action
+        #
+        
+        if arg == 'update':
+            # update because of dirwatcher changes
+            self.menu.choices = items
+
+            if selected_pos != -1:
+                for i in items:
+                    if i.id() == selected_id:
+                        self.menu.selected = i
+                        break
+                else:
+                    # item is gone now, try to the selection close
+                    # to the old item
+                    pos = max(0, min(selected_pos-1, len(items)-1))
+                    if items:
+                        self.menu.selected = items[pos]
+
+            self.menuw.init_page()
+            self.menuw.refresh()
+                
+
+        elif len(items) == 1 and items[0].actions() and \
+                 self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
+            # autoplay
             items[0].actions()[0][0](menuw=menuw)
 
         elif arg=='play' and self.play_items:
+            # called by play function
             self.playlist = self.play_items
             Playlist.play(self, menuw=menuw)
             
         else:
+            # normal menu build
             item_menu = menu.Menu(self.name, items, reload_func=self.reload,
                                   item_types = self.display_type,
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
@@ -653,91 +689,10 @@ class DirItem(Playlist):
         called when we return to this menu
         """
         dirwatcher.cwd(self.menuw, self, self.menu, self.dir, self.all_files)
-        dirwatcher.scan(force=True)
+        dirwatcher.scan()
 
         # we changed the menu, don't build a new one
         return None
-
-
-    def update(self, menuw, new_files, del_files, all_files):
-        """
-        update the current item set. Maybe this function can share some code
-        with cwd in the future, but it's easier now the way it is
-        """
-        new_items = []
-        del_items = []
-
-        self.all_files = all_files
-
-        display_type = self.display_type
-        if self.display_type == 'tv':
-            display_type = 'video'
-
-
-        # add/delete items based on mimetypes
-        for p in plugin.mimetype(display_type):
-            p.update(self, new_files, del_files, new_items, del_items,
-                     self.play_items + self.dir_items + self.pl_items)
-
-        # delete directories
-        for file in del_files:
-            for dir in self.dir_items:
-                if file == dir.dir:
-                    del_items.append(dir)
-
-        # add directories
-        for d in new_files:
-            if vfs.isdir(d):
-                new_items.append(DirItem(d, self, display_type = self.display_type))
-
-
-        # store the current selected item
-        selected = self.menu.selected
-        
-
-        # delete items
-        for item in del_items:
-            if item in self.play_items:
-                self.play_items.remove(item)
-            if item in self.dir_items:
-                self.dir_items.remove(item)
-            if item in self.pl_items:
-                self.pl_items.remove(item)
-
-            self.menu.delete_item(item)
-
-
-        # add new items to the menu
-        if new_items:
-            for i in new_items:
-                if i.type == 'playlist':
-                    self.pl_items.append(i)
-                elif i.type == 'dir':
-                    self.dir_items.append(i)
-                else:
-                    self.play_items.append(i)
-
-            items = self.sort_items()
-
-            # finally add the items
-            for i in new_items:
-                self.menu.add_item(i, items.index(i))
-
-
-        # maybe change selected item
-        if not selected in self.menu.choices:
-            id = selected.id()
-            for i in self.menu.choices:
-                if i.id() == selected.id():
-                    self.menu.selected = i
-                    break
-                    
-        # reload the menu
-        if hasattr(self.menu,'skin_force_text_view'):
-            del self.menu.skin_force_text_view
-
-        menuw.init_page()
-        menuw.refresh()
 
 
     # ======================================================================
@@ -877,46 +832,59 @@ class Dirwatcher(plugin.DaemonPlugin):
         self.item_menu = item_menu
         self.dir       = dir
         self.files     = files
-        self.last_time = vfs.stat(self.dir)[stat.ST_MTIME]
+        try:
+            self.last_time = item.__dirwatcher_last_time__
+        except AttributeError:
+            self.last_time = vfs.stat(self.dir)[stat.ST_MTIME]
+            self.item.__dirwatcher_last_time__ = self.last_time
         
 
     def scan(self, force=False):
         if not self.dir:
             return
         try:
-            if not force and config.DIRECTORY_USE_STAT_FOR_CHANGES and \
-               vfs.stat(self.dir)[stat.ST_MTIME] == self.last_time:
+            if config.DIRECTORY_USE_STAT_FOR_CHANGES and \
+                   vfs.stat(self.dir)[stat.ST_MTIME] == self.last_time:
                 return True
         except IOError:
             # the directory is gone
             _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
 
-        try:
-            files = vfs.listdir(self.dir, False)
-        except OSError:
-            # the directory is gone
-            _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
-
             # send EXIT to go one menu up:
             rc.post_event(MENU_BACK_ONE_MENU)
+            self.dir = None
             return
         
-        new_files = []
-        del_files = []
-        
-        for f in files:
-            if not f in self.files:
-                new_files += [ f ]
-        for f in self.files:
-            if not f in files:
-                del_files += [ f ]
 
-        if new_files or del_files:
+        if not config.DIRECTORY_USE_STAT_FOR_CHANGES:
+            try:
+                files = vfs.listdir(self.dir, False)
+            except OSError:
+                # the directory is gone
+                _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
+
+                # send EXIT to go one menu up:
+                rc.post_event(MENU_BACK_ONE_MENU)
+                self.dir = None
+                return
+
+            new_files = []
+            del_files = []
+            for f in files:
+                if not f in self.files:
+                    new_files.append(f)
+            for f in self.files:
+                if not f in files:
+                    del_files.append(f)
+            self.files = files
+
+
+        if config.DIRECTORY_USE_STAT_FOR_CHANGES or new_files or del_files:
             _debug_('directory has changed')
-            self.item.update(self.menuw, new_files, del_files, files)
+            self.item.build(menuw=self.menuw, arg='update')
             self.last_time = vfs.stat(self.dir)[stat.ST_MTIME]
+            self.item.__dirwatcher_last_time__ = self.last_time
                     
-        self.files = files
 
     
     def poll(self):
@@ -925,6 +893,5 @@ class Dirwatcher(plugin.DaemonPlugin):
             self.scan()
 
 # and activate that DaemonPlugin
-dirwatcher_thread = Dirwatcher()
-dirwatcher        = dirwatcher_thread
-plugin.activate(dirwatcher_thread)
+dirwatcher = Dirwatcher()
+plugin.activate(dirwatcher)
