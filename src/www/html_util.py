@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/20 21:52:26  rshortt
+# Added a link 'Video Library' to library.cgi which was contributed by Mike Ruelle.
+#
 # Revision 1.2  2003/02/08 18:35:26  dischi
 # added new version of freevoweb from Rob Shortt
 #
@@ -124,6 +127,7 @@ def printLinks(fp=sys.stdout):
     <td class="tablelink" onClick="document.location=\'guide.cgi\'">TV Guide</td>
     <td class="tablelink" onClick="document.location=\'record.cgi\'">Scheduled Recordings</td>
     <td class="tablelink" onClick="document.location=\'favorites.cgi\'">Favorites</td>
+    <td class="tablelink" onClick="document.location=\'library.cgi\'">Video Library</td>
   </tr>
 </table>
 </center>
