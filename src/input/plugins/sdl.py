@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/06 18:52:27  dischi
+# use KEYBOARD_MAP now and switch to new notifier code
+#
 # Revision 1.2  2004/09/27 18:40:35  dischi
 # reworked input handling again
 #
@@ -40,6 +43,9 @@
 # ----------------------------------------------------------------------- */
 #endif
 
+# external imports
+import notifier
+
 # python imports
 import time
 import pygame
@@ -48,7 +54,6 @@ from pygame import locals
 # Freevo imports
 import config
 import plugin
-import rc
 
 
 class PluginInterface(plugin.InputPlugin):
@@ -59,18 +64,18 @@ class PluginInterface(plugin.InputPlugin):
         plugin.InputPlugin.__init__(self)
 
         self.keymap = {}
-        for key in config.KEYMAP:
+        for key in config.KEYBOARD_MAP:
             if hasattr(locals, 'K_%s' % key):
                 code = getattr(locals, 'K_%s' % key)
-                self.keymap[code] = config.KEYMAP[key]
+                self.keymap[code] = config.KEYBOARD_MAP[key]
             elif hasattr(locals, 'K_%s' % key.lower()):
                 code = getattr(locals, 'K_%s' % key.lower())
-                self.keymap[code] = config.KEYMAP[key]
+                self.keymap[code] = config.KEYBOARD_MAP[key]
             else:
                 _debug_('Error: unable to find key code for %s' % key, 0)
         self.mousehidetime = time.time()
         pygame.key.set_repeat(500, 30)
-        rc.register(self.handle, True, 1)
+        notifier.addTimer( 20, self.handle )
 
 
     def handle(self):
@@ -78,7 +83,7 @@ class PluginInterface(plugin.InputPlugin):
         Callback to handle the pygame events.
         """
         if not pygame.display.get_init():
-            return
+            return True
 
         # Check if mouse should be visible or hidden
         mouserel = pygame.mouse.get_rel()
@@ -97,8 +102,10 @@ class PluginInterface(plugin.InputPlugin):
             event = pygame.event.poll()
 
             if event.type == locals.NOEVENT:
-                return
+                return True
 
             if event.type == locals.KEYDOWN:
                 if event.key in self.keymap:
                     self.post_key(self.keymap[event.key])
+
+        return True
