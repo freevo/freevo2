@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/07/13 13:44:06  dischi
+# small bugfix
+#
 # Revision 1.8  2003/07/10 20:01:31  dischi
 # support for mmpython mime types
 #
@@ -79,7 +82,7 @@ def format_image(settings, item, width, height, force=0):
             type = item.type
 
     cname = '%s-%s-%s-%s-%s-%s' % (item.image, type, item.type, width, height, force)
-    if item.media:
+    if item.media and item.media.info == item:
         cname = '%s-%s' % (cname, item.media)
         
     cimage = format_imagecache[cname]
