@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/12/11 10:25:28  dischi
+# Sort directories and playlists, too
+#
 # Revision 1.10  2002/12/09 14:23:53  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
 #
@@ -287,6 +290,7 @@ class DirItem(Playlist):
                 play_items += eval(t + '.interface.cwd(self, files)')
         play_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
 
+        files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
         # add sub-directories
         for dir in files:
