@@ -31,6 +31,7 @@
 #include "fb.h"
 #include "x11.h"
 #include "sdl.h"
+#include "dxr3.h"
 
 
 #ifdef OSD_X11
@@ -40,11 +41,15 @@
 #define SCREEN_WIDTH 768
 #define SCREEN_HEIGHT 576
 #endif
+//#define SCREEN_WIDTH 384
+//#define SCREEN_HEIGHT 288
 
 #ifndef OSD_FB
 #ifndef OSD_X11
 #ifndef OSD_SDL
-#error Either OSD_FB, OSD_SDL or OSD_X11 must be defined!
+#ifndef OSD_DXR3
+#error Either OSD_FB, OSD_SDL, OSD_X11 or OSD_DXR3 must be defined!
+#endif
 #endif
 #endif
 #endif
@@ -280,7 +285,7 @@ udpserver (int port)
         fflush (stdout);
       }
     }
-    
+
 #ifdef OSD_X11
     x11_pollevents ();
 #endif
@@ -309,6 +314,10 @@ osd_close (void)
 #ifdef OSD_SDL
    sdl_close();
 #endif
+
+#ifdef OSD_DXR3
+   dxr3_close ();
+#endif
 }
 
 
@@ -325,6 +334,10 @@ osd_update (void)
 
 #ifdef OSD_SDL
     sdl_update ((uint8 *) framebuffer);
+#endif
+
+#ifdef OSD_DXR3
+    dxr3_update ((uint8 *) framebuffer);
 #endif
 }
 
@@ -370,13 +383,13 @@ osd_setpixel (uint16 x, uint16 y, uint32 color)
      new_r = ALPHA_BLEND (old_r, r, t);
      new_g = ALPHA_BLEND (old_g, g, t);
      new_b = ALPHA_BLEND (old_b, b, t);
-     
+
      framebuffer[y][x][3] = 0;
      framebuffer[y][x][2] = new_r;
      framebuffer[y][x][1] = new_g;
      framebuffer[y][x][0] = new_b;
   } /* else don't change the pixel */
-  
+
 }
 
 
@@ -386,7 +399,7 @@ strcasecmp_tail (char *str, char *tail)
 {
   int pos;
 
-  
+
   /* str can't end in tail if it is shorter than tail */
   if (strlen (str) < strlen (tail)) {
     return (FALSE);
@@ -897,17 +910,17 @@ osd_clearscreen (int color)
    uint32 *pBuf = (uint32 *) framebuffer;
    int i;
 
-
+   memset(pBuf, color, SCREEN_WIDTH*SCREEN_HEIGHT*4);
    /* Set the first line to the color in question */
-   for (i = 0; i < SCREEN_WIDTH; i++) {
+/*   for (i = 0; i < SCREEN_WIDTH; i++) {
       pBuf[i] = color;
    }
-
+*/
    /* And then repeatedly copy that line to the other lines */
-   for (i = 1; i < SCREEN_HEIGHT; i++) {
+/*   for (i = 1; i < SCREEN_HEIGHT; i++) {
       memcpy (framebuffer[i], framebuffer[0], SCREEN_WIDTH*4);
    }
-
+*/
 }
 
 
@@ -964,6 +977,10 @@ main (int ac, char *av[])
 
 #ifdef OSD_SDL
    sdl_open (SCREEN_WIDTH, SCREEN_HEIGHT);
+#endif
+
+#ifdef OSD_DXR3
+   dxr3_open (SCREEN_WIDTH, SCREEN_HEIGHT);
 #endif
 
    udpserver (16480);           /* XXX get config info from central file */

@@ -37,6 +37,10 @@ osds_sdl: main.c ft.c ft.h sdl.c sdl.h readpng.c readpng.h readjpeg.c readjpeg.h
 	gcc -DOSD_SDL $(CFLAGS) $(SDLFLAGS) -o osds_sdl main.c ft.c sdl.c \
 	readpng.c readjpeg.c $(SDLLIBS) $(LIBS)
 
+osds_dxr3: main.c ft.c ft.h dxr3.c dxr3.h readpng.c readpng.h readjpeg.c readjpeg.h rgb2yuv.c rgb2yuv.h
+	gcc -DOSD_DXR3 $(CFLAGS) -o osds_dxr3 main.c ft.c dxr3.c readpng.c readjpeg.c rgb2yuv.c \
+	$(LIBS) -lfame -pg
+
 x11test: x11.c x11.h readpng.c readpng.h readjpeg.c readjpeg.h
 	gcc -Wall -g -DTEST x11.c readpng.c readjpeg.c -o x11test $(XLIBS) $(LIBS)
 
@@ -50,4 +54,4 @@ pngtest: readpng.c readpng.h
 	gcc -DPNGTEST $(CFLAGS) -Wall readpng.c -o pngtest $(LIBS)
 
 clean:
-	-rm -f *.o *.pyc osds_fb osds_x11 x11test pngtest fttest sdltest osds_sdl vtrelease
+	-rm -f *.o *.pyc osds_fb osds_x11 osds_dxr3 x11test pngtest fttest sdltest osds_sdl vtrelease
