@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2005/01/09 10:47:53  dischi
+# gb patch
+#
 # Revision 1.9  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -62,9 +65,17 @@ class PluginInterface(plugin.ItemPlugin):
 
     def actions(self, item): 
         if item.type == 'dir':
-            diskfree = _('%i free of %i Mb total')  % \
-                       ( (( util.freespace(item.dir) / 1024) / 1024),
-                         ((util.totalspace(item.dir) /1024) /1024))
+            freespace = util.freespace(item.dir)
+            totalspace = util.totalspace(item.dir)
+
+            if (totalspace > 1073741824): # more than 1024 Mb
+                diskfree = _('%i free of %i Gb total (%i%% free)') % \
+                           ( (((freespace / 1024) / 1024) / 1024),
+                             (((totalspace / 1024) / 1024) / 1024), (freespace*100.0/totalspace) )
+            else:
+                diskfree = _('%i free of %i Mb total (%i%% free)') % \
+                           ( ((freespace / 1024) / 1024),
+                             ((totalspace / 1024) / 1024), (freespace*100.0/totalspace) )
             return  [ ( self.dud, diskfree) ]
         else:
             return []
