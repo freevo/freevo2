@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/30 15:57:06  dischi
+# Added search for DVD/VCD to the item menu. You can only search the disc
+# label and you can't insert your own search text
+#
 # Revision 1.1  2002/12/07 13:33:08  dischi
 # plugin example: add discs to imdb.py xml files
 #
@@ -52,22 +56,65 @@ def actions(item):
     if (not item.type == 'video') or item.mode == file or item.rom_id or item.rom_label:
         return []
     current_media = item.media
-    return [ (imdb_add_disc_menu, 'Add disc to existing entry in database') ]
+    return [ (imdb_search_disc, 'Search IMDB for [%s]' % item.label),
+             (imdb_add_disc_menu, 'Add disc to existing entry in database') ]
 
+# -------------------------------------------
+
+def imdb_search_disc(arg=None, menuw=None):
+    """
+    search imdb for this disc
+    """
+    import helpers.imdb
+    global current_media
+
+    skin.PopupBox('searching IMDB, be patient...')
+    osd.update()
+
+    items = []
+    for id,name,year,type in helpers.imdb.search(current_media.info.label):
+        items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                                 imdb_create_disc, (id, year)) ]
+    moviemenu = menu.Menu('IMDB QUERY', items)
+    menuw.pushmenu(moviemenu)
+
+
+def imdb_create_disc(arg=None, menuw=None):
+    """
+    get imdb informations and store them
+    """
+    import helpers.imdb
+    global current_media
+
+    skin.PopupBox('getting data, be patient...')
+    osd.update()
+    menuw.delete_menu()
+    menuw.delete_menu()
+
+    disc_id = helpers.imdb.getCDID(current_media.devicename)
+    filename = ('%s/%s_%s' % (config.MOVIE_DATA_DIR, current_media.info.label, \
+                              arg[1])).lower()
+    if os.path.isfile('%s.xml' % filename):
+        filename = '%s_%s' % (filename, disc_id)
+
+    helpers.imdb.get_data_and_write_xml(arg[0], filename, disc_id,
+                                        current_media.info.mode,None)
+    
 # -------------------------------------------
 
 def imdb_add_disc(arg=None, menuw=None):
     """
     call imdb.py to add this disc to the database
     """
+    import helpers.imdb
     global current_media
+
     skin.PopupBox('adding to database, be patient...')
     osd.update()
     menuw.delete_menu()
     menuw.delete_menu()
 
-    os.system('./helpers/imdb.py --add-id %s %s' % \
-              (current_media.devicename, arg.xml_file))
+    helpers.imdb.add_id(current_media.devicename, arg.xml_file)
 
 
 def imdb_add_disc_menu(arg=None, menuw=None):
