@@ -1,4 +1,0 @@
-#!/bin/sh
-for t in /dev/tty[1-6] ; do
- setterm -term linux -cursor off -blank 0 -clear -powerdown 0 -powersave off <$t >$t 2>&1
-done

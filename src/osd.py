@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2003/08/23 09:19:01  dischi
+# merged blanking helper into osd.py
+#
 # Revision 1.80  2003/08/16 12:10:55  dischi
 # this does not work on mga framebuffer
 #
@@ -352,17 +355,24 @@ class OSD:
                config.CONF.display == 'x11':
             os.environ['SDL_VIDEODRIVER'] = 'x11'
 
-        if config.CONF.display == 'mga':
-            # set ioctl (tty, KDSETMODE, KD_TEXT)
-            try:
-                fd = os.open('/dev/tty0', os.O_RDONLY | os.O_NONBLOCK)
+
+        # disable term blanking for mga and fbcon and restore the
+        # tty so that sdl can use it
+        if config.CONF.display in ('mga', 'fbcon'):
+            for i in range(1,7):
                 try:
-                    ioctl(fd, 0x4B3A, 0)
+                    fd = os.open('/dev/tty%s' % i, os.O_RDONLY | os.O_NONBLOCK)
+                    try:
+                        # set ioctl (tty, KDSETMODE, KD_TEXT)
+                        ioctl(fd, 0x4B3A, 0)
+                    except:
+                        pass
+                    os.close(fd)
+                    os.system('%s -term linux -cursor off -blank 0 -clear -powerdown 0 ' \
+                              '-powersave off </dev/tty%s > /dev/tty%s 2>/dev/null' % \
+                              (config.CONF.setterm, i,i))
                 except:
                     pass
-                os.close(fd)
-            except:
-                pass
             
         # Initialize the PyGame modules.
         pygame.display.init()

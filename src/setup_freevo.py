@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/23 09:19:01  dischi
+# merged blanking helper into osd.py
+#
 # Revision 1.4  2003/08/22 18:03:27  dischi
 # write freevo.conf to /etc/freevo or ~/.freevo
 #
@@ -72,7 +75,8 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("lame", "lame",0),
                      ("cdparanoia","cdparanoia",0),
                      ("oggenc","oggenc",0),
-                     ("renice","renice",0))
+                     ("renice","renice",0),
+                     ("setterm", "setterm", 0))
     
 
 # Help text
