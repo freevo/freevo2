@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/09/21 13:17:20  dischi
+# add OSD_MESSAGE and DIRECTORY_CHANGE_DISPLAY_TYPE (not on any key)
+#
 # Revision 1.21  2003/09/19 22:07:14  dischi
 # TRUE/True/FALSE/False changes
 #
@@ -121,7 +124,10 @@ MENU_PLAY_ITEM         = Event('MENU_PLAY_ITEM')
 MENU_SUBMENU           = Event('MENU_SUBMENU')
 MENU_CALL_ITEM_ACTION  = Event('MENU_CALL_ITEM_ACTION')
 MENU_CHANGE_STYLE      = Event('MENU_CHANGE_STYLE')
-                       
+
+
+DIRECTORY_CHANGE_DISPLAY_TYPE = Event('DIRECTORY_CHANGE_DISPLAY_TYPE')
+
 #
 # TV module
 #
@@ -481,4 +487,6 @@ USER_END        = Event('USER_END')
 DVD_PROTECTED   = Event('DVD_PROTECTED')
 AUDIO_PLAY_END  = Event('AUDIO_PLAY_END')
 PLAY_START      = Event('PLAY_START')
+
+OSD_MESSAGE     = Event('OSD_MESSAGE')
 
