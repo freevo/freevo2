@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2004/10/09 16:24:54  dischi
+# add function to return number of plugins, activate callback change
+#
 # Revision 1.76  2004/10/08 20:18:17  dischi
 # new eventhandler <-> plugin interface
 #
@@ -348,7 +351,12 @@ def is_active(name, arg=None):
                 return p
     return False
                 
-    
+
+def get_number():
+    global _all_plugins
+    return len(_all_plugins)
+
+
 def init(callback = None, reject=['record', 'www'], exclusive=[]):
     """
     load and init all the plugins
@@ -364,7 +372,7 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
     for name, type, level, args, number in _all_plugins:
         current += 1
         if callback:
-            callback(int((float(current) / len(_all_plugins)) * 100))
+            callback()
         if exclusive:
             # load only plugins from exclusive list
             for e in exclusive:
