@@ -8,10 +8,10 @@
 <title>SourceDoc/PyEPG - Freevo 2.0 Wiki</title>
 
 
-<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="/moin-1.3.1/modern/css/common.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="/moin-1.3.1/modern/css/screen.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="/moin-1.3.1/modern/css/print.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" href="/moin-1.3.1/modern/css/freevo.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="../modern/css/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="../modern/css/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="../modern/css/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" href="../modern/css/freevo.css">
 
 <link rel="alternate" title="Freevo 2.0 Wiki Recent Changes" href="/cgi-bin/freevo-2.0/RecentChanges?action=rss_rc&amp;ddiffs=1&amp;unique=1" type="application/rss+xml">
 <link rel="Start" href="/cgi-bin/freevo-2.0/Index">
@@ -91,7 +91,7 @@
 
 </ol>
 <p> </p>
-<p>PyEPG is an electronic program guide with a database frontent. It is located in the Freevo source tree at lib/pyepg but it does not depend on Freevo. It only depends on a working sql database interface, right now only <a class="external" href="http://sqlite.sf.net"><img src="/moin-1.3.1/modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> pysqlite</a> is supported. </p>
+<p>PyEPG is an electronic program guide with a database frontent. It is located in the Freevo source tree at lib/pyepg but it does not depend on Freevo. It only depends on a working sql database interface, right now only <a class="external" href="http://sqlite.sf.net"><img src="../modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> pysqlite</a> is supported. </p>
 
 <h2 id="head-a2107bc32b8b821c9c1e2edfa936eaecc507741e">Setup the database</h2>
 
@@ -122,7 +122,7 @@ pyepg.update('xmltv', '/tmp/TV.xml')
 
 <h3 id="head-20e8543fa3acf8ff1ab8d665b8fc4779be541499">Using the VDR backend</h3>
 
-<p>The VDR backend requires vdrpylib to be installed (from CVS), which can be found at <a href="http://sourceforge.net/projects/vdrpylib/"><img src="/moin-1.3.1/modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> http://sourceforge.net/projects/vdrpylib/</a>.  Updating from VDR does not require any more parameters but you may pass some to override the defaults set by PyEPG and vdrpylib.  The simplest update call would be: 
+<p>The VDR backend requires vdrpylib to be installed (from CVS), which can be found at <a href="http://sourceforge.net/projects/vdrpylib/"><img src="../modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> http://sourceforge.net/projects/vdrpylib/</a>.  Updating from VDR does not require any more parameters but you may pass some to override the defaults set by PyEPG and vdrpylib.  The simplest update call would be: 
 </p>
 <pre>
 pyepg.update('vdr')
