@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/04/20 19:32:53  dischi
+# prepare images for faster blitting
+#
 # Revision 1.33  2003/04/11 21:50:53  dischi
 # autodetection has strange results for the G400
 #
@@ -312,6 +315,7 @@ class OSD:
         self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
                                               self.depth)
 
+        self.depth = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
         
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
@@ -1441,9 +1445,16 @@ class OSD:
 
                             
             image = pygame.image.load(filename)
-            image.set_alpha(image.get_alpha(), RLEACCEL)
 
-
+            # convert the surface to speed up blitting later
+            if image.get_alpha():
+                image.set_alpha(image.get_alpha(), RLEACCEL)
+            else:
+                if image.get_bitsize() != self.depth:
+                    i = pygame.Surface((image.get_width(), image.get_height()))
+                    i.blit(image, (0,0))
+                    image = i
+                    
         except pygame.error, e:
             print 'SDL image load problem: %s' % e
             return None
