@@ -230,6 +230,13 @@ if CONF.xmame_SDL or CONF.snes:
 # mixer
 mixer_plugin = plugin.activate('mixer')
 
+# use mplayer for audio playpack
+audio_player = plugin.activate('audio.mplayer')
+
+# make it possible to detach the player
+audio_detach = plugin.activate('audio.detach', level=20)
+
+
 # ======================================================================
 # Freevo directory settings:
 # ======================================================================
@@ -509,7 +516,8 @@ LIRCRC = '/etc/freevo/lircrc'
 #     'SUB'         : ( 'sub_visibility', 'Toggle subtitle visibility' )
 # }
 
-RC_MPLAYER_CMDS = {}
+RC_MPLAYER_CMDS       = {}
+RC_MPLAYER_AUDIO_CMDS = {}
 
 # XXX This is experimental, please send in testreports!
 # XXX If you want to use it you need to uncomment a line
