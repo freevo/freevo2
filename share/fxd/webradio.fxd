@@ -170,20 +170,20 @@
       </audio>
     </container>
 
-    <container title="Classic">
+    <container title="Classical">
       <audio title="Mostly Classical">
-	<mplayer_options></mplayer_options>
+	<mplayer_options>-playlist</mplayer_options>
 	<url>http://www.mostlyclassical.com/mp3/classical128k.pls</url>
 	<player>mplayer</player>
 	<info>
-	  <genre>Classic</genre>
+	  <genre>Classical</genre>
 	  <description>Relax, it's good for you</description>
 	  <bitrate>128</bitrate>
 	  <link>http://www.mostlyclassical.com</link>
 	</info>
       </audio>
       <info>
-	<genre>Classic</genre>
+	<genre>Classical</genre>
       </info>
     </container>
 
