@@ -971,10 +971,12 @@ if CONF.display in ( 'dxr3', 'dga' ):
 #
 # Output display to use. Possible values are SDL (using pygame),
 # Imlib2 (X only), Bmovl and Bmovl2. The two Bmovl displays also need
-# a background video set in OSD_BACKGROUND_VIDEO
+# a background video set in OSD_BACKGROUND_VIDEO. If you want to use
+# mplayer in mplayer, set MPLAYER_BMOVL2_POSSIBLE to 1.
 #
 OSD_DISPLAY = 'SDL'
 OSD_BACKGROUND_VIDEO = ''
+MPLAYER_BMOVL2_POSSIBLE = 0
 
 
 # ======================================================================
