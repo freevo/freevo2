@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/10 16:29:03  dischi
+# small bugfix
+#
 # Revision 1.9  2003/02/10 15:42:32  dischi
 # small bugfix
 #
@@ -325,6 +328,7 @@ class AudioItem(Item):
         Start playing the item
         """
         self.parent.current_item = self
+        self.elapsed = 0
         self.audio_player.play(self)
 
 
