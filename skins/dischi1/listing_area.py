@@ -1,6 +1,6 @@
 #if 0
 # -----------------------------------------------------------------------
-# listing.py - A listing area for the Freevo skin
+# listing_area.py - A listing area for the Freevo skin
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/02/27 22:39:50  dischi
+# The view area is working, still no extended menu/info area. The
+# blue_round1 skin looks like with the old skin, blue_round2 is the
+# beginning of recreating aubin_round1. tv and music player aren't
+# implemented yet.
+#
 # Revision 1.5  2003/02/26 21:21:11  dischi
 # blue_round1.xml working
 #
@@ -56,11 +62,10 @@
 import copy
 
 import osd
-import util
+import pygame
 
 from area import Skin_Area
 
-# Create the OSD object
 osd = osd.get_singleton()
 
 # Set to 1 for debug output
@@ -70,39 +75,22 @@ TRUE = 1
 FALSE = 0
 
 
-class Skin_Listing(Skin_Area):
-    def __init__(self, parent):
-        Skin_Area.__init__(self, 'listing')
+class Listing_Area(Skin_Area):
+    """
+    this call defines the listing area
+    """
+
+    def __init__(self, parent, screen):
+        Skin_Area.__init__(self, 'listing', screen)
         self.last_choices = ( None, None )
-        self.depends = ( parent.screen_area, )
 
-    def get_item_rectangle(self, rectangle, item_w, item_h):
-        r = copy.copy(rectangle)
-        
-        if not r.width:
-            r.width = item_w
-
-        if not r.height:
-            r.height = item_h
-
-        MAX = item_w
-        r.x = int(eval('%s' % r.x))
-        r.width = int(eval('%s' % r.width))
-            
-        MAX = item_h
-        r.y = int(eval('%s' % r.y))
-        r.height = int(eval('%s' % r.height))
-
-        if r.x < 0:
-            item_w -= r.x
-
-        if r.y < 0:
-            item_h -= r.y
-
-        return max(item_w, r.width), max(item_h, r.height), r
-    
 
     def get_items_geometry(self, settings, menu):
+        """
+        get the geometry of the items. How many items per row/col, spaces
+        between each item, etc
+        """
+
         # store the old values in case we are called by ItemsPerMenuPage
         backup = ( self.area_val, self.layout)
         
@@ -176,7 +164,11 @@ class Skin_Listing(Skin_Area):
                 items_h + content.spacing, -hskip, -vskip)
 
 
+
     def update_content_needed(self, settings, menuw):
+        """
+        check if the content needs an update
+        """
         menu = menuw.menustack[-1]
         if self.last_choices[0] != menu.selected:
             return TRUE
@@ -186,8 +178,12 @@ class Skin_Listing(Skin_Area):
             if self.last_choices[1][i] != choice:
                 return TRUE
             i += 1
-                
+
+        
     def update_content(self, settings, menuw):
+        """
+        update the listing area
+        """
         menu = menuw.menustack[-1]
 
         layout    = self.layout
@@ -231,8 +227,11 @@ class Skin_Listing(Skin_Area):
             if content.type == 'text':
                 font_w, font_h = osd.stringsize('Arj', font=font.name, ptsize=font.size)
                 if choice.icon:
-                    osd.drawbitmap(util.resize(choice.icon, font_h, font_h), x0, y0)
-                    icon_x = font_h + content.spacing
+                    image = osd.loadbitmap(choice.icon)
+                    if image:
+                        image = pygame.transform.scale(image, (font_h, font_h))
+                        self.draw_image(image, (x0, y0))
+                        icon_x = font_h + content.spacing
                 else:
                     icon_x = 0
 
@@ -242,7 +241,6 @@ class Skin_Listing(Skin_Area):
                         r.width = width - hskip - r.y
                     self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
                                       r.width - icon_x, r.height, r)
-                                  
                     
                 self.write_text(text, font, content, x=x0 + hskip + icon_x, y=y0 + vskip,
                                 width=width-icon_x, height=-1, mode='hard')

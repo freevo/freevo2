@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/02/27 22:39:50  dischi
+# The view area is working, still no extended menu/info area. The
+# blue_round1 skin looks like with the old skin, blue_round2 is the
+# beginning of recreating aubin_round1. tv and music player aren't
+# implemented yet.
+#
 # Revision 1.21  2003/02/26 21:21:11  dischi
 # blue_round1.xml working
 #
@@ -100,34 +106,53 @@ rc = rc.get_singleton()
 #
 # We have five areas, all inherit from Skin_Area (file area.py)
 #
-# Skin_Screen   (this file)
-# Skin_Title    (this file)
-# Skin_View     (not implemented yet)
-# Skin_Listing  (listing.py)
-# Skin_Info     (not implemented yet)
+# Screen_Area   (this file)
+# Title_Area    (this file)
+# View_Area     (view_area.py)
+# Listing_Area  (listing_area.py)
+# Info_Area     (not implemented yet)
 
 from area import Skin_Area
-from listing import Skin_Listing
+from area import Screen
 
-class Skin_Screen(Skin_Area):
-    def __init__(self, parent):
-        Skin_Area.__init__(self, 'screen')
+from listing_area import Listing_Area
+from view_area import View_Area
+
+
+class Screen_Area(Skin_Area):
+    """
+    this area is the screen or background of the skin
+    """
+    def __init__(self, parent, screen):
+        Skin_Area.__init__(self, 'screen', screen)
 
     def update_content_needed(self, settings, menuw):
+        """
+        this area needs never a content update
+        """
         return FALSE
 
     def update_content(self, settings, menuw):
+        """
+        there is no content in this area
+        """
         pass
 
 
-class Skin_Title(Skin_Area):
-    def __init__(self, parent):
-        Skin_Area.__init__(self, 'title')
-        self.depends = ( parent.screen_area, )
+
+class Title_Area(Skin_Area):
+    """
+    in this area the title of the menu is drawn
+    """
+    def __init__(self, parent, screen):
+        Skin_Area.__init__(self, 'title', screen)
         self.text = ''
 
         
     def update_content_needed(self, settings, menuw):
+        """
+        check if the content needs an update
+        """
         menu = menuw.menustack[-1]
 
         layout    = self.layout
@@ -143,6 +168,9 @@ class Skin_Title(Skin_Area):
 
 
     def update_content(self, settings, menuw):
+        """
+        update the content
+        """
         menu = menuw.menustack[-1]
 
         layout    = self.layout
@@ -161,6 +189,8 @@ class Skin_Title(Skin_Area):
             return
 
         self.write_text(text, settings.font[content.font], content, mode='hard')
+
+
 
 ###############################################################################
 
@@ -193,9 +223,11 @@ class Skin:
     hold = 0
 
     def __init__(self):
-        self.area_names = ( 'screen', 'title', 'listing')
+        self.screen = Screen()
+        self.area_names = ( 'screen', 'title', 'listing', 'view')
         for a in self.area_names:
-            setattr(self, '%s_area' % a, eval('Skin_%s%s(self)' % (a[0].upper(), a[1:])))
+            setattr(self, '%s_area' % a, eval('%s%s_Area(self, self.screen)' % \
+                                              (a[0].upper(), a[1:])))
 
 
     # This function is called from the rc module and other places
@@ -292,6 +324,7 @@ class Skin:
         if len(menuw.menustack) == 1:
             menu.item_types = 'main'
             
+        self.screen.clear()
         for a in self.area_names:
             area = eval('self.%s_area' % a)
             area.draw(settings, menuw)
@@ -302,3 +335,33 @@ class Skin:
     def DrawMP3(self, info):
         osd.update()
 
+    def format_track (self, array):
+        """ Return a formatted string for use in music.py """
+	# This is the default - track name only
+	formatstr = '%(t)s'
+       	# This will show the track number as well 
+	#formatstr = '%(n)s - %(t)s'
+
+	# Since we can't specify the length of the integer in the
+	# format string (Python doesn't seem to recognize it) we
+	# strip it out first, when we see the only thing that can be
+	# a number.
+
+
+        # Before we begin, make sure track is an integer
+    
+        if array.track:
+            try:
+    	        mytrack = ('%0.2d' % int(array.track))
+            except ValueError:
+    	        mytrack = None
+        else:
+           mytrack = None
+    
+        song_info = {  'a'  : array.artist,
+       	               'l'  : array.album,
+    	               'n'  : mytrack,
+    	               't'  : array.title,
+    	               'y'  : array.year }
+   
+        return formatstr % song_info

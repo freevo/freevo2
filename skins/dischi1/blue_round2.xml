@@ -1,14 +1,23 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <!-- 
-  This is the blue round 1 skin
-  It includes blue_round1 for the background, some fonts and the main
-  menu style
-   -->
-
   <skin include="blue1_small" geometry="800x600">
 
+    <main>
+      <item pos="0" name="         Watch TV"       action="tv.tv.main_menu"  arg="" 
+	visible="yes" icon="" image="skins/dischi1/tv_watermark.png" />
+      <item pos="1" name="      Watch a Movie" action="MediaMenu().main_menu" arg="video" 
+	visible="yes" icon="" image="skins/dischi1/movie_watermark.png"  />
+      <item pos="2" name="     Listen to Music"   action="MediaMenu().main_menu" arg="audio" 
+	visible="yes" icon="" image="skins/dischi1/music_watermark.png" />
+      <item pos="3" name="     Look at Pictures"   action="MediaMenu().main_menu" arg="image" 
+	visible="yes" icon="" image="skins/dischi1/image_watermark.png" />
+      <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
+	visible="no" icon="" image="" />
+      <item pos="5" name="         Shutdown" action="ShutdownItem" arg="" 
+	visible="yes" icon="" image="skins/dischi1/shutdown_watermark.png" />
+    </main>
+    
     <!-- Redefine of the type default -->
     <menu type="default">
       <!-- screen0 is already defined in blue1_big -->
@@ -32,6 +41,24 @@
       <info visible="no"/>
     </menu>
 
+    <menu type="main">
+      <!-- definition of the main menu -->
+      <screen layout="screen watermark" visible="yes">
+	<area x="0" y="0" width="800" height="600"/>
+      </screen>
+      <listing layout="list_main" visible="yes">
+	<area x="230" y="120" width="380" height="390"/> 
+      </listing>
+    </menu>
+
+    <menu type="video">
+      <screen layout="video screen"/>
+    </menu>
+      
+    <menu type="audio">
+      <screen layout="audio screen"/>
+    </menu>
+      
     <!-- 
     the main menu isn't redefined, the area is the same.
     But there is a new define of list_main later 
@@ -40,6 +67,40 @@
     <!-- ********************************************** -->
     <!-- LAYOUT DEFINITIONS -->
 
+
+    <!-- background -->
+    <layout label="screen0">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
+      </background>
+    </layout>
+
+    <layout label="screen watermark">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
+	<image x="500" y="300" width="300" height="300" label="watermark"/>
+      </background>
+    </layout>
+
+    <layout label="video screen">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
+	<image filename="movie_watermark.png" x="500" y="300" width="300"
+	  height="300"/>
+      </background>
+    </layout>
+
+    <layout label="audio screen">
+      <background>
+	<image filename="../images/aubin/blurr.jpg" x="0" y="0" label="background"/>
+	<image filename="../images/logo.png" x="10" y="0" width="200" height="98"/>
+	<image filename="music_watermark.png" x="500" y="300" width="300"
+	  height="300"/>
+      </background>
+    </layout>
 
     <layout label="view0">
       <content align="left" valign="top">

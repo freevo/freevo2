@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/02/27 22:39:50  dischi
+# The view area is working, still no extended menu/info area. The
+# blue_round1 skin looks like with the old skin, blue_round2 is the
+# beginning of recreating aubin_round1. tv and music player aren't
+# implemented yet.
+#
 # Revision 1.14  2003/02/26 21:21:12  dischi
 # blue_round1.xml working
 #
@@ -349,6 +355,10 @@ class XML_content(XML_data):
                             self.types[type].rectangle = XML_rectangle()
                             self.types[type].rectangle.parse(rnode, scale, current_dir)
 
+        if not self.types.has_key('default'):
+            self.types['default'] = XML_data(('font',))
+            self.types['default'].rectangle = None
+        
 
         
 class XML_layout:

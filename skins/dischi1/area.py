@@ -4,11 +4,45 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes: WIP
-# Todo:        
+# Notes:
+#
+#
+# This is the main class for all area. Right now it's working, but
+# some things are not very good. Maybe someone can create a new
+# Skin_Area with a different behaviour.
+#
+# My first draft was an area which redraws only the needed parts and
+# blits it onto the surface.. But there are some problems with that,
+# which makes this a little bit difficult. This version redraws too
+# much, but blits only the needed parts on the screen.
+#
+# If you want to create a new Skin_Area, please keep my problems in mind:
+#
+#
+# 1. Not all areas are visible at the same time, some areas may change
+#    the settings and others don't
+# 2. The listing and the view area can overlap, at the next item the image
+#    may be gone
+# 3. alpha layers are slow to blit on a non alpha surface.
+# 4. the blue_round1 draws two alpha masks, one for the listing, one
+#    for the view area. They overlap, but the overlapping area
+#    shouldn't be an addition of the transparent value
+# 5. If you drop an alpha layer on the screen, you can't get the original
+#    background back by making a reverse alpha layer.
+#
+# For more informations contact me (dmeyer@tzi.de)
+#
+#
+# Todo: make it faster :-)
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/27 22:39:49  dischi
+# The view area is working, still no extended menu/info area. The
+# blue_round1 skin looks like with the old skin, blue_round2 is the
+# beginning of recreating aubin_round1. tv and music player aren't
+# implemented yet.
+#
 # Revision 1.4  2003/02/26 19:59:25  dischi
 # title area in area visible=(yes|no) is working
 #
@@ -55,6 +89,7 @@ import pygame
 
 import osd
 import config
+import objectcache
 
 import xml_skin
 
@@ -69,39 +104,98 @@ TRUE = 1
 FALSE = 0
 
 
+background = None
+alpha = None
+
+
+class Screen:
+    """
+    this call is a set of surfaces for the area to do it's job
+    """
+
+    def __init__(self):
+        self.background  = pygame.Surface((osd.width, osd.height), 1, 32)
+        self.alpha       = self.background.convert_alpha()
+        self.alpha.fill((0,0,0,0))
+        self.alpha_bg    = self.background.convert()
+        
+    def clear(self):
+        self.alpha.fill((0,0,0,0))
+
+
+	
 class Skin_Area:
-    def __init__(self, name):
+    """
+    the base call for all areas. Each child needs two functions:
+
+    def update_content_needed
+    def update_content
+    """
+
+    def __init__(self, name, screen):
         self.area_name = name
-        self.alpha     = None           # alpha layer for rectangles
-        self.screen    = None           # backup of the final screen
         self.area_val  = None
         self.redraw    = TRUE
         self.depends   = ()
-        self.bg        = [ None, None ]
         self.layout    = None
-        self.visible   = FALSE
+        self.name      = name
         
+        self.background = screen.background
+        self.alpha = screen.alpha
+        self.alpha_bg = screen.alpha_bg
+
+        self.redraw_background  = []
+        self.redraw_alpha       = []
+        self.content_alpha      = []
+
+        self._write_text   = []
+        self._draw_image   = []
+
+        self.imagecache = objectcache.ObjectCache(5, desc='%s_image' % self.name)
+
     def draw(self, settings, menuw):
+        """
+        this is the main draw function. This function draws the background,
+        checks if redraws are needed and calls the two update functions for
+        the different types of areas
+        """
+        
         menu = menuw.menustack[-1]
 
-        self.redraw = FALSE
-
-        for d in self.depends:
-            self.redraw = d.redraw or self.redraw
+        self.menu = menu
         
-        dep_redraw = self.redraw
+        self.redraw = FALSE
+        self.mode = 0                   # start draw
+        
+        area = self.area_val
+
+        if area:
+            visible = area.visible
+        else:
+            visible = FALSE
+            
         self.redraw = self.init_vars(settings, menu.item_types)
 
-        # we need to restore the area we want to draw in
-        if not dep_redraw and self.redraw and self.bg[0] and self.visible:
-            osd.screen.blit(self.bg[0][0], self.bg[0][1:])
+        if area and area != self.area_val:
+            self.redraw_alpha += [ (area.x, area.y, area.width, area.height) ]
+            old_area = area
+        else:
+            old_area = None
+            
+        area = self.area_val
 
-        self.visible = self.area_val.visible
+        # maybe we are NOW invisible
+        if visible and not area.visible:
+            for rect in self.content_alpha:
+                self.alpha_bg.blit(self.background, (rect[0], rect[1]), rect)
+                self.alpha_bg.blit(self.alpha, (rect[0], rect[1]), rect)
+                osd.screen.blit(self.alpha_bg, (rect[0], rect[1]), rect)
 
-        # maybe we are invisible
-        if not self.visible:
+            self.content_alpha = []
+
+        if not area.visible:
             return
-
+        
         self.draw_background()
 
         # dependencies haven't changed
@@ -110,13 +204,68 @@ class Skin_Area:
             if not self.update_content_needed(settings, menuw):
                 return
 
-            # restore the background
-            osd.screen.blit(self.bg[1], (self.area_val.x, self.area_val.y))
+        for rect in self.content_alpha:
+            self.alpha_bg.blit(self.background, (rect[0], rect[1]), rect)
+            self.alpha_bg.blit(self.alpha, (rect[0], rect[1]), rect)
+            osd.screen.blit(self.alpha_bg, (rect[0], rect[1]), rect)
 
+        self.content_alpha = []
+
+        self.mode = 1                   # draw alpha stuff
         self.update_content(settings, menuw)
-        
 
-    def calc_geometry(self, object, copy_object=0, fit_area=1):
+        for rect in self.redraw_background:
+            # FIXME: redraw background
+            self.alpha_bg.blit(self.background, rect[:2], rect)
+
+
+        for rect in self.redraw_alpha:
+            # redraw alpha means to create a new merge of background
+            # and alpha on alpha_bg and blit it into osd.screen
+            self.alpha_bg.blit(self.background, rect[:2], rect)
+            self.alpha_bg.blit(self.alpha, rect[:2], rect)
+
+        self.redraw_alpha = []
+        self.redraw_background = []
+
+        if old_area:
+            osd.screen.blit(self.alpha_bg, (old_area.x,old_area.y),
+                            (old_area.x, old_area.y, old_area.width,
+                             old_area.height))
+
+        osd.screen.blit(self.alpha_bg, (area.x,area.y),
+                        (area.x, area.y, area.width, area.height))
+
+
+
+        
+        for t in self._write_text:
+            ( text, font, x, y, width, height, align_h, align_v, mode, ellipses ) = t
+            if font.shadow.visible:
+                osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
+                                     width, height, font.shadow.color, None,
+                                     font=font.name, ptsize=font.size,
+                                     align_h = align_h, align_v = align_v,
+                                     mode=mode, ellipses=ellipses)
+            osd.drawstringframed(text, x, y, width, height, font.color, None,
+                                 font=font.name, ptsize=font.size,
+                                 align_h = align_h, align_v = align_v,
+                                 mode=mode, ellipses=ellipses)
+
+        for i in self._draw_image:
+            osd.screen.blit(i[0], i[1])
+
+        self._write_text = []
+        self._draw_image = []
+
+
+
+
+    def calc_geometry(self, object, copy_object=0):
+        """
+        calculate the real values of the object (e.g. content) based
+        on the geometry of the area
+        """
         if copy_object:
             object = copy.deepcopy(object)
 
@@ -126,10 +275,9 @@ class Skin_Area:
         MAX = self.area_val.height
         object.height = eval('%s' % object.height)
 
-        if fit_area:
-            object.x += self.area_val.x
-            object.y += self.area_val.y
-
+        object.x += self.area_val.x
+        object.y += self.area_val.y
+        
         if not object.width:
             object.width = self.area_val.width
 
@@ -145,52 +293,84 @@ class Skin_Area:
         return object
 
         
+    def get_item_rectangle(self, rectangle, item_w, item_h):
+        """
+        calculates the values for a rectangle inside the item tag
+        """
+        r = copy.copy(rectangle)
+        
+        if not r.width:
+            r.width = item_w
+
+        if not r.height:
+            r.height = item_h
+
+        MAX = item_w
+        r.x = int(eval('%s' % r.x))
+        r.width = int(eval('%s' % r.width))
+            
+        MAX = item_h
+        r.y = int(eval('%s' % r.y))
+        r.height = int(eval('%s' % r.height))
+
+        if r.x < 0:
+            item_w -= r.x
+
+        if r.y < 0:
+            item_h -= r.y
+
+        return max(item_w, r.width), max(item_h, r.height), r
+    
+
+
     def init_vars(self, settings, display_type):
+        """
+        check which layout is used and set variables for the object
+        """
         redraw = self.redraw
         
         if settings.menu.has_key(display_type):
-            area_val = settings.menu[display_type][0]
+            area = settings.menu[display_type][0]
         else:
-            area_val = settings.menu['default'][0]
+            area = settings.menu['default'][0]
 
-        area_val = eval('area_val.%s' % self.area_name)
+        area = eval('area.%s' % self.area_name)
         
-        if (not self.area_val) or area_val != self.area_val:
-            self.area_val = area_val
+        if (not self.area_val) or area != self.area_val:
+            self.area_val = area
             redraw = TRUE
             
-        if not settings.layout.has_key(area_val.layout):
-            print '*** layout <%s> not found' % area_val.layout
+        if not settings.layout.has_key(area.layout):
+            print '*** layout <%s> not found' % area.layout
             return FALSE
 
         old_layout = self.layout
-        self.layout = settings.layout[area_val.layout]
+        self.layout = settings.layout[area.layout]
 
         if old_layout and old_layout != self.layout:
             redraw = TRUE
+
+        area.r = (area.x, area.y, area.width, area.height)
 
         return redraw
         
 
 
     def draw_background(self):
-        if not self.redraw:
-            return
-
+        """
+        draw the <background> of the area
+        """
         area = self.area_val
 
-        self.bg = [ [ None, area.x, area.y ], None ]
-        self.bg[0][0] = osd.createlayer(area.width, area.height)
-        self.bg[0][0].blit(osd.screen, (0,0), (area.x, area.y,
-                                               area.x + area.width,
-                                               area.y + area.height))
-
-        self.alpha = None
+        if hasattr(self, 'has_watermark') and self.has_watermark:
+            self.redraw = TRUE
+            self.has_watermark = FALSE
+            
         for bg in copy.deepcopy(self.layout.background):
             if isinstance(bg, xml_skin.XML_image):
                 self.calc_geometry(bg)
-                image = osd.loadbitmap(bg.filename)
-
+                imagefile = ''
+                
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
                 if bg.label == 'background':
@@ -198,50 +378,60 @@ class Skin_Area:
                     bg.y -= config.OVERSCAN_Y
                     bg.width  += 2 * config.OVERSCAN_X
                     bg.height += 2 * config.OVERSCAN_Y
-                if image:
-                    osd.screen.blit(pygame.transform.scale(image,(bg.width,bg.height)),
-                                    (bg.x, bg.y))
+
+                if bg.label == 'watermark' and self.menu.selected.image:
+                    imagefile = self.menu.selected.image
+                    self.has_watermark = TRUE
+                    self.redraw = TRUE
+                else:
+                    imagefile = bg.filename
+
+                if self.name == 'screen':
+                    bg.label = 'background'
+                    
+                if imagefile:
+                    cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
+                    image = self.imagecache[cname]
+                    if not image:
+                        image = osd.loadbitmap(imagefile)
+                        if image:
+                            image = pygame.transform.scale(image,(bg.width,bg.height))
+                            self.imagecache[cname] = image
+                    if image:
+                        self.draw_image(image, bg, redraw=self.redraw)
+                
             elif isinstance(bg, xml_skin.XML_rectangle):
-                self.calc_geometry(bg, fit_area=FALSE)
-                if not self.alpha:
-                    self.alpha = osd.createlayer(area.width, area.height)
-                    # clear surface
-                    self.alpha.fill((0,0,0,0))
-                osd.drawroundbox(bg.x, bg.y, bg.x+bg.width, bg.y+bg.height, bg.bgcolor,
-                                 bg.size, bg.color, bg.radius, layer=self.alpha)
-
-        if self.alpha:
-            osd.screen.blit(self.alpha, (area.x, area.y))
-
-        if hasattr(self, 'bg'):
-            self.bg[1] = osd.createlayer(area.width, area.height)
-            self.bg[1].blit(osd.screen, (0,0), (area.x, area.y,
-                                                area.x + area.width,
-                                                area.y + area.height))
+                self.calc_geometry(bg)
+                self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg, redraw=self.redraw)
 
 
 
-    def drawroundbox(self, x, y, width, height, rect):
+    def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
+        """
+        draw a round box
+        """
+        # only call this function in mode 0 and mode 1
+        if self.mode > 1:
+            return
+
         area = self.area_val
-        if self.alpha:
-            osd.screen.blit(self.bg[0][0], (x, y), (x-area.x, y-area.y, width, height))
-            a = osd.createlayer(width, height)
-            a.blit(self.alpha, (0,0), (x - area.x, y - area.y, width, height))
+        osd.drawroundbox(x, y, x+width, y+height,
+                         color = rect.bgcolor, border_size=rect.size,
+                         border_color=rect.color, radius=rect.radius, layer=self.alpha)
+        if redraw:
+            self.redraw_alpha  += [ (x, y, width, height) ]
 
-            osd.drawroundbox(0, 0, width, height,
-                             color = rect.bgcolor, border_size=rect.size,
-                             border_color=rect.color, radius=rect.radius, layer=a)
-            osd.screen.blit(a, (x, y))
-        else:
-            osd.drawroundbox(x, y, x+width, y+height,
-                             color = rect.bgcolor, border_size=rect.size,
-                             border_color=rect.color, radius=rect.radius)
+        if self.mode == 1:
+            self.content_alpha += [ (x, y, width, height) ]
 
-        
+            
     # Draws a text inside a frame based on the settings in the XML file
     def write_text(self, text, font, content, x=-1, y=-1, width=None, height=None,
                    align_h = None, align_v = None, mode='hard', ellipses='...'):
-    
+        """
+        writes a text ... or better stores the information about this call
+        in a variable. The real drawing is done inside draw()
+        """
         if x == -1: x = content.x
         if y == -1: y = content.y
 
@@ -259,18 +449,30 @@ class Skin_Area:
             align_v = content.valign
             if not align_v:
                 align_v = 'top'
-                
-        if font.shadow.visible:
-            osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
-                                 width, height, font.shadow.color, None,
-                                 font=font.name, ptsize=font.size,
-                                 align_h = align_h, align_v = align_v,
-                                 mode=mode, ellipses=ellipses)
-        osd.drawstringframed(text, x, y, width, height, font.color, None,
-                             font=font.name, ptsize=font.size,
-                             align_h = align_h, align_v = align_v,
-                             mode=mode, ellipses=ellipses)
+
+        self._write_text += [ ( text, font, x, y, width, height, align_h,
+                                align_v, mode, ellipses ) ]
 
 
 
-    
+    def draw_image(self, image, val, redraw=TRUE):
+        """
+        draws an image ... or better stores the information about this call
+        in a variable. The real drawing is done inside draw()
+        """
+        if isinstance(val, tuple):
+            self._draw_image += [ ( image, val ) ]
+            
+            
+        elif hasattr(val, 'label') and val.label == 'background':
+            if redraw:
+                self.background.blit(image, (val.x, val.y))
+                self.redraw_background += [ (val.x, val.y, val.width, val.height) ]
+                if val.label == 'background':
+                    osd.screen.blit(image, (val.x, val.y))
+        else:
+            self._draw_image += [ ( image, (val.x, val.y)) ]
+            
+
+
+
