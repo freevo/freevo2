@@ -9,6 +9,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/02/14 16:45:16  outlyer
+# Ugly hack to work around missing stop times. This is a slight improvement
+# over my patch from yesterday, because it "guesses" the stop time of the shows.
+#
+# Logic:
+#
+# Since the only shows missing stop dates are those which appear to end at
+# midnight, we insert a stop date of midnight for those shows missing a stop
+# date.
+#
+# This is not perfect. If you have a better solution, I'll be the first one to
+# put it in. Hopefully, this'll be fixed in XMLTV at some point and this hack
+# won't be necessary.
+#
 # Revision 1.7  2003/02/13 01:48:02  outlyer
 # A workaround for the issue which has arisen with zap2it TV listings wherein
 # the stop date has to be guessed by XMLTV and sometimes isn't guessed properly.
@@ -258,7 +272,8 @@ def load_guide():
             try:
                 prog.stop = timestr2secs_utc(p['stop'])
             except:
-                continue
+                # Fudging end time
+                prog.stop = timestr2secs_utc(p['start'][0:8] + '235900' + p['start'][14:18])
         except EPG_TIME_EXC:
             continue
         guide.AddProgram(prog)
