@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/12/01 05:12:02  mikeruelle
+# remove a couple debug statements
+#
 # Revision 1.1  2003/12/01 04:11:03  mikeruelle
 # grab the astronomy picture of the day
 #
@@ -56,11 +59,9 @@ class ApodMainMenuItem(Item):
         self.apoddir = apoddir
 
     def actions(self):
-        print "in actions\n"
         return [ ( self.create_apod_menu , 'APOD Pictures' ) ]
 
     def create_apod_menu(self, arg=None, menuw=None):
-        print "in create menu\n"
         apodmenuitems = []
 	apodmenuitems += [menu.MenuItem(_('Current Picture'), action=self.fetchCurrentPicture)]
 	apodmenuitems += [menu.MenuItem(_('Previous Pictures'), action=self.browsePictureDir)]
