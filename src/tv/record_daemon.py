@@ -25,8 +25,10 @@ import config
 SCHEDULE = config.REC_SCHEDULE_FILE
 LOG_FILE = config.LOGDIR + '/freevo_record.log'
 
+DEBUG = config.DEBUG
+
 def log(s=''):
-    if config.DEBUG:
+    if DEBUG:
         fd = open(LOG_FILE, 'a')
         fd.write(s + '\n')
         fd.close()
@@ -71,8 +73,10 @@ class ScheduleItem:
 
         cmd = self.cmd + (' -v -endpos %s' % len_secs)
 
-        #cmd += ' >& /dev/null &'
-        if config.DEBUG: cmd += ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
+        if DEBUG: 
+            cmd += ' >& %s/freevo_record_%s.log &' % (config.LOGDIR, int(time.time()))
+        else: 
+            cmd += ' >& /dev/null &'
 
         return cmd
         
