@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/03 19:16:23  dischi
+# Some changes in actions(): play will always play the item, for DVD/VCD
+# this means track 1. The DVD/VCD title menu is an extra action
+#
 # Revision 1.3  2002/11/28 19:56:12  dischi
 # Added copy function
 #
@@ -70,6 +74,7 @@ osd        = osd.get_singleton()
 
 from item import Item
 import configure
+
 
 class VideoItem(Item):
     def __init__(self, files, parent):
@@ -138,14 +143,69 @@ class VideoItem(Item):
             self.num_titles        = obj.num_titles
 
 
+
     # ------------------------------------------------------------------------
-    # help function
+    # actions:
 
 
-    # Generate special menu for DVD/VCD/SVCD content
-    #
-    def dvd_vcd_handler(self, menuw):
+    def actions(self):
+        """
+        return a list of possible actions on this item.
+        """
+        items = [ (self.play, 'Play') ]
+        if self.mode == 'dvd':
+            #items += [( self.dvdnav, 'DVD Menu (experimental)' )]
+            items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
+        if self.mode == 'vcd':
+            items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
+        return items
 
+
+    def play(self, arg=None, menuw=None):
+        """
+        play the item.
+        """
+        self.parent.current_item = self
+        if not self.files[0] and (self.mode == 'dvd' or self.mode == 'vcd'):
+            self.files[0] = '1'
+
+        self.current_file = self.files[0]
+        mplayer_options = self.mplayer_options
+
+        if self.media:
+            mplayer_options += '-cdrom-device %s -dvd-device %s' % \
+                               (self.media.devicename, self.media.devicename)
+
+        if self.selected_subtitle:
+            mplayer_options += ' -sid %s' % self.selected_subtitle
+
+        if self.selected_audio:
+            mplayer_options += ' -aid %s' % self.selected_audio
+
+        if arg:
+            mplayer_options += arg
+
+        self.video_player.play(self.current_file, mplayer_options, self)
+
+
+    def stop(self, arg=None, menuw=None):
+        """
+        stop playing
+        """
+        self.video_player.stop()
+
+
+    def dvdnav(self, arg=None, menuw=None):
+        """
+        dvdnav support, not implemented yet, it's also still buggy in mplayer
+        """
+        return
+
+
+    def dvd_vcd_title_menu(self, arg=None, menuw=None):
+        """
+        Generate special menu for DVD/VCD/SVCD content
+        """
         if not self.num_titles:
             # Use the uid to make a user-unique filename
             uid = os.getuid()
@@ -216,7 +276,6 @@ class VideoItem(Item):
         # Done scanning the disc, set up the menu.
         #
 
-        # Now let's see what we can do now:
         # only one track, play it
         if self.num_titles == 1:
             file = copy.copy(self)
@@ -238,46 +297,11 @@ class VideoItem(Item):
         return
 
 
-
-    # ------------------------------------------------------------------------
-    # actions:
-
-
-    def actions(self):
-        return [ ( self.play, 'Play' ) ]
-    
-
-    def play(self, arg=None, menuw=None):
-        self.parent.current_item = self
-        if not self.files[0] and (self.mode == 'dvd' or self.mode == 'vcd'):
-            self.dvd_vcd_handler(menuw)
-        else:
-            print "now playing %s" % self.files
-            self.current_file = self.files[0]
-            mplayer_options = self.mplayer_options
-
-            if self.media:
-                mplayer_options += '-cdrom-device %s -dvd-device %s' % \
-                                   (self.media.devicename, self.media.devicename)
-
-            if self.selected_subtitle:
-                mplayer_options += ' -sid %s' % self.selected_subtitle
-                
-            if self.selected_audio:
-                mplayer_options += ' -aid %s' % self.selected_audio
-                
-            if arg:
-                mplayer_options += arg
-                
-            self.video_player.play(self.current_file, mplayer_options, self)
-
-
-    def stop(self, menuw=None):
-        self.video_player.stop()
-
-
     def eventhandler(self, event, menuw=None):
-
+        """
+        eventhandler for this item
+        """
+        
         # PLAY_END: do have have to play another file?
         if event == rc.PLAY_END:
             pos = self.files.index(self.current_file)
@@ -287,6 +311,7 @@ class VideoItem(Item):
                 self.video_player.play(self.current_file, self.mplayer_options, self)
                 return TRUE
 
+        # show configure menu
         if event == rc.MENU:
             self.video_player.stop()
             configure.main_menu(self)
