@@ -16,8 +16,8 @@
 
 ##########################################################################
 %define name freevo-src
-%define version 1.4.0
-%define release 4_freevo
+%define version 1.4
+%define release rc1
 %define _cachedir /var/cache
 %define _logdir /var/log
 
@@ -26,7 +26,10 @@ Summary:        Freevo
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Source0: %{name}-%{version}.tar.gz
+#Source0: %{name}-%{version}.tar.gz
+Source0: %{name}-%{version}-%{release}.tgz
+Source1: redhat-boot_config
+#Patch0: freevo-%{version}-%{release}-freevo_dep.patch
 Copyright: gpl
 Group: Applications/Multimedia
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -65,8 +68,10 @@ Note: This installs the initscripts necessary for a standalone Freevo system.
 
 %prep
 rm -rf $RPM_BUILD_ROOT
-#%setup -n %{name}_%{version}
-%setup -n freevo
+%setup -n freevo-%{version}-%{release}
+#%setup -n freevo
+
+#%patch0 -p1 
 
 %build
 find . -name CVS | xargs rm -rf
@@ -75,7 +80,7 @@ find . -name "*.pyc" |xargs rm -f
 find . -name "*.pyo" |xargs rm -f
 find . -name "*.py" |xargs chmod 644
 
-./autogen.sh
+#./autogen.sh
 
 env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
@@ -87,12 +92,12 @@ touch %{buildroot}%{_sysconfdir}/freevo/freevo.conf
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
+#install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m 755 boot/record_server %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_recordserver
 install -m 755 boot/webserver %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_webserver
 install -m 755 boot/record_server_init %{buildroot}%{_bindir}/freevo_recordserver_init
 install -m 755 boot/webserver_init %{buildroot}%{_bindir}/freevo_webserver_init
-install -m 644 boot/boot_config %{buildroot}%{_sysconfdir}/freevo/
+install -m 644 -D %{SOURCE1} %{buildroot}%{_sysconfdir}/freevo/boot_config
 
 
 mkdir -p %{buildroot}%{_logdir}/freevo
@@ -108,6 +113,7 @@ python setup.py install %{?_without_compile_obj:--no-compile} \
 
 cat >>INSTALLED_FILES <<EOF
 %doc BUGS COPYING ChangeLog FAQ INSTALL README TODO Docs local_conf.py.example
+%doc contrib/lirc 
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(777,root,root) %dir %{_logdir}/freevo
 %attr(777,root,root) %dir %{_cachedir}/freevo
@@ -146,11 +152,16 @@ rm -rf $RPM_BUILD_ROOT
 %attr(644,root,root) %config %{_sysconfdir}/freevo/boot_config
 
 %post boot
+# Add the service, but don't automatically invoke it
+# user has to enable it via ntsysv
 if [ -x /sbin/chkconfig ]; then
      chkconfig --add freevo
-     chkconfig --add freevo_dep
+     chkconfig --levels 234 freevo off
+#     chkconfig --add freevo_dep
      chkconfig --add freevo_recordserver
+     chkconfig --levels 234 freevo_recordserver off
      chkconfig --add freevo_webserver
+     chkconfig --levels 234 freevo_webserver off
 fi
 depmod -a
 
@@ -158,13 +169,16 @@ depmod -a
 if [ "$1" = 0 ] ; then
   if [ -x /sbin/chkconfig ]; then
      chkconfig --del freevo
-     chkconfig --del freevo_dep
+#     chkconfig --del freevo_dep
      chkconfig --del freevo_recordserver
      chkconfig --del freevo_webserver
   fi
 fi
 
 %changelog
+* Wed Oct  8 2003 TC Wan <tcwan@cs.usm.my>
+- Fixed boot scripts for RH 9, disabled freevo_dep since it's obsolete (?)
+
 * Fri Sep 26 2003 TC Wan <tcwan@cs.usm.my>
 - Removed testfiles from build since it's no longer part of the package
   Cleaned up conditional flags
