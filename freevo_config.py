@@ -857,6 +857,22 @@ TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
 TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
 TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
 
+# This is the filename format for files recorded using Freevo.
+# You can use any of the strftime variables in it, provided you
+# put two '%%' at the beginning. 
+# 
+# Some examples:
+# %%A - Full weekday name.
+# %%H - Hour (24-hour clock) as a decimal number [00,23].
+# %%M - Minute as a decimal number [00,59].
+# %%m - Month as a decimal number [01,12].
+# %%d - Day of the month as a decimal number [01,31].
+# %%p - Locale's equivalent of either AM or PM.
+# 
+# More can be found at: http://www.python.org/doc/current/lib/module-time.html
+
+TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
+
 
 #
 # XXX Recording is still work in progress. You need to change

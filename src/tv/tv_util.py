@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/11 19:32:33  outlyer
+# Move the file mask into the config; I didn't bump the conf file version
+# since this doesn't need to be edited by the user; it's an optional thing to
+# override the default.
+#
 # Revision 1.8  2003/09/11 13:58:06  outlyer
 # Initial implementation of user configurable naming styles for recording
 # filenames. The 'mask' variable should move into config, but due to Dischi's
@@ -101,7 +106,7 @@ def getProgFilename(prog=None):
     if not prog:
         return 'ERROR: no prog'
     
-    mask = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
+    mask = config.TV_TV_RECORDFILE_MASK   # '%%m-%%d %%H:%%M %(progname)s - %(title)s'
     filename_array = { 'progname': prog.title,
                        'title'   : prog.sub_title }
 
