@@ -17,7 +17,7 @@
 ##########################################################################
 %define name freevo-src
 %define version 1.4
-%define release rc1
+%define release rc2
 %define _cachedir /var/cache
 %define _logdir /var/log
 
@@ -68,7 +68,7 @@ Note: This installs the initscripts necessary for a standalone Freevo system.
 
 %prep
 rm -rf $RPM_BUILD_ROOT
-%setup -n freevo-%{version}-%{release}
+%setup -n freevo-%{version}%{release}
 #%setup -n freevo
 
 #%patch0 -p1 
@@ -93,9 +93,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_bindir}
 install -m 755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 #install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 755 boot/record_server %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_recordserver
+install -m 755 boot/recordserver %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_recordserver
 install -m 755 boot/webserver %{buildroot}%{_sysconfdir}/rc.d/init.d/freevo_webserver
-install -m 755 boot/record_server_init %{buildroot}%{_bindir}/freevo_recordserver_init
+install -m 755 boot/recordserver_init %{buildroot}%{_bindir}/freevo_recordserver_init
 install -m 755 boot/webserver_init %{buildroot}%{_bindir}/freevo_webserver_init
 install -m 644 -D %{SOURCE1} %{buildroot}%{_sysconfdir}/freevo/boot_config
 
@@ -176,6 +176,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Sat Oct 25 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.4-rc2
+
 * Wed Oct  8 2003 TC Wan <tcwan@cs.usm.my>
 - Fixed boot scripts for RH 9, disabled freevo_dep since it's obsolete (?)
 
