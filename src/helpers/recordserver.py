@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/03/13 03:28:32  outlyer
+# Someone must have fixed the str2XML part internal to the FxdIMDB code, since
+# I was getting
+# &amp&amp; (double-escaped) so I'm removing this one.
+#
 # Revision 1.34  2004/03/08 19:15:49  dischi
 # use our marmalade
 #
@@ -882,7 +887,7 @@ class RecordServer(xmlrpc.XMLRPC):
         fxd.info['plot'] = fxd.str2XML(rec_prog.desc)
         fxd.info['runtime'] = None
         fxd.info['year'] = time.strftime('%m-%d ' + config.TV_TIMEFORMAT, time.localtime(rec_prog.start))
-        fxd.title = fxd.str2XML(rec_prog.title)     # I don't know why this has to be done twice?
+        fxd.title = rec_prog.title 
         fxd.writeFxd()
             
 
