@@ -70,5 +70,38 @@
       </content>
     </layout>
 
+    <tv>
+      <subtitle layout="title1" x="10" y="90" width="780" height="30"/>
+      <listing y="140">
+	<image y="140" label="uparrow"/>
+      </listing>
+      <info layout="tv info" y="440" height="150"/>
+    </tv>
+
+    <!-- tv info area -->
+    <layout label="tv info">
+      <content>
+	<item type="default">
+          <text font="tv time" valign="center">Date: </text>
+          <text font="tv time" valign="center" expression="date"/>
+	  <goto_pos x="50" mode="relative"/>
+          <text font="tv time" valign="center">Time: </text>
+          <text font="tv time" valign="center" expression="start"/>
+          <text font="tv time" valign="center">-</text>
+          <text font="tv time" valign="center" expression="stop"/>
+	  <newline/>
+	  <goto_pos y="10" mode="relative"/>
+	  <if expression="sub_title">
+	    <text font="info tagline" expression="sub_title"/>
+	    <newline/>
+	  </if>
+	  <if expression="desc">
+	    <text font="info plot" height="max" mode="soft" expression="desc"/>
+	    <newline/>
+	  </if>
+	</item>
+      </content>
+    </layout>
+
   </skin>
 </freevo>
