@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/24 00:21:05  mikeruelle
+# rewrite for styles too
+#
 # Revision 1.6  2003/09/23 19:37:54  mikeruelle
 # a patch to help dischi see images without those nasty hard links
 #
@@ -70,6 +73,9 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
 
 def helpimagesrewrite(request):
     if request.postpath and request.postpath[0]=='help' and request.postpath[1]=='images':
+        request.postpath.pop(0) 
+        request.path = '/'+'/'.join(request.prepath+request.postpath)
+    if request.postpath and request.postpath[0]=='help' and request.postpath[1]=='styles':
         request.postpath.pop(0) 
         request.path = '/'+'/'.join(request.prepath+request.postpath)
 
