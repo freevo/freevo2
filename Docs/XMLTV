@@ -4,7 +4,7 @@ XMLTV
 Abstract:
 ==
 
-Freevo can now use the XMLTV format (http://xmltv.sourceforge.net/)
+Freevo can now use the XMLTV format (http://www.doc.ic.ac.uk/~epa98/work/apps/xmltv/)
 for TV listings. XMLTV downloads listings from a number of different
 countries and regions into a standard XML based format. This is the
 only way to get TV listings for Canada, and Europe, for use in Freevo
