@@ -143,15 +143,21 @@ EOF
 
 
 %post
+# Make backup of old freevo.conf here
+if [ -s %{_sysconfdir}/freevo/freevo.conf ]; then
+   cp %{_sysconfdir}/freevo/freevo.conf %{_sysconfdir}/freevo/freevo.conf.rpmsave
+fi
+
 # Copy old local_conf.py to replace dummy file
 %{_bindir}/freevo setup --geometry=%{geometry} --display=%{display} \
         --tv=%{tv_norm} --chanlist=%{chanlist} \
 	%{!?_without_use_sysapps:--sysfirst}
 
 %preun
-if [ -s %{_sysconfdir}/freevo/freevo.conf ]; then
-   cp %{_sysconfdir}/freevo/freevo.conf %{_sysconfdir}/freevo/freevo.conf.rpmsave
-fi
+# Not safe to run this when upgrading!
+#if [ -s %{_sysconfdir}/freevo/freevo.conf ]; then
+#   cp %{_sysconfdir}/freevo/freevo.conf %{_sysconfdir}/freevo/freevo.conf.rpmsave
+#fi
 if [ -s %{_sysconfdir}/freevo/local_conf.py ]; then
    cp %{_sysconfdir}/freevo/local_conf.py %{_sysconfdir}/freevo/local_conf.py.rpmsave
 fi
@@ -195,7 +201,8 @@ fi
 
 %changelog
 * Tue Jun 29 2004 TC Wan <tcwan@cs.usm.my>
-- Added python-numeric dependency
+- Added python-numeric dependency, backup freevo.conf 
+  just before creating new default copy
 
 * Fri Jun 18 2004 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.5
