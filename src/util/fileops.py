@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/17 17:28:41  dischi
+# bugfix
+#
 # Revision 1.1  2003/10/11 11:20:11  dischi
 # move util.py into a directory and split it into two files
 #
@@ -43,6 +46,7 @@ import string
 import copy
 import cPickle, pickle # pickle because sometimes cPickle doesn't work
 import fnmatch
+import misc
 
 if float(sys.version[0:3]) < 2.3:
     PICKLE_PROTOCOL = 1
@@ -231,7 +235,7 @@ def match_files_recursively(dir, suffix_list):
     all_files = []
     os.path.walk(dir, match_files_recursively_helper, all_files)
 
-    matches = unique([f for f in all_files if match_suffix(f, suffix_list) ])
+    matches = misc.unique([f for f in all_files if match_suffix(f, suffix_list) ])
 
     matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
     
