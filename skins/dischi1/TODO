@@ -1,10 +1,8 @@
-no indicators for tv items and UP/DOWN for more items than you see
+add indicators for tv items and UP/DOWN for more items than you see
 
-DISPLAY can only toggle between two styles
+DISPLAY should toggle between more than two styles
 
-No fallback to text view if all images are the same
-
-No grey skin
+fallback to text view if all images are the same
 
 Some tag names are the same as in the movie definitions. I will
 change the area names from e.g. title to titlearea to have _one_
@@ -17,3 +15,5 @@ No "this directory is empty" handling yet (you only see nothing)
 blue1_round will get an image listing, too
 
 Finish integration of Robs new gui stuff
+
+fix the <mainmenu> stuff
