@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.119  2004/02/21 19:39:04  dischi
+# use new gui box for password
+#
 # Revision 1.118  2004/02/16 17:57:04  dischi
 # use ucmp to compare
 #
@@ -142,7 +145,7 @@ import fxditem
 from item import Item, FileInformation
 from playlist import Playlist
 from event import *
-from gui import PasswordInputBox, AlertBox, ProgressBox
+from gui import InputBox, AlertBox, ProgressBox
 
 all_variables = [('DIRECTORY_SORT_BY_DATE', _('Directory Sort By Date'),
                   _('Sort directory by date and not by name.'), False),
@@ -565,7 +568,8 @@ class DirItem(Playlist):
 	    print 'password protected dir'
             self.arg   = arg
             self.menuw = menuw
-	    pb = PasswordInputBox(text=_('Enter Password'), handler=self.pass_cmp_cb)
+	    pb = InputBox(text=_('Enter Password'), handler=self.pass_cmp_cb,
+                          type='password')
 	    pb.show()
 	else:
 	    self.build(arg=arg, menuw=menuw)
