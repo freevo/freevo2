@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/12/13 01:46:33  rshortt
+# remove old channel changing code and add some logging
+#
 # Revision 1.4  2004/09/15 20:45:31  dischi
 # remove unneeded events functions
 #
@@ -55,7 +58,9 @@
 # ----------------------------------------------------------------------- */
 
 
-import time, os
+import time
+import os
+import logging
 
 import config
 import util
@@ -64,6 +69,7 @@ import plugin
 from event import *
 from application import Application
 
+log = logging.getLogger('tv')
 
 class TVPlayer(Application):
     """
@@ -106,28 +112,7 @@ class TVPlayer(Application):
             return True
 
         if event in [ TV_CHANNEL_UP, TV_CHANNEL_DOWN] or str(event).startswith('INPUT_'):
-            print 'NOT IMPLEMENTED YET'
-            return True
-
-            if event == TV_CHANNEL_UP:
-                nextchan = self.fc.getNextChannel()
-            elif event == TV_CHANNEL_DOWN:
-                nextchan = self.fc.getPrevChannel()
-            else:
-                chan = int(event.arg)
-                nextchan = self.fc.getManChannel(chan)
-
-            nextvg = self.fc.getVideoGroup(nextchan)
-
-            if self.current_vg != nextvg:
-                self.stop(channel_change=1)
-                print 'FIXME: vg changes'
-                self.play('tv', nextchan)
-                return True
-
-            self.set_channel(nextchan)
-            self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
-            return True
+            log.warning('channel events not implemented here yet')
 
         return False
     
