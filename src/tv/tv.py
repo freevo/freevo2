@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/20 10:55:41  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.7  2003/04/17 04:44:11  krister
 # Added a quick hack to support tvtime. It uses stdin on tvtime for commands, this is not supported in tvtime yet.
 #
@@ -84,7 +87,7 @@ import epg_xmltv as epg
 from item import Item
 
 from tvguide import TVGuide
-from mediamenu import DirItem
+from directory import DirItem
 
 from gui.AlertBox import AlertBox
 from gui.PopupBox import PopupBox

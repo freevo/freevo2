@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/20 10:55:40  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.9  2003/04/06 21:12:56  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -53,13 +56,13 @@ import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import menu       # The menu widget class
-import mixer      # Controls the volumes for playback and recording
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
 import fnmatch
 
 # RegExp
 import re
+import plugin
 
 DEBUG = config.DEBUG
 
@@ -70,7 +73,6 @@ FALSE = 0
 osd        = osd.get_singleton()
 rc         = rc.get_singleton()
 menuwidget = menu.get_singleton()
-mixer      = mixer.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
 _singleton = None
@@ -139,21 +141,10 @@ class MPlayer:
         command = '%s -vo null -ao %s %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
                                                      demux, extra_opts, filename)
                 
+        if plugin.getbyname('MIXER'):
+            plugin.getbyname('MIXER').reset()
+
         self.item = item
-
-        # XXX A better place for the major part of this code would be
-        # XXX mixer.py
-        if config.CONTROL_ALL_AUDIO:
-            mixer.setLineinVolume(0)
-            mixer.setMicVolume(0)
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
-                mixer.setPcmVolume(config.MAX_VOLUME)
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                mixer.setMainVolume(config.MAX_VOLUME)
-                
-        mixer.setIgainVolume(0) # SB Live input from TV Card.
-        # This should _really_ be set to zero when playing other audio.
-
         self.thread.item = item
 
         if self.thread.item.valid:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/20 10:55:41  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.9  2003/04/06 21:12:58  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -71,7 +74,6 @@ import threading
 import signal
 
 import util    # Various utilities
-import mixer   # The mixer class
 import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
 import childapp # Handle child applications
@@ -91,10 +93,6 @@ FALSE = 0
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-# Set up the mixer
-mixer = mixer.get_singleton()
-
 
 # Module variable that contains an initialized V4L1TV() object
 _singleton = None
@@ -258,17 +256,19 @@ class MPlayer:
                 pass
 
         command = mpl
-                
         self.mode = mode
+
 
         # XXX Mixer manipulation code.
         # TV is on line in
         # VCR is mic in
         # btaudio (different dsp device) will be added later
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
+        mixer = plugin.getbyname('MIXER')
+        
+        if mixer and config.MAJOR_AUDIO_CTRL == 'VOL':
             mixer_vol = mixer.getMainVolume()
             mixer.setMainVolume(0)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+        elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
             mixer_vol = mixer.getPcmVolume()
             mixer.setPcmVolume(0)
 
@@ -286,15 +286,15 @@ class MPlayer:
         # Suppress annoying audio clicks
         time.sleep(0.4)
         # XXX Hm.. This is hardcoded and very unflexible.
-        if mode == 'vcr':
+        if mixer and mode == 'vcr':
             mixer.setMicVolume(config.VCR_IN_VOLUME)
-        else:
+        elif mixer:
             mixer.setLineinVolume(config.TV_IN_VOLUME)
             mixer.setIgainVolume(config.TV_IN_VOLUME)
             
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
+        if mixer and config.MAJOR_AUDIO_CTRL == 'VOL':
             mixer.setMainVolume(mixer_vol)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+        elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
             mixer.setPcmVolume(mixer_vol)
 
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)

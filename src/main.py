@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/04/20 10:55:40  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.38  2003/04/19 21:28:39  dischi
 # identifymedia.py is now a plugin and handles everything related to
 # rom drives (init, autostarter, items in menus)
@@ -106,7 +109,6 @@ import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
 import menu    # The menu widget class
 import skin    # The skin class
-import mixer   # The mixer class
 import rc      # The RemoteControl class.
 
 import signal
@@ -121,31 +123,6 @@ DEBUG = config.DEBUG
 
 TRUE  = 1
 FALSE = 0
-
-# Set up the mixer
-# XXX Doing stuff to select correct device to manipulate.
-mixer = mixer.get_singleton()
-
-if config.MAJOR_AUDIO_CTRL == 'VOL':
-    mixer.setMainVolume(config.DEFAULT_VOLUME)
-    if config.CONTROL_ALL_AUDIO:
-        mixer.setPcmVolume(config.MAX_VOLUME)
-        # XXX This is for SB Live cards should do nothing to others
-        # XXX Please tell if you have problems with this.
-        mixer.setOgainVolume(config.MAX_VOLUME)
-elif config.MAJOR_AUDIO_CTRL == 'PCM':
-    mixer.setPcmVolume(config.DEFAULT_VOLUME)
-    if config.CONTROL_ALL_AUDIO:
-        mixer.setMainVolume(config.MAX_VOLUME)
-        # XXX This is for SB Live cards should do nothing to others
-        # XXX Please tell if you have problems with this.
-        mixer.setOgainVolume(config.MAX_VOLUME)
-else:
-    if DEBUG: print "No appropriate audio channel found for mixer"
-
-if config.CONTROL_ALL_AUDIO:
-    mixer.setLineinVolume(0)
-    mixer.setMicVolume(0)
 
 # Create the remote control object
 rc = rc.get_singleton()
@@ -264,10 +241,6 @@ class MainMenu(Item):
         menuwidget.pushmenu(mainmenu)
         osd.focused_app = menuwidget
 
-        muted = 0
-        mainVolume = 0 # XXX We are using this for PcmVolume as well.
-
-
     def eventhandler(self, event = None, menuw=None, arg=None):
         """
         Automatically perform actions depending on the event, e.g. play DVD
@@ -338,36 +311,6 @@ def main_func():
         if not rc.func:
             for p in poll_plugins:
                 p.poll()
-
-        # Handle volume control   XXX move to the skin
-        if event == rc.VOLUP:
-            print "Got VOLUP in main!"
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.incMainVolume()
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.incPcmVolume()
-
-        elif event == rc.VOLDOWN:
-            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
-                mixer.decMainVolume()
-            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
-                mixer.decPcmVolume()
-
-        elif event == rc.MUTE:
-            if muted:
-                if config.MAJOR_AUDIO_CTRL == 'VOL':
-                    mixer.setMainVolume(mainVolume)
-                elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                    mixer.setPcmVolume(mainVolume)
-                muted = 0
-            else:
-                if config.MAJOR_AUDIO_CTRL == 'VOL':
-                    mainVolume = mixer.getMainVolume()
-                    mixer.setMainVolume(0)
-                elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                    mainVolume = mixer.getPcmVolume()
-                    mixer.setPcmVolume(0)
-                muted = 1
 
         # Send events to either the current app or the menu handler
         if rc.app:

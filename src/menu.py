@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/04/20 10:55:40  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.38  2003/04/19 21:28:39  dischi
 # identifymedia.py is now a plugin and handles everything related to
 # rom drives (init, autostarter, items in menus)
@@ -560,13 +563,15 @@ class MenuWidget(GUIObject):
             if menu.selected.eventhandler(event = event, menuw=self):
                 return
             
-        if self.eventhandler_plugins == None:
-            self.eventhandler_plugins = plugin.get('daemon_eventhandler')
+        else:
+            if self.eventhandler_plugins == None:
+                self.eventhandler_plugins = plugin.get('daemon_eventhandler')
 
-        for p in self.eventhandler_plugins:
-            if p.eventhandler(event=event, menuw=self):
-                return
-        
+            for p in self.eventhandler_plugins:
+                if p.eventhandler(event=event, menuw=self):
+                    return
+
+            print 'no eventhandler for event %s' % event
         return 0
 
 

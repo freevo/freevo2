@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/04/20 10:55:40  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.4  2003/04/06 21:12:55  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -46,25 +49,21 @@
 import fcntl
 import struct
 import config
-import os     # system() is used to manipulate the mixer for SB Live cards.
+import os
+
+import plugin
+import rc
+
+# Create the remote control object
+rc = rc.get_singleton()
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
-# Module variable that contains an initialized Mixer() object
-_singleton = None
+TRUE = 1
+FALSE = 0
 
-def get_singleton():
-    global _singleton
-
-    # One-time init
-    if _singleton == None:
-        _singleton = Mixer()
-        
-    return _singleton
-
-
-class Mixer:
+class PluginInterface(plugin.DaemonPlugin):
     # These magic numbers were determined by writing a C-program using the
     # macros in /usr/include/linux/... and printing the values.
     # They seem to work on my machine. XXX Is there a real python interface?
@@ -77,33 +76,85 @@ class Mixer:
     SOUND_MASK_LINE = 64
     
     def __init__(self):
+        plugin.DaemonPlugin.__init__(self)
+        self.plugin_name = 'MIXER'
         self.mixfd = None
-        if config.DEV_MIXER:    # If you're using ALSA or something and you don't set the mixer, why are
-                                # we trying to open it?
+        self.muted = 0
+        
+        # If you're using ALSA or something and you don't set the mixer, why are
+        # we trying to open it?
+        if config.DEV_MIXER:    
             try:
-                self.mixfd        = open(config.DEV_MIXER, 'r')
+                self.mixfd = open(config.DEV_MIXER, 'r')
             except IOError:
                 print 'Couldn\'t open mixer %s' % config.DEV_MIXER
                 return
-        return
-        
-        self.mainVolume   = 0
-        self.pcmVolume    = 0
-        self.lineinVolume = 0
-        self.micVolume    = 0
-        self.igainVolume  = 0 # XXX Used on SB Live
-        self.ogainVolume  = 0 # XXX Ditto
-        
-        # Gustavo: By default, don't change the values to zero
-        # self.setMainVolume(self.mainVolume)
-        # self.setPcmVolume(self.pcmVolume)
-        # self.setLineinVolume(self.lineinVolume)
-        #  self.setMicVolume(self.micVolume)
 
-        if self.mixfd:
-            data = struct.pack( 'L', self.SOUND_MASK_LINE )
-            fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
+        if 0:
+            self.mainVolume   = 0
+            self.pcmVolume    = 0
+            self.lineinVolume = 0
+            self.micVolume    = 0
+            self.igainVolume  = 0 # XXX Used on SB Live
+            self.ogainVolume  = 0 # XXX Ditto
+
+            if self.mixfd:
+                data = struct.pack( 'L', self.SOUND_MASK_LINE )
+                fcntl.ioctl( self.mixfd.fileno(), self.SOUND_MIXER_WRITE_RECSRC, data )
+
+        if config.MAJOR_AUDIO_CTRL == 'VOL':
+            self.setMainVolume(config.DEFAULT_VOLUME)
+            if config.CONTROL_ALL_AUDIO:
+                self.setPcmVolume(config.MAX_VOLUME)
+                # XXX This is for SB Live cards should do nothing to others
+                # XXX Please tell if you have problems with this.
+                self.setOgainVolume(config.MAX_VOLUME)
+        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            self.setPcmVolume(config.DEFAULT_VOLUME)
+            if config.CONTROL_ALL_AUDIO:
+                self.setMainVolume(config.MAX_VOLUME)
+                # XXX This is for SB Live cards should do nothing to others
+                # XXX Please tell if you have problems with this.
+                self.setOgainVolume(config.MAX_VOLUME)
+        else:
+            if DEBUG: print "No appropriate audio channel found for mixer"
+
+        if config.CONTROL_ALL_AUDIO:
+            self.setLineinVolume(0)
+            self.setMicVolume(0)
+
+
+    def eventhandler(self, event = None, menuw=None, arg=None):
+        """
+        eventhandler to handle the VOL events
+        """
+        # Handle volume control
+        if event == rc.VOLUP:
+            print "Got VOLUP"
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                self.incMainVolume()
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                self.incPcmVolume()
+            return TRUE
         
+        elif event == rc.VOLDOWN:
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                self.decMainVolume()
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                self.decPcmVolume()
+            return TRUE
+
+        elif event == rc.MUTE:
+            if self.getMuted() == 1: self.setMuted(0)
+            else: self.setMuted(1)
+            return TRUE
+
+            return TRUE
+
+        return FALSE
+
+
+
     def _setVolume(self, device, volume):
         if self.mixfd:
             if DEBUG: print 'Volume = %d' % volume
@@ -113,13 +164,21 @@ class Mixer:
             data = struct.pack('L', vol)
             fcntl.ioctl(self.mixfd.fileno(), device, data)
 
+    def getMuted(self):
+        return(self.muted)
+
+    def setMuted(self, mute):
+        self.muted = mute
+        if mute == 1: self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, 0)
+        else:self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
+
     def getMainVolume(self):
         return(self.mainVolume)
-        
+
     def setMainVolume(self, volume):
         self.mainVolume = volume
         self._setVolume(self.SOUND_MIXER_WRITE_VOLUME, self.mainVolume)
-        
+
     def incMainVolume(self):
         self.mainVolume += 5
         if self.mainVolume > 100: self.mainVolume = 100
@@ -185,9 +244,20 @@ class Mixer:
         self.ogainVolume = volume
         os.system('aumix -o%s &> /dev/null &' % volume)
 
+    def reset(self):
+        if config.CONTROL_ALL_AUDIO:
+            self.setLineinVolume(0)
+            self.setMicVolume(0)
+            if config.MAJOR_AUDIO_CTRL == 'VOL':
+                self.setPcmVolume(config.MAX_VOLUME)
+            elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                self.setMainVolume(config.MAX_VOLUME)
 
+        self.setIgainVolume(0) # SB Live input from TV Card.
+
+        
 # Simple test...
 if __name__ == '__main__':
-    mixer = Mixer()
+    mixer = PluginInterface()
     mixer.setPcmVolume(50)
     

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/20 10:55:40  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.3  2003/02/22 07:13:19  krister
 # Set all sub threads to daemons so that they die automatically if the main thread dies.
 #
@@ -52,9 +55,9 @@ import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import menu       # The menu widget class
-import mixer      # Controls the volumes for playback and recording
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
+import plugin
 
 DEBUG = config.DEBUG
 
@@ -65,7 +68,6 @@ FALSE = 0
 osd        = osd.get_singleton()
 rc         = rc.get_singleton()
 menuwidget = menu.get_singleton()
-mixer      = mixer.get_singleton()
 
 # Module variable that contains an initialized Game() object
 _singleton = None
@@ -103,18 +105,8 @@ class Game:
             menuwidget.refresh()
             return 0
 
-        # XXX A better place for the major part of this code would be
-        # XXX mixer.py
-        if config.CONTROL_ALL_AUDIO:
-            mixer.setLineinVolume(0)
-            mixer.setMicVolume(0)
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
-                mixer.setPcmVolume(config.MAX_VOLUME)
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                mixer.setMainVolume(config.MAX_VOLUME)
-                
-        mixer.setIgainVolume( 0 ) # SB Live input from TV Card.
-        # This should _really_ be set to zero when playing other audio.
+        if plugin.getbyname('MIXER'):
+            plugin.getbyname('MIXER').reset()
 
         # clear the screen for mame
         osd.clearscreen(color=osd.COL_BLACK)

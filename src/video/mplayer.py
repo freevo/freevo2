@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/04/20 10:55:41  dischi
+# mixer is now a plugin, too
+#
 # Revision 1.31  2003/04/12 18:30:04  dischi
 # add support for audio/subtitle selection for avis, too
 #
@@ -87,9 +90,9 @@ import threading, signal
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
-import mixer      # Controls the volumes for playback and recording
 import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
+import plugin
 
 # RegExp
 import re
@@ -102,7 +105,6 @@ FALSE = 0
 # Setting up the default objects:
 osd        = osd.get_singleton()
 rc         = rc.get_singleton()
-mixer      = mixer.get_singleton()
 
 # Module variable that contains an initialized MPlayer() object
 _singleton = None
@@ -249,21 +251,10 @@ class MPlayer:
 
         command=vop_append(command)
         
+        if plugin.getbyname('MIXER'):
+            plugin.getbyname('MIXER').reset()
+
         self.file = item
-
-        # XXX A better place for the major part of this code would be
-        # XXX mixer.py
-        if config.CONTROL_ALL_AUDIO:
-            mixer.setLineinVolume(0)
-            mixer.setMicVolume(0)
-            if config.MAJOR_AUDIO_CTRL == 'VOL':
-                mixer.setPcmVolume(config.MAX_VOLUME)
-            elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                mixer.setMainVolume(config.MAX_VOLUME)
-                
-        mixer.setIgainVolume(0) # SB Live input from TV Card.
-        # This should _really_ be set to zero when playing other audio.
-
         self.thread.play_mode = self.mode
         self.thread.item  = item
         self.item  = item
