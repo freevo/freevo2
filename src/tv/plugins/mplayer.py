@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/06/25 20:03:33  dischi
+# basic dvb support
+#
 # Revision 1.33  2004/02/13 17:36:54  dischi
 # fixed crash on stop
 #
@@ -144,6 +147,11 @@ class MPlayer:
                 if config.MPLAYER_ARGS.has_key('webcam'):
                     args += (config.MPLAYER_ARGS['webcam'],)
 
+            elif vg.group_type == 'dvb':
+                self.fc.chanSet(tuner_channel, app='mplayer')
+                tvcmd = ''
+                args += ('"dvb://%s" -vf pp=de/fd' % tuner_channel,)
+
             else:
                 freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
                 tuner_freq = '%1.3f' % (freq_khz / 1000.0)
@@ -261,6 +269,11 @@ class MPlayer:
             if self.mode == 'vcr':
                 return
             
+            elif self.current_vg.group_type == 'dvb':
+                self.Stop(channel_change=1)
+                self.Play('tv', nextchan)
+                return TRUE
+
             elif self.current_vg.group_type == 'ivtv':
                 self.fc.chanSet(nextchan)
                 self.app.write('seek 999999 0\n')
