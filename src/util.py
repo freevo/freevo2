@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2003/09/20 15:08:25  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.51  2003/09/20 08:48:11  dischi
 # fixed rmrf to work with python < 2.3
 #
@@ -598,6 +601,8 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktota
 
 
 def getdatadir(item):
+    if not config.MOVIE_DATA_DIR:
+        return '/tmp'
     directory = item.dir
     if item.media:
         directory = directory[len(item.media.mountdir):]

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/20 15:08:26  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.14  2003/09/20 09:50:07  dischi
 # cleanup
 #
@@ -230,6 +233,10 @@ class FxdImdb:
         (data will be added) unless overwrite = True
         """
         
+        datadir = config.MOVIE_DATA_DIR
+        if not datadir:
+            datadir = '/tmp/'
+
         if fxdfilename: 
             if os.path.splitext(fxdfilename)[1] == '.fxd':
                 self.fxdfile = os.path.splitext(fxdfilename)[0]
@@ -237,14 +244,13 @@ class FxdImdb:
         
         else:
             if self.isdiscset == True:
-                self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, 'disc-set',
+                self.fxdfile = os.path.join(datadir, 'disc-set',
                                             self.getmedia_id(self.device))
             else:
                 #unwrap first video tuple
                 type, none, device, none, file = self.video[0]
                 if type == 'file' and device == None: self.fxdfile = os.path.splitext(file)[0]
-                else: self.fxdfile = os.path.join(config.MOVIE_DATA_DIR ,
-                                                  self.getmedia_id(device))
+                else: self.fxdfile = os.path.join(datadir, self.getmedia_id(device))
         
         if overwrite == False:
             try:
@@ -321,6 +327,9 @@ class FxdImdb:
                 raise FxdImdb_XML_Error("""FXD file generated is invalid, please "+
                                         "post bugreport, tracebacks and fxd file.""")
         except (IOError, FxdImdb_IO_Error), error:
+            if not config.MOVIE_DATA_DIR:
+                raise FxdImdb_IO_Error('error saving the file: %s' % str(error))
+
             self.fxdfile = os.path.abspath(self.fxdfile)
 
             # could not save, try new directory

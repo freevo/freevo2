@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/20 15:08:26  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.4  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -93,9 +96,12 @@ class PluginInterface(plugin.ItemPlugin):
 
         if self.item.type == 'video' and hasattr(self, 'fxd_file') and \
                os.path.isfile(self.item.fxd_file) and \
-               self.item.fxd_file.find(config.MOVIE_DATA_DIR) == -1 and \
-               self.item.fxd_file.find(config.TV_SHOW_DATA_DIR) == -1 and \
-               self.item.fxd_file.find(config.TV_SHOW_IMAGE_DIR) == -1:
-                self.save_unlink(self.item.fxd_file)
+               (not config.MOVIE_DATA_DIR or \
+                self.item.fxd_file.find(config.MOVIE_DATA_DIR)) and \
+               (not config.TV_SHOW_DATA_DIR or \
+                self.item.fxd_file.find(config.TV_SHOW_DATA_DIR) == -1)
+               (not config.TV_SHOW_IMAGE_DIR or \
+                self.item.fxd_file.find(config.TV_SHOW_IMAGE_DIR) == -1):
+                   self.save_unlink(self.item.fxd_file)
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/09/20 15:08:25  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.35  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -151,10 +154,11 @@ class DirItem(Playlist):
             self.name = os.path.basename(dir)
 
         # Check for cover in COVER_DIR
-        image = util.getimage(config.COVER_DIR+os.path.basename(dir))
-        if image:
-            self.image = image
-            self.handle_type = self.display_type
+        if config.COVER_DIR:
+            image = util.getimage(config.COVER_DIR+os.path.basename(dir))
+            if image:
+                self.image = image
+                self.handle_type = self.display_type
 
         # Check for a cover in current dir, overide COVER_DIR if needed
         image = util.getimage(dir+'/cover')
@@ -188,7 +192,7 @@ class DirItem(Playlist):
                     image = os.path.join(dir, covers[0])
             self.image = image
 
-        if not self.image:
+        if not self.image and TV_SHOW_DATA_DIR:
             self.image = util.getimage(os.path.join(config.TV_SHOW_DATA_DIR,
                                                     os.path.basename(dir).lower()))
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/09/20 15:08:26  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.36  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -482,16 +485,17 @@ def parse_movie(node, file, parent, duplicate_check):
     dir = os.path.dirname(file)
 
     # find the realdir in case this file is in MOVIE_DATA_DIR
-    if dir.find(config.MOVIE_DATA_DIR) == 0:
-        realdir = os.path.join('/', dir[len(config.MOVIE_DATA_DIR):])
-        if realdir.find('/disc/') == 0:
-            realdir = realdir[6:]
-            for c in config.REMOVABLE_MEDIA:
-                if realdir.find(c.id) == 0:
-                    realdir = os.path.join(c.mountdir, realdir[len(c.id)+1:])
-                    break
-    else:
-        realdir = dir
+    if config.MOVIE_DATA_DIR:
+        if dir.find(config.MOVIE_DATA_DIR) == 0:
+            realdir = os.path.join('/', dir[len(config.MOVIE_DATA_DIR):])
+            if realdir.find('/disc/') == 0:
+                realdir = realdir[6:]
+                for c in config.REMOVABLE_MEDIA:
+                    if realdir.find(c.id) == 0:
+                        realdir = os.path.join(c.mountdir, realdir[len(c.id)+1:])
+                        break
+        else:
+            realdir = dir
 
     for movie_child in node.children:
         if movie_child.name == u'video':
@@ -646,29 +650,31 @@ def hash_xml_database():
                             l_re = re.compile(l)
                             config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
                 
-    for file in util.recursefolders(config.MOVIE_DATA_DIR,1,
-                                    '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-        infolist = parseMovieFile(file)
-        for info in infolist:
-            config.MOVIE_INFORMATIONS += [ info ]
-            if info.rom_id:
-                for i in info.rom_id:
-                    config.MOVIE_INFORMATIONS_ID[i] = info
-            if info.rom_label:
-                for l in info.rom_label:
-                    l_re = re.compile(l)
-                    config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
-            if info.files_options:
-                for fo in info.files_options:
-                    config.DISC_SET_INFORMATIONS_ID[fo['file-id']] = fo['mplayer-options']
+    if config.MOVIE_DATA_DIR:
+        for file in util.recursefolders(config.MOVIE_DATA_DIR,1,
+                                        '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
+            infolist = parseMovieFile(file)
+            for info in infolist:
+                config.MOVIE_INFORMATIONS += [ info ]
+                if info.rom_id:
+                    for i in info.rom_id:
+                        config.MOVIE_INFORMATIONS_ID[i] = info
+                if info.rom_label:
+                    for l in info.rom_label:
+                        l_re = re.compile(l)
+                        config.MOVIE_INFORMATIONS_LABEL += [(l_re, info)]
+                if info.files_options:
+                    for fo in info.files_options:
+                        config.DISC_SET_INFORMATIONS_ID[fo['file-id']] = fo['mplayer-options']
 
-    for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
-                                    '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-        infolist = parseMovieFile(file)
-        for info in infolist:
-            k = os.path.splitext(os.path.basename(file))[0]
-            config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options,
-                                              file)
+    if config.TV_SHOW_DATA_DIR:
+        for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
+                                        '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
+            infolist = parseMovieFile(file)
+            for info in infolist:
+                k = os.path.splitext(os.path.basename(file))[0]
+                config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info,
+                                                  info.mplayer_options, file)
             
     _debug_('done')
     return 1

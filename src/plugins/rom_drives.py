@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/09/20 15:08:26  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.31  2003/09/19 22:12:59  dischi
 # kill some debug for level 1
 #
@@ -526,7 +529,7 @@ class Identify_Thread(threading.Thread):
                         media.info.info.keys.append(k)
                         media.info.info[k] = media.info.info.tracks[0][k]
 
-            if os.path.isfile(config.COVER_DIR+label+'.jpg'):
+            if config.COVER_DIR and os.path.isfile(config.COVER_DIR+label+'.jpg'):
                 media.info.image = config.COVER_DIR+label+'.jpg'
 
             media.info.num_titles = len(data.tracks)
@@ -603,7 +606,7 @@ class Identify_Thread(threading.Thread):
                             start_ep = end_ep
                         volumes += show[1] + "x" + show[2]
 
-                if show_name and the_same:
+                if show_name and the_same and TV_SHOW_DATA_DIR:
                     if end_ep > 0:
                         volumes = '%dx%02d - %dx%02d' % (start_ep / 100, start_ep % 100,
                                                          end_ep / 100, end_ep % 100)
@@ -621,7 +624,7 @@ class Identify_Thread(threading.Thread):
                         if not xml_file:
                             xml_file = tvinfo[3]
                         
-                elif not show_name:
+                elif not show_name and config.COVER_DIR:
                     if os.path.isfile(config.COVER_DIR+\
                                       os.path.splitext(os.path.basename(movie))[0]+'.png'):
                         image = config.COVER_DIR+\

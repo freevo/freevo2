@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.86  2003/09/20 15:08:26  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.85  2003/09/20 12:59:31  dischi
 # do not match urls as tv shows
 #
@@ -126,7 +129,8 @@ class VideoItem(Item):
         self.xml_file = None
         
         # find image for tv show and build new title
-        if config.TV_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1:
+        if config.TV_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
+               config.TV_SHOW_DATA_DIR:
             show_name = config.TV_SHOW_REGEXP_SPLIT(self.name)
             if show_name[0] and show_name[1] and show_name[2] and show_name[3]:
                 self.name = show_name[0] + " " + show_name[1] + "x" + show_name[2] +\
@@ -149,7 +153,8 @@ class VideoItem(Item):
             
         # find image for this file
         # First check in COVER_DIR
-        self.image = util.getimage(config.COVER_DIR+self.basename, self.image)
+        if config.COVER_DIR:
+            self.image = util.getimage(config.COVER_DIR+self.basename, self.image)
 
         # Then check for episode in TV_SHOW_DATA_DIR
         self.image = util.getimage(os.path.splitext(filename)[0], self.image)

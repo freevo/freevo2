@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/09/20 15:08:25  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.53  2003/09/20 14:10:17  dischi
 # move version info into a python file
 #
@@ -411,7 +414,54 @@ if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
 OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 
 
+#
+# set data dirs
+#
+if not DIR_MOVIES:
+    ONLY_SCAN_DATADIR = True
+    DIR_MOVIES = [ ('Root', '/') ]
+    if os.environ.has_key('HOME') and os.environ['HOME']:
+        DIR_MOVIES = [ ('Home', os.environ['HOME']) ] + DIR_MOVIES
+    if not HELPER and plugin.is_active('mediamenu', 'video'):
+            error('DIR_MOVIES not set', 'set it to default Home directory')
 
+if not DIR_AUDIO:
+    DIR_AUDIO = [ ('Root', '/') ]
+    if os.environ.has_key('HOME') and os.environ['HOME']:
+        DIR_AUDIO = [ ('Home', os.environ['HOME']) ] + DIR_AUDIO
+    if not HELPER and plugin.is_active('mediamenu', 'audio'):
+        error('DIR_AUDIO not set', 'set it to default Home directory')
+
+if not DIR_IMAGES:
+    DIR_IMAGES = [ ('Root', '/') ]
+    if os.environ.has_key('HOME') and os.environ['HOME']:
+        DIR_IMAGES = [ ('Home', os.environ['HOME']) ] + DIR_IMAGES
+    if not HELPER and plugin.is_active('mediamenu', ('image', True)):
+        error('DIR_IMAGES not set', 'set it to default Home directory')
+
+if not DIR_GAMES:
+    DIR_GAMES = [ ('Root', '/') ]
+    if os.environ.has_key('HOME') and os.environ['HOME']:
+        DIR_GAMES = [ ('Home', os.environ['HOME']) ] + DIR_GAMES
+    if not HELPER and plugin.is_active('mediamenu', 'games'):
+        error('DIR_GAMES not set', 'set it to default Home directory')
+
+if not DIR_RECORD:
+    DIR_RECORD = '/tmp/'
+    if not HELPER and plugin.is_active('tv'):
+        error('DIR_RECORD not set', 'Please set DIR_RECORD to the directory ',
+              'where recordings should be stored or remove the tv plugin. ',
+              'Autoset variable to /tmp.')
+
+if not TV_SHOW_DATA_DIR:
+    error('TV_SHOW_DATA_DIR not found')
+    
+if not COVER_DIR:
+    error('COVER_DIR not found')
+    
+if not MOVIE_DATA_DIR:
+    error('MOVIE_DATA_DIR not found')
+    
 #
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 #

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/09/20 15:08:26  dischi
+# some adjustments to the missing testfiles
+#
 # Revision 1.36  2003/09/20 09:44:23  dischi
 # cleanup
 #
@@ -102,10 +105,9 @@ class AudioItem(Item):
         # it's a real png, and not a lying one :)
 
         # Check for cover in COVER_DIR
-        if os.path.isfile(config.COVER_DIR+os.path.basename(file)+'.png'):
-            self.image = config.COVER_DIR+os.path.basename(file)+'.png'
-        elif os.path.isfile(config.COVER_DIR+os.path.basename(file)+'.jpg'):
-            self.image = config.COVER_DIR+os.path.basename(file)+'.jpg'
+        if config.COVER_DIR:
+            base = os.path.join(config.COVER_DIR, os.path.basename(file))
+            self.image = util.getimage(base, self.image)
 
         # Check for cover in local dir
         if os.path.isfile(cover_logo+'png') and imghdr.what(cover_logo+'png'):
