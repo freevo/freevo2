@@ -530,7 +530,7 @@ class Guide:
                 clause = '%s subtitle like "%%%s%%"' % (clause, searchstr)
 
         if search_description:
-            if search_title or se: clause += ' or'
+            if search_title or search_subtitle: clause += ' or'
             if exact_match:
                 clause = '%s description="%s"' % (clause, searchstr)
             else:
