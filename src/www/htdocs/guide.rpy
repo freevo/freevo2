@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/08/18 01:20:10  rshortt
+# Another patch from Mike, this one adds the option to select the time you
+# would like to view in the guide.
+#
 # Revision 1.8  2003/08/11 19:58:39  rshortt
 # Patch from Mike Ruelle to add a row with the time in it every so many rows.
 # Something like this could also be done using style sheets.
@@ -74,7 +78,7 @@ from web_types import HTMLResource, FreevoResource
 from twisted.web.woven import page
 
 import web
-
+import tv_util
 import config 
 import xmltv
 import epg_xmltv 
@@ -89,6 +93,36 @@ FALSE = 0
 
 class GuideResource(FreevoResource):
 
+    def maketimejumpboxday(self):
+        retval='<select name="day">' + "\n"
+        myt = time.time()
+        myt_t=time.localtime(myt)
+        myt=time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, myt_t[6], myt_t[7], -1))
+        listh = tv_util.when_listings_expire()
+        if listh == 0:
+            return retval + "</select>\n"
+        listd = int((listh/24)+2)
+        for i in range(1,listd):
+            retval+='<option value="' + str(myt) + '">' + time.strftime('%a %b %d', time.localtime(myt)) + "\n"
+            myt+=60*60*24
+        retval+="</select>\n"
+        return retval
+
+
+    def maketimejumpboxoffset(self):
+        retval='<select name="offset">' + "\n"
+        myt = time.time()
+        myt_t=time.localtime(myt)
+        hrstart=time.mktime((myt_t[0], myt_t[1], myt_t[2], 0, 0, 5, myt_t[6], myt_t[7], -1))
+        hrinc=hrstart
+        hrstop=hrstart + (60*60*24)
+        while (hrinc < hrstop):
+            myoff=hrinc-hrstart
+            retval+='<option value="' + str(myoff) + '">' + time.strftime('%H:%M', time.localtime(hrinc)) + "\n"
+            hrinc+=web.INTERVAL
+        retval+="</select>\n"
+        return retval
+
     def _render(self, request):
         fv = HTMLResource()
         form = request.args
@@ -98,8 +132,12 @@ class GuideResource(FreevoResource):
 
         mfrguidestart = time.time()
         mfrguideinput = fv.formValue(form, 'stime')
+        mfrguideinputday = fv.formValue(form, 'day')
+        mfrguideinputoff = fv.formValue(form, 'offset')
         if mfrguideinput:
             mfrguidestart = int(mfrguideinput)
+        elif mfrguideinputday and mfrguideinputoff:
+            mfrguidestart = float(mfrguideinputday) + float(mfrguideinputoff)
         now = int(mfrguidestart / INTERVAL) * INTERVAL
         now2 = int(time.time() / INTERVAL) * INTERVAL
         mfrnextguide = now + INTERVAL * n_cols
@@ -122,16 +160,21 @@ class GuideResource(FreevoResource):
         pops = ''
         desc = ''
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1"')
+        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+        fv.tableRowOpen('class="chanrow"')
+        fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday() + self.maketimejumpboxoffset() + '<input type=submit value="Change"></form>', 'class="guidehead"')
+        fv.tableRowClose()
+        fv.tableClose()
 
+        fv.tableOpen('border="0" cellpadding="4" cellspacing="1"')
 
         showheader = 0
         for chan in guide.chan_list:
             #put guidehead every X rows
             if showheader % 15 == 0:
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(time.strftime('%b %d'), 'class="guidehead"')
                 headerstart = int(mfrguidestart / INTERVAL) * INTERVAL
+                fv.tableCell(time.strftime('%b %d', time.localtime(headerstart)), 'class="guidehead"')
                 for i in range(n_cols):
                     if i == n_cols-1 or i == 0:
                         dacell = ''
