@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/03 03:17:47  outlyer
+# Added a Clear() function to match Dischi's changes.
+#
 # Revision 1.9  2003/02/26 18:35:43  outlyer
 # A bunch of in progress stuff.  I've been using it for a couple of days, and
 # just thought I'd commit it here since anyone using 'skin_aubin1' is probably
@@ -419,7 +422,11 @@ class Skin:
                                  val.message.size, val.message.align, 'center')
 
         osd.update()
-        
+       
+    def Clear(self):
+        osd.clearscreen(osd.COL_BLACK)
+        osd.update()
+
 
     def DrawMenu_Cover(self, menuw, settings):
         image_x = 0
