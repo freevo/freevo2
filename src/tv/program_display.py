@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/21 15:11:52  outlyer
+# Remove a stray print... this was probably for debugging.
+#
 # Revision 1.19  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
 #
@@ -195,7 +198,6 @@ class ProgramDisplay(PopupBox):
             self.height = self.layout_manager.needed_space + 2 * self.v_margin
         if not top:
             self.top  = self.osd.height/2 - self.height/2
-        print self.parent
 
     def eventhandler(self, event, menuw=None):
         if DEBUG: print 'ProgramDisplay: event = %s' % event
