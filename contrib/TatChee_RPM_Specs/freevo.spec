@@ -6,10 +6,10 @@
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.1
-Release:	pre3
+Release:	1
 License:	GPL
 Group:		Applications/Multimedia
-Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
+Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
 Patch0:		%{name}-%{version}-runtime.patch
 Patch1:		%{name}-%{version}-Makefile.patch
 URL:		http://freevo.sourceforge.net/
@@ -31,7 +31,7 @@ and audio.
 
 %prep
 #%setup  -n %{name}
-%setup  -n %{name}-%{version}-%{release}
+%setup  -n %{name}-%{version}
 %patch0 -p0
 %patch1 -p0
 
@@ -106,7 +106,7 @@ mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
 mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
 mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
-mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins,www/images,www/scripts,www/styles}
+mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins,www/bin,www/htdocs/images,www/htdocs/scripts,www/htdocs/styles}
 mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
 mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml/type1}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
@@ -147,15 +147,11 @@ install -m 644 src/tv/*.py %{buildroot}%{_prefix}/src/tv
 install -m 644 src/video/*.py %{buildroot}%{_prefix}/src/video
 install -m 644 src/video/plugins/*.py %{buildroot}%{_prefix}/src/video/plugins
 
-install -m 755 src/www/ENV %{buildroot}%{_prefix}/src/www
-install -m 755 src/www/INSTALL %{buildroot}%{_prefix}/src/www
-install -m 755 src/www/tvrecord %{buildroot}%{_prefix}/src/www
-install -m 755 src/www/*.sh %{buildroot}%{_prefix}/src/www
-install -m 755 src/www/*.cgi %{buildroot}%{_prefix}/src/www
 install -m 644 src/www/*.py %{buildroot}%{_prefix}/src/www
-install -m 644 src/www/images/* %{buildroot}%{_prefix}/src/www/images
-install -m 644 src/www/scripts/* %{buildroot}%{_prefix}/src/www/scripts
-install -m 644 src/www/styles/* %{buildroot}%{_prefix}/src/www/styles
+install -m 644 src/www/bin/* %{buildroot}%{_prefix}/src/www/bin
+install -m 644 src/www/htdocs/images/* %{buildroot}%{_prefix}/src/www/htdocs/images
+install -m 644 src/www/htdocs/scripts/* %{buildroot}%{_prefix}/src/www/htdocs/scripts
+install -m 644 src/www/htdocs/styles/* %{buildroot}%{_prefix}/src/www/htdocs/styles
 
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
 install -m 644 skins/icons/AquaFusion/* %{buildroot}%{_prefix}/skins/icons/AquaFusion
@@ -263,6 +259,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Thu Feb 13 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.3.1 release
+
 * Fri Feb  7 2003 TC Wan <tcwan@cs.usm.my>
 - Moved *.py bytecompilation to post-install to reduce RPM size
 - Disabled automatic requires checking for runtime and apps
