@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/18 03:49:50  outlyer
+# Revert this change, since it was due to the idlebar problem I just fixed.
+#
 # Revision 1.3  2003/07/16 14:58:20  outlyer
 # Just a change to prevent a crash; this should do something eventually.
 #
@@ -298,8 +301,7 @@ class IVTV_TV:
             return TRUE
             
         elif event == em.TOGGLE_OSD:
-            # XXX FIX ME
-            return TRUE
+            return FALSE
         
             # Display the channel info message
             # XXX Experimental, disabled for now
@@ -397,6 +399,8 @@ class MPlayer_Thread(threading.Thread):
                     if DEBUG:
                         print "Stopping Display for Video Playback on DXR3"
                     osd.stopdisplay()			
+
+                os.system('/usr/sbin/matroxcolor')
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -415,6 +419,8 @@ class MPlayer_Thread(threading.Thread):
                     osd.restartdisplay()
                     osd.update()
                     print "Display back online"
+
+                os.system('/usr/sbin/undomatroxcolor')
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
