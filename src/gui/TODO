@@ -1,7 +1,7 @@
 o make sure all parts respect the guidelines:
-  o no part of freevo is allowed to import osd or skin
-  o no part outside the gui code should use the renderer
-  o never call screen.clear or osd.clear, everyone cleans up it's own mess
+  - no part of freevo is allowed to import osd or skin
+  - no part outside the gui code should use the renderer
+  - never call screen.clear or osd.clear, everyone cleans up it's own mess
 
 o make it possible to switch backends
 
@@ -9,9 +9,30 @@ o better integration of the settings code
 
 o make animation work again
 
-o clean up the code in widgets
+o clean up the code in widgets:
+  This is done for a small set of widgets. PopupBox, AlertBox,
+  ConfirmBox and ProgressBox are working again. If someone wants to
+  fix the other boxes, please do so (and drop me a note). The design
+  is different now:
+  - A window is only something that draws on the screen. The label
+    inside it has nothing to do with the window. So x/y coordiates are
+    based to the screen values, not the parent once (there is no
+    parent). 
+  - There is no container support, I'm still thinking how and if we
+    need it. 
+  - Layout is done inside the boxes. If someone wants to re-add the
+    LayoutManager, please do so, but don't add hundrets of attributes
+    to the objects please, 'style' should be enough.
+  - It's simpler now: before the change, a button was a container with
+    a border and a label. A label itself was something with text. Now
+    a label _is_ a text, a button _is_ a label (only with a different
+    drawing function).
 
 o split sdl keyboard into keyboard and sdl poll loop for redraw
 
-o define interface for renderer and it's objects
+
+
+If you want to help, just tell me (and ask questions). If you want to
+add a backend, look in the README.txt inside the backends dir.
+
 
