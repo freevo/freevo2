@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/08/27 14:17:15  dischi
+# remove old plugin code
+#
 # Revision 1.12  2004/08/26 18:13:18  dischi
 # always use Text not Textbox
 #
@@ -333,27 +336,20 @@ class Area:
         redraw = False
         self.settings = settings
 
-        if self.area_name == 'plugin':
-            if not self.area_values:
-                self.area_values = fxdparser.Area(self.area_name)
-                self.area_values.visible = True
-                self.area_values.r = (0, 0, self.screen.width, self.screen.height)
-            return True
-        else:
+        try:
+            area = getattr(area, self.area_name)
+        except AttributeError:
             try:
-                area = getattr(area, self.area_name)
-            except AttributeError:
-                try:
-                    area = area.areas[self.area_name]
-                except (KeyError, AttributeError):
-                    _debug_('no skin information for %s' % (self.area_name), )
-                    area = fxdparser.Area(self.area_name)
-                    area.visible = False
+                area = area.areas[self.area_name]
+            except (KeyError, AttributeError):
+                _debug_('no skin information for %s' % (self.area_name), )
+                area = fxdparser.Area(self.area_name)
+                area.visible = False
 
         if (not self.area_values) or area != self.area_values:
             self.area_values = area
             redraw = True
-            
+
         if not area.layout:
             return redraw
 
@@ -431,6 +427,7 @@ class Area:
         for image in background_image:
             imagefile, x, y, width, height = image
             i = self.drawimage(imagefile, (x, y, width, height), background=True)
+            i.set_zindex(-10)
             if i:
                 self.__background__.append(i)
                 i.info = image
