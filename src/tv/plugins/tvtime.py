@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/01/14 18:39:45  mikeruelle
+# suppress debug always showing
+#
 # Revision 1.28  2004/01/08 22:17:55  mikeruelle
 # not needed and is now annoying because of new osd behavior in new tvtime releases.
 #
@@ -110,7 +113,7 @@ import event as em
 import plugin
 
 # Set to 1 for debug output
-DEBUG = config.DEBUG or 3
+DEBUG = config.DEBUG
 
 # Create the OSD object
 osd = osd.get_singleton()
