@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2003/06/20 17:48:01  dischi
+# Title menu is now the default action for DVD/VCD. Autoplay is done by
+# pressing PLAY and not SELECT. This file is also prepared for the use of
+# mmpython.
+#
 # Revision 1.52  2003/06/07 11:32:17  dischi
 # added id to find the item if it changes
 #
@@ -260,6 +265,7 @@ class VideoItem(Item):
             self.tv_show           = obj.tv_show
             self.id                = obj.id
 
+                
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
@@ -300,9 +306,9 @@ class VideoItem(Item):
         if not self.filename or self.filename == '0':
             if self.mode == 'dvd':
                 items += [( self.dvdnav, 'DVD Menu (experimental)' )]
-                items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
+                items = [( self.dvd_vcd_title_menu, 'DVD title list' )] + items
             if self.mode == 'vcd':
-                items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
+                items = [( self.dvd_vcd_title_menu, 'VCD title list' )] + items
             for m in self.subitems:
                 # Allow user to watch one of the subitems instead of always both
                 # XXX Doesn't work
@@ -544,6 +550,13 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
+
+        # XXX all this scanning can be deleted if we switch to mmpython
+        # XXX also delete 'pop' in this function, it's already scanned by
+        # XXX mmpython and we will never use the popup box
+        # XXX
+        # XXX BEGIN BLOCK MARKED FOR DELETION
+        # XXX
         if not self.num_titles:
             # Use the uid to make a user-unique filename
             uid = os.getuid()
@@ -612,6 +625,10 @@ class VideoItem(Item):
             if not done or not found:
                 self.num_titles = 100 # XXX Kludge
 
+        # XXX
+        # XXX END BLOCK MARKED FOR DELETION
+        # XXX
+
         #
         # Done scanning the disc, set up the menu.
         #
@@ -629,6 +646,10 @@ class VideoItem(Item):
         items = []
         for title in range(1,self.num_titles+1):
             file = copy.copy(self)
+
+            # copy the attributes from mmpython about this track
+            if self.info.has_key('tracks'):
+                file.info = self.info.tracks[title-1]
             file.filename = '%s' % title
             file.name = 'Play Title %s' % title
             items += [file]
