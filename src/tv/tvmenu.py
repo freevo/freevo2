@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/01/07 20:41:03  dischi
+# fix coming up and other parts of the tv menu
+#
 # Revision 1.23  2005/01/06 18:49:04  dischi
 # remove old tv_util
 #
@@ -79,9 +82,18 @@ import plugin
 from item import Item
 
 import tvguide
+from record.client import recordings
 from directory import DirItem
 from gui import AlertBox
 
+
+class Info(Item):
+    def __getitem__(self, key):
+        if key in ('comingup', 'running'):
+            return getattr(recordings, key)
+        if key == 'recordserver':
+            return recordings.server
+        return Info.__getitem__(self, key)
 
 
 class TVMenu(Item):
@@ -111,8 +123,10 @@ class TVMenu(Item):
         for p in plugins_list:
             items += p.items(self)
 
-        menuw.pushmenu(menu.Menu(_('TV Main Menu'), items, item_types = 'tv main menu'))
-
+        m = menu.Menu(_('TV Main Menu'), items, item_types = 'tv main menu')
+        m.infoitem = Info()
+        menuw.pushmenu(m)
+        
 
     def start_tvguide(self, arg, menuw):
 

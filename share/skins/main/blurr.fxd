@@ -526,16 +526,20 @@
 	******************************************************* -->
 
 
+        <layout label="tv screen">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <image filename="gant/tv.png" x="435" y="230" width="370"
+		    height="380"/>
+            </background>
+        </layout>
+        
         <!-- GUIDE  -->
 
-        <menu type="tv">
-            <style text="text with tv info style"/>
-        </menu>
-        
         <menuset label="tv menu">
             <screen layout="screen" x="0" y="0" width="800" height="600"/>
             <title visible="no"/>
-            <info layout="tv info" x="10" y="80" width="760" height="140"/>
+            <info layout="tv info" x="10" y="90" width="780" height="140"/>
             <listing layout="tv listing" x="10" y="240" width="750" height="350">
                 <image x="765" y="240" width="32" height="32" label="uparrow"
 	            filename="up.png"/>
@@ -577,15 +581,54 @@
 	<!-- tv main menu -->
 
         <menu type="tv main menu">
-            <style text="text with tv info style (main)"/>
+            <style text="tv main menu"/>
         </menu>
         
-        <menuset label="text with tv info style (main)" inherits="text with info style">
+        <menuset label="tv main menu" inherits="text with info style">
             <screen layout="tv screen" visible="yes"/>
-            <info layout="tv extended info" x="30" y="100" width="740" height="230"/>
+            <info layout="tv main menu info" x="10" y="90" width="780" height="250"/>
             <view visible="no"/>
         </menuset>
         
+        <layout label="tv main menu info">
+            <background>
+                <rectangle size="0" bgcolor="0x80000000" radius="10" x="0" y="0"
+		    width="max" height="max"/>
+	    </background>
+            <content x="10" y="10" type="text" height="max-20" width="max-20"
+		spacing="20" font="default">
+                <item type="default">
+                    <if expression="recordserver">
+			<if expression="running">
+			    <text font="tv title" width="max" 
+				height="-1">Currently recording:</text>
+			    <newline/>
+			    <goto_pos y="20" mode="relative"/>
+			    <text font="comingup" width="max" height="max" 
+				expression="running" mode="soft"/>
+			    <newline/>
+			    <goto_pos y="30" mode="relative"/>
+			</if>
+			<if expression="comingup">
+			    <text font="tv title" width="max" 
+				height="-1">Next recordings:</text>
+			    <newline/>
+			    <goto_pos y="20" mode="relative"/>
+			    <text font="comingup" width="max" height="max" 
+				expression="comingup" mode="soft"/>
+			</if>
+			<if expression="not comingup and not running">
+			    <text font="tv title" width="max"
+				height="-1">Nothing scheduled</text>
+			</if>
+		    </if>
+                    <if expression="not recordserver">
+			<text font="tv title" width="max"
+			    height="-1">Recordserver not found</text>
+		    </if>
+                </item>
+            </content>
+        </layout>
 
 	<!-- program details -->
 
@@ -593,64 +636,16 @@
 	    <style text="text with program info style"/>
         </menu>
 
-
         <menu type="tv favorite menu">
 	    <style text="text with program info style"/>
         </menu>
 
         <menuset label="text with program info style" 
-	    inherits="text with tv info style (main)">
+	    inherits="tv main menu">
             <listing y="230" height="340"/>
-            <info layout="tv program info" x="10" y="80" width="780" height="125"/>
+            <info layout="tv program info" x="10" y="90" width="780" height="130"/>
         </menuset>
 
-
-	<!-- old stuff ? -->
-
-        <menu type="tv manual record menu">
-	    <style text="text with manual record info style"/>
-        </menu>
-
-        <menuset label="tv" inherits="normal text style"> 
-            <view visible="no"/>
-            <listing x="100" width="680">
-                <image label="uparrow" x="290" y="110"/>
-                <image label="downarrow" x="max-32" y="520"/>
-            </listing>
-            <screen layout="tv menu screen"/>
-        </menuset>
-        
-        <menuset label="text with tv info style" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-        </menuset>
-        
-        <menuset label="text with favorite info style"
-	    inherits="text with tv info style (main)">
-            <info layout="tv favorite info"/>
-        </menuset>
-
-        <menuset label="text with manual record info style"
-	    inherits="text with tv info style (main)">
-            <info layout="tv manual record info"/>
-        </menuset>
-
-        <layout label="tv screen">
-            <background>
-                <image image="background" x="0" y="0" label="background"/>
-                <image filename="gant/tv.png" x="435" y="230" width="370"
-		    height="380"/>
-            </background>
-        </layout>
-        
-        <layout label="tv extended info">
-            <content x="0" y="0" type="text" spacing="20" font="default">
-                <item type="default">
-                    <text font="comingup" width="max" height="max" 
-			expression="function:comingup" mode="soft"/>
-                </item>
-            </content>
-        </layout>
-        
         <layout label="tv program info">
             <background>
                 <rectangle size="0" bgcolor="0x80000000" radius="10" x="0" y="0"
@@ -658,6 +653,30 @@
 	    </background>
             <content x="10" y="10" width="max-20" height="max-20"/>
 	</layout>
+
+
+	<!-- normal menus in tv -->
+
+        <menu type="tv">
+            <style text="text with tv info style"/>
+        </menu>
+        
+        <menuset label="text with tv info style" inherits="text with info style">
+            <screen layout="tv screen with background" visible="yes"/>
+        </menuset>
+        
+        <layout label="tv screen with background">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
+		    width="780" height="250"/>
+                <image filename="gant/tv.png" x="435" y="230" width="370"
+		    height="380"/>
+            </background>
+        </layout>
+        
+
+        <!-- fonts -->
 
         <font label="tv" name="Arial_Bold" size="14" color="0xffffff"/>
         <font label="tv selected" name="Arial_Bold" size="14" color="0x164668">
