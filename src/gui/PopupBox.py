@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/09/03 21:02:44  outlyer
+# Left in a debug line
+#
 # Revision 1.24  2003/09/01 18:50:56  dischi
 # Set default width and height based on screen size and size of the text
 # in it. This avoids ugly line breaks
@@ -129,7 +132,6 @@ class PopupBox(Container):
             self.left = self.osd.width/2 - self.width/2
         if not self.top:
             self.top  = self.osd.height/2 - self.height/2
-
 
         if type(text) is StringType:
             self.label = Label(text, self, Align.CENTER, Align.CENTER)
