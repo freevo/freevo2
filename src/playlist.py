@@ -9,10 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.56  2004/01/15 00:49:01  outlyer
-# An audio event which passed along the filename of files which have completed
-# playing normally. This is the foundation for something which will end up in
-# my WIP soon.
+# Revision 1.57  2004/01/15 20:46:02  outlyer
+# Added a "RATING" event... press a number from 0-5 to have the sqlite
+# database keep track of your score. The idea is to be able to build
+# playlists automatically of "top rated" songs. When you press the number,
+# the score is printed on the screen via tiny_osd
 #
 # Revision 1.55  2004/01/10 13:16:14  dischi
 # remove self.fxd_file, not needed anymore
@@ -467,7 +468,13 @@ class Playlist(Item):
         """
 
         if event == PLAY_END:
-            rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
+            if (self.current_item.type == 'audio'):
+                rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
+
+        if event == BUTTON and event.arg and hasattr(self.current_item,'type'):
+            if (self.current_item.type == 'audio'):
+                rc.post_event(Event(RATING,(event.arg,self.current_item.filename)))
+
 
         if not menuw:
             menuw = self.menuw

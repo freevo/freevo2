@@ -9,10 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.35  2004/01/15 00:49:01  outlyer
-# An audio event which passed along the filename of files which have completed
-# playing normally. This is the foundation for something which will end up in
-# my WIP soon.
+# Revision 1.36  2004/01/15 20:46:02  outlyer
+# Added a "RATING" event... press a number from 0-5 to have the sqlite
+# database keep track of your score. The idea is to be able to build
+# playlists automatically of "top rated" songs. When you press the number,
+# the score is printed on the screen via tiny_osd
 #
 # Revision 1.34  2003/12/14 17:27:19  dischi
 # cleanup
@@ -272,6 +273,7 @@ FUNCTION_CALL          = Event('FUNCTION_CALL')
 # All buttons which are not mapped to an event will be send as
 # BOTTON event with the pressed button as arg
 BUTTON                 = Event('BUTTON')
+RATING                 = Event('RATING')
 
 
 
