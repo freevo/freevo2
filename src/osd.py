@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.157  2004/05/31 10:41:44  dischi
+# remove sleep function, not needed anymore
+#
 # Revision 1.156  2004/05/13 12:33:42  dischi
 # animation damage patch from Viggo Fredriksen
 #
@@ -1271,19 +1274,6 @@ class OSD:
             self.busyicon.rect = None
         
 
-    def sleep(self, sleep_time):
-        if self.render.realtime and sleep_time:
-            tick  = pygame.time.get_ticks()
-            start = tick
-            while tick - start < sleep_time * 100:
-                self.render.update(tick)
-                tick = pygame.time.get_ticks()
-        else:
-            self.render.update(pygame.time.get_ticks())
-            if sleep_time:
-                time.sleep(sleep_time)
-
-        
     def _getbitmap(self, url):
         """
         load the bitmap or thumbnail
