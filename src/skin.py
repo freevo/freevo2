@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/08/05 17:37:35  dischi
+# remove more functions
+#
 # Revision 1.19  2004/08/01 10:54:15  dischi
 # remove outdated code
 #
@@ -73,8 +76,7 @@ _singleton = None
 
 # a list of all functions the skin needs to have
 __all__ = ( 'Rectange', 'Image', 'Area', 'register', 'delete', 'change_area',
-            'toggle_display_style', 'get_display_style', 'items_per_page',
-            'clear', 'draw', 'active' )
+            'toggle_display_style', 'items_per_page', 'clear', 'draw' )
     
 __all__gui__ = ( 'get_settings', 'get_font', 'get_image', 'get_icon' )
     
