@@ -22,7 +22,6 @@
 #include <pygame.h>
 #endif
 
-static int _shm_ctr = 0;
 
 PyTypeObject Image_PyObject_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -86,8 +85,11 @@ PyObject *Image_PyObject__clear(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
 { 
-	int x, y, dst_w, dst_h, src_w, src_h, i;
+	int x, y, dst_w, dst_h, src_w, src_h;
+#if 0
+	int i;
 	unsigned char *imgbuf;
+#endif
 	Imlib_Image *image;
 	Image_PyObject *o;
 
@@ -142,7 +144,6 @@ PyObject *Image_PyObject__rotate(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__orientate(PyObject *self, PyObject *args)
 { 
-	Image_PyObject *o;
 	int orientation;
 
 	if (!PyArg_ParseTuple(args, "i", &orientation))
@@ -156,7 +157,6 @@ PyObject *Image_PyObject__orientate(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__flip(PyObject *self, PyObject *args)
 { 
-	Image_PyObject *o;
 	int horiz, vert, diag;
 
 	if (!PyArg_ParseTuple(args, "iii", &horiz, &vert, &diag))
@@ -172,7 +172,6 @@ PyObject *Image_PyObject__flip(PyObject *self, PyObject *args)
 }
 PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
 { 
-	int dst_w, dst_h, src_w, src_h;
 	Imlib_Image *image;
 	Image_PyObject *o;
 
@@ -282,7 +281,7 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
 
 PyObject *Image_PyObject__draw_text(PyObject *self, PyObject *args)
 { 
-	int x, y, w, h, advance_w, advance_h, r, g, b, a, descent, inset;
+	int x, y, w, h, advance_w, advance_h, r, g, b, a;
 	char *text;
 	Font_PyObject *font;
 
@@ -368,10 +367,24 @@ PyObject *Image_PyObject__copy_rect(PyObject *self, PyObject *args)
 }
 
 
+PyObject *Image_PyObject__get_pixel(PyObject *self, PyObject *args)
+{ 
+	int x, y;
+	Imlib_Color col;
+	if (!PyArg_ParseTuple(args, "(ii)", &x, &y))
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
+
+	imlib_context_set_image(((Image_PyObject *)self)->image);
+	imlib_image_query_pixel(x, y, &col);
+	
+	return Py_BuildValue("(iii)", col.alpha, col.red, col.green, col.blue);
+}
+
+
 PyObject *Image_PyObject__move_to_shmem(PyObject *self, PyObject *args)
 {
 	char *shmem_name, *buf, *format = "BGRA";
-	unsigned long size, w, h;
+	unsigned long size;
 	int fd;
 
 	if (!PyArg_ParseTuple(args, "|ss", &format, &shmem_name))
@@ -404,7 +417,7 @@ PyObject *Image_PyObject__move_to_shmem(PyObject *self, PyObject *args)
 PyObject *Image_PyObject__get_bytes(PyObject *self, PyObject *args)
 {
 	unsigned char *format = "BGRA", *buffer;
-	unsigned long size, w, h;
+	unsigned long size;
 	PyObject *ret;
 
 	if (!PyArg_ParseTuple(args, "|s", &format))
@@ -412,12 +425,6 @@ PyObject *Image_PyObject__get_bytes(PyObject *self, PyObject *args)
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	size = get_raw_bytes_size(format);
-/*
-	if (!strcmp(format, "BGRA"))
-		buffer = imlib_image_get_data_for_reading_only();
-	else
-		buffer = get_raw_bytes(format, NULL);
-*/
 	buffer = get_raw_bytes(format, NULL);
 	ret = PyBuffer_FromMemory(buffer, size);
 
@@ -488,6 +495,7 @@ PyMethodDef Image_PyObject_methods[] = {
 	{ "set_alpha", Image_PyObject__set_alpha, METH_VARARGS },
 	{ "move_to_shmem", Image_PyObject__move_to_shmem, METH_VARARGS },
 	{ "get_bytes", Image_PyObject__get_bytes, METH_VARARGS },
+	{ "get_pixel", Image_PyObject__get_pixel, METH_VARARGS },
 	{ "to_sdl_surface", Image_PyObject__to_sdl_surface, METH_VARARGS },
 	{ "save", Image_PyObject__save, METH_VARARGS },
 	{ NULL, NULL }
