@@ -41,6 +41,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/08/24 19:56:38  outlyer
+# Adjust to the renamed 'type' of empty cdrom drives.
+#
 # Revision 1.35  2003/08/24 10:16:26  dischi
 # do not use osd.OSDFont, xml_font has the font as font.font in it
 #
@@ -198,7 +201,9 @@ class cdstatus(IdleBarPlugin):
         for media in config.REMOVABLE_MEDIA:
             image = self.cdimages['empty_cdrom']
             if hasattr(media.info,'type') and hasattr(media.info,'handle_type'):
-                if not media.info.handle_type and media.info.type:
+                if media.info.type == 'empty_cdrom':
+                    image = self.cdimages['empty_cdrom']
+                elif not media.info.handle_type and media.info.type:
                     image = self.cdimages['mixed']
                 elif media.info.handle_type: 
                     image = self.cdimages[media.info.handle_type]
