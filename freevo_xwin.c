@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/09/18 02:32:47  gsbarbieri
+# Fixed compilation warning: added #include <string.h> to fix memset implict declaration
+#
 # Revision 1.2  2002/08/19 02:11:21  krister
 # Make window black at startup.
 #
@@ -49,7 +52,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include <string.h>
 #include "portable.h"
 
       
