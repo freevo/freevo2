@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.105  2004/01/10 14:56:45  dischi
+# better shutdown handling
+#
 # Revision 1.104  2004/01/10 13:19:52  dischi
 # use new skin.set_base_fxd function
 #
@@ -489,7 +492,7 @@ except KeyboardInterrupt:
     shutdown()
 
 except SystemExit:
-    sys.exit(0)
+    pass
 
 except:
     print 'Crash!'
