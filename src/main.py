@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.124  2004/06/06 07:45:35  dischi
+# check for numeric
+#
 # Revision 1.123  2004/05/30 18:27:53  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
 #
@@ -74,7 +77,8 @@ try:
     import Image
     import pygame
     import twisted
-
+    import Numeric
+    
     import config
 
     if not config.CONF.lsdvd:
@@ -92,6 +96,8 @@ try:
 except ImportError, i:
     print 'Can\'t find all Python dependencies:'
     print i
+    if str(i)[-7:] == 'Numeric':
+        print 'You need to recompile pygame after installing Numeric!'
     print
     print 'Not all requirements of Freevo are installed on your system.'
     print 'Please check the INSTALL file for more informations.'
