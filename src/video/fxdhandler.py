@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/03/02 20:56:59  dischi
+# fxd files are always right about the name
+#
 # Revision 1.18  2004/02/14 12:59:26  dischi
 # make sure url is a string
 #
@@ -228,6 +231,8 @@ def parse_movie(fxd, node):
             item.info.set_variables(variables)
         else:
             item.set_url(url, info=False)
+        if title:
+            item.name = title
         if player:
             item.force_player = player
         if is_playlist:
