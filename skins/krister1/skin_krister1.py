@@ -83,7 +83,7 @@ class Skin:
 
 
     # Parse XML files with additional settings
-    def LoadSettings(self, dir)
+    def LoadSettings(self, dir):
         return None
 
     
@@ -228,19 +228,19 @@ class Skin:
             osd.drawstring(info.filename, 30, 520)
 
             osd.drawstring('Title:', 30, 100)
-            osd.drawstring('%s ' % info.id3.title, left, 100)
+            osd.drawstring('%s ' % info.title, left, 100)
         
             osd.drawstring('Artist:', 30, 130)
-            osd.drawstring('%s ' % info.id3.artist, left, 130)
+            osd.drawstring('%s ' % info.artist, left, 130)
         
             osd.drawstring('Album:', 30, 160)
-            osd.drawstring('%s ' % info.id3.album, left, 160)
+            osd.drawstring('%s ' % info.album, left, 160)
         
             osd.drawstring('Year:', 30, 190)
-            osd.drawstring('%s ' % info.id3.year, left, 190)
+            osd.drawstring('%s ' % info.year, left, 190)
         
             osd.drawstring('Track:', 30, 220)
-            osd.drawstring('%s ' % info.id3.track, left, 220)
+            osd.drawstring('%s ' % info.track, left, 220)
 
 
             osd.drawstring('Elapsed:', 30, 300, osd.default_fg_color)
