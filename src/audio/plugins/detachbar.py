@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/11 11:14:53  dischi
+# lcd detach fixes from Magnus Schmidt
+#
 # Revision 1.8  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -62,6 +65,7 @@ class PluginInterface(plugin.DaemonPlugin):
     """
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
+        self.plugin_name = 'audio.detachbar'
 
         # tunables
         self.TimeOut  = 3  # 3 seconds till we hide the bar

@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/11 11:14:53  dischi
+# lcd detach fixes from Magnus Schmidt
+#
 # Revision 1.18  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -726,6 +729,12 @@ class PluginInterface( plugin.DaemonPlugin ):
         'Draw' the information on the LCD display.
         """
         if self.disable: return
+
+        # Check if audio is detached
+        # When in detached mode, do not draw the player screen
+        if plugin.getbyname('audio.detachbar'):
+            if type == 'player' and plugin.getbyname('audio.detachbar').status != 0:
+                return
 
         if type == 'player':
             sname = "%s_%s" % ( object.type, type )
