@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/07/05 14:57:07  dischi
+# the idlebar registers itself as idlebar to the plugin interface
+#
 # Revision 1.17  2003/07/04 20:14:04  outlyer
 # Fixed some confusing logic. It's still confusing, but it works now. Probably
 # need to clean this up.
@@ -130,7 +133,8 @@ class interface(plugin.DaemonPlugin):
         self.poll_interval   = 300
         self.toolbar_surface = None
         self.plugins = None
-
+        plugin.register(self, 'idlebar')
+        self.visible = TRUE
         
     def draw(self, (type, object)):
         if not self.toolbar_surface:
