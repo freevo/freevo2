@@ -33,12 +33,12 @@ $(SUBDIRS):
 clean:
 	-rm -f *.pyc */*.pyc */*/*.pyc */*/*/*.pyc *.o log_main_out 
 	-rm -f log_main_err log.txt runapp freevo_xwin
-	cd fbcon ; make clean
+	cd fbcon ; $(MAKE) clean
 
 # Remove all compiled python files
 distclean:
 	find . -name "*.pyc*" -exec rm -f {} \;
-	make -C fbcon distclean
+	$(MAKE) -C fbcon distclean
 
 release: clean
 	cd ..; tar czvf freevo-`cat freevo/VERSION`-`date +%Y%m%d`.tar.gz \
