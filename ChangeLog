@@ -8,6 +8,7 @@ Release 1.5.0-rc1 (2004-05-07):
 -------------------------------
  * Add new animation classes
  * pygoom support (http://freevo.sf.net/pygoom)
+ * Support for DVD images as .iso
  * Bugfixes
 
 
