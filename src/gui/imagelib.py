@@ -128,11 +128,14 @@ def load(url, size=None, cache=False, vfs_save=False):
 
 item_imagecache = util.objectcache.ObjectCache(30, desc='item_image')
 
-def item_image(item, size, icon_dir, force=False):
+def item_image(item, size, icon_dir, force=False, cache=True):
     """
     Return the image for an item. This function uses internal caches and
     can also return a mimetype image if no image is found and force is True
     """
+    if cache == True:
+        cache = item_imagecache
+        
     width, height = size
     try:
         type = item.display_type
@@ -151,7 +154,7 @@ def item_image(item, size, icon_dir, force=False):
     if item.media and item.media.item == item:
         key = '%s-%s' % (key, item.media)
         
-    image = item_imagecache[key]
+    image = cache[key]
 
     if image:
         return image
@@ -237,5 +240,5 @@ def item_image(item, size, icon_dir, force=False):
         height = int(float(width * i_h) / i_w)
 
     image.scale((width, height))
-    item_imagecache[key] = image
+    cache[key] = image
     return image
