@@ -206,7 +206,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if not self.__auth_user(auth):
             self.send_response(401, ' Authorization Required')
             self.send_header("Content-type", 'text/html')
-            self.send_header("WWW-Authenticate", 'Basic realm="Freevo')
+            self.send_header("WWW-Authenticate", 'Basic realm="Freevo"')
             self.end_headers()
             self.wfile.write('''
             <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
