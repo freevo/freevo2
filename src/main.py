@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/07 12:43:30  dischi
+# Removed some stuff Krister (?) checked in by accident
+#
 # Revision 1.10  2003/02/07 07:31:43  krister
 # Added a fix for LD_PRELOAD problems, turned out some stuff ran before it was turned off.
 #
@@ -470,8 +473,6 @@ def main_func():
 #
 if __name__ == "__main__":
     try:
-        os.system('ls')
-        sys.exit()                      # XXX REMOVE
         main_func()
     except KeyboardInterrupt:
         print 'Shutdown by keyboard interrupt'
