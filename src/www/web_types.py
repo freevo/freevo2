@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/03/09 00:14:35  rshortt
+# Add advanced search and link to search page.  Next will probably add genre
+# options.
+#
 # Revision 1.23  2004/02/23 08:31:55  gsbarbieri
 # Helper functions.
 # Please use them to print messages to user.
@@ -177,6 +181,7 @@ class HTMLResource:
                  (_('Favorites'),_('View Favorites'),'%sfavorites.rpy' % str(strprefix)),
                  (_('Media Library'),_('View Media Library'),'%slibrary.rpy' % str(strprefix)),
                  (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),
+                 (_('Search'),_('Advanced Search Page'),'%ssearch.rpy' % str(strprefix)),
                  (_('Help'),_('View Online Help and Documentation'),'%shelp/' % str(strprefix))]
 
         try:
@@ -274,7 +279,17 @@ class HTMLResource:
     def printSearchForm(self):
         self.res += """
     <form id="SearchForm" action="search.rpy" method="get">
-    <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20"/></div>
+    <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20" /></div>
+    </form>
+    """
+
+    def printAdvancedSearchForm(self):
+        self.res += """
+    <form id="SearchForm" action="search.rpy" method="get">
+    <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20" />
+    <input type="checkbox" selected=0 name="movies_only" />"""+_('Movies only')+"""
+    <input type="submit" value=" """+_('Go!')+""" " />
+    </div>
     </form>
     """
 

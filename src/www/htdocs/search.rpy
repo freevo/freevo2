@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/03/09 00:14:35  rshortt
+# Add advanced search and link to search page.  Next will probably add genre
+# options.
+#
 # Revision 1.16  2004/02/23 08:33:21  gsbarbieri
 # i18n: help translators job.
 #
@@ -126,15 +130,21 @@ class SearchResource(FreevoResource):
         if not server_available:
             fv.printHeader(_('Search Results'), 'styles/main.css')
             fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
-            fv.printSearchForm()
+            fv.printAdvancedSearchForm()
             fv.printLinks()
             fv.printFooter()
 
             return String( fv.res )
 
         find = fv.formValue(form, 'find')
+        if fv.formValue(form, 'movies_only'):
+            movies_only = 1
+        else:
+            movies_only = 0
 
-        (got_matches, progs) = ri.findMatches(find)
+        print 'DEBUG: movies_only=%s' % movies_only
+
+        (got_matches, progs) = ri.findMatches(find, movies_only)
 
         if got_matches: 
             (result, favs) = ri.getFavorites()
@@ -142,10 +152,14 @@ class SearchResource(FreevoResource):
             if result:
                 rec_progs = recordings.getProgramList()
 
-        fv.printHeader(_('Search Results'), 'styles/main.css')
+        fv.printHeader(_('Search'), 'styles/main.css')
 
-        if not got_matches: 
-            fv.res += '<h3>'+_('No matches')+'</h3>'
+        fv.res += '<br /><br />'
+        fv.printAdvancedSearchForm()
+
+        if not got_matches:
+            if find or movies_only: 
+                fv.res += '<h3>'+_('No matches')+'</h3>'
 
         else:
             fv.res += '<div id="content"><br>'
@@ -207,7 +221,7 @@ class SearchResource(FreevoResource):
             fv.tableClose()
 
         fv.res += '</div>'
-        fv.printSearchForm()
+        # fv.printSearchForm()
 
         fv.printLinks()
 
