@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/02/08 23:31:33  gsbarbieri
+# hanged the Image menu to ExtendedMenu.
+#
+# OBS:
+#    main1_tv: modified to handle the <indicator/> as a dict
+#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
+#    main: modified to use the ExtendedMenu
+#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
+#
 # Revision 1.74  2003/02/07 20:18:23  dischi
 # break after a local_skin is found
 #
@@ -105,6 +114,9 @@ from main1_utils import *
 # TV guide support
 import main1_tv
 
+# Image browser support
+import main1_image
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -152,6 +164,7 @@ class Skin:
 
     def __init__(self):
         self.tv = main1_tv.Skin_TV()
+        self.image = main1_image.Skin_Image()
         pass
 
 
@@ -791,6 +804,7 @@ class Skin:
         osd.update()
 
 
+    # TV Guide:
 
     def DrawTVGuide(self):
         if 'tv' in self.settings.e_menu:
@@ -823,6 +837,47 @@ class Skin:
     def DrawTVGuide_Listing(self, to_listing):
         if 'tv' in self.settings.e_menu:
             return self.tv.DrawTVGuide_Listing(to_listing, self.settings.e_menu['tv'])
+
+    # Image Browser:
+
+    def DrawImage(self):
+        if 'image' in self.settings.e_menu:
+            self.image.DrawImage(self.settings.e_menu['image'])
+        
+    def DrawImage_Clear(self):
+        if 'image' in self.settings.e_menu:
+            self.image.DrawImage_Clear(self.settings.e_menu['image'])
+
+    def DrawImage_getExpand(self):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_getExpand(self.settings.e_menu['image'])
+
+    def DrawImage_setExpand(self, expand):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_setExpand(expand, self.settings.e_menu['image'])
+
+    def DrawImage_View(self, to_view):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_View(to_view, self.settings.e_menu['image'])
+
+    def DrawImage_Info(self, to_info):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_Info(to_info, self.settings.e_menu['image'])
+                         
+    def DrawImage_getCols(self):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_getCols(self.settings.e_menu['image'])
+
+    def DrawImage_getRows(self):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_getRows(self.settings.e_menu['image'])
+
+    def DrawImage_Listing(self, to_listing):
+        if 'image' in self.settings.e_menu:
+            return self.image.DrawImage_Listing(to_listing, self.settings.e_menu['image'])
+
+
+
 
     def format_track (self, array):
         """ Return a formatted string for use in music.py """

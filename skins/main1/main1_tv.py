@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/08 23:31:33  gsbarbieri
+# hanged the Image menu to ExtendedMenu.
+#
+# OBS:
+#    main1_tv: modified to handle the <indicator/> as a dict
+#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
+#    main: modified to use the ExtendedMenu
+#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
+#
 # Revision 1.10  2002/11/24 06:32:01  krister
 # Cleanup.
 #
@@ -195,8 +204,8 @@ class Skin_TV:
                          osd.stringsize('Ajg', val.selection.font, val.selection.size)
         str_w_normal, str_h_normal = osd.stringsize('Ajg', val.font, val.size)
 
-        left_arrow_size = osd.bitmapsize(val.left_arrow)
-        right_arrow_size = osd.bitmapsize(val.right_arrow)
+        left_arrow_size = osd.bitmapsize(val.indicator['left'])
+        right_arrow_size = osd.bitmapsize(val.indicator['right'])
 
 
         y_contents = conf_y + str_h_label + 2 * val.spacing
@@ -340,10 +349,10 @@ class Skin_TV:
                     DrawTextFramed(prg.title, cur_val, tx0, y0+spacing, tx1-tx0, h)
 
                     if flag_left:
-                        osd.drawbitmap(val2.left_arrow, x0 + spacing,
+                        osd.drawbitmap(val2.indicator['left'], x0 + spacing,
                                        y0+spacing+int((str_h - left_arrow_size[1])/2))
                     if flag_right:
-                        osd.drawbitmap(val2.right_arrow, x1-right_arrow_size[0]-spacing, \
+                        osd.drawbitmap(val2.indicator['right'], x1-right_arrow_size[0]-spacing, \
                                        y0+spacing+int((str_h - right_arrow_size[1])/2))
 
             else:

@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/08 23:31:37  gsbarbieri
+# hanged the Image menu to ExtendedMenu.
+#
+# OBS:
+#    main1_tv: modified to handle the <indicator/> as a dict
+#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
+#    main: modified to use the ExtendedMenu
+#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
+#
 # Revision 1.11  2003/02/07 12:43:30  dischi
 # Removed some stuff Krister (?) checked in by accident
 #
@@ -87,6 +96,7 @@ import skin    # The skin class
 import mixer   # The mixer class
 import rc      # The RemoteControl class.
 import tv.tv   # The TV module
+import image.image # The Image module
 
 import identifymedia
 import signal

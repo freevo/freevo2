@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/02/08 23:31:37  gsbarbieri
+# hanged the Image menu to ExtendedMenu.
+#
+# OBS:
+#    main1_tv: modified to handle the <indicator/> as a dict
+#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
+#    main: modified to use the ExtendedMenu
+#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
+#
 # Revision 1.23  2003/02/04 13:14:12  dischi
 # o fixed some problems with the eventhandler (and cleaned up that part)
 # o DirectoryItem now reads skin.xml to get personal settings for the
@@ -425,7 +434,8 @@ class DirItem(Playlist):
             if self.xml_file:
                 item_menu.skin_settings = skin.LoadSettings(self.xml_file)
 
-            menuw.pushmenu(item_menu)
+            if menuw:
+                menuw.pushmenu(item_menu)
 
             global dirwatcher_thread
             if not dirwatcher_thread:
@@ -435,6 +445,7 @@ class DirItem(Playlist):
             dirwatcher_thread.cwd(self, item_menu, self.dir, self.all_files)
             self.menu = item_menu
 
+        return items
 
     def reload(self):
         """

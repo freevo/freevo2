@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/02/08 23:31:36  gsbarbieri
+# hanged the Image menu to ExtendedMenu.
+#
+# OBS:
+#    main1_tv: modified to handle the <indicator/> as a dict
+#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
+#    main: modified to use the ExtendedMenu
+#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
+#
 # Revision 1.21  2003/01/19 16:55:59  dischi
 # small bugfix
 #
@@ -289,7 +298,7 @@ class XML_data:
         self.mask = ''
         self.radius = 0
         self.spacing = 10
-        
+        self.img = { }
         
     def parse(self, node, scale, c_dir=''):
         self.x = attr_int(node, "x", self.x, scale[0], config.OVERSCAN_X)
@@ -335,7 +344,11 @@ class XML_data:
                 self.width = attr_int(subnode, "width", self.width, scale[0])
                 self.height = attr_int(subnode, "height", self.height, scale[1])
 
-
+            if subnode.name == u'img':
+                name = attr_str(subnode, 'name', None)
+                src = attr_str(subnode, 'src', None)
+                if name and src:
+                    self.img[name]=src
 
 # ======================================================================
 
@@ -564,10 +577,7 @@ class XML_listingmenuitem(XML_menuitem):
         self.border_color = 0
         self.border_size = 1
         self.spacing = 0
-        self.left_arrow = None
-        self.right_arrow = None
-        self.up_arrow = None
-        self.down_arrow = None
+        self.indicator = { }
 
 
     def parse_content(self, node, scale):
@@ -575,14 +585,11 @@ class XML_listingmenuitem(XML_menuitem):
         for subnode in node.children:
             if subnode.name == u'indicator':
                 type = attr_str(subnode, 'type', 'None')
-                if type == 'left':
-                    self.left_arrow = attr_str(subnode,'image', self.left_arrow)
-                if type == 'right':
-                    self.right_arrow = attr_str(subnode,'image', self.right_arrow)
-                if type == 'down':
-                    self.down_arrow = attr_str(subnode,'image', self.down_arrow)
-                if type == 'up':
-                    self.up_arrow = attr_str(subnode,'image', self.up_arrow)
+                bkp = ''
+                if type in self.indicator:
+                    bkp = self.indicator[type]
+                    
+                self.indicator[type] = attr_str(subnode,'image', bkp)
 
 
     def parse(self, node, scale, c_dir=''):

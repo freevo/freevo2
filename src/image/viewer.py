@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/02/08 23:31:40  gsbarbieri
+# hanged the Image menu to ExtendedMenu.
+#
+# OBS:
+#    main1_tv: modified to handle the <indicator/> as a dict
+#    xml_skin: modified to handle <indicator/> as dict and the new tag, <img/>
+#    main: modified to use the ExtendedMenu
+#    mediamenu: DirItem.cmd() now return items, so we can use it without a menu
+#
 # Revision 1.10  2003/01/31 03:27:53  krister
 # Committed Jens Axboe's image viewer overscan fix.
 #
@@ -74,7 +83,7 @@ import config # Configuration file.
 import menu   # The menu widget class
 import skin   # The skin class
 import osd    # The OSD class, used to communicate with the OSD daemon
-import rc     # The RemoteControl class.
+import rc as rc_class # The RemoteControl class.
 import exif
 
 DEBUG = config.DEBUG
@@ -84,9 +93,12 @@ FALSE = 0
 
 
 osd        = osd.get_singleton()  # Create the OSD object
-rc         = rc.get_singleton()   # Create the remote control object
-menuwidget = menu.get_singleton() # Create the MenuWidget object
+rc         = rc_class.get_singleton()   # Create the remote control object
+#menuwidget = menu.get_singleton() # Create the MenuWidget object
 skin       = skin.get_singleton() # The skin object.
+
+rc_app_bkp = None
+
 
 # Module variable that contains an initialized ImageViewer() object
 _singleton = None
@@ -110,14 +122,31 @@ class ImageViewer:
     slideshow = TRUE                    # currently in slideshow mode
 
     def view(self, item, zoom=0, rotation=0):
+        global rc_app_bkp
         filename = item.filename
 
         self.fileitem = item
 
         self.filename = filename
         self.rotation = rotation
+        if not rotation and 'Orientation' in item.binsexif:
+            i_orientation = item.binsexif['Orientation']
+            if i_orientation == 'right_top':
+                self.rotation=-90.0
+            elif i_orientation == 'right_bottom':
+                self.rotation=-180.0
+            elif i_orientation == 'left_top':
+                self.rotation=0
+            elif i_orientation == 'left_bottom':
+                self.rotation=-270.0
 
+        
+
+        rc = rc_class.get_singleton() # to get the rc.app, so we can go back (on rc.EXIT)
+        if rc.app != self.eventhandler:
+            rc_app_bkp = rc.app
         rc.app = self.eventhandler
+
         if filename and len(filename) > 0:
             image = osd.loadbitmap(filename)
         else:
@@ -251,9 +280,9 @@ class ImageViewer:
                 signal.alarm(1)
 
         elif event == rc.STOP or event == rc.EXIT:
-            rc.app = None
+            rc.app = rc_app_bkp
             signal.alarm(0)
-            menuwidget.refresh(reload=1)
+            rc.post_event(rc.REFRESH_SCREEN)
 
         # up and down will stop the slideshow and pass the
         # event to the playlist

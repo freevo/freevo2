@@ -11,7 +11,7 @@
         visible="yes" icon="skins/icons/AquaFusion/movies.png"  />
       <item pos="2" name="Music"   action="MediaMenu().main_menu" arg="audio" 
         visible="yes" icon="skins/icons/AquaFusion/mp3.png"  />
-      <item pos="3" name="Images"   action="MediaMenu().main_menu" arg="image" 
+      <item pos="3" name="Images"   action="image.image.main_menu" arg="" 
         visible="yes" icon="skins/icons/AquaFusion/images.png"  />
       <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
         visible="no" icon="skins/icons/AquaFusion/package_games.png"  />
@@ -176,6 +176,61 @@
 
       </listing>
     </extendedmenu>
+
+
+    <extendedmenu type="image">
+      <background image="../../images/aubin_bg2" mask=""/>
+      <logo visible="yes" x="20" y="20" image="../../images/logo_100x50.png"/>
+
+      <info spacing="10">
+        <geometry x="20" y="90" width="450" height="190"/>
+	<background color="0xaa000000"/>
+	<font name="Arial_Bold" size="16" color="0xffffff" align="left"/>
+	<shadow visible="no" color="0x000000" x="1" y="1"/>
+      </info>
+      
+      <view spacing="5" radius="10">
+        <geometry x="470" y="80" width="330" height="210" />
+	<background color="0x000000"/>
+	<font name="Arial_Bold" size="20" color="0xffffff" align="center" valign="center"/>
+	<shadow visible="no"/>
+	<img name="dir" src="skins/icons/gnome/gnome-folder.png"/>
+	<img name="playlist" src="skins/icons/gnome/gedit-icon.png"/>
+      </view>
+      
+      <listing type="table">
+        <geometry x="20" y="300" width="760" height="290"/>
+	<background color="0xbb58677c"/>
+	
+	<expand>
+	  <geometry x="10" y="75" width="780" height="495"/>
+	  <background color="0xffffffff"/>
+	</expand>
+
+	<table border_color="0xaa000000" border_size="2" spacing="5">
+
+	  <content>
+	    <font name="Arial_Bold" size="15" color="0xffffff" align="center"/>
+	    <shadow visible="no"/>
+
+	    <selection bgcolor="0x88ffffff" radius="10">
+	      <font name="Arial_Bold" size="15" color="0xffff66" align="center"/>
+	      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+	    </selection>
+
+	    <img name="dir" src="skins/icons/gnome/gnome-folder.png"/>
+	    <img name="playlist" src="skins/icons/gnome/gedit-icon.png"/>
+
+	    <indicator type="up" image="skins/images/arrow_up.png"/>
+	    <indicator type="down" image="skins/images/arrow_down.png"/>
+
+	  </content>
+	</table>
+
+      </listing>
+    </extendedmenu>
+
+
     
   </skin>
   
