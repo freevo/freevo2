@@ -55,6 +55,7 @@ class PluginInterface(plugin.Plugin):
         cgi_dir = os.path.join(os.path.dirname(__file__), '../www')
         cgi_dir = os.path.abspath(cgi_dir)
         htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
+                    os.path.join(config.SHARE_DIR, 'htdocs'),
                     os.path.join(config.DOC_DIR, 'html') ]
         # launch the server
         Server('', config.WWW_PORT, RequestHandler, [ cgi_dir, 'www' ], htdocs)

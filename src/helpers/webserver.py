@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/12/19 11:27:09  dischi
+# add new htdocs dir
+#
 # Revision 1.15  2004/12/18 20:08:23  dischi
 # use logging module for debug
 #
@@ -66,6 +69,7 @@ import tv.recordings
 
 cgi_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../www'))
 htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
+            os.path.join(config.SHARE_DIR, 'htdocs'),
             os.path.join(config.DOC_DIR, 'html') ]
 
 # launch the server on port 8080
