@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/08/04 21:34:06  outlyer
+# Bugfix for Ogg ripping, reported by Nicolas Michaux
+#
 # Revision 1.36  2004/08/01 10:41:03  dischi
 # deactivate plugin
 #
@@ -428,7 +431,7 @@ class main_backup_thread(threading.Thread):
                 output = '%s%s.ogg' % (pathname, path_tail)
                 cmd = str('%s %s' % (config.OGGENC_CMD, config.CD_RIP_OGG_OPTS))
                 cmd = cmd.split(' ') + \
-                      [ '-a', artist, 'G', genre, '-N', track, '-t', song_names[i],
+                      [ '-a', artist, '-G', genre, '-N', track, '-t', song_names[i],
                         '-l', album, wav_file, '-o', output ]
 
                 _debug_('oggenc_command: %s' % cmd)
