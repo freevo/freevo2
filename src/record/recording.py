@@ -75,15 +75,19 @@ class Recording:
         self.status   = status
         self.info     = {}
 
-        self.subtitle = ''
-        self.episode  = ''
-        self.url      = ''
-        self.fxdname  = ''
+        self.subtitle    = ''
+        self.episode     = ''
+        self.description = ''
+        self.url         = ''
+        self.fxdname     = ''
+
         self.start_padding = config.TV_RECORD_START_PADDING
         self.stop_padding  = config.TV_RECORD_STOP_PADDING
         for i in info:
             if i == 'subtitle':
                 self.subtitle = Unicode(info[i])
+            elif i == 'description':
+                self.description = Unicode(info[i])
             elif i == 'url':
                 self.url = String(info[i])
             elif i == 'start-padding':
@@ -114,6 +118,8 @@ class Recording:
             info['episode'] = self.episode
         if self.url:
             info['url'] = Unicode(self.url)
+        if self.description:
+            info['description'] = Unicode(self.description)
         return self.id, self.name, self.channel, self.priority, self.start, \
                self.stop, self.status, self.start_padding, self.stop_padding, \
                info
@@ -126,7 +132,7 @@ class Recording:
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
             for var in ('name', 'channel', 'status', 'subtitle', 'fxdname',
-                        'episode'):
+                        'episode', 'description'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
             if child.name == 'url':
@@ -163,7 +169,7 @@ class Recording:
         name = u'"' + name + u'"'
         status = self.status
         if status == 'scheduled' and self.recorder[1]:
-            status = self.recorder[0].name
+            status = self.recorder[1]
         return '%3d %10s %-25s %4d %s-%s %s' % \
                (self.id, String(channel), String(name),
                 self.priority, _int2time(self.start)[4:],
@@ -176,7 +182,7 @@ class Recording:
         """
         node = fxdparser.XMLnode('recording', [ ('id', self.id ) ] )
         for var in ('name', 'channel', 'priority', 'url', 'status',
-                    'subtitle', 'fxdname', 'episode'):
+                    'subtitle', 'fxdname', 'episode', 'description'):
             if getattr(self, var):
                 subnode = fxdparser.XMLnode(var, [],
                                             Unicode(getattr(self, var)) )
