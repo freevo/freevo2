@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2002/12/03 21:29:39  dischi
+# added dvdnav options
+#
 # Revision 1.97  2002/11/26 22:02:09  dischi
 # Added key to enable/disable subtitles. This works only with mplayer pre10
 # (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
@@ -378,7 +381,7 @@ MPLAYER_ARGS_DVD     = '-cache 8192 -dvd %s'
 MPLAYER_ARGS_VCD     = '-cache 4096 -vcd %s'
 MPLAYER_ARGS_MPG     = '-cache 5000 -idx'
 MPLAYER_ARGS_TVVIEW  = '-nocache'
-MPLAYER_ARGS_DVDNAV  = ''
+MPLAYER_ARGS_DVDNAV  = '-dvdnav'
 MPLAYER_USE_WID      = 1
 
 # ======================================================================
