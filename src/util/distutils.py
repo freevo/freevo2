@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/05 19:14:52  dischi
+# enhance i18n support and better doc
+#
 # Revision 1.8  2003/11/01 15:21:20  dischi
 # better howto support
 #
@@ -77,19 +80,6 @@
 #
 # Revision 1.5  2003/10/19 16:40:09  dischi
 # i18n support function for plugins
-#
-# Revision 1.4  2003/10/19 14:04:19  dischi
-# bugfix
-#
-# Revision 1.3  2003/10/18 15:37:14  dischi
-# doc fix
-#
-# Revision 1.2  2003/10/18 13:32:05  dischi
-# Update example
-#
-# Revision 1.1  2003/10/18 13:04:42  dischi
-# add distutils
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -122,6 +112,9 @@ except:
     import freevo.version as version
     
 def package_finder(result, dirname, names):
+    """
+    os.path.walk helper for 'src'
+    """
     for name in names:
         if os.path.splitext(name)[1] == '.py':
             import_name = dirname.replace('/','.').replace('..src', 'freevo')
@@ -131,6 +124,10 @@ def package_finder(result, dirname, names):
 
 
 def data_finder(result, dirname, names):
+    """
+    os.path.walk helper for data directories
+    """
+    Transform all files in 
     files = []
     for name in names:
         if os.path.isfile(os.path.join(dirname, name)):
@@ -149,6 +146,9 @@ def data_finder(result, dirname, names):
 
 
 def docbook_finder(result, dirname, names):
+    """
+    os.path.walk helper for docbook data files in Docs
+    """
     files = []
     for name in names:
         if os.path.splitext(name)[1] == '.html':
@@ -161,8 +161,9 @@ def docbook_finder(result, dirname, names):
 
 
 def check_libs(libs):
-    # ok, this can't be done by setup it seems, so we have to do it
-    # manually
+    """
+    check for python libs installed
+    """
     if len(sys.argv) > 1 and sys.argv[1].lower() == 'install':
         # check for needed libs
         for module, url in libs:
@@ -177,6 +178,13 @@ def check_libs(libs):
             
 
 def i18n(application):
+    """
+    i18n cmd support
+    """
+    global use_i18n
+    use_i18n = 1
+
+    # cmd == '18n'
     if len(sys.argv) > 1 and sys.argv[1].lower() == 'i18n':
         if len(sys.argv) > 2 and sys.argv[2].lower() == '--help':
             print 'Updates the i18n translation. This includes generating the pot'
@@ -190,8 +198,28 @@ def i18n(application):
             
         # arg i18n will update the pot file and maybe merge the po files
         print 'updating pot file'
+
+        # for freevo main package: remember the skin settings
+        if application == 'freevo':
+            f = open('i18n/freevo.pot')
+            fxd_strings = []
+            add = 0
+            for line in f.readlines():
+                if line.find('Manualy added from fxd skin files') > 0:
+                    add = 1
+                if add:
+                    fxd_strings.append(line)
+            f.close()
+
         os.system('(cd src ; find . -name \*.py | xargs xgettext -o ../i18n/%s.pot)' % \
                   application)
+
+        # for freevo main package: restore the skin settings
+        if application == 'freevo':
+            f = open('freevo.pot', 'a')
+            for line in fxd_strings:
+                f.write(line)
+            f.close()
 
         # if arg 2 is not --no-merge to the merge
         if not (len(sys.argv) > 2 and sys.argv[2] == '--no-merge'):
@@ -204,6 +232,12 @@ def i18n(application):
                               (file, application))
             print
 
+    # do not run this function if --help is given
+    for a in sys.argv:
+        if a.lower() == '--help':
+            return
+
+    # generate mo files for 'i18n', 'sdist' and 'bdist_rpm'
     if len(sys.argv) > 1 and sys.argv[1].lower() in ('i18n', 'sdist', 'bdist_rpm'):
         # update the mo files
         print 'updating mo files'
@@ -212,10 +246,28 @@ def i18n(application):
                 file = os.path.join(file, 'LC_MESSAGES/%s.po' % application)
                 mo = os.path.splitext(file)[0] + '.mo'
                 os.system('msgfmt -o %s %s' % (mo, file))
-        
+
+    # exit for cmd == 'i18n'
     if len(sys.argv) > 1 and sys.argv[1].lower() == 'i18n':
         sys.exit(0)
-    
+
+
+
+def finalize():
+    """
+    some stuff after setup is finished
+    """
+    global use_i18n
+    if use_i18n and len(sys.argv) > 1 and sys.argv[1].lower() == '--help-commands':
+        print 'Special Commands for Freevo:'
+        print '  i18n             i18n help functions'
+        print
+
+
+        
+# use i18n command option
+use_i18n = 0
+
 # create list of source files
 package_dir = {}
 
@@ -231,3 +283,4 @@ os.path.walk('./contrib/fbcon', data_finder, data_files)
 os.path.walk('./contrib/xmltv', data_finder, data_files)
 os.path.walk('./src/www/htdocs', data_finder, data_files)
 os.path.walk('./i18n', data_finder, data_files)
+
