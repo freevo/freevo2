@@ -47,7 +47,13 @@ Thomas Malt <thomas@malt.no>
 o Mplayer for Audio support
 o Ogg Vorbis Tag and Playback support
 
+
+
 Occasional contributors:
+
 Dan Eriksen <eriksen@canada.com>
 o 16-bit pixel support for the X11 OSD server
+
+Jens Oberender <j.obi@troja.net>
+o DXR3 support
 
