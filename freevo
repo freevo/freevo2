@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2003/10/22 19:43:21  dischi
+# do not KILL the child
+#
 # Revision 1.91  2003/10/19 17:16:56  rshortt
 # DOn't start a helper is there is already one like it running.
 #
@@ -210,14 +213,14 @@ fi
 # needed to work around signal problems when starting
 # a helper
 kill_waiting_child() {
-    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+    kill `cat $PID_FILE` > /dev/null 2>&1
 }
 
 if [ -e "$script" ]; then
     PID_FILE="$PID_DIR/freevo-$name.pid"
     if [ "$1" = "stop" ]; then
 	if [ -e $PIDFILE ]; then
-	    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+	    kill `cat $PID_FILE` > /dev/null 2>&1
 	    rm $PID_FILE > /dev/null 2>&1
 	else
 	    echo $name not running
@@ -362,7 +365,7 @@ if [ "$1" = "stop" ] ; then
         PID_FILE=$PID_DIR/freevo-`basename $1`.pid
     fi
     if [ -e $PID_FILE ]; then
-	kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+	kill `cat $PID_FILE` > /dev/null 2>&1
 	rm $PID_FILE > /dev/null 2>&1
     fi
     exit 0
@@ -436,7 +439,7 @@ wait `cat $PID_FILE` >/dev/null 2>/dev/null
 # they may be problem with the signal handler when pressing C-c
 RUNNING=`ps -ef | grep " $PID " | grep main`
 if [ ! "$RUNNING" = "" ] ; then
-    kill -KILL `cat $PID_FILE` > /dev/null 2>&1
+    kill `cat $PID_FILE` > /dev/null 2>&1
 fi
 
 # Freevo exited, make sure all children are killed
