@@ -4,7 +4,7 @@
 #
 # Notes: Info plugin.
 #        You can show IMDB informations for video items with this plugin.
-#        Activate with: plugin.activate('video.info')
+#        Activate with: plugin.activate('video.imdb_info')
 #        You can also bind it to a key (in this case key 2):
 #        EVENTS['menu']['2'] = Event(MENU_CALL_ITEM_ACTION, arg='info_show')
 #
