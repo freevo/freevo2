@@ -158,11 +158,7 @@ class MenuWidget:
             curr_selected = min(curr_selected+1, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
-	elif event == rc.CHUP:
-	    self.goto_prev_page()
-	elif event == rc.CHDOWN:
-	    self.goto_next_page()
-        elif event == rc.LEFT:
+        elif event == rc.CHUP:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -177,7 +173,7 @@ class MenuWidget:
                 curr_selected = 0
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
-        elif event == rc.RIGHT:
+        elif event == rc.CHDOWN:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
