@@ -170,7 +170,8 @@ DIR_MOVIES = [ ('Test Movies', 'testfiles/Movies') ]
 #
 # This is where recorded video is written.
 #
-DIR_RECORD = './testfiles/Movies/Recorded'
+# XXX the path doesn't work from the www cgi scripts!
+DIR_RECORD = 'testfiles/Movies/Recorded'
 
 #
 # Directory for XML definitions for DVDs and VCDs. Items in this
@@ -511,6 +512,8 @@ TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
 # XXX the website docs or the mailing lists if that fails.
 # XXX Example cron script:
 # XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
+
+REC_SCHEDULE = '/tmp/freevo_record.pickle'
 #
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
@@ -678,6 +681,27 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
                 ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
                ('103 Station 3b', 'Station 3b', '103',
                 ('1234567', '1600', '2159'))]
+
+# ======================================================================
+# Builtin WWW server settings
+# ======================================================================
+
+# XXX THIS IS WORK IN PROGRESS! PLEASE DON'T USE IT UNLESS YOU KNOW
+# XXX WHAT YOU'RE DOING! DO NOT ASK FOR HELP USING IT YET!
+
+#
+# The builtin WWW server must be started separately using the
+# following commandline:
+#   "freevo execute src/www/webserver.py"
+# It uses local_conf.py to find files and TV channels, so it
+# matters where it is started from! If you start it from the 
+# freevo source directory, and there is a standard local_conf.py there,
+# you will not get your local settings!
+#
+
+# Allowed IP addresses list. Set to [] to allow all addresses.
+#
+WWW_IP_ALLOW = ['127.0.0.1']
 
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know
