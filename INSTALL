@@ -5,26 +5,12 @@ $Id$
 
 
 Detailed help is in the Freevo Wiki at
-http://freevo.sourceforge.net/cgi-bin/moin.cgi/DocumentationPage
+http://freevo.sourceforge.net/cgi-bin/doc
+http://freevo.sourceforge.net/cgi-bin/doc/Installation
 
 
 Short description:
 ------------------
-
-1. Using the runtime package:
-
-   If you only want to test Freevo, you can download the runtime
-   package, which contains all Python modules needed to run Freevo. You
-   only need some extra applications like MPlayer.
-
-   You can download the runtime from the Freevo download page at
-   http://sourceforge.net/project/showfiles.php?group_id=46652&release_id=194955
-
-   Then run 'freevo install <path-to-runtime.tgz>' to install the
-   runtime into Freevo.
-
-
-2. Installing Freevo into the system:
 
    To install Freevo, run 'python setup.py install' as root. If you
    don't want to install Freevo, you can also start Freevo directly in
@@ -94,4 +80,4 @@ o If you want to install Freevo on a different distribution, here is
   tvtime                        http://tvtime.sourceforge.net/
   
   You can find more details on
-  http://freevo.sourceforge.net/cgi-bin/moin.cgi/DocumentationPage_2fInstallDeps
+  http://freevo.sourceforge.net/cgi-bin/doc/Installation
