@@ -38,7 +38,7 @@ if test -a $RT_DIR/freevo_rt ; then
     # Freevo exited, make sure all children are killed
     sleep 1
     killall -9 freevo_rt &> /dev/null
-    exit
+    exit 0
 
 fi
 
