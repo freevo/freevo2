@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/14 01:38:59  outlyer
+# More FreeBSD support from Lars
+#
 # Revision 1.19  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -155,8 +158,13 @@ class MPlayer:
 
             # Convert to MPlayer TV setting strings
             norm = 'norm=%s' % cf_norm.upper()
-            tmp = { 'television':0, 'composite1':1, 'composite2':2,
-                    's-video':3}[cf_input.lower()]
+            if os.uname()[0] == 'FreeBSD':
+                # XXX fix
+                tmp = { 'television':1, 'composite1':0, 'composite2':2,   
+                        's-video':3}[cf_input.lower()]
+            else:
+                tmp = { 'television':0, 'composite1':1, 'composite2':2,
+                        's-video':3}[cf_input.lower()]
             input = 'input=%s' % tmp
             chanlist = 'chanlist=%s' % cf_clist
             device= 'device=%s' % cf_device
@@ -164,9 +172,9 @@ class MPlayer:
             w, h = config.TV_VIEW_SIZE
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
 
-            tvcmd = ('tv://%s -tv driver=v4l:%s:%s:%s:'
+            tvcmd = ('tv://%s -tv driver=%s:%s:%s:%s:'
                      '%s:width=%s:height=%s:%s' %
-                     (tuner_channel, device, input, norm, chanlist, w, h, outfmt))
+                     (tuner_channel, config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt))
             
             # Build the MPlayer command
             args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
@@ -182,17 +190,23 @@ class MPlayer:
 
             # Convert to MPlayer TV setting strings
             norm = 'norm=%s' % cf_norm.upper()
-            tmp = { 'television':0, 'composite1':1, 'composite2':2,
-                    's-video':3}[cf_input.lower()]
+            if os.uname()[0] == 'FreeBSD':
+                # XXX fix
+                tmp = { 'television':1, 'composite1':0, 'composite2':2,
+                        's-video':3}[cf_input.lower()]
+            else:
+                tmp = { 'television':0, 'composite1':1, 'composite2':2,
+                        's-video':3}[cf_input.lower()]
             input = 'input=%s' % tmp
+            chanlist = 'chanlist=%s' % cf_clist
             device= 'device=%s' % cf_device
 
             w, h = config.TV_VIEW_SIZE
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
             
-            tvcmd = ('-tv on:driver=v4l:%s:%s:%s:channel=2:'
-                     'chanlist=us-cable:width=%s:height=%s:%s' %
-                     (device, input, norm, w, h, outfmt))
+            tvcmd = ('-tv on:driver=%s:%s:%s:%s:'
+                     '%s:width=%s:height=%s:%s' %
+                     (config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt))
 
             args = (config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
                     config.MPLAYER_VO_DEV_OPTS, tvcmd,

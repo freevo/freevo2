@@ -415,12 +415,17 @@ USE_MEDIAID_TAG_NAMES = 1
 # Freevo cache dir:
 # ======================================================================
 
-if os.path.isdir('/var/cache/freevo'):
-    FREEVO_CACHEDIR = '/var/cache/freevo'
+#
+# Under Linux, use /var/cache. Under FreeBSD, use /var/db.
+#
+if os.uname()[0] == 'FreeBSD':
+    OS_CACHEDIR = '/var/db'
 else:
-    if not os.path.isdir('/tmp/freevo/cache'):
-        os.makedirs('/tmp/freevo/cache')
-    FREEVO_CACHEDIR = '/tmp/freevo/cache'
+    OS_CACHEDIR = '/var/cache'
+
+FREEVO_CACHEDIR = OS_CACHEDIR + '/freevo'
+if not os.path.isdir(FREEVO_CACHEDIR):
+    os.makedirs(FREEVO_CACHEDIR)
 
 
 # ======================================================================
@@ -831,7 +836,18 @@ if XINE_COMMAND:
 # DEVICE: Usually /dev/video0, but might be /dev/video1 instead for multiple
 # boards.
 #
-TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
+# FreeBSD uses the Brooktree TV-card driver, not V4L.
+#
+if os.uname()[0] == 'FreeBSD':
+    TV_DRIVER = 'bsdbt848'
+    TV_DEVICE = '/dev/bktr0'
+    TV_INPUT = 1
+else:
+    TV_DRIVER = 'v4l'
+    TV_DEVICE = '/dev/video0'
+    TV_INPUT = 0
+
+TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 # This is the size (in MB) of the timeshift buffer, ie: how long you can
 # pause tv for.  This is set to a low default because the default buffer
@@ -889,14 +905,14 @@ RECORD_SERVER_PORT = 18001
 # XXX below. Some stuff must be changed (adevice), others probably
 # XXX should be ("Change"), or could be in some cases ("change?")
 VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtime
-           '-tv on:driver=v4l:input=0' +   # Input 0 = Comp. V. in
-           ':norm=NTSC' +                  # Change
-           ':channel=%(channel)s' +         # Filled in by Freevo
-           ':chanlist=us-cable' +          # Change
+           '-tv on:driver=%s:input=%d' % (TV_DRIVER, TV_INPUT) +
+           ':norm=%s' % CONF.tv +
+           ':channel=%(channel)s' +        # Filled in by Freevo
+           ':chanlist=%s' % CONF.chanlist +
            ':width=320:height=240' +       # Change if needed
            ':outfmt=yv12' +                # Prob. ok, yuy2 might be faster
-           ':device=/dev/video0' +         # CHANGE!
-           ':adevice=/dev/dsp4' +          # CHANGE!
+           ':device=%s' % TV_DEVICE +
+           ':adevice=%s' % AUDIO_DEVICE +
            ':audiorate=32000' +            # 44100 for better sound
            ':forceaudio:forcechan=1:' +    # Forced mono for bug in my driver
            'buffersize=64' +               # 64 Megabyte capture buffer, change?
@@ -908,10 +924,10 @@ VCR_CMD = ('/usr/local/bin/mencoder ' +    # Change. Absolute path to the runtim
            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
-           '-o %(filename)s.avi ')                   # Filled in by Freevo
+           '-o %(filename)s.avi ')         # Filled in by Freevo
 
 # XXX Not used yet
-VCR_SETTINGS = '%s composite1 %s /dev/video0' % (CONF.tv, CONF.chanlist)
+VCR_SETTINGS = '%s composite1 %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
@@ -1118,7 +1134,10 @@ REMOTE_CONTROL_PORT = 16310
 #
 # This is the XMLTV file that can be optionally used for TV listings
 #
-XMLTV_FILE = '/tmp/TV.xml'
+if os.uname()[0] == 'FreeBSD':
+    XMLTV_FILE = OS_CACHEDIR + '/xmltv/TV.xml'
+else:
+    XMLTV_FILE = '/tmp/TV.xml'
 
 #
 # XML TV Logo Location
@@ -1126,8 +1145,8 @@ XMLTV_FILE = '/tmp/TV.xml'
 # Use the "makelogos.py" script to download all the
 # Station logos into a directory. And then put the path
 # to those logos here
-if os.path.isdir('/var/cache/xmltv/logos'):
-    TV_LOGOS = '/var/cache/xmltv/logos'
+if os.path.isdir(OS_CACHEDIR + '/xmltv/logos'):
+    TV_LOGOS = OS_CACHEDIR + '/xmltv/logos'
 else:
     if not os.path.isdir('/tmp/freevo/xmltv/logos'):
         os.makedirs('/tmp/freevo/xmltv/logos')

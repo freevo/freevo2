@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2003/09/14 01:38:58  outlyer
+# More FreeBSD support from Lars
+#
 # Revision 1.82  2003/09/13 10:08:20  dischi
 # i18n support
 #
@@ -331,7 +334,7 @@ else
     OPTIMZE="-OO"
 fi
 
-if [ "$1" == "start" ]; then
+if [ "$1" = "start" ]; then
     shift
 
     # Start the main freevo application
