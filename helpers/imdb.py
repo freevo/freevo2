@@ -5,7 +5,7 @@
 
 
 import re
-import httplib
+import httplib, urllib
 import sys
 
 try:
@@ -13,8 +13,26 @@ try:
     filename = sys.argv[2]
 except IndexError:
     print "Usage: imdb.py [IMDB-NUMBER] [OUTPUT_FILE] [MOVIEFILE(S)]"
+    print "       imdb.py -s [SEARCH_STRING]"
+    print
     print "Generate XML data that stores extra IMDB information for use"
     print "in the movie browser."
+    print
+    print "IMDB_NUMBER:"
+    print "  IMDB title number for this movie"
+    print
+    print "OUTPUT_FILE:"
+    print "  The script will generate OUTPUT_FILE.xml fot the IMDB data"
+    print "  and OUTPUT_FILE.jpg for the image (if possible)"
+    print
+    print "MOVIE_FILE(S):"
+    print "  One or more files belonging to this movie"
+    print "  -dvd or -vcd to generate data for a DVD or VCD."
+    print "  -cd MOVIEFILES(S) if the files are stored on a cd. Please"
+    print "   give a relative path to the files from the cd mount point"
+    print
+    print "-s [SEARCH_STRING]"
+    print "  Search IMDB to get the IMDB_NUMBER"
     sys.exit(1)
 
 # connect to imdb 
@@ -22,6 +40,22 @@ conn = httplib.HTTPConnection("us.imdb.com")
 
 # let's lie about the user agent, without user-agent the return is 403
 headers = { 'User-Agent': 'Netscape 3.0' }
+
+if imdb_number == '-s':
+    print "searching " + filename
+
+    params = urllib.urlencode({'select': "All", 'for': filename})
+    conn.request("POST", "/Find", params, headers)
+    response = conn.getresponse()
+
+    regexp_title   = re.compile('<LI><A HREF="/Title\?([0-9]*)">(.*)</A></LI>')
+    for line in response.read().split("\n"):
+        m = regexp_title.match(line)
+        if m:
+            print m.group(1) + " " + m.group(2)
+    sys.exit(0)
+
+
 conn.request("GET", "/Title?"+imdb_number, "", headers)
 r = conn.getresponse()
 if r.status != 200:
@@ -96,19 +130,36 @@ i.write( "\
   <movie>\n\
     <title>"+title+"</title>\n\
     <cover>"+image+"</cover>\n\
-    <video>\n\
-      <files>\n")
+    <video>\n")
 
 index = 3
+
 try:
-    while 1:
-        i.write( "        <filename>"+sys.argv[index]+"</filename>\n")
+    if sys.argv[3] == "-vcd":
+        i.write("      <vcd/>\n")
+        index = 0
+    if sys.argv[3] == "-dvd":
+        i.write("      <dvd/>\n")
+        index = 0
+    if sys.argv[3] == "-cd":
+        i.write("      <cd/>\n")
         index += 1
 except IndexError:
     pass
 
-i.write( "\
-      </files>\n\
+if index > 0:
+    i.write  ("      <files>\n")
+
+    try:
+        while 1:
+            i.write( "        <filename>"+sys.argv[index]+"</filename>\n")
+            index += 1
+    except IndexError:
+        pass
+
+    i.write("      </files>\n")
+
+i.write("\
     </video>\n\
     <info>\n\
       <url>http://us.imdb.com/Title?"+imdb_number+"</url>\n\
