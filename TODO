@@ -10,6 +10,9 @@ o Add rcs id to all files!
 o Channel guide layout
 o Add load/display bitmaps to osd
 o Add view related bitmap to mp3/movie lists/playing
+  Paul Aubin:
+  Put a .jpg file in the directory called cover.jpg,
+  and for the movies, a movie_filename.jpg and show the cover art.
 o A switch to turn off the EPG altogether if no listings are available.
 o Installation instructions, clean up config stuff
   Paul Aubin:
