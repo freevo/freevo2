@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/08 20:18:52  dischi
+# plugins register to cleanup, no need to call plugin.cleanup()
+#
 # Revision 1.1  2004/10/06 18:44:51  dischi
 # move shutdown code from plugin to cleanup.py
 #
@@ -63,7 +66,6 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     shut down when argshutdown is True, restarted when argrestart is true,
     else only Freevo will be stopped.
     """
-    import plugin
     import util.mediainfo
     import gui
 
@@ -92,7 +94,6 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
                       os.environ['FREEVO_SCRIPT'])
             time.sleep(1)
 
-        plugin.shutdown()
         # Shutdown all children still running
         for c in _callbacks:
             _debug_( 'shutting down %s' % c[ 0 ], 2 )
@@ -113,9 +114,6 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     # Exit Freevo
     #
     
-    # Shutdown any daemon plugins that need it.
-    plugin.shutdown()
-
     # Shutdown all children still running
     for c in _callbacks:
         _debug_( 'shutting down %s' % c[ 0 ], 2 )
