@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/07/11 14:02:01  dischi
+# prevent crash
+#
 # Revision 1.39  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -86,12 +89,15 @@ class ProgramItem(Item):
                                        time.localtime(prog.stop))
 
         self.categories = ''
-        for cat in prog.categories:
-            if prog.categories.index(cat) > 0:
-                self.categories += ', %s' % cat
-            else:
-                self.categories += '%s' % cat
-
+        try:
+            for cat in prog.categories:
+                if prog.categories.index(cat) > 0:
+                    self.categories += ', %s' % cat
+                else:
+                    self.categories += '%s' % cat
+        except AttributeError:
+            pass
+        
         self.ratings = ''
         try:
             for rat in prog.ratings.keys():
