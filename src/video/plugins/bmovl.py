@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/10 10:36:53  dischi
+# fix more crashes
+#
 # Revision 1.11  2004/07/10 08:44:20  dischi
 # fix crash
 #
@@ -94,6 +97,7 @@ class OSDbmovl(OSD):
         self.width  = width
         self.height = height
         self.depth  = 32
+        print 'new bmovl interface: %s, %s' % (width, height)
         self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
 
         # clear surface
@@ -181,8 +185,13 @@ class OSDbmovl(OSD):
             rect = self.x0, self.y0, self.x1 - self.x0, self.y1 - self.y0
             self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
         
-        update = self.screen.subsurface(rect)
-
+        try:
+            update = self.screen.subsurface(rect)
+        except Exception, e:
+            print e
+            print rect, self.screen
+            return
+        
         try:
             os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
                      (update.get_width(), update.get_height(), rect[0], rect[1], 0, 0))
@@ -215,7 +224,8 @@ class PluginInterface(plugin.Plugin):
         print 'bug reports for this plugin, we know it\'s broekn.'
         print
         plugin.Plugin.__init__(self)
-        self._type = 'mplayer_video'
+        self._type  = 'mplayer_video'
+        self.status = 'waiting'
 
         
     def play(self, command, player):
@@ -244,6 +254,8 @@ class PluginInterface(plugin.Plugin):
 
         self.height = 0
         self.width  = 0
+
+        self.status = 'playing'
 
         if os.path.exists('/tmp/bmovl'):
             return command + [ '-vf', 'bmovl=1:0:/tmp/bmovl' ]
@@ -337,7 +349,8 @@ class PluginInterface(plugin.Plugin):
         """
         stop bmovl
         """
-        if self.bmovl:
+        if self.bmovl and self.status == 'playing':
+            self.status = 'waiting'
             self.bmovl.close()
             self.bmovl = None
 
@@ -372,7 +385,7 @@ class PluginInterface(plugin.Plugin):
                 if self.height < int(height):
                     self.width  = int(width)
                     self.height = int(height)
-        except:
+        except Exception, e:
             pass
 
 
@@ -387,7 +400,7 @@ class PluginInterface(plugin.Plugin):
         """
         update osd
         """
-        if not self.bmovl:
+        if not self.bmovl and self.status == 'playing' and self.height and self.width:
             self.bmovl = OSDbmovl(self.width, self.height)
             
         if self.osd_visible:
