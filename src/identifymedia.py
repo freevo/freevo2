@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/14 20:29:26  dischi
+# small bugfix
+#
 # Revision 1.6  2003/01/12 17:57:52  dischi
 # Renamed SUFFIX_MPLAYER_FILES to SUFFIX_VIDEO_FILES because we also play
 # audio files with mplayer. Also renamed SUFFIX_FREEVO_FILES to
@@ -184,7 +187,7 @@ class Identify_Thread(threading.Thread):
                 if movie_info:
                     media.info = copy.copy(movie_info)
                 else:
-                    media.info = videoitem.VideoItem(None, None)
+                    media.info = videoitem.VideoItem('0', None)
 
                 media.info.label = label
                 media.info.name = title
