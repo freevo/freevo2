@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/02 11:19:40  dischi
+# import popen3
+#
 # Revision 1.7  2003/11/29 11:27:41  dischi
 # move objectcache to util
 #
@@ -70,3 +73,5 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
 
     import fxdparser
     import objectcache
+    import popen3
+    
