@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/03/13 22:32:44  dischi
+# Improve input handling:
+# o support upper and lower case
+# o variable box width up to a length of 60 chars
+# o keyboard input
+#
 # Revision 1.15  2004/02/21 19:33:24  dischi
 # enhance input box, merge password and normal input
 #
@@ -54,11 +60,13 @@
 #endif
 
 import config
+import copy
 
 from GUIObject       import Align
 from Container       import Container
 from LayoutManagers  import LayoutManager
 from Button          import Button
+from Border          import Border
 from event           import *
 
 class LetterBoxGroup(Container):
@@ -84,38 +92,53 @@ class LetterBoxGroup(Container):
                            fg_color, selected_bg_color, selected_fg_color,
                            border, bd_color, bd_width)
 
-        self.h_margin  = 0
+        self.h_margin  = 5
         self.v_margin  = 0
         self.h_spacing = 0
         self.v_spacing = 0
 
         self.text     = text
         self.type     = type
-        self.numboxes = numboxes
         self.boxes    = []
 
         self.set_layout(LetterBoxLayout(self))
 
+        bw = 0
+        for c in ('M', 'A', 'm'):
+            bw = max(bw, self.content_layout.types['button'].font.stringsize(c),
+                     self.content_layout.types['button selected'].font.stringsize(c))
+
+        bw += 2
+        
         l = 0
         h = 0
-        for i in range(self.numboxes):
-            lb = LetterBox(border=None)
+
+        for i in range(numboxes or 60):
+            lb = LetterBox(width=bw)
+
             if self.type != 'password': 
                 if self.text and len(self.text) > i:
-                    lb.set_text(self.text[i])
+                    lb.set_text(self.text[i], fix_case=False)
+                else:
+                    lb.set_text(' ')
+            l = l + lb.width
+            h = max(lb.height, h)
 
-            l = l + lb.width - self.bd_width
-            if lb.height > h:  h = lb.height
-            if i == 0:
-                lb.toggle_selected()
             self.add_child(lb)
+            if self.boxes:
+                lb.upper_case = False
             self.boxes.append(lb)
 
-        self.width  = l + self.bd_width
+        self.width  = min(self.width, l + self.bd_width + 2 * self.h_margin)
         self.height = h
 
         self.set_h_align(Align.CENTER)
         self.last_key = None
+        
+        if self.type != 'password' and self.text and len(self.text) < len(self.boxes):
+            self.boxes[len(self.text)].toggle_selected()
+        else:
+            self.boxes[0].toggle_selected()
 
 
     def get_selected_box(self):
@@ -124,42 +147,58 @@ class LetterBoxGroup(Container):
                 return box
 
 
-    def change_selected_box(self, dir=None):
-        boxNow = self.boxes.index(self.get_selected_box())
-
-        if not dir:
-            dir = 'right'
+    def change_selected_box(self, dir='right', allow_roundtrip=False):
+        boxNow  = self.boxes.index(self.get_selected_box())
+        boxNext = boxNow
 
         if dir == 'right':
             if boxNow < len(self.boxes)-1:
                 boxNext = boxNow + 1
-            else:
+                if self.boxes[boxNow].text == ' ':
+                    self.boxes[boxNext].upper_case = True
+                if not self.boxes[boxNext].visible and allow_roundtrip:
+                    boxNext = 0
+            elif allow_roundtrip:
                 boxNext = 0
+                
         else:
             if boxNow > 0:
                 boxNext = boxNow - 1
-            else:
-                boxNext = len(self.boxes)-1
+            elif allow_roundtrip:
+                for x in range(len(self.boxes)):
+                    if self.boxes[x].visible:
+                        boxNext = x
 
-        self.boxes[boxNow].toggle_selected()
-        self.boxes[boxNext].toggle_selected()
+        if self.boxes[boxNext].visible and boxNext != boxNow:
+            self.boxes[boxNow].toggle_selected()
+            self.boxes[boxNext].toggle_selected()
 
 
     def get_word(self):
         word = ''
         for box in self.boxes:
-            if hasattr(box, 'real_text'):
-                word += box.real_text
-            else:
-                word = word + box.get_text()
+            if box.visible:
+                if hasattr(box, 'real_text'):
+                    word += box.real_text
+                else:
+                    word = word + box.get_text()
         return word.rstrip()
 
 
+    def set_word(self, text):
+        for i in range(min(len(self.boxes), len(text))):
+            self.boxes[i].set_text(text[i], fix_case=False)
+
+            
     def _draw(self):
         """
         The actual internal draw function.
         """
+
+        rect = self.content_layout.types['button'].rectangle
         self.surface = self.get_surface()
+        self.osd.drawroundbox(0, 0, self.width, self.height, rect.bgcolor, 0, rect.color,
+                              0, self.surface)
         Container._draw(self)
 
 
@@ -188,12 +227,12 @@ class LetterBoxGroup(Container):
             
         else:
             if event == INPUT_LEFT:
-                self.change_selected_box('left')
+                self.change_selected_box('left', allow_roundtrip=True)
                 self.last_key = None
                 return True
 
             if event == INPUT_RIGHT:
-                self.change_selected_box('right')
+                self.change_selected_box('right', allow_roundtrip=True)
                 self.last_key = None
                 return True
 
@@ -214,6 +253,12 @@ class LetterBoxGroup(Container):
                 self.get_selected_box().cycle_phone_char(event.arg)
                 return True
 
+            if event == BUTTON:
+                # direct key input (I hope)
+                self.get_selected_box().set_text(event.arg, fix_case=False)
+                self.change_selected_box('right')
+                return True
+
         return False
 
 
@@ -227,9 +272,6 @@ class LetterBox(Button):
     text      Letter to hold.
     bg_color  Background color (Color)
     fg_color  Foreground color (Color)
-    border    Border
-    bd_color  Border color (Color)
-    bd_width  Border width Integer
     """
     ourChars = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 
                  'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
@@ -250,12 +292,13 @@ class LetterBox(Button):
 
     def __init__(self, text=' ', x=None, y=None, width=35, height=35, 
                  bg_color=None, fg_color=None, selected_bg_color=None, 
-                 selected_fg_color=None, border=None, bd_color=None, 
-                 bd_width=None):
+                 selected_fg_color=None):
+
+        self.upper_case = True
+        self.max_width  = width
 
         Button.__init__(self, text, None, x, y, width, height, bg_color,
-                        fg_color, selected_bg_color, selected_fg_color,
-                        border, bd_color, bd_width)
+                        fg_color, selected_bg_color, selected_fg_color, border=None)
 
         self.h_margin  = 0
         self.v_margin  = 0
@@ -266,32 +309,59 @@ class LetterBox(Button):
         self.label.set_v_align(Align.CENTER)
         self.label.set_h_align(Align.CENTER)
 
+        for c in copy.copy(self.children):
+            if isinstance(c, Border):
+                self.children.remove(c)
 
-    def set_text(self, text):
-        text = text.upper()
+        self.border = -1
+        
+
+    def draw(self):
+        if self.left + self.max_width <= self.parent.width - self.parent.bd_width - \
+           2 * self.parent.h_margin:
+            self.visible = True
+        else:
+            self.visible = False
+        Button.draw(self)
+        
+        
+    def set_text(self, text, fix_case=True):
+        if fix_case:
+            if self.upper_case:
+                text = text.upper()
+            else:
+                text = text.lower()
         Button.set_text(self, text)
-        self.label.width  = self.width
-        self.label.height = self.height
         self.label.set_v_align(Align.CENTER)
         self.label.set_h_align(Align.CENTER)
+        if self.label.font:
+            self.label.width = self.max_width
+            self.width = self.label.get_rendered_size()[0] or self.max_width
+            self.width += 4
 
 
     def charUp(self):
-        charNow = self.ourChars.index(self.text)
-        if charNow < len(self.ourChars)-1:
-            charNext = charNow + 1
-        else:
+        try:
+            charNow = self.ourChars.index(self.text.upper())
+            if charNow < len(self.ourChars)-1:
+                charNext = charNow + 1
+            else:
+                charNext = 0
+        except:
             charNext = 0
 
         self.set_text(self.ourChars[charNext])
 
 
     def charDown(self):
-        charNow = self.ourChars.index(self.text)
-        if charNow > 0:
-            charNext = charNow - 1
-        else:
-            charNext = len(self.ourChars)-1
+        try:
+            charNow = self.ourChars.index(self.text.upper())
+            if charNow > 0:
+                charNext = charNow - 1
+            else:
+                charNext = len(self.ourChars)-1
+        except:
+            charNext = 0
 
         self.set_text(self.ourChars[charNext])
 
@@ -299,15 +369,17 @@ class LetterBox(Button):
     def cycle_phone_char(self, number):
         letters = self.phoneChars[number]
 
-        if not self.text in letters:
+        if not self.text.upper() in letters:
             self.set_text(letters[0])
         else:
-            i = letters.index(self.text)
+            i = letters.index(self.text.upper())
             if i < len(letters)-1:
                 i = i + 1
             else:
                 i = 0
+                self.upper_case = not self.upper_case
             self.set_text(letters[i])
+
 
 
 class LetterBoxLayout(LayoutManager):
@@ -315,11 +387,11 @@ class LetterBoxLayout(LayoutManager):
     def __init__(self, container):
         self.container = container
 
-
     def layout(self):
-        y = l = 0
+        y = 0
+        l = self.container.h_margin
+
         for box in self.container.boxes:
             x = l
-            l = l + box.width - self.container.bd_width
+            l = l + box.width
             box.set_position(x, y)
-
