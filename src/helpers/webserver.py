@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/23 19:37:54  mikeruelle
+# a patch to help dischi see images without those nasty hard links
+#
 # Revision 1.5  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -57,6 +60,7 @@ import config
 from twisted.internet import app
 from twisted.web import static, server, vhost, script
 from twisted.python import log
+import twisted.web.rewrite as rewrite
 
 
 if len(sys.argv)>1 and sys.argv[1] == '--help':
@@ -64,6 +68,10 @@ if len(sys.argv)>1 and sys.argv[1] == '--help':
     print 'usage freevo webserver [ start | stop ]'
     sys.exit(0)
 
+def helpimagesrewrite(request):
+    if request.postpath and request.postpath[0]=='help' and request.postpath[1]=='images':
+        request.postpath.pop(0) 
+        request.path = '/'+'/'.join(request.prepath+request.postpath)
 
 def main():
     # the start and stop stuff will be handled from the freevo script
@@ -80,7 +88,8 @@ def main():
     root.processors = { '.rpy': script.ResourceScript, }
     
     root.putChild('vhost', vhost.VHostMonsterResource())
-    site = server.Site(root)
+    rewriter =  rewrite.RewriterResource(root, helpimagesrewrite)
+    site = server.Site(rewriter)
     
     application = app.Application('web')
     application.listenTCP(config.WWW_PORT, site)
