@@ -1,6 +1,6 @@
 %define name Numeric
 %define version 23.1
-%define release 1_rh9_py2.2.2
+%define release 1_freevo
 
 Summary: Numerical Extension to Python
 Name: %{name}
@@ -63,3 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+
+%changelog
+* Sat Sep 27 2003 TC Wan <tcwan@cs.usm.my>
+- Changed release to denote freevo

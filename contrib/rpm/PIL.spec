@@ -5,7 +5,7 @@
 Summary:        Python Imaging Library (PIL)
 Name:           PIL
 Version:        %{version}
-Release:        2
+Release:        2_freevo
 License:        PIL_Freeware
 Group:          Development/Libraries
 Source:         http://www.pythonware.com/%{tarballname}-%{version}.tar.gz
