@@ -35,14 +35,14 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-	./autogen.sh
+	./autogen.sh nodocs
 	python2.3 setup.py install --no-compile --root=`pwd`/debian/freevo
 	# Move the files in to the data package
 	mv `pwd`/debian/freevo/usr/share/freevo/fonts  `pwd`/debian/freevo-media/usr/share/freevo/
 	mv `pwd`/debian/freevo/usr/share/freevo/icons  `pwd`/debian/freevo-media/usr/share/freevo/
 	mv `pwd`/debian/freevo/usr/share/freevo/images `pwd`/debian/freevo-media/usr/share/freevo/
 	mv `pwd`/debian/freevo/usr/share/freevo/skins  `pwd`/debian/freevo-media/usr/share/freevo/
-	sudo mkdir -p `pwd`/debian/freevo/usr/share/freevo/init/ || true
+	mkdir -p `pwd`/debian/freevo/usr/share/freevo/init/ || true
 	cp `pwd`/boot/webserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
 	cp `pwd`/boot/recordserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
 
