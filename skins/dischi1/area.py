@@ -27,6 +27,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/03/30 14:13:23  dischi
+# (listing.py from prev. checkin has the wrong log message)
+# o tvlisting now has left/right items and the label width is taken from the
+#   skin xml file. The channel logos are scaled to fit that space
+# o add image load function to area
+# o add some few lines here and there to make it possible to force the
+#   skin to a specific layout
+# o initial display style is set to config.SKIN_START_LAYOUT
+#
 # Revision 1.34  2003/03/27 20:10:56  dischi
 # Fix endless loop on empty directories (and added a messages)
 #
@@ -356,9 +365,14 @@ class Skin_Area:
         for the different types of areas
         """
 
+        self.display_style = display_style
+
         if widget_type == 'menu':
             self.menuw = obj
             self.menu  = obj.menustack[-1]
+            if self.menu.force_skin_layout != -1:
+                self.display_style = self.menu.force_skin_layout
+            
             if self.menu.viewitem:
                 self.viewitem = self.menu.viewitem
             else:
@@ -391,7 +405,6 @@ class Skin_Area:
         else:
             visible = FALSE
 
-        self.display_style = display_style
         self.redraw = self.init_vars(settings, item_type, widget_type)
             
         if area and area != self.area_val:
@@ -761,6 +774,30 @@ class Skin_Area:
             return ret[1]
     
 
+    def load_image(self, image, val, redraw=TRUE):
+        """
+        load an image (use self.imagecache
+        """
+        if isinstance(val, tuple) or isinstance(val, list):
+            w = val[0]
+            h = val[1]
+        else:
+            w = val.width
+            h = val.height
+            
+        cname = '%s-%s-%s' % (image, w, h)
+        cimage = self.imagecache[cname]
+        if not cimage:
+            try:
+                image = pygame.transform.scale(osd.loadbitmap(image), (w, h))
+                self.imagecache[cname] = image
+            except:
+                return None
+        else:
+            image = cimage
+        return image
+
+        
     def draw_image(self, image, val, redraw=TRUE):
         """
         draws an image ... or better stores the information about this call
@@ -771,13 +808,7 @@ class Skin_Area:
             return
         
         if isinstance(image, str):
-            cname = '%s-%s-%s' % (image, val.width, val.height)
-            cimage = self.imagecache[cname]
-            if not cimage:
-                image = pygame.transform.scale(osd.loadbitmap(image), (val.width, val.height))
-                self.imagecache[cname] = image
-            else:
-                image = cimage
+            image = self.load_image(image, val)
                 
         if not image:
             return

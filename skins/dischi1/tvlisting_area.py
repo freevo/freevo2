@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/03/30 14:13:23  dischi
+# (listing.py from prev. checkin has the wrong log message)
+# o tvlisting now has left/right items and the label width is taken from the
+#   skin xml file. The channel logos are scaled to fit that space
+# o add image load function to area
+# o add some few lines here and there to make it possible to force the
+#   skin to a specific layout
+# o initial display style is set to config.SKIN_START_LAYOUT
+#
 # Revision 1.9  2003/03/22 20:08:31  dischi
 # Lots of changes:
 # o blue2_big and blue2_small are gone, it's only blue2 now
@@ -133,11 +142,13 @@ class TVListing_Area(Skin_Area):
 
 
         # get the max width needed for the longest channel name
-        label_width = 0
-        for channel in menuw.all_channels:
-            label_width = max(label_width, osd.stringsize(channel.displayname,
-                                                          label_val.font.name,
-                                                          label_val.font.size)[0])
+        label_width = label_val.width
+
+        #for channel in menuw.all_channels:
+        #    label_width = max(label_width, osd.stringsize(channel.displayname,
+        #                                                  label_val.font.name,
+        #                                                  label_val.font.size)[0])
+
         label_txt_width = label_width
 
         if label_val.rectangle:
@@ -203,31 +214,20 @@ class TVListing_Area(Skin_Area):
         label_val, label_font, head_val, head_font, selected_val, \
                    selected_font, default_val, default_font = self.all_vals
 
-        
-        #left_arrow_size = osd.bitmapsize(val.indicator['left'])
-        #right_arrow_size = osd.bitmapsize(val.indicator['right'])
 
-        left_arrow_size = (0,0)
-        right_arrow_size = (0,0)
+        leftarraw = None
+        if area.images['leftarrow']:
+            i = area.images['leftarrow']
+            leftarrow = self.load_image(i.filename, i)
+            if leftarrow:
+                leftarrow_size = (leftarrow.get_width(), leftarrow.get_height())
 
-        # col_size = int( w_contents / n_cols )
-
-        # Display the Time on top
-        #x = conf_x
-        #y = conf_y
-
-        # Display the Channel on top
-        #drawroundbox(x, y, x+val.label.width, y+str_h_head + 2 * val.spacing,
-        #             val.head.bgcolor, 1, val.border_color, radius=val.head.radius)
-        #settings2 = copy.copy(val.head)
-        # first head column is date, should be aligned like 'label'
-        #settings2.align=val.label.align
-        #settings2.valign=val.label.valign
-        #DrawTextFramed(time.strftime("%m/%d",time.localtime(to_listing[0][1])),
-        #               settings2, x + val.spacing, y + val.spacing,
-        #               val.label.width - 2 * val.spacing, str_h_head)
-
-        # other head columns should be aligned like specified in xml
+        rightarraw = None
+        if area.images['rightarrow']:
+            i = area.images['rightarrow']
+            rightarrow = self.load_image(i.filename, i)
+            if rightarrow:
+                rightarrow_size = (rightarrow.get_width(), rightarrow.get_height())
 
         x_contents = content.x + label_width + content.spacing
         w_contents = content.width - label_width - content.spacing
@@ -282,22 +282,7 @@ class TVListing_Area(Skin_Area):
 
             channel_logo = config.TV_LOGOS + '/' + to_listing[i].id + '.png'
             if os.path.isfile(channel_logo):
-                image = self.imagecache[to_listing[i].id]
-                if image:
-                    channel_logo = image
-                else:
-                    image = osd.loadbitmap(channel_logo)
-                    if image:
-                        i_w, i_h = image.get_size()
-                        if int(float(logo_geo[2] * i_h) / i_w) > logo_geo[3]:
-                            logo_geo[2] = int(float(logo_geo[3] * i_w) / i_h)
-                        else:
-                            logo_geo[3] = int(float(logo_geo[2] * i_h) / i_w)
-                    
-                        channel_logo = pygame.transform.scale(image, logo_geo[2:])
-                        self.imagecache[to_listing[i].id] = channel_logo
-                    else:
-                        channel_logo = None
+                channel_logo = self.load_image(channel_logo, logo_geo[2:])
             else:
                 channel_logo = None
 
@@ -347,9 +332,6 @@ class TVListing_Area(Skin_Area):
                         val = copy.copy(val)
                         val.align='center'
 
-                    #tx0 = min(x1, x0+(flag_left+1)*spacing+flag_left*left_arrow_size[0])
-                    #tx1 = max(x0, x1-(flag_right+1)*spacing-flag_right*right_arrow_size[0])
-
                     if x0 > x1:
                         break
                     
@@ -362,18 +344,21 @@ class TVListing_Area(Skin_Area):
                         ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1, item_h)
                         self.drawroundbox(tx0+r.x, ty0+r.y, r.width, r.height, r)
                         
+                    if flag_left:
+                        tx0 += leftarrow_size[0]
+                        if tx0 < tx1:
+                            self.draw_image(leftarrow, (tx0-leftarrow_size[0], ty0 + ig.y +\
+                                                        (ig.height-leftarrow_size[1])/2))
+                    if flag_right:
+                        tx1 -= rightarrow_size[0]
+                        if tx0 < tx1:
+                            self.draw_image(rightarrow, (tx1, ty0 + ig.y + \
+                                                         (ig.height-rightarrow_size[1])/2))
+
                     if tx0 < tx1:
                         self.write_text(prg.title, font, content, x=tx0+ig.x,
                                         y=ty0+ig.y, width=ig.width, height=-1,
                                         align_v='center', align_h = val.align)
-
-                    #if flag_left:
-                    #    osd.drawbitmap(val2.indicator['left'], x0 + spacing,
-                    #                   y0+spacing+int((str_h - left_arrow_size[1])/2))
-                    #if flag_right:
-                    #    osd.drawbitmap(val2.indicator['right'],
-                    #                   x1-right_arrow_size[0]-spacing, \
-                    #                   y0+spacing+int((str_h - right_arrow_size[1])/2))
 
             i += 1
             y0 += item_h - 1

@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/03/30 14:13:23  dischi
+# (listing.py from prev. checkin has the wrong log message)
+# o tvlisting now has left/right items and the label width is taken from the
+#   skin xml file. The channel logos are scaled to fit that space
+# o add image load function to area
+# o add some few lines here and there to make it possible to force the
+#   skin to a specific layout
+# o initial display style is set to config.SKIN_START_LAYOUT
+#
 # Revision 1.43  2003/03/27 20:11:00  dischi
 # Fix endless loop on empty directories (and added a messages)
 #
@@ -296,7 +305,7 @@ class Skin:
     """
     
     def __init__(self):
-        self.display_style = 0
+        self.display_style = config.SKIN_START_LAYOUT
         self.force_redraw = TRUE
         self.last_draw = None
         self.screen = Screen()
@@ -370,6 +379,9 @@ class Skin:
         """
         Toggle display style
         """
+        if menu.force_skin_layout != -1:
+            return 0
+        
         if menu and menu.skin_settings:
             settings = menu.skin_settings
         else:
@@ -387,10 +399,12 @@ class Skin:
         return 1
 
 
-    def GetDisplayStyle(self):
+    def GetDisplayStyle(self, menu=None):
         """
         return current display style
         """
+        if menu and menu.force_skin_layout != -1:
+            return menu.force_skin_layout
         return self.display_style
 
 
