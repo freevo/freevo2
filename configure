@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # configure - the main configure script
 #
@@ -15,7 +15,7 @@ RUNTIME_VERSION=3
 RT_DIR=../freevo_runtime$RUNTIME_VERSION
 
 # First check if the runtime is installed
-if test -a $RT_DIR/freevo_python ; then
+if test -d $RT_DIR/freevo_python ; then
 
     # Double-check that we have the correct runtime version
     rt_ver=`cat $RT_DIR/VERSION`
@@ -58,8 +58,8 @@ echo
 
 PYTHON_VERSION=`python -c "import sys ; ok = sys.version_info[:3] >= (2,2,0) ; print ok"`
 
-if python -V &> /dev/null  && \
-    [[ "$PYTHON_VERSION" -eq "1" ]]; then
+if command -v python -V > /dev/null 2>&1  && \
+    [ "$PYTHON_VERSION" -eq "1" ]; then
 	python setup_build.py $*
 else
     echo "Installed python version is outdated. Please upgrade to 2.2.0 or better."
