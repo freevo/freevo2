@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/16 18:41:10  dischi
+# Fix overlapping programs. The German listing sometimes has a program with
+# a wrong stop time so that is overlapps the next entries (mostly the wrong
+# entry stops at the end of the day)
+#
 # Revision 1.5  2003/04/24 19:56:40  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -174,6 +179,16 @@ class TvGuide:
         # The channel must be present, or the program is
         # silently dropped
         if self.chan_dict.has_key(program.channel_id):
+            if len(self.chan_dict[program.channel_id].programs) and \
+                   self.chan_dict[program.channel_id].programs[-1].stop > program.start:
+                # the tv guide is corrupt, the last entry has a stop time higher than
+                # the next start time. Correct that by reducing the stop time of
+                # the last entry
+                if config.DEBUG > 1:
+                    print 'wrong stop time: %s' % \
+                          self.chan_dict[program.channel_id].programs[-1]
+                self.chan_dict[program.channel_id].programs[-1].stop = program.start
+                
             self.chan_dict[program.channel_id].programs += [program]
 
 
