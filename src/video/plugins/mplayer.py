@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/10/01 22:30:10  dischi
+# some bmovl fixes, you must use software scale with expand to make it work
+#
 # Revision 1.27  2003/10/01 20:39:34  dischi
 # bmovl support
 #
@@ -231,7 +234,7 @@ class MPlayer:
         elif mpl.find(' -framedrop ') == -1 and mpl.find(' -framedrop ') == -1:
             mpl += (' ' + config.MPLAYER_SOFTWARE_SCALER )
             
-        if os.path.exists('/tmp/bmovl'):
+        if os.path.exists('/tmp/bmovl') and config.MPLAYER_SOFTWARE_SCALER:
             mpl += ' -vf bmovl=1:0:/tmp/bmovl'
 
         command = mpl + ' "' + filename + '"'
@@ -267,17 +270,20 @@ class MPlayer:
         self.file = item
 
         self.bmovl = None
+        rc.app(self)
+
         self.thread.start(MPlayerApp, (command, item, network_play))
 
         self.item  = item
 
         _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
-        rc.app(self)
 
         # bmovl support?
-        if os.path.exists('/tmp/bmovl'):
+        if os.path.exists('/tmp/bmovl') and config.MPLAYER_SOFTWARE_SCALER:
             # show warning until this code is stable
             print 'Found /tmp/bmovl, activating experimental bmovl support'
+            # BUG: if mplayer doesn't start because of bad a command line
+            # this will cause Freevo to wait forever
             self.bmovl = os.open('/tmp/bmovl', os.O_WRONLY)
             self.osd_visible = False
         return None
@@ -289,25 +295,32 @@ class MPlayer:
         """
         s = self.osd_bg.convert()
         length = self.item.elapsed
-        pos = osd.drawstringframed('%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60,
-                                                      length % 60),
-                                   10, 10, osd.width / 2, -1, self.osd_font.font,
-                                   self.osd_font.color, layer=s)
 
+        txt = '%d:%02d:%02d' % ( length / 3600, (length % 3600) / 60, length % 60)
         length = self.item.getattr('length')
+
         if length:
-            pos = osd.drawstringframed(length, 10, pos[1][3]+5, osd.width / 2, -1,
-                                       self.osd_font.font, self.osd_font.color,
-                                       layer=s)
-        
+            txt = '%s / %s' % (txt, length)
+
+        osd.drawstringframed(txt, 10, 10, osd.width / 2, -1, self.osd_font.font,
+                             self.osd_font.color, layer=s)
+
         clock = time.strftime('%a %I:%M %P')
         osd.drawstringframed(clock, s.get_width()-10-self.osd_font.font.stringsize(clock),
                              10, osd.width / 2, -1, self.osd_font.font,
                              self.osd_font.color, layer=s)
 
-        os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
-                 (s.get_width(), s.get_height(), 0, osd.height-s.get_height(), 0, 0))
-        os.write(self.bmovl, pygame.image.tostring(s, 'RGBA'))
+        bottom_space = (osd.height - self.thread.app.height) / 2
+        if bottom_space > s.get_height():
+            _debug_('enough space to draw on screen via osd.py')
+            osd.screen.blit(s, (0, osd.height-s.get_height()))
+            osd.update()
+        else:
+            _debug_('write on mplayer via bmovl (%s)' % bottom_space)
+            os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
+                     (s.get_width(), s.get_height(), 0,
+                      self.thread.app.height-s.get_height(), 0, 0))
+            os.write(self.bmovl, pygame.image.tostring(s, 'RGBA'))
 
     
     def show_osd(self):
@@ -353,10 +366,17 @@ class MPlayer:
             image = pygame.transform.scale(osd.loadbitmap(self.item.image), (65, 90))
             topbar.blit(image, (osd.width-config.OVERSCAN_X-100, config.OVERSCAN_Y+5))
 
+        if self.thread.app.height < osd.height:
+            topspace = (osd.height - self.thread.app.height) / 2
+            osd.screen.blit(topbar, (0,0))
+            topbar = topbar.subsurface(0, topspace, topbar.get_width(),
+                                       topbar.get_height()-topspace)
+            
         os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
                  (topbar.get_width(), topbar.get_height(), 0, 0, 0, 1))
         os.write(self.bmovl, pygame.image.tostring(topbar, 'RGBA'))
 
+        height -= 50
         self.osd_bg   = bg.subsurface((0,osd.height-height,osd.width,height)).convert()
         osd.drawbox(0, 0, osd.width, 0, width=1, color=0x000000, layer=self.osd_bg)
         self.osd_font = skin.get_singleton().GetFont('clock')
@@ -373,6 +393,8 @@ class MPlayer:
         _debug_('hide')
         self.thread.app.refresh = None
         os.write(self.bmovl, 'HIDE\n')
+        osd.clearscreen(osd.COL_BLACK)
+        osd.update()
         
         
     def stop(self):
@@ -540,6 +562,8 @@ class MPlayerApp(childapp.ChildApp):
         self.exit_type = None
         self.osdfont = osd.getfont(config.OSD_DEFAULT_FONTNAME, config.OSD_DEFAULT_FONTSIZE)
         self.refresh = None
+        self.width   = 0
+        self.height  = 0
         
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -584,7 +608,21 @@ class MPlayerApp(childapp.ChildApp):
                                      osd.width - 2 * config.OVERSCAN_X, -1, self.osdfont,
                                      osd.COL_WHITE)
                 osd.update()
-                
+
+        # experimental for bmovl, may crash
+        try:
+            if line.find('SwScaler:') ==0 and line.find(' -> ') > 0 and \
+                   line[line.find(' -> '):].find('x') > 0 and not self.width:
+                self.width, self.height = line[line.find(' -> ')+4:].split('x')
+                self.width  = int(self.width)
+                self.height = int(self.height)
+            if line.find('Expand: ') == 0:
+                self.width, self.height = line[7:line.find(',')].split('x')
+                self.width  = int(self.width)
+                self.height = int(self.height)
+        except:
+            pass
+        
         if line.find("A:") == 0:
             m = self.RE_TIME(line) # Convert decimal
             if hasattr(m,'group'):
