@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/12/01 15:08:07  dischi
+# set logging level to INFO as default
+#
 # Revision 1.69  2004/11/28 17:32:05  dischi
 # use config.detect
 #
@@ -79,6 +82,13 @@ import time
 import os
 import pwd
 import traceback
+import logging
+
+# create logger objects in sysconfig
+import sysconfig
+
+# set basic recording debug to info
+logging.getLogger('record').setLevel(logging.INFO)
 
 import config
 
@@ -98,7 +108,6 @@ import notifier
 import record.server
 
 config.detect('tvcards')
-
 
 while 1:
     try:
