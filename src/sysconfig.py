@@ -116,9 +116,12 @@ for dirname in _cfgfilepath:
         for line in c.readlines():
             if line.startswith('#'):
                 continue
+            if line.find('=') == -1:
+                continue
             vals = line.strip().split('=')
             if not len(vals) == 2:
                 print 'invalid config entry: %s' % line
+                continue
             name, val = vals[0].strip(), vals[1].strip()
             CONF.__dict__[name] = val
 
@@ -203,7 +206,7 @@ logger.addHandler(handler)
 
 # set file logger
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s [%(name)6s] '+\
-                              '%(levelname)-8s %(filename)s %(lineno)s: '+\
+                              '%(filename)s %(lineno)s: '+\
                               '%(message)s')
 fname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 fname = '%s/%s-%s' % (CONF.logdir, fname, os.getuid())
