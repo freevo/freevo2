@@ -152,7 +152,7 @@
 
 
     <!-- background image -->
-    <image label="background" filename="blurr"/>
+    <image label="background" filename="blurrback"/>
 
 
     <!-- 
