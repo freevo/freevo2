@@ -350,12 +350,21 @@
 	</item>
 
 	<item type="playlist">
-	  <if expression="len(playlist)>0">
-  	     <text font="info value" expression="len(playlist)"/>
-  	     <text font="info value"> items in this playlist</text>
-   	     <newline/>
+	  <if expression="description">
+	    <text font="info plot" height="max" mode="soft" expression="description"/>
+	    <newline/>
 	  </if>
-	  <if expression="len(playlist)==0">
+	  <if expression="len(playlist)>0">
+	    <text font="info value" expression="len(playlist)"/>
+	    <text font="info value"> items in this playlist</text>
+	    <newline/>
+	  </if>
+	  <if expression="len(playlist)==0 and len(unplayed)>0">
+	    <text font="info value" expression="len(unplayed)"/>
+	    <text font="info value"> items in this playlist</text>
+	    <newline/>
+	  </if>
+	  <if expression="len(playlist)==0 and len(unplayed)==0">
 	    <text font="info value">This playlist is empty!</text>
 	    <newline/>
 	  </if>
