@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/08/10 19:37:23  dischi
+# better pyepg integration
+#
 # Revision 1.44  2004/08/09 21:19:47  dischi
 # make tv guide working again (but very buggy)
 #
@@ -116,7 +119,8 @@ class TVGuide(MenuApplication):
         
         self.current_time = time.time()
         self.channel      = channels.get()
-        self.selected     = self.channel.epg.get(self.current_time)
+        self.selected     = self.channel.get(self.current_time)[0]
+
         self.channel_list = channels
         box.destroy()
         return True
@@ -225,23 +229,29 @@ class TVGuide(MenuApplication):
         if event == MENU_UP:
             self.channel_list.up()
             self.channel  = self.channel_list.get()
-            self.selected = self.channel.epg.get(self.current_time)
+            self.selected = self.channel.get(self.current_time)[0]
             self.refresh()
 
         elif event == MENU_DOWN:
             self.channel_list.down()
             self.channel  = self.channel_list.get()
-            self.selected = self.channel.epg.get(self.current_time)
+            self.selected = self.channel.get(self.current_time)[0]
             self.refresh()
 
         elif event == MENU_LEFT:
-            pos = max(0, self.selected.index-1)
-            self.selected = self.channel.epg.programs[pos]
+            self.selected = self.channel.prev(self.selected)
+            if self.selected.start:
+                self.current_time = self.selected.start + 1
+            else:
+                self.current_time -= 60 * 30
             self.refresh()
 
         elif event == MENU_RIGHT:
-            pos = min(len(self.channel.epg.programs)-1, self.selected.index+1)
-            self.selected = self.channel.epg.programs[pos]
+            self.selected = self.channel.next(self.selected)
+            if self.selected.start:
+                self.current_time = self.selected.start + 1
+            else:
+                self.current_time -= 60 * 30
             self.refresh()
 
 #         elif event == MENU_PAGEUP:

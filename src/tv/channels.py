@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/08/10 19:37:22  dischi
+# better pyepg integration
+#
 # Revision 1.21  2004/08/09 21:19:47  dischi
 # make tv guide working again (but very buggy)
 #
@@ -82,7 +85,15 @@ class Channel:
                 self.__add_freq__(f)
         else:
             self.__add_freq__(freq)
-        
+
+        # variables from the epg
+        self.id   = self.epg.id
+
+        # functions from the epg
+        self.next = self.epg.next
+        self.prev = self.epg.prev
+        self.get  = self.epg.get
+
 
     def __add_freq__(self, freq):
         """
@@ -120,12 +131,7 @@ class ChannelList:
         source = config.XMLTV_FILE
         pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
 
-        epg = util.read_pickle(pickle)
-        if not epg:
-            epg = pyepg.load(source)
-            if not epg:
-                raise Exception(_('TV Guide is corrupt!'))
-            util.save_pickle(epg, pickle)
+        epg = pyepg.load(source, pickle)
 
         for c in config.TV_CHANNELS:
             self.channels.append(Channel(c[1], c[2], epg.get(c[0])))
