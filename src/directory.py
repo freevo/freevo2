@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/10/22 03:00:11  gsbarbieri
+# Support icons instead of labels "on", "off" and "auto"
+#
 # Revision 1.53  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -908,7 +911,7 @@ class DirItem(Playlist):
             mi.description = descr
             items.append(mi)
         m = menu_module.Menu(_('Configure'), items)
-        m.table = (80, 20)
+        m.table = [ -1, 30 ] # < 0 == take all remaining space, > 1 pixels that this column should use
         m.back_one_menu = 2
         menuw.pushmenu(m)
 
