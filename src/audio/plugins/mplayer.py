@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/22 11:57:07  dischi
+# added STOP
+#
 # Revision 1.2  2003/04/21 18:40:33  dischi
 # use plugin name structure to find the real player
 #
@@ -179,7 +182,7 @@ class MPlayer:
         if event == 'AUDIO_PLAY_END':
             event = rc.PLAY_END
             
-        if event in ( rc.EXIT, rc.PLAY_END, rc.USER_END ):
+        if event in ( rc.EXIT, rc.PLAY_END, rc.USER_END, rc.STOP ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
 
