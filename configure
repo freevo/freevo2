@@ -6,9 +6,10 @@
 #
 
 REQUIRE_PYTHON=210
-PYTHON_VERSION=`python -V 2>&1 | cut -d' ' -f2 | sed -e 's/\.//g'`  # sh doesn't understand decimals
+PYTHON_VERSION=`python -V 2>&1 | cut -d' ' -f2 | sed -e 's/\(\.[0-9]\)$/\10/' -e 's/\.//g'`  # sh doesn't understand decimals
 
-if [[ "$PYTHON_VERSION" -gt "$REQUIRE_PYTHON" ]]; then
+if python -V 2>/dev/null >/dev/null  && \
+    [[ "$PYTHON_VERSION" -gt "$REQUIRE_PYTHON" ]]; then
 	python setup_build.py $*
 else
 	echo "Installed python version is outdated. Please upgrade to 2.1.0 or better"
