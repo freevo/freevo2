@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/08/23 12:40:54  dischi
+# remove osd.py dep
+#
 # Revision 1.10  2004/08/05 17:33:31  dischi
 # fix skin imports
 #
@@ -58,14 +61,12 @@ except:
 # from pygame import Rect, image, transform, Surface
 
 # freevo modules
-import plugin, config, rc, osd, time
+import plugin, config, rc, time
 
 from event          import *
 from gui.animation      import render, BaseAnimation
 
 mmap_file = '/tmp/mpav'
-osd  = osd.get_singleton()
-
 
 class mpv_Goom(BaseAnimation):
     message    = None

@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/08/23 12:39:59  dischi
+# remove osd.py dep
+#
 # Revision 1.15  2004/08/01 10:49:47  dischi
 # deactivate plugin
 #
@@ -61,7 +64,6 @@ import menu
 import plugin
 import util
 import childapp
-import osd
 import fxditem
 import rc
 

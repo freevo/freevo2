@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2004/08/23 12:39:59  dischi
+# remove osd.py dep
+#
 # Revision 1.58  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -61,10 +64,10 @@ import signal
 import copy
 
 import config
-import osd
 import rc
 import eventhandler
 import util
+import gui
 
 from event import *
 
@@ -373,7 +376,7 @@ class ChildApp2(ChildApp):
 
         self.stop_osd = stop_osd
         if self.stop_osd:
-           osd.stop()
+           gui.display.stop()
         
         if hasattr(self, 'item'):
             eventhandler.post(Event(PLAY_START, arg=self.item))
@@ -429,7 +432,7 @@ class ChildApp2(ChildApp):
 
         # Ok, we can use the OSD again.
         if self.stop_osd:
-            osd.restart()
+            gui.display.restart()
 
         if self.is_video:
             eventhandler.post(Event(VIDEO_END))

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/08/23 12:40:56  dischi
+# remove osd.py dep
+#
 # Revision 1.40  2004/07/26 18:10:19  dischi
 # move global event handling to eventhandler.py
 #
@@ -65,8 +68,7 @@ from xml.dom.ext import PrettyPrint
 from cStringIO import StringIO
 
 import util    # Various utilities
-import osd
-      # The RemoteControl class.
+
 import childapp # Handle child applications
 import tv.epg_xmltv as epg # The Electronic Program Guide
 import event as em
@@ -77,9 +79,6 @@ import eventhandler
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
-
-# Create the OSD object
-osd = osd.get_singleton()
 
 class PluginInterface(plugin.Plugin):
     """
@@ -445,10 +444,11 @@ class TVTime:
                                                                    mychan,
 								   cf_input)
 
-            if osd.get_fullscreen() == 1:
-                command += ' -m'
-            else:
-                command += ' -M'
+#             FIXME: osd is gone now
+#             if osd.get_fullscreen() == 1:
+#                 command += ' -m'
+#             else:
+#                 command += ' -M'
 
 
         else:
@@ -603,7 +603,8 @@ class TVTimeApp(childapp.ChildApp2):
         elif line == 'z':
             if DEBUG: print 'TVTIME fullscreen toggle!'
             self.write('toggle_fullscreen\n')
-            osd.toggle_fullscreen()
+            # FIXME: osd is gone now
+            # osd.toggle_fullscreen()
         else:
             event = events.get(line, None)
             if event is not None:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/08/23 12:40:00  dischi
+# remove osd.py dep
+#
 # Revision 1.17  2004/07/24 12:24:02  dischi
 # reflect gui changes
 #
@@ -50,7 +53,6 @@ import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import menu       # The menu widget class
-import osd        # The OSD class, used to communicate with the OSD daemon
 import rc         # The RemoteControl class.
 import plugin
 import event as em
@@ -59,9 +61,6 @@ DEBUG = config.DEBUG
 
 TRUE  = 1
 FALSE = 0
-
-# Setting up the default objects:
-osd        = osd.get_singleton()
 
 # Module variable that contains an initialized Game() object
 _singleton = None

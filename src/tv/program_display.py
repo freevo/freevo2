@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/08/23 12:40:55  dischi
+# remove osd.py dep
+#
 # Revision 1.41  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -55,7 +58,7 @@ import time, traceback
 from time import gmtime, strftime
 
 import plugin, config, menu
-import osd
+import gui
 
 import util.tv_util as tv_util
 import tv.record_client as record_client
@@ -286,7 +289,7 @@ class FavoriteItem(Item):
     def mod_name(self, arg=None, menuw=None):
         self.menuw = menuw
         InputBox(text=_('Alter Name'), handler=self.alter_name,
-                 width = osd.get_singleton().width - config.OSD_OVERSCAN_X - 20,
+                 width = gui.width - config.OSD_OVERSCAN_X - 20,
                  input_text=self.name).show()
 
 
