@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/12/31 16:09:32  rshortt
+# Use the VideoGroup for this channel to change to the correct input on the
+# v4l device.
+#
 # Revision 1.16  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -153,6 +157,10 @@ class Record_Thread(threading.Thread):
                 v = tv.ivtv.IVTV(v_dev)
 
                 v.init_settings()
+                vg = fc.getVideoGroup(self.prog.tunerid)
+
+                print 'Setting Input to %s' % vg.input_num
+                v.setinput(vg.input_num)
 
                 print 'Setting Channel to %s' % self.prog.tunerid
                 fc.chanSet(str(self.prog.tunerid))
