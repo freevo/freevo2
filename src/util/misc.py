@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/12/12 19:20:07  dischi
+# check images
+#
 # Revision 1.7  2003/12/10 19:47:12  dischi
 # remove unneeded imports
 #
@@ -50,6 +53,7 @@ import os, sys
 import string, re
 import copy
 import htmlentitydefs
+import imghdr
 
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -160,7 +164,7 @@ def getimage(base, default=None):
     If not return the default
     """
     for suffix in ('png', 'jpg', 'gif'):
-        if vfs.abspath(base+'.'+suffix):
+        if vfs.abspath(base+'.'+suffix) and imghdr.what(base+'.'+suffix):
             return vfs.abspath(base+'.'+suffix)
     return default
 
