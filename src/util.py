@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/03/20 15:42:21  dischi
+# Added function to remove whitespaces and other yunk from the beginning
+# of a text. Usefull for cdata from xml files
+#
 # Revision 1.16  2003/03/17 19:04:10  outlyer
 # Changed how we save bookmarks; the path is less important, but the filename
 # is what we match on now.
@@ -490,4 +494,9 @@ def get_bookmarkfile(filename):
     myfile = config.FREEVO_CACHEDIR + "/" + str(myfile) + '.bookmark'
     return myfile
 
+
+def format_text(text):
+    while len(text) and text[0] in (' ', '\t', '\n'):
+        text = text[1:]
+    return text
 
