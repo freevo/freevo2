@@ -1,52 +1,24 @@
 <?xml version="1.0" ?>
 <freevo>
+   <skin include="blue1_small_800x600" scale="0.96">
 
-   <skin include="blue1_big_768x576">
-
-    <!-- Settings for a normal menu -->
     <menu type="all">
-      <items>
-	<item type="all">
-	  <font size="16"/>
-	  <selection>
-	    <font size="16"/>
-	  </selection>
-	</item>
-      </items>
-    </menu>   
-
-    <!-- Override some settings for the main menu -->
-    <menu type="main">
-      <items>
-	<item type="all">
-	  <font size="28"/>
-	  <selection>
-	    <font size="28"/>
-	  </selection>
-	</item>
-      </items>
+      <background image="../../images/aubin_bg2.png"/>
     </menu>
 
+    <mp3>
+      <background image="../../images/aubin_bg2.png"/>
+    </mp3>
+
     <extendedmenu type="tv">
-      <info>
-	<font size="14"/>
-      </info>
+      <background image="../../images/aubin_bg2.png"/>
       <listing>
-	<table>
-	  <label>
-	    <font size="14"/>
-	  </label>
-	  <content>
-	    <font size="14"/>
-	    <selection>
-	      <font size="14"/>
-	    </selection>
-	  </content>
-	</table>
+	<geometry height="365"/>
+	<expand>
+	  <geometry height="475"/>
+	</expand>
       </listing>
     </extendedmenu>
-
-
   </skin>
   
 </freevo>

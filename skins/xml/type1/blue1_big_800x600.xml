@@ -1,0 +1,174 @@
+<?xml version="1.0" ?>
+<freevo>
+  
+  <skin>
+
+    <!-- Items of the main menu (will change soon) -->
+    <main>        
+      <item pos="0" name="TV"       action="tv.main_menu"  arg="" 
+	visible="yes" icon="icons/64x64/tv.png"   />
+      <item pos="1" name="Movies"   action="movie.main_menu" arg="" 
+	visible="yes" icon="icons/64x64/movies.png"  />
+      <item pos="2" name="Music"    action="music.main_menu" arg="" 
+	visible="yes" icon="icons/64x64/mp3.png"  />
+      <item pos="3" name="Images"   action="imenu.main_menu" arg="" 
+	visible="yes" icon="icons/64x64/images.png"  />
+      <item pos="4" name="Video Games" action="videogame.main_menu" arg="" 
+	visible="no" icon="icons/mame.png"  />
+      <item pos="5" name="Shutdown" action="shutdown" arg="" 
+	visible="yes" icon="icons/64x64/shutdown.png"  />
+    </main>
+    
+    <!-- Settings for a normal menu -->
+    <menu type="all">
+
+      <background image="../../images/aubin_bg2_800x600.png"/>
+      <logo visible="yes" x="10" y="10" image="../../images/logo.png"/>
+
+      <title visible="no" x="400" y="19">
+	<font name="Arial_Bold" size="36" color="0x000000" align="center"/>
+	<shadow visible="no" color="0xaaffffff" x="3" y="3"/>
+      </title>
+
+      <items x="60" y="110" height="390" width="680">
+	<item type="all">
+	  <font name="Arial_Bold" size="19" color="0xdddddd"/>
+	  <shadow visible="no" color="0x000000" x="1" y="1"/> 
+	  <selection visible="yes" color="0xffffff" bgcolor="0xa0000000">
+	    <font name="Arial_Bold" size="19" color="0xffffff"/>
+	    <shadow visible="no" color="0x000000" x="1" y="1"/>
+	  </selection>
+	</item>
+      </items>
+
+      <covers>
+	<cover type="movie" visible="yes" x="560" y="105" width="200"
+	  height="280" border_color="0x000000" border_size="1"/>
+	<cover type="music" visible="yes" x="560" y="105" width="200"
+	  height="200" border_color="0x000000" border_size="1"/> 
+	<cover type="image" visible="yes" x="560" y="105" width="200" 
+	  height="160" border_color="0x000000" border_size="1"/>
+      </covers>
+      
+      <submenu x="40" y="520">
+	<font name="Arial_Bold" size="15" color="0xdddddd"/>
+	<selection length="154" bgcolor="0xa008171c" color="0xffffff">
+	  <font name="Arial_Bold" size="15" color="0xffffff"/>
+	  <shadow visible="no" color="0x000000" x="2" y="2"/>
+        </selection>
+      </submenu>
+	
+    </menu>   
+
+    <!-- Override some settings for the main menu -->
+    <menu type="main">
+      <items x="230" width="320">
+	<item type="all">
+	  <font size="34" color="0xffffff"/>
+	  <selection>
+	    <font size="34"/>
+	  </selection>
+	</item>
+      </items>
+    </menu>
+
+    <!-- Settings for the mp3 player -->
+    <mp3>
+      <title visible="no" x="400" y="15">
+	<font name="Arial_Bold" size="38" color="0xffffff" align="center"/>
+      </title>
+
+      <background image="../../images/aubin_bg2_800x600.png">
+	<mask>
+	  <rectangle x="-25" y="88" width="666" height="232" color="0x80000000" radius="20"/>
+	</mask>
+      </background>
+
+      <cover visible="yes" x="485" y="200" width="300" height="300" 
+	border_color="0x000000" border_size="1"> 
+	<mask>
+	  <rectangle x="470" y="185" width="400" height="330" 
+	    color="0x80000000" radius="20"/>
+	</mask>
+      </cover>
+
+      <fileinfo x="30" y="94" height="200">
+	<font name="Arial_Bold" size="18" color="0xffffff"/>
+	<shadow visible="no"/>
+      </fileinfo>
+
+      <progressbar visible="no"/>
+    </mp3>
+
+
+
+    <!-- Settings for a popup box -->
+    <popup mask="" bgcolor="0x99000000" radius="15" spacing="20">
+      <message x="100" y="100" width="600" height="400">
+	<font name="Arial_Bold" size="17" color="0xffffff" align="center"/>
+	<shadow visible="no"/>
+      </message>
+    </popup>
+
+
+    <extendedmenu type="tv">
+      <background image="../../images/aubin_bg2_800x600.png" mask=""/>
+      <logo visible="yes" x="10" y="10" width="100" height="60" 
+	image="../../images/logo.png"/>
+
+      <header>
+        <geometry x="10" y="10" width="780" height="55"/>
+	<font name="Arial_Bold" size="25" color="0xffffff" align="center" valign="center"/>
+	<shadow visible="no"/>
+      </header>
+
+      <info>
+        <geometry x="10" y="75" width="670" height="100"/>
+	<background color="0xaa000000"/>
+	<font name="Arial_Bold" size="16" color="0xffffff" align="left"/>
+	<shadow visible="no" color="0x000000" x="1" y="1"/>
+      </info>
+      
+      <view>
+        <geometry x="690" y="75" width="100" height="100"/>
+	<background color="0x000000"/>
+	<font name="Arial_Bold" size="20" color="0xffffff" align="center" valign="center"/>
+	<shadow visible="no"/>
+      </view>
+      
+      <listing type="table">
+        <geometry x="10" y="190" width="780" height="380"/>
+	<background color="0xbb58677c"/>
+	
+	<expand>
+	  <geometry x="10" y="75" width="780" height="495"/>
+	  <background color="0xffffffff"/>
+	</expand>
+
+	<table border_color="0xaa000000" border_size="2" spacing="3">
+	  <label bgcolor="0x88000066" width="158">
+	    <font name="Arial_Bold" size="19" color="0xffffff" align="center" 
+	      valign="center"/>
+	    <shadow visible="no"/>
+	  </label>
+
+	  <content>
+	    <font name="Arial_Bold" size="19" color="0xffffff" align="left"/>
+	    <shadow visible="no"/>
+
+	    <selection bgcolor="0x88ffffff">
+	      <font name="Arial_Bold" size="19" color="0xffff66"/>
+	      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+	    </selection>
+
+	    <indicator type="left" image="skins/images/arrow_left.png"/>
+	    <indicator type="right" image="skins/images/arrow_right.png"/>
+	  </content>
+	</table>
+
+      </listing>
+    </extendedmenu>
+    
+  </skin>
+  
+</freevo>

@@ -1,9 +1,12 @@
 <?xml version="1.0" ?>
 <freevo>
-   <skin include="blue1_big_800x600" scale="0.96">
+   <skin include="blue1_small_800x600" scale="0.8">
+
+    <!-- use the 768x576 backgrounds -->
 
     <menu type="all">
       <background image="../../images/aubin_bg2.png"/>
+      <logo height="60" width="100"/>
     </menu>
 
     <mp3>
@@ -12,12 +15,6 @@
 
     <extendedmenu type="tv">
       <background image="../../images/aubin_bg2.png"/>
-      <listing>
-	<geometry height="365"/>
-	<expand>
-	  <geometry height="475"/>
-	</expand>
-      </listing>
     </extendedmenu>
   </skin>
   
