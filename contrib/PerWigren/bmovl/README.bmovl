@@ -1,0 +1,5 @@
+To install bmovl:
+ * Unpack MPlayer sources.
+ * cd to libmpcodecs/
+ * copy vf_bmovl.c here and patch Makefile.diff and vf.c.diff
+ * compile and install mplayer ;)
