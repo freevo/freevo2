@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/06/10 02:32:17  rshortt
+# Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
+#
 # Revision 1.18  2004/06/07 16:45:54  rshortt
 # Didn't mean to add partial support for multiple recording plugins yet.
 #
@@ -118,10 +121,12 @@ class Recorder:
     def Record(self, rec_prog):
         frequency = self.fc.chanSet(str(rec_prog.tunerid), 'record plugin')
 
+        rec_prog.filename = config.TV_RECORD_DIR + '/' + rec_prog.filename
+
         cl_options = { 'channel'  : rec_prog.tunerid,
                        'frequency' : frequency,
-                       'filename' : config.TV_RECORD_DIR + '/' + rec_prog.filename,
-                       'base_filename' : rec_prog.filename,
+                       'filename' : rec_prog.filename,
+                       'base_filename' : os.path.basename(rec_prog.filename),
                        'title' : rec_prog.title,
                        'sub-title' : rec_prog.sub_title,
                        'seconds'  : rec_prog.rec_duration }
@@ -129,6 +134,7 @@ class Recorder:
         self.rec_command = config.VCR_CMD % cl_options
 
         self.thread.mode = 'record'
+        self.thread.prog = rec_prog
         self.thread.command = self.rec_command
         self.thread.mode_flag.set()
         
@@ -178,6 +184,7 @@ class Record_Thread(threading.Thread):
         self.mode = 'idle'
         self.mode_flag = threading.Event()
         self.command  = ''
+        self.prog = None
         self.app = None
 
     def run(self):
@@ -188,21 +195,8 @@ class Record_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
+                rc.post_event(Event('RECORD_START', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: cmd=%s' % self.command)
-
-                tv_lock_file = config.FREEVO_CACHEDIR + '/record'
-                open(tv_lock_file, 'w').close()
-		
-		# should prolly be replaced with new pre recording command
-		# The FreeBSD bsdbt848 driver does not support the adevice
-		# setting, so we must switch the mixer to the correct record
-		# source before starting mencoder. I'm not sure how to do
-		# this with Python, so just call the mixer command directly.
-                if os.uname()[0] == 'FreeBSD':
-                    os.system('mixer =rec line rec 100 > /dev/null 2>&1')
-
-                if hasattr(config, "VCR_PRE_REC") and config.VCR_PRE_REC:
-		    os.system(config.VCR_PRE_REC)
 
                 self.app = RecordApp(self.command)
                 
@@ -212,24 +206,12 @@ class Record_Thread(threading.Thread):
                 if DEBUG: print('Record_Thread::run: past wait()!!')
 
                 rc.post_event(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
-
                 self.app.kill()
 
-                if hasattr(config, "VCR_POST_REC") and config.VCR_POST_REC:
-		    os.system(config.VCR_POST_REC)
-
-                os.remove(tv_lock_file)
-
-                # XXX Move this into recordserver after
-                # XXX Rob puts the event support in.
-                #
-                # Can't test this, someone with generic record please
-                # try it
-                #
-                # from  util.videothumb import snapshot
-                # snapshot(rec_prog.filename)
-
                 self.mode = 'idle'
+
+                rc.post_event(Event('RECORD_STOP', arg=self.prog))
+                if DEBUG: print('Record_Thread::run: finished recording')
                 
             else:
                 self.mode = 'idle'

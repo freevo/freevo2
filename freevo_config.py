@@ -1243,6 +1243,11 @@ TV_REC_SIZE = (320, 240)   # Default for slower computers
 TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
 TV_REC_OUTFMT  = 'yuy2'
 
+# PRE and POST recording commands.  Set these to a runnable command if
+# you wish to have special mixer settings or video post processing.
+VCR_PRE_REC  = None
+VCR_POST_REC = None
+
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
 # XXX should be ("Change"), or could be in some cases ("change?")

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/06/10 02:32:17  rshortt
+# Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
+#
 # Revision 1.22  2004/06/07 16:46:00  rshortt
 # Didn't mean to add partial support for multiple recording plugins yet.
 #
@@ -91,6 +94,9 @@ import config
 import tv.ivtv
 import childapp 
 import plugin 
+import rc
+
+from event import Event
 
 from tv.channels import FreevoChannels
 
@@ -122,14 +128,11 @@ class Recorder:
         
 
     def Record(self, rec_prog):
-
-        self.thread.save_flag.wait()
         self.thread.mode = 'record'
         self.thread.prog = rec_prog
         self.thread.mode_flag.set()
         
         if DEBUG: print('Recorder::Record: %s' % rec_prog)
-        
         
     def Stop(self):
         self.thread.mode = 'stop'
@@ -144,10 +147,9 @@ class Record_Thread(threading.Thread):
         
         self.mode = 'idle'
         self.mode_flag = threading.Event()
-        self.save_flag = threading.Event()
-        self.save_flag.set()
-        self.prog  = ''
+        self.prog = None
         self.app = None
+
 
     def run(self):
         while 1:
@@ -157,18 +159,17 @@ class Record_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'record':
+                self.prog.filename = '%s/%s.mpeg' % \
+                                            (config.TV_RECORD_DIR, 
+                                             string.replace(self.prog.filename,
+                                                            ' ', '_'))
+
+                rc.post_event(Event('RECORD_START', arg=self.prog))
                 if DEBUG: print 'Record_Thread::run: started recording'
 
                 fc = FreevoChannels()
                 if DEBUG: print 'CHAN: %s' % fc.getChannel()
 
-                tv_lock_file = config.FREEVO_CACHEDIR + '/record'
-                open(tv_lock_file, 'w').close()
-
-                video_save_file = '%s/%s.mpeg' % (config.TV_RECORD_DIR, 
-                                             string.replace(self.prog.filename,
-                                                            ' ', '_'))
-                
                 (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
 
                 v = tv.ivtv.IVTV(v_dev)
@@ -190,7 +191,7 @@ class Record_Thread(threading.Thread):
                 time.sleep(2)
 
                 v_in  = open(v_dev, 'r')
-                v_out = open(video_save_file, 'w')
+                v_out = open(self.prog.filename, 'w')
 
                 while time.time() < stop:
                     buf = v_in.read(CHUNKSIZE)
@@ -198,20 +199,17 @@ class Record_Thread(threading.Thread):
                     if self.mode == 'stop':
                         break
 
-                self.save_flag.clear()
                 v_in.close()
                 v_out.close()
                 v.close()
                 v = None
 
-                os.remove(tv_lock_file)
+                self.mode = 'idle'
 
+                rc.post_event(Event('RECORD_STOP', arg=self.prog))
                 if DEBUG: print('Record_Thread::run: finished recording')
 
-                self.mode = 'idle'
-                self.save_flag.set()
-                from  util.videothumb import snapshot
-                snapshot(video_save_file)
             else:
                 self.mode = 'idle'
+
             time.sleep(0.5)

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/06/10 02:32:17  rshortt
+# Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
+#
 # Revision 1.39  2004/05/30 18:27:53  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
 #
@@ -210,6 +213,8 @@ import tv.epg_xmltv
 import util.tv_util as tv_util
 import plugin
 import util.popen3
+from   util.videothumb import snapshot
+
 
 from event import *
 
@@ -228,6 +233,9 @@ logfile = '%s/%s-%s.log' % (config.LOGDIR, appname, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
 plugin.init_special_plugin(config.plugin_record)
+
+# XXX: In the future we should have one lock per VideoGroup.
+tv_lock_file = config.FREEVO_CACHEDIR + '/record'
 
 
 class RecordServer(xmlrpc.XMLRPC):
@@ -879,21 +887,20 @@ class RecordServer(xmlrpc.XMLRPC):
     #################################################################
 
 
-    def create_fxd(self,rec_prog):
+    def create_fxd(self, rec_prog):
         from util.fxdimdb import FxdImdb, makeVideo
         fxd = FxdImdb()
-        fxd.setFxdFile(config.TV_RECORD_DIR + '/' + rec_prog.filename, overwrite = True)
 
-	fileext = '.mpeg'
-	if hasattr(config, "DEFAULT_REC_EXT") and config.DEFAULT_REC_EXT:
-	    fileext = config.DEFAULT_REC_EXT
+	(filebase, fileext) = os.path.splitext(rec_prog.filename)
+        fxd.setFxdFile(filebase, overwrite = True)
 
-        video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename) + fileext)
+        video = makeVideo('file', 'f1', os.path.basename(rec_prog.filename))
         fxd.setVideo(video)
         fxd.info['tagline'] = fxd.str2XML(rec_prog.sub_title)
         fxd.info['plot'] = fxd.str2XML(rec_prog.desc)
         fxd.info['runtime'] = None
-        fxd.info['year'] = time.strftime('%m-%d ' + config.TV_TIMEFORMAT, time.localtime(rec_prog.start))
+        fxd.info['year'] = time.strftime('%m-%d ' + config.TV_TIMEFORMAT, 
+                                         time.localtime(rec_prog.start))
         fxd.title = rec_prog.title 
         fxd.writeFxd()
             
@@ -910,7 +917,6 @@ class RecordServer(xmlrpc.XMLRPC):
         if rec_prog:
             self.record_app = plugin.getbyname('RECORD')
             self.record_app.Record(rec_prog)
-            self.create_fxd(rec_prog)
             
 
     def eventNotice(self):
@@ -964,6 +970,7 @@ class RecordServer(xmlrpc.XMLRPC):
                     if wpid == pid:
                         break
                     time.sleep(0.1)
+
                 else:
                     print 'force killing with signal 9'
                     try:
@@ -980,6 +987,23 @@ class RecordServer(xmlrpc.XMLRPC):
                             break
                         time.sleep(0.1)
                 print 'recorderver: After wait()'
+
+            elif event == RECORD_START:
+                print 'Handling event RECORD_START'
+                prog = event.arg
+                open(tv_lock_file, 'w').close()
+                self.create_fxd(prog)
+                if config.VCR_PRE_REC:
+                    util.popen3.Popen3(config.VCR_PRE_REC)
+
+            elif event == RECORD_STOP:
+                print 'Handling event RECORD_STOP'
+                os.remove(tv_lock_file)
+                prog = event.arg
+                snapshot(prog.filename)
+                if config.VCR_POST_REC:
+                    util.popen3.Popen3(config.VCR_POST_REC)
+
             else:
                 print 'not handling event %s' % str(event)
                 return
