@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/01/22 11:57:32  dischi
+# make sure height is an int
+#
 # Revision 1.7  2004/12/18 18:12:24  dischi
 # fix \n handling
 #
@@ -82,6 +85,8 @@ class Textbox(text.Text):
         line_height = font.height * 1.1
         if int(line_height) < line_height:
             line_height = int(line_height) + 1
+        else:
+            line_height = int(line_height)
         max_lines = int((height + line_height - font.height) / line_height)
         max_width = 0
         
