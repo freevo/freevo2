@@ -2,6 +2,17 @@
 # -----------------------------------------------------------------------
 # main1_image.py - skin Image support functions
 # -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2003/02/09 07:04:22  krister
+# Some fixes for broken pics, and pics that SDL cannot handle.
+#
+#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -24,7 +35,12 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, os, copy, re, math
+import sys
+import os
+import copy
+import re
+import math
+
 import config
 
 from main1_utils import *
@@ -59,6 +75,10 @@ class Skin_Image:
 
     def DrawImage_getFormatedImage(self, filename, w, h, i_orientation=None):
         image = osd.loadbitmap(filename)
+
+        if not image:
+            return None
+        
         i_w, i_h = image.get_size()
 
         # rotate:
@@ -126,16 +146,15 @@ class Skin_Image:
             preview = self.DrawImage_getFormatedImage(filename,
                                                       val.width - 2*val.spacing,
                                                       val.height - 2*val.spacing, orientation)
+            if not preview:
+                return
+            
             w, h = preview.get_size()
 
             x = val.x + (val.width - w)/2
             y = val.y + (val.height - h)/2
 
             osd.drawsurface(preview, x, y)
-            
-
-            
-
 
 
     def DrawImage_Info(self, to_info, settings):
@@ -219,7 +238,6 @@ class Skin_Image:
             osd.drawbox(conf_x, conf_y, conf_x +conf_w, conf_y + conf_h,
                         width=val.border_size, color=val.border_color)
         
-
 
     def DrawImage_Listing(self, to_listing, settings):
         val = settings.listing 
