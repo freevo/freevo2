@@ -12,6 +12,7 @@ Release 1.3.X (???):
  * New info area
  * New skin 'info' which uses the new info area
  * Major speed enhancements in the skin drawing code
+ * Replaced fonts with Bitstream Vera fonts.
 	
 
 
