@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2002/10/16 02:48:49  krister
+# Cosmetic changes.
+#
 # Revision 1.74  2002/10/13 14:08:31  dischi
 # Don't show crash screen on keyboard interrupt
 # Don't show "reading cdrom info" popup at startup
@@ -103,19 +106,19 @@ skin    = skin.get_singleton()
 mixer = mixer.get_singleton()
 
 if config.MAJOR_AUDIO_CTRL == 'VOL':
-    mixer.setMainVolume( config.DEFAULT_VOLUME )
+    mixer.setMainVolume(config.DEFAULT_VOLUME)
     if config.CONTROL_ALL_AUDIO:
-        mixer.setPcmVolume( config.MAX_VOLUME )
+        mixer.setPcmVolume(config.MAX_VOLUME)
         # XXX This is for SB Live cards should do nothing to others
         # XXX Please tell if you have problems with this.
-        mixer.setOgainVolume( config.MAX_VOLUME )
+        mixer.setOgainVolume(config.MAX_VOLUME)
 elif config.MAJOR_AUDIO_CTRL == 'PCM':
-    mixer.setPcmVolume( config.DEFAULT_VOLUME )
+    mixer.setPcmVolume(config.DEFAULT_VOLUME)
     if config.CONTROL_ALL_AUDIO:
-        mixer.setMainVolume( config.MAX_VOLUME )
+        mixer.setMainVolume(config.MAX_VOLUME)
         # XXX This is for SB Live cards should do nothing to others
         # XXX Please tell if you have problems with this.
-        mixer.setOgainVolume( config.MAX_VOLUME )
+        mixer.setOgainVolume(config.MAX_VOLUME)
 else:
     if DEBUG: print "No appropriate audio channel found for mixer"
 
@@ -258,9 +261,9 @@ def getcmd():
         elif event == rc.MUTE:
             if muted:
                 if config.MAJOR_AUDIO_CTRL == 'VOL':
-                    mixer.setMainVolume( mainVolume )
+                    mixer.setMainVolume(mainVolume)
                 elif config.MAJOR_AUDIO_CTRL == 'PCM':
-                    mixer.setPcmVolume( mainVolume )
+                    mixer.setPcmVolume(mainVolume)
                 muted = 0
             else:
                 if config.MAJOR_AUDIO_CTRL == 'VOL':
