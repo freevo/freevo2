@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/05/09 14:18:20  dischi
+# remove comments
+#
 # Revision 1.68  2004/03/02 20:28:54  dischi
 # prefer "play" function in playlist mode
 #
@@ -18,88 +21,8 @@
 # Revision 1.66  2004/02/23 19:59:34  dischi
 # unicode fixes
 #
-# Revision 1.65  2004/02/19 04:57:56  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
 # Revision 1.64  2004/02/13 18:32:57  dischi
 # add event to toggle playlist repeat
-#
-# Revision 1.63  2004/02/08 17:39:39  dischi
-# small cosmetic fixes
-#
-# Revision 1.62  2004/01/31 16:38:49  dischi
-# removed unneeded attr
-#
-# Revision 1.61  2004/01/31 13:18:35  dischi
-# fix string->object building
-#
-# Revision 1.60  2004/01/20 20:24:19  dischi
-# bugfix
-#
-# Revision 1.59  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.58  2004/01/15 21:15:28  outlyer
-# Fixed to use proper audio context buttons.
-#
-# Note: Is is possible to do this without adding code to playlist.py? All I need
-# is the filename and an event, but because no existing event sends the filename,
-# and the plugin doesn't know about it, I have to pass it along somehow.
-#
-# Anyone want to chime in with an idea on how?
-#
-# Revision 1.55  2004/01/10 13:16:14  dischi
-# remove self.fxd_file, not needed anymore
-#
-# Revision 1.54  2004/01/06 19:31:18  dischi
-# add repeat support
-#
-# Revision 1.53  2004/01/06 19:17:28  dischi
-# autostart ssr slideshows and fix display_type bug
-#
-# Revision 1.52  2004/01/04 10:20:05  dischi
-# fix missing DIRECTORY_USE_MEDIAID_TAG_NAMES for all kinds of parents
-#
-# Revision 1.51  2004/01/04 03:52:27  outlyer
-# Fix a crash; a playlist file (m3u/pls/etc.) doesn't have this property,
-# which appears to be assigned to directory items.
-#
-# Revision 1.50  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.49  2004/01/02 11:18:39  dischi
-# call correct build function
-#
-# Revision 1.48  2003/12/31 16:39:43  dischi
-# flag if the mimetype returns something else than play files
-#
-# Revision 1.47  2003/12/30 15:33:29  dischi
-# add random playing an option for normal playlist files
-#
-# Revision 1.46  2003/12/29 22:07:14  dischi
-# renamed xml_file to fxd_file
-#
-# Revision 1.45  2003/12/18 18:19:27  outlyer
-# If we're using a playlist file, make sure the object has that attribute
-# so we can use fileops on it later.
-#
-# Revision 1.44  2003/12/18 17:07:52  outlyer
-# Two bugfixes for the previously broken playlist stuff:
-#
-# * Don't iterate over the playlist if it is a string, since it just splits
-#     the string into characters
-# * self.display_type seems to be set to None, so the playlist.Mimetype plugin
-#     is never loaded
-#
-# Playlists are working again! Woohoo!
-#
-# TODO:
-#     Figure out why display_type is always none; shouldn't it be the menu type
-#     or something?
-#
-# Revision 1.43  2003/12/13 18:16:34  dischi
-# allow fxd playlists with relative path
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework

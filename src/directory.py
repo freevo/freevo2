@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.127  2004/05/09 14:18:20  dischi
+# remove comments
+#
 # Revision 1.126  2004/03/13 22:35:52  dischi
 # more debug, will be removed later
 #
@@ -17,55 +20,6 @@
 #
 # Revision 1.124  2004/03/02 20:29:34  dischi
 # support for show all files in directory
-#
-# Revision 1.123  2004/02/27 21:38:16  dischi
-# remove debug
-#
-# Revision 1.122  2004/02/27 20:11:19  dischi
-# o fix umount while scanning the dir
-# o shorten name if they start similar
-#
-# Revision 1.121  2004/02/25 17:57:11  dischi
-# bugfix: call parse() for fxd files
-#
-# Revision 1.120  2004/02/23 19:59:33  dischi
-# unicode fixes
-#
-# Revision 1.119  2004/02/21 19:39:04  dischi
-# use new gui box for password
-#
-# Revision 1.118  2004/02/16 17:57:04  dischi
-# use ucmp to compare
-#
-# Revision 1.117  2004/02/14 15:45:03  dischi
-# add support folder.fxd to hold fxditem tags
-#
-# Revision 1.116  2004/02/14 13:04:46  dischi
-# do not call skin.get_singleton() anymore
-#
-# Revision 1.115  2004/02/14 12:06:29  dischi
-# fix unicode crash
-#
-# Revision 1.114  2004/02/13 17:18:38  dischi
-# do not skip after . for directories
-#
-# Revision 1.113  2004/02/12 12:20:11  dischi
-# fix item counter for different display_types
-#
-# Revision 1.112  2004/02/08 17:40:09  dischi
-# remember number of items, calc when needed
-#
-# Revision 1.111  2004/02/07 13:24:21  dischi
-# better directory name building
-#
-# Revision 1.110  2004/02/05 19:55:24  dischi
-# make name a unicode object
-#
-# Revision 1.109  2004/02/02 19:59:38  dischi
-# fixed a crash for tv recorded shows
-#
-# Revision 1.108  2004/02/02 19:40:53  dischi
-# include overlay in listdir
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -1021,7 +975,7 @@ class Dirwatcher(plugin.DaemonPlugin):
             self.item.__dirwatcher_last_files__ = self.files
 
 
-    def scan(self, force=False):
+    def scan(self):
         if not self.dir:
             return
         try:

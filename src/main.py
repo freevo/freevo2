@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.121  2004/05/09 14:18:20  dischi
+# remove comments
+#
 # Revision 1.120  2004/04/25 11:23:55  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
 #
@@ -413,7 +416,7 @@ try:
         while 1:
 
             event = rc_object.poll()
-            # OK, now we have a repeat_count... to whom could we give it?
+
             if event:
                 if event == OS_EVENT_POPEN2:
                     _debug_('popen2 %s' % event.arg[1])
