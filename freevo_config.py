@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.83  2002/10/21 01:20:25  krister
+# Clarified TV_CHANNELS updates.
+#
 # Revision 1.82  2002/10/17 04:16:16  krister
 # Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
 #
@@ -387,6 +390,8 @@ TV_REC_OUTFMT = 'yuy2'
 # TV_CHANNELS below must be set to None. The output contains guesses for the
 # displayed name and TV channel name. You can edit this list, delete lines,
 # reorder it, etc. For instance, put all your favorite channels first.
+# Don't forget to actually update TV_CHANNELS afterwards, it won't work
+# if it is set to None!
 #
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
