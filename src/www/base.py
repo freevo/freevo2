@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2005/02/03 16:05:38  rshortt
+# Minor cosmetics fix.
+#
 # Revision 1.7  2005/02/02 02:13:16  rshortt
 # Revive search page, add more search options.
 #
@@ -102,10 +105,10 @@ class HTMLResource:
 
         self.res += '<?xml version="1.0" encoding="'+ config.encoding +'"?>\n'
         self.res += '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n'
-        self.res += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
-        self.res += '<html>\n\t<head>\n'
+        self.res += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n'
+        self.res += '<html>\n<head>\n'
         self.res += '\t<title>Freevo | '+title+'</title>\n'
-        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset='+ config.encoding +'"/>\n'
+        self.res += '\t<meta http-equiv="Content-Type" content= "text/html; charset='+ config.encoding +'" />\n'
         if style != None:
             self.res += '\t<link rel="stylesheet" href="%sstyles/main.css" type="text/css" />\n' % strprefix
         if script != None:
@@ -139,7 +142,7 @@ class HTMLResource:
             else:
                 self.res += '<li>'
             self.res += "<a href=\"%s\" title=\"%s\">%s</a></li>\n" % (i[2], i[1],i[0])
-        self.res += '</ul>\n</div>'
+        self.res += '</ul>\n</div><br clear="all" />'
         
         self.res += '\n<!-- Main Content -->\n';
 
@@ -217,8 +220,8 @@ class HTMLResource:
 
     def printAdvancedSearchForm(self):
         self.res += """
-        <form id="SearchForm" action="search" method="get">
         <div class="searchform">
+        <form id="SearchForm" action="search" method="get">
         <table border="0">
           <tr><td align="left"><b>"""+ _('Search')+ """:</b>
           <input type="text" name="find" size="20" /></td></tr>
@@ -238,8 +241,8 @@ class HTMLResource:
             <input type="submit" value=" """+ _('Go!') +""" " />
           </td></tr>
         </table>
-        </div>
         </form>
+        </div>
         """
 
     def printMessages( self, messages ):

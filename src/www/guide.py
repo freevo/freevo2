@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2005/02/03 16:05:38  rshortt
+# Minor cosmetics fix.
+#
 # Revision 1.4  2005/01/14 22:41:45  rshortt
 # More fixes: variable guide start time, category box, recordserver message.
 # TODO:
@@ -223,7 +226,6 @@ class GuideResource(FreevoResource):
 
         fv.printHeader(_('TV Guide'), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT, selected=_('TV Guide'))
         fv.res += '<div id="content">\n';
-        fv.res += '&nbsp;<br/>\n'
 
         # Fool "is prog scheduled" until that is hooked up.
         got_schedule = False

@@ -13,7 +13,7 @@ class IndexResource(FreevoResource):
         fv.printHeader(_('Welcome'), 'styles/main.css',selected=_('Home'))
         fv.res += '<div id="contentmain">\n'
         
-        fv.res += '<br/><br/><h2>'+( _('Freevo Web Status as of %s') % \
+        fv.res += '<h2>'+( _('Freevo Web Status as of %s') % \
                 time.strftime('%B %d ' + config.TV_TIMEFORMAT, time.localtime()) ) +'</h2>'
 
         if record.client.recordings.server:
