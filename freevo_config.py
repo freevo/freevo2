@@ -667,7 +667,7 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
 # Config for xml support in the movie browser
 # the regexp has to be with ([0-9]|[0-9][0-9]) so we can get the numbers
 #
-SUFFIX_VIDEO_DEF_FILES = [ 'xml' ]
+SUFFIX_VIDEO_DEF_FILES = [ 'fxd' ]
 TV_SHOW_REGEXP = "s?([0-9]|[0-9][0-9])[xe]([0-9]|[0-9][0-9])[^0-9]"
 
 
