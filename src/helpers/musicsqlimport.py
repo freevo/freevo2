@@ -101,11 +101,20 @@ def mainloop(path='/media/Music',dirtitle='',type='*.mp3'):
     for song in songs:
         cursor.execute(make_query(song,dirtitle))
 
-    # Only call commit after we're done to save time... (autocommit slows down the db dramatically)
+    # Only call commit after we're done to save time...
+    # (autocommit slows down the db dramatically)
     db.commit()
     db.close()
 
+
+
+
 if __name__ == '__main__':
+    if len(sys.argv)>1 and sys.argv[1] == '--help':
+        print 'Freevo musicsqlimport helper'
+        print 'adds all mp3 files into the database'
+        sys.exit(0)
+        
     if not check_db():
         print "Creating data file..."
         create_db()

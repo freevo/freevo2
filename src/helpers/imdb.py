@@ -11,6 +11,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/08/05 19:32:55  dischi
+# Moved the first three helpers from helpers/ to src/helpers and changed
+# the freevo script to easy access them. The old helpers need a cleanup:
+# o what is realy needed?
+# o what should be in src/helpers because we need it from time to time?
+# o what should go to contrib?
+#
 # Revision 1.27  2003/08/04 18:42:03  dischi
 # remove some stuff we do not need with the new freevo script
 #

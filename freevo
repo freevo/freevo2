@@ -9,7 +9,7 @@
 
 # begin configuration
 
-helpers=helpers
+helpers=src/helpers
 src=src
 
 # end configuration
@@ -106,7 +106,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-" ] ; then
     echo
 
     for i in $helpers/*.py; do
-	s=`echo $i | sed "s/^$helpers.\\(.*\\).py/\\1/"`
+	s=`echo $i | sed "s|^$helpers.\\(.*\\).py|\\1|"`
 	if [ "$s" != "__init__" ]; then
 	    echo $s
 	fi
