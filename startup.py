@@ -66,7 +66,7 @@ class AppArgs:
         
 # The remote control simulator, debug output in an Xterm
 remote_xterm = ('remote', '/usr/X11R6/bin/xterm',
-                    [ '-title', 'Freevo Remote Simulator', '-geom', '80x50',
+                    [ '-title', 'Freevo Remote Simulator', '-geom', '57x50',
                       '-e', 'python', './rc_client/remote.py', '--remote=%(remote)s'])
 
 # The remote control lirc interface, no debug output
@@ -84,7 +84,8 @@ osd_x11 = ('osd_x11', '/bin/sh', ['-c',
 
 # The Freevo main application, debug output in an Xterm
 freevo_main_xterm = ('freevo', '/usr/X11R6/bin/xterm',
-                     [ '-title', 'Freevo Main', '-e', '/usr/local/bin/python',
+                     [  '-geom', '80x15', '-title', 'Freevo Main',
+                        '-e', '/usr/local/bin/python',
                        './main.py', '--videotools=%(videotools)s'])
 
 # The Freevo main application, no debug output
