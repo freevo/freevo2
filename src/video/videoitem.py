@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.143  2004/07/17 08:18:56  dischi
+# unicode fixes
+#
 # Revision 1.142  2004/07/11 10:22:28  dischi
 # fix bug for auto joined files on disc
 #
@@ -252,7 +255,7 @@ class VideoItem(Item):
         Returns the string how to sort this item
         """
         if mode == 'date' and self.mode == 'file' and os.path.isfile(self.filename):
-            return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
+            return u'%s%s' % (os.stat(self.filename).st_ctime, Unicode(self.filename))
 
         if self.name.find(u"The ") == 0:
             return self.name[4:]

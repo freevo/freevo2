@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/07/17 08:18:56  dischi
+# unicode fixes
+#
 # Revision 1.24  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -94,8 +97,8 @@ class ImageItem(Item):
         Returns the string how to sort this item
         """
         if mode == 'date':
-            return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
-        return self.filename
+            return u'%s%s' % (os.stat(self.filename).st_ctime, Unicode(self.filename))
+        return Unicode(self.filename)
 
 
     def actions(self):

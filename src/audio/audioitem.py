@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/07/17 08:18:55  dischi
+# unicode fixes
+#
 # Revision 1.56  2004/07/10 13:36:07  outlyer
 # Handle the situation where track number can't be converted into an int()
 #
@@ -131,14 +134,14 @@ class AudioItem(Item):
         """
         if mode == 'date':
             if self.filename:
-                return '%s%s' % (os.stat(self.filename).st_ctime, self.filename)
+                return u'%s%s' % (os.stat(self.filename).st_ctime, Unicode(self.filename))
         if mode == 'advanced':
             # sort by track number
             try:
-                return '%0.3i-%s' % (int(self['trackno']), String(self.url))
+                return '%0.3i-%s' % (int(self['trackno']), Unicode(self.url))
             except ValuError:
-                return '%s-%s' % (String(self['trackno']), String(self.url))
-        return self.url
+                return '%s-%s' % (Unicode(self['trackno']), Unicode(self.url))
+        return Unicode(self.url)
 
 
     def set_url(self, url, info=True):
