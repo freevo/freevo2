@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/08/05 17:25:58  dischi
+# fixed event name
+#
 # Revision 1.7  2003/08/02 16:21:40  dischi
 # add MPLAYER_AUTOCROP
 #
@@ -450,7 +453,7 @@ class MPlayer:
                 self.seek = 0
                 return TRUE
 
-            elif event == INPUT_QUIT:
+            elif event == INPUT_EXIT:
                 if DEBUG: print 'seek stopped'
                 self.seek_timer.cancel()
                 self.seek = 0
