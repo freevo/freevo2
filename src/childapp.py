@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/10/11 11:21:14  dischi
+# use util killall function
+#
 # Revision 1.26  2003/10/04 18:42:45  dischi
 # do not kill a dead child
 #
@@ -98,6 +101,8 @@ import signal
 import config
 import osd
 import rc
+import util
+
 from event import *
 
 
@@ -139,9 +144,6 @@ class ChildApp:
             self.binary = app[app.find(' ')+1:].lstrip()
         else:
             self.binary = app.lstrip()
-
-        if self.binary.find(' ') > 0:
-            self.binary=self.binary[:self.binary.find(' ')]
 
         start_str = '%s %s' % (config.RUNAPP, app)
 
@@ -262,7 +264,7 @@ class ChildApp:
             # Solution: there is no good one, let's try killall on the binary. It's
             # ugly but it's the _only_ way to stop this nasty app
             print 'Oops, command refuses to die, try bad hack....'
-            os.system('killall %s' % self.binary)
+            util.killall(self.binary, sig=15)
             for i in range(20):
                 if self.outfile.closed:
                     break
@@ -271,7 +273,7 @@ class ChildApp:
                 # still not dead. Puh, something is realy broekn here.
                 # Try killall -9 as last chance
                 print 'Try harder to kill the app....'
-                os.system('killall -9 %s' % self.binary)
+                util.killall(self.binary, sig=9)
                 for i in range(20):
                     if self.outfile.closed:
                         break
@@ -376,6 +378,7 @@ class ChildThread(threading.Thread):
 
     def stop(self, cmd=None):
         if self.mode != 'play':
+            _debug_('not playing anymore')
             return
 
         if cmd:
