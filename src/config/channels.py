@@ -100,12 +100,18 @@ def get_uri(channel, card):
 
 def player(channel):
     for u in channel.uri:
-        device, uri = u.split(':')
         # try all internal URIs
-        for p in plugin.getbyname(plugin.TV, True):
+        device, uri = u.split(':')
+
+        tvp = plugin.getbyname(plugin.TV, True)
+        if not tvp or len(tvp) == 0: 
+            return None
+
+        for p in tvp:
             # FIXME: better handling for rate == 1 or 2
             if p.rate(channel, device, uri):
                 return p, device, uri
+
     return None
 
 
