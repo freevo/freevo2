@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/03/22 01:24:40  mikeruelle
+# tv channel padding so that the big number in tvtime is what us cable channel it is. channels must be in order to use this
+#
 # Revision 1.33  2004/03/21 18:30:04  mikeruelle
 # allow for some special options during setup
 #
@@ -304,6 +307,16 @@ class PluginInterface(plugin.Plugin):
                 mychan = float(mychan)
                 mychan = mychan / 1000.0
                 mychan = "%.2fMHz" % mychan
+            if (hasattr(config, 'TV_PAD_CHAN_NUMBERS') and config.TV_PAD_CHAN_NUMBERS and re.search('^\d+$', mychan)):
+	        for i in range(c,int(mychan)):
+                    fchild =  doc.createElement('station')
+                    fchild.setAttribute('channel',str(i))
+                    fchild.setAttribute('band',myband)
+                    fchild.setAttribute('name',str(i))
+                    fchild.setAttribute('active','0')
+                    fchild.setAttribute('position',str(i))
+                    freevonode.appendChild(fchild)
+                    c = c + 1
             fchild =  doc.createElement('station')
             fchild.setAttribute('channel',mychan)
             fchild.setAttribute('band',myband)
@@ -349,6 +362,10 @@ class PluginInterface(plugin.Plugin):
                 mychan = float(mychan)
                 mychan = mychan / 1000.0
                 mychan = "%.2fMHz" % mychan
+            if (hasattr(config, 'TV_PAD_CHAN_NUMBERS') and config.TV_PAD_CHAN_NUMBERS and re.search('^\d+$', mychan)):
+	        for i in range(c,int(mychan)):
+                    fp.write('    <station name="%s" active="0" position="%s" band="%s" channel="%s"/>\n' % (i,i,myband,i))
+                    c = c + 1
             if self.xmltv_supported:
                 fp.write('    <station name="%s" xmltvid="%s" active="1" position="%s" band="%s" channel="%s"/>\n' % (cgi.escape(m[1]), m[0], c, myband, mychan))
             else:
@@ -498,13 +515,18 @@ class TVTime:
 		if hasattr(config, "TV_VCR_INPUT_NUM") and config.TV_VCR_INPUT_NUM:
 		    cf_input = config.TV_VCR_INPUT_NUM
 
+            if hasattr(config, 'TV_PAD_CHAN_NUMBERS') and config.TV_PAD_CHAN_NUMBERS:
+	        mychan = tuner_channel
+            else:
+	        mychan = self.tuner_chidx
+
             command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s -i %s' % (config.TVTIME_CMD,
                                                                    outputplugin,
                                                                    w,
                                                                    s_norm,
                                                                    cf_device,
                                                                    'freevo',
-                                                                   self.tuner_chidx,
+                                                                   mychan,
 								   cf_input)
 
             if osd.get_fullscreen() == 1:
