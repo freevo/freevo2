@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/04/25 12:38:22  dischi
+# move idlebar image to background
+#
 # Revision 1.15  2004/03/14 11:42:35  dischi
 # make idlebar have a background image
 #
@@ -155,7 +158,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 
         # draw the cached barimage
         if self.bar:
-            osd.drawimage(self.bar, (0, 0, w, h) )
+            osd.drawimage(self.bar, (0, 0, w, h), background=True )
 
         if not self.plugins:
             self.plugins = plugin.get('idlebar')

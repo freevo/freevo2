@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/04/25 12:38:22  dischi
+# move idlebar image to background
+#
 # Revision 1.39  2004/03/14 17:22:46  dischi
 # seperate ellipses and dim in drawstringframed
 #
@@ -710,7 +713,7 @@ class Skin_Area:
         return cimage
 
         
-    def drawimage(self, image, val):
+    def drawimage(self, image, val, background=False):
         """
         draws an image ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -729,12 +732,16 @@ class Skin_Area:
             return 0,0
         
         if isinstance(val, tuple):
-            self.tmp_objects.images.append((val[0], val[1], val[0] + image.get_width(),
-                                            val[1] + image.get_height(), image))
+            if background:
+                o = self.tmp_objects.bgimages
+            else:
+                o = self.tmp_objects.images
+            o.append((val[0], val[1], val[0] + image.get_width(),
+                      val[1] + image.get_height(), image))
             return image.get_width(), image.get_height()
 
         try:
-            if val.label == 'background':
+            if background or val.label == 'background':
                 self.tmp_objects.bgimages.append((val.x, val.y, val.x + val.width,
                                                   val.y + val.height, image))
                 return val.width, val.height
