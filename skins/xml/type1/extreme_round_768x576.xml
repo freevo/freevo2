@@ -1,120 +1,19 @@
 <?xml version="1.0" ?>
 <freevo>
-
-   <skin include="blue1_small_768x576">
+  
+  <skin include="extreme_round_800x600">
     
     <!-- Settings for a normal menu -->
     <menu type="all">
-
-      <background>
-	<mask>
-	  <rectangle x="30" y="120" width="488" height="375" color="0x80000000"
-	    radius="10"/>
-	</mask>
-      </background>
-
-      <title visible="yes" x="460" y="25">
-	<font name="oliversb" size="28" color="0xffffff" align="center"/>
-	<shadow visible="yes" color="0x80000000" x="3" y="3"/>
-      </title>
-
-      <items x="60" y="145" height="330" width="428">
-	<item type="all">
-	  <font name="bluehigh" size="18"/>
-	  <shadow visible="no"/> 
-	  <selection visible="yes" bgcolor="0xff000000" radius="5" spacing="8">
-	    <font name="bluehigh" size="18"/>
-	    <shadow visible="yes" color="0x000000" x="1" y="1"/>
-	  </selection>
-	</item>
-      </items>
-
-      <covers>
-	<cover type="movie" x="523" y="98">
-	  <mask>
-	    <rectangle x="508" y="83" width="230" height="310" 
-	      color="0x80000000" radius="10"/>
-	  </mask>
-	</cover>
-	<cover type="music" x="523" y="98">
-	  <mask>
-	    <rectangle x="508" y="83" width="230" height="230" 
-	      color="0x80000000" radius="10"/>
-	  </mask>
-	</cover>
-	<cover type="image" x="523" y="98">
-	  <mask>
-	    <rectangle x="508" y="83" width="230" height="190" 
-	      color="0x80000000" radius="10"/>
-	  </mask>
-	</cover>
-      </covers>
-
-      <submenu x="30" y="510">
-	<font name="bluehigh" size="20" color="0xffffff"/>
-	<selection length="154" bgcolor="0x80000000" radius="10">
-           <font name="bluehigh" size="20" color="0xffffff"/>
-           <shadow visible="yes" color="0x000000" x="2" y="2"/>
-        </selection>
-      </submenu>
-
+      <background image="../../images/aubin_bg2.png"/>
     </menu>
-
-    <!-- Override some settings for the main menu -->
-    <menu type="main">
-      <background mask=""/>
-      <title visible="no"/>
-      <logo x="560"/>
-      <items x="230" y="105" width="320">
-	<item type="all">
-	  <font name="bluehigh" size="36" color="0xffffff"/>
-	  <shadow visible="yes" color="0x000000" x="1" y="1"/>
-
-	  <selection bgcolor="0xaa000000">
-	    <font name="bluehigh" size="36" color="0xffffff"/>
-	    <shadow visible="yes" color="0xaa000000" x="3" y="3"/>
-	  </selection>
-	</item>
-      </items>
-    </menu>
-
-
-    <!-- Settings for a popup box -->
-    <popup mask="" bgcolor="0xaa000000" border_size="1" border_color="0x000000"
-      radius="15" spacing="20">
-
-      <message x="100" y="100" width="600" height="400">
-	<font name="bluehigh" size="18" color="0xffffff" align="center"/>
-	<shadow visible="no"/>
-      </message>
-    </popup>
-
-
+    
+    <mp3>
+      <background image="../../images/aubin_bg2.png"/>
+    </mp3>
+    
     <extendedmenu type="tv">
-      <info>
-	<background radius="10" spacing="10"/>
-      </info>
-
-      <view>
-	<background radius="10"/>
-      </view>
-
-      <listing>
-        <table border_size="0"> 
-	   <label>
-	      <background radius="10"/>
-	   </label>
-	   <head>
-	      <background radius="3" />
-	   </head>
-	   <content>
-	      <background radius="5"/>
-	   </content>
-        </table>
-      </listing>
-
+      <background image="../../images/aubin_bg2.png"/>
     </extendedmenu>
   </skin>
-  
-
 </freevo>
