@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.11
+LOCAL_CONF_VERSION  = 5.12
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -213,7 +213,11 @@ LOCAL_CONF_CHANGES = [
      IMAGEVIEWER_BLEND_MODE to control the blending effect in the image viewer'''),
     (5.11,
      '''Add IMAGEVIEWER_OSD to customize the osd and VIDEO_AUTOJOIN to auto join
-     movies with more than one file''') ]
+     movies with more than one file'''),
+    (5.12,
+     '''Added TV_RECORD_SERVER_UID to set the uid for the recordserver and
+     TV_RECORDFILE_SUFFIX for the suffix. If your TV_RECORDFILE_MASK contains
+     the suffix, please remove it here''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -1210,6 +1214,10 @@ TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
 
 TV_RECORD_SERVER_IP = 'localhost'
 TV_RECORD_SERVER_PORT = 18001
+
+# If the recordserver runs as root, set the uid to the given one
+# after startup.
+TV_RECORD_SERVER_UID = 0
 
 # start every recording X minutes before scheduled,
 # and stop X minutes after scheduled - default to zero minutes.
