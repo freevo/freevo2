@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/04/22 12:32:13  dischi
+# Arg, I should import something I need
+#
 # Revision 1.12  2003/04/22 08:58:28  dischi
 # fixed mixer bug
 #
@@ -88,6 +91,7 @@ import rc      # The RemoteControl class.
 import childapp # Handle child applications
 import epg_xmltv as epg # The Electronic Program Guide
 
+import plugin
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
