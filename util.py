@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2002/11/23 19:32:27  dischi
+# We don't need that
+#
 # Revision 1.46  2002/11/15 03:39:20  krister
 # Fixed a bug in autoslideshows.
 #
@@ -57,9 +60,6 @@ import md5
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
-
-# XML support
-import movie_xml
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
