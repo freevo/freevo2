@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/24 00:09:02  rshortt
+# Bugfix.
+#
 # Revision 1.9  2003/07/14 19:30:37  rshortt
 # Library update from Mike Ruelle.  Now you can view other media types and
 # download as well.
@@ -289,7 +292,7 @@ class LibraryResource(FreevoResource):
                     for prog in progl:
                         try:
                             if prog.isRecording == TRUE:
-                                recordingprogram = ri.getProgFilename(prog)
+                                recordingprogram = tv_util.getProgFilename(prog)
                                 break
                         except:
                             # sorry, have to pass without doing anything.
