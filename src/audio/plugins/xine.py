@@ -7,11 +7,14 @@
 # Notes: Use xine (or better fbxine) to play audio files. This requires
 #        xine-ui > 0.9.22 (when writing this plugin this means cvs)
 #
-# Todo:  test it
+# Todo:
 #
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/12/10 19:02:38  dischi
+# move to new ChildApp2 and remove the internal thread
+#
 # Revision 1.9  2003/11/22 15:30:55  dischi
 # support more than one player
 #
@@ -20,22 +23,6 @@
 #
 # Revision 1.7  2003/11/08 10:00:59  dischi
 # fix cd playback
-#
-# Revision 1.6  2003/10/21 21:17:41  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.5  2003/09/19 22:09:16  dischi
-# use new childapp thread function
-#
-# Revision 1.4  2003/09/01 19:46:02  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.3  2003/08/26 20:24:07  outlyer
-# Apparently some files have spaces in them... D'oh :)
-#
-# Revision 1.2  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -60,12 +47,9 @@
 #endif
 
 
-import time, os
-import signal
 import popen2, re
 
 import config     # Configuration handler. reads config file.
-import util       # Various utilities
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 
@@ -113,11 +97,8 @@ class PluginInterface(plugin.Plugin):
             print _( 'You need software %s' ) % 'xine-ui > 0.9.22'
             return
             
-        # create the xine object
-        xine = util.SynchronizedObject(Xine(xine_version))
-
-        # register it as the object to play
-        plugin.register(xine, plugin.AUDIO_PLAYER, True)
+        # register xine as the object to play
+        plugin.register(Xine(xine_version), plugin.AUDIO_PLAYER, True)
 
 
 # ======================================================================
@@ -128,12 +109,10 @@ class Xine:
     """
     
     def __init__(self, version):
-        self.name = 'xine'
-        self.thread = childapp.ChildThread()
-        self.mode = None
+        self.name         = 'xine'
         self.xine_version = version
-        self.app_mode = 'audio'
-
+        self.app_mode     = 'audio'
+        self.app          = None
         self.command = '%s -V none -A %s --stdctl' % (config.CONF.fbxine, config.XINE_AO_DEV)
         if rc.PYLIRC:
             self.command = '%s --no-lirc' % self.command
@@ -171,13 +150,13 @@ class Xine:
             add_args += ' cfg:/input.cdda_device:%s' % item.media.devicename
             
         command = '%s %s "%s"' % (self.command, add_args, filename)
-        _debug_('Xine.play(): Starting thread, cmd=%s' % command)
+        _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        self.thread.start(XineApp, (command, item, self.refresh))
+        self.app = XineApp(command, self)
     
 
     def is_playing(self):
-        return self.thread.mode != 'idle'
+        return self.app.isAlive()
 
 
     def refresh(self):
@@ -186,9 +165,9 @@ class Xine:
 
     def stop(self):
         """
-        Stop xine and set thread to idle
+        Stop xine
         """
-        self.thread.stop('quit\n')
+        self.app.stop('quit\n')
             
 
     def eventhandler(self, event, menuw=None):
@@ -196,19 +175,17 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
-        if event == AUDIO_PLAY_END:
-            if event.arg:
-                self.stop()
-                if self.playerGUI.try_next_player():
-                    return True
-            event = PLAY_END
+        if event == PLAY_END and event.arg:
+            self.stop()
+            if self.playerGUI.try_next_player():
+                return True
 
         if event in ( PLAY_END, USER_END ):
             self.playerGUI.stop()
             return self.item.eventhandler(event)
 
         if event == PAUSE or event == PLAY:
-            self.thread.app.write('pause\n')
+            self.app.write('pause\n')
             return True
 
         if event == STOP:
@@ -228,7 +205,7 @@ class Xine:
                 pos = 30
             else:
                 pos = 30
-            self.thread.app.write('%s%s\n' % (action, pos))
+            self.app.write('%s%s\n' % (action, pos))
             return True
 
         # nothing found? Try the eventhandler of the object who called us
@@ -238,20 +215,21 @@ class Xine:
 
 # ======================================================================
 
-class XineApp(childapp.ChildApp):
+class XineApp(childapp.ChildApp2):
     """
     class controlling the in and output from the xine process
     """
 
-    def __init__(self, (app, item, refresh)):
-        self.item = item
-        childapp.ChildApp.__init__(self, app)
-        self.elapsed = 0
-        self.refresh = refresh
+    def __init__(self, app, player):
+        self.item        = player.item
+        self.player      = player
+        self.elapsed     = 0
         self.stop_reason = 0 # 0 = ok, 1 = error
+        childapp.ChildApp2.__init__(self, app)
 
-    def stopped(self):
-        rc.post_event(Event(AUDIO_PLAY_END, self.stop_reason))
+
+    def stop_event(self):
+        return Event(PLAY_END, self.stop_reason, handler=self.player.eventhandler)
 
 
     def stdout_cb(self, line):
@@ -259,7 +237,7 @@ class XineApp(childapp.ChildApp):
             self.item.elapsed = int(line[6:])
 
             if self.item.elapsed != self.elapsed:
-                self.refresh()
+                self.player.refresh()
             self.elapsed = self.item.elapsed
 
 

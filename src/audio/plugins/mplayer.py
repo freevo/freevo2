@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/12/10 19:02:38  dischi
+# move to new ChildApp2 and remove the internal thread
+#
 # Revision 1.27  2003/12/06 13:43:35  dischi
 # expand the <audio> parsing in fxd files
 #
@@ -49,17 +52,15 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import time, os
-import string
-import threading, signal
+import os
 import re
 
 import config     # Configuration handler. reads config file.
-import util       # Various utilities
 import childapp   # Handle child applications
 
 import rc
 import plugin
+
 from event import *
 
 
@@ -71,10 +72,9 @@ class PluginInterface(plugin.Plugin):
     def __init__(self):
         # create the mplayer object
         plugin.Plugin.__init__(self)
-        mplayer = util.SynchronizedObject(MPlayer())
 
-        # register it as the object to play audio
-        plugin.register(mplayer, plugin.AUDIO_PLAYER, True)
+        # register mplayer as the object to play audio
+        plugin.register(MPlayer(), plugin.AUDIO_PLAYER, True)
 
 
 class MPlayer:
@@ -83,10 +83,9 @@ class MPlayer:
     """
     
     def __init__(self):
-        self.name = 'mplayer'
-        self.thread = childapp.ChildThread()
-        self.mode = None
+        self.name     = 'mplayer'
         self.app_mode = 'audio'
+        self.app      = None
 
 
     def rate(self, item):
@@ -105,9 +104,9 @@ class MPlayer:
         DEMUXER_MP3 = 17
         DEMUXER_OGG = 18
         rest, extension     = os.path.splitext(filename)
-        if string.lower(extension) == '.mp3':
+        if extension.lower() == '.mp3':
             return "-demuxer " + str(DEMUXER_MP3)
-        if string.lower(extension) == '.ogg':
+        if extension.lower() == '.ogg':
             return "-demuxer " + str(DEMUXER_OGG)
         else:
             return ''
@@ -183,21 +182,21 @@ class MPlayer:
             # Invalid file, show an error and survive.
             return _('Invalid audio file')
 
-        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
+        _debug_('MPlayer.play(): Starting cmd=%s' % command)
             
-        self.thread.start(MPlayerApp, (command, item, self.refresh))
+        self.app = MPlayerApp(command, self)
         return None
     
 
     def stop(self):
         """
-        Stop mplayer and set thread to idle
+        Stop mplayer
         """
-        self.thread.stop('quit\n')
+        self.app.stop('quit\n')
 
 
     def is_playing(self):
-        return self.thread.mode != 'idle'
+        return self.app.isAlive()
 
 
     def refresh(self):
@@ -218,7 +217,7 @@ class MPlayer:
             event = PLAY_END
             
         if event == AUDIO_SEND_MPLAYER_CMD:
-            self.thread.app.write('%s\n' % event.arg)
+            self.app.write('%s\n' % event.arg)
             return True
 
         if event in ( STOP, PLAY_END, USER_END ):
@@ -226,11 +225,11 @@ class MPlayer:
             return self.item.eventhandler(event)
 
         elif event == PAUSE or event == PLAY:
-            self.thread.app.write('pause\n')
+            self.app.write('pause\n')
             return True
 
         elif event == SEEK:
-            self.thread.app.write('seek %s\n' % event.arg)
+            self.app.write('seek %s\n' % event.arg)
             return True
 
         else:
@@ -240,23 +239,22 @@ class MPlayer:
             
 # ======================================================================
 
-class MPlayerApp(childapp.ChildApp):
+class MPlayerApp(childapp.ChildApp2):
     """
     class controlling the in and output from the mplayer process
     """
-
-    def __init__(self, (app, item, refresh)):
-        self.item = item
-        self.elapsed = 0
-        childapp.ChildApp.__init__(self, app)
-        self.RE_TIME = re.compile("^A: *([0-9]+)").match
-	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
-        self.refresh = refresh
+    def __init__(self, app, player):
+        self.item        = player.item
+        self.player      = player
+        self.elapsed     = 0
         self.stop_reason = 0 # 0 = ok, 1 = error
+        self.RE_TIME     = re.compile("^A: *([0-9]+)").match
+	self.RE_TIME_NEW = re.compile("^A: *([0-9]+):([0-9]+)").match
+        childapp.ChildApp2.__init__(self, app)
 
 
-    def stopped(self):
-        rc.post_event(Event(AUDIO_PLAY_END, self.stop_reason))
+    def stop_event(self):
+        return Event(PLAY_END, self.stop_reason, handler=self.player.eventhandler)
 
         
     def stdout_cb(self, line):
@@ -264,7 +262,7 @@ class MPlayerApp(childapp.ChildApp):
             m = self.RE_TIME_NEW(line)
             if m:
                 self.stop_reason = 0
-		timestrs = string.split(m.group(),":")
+		timestrs = m.group().split(":")
 		if len(timestrs) == 5:
 		    # playing for days!
                     self.item.elapsed = 86400*int(timestrs[1]) + \
@@ -288,7 +286,7 @@ class MPlayerApp(childapp.ChildApp):
                     self.item.elapsed = int(m.group(1))
 
             if self.item.elapsed != self.elapsed:
-                self.refresh()
+                self.player.refresh()
             self.elapsed = self.item.elapsed
 
 

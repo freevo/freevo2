@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/12/10 19:06:06  dischi
+# move to new ChildApp2 and remove the internal thread
+#
 # Revision 1.48  2003/12/09 20:40:13  dischi
 # fixed copy paste error
 #
@@ -69,7 +72,7 @@
 #endif
 
 
-import time, os
+import time, os, re
 import threading, signal
 import traceback, popen2
 
@@ -81,8 +84,6 @@ import rc         # The RemoteControl class.
 from event import *
 import plugin
 
-# RegExp
-import re
 
 class PluginInterface(plugin.Plugin):
     """
@@ -112,10 +113,9 @@ class PluginInterface(plugin.Plugin):
                 _debug_("MPlayer version set to: %s" % mplayer_version)
                     
         child.wait()
-        mplayer = util.SynchronizedObject(MPlayer(mplayer_version))
 
-        # register it as the object to play audio
-        plugin.register(mplayer, plugin.VIDEO_PLAYER, True)
+        # register mplayer as the object to play video
+        plugin.register(MPlayer(mplayer_version), plugin.VIDEO_PLAYER, True)
 
 
 class MPlayer:
@@ -124,14 +124,13 @@ class MPlayer:
     """
     def __init__(self, version):
         self.name = 'mplayer'
-        self.thread = childapp.ChildThread()
-        self.thread.stop_osd = True
 
         self.mode = None
         self.app_mode = 'video'
         self.version = version
         self.seek = 0
         self.seek_timer = threading.Timer(0, self.reset_seek)
+        self.app = None
 
 
     def rate(self, item):
@@ -313,8 +312,7 @@ class MPlayer:
 
         rc.app(self)
 
-        self.thread.start(MPlayerApp, (command, self, item, network_play))
-
+        self.app = MPlayerApp(command, self, item, network_play)
         return None
     
 
@@ -322,8 +320,10 @@ class MPlayer:
         """
         Stop mplayer and set thread to idle
         """
-        self.thread.stop('quit\n')
+        self.app.stop('quit\n')
         rc.app(None)
+        self.app = None
+
         for p in self.plugins:
             command = p.stop()
 
@@ -352,7 +352,7 @@ class MPlayer:
             elif event == INPUT_ENTER:
                 self.seek_timer.cancel()
                 self.seek *= 60
-                self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
+                self.app.write('seek ' + str(self.seek) + ' 2\n')
                 _debug_("seek "+str(self.seek)+" 2\n")
                 self.seek = 0
                 rc.set_context('video')
@@ -380,19 +380,19 @@ class MPlayer:
 
         try:
             if event == VIDEO_SEND_MPLAYER_CMD:
-                self.thread.app.write('%s\n' % event.arg)
+                self.app.write('%s\n' % event.arg)
                 return True
 
             if event == TOGGLE_OSD:
-                self.thread.app.write('osd\n')
+                self.app.write('osd\n')
                 return True
 
             if event == PAUSE or event == PLAY:
-                self.thread.app.write('pause\n')
+                self.app.write('pause\n')
                 return True
 
             if event == SEEK:
-                self.thread.app.write('seek %s\n' % event.arg)
+                self.app.write('seek %s\n' % event.arg)
                 return True
         except:
             print 'Exception while sending command to mplayer:'
@@ -444,14 +444,13 @@ class MPlayer:
 
 # ======================================================================
 
-import osd
 
-class MPlayerApp(childapp.ChildApp):
+class MPlayerApp(childapp.ChildApp2):
     """
     class controlling the in and output from the mplayer process
     """
 
-    def __init__(self, (app, mplayer, item, network_play)):
+    def __init__(self, app, mplayer, item, network_play):
         # DVD items also store mplayer_audio_broken to check if you can
         # start them with -alang or not
         if hasattr(item, 'mplayer_audio_broken') or item.mode != 'dvd':
@@ -466,6 +465,8 @@ class MPlayerApp(childapp.ChildApp):
         self.item         = item
         self.mplayer      = mplayer
         self.exit_type    = None
+
+        import osd
         self.osd          = osd.get_singleton()
         self.osdfont      = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
                                              config.OSD_DEFAULT_FONTSIZE)
@@ -480,18 +481,18 @@ class MPlayerApp(childapp.ChildApp):
                 self.elapsed_plugins.append(p)
 
         # init the child (== start the threads)
-        childapp.ChildApp.__init__(self, app)
+        childapp.ChildApp2.__init__(self, app)
 
 
                 
-    def stopped(self):
+    def stop_event(self):
         if self.exit_type == "End of file":
-            rc.post_event(PLAY_END)
+            return PLAY_END
         elif self.exit_type == "Quit":
-            rc.post_event(USER_END)
+            return USER_END
         else:
             print _( 'ERROR' ) + ': ' + _( 'unknow error while playing file' )
-            rc.post_event(PLAY_END)
+            return PLAY_END
                         
 
     def stdout_cb(self, line):
@@ -509,7 +510,8 @@ class MPlayerApp(childapp.ChildApp):
                 if line.find('Connecting to server') == 0:
                     line = 'Connecting to server'
                 self.osd.clearscreen(self.osd.COL_BLACK)
-                self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10, config.OSD_OVERSCAN_Y+10,
+                self.osd.drawstringframed(line, config.OSD_OVERSCAN_X+10,
+                                          config.OSD_OVERSCAN_Y+10,
                                           self.osd.width - 2 * (config.OSD_OVERSCAN_X+10), -1,
                                           self.osdfont, self.osd.COL_WHITE)
                 self.osd.update()

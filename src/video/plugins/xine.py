@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/12/10 19:06:06  dischi
+# move to new ChildApp2 and remove the internal thread
+#
 # Revision 1.30  2003/12/07 08:57:20  dischi
 # add config.XINE_ARGS_DEF
 #
@@ -75,12 +78,10 @@
 
 
 import time, os
-import signal
 import popen2, re
 import copy
 
 import config     # Configuration handler. reads config file.
-import util       # Various utilities
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 
@@ -139,11 +140,8 @@ class PluginInterface(plugin.Plugin):
             print _( "You need %s to use all features of the '%s' plugin" ) % \
                   ( 'xine-ui > 0.9.21', 'xine' )
             
-        # create the xine object
-        xine = util.SynchronizedObject(Xine(type, xine_version))
-
-        # register it as the object to play
-        plugin.register(xine, plugin.VIDEO_PLAYER, True)
+        # register xine as the object to play
+        plugin.register(Xine(type, xine_version), plugin.VIDEO_PLAYER, True)
 
 
 class Xine:
@@ -154,14 +152,11 @@ class Xine:
     def __init__(self, type, version):
         self.name = 'xine'
 
-        # start the thread
-        self.thread = childapp.ChildThread()
-        self.thread.stop_osd = True
-
         self.mode         = None
         self.app_mode     = ''
         self.xine_type    = type
         self.xine_version = version
+        self.app          = None
 
         self.command = [ '--prio=%s' % config.MPLAYER_NICE ] + \
                        config.XINE_COMMAND.split(' ') + \
@@ -250,18 +245,18 @@ class Xine:
         else:
             command.append(item.url)
             
-        _debug_('Xine.play(): Starting thread, cmd=%s' % command)
+        _debug_('Xine.play(): Starting cmd=%s' % command)
 
         rc.app(self)
-        self.thread.start(childapp.ChildApp, command)
+        self.app = childapp.ChildApp2(command)
         return None
     
 
     def stop(self):
         """
-        Stop xine and set thread to idle
+        Stop xine
         """
-        self.thread.stop('quit\n')
+        self.app.stop('quit\n')
         rc.app(None)
             
 
@@ -279,7 +274,7 @@ class Xine:
             return True
         
         if event == PAUSE or event == PLAY:
-            self.thread.app.write('pause\n')
+            self.app.write('pause\n')
             return True
 
         if event == STOP:
@@ -299,97 +294,97 @@ class Xine:
                 pos = 30
             else:
                 pos = 30
-            self.thread.app.write('%s%s\n' % (action, pos))
+            self.app.write('%s%s\n' % (action, pos))
             return True
 
         if event == TOGGLE_OSD:
-            self.thread.app.write('OSDStreamInfos\n')
+            self.app.write('OSDStreamInfos\n')
             return True
 
         if event == VIDEO_TOGGLE_INTERLACE:
-            self.thread.app.write('ToggleInterleave\n')
+            self.app.write('ToggleInterleave\n')
             return True
 
         if event == NEXT:
-            self.thread.app.write('EventNext\n')
+            self.app.write('EventNext\n')
             return True
 
         if event == PREV:
-            self.thread.app.write('EventPrior\n')
+            self.app.write('EventPrior\n')
             return True
 
         # DVD NAVIGATION
         if event == DVDNAV_LEFT:
-            self.thread.app.write('EventLeft\n')
+            self.app.write('EventLeft\n')
             return True
             
         if event == DVDNAV_RIGHT:
-            self.thread.app.write('EventRight\n')
+            self.app.write('EventRight\n')
             return True
             
         if event == DVDNAV_UP:
-            self.thread.app.write('EventUp\n')
+            self.app.write('EventUp\n')
             return True
             
         if event == DVDNAV_DOWN:
-            self.thread.app.write('EventDown\n')
+            self.app.write('EventDown\n')
             return True
             
         if event == DVDNAV_SELECT:
-            self.thread.app.write('EventSelect\n')
+            self.app.write('EventSelect\n')
             return True
             
         if event == DVDNAV_TITLEMENU:
-            self.thread.app.write('TitleMenu\n')
+            self.app.write('TitleMenu\n')
             return True
             
         if event == DVDNAV_MENU:
-            self.thread.app.write('Menu\n')
+            self.app.write('Menu\n')
             return True
 
         # VCD NAVIGATION
         if event in INPUT_ALL_NUMBERS:
-            self.thread.app.write('Number%s\n' % event.arg)
+            self.app.write('Number%s\n' % event.arg)
             time.sleep(0.1)
-            self.thread.app.write('EventSelect\n')
+            self.app.write('EventSelect\n')
             return True
         
         if event == MENU:
-            self.thread.app.write('TitleMenu\n')
+            self.app.write('TitleMenu\n')
             return True
 
 
         # DVD/VCD language settings
         if event == VIDEO_NEXT_AUDIOLANG and self.max_audio:
             if self.current_audio < self.max_audio - 1:
-                self.thread.app.write('AudioChannelNext\n')
+                self.app.write('AudioChannelNext\n')
                 self.current_audio += 1
                 # wait until the stream is changed
                 time.sleep(0.1)
             else:
                 # bad hack to warp around
                 if self.xine_type == 'fb':
-                    self.thread.app.write('AudioChannelDefault\n')
+                    self.app.write('AudioChannelDefault\n')
                     time.sleep(0.1)
                 for i in range(self.max_audio):
-                    self.thread.app.write('AudioChannelPrior\n')
+                    self.app.write('AudioChannelPrior\n')
                     time.sleep(0.1)
                 self.current_audio = -1
             return True
             
         if event == VIDEO_NEXT_SUBTITLE and self.max_subtitle:
             if self.current_subtitle < self.max_subtitle - 1:
-                self.thread.app.write('SpuNext\n')
+                self.app.write('SpuNext\n')
                 self.current_subtitle += 1
                 # wait until the stream is changed
                 time.sleep(0.1)
             else:
                 # bad hack to warp around
                 if self.xine_type == 'fb':
-                    self.thread.app.write('SpuDefault\n')
+                    self.app.write('SpuDefault\n')
                     time.sleep(0.1)
                 for i in range(self.max_subtitle):
-                    self.thread.app.write('SpuPrior\n')
+                    self.app.write('SpuPrior\n')
                     time.sleep(0.1)
                 self.current_subtitle = -1
             return True
