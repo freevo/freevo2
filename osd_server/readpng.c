@@ -135,10 +135,8 @@ int read_png (char *file_name, uint8 **ppBitmap,
    /* swap the RGBA or GA data to ARGB or AG (or BGRA to ABGR) */
    /*  png_set_swap_alpha (png_ptr); */
 
-#if 0
    /* Add filler (or alpha) byte (before/after each RGB triplet) */
-   png_set_filler (png_ptr, 0xff, PNG_FILLER_BEFORE);
-#endif
+   png_set_filler (png_ptr, 0x00, PNG_FILLER_AFTER);
    
    if ((color_type == PNG_COLOR_TYPE_GRAY) ||
        (color_type == PNG_COLOR_TYPE_GRAY_ALPHA)) {
@@ -210,11 +208,19 @@ int read_png (char *file_name, uint8 **ppBitmap,
 int
 main (int ac, char *av[])
 {
-   uint8 *pBitmap;
+   uint32 *pBitmap, val;
    uint16 w, h;
+   int r, c;
    
    
-   read_png (av[1], &pBitmap, &w, &h);
+   read_png (av[1], (uint8 **) &pBitmap, &w, &h);
+
+   for (r = 0; r < h; r++) {
+      for (c = 0; c < w; c++) {
+         val = pBitmap[r*w+c];
+         printf ("%3d %3d  0x%08x\n", c, r, val);
+      }
+   }
 
    return (0);
    
