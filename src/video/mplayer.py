@@ -20,6 +20,26 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/06/23 00:16:04  outlyer
+# Fixed the regular expression. It wasn't making bookmarks when less than
+# 1000 seconds has elapsed. I don't know who made this one, but just in case,
+#
+# here is the old one:
+#
+# self.RE_TIME = re.compile("^A:?([0-9]+)").match
+#
+# The '?' means, match ':' zero or one times, which doesn't make sense in this context.
+#
+# The new one:
+#
+# self.RE_TIME = re.compile("^A: *([0-9]+)").match
+#
+# In this case '*' means match ' ' zero or more times.
+#
+# I also removed the comment about multiple bookmarks since you can have as many bookmarks
+# as you want. The limitation with bookmarks is that mplayer isn't great at seeking in files
+# other than avi; DVD, and mpg files will have varying results.
+#
 # Revision 1.42  2003/06/10 18:02:57  dischi
 # Bad alang hack for mplayer and badly mastered DVDs. Restart mplayer if we
 # have audio tracks in the ifo that aren't there.
@@ -402,9 +422,7 @@ class MPlayer:
             
             bookmarkfile = util.get_bookmarkfile(self.filename)
             
-            handle = open(bookmarkfile,'a+') # Should be appending so we could
-                                             # have multiple bookmarks later, with
-                                             # a menu or something. 
+            handle = open(bookmarkfile,'a+') 
             handle.write(str(self.item.elapsed))
             handle.write('\n')
             handle.close()
@@ -574,7 +592,7 @@ class MPlayerApp(childapp.ChildApp):
             else:
                 print 'MPlayer logging to "%s" and "%s"' % (fname_out, fname_err)
 
-        self.RE_TIME = re.compile("^A:?([0-9]+)").match
+        self.RE_TIME = re.compile("^A: *([0-9]+)").match
         self.item = item
         self.parser = MPlayerParser(item)
         childapp.ChildApp.__init__(self, app)
