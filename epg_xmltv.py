@@ -32,6 +32,8 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+EPG_TIME_EXC = 'Time conversion error'
+
 
 cached_guide = None
 
@@ -133,8 +135,11 @@ def load_guide():
         prog.title = p['title'][0][0].encode('Latin-1')
         if p.has_key('desc'):
             prog.desc = p['desc'][0][0].encode('Latin-1')
-        prog.start = timestr2secs_utc(p['start'])
-        prog.stop = timestr2secs_utc(p['stop'])
+        try:
+            prog.start = timestr2secs_utc(p['start'])
+            prog.stop = timestr2secs_utc(p['stop'])
+        except EPG_TIME_EXC:
+            continue
         guide.AddProgram(prog)
 
     guide.Sort()  # Sort the programs in time order
@@ -150,7 +155,11 @@ def load_guide():
 # '200209080000 +0100'
 def timestr2secs_utc(str):
     # This is either something like 'EDT', or '+1'
-    tval, tz = str.split()
+    try:
+        tval, tz = str.split()
+    except ValueError:
+        # The time value couldn't be decoded
+        raise EPG_TIME_EXC
 
     # Is it the '+1' format?
     if tz[0] == '+' or tz[0] == '-':
