@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/05/30 14:47:32  outlyer
+# This wasn't working because you can do:
+#
+# if (e = something):
+#
+# since setting the variable doesn't seem to return a true. This version
+# works.
+#
 # Revision 1.16  2003/05/30 00:53:19  rshortt
 # Various event bugfixes.
 #
@@ -202,8 +210,8 @@ class RemoteControl:
             list = pylirc.nextcode()
             if list:
                 for code in list:
-                    if not (e == self.key_event_mapper(code)):
-	                e = self.key_event_mapper(osd._cb)
+                    e = self.key_event_mapper(code)
+	            if not e:  e = self.key_event_mapper(osd._cb)
                     if e:
                         return e
                 
