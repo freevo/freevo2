@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2004/01/01 12:27:05  dischi
+# make absolute pathnames
+#
 # Revision 1.84  2003/12/30 22:31:44  dischi
 # OVERLAY_DIRS needs specific format for speedup
 #
@@ -389,8 +392,9 @@ CONF.version = 0
 #
 # Read the environment set by the start script
 #
-SHARE_DIR = os.environ['FREEVO_SHARE']
-CONTRIB_DIR = os.environ['FREEVO_CONTRIB']
+SHARE_DIR   = os.path.abspath(os.environ['FREEVO_SHARE'])
+CONTRIB_DIR = os.path.abspath(os.environ['FREEVO_CONTRIB'])
+
 SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
 ICON_DIR  = os.path.join(SHARE_DIR, 'icons')
 IMAGE_DIR = os.path.join(SHARE_DIR, 'images')
