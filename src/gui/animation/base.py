@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/23 15:10:34  dischi
+# remove callback and add wait function
+#
 # Revision 1.5  2004/08/23 14:28:23  dischi
 # fix animation support when changing displays
 #
@@ -73,9 +76,8 @@ class BaseAnimation:
      @bg_redraw  : set background to original screen bg when finished
     """
 
-    def __init__(self, fps, callback = None):
+    def __init__(self, fps):
         self.set_fps(fps)
-        self.callback = callback
         self.active       = False  # Should it be updated in the poll
         self.delete       = False  # Delete from list on next poll
         self.next_update  = 0      # timestamp for next update
@@ -101,9 +103,6 @@ class BaseAnimation:
         Stops the animation from being polled
         """
         self.active = False
-        if self.callback:
-            self.callback()
-            self.callback = None
 
 
     def running(self):
@@ -119,9 +118,6 @@ class BaseAnimation:
         """
         self.active = False
         self.delete = True
-        if self.callback:
-            self.callback()
-            self.callback = None
 
 
     def poll(self, current_time):
@@ -147,3 +143,10 @@ class BaseAnimation:
         on the surface and call the parent function.
         """
         self.remove()
+
+
+    def wait(self):
+        """
+        Wait for this animation to finish
+        """
+        render.get_singleton().wait([self])

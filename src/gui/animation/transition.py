@@ -90,8 +90,8 @@ class Fade(BaseAnimation):
     object is set to 'start' and than moved to 'stop' with the given
     framerate.
     """
-    def __init__(self, objects, frames, start, stop, fps=25, callback=None):
-        BaseAnimation.__init__(self, fps, callback)
+    def __init__(self, objects, frames, start, stop, fps=25):
+        BaseAnimation.__init__(self, fps)
         self.objects     = objects
         self.max_frames  = frames
         self.frame       = 0

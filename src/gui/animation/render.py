@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/08/23 15:10:50  dischi
+# remove callback and add wait function
+#
 # Revision 1.4  2004/08/23 14:28:23  dischi
 # fix animation support when changing displays
 #
@@ -192,3 +195,11 @@ class Render:
         # no animation possible, finish the animation at once
         if not self.display.animation_possible:
             anim_object.finish()
+
+
+    def wait(self, anim_objects):
+        """
+        wait until the given animations are finished
+        """
+        while filter(lambda a: a.running(), anim_objects):
+            self.update()
