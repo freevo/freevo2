@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/06 13:59:19  gsbarbieri
+# Now buttons try to get height from font if no value was given as argument.
+#
 # Revision 1.13  2003/09/05 15:59:20  outlyer
 # Use StringTypes instead of "StringType" since StringTypes includes unicode,
 # which TV listings are sometimes in (like mine)
@@ -119,6 +122,24 @@ class Button(Container):
         Container.__init__(self, 'widget', left, top, width, height, bg_color,
                            fg_color, selected_bg_color, selected_fg_color,
                            border, bd_color, bd_width)
+
+        if not height:
+            if self.skin_info_widget.font:
+                nf = OSDFont( self.skin_info_widget.font.name, self.skin_info_widget.font.size )
+                height = nf.height
+
+            if self.skin_info_widget_selected.font:
+                sf = OSDFont( self.skin_info_widget_selected.font.name, \
+                              self.skin_info_widget_selected.font.size )
+                if height:
+                    height = max( height, sf.height )
+                else:
+                    height = sf.height
+                
+            if not height:
+                height = default_button_height
+
+            self.height = height
 
         self.handler           = handler
         self.h_margin          = 2
