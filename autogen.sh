@@ -15,7 +15,7 @@ echo
 echo generating freevo_howto html files
 
 cd Docs
-docbook2html -o freevo_howto freevo_howto.sgml 2>&1 | grep -v jade
+docbook2html -o howto freevo_howto.sgml 2>&1 | grep -v jade
 
 
 # end of autogen.sh 
