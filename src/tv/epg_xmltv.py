@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/24 19:08:38  mikeruelle
+# populate the rating and categories entries for TvProgram objects.
+#
 # Revision 1.26  2003/08/24 18:15:59  outlyer
 # Use the "best" Python pickle available. Starting in Python 2.3 this is
 # a defined constant, so we'll use the constant; older versions of Python
@@ -295,6 +298,11 @@ def load_guide():
         prog = epg_types.TvProgram()
         prog.channel_id = p['channel'].encode('Latin-1')
         prog.title = p['title'][0][0].encode('Latin-1')
+        if p.has_key('rating'):
+            for darating in p['rating']:
+                prog.ratings[darating['system'].encode('Latin-1')] = darating['value'].encode('Latin-1')
+        if p.has_key('category'):
+             prog.categories = [ cat[0].encode('Latin-1') for cat in p['category'] ]
         if p.has_key('desc'):
             prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1'))
         if p.has_key('sub-title'):
