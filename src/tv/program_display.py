@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/03/13 22:29:39  dischi
+# improve input select dialog
+#
 # Revision 1.34  2004/03/13 20:14:12  rshortt
 # Add 'add to favorites' capabilities.  This needs more work and error handling still.
 # 'remove from favorites' isn't implimented yet either.
@@ -64,6 +67,7 @@ import time, traceback
 from time import gmtime, strftime
 
 import plugin, config, menu
+import osd
 
 import util.tv_util as tv_util
 import tv.record_client as record_client
@@ -284,7 +288,9 @@ class FavoriteItem(Item):
 
     def mod_name(self, arg=None, menuw=None):
         self.menuw = menuw
-        InputBox(text=_('Alter Name'), handler=self.alter_name).show()
+        InputBox(text=_('Alter Name'), handler=self.alter_name,
+                 width = osd.get_singleton().width - config.OSD_OVERSCAN_X - 20,
+                 input_text=self.name).show()
 
 
     def alter_name(self, name):
