@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/06/09 17:04:28  outlyer
+# Looks I did in fact break x11 output, but it was only for a few seconds,
+# so no one should be upset :) Mapped config of 'x11' to 'xv' and 'dfbmga'
+# to 'directfb' since that's what tvtime uses.
+#
 # Revision 1.6  2003/06/09 16:42:13  outlyer
 # Don't shut down the display if using mga since it breaks the framebuffer
 # config. Please retest with x11, I know mga works but I don't have an x11
@@ -196,7 +201,14 @@ class TVTime:
             # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
             # Most of these options are only available in tvtime ver >= 0.9.8
 
-            command = 'tvtime -D %s -k -I %s -n %s -d %s -f %s -c %s' % (config.CONF.display,
+            if config.CONF.display == 'x11':
+                outputplugin = 'Xv'
+            if config.CONF.display == 'mga':
+                outputplugin = 'mga'
+            if config.CONF.display == 'dfbmga':
+                outputplugin = 'directfb'
+
+            command = 'tvtime -D %s -k -I %s -n %s -d %s -f %s -c %s' % (outputplugin,
                                                                    w,
                                                                    s_norm,
                                                                    cf_device,
