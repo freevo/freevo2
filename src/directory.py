@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.117  2004/02/14 15:45:03  dischi
+# add support folder.fxd to hold fxditem tags
+#
 # Revision 1.116  2004/02/14 13:04:46  dischi
 # do not call skin.get_singleton() anymore
 #
@@ -131,6 +134,7 @@ import menu
 import skin
 import plugin
 import osd
+import fxditem
 
 from item import Item, FileInformation
 from playlist import Playlist
@@ -257,15 +261,15 @@ class DirItem(Playlist):
         """
         self.folder_fxd = file
         if self.folder_fxd and vfs.isfile(self.folder_fxd):
+            if self.display_type == 'tv':
+                display_type = 'video'
             try:
                 parser = util.fxdparser.FXD(self.folder_fxd)
                 parser.set_handler('folder', self.read_folder_fxd)
                 parser.set_handler('skin', self.read_folder_fxd)
-                parser.parse()
             except:
                 print "fxd file %s corrupt" % self.folder_fxd
                 traceback.print_exc()
-
 
 
     def read_folder_fxd(self, fxd, node):
@@ -492,6 +496,9 @@ class DirItem(Playlist):
                        (self.play_recursive, _('Recursive play all items')) ]
 
         items.append((self.configure, _('Configure directory'), 'configure'))
+
+        if self.folder_fxd:
+            items += fxditem.mimetype.get(self, [self.folder_fxd])
 
         if self.media:
             self.media.umount()
