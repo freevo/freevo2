@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/08/01 13:17:48  outlyer
+# Added Matthew Weber's "rc repeat" patch; it requires pylirc 0.0.4 or newer (CVS)
+#
 # Revision 1.54  2003/07/30 15:13:00  outlyer
 # Add encoding to remove some warnings from Python 2.3. Has no effect on
 # Python < 2.3
@@ -316,7 +319,8 @@ def main_func():
         # Get next command
         while 1:
 
-            event = rc_object.poll()
+            event, event_repeat_count = rc_object.poll()
+            # OK, now we have a repeat_count... to whom could we give it?
             if event:
                 break
 
@@ -327,7 +331,7 @@ def main_func():
                         p.poll_counter = 0
                         p.poll()
 
-            time.sleep(0.1)
+            time.sleep(0.01)
 
         for p in poll_plugins:
             if not (rc_object.app and p.poll_menu_only):
