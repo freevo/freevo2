@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/22 05:59:35  gsbarbieri
+# Fixed some mistakes.
+# Now it's possible to have more than one line for program/label, just make
+# the height fit the number of wanted lines.
+#
 # Revision 1.9  2003/08/03 11:10:26  dischi
 # Added TVGUIDE_HOURS_PER_PAGE
 #
@@ -337,7 +342,8 @@ class TVGuide(gui.GUIObject):
             if flag_start_channel == 1:
                 n += 1
 
-        if n >= self.n_items and (i-self.n_items+2) < len(self.guide.chan_list):
+        if n >= self.n_items and (i-self.n_items+2) < len(self.guide.chan_list) and \
+               (i-self.n_items+1 + self.n_items) < len( self.guide.chan_list ):
             start_channel = self.guide.chan_list[i-self.n_items+2].id
         else:
             channel = self.guide.chan_list[i]

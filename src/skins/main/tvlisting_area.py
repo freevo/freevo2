@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/08/22 05:59:35  gsbarbieri
+# Fixed some mistakes.
+# Now it's possible to have more than one line for program/label, just make
+# the height fit the number of wanted lines.
+#
 # Revision 1.2  2003/08/21 22:40:55  gsbarbieri
 # Now left-top corner cell (date) use vertical padding from head and
 # horizontal padding from label.
@@ -137,7 +142,6 @@ class TVListing_Area(Skin_Area):
 
         self.last_items_geometry = font_h, label_width, label_txt_width, content_y,\
                                    content_h / item_h, item_h, head_h
-
         return self.last_items_geometry
     
         
@@ -254,7 +258,7 @@ class TVListing_Area(Skin_Area):
 
         # selected program:
         selected_prog = to_listing[1]
-        
+
         for i in range(2,len(to_listing)):
             ty0 = y0
             tx0 = content.x
@@ -262,14 +266,15 @@ class TVListing_Area(Skin_Area):
             logo_geo = [ tx0, ty0, label_width, font_h ]
             
             if label_val.rectangle:
-                r = self.get_item_rectangle(label_val.rectangle, label_width, font_h)[2]
+                r = self.get_item_rectangle(label_val.rectangle, label_width, item_h)[2]
                 if r.x < 0:
                     tx0 -= r.x
                 if r.y < 0:
                     ty0 -= r.y
                             
-                self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, r.height, r)
-                
+                val = default_val
+
+                self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
                 logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
                             r.height-2*r.size ]
                     
@@ -287,8 +292,9 @@ class TVListing_Area(Skin_Area):
 
             else:
                 self.write_text(to_listing[i].displayname, label_font, content,
-                                x=tx0, y=ty0, width=r.width+2*r.x, height=font_h)
+                                x=tx0, y=ty0, width=r.width+2*r.x, height=item_h)
 
+            self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
 
             if to_listing[i].programs:
                 for prg in to_listing[i].programs:
@@ -348,26 +354,27 @@ class TVListing_Area(Skin_Area):
                     ig = Geometry(0, 0, tx1-tx0+1, item_h)
                     if val.rectangle:
                         ig, r = self.fit_item_in_rectangle(val.rectangle, tx1-tx0+1, item_h)
-                        self.drawroundbox(tx0+r.x, ty0+r.y, r.width, r.height, r)
+                        self.drawroundbox(tx0+r.x, ty0+r.y, r.width, item_h, r)
                         
                     if flag_left:
                         tx0 += leftarrow_size[0]
                         ig.width -= leftarrow_size[0]
                         if tx0 < tx1:
-                            self.draw_image(leftarrow, (tx0-leftarrow_size[0], ty0 + ig.y +\
-                                                        (ig.height-leftarrow_size[1])/2))
+                            self.draw_image(leftarrow, (tx0-leftarrow_size[0], ty0 +\
+                                                        (item_h-leftarrow_size[1])/2))
                     if flag_right:
                         tx1 -= rightarrow_size[0]
                         ig.width -= rightarrow_size[0]
                         if tx0 < tx1:
-                            self.draw_image(rightarrow, (tx1, ty0 + ig.y + \
-                                                         (ig.height-rightarrow_size[1])/2))
+                            self.draw_image(rightarrow, (tx1, ty0 + \
+                                                         (item_h-rightarrow_size[1])/2))
 
                     if tx0 < tx1:
                         pad_x0 = flag_right * rightarrow_size[0]
                         pad_x1 = flag_left  * leftarrow_size[0]
                         self.write_text(prg.title, font, content, x=tx0+ig.x + pad_x0,
-                                        y=ty0+ig.y, width=ig.width - pad_x0 - pad_x1, height=-1,
+                                        y=ty0+ig.y, width=ig.width - pad_x0 - pad_x1,
+                                        height=item_h - 2 * ig.y,
                                         align_v='center', align_h = val.align)
 
             i += 1
