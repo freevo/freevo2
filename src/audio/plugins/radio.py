@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/14 21:08:27  mikeruelle
+# makes detach audio work.
+#
 # Revision 1.6  2004/01/14 20:37:11  mikeruelle
 # add url for preffered player stuff.
 #
@@ -135,6 +138,7 @@ class RadioMainMenuItem(Item):
             radio_item.length = 0
             radio_item.remain = 0
             radio_item.elapsed = 0
+            radio_item.info = {'album':'', 'artist':'', 'trackno': '', 'title':''}
             station_items += [ radio_item ]
         if (len(station_items) == 0):
             station_items += [menu.MenuItem( _( 'No Radio Stations found' ),
