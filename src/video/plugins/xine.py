@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/09/29 18:47:37  dischi
+# fix xine lirc handling
+#
 # Revision 1.51  2004/08/25 12:51:46  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -167,8 +170,11 @@ class Xine(Application):
         if item['deinterlace'] and (self.xine_type == 'X' or self.version > 922):
             command.append('-D')
 
-        if not rc.PYLIRC and '--no-lirc' in command:
-            command.remove('--no-lirc')
+        if config.XINE_COMMAND.startswith(config.CONF.xine) and conf.XINE_USE_LIRC:
+            command.append('--no-lirc')
+
+        if config.XINE_COMMAND.startswith(config.CONF.fbxine) and conf.FBXINE_USE_LIRC:
+            command.append('--no-lirc')
 
         if self.version < 923:
             for arg in command:

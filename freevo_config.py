@@ -1140,7 +1140,7 @@ if CONF.display == 'x11' and CONF.xine:
     XINE_COMMAND = '%s --hide-gui -pq -g -B --geometry %sx%s+0+0 --no-splash' % \
                    (CONF.xine, CONF.width, CONF.height)
 
-XINE_ARGS_DEF = '--no-lirc --post=pp:quality=10,expand'
+XINE_ARGS_DEF = '--post=pp:quality=10,expand'
 
 XINE_AO_DEV = 'oss'                     # alsa or oss
 

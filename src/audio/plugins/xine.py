@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/09/29 18:47:36  dischi
+# fix xine lirc handling
+#
 # Revision 1.17  2004/08/01 10:42:23  dischi
 # update to new application/eventhandler code
 #
@@ -100,7 +103,7 @@ class Xine:
         self.app_mode     = 'audio'
         self.app          = None
         self.command = '%s -V none -A %s --stdctl' % (config.CONF.fbxine, config.XINE_AO_DEV)
-        if rc.PYLIRC:
+        if conf.FBXINE_USE_LIRC:
             self.command = '%s --no-lirc' % self.command
 
         
