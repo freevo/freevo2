@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2003/07/22 11:07:52  dischi
+# Fixed PluginArea when calling the plugins draw() function
+#
 # Revision 1.107  2003/07/12 17:29:33  dischi
 # added redraw() to force a redraw (plugins may need this)
 #
@@ -251,8 +254,13 @@ class Plugin_Area(Skin_Area):
         if self.plugins == None:
             self.plugins = plugin.get('daemon_draw')
 
+        if self.widget_type == 'player':
+            object = self.infoitem
+        else:
+            object = self.menuw
+            
         for p in self.plugins:
-            p.draw((type, object), self)
+            p.draw((self.widget_type, object), self)
 
 
 

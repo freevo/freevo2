@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/07/22 11:07:52  dischi
+# Fixed PluginArea when calling the plugins draw() function
+#
 # Revision 1.20  2003/07/19 19:14:26  dischi
 # new menu type: default no image
 #
@@ -296,8 +299,9 @@ class Skin_Area:
         """
 
         self.display_style = display_style
-        self.xml_settings = settings
-        
+        self.xml_settings  = settings
+        self.widget_type   = widget_type
+
         if widget_type == 'menu':
             self.menuw = obj
             self.menu  = obj.menustack[-1]
