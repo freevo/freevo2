@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/10/04 18:38:34  dischi
+# better layout when the box is too large
+#
 # Revision 1.5  2004/10/03 15:54:00  dischi
 # make PopupBoxes work again as they should
 #
@@ -104,10 +107,10 @@ class PopupBox(Window):
             # resize and move the box
             self.set_size((self.get_size()[0], box_height + add_to_height))
             self.move_relative((0, -int(add_to_height/2)))
-
+            
         # move the label height pixel (minimum value is content y1)
         x, y = self.label.get_pos()
-        y = max(self.content_pos.y1, y - spacing - height)
+        y = max(self.content_pos.y1, y - int((spacing + height) / 2))
         self.label.set_pos((x, y))
         # the y position of the text is now label pos + label height + spacing
         return y + label_height + spacing
