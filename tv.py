@@ -132,6 +132,16 @@ def refresh():
 
 
 def main_menu(arg, menuw):
+
+    # Check that the TV channel list is not None
+    if not config.TV_CHANNELS:
+        msg = 'The list of TV channels is invalid!\n'
+        msg += 'Please check the config file.'
+        skin.PopupBox(msg)
+        time.sleep(3.0)
+        menuwidget.refresh()
+        return
+    
     if arg == 'record':
         start_tv(None, ('record', None))
         return
