@@ -9,6 +9,24 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/03/17 19:22:31  outlyer
+# Bookmarks are working now.
+#
+# Usage:
+#     1. while watching a movie file, hit the 'record' button and it'll save a
+#     bookmark. There is no visual feedback though.
+#     2. Later, to get back there, choose the actions button in the menu, and it'll
+#     have a list of bookmarks in a submenu, click on one of those to resume from
+#     where you saved.
+#
+#     The bookmarks do work for multiple AVI's together, though the time shown in the
+#     menu will be the time for the individual file, not the aggregate.
+#
+# TODO:
+#     For multi-part files (i.e. two AVI's together via an XML file) it would be
+#     nice to be able to choose which one. I added a menu item (commented out now)
+#     until I can figure out how to pass self.play a specific filename.
+#
 # Revision 1.21  2003/03/17 18:54:45  outlyer
 # Some changes for the bookmarks
 #     o videoitem.py - Added bookmark menu, bookmark "parser" and menu generation,
@@ -233,11 +251,11 @@ class VideoItem(Item):
                 items += [( self.dvd_vcd_title_menu, 'VCD title list' )]
             for m in self.subitems:
                 # Allow user to watch one of the subitems instead of always both
-                items += [( self.play, 'Play %s' % (m.filename))]
+                #items += [( self.play, 'Play %s' % (os.path.basename(m.filename)))]  # XXX Doesn't work
                 if os.path.exists(util.get_bookmarkfile(m.filename)):
                     myfilename = util.get_bookmarkfile(m.filename)
                     self.current_subitem = myfilename
-                    items += [( self.bookmark_menu, 'Bookmark list %s' % (myfilename))]
+                    items += [( self.bookmark_menu, 'Bookmark: %s' % (os.path.basename(m.filename)))]
         return items
 
 
@@ -256,6 +274,7 @@ class VideoItem(Item):
 
         if self.subitems:
             self.current_subitem = self.subitems[0]
+            self.current_subitem.mplayer_options = self.mplayer_options # Pass along the options
             self.current_subitem.play(arg, menuw)
             return
 
