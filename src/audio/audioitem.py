@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2004/08/27 14:24:25  dischi
+# AudioItem is now based on MediaItem
+#
 # Revision 1.60  2004/08/01 10:42:51  dischi
 # make the player an "Application"
 #
@@ -26,24 +29,6 @@
 #
 # Revision 1.55  2004/07/10 12:33:37  dischi
 # header cleanup
-#
-# Revision 1.54  2004/06/25 23:11:43  outlyer
-# Fix the advanced sort. Since 'trackno' is a number, but the sort is alphabetical,
-# we pad the numbers with 0's to make it sort properly. Fixed my problem with
-# '9' showing up at the end of the list.
-#
-# For some reason, it's still returning
-# 01
-# 02
-# 03
-# 04
-# 05
-# 06
-# 07
-# 08
-# 9
-# 10
-# 11
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -74,18 +59,17 @@ import traceback
 import config
 import player
 
-from item import Item
+from item import MediaItem
 from event import *
 
 
-class AudioItem(Item):
+class AudioItem(MediaItem):
     """
     This is the common class to get information about audiofiles.
     """
     
     def __init__(self, url, parent, name=None, scan=True):
-        self.type = 'audio'
-        Item.__init__(self, parent)
+        MediaItem.__init__(self, 'audio', parent)
 
         self.set_url(url, info=scan)
 
@@ -157,7 +141,7 @@ class AudioItem(Item):
         directly because this functions also changes other attributes, like
         filename, mode and network_play
         """
-        Item.set_url(self, url, info)
+        MediaItem.set_url(self, url, info)
         if url.startswith('cdda://'):
             self.network_play = False
             self.mimetype = 'cdda'
@@ -176,7 +160,7 @@ class AudioItem(Item):
         if key  == 'elapsed':
             return '%d:%02d' % (int(self.elapsed / 60), int(self.elapsed % 60))
             
-        return Item.__getitem__(self, key)
+        return MediaItem.__getitem__(self, key)
 
    
     # ----------------------------------------------------------------------------
