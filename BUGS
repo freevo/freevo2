@@ -4,8 +4,6 @@ Known bugs for the Freevo project
 $Id$
 
 
-o The EPG (electronic program guide = TV programs) has misaligned columns.
-o The menu headings are not centered.
 o The EPG should be reloaded automatically to allow program end/start
 o Remote command events cannot be handled fast enough, e.g. when scrolling
   through menu items.
