@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2003/10/28 18:15:19  dischi
+# bugfix
+#
 # Revision 1.101  2003/10/27 20:37:59  dischi
 # add active variable
 #
@@ -1072,7 +1075,8 @@ class OSD:
             return None
 
         thumbnail = False
-
+        filename  = url
+        
         try:
             image = pygame.image.fromstring(url.tostring(), url.size, url.mode)
         except:
