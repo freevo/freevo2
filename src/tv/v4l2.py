@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/10/28 19:45:38  dischi
+# remove future warning
+#
 # Revision 1.19  2004/08/23 01:24:50  rshortt
 # -Revive v4l2 channel changing.
 # -Set the card's input based on the current settings.
@@ -83,10 +86,10 @@ _IOC_WRITE = 1
 _IOC_READ = 2
 
 def _IOC(dir,type,nr,size):
-    return (((dir)  << _IOC_DIRSHIFT) | \
-           (ord(type) << _IOC_TYPESHIFT) | \
-           ((nr)   << _IOC_NRSHIFT) | \
-           ((size) << _IOC_SIZESHIFT))
+    return ((long(dir)  << _IOC_DIRSHIFT) | \
+           (long(ord(type)) << _IOC_TYPESHIFT) | \
+           (long(nr)   << _IOC_NRSHIFT) | \
+           (long(size) << _IOC_SIZESHIFT))
 
 def _IO(type,nr): return _IOC(_IOC_NONE,(type),(nr),0)
 def _IOR(type,nr,size): return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
