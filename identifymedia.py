@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2002/09/30 05:56:28  krister
+# Fixed a bug in the file-close.
+#
 # Revision 1.13  2002/09/30 05:52:59  krister
 # Added a close on error for the filedescriptor, hopefully prevents open files lying around.
 #
@@ -69,7 +72,7 @@ class Identify_Thread(threading.Thread):
             fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
             s = ioctl(fd, cdrom.CDROM_DRIVE_STATUS, cdrom.CDSL_CURRENT)
         except:
-            fd.close()
+            os.close(fd)
             media.drive_status = None
             media.info = None
             return
