@@ -31,6 +31,7 @@
 # -----------------------------------------------------------------------------
 
 
+import notifier
 from program import Program
 
 
@@ -89,16 +90,21 @@ class Channel:
         add them to our local list.  If there are gaps between the programs
         we will add dummy programs to fill it (TODO).
         """
+        # FIXME: adding dummy programs will add them from start to stop and
+        # not in 30 minutes chunks. That's bad!
         new_progs = []
         dummy_progs = []
-
+        # keep the notifier alive
+        notifier_counter = 0
         if not progs:
             progs = self.epg.get_programs(self.id, start, stop)
         for p in progs:
             i = Program(p.id, p.title, p.start, p.stop, p.episode, p.subtitle,
                         p['description'], channel=self)
             new_progs.append(i)
-
+            notifier_counter = (notifier_counter + 1) % 500
+            if not notifier_counter:
+                notifier.step(False, False)
             # TODO: add information about program being recorded which
             #       comes from another DB table - same with categories,
             #       ratings and advisories.
@@ -107,30 +113,46 @@ class Channel:
         if not l:
             dummy_progs = self.__get_dummy_programs(start, stop)
         else:
+            p0 = new_progs[0]
+            p1 = new_progs[-1]
+            last = None
+
             for p in new_progs:
-                i = new_progs.index(p)
-                if i == 0:
+                notifier_counter = (notifier_counter + 1) % 500
+                if not notifier_counter:
+                    notifier.step(False, False)
+                if p == p0:
                     # fill gaps before
                     if p.start > start:
                         n = self.__get_dummy_programs(start, p.start)
                         dummy_progs += n
-
-                if i < l-1:
-                    # fill gaps between programs
-                    next_p = new_progs[i+1]
-                    if p.stop < next_p.start:
-                        n = self.__get_dummy_programs(p.stop, next_p.start)
-                        dummy_progs += n
-
-                elif i == l-1:
+                elif p == p1:
                     # fill gaps at the end
                     if p.stop < stop:
                         n = self.__get_dummy_programs(p.stop, stop)
                         dummy_progs += n
+                else:
+                    # fill gaps between programs
+                    if last.stop < p.start:
+                        n = self.__get_dummy_programs(last.stop, p.start)
+                        dummy_progs += n
+                last = p
+                # Add program. Because of some bad jitter from 60 seconds in
+                # __import_programs calling the first one and the last could
+                # already be in self.programs
+                if (p == new_progs[0] or p == new_progs[-1]) and \
+                   p in self.programs:
+                    continue
+                self.programs.append(p)
 
-        for i in new_progs + dummy_progs:
-            if not i in self.programs:
-                self.programs.append(i)
+        for p in dummy_progs:
+            # Add program. Because of some bad jitter from 60 seconds in
+            # __import_programs calling the first one and the last could
+            # already be in self.programs
+            if (p == dummy_progs[0] or p == dummy_progs[-1]) and \
+                   p in self.programs:
+                continue
+            self.programs.append(p)
 
         self.__sort_programs()
 
