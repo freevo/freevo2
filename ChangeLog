@@ -3,7 +3,11 @@ Freevo Changelog
 
 $Id$
 
+Release 1.5.0 (2004-07-17):
+---------------------------
+ * Bugfixes
 
+	
 Release 1.5.0-rc4 (2004-06-29):
 -------------------------------
  * Better DVB support
