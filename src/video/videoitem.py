@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.134  2004/05/12 19:24:54  dischi
+# remove debug and cvs log
+#
 # Revision 1.133  2004/05/02 08:55:52  dischi
 # dvd as .iso support
 #
@@ -21,78 +24,6 @@
 #
 # Revision 1.130  2004/03/19 22:10:26  dischi
 # fix dead menu for missing videos
-#
-# Revision 1.129  2004/02/27 20:15:03  dischi
-# more unicode fixes
-#
-# Revision 1.128  2004/02/22 20:33:48  dischi
-# some unicode fixes
-#
-# Revision 1.127  2004/02/20 18:53:23  dischi
-# add parent in dvd menu
-#
-# Revision 1.126  2004/02/19 04:57:58  gsbarbieri
-# Support i18n.
-#
-# Revision 1.125  2004/02/15 15:22:42  dischi
-# better dvd disc support
-#
-# Revision 1.124  2004/02/12 12:28:38  dischi
-# prevent a crash
-#
-# Revision 1.123  2004/02/06 19:28:51  dischi
-# fix/cleanup dvd on hd handling
-#
-# Revision 1.122  2004/02/03 20:51:12  dischi
-# fix/enhance dvd on disc
-#
-# Revision 1.121  2004/02/01 19:47:13  dischi
-# some fixes by using new mmpython data
-#
-# Revision 1.120  2004/01/31 16:38:24  dischi
-# changes because of mediainfo changes
-#
-# Revision 1.119  2004/01/24 19:16:14  dischi
-# clean up autovar handling
-#
-# Revision 1.118  2004/01/19 20:21:33  dischi
-# change doc string
-#
-# Revision 1.117  2004/01/18 16:51:48  dischi
-# (re)move unneeded variables
-#
-# Revision 1.116  2004/01/17 20:30:19  dischi
-# use new metainfo
-#
-# Revision 1.115  2004/01/10 13:22:17  dischi
-# reflect self.fxd_file changes
-#
-# Revision 1.114  2004/01/09 21:05:09  dischi
-# override folder.fxd with tv show version
-#
-# Revision 1.113  2004/01/07 17:11:20  mikeruelle
-# make screensaver videos not blowup
-#
-# Revision 1.112  2004/01/04 18:18:56  dischi
-# add more infos about tv shows
-#
-# Revision 1.111  2004/01/04 17:20:20  dischi
-# check for .raw file as image
-#
-# Revision 1.110  2004/01/04 13:06:52  dischi
-# make it possible to call thumbnail creation with MENU_CALL_ITEM_ACTION
-#
-# Revision 1.109  2004/01/04 11:17:10  dischi
-# add create thumbnail
-#
-# Revision 1.108  2004/01/01 19:36:46  dischi
-# do not inherit players to child
-#
-# Revision 1.107  2004/01/01 16:41:30  mikeruelle
-# fix dvd crash
-#
-# Revision 1.106  2004/01/01 16:15:45  dischi
-# make sure we have a player even for classes inheriting from videoitem
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -511,10 +442,6 @@ class VideoItem(Item):
                                  self.name, handler=self.play ).show()
             return
 
-        print 'XXX'
-        print self.media
-        print self.url
-        print self.filename
         # normal plackback of one file
         if self.url.startswith('file://'):
             file = self.filename
@@ -543,7 +470,6 @@ class VideoItem(Item):
                            handler=self.play).show()
                 return
 
-        print self.media
         if self.player_rating < 10:
             AlertBox(text=_('No player for this item found')).show()
             return
