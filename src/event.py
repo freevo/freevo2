@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/06/28 15:55:10  dischi
+# angle switching
+#
 # Revision 1.45  2004/06/17 23:16:05  rshortt
 # Add events for RECORD_START/STOP. (forgot to check in this file earlier).
 #
@@ -194,6 +197,7 @@ VIDEO_MANUAL_SEEK      = Event('VIDEO_MANUAL_SEEK')
 VIDEO_NEXT_AUDIOLANG   = Event('VIDEO_NEXT_AUDIOLANG')
 VIDEO_NEXT_SUBTITLE    = Event('VIDEO_NEXT_SUBTITLE')
 VIDEO_TOGGLE_INTERLACE = Event('VIDEO_TOGGLE_INTERLACE')
+VIDEO_NEXT_ANGLE       = Event('VIDEO_NEXT_ANGLE')
 STORE_BOOKMARK         = Event('STORE_BOOKMARK')
 MENU                   = Event('MENU')
 
@@ -413,7 +417,9 @@ VCD_EVENTS = {
     'FFWD'      : Event(SEEK, arg=10),
     'MENU'      : MENU,
     'DISPLAY'   : TOGGLE_OSD,
+    'LANG'      : VIDEO_NEXT_AUDIOLANG,
     'SUBTITLE'  : VIDEO_NEXT_SUBTITLE,
+    'ANGLE'     : VIDEO_NEXT_ANGLE,
     '1'         : INPUT_1,
     '2'         : INPUT_2,
     '3'         : INPUT_3,

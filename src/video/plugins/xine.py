@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/06/28 15:53:59  dischi
+# angle switching
+#
 # Revision 1.42  2004/06/19 17:21:52  dischi
 # only set app.mode to valid events
 #
@@ -384,5 +387,10 @@ class Xine:
                 self.current_subtitle = -1
             return True
             
+        if event == VIDEO_NEXT_ANGLE:
+            self.app.write('EventAngleNext\n')
+            time.sleep(0.1)
+            return True            
+
         # nothing found? Try the eventhandler of the object who called us
         return self.item.eventhandler(event)
