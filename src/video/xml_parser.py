@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/04/28 17:57:11  dischi
+# exception handling for bad fxd files
+#
 # Revision 1.18  2003/04/26 16:38:57  dischi
 # added patch from Matthieu Weber for mplayer options in disc
 #
@@ -54,6 +57,7 @@
 
 import os
 import re
+import traceback
 
 import config
 import util
@@ -353,6 +357,15 @@ def make_videoitem(video, variant):
 #
 # parse a XML movie file
 #
+def save_parseMovieFile(file, parent, duplicate_check):
+    try:
+        return parseMovieFile(file, parent, duplicate_check)
+    except:
+        print 'Error parsing %s' % file
+        traceback.print_exc()
+        return []
+
+    
 def parseMovieFile(file, parent, duplicate_check):
     # Returns:
     #   a list of VideoItems,
@@ -361,14 +374,9 @@ def parseMovieFile(file, parent, duplicate_check):
     dir = os.path.dirname(file)
     movies = []
     
-    try:
-        parser = qp_xml.Parser()
-        # Let's name node variables after their XML names
-        freevo = parser.parse(open(file).read())
-    except:
-        print "XML file %s corrupt" % file
-        return []
-
+    parser = qp_xml.Parser()
+    # Let's name node variables after their XML names
+    freevo = parser.parse(open(file).read())
 
     for freevo_child in freevo.children:
         if freevo_child.name == 'disc-set':
@@ -586,7 +594,7 @@ def hash_xml_database():
 
     for name,dir in config.DIR_MOVIES:
         for file in util.recursefolders(dir,1,'*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-            infolist = parseMovieFile(file, os.path.dirname(file),[])
+            infolist = save_parseMovieFile(file, os.path.dirname(file),[])
             for info in infolist:
                 if info.rom_id:
                     for i in info.rom_id:
@@ -598,7 +606,7 @@ def hash_xml_database():
                 
     for file in util.recursefolders(config.MOVIE_DATA_DIR,1,
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-        infolist = parseMovieFile(file, os.path.dirname(file),[])
+        infolist = save_parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
             config.MOVIE_INFORMATIONS += [ info ]
             if info.rom_id:
@@ -614,7 +622,7 @@ def hash_xml_database():
 
     for file in util.recursefolders(config.TV_SHOW_DATA_DIR,1,
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1):
-        infolist = parseMovieFile(file, os.path.dirname(file),[])
+        infolist = save_parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
             k = os.path.splitext(os.path.basename(file))[0]
             config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info, info.mplayer_options,

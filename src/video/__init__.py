@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/28 17:57:11  dischi
+# exception handling for bad fxd files
+#
 # Revision 1.3  2003/04/26 16:38:57  dischi
 # added patch from Matthieu Weber for mplayer options in disc
 #
@@ -54,7 +57,7 @@ def cwd(parent, files):
     items = []
 
     for file in util.find_matches(files, config.SUFFIX_VIDEO_DEF_FILES):
-        x = xml_parser.parseMovieFile(file, parent, files)
+        x = xml_parser.save_parseMovieFile(file, parent, files)
         if x:
             files.remove(file)
             items += x
@@ -110,7 +113,7 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
 
     # add new xml files
     for file in util.find_matches(new_files, config.SUFFIX_VIDEO_DEF_FILES):
-        x = xml_parser.parseMovieFile(file, parent, new_files)
+        x = xml_parser.save_parseMovieFile(file, parent, new_files)
         if x:
             new_files.remove(file)
             new_items += x
