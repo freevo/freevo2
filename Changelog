@@ -1,2 +1,4 @@
+Release 1.1:
+------------
 o Moved mp3/movie suffix definitions to config.py
-
+o Watching TV is disabled at the moment, seems to be a bug in it.
