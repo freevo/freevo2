@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/18 09:37:00  dischi
+# Added viewitem and infoitem to the menu to set an item which image/info
+# to take (only for the new skin)
+#
 # Revision 1.8  2003/03/16 19:36:04  dischi
 # Adjustments to the new xml_parser, added listing type 'image+text' to
 # the listing area and blue2, added grey skin. It only looks like grey1
@@ -91,18 +95,15 @@ class Info_Area(Skin_Area):
         """
         check if the content needs an update
         """
-        return self.auto_update or (self.last_item != self.item)
+        return self.auto_update or (self.last_item != self.infoitem)
         
 
     def update_content(self):
         """
         update the info area
         """
-        settings  = self.settings
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
-        item      = self.item
+        content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
+        item      = self.infoitem
 
         if hasattr(item, 'type') and content.types.has_key(item.type):
             val = content.types[item.type]
@@ -172,5 +173,5 @@ class Info_Area(Skin_Area):
                                     height=-1, mode='hard')
                 y0 += y_spacing
 
-        self.last_item = self.item
+        self.last_item = self.infoitem
         self.table = table

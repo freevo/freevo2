@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/18 09:37:00  dischi
+# Added viewitem and infoitem to the menu to set an item which image/info
+# to take (only for the new skin)
+#
 # Revision 1.24  2003/03/16 19:33:12  dischi
 # adjustments to the new xml_parser
 #
@@ -308,16 +312,25 @@ class Skin_Area:
         if widget_type == 'menu':
             self.menuw = obj
             self.menu  = obj.menustack[-1]
-            self.item  = self.menu.selected
+            if self.menu.viewitem:
+                self.viewitem = self.menu.viewitem
+            else:
+                self.viewitem  = self.menu.selected
+            if self.menu.infoitem:
+                self.infoitem = self.menu.infoitem
+            else:
+                self.infoitem  = self.menu.selected
             item_type  = self.menu.item_types
         elif widget_type == 'tv':
             self.menuw = obj
             self.menu  = obj
             item_type = None
-            self.item = obj.selected
+            self.viewitem = obj.selected
+            self.infoitem = obj.selected
         else:
             item_type = None
-            self.item = obj
+            self.viewitem = obj
+            self.infoitem = obj
             
         self.bg_objects = []
         self.content_objects = []

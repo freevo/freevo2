@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/18 09:37:00  dischi
+# Added viewitem and infoitem to the menu to set an item which image/info
+# to take (only for the new skin)
+#
 # Revision 1.5  2003/03/11 20:25:59  dischi
 # Small fixes
 #
@@ -71,7 +75,7 @@ class View_Area(Skin_Area):
         """
         check if the content needs an update
         """
-        item = self.item
+        item = self.viewitem
         image = None
 
         if hasattr(item, 'image') and item.image:
@@ -84,7 +88,7 @@ class View_Area(Skin_Area):
         """
         update the view area
         """
-        item = self.item
+        item = self.viewitem
         
         layout    = self.layout
         area      = self.area_val

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/03/18 09:37:00  dischi
+# Added viewitem and infoitem to the menu to set an item which image/info
+# to take (only for the new skin)
+#
 # Revision 1.21  2003/03/09 21:38:37  rshortt
 # In MenuWidget call child.draw() now instead of child._draw().
 #
@@ -199,6 +203,11 @@ class Menu:
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
+
+        # special items for the new skin to use in the view or info
+        # area. If None, menu.selected will be taken
+        self.infoitem = None
+        self.viewitem = None
 
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
