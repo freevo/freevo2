@@ -50,8 +50,6 @@ osd = osd.get_singleton()
 # Create the skin implementation object
 impl = skinimpl.Skin()
 
-OSD_DEFAULT_FONTNAME = impl.OSD_FONTNAME
-OSD_DEFAULT_FONTSIZE = impl.OSD_FONTSIZE
 items_per_page = impl.items_per_page
 
 
@@ -66,8 +64,8 @@ def HandleEvent(ev):
 
 
 # Load special settings for this menu
-def ParseXML(file):
-    return impl.ParseXML(file)
+def LoadSettings(dir):
+    return impl.LoadSettings(dir)
 
 
 # Called from the MenuWidget class to draw a menu page on the

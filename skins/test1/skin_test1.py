@@ -81,6 +81,12 @@ class Skin:
         pass
 
 
+    # Parse XML files with additional settings
+    # Not implemented in this skin
+    def LoadSettings(self, dir):
+        pass
+
+    
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):

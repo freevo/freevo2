@@ -83,7 +83,7 @@ class Skin:
 
 
     # Parse XML files with additional settings
-    def ParseXML(self, file):
+    def LoadSettings(self, dir)
         return None
 
     
