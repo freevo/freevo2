@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/21 03:16:18  gsbarbieri
+# MPAV support
+#
 # Revision 1.14  2004/02/21 03:09:16  gsbarbieri
 # This file doesn't use gettext( ... unicode=True ), so we don't need String().
 #
@@ -108,7 +111,8 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("cdparanoia","cdparanoia",0),
                      ("oggenc","oggenc",0),
                      ("renice","renice",0),
-                     ("setterm", "setterm", 0))
+                     ("setterm", "setterm", 0),
+                     ("mpav", "mpav", 0))
 
 # Help text
 def print_usage():
