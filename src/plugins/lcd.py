@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/08/04 04:08:10  gsbarbieri
+# Now you can have screens for Lines x Columns, before we could just have screens for Lines.
+#
 # Revision 1.2  2003/08/04 03:02:03  gsbarbieri
 # Changes from Magnus:
 #    * Progress bar
@@ -52,7 +55,7 @@ import pylcd
 import time
 import plugin
 import config
-
+DEBUG=1
 # Configuration: (Should move to freevo_conf.py?)
 sep_str = " | " # use as separator between two strings. Like: "Length: 123<sep_str>Plot: ..."
 
@@ -108,17 +111,19 @@ menu_strinfo = {
 # Structure:
 #
 # layouts = { <#_OF_LINES_IN_DISPLAY> :
-#             { <SCREEN_NAME> :
-#               <WIDGET_NAME> : ( <WIDGET_TYPE>,
-#                                 <WIDGET_PARAMETERS>,
-#                                 <PARAMETERS_VALUES> ),
-#               ...
-#               <MORE_WIDGETS>
-#               ...
-#             },
-#             ...
-#             <MORE_SCREENS>
-#             ...
+#             { <#_OF_CHARS_IN_LINES> :
+#                { <SCREEN_NAME> :
+#                  <WIDGET_NAME> : ( <WIDGET_TYPE>,
+#                                    <WIDGET_PARAMETERS>,
+#                                    <PARAMETERS_VALUES> ),
+#                  ...
+#                  <MORE_WIDGETS>
+#                  ...
+#                },
+#                ...
+#                <MORE_SCREENS>
+#                ...
+#              }
 #           }
 # Note:
 #    <PARAMETERS_VALUES>: will be used like this:
@@ -130,110 +135,182 @@ menu_strinfo = {
 #            tv: will be used in tv mode
 # Values should match the ones supported by LCDd (man LCDd)
 layouts = { 4 : # 4 lines display
-            # Welcome screen
-            { "welcome" : 
-              { "title"    : ( "title",
-                               "Freevo",
-                               None ),
-                "calendar" : ( "scroller",
-                               "1 2 %d 2 h 2 \"Today is %s.\"",
-                               "( self.width, time.strftime('%A, %d-%B') )" ),
-                "clock"    : ( "string",
-                               "%d 3 \"%s\"",
-                               "( ( self.width - len( time.strftime('%T') ) ) / 2 + 1 ," + \
-                               " time.strftime('%T') )" )
-                },
-
-              "menu"    :
-              { "title_l"  : ( "string",
-                               "1 1 'MENU: '",
-                               None ),
-                "item_l"   : ( "string",
-                               "1 2 'ITEM: '",
-                               None ),
-                "type_l"   : ( "string",
-                               "1 3 'TYPE: '",
-                               None ),
-                "info_l"   : ( "string",
-                               "1 4 'INFO: '",
-                               None ),                
-                "title_v"  : ( "scroller",
-                               "7 1 %d 1 h 2 \"%s\"",
-                               "( self.width, menu.heading )" ),
-                "item_v"   : ( "scroller",
-                               "7 2 %d 2 h 2 \"%s\"",
-                               "( self.width, title )" ),
-                "type_v"   : ( "scroller",
-                               "7 3 %d 3 h 2 \"%s\"",
-                               "( self.width, typeinfo )" ),
-                "info_v"   : ( "scroller",
-                               "7 4 %d 1 h 2 \"%s\"",
-                               "( self.width, info )" )
-                },
-
-              "audio_player"  :
-              { "music_l"   : ( "string",
-                                "2 1 'MUSIC: '",
-                                None ),
-                "album_l"   : ( "string",
-                                "2 2 'ALBUM: '",
-                                None ),
-                "artist_l"  : ( "string",
-                                "1 3 'ARTIST: '",
-                                None ),
-                "music_v"   : ( "scroller",
-                                "9 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
-                "album_v"   : ( "scroller",
-                                "9 2 %d 2 h 2 \"%s\"",
-                                "( self.width, player.getattr('album') )" ),
-                "artist_v"  : ( "scroller",
-                                "9 3 %d 3 h 2 \"%s\"",
-                                "( self.width, player.getattr('artist') )" ),
-                "time_v"    : ( "string",
-                                "2 4 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
-                                "( int(player.length / 60), int(player.length % 60)," +
-                                " int(player.elapsed / 60), int(player.elapsed % 60)," +
-                                " int(player.elapsed * 100 / player.length) )" ),
-                # If the display is 40 chars wide show a progress bar:
-                "timebar1_v": ( "string", "21 4 '['", None),
-                "timebar2_v": ( "string", "40 4 ']'", None),
-                "timebar3_v": ( "hbar",
-                                "22 4 '%d'","(int(player.elapsed *90 / player.length))"),
-                # animation at the begining of the time line
-                "animation_v": ( "string", "1 4 '%s'",
-                "animation_audioplayer_chars[player.elapsed % len(animation_audioplayer_chars)]")
-                },
+            
+            { 40 : # 40 chars per line
               
-              "tv"            :
-              { "chan_l"   : ( "string",
-                                "1 1 'CHAN: '",
-                                None ),
-                "prog_l"   : ( "string",
-                                "1 2 'PROG: '",
-                                None ),
-                "time_l"  : ( "string",
+              # Welcome screen
+              { "welcome" : 
+                { "title"    : ( "title",
+                                 "Freevo",
+                                 None ),
+                  "calendar" : ( "scroller",
+                                 "1 2 %d 2 h 2 \"Today is %s.\"",
+                                 "( self.width, time.strftime('%A, %d-%B') )" ),
+                  "clock"    : ( "string",
+                                 "%d 3 \"%s\"",
+                                 "( ( self.width - len( time.strftime('%T') ) ) / 2 + 1 ," + \
+                                 " time.strftime('%T') )" )
+                  },
+                
+                "menu"    :
+                { "title_l"  : ( "string",
+                                 "1 1 'MENU: '",
+                                 None ),
+                  "item_l"   : ( "string",
+                                 "1 2 'ITEM: '",
+                                 None ),
+                  "type_l"   : ( "string",
+                                 "1 3 'TYPE: '",
+                                 None ),
+                  "info_l"   : ( "string",
+                                 "1 4 'INFO: '",
+                                 None ),                
+                  "title_v"  : ( "scroller",
+                                 "7 1 %d 1 h 2 \"%s\"",
+                                 "( self.width, menu.heading )" ),
+                  "item_v"   : ( "scroller",
+                                 "7 2 %d 2 h 2 \"%s\"",
+                                 "( self.width, title )" ),
+                  "type_v"   : ( "scroller",
+                                 "7 3 %d 3 h 2 \"%s\"",
+                                 "( self.width, typeinfo )" ),
+                  "info_v"   : ( "scroller",
+                                 "7 4 %d 1 h 2 \"%s\"",
+                                 "( self.width, info )" )
+                  },
+                
+                "audio_player"  :
+                { "music_l"   : ( "string",
+                                  "2 1 'MUSIC: '",
+                                  None ),
+                  "album_l"   : ( "string",
+                                  "2 2 'ALBUM: '",
+                                  None ),
+                  "artist_l"  : ( "string",
+                                  "1 3 'ARTIST: '",
+                                  None ),
+                  "music_v"   : ( "scroller",
+                                  "9 1 %d 1 h 2 \"%s\"",
+                                "( self.width, title )" ),
+                  "album_v"   : ( "scroller",
+                                  "9 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, player.getattr('album') )" ),
+                  "artist_v"  : ( "scroller",
+                                  "9 3 %d 3 h 2 \"%s\"",
+                                  "( self.width, player.getattr('artist') )" ),
+                  "time_v"    : ( "string",
+                                  "2 4 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
+                                  "( int(player.length / 60), int(player.length % 60)," +
+                                  " int(player.elapsed / 60), int(player.elapsed % 60)," +
+                                  " int(player.elapsed * 100 / player.length) )" ),
+                  "timebar1_v": ( "string", "21 4 '['", None),
+                  "timebar2_v": ( "string", "40 4 ']'", None),
+                  "timebar3_v": ( "hbar",
+                                  "22 4 '%d'","(int(player.elapsed *90 / player.length))"),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 4 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },
+                
+                "tv"            :
+                { "chan_l"   : ( "string",
+                                 "1 1 'CHAN: '",
+                                 None ),
+                  "prog_l"   : ( "string",
+                                 "1 2 'PROG: '",
+                                 None ),
+                  "time_l"  : ( "string",
                                 "1 3 'TIME: '",
                                 None ),
-                "desc_l"  : ( "string",
+                  "desc_l"  : ( "string",
                                 "1 4 'DESC: '",
                                 None ),                
-                "chan_v"   : ( "scroller",
-                                "7 1 %d 1 h 2 \"%s\"",
-                                "( self.width, tv.channel_id )" ),
-                "prog_v"   : ( "scroller",
-                                "7 2 %d 2 h 2 \"%s\"",
-                                "( self.width, tv.title )" ),
-                "time_v"  : ( "scroller",
-                                "7 3 %d 3 h 2 \"%s-%s\"",
-                                "( self.width, tv.start, tv.stop )" ),
-                "desc_v"  : ( "scroller",
-                                "7 4 %d 4 h 2 \"%s\"",
-                                "( self.width, tv.desc )" )
-                }              
+                  "chan_v"   : ( "scroller",
+                                 "7 1 %d 1 h 2 \"%s\"",
+                                 "( self.width, tv.channel_id )" ),
+                  "prog_v"   : ( "scroller",
+                                 "7 2 %d 2 h 2 \"%s\"",
+                                 "( self.width, tv.title )" ),
+                  "time_v"   : ( "scroller",
+                                 "7 3 %d 3 h 2 \"%s-%s\"",
+                                 "( self.width, tv.start, tv.stop )" ),
+                  "desc_v"   : ( "scroller",
+                                 "7 4 %d 4 h 2 \"%s\"",
+                                 "( self.width, tv.desc )" )
+                  }              
+                },
+            
+
+              20 : # 20 chars per line
+              
+              # Welcome screen
+              { "welcome" : 
+                { "title"    : ( "title",
+                                 "Freevo",
+                                 None ),
+                  "calendar" : ( "scroller",
+                                 "1 2 %d 2 h 2 \"Today is %s.\"",
+                                 "( self.width, time.strftime('%A, %d-%B') )" ),
+                  "clock"    : ( "string",
+                                 "%d 3 \"%s\"",
+                                 "( ( self.width - len( time.strftime('%T') ) ) / 2 + 1 ," + \
+                                 " time.strftime('%T') )" )
+                  },
+                
+                "menu"    :
+                { "title_v"  : ( "scroller",
+                                 "1 1 %d 1 h 2 \"%s\"",
+                                 "( self.width, menu.heading )" ),
+                  "item_v"   : ( "scroller",
+                                 "1 2 %d 2 h 2 \"%s\"",
+                                 "( self.width, title )" ),
+                  "type_v"   : ( "scroller",
+                                 "1 3 %d 3 h 2 \"%s\"",
+                                 "( self.width, typeinfo )" ),
+                  "info_v"   : ( "scroller",
+                                 "1 4 %d 1 h 2 \"%s\"",
+                                 "( self.width, info )" )
+                  },
+                
+                "audio_player"  :
+                { "music_v"   : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                  "( self.width, title )" ),
+                  "album_v"   : ( "scroller",
+                                  "1 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, player.getattr('album') )" ),
+                  "artist_v"  : ( "scroller",
+                                  "1 3 %d 3 h 2 \"%s\"",
+                                  "( self.width, player.getattr('artist') )" ),
+                  "time_v"    : ( "string",
+                                  "2 4 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
+                                  "( int(player.length / 60), int(player.length % 60)," +
+                                  " int(player.elapsed / 60), int(player.elapsed % 60)," +
+                                  " int(player.elapsed * 100 / player.length) )" ),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 4 '%s'",
+                                   "animation_audioplayer_chars[player.elapsed % len(animation_audioplayer_chars)]")
+                  },
+                
+                "tv"            :
+                { "chan_v"   : ( "scroller",
+                                 "1 1 %d 1 h 2 \"%s\"",
+                                 "( self.width, tv.channel_id )" ),
+                  "prog_v"   : ( "scroller",
+                                 "1 2 %d 2 h 2 \"%s\"",
+                                 "( self.width, tv.title )" ),
+                  "time_v"   : ( "scroller",
+                                 "1 3 %d 3 h 2 \"%s-%s\"",
+                                 "( self.width, tv.start, tv.stop )" ),
+                  "desc_v"   : ( "scroller",
+                                 "1 4 %d 4 h 2 \"%s\"",
+                                 "( self.width, tv.desc )" )
+                  }              
+                }
               }
             }
-
+             
 # poll_widgets: widgets that should be refreshed during the pool
 # Structure:
 #
@@ -241,8 +318,10 @@ layouts = { 4 : # 4 lines display
 #                  { <SCREEN_NAME> : ( <WIDGET_NAME>, ... ) },
 #                  ...
 #                }
-poll_widgets = { 4 :
-                 { "welcome" : [ "clock" ] }
+poll_widgets = { 4 : {
+    40 : { "welcome" : [ "clock" ] },
+    20 : { "welcome" : [ "clock" ] }
+    }
                  }
 
 DEBUG = config.DEBUG
@@ -392,11 +471,13 @@ class PluginInterface( plugin.DaemonPlugin ):
     def poll( self ):
         if self.disable: return
 
-        if not poll_widgets.has_key( self.lines ): return
+        try:
+            screens = poll_widgets[ self.lines ][ self.columns ]
+        except:
+            return
 
-        screens = poll_widgets[ self.lines ]
         for s in screens:
-            widgets = poll_widgets[ self.lines ][ s ]
+            widgets = screens[ s ]
             
             for w in widgets:
                 type, param, val = self.screens[ s ][ w ]
@@ -408,9 +489,11 @@ class PluginInterface( plugin.DaemonPlugin ):
     def generate_screens( self ):
         screens = None
         l = self.height
+        c = self.width
         # Find a screen
+        # find a display with 'l' lines
         while not screens:
-            try:
+            try:                
                 screens = layouts[ l ]
             except KeyError:
                 if DEBUG > 0:
@@ -420,9 +503,23 @@ class PluginInterface( plugin.DaemonPlugin ):
                     print "ERROR: No screens found!"
                     self.disable = 1
                     return
+        # find a display with 'l' line and 'c' columns
+        while not screens:
+            try:
+                screens = layouts[ l ][ c ]
+            except KeyError:
+                if DEBUG > 0:
+                    print "WARNING: Could not find screens for %d lines and %d columns LCD!" % ( l, c )
+                c -= 1
+                if c < 1:
+                    print "ERROR: No screens found!"
+                    self.disable = 1
+                    return
 
+        
         self.lines = l
-        self.screens = screens
+        self.columns = c
+        self.screens = screens = layouts[ l ][ c ]
         for s in screens:
             self.lcd.screen_add( s )
             widgets = screens[ s ]
