@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/01/09 19:43:56  outlyer
+# Was that \x0 supposed to be there? If so, sorry. I didn't think it was
+# supposed to be there and it was causing warnings in the recordserver
+# and the OSD interface.
+#
 # Revision 1.9  2004/01/09 19:39:31  outlyer
 # Oops, we don't use config here.
 #
@@ -160,7 +165,7 @@ class Favorite:
                             + '@ABCDEFGHIJKLMNO' \
                             + 'PQRSTUVWXYZ[\]^_' \
                             + '`abcdefghijklmno' \
-                            + 'pqrstuvwxyz{|}~ ' \
+                            + 'pqrstuvwxyz{|}~ ' \
                             + '                ' \
                             + '                ' \
                             + '                ' \
