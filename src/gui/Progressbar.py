@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/11 11:23:50  dischi
+# fix division by zero crash and do not draw more than 100%
+#
 # Revision 1.5  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -83,7 +86,11 @@ class Progressbar(Container):
         if not self.width or not self.height:
             raise TypeError, 'Not all needed variables set.'
 
-        position = (self.position * 100) / self.full 
+        if not self.full:
+            # catch division by zero error.
+            return
+        
+        position = min((self.position * 100) / self.full, 100)
         width, height = self.get_size()
 
         self.surface = self.get_surface()
