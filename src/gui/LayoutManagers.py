@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/16 02:11:50  rshortt
+# Fixed a nasty label alingment-bouncing bug.  There are lots of leftover
+# comments and DEBUG statements but I will continue to make use of them
+# for improvements.
+#
 # Revision 1.5  2003/05/04 23:03:12  rshortt
 # Fix for a crash with a row with no cols.
 #
@@ -123,28 +128,34 @@ class FlowLayout(LayoutManager):
 
             if child.width == -1:
                 if DEBUG: print '            child width not set'
-                if next and next.h_align == Align.RIGHT and next.width > 0:
-                    if DEBUG: print '            next align is RIGHT'
-                    child.width = self.container.width - \
-                                  2 * self.container.h_margin - \
-                                  next.width - x
-                else:
-                    child.width = self.container.width - \
-                                  self.container.h_margin - x
+                # if next and next.h_align == Align.RIGHT and next.width > 0:
+                #     if DEBUG: print '            next align is RIGHT'
+                #     child.width = self.container.width - \
+                #                   2 * self.container.h_margin - \
+                #                   next.width - x
+                # else:
+                #     child.width = self.container.width - \
+                #                   self.container.h_margin - x
+                child.width = self.container.width - \
+                              2 * self.container.h_margin
                 if DEBUG: print '            child width set to %s' % child.width
 
 
             if child.height == -1 and isinstance(child, Label):
                 child.height = self.container.height - \
                                self.container.v_margin - y
-                if DEBUG: print '            child height set to %s' % child.height
+                if DEBUG: print '            child was %sx%s' % (child.width,child.height)
                 child.render('dummy')
                 if DEBUG: print '            child now %sx%s' % (child.width,child.height)
         
             end = x + child.width + self.container.h_margin 
             if DEBUG: print '            end is %s' % end
 
-            if end > self.container.width:
+            if DEBUG: print '            child row len is %s' % len(self.table[row])
+            if DEBUG: print '            child h_align is %s' % child.h_align
+
+            if end > self.container.width or \
+               (len(self.table[row]) and child.h_align == Align.LEFT):
                 if DEBUG: print '            new row'
                 row += 1
                 self.table.append([])

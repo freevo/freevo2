@@ -9,6 +9,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/16 02:11:50  rshortt
+# Fixed a nasty label alingment-bouncing bug.  There are lots of leftover
+# comments and DEBUG statements but I will continue to make use of them
+# for improvements.
+#
 # Revision 1.8  2003/05/04 23:12:35  rshortt
 # Dumb typo.
 #
@@ -118,25 +123,38 @@ class Label(GUIObject):
     draw is called an exception is raised.
     """
     
-    def __init__(self, text=None, width=-1, height=-1, h_align=None, 
-                 v_align=None, parent=None):
+    def __init__(self, text=None, parent=None, h_align=None, v_align=None, 
+                 width=-1, height=-1):
 
-        self.h_align  = Align.LEFT
-        self.v_align  = Align.CENTER
+        if h_align:
+            self.h_align  = h_align
+        else:
+            self.h_align  = Align.LEFT
+
+        if v_align:
+            self.v_align  = v_align
+        else:
+            self.v_align  = Align.CENTER
+
         self.text     = None
         self.font     = None # This is a OSD.Font object not pygame.
         self.font_name = None
         self.font_size = None
         self.selected_font_name = None
         self.selected_font_size = None
-        self.parent   = None
         self.v_margin = 0
         self.h_margin = 0
-        
+        self.set_background_color(None)
+
         GUIObject.__init__(self, width=width, height=height)
 
-        if h_align: self.set_h_align(align)
-        if v_align: self.set_v_align(align)
+        if parent:
+            (state, filename, size, color) = parent.get_font()
+            self.set_font(state, filename, size, color)
+            self.set_h_margin(parent.h_margin)
+            self.set_v_margin(parent.v_margin)
+            parent.add_child(self)
+        
         if text:    self.set_text(text)
 
 
@@ -170,6 +188,10 @@ class Label(GUIObject):
         Sets the font of label.
         Uses _getfont in osd, and the fontcache in osd.
         """
+        if DEBUG: print 'LABEL: state=%s' % state
+        if DEBUG: print 'LABEL: font=%s' % font
+        if DEBUG: print 'LABEL: size=%s' % size
+
         if type(font) is StringType and type(size) is IntType:
             if self.surface: self.surface = None
             self.font = self.osd._getfont(font, size)
@@ -235,21 +257,22 @@ class Label(GUIObject):
         else:
             if self.width > pw: self.width = pw
             if self.height > ph: self.height = ph
-            self.surface = self.parent.surface.subsurface((0, 0, self.width, self.height))
-            if DEBUG: print '      surfaceXX=%s' % self.surface
+            # self.surface = self.parent.surface.subsurface((0, 0, self.width, self.height))
+            self.surface = self.parent.surface.subsurface((self.left, self.top, self.width, self.height))
+            if DEBUG: print '       surface=%s' % self.surface
 
         (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
         self.osd.drawstringframed(self.text,
-                                  self.left,
-                                  self.top,
+                                  0,
+                                  0,
                                   self.width,
                                   self.height,
                                   fgcolor=fgc,
                                   bgcolor=None,
                                   font=font, 
                                   ptsize=size, 
-                                  align_h='center',
-                                  align_v='center',
+                                  align_h='left',
+                                  align_v='top',
                                   mode='soft',
                                   layer=self.surface)
 
@@ -257,7 +280,9 @@ class Label(GUIObject):
         # LABEL: ,71,17,294,43
         # self.width = return_x1 - return_x0
         self.width = return_x1
+        # self.width = self.surface.get_width()
         self.height = return_y1 - return_y0
+        # self.height = self.surface.get_height()
         # self.height = return_y1 
 
         if DEBUG: print '       parent="%s"' % self.parent
@@ -271,9 +296,9 @@ class Label(GUIObject):
     def _draw(self):
         self.render()
 
-        # self.parent.surface.blit(self.surface, (0, 0))
         if DEBUG: print '       draw position="%s,%s"' % self.get_position()
-        self.parent.surface.blit(self.surface, self.get_position(), self.get_rect())
+        # self.parent.surface.blit(self.surface, self.get_position(), self.get_rect())
+        self.parent.surface.blit(self.surface, self.get_position())
         
  
     def _erase(self):
