@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/07/06 20:22:32  outlyer
+# Cleanup
+#
 # Revision 1.19  2003/06/29 15:01:31  outlyer
 # Display the channel's friendly (display name) in the tuner popupbox.
 #
@@ -234,8 +237,6 @@ def main_menu(prog):
     
 
 def generate_main():
-    print 'REC: generate_main'
-    
     items = []
 
     items += [menu.MenuItem('Select Recording Name (%s)' % recinfo.program_name.selected,
@@ -277,8 +278,6 @@ def selection_menu(arg=None, menuw=None):
 
 def set_selection(arg=None, menuw=None):
     setting, selected = arg
-
-    print 'REC: set_sel %s, %s' % (setting.name, selected)
 
     setting.set_selected(selected)
     
@@ -346,8 +345,6 @@ def set_schedule(arg=None, menuw=None):
 
     # Build the commandline. The -frames option is added later by the daemon.
     sch_cmd = config.VCR_CMD % cl_options
-    print 'SCHEDULE: %s, %s, %s' % (tunerid, time.ctime(start_time_f), rec_name)
-    print 'SCHEDULE: %s' % sch_cmd
     
     record_daemon.schedule_recording(start_time_s, len_secs, sch_cmd, recinfo.channel)
 
@@ -356,8 +353,6 @@ def set_schedule(arg=None, menuw=None):
     s += 'Channel %s\n' % tunername
     s += '%s %s %s min' % (recinfo.start_date.selected, recinfo.start_time.selected,
                            recinfo.length.selected)
-    print '"%s"' % s
-
 
     pop = PopupBox(text=s)
     pop.show()
@@ -366,10 +361,6 @@ def set_schedule(arg=None, menuw=None):
 
 
 def eventhandler( event):
-    print 'using record_video event handler'
-    # XXX Hack, make it better!!!!
-    #if event == em.MENU_CHANGE_STYLE:
-    #    record_schedule.main_menu()
     if event == em.MENU_BACK_ONE_MENU or event == em.MENU_GOTO_MAINMENU:
         menu.MenuWidget.eventhandler( menuwidget, event )
         rc.app(None) #give control back to the main program
