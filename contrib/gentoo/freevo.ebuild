@@ -2,7 +2,7 @@ DESCRIPTION="Digital video jukebox (PVR, DVR)."
 HOMEPAGE="http://www.freevo.org/"
 
 PV2=`echo $PV | sed 's/_//'`
-SRC_URI="mirror://sourceforge/${PN}/${PN}-src-${PV2}.tgz"
+SRC_URI="mirror://sourceforge/${PN}/${PN}-${PV2}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -29,7 +29,7 @@ DEPEND=">=dev-python/pygame-1.5.6
 
 
 src_unpack() {
-	unpack freevo-src-${PV2}.tgz
+	unpack freevo-${PV2}.tar.gz
 	ln -s freevo-${PV2} freevo-${PV}
 }
 

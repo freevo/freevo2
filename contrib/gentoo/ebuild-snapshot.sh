@@ -27,47 +27,28 @@ function cvs_tag {
     cvs tag $tag
 }
 
-function cleanup_and_pack {
-    echo cleaning up
-    cd /tmp/freevo-$version
-    rm freevo.conf* local_conf.py local_skin.fxd
-    find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
-    find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
-    find /tmp/freevo-$version -name '.#*'       | xargs rm -rf
-    find /tmp/freevo-$version -name '*.pyo'     | xargs rm -rf
-    find /tmp/freevo-$version -name '*.pyc'     | xargs rm -rf
-    rm -rf find /tmp/freevo-$version/WIP /tmp/freevo-$version/dischi1 \
-	/tmp/freevo-$version/aubin1 /tmp/freevo-$version/contrib/gentoo
-
-    ./autogen.sh
-    rm ./autogen.sh
-    sudo chown -R root.root /tmp/freevo-$version
-
-    cd /tmp/
-    echo making tgz
-    sudo tar -zcvf /usr/portage/distfiles/freevo-src-$version.tgz freevo-$version
-
-    echo remove tmp dir
-    sudo rm -rf freevo-$version
-}
-
 function pack {
-    cd ..
-    sudo rm -rf /tmp/freevo-$version
-    echo copy directory to /tmp
-    cp -r freevo /tmp/freevo-$version
-    cp -r  ~/src/wiki/freevo.sourceforge.net/cgi-bin/moin.cgi/ /tmp/freevo-$version/Docs/html
-    cleanup_and_pack
-}
-
-function pack_tag {
     cd /tmp
     sudo rm -rf freevo-$version
     mkdir freevo-$version
     cd freevo-$version
     cp -r /home/dmeyer/src/freevo/CVS .
     cvs update -r $tag -dP
-    cleanup_and_pack
+
+    cd /tmp/freevo-$version
+
+    ./autogen.sh
+
+    find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
+    find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
+
+    sudo chown -R root.root /tmp/freevo-$version
+
+    sudo python setup.py sdist
+    sudo mv dist/* /usr/portage/distfiles
+    cd /tmp
+    echo remove tmp dir
+    sudo rm -rf freevo-$version
 }
 
 function ebuild {
