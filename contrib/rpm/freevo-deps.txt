@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.52 2003/09/29	TC Wan (tcwan at cs dot usm dot my)
+Version 0.53 2003/10/15	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -70,7 +70,7 @@ pygame / python-game	http://dag.wieers.com/home-made/apt/
 													# python-numeric-23.1-0.dag.rh90.i386.rpm
 		
 mmpython		http://www.sf.net/projects/mmpython
-			[mmpython-0.1 RPMs available from freevo downloads]
+			[mmpython-0.2 RPMs available from freevo downloads]
 
 PyXML / python-xml	PyXML-0.8.3 
 			RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
@@ -86,6 +86,9 @@ python-imaging / PIL 	http://dag.wieers.com/home-made/apt/	tcl, tk (comes with R
 			# python-imaging-1.1.4-0.dag.src.rpm
 			# python-imaging-1.1.4-0.dag.rh90.i386.rpm
 			[PIL-1.1.4 RPMs available from freevo downloads]	*No tcl, tk dependencies*
+
+python-twisted		http://twistedmatrix.com/products/download
+			[1.0.7, RPMs available from freevo downloads]
 
 python-fchksum		http://www.dakotacom.net/~donut/programs/fchksum.html
 			[python-fchksum-1.7.1 RPMs available from freevo downloads]
@@ -105,29 +108,20 @@ aumix-2.8		RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHa
 [Runtime - Recording]
 =====================
 
-python-twisted		http://twistedmatrix.com/products/download
-			[1.0.7, RPMs available from freevo downloads]
-
 lame-3.93.1		http://freshrpms.net/ 
 
 oggenc			vorbis-tools-1.0 (comes with RH 9)	libvorbis-1.0 (comes with RH 9)
 								libogg-1.0 (comes with RH 9)
 								libao-0.8.3 (comes with RH 9)
 
-pyogg			http://www.andrewchatham.com/pyogg/	libogg (comes with RH 9)
-			[1.3, RPMs available from freevo downloads]
-
-pyao			http://www.andrewchatham.com/pyogg/	libao (comes with RH 9)
-			[0.82, RPMs available from freevo downloads]
-
-pyvorbis		http://www.andrewchatham.com/pyogg/	pyogg, libogg, libvorbis (comes with RH 9)
-			[1.3, RPMs available from freevo downloads]
-
 cdparanoia		cdparanoia-alpha9.8 (comes with RH 9)
 
 mp1e-1.9.3		http://zapping.sourceforge.net [mp1e-1.9.3 RPMs available from freevo downloads]
 
 ffmpeg-0.4.7		Dag/Freshrpms				imlib2					Freshrpms
+													# imlib2-1.0.6-fr3.src.rpm
+													# imlib2-1.0.6-fr3.i386.rpm
+													# imlib2-devel-1.0.6-fr3.i386.rpm
 
 
 [Runtime - TV Schedules]
@@ -161,14 +155,10 @@ swig			swig-1.1p5 (comes with RH 9)
 ===========
 {need at least xine + tvtime for X11, or mplayer for fbdev}
 tvtime-0.9.10 		http://dag.wieers.com/home-made/apt/
-mplayer-0.90		Freshrpms/ATrpms
+mplayer-1.00pre2	Freshrpms/ATrpms
 xine-0.9.22		http://freshrpms.net/ 
 
 [Apps-Games]
 ============
-xmame-0.72.1		http://freshrpms.net/ 
+xmame-0.74.1		http://freshrpms.net/ 
 zsnes ??		http://newrpms.sunsite.dk/
-
-													# imlib2-1.0.6-fr3.src.rpm
-													# imlib2-1.0.6-fr3.i386.rpm
-													# imlib2-devel-1.0.6-fr3.i386.rpm
