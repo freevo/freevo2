@@ -13,6 +13,8 @@ o Added a feature to playing movies where a file can be attached to each
   The file is named <filename>.mplayer.
 o Added freevo/testfiles, it is now the default in config.py and contains
   some movie/mp3 files for test purposes.
+o Changed movie/music playlists to not repeat after playing all files.
+  This shoyld be configurable when playing in a later version.
 
 
 Release 1.2.0 (2002-05-12):
