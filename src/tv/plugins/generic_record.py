@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/31 22:04:45  rshortt
+# Make sure the recording goes into config.DIR_RECORD.
+#
 # Revision 1.3  2003/06/05 00:04:46  rshortt
 # Create the tv lock file so the idlebar plugin will know. :)
 #
@@ -79,7 +82,7 @@ class Recorder:
 
     def Record(self, rec_prog):
         cl_options = { 'channel'  : rec_prog.tunerid,
-                       'filename' : rec_prog.filename,
+                       'filename' : config.DIR_RECORD + '/' + rec_prog.filename,
                        'seconds'  : rec_prog.rec_duration }
 
         self.rec_command = config.VCR_CMD % cl_options
