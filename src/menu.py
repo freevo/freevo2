@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2002/12/11 16:08:48  dischi
+# no ENTER selects the item menu
+#
 # Revision 1.5  2002/12/07 15:23:46  dischi
 # small fix for non-item menus
 #
@@ -285,7 +288,7 @@ class MenuWidget:
                 else:
                     action( menuw=self )
 
-        elif event == rc.K0:
+        elif event == rc.ENTER:
             try:
                 actions = menu.selected.actions()
                 if config.FREEVO_PLUGINS.has_key(menu.selected.type):
