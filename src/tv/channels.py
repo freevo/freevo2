@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/24 17:16:40  rshortt
+# Bugfixes.
+#
 # Revision 1.7  2003/11/24 04:41:14  krister
 # Commented out a part that crashes the TV viewer plugin. Please fix!
 #
@@ -132,14 +135,14 @@ class FreevoChannels:
         """
         Using this method will not support custom frequencies.
         """
-        self.chanSet(self.getNextChannel(), app, app_cmd)
+        return self.chanSet(self.getNextChannel(), app, app_cmd)
 
 
     def chanDown(self, app=None, app_cmd=None):
         """
         Using this method will not support custom frequencies.
         """
-        self.setChannel(self.getPrevChannel(), app, app_cmd)
+        return self.chanSet(self.getPrevChannel(), app, app_cmd)
 
 
     def chanSet(self, chan, app=None, app_cmd=None):
@@ -201,7 +204,7 @@ class FreevoChannels:
                 # or provide it on the command line.
                 return freq
         else:
-            # Letf set the freq ourselves using the V4L device.
+            # Lets set the freq ourselves using the V4L device.
             try:
                 vd = tv.v4l2.Videodev(vg.vdev)
                 try:
@@ -224,7 +227,7 @@ class FreevoChannels:
 
 
     def getPrevChannel(self):
-        return (self.chan_index-1) % len(config.TV_CHANNELS)
+        return config.TV_CHANNELS[(self.chan_index-1) % len(config.TV_CHANNELS)][2]
 
 
     def setChanlist(self, chanlist):
