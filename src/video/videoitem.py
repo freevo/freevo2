@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/08/20 20:47:02  outlyer
+# Fixed the bookmark file "parser" I don't know what happened, but it was
+# completely broken for AVI files (or any file without options in local_conf)
+#
+# Also, the minute calculation wasn't working. I don't know why I thought
+# the old one would, but this works for bookmarks > 3600
+#
 # Revision 1.71  2003/08/16 23:53:32  outlyer
 # Fix a typo causing a crash.
 #
@@ -600,10 +607,12 @@ class VideoItem(Item):
             file = copy.copy(self)
             sec = int(line)
             hour = int(sec/3600)
-            min = int(sec/60)
+            min = int((sec-(hour*3600))/60)
             sec = int(sec%60)
             time = '%0.2d:%0.2d:%0.2d' % (hour,min,sec)
             file.name = 'Jump to %s' % (time)
+            if not self.mplayer_options:
+                self.mplayer_options = ''
             file.mplayer_options = str(self.mplayer_options) +  ' -ss %s' % time
             items += [file]
         moviemenu = menu.Menu(self.name, items, xml_file=self.xml_file)
