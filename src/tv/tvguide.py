@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/06/13 00:28:19  outlyer
+# Fix a crash.
+#
 # Revision 1.30  2004/06/05 18:15:46  dischi
 # cleanup
 #
@@ -188,7 +191,6 @@ class TVGuide(Item):
 
         elif event == em.MENU_PAGEUP:
             self.event_change_channel(-self.n_items)
-            self.event_PageUp()
             self.menuw.refresh()
 
         elif event == em.MENU_PAGEDOWN:
