@@ -34,5 +34,5 @@ ID3_V2_4            = 0x24;
 ID3_DEFAULT_VERSION = ID3_V2_4;
 ID3_ANY_VERSION     = ID3_V1 | ID3_V2;
 
-from eyeD3.tag import *;
+from tag import *;
 

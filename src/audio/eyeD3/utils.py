@@ -43,7 +43,7 @@ def TRACE_MSG(msg):
 #
 #  $Id$
 ################################################################################
-from eyeD3 import *;
+from audio.eyeD3 import *;
 
 def versionsToConstant(v):
    major = v[0];

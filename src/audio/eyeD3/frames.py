@@ -21,8 +21,8 @@
 
 import os, os.path, re, zlib, StringIO, time;
 from StringIO import StringIO;
-from eyeD3.utils import *;
-from eyeD3.binfuncs import *;
+from utils import *;
+from binfuncs import *;
 
 # Valid time stamp formats per ISO 8601 and used by time.strptime.
 timeStampFormats = ["%Y",

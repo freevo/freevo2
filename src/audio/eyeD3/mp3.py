@@ -17,8 +17,8 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 ################################################################################
-from eyeD3.binfuncs import *;
-from eyeD3.utils import *;
+from binfuncs import *;
+from utils import *;
 
 #######################################################################
 class Mp3Exception:
