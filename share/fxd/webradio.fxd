@@ -182,6 +182,16 @@
 	  <link>http://www.mostlyclassical.com</link>
 	</info>
       </audio>
+       <audio title="The Classical Station (WCPE)">
+	<url>http://audio.ibiblio.org:8010/wcpe.ogg</url>
+	<player>mplayer</player>
+	<info>
+	  <genre>Classical</genre>
+	  <description>Great Classical Music, 24 hours a day</description>
+	  <bitrate>56</bitrate>
+	  <link>http://www.wcpe.org</link>
+	</info>
+      </audio>
       <audio title="Classical 96.3 FM Toronto">
         <url>mms://38.112.16.114/c96</url>
         <info>
