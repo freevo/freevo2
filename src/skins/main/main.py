@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/07/09 11:20:12  dischi
+# do not load outdated skins
+#
 # Revision 1.45  2004/03/14 11:42:34  dischi
 # make idlebar have a background image
 #
@@ -196,6 +199,9 @@ class Skin:
         if hasattr(self, '__last_load_cache__') and self.__last_load_cache__[0] == filename:
             return self.__last_load_cache__[1]
             
+        if not os.path.isfile(filename):
+            return None
+        
         cache = self.cachename(filename)
         if not cache:
             return None
