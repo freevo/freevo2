@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/01/06 00:29:45  mikeruelle
+# fix regex for version detect and start osd message support
+#
 # Revision 1.25  2003/12/17 16:58:37  mikeruelle
 # xmltv autochannel detect still occasionally sets things to numbers instead of strings
 #
@@ -135,7 +138,7 @@ class PluginInterface(plugin.Plugin):
         child = popen2.Popen3( helpcmd, 1, 100)
         data = child.childerr.readline() # Just need the first line
         if data:
-            data = re.search( "^tvtime: Running tvtime (?P<major>\d+).(?P<minor>\d+).(?P<version>\d+).", data )
+            data = re.search( "^(tvtime: )?Running tvtime (?P<major>\d+).(?P<minor>\d+).(?P<version>\d+).", data )
             if data:
                 _debug_("major is: %s" % data.group( "major" ))
                 _debug_("minor is: %s" % data.group( "minor" ))
@@ -546,6 +549,13 @@ class TVTime:
             self.app.write('DISPLAY_INFO\n')
             return True
         
+        elif event == em.OSD_MESSAGE:
+	    #this doesn't work
+            #self.app.write('DISPLAY_MESSAGE %s\nENTER\n' % event.arg)
+	    #this does
+            os.system('tvtime-command display_message \'%s\' enter' % event.arg)
+            return True
+        
         elif event == em.BUTTON:
 	    if re.search('^\d+$', event.arg) and int(event.arg) in range(10):
                 self.app.write('CHANNEL_%s\n' % event.arg)
@@ -598,6 +608,7 @@ class TVTimeApp(childapp.ChildApp2):
 
 
     def stdout_cb(self, line):
+        if not len(line) > 0: return
         # XXX Needed because tvtime grabs focus unless used with freevo -fs
         events = { 'n' : em.MIXER_VOLDOWN,
                    'm' : em.MIXER_VOLUP,
@@ -618,7 +629,7 @@ class TVTimeApp(childapp.ChildApp2):
                    '9' : em.Event(em.BUTTON, arg='9'),
                    'F3' : em.MIXER_MUTE,
                    's' : em.STOP }
-        
+
         if DEBUG: print 'TVTIME 1 KEY EVENT: "%s"' % str(list(line))
         if line == 'F10':
             if DEBUG: print 'TVTIME screenshot!'
