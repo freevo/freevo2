@@ -90,7 +90,7 @@ def main_menu(arg, menuw):
     
     for channel in channels:
         # Channel display name
-        menu_str = '%-10s ' % channel.displayname
+        menu_str = '%s' % channel.displayname
         # Logo
 	channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
 	if not os.path.isfile(channel_logo):
@@ -102,9 +102,9 @@ def main_menu(arg, menuw):
             for p in channel.programs[:2]:
                 hh = time.localtime(p.start)[3]
                 mm = time.localtime(p.start)[4]
-                menu_str += '%2d.%02d   %-20.20s    ' % (hh, mm, p.title)
+                menu_str += ' \t%2d.%02d\t%s' % (hh, mm, p.title[:20])
         else:
-            menu_str += 'NO DATA'
+            menu_str += '\tNO DATA'
             
         items += [menu.MenuItem(menu_str, start_tv,
                                 ('tv', channel.tunerid), None, None, channel_logo)]
