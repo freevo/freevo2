@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/18 06:03:22  gsbarbieri
+# Now you can hide each of the 3 areas by using visible="no" inside their tags
+#
 # Revision 1.5  2003/02/17 05:40:45  gsbarbieri
 # main1_image: now the image_{width,height} are not hardcoded anymore
 #
@@ -154,6 +157,9 @@ class Skin_Image:
     def View(self, item, settings):
         val = settings.view
 
+        if not val.visible:
+            return
+
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
 
@@ -184,6 +190,10 @@ class Skin_Image:
 
     def Info(self, item, settings):
         val = settings.info
+
+        if not val.visible:
+            return
+
         osd.drawroundbox(val.x, val.y, val.x+val.width, val.y+val.height,
                          color=val.bgcolor, radius=val.radius)
         if item:
@@ -265,6 +275,9 @@ class Skin_Image:
 
     def Listing(self, to_listing, settings):
         val = settings.listing 
+
+        if not val.visible:
+            return
 
         if self.getExpand(settings) == 0:
             conf_x = val.x
