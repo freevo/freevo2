@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/12/29 22:29:09  dischi
+# remove debug
+#
 # Revision 1.53  2003/12/29 22:08:54  dischi
 # move to new Item attributes
 #
@@ -158,7 +161,6 @@ class MPlayer:
         """
         if item.url in ('dvd://', 'vcd://'):
             return 1
-        print item.mimetype
         if item.mimetype in config.VIDEO_MPLAYER_SUFFIX:
             return 2
         if item.network_play:
