@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/08 17:37:56  dischi
+# added compare function
+#
 # Revision 1.2  2003/02/27 02:03:04  outlyer
 # Added support for the xmltv 'sub-title' tag which sometimes contains the
 # episode title for TV shows. Its not always there, but if it is, we can use
@@ -81,6 +84,18 @@ class TvProgram:
 
         s = '%s to %s  %3s %s' % (begins, ends, self.channel_id, self.title)
         return s
+
+
+    def __cmp__(self, other):
+        """
+        compare function, return 0 if the objects are identical, 1 otherwise
+        """
+        if not other:
+            return 1
+        return self.title != other.title or \
+               self.start != other.start or \
+               self.stop  != other.stop or \
+               self.channel_id != other.channel_id
 
 
 class TvChannel:
