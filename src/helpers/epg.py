@@ -7,16 +7,20 @@ import time
 import sqlite
 
 import config
-from tv.channels import get_epg
+import sysconfig
+import pyepg
 
-epg = get_epg()
-print 'Using database: %s' % epg.db.db.filename
+pyepg.connect('sqlite', sysconfig.datafile('epgdb'))
+pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
+
+
+# db.db.db looks a bit rediculous!
+print 'Using database: %s' % pyepg.guide.db.db.db.filename
 
 
 def usage():
     print '\nUsage:  %s [options]' % sys.argv[0]
     print '\nOptions:'
-    print '  [-c|--update-channels]            Use config to add new channels.'
     print '  [-h|--help]                       Print help and exit.'
     print '  [-i|--info]                       Print some information.'
     print '  [-l|--list]                       List your channels.'
@@ -30,21 +34,18 @@ def usage():
     sys.exit(0)
 
 
-def update_channels():
-    for chan in config.TV_CHANNELS:
-        epg.add_channel(chan[0], chan[1], chan[2])
-        
-
 def list_channels():
-    res = epg.execute('select * from channels')
     print 'EPGDB Channels:'
     print '---------------'
-    for row in res:
-        print '%s: %s' % (row.id, row.call_sign)
+    for c in pyepg.channels:
+        print '%s: %s' % (c.id, c.title)
 
 
 def list_programs(channel):
-    print epg.get_programs(channel)
+    print 'list_programs() disabled'
+    sys.exit(0)
+    for c in pyepg.channels:
+        print c
 
 
 def fill_xmltv(xmltv_file):
@@ -53,10 +54,12 @@ def fill_xmltv(xmltv_file):
 
     print 'FILE: "%s"' % xmltv_file
 
-    epg.add_data_xmltv(xmltv_file)
+    pyepg.update('xmltv', xmltv_file)
 
 
 def info():
+    print 'info() disabled'
+    sys.exit(0)
     print 'Version:'
     print epg.execute('select * from admin')
     print 'Channel Types:'
@@ -70,6 +73,8 @@ def info():
    
 
 def list_tables():
+    print 'list_tables() disabled'
+    sys.exit(0)
     rows = epg.execute('select tbl_name from sqlite_master where \
                         type="table" order by tbl_name')
     print 'EPGDB Tables:'
@@ -81,16 +86,16 @@ def list_tables():
 def search_progs(subs):
     print 'Results:'
     print '--------'
-    programs = epg.search_programs(subs)
+    programs = pyepg.search(subs)
     for p in programs:
-        print '%s:%d: %s - %s' % (String(p['channel_id']), p['id'], 
-               String(p['title']), 
+        print '%s:%d: %s - %s' % (String(p.channel.id), p.id, 
+               String(p.title), 
                time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
-                             time.localtime(p['start'])))
+                             time.localtime(p.start)))
 
 
 def test_func():
-    epg.expire_programs()
+    pyepg.guide.expire_programs()
     sys.exit(0)
 
 
