@@ -105,7 +105,8 @@ def start_tv(mode=None, channel_id=None):
 
 def get_tunerid(channel_id):
     tuner_id = None
-    for tv_channel_id, tv_display_name, tv_tuner_id in config.TV_CHANNELS:
+    for vals in config.TV_CHANNELS:
+        tv_channel_id, tv_display_name, tv_tuner_id = vals[:3]
         if tv_channel_id == channel_id:
             return tv_tuner_id
 
@@ -117,7 +118,7 @@ def get_tunerid(channel_id):
 def eventhandler(event):
     print 'TV %s' % event
     
-    if event == rc.EXIT:
+    if event == rc.EXIT or event == rc.MENU:
         rc.app = None
         menuwidget.refresh()
     elif event == rc.SELECT or event == rc.PLAY:
