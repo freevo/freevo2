@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/20 10:54:04  dischi
+# add getbyname and add some more load paths
+#
 # Revision 1.6  2003/04/19 21:24:59  dischi
 # small changes at the plugin interface
 #
@@ -67,7 +70,9 @@ class Plugin:
         self._type   = None
         self._level  = 0
         self._number = 0
+        self.plugin_name   = ''
 
+        
 class MainMenuPlugin(Plugin):
     """
     Plugin class for plugins to add something to the main menu
@@ -114,7 +119,8 @@ plugin_number = 0
 # the plugin dictionary
 #
 ptl = {}
-        
+named_plugins = {}
+
 #
 # activate a plugin
 #
@@ -153,18 +159,20 @@ def init():
     global ptl
     global all_plugins
     global initialized
-
+    global named_plugins
+    
     initialized = TRUE
 
     for name, type, level, args, number in all_plugins:
         module = name[:name.rfind('.')]
-            
+
         if os.path.isfile('src/plugins/%s.py' % module):
             module  = 'plugins.%s' % module
             object  = 'plugins.%s' % name
             special = None
-        elif os.path.isfile('src/%s.py' % module):
-            object  = name
+        elif os.path.isfile('src/plugins/%s.py' % name):
+            module  = 'plugins.%s' % name
+            object  = 'plugins.%s.PluginInterface' % name
             special = None
         elif os.path.isfile('src/%s/plugins/%s.py' % (module, name[name.rfind('.')+1:])):
             special = module
@@ -202,6 +210,10 @@ def init():
             else:
                 type.append(p)
 
+            if p.plugin_name:
+                named_plugins[p.plugin_name] = p
+                
+                
         except:
             print 'failed to load plugin %s' % name
             traceback.print_exc()
@@ -223,6 +235,13 @@ def get(type):
         ptl[type] = []
 
     return ptl[type]
+
+
+def getbyname(name):
+    global named_plugins
+    if named_plugins.has_key(name):
+        return named_plugins[name]
+    return None
 
 #
 # create plugin event
