@@ -435,7 +435,7 @@ print 'Using MPlayer: %s' % MPLAYER_CMD
 MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 
 if CONF.display == 'x11':
-    MPLAYER_VO_DEV       = 'xmga,xv,x11,'  # X11 drivers in order of preference
+    MPLAYER_VO_DEV       = 'xmga,xv,sdl,x11,'  # X11 drivers in order of preference
 else:
     MPLAYER_VO_DEV       = CONF.display    # e.g.: x11,mga,fbdev, see mplayer docs
 
