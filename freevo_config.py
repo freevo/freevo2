@@ -15,6 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2002/11/24 19:10:19  dischi
+# Added mame support to the new code. Since the hole new code is
+# experimental, mame is activated by default. Change local_skin.xml
+# to deactivate it after running ./cleanup
+#
 # Revision 1.95  2002/11/18 13:36:44  krister
 # Applied Rob Shortt's patch for starting in fullscreen under X11.
 #
@@ -587,6 +592,8 @@ else:
     if not os.path.isdir('/tmp/freevo/cache'):
         os.makedirs('/tmp/freevo/cache')
     FREEVO_CACHEDIR = '/tmp/freevo/cache'
+
+MAME_CACHE = '%s/romlist.pickled' % FREEVO_CACHEDIR
 
 #
 # XMLTV File

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/24 19:10:19  dischi
+# Added mame support to the new code. Since the hole new code is
+# experimental, mame is activated by default. Change local_skin.xml
+# to deactivate it after running ./cleanup
+#
 # Revision 1.2  2002/11/24 15:15:31  dischi
 # skin.xml support re-added
 #
@@ -49,11 +54,13 @@ import string
 import skin
 
 from video import xml_parser
+import games.mame_cache as mame_cache
 
 from item import Item
 from video.videoitem import VideoItem
 from audio.audioitem import AudioItem
 from image.imageitem import ImageItem
+from games.mameitem import MameItem
 
 from playlist import Playlist
 
@@ -87,6 +94,8 @@ class MediaMenu(Item):
             dirs += config.DIR_AUDIO
         if self.display_type == 'image':
             dirs += config.DIR_IMAGES
+        if self.display_type == 'game':
+            dirs += config.DIR_MAME
 
         # add default items
         for d in dirs:
@@ -126,13 +135,17 @@ class MediaMenu(Item):
 
     def main_menu(self, arg=None, menuw=None):
         """
-        display the (IMAGE|VIDEO|AUDIO) main menu
+        display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
         """
         self.display_type = arg
         if self.display_type == 'video':
             title = 'MOVIE'
+        elif self.display_type == 'audio':
+            title = 'MOVIE'
         elif self.display_type == 'image':
             title = 'IMAGE'
+        elif self.display_type == 'game':
+            title = 'GAMES'
         else:
             title = 'MEDIA'
         item_menu = menu.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
@@ -268,7 +281,20 @@ class DirItem(Playlist):
                 pl.autoplay = TRUE
                 items += [ pl ]
 
-        
+         
+        # games, right now just mame items
+        if not self.display_type or self.display_type == 'game':
+ 
+            mame_list = mame_cache.getMameItemInfoList(self.dir)
+ 
+            print "mame_list: %s" % mame_list
+            for ml in mame_list:
+                # ml contains: title, file, image
+                play_items += [ MameItem(ml[0], ml[1], ml[2], self) ]
+ 
+            self.playlist = play_items
+             
+       
         items += play_items
 
         title = self.name
