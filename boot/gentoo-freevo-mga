@@ -10,18 +10,12 @@ start() {
 
 	export DISPLAY=""
         sysctl -w dev.rtc.max-user-freq=1024 > /dev/null
-	/usr/local/bin/freevo 2>/dev/null >/dev/null&
+	/usr/bin/freevo 2>/dev/null >/dev/null&
 	eend $?
 }
 
 stop() {
 	ebegin "Stopping freevo"
-	killall mplayer 2>/dev/null
-
-	killproc freevo > /dev/null 2>/dev/null
-
-	kill `pgrep -f "python.*rc_client/remote.py"` 2>/dev/null >/dev/null
-	kill `pgrep -f "python.*main.py"` 2>/dev/null >/dev/null
-	
+	/usr/bin/freevo stop 2>/dev/null >/dev/null&
 	eend 0
 }

@@ -9,14 +9,14 @@ depend() {
 
 start() {
         ebegin "Starting freevo record_server"
-                /opt/freevo/freevo execute /opt/freevo/src/tv/record_server.py \
+                /usr/bin/freevo execute record_server start \
 		    &> /dev/null &
         eend
 }
 
 stop() {
         ebegin "Stopping freevo record_server"
-                kill `pgrep -f "python /opt/freevo/src/tv/record_server.py" -d" "` \
+                /usr/bin/freevo execute record_server stop \
 		    &> /dev/null
         eend
 }

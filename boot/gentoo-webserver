@@ -9,14 +9,14 @@ depend() {
 
 start() {
         ebegin "Starting freevo webserver"
-                /opt/freevo/freevo execute /opt/freevo/src/www/webserver.py \
+                /usr/bin/freevo execute webserver start \
 		    &> /dev/null &
         eend
 }
 
 stop() {
         ebegin "Stopping freevo webserver"
-                kill `pgrep -f "python /opt/freevo/src/www/webserver.py" -d" "` \
+                /usr/bin/freevo execute webserver stop \
 		    &> /dev/null
         eend
 }
