@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/02/24 06:00:30  outlyer
+# Allow update to optionally use a screen region rather than flipping the whole
+# display.
+#
 # Revision 1.17  2003/02/19 16:59:39  outlyer
 # Changing a stray print into a 'debug' to match the rest of the OSD.
 #
@@ -1278,12 +1282,13 @@ class OSD:
 
 
 
-    def update(self):
-
+    def update(self,rect=None):
         if not pygame.display.get_init():
             return None
-
-        pygame.display.flip()
+        if rect:
+            pygame.display.update(rect)
+        else:
+            pygame.display.flip()
 
 
     def _getfont(self, filename, ptsize):
