@@ -11,6 +11,52 @@
 #    you # want a alsa as mplayer audio out, just put
 #    "MPLAYER_AO_DEV = # 'alsa9'" in local_conf.py
 #
+# How config files are loaded:
+#  
+# [$freevo-bindir/ is the directory where the freevo start-script is 
+# located (i.e. the "shipping copy dir"). This can be any directory, e.g. 
+# the download directory or /usr/local] 
+#  
+# [$cwd/ is the directory the user started freevo from. This can be 
+# $freevo-bindir/, or any other directory] 
+#  
+# 1) freevo.conf is not shipped, but it is required and must be generated 
+# using ./configure before freevo can be used. 
+#  
+# 2) freevo.conf is searched for in ['$cwd/', '~/.freevo/', 
+# '/etc/freevo/', $freevo-bindir/]. The first one found is loaded. 
+#  
+# 3) freevo_config.py is always loaded from $freevo-bindir/, it is not 
+# supposed to be changed by the user. It has a format version number in 
+# the format "MAJOR.MINOR", e.g. "2.3". The version number reflects the 
+# config file format, *not* the Freevo version number. 
+#  
+# 4) local_conf.py is searched for in ['$cwd/', '~/.freevo', 
+# '/etc/freevo/', $freevo-bindir/]. The first one found is loaded. It is 
+# not a required file. The search is independent of where freevo.conf was 
+# found. 
+#  
+# 5) The same logic as in 4) applies for local_skin.xml. 
+#  
+# 6) The version MAJOR numbers must match in freevo_config.py and 
+# local_conf.py, otherwise it is an error. 
+#  
+# 7) The version MINOR number is used for backwards-compatible changes, 
+# i.e. when new options are added that have reasonable default values. 
+#  
+# 8) A warning is issued if freevo_config.py.MINOR > local_conf.py.MINOR. 
+#  
+# 9) It is an error if local_conf.py.MINOR > freevo_config.py.MINOR since 
+# the user most likely did not intend to use a recent local_conf.py with 
+# an old Freevo installation. 
+#  
+# 10) There is a list of change descriptions in freevo_config.py, 
+# one per MAJOR.MINOR change. The user is informed of what has 
+# changed between his local_conf.py and the new freevo_config.py format if 
+# they differ in version numbers.
+#
+#
+#
 # Developer Notes:
 #    The CVS log isn't used here. Write changes directly in this file
 #    to make it easier for the user
