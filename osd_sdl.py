@@ -180,6 +180,8 @@ class OSD:
         self.screen = pygame.display.set_mode((width, height), 0, 32)
 
         pygame.display.set_caption('Freevo')
+        icon = pygame.image.load('icons/freevo_app.png').convert()
+        pygame.display.set_icon(icon)
         
         self.clearscreen(self.COL_BLACK)
         self.update()
