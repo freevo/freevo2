@@ -18,13 +18,13 @@ def notification(entity):
         server = None
         return
 
-    if entity.present and entity.has_key('app') and \
-           entity['app'] == 'recordserver':
+    if entity.present and entity.matches(mcomm.get_address('recordserver')):
         print 'recordserver found'
         server = entity
-        # server.list_recordings(callback=list_recordings_return)
-        # server.list_recordings(list_recordings_return)
-        print server.list_recordings()  # wait
+        try:
+            print server.list_recordings()  # wait
+        except mcomm.MException, e:
+            print 'recordings.notification:', e
         return
     
 mcomm.register_entity_notification(notification)

@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/11/04 17:37:55  dischi
+# update to new mcomm interface
+#
 # Revision 1.8  2004/11/02 20:15:50  dischi
 # replace recordserver with mbus test code
 #
@@ -36,16 +39,14 @@
 import notifier
 import mcomm
 
-class RecordServer:
-    def __init__(self):
-        mcomm.register_server(self)
+class RecordServer(mcomm.RPCServer):
                 
-    def __rpc_list_recordings__(self, addr, val, data = None):
+    def __rpc_list_recordings__(self, addr, val):
         print 'request from', addr
         print 'val', val
-        print 'data', data
         print
-        return mcomm.result([])
+        self.parse_parameter(val, () )
+        return mcomm.RPCReturn()
     
 #     def saveScheduledRecordings(self, scheduledRecordings=None):
 #         pass
