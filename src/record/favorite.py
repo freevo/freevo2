@@ -67,8 +67,8 @@ class Favorite:
             start = int(m[0])*100 + int(m[1])
             stop  = int(m[2])*100 + int(m[3])
             self.times.append((start, stop))
-        self.start_padding = config.TV_RECORD_PADDING
-        self.stop_padding  = config.TV_RECORD_PADDING
+        self.start_padding = config.TV_RECORD_START_PADDING
+        self.stop_padding  = config.TV_RECORD_STOP_PADDING
 
 
     def short_list(self):

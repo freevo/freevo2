@@ -79,8 +79,8 @@ class Recording:
         self.episode  = ''
         self.url      = ''
         self.fxdname  = ''
-        self.start_padding = config.TV_RECORD_PADDING
-        self.stop_padding  = config.TV_RECORD_PADDING
+        self.start_padding = config.TV_RECORD_START_PADDING
+        self.stop_padding  = config.TV_RECORD_STOP_PADDING
         for i in info:
             if i == 'subtitle':
                 self.subtitle = info[i]
@@ -110,6 +110,8 @@ class Recording:
         info = copy.copy(self.info)
         if self.subtitle:
             info['subtitle'] = self.subtitle
+        if self.episode:
+            info['episode'] = self.episode
         if self.url:
             info['url'] = Unicode(self.url)
         return self.id, self.name, self.channel, self.priority, self.start, \
@@ -123,7 +125,8 @@ class Recording:
         """
         self.id = int(parser.getattr(node, 'id'))
         for child in node.children:
-            for var in ('name', 'channel', 'status', 'subtitle', 'fxdname'):
+            for var in ('name', 'channel', 'status', 'subtitle', 'fxdname',
+                        'episode'):
                 if child.name == var:
                     setattr(self, var, parser.gettext(child))
             if child.name == 'url':
@@ -172,9 +175,10 @@ class Recording:
         """
         node = fxdparser.XMLnode('recording', [ ('id', self.id ) ] )
         for var in ('name', 'channel', 'priority', 'url', 'status',
-                    'subtitle', 'fxdname'):
+                    'subtitle', 'fxdname', 'episode'):
             if getattr(self, var):
-                subnode = fxdparser.XMLnode(var, [], Unicode(getattr(self, var)) )
+                subnode = fxdparser.XMLnode(var, [],
+                                            Unicode(getattr(self, var)) )
                 fxd.add(subnode, node)
         timer = fxdparser.XMLnode('timer', [ ('start', _int2time(self.start)),
                                              ('stop', _int2time(self.stop)) ])

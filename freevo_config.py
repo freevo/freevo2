@@ -1186,7 +1186,8 @@ TV_RECORD_SERVER_GID = 0
 # and stop X minutes after scheduled - default to zero minutes.
 # This must be a value in seconds although at the moment only has
 # the percision of one minute.
-TV_RECORD_PADDING = 0 * 60
+TV_RECORD_START_PADDING = 2 * 60
+TV_RECORD_STOP_PADDING  = 5 * 60
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
