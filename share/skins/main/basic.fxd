@@ -168,8 +168,8 @@
       <content type="text" spacing="2">
 	<item type="default" font="item"/>
 	<item type="selected" font="selected">
-	  <rectangle bgcolor="selection" size="0" x="-5" y="-3" width="max+5"
-	    height="max+3"/>
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-3" width="max+10"
+	    height="max+6"/>
 	</item>
       </content>
     </layout>
@@ -178,7 +178,7 @@
     <layout label="view">
       <content align="center" valign="top">
 	<item type="default">
-	  <rectangle size="1" x="-1" y="-1" width="max+1" height="max+1"/>
+	  <rectangle size="1" x="-1" y="-1" width="max+2" height="max+2"/>
 	</item>
       </content>
     </layout>
@@ -202,7 +202,7 @@
 	<item type="default" font="main"/>
 	<item type="selected" font="main selected">
 	  <rectangle bgcolor="selection" size="0" y="-5" x="-10"
-	    width="max+10" height="max+5"/>
+	    width="max+20" height="max+10"/>
 	</item>
       </content>
     </layout>
@@ -316,7 +316,7 @@
       <content type="text" spacing="10">
 	<item type="default">
 	  <rectangle size="0" bgcolor="player mask" radius="10" x="-15" y="-15"
-	    width="max+80" height="max+15"/>
+	    width="max+80" height="max+30"/>
 	</item>
       </content>
     </layout>
@@ -417,27 +417,27 @@
 
 	<item type="label" font="tv" width="80">
 	  <rectangle bgcolor="tv label" size="1" color="0x000000" x="-5" y="-5"
-	    width="max+5" height="max+5"/>
+	    width="max+10" height="max+10"/>
 	</item>
 
 	<item type="head" font="tv">
 	  <rectangle bgcolor="tv label" size="1" color="0x000000" x="-5" y="-5"
-	    width="max+5" height="max+5"/>
+	    width="max+10" height="max+10"/>
 	</item>
 
 	<item type="default" font="tv">
 	  <rectangle bgcolor="0xff000000" color="0x000000" size="1" x="-5"
-	    y="-5" width="max+5" height="max+5"/>
+	    y="-5" width="max+10" height="max+10"/>
 	</item>
 	
 	<item type="selected" font="tv selected">
 	  <rectangle bgcolor="tv selection" size="1" color="0x000000" x="-5"
-	    y="-5" width="max+5" height="max+5"/>
+	    y="-5" width="max+10" height="max+10"/>
 	</item>
 	
 	<item type="scheduled" font="tv">
 	  <rectangle bgcolor="0x14ba05" size="1" color="0x000000" x="-5"
-	    y="-5" width="max+5" height="max+5"/>
+	    y="-5" width="max+10" height="max+10"/>
 	</item>
 	
       </content>
@@ -445,7 +445,7 @@
 
     <!-- tv info area -->
     <layout label="tv info">
-      <content x="10" y="10" height="max-10" width="max-10" type="text"
+      <content x="10" y="10" height="max-20" width="max-20" type="text"
 	spacing="10" font="tv">
 	<item type="default">
 	  <goto_pos x="600" mode="relative"/>
@@ -471,7 +471,7 @@
     </layout>
 
     <font label="tv" name="VeraBd.ttf" size="16" color="0xffffff"/>
-    <font label="tv selected" name="VeraBd.ttf" size="20" color="0xffff66">
+    <font label="tv selected" name="VeraBd.ttf" size="16" color="0xffff66">
       <shadow visible="yes" color="0x000000" x="1" y="1"/>
     </font>
     <font label="tv time" name="VeraBd.ttf" size="14" color="0xffffaa"/>

@@ -38,7 +38,7 @@
 	<item type="default" font="main" align="center"/>
 	<item type="selected" font="main selected" align="center">
 	  <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
-	    width="max+3" height="max+3" radius="10"/>
+	    width="max+6" height="max+6" radius="10"/>
 	</item>
       </content>
     </layout>
@@ -137,8 +137,8 @@
       <content type="image" spacing="-2">
 	<item type="default" width="100" height="100" align="center" valign="center"/>
 	<item type="selected" width="110" height="110" align="center" valign="center">
-	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+5"
-	    height="max+5"/>
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
+	    height="max+10"/>
 	</item>
       </content>
     </layout>
@@ -148,8 +148,8 @@
       <content type="image" spacing="-2">
 	<item type="default" width="80" height="112" align="center" valign="center"/>
 	<item type="selected" width="87" height="122" align="center" valign="center">
-	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+5"
-	    height="max+5"/>
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
+	    height="max+10"/>
 	</item>
       </content>
     </layout>
@@ -161,8 +161,8 @@
 	  valign="center"/>
 	<item type="selected" width="154" height="131"
 	  align="center" valign="center">
-	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+5"
-	    height="max+5"/>
+	  <rectangle bgcolor="selection" size="0" x="-5" y="-5" width="max+10"
+	    height="max+10"/>
 	</item>
       </content>
     </layout>

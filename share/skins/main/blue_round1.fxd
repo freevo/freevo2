@@ -39,7 +39,7 @@
       <content align="left" valign="top">
 	<item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="10" x="-15" y="-15"
-	    width="max+15" height="max+15"/>
+	    width="max+30" height="max+30"/>
 	</item>
       </content>
     </layout>
@@ -49,12 +49,12 @@
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
-      <content x="25" y="25" width="max-20" height="max-25" type="text"
+      <content x="25" y="25" width="max-45" height="max-50" type="text"
 	spacing="-1">
 	<item type="default" font="white shadow1"/>
 	<item type="selected" font="white shadow1">
-	  <rectangle bgcolor="0xff000000" size="0" x="-5" y="-3" width="max+5"
-	    height="max+3" radius="5"/>
+	  <rectangle bgcolor="0xff000000" size="0" x="-5" y="-3" width="max+10"
+	    height="max+6" radius="5"/>
 	</item>
       </content>
     </layout>
@@ -66,7 +66,7 @@
 	<item type="default" font="white shadow1 big"/>
 	<item type="selected" font="white shadow3 big">
 	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
-	    width="max+10" height="max+5" radius="5"/>
+	    width="max+20" height="max+10" radius="5"/>
 	</item>
       </content>
     </layout>
