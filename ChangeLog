@@ -8,8 +8,9 @@ Release 1.3.x (2003-??-??):
 
  * idlebar plugin for lmsensors
  * Merged latest xmltv parsing support
- * the usual: bugfixes and better error handling
-
+ * Preliminary FreeBSD support from Lars Eggert
+ * bugfixes and better error handling
+ 
 
 Release 1.3.4 (2003-08-03) -- Bugfix release:
 ---------------------------------------------
