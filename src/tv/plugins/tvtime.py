@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/01/06 00:58:40  mikeruelle
+# better osd message support
+#
 # Revision 1.26  2004/01/06 00:29:45  mikeruelle
 # fix regex for version detect and start osd message support
 #
@@ -551,9 +554,9 @@ class TVTime:
         
         elif event == em.OSD_MESSAGE:
 	    #this doesn't work
-            #self.app.write('DISPLAY_MESSAGE %s\nENTER\n' % event.arg)
+            #self.app.write('display_message %s\n' % event.arg)
 	    #this does
-            os.system('tvtime-command display_message \'%s\' enter' % event.arg)
+            os.system('tvtime-command display_message \'%s\'' % event.arg)
             return True
         
         elif event == em.BUTTON:
