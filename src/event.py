@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/07/29 19:06:40  dischi
+# add vcd events (used by xine)
+#
 # Revision 1.15  2003/07/27 19:12:21  dischi
 # add dvd events
 #
@@ -370,6 +373,30 @@ DVD_EVENTS = {
     'REW'       : Event(SEEK, arg=-10),
     'FFWD'      : Event(SEEK, arg=10),
     'MENU'      : DVDNAV_TITLEMENU,
+    'VOL+'      : MIXER_VOLUP,
+    'VOL-'      : MIXER_VOLDOWN,
+    'MUTE'      : MIXER_MUTE
+    }
+
+VCD_EVENTS = {
+    'PLAY'      : PLAY,
+    'PAUSE'     : PAUSE,
+    'STOP'      : STOP,
+    'EXIT'      : STOP,
+    'LEFT'      : Event(SEEK, arg=-60),
+    'RIGHT'     : Event(SEEK, arg=60),
+    'REW'       : Event(SEEK, arg=-10),
+    'FFWD'      : Event(SEEK, arg=10),
+    'MENU'      : MENU,
+    '1'         : INPUT_1,
+    '2'         : INPUT_2,
+    '3'         : INPUT_3,
+    '4'         : INPUT_4,
+    '5'         : INPUT_5,
+    '6'         : INPUT_6,
+    '7'         : INPUT_7,
+    '8'         : INPUT_8,
+    '9'         : INPUT_9,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
     'MUTE'      : MIXER_MUTE

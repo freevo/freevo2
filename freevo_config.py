@@ -218,7 +218,8 @@ EVENTS = {
     'input'   : INPUT_EVENTS,
     'tv'      : TV_EVENTS,
     'video'   : VIDEO_EVENTS,
-    'dvd'     : DVD_EVENTS,
+    'dvd'     : DVD_EVENTS,             # only used by xine
+    'vcd'     : VCD_EVENTS,             # only used by xine
     'audio'   : AUDIO_EVENTS,
     'games'   : GAMES_EVENTS,
     'image'   : IMAGE_EVENTS

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/07/29 19:06:40  dischi
+# add vcd events (used by xine)
+#
 # Revision 1.24  2003/07/12 19:13:25  rshortt
 # Need to set the plugin level in the plugin object.
 #
@@ -134,6 +137,7 @@ class DaemonPlugin(Plugin):
 AUDIO_PLAYER = 'AUDIO_PLAYER'
 VIDEO_PLAYER = 'VIDEO_PLAYER'
 DVD_PLAYER   = 'DVD_PLAYER'
+VCD_PLAYER   = 'VCD_PLAYER'
 TV           = 'TV'
 
 
