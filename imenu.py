@@ -42,7 +42,7 @@ iview = iview.get_singleton()
 #
 # view the image
 #
-def view_image(menuw=None, arg=None):
+def view_image(arg=None, menuw=None):
     osd.clearscreen(color=osd.COL_BLACK)
            
     osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
