@@ -6,6 +6,12 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/02 20:11:36  rshortt
+# Started fixing up ZIndexRenderer.py.  Working on update_hide() and
+# update_show(), commented out the old code for now.  show() and hide() on
+# GUIObjects now keep track of what is behind them so it can be replaced
+# when they go away.
+#
 # Revision 1.3  2003/02/24 11:53:23  rshortt
 # ZIndexRenderer has a nasty bug which results in _huge_ memory usage.  For
 # every single instance of GUIObject (even if it is not drawn, visible, or
@@ -72,6 +78,8 @@ import osd
 import pygame
 
 osd = osd.get_singleton()
+
+DEBUG = 1
 
 _singleton = None
 
@@ -151,27 +159,32 @@ class ZIndexRenderer:
         Notify objects above the calling object to do a redraw.
         Does anyone have a better idea for a name for this function?
         """
-        oi = self.zindex.index(object)
-        if not len(self.zindex) > (oi+1):
-            return
+        # oi = self.zindex.index(object)
+        # if not len(self.zindex) > (oi+1):
+        #     return
 
-        ol   = self.zindex[(oi+1):]
-        t_bg = object.bg_image.convert()
-        for o in ol:
-            if o.is_visible():
-                if o.border:
-                    # Erase a little bigger area when we have borders.
-                    x,y,w,h = o.border.get_erase_rect()
-                else:
-                    x,y,w,h = o.get_rect()
+        # ol   = self.zindex[(oi+1):]
+        # t_bg = object.bg_image.convert()
+        # for o in ol:
+        #     if o.is_visible():
+        #         if o.border:
+        #             # Erase a little bigger area when we have borders.
+        #             x,y,w,h = o.border.get_erase_rect()
+        #         else:
+        #             x,y,w,h = o.get_rect()
                     
-                o.bg_image.blit(t_bg, (x,y), (x,y,w,h))
-                o._erase()
+        #         o.bg_image.blit(t_bg, (x,y), (x,y,w,h))
+        #         o._erase()
 
-        for o in ol:
-            if o.is_visible():
-                o.bg_image = osd.screen.convert()
-                o._draw()
+        # for o in ol:
+        #     if o.is_visible():
+        #         o.bg_image = osd.screen.convert()
+        #         o._draw()
+
+        for o in self.zindex:
+            if o == object:
+                if o.bg_surface:
+                    osd.putsurface(o.bg_surface, o.left, o.top)
 
 
     def update_show(self, object):        
@@ -182,32 +195,44 @@ class ZIndexRenderer:
         Does anyone have a better idea for a name for this function?
         """
 
-        oi = self.zindex.index(object) 
-        ol = self.zindex[(oi):]
+        # oi = self.zindex.index(object) 
+        # ol = self.zindex[(oi):]
 
-        if object.bg_image: t_bg = object.bg_image.convert()
+        # object.bg_surface = osd.getsurface(object.left, object.top, 
+        #                                    object.width, object.height)
+        # object.bg_image = object.bg_surface.convert()
+
+        # if object.bg_image: t_bg = object.bg_image.convert()
+        # xx = 0
+        # for o in ol:
+        #     if not o == object and o.is_visible():
+        #         if o.border:
+        #             x,y,w,h = o.border.get_erase_rect()
+        #         else:
+        #             x,y,w,h = o.get_rect()
+ 
+        #         if t_bg: o.bg_image.blit( t_bg, (x,y), (x,y,w,h))
+        #         o._erase() 
+
         xx = 0
-        for o in ol:
-            if not o == object and o.is_visible():
-                if o.border:
-                    x,y,w,h = o.border.get_erase_rect()
-                else:
-                    x,y,w,h = o.get_rect()
-
-                if t_bg: o.bg_image.blit( t_bg, (x,y), (x,y,w,h))
-                o._erase() 
-
-            o.bg_image = osd.screen.convert()
-            iname = '/tmp/bg1-%s.bmp' % xx
-            pygame.image.save( o.bg_image, iname )
-            xx = xx + 1
-
-        xx = 0
-        for o in ol:
-            if o == object or o.is_visible():
-                o.bg_image = osd.screen.convert()
-                iname = '/tmp/bg2-%s.bmp' % xx
-                pygame.image.save( o.bg_image, iname )
-                xx = xx + 1
+        for o in self.zindex:
+            if o == object:
+                o.bg_surface = osd.getsurface(o.left, o.top, 
+                                              o.width, o.height)
+                if DEBUG:
+                    o.bg_image = o.bg_surface.convert()
+                    iname = '/tmp/bg1-%s.bmp' % xx
+                    pygame.image.save( o.bg_image, iname )
                 o._draw()
+            xx += 1
+
+        # xx = 0
+        # for o in ol:
+        #     if o == object or o.is_visible():
+        #         o.bg_image = osd.screen.convert()
+        #         iname = '/tmp/bg2-%s.bmp' % xx
+        #         pygame.image.save( o.bg_image, iname )
+        #         xx = xx + 1
+        #         o._draw()
+
 
