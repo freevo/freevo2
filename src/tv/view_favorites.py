@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/18 21:55:11  dischi
+# update to new gui code
+#
 # Revision 1.7  2004/01/09 06:36:53  outlyer
 # Fix a crash; I don't know if Python 2.2 is more forgiving about the types,
 # but 2.3 was pretty upset when it thought it wasn't getting a float()
@@ -90,8 +93,8 @@ class ViewFavorites(PopupBox):
         if not text:
             text = _('View Favorites')
         
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width)
+        PopupBox.__init__(self, text, handler, left, top, width, height,
+                          icon, parent=parent)
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:

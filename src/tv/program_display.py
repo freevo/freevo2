@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/18 21:55:11  dischi
+# update to new gui code
+#
 # Revision 1.24  2004/01/09 02:10:00  rshortt
 # Patch from Matthieu Weber to revive add/edit favorites support from the
 # TV interface.
@@ -135,12 +138,9 @@ class ProgramDisplay(PopupBox):
         else:
             self.context = 'guide'
 
-        PopupBox.__init__(self, parent=parent, text=self.prog.title, left=left,
-                          top=top, width=width, height=height,
+        PopupBox.__init__(self, parent=parent, text=self.prog.title, x=left,
+                          y=top, width=width, height=height,
                           vertical_expansion=vertical_expansion)
-
-        if not height:
-            self.height  = self.osd.height - (2 * config.OSD_OVERSCAN_Y) - 100
 
         self.v_spacing = 15
         self.h_margin = 20
@@ -210,14 +210,13 @@ class ProgramDisplay(PopupBox):
             desc.get_rendered_size()
 
 
-        # layout the box to get top and height values
-        self.layout()
-
         # correct height and top 
-        if not height:
-            self.height = self.layout_manager.needed_space + 2 * self.v_margin
-        if not top:
-            self.top  = self.osd.height/2 - self.height/2
+        self.content.layout()
+        needed_height = self.content.layout_manager.needed_space + 2 * self.v_margin
+
+        if needed_height > self.height:
+            self.set_size(self.width, needed_height)
+
 
     def eventhandler(self, event, menuw=None):
         if DEBUG: print _('ProgramDisplay: event = %s') % event
@@ -347,9 +346,8 @@ class ScheduledRecordings(PopupBox):
         if not text:
             text = _('Scheduled Recordings')
         
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width,
-                          vertical_expansion)
+        PopupBox.__init__(self, text, handler, left, top, width, height,
+                          icon, vertical_expansion, parent=parent)
 
         self.result = False
 

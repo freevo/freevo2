@@ -11,24 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/18 21:55:11  dischi
+# update to new gui code
+#
 # Revision 1.11  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
 # Revision 1.10  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
-#
-# Revision 1.9  2003/09/07 11:18:27  dischi
-# many optical improvements
-#
-# Revision 1.8  2003/09/05 02:48:12  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.7  2003/09/01 19:46:03  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.6  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -95,9 +85,8 @@ class ProgramSearch(PopupBox):
         if not text:
             text = _('Program Search')
         
-        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
-                          bg_color, fg_color, icon, border, bd_color, bd_width,
-                          vertical_expansion)
+        PopupBox.__init__(self, text, handler, left, top, width, height,
+                          icon, vertical_expansion, parent=parent)
 
         (self.server_available, msg) = record_client.connectionTest()
         if not self.server_available:
@@ -135,7 +124,9 @@ class ProgramSearch(PopupBox):
         (result, matches) = record_client.findMatches(find)
 
         if result:
-            if DEBUG: print 'FOUND: %s' % len(matches)
+            if DEBUG:
+                print 'FOUND: %s' % len(matches)
+
             i = 0
             self.results.items = []
 
@@ -172,49 +163,49 @@ class ProgramSearch(PopupBox):
             if event == em.INPUT_LEFT:
                 self.lbg.change_selected_box('left')
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+
             elif event == em.INPUT_RIGHT:
                 self.lbg.change_selected_box('right')
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+
             elif event == em.INPUT_ENTER:
                 self.searchProg(self.lbg.get_word())
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+
             elif event == em.INPUT_UP:
                 self.lbg.get_selected_box().charUp()
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+
             elif event == em.INPUT_DOWN:
                 self.lbg.get_selected_box().charDown()
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+
             elif event == em.MENU_PAGEDOWN:
                 self.lbg.get_selected_box().toggle_selected()
                 self.results.toggle_selected_index(0)
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+
             elif event in em.INPUT_ALL_NUMBERS:
                 self.lbg.get_selected_box().cycle_phone_char(event)
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
 
         elif self.get_selected_child() == self.results:
             if event == em.INPUT_UP or event == em.INPUT_DOWN:
                 return self.results.eventhandler(event)
+
             elif event in (em.INPUT_LEFT, em.INPUT_RIGHT, em.MENU_PAGEUP):
                 self.results.get_selected_child().toggle_selected()
                 self.lbg.boxes[0].toggle_selected()
                 self.draw()
-                self.osd.update(self.get_rect())
                 return
+            
             elif event == em.INPUT_ENTER:
                 prog = self.results.get_selected_child().value
                 if prog:

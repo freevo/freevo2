@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/18 21:55:11  dischi
+# update to new gui code
+#
 # Revision 1.7  2004/01/09 19:35:49  outlyer
 # Inherit DEBUG parameter from config, move some prints into DEBUG
 #
@@ -116,7 +119,7 @@ class EditFavorite(PopupBox):
             
 
 
-        PopupBox.__init__(self, text=_('Edit Favorite'), left=left, top=top, width=width, 
+        PopupBox.__init__(self, text=_('Edit Favorite'), x=left, y=top, width=width, 
                           height=height)
 
         self.v_spacing = 15
@@ -238,41 +241,36 @@ class EditFavorite(PopupBox):
 
     def eventhandler(self, event, menuw=None):
         #print 'SELECTED CHILD: %s' % self.get_selected_child()
+
         if self.get_selected_child() == self.name_input:
             if event == em.INPUT_LEFT:
                 self.name_input.change_selected_box('left')
                 self.draw()
-                self.osd.update(self.get_rect())
-                return
+                return True
             elif event == em.INPUT_RIGHT:
                 self.name_input.change_selected_box('right')
                 self.draw()
-                self.osd.update(self.get_rect())
-                return
+                return True
             elif event == em.INPUT_ENTER:
                 self.name_input.get_selected_box().toggle_selected()
                 self.chan_box.toggle_selected()
                 self.draw()
-                self.osd.update(self.get_rect())
-                return
+                return True
             elif event == em.INPUT_UP:
                 self.name_input.get_selected_box().charUp()
                 self.draw()
-                self.osd.update(self.get_rect())
-                return
+                return True
             elif event == em.INPUT_DOWN:
                 self.name_input.get_selected_box().charDown()
                 self.draw()
-                self.osd.update(self.get_rect())
-                return
+                return True
             elif event in em.INPUT_ALL_NUMBERS: 
                 self.name_input.get_selected_box().cycle_phone_char(event)
                 self.draw()
-                self.osd.update(self.get_rect())
-                return
+                return True
             elif event == em.INPUT_EXIT:
                 self.destroy()
-                return
+                return True
 
         elif self.get_selected_child() == self.chan_box:
             if event in (em.INPUT_UP, em.INPUT_DOWN):
@@ -293,9 +291,7 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event == em.INPUT_EXIT:
                 self.destroy()
-                return
-            self.osd.update(self.get_rect())
-            return
+            return True
 
         elif self.get_selected_child() == self.dow_box:
             if event in (em.INPUT_UP, em.INPUT_DOWN):
@@ -315,9 +311,8 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event == em.INPUT_EXIT:
                 self.destroy()
-                return
-            self.osd.update(self.get_rect())
-            return
+                return True
+            return True
 
         elif self.get_selected_child() == self.tod_box:
             if event in (em.INPUT_UP, em.INPUT_DOWN):
@@ -337,9 +332,8 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event == em.INPUT_EXIT:
                 self.destroy()
-                return
-            self.osd.update(self.get_rect())
-            return
+                return True
+            return True
 
         elif self.get_selected_child() == self.save:
             if event == em.INPUT_ENTER:
@@ -358,7 +352,7 @@ class EditFavorite(PopupBox):
                     AlertBox(parent='osd', text=_('Favorite %s has been saved') % self.name_input.get_word()).show()
                 else:
                     AlertBox(parent=self, text=_('Failed: %s') % msg).show()
-                return
+                return True
             elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):
                 self.save.toggle_selected()
                 self.tod_box.toggle_selected()
@@ -372,15 +366,14 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event == em.INPUT_EXIT:
                 self.destroy()
-                return
-            self.osd.update(self.get_rect())
-            return
+                return True
+            return True
 
         elif self.get_selected_child() == self.remove:
             if event == em.INPUT_ENTER:
                 ConfirmBox(text=_('Do you want to remove %s?') % self.name_input.get_word(),
                            handler=self.removeFavorite).show()
-                return
+                return True
             elif event in (em.INPUT_LEFT, em.MENU_PAGEUP):
                 self.save.toggle_selected()
                 self.remove.toggle_selected()
@@ -391,9 +384,8 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event in (em.INPUT_ENTER, em.INPUT_EXIT):
                 self.destroy()
-                return
-            self.osd.update(self.get_rect())
-            return
+                return True
+            return True
         
         elif self.get_selected_child() == self.cancel:
             if event in (em.INPUT_LEFT, em.MENU_PAGEUP):
@@ -405,12 +397,15 @@ class EditFavorite(PopupBox):
                 self.draw()
             elif event in (em.INPUT_ENTER, em.INPUT_EXIT):
                 self.destroy()
-                return
-            self.osd.update(self.get_rect())
-            return
+                return True
+            return True
         if event == em.INPUT_EXIT:
             self.destroy()
-            return
+            return True
+        elif event in (em.MENU_PAGEDOWN, em.MENU_PAGEUP):
+            return True
         else:
             return self.parent.eventhandler(event)
+
+
 
