@@ -78,3 +78,15 @@ def log(str):
     write_lock.acquire()
     fp.write(str + '\n')
     write_lock.release()
+# Simple Python Imaging routine to return image size
+# and return a default if the Imaging library is not
+# installed.
+
+def pngsize(file):
+	try:
+		import Image
+	except ImportError:
+		return '200','200'
+	image = Image.open(file)
+	width, height = image.size
+	return width,height
