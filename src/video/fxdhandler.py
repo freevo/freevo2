@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/08 05:33:30  outlyer
+# Removed some debug print.
+#
 # Revision 1.16  2004/02/03 20:51:12  dischi
 # fix/enhance dvd on disc
 #
@@ -220,7 +223,6 @@ def parse_movie(fxd, node):
             # dvd dir
             variables = item.info.get_variables()
             item.set_url(url.replace('file://', 'dvd:/')+ '/VIDEO_TS/', info=True)
-            print item.url
             item.info.set_variables(variables)
         else:
             item.set_url(url, info=False)
