@@ -11,6 +11,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/20 00:32:11  rshortt
+# Placed most of the work into functions and added a check for '__main__' for
+# the command line.  I'm planning on importing this module from recordserver
+# and calling functions to grab and sort listings at a configurable time.
+#
+# Alco changed '-query' to '--query' for consistency's sake.
+#
 # Revision 1.3  2003/10/15 19:26:55  rshortt
 # The channel number portion of TV_CHANNELS entries is handled as a string,
 # this is especially important for some European channels ie: E8.
@@ -48,67 +55,87 @@
 
 import sys
 import os
+import shutil
 
 import config
-import util
 
 def usage():
     print 'Downloads the listing for xmltv and cache the data'
     print
-    print 'usage: freevo tv_grab [ -query ]'
+    print 'usage: freevo tv_grab [ --query ]'
     print 'options:'
-    print '  -query:  print a list of all stations. The list can be used to set TV_CHANNELS'
+    print '  --query:  print a list of all stations. The list can be used to set TV_CHANNELS'
     sys.exit(0)
 
 
-if len(sys.argv)>1 and sys.argv[1] == '--help':
-    usage()
-    
-if not config.XMLTV_GRABBER:
-    print 'No program found to grab the listings. Please set XMLTV_GRABBER'
-    print 'in local.conf.py to the grabber you need'
-    print
-    usage()
+def grab():
+    if not config.XMLTV_GRABBER:
+        print 'No program found to grab the listings. Please set XMLTV_GRABBER'
+        print 'in local.conf.py to the grabber you need'
+        print
+        usage()
 
-QUERY = 0
-if len(sys.argv)>1 and sys.argv[1] == '-query':
-    QUERY = 1
-    
-if not os.path.isfile(config.XMLTV_FILE) or not QUERY:
     print 'Grabbing listings.'
-    os.system('%s --output %s --days %s' % ( config.XMLTV_GRABBER, config.XMLTV_FILE,
+    xmltvtmp = '/tmp/TV.xml.tmp'
+    os.system('%s --output %s --days %s' % ( config.XMLTV_GRABBER, 
+                                             xmltvtmp,
                                              config.XMLTV_DAYS ))
 
-if os.path.isfile(config.XMLTV_SORT):
-    print 'Sorting listings.'
-    os.system('%s --output %s %s' % ( config.XMLTV_SORT, config.XMLTV_FILE,
-                                             config.XMLTV_FILE ))
+    if os.path.exists(xmltvtmp):
+        shutil.copyfile(xmltvtmp, config.XMLTV_FILE)
+        os.unlink(xmltvtmp)
 
-print
-print 'searching for station information'
-chanlist = config.detect_channels()
 
-if QUERY:
-    print
-    print 'Possible list of tv channels. If you want to change the station'
-    print 'id, copy the next statement into your local_conf.py and edit it.'
-    print 'You can also remove lines or resort them'
-    print
-    print 'TV_CHANNELS = ['
-    for c in chanlist[:-1]:
-        print '    ( \'%s\', \'%s\', \'%s\' ), ' % c
-    print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % chanlist[-1]
-    sys.exit(0)
+def sort():
+    if os.path.isfile(config.XMLTV_SORT):
+        print 'Sorting listings.'
+        xmltvtmp = '/tmp/TV.xml.tmp'
+        os.system('%s --output %s %s' % ( config.XMLTV_SORT,
+                                          xmltvtmp,
+                                          config.XMLTV_FILE ))
 
-print 'caching data, this may take a while'
+        if os.path.exists(xmltvtmp):
+            shutil.copyfile(xmltvtmp, config.XMLTV_FILE)
+            os.unlink(xmltvtmp)
+    else:
+        print 'Not configured to use tv_sort, skipping.'
 
-import tv.epg_xmltv
-tv.epg_xmltv.get_guide()
 
-import tv.record_client as rc
+if __name__ == '__main__':
 
-print 'Scheduling favorites for recording:  '
+    if len(sys.argv)>1 and sys.argv[1] == '--help':
+        usage()
+    
+    if len(sys.argv)>1 and sys.argv[1] == '--query':
+        print
+        print 'searching for station information'
 
-(result, response) = rc.updateFavoritesSchedule()
-print '    %s' % response
+        chanlist = config.detect_channels()
+
+        print
+        print 'Possible list of tv channels. If you want to change the station'
+        print 'id, copy the next statement into your local_conf.py and edit it.'
+        print 'You can also remove lines or resort them'
+        print
+        print 'TV_CHANNELS = ['
+        for c in chanlist[:-1]:
+            print '    ( \'%s\', \'%s\', \'%s\' ), ' % c
+        print '    ( \'%s\', \'%s\', \'%s\' ) ] ' % chanlist[-1]
+        sys.exit(0)
+
+    grab()
+    sort()
+
+    print 'caching data, this may take a while'
+
+    import tv.epg_xmltv
+    tv.epg_xmltv.get_guide()
+
+    import tv.record_client as rc
+    
+    print 'Scheduling favorites for recording:  '
+
+    (result, response) = rc.updateFavoritesSchedule()
+    print '    %s' % response
+
 
