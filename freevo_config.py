@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.05
+LOCAL_CONF_VERSION  = 5.06
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -199,7 +199,11 @@ LOCAL_CONF_CHANGES = [
      When SKIN_XML_FILE is not set, the skin will remember the last settings'''),
     (5.05,
      '''Use MMPYTHON_CREATE_MD5_ID with current mmpython cvs to have a second
-     way to generate the disc ids in case they are not unique on your system''') ]
+     way to generate the disc ids in case they are not unique on your system'''),
+    (5.06,
+     '''Add MEDIAINFO_USE_MEMORY. Setting this variable will keep all cache
+     files in memory. Startup will be slower, but for large directories, this
+     will speed up entering the dir''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -333,6 +337,20 @@ PLAYLIST_SUFFIX = [ 'm3u' ]
 # problems with different discs having the same id
 #
 MMPYTHON_CREATE_MD5_ID = 0
+
+#
+# keep metadata in memory
+# Setting this variable will keep all cache files in memory. Startup will be
+# slower, but for large directories, this will speed up entering the dir.
+# 0 = Only keep current dir in memory. Use this if you have too much data
+#     and not enough RAM
+# 1 = Once loaded, keep cachefile for directory in memory
+# 2 = Load all cachefiles on startup
+#
+# WARNING: you should not run 'freevo cache' when freevo is running.
+#
+MEDIAINFO_USE_MEMORY   = 1
+
 
 # ======================================================================
 # Plugins:
@@ -644,10 +662,10 @@ IMAGE_SSHOW_SUFFIX = [ 'ssr' ]
 
 
 # The number of blend steps between images, 0 to disable blending
-IMAGEVIEWER_BLEND_STEPS = 5
+IMAGEVIEWER_BLEND_STEPS = 10
     
 # Total time in seconds for blending from one image to the next
-IMAGEVIEWER_BLEND_TIME = 0.5
+IMAGEVIEWER_BLEND_TIME  = 0.75
 
 
 # ======================================================================
