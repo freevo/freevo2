@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/23 00:57:55  outlyer
+# Can't edit favourites with '&' in the name unless you use the proper 'query'
+# string, in this case %26
+#
 # Revision 1.8  2003/10/20 02:24:16  rshortt
 # more tv_util fixes
 #
@@ -168,8 +172,8 @@ class FavoritesResource(FreevoResource):
             fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
 
             # cell = '<input type="hidden" name="action" value="%s">' % action
-            cell = '<a href="edit_favorite.rpy?action=edit&name=%s">Edit</a>, ' % fav.name
-            cell += '<a href="favorites.rpy?action=remove&name=%s">Remove</a>' % fav.name
+            cell = '<a href="edit_favorite.rpy?action=edit&name=%s">Edit</a>, ' % fav.name.replace('&','%26')
+            cell += '<a href="favorites.rpy?action=remove&name=%s">Remove</a>' % fav.name.replace('&','%26')
             fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
 
             cell = ''
