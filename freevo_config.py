@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2002/10/16 04:58:16  krister
+# Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
+#
 # Revision 1.79  2002/10/15 21:44:31  krister
 # Added a font alias list, substitute missing non-free fonts with free alternates.
 #
@@ -252,7 +255,7 @@ OSD_SKIN = 'skins/main1/skin_main1.py'
 #
 # XML file for the skin
 #
-SKIN_XML_FILE = 'skins/xml/type1/%s.xml' % CONF.geometry
+SKIN_XML_FILE = 'skins/xml/type1/grey1_%s.xml' % CONF.geometry
 
 # XXX The options to disable TV and Images have been removed. This must be
 # XXX done in the skin instead (visible="no").

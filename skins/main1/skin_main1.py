@@ -1,76 +1,37 @@
 #if 0
 # -----------------------------------------------------------------------
-# skin_main.py - Freevo main skin no 1
+# skin_main1.py - Freevo skin
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Notes:   This is the default skin
+# Notes:   This is the main1 skin
 # Todo:        
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.39  2002/10/09 02:35:16  krister
-# Removed special workarounds for the old runtime since the new runtime works better.
+# Revision 1.40  2002/10/16 04:58:16  krister
+# Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
 #
-# Revision 1.38  2002/10/08 04:48:08  krister
-# Made popup box width stringsize dependent.
+# Revision 1.16  2002/10/15 19:57:56  dischi
+# Added extended menu support
 #
-# Revision 1.37  2002/10/07 04:37:48  outlyer
-# Reverting my changes which were to the wrong file.
+# Revision 1.15  2002/10/14 18:47:00  dischi
+# o added scale support, you can define a scale value for the import
+#   grey640x480 and grey768x576 are very simple now
+# o renamed the xml files
 #
-# Revision 1.35  2002/10/06 14:35:19  dischi
-# log message cleanup and removed a debug message
+# Revision 1.14  2002/10/13 14:16:55  dischi
+# Popup box and mp3 player are now working, too. This skin can look
+# like main1 and aubin1. I droped the support for the gui classes
+# because there are not powerfull enough
 #
-# Revision 1.34  2002/10/05 18:16:37  dischi
-# Don't copy settings, we want to override it
+# Revision 1.13  2002/10/12 19:00:55  dischi
+# deactivated the movie box since we don't have informations for this
+# right now.
 #
-# Revision 1.33  2002/10/05 18:10:56  dischi
-# Added support for a local_skin.xml file. See Docs/documentation.html
-# section 4.1 for details. An example is also included.
+# Revision 1.12  2002/10/12 18:45:25  dischi
+# New skin, Work in progress
 #
-# Revision 1.32  2002/10/05 17:25:45  dischi
-# Added ability to display shadows for title as well (deactivated in the
-# xml file)
-#
-# Revision 1.31  2002/09/27 08:43:38  dischi
-# removed 2 debugs again, this makes no sense.
-#
-# Revision 1.30  2002/09/27 08:39:10  dischi
-# More debug for error location
-#
-# Revision 1.29  2002/09/26 09:20:58  dischi
-# Fixed (?) bug when using freevo_runtime. Krister, can you take a look
-# at that?
-#
-# Revision 1.28  2002/09/25 18:53:43  dischi
-# Added border around the cover image (set by the xml file border_size
-# and border_color)
-#
-# Revision 1.27  2002/09/24 02:17:00  gsbarbieri
-# In DrawMP3 changed the layout, now the labels ('Title: ', 'Author: ', ...) are right aligned.
-#
-# Revision 1.26  2002/09/23 19:01:06  dischi
-# o Added alignment from the xml file for fonts
-# o Added PopupBox from gui classes (looks better)
-# o cleanup: improved DrawText(...) and now the code looks much
-#   better, also alignment works for all texts
-#
-# Revision 1.25  2002/09/23 18:16:48  dischi
-# removed shadow mode
-#
-# Revision 1.24  2002/09/22 09:54:31  dischi
-# XML cleanup. Please take a look at the new skin files to see the new
-# structure. The 640x480 skin is also workin now, only one small bug
-# in the submenu (seems there is something hardcoded).
-#
-# Revision 1.23  2002/09/21 10:08:53  dischi
-# Added the function PopupBox. This function is identical with
-# osd.popup_box, but drawing a popup box should be part of the skin.
-#
-# Revision 1.22  2002/09/20 19:18:59  dischi
-# o added ItemsPerMenuPage and adapted some stuff that it works
-# o integrated the tv show alignment from dischi1 (testfiles needed to show
-#   that feature)
 #
 #
 # -----------------------------------------------------------------------
@@ -112,7 +73,7 @@ import mixer
 # The OSD class, used to communicate with the OSD daemon
 import osd
 
-# Freevo's GUI class
+# The gui class
 import gui
     
 # The RemoteControl class, sets up a UDP daemon that the remote control client
@@ -123,6 +84,14 @@ import rc
 sys.path.append('skins/xml/type1')
 import xml_skin
 
+# Create the OSD object
+osd = osd.get_singleton()
+
+# Skin utility functions
+from main1_utils import *
+
+# TV guide support
+import main1_tv
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -141,21 +110,27 @@ mixer = mixer.get_singleton()
 # Create the remote control object
 rc = rc.get_singleton()
 
-# Create the OSD object
-osd = osd.get_singleton()
-
-
 ###############################################################################
 # Skin main functions
 ###############################################################################
+
+XML_SKIN_DIRECTORY = 'skins/xml/type1'
 
 class Skin:
 
     if DEBUG: print 'Skin: Loading XML file %s' % config.SKIN_XML_FILE
     
     settings = xml_skin.XMLSkin()
-    settings.load(config.SKIN_XML_FILE)
 
+    # try to find the skin xml file
+    
+    if not settings.load(config.SKIN_XML_FILE):
+        if not settings.load("%s%s.xml" % (config.SKIN_XML_FILE, config.CONF.geometry)):
+            if not settings.load("%s/%s_%s.xml" % (XML_SKIN_DIRECTORY, config.SKIN_XML_FILE, \
+                                                   config.CONF.geometry)):
+                print "skin not found, using fallback skin"
+                settings.load("%s/grey1_%s.xml" % (XML_SKIN_DIRECTORY, config.CONF.geometry))
+        
     if os.path.isfile("local_skin.xml"):
         if DEBUG: print 'Skin: Add local config to skin'
         settings.load("local_skin.xml")
@@ -164,7 +139,7 @@ class Skin:
 
 
     def __init__(self):
-        # Push main menu items
+        self.tv = main1_tv.Skin_TV()
         pass
 
 
@@ -203,11 +178,12 @@ class Skin:
         if not menu.packrows:
             return 5
         
-        # get the settings
+        # find the correct structures, I hope we don't need this
+        # for the main menu ...
         if menu.skin_settings:
-            val = menu.skin_settings.menu
+            val = menu.skin_settings.menu_default
         else:
-            val = self.settings.menu
+            val = self.settings.menu_default
 
         used_height = 0
         n_items     = 0
@@ -218,8 +194,6 @@ class Skin:
                     pref_item = val.items.dir
                 elif item.type == 'list':
                     pref_item = val.items.pl
-                elif item.type == 'main':
-                    pref_item = val.item_main
                 else:
                     pref_item = val.items.default;
             else:
@@ -251,7 +225,7 @@ class Skin:
 
     def PopupBox(self, text=None, icon=None):
         """
-        text  STring to display
+        text  String to display
 
         Draw a popupbox with an optional icon and a text.
         
@@ -259,46 +233,58 @@ class Skin:
                Maybe I should use one common box item.
         """
 
-        width, tmp = osd.stringsize(text, 'skins/fonts/bluehigh.ttf', 24)
-        if icon:
-            width += 64  # XXX hardcoded, fix
-        left   = (osd.width/2)-(width/2)
-        top    = (osd.height/2)-30
-        height = 60
-        icn    = icon
-        bd_w   = 2
+        val = self.settings.popup
 
-        bg_c   = gui.Color(osd.default_bg_color)
-        fg_c   = gui.Color(osd.default_fg_color)
+        # XXX If someone has the time, please fix this. It's a bad mixture
+        # XXX between hardcoded stuff (some values and the alpha mask) and
+        # XXX the use of the gui toolkit
 
-        bg_c.set_alpha(192)
-
-        pb = gui.PopupBox(left, top, width, height, icon=icn, bg_color=bg_c,
-                          fg_color=fg_c, border='flat', bd_width=bd_w)
-
-        pb.set_text(text)
-        pb.set_h_align(gui.Label.CENTER)
-
-        pb.set_font('skins/fonts/bluehigh.ttf', 24)
-        pb.show()
+        x = val.message.x
+        width = val.message.width
         
-        osd.update()
-        
-
-    # Draws a text based on the settings in the XML file
-    def DrawText(self, text, settings, x=-1, y=-1):
-        if x == -1:
-            x = settings.x
-        if y == -1:
-            y = settings.y
+        # if we have an alpha mask, don't use the gui toolkit
+        # just draw it
+        if val.mask:
+            osd.drawbitmap(val.mask, val.x, val.y)
             
-        if settings.shadow_visible:
-            osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
-                           settings.shadow_color, None, settings.font,
-                           settings.size, settings.align)
-        osd.drawstring(text, x, y, settings.color, None, settings.font,
-                       settings.size, settings.align)
+        if icon:
+            icon_width, icon_height = util.pngsize(icon)
+            x += icon_width
+            width -= icon_width
 
+        need = osd.drawstringframed(text, x, val.message.y, width, val.message.height, \
+                                    val.message.color, None, val.message.font, \
+                                    val.message.size, val.message.align, 'center',
+                                    mode='soft')
+        (x0, y0, x1, y1) = need[1]
+
+        if icon:
+            x0 -= icon_width + 10
+            if icon_height > (y1 - y0):
+                missing = (icon_height - (y1 - y0)) / 2
+                y1 += missing
+                y0 -= missing
+                
+        if val.mask:
+            if icon:
+                osd.drawbitmap(icon, val.x+25, y0 + (y1-y0) / 2 - (icon_height/2))
+                
+        else:            
+            osd.drawbox(x0-10, y0-10, x1+10, y1+10, width = -1, color = val.bgcolor)
+            if val.border_size:
+                osd.drawbox(x0-10, y0-10, x1+10, y1+10, width = val.border_size,
+                            color=val.border_color)
+
+            if icon:
+                osd.drawbitmap(icon, x0, y0 + (y1-y0) / 2 - (icon_height/2))
+
+            osd.drawstringframed(text, x, val.message.y, width, val.message.height, \
+                                 val.message.color, None, val.message.font, \
+                                 val.message.size, val.message.align, 'center')
+
+        osd.update()
+
+        
 
     def DrawMenu_Cover(self, menuw, settings):
         image_x = 0
@@ -328,6 +314,8 @@ class Skin:
                         osd.drawbitmap(util.resize(image, val.cover_movie.width, \
                                                    val.cover_movie.height),\
                                        val.cover_movie.x, val.cover_movie.y)
+                        # deactivate it until we have the info for this
+			# osd.drawbitmap('skins/images/moviebox.png',-1,-1)
                         i_val = val.cover_movie
 
                 elif type == 'music' and val.cover_music.visible:
@@ -363,7 +351,7 @@ class Skin:
 
 
         for choice in menuw.menu_items:
-            
+
             if menu.selected == choice:
                 image = choice.image
 
@@ -375,15 +363,6 @@ class Skin:
                     item = val.items.dir
                 elif choice.type == 'list':
                     item = val.items.pl
-
-                # XXX BAD HACK (tm)
-                # overwrite settings for main
-                elif choice.type == 'main':
-                    item = val.item_main
-                    valign = 1
-                    x0 = val.item_main.x
-                    width = val.item_main.width
-                    
                 else:
                     item = val.items.default
             else:
@@ -438,7 +417,7 @@ class Skin:
             # TV show, align the text with all files from the same show
             if show_name[0]:
                 x = x0
-                self.DrawText(show_name[0], obj, x=x, y=top)
+                DrawText(show_name[0], obj, x=x, y=top)
 
                 season_w = 0
                 volume_w = 0
@@ -456,21 +435,22 @@ class Skin:
                     osd.stringsize('%s  ' % show_name[0], font=obj.font, \
                                    ptsize=obj.size)[0] - season_w + \
                     osd.stringsize(show_name[1], font=obj.font, ptsize=obj.size)[0]
-                self.DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top)
+                DrawText('%sx%s' % (show_name[1], show_name[2]), obj, x=x, y=top)
 
                 x = x + season_w + volume_w + \
                     osd.stringsize('x  ', font=obj.font, ptsize=obj.size)[0]
-                self.DrawText('-  %s' % show_name[3], obj, x=x, y=top)
+                DrawText('-  %s' % show_name[3], obj, x=x, y=top)
                 
 
             # normal items
             else:
-                self.DrawText(text, obj, x=x0, y=top)
+                DrawText(text, obj, x=x0, y=top)
 
             # draw icon
             if choice.icon != None:
-                icon_x = item.x - icon_size - 15
-                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x, y0)
+                icon_x = x0 - icon_size - 15
+                icon_y = y0 - (icon_size - font_h) / 2
+                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size), icon_x, icon_y)
 
             y0 += spacing
         
@@ -482,7 +462,7 @@ class Skin:
             print 'skin.drawmenu() hold!'
             return
         
-        osd.clearscreen(osd.COL_WHITE)
+        osd.clearscreen(osd.COL_BLACK)
 
         menu = menuw.menustack[-1]
 
@@ -490,27 +470,36 @@ class Skin:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
 
-        # XXX Kludge to draw the TV Guide using the old code. 
-        if menu.heading.find('TV MENU') != -1:
-            self._DrawTVGuide(menuw)
-            return
-            
-        # get the settings
+        # find the correct structures:
         if menu.skin_settings:
-            val = menu.skin_settings.menu
+            val = menu.skin_settings
         else:
-            val = self.settings.menu
+            val = self.settings
 
-        if val.bgbitmap[0]:
-            apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-        
+        # now find the correct menu:
+        if len(menuw.menustack) == 1:
+            val = val.menu_main
+        elif menu.heading.find('TV MENU') != -1:
+            val = val.menu_tv
+        else:
+            val = val.menu_default
+            
+
+        if val.background.image:
+            apply(osd.drawbitmap, (val.background.image, -1, -1))
+
+        if val.background.mask:
+            osd.drawbitmap(val.background.mask,-1,-1)
+
         # Menu heading
         if val.title.visible:
             if val.title.text:
                 menu.heading = val.title.text
 
-            self.DrawText(menu.heading, val.title)
-            
+            DrawText(menu.heading, val.title)
+
+        if val.logo.image and val.logo.visible:
+            osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
 
         # Draw the menu choices for the main selection
         y0 = val.items.y
@@ -540,192 +529,57 @@ class Skin:
                             width=-1,
                             color=((160 << 24) | val.submenu.selection.bgcolor))
                 
-                self.DrawText(item.name, val.submenu.selection, x=x0, y=y0)
+                DrawText(item.name, val.submenu.selection, x=x0, y=y0)
                 
             else:
-                self.DrawText(item.name, val.submenu, x=x0, y=y0)
+                DrawText(item.name, val.submenu, x=x0, y=y0)
             x0 += 190
 
         osd.update()
         
-
-
-    # XXX Super-kludge warning!
-    # I (Krister) don't have time to integrate Gustavo's new stuff with my
-    # column menu drawing, so I'll just include my old DrawMenu() and
-    # call that for the TV menu only for now.
-    #
-    # Called from DrawMenu to draw the TV Guide menu page
-    def _DrawTVGuide(self, menuw):
-        if self.hold:
-            print 'skin.drawmenu() hold!'
-            return
-
-        if DEBUG: print 'Skin.drawmenu()'
-        
-        osd.clearscreen(osd.COL_WHITE)
-
-        menu = menuw.menustack[-1]
-
-        if not menu:
-            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
-            return
-
-        # get the settings
-        if menu.skin_settings:
-            val = menu.skin_settings.menu
-        else:
-            val = self.settings.menu
-
-        if val.bgbitmap[0]:
-            apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-        
-        # Menu heading
-        if val.title.visible:
-            if val.title.text:
-                menu.heading = val.title.text
-            osd.drawstring(menu.heading, val.title.x, val.title.y,
-                           val.title.color, font=val.title.font,
-                           ptsize=val.title.size, align=val.title.align)
-
-        # Sub menus
-        icon_size = 25
-
-        x0 = val.items.x
-        y0 = val.items.y
-        height = val.items.height
-
-        fontsize = val.items.default.size
-
-        if menu.packrows:
-            w, h = osd.stringsize('Ajg', font=val.items.default.font,
-                                  ptsize=fontsize)
-            spacing = h + PADDING
-        else:
-            spacing = height / max(len(menuw.menu_items),1)
-
-        # image to display
-        image = None
-        
-        
-        # Handle multiple columns in the menu widget.
-        # Only the first column is highlighted, and all columns have
-        # their left edges vertically aligned
-        rows = []
-        maxcols = 0  # Largest number of columns in any row
-        for item in menuw.menu_items:
-            row = item.name.split('\t')
-            rows += [row]
-            maxcols = max(maxcols, len(row))
-            
-        # Determine the width of the widest column string
-        maxwidth = 0
-        for row in rows:
-            w, h = osd.stringsize(row[0], font=val.items.default.font,
-                                  ptsize=fontsize)
-            maxwidth = max(maxwidth, w)
-            
-        # Draw the menu items, with icons if any
-        row = 0
-        for choice in menuw.menu_items:
-            if choice.icon != None:
-                icon_x = x0 - icon_size - 10
-                osd.drawbitmap(util.resize(choice.icon, icon_size, icon_size),
-                               icon_x, y0)
-
-            # Draw the selection
-            osd.drawstring(rows[row][0], x0, y0, val.items.default.color,
-                           font=val.items.default.font,
-                           ptsize=fontsize)
-            
-            if menu.selected == choice:
-                osd.drawbox(x0 - 3, y0 - 3,
-                            x0 + maxwidth + 3,
-                            y0 + fontsize*1.5 + 1, width=-1,
-                            color=((160 << 24) | val.items.default.selection.bgcolor))
-
-                image = choice.image
-
-            y0 += spacing
-            row += 1
-
-        x0 += maxwidth + 8
-        
-        # Draw the additional text columns with vertical alignment
-        for col in range(1, maxcols):
-
-            y0 = val.items.y  # Start over from the top
-            
-            # Determine the width of the widest column string
-            maxwidth = 0
-            for row in rows:
-                if col >= len(row): continue # Not all rows are same length
-                
-                w, h = osd.stringsize(row[col], font=val.items.default.font,
-                                      ptsize=fontsize)
-                maxwidth = max(maxwidth, w)
-
-            # Draw the column strings for all rows
-            for row in rows:
-                if col < len(row): 
-                    osd.drawstring(row[col], x0, y0, val.items.default.color,
-                                   font=val.items.default.font,
-                                   ptsize=fontsize)
-                y0 += spacing
-
-            # Update x for the next column
-            x0 += maxwidth + 8
-
-        # Draw the menu choices for the meta selection
-        x0 = val.submenu.x
-        y0 = val.submenu.y
-        
-        for item in menuw.nav_items:
-            if menu.selected == item:
-                osd.drawbox(x0 - 4, y0 - 3, x0 + val.submenu.selection.length, 
-                            y0 + val.submenu.selection.size*1.5,
-                            width=-1, color=((160 << 24) |
-                                             val.submenu.selection.bgcolor))
-                
-                self.DrawText(item.name, val.submenu.selection, x=x0, y=y0)
-            else:
-                self.DrawText(item.name, val.submenu, x=x0, y=y0)
-            x0 += 190
-
-        osd.update()
-
 
     def DrawMP3(self, info):
 
         val = self.settings.mp3
-        val2 = copy.copy(val)
-        val2.align = 'right'
+        iv  = val.info
 
-        str_w_title, str_h_title = osd.stringsize('Title: ',val2.font, val2.size)
-        str_w_artist, str_h_artist = osd.stringsize('Artist: ',val2.font, val2.size)
-        str_w_album, str_h_album = osd.stringsize('Album: ',val2.font, val2.size)
-        str_w_year, str_h_year = osd.stringsize('Year: ',val2.font, val2.size)
-        str_w_track, str_h_track = osd.stringsize('Track: ',val2.font, val2.size)
-        str_w_time, str_h_time = osd.stringsize('Time: ',val2.font, val2.size)
-        left = max( str_w_title, str_w_artist, str_w_album, str_w_year, str_w_track, str_w_time )
-        left += 30
+        str_w_title, str_h_title = osd.stringsize('Title: ',iv.font, iv.size)
+        str_w_artist, str_h_artist = osd.stringsize('Artist: ',iv.font, iv.size)
+        str_w_album, str_h_album = osd.stringsize('Album: ',iv.font, iv.size)
+        str_w_year, str_h_year = osd.stringsize('Year: ',iv.font, iv.size)
+        str_w_track, str_h_track = osd.stringsize('Track: ',iv.font, iv.size)
+        str_w_length, str_h_length = osd.stringsize('Length: ',iv.font, iv.size)
+        str_w_time, str_h_time = osd.stringsize('Time: ',iv.font, iv.size)
+        left = max( str_w_title, str_w_artist, str_w_album, str_w_year, \
+                    str_w_track, str_w_length, str_w_time )
+        left += iv.x
+
+        spacing = iv.height / 7
 
         if info.drawall:
             osd.clearscreen()
 
-            if val.bgbitmap[0]:
-                apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-            
+            if val.background.image:
+                apply(osd.drawbitmap, (val.background.image, -1, -1))
+
+            if val.background.mask:
+                osd.drawbitmap(val.background.mask,-1,-1)
+
             if val.title.visible:
                 osd.drawstring('Playing Music', val.title.x, val.title.y,
                                val.title.color, font=val.title.font,
                                ptsize=val.title.size, align=val.title.align)
 
+            if val.logo.image and val.logo.visible:
+                osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y)
 
-            # Display the cover image file if it is present
+            #Display the cover image file if it is present
             if info.image:
-                osd.drawbox(465,190, 755, 480, width=1, color=0x000000)   
-                osd.drawbitmap(util.resize(info.image, 289, 289), 466, 191)
+                c = val.cover
+                osd.drawbox(c.x - c.border_size, c.y - c.border_size, \
+                            c.x + c.border_size + c.width, c.y + c.border_size + c.height,\
+                            width=c.border_size, color=c.border_color)
+                osd.drawbitmap(util.resize(info.image, c.width, c.height), c.x, c.y)
                
             file_name = info.filename.split('/')
             dir_name = ''
@@ -734,32 +588,49 @@ class Skin:
 
             file_name = file_name[i+1]
             py = val.progressbar.y
-            self.DrawText('Dir: '+dir_name, val, x=5, y=(py + 20))
-            self.DrawText('File: '+file_name, val, 5, y=(py + 40))
-                
-            self.DrawText('Title: ', val2, x=left, y=100)
-            self.DrawText('%s ' % info.title, val, x=left, y=100)
- 
-            self.DrawText('Artist: ', val2, x=left, y=130)
-            self.DrawText('%s ' % info.artist, val, x=left, y=130)
 
-            self.DrawText('Album: ', val2, x=left, y=160)
-            self.DrawText('%s ' % info.album, val, x=left, y=160)
-        
-            self.DrawText('Year: ', val2, x=left, y=190)
-            self.DrawText('%s ' % info.year, val, x=left, y=190)
+            top = iv.y
+            DrawText('Title: ', iv, x=left, y=top, align='right')
+            DrawText('%s ' % info.title, iv, x=left, y=top)
 
-            self.DrawText('Track: ', val2, x=left, y=220)
-            self.DrawText('%s ' % info.track, val, x=left, y=220)
+            if info.artist:
+                top += spacing
+                DrawText('Artist: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.artist, iv, x=left, y=top)
 
-            self.DrawText('Time: ', val2, x=left, y=250)
+            if info.album:
+                top += spacing
+                DrawText('Album: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.album, iv, x=left, y=top)
 
+            if info.year:
+                top += spacing
+                DrawText('Year: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.year, iv, x=left, y=top)
+
+            if info.track:
+                top += spacing
+                DrawText('Track: ', iv, x=left, y=top, align='right')
+                DrawText('%s ' % info.track, iv, x=left, y=top)
+
+            top += spacing
+            DrawText('Length: ', iv, x=left, y=top, align='right')
+            DrawText('%s:%s ' % (info.length / 60, info.length % 60), \
+                          iv, x=left, y=top)
+
+            top += spacing
+            DrawText('Time: ', iv, x=left, y=top, align='right')
+
+            # remember the surface to redraw it
+            self.time_y = top
+            self.time_surface = osd.getsurface(left, top, 100, spacing)
+            
                 
         else:
-            # Erase the portion that will be redrawn
-            if val.bgbitmap[0]:
-                osd.drawbitmap( val.bgbitmap, left, 250, None, left,
-                                250, 300, 30 )
+
+            # redraw the surface on some positions
+            osd.putsurface(self.time_surface, left, self.time_y)
+
 
         # XXX I changed this because round rounds up on 3.58 etc. instead
         # XXX of giving us the desired "round down modulo" effect.
@@ -768,9 +639,8 @@ class Skin:
         rem_min = int(info.remain)/60
         rem_sec = int(info.remain)%60
 
-        str = '%s:%02d/-%s:%02d (%0.1f%%) ' % (el_min, el_sec, rem_min,
-                                               rem_sec, info.done)
-        self.DrawText(str, val, x=left, y=250)
+        str = '%s:%02d ' % (el_min, el_sec)
+        DrawText(str, iv, x=left, y=self.time_y)
 
         # Draw the progress bar
         if val.progressbar.visible:
@@ -800,4 +670,37 @@ class Skin:
                         color = val.progressbar.color)
             
         osd.update()
-    
+
+
+
+    def DrawTVGuide(self):
+        if 'tv' in self.settings.e_menu:
+            self.tv.DrawTVGuide(self.settings.e_menu['tv'])
+        
+    def DrawTVGuide_Clear(self):
+        if 'tv' in self.settings.e_menu:
+            self.tv.DrawTVGuide_Clear(self.settings.e_menu['tv'])
+
+    def DrawTVGuide_getExpand(self):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_getExpand(self.settings.e_menu['tv'])
+
+    def DrawTVGuide_setExpand(self, expand):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_setExpand(expand, self.settings.e_menu['tv'])
+
+    def DrawTVGuide_View(self, to_view):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_View(to_view, self.settings.e_menu['tv'])
+
+    def DrawTVGuide_Info(self, to_info):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_Info(to_info, self.settings.e_menu['tv'])
+                         
+    def DrawTVGuide_ItemsPerPage(self):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_ItemsPerPage(self.settings.e_menu['tv'])
+
+    def DrawTVGuide_Listing(self, to_listing):
+        if 'tv' in self.settings.e_menu:
+            return self.tv.DrawTVGuide_Listing(to_listing, self.settings.e_menu['tv'])

@@ -6,9 +6,10 @@
 # $Id$
 
 import sys
-import random
-import time, os, glob
-import string, popen2, fcntl, select, struct
+#import random
+import time, math
+#, os, glob
+#import string, popen2, fcntl, select, struct
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -32,11 +33,18 @@ import rc
 # The TV application
 import mplayer_tv
 
-# Skin class
-import skin
-
 # The Electronic Program Guide
 import epg_xmltv as epg
+
+# The Skin
+import skin
+
+# Extended Menu
+import ExtendedMenu
+sys.path.append('tv/')
+import ExtendedMenu_TV
+
+
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -47,9 +55,6 @@ FALSE = 0
 # Create the OSD object
 osd = osd.get_singleton()
 
-# Create the MenuWidget object
-menuwidget = menu.get_singleton()
-
 # Create the remote control object
 rc = rc.get_singleton()
 
@@ -59,76 +64,87 @@ mixer = mixer.get_singleton()
 # Set up the TV application
 tvapp = mplayer_tv.get_singleton()
 
-# Set up skin
+menuwidget = menu.get_singleton()
+
 skin = skin.get_singleton()
 
-def start_tv(menuw=None, arg=None):
-    mode = arg[0]
-    channel = arg[1]
-    tvapp.Play(mode, channel)
+
+# Set up the extended menu
+view = ExtendedMenu_TV.ExtendedMenuView_TV()
+info = ExtendedMenu_TV.ExtendedMenuInfo_TV()
+listing = ExtendedMenu_TV.ExtendedMenuListing_TV()
+em = ExtendedMenu_TV.ExtendedMenu_TV(view, info, listing)
+
+def get_start_time():
+    ttime = time.localtime()
+    stime = [ ]
+    for i in ttime:
+        stime += [i]
+    stime[5] = 0 # zero seconds
+    if stime[4] >= 30:
+        stime[4] = 30
+    else:
+        stime[4] = 0
     
+    return time.mktime(stime)
+
+# Set up some global variables
+start_time = get_start_time()
+stop_time = get_start_time()
+
+
+def start_tv(mode=None, channel_id=None):
+    tuner_id = None
+    for tv_channel_id, tv_display_name, tv_tuner_id in config.TV_CHANNELS:
+        if tv_channel_id == channel_id:
+            tuner_id = tv_tuner_id
+            break
+
+    if not tuner_id:
+        skin.PopupBox('Could not find TV channel %s' % channel_id)
+        time.sleep(2)
+        return
+    
+    print 'mode=%s    channel=%s  tuner=%s' % (mode, channel_id, tuner_id)
+    
+    tvapp.Play(mode, tuner_id)
+
+
+def eventhandler(event):
+    if event == rc.EXIT:
+        rc.app = None
+        menuwidget.refresh()
+    elif event == rc.SELECT or event == rc.PLAY:
+        start_tv('tv', em.listing.last_to_listing[3].channel_id)
+    else:
+        em.eventhandler(event)
+
+
 
 def main_menu(arg, menuw):
     if arg == 'record':
         start_tv(None, ('record', None))
         return
-    
-    skin.PopupBox('Preparing the program guide', icon='icons/clock.png')
+
+    rc.app = eventhandler
+
+    skin.PopupBox('Preparing the program guide') 
 
     guide = epg.get_guide()
-
-    items = []
-
-    items += [menu.MenuItem('Last Channel', start_tv, ('tv', None))]
-    items += [menu.MenuItem('VCR', start_tv, ('vcr', None))]
-
-    # Get all programs from now until the end of the guide
-    now = time.time()
-    channels = guide.GetPrograms(start=now, stop=None)
-
-    local = time.localtime()
-    weekday, hh, mm = local[6]+1, local[3], local[4]
-    today_wday = str(weekday)
-    today_hhmm = hh*100 + mm
-
-    for channel in channels:
-        # Only display active channels
-        if DEBUG: print channel.displayname, channel.times
-        if channel.times:
-            displayit = FALSE
-            for (days, start_time, stop_time) in channel.times:
-                if today_wday in list(days):
-                    if DEBUG: print "Channel timeinfo today"
-                    if start_time <= today_hhmm <= stop_time:
-                        displayit = TRUE
-                        break # Out of for-loop
-            if not displayit:
-                continue  # Skip to next channel
-
-        # Channel display name
-        menu_str = '%s' % channel.displayname
-        # Logo
-        channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
-        if not os.path.isfile(channel_logo):
-            if DEBUG: print 'TV: Cannot find logo "%s"' % channel_logo
-            channel_logo = None
-
-        # Add the first two programs to the menu item
-        if channel.programs:
-            for p in channel.programs[:2]:
-                hh = time.localtime(p.start)[3]
-                mm = time.localtime(p.start)[4]
-                menu_str += ' \t%2d.%02d\t%s' % (hh, mm, p.title[:20])
-        else:
-            menu_str += '\tNO DATA'
-            
-        items += [menu.MenuItem(menu_str, start_tv,
-                                ('tv', channel.tunerid), None, None, None, channel_logo)]
     
-    hh = time.localtime(time.time())[3]
-    mm = time.localtime(time.time())[4]
-    
-    mp3menu = menu.Menu('TV MENU  %02d:%02d' % (hh, mm), items)
-    menuw.pushmenu(mp3menu)
+    start_time = get_start_time()
+    stop_time = get_start_time() + 2 * 60 * 60
 
-    return
+    channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
+
+    prg = None
+    for chan in channels:
+        if chan.programs:
+            prg = chan.programs[0]
+            break
+        
+    listing.ToListing([start_time, stop_time, guide.chan_list[0].id, prg])
+    em.eventhandler(rc.UP)
+
+    em.refresh()
+
