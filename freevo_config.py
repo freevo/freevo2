@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2002/08/11 08:13:00  dischi
+# New variable SKIN_XML_FILE, where to find the xml file for the skin
+#
 # Revision 1.43  2002/08/10 17:44:20  dischi
 # Added OSD_SDL_EXEC_AFTER_STARTUP. The script in this variable will
 # be executed after the SDL interface is started. You can use this to
@@ -175,6 +178,7 @@ MOVIE_DATA_DIR = 'movie-data/'
 # from skin.py
 #
 OSD_SKIN = 'skins/main1/skin_main1.py'
+SKIN_XML_FILE = 'skins/xml/768x576.xml'
 
 # OSD default font. It is only used for debug/error stuff, not regular
 # skinning.
