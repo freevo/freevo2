@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/10/29 18:15:56  dischi
+# move some misc utils here (only needed here)
+#
 # Revision 1.39  2004/10/06 19:14:08  dischi
 # remove util.open3, move run and stdout to misc for now
 #
@@ -83,6 +86,7 @@ import sys
 import threading
 import re
 import shutil
+import popen2
 
 import config
 import menu
@@ -268,6 +272,72 @@ class PluginInterface(plugin.ItemPlugin):
         eventhandler.post(Event(OSD_MESSAGE, _( 'Ripping started' )))
 
 
+def tagmp3 (filename, title=None, artist=None, album=None, track=None,
+            tracktotal=None, year=None):
+    """
+    use eyeD3 directly from inside mmpython to
+    set the tag. We default to 2.3 since even
+    though 2.4 is the accepted standard now, more
+    players support 2.3
+    """
+    import mmpython.audio.eyeD3 as eyeD3
+
+    tag = eyeD3.Tag(String(filename))
+    tag.header.setVersion(eyeD3.ID3_V2_3)
+    if artist: tag.setArtist(String(artist))
+    if album:  tag.setAlbum(String(album))
+    if title:  tag.setTitle(String(title))
+    if track:  tag.setTrackNum((track,tracktotal))
+    if year:   tag.setDate(year)
+    tag.update()
+    return
+
+
+def title_case(phrase):
+    """
+    Return a text string (i.e. from CDDB) with
+    the case normalized into title case.
+    This is because people frequently put in ugly
+    information, and we can avoid it here'
+    """
+
+    s = ''
+    for letter in phrase:
+        if s and s[-1] == ' ' or s == '' or s[-1] == '-' or s[-1] == '.':
+            s += string.upper(letter)
+        elif letter == '_':
+                s += ' '
+        else:
+            s += string.lower(letter)
+    return s
+
+def run(app, object, signal=15):
+    """
+    run a child until object.abort is True. Than kill the child with
+    the given signal
+    """
+    if isinstance(app, str) or isinstance(app, unicode):
+        print 'WARNING: popen.run with string as app'
+        print 'This may cause some problems with threads'
+
+    child = popen2.Popen3(app, 1, 100)
+    child.childerr.close()
+    child.fromchild.close()
+    while(1):
+        time.sleep(0.1)
+        if object.abort:
+            os.kill(child.pid, signal)
+
+        try:
+            pid = os.waitpid(child.pid, os.WNOHANG)[0]
+        except OSError:
+            break
+
+        if pid:
+            break
+
+    child.tochild.close()
+
 
 class main_backup_thread(threading.Thread):
     device = None
@@ -399,7 +469,7 @@ class main_backup_thread(threading.Thread):
             _debug_('cdparanoia:  %s' % cdparanoia_command)
 
             # Have the OS execute the CD Paranoia rip command
-            util.run(cdparanoia_command, self, 9)
+            run(cdparanoia_command, self, 9)
             if self.abort:
                 eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
                 self.current_track = -1
@@ -417,13 +487,13 @@ class main_backup_thread(threading.Thread):
                 cmd = cmd.split(' ') + [ wav_file, output ]
 
                 _debug_('lame: %s' % cmd)
-                util.run(cmd, self, 9)
+                run(cmd, self, 9)
 
                 try:
                     if not self.abort:
-                        util.tagmp3(pathname+path_tail+'.mp3', title=song_names[i],
-                                    artist=artist, album=album, track=track,
-                                    tracktotal=len(song_names))
+                        tagmp3(pathname+path_tail+'.mp3', title=song_names[i],
+                               artist=artist, album=album, track=track,
+                               tracktotal=len(song_names))
                 except IOError:
                     # This sometimes fails if the CD has a data track
                     # This is not a 100% fix, but temporary until I figure out why
@@ -440,7 +510,7 @@ class main_backup_thread(threading.Thread):
                         '-l', album, wav_file, '-o', output ]
 
                 _debug_('oggenc_command: %s' % cmd)
-                util.run(cmd, self, 9)
+                run(cmd, self, 9)
 
 
             # Build the flacenc command
@@ -457,7 +527,7 @@ class main_backup_thread(threading.Thread):
 
                 _debug_('flac_command: %s' % (config.FLAC_CMD))
                 _debug_('metaflac    : %s' % (metaflac_command))
-                util.run(cmd, self, 9)
+                run(cmd, self, 9)
 
                 if not self.abort:
                     os.system(metaflac_command)
@@ -575,6 +645,6 @@ class main_backup_thread(threading.Thread):
 
     def fix_case(self, string):
         if config.RIP_TITLE_CASE:
-            return util.title_case(string)
+            return title_case(string)
         else:
             return string
