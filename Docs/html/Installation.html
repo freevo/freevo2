@@ -8,10 +8,10 @@
 <title>Installation - Freevo 2.0 Wiki</title>
 
 
-<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="modern/css/common.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="modern/css/screen.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="modern/css/print.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" href="modern/css/freevo.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="/moin-1.3.1/modern/css/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="/moin-1.3.1/modern/css/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="/moin-1.3.1/modern/css/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" href="/moin-1.3.1/modern/css/freevo.css">
 
 <link rel="alternate" title="Freevo 2.0 Wiki Recent Changes" href="/cgi-bin/freevo-2.0/RecentChanges?action=rss_rc&amp;ddiffs=1&amp;unique=1" type="application/rss+xml">
 <link rel="Start" href="/cgi-bin/freevo-2.0/Index">
@@ -46,11 +46,11 @@
 
 <h2 id="head-f6265a497db58c8e89438a962abe8add6941697c">Using the source tree</h2>
 
-<p>To test Freevo, use the directory you checked out in. Before you can start Freevo, you need to type 'makde'. This will compile some modules in the lib tree and download external dependencies like mbus and the notifier. As a new requirement (besides the Freevo 1.5 modules), you need <a class="external" href="http://www.enlightenment.org/pages/imlib2.html"><img src="modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> Imlib2</a> and <a class="external" href="http://pysqlite.sf.net"><img src="modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> pysqlite</a>. </p>
+<p>To test Freevo, use the directory you checked out in. Before you can start Freevo, you need to type './autogen.sh' and then 'make'. This will compile some modules in the lib tree and download external dependencies like mbus and the notifier. As a new requirement (besides the Freevo 1.5 modules), you need <a class="external" href="http://www.enlightenment.org/pages/imlib2.html"><img src="/moin-1.3.1/modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> Imlib2</a> and <a class="external" href="http://pysqlite.sf.net"><img src="/moin-1.3.1/modern/img/moin-www.png" alt="[WWW]" height="11" width="11"> pysqlite</a>. </p>
 
 <h2 id="head-56a56cf1567b1845d9075009d8a57b7e32304a99">Installing Freevo</h2>
 
-<p>This is tricky right now. There are no ebuilds, RPMs, Debian packages or similar. Go into the lib directory and call 'python setup.py install' as root on all packages. After that, you can call 'python setup.py install' in the root directory. 
+<p>You should test Freevo using the source tree first. The current cvs is not stable. The installation into the system is tricky right now. There are no ebuilds, RPMs, Debian packages or similar. Go into the lib directory and call 'python setup.py install' as root on all packages. After that, you can call 'python setup.py install' in the root directory. 
 </p>
 <pre>
 cd ~/src/freevo/lib
@@ -62,8 +62,8 @@ python setup.py install
 <a id="bottom"></a>
 
 </div>
-<p id="pageinfo" class="info" lang="en" dir="ltr">last edited 2004-12-11 16:36:20 by <span title="134.102.71.53">Dischi</span>
-<br>Current version: <a href="http://freevo.sourceforge.net/cgi-bin/freevo-2.0/Installation">http://freevo.sourceforge.net/cgi-bin/freevo-2.0/Installation</a></p>
+<p id="pageinfo" class="info" lang="en" dir="ltr">last edited 2004-12-13 12:12:35 by <span title="riemen.informatik.uni-bremen.de">Dischi</span>
+<br>current version: <a href="http://freevo.sourceforge.net/cgi-bin/freevo-2.0/Installation">http://freevo.sourceforge.net/cgi-bin/freevo-2.0/Installation</a></p>
 </div> <!-- end page -->
 </body>
 </html>

@@ -8,10 +8,10 @@
 <title>CurrentStatus - Freevo 2.0 Wiki</title>
 
 
-<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="modern/css/common.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="modern/css/screen.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="modern/css/print.css">
-<link rel="stylesheet" type="text/css" charset="utf-8" href="modern/css/freevo.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="/moin-1.3.1/modern/css/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="/moin-1.3.1/modern/css/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="/moin-1.3.1/modern/css/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" href="/moin-1.3.1/modern/css/freevo.css">
 
 <link rel="alternate" title="Freevo 2.0 Wiki Recent Changes" href="/cgi-bin/freevo-2.0/RecentChanges?action=rss_rc&amp;ddiffs=1&amp;unique=1" type="application/rss+xml">
 <link rel="Start" href="/cgi-bin/freevo-2.0/Index">
@@ -42,14 +42,14 @@
 <h1 id="title">CurrentStatus</h1>
 <div lang="en" id="content" dir="ltr">
 <a id="top"></a>
-<p>For Freevo 2.0 we changed many parts of the code, some parts moved in extra python modules and some parts got a complete rewrite. Because of that, not everything is working right now, e.g. the gui part got a restructuring with a big rewrite of important parts. For that reason some plugins still don't work, they are auto deactivated and can onlt be activated when the code is ported to the new interface. </p>
+<p>For Freevo 2.0 we changed many parts of the code, some parts moved in extra python modules and some parts got a complete rewrite. Because of that, not everything is working right now, e.g. the gui part got a restructuring with a big rewrite of important parts. For that reason some plugins still don't work, they are auto deactivated and can only be activated when the code is ported to the new interface. </p>
 
 <h2 id="head-5ad711f4968bb04ded9189d3b1cd74c0faccb0fa">Changes</h2>
 
 <ul>
 <li><p> Changed the main loop to use <a href="SourceDoc/Notifier.html">PyNotifier</a>. No threads are allowed anymore and every part must take care that the notifier loop is kept alive. Not all parts respect that right now. </p>
 </li>
-<li><p> Removed Twisted. It is a huge monster and hard to understand. As communication we now use <a href="SourceDoc/Mbus.html">PyMbus</a>. As a side effect, modules using twisted need to be rewritten. </p>
+<li><p> Removed Twisted. It is a huge monster and hard to understand. For inter-process communication a python implementation (<a href="SourceDoc/Mbus.html">PyMbus</a>) of the Mbus transport protocol is used. As a side effect, modules using twisted need to be rewritten. </p>
 </li>
 <li><p> Complete rewrite of the recordserver. </p>
 <ul>
@@ -67,9 +67,9 @@
 <ul>
 <li><p> Moved to <a href="SourceDoc/Mevas.html">Mevas</a> as gui backend, using imlib2 as underlaying render engine </p>
 </li>
-<li><p> Support different display engines. Besides the old pygame output you can now alos use native imlib2 for X, DirectFB (PleaseUpdate: status of DirectFB?) or bmovl and bmovl2 on mplayer (currently broken as primary backend). </p>
+<li><p> Support different display engines. Besides the old pygame output you can now also use native imlib2 for X, DirectFB (PleaseUpdate: status of DirectFB?) or bmovl and bmovl2 on mplayer (currently broken as primary backend). </p>
 </li>
-<li><p> Draw with the normal Freevo gui code on mplayer using bmvol </p>
+<li><p> Draw with the normal Freevo gui code on mplayer using bmovl </p>
 </li>
 </ul>
 </li>
@@ -95,8 +95,8 @@
 <a id="bottom"></a>
 
 </div>
-<p id="pageinfo" class="info" lang="en" dir="ltr">last edited 2004-12-11 18:25:10 by <span title="port-212-202-30-101.dynamic.qsc.de">Juergen</span>
-<br>Current version: <a href="http://freevo.sourceforge.net/cgi-bin/freevo-2.0/CurrentStatus">http://freevo.sourceforge.net/cgi-bin/freevo-2.0/CurrentStatus</a></p>
+<p id="pageinfo" class="info" lang="en" dir="ltr">last edited 2004-12-15 07:57:27 by <span title="dataman.informatik.uni-bremen.de">crunchy</span>
+<br>current version: <a href="http://freevo.sourceforge.net/cgi-bin/freevo-2.0/CurrentStatus">http://freevo.sourceforge.net/cgi-bin/freevo-2.0/CurrentStatus</a></p>
 </div> <!-- end page -->
 </body>
 </html>
