@@ -208,7 +208,7 @@ LOCAL_CONF_CHANGES = [
      now. Also added OSD_EXTRA_FONT_PATH to search for fonts'''),
     (5.08,
      '''Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
-     skin. Also added RESTART_SYS_CMD and OSD_DIM_TEXT.''') ]
+     skin. Also added RESTART_SYS_CMD, OSD_DIM_TEXT and OSD_UPDATE_COMPLETE_REDRAW.''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -828,6 +828,12 @@ if CONF.display in ( 'dfbmga', 'dxr3', 'dga' ):
 
 # Dim text that doesn't fit instead of using ellipses. 
 OSD_DIM_TEXT = 1
+
+# Make a complete screen redraw every time. This is necessary sometimes
+OSD_UPDATE_COMPLETE_REDRAW = 0
+
+if CONF.display in ( 'dxr3', 'dga' ):
+    OSD_UPDATE_COMPLETE_REDRAW = 1
 
 # ======================================================================
 # Remote control section

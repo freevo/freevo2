@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.150  2004/03/14 17:46:24  dischi
+# fix update for some cards
+#
 # Revision 1.149  2004/03/14 17:22:43  dischi
 # seperate ellipses and dim in drawstringframed
 #
@@ -1238,6 +1241,9 @@ class OSD:
         if self.busyicon.active and stop_busyicon:
             self.busyicon.stop()
 
+        if config.OSD_UPDATE_COMPLETE_REDRAW:
+            rect = None
+            
         # XXX New style blending
         if blend_surface and blend_steps:
             blend_last_screen = self.screen.convert()
