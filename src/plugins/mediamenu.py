@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/08/24 06:58:18  gsbarbieri
+# Partial support for "out" icons in main menu.
+# The missing part is in listing_area, which have other changes to
+# allow box_under_icon feature (I mailed the list asking for opinions on
+# that)
+#
 # Revision 1.16  2003/08/24 05:20:15  gsbarbieri
 # Empty cdroms type is now 'empty_cdrom' instead of None
 #
@@ -93,12 +99,17 @@ class PluginInterface(plugin.MainMenuPlugin):
         menu_items = skin.settings.mainmenu.items
 
         icon = ""
+        outicon = ""
         if menu_items[self.type].icon:
             icon = os.path.join(skin.settings.icon_dir, menu_items[self.type].icon)
+        if menu_items[self.type].outicon:
+            outicon = os.path.join(skin.settings.icon_dir, menu_items[self.type].outicon)
+            
         return ( menu_module.MenuItem(menu_items[self.type].name, icon=icon,
                                       action=MediaMenu().main_menu,
                                       arg=(self.type,self.force_text_view), type='main',
-                                      image=menu_items[self.type].image, parent=parent), )
+                                      image=menu_items[self.type].image, parent=parent,
+                                      outicon=outicon), )
 
 
 

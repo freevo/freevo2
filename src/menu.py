@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2003/08/24 06:58:18  gsbarbieri
+# Partial support for "out" icons in main menu.
+# The missing part is in listing_area, which have other changes to
+# allow box_under_icon feature (I mailed the list asking for opinions on
+# that)
+#
 # Revision 1.59  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -74,7 +80,7 @@ class MenuItem(Item):
     Default item for the main menu actions
     """
     def __init__( self, name, action=None, arg=None, type=None, image=None,
-                  icon=None, parent=None):
+                  icon=None, parent=None, outicon=None):
         Item.__init__(self, parent)
         self.name     = name
         self.icon     = icon
@@ -82,6 +88,7 @@ class MenuItem(Item):
         self.arg      = arg
         self.type     = type
         self.image    = image
+        self.outicon  = outicon
         
     def setImage(self, image):
         self.type  = image[0]

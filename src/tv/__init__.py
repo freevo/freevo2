@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/24 06:58:18  gsbarbieri
+# Partial support for "out" icons in main menu.
+# The missing part is in listing_area, which have other changes to
+# allow box_under_icon feature (I mailed the list asking for opinions on
+# that)
+#
 # Revision 1.5  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -53,11 +59,14 @@ class PluginInterface(plugin.MainMenuPlugin):
         menu_items = skin.settings.mainmenu.items
 
         icon = ""
+        outicon = ""
         if menu_items['tv'].icon:
             icon = os.path.join(skin.settings.icon_dir, menu_items['tv'].icon)
+        if menu_items['tv'].outicon:
+            outicon = os.path.join(skin.settings.icon_dir, menu_items['tv'].outicon)
         return ( menu.MenuItem(menu_items['tv'].name, icon=icon,
                                action=tv.TVMenu().main_menu, type='main',
-                               image=menu_items['tv'].image, parent=parent), )
+                               image=menu_items['tv'].image, parent=parent, outicon=outicon), )
 
 
 
