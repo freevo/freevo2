@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/09/14 20:07:56  dischi
+# make sure font is set
+#
 # Revision 1.5  2004/09/07 18:51:39  dischi
 # internal colors are now lists, not int
 #
@@ -486,7 +489,9 @@ class XML_data:
         if font_dict:
             try:
                 self.font = font_dict[self.font]
-            except (TypeError, KeyError, AttributeError):
+            except (TypeError, KeyError):
+                self.font = font_dict['default']
+            except AttributeError:
                 pass
         if color_dict:
             try:
