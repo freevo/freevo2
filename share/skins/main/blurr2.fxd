@@ -345,6 +345,34 @@
           </if>
         </item>
 
+	<item type="track">
+	  <if expression="trackno">
+	    <text font="info tagline">Track </text>
+	    <text font="info tagline" expression="trackno"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="length:min">
+	    <text font="info value" expression="length:min"/>
+            <newline/>
+	  </if>
+	  <if expression="len(audio)">
+	    <text font="info value" expression="len(audio)"/>
+	    <text font="info value"> Audiotracks</text>
+            <newline/>
+	  </if>
+	  <if expression="len(subtitles)">
+	    <text font="info value" expression="len(subtitles)"/>
+	    <text font="info value"> Subtitles</text>
+            <newline/>
+	  </if>
+	  <if expression="chapters">
+	    <text font="info value" expression="chapters"/>
+	    <text font="info value"> Chapter</text>
+            <newline/>
+	  </if>
+	</item>
+
       </content>
     </layout>
 
