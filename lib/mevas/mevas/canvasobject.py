@@ -65,6 +65,16 @@ class CanvasObject(object):
 		self._properties_dirty = True
 
 
+
+	def unparent(self):
+		"""
+		Remove the object from the parent.
+		"""
+		parent = self.get_parent()
+		if parent:
+			parent.remove_child(self)
+
+        
 	def _unparent(self, destroy = True):
 		"""
 		Makes the object an orphan.  Tells the parent to disown it and then
