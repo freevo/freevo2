@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/08/12 19:39:05  dischi
+# Added event_lister to get all events
+#
 # Revision 1.25  2003/07/29 19:06:40  dischi
 # add vcd events (used by xine)
 #
@@ -118,7 +121,9 @@ class DaemonPlugin(Plugin):
     def draw(self(type, object), osd):
         this function will be called to update the screen
     def eventhandler(self, event):
-        events no one else wants will be passed to this functions
+        events no one else wants will be passed to this functions, when
+        you also set the variable event_listener to TRUE, the object will
+        get all events
     def shutdown(self):
         this function may be called to shutdown the plugin and will
         be called on freevo shutdown
@@ -128,7 +133,7 @@ class DaemonPlugin(Plugin):
         self.poll_counter   = 0         # poll counter, don't change this
         self.poll_interval  = 1         # poll every x*0.1 seconds
         self.poll_menu_only = TRUE      # poll only when menu is active
-
+        self.event_listener = FALSE     # process all events
 
 #
 # Some plugin names to avoid typos

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2003/08/12 19:39:06  dischi
+# Added event_lister to get all events
+#
 # Revision 1.58  2003/08/06 19:36:47  dischi
 # o removed freevo_xwin
 # o use the freevo startscript to call matroxset
@@ -313,7 +316,14 @@ def main_func():
     main.getcmd()
 
     poll_plugins = plugin.get('daemon_poll')
-    eventhandler_plugins = plugin.get('daemon_eventhandler')
+    eventhandler_plugins  = []
+    eventlistener_plugins = []
+
+    for p in plugin.get('daemon_eventhandler'):
+        if hasattr(p, 'event_listener') and p.event_listener:
+            eventlistener_plugins.append(p)
+        else:
+            eventhandler_plugins.append(p)
     
     # Kick off the main menu loop
     if config.DEBUG: print 'Main loop starting...'
@@ -343,6 +353,9 @@ def main_func():
                 if p.poll_counter == p.poll_interval:
                     p.poll_counter = 0
                     p.poll()
+
+        for p in eventlistener_plugins:
+            p.eventhandler(event=event)
 
         if event == em.FUNCTION_CALL:
             event.arg()
