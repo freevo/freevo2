@@ -9,6 +9,7 @@ Release 1.2.2 (2002-05-XX):
 o Added <movie>.wmv file type to MPlayer
 o Fixed a bug in runapp.c
 o Changed boot/boot.freevo1 to not run /etc/rc.config, it resets the path
+o Swapped MPlayer next/prev keys
 
 
 Release 1.2.1 (2002-05-17):
