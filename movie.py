@@ -119,7 +119,14 @@ def cwd(arg=None, menuw=None):
 
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
-        items += [menu.MenuItem(title, cwd, dirname)]
+        m = menu.MenuItem(title, cwd, dirname)
+        if os.path.isfile(dirname+'/cover.png'): 
+            m.setImage(('movie', (dirname+'/cover.png')))
+        if os.path.isfile(dirname+'/cover.jpg'): 
+            m.setImage(('movie', (dirname+'/cover.jpg')))
+
+        items += [m]
+
     
     files = []
 
@@ -181,12 +188,8 @@ def cwd(arg=None, menuw=None):
     # add everything to the menu
     for (title, mode, file, playlist, image) in files:
         m = menu.MenuItem(title, play_movie, (mode, file, playlist))
-        m.setImage(('cover', image))
+        m.setImage(('movie', image))
         items += [m]
     
-    moviemenu = menu.Menu('MOVIE MENU', items)
-
-    if os.path.isfile(os.path.join(dir, "skin.xml")):
-        moviemenu.set_skin_settings(os.path.join(dir, "skin.xml"))
-
+    moviemenu = menu.Menu('MOVIE MENU', items, dir=dir)
     menuw.pushmenu(moviemenu)

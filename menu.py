@@ -61,16 +61,16 @@ class MenuItem:
         
 class Menu:
 
-    def __init__(self, heading, choices, packrows=1):
+    def __init__(self, heading, choices, dir=None, packrows=1):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
-        self.skin_settings = None
-
-    def set_skin_settings(self, file):
-        self.skin_settings = skin.ParseXML(file)
+        if dir:
+            self.skin_settings = skin.LoadSettings(dir)
+        else:
+            self.skin_settings = None
 
 
 #
