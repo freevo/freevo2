@@ -1,21 +1,20 @@
-%define _target sdl
-#%define _target x11
+%define geometry 800x600
+%define display  x11
+%define tv_norm  pal
+%define chanlist europe-west
 Summary:	Freevo
 Name:		freevo
 Version:	1.2.5
-Release:	20020802
+Release:	1
 License:	GPL
 Group:		Applications/Multimedia
-Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
-Patch:		%{name}-%{version}-%{release}-rh73.patch
+Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
+Patch0:		%{name}-%{version}-setup_build.py.patch
+Patch1:		%{name}-%{version}-configure.patch
 URL:		http://freevo.sourceforge.net/
-Requires:	python2
-Requires:	libpng, zlib
+Requires:	freevo_runtime
 #Requires:	mplayer, mpg321, xawtv, nvrec
-Requires:	PyXML2 >= 0.7
-Requires:	freetype >= 2.0.9
-BuildRequires:	python2
-BuildRequires:	freetype-devel >= 2.0.9
+BuildRequires:	freevo_runtime
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 
 %define _prefix /usr/local/freevo
@@ -28,16 +27,16 @@ and/or TV-out into a standalone multimedia jukebox/VCR. It builds on
 other applications such as mplayer, mpg321 and nvrec to play and
 record video and audio.
 
-Note: This version does not have matroxfb support.
-
 %prep
-%setup  -n %{name}-%{version}-%{release}
-%patch -p1
+%setup  -n %{name}
+%patch0 -p0
+%patch1 -p0
 
-./configure --osd=%{_target}
-
+./configure --geometry=%{geometry} --display=%{display} \
+	--tv=%{tv_norm} --chanlist=%{chanlist}
 %build
-make
+make clean; make
+cd plugins/cddb; make
 
 %package boot
 Summary: Files to enable a standalone Freevo system (started from initscript)
@@ -62,32 +61,42 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
-#mkdir -p %{buildroot}%{_prefix}/matrox_g400
-mkdir -p %{buildroot}%{_prefix}/{helpers,icons,osd_server,rc_client,skins}
-#mkdir -p %{buildroot}%{_prefix}/matrox_g400/{fbset,matroxset}
-mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,test1,test2,dischi1,krister1}
+mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
+mkdir -p %{buildroot}%{_prefix}/{boot,fbcon,gui,helpers,icons,plugins,rc_client,skins}
+mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather}
+mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
+mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,xml}
+mkdir -p %{buildroot}%{_prefix}/skins/xml/type1
+mkdir -p %{buildroot}%{_prefix}/skins/{barbieri,dischi1,krister1,malt1}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
-mkdir -p %{buildroot}/etc/rc.d/init.d
+mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music}
-install -m 755 freevo runapp skin.py startup.py strptime.py [a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
-install -m 755 helpers/* %{buildroot}%{_prefix}/helpers
+
+install -m 755 freevo freevo_xwin runapp freevo.conf skin.py strptime.py [a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
+install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
+install -m 755 fbcon/vtrelease %{buildroot}%{_prefix}/fbcon
+install -m 755 fbcon/*.sh %{buildroot}%{_prefix}/fbcon
+install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
+install -m 644 gui/* %{buildroot}%{_prefix}/gui
+install -m 644 helpers/* %{buildroot}%{_prefix}/helpers
 install -m 644 icons/* %{buildroot}%{_prefix}/icons
-#install -m 755 matrox_g400/*.sh matrox_g400/v4l1* %{buildroot}%{_prefix}/matrox_g400
-#install -m 755 matrox_g400/fbset/fbset %{buildroot}%{_prefix}/matrox_g400/fbset
-#install -m 755 matrox_g400/matroxset/matroxset %{buildroot}%{_prefix}/matrox_g400/matroxset
-install -m 755 osd_server/osds_* osd_server/vtrelease %{buildroot}%{_prefix}/osd_server
-install -m 755 rc_client/*py %{buildroot}%{_prefix}/rc_client
+install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
+install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
+install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
+install -m 644 rc_client/*py %{buildroot}%{_prefix}/rc_client
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
 install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
-install -m 644 skins/test1/* %{buildroot}%{_prefix}/skins/test1
-install -m 644 skins/test2/* %{buildroot}%{_prefix}/skins/test2
-#install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
+install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
+install -m 644 skins/barbieri/* %{buildroot}%{_prefix}/skins/barbieri
+install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
 install -m 644 skins/krister1/* %{buildroot}%{_prefix}/skins/krister1
+install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
 install -m 644 freevo_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
-install -m755 boot/freevo %{buildroot}/etc/rc.d/init.d/freevo
-install -m755 boot/freevo %{buildroot}/etc/rc.d/init.d/freevo
+install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
+install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
+install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
 
 
 install -m 644 testfiles/Images/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images
@@ -110,39 +119,61 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %dir %{_prefix}
+%attr(755,root,root) %dir %{_prefix}/fbcon
+%attr(755,root,root) %dir %{_prefix}/gui
+%attr(755,root,root) %dir %{_prefix}/helpers
 %attr(755,root,root) %dir %{_prefix}/icons
+%attr(755,root,root) %dir %{_prefix}/plugins
+%attr(755,root,root) %dir %{_prefix}/plugins/cddb
+%attr(755,root,root) %dir %{_prefix}/plugins/weather
+%attr(755,root,root) %dir %{_prefix}/plugins/weather/icons
+%attr(755,root,root) %dir %{_prefix}/rc_client
 %attr(755,root,root) %dir %{_prefix}/skins
 %attr(755,root,root) %dir %{_prefix}/skins/fonts
 %attr(755,root,root) %dir %{_prefix}/skins/images
 %attr(755,root,root) %dir %{_prefix}/skins/main1
-%attr(755,root,root) %dir %{_prefix}/skins/test1
-%attr(755,root,root) %dir %{_prefix}/skins/test2
-#%attr(755,root,root) %dir %{_prefix}/skins/dischi1
+%attr(755,root,root) %dir %{_prefix}/skins/xml
+%attr(755,root,root) %dir %{_prefix}/skins/xml/type1
+%attr(755,root,root) %dir %{_prefix}/skins/barbieri
+%attr(755,root,root) %dir %{_prefix}/skins/dischi1
 %attr(755,root,root) %dir %{_prefix}/skins/krister1
+%attr(755,root,root) %dir %{_prefix}/skins/malt1
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(755,root,root) %{_prefix}/freevo
+%attr(755,root,root) %{_prefix}/freevo_xwin
 %attr(755,root,root) %{_prefix}/runapp
-%attr(755,root,root) %{_prefix}/*.py
-%attr(755,root,root) %{_prefix}/helpers
+%attr(644,root,root) %{_prefix}/*.py
+%attr(644,root,root) %{_prefix}/freevo.conf
+%attr(644,root,root) %{_prefix}/fbcon/fbset.db
+%attr(755,root,root) %{_prefix}/fbcon/vtrelease
+%attr(755,root,root) %{_prefix}/fbcon/*.sh
+%attr(755,root,root) %{_prefix}/fbcon/matroxset
+%attr(644,root,root) %{_prefix}/helpers/*
 %attr(644,root,root) %{_prefix}/icons/*
-#%attr(755,root,root) %{_prefix}/matrox_g400
-%attr(755,root,root) %{_prefix}/osd_server
-%attr(755,root,root) %{_prefix}/rc_client
+%attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
+%attr(644,root,root) %{_prefix}/plugins/cddb/*.py
+%attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
+%attr(644,root,root) %{_prefix}/plugins/weather/*.py
+%attr(644,root,root) %{_prefix}/plugins/weather/icons/*
+%attr(644,root,root) %{_prefix}/rc_client/*
 %attr(644,root,root) %{_prefix}/skins/fonts/*
 %attr(644,root,root) %{_prefix}/skins/images/*
 %attr(644,root,root) %{_prefix}/skins/main1/*
-%attr(644,root,root) %{_prefix}/skins/test1/*
-%attr(644,root,root) %{_prefix}/skins/test2/*
-#%attr(644,root,root) %{_prefix}/skins/dischi1/*
+%attr(644,root,root) %{_prefix}/skins/xml/type1/*
+%attr(644,root,root) %{_prefix}/skins/barbieri/*
+%attr(644,root,root) %{_prefix}/skins/dischi1/*
 %attr(644,root,root) %{_prefix}/skins/krister1/*
-%attr(644,root,root) %{_sysconfdir}/freevo/freevo_config.py
-%doc BUGS ChangeLog FAQ INSTALL README TODO Docs/*
+%attr(644,root,root) %{_prefix}/skins/malt1/*
+%config %{_sysconfdir}/freevo/freevo_config.py
+%doc BUGS ChangeLog COPYING FAQ INSTALL* README TODO Docs/*
 
 %files boot
 %defattr(644,root,root,755)
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
-%attr(755,root,root) /etc/rc.d/init.d/freevo
-%attr(644,root,root) %{_sysconfdir}/freevo/boot_config
+%attr(755,root,root) %{_sysconfdir}/rc.d/init.d/freevo
+%attr(755,root,root) %{_sysconfdir}/rc.d/init.d/freevo_dep
+%attr(755,root,root) %{_prefix}/boot/URC-7201B00
+%config %{_sysconfdir}/freevo/boot_config
 
 %files testfiles
 %defattr(644,root,root,755)
@@ -165,10 +196,18 @@ fi
 
 %post testfiles
 mkdir -p %{_cachedir}/freevo/testfiles/Movies/Recorded
+ln -s %{_cachedir}/freevo/testfiles %{_prefix}
 
 %preun testfiles
+rm -f %{_prefix}/testfiles
 
 %changelog
+* Fri Aug 23 2002 TC Wan <tcwan@cs.usm.my>
+Updated for 1.2.5 release.
+
+* Fri Aug  7 2002 TC Wan <tcwan@cs.usm.my>
+Cleaned up Makefile.in, build both x11 and sdl versions
+
 * Fri Aug  2 2002 TC Wan <tcwan@cs.usm.my>
 Updated for 1.2.5 prerelease version
 
