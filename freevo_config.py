@@ -141,7 +141,11 @@ LOCAL_CONF_CHANGES = [
      all different kinds of files. Also added MPLAYER_SOFTWARE_SCALER to use
      the software scaler for fast CPUs'''),
     (3.3,
-     '''Added AUDIO_FORMAT_STRING to customize the audio item title generation''')]
+     '''Added AUDIO_FORMAT_STRING to customize the audio item title generation'''),
+    (3.4,
+     '''Removed RC_MPLAYER_CMDS for video and audio. Set special handling (and
+     other key mappings with the variable EVENTS. See event.py for possible
+     events''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -200,7 +204,14 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
                                       # you don't have the permissions to
                                       # shutdown
 
-EVENTS = event.default_events
+EVENTS = {
+    'menu'    : event.MENU_EVENTS,
+    'input'   : event.INPUT_EVENTS,
+    'video'   : event.VIDEO_EVENTS,
+    'audio'   : event.AUDIO_EVENTS,
+    'games'   : event.GAMES_EVENTS,
+    'image'   : event.IMAGE_EVENTS
+    }
 
 # ======================================================================
 # Plugins:
@@ -543,24 +554,6 @@ if CONF.display == 'mga':
 #
 
 LIRCRC = '/etc/freevo/lircrc'
-
-#
-# List of mplayer commands. It's a simple mapping from buttons on your
-# remote to mplayer slave commands.
-#
-# lirc comand : ( 'mplayer slave command', 'description')
-#
-# For a list of possible mplayer commands read input/input.c from the
-# mplayer source tree -- don't believe the manual ;-)
-#
-# Example to use the SUB button to toggle subtitle visibility:
-#
-# RC_MPLAYER_CMDS = {
-#     'SUB'         : ( 'sub_visibility', 'Toggle subtitle visibility' )
-# }
-
-RC_MPLAYER_CMDS       = {}
-RC_MPLAYER_AUDIO_CMDS = {}
 
 #
 # Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/05/28 15:01:24  dischi
+# improved event handling
+#
 # Revision 1.43  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -292,15 +295,17 @@ def main_func():
                     p.poll_counter = 0
                     p.poll()
 
+        if event == em.FUNCTION_CALL:
+            event.arg()
+
         # Send events to either the current app or the menu handler
-        used = FALSE
-        if rc_object.app:
+        elif rc_object.app:
             if not rc_object.app(event):
                 for p in eventhandler_plugins:
                     if p.eventhandler(event=event):
                         break
                 else:
-                    print 'no eventhandler for event %s' % event.name
+                    print 'no eventhandler for event %s' % event
 
         else:
             if osd.focused_app:
