@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/23 21:15:14  dischi
+# show info not only for files
+#
 # Revision 1.9  2003/09/14 03:19:42  outlyer
 # Fixed to accomodate changes in xml_parser.py; works again.
 #
@@ -66,9 +69,8 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
         if item.type == 'video' and item.info:
-            if item.mode == 'file':
-                return [ ( self.info_showdata, _('Show info for this file'),
-                           'info_show') ]
+            return [ ( self.info_showdata, _('Show info for this file'),
+                       'info_show') ]
         return []
 
 
