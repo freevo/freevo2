@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/11/23 19:12:22  rshortt
+# Make sure VideoGroup gets the norm as upper case.
+#
 # Revision 1.71  2003/11/23 18:56:33  rshortt
 # Cleanup VideoGroup class a bit.
 #
@@ -98,7 +101,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, os, time, re
+import sys, os, time, re, string
 import setup_freevo
 import traceback
 import __builtin__
@@ -193,7 +196,7 @@ class VideoGroup:
         self.adev = adev
         self.input_type = input_type
         self.tuner_type = tuner_type
-        self.tuner_norm = tuner_norm
+        self.tuner_norm = string.upper(tuner_norm)
         self.tuner_chanlist = tuner_chanlist
         self.tuner_chan = tuner_chan
         self.recordable = recordable
