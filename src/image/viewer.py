@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2004/07/27 18:53:07  dischi
+# switch to new layer code and add basic animation support
+#
 # Revision 1.57  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -74,6 +77,7 @@ from event import *
 import time
 # from gui.animation import render, Transition
 import gui
+from gui.animation import render, Move
 
 # Module variable that contains an initialized ImageViewer() object
 _singleton = None
@@ -301,8 +305,8 @@ class ImageViewer:
         image = gui.Image(x, y, x+image.get_size()[0], y+image.get_size()[1], image)
 
         if self.last_image[1]:
-            screen.remove('bg', self.last_image[1])
-        screen.add('bg', image)
+            screen.remove(self.last_image[1])
+        screen.add(image)
 
         self.drawosd()
         screen.update()
@@ -366,14 +370,14 @@ class ImageViewer:
             
             screen = gui.get_screen()
             if self.last_image[1]:
-                screen.remove('bg', self.last_image[1])
+                screen.remove(self.last_image[1])
             self.last_image = (None, None)
 
             if self.osd_text:
-                screen.remove('content', self.osd_text)
+                screen.remove(self.osd_text)
                 self.osd_text = None
             if self.osd_box:
-                screen.remove('alpha', self.osd_box)
+                screen.remove(self.osd_box)
                 self.osd_box = None
 
             self.filename = None
@@ -456,7 +460,7 @@ class ImageViewer:
         
         # remove old osd text:
         if self.osd_text:
-            screen.remove('content', self.osd_text)
+            screen.remove(self.osd_text)
             self.osd_text = None
             newosd = False
 
@@ -464,7 +468,7 @@ class ImageViewer:
         if not self.osd_mode:
             # remove old osd bar:
             if self.osd_box:
-                screen.remove('alpha', self.osd_box)
+                screen.remove(self.osd_box)
                 self.osd_box = None
             return
 
@@ -508,11 +512,13 @@ class ImageViewer:
 
         if r != self.osd_box:
             if self.osd_box:
-                screen.remove('alpha', self.osd_box)
+                screen.remove(self.osd_box)
             self.osd_box = r
-            screen.add('alpha', self.osd_box)
+            self.osd_box.layer = 1
+            screen.add(self.osd_box)
 
-        screen.add('content', self.osd_text)
+        self.osd_text.layer = 2
+        screen.add(self.osd_text)
 
         # FIXME: better integration, just a performance test
         if newosd:
@@ -521,10 +527,6 @@ class ImageViewer:
 
             for o in (self.osd_box, self.osd_text):
                 o.set_position(o.x1, o.y1 + max_height, o.x2, o.y2 + max_height)
-
-            screen.update()
-            for i in range(max_height / 4):
-                for o in (self.osd_box, self.osd_text):
-                    o.set_position(o.x1, o.y1 - 4, o.x2, o.y2 - 4)
-                screen.update()
-                
+            r = render.get_singleton()
+            m = Move((self.osd_box, self.osd_text), 'vertical', 4, max_height)
+            m.start()
