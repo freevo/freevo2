@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/03/15 10:15:43  dischi
+# Faster caching and there is no need for fchksum anymore
+#
 # Revision 1.22  2003/03/11 20:24:06  dischi
 # Fixed some return values
 #
@@ -128,14 +131,8 @@ import urllib
 import urlparse
 import objectcache
 import util
+import md5
 
-try:
-    import fchksum
-    thumbs_fchksum = 1
-except:
-    print 'fchksum not available, thumbnails deactivated'
-    thumbs_fchksum = 0
-    
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
 
@@ -1395,25 +1392,30 @@ class OSD:
                 tmp = util.getExifThumbnail(filename)
                 if tmp:
                     filename = tmp
-                elif thumbs_fchksum and os.stat(filename)[stat.ST_SIZE] > 50000:
-                    thumb = os.path.join('%s/%s.thumb.png' % \
-                                         (config.FREEVO_CACHEDIR,
-                                          fchksum.fmd5t(filename)[0]))
-                    if not os.path.isfile(thumb):
-                        # convert with Imaging, pygame doesn't work
-                        image = Image.open(filename)
-                        width  = 300
-                        height = 300
+                else:
+                    sinfo = os.stat(filename)
+                    if sinfo[stat.ST_SIZE] > 50000:
+                        m = md5.new('%s/%s-%s' % (filename, sinfo[stat.ST_SIZE],
+                                                  sinfo[stat.ST_MTIME]))
+                        thumb = os.path.join('%s/thumbnails/%s.png' % \
+                                             (config.FREEVO_CACHEDIR,
+                                              util.hexify(m.digest())))
+                    
+                        if not os.path.isfile(thumb):
+                            # convert with Imaging, pygame doesn't work
+                            image = Image.open(filename)
+                            width  = 300
+                            height = 300
 
-                        w, h = image.size
-                        if int(float(width * h) / w) > height:
-                            width = int(float(height * w) / h)
-                        else:
-                            height = int(float(width * h) / w)
-                        image = image.resize((width, height), Image.BICUBIC)
-                        image.save(thumb, 'PNG')
+                            w, h = image.size
+                            if int(float(width * h) / w) > height:
+                                width = int(float(height * w) / h)
+                            else:
+                                height = int(float(width * h) / w)
+                            image = image.resize((width, height), Image.BICUBIC)
+                            image.save(thumb, 'PNG')
 
-                    filename = thumb
+                        filename = thumb
 
                             
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
