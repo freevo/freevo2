@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/07/20 19:56:25  dischi
+# small fixes
+#
 # Revision 1.1  2003/07/20 17:50:24  dischi
 # Very basic Xine support. By loading this plugin and setting XINE_COMMAND
 # in the local_conf.py, xine will be used as DVD player when you hit PLAY
@@ -49,6 +52,7 @@ import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
+import skin
 
 from event import *
 import plugin
@@ -118,6 +122,7 @@ class Xine:
             print 'Xine.play(): Starting thread, cmd=%s' % command
         rc.app(self)
 
+        skin.get_singleton().clear()
         self.thread.mode    = 'play'
         self.thread.command = '%s dvd://' % self.command
         self.thread.mode_flag.set()
@@ -141,7 +146,7 @@ class Xine:
         eventhandler for xine control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
-        if event in ( STOP, PLAY_END, USER_END, DVD_PROTECTED ):
+        if event in ( PLAY_END, USER_END ):
             self.stop()
             return self.item.eventhandler(event)
 
@@ -193,7 +198,7 @@ class Xine_Thread(threading.Thread):
                 self.mode_flag.clear()
 
             elif self.mode == 'play':
-                if DEBUG or 1:
+                if DEBUG:
                     print 'Xine_Thread.run(): Started, cmd=%s' % self.command
                     
                 self.app = XineApp(self.command, self.item)
@@ -211,7 +216,11 @@ class Xine_Thread(threading.Thread):
                     else:
                         rc.post_event(PLAY_END)
                         
+                if DEBUG:
+                    print 'Xine_Thread.run(): Stopped'
+
                 self.mode = 'idle'
+                skin.get_singleton().redraw()
                 
             else:
                 self.mode = 'idle'
