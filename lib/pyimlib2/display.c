@@ -41,7 +41,7 @@ void display_set_context(Display_PyObject *self)
 	imlib_context_set_drawable(self->window);
 }
 
-PyObject *Display_PyObject__render(PyObject *self, PyObject *args)
+PyObject *Display_PyObject__render( Display_PyObject *self, PyObject *args)
 {
     Image_PyObject *img;
 	int dst_x = 0, dst_y = 0, src_x = 0, src_y = 0, 
@@ -56,7 +56,7 @@ PyObject *Display_PyObject__render(PyObject *self, PyObject *args)
 	if (w == -1) w = img_w;
 	if (h == -1) h = img_h;
 
-	display_set_context((Display_PyObject *)self);
+	display_set_context(self);
 
 	imlib_context_set_dither(dither);
 	imlib_context_set_blend(blend);
@@ -94,8 +94,8 @@ PyObject *Display_PyObject__update( Display_PyObject *self, PyObject *args )
 }	
 
 PyMethodDef Display_PyObject_methods[] = {
-	{ "render", Display_PyObject__render, METH_VARARGS },
-	{ "update", Display_PyObject__update, METH_VARARGS },
+	{ "render", ( PyCFunction ) Display_PyObject__render, METH_VARARGS },
+	{ "update", ( PyCFunction ) Display_PyObject__update, METH_VARARGS },
 	{ NULL, NULL }
 };
 
