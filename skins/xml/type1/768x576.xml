@@ -34,6 +34,7 @@
 
       <title visible="yes" x="384" y="18">
 	<font name="oliversb" size="34" color="0x000000" align="center"/>
+	<shadow visible="no" color="0xaaffffff" x="3" y="3"/>
       </title>
 
       <items x="60" y="105" height="370" width="620">

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2002/10/05 17:25:45  dischi
+# Added ability to display shadows for title as well (deactivated in the
+# xml file)
+#
 # Revision 1.31  2002/09/27 08:43:38  dischi
 # removed 2 debugs again, this makes no sense.
 #
@@ -529,9 +533,7 @@ class Skin:
             if val.title.text:
                 menu.heading = val.title.text
 
-            osd.drawstring(menu.heading, val.title.x, val.title.y, val.title.color,
-                           font=val.title.font,
-                           ptsize=val.title.size, align=val.title.align)
+            self.DrawText(menu.heading, val.title)
             
 
         # Draw the menu choices for the main selection
