@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/05/29 21:10:18  rshortt
+# Remove the 'killall' kludge and save and use process id's.  The freevo script accepts a stop command that can be used alone to stop freevo or with an extra argument to stop a process that was started with 'execute'.  That extra argument must be the .py file or the path to the .py file.
+#
 # Revision 1.44  2003/05/28 15:01:24  dischi
 # improved event handling
 #
@@ -115,6 +118,8 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     """
     function to shut down freevo or the whole system
     """
+    import plugin
+
     osd.clearscreen(color=osd.COL_BLACK)
     osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
@@ -146,16 +151,17 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     osd.shutdown()
 
     #
-    # Here are some different ways of exiting freevo for the
-    # different ways that it could have been started.
+    # Exit Freevo
     #
     
-    # XXX kludge to shutdown the runtime version (no linker)
-    util.killall('freevo_python')
-    util.killall('freevo_loader')
+    # Shutdown any daemon plugins that need it.
+    plugin.shutdown()
+
+    os.system('./freevo stop')
+
+    # XXX kludge to shutdown freevo_xwin
     util.killall('freevo_xwin')
-    # XXX Kludge to shutdown if started with "python main.py"
-    os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
+
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
     while 1:
@@ -239,16 +245,17 @@ class MainMenu(Item):
     
 
 def signal_handler(sig, frame):
+    import plugin
+
     if sig == signal.SIGTERM:
         osd.clearscreen(color=osd.COL_BLACK)
         osd.shutdown() # SDL must be shutdown to restore video modes etc
 
-        # XXX kludge to shutdown the runtime version (no linker)
-        util.killall('freevo_python')
-        util.killall('freevo_loader')
+        # Shutdown any daemon plugins that need it.
+        plugin.shutdown()
+
+        # XXX kludge to shutdown freevo_xwin
         util.killall('freevo_xwin')
-        # XXX Kludge to shutdown if started with "python main.py"
-        os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
 
 
 #
