@@ -4,14 +4,11 @@
 %define chanlist us-cable
 Summary:	Freevo
 Name:		freevo
-Version:	1.2.6
-Release:	3
+Version:	1.3.0
+Release:	1
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
-#Patch0:		%{name}-%{version}-setup_build.py.patch
-#Patch1:		%{name}-%{version}-configure.patch
-#Patch2:		%{name}-%{version}-freevo_config.py.patch
 URL:		http://freevo.sourceforge.net/
 Requires:	freevo_runtime >= 3
 BuildRequires:	freevo_runtime
@@ -29,9 +26,6 @@ and audio.
 
 %prep
 %setup  -n %{name}
-#%patch0 -p0
-#%patch1 -p0
-#%patch2 -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
@@ -63,7 +57,7 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,fbcon,gui,helpers,icons,plugins,rc_client,skins}
+mkdir -p %{buildroot}%{_prefix}/{boot,eyed3,fbcon,gui,helpers,icons,plugins,rc_client,skins,tv}
 mkdir -p %{buildroot}%{_prefix}/icons/64x64
 mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather}
 mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
@@ -72,14 +66,18 @@ mkdir -p %{buildroot}%{_prefix}/skins/xml/type1
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music}
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music,tv-show-images}
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 
-install -m 755 freevo freevo_xwin runapp skin.py strptime.py [a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
+install -m 755 freevo freevo_xwin runapp skin.py strptime.py [A-Z,a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/vtrelease %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 install -m 644 gui/* %{buildroot}%{_prefix}/gui
+install -m 644 eyed3/* %{buildroot}%{_prefix}/eyed3
+install -m 644 tv/* %{buildroot}%{_prefix}/tv
 install -m 644 helpers/* %{buildroot}%{_prefix}/helpers
 install -m 644 icons/[a-z]* %{buildroot}%{_prefix}/icons
 install -m 644 icons/64x64/* %{buildroot}%{_prefix}/icons/64x64
@@ -93,8 +91,8 @@ install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
 install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
 install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
 install -m 644 skins/barbieri/* %{buildroot}%{_prefix}/skins/barbieri
-install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
-install -m 644 skins/krister1/* %{buildroot}%{_prefix}/skins/krister1
+#install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
+#install -m 644 skins/krister1/* %{buildroot}%{_prefix}/skins/krister1
 install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
 install -m 644 freevo.conf freevo_config.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
@@ -103,8 +101,11 @@ install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
 
 
-install -m 644 testfiles/Images/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images
-install -m 644 testfiles/Movies/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Movies
+install -m 644 testfiles/Images/*.jpg %{buildroot}%{_cachedir}/freevo/testfiles/Images
+install -m 644 testfiles/Images/*.ssr %{buildroot}%{_cachedir}/freevo/testfiles/Images
+install -m 644 testfiles/Images/Show/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
+install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 install -m 644 testfiles/Music/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Music
 
 %clean
@@ -124,6 +125,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %dir %{_prefix}
+%attr(755,root,root) %dir %{_prefix}/eyed3
 %attr(755,root,root) %dir %{_prefix}/fbcon
 %attr(755,root,root) %dir %{_prefix}/gui
 %attr(755,root,root) %dir %{_prefix}/helpers
@@ -140,19 +142,21 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %dir %{_prefix}/skins/xml/type1
 %attr(755,root,root) %dir %{_prefix}/skins/aubin1
 %attr(755,root,root) %dir %{_prefix}/skins/barbieri
-%attr(755,root,root) %dir %{_prefix}/skins/dischi1
-%attr(755,root,root) %dir %{_prefix}/skins/krister1
+#%attr(755,root,root) %dir %{_prefix}/skins/dischi1
+#%attr(755,root,root) %dir %{_prefix}/skins/krister1
 %attr(755,root,root) %dir %{_prefix}/skins/malt1
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(755,root,root) %{_prefix}/freevo
 %attr(755,root,root) %{_prefix}/freevo_xwin
 %attr(755,root,root) %{_prefix}/runapp
 %attr(644,root,root) %{_prefix}/*.py
+%attr(644,root,root) %{_prefix}/eyed3/*
 %attr(644,root,root) %{_prefix}/fbcon/fbset.db
 %attr(755,root,root) %{_prefix}/fbcon/vtrelease
 %attr(755,root,root) %{_prefix}/fbcon/*.sh
 %attr(755,root,root) %{_prefix}/fbcon/matroxset
 %attr(644,root,root) %{_prefix}/gui/*
+%attr(644,root,root) %{_prefix}/tv/*
 %attr(644,root,root) %{_prefix}/helpers/*
 %attr(755,root,root) %{_prefix}/icons
 %attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
@@ -167,8 +171,8 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(644,root,root) %{_prefix}/skins/xml/type1/*
 %attr(644,root,root) %{_prefix}/skins/aubin1/*
 %attr(644,root,root) %{_prefix}/skins/barbieri/*
-%attr(644,root,root) %{_prefix}/skins/dischi1/*
-%attr(644,root,root) %{_prefix}/skins/krister1/*
+#%attr(644,root,root) %{_prefix}/skins/dischi1/*
+#%attr(644,root,root) %{_prefix}/skins/krister1/*
 %attr(644,root,root) %{_prefix}/skins/malt1/*
 %config %{_sysconfdir}/freevo/freevo_config.py
 %config %{_sysconfdir}/freevo/freevo.conf
@@ -184,9 +188,10 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %files testfiles
 %defattr(644,root,root,755)
-%attr(644,root,root) %{_cachedir}/freevo/testfiles/Images/*
-%attr(644,root,root) %{_cachedir}/freevo/testfiles/Movies/*
-%attr(644,root,root) %{_cachedir}/freevo/testfiles/Music/*
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/Images
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/Movies
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/Music
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/tv-show-images
 
 %post boot
 if [ -x /sbin/chkconfig ]; then
@@ -209,6 +214,12 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Mon Nov 18 2002 TC Wan <tcwan@cs.usm.my>
+- Update SPEC file to 1.3.0 release
+
+* Wed Nov 13 2002 TC Wan <tcwan@cs.usm.my>
+- Disabled display=sdl as mplayer doesn't work reliably with this option
+
 * Sat Oct 26 2002 TC Wan <tcwan@cs.usm.my>
 - Fixed permissions problem for icons/64x64 directory
 

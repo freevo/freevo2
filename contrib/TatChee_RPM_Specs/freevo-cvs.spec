@@ -1,8 +1,8 @@
 %define geometry 800x600
-%define display  sdl
+%define display  xv
 %define tv_norm  pal
 %define chanlist europe-west
-%define _cvsdate 20021026
+%define _cvsdate 20021118
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.0
@@ -10,7 +10,7 @@ Release:	CVS%{_cvsdate}
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{_cvsdate}.tar.gz
-#Patch0:		%{name}-%{version}-setup_build.py.patch
+#Patch0:		%{name}-%{version}-configure.patch
 #Patch1:		%{name}-%{version}-configure.patch
 #Patch2:		%{name}-%{version}-freevo_config.py.patch
 URL:		http://freevo.sourceforge.net/
@@ -30,12 +30,13 @@ and audio.
 
 %prep
 %setup  -n %{name}
-#%patch0 -p0
+#%patch0 -p1
 #%patch1 -p0
 #%patch2 -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
+
 %build
 make clean; make
 cd plugins/cddb; make
@@ -73,7 +74,9 @@ mkdir -p %{buildroot}%{_prefix}/skins/xml/type1
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music}
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music,tv-show-images}
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 
 install -m 755 freevo freevo_xwin runapp skin.py strptime.py [A-Z,a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
@@ -106,8 +109,11 @@ install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
 
 
-install -m 644 testfiles/Images/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images
-install -m 644 testfiles/Movies/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Movies
+install -m 644 testfiles/Images/*.jpg %{buildroot}%{_cachedir}/freevo/testfiles/Images
+install -m 644 testfiles/Images/*.ssr %{buildroot}%{_cachedir}/freevo/testfiles/Images
+install -m 644 testfiles/Images/Show/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
+install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 install -m 644 testfiles/Music/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Music
 
 %clean
@@ -131,7 +137,6 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %dir %{_prefix}/fbcon
 %attr(755,root,root) %dir %{_prefix}/gui
 %attr(755,root,root) %dir %{_prefix}/helpers
-%attr(755,root,root) %dir %{_prefix}/icons
 %attr(755,root,root) %dir %{_prefix}/plugins
 %attr(755,root,root) %dir %{_prefix}/plugins/cddb
 %attr(755,root,root) %dir %{_prefix}/plugins/weather
@@ -161,7 +166,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(644,root,root) %{_prefix}/gui/*
 %attr(644,root,root) %{_prefix}/tv/*
 %attr(644,root,root) %{_prefix}/helpers/*
-%attr(644,root,root) %{_prefix}/icons/*
+%attr(755,root,root) %{_prefix}/icons
 %attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
 %attr(644,root,root) %{_prefix}/plugins/cddb/*.py
 %attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
@@ -191,9 +196,10 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %files testfiles
 %defattr(644,root,root,755)
-%attr(644,root,root) %{_cachedir}/freevo/testfiles/Images/*
-%attr(644,root,root) %{_cachedir}/freevo/testfiles/Movies/*
-%attr(644,root,root) %{_cachedir}/freevo/testfiles/Music/*
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/Images
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/Movies
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/Music
+%attr(755,root,root) %{_cachedir}/freevo/testfiles/tv-show-images
 
 %post boot
 if [ -x /sbin/chkconfig ]; then
@@ -216,6 +222,12 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Wed Nov 13 2002 TC Wan <tcwan@cs.usm.my>
+- Disabled display=sdl as mplayer doesn't work reliably with this option
+
+* Sat Oct 26 2002 TC Wan <tcwan@cs.usm.my>
+- Fixed permissions problem for icons/64x64 directory
+
 * Tue Oct 15 2002 TC Wan <tcwan@cs.usm.my>
 - Moved freevo.conf to /etc/freevo where freevo_config.py resides
 - Defaulted TV settings to ntsc, us-cable to match TV guide
