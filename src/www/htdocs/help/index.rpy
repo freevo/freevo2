@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/07 17:14:21  dischi
+# typo
+#
 # Revision 1.1  2003/09/23 18:24:07  dischi
 # moved help to a new directory and add more docs
 #
@@ -51,7 +54,7 @@ class HelpResource(FreevoResource):
         fv.printHeader('Freevo Help', '/styles/main.css')
         fv.res += 'This is the internal Freevo documentation. The documents \
         are in an early stage of development, if you like to help, please \
-        contact the develepers. You find more informations like \
+        contact the developers. You find more informations like \
         the <a href="http://freevo.sourceforge.net/cgi-bin/moin.cgi/FrontPage">\
         WiKi (online manual)</a> and mailing lists on the \
         <a href="http://www.freevo.org">Freevo Homepage</a>.\
