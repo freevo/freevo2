@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2005/01/07 20:42:55  dischi
+# better new line handling
+#
 # Revision 1.10  2004/11/20 18:23:02  dischi
 # use python logger module for debug
 #
@@ -180,6 +183,9 @@ class Text(CanvasImage):
             if width > max_width:
                 # ok, that's it. We don't have any space left
                 break
+            if c == len(text):
+                # everything fits
+                return text, ''
             if word_splitter and text[c] in word_splitter:
                 # rememeber the last space for mode == 'soft' (not hard)
                 space = c
@@ -187,7 +193,7 @@ class Text(CanvasImage):
                     ellipses_space = c
             if text[c-1] == '\n':
                 # Oops, line break, stop right here
-                break
+                return text[:c-1], text[c:]
             
         # now we a have string that is too long, shorten it again
         if ellipses:
