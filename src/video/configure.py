@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/11/09 16:24:30  dischi
+# fix subtitle selection
+#
 # Revision 1.16  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -96,7 +99,7 @@ def subtitle_selection_menu(arg=None, menuw=None):
     global current_xml_file
     items = []
 
-    items += [ menu.MenuItem(_('no subtitles'), subtitle_selection, (arg, None)) ]
+    items += [ menu.MenuItem(_('no subtitles'), subtitle_selection, (arg, -1)) ]
     for s in range(len(arg.info['subtitles'])):
         items.append(menu.MenuItem(arg.info['subtitles'][s], subtitle_selection, (arg, s)))
     moviemenu = menu.Menu(_('Subtitle Menu'), items, xml_file=current_xml_file)

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2003/11/09 16:24:30  dischi
+# fix subtitle selection
+#
 # Revision 1.89  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -474,8 +477,9 @@ class VideoItem(Item):
         if self.mode == 'dvd':
             mplayer_options += ' -dvd-device %s' % self.media.devicename
 
-
-        if self.selected_subtitle and self.mode == 'file':
+        if self.selected_subtitle == -1:
+            mplayer_options += ' -noautosub'
+        elif self.selected_subtitle and self.mode == 'file':
             mplayer_options += ' -vobsubid %s' % self.selected_subtitle
         elif self.selected_subtitle:
             mplayer_options += ' -sid %s' % self.selected_subtitle
