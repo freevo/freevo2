@@ -139,7 +139,7 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 # MainMenuItem('games', 'MediaMenu().main_menu', 'games')
 
 MAIN_MENU_ITEMS = [
-    MainMenuItem('tv', 'tv.tv.main_menu', ''),
+    MainMenuItem('tv', 'TVMenu().main_menu', ''),
     MainMenuItem('video', 'MediaMenu().main_menu', 'video'),
     MainMenuItem('audio', 'MediaMenu().main_menu', 'audio'),
     MainMenuItem('image', 'MediaMenu().main_menu', 'image'),
@@ -174,8 +174,9 @@ AUDIO_RANDOM_PLAYLIST = 1
 
 #
 # Should directories sorted by date instead of filename
+# 0 = no, 1 = yes, 2 = no for normal menus, yes for DIR_RECORD
 #
-DIRECTORY_SORT_BY_DATE = 0
+DIRECTORY_SORT_BY_DATE = 2
 
 #
 # Should freevo autoplay the item if only one item is in the directory

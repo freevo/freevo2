@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/03/29 21:45:26  dischi
+# added display_type tv for the new skin
+#
 # Revision 1.41  2003/03/15 17:19:44  dischi
 # renamed skin.xml to folder.fxd for the new skin
 #
@@ -397,7 +400,11 @@ class DirItem(Playlist):
                             if var_names.name.upper() == v.upper():
                                 setattr(self, v, int(var_names.textof()))
 
-        
+
+        if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
+            self.DIRECTORY_SORT_BY_DATE = 0
+
+            
     def copy(self, obj):
         """
         Special copy value DirItem
@@ -458,6 +465,9 @@ class DirItem(Playlist):
             if not self.display_type or self.display_type == t:
                 play_items += eval(t + '.interface.cwd(self, files)')
 
+        if self.display_type == 'tv':
+            play_items += video.interface.cwd(self, files)
+            
         if self.DIRECTORY_SORT_BY_DATE:
             play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                              o.sort('date').upper()))
@@ -576,6 +586,10 @@ class DirItem(Playlist):
                                               new_items, del_items, \
                                               self.play_items)
                 
+        if self.display_type == 'tv':
+            video.interface.update(self, new_files, del_files, 
+                                   new_items, del_items, self.play_items)
+
         # delete play items from the menu
         for i in del_items:
             self.menu.delete_item(i)
