@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/13 01:48:02  outlyer
+# A workaround for the issue which has arisen with zap2it TV listings wherein
+# the stop date has to be guessed by XMLTV and sometimes isn't guessed properly.
+# This is an imperfect workaround, but it allows the guide to work.
+#
+# I should stress imperfect, because there is a nested exception which is so
+# ugly, it hurts to look at it. I don't know the internals of the xmltv.py
+# library well enough to do a proper fix but I will try. As I said, at least
+#  the guide works now.
+#
 # Revision 1.6  2003/01/07 07:36:09  krister
 # Removed the hack to scrub 8-bit chars from the guide.
 #
@@ -245,7 +255,10 @@ def load_guide():
             prog.desc = p['desc'][0][0].encode('Latin-1')
         try:
             prog.start = timestr2secs_utc(p['start'])
-            prog.stop = timestr2secs_utc(p['stop'])
+            try:
+                prog.stop = timestr2secs_utc(p['stop'])
+            except:
+                continue
         except EPG_TIME_EXC:
             continue
         guide.AddProgram(prog)

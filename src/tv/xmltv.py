@@ -297,7 +297,10 @@ def _node_to_programme(node):
     programme = _extractNodes(node, handler)
 
     for attr in (u'start', u'stop', u'channel'):
-        programme[attr.encode(locale)] = node.attrs[(u'', attr)]
+        try:
+            programme[attr.encode(locale)] = node.attrs[(u'', attr)]
+        except KeyError: # No stop time, skip
+            continue
     return programme
 
 def _node_to_channel(node):
