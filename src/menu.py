@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2004/08/14 15:09:54  dischi
+# use new AreaHandler
+#
 # Revision 1.101  2004/08/05 17:36:13  dischi
 # remove "page" code, the skin takes care of that now
 #
@@ -220,10 +223,8 @@ class MenuWidget(Application):
         self.menustack = []
         self.eventhandler_plugins = None
         if not engine:
-            engine = gui.get_areas()
-            # register menu to the skin
-            engine.register('menu', ('screen', 'title', 'subtitle', 'view',
-                                     'listing', 'info'))
+            engine = gui.AreaHandler('menu', ('screen', 'title', 'subtitle', 'view',
+                                              'listing', 'info'))
         self.engine = engine
         
 
@@ -249,7 +250,7 @@ class MenuWidget(Application):
         hide the menu
         """
         Application.hide(self)
-        self.engine.clear('menu')
+        self.engine.clear()
             
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
@@ -257,7 +258,9 @@ class MenuWidget(Application):
         delete last menu from the stack, no redraw
         """
         if len(self.menustack) > 1:
-            self.menustack = self.menustack[:-1]
+            if hasattr(self.menustack[-1], 'hide'):
+                self.menustack[-1].hide()
+            del self.menustack[-1]
             menu = self.menustack[-1]
 
             if not isinstance(menu, Menu):
@@ -290,11 +293,12 @@ class MenuWidget(Application):
     def back_one_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
             try:
-                count = -self.menustack[-1].back_one_menu
+                count = self.menustack[-1].back_one_menu
             except:
-                count = -1
+                count = 1
 
-            self.menustack = self.menustack[:count]
+            for i in range(count):
+                del self.menustack[-1]
             menu = self.menustack[-1]
 
             if not isinstance(menu, Menu):
@@ -313,7 +317,8 @@ class MenuWidget(Application):
                 
 
     def goto_main_menu(self, arg=None, menuw=None):
-        self.menustack = [self.menustack[0]]
+        while len(self.menustack) > 1:
+            del self.menustack[-1]
         menu = self.menustack[0]
         self.refresh()
 
@@ -346,7 +351,7 @@ class MenuWidget(Application):
                 self.menustack[-1] = new_menu
 
         if self.visible:
-            self.engine.draw('menu', self.menustack[-1])
+            self.engine.draw(self.menustack[-1])
 
 
     def make_submenu(self, menu_name, actions, item):

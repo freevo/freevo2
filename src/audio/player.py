@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/08/14 15:12:55  dischi
+# use new AreaHandler
+#
 # Revision 1.25  2004/08/05 17:33:30  dischi
 # fix skin imports
 #
@@ -54,8 +57,6 @@ def get_singleton():
     global _player_
     if not _player_:
         _player_ = PlayerGUI()
-        # register player to the skin
-        gui.get_areas().register('player', ('screen', 'title', 'view', 'info'))
     return _player_
 
 
@@ -69,6 +70,8 @@ class PlayerGUI(Application):
         self.running    = False
         self.bg_playing = False
 
+        # register player to the skin
+        self.draw_engine = gui.AreaHandler('player', ('screen', 'title', 'view', 'info'))
 
     def play(self, item, player=None):
         """
@@ -162,7 +165,7 @@ class PlayerGUI(Application):
         hide the player gui
         """
         Application.hide(self)
-        gui.get_areas().clear('audio')
+        self.draw_engine.clear()
         self.bg_playing = True
             
 
@@ -171,7 +174,7 @@ class PlayerGUI(Application):
         destroy the gui (remove it from handling)
         """
         Application.destroy(self)
-        gui.get_areas().clear('audio')
+        self.draw_engine.clear()
 
         
     def refresh(self):
@@ -189,7 +192,7 @@ class PlayerGUI(Application):
             self.item.remain = 0
         else:
             self.item.remain = self.item.length - self.item.elapsed
-        gui.get_areas().draw('player', self.item)
+        self.draw_engine.draw(self.item)
 
 
     def eventhandler(self, event):
@@ -212,6 +215,4 @@ class PlayerGUI(Application):
 
         # give it to the item
         return self.item.eventhandler(event)
-        
-
 

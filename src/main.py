@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.138  2004/08/14 15:09:54  dischi
+# use new AreaHandler
+#
 # Revision 1.137  2004/08/05 17:37:55  dischi
 # remove a bad skin hack
 #
@@ -153,11 +156,11 @@ except ImportError:
 import gui
 import util    # Various utilities
 import menu    # The menu widget class
-import skin    # The skin class
 
 from item import Item
 from event import *
 from plugins.shutdown import shutdown
+from gui.areas import Area
 
 
 
@@ -260,46 +263,66 @@ class MainMenu(Item):
         
     
 
-
-class Splashscreen(skin.Area):
+class Splashscreen(Area):
     """
     A simple splash screen for osd startup
     """
     def __init__(self, text):
-        skin.Area.__init__(self, 'content')
-
+        Area.__init__(self, 'content')
         self.pos          = 0
-        self.bar_border   = skin.Rectange(bgcolor=0xff000000L, size=2)
-        self.bar_position = skin.Rectange(bgcolor=0xa0000000L)
+        self.bar_border   = self.Rectangle(bgcolor=0xff000000L, size=2)
+        self.bar_position = self.Rectangle(bgcolor=0xa0000000L)
         self.text         = text
+        self.content      = []
+        self.bar          = None
+        self.engine       = gui.AreaHandler('splashscreen', ('screen', self))
 
-
-    def update_content(self):
+        
+    def clear(self):
         """
-        there is no content in this area
+        clear all content objects
         """
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=True)
+        for c in self.content:
+            self.screen.remove(c)
+        self.content = []
+        if self.bar:
+            self.screen.remove(self.bar)
+            self.bar = None
+            
+        
+    def update(self):
+        """
+        update the splashscreen
+        """
+        content   = self.calc_geometry(self.layout.content, copy_object=True)
 
-        self.drawstring(self.text, content.font, content, height=-1, align_h='center')
-
-        pos = 0
         x0, x1 = content.x, content.x + content.width
         y = content.y + content.font.font.height + content.spacing
+
+        if not self.content:
+            self.content.append(self.drawstring(self.text, content.font,
+                                                content, height=-1, align_h='center'))
+            self.content.append(self.drawbox(x0, y, x1-x0, 20, self.bar_border))
+
+        pos = 0
         if self.pos:
             pos = round(float((x1 - x0 - 4)) / (float(100) / self.pos))
-        self.drawbox(x0, y, x1-x0, 20, self.bar_border)
-        self.drawbox(x0+2, y+2, pos, 16, self.bar_position)
-
+        if self.bar:
+            self.screen.remove(self.bar)
+        self.bar = self.drawbox(x0+2, y+2, pos, 16, self.bar_position)
+        
 
     def progress(self, pos):
         """
         set the progress position and refresh the screen
         """
         self.pos = pos
-        skin.draw('splashscreen', None)
+        if self.engine:
+            self.engine.draw(None)
 
+
+    def destroy(self):
+        del self.engine
 
 
 
@@ -403,16 +426,15 @@ try:
 
     # Fire up splashscreen and load the plugins
     splash = Splashscreen(_('Starting Freevo, please wait ...'))
-    skin.register('splashscreen', ('screen', splash))
     plugin.init(splash.progress)
-    skin.delete('splashscreen')
-
+    splash.destroy()
+    del splash
+    
     # Fire up splashscreen and load the cache
     if config.MEDIAINFO_USE_MEMORY == 2:
         import util.mediainfo
 
         splash = Splashscreen(_('Reading cache, please wait ...'))
-        skin.register('splashscreen', ('screen', splash))
 
         cachefiles = []
         for type in ('video', 'audio', 'image', 'games'):
@@ -429,7 +451,8 @@ try:
         for f in cachefiles:
             splash.progress(int((float((cachefiles.index(f)+1)) / len(cachefiles)) * 100))
             util.mediainfo.load_cache(f)
-        skin.delete('splashscreen')
+        splash.destroy()
+        del splash
 
     # prepare again, now that all plugins are loaded
     gui.settings.settings.prepare()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/08/14 15:12:55  dischi
+# use new AreaHandler
+#
 # Revision 1.46  2004/08/14 12:52:31  rshortt
 # Used cached channal list/epg.
 #
@@ -96,14 +99,13 @@ class TVGuide(MenuApplication):
     """
     def __init__(self):
         MenuApplication.__init__(self, 'tvguide', 'tvmenu', False)
-        self.engine = gui.get_areas()
-        self.engine.register('tv', ('screen', 'title', 'subtitle', 'view',
-                                    'tvlisting', 'info'))
         self.CHAN_NO_DATA = _('This channel has no data loaded')
         self.last_update  = 0
         
 
     def start(self, parent):
+        self.engine = gui.AreaHandler('tv', ('screen', 'title', 'subtitle', 'view',
+                                             'tvlisting', 'info'))
         self.parent = parent
         
         # self.n_items, hours_per_page = self.engine.items_per_page(('tv', self))
@@ -138,13 +140,20 @@ class TVGuide(MenuApplication):
         self.refresh()
         
 
-    def hide(self, clear=True):
+    def hide(self):
         """
         hide the guide
         """
         MenuApplication.hide(self)
-        self.engine.clear('tv')
+        self.engine.clear()
             
+        
+    def destroy(self):
+        """
+        destroy the guide
+        """
+        MenuApplication.destroy(self)
+        del self.engine
         
         
     def start_tv(self):
@@ -302,7 +311,7 @@ class TVGuide(MenuApplication):
 
 
     def refresh(self):
-        self.engine.draw('tv', self)
+        self.engine.draw(self)
 
 
 
