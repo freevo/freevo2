@@ -5,6 +5,7 @@ import sys, time
 from www.base import HTMLResource, FreevoResource
 import config
 import util
+import tv.recordings as recordserver
 
 class IndexResource(FreevoResource):
     def _render(self, request):
@@ -14,12 +15,15 @@ class IndexResource(FreevoResource):
         
         fv.res += '<br/><br/><h2>'+( _('Freevo Web Status as of %s') % \
                 time.strftime('%B %d ' + config.TV_TIMEFORMAT, time.localtime()) ) +'</h2>'
-    
-#         (server_available, schedule) = tv.record_client.connectionTest()
-#         if not server_available:
-#             fv.res += '<p class="alert"><b>'+_('Notice')+'</b>: '+_('The recording server is down.')+'</p>\n'
+
+        if recordserver.server:
+            fv.res += '<p class="normal">'\
+                      +_('The recording server is up and running.')+'</p>\n'
+        else:
+            fv.res += '<p class="alert"><b>'+_('Notice')+'</b>: ' \
+                      +_('The recording server is down.')+'</p>\n'
+
 #         else:
-#             fv.res += '<p class="normal">'+_('The recording server is up and running.')+'</p>\n'
 
 #         listexpire = tv_util.when_listings_expire()
 #         if listexpire == 1:
@@ -62,4 +66,4 @@ class IndexResource(FreevoResource):
     
 
 resource = IndexResource()
-print resource
+
