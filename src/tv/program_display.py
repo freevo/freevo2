@@ -9,6 +9,14 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/10/14 02:30:12  rshortt
+# Changes to make the list update when you remove a scheduled recording.
+#
+# Also made the buttons in the program display on top of one another instead
+# of side by side.  I will be adding more buttons (add to favorites, search
+# for more) and they will look and fit better this way.  I think they would
+# all be better together in a ListBox.
+#
 # Revision 1.15  2003/09/13 21:00:50  outlyer
 # OSDFont has 'name' as an attribute, while Font has 'filename' It was swapped
 # here, and was crashing.
@@ -154,12 +162,12 @@ class ProgramDisplay(PopupBox):
         else:
             self.b0 = Button('Remove', width=(width-60)/2)
 
-        self.b0.set_h_align(Align.NONE)
+        self.b0.set_h_align(Align.CENTER)
         self.add_child(self.b0)
         self.b0.toggle_selected()
         
         self.b1 = Button('CANCEL', width=(width-60)/2)
-        self.b1.set_h_align(Align.NONE)
+        self.b1.set_h_align(Align.CENTER)
         self.add_child(self.b1)
 
         if desc:
@@ -187,7 +195,7 @@ class ProgramDisplay(PopupBox):
         #    return
 
 
-        if event in (em.INPUT_LEFT, em.INPUT_RIGHT):
+        if event in (em.INPUT_UP, em.INPUT_DOWN):
             self.b0.toggle_selected()
             self.b1.toggle_selected()
             self.draw()
@@ -195,12 +203,14 @@ class ProgramDisplay(PopupBox):
             return
         
 
-        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
-            if DEBUG: print 'ProgramDisplay: should scroll'
-            if hasattr(self,'options'):
-                return self.options.eventhandler(event)
-            else:
-                return
+        # The following block of code was for when the options were in a list
+        # box.  Trying a different way (buttons) now.
+        #if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
+        #    if DEBUG: print 'ProgramDisplay: should scroll'
+        #    if hasattr(self,'options'):
+        #        return self.options.eventhandler(event)
+        #    else:
+        #        return
 
         elif event == em.INPUT_ENTER:
             if self.b0.selected and self.context == 'guide':
@@ -212,18 +222,42 @@ class ProgramDisplay(PopupBox):
                 else:
                     AlertBox(parent=self, 
                              text='Scheduling Failed: %s' % msg).show()
+
+            # XXX: search for other programs like this
             elif 0:
                 tv.program_search.ProgramSearch(parent=self, 
                                              search=self.prog.title).show()
+
+            # XXX: add to favorites - should go to an edit favorites screen
             elif 0:
                 tv.edit_favorite.EditFavorite(parent=self, 
                                            subject=self.prog).show()
+
+            # next will only happen if we are not viewing from the guide
             elif self.b0.selected:
                 (result, msg) = record_client.removeScheduledRecording(self.prog)
                 if result:
-                    AlertBox(parent=self, 
-                             text='"%s" has been removed' % \
-                              self.prog.title, handler=self.destroy).show()
+                    pop = PopupBox(parent=self, 
+                                   text='"%s" has been removed' % \
+                                   self.prog.title)
+                    pop.show()
+                    time.sleep(2)
+                    pop.destroy()
+
+                    searcher = None
+ 
+                    if self.context == 'recording' and self.parent:
+                        for child in self.parent.children:
+                            if isinstance(child, ScheduledRecordings):
+                                searcher = child
+                                break
+
+                    self.destroy()
+                    if searcher:
+                        searcher.refreshList()
+                        searcher.draw()
+                        self.osd.update()
+
                 else:
                     AlertBox(parent=self, 
                              text='Remove Failed: %s' % msg).show()
@@ -267,19 +301,17 @@ class ScheduledRecordings(PopupBox):
                           bg_color, fg_color, icon, border, bd_color, bd_width,
                           vertical_expansion)
 
-
-        (self.result, recordings) = record_client.getScheduledRecordings()
-        if self.result:
-            progs = recordings.getProgramList()
-        else:
-            errormsg = Label('Get recordings failed: %s' % recordings, 
+        (self.server_available, msg) = record_client.connectionTest()
+        if not self.server_available:
+            errormsg = Label('Record server unavailable: %s' % msg,
                              self, Align.CENTER)
-            return 
+            return
+
 
         self.internal_h_align = Align.CENTER
 
-        items_height = 40
-        self.num_shown_items = 7
+        items_height = Button('foo').height + 2
+        self.num_shown_items = 8
         self.results = ListBox(width=(self.width-2*self.h_margin),
                                height=self.num_shown_items*items_height,
                                show_v_scrollbar=0)
@@ -288,6 +320,18 @@ class ScheduledRecordings(PopupBox):
 
         self.results.set_h_align(Align.CENTER)
         self.add_child(self.results)
+
+        self.refreshList()
+
+
+    def refreshList(self):
+        (self.result, recordings) = record_client.getScheduledRecordings()
+        if self.result:
+            progs = recordings.getProgramList()
+        else:
+            errormsg = Label('Get recordings failed: %s' % recordings, 
+                             self, Align.CENTER)
+            return 
 
 
         if self.result:
