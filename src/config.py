@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.91  2004/01/10 13:12:02  dischi
+# create disc and disc-set dirs in OVERLAY_DIR
+#
 # Revision 1.90  2004/01/10 04:30:32  outlyer
 # Newer versions of twisted print this message:
 # "/usr/lib/python2.3/site-packages/freevo/helpers/webserver.py:106:
@@ -819,6 +822,12 @@ if not os.path.isdir(OVERLAY_DIR):
 # concat is much faster
 if OVERLAY_DIR and OVERLAY_DIR.endswith('/'):
     OVERLAY_DIR = OVERLAY_DIR[:-1]
+
+if not os.path.isdir(OVERLAY_DIR + '/disc'):
+    os.makedirs(OVERLAY_DIR + '/disc')
+    
+if not os.path.isdir(OVERLAY_DIR + '/disc-set'):
+    os.makedirs(OVERLAY_DIR + '/disc-set')
     
 #
 # delete LD_PRELOAD for all helpers, main.py does it after
