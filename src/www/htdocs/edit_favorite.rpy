@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.8  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -134,12 +148,12 @@ class EditFavoriteResource(FreevoResource):
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Name of favorite', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Program', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Day of week', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Time of day', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Action', 'class="guidehead" align="center" colspan="1"')
+        fv.tableCell('Name of favorite', 'class="guidehead" colspan="1"')
+        fv.tableCell('Program', 'class="guidehead" colspan="1"')
+        fv.tableCell('Channel', 'class="guidehead" colspan="1"')
+        fv.tableCell('Day of week', 'class="guidehead" colspan="1"')
+        fv.tableCell('Time of day', 'class="guidehead" colspan="1"')
+        fv.tableCell('Action', 'class="guidehead" colspan="1"')
         fv.tableRowClose()
 
         status = 'basic'
@@ -148,10 +162,10 @@ class EditFavoriteResource(FreevoResource):
 
         cell = '<input type="hidden" name="oldname" value="%s">' % fav.name
         cell += '<input type="text" size="20" name="name" value="%s">' % fav.name
-        fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '<input type="hidden" name="title" value="%s">%s' % (fav.title, fav.title)
-        fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '\n<select name="chan" selected="%s">\n' % fav.channel
         cell += '  <option value=ANY>ANY CHANNEL</option>\n'
@@ -164,7 +178,7 @@ class EditFavoriteResource(FreevoResource):
             i = i +1
 
         cell += '</select>\n'
-        fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '\n<select name="dow">\n' 
         cell += """
@@ -178,7 +192,7 @@ class EditFavoriteResource(FreevoResource):
           <option value="6">Sun</option>
         </select>
         """
-        fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '\n<select name="mod" selected="%s">\n' % fav.mod
         cell += """
@@ -233,18 +247,18 @@ class EditFavoriteResource(FreevoResource):
           <option value="1410">11:30 PM</option>
         </select>
         """
-        fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         # cell = '\n<select name="priority" selected="%s">\n' % fav.priority
         # for i in range(num_favorites+1):
         #     cell += '  <option value="%s">%s</option>\n' % (i+1, i+1)
         # cell += '</select>\n'
-        # fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        # fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '<input type="hidden" name="priority" value="%s">' % fav.priority
         cell += '<input type="hidden" name="action" value="%s">' % action
         cell += '<input type="submit" value="Save">' 
-        fv.tableCell(cell, 'class="'+status+'" align="center" colspan="1"')
+        fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         fv.tableRowClose()
 

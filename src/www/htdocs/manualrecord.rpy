@@ -65,7 +65,8 @@ class ManualRecordResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader('Manual Record', 'styles/main.css')
+            fv.printHeader('Manual Record', 'styles/main.css',selected="Manual Record")
+            fv.res += '&nbsp;<br/>\n'
             fv.res += '<h4>ERROR: recording server is unavailable</h4>'
             fv.printSearchForm()
             fv.printLinks()
@@ -196,15 +197,16 @@ class ManualRecordResource(FreevoResource):
             stopcell = stopcell + ':' 
             stopcell = stopcell + minuteselect % ("stopminute", " ")
 
-            fv.printHeader('Manual Record', 'styles/main.css')
+            fv.printHeader('Manual Record', 'styles/main.css', selected="Manual Recording")
+            fv.res += '&nbsp;<br/>\n'
 
             if errormsg:
                 fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="100%"')
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell('Error Message', 'class="guidehead" align="center" colspan="1"')
+                fv.tableCell('Error Message', 'class="guidehead" colspan="1"')
                 fv.tableRowClose()
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(errormsg, 'class="basic" align="center" colspan="1"')
+                fv.tableCell(errormsg, 'class="basic" colspan="1"')
                 fv.tableRowClose()
                 fv.tableClose()
 
@@ -212,22 +214,22 @@ class ManualRecordResource(FreevoResource):
             fv.res += '<center>'
             fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Start Time', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Stop Time', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Title', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Program Description', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Channel', 'class="guidehead" colspan="1"')
+            fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
+            fv.tableCell('Stop Time', 'class="guidehead" colspan="1"')
+            fv.tableCell('Title', 'class="guidehead" colspan="1"')
+            fv.tableCell('Program Description', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(channelselect, 'class="basic" align="left" colspan="1"')
-            fv.tableCell(startcell, 'class="basic" align="left" colspan="1" nowrap')
-            fv.tableCell(stopcell, 'class="basic" align="left" colspan="1" nowrap')
-            fv.tableCell('<input name="title" size="20">', 'class="basic" align="left" colspan="1"')
-            fv.tableCell('<textarea name="desc" rows="1" cols="20" wrap="soft"></textarea>', 'class="basic" align="left" colspan="1"')
+            fv.tableCell(channelselect, 'class="basic" colspan="1"')
+            fv.tableCell(startcell, 'class="basic" colspan="1" nowrap')
+            fv.tableCell(stopcell, 'class="basic" colspan="1" nowrap')
+            fv.tableCell('<input name="title" size="20">', 'class="basic" colspan="1"')
+            fv.tableCell('<textarea name="desc" rows="1" cols="20" wrap="soft"></textarea>', 'class="basic" colspan="1"')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<center><input type="hidden" name="action" value="add" /><input type="submit" value="Add to Recording Schedule" /></center>', 'class="basic" align="center" colspan="5"')
+            fv.tableCell('<center><input type="hidden" name="action" value="add" /><input type="submit" value="Add to Recording Schedule" /></center>', 'class="basic" colspan="5"')
             fv.tableRowClose()
 
             fv.tableClose()

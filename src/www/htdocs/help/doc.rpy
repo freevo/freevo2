@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.3  2004/02/06 20:30:32  dischi
 # some layout updates
 #
@@ -77,7 +91,7 @@ class WikiResource(FreevoResource):
             src_file = os.path.join(self.docRoot, file + '.html')
 
         if not src_file:
-            fv.printHeader('Freevo Documentation', '/styles/main.css')
+            fv.printHeader('Freevo Documentation', '/styles/main.css', prefix=request.path.count('/')-1)
             fv.res += 'ERROR, unable to load %s.html<br>' % file
             fv.res += 'If you use a CVS version of Freevo, run ./autogen.sh '\
                       'in the Freevo root directory.<br>'
@@ -88,8 +102,8 @@ class WikiResource(FreevoResource):
                 if title_reg(line):
                     title = title_reg(line).group(1).replace('DocumentationPage/', '')
                     fv.printHeader('Freevo Documentation -- %s' % title,
-                                   '/styles/main.css')
-                    fv.res += '<table id="help" width="100%"><tr><td>\n'
+                                   '/styles/main.css', prefix=request.path.count('/')-1)
+                    fv.res += '<div id="content">\n'
                     source = 'http://freevo.sourceforge.net/cgi-bin/moin.cgi/'
                     if file == 'faq':
                         source += 'FrequentlyAskedQuestions'
@@ -115,7 +129,7 @@ class WikiResource(FreevoResource):
                 if line.find('<hr>') != -1 and pos == 0:
                     pos = 1
         fv.res += '<br><br>'
-        fv.res += '</td></tr></table>\n'
+        fv.res += '</div>\n'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')

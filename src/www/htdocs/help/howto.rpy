@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.6  2004/02/06 20:30:33  dischi
 # some layout updates
 #
@@ -107,13 +121,15 @@ class HowtoResource(FreevoResource):
         name = TYPES[type][1]
             
         if not self.BASEDIR.has_key(type):
-            fv.printHeader(name, '/styles/main.css')
-            fv.res += 'ERROR, unable to load html files<br>'
-            fv.res += 'If you use a CVS version of Freevo, run "autogen.sh". '\
-                      'The files are searched in the following locations:<br><ol>'
+            fv.printHeader(name, '/styles/main.css', prefix=request.path.count('/')-1)
+            fv.res += '<div id="content">\n'
+            fv.res += '<p class="alert">ERROR, unable to load html files<br>'
+            fv.res += 'If you use a CVS version of Freevo, run "autogen.sh".</p> '\
+                      'The files are searched in the following locations:<ol>'
             for d in SEARCH_PATH:
                 fv.res += '<li>%s/%s</li>\n' % (d, TYPES[type][0])
             fv.res += '</ol>'
+            fv.res += '</div>'
 
         else:
             if not os.path.isfile(os.path.join(self.BASEDIR[type], file)) \
@@ -138,8 +154,8 @@ class HowtoResource(FreevoResource):
                     pos = 1
                 elif pos == 1:
                     fv.printHeader('%s: %s' % (name, line[1:line.find('<')]),
-                                   '/styles/main.css')
-                    fv.res += '<table id="help" width="100%"><tr><td>\n'
+                                   '/styles/main.css', prefix=request.path.count('/')-1)
+                    fv.res += '<div id=\"content\">\n'
                     pos = 2
                 elif pos == 2 and line.find('><BODY') == 0:
                     pos = 3
@@ -152,7 +168,7 @@ class HowtoResource(FreevoResource):
                     else:
                         fv.res += line
         fv.res += '<br><br>'
-        fv.res += '</td></tr></table>\n'
+        fv.res += '</div>'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')

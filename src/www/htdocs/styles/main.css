@@ -6,12 +6,17 @@ BODY {
 }
 
 A:link { 
-    color: white; 
+    color: #000;
     text-decoration: none;
+    border-bottom: 1px dotted #333; 
 }
 
+A:hover {
+    color: #638BCA;
+    }
+
 A:visited { 
-    color: white; 
+    color: #000;
     text-decoration: none;
 }
 
@@ -20,6 +25,22 @@ p { padding-left: 1em;
     text-align: justify; 
     }
 
+table { 
+        border-collapse:        collapse;
+        width: 100%; 
+        border-width: none;  }
+
+table.library { margin-left: auto;
+                margin-right: auto;
+                background-color: #fff;
+                padding: 1em; 
+                width: inherit; 
+                }
+
+table.library td { padding: 1em; }
+
+td { padding: 4px; margin: 0px; border-style: none; }
+
 TD.tablelink { 
     background: #2A577E; 
     color: white; 
@@ -27,12 +48,6 @@ TD.tablelink {
     cursor: pointer;
     text-decoration: none;
 }
-
-TD.tablelink a { text-decoration: none; 
-                 padding-left: 1em;
-                 padding-right: 1em; 
-                 }
-
 
 TD.tablelink:hover { 
     background: #0B1C52; 
@@ -50,25 +65,45 @@ TD.channel {
     border: #638BCA 1px solid;
 }
 
-td.utilhead { 
-    background: #0B1C52; 
+td.utilhead1 { 
+    background: #0B1C52 url('/images/utilhead-topleft.gif') left no-repeat; 
+/* background: #0B1C52 url('/images/utilhead-topright.gif') right no-repeat; */
     color: white; 
     font-weight: bold; 
     text-align: center; 
+    padding-top: 13px;
+    height: 53px;
 }
+
+td.utilhead2 { 
+    background: #0B1C52 url('/images/utilhead-topright.gif') right no-repeat; 
+    color: white; 
+    font-weight: bold; 
+    text-align: center; 
+    height: 53px;
+    padding-top: 13px; 
+    
+}
+
 
 td.guidehead { 
     background: #0B1C52; 
     color: white; 
     font-weight: bold; 
     border: #638BCA 1px solid;
-    text-align: center; 
+    text-align: left;
+}
+
+td.guidehead a {
+    color: white;
+    font-weight: bold;
+    border: none;
 }
 
 TD.heading { 
     color: white; 
     font-weight: bold; 
-    font-size: 40;
+    font-size: 40px;
     text-align: left 
 }
 
@@ -84,11 +119,30 @@ TD.recording {
     text-align: left 
 }
 
+td.recording a {
+    color: white;
+    border: none;
+}
+
 TD.scheduled { 
     background: #996600; 
     color: white; 
     text-align: left 
 }
+
+
+TD.tablelink a { text-decoration: none; 
+                 padding-left: 1em;
+                 padding-right: 1em; 
+                 }
+
+
+td.favorite a, td.scheduled a, td.basic a { color: white;
+                 border: none; }
+
+td.favorite a:hover, td.scheduled a:hover, td.basic a:hover { color: white;
+                 border-bottom: 1px solid #fff ; }
+
 
 TD.favorite { 
     background: #006666; 
@@ -117,9 +171,8 @@ TD.programnodata {
 }
 
 TR.chanrow { 
-    height: 42 
+    height: 42px;
 }
-
 
 td.chanrow {
     padding-left: 1em;
@@ -160,7 +213,7 @@ table.popupbuttons tbody td {
     background: #2A577E; 
     color: white; 
     text-align: center;
-    border: #2a577e 2px outset;
+    border: #2a577e 2px solid;
     padding: 2px;
     margin: 10px;
 }
@@ -169,36 +222,32 @@ table.popupbuttons td:hover {
     text-indent: 0;
     background: #0B1C52; 
     color: #FFFFFF;
-    border: #0b1c52 2px outset;
+    border: #0b1c52 2px solid;
     padding: 2px;
     margin: 10px;
 }
 
 
 .proginfo {
-    width: 450;
+    width: 450px;
     position: absolute;
-    left: 250;
-    top: 200;
+    left: 250px;
+    top: 200px;
     font-size: 13px;
     font-family: "Trebuchet MS", Helvetica, Verdana, sans-serif;
     visibility: hidden;
-    border: white 3px outset;
-}
-
-input, select, textarea {
-    background: #2A577E; 
-    color: white; 
+    border: #000 3px solid;
 }
 
 div.searchform {
-    color: #ffffff;
+    color: #333;
     background: inherit;
     padding-top: 1em;
-    padding-left: 3em;
+    text-align: center;
 }
 
 div.searchform input {
+    margin-left: 1em;
     border: #0B1C52 1px solid;
     background:  #c9c9ff;
     color: #000000;
@@ -213,7 +262,7 @@ p {     padding-left: 0em;
         padding-right: 0em;
         }
     
-h2 {    padding-left: 0em;
+h2 {    margin-top: 3em;
         font-weight: bold;
        } 
 
@@ -255,4 +304,85 @@ h2.SUBTITLE { padding-left: 0em; }
 
 .TOC { padding-left: 2em; }
 
+#content { margin-left: 1em; margin-right: 1em; margin-top: 1em; margin-bottom: 1em; padding-top: 2em; }
+#contentmain { text-align: center; }
+.normal { color: #333; text-align: center; }
+.alert { color: red; text-align: center;}
 
+/*
+#navbar { text-align: center; 
+          margin-left: auto;
+          margin-right: auto; 
+          background-color: #2A577E;
+          }
+*/
+#navbar { margin-left: auto;
+             margin-right: auto;
+             width: 70%;
+             padding: 0.5em 1em 0.5em 1em; 
+             text-align: center;
+             background-color: #2A577E;
+            } 
+
+#navbar a { padding: 0.5em 1em 0.5em 1em;
+            background-color: #2A577E;
+            color: white; }
+
+#navbar a:hover { padding: 0.5em 1em 0.5em 1em;
+                  background-color: #0B1C52;
+                  text-decoration: none;
+                  }
+
+/* Navigation Tabs */
+    body {
+      background:#fff;
+      margin:0;
+      padding:0;
+      color:#000;
+      font:x-small/1.5em Georgia,Serif;
+      voice-family: "\"}\""; voice-family:inherit;
+      font-size:small;
+      } html>body {font-size:small;}
+    
+    #header {
+      float:left;
+      width:100%;
+      background: #91AECE url("/images/tab/bg.gif") repeat-x bottom;
+      font-size:93%;
+      line-height:normal;
+      }
+    #header ul {
+      margin:0;
+      padding:10px 10px 0;
+      list-style:none;
+      }
+    #header li {
+      float:left;
+      background:url("/images/tab/left.gif") no-repeat left top;
+      margin:0;
+      padding:0 0 0 9px;
+      }
+    #header a {
+      display:block;
+      background:url("/images/tab/right.gif") no-repeat right top;
+      padding:5px 15px 4px 6px;
+      text-decoration:none;
+      font-weight:bold;
+      color:#888;
+      }
+    #header a:hover {
+      color:#333;
+      }
+    #header #current {
+      background-image:url("/images/tab/left_on.gif");
+      }
+    #header #current a {
+      background-image:url("/images/tab/right_on.gif");
+      color:#333;
+      padding-bottom:5px;
+      }
+
+tt, pre { font-family: monospace; }
+
+
+span.name { display: none; }

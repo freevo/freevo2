@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.9  2004/01/23 00:57:55  outlyer
 # Can't edit favourites with '&' in the name unless you use the proper 'query'
 # string, in this case %26
@@ -90,7 +104,7 @@ class FavoritesResource(FreevoResource):
 
         (server_available, message) = ri.connectionTest()
         if not server_available:
-            fv.printHeader('Favorites', 'styles/main.css')
+            fv.printHeader('Favorites', 'styles/main.css', selected='Favorites')
             fv.res += '<h4>ERROR: recording server is unavailable</h4>'
             fv.printSearchForm()
             fv.printLinks()
@@ -133,17 +147,17 @@ class FavoritesResource(FreevoResource):
             '6' : 'Sunday'
         }
 
-        fv.printHeader('Favorites', 'styles/main.css')
-
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+        fv.printHeader('Favorites', 'styles/main.css',selected='Favorites')
+        fv.res +='&nbsp;'
+        fv.tableOpen('')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Favorite Name', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Program', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Day of week', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Time of day', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Priority', 'class="guidehead" align="center" colspan="1"')
+        fv.tableCell('Favorite Name', 'class="guidehead" colspan="1"')
+        fv.tableCell('Program', 'class="guidehead" colspan="1"')
+        fv.tableCell('Channel', 'class="guidehead" colspan="1"')
+        fv.tableCell('Day of week', 'class="guidehead" colspan="1"')
+        fv.tableCell('Time of day', 'class="guidehead" colspan="1"')
+        fv.tableCell('Actions', 'class="guidehead" colspan="1"')
+        fv.tableCell('Priority', 'class="guidehead" colspan="1"')
         fv.tableRowClose()
 
         f = lambda a, b: cmp(a.priority, b.priority)
@@ -153,28 +167,28 @@ class FavoritesResource(FreevoResource):
             status = 'favorite'
 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(fav.name, 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(fav.title, 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(fav.channel, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(fav.name, 'class="'+status+'" colspan="1"')
+            fv.tableCell(fav.title, 'class="'+status+'" colspan="1"')
+            fv.tableCell(fav.channel, 'class="'+status+'" colspan="1"')
 
             if fav.dow != 'ANY':
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
                 cell = '%s' % days[fav.dow]
             else:
                 cell = 'ANY'
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             if fav.mod != 'ANY':
                 # cell = time.strftime('%b %d %H:%M', time.localtime(fav.start))
                 cell = '%s' % tv_util.minToTOD(fav.mod)
             else:
                 cell = 'ANY'
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             # cell = '<input type="hidden" name="action" value="%s">' % action
             cell = '<a href="edit_favorite.rpy?action=edit&name=%s">Edit</a>, ' % fav.name.replace('&','%26')
             cell += '<a href="favorites.rpy?action=remove&name=%s">Remove</a>' % fav.name.replace('&','%26')
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             cell = ''
 
@@ -189,7 +203,7 @@ class FavoritesResource(FreevoResource):
                 tmp_prio = int(fav.priority) + 1
                 cell += '<a href="favorites.rpy?action=bump&name=%s&priority=1">Lower</a>' % fav.name
 
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(cell, 'class="'+status+'" colspan="1"')
         
             fv.tableRowClose()
 

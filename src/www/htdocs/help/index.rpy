@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.5  2004/02/06 20:30:33  dischi
 # some layout updates
 #
@@ -60,7 +74,9 @@ class HelpResource(FreevoResource):
 
     def _render(self, request):
         fv = HTMLResource()
-        fv.printHeader('Freevo Help', '/styles/main.css')
+        fv.printHeader('Freevo Help', '/styles/main.css', prefix=request.path.count('/')-1)
+        fv.res += '<div id="content">'
+        fv.res += '&nbsp;<br/>'
         fv.res += 'This is the internal Freevo documentation. The documents \
         are in an early stage of development, if you like to help, please \
         contact the developers. You find more informations like \
@@ -84,6 +100,7 @@ class HelpResource(FreevoResource):
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')
+        fv.res+='</div>'
         return fv.res
     
 resource = HelpResource()

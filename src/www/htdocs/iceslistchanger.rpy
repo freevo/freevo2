@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.3  2003/11/28 19:31:52  dischi
 # renamed some config variables
 #
@@ -78,17 +92,17 @@ class IceslistchangerResource(FreevoResource):
             self.change2m3u(rpym3u)
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Music List', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Music List', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('List has been changed to %s' % rpym3u, 'class="basic" align="left" colspan="1"')
+            fv.tableCell('List has been changed to %s' % rpym3u, 'class="basic" colspan="1"')
             fv.tableRowClose()
             fv.tableClose()
 
         if rpydir:
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Pick a Music List', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Pick a Music List', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
             # find m3u's
             rpym3ulist = util.match_files_recursively(rpydir, config.PLAYLIST_SUFFIX)
@@ -97,19 +111,19 @@ class IceslistchangerResource(FreevoResource):
                 link = '<a href="' + rpyscript +'?m3u='+urllib.quote(m3u)+'">'+title+'</a>'
 
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(link, 'class="basic" align="left" colspan="1"')
+                fv.tableCell(link, 'class="basic" colspan="1"')
                 fv.tableRowClose()
             fv.tableClose()
         else:
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Pick a Music Directory', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Pick a Music Directory', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
             for d in directories:
                 (title, dir) = d
                 link = '<a href="' + rpyscript +'?dir='+urllib.quote(dir)+'">'+title+'</a>'
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(link, 'class="basic" align="left" colspan="1"')
+                fv.tableCell(link, 'class="basic" colspan="1"')
                 fv.tableRowClose()
             fv.tableClose()
 

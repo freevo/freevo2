@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.12  2003/10/20 02:24:18  rshortt
 # more tv_util fixes
 #
@@ -126,12 +140,12 @@ class SearchResource(FreevoResource):
         else:
             fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Start Time', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Stop Time', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Title', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Program Description', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
+            fv.tableCell('Stop Time', 'class="guidehead" colspan="1"')
+            fv.tableCell('Channel', 'class="guidehead" colspan="1"')
+            fv.tableCell('Title', 'class="guidehead" colspan="1"')
+            fv.tableCell('Program Description', 'class="guidehead" colspan="1"')
+            fv.tableCell('Actions', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
             for prog in progs:
@@ -152,20 +166,20 @@ class SearchResource(FreevoResource):
                     status = 'favorite'
     
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
-                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
+                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
 
                 chan = tv_util.get_chan_displayname(prog.channel_id)
                 if not chan: chan = 'UNKNOWN'
-                fv.tableCell(chan, 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(chan, 'class="'+status+'" colspan="1"')
 
-                fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
     
                 if prog.desc == '':
                     cell = 'Sorry, the program description for "%s" is unavailable.' % prog.title
                 else:
                     cell = prog.desc
-                fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
                 if status == 'scheduled':
                     cell = '<a href="record.rpy?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
@@ -175,7 +189,7 @@ class SearchResource(FreevoResource):
                     cell = '<a href="record.rpy?chan=%s&start=%s&action=add">Record</a>' % (prog.channel_id, prog.start)
     
                 cell += ' | <a href="edit_favorite.rpy?chan=%s&start=%s&action=add">New favorite</a>' % (prog.channel_id, prog.start)
-                fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
                 fv.tableRowClose()
 

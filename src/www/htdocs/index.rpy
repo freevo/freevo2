@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.9  2003/11/28 19:31:52  dischi
 # renamed some config variables
 #
@@ -83,23 +97,24 @@ class IndexResource(FreevoResource):
     def _render(self, request):
         fv = HTMLResource()
 
-        fv.printHeader('Welcome', 'styles/main.css')
-    
-        fv.res += '<h2>Freevo Web Status as of %s</h2>' % time.strftime('%B %d %H:%M', time.localtime())
+        fv.printHeader('Welcome', 'styles/main.css',selected='Home')
+        fv.res += '<div id="contentmain">\n'
+        fv.res += '<br/><br/><h2>Freevo Web Status as of %s</h2>' % time.strftime('%B %d %H:%M', time.localtime())
+
     
         (server_available, schedule) = tv.record_client.connectionTest()
         if not server_available:
-            fv.res += '<p><font color="red" >Notice: The recording server is down.</font></p>'
+            fv.res += '<p class="alert">Notice: The recording server is down.</p>\n'
         else:
-            fv.res += '<p><font color="white" >The recording server is up and running.</font></p>'
+            fv.res += '<p class="normal">The recording server is up and running.</p>\n'
 
         listexpire = tv_util.when_listings_expire()
         if listexpire == 1:
-            fv.res += '<p><font color="red" >Notice: Your listings expire in 1 hour.</font></p>'
+            fv.res += '<p class="alert">Notice: Your listings expire in 1 hour.</p>\n'
         elif listexpire < 12:
-            fv.res += '<p><font color="red" >Notice: Your listings expire in %s hours.</font></p>' % listexpire 
+            fv.res += '<p class="alert">Notice: Your listings expire in %s hours.</p>\n' % listexpire 
         else:
-            fv.res += '<p><font color="white" >Your listings are up to date.</font></p>'
+            fv.res += '<p class="normal">Your listings are up to date.</p>\n'
 
         (got_schedule, recordings) = tv.record_client.getScheduledRecordings()
         if got_schedule:
@@ -109,27 +124,26 @@ class IndexResource(FreevoResource):
             for prog in progl:
                 try:
                     if prog.isRecording == TRUE:
-                        fv.res += '<p><font color="red" >Now Recording %s.</font></p>' % prog.title
+                        fv.res += '<p class="alert">Now Recording %s.</p>\n' % prog.title
 	                break
                 except:
                     pass
             num_sched_progs = len(progl)
             if num_sched_progs == 1:
-                fv.res += '<p><font color="white" >One program scheduled to record.</font></p>'
+                fv.res += '<p class="normal">One program scheduled to record.</p>\n'
             elif num_sched_progs > 0:
-                fv.res += '<p><font color="white" >%i programs scheduled to record.</font></p>' % num_sched_progs
+                fv.res += '<p class="normal">%i programs scheduled to record.</p>\n' % num_sched_progs
             else:
-                fv.res += '<p><font color="white" >No programs scheduled to record.</font></p>'
+                fv.res += '<p class="normal">No programs scheduled to record.</p>\n'
         else:
-            fv.res += '<p><font color="white" >No programs scheduled to record.</font></p>'
+            fv.res += '<p class="normal">No programs scheduled to record.</p>\n'
 
         diskfree = '%i of %i Mb free in %s'  % ( (( util.freespace(config.TV_RECORD_DIR) / 1024) / 1024), ((util.totalspace(config.TV_RECORD_DIR) /1024) /1024), config.TV_RECORD_DIR)
-        fv.res += '<p><font color="white" >' + diskfree + '</font></p>'
-
+        fv.res += '<p class="normal">' + diskfree + '</p>\n'
+        fv.res += '</div>'
         fv.printSearchForm()
-        fv.printLinks()
+        #fv.printLinks()
         fv.printFooter()
-        fv.res+=('</ul>')
 
         return fv.res
     

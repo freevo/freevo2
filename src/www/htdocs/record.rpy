@@ -11,6 +11,20 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.9  2003/10/20 02:24:18  rshortt
 # more tv_util fixes
 #
@@ -79,6 +93,8 @@ import tv.record_client as ri
 
 from www.web_types import HTMLResource, FreevoResource
 
+import config
+
 TRUE = 1
 FALSE = 0
 
@@ -123,16 +139,18 @@ class RecordResource(FreevoResource):
         progs = recordings.getProgramList()
         (status, favs) = ri.getFavorites()
 
-        fv.printHeader('Scheduled Recordings', 'styles/main.css')
+        fv.printHeader('Scheduled Recordings', 'styles/main.css', selected='Scheduled Recordings')
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+        fv.res += '&nbsp;\n'
+
+        fv.tableOpen('')
         fv.tableRowOpen('class="chanrow"')
-        fv.tableCell('Start Time', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Stop Time', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Channel', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Title', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Program Description', 'class="guidehead" align="center" colspan="1"')
-        fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
+        fv.tableCell('Start Time', 'class="guidehead" colspan="1"')
+        fv.tableCell('Stop Time', 'class="guidehead" colspan="1"')
+        fv.tableCell('Channel', 'class="guidehead" colspan="1"')
+        fv.tableCell('Title', 'class="guidehead" colspan="1"')
+        fv.tableCell('Program Description', 'class="guidehead" colspan="1"')
+        fv.tableCell('Actions', 'class="guidehead" colspan="1"')
         fv.tableRowClose()
 
         f = lambda a, b: cmp(a.start, b.start)
@@ -152,29 +170,29 @@ class RecordResource(FreevoResource):
                 pass
 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(time.strftime(config.TV_TIMEFORMAT, time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime(config.TV_TIMEFORMAT, time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
 
             chan = tv_util.get_chan_displayname(prog.channel_id)
             if not chan: chan = 'UNKNOWN'
-            fv.tableCell(chan, 'class="'+status+'" align="left" colspan="1"')
-            fv.tableCell(prog.title, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(chan, 'class="'+status+'" colspan="1"')
+            fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
     
             if prog.desc == '':
                 cell = 'Sorry, the program description for "%s" is unavailable.' % prog.title
             else:
                 cell = prog.desc
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+            fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
-            cell = '<a href="record.rpy?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
-            fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
+            cell = '<a href="record.rpy?chan=%s&amp;start=%s&amp;action=remove">Remove</a>' % (prog.channel_id, prog.start)
+            fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
             fv.tableRowClose()
 
         fv.tableClose()
     
         fv.printSearchForm()
-        fv.printLinks()
+        #fv.printLinks()
         fv.printFooter()
 
         return fv.res

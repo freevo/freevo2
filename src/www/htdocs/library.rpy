@@ -11,6 +11,20 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/09 21:23:42  outlyer
+# New web interface...
+#
+# * Removed as much of the embedded design as possible, 99% is in CSS now
+# * Converted most tags to XHTML 1.0 standard
+# * Changed layout tables into CSS; content tables are still there
+# * Respect the user configuration on time display
+# * Added lots of "placeholder" tags so the design can be altered pretty
+#   substantially without touching the code. (This means using
+#   span/div/etc. where possible and using 'display: none' if it's not in
+#   _my_ design, but might be used by someone else.
+# * Converted graphical arrows into HTML arrows
+# * Many minor cosmetic changes
+#
 # Revision 1.18  2004/01/26 19:16:13  mikeruelle
 # this does not seem to work anymore with twisted 1.1.0
 #
@@ -239,7 +253,7 @@ class LibraryResource(FreevoResource):
 
 
         if action and action != "download":
-            fv.printHeader('Media Library', 'styles/main.css')
+            fv.printHeader('Media Library', 'styles/main.css', selected="Media Library")
             fv.res += '<script language="JavaScript"><!--' + "\n"
             fv.res += 'function renameFile(basedir, file, mediatype) {' + "\n"
             fv.res += '   newfile=window.prompt("New name please.");' + "\n"
@@ -247,22 +261,28 @@ class LibraryResource(FreevoResource):
             fv.res += '   document.location="' + action_script +'?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
             fv.res += '}' + "\n"
             fv.res += '//--></script>' + "\n"
+            fv.res += '&nbsp;<br/>\n'
 
         if not action_mediatype:
-            fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="85%"')
-            fv.tableRowOpen('class="chanrow"')
+            fv.tableOpen('class="library"')
             movmuslink = '<a href="%s?media=%s">%s</a>' 
             rectvlink = '<a href="%s?media=%s&dir=%s">%s</a>' 
-            fv.tableCell(movmuslink % (action_script, "movies","Movies"), 'align=center')
+            
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<img src=\"images/library/library-movies.jpg\">')
+            fv.tableCell(movmuslink % (action_script, "movies","Movies"), '')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(rectvlink % (action_script, "rectv", config.TV_RECORD_DIR, "Recorded TV"), 'align=center')
+            fv.tableCell('<img src=\"images/library/library-tv.jpg\">')
+            fv.tableCell(rectvlink % (action_script, "rectv", config.TV_RECORD_DIR, "Recorded TV"), '')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(movmuslink % (action_script,"music","Music"), 'align=center')
+            fv.tableCell('<img src=\"images/library/library-music.jpg\">')
+            fv.tableCell(movmuslink % (action_script,"music","Music"), '')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(movmuslink % (action_script,"images","Images"), 'align=center')
+            fv.tableCell('<img src=\"images/library/library-images.jpg\">')
+            fv.tableCell(movmuslink % (action_script,"images","Images"), '')
             fv.tableRowClose()
             fv.tableClose()
             fv.printSearchForm()
@@ -272,18 +292,18 @@ class LibraryResource(FreevoResource):
             # show the appropriate dirs from config variables
             # make a back to pick music or movies
             # now make the list unique
-            fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="85%"')
+            fv.tableOpen('class="library"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Choose a Directory', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Choose a Directory', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('<a href="' + action_script + '">Back</a>', 'class="basic" align="left" colspan="1"')
+            fv.tableCell('<a href="' + action_script + '">&laquo; Back</a>', 'class="basic" colspan="1"')
             fv.tableRowClose()
             for d in directories:
                 (title, dir) = d
                 link = '<a href="' + action_script +'?media='+action_mediatype+'&dir='+urllib.quote(dir)+'">'+title+'</a>'
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(link, 'class="basic" align="left" colspan="1"')
+                fv.tableCell(link, 'class="basic" colspan="1"')
                 fv.tableRowClose()
             fv.tableClose()
             fv.printSearchForm()
@@ -293,11 +313,11 @@ class LibraryResource(FreevoResource):
             if not self.check_dir(action_mediatype,action_dir):
                 sys.exit(1)
 
-            fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+            fv.tableOpen('class="library"')
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell('Name', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Size', 'class="guidehead" align="center" colspan="1"')
-            fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
+            fv.tableCell('Name', 'class="guidehead" colspan="1"')
+            fv.tableCell('Size', 'class="guidehead" colspan="1"')
+            fv.tableCell('Actions', 'class="guidehead" colspan="1"')
             fv.tableRowClose()
 
             # find out if anything is recording
@@ -349,16 +369,16 @@ class LibraryResource(FreevoResource):
                     break
             backlink = ''
             if actiondir_is_root == TRUE and action_mediatype == 'rectv':
-                backlink = '<a href="'+ action_script +'">Back</a>'
+                backlink = '<a href="'+ action_script +'">&laquo; Back</a>'
             elif actiondir_is_root == TRUE:
-                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'">Back</a>'
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'">&laquo; Back</a>'
             else:
                 backdir = os.path.dirname(action_dir)
-                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(backdir)+'">Back</a>'
+                backlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(backdir)+'">&laquo; Back</a>'
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(backlink, 'class="basic" align="left" colspan="1"')
-            fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
-            fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
+            fv.tableCell(backlink, 'class="basic" colspan="1"')
+            fv.tableCell('&nbsp;', 'class="basic" colspan="1"')
+            fv.tableCell('&nbsp;', 'class="basic" colspan="1"')
             fv.tableRowClose()
 
             # get me the directories to output
@@ -367,9 +387,9 @@ class LibraryResource(FreevoResource):
                 fv.tableRowOpen('class="chanrow"')
                 mydispdir = os.path.basename(mydir)
                 mydirlink = '<a href="'+ action_script +'?media='+action_mediatype+'&dir='+urllib.quote(mydir)+'">'+mydispdir+'</a>'
-                fv.tableCell(mydirlink, 'class="basic" align="left" colspan="1"')
-                fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
-                fv.tableCell('&nbsp;', 'class="basic" align="center" colspan="1"')
+                fv.tableCell(mydirlink, 'class="basic" colspan="1"')
+                fv.tableCell('&nbsp;', 'class="basic" colspan="1"')
+                fv.tableCell('&nbsp;', 'class="basic" colspan="1"')
                 fv.tableRowClose()
 
             suffixes = self.get_suffixes(action_mediatype)
@@ -389,17 +409,17 @@ class LibraryResource(FreevoResource):
                 elif favs and re.match(favre, file):
                     status = 'favorite'
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(file, 'class="'+status+'" align="left" colspan="1"')
-                fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" align="left" colspan="1"')
+                fv.tableCell(file, 'class="'+status+'" colspan="1"')
+                fv.tableCell(tv_util.descfsize(len_file), 'class="'+status+'" colspan="1"')
                 if suppressaction == TRUE:
-                    fv.tableCell('&nbsp;', 'class="'+status+'" align="center" colspan="1"')
+                    fv.tableCell('&nbsp;', 'class="'+status+'" colspan="1"')
                 else:
                     file_esc = urllib.quote(file)
                     dllink = '<a href="'+action_script+'%s">Download</a>' %  os.path.join(basedir,file)
                     filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
                     delete = filelink % (action_mediatype, basedir, 'delete', file_esc,'Delete')
                     rename = '<a href="javascript:renameFile(\'%s\',\'%s\',\'%s\')">Rename</a>' % (basedir, file_esc, action_mediatype)
-                    fv.tableCell(rename + '&nbsp;&nbsp;' + delete + '&nbsp;&nbsp;' + dllink, 'class="'+status+'" align="center" colspan="1"')
+                    fv.tableCell(rename + '&nbsp;&nbsp;' + delete + '&nbsp;&nbsp;' + dllink, 'class="'+status+'" colspan="1"')
                 fv.tableRowClose()
 
             fv.tableClose()
