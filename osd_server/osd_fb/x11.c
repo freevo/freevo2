@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "x11.h"
+#include "jpeg.h"
 
 static Display *dpy;
 static Window w;
@@ -15,12 +16,18 @@ static int xres, yres;
 
 #ifdef TEST
 int
-main (void)
+main (int ac, char *av[])
 {
+   FILE *fp;
+   uint8 *pBitmap;
+   uint16 w, h;
+   
+   
    printf ("open()\n");
    x11_open (768, 576);
    sleep (1);
 
+#if 0
    printf ("clearscreen()\n");
    x11_clearscreen (0);
    sleep (1);
@@ -36,7 +43,14 @@ main (void)
    sleep (1);
    x11_setpixel (10, yres - 10, 0xff0000);
    sleep (1);
+#endif
+   
+   printf ("read jpeg\n");
+   fp = fopen (av[1], "r");
+   pBitmap = jpeg_readbitmap (fp, &w, &h);
+   sleep (1);
 
+ 
    x11_close ();
 
    return (0);
