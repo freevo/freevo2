@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/10/12 13:15:41  dischi
+# prevent a crash when reconfiguring the directory
+#
 # Revision 1.45  2003/10/12 09:49:46  dischi
 # make option how much "one menu" is and go back 2 for configure directory
 #
@@ -441,6 +444,8 @@ class DirItem(Playlist):
 
 
     def do_cwd(self, arg=None, menuw=None):
+        self.playlist = []
+        
         datadir = util.getdatadir(self)
         try:
             files = ([ os.path.join(self.dir, fname)
