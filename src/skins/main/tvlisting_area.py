@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/02/21 19:50:39  dischi
+# unicode fix
+#
 # Revision 1.17  2004/02/04 23:01:10  outlyer
 # Remove some debugging Dischi left in... but the good news is the @*!
 # bug is fixed!
@@ -370,15 +373,17 @@ class TVListing_Area(Skin_Area):
                     # Not at all elegant.
                     # TODO:
                     #    * This is going to be SLOW for large schedules
-                    #    * We should have a skin setting for recording background color
+                    #    * We should have a skin setting for recording
+                    #      background color
                     #    * I dunno what else.
-                    #   I will work on this soon, but think of this as a proof of concept.
+                    #   I will work on this soon, but think of this as a
+                    #   proof of concept.
                     if recordingshows:
                         for recprogs in recordingshows:
                             if (prg.channel_id, prg.start, prg.stop) == recprogs:
                                 val = selected_val
 
-                    if prg.title == _('This channel has no data loaded'):
+                    if prg.title == Unicode(_('This channel has no data loaded')):
                         val = copy.copy(val)
                         val.align='center'
 
