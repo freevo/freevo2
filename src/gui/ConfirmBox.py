@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/05/04 23:18:19  rshortt
+# Change some height values (temporarily) to avoid some crashes.
+#
 # Revision 1.12  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -112,7 +115,7 @@ class ConfirmBox(PopupBox):
     """
 
     def __init__(self, parent='osd', text=" ", handler=None, default_choice=0, 
-                 left=None, top=None, width=300, height=110, bg_color=None, 
+                 left=None, top=None, width=300, height=150, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None):
 

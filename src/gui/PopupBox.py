@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/05/04 23:18:19  rshortt
+# Change some height values (temporarily) to avoid some crashes.
+#
 # Revision 1.17  2003/05/04 22:50:12  rshortt
 # Fix for some crashes with text wrapping.
 #
@@ -114,7 +117,7 @@ class PopupBox(Container):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, parent='osd', text=" ", left=None, top=None, width=360, height=90,
+    def __init__(self, parent='osd', text=" ", left=None, top=None, width=360, height=120,
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
@@ -192,7 +195,7 @@ class PopupBox(Container):
             self.label.set_v_margin(self.v_margin)
             label_panel = Panel() 
             label_panel.width = 280
-            label_panel.height = 60
+            label_panel.height = 90
             label_panel.internal_h_align = Align.CENTER
             label_panel.add_child(self.label)
             self.add_child(label_panel)
