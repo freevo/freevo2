@@ -258,14 +258,14 @@ class OSD:
     # Draw a bitmap on the OSD. It is automatically loaded into the cache
     # if not already there. The loadbitmap()/zoombitmap() functions can
     # be used to "pipeline" bitmap loading/drawing.
-    def drawbitmap(self, filename, x=0, y=0, scaling=None,   # XXX scale, zoom, tile not supported yet!
-                   bbx=0, bby=0, bbw=0, bbh=0):
+    def drawbitmap(self, filename, x=0, y=0, scaling=None,
+                   bbx=0, bby=0, bbw=0, bbh=0, rotation = 0):
 
         image = self._getbitmap(filename)
 
         if not image: return
 
-        if bbx or bby:
+        if bbx or bby or bbw or bbh:
             imbb = pygame.Surface((bbw, bbh), 0, 32)
             imbb.blit(image, (0, 0), (bbx, bby, bbw, bbh))
             image = imbb
@@ -274,8 +274,14 @@ class OSD:
             w, h = image.get_size()
             w = int(w*scaling)
             h = int(h*scaling)
-            #image = pygame.transform.rotozoom(image, 0, scaling) # XXX incorporate rotation too
-            image = pygame.transform.scale(image, (w, h))
+            if rotation:
+                image = pygame.transform.rotozoom(image, rotation, scaling)
+            else:
+                image = pygame.transform.scale(image, (w, h))
+
+        elif rotation:
+            image = pygame.transform.rotate(image, rotation)
+            
         self.screen.blit(image, (x, y))
 
 
