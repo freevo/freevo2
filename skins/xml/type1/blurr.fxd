@@ -46,6 +46,22 @@
       <view visible="no"/>
     </menuset>
 
+
+     <tv>
+            <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
+            <info layout="tv info" x="10" y="80" width="760" height="115"/>
+            <listing layout="tv listing" x="10" y="220" width="750" height="370">
+            <image x="765" y="220" width="32" height="32" label="uparrow"
+                filename="blurr-up.png"/>
+                                    <title visible="no"/>
+
+            <image x="765" y="544" width="32" height="32" label="downarrow" 
+                filename="down.png"/>
+            <image width="16" height="16" label="leftarrow" filename="left.png"/>
+            <image width="16" height="16" label="rightarrow" filename="right.png"/>
+            </listing>
+      </tv>
+
     <!-- definition of video/audio/image menu. The same as default, but with a -->
     <!-- different background -->
     <menu type="video">
@@ -201,11 +217,28 @@
       </content>
     </layout>
 
+    <!-- tv listing area -->
+  <layout label="tv info">
+      <background>
+	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
+      </background>
+      <content x="10" y="10" height="max-20" width="max-20" type="text"
+	spacing="10" font="tv">
+	<item type="default">
+	  @title@ "@sub_title@"            		        @start@ - @stop@
+	  @desc@
+	</item>
+      </content>
+    </layout> 
+
+
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
     <font label="main" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="main selected" name="Arial_Bold" size="16" color="0xffffff"/>
+    <font label="tv" name="Arial_Bold" size="14" color="0xffffff"/>
+    <font label="tv selected" name="Arial_Bold" size="14" color="0xffff66"/>
     <font label="grey" name="Arial_Bold" size="16" color="0xdddddd"/>
     <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
