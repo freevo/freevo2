@@ -53,6 +53,7 @@ import random
 import string
 import time
 import traceback
+import logging
 
 # notifier / mbus import
 import notifier
@@ -65,6 +66,9 @@ import config
 # fix encoding in mbus
 import mbus.types
 mbus.types.encoding = sysconfig.ENCODING
+
+# get loggin object
+log = logging.getLogger()
 
 # dict of all our mbus instances
 _instance_list = {}
