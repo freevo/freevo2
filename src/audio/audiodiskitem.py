@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/11/08 12:58:41  dischi
+# better support for mixed discs
+#
 # Revision 1.23  2003/11/05 21:18:42  dischi
 # mixed disc support (needs mmpython cvs)
 #
@@ -97,24 +100,19 @@ class AudioDiskItem(Playlist):
         return a list of actions for this item
         """
         items = [ ( self.cwd, _('Browse disc') ) ]
-        if self.info and hasattr(self.info, 'mixed'):
-            items.append(( self.cwd_files, _('Browse data files on disc')))
         return items
 
     
-    def cwd_files(self, arg=None, menuw=None):
-        """
-        make a menu for data files on disc
-        """
-        DirItem('/mnt/cdrom', self).cwd(menuw=menuw)
-
-        
     def cwd(self, arg=None, menuw=None):
         """
         make a menu item for each file in the directory
         """
         play_items = []
-        for i in range(0, len(self.info['tracks'])):
+        number = len(self.info['tracks'])
+        if hasattr(self.info, 'mixed'):
+            number -= 1
+            
+        for i in range(0, number):
             title=self.info['tracks'][i]['title']
             item = AudioItem('cdda://%d' % (i+1), self, title, scan=False)
 
@@ -146,6 +144,11 @@ class AudioDiskItem(Playlist):
 
         items += play_items
 
+        if hasattr(self.info, 'mixed'):
+            d = DirItem(self.media.mountdir, self)
+            d.name = _('Data files on disc')
+            items.append(d)
+            
         self.play_items = play_items
 
         title = self.name
