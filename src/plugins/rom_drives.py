@@ -638,7 +638,7 @@ class Watcher:
         # One video in the root dir. This sounds like a disc with one
         # movie on it. Save the information about it and autostart will
         # play this.
-        if len(video_files) == 1:
+        if len(video_files) == 1 and media.item['num_dir_items'] == 0:
             util.mount(media.mountdir)
             if movie_info:
                 media.videoitem = copy.deepcopy(movie_info)
