@@ -67,12 +67,12 @@ if __name__ != "__main__":
         def stdout_cb(self, line):
             line.strip(' \t\n')
             if line:
-                log.info('>>' % line)
+                log.info('>> %s' % line)
 
         def stderr_cb(self, line):
             line.strip(' \t\n')
             if line:
-                log.info('>>' % line)
+                log.info('>> %s' % line)
 
         def finished(self):
             global _runqueue
