@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/08/14 15:08:21  dischi
+# new area handling code
+#
 # Revision 1.21  2004/08/01 10:38:14  dischi
 # better access to various submodules
 #
@@ -103,28 +106,12 @@ def get_screen():
     return _screen
 
 
-def get_skin():
-    """
-    return the skin object
-    """
-    global _skin
-    if not _skin:
-        import areas
-        _skin = areas.AreaHandler(get_settings())
-        _skin.set_screen(get_screen())
-    return _skin
-
-    
-def get_areas():
+def AreaHandler(type, area_list):
     """
     return the area object
     """
-    global _skin
-    if not _skin:
-        import areas
-        _skin = areas.AreaHandler(get_settings())
-        _skin.set_screen(get_screen())
-    return _skin
+    import areas
+    return areas.AreaHandler(type, area_list, get_settings(), get_screen())
 
     
 def get_settings():
