@@ -94,7 +94,8 @@ log = logging.getLogger()
 # programs to this list, use the config variable SHUTDOWN_IMPORTANT_PROGRAMS
 _important_programs = [ 'wget', 'cdrecord', 'growisofs', 'cdparanoia', 'lame',
                         'mencoder', 'transcode', 'dvdauthor', 'mpeg2enc',
-                        'rsync', 'gcc', 'g++', 'make' ]
+                        'rsync', 'gcc', 'g++', 'make', 'scp', 'scp2', 'sftp',
+                        'ncftp', 'ftp', 'mkisofs' ]
 
 # internal variables
 POLL_INTERVALL          = 60000    #  1 minute
