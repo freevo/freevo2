@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.121  2004/01/11 20:01:28  dischi
+# make bmovl work again
+#
 # Revision 1.120  2004/01/10 14:57:23  dischi
 # better debug messages
 #
@@ -1228,15 +1231,17 @@ class OSD:
             thumb = None
             _debug_('Trying to load file "%s"' % filename, level=3)
 
-            if thumbnail:
+            if filename.endswith('.raw'):
+                data  = util.read_pickle(filename)
+                image = pygame.image.fromstring(data[0], data[1], data[2])
+
+            elif thumbnail:
                 sinfo = os.stat(filename)
                 thumb = vfs.getoverlay(filename + '.raw')
                 data = None
 
                 try:
-                    if filename.endswith('.raw'):
-                        data = util.read_pickle(filename)
-                    elif os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                    if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
                         data = util.read_pickle(thumb)
                 except OSError:
                     pass

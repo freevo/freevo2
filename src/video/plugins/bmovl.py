@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/11 20:01:28  dischi
+# make bmovl work again
+#
 # Revision 1.6  2003/12/07 19:40:30  dischi
 # convert OVERSCAN variable names
 #
@@ -76,7 +79,7 @@ class OSDbmovl(OSD):
         self.width  = width
         self.height = height
         self.depth  = 32
-        self.screen = pygame.Surface((width, height), SRCALPHA)
+        self.screen = pygame.Surface((width, height), pygame.SRCALPHA)
 
         # clear surface
         self.screen.fill((0,0,0,0))
@@ -137,6 +140,7 @@ class PluginInterface(plugin.Plugin):
         self.item = player.item
         self.player = player
         self.osd_visible = False
+        print '1'
         self.bmovl = None
         if os.path.exists('/tmp/bmovl'):
             return command + [ '-vf', 'bmovl=1:0:/tmp/bmovl' ]
@@ -149,7 +153,7 @@ class PluginInterface(plugin.Plugin):
         """
         _debug_('show osd')
 
-        height = config.OSD_OSD_OVERSCAN_Y + 60
+        height = config.OSD_OVERSCAN_Y + 60
         if not skin.get_singleton().settings.images.has_key('background'):
             _debug_('no background')
             return
@@ -164,11 +168,20 @@ class PluginInterface(plugin.Plugin):
 
         clock       = time.strftime('%a %I:%M %P')
         clock_font  = skin.get_singleton().get_font('clock')
-        clock_width = clock_font.font.stringsize(clock)
+        clock_width = clock_font.stringsize(clock)
+
+        shadow = None
+        border = None
+        if clock_font.shadow.visible:
+            if clock_font.shadow.border:
+                border = clock_font.shadow.color
+            else:
+                shadow = (clock_font.shadow.x, clock_font.shadow.y, clock_font.shadow.color)
         
-        self.bmovl.drawstringframed(clock, self.bmovl.width-config.OSD_OVERSCAN_X-10-clock_width,
-                                    config.OSD_OVERSCAN_Y+10, clock_width, -1,
-                                    clock_font.font, clock_font.color)
+        self.bmovl.drawstringframed(clock, self.bmovl.width-config.OSD_OVERSCAN_X-10-\
+                                    clock_width, config.OSD_OVERSCAN_Y+10,
+                                    clock_width, -1, clock_font.font, clock_font.color,
+                                    shadow=shadow, border_color=border)
 
         self.bmovl.update((0, 0, self.bmovl.width, height))
 
@@ -176,13 +189,16 @@ class PluginInterface(plugin.Plugin):
         height += 40
         x0      = config.OSD_OVERSCAN_X+10
         y0      = self.bmovl.height + 5 - height
-        width   = self.bmovl.width - 2 * config.OSD_OSD_OVERSCAN_X
+        width   = self.bmovl.width - 2 * config.OSD_OVERSCAN_X
         
         self.bmovl.drawbox(0, self.bmovl.height + 1 - height, self.bmovl.width,
                            self.bmovl.height + 1 - height, width=1, color=0x000000)
 
         if self.item.image:
-            image = pygame.transform.scale(self.bmovl.loadbitmap(self.item.image), (65, 90))
+            i = self.bmovl.loadbitmap(self.item.image)
+            scale = max(float(i.get_width()) / 200, float(i.get_height()) / 90)
+            image = pygame.transform.scale(i, (int(i.get_width() / scale),
+                                               int(i.get_height() / scale)))
             self.bmovl.screen.blit(image, (x0, y0))
             x0    += image.get_width() + 10
             width -= image.get_width() + 10
@@ -195,14 +211,33 @@ class PluginInterface(plugin.Plugin):
             title   = show[0] + " " + show[1] + "x" + show[2]
             tagline = show[3]
         
-        title_font   = skin.get_singleton().get_font('title')
-        tagline_font = skin.get_singleton().get_font('info tagline')
+        font   = skin.get_singleton().get_font('title')
 
-        pos = self.bmovl.drawstringframed(title, x0, y0, width, -1, title_font.font,
-                                          title_font.color)
+        shadow = None
+        border = None
+        if font.shadow.visible:
+            if font.shadow.border:
+                border = font.shadow.color
+            else:
+                shadow = (font.shadow.x, font.shadow.y, font.shadow.color)
+        
+        pos = self.bmovl.drawstringframed(title, x0, y0, width, -1, font.font,
+                                          font.color, shadow=shadow, border_color=border)
+
         if tagline:
+            font = skin.get_singleton().get_font('info tagline')
+
+            shadow = None
+            border = None
+            if font.shadow.visible:
+                if font.shadow.border:
+                    border = font.shadow.color
+                else:
+                    shadow = (font.shadow.x, font.shadow.y, font.shadow.color)
+
             self.bmovl.drawstringframed(tagline, x0, pos[1][3]+5, width, -1,
-                                        tagline_font.font, tagline_font.color)
+                                        font.font, font.color,
+                                        shadow=shadow, border_color=border)
             
         self.bmovl.update((0, self.bmovl.height-height, self.bmovl.width, height))
 
@@ -215,7 +250,7 @@ class PluginInterface(plugin.Plugin):
         bmovl: hide osd
         """
         _debug_('hide')
-        self.player.thread.app.refresh = None
+        self.player.app.refresh = None
         self.bmovl.clearscreen()
         self.bmovl.hide()
         
@@ -235,11 +270,11 @@ class PluginInterface(plugin.Plugin):
         """
         if event == TOGGLE_OSD and self.bmovl:
             if self.osd_visible:
-                self.player.thread.app.write('osd 1\n')
+                self.player.app.write('osd 1\n')
                 self.hide_osd()
             else:
                 self.show_osd()
-                self.player.thread.app.write('osd 3\n')
+                self.player.app.write('osd 3\n')
             self.osd_visible = not self.osd_visible
             return True
 
