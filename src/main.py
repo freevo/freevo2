@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/02/24 04:03:25  krister
+# Added a --trace option to see all function calls in freevo.
+#
 # Revision 1.23  2003/02/22 22:32:27  krister
 # Removed debug code, cleanup
 #
@@ -562,7 +565,7 @@ if __name__ == "__main__":
                     pass
             here = '%s:%s:%s()' % (filename, lineno, funcname)
             _indent[0] += 1
-            tracefd.write('%s%s\n' % (' ' * _indent[0], here))
+            tracefd.write('%4s %s%s\n' % (_indent[0], ' ' * _indent[0], here))
             tracefd.flush()
         elif event == 'return':
             _indent[0] -= 1
