@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/04/18 15:01:36  dischi
+# support more types of plugins and removed the old item plugin support
+#
 # Revision 1.36  2003/04/17 21:21:56  dischi
 # Moved the idle bar to plugins and changed the plugin interface
 #
@@ -419,24 +422,6 @@ def main_func():
     im_thread.setDaemon(1)
     im_thread.start()
     
-    # scan for plugins
-    for t in ('video', 'audio', 'image', 'games'):
-        config.FREEVO_PLUGINS[t] = []
-        dirname = 'src/%s/plugins' % t
-        if os.path.isdir(dirname):
-            for iplugin in [ os.path.splitext(fname)[0] for fname in os.listdir(dirname)
-                            if os.path.isfile(os.path.join(dirname, fname))\
-                            and os.path.splitext(fname)[1].lower()[1:] == 'py' \
-                            and not fname == '__init__.py']:
-                try:
-                    exec('import %s.plugins.%s' % (t, iplugin))
-                    if hasattr(eval('%s.plugins.%s'  % (t, iplugin)), 'actions'):
-                        print 'load %s plugin %s ' % (t, iplugin)
-                    config.FREEVO_PLUGINS[t] += [ eval('%s.plugins.%s.actions'\
-                                                       % (t, iplugin)) ]
-                except:
-                    traceback.print_exc()
-
     main = MainMenu()
     main.getcmd()
 

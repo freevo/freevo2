@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/04/18 15:01:36  dischi
+# support more types of plugins and removed the old item plugin support
+#
 # Revision 1.49  2003/04/18 10:22:06  dischi
 # You can now remove plugins from the list and plugins know the list
 # they belong to (can be overwritten). level and args are optional.
@@ -117,13 +120,6 @@ import gui.AlertBox as AlertBox
 # XML support
 from xml.utils import qp_xml
             
-try:
-    import image.camera
-    USE_CAMERA = 1
-except ImportError:
-    USE_CAMERA = 0
-
-    
 # Add support for bins album files
 from image import bins
 
@@ -136,14 +132,14 @@ skin = skin.get_singleton()
 dirwatcher_thread = None
 
 
-from plugin import MainMenuPlugin
+import plugin
 
 #
 # Plugin interface to integrate the MediaMenu into Freevo
 #
-class PluginInterface(MainMenuPlugin):
+class PluginInterface(plugin.MainMenuPlugin):
     def __init__(self, type=None):
-        MainMenuPlugin.__init__(self)
+        plugin.MainMenuPlugin.__init__(self)
         self.type = type
 
     def items(self, parent):
@@ -189,6 +185,11 @@ class MediaMenu(Item):
         if self.display_type == 'games':
             dirs += config.DIR_GAMES
 
+        if self.display_type:
+            plugins = plugin.get('mainmenu_%s' % self.display_type)
+        else:
+            plugins = []
+            
         # add default items
         for d in dirs:
             try:
@@ -199,14 +200,8 @@ class MediaMenu(Item):
             except:
                 traceback.print_exc()
 
-        # DigiCam
-        if USE_CAMERA:
-            cams = image.camera.detectCameras( )
-            for c in cams:
-                m = image.camera.cameraFactory( self, c[0], c[1] )
-                m.type = 'camera'
-                m.name = c[0]
-                items += [ m ]
+        for p in plugins:
+            items += p.items(self)
 
         # add rom drives
         for media in config.REMOVABLE_MEDIA:

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/04/18 15:01:36  dischi
+# support more types of plugins and removed the old item plugin support
+#
 # Revision 1.22  2003/04/06 21:12:54  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -390,13 +393,6 @@ MOVIE_INFORMATIONS_LABEL = []
 #
 TV_SHOW_REGEXP_MATCH = re.compile("^.*" + TV_SHOW_REGEXP).match
 TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").split
-
-
-#
-# search plugins
-#
-
-FREEVO_PLUGINS = {}
 
 
 #

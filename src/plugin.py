@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/04/18 15:01:37  dischi
+# support more types of plugins and removed the old item plugin support
+#
 # Revision 1.4  2003/04/18 10:22:07  dischi
 # You can now remove plugins from the list and plugins know the list
 # they belong to (can be overwritten). level and args are optional.
@@ -159,11 +162,17 @@ def init():
         module = name[:name.rfind('.')]
             
         if os.path.isfile('src/plugins/%s.py' % module):
-            module = 'plugins.%s' % module
-            object = 'plugins.%s' % name
+            module  = 'plugins.%s' % module
+            object  = 'plugins.%s' % name
+            special = None
+        elif os.path.isfile('src/%s/plugins/%s.py' % (module, name[name.rfind('.')+1:])):
+            special = module
+            module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
+            object  = '%s.PluginInterface' % module
         else:
-            module = name
-            object = '%s.PluginInterface' % module
+            module  = name
+            object  = '%s.PluginInterface' % module
+            special = None
 
         try:
             exec('import %s' % module)
@@ -173,8 +182,11 @@ def init():
                 p = eval('%s()' % object)
 
             p._number = number
+
             if type:
                 p._type  = type
+            elif special:
+                p._type  = '%s_%s' % (p._type, special)
             if level:
                 p._level = level
 
@@ -189,11 +201,11 @@ def init():
             else:
                 type.append(p)
 
-        except ImportError:
-            print 'failed to import plugin %s' % name
+#         except ImportError:
+#             print 'failed to import plugin %s' % name
             
-        except AttributeError:
-            print 'failed to load plugin %s' % name
+#         except AttributeError:
+#             print 'failed to load plugin %s' % name
 
         except TypeError:
             print 'wrong number of parameter for %s' % name
