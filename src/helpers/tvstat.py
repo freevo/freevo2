@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/11/13 15:58:01  dischi
+# more dvb info
+#
 # Revision 1.2  2004/08/13 16:17:33  rshortt
 # More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
 #
@@ -60,8 +63,8 @@ def main():
 
         elif isinstance(card, config.DVBCard):
             print 'adapter: %s' % card.adapter
-
-
+            print 'Card: %s' % card.name
+            print 'Type: %s' % card.type
         if v4l2:
             v4l2.init_settings()
             v4l2.print_settings()
