@@ -73,7 +73,7 @@ def getcmd():
     items += [menu.MenuItem('TV', tv.main_menu, 'tv','icons/tv.png',0)]  # XXX Move icons into skin
     items += [menu.MenuItem('MOVIES', movie.main_menu,'','icons/movies.png',0)]
     items += [menu.MenuItem('MUSIC', mp3.main_menu,'','icons/mp3.png',0)]
-    items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'/usr/local/freevo/icons/dvd.png',0)]  # XXX Add DVD title handling
+    items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
     #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
 
