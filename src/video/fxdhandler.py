@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/17 20:30:19  dischi
+# use new metainfo
+#
 # Revision 1.12  2004/01/10 13:22:17  dischi
 # reflect self.fxd_file changes
 #
@@ -119,8 +122,8 @@ def parse_movie(fxd, node):
         # a list of variants
         id = {}
         for v in video:
-            info = parse_video_child(fxd, v, dirname)
-            id[info[0]] = info
+            video_child = parse_video_child(fxd, v, dirname)
+            id[video_child[0]] = video_child
 
         for variant in variants:
             mplayer_options += " " + fxd.getattr(variant, 'mplayer-options');
@@ -200,12 +203,6 @@ def parse_movie(fxd, node):
         # only one file, this is directly for the item
         id, url, item.media_id, item.mplayer_options, player, is_playlist = \
             parse_video_child(fxd, video[0], dirname)
-        mminfo = item.info
-        item.set_url(url)
-        item.name = title
-        for key in mminfo:
-            item.info[key] = mminfo[key]
-            
         if player:
             item.force_player = player
         if is_playlist:
@@ -216,13 +213,13 @@ def parse_movie(fxd, node):
     else:
         # a list of files
         for s in video:
-            info = parse_video_child(fxd, s, dirname)
-            v = VideoItem(info[1], parent=item, info=item.info, parse=False)
+            video_child = parse_video_child(fxd, s, dirname)
+            v = VideoItem(video_child[1], parent=item, info=item.info, parse=False)
             v.files = None
-            v.media_id, v.mplayer_options, player, is_playlist = info[2:]
-            if info[-2]:
-                v.force_player = info[-2]
-            if info[-1]:
+            v.media_id, v.mplayer_options, player, is_playlist = video_child[2:]
+            if video_child[-2]:
+                v.force_player = video_child[-2]
+            if video_child[-1]:
                 item.is_playlist = True
             # global <video> mplayer_options
             if mplayer_options:

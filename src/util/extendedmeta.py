@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/01/17 20:28:12  dischi
+# use new metainfo
+#
 # Revision 1.3  2004/01/16 17:15:29  dischi
 # Many improvements to AudioParser
 # o try to detect if we should overwrite an existing fxd file
@@ -72,9 +75,9 @@
 import os,string,fnmatch,sys,md5,stat
 
 # Metadata tools
-import mmpython
 import config, util
 import util.fxdparser
+import mediainfo
 
 try:
     # The DB stuff
@@ -88,13 +91,6 @@ except ImportError:
 from mmpython.audio import eyeD3
 from util import recursefolders
 
-mmcache = '%s/mmpython' % ('/var/cache/freevo')
-mmpython.use_cache(mmcache)
-
-if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
-    mmpython.object_cache.md5_cachedir = False
-    mmpython.object_cache.cachedir     = config.OVERLAY_DIR
-
 ##### Database
 
 dbschema = """CREATE TABLE music (id INTEGER PRIMARY KEY, dirtitle VARCHAR(255), path VARCHAR(255), 
@@ -107,9 +103,9 @@ def make_query(filename,dirtitle):
         print "File %s does not exist" % (filename)
         return None
 
-    mmpython.cache_dir(os.path.dirname(filename))
+    mediainfo.cache_dir(os.path.dirname(filename))
 
-    a = mmpython.parse(filename)
+    a = mediainfo.get(filename)
     t = tracknum(a['trackno'])
 
     VALUES = "(null,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%i,%i,%i,\'%s\',%f,%i,\'%s\',\'%s\',%i,\'%s\')" \
@@ -188,9 +184,10 @@ def extract_image(path):
 
 various = '__various__'
 
+
 class AudioParser:
 
-    def __init__(self, dirname, force=False):
+    def __init__(self, dirname, force=False, rescan=False):
 
         self.artist  = ''
         self.album   = ''
@@ -198,75 +195,69 @@ class AudioParser:
         self.length  = 0
         self.changed = False
         self.force   = force
-        
-        fxdfile      = os.path.join(dirname, 'folder.fxd')
-        fname        = vfs.abspath(fxdfile)
-        if fname:
-            fxdfile  = fname
+
+        cachefile    = vfs.getoverlay(os.path.join(dirname, '..', 'freevo.cache'))
         subdirs      = util.getdirnames(dirname, softlinks=False)
         filelist     = None
 
-        for subdir in subdirs:
-            d = AudioParser(subdir)
-            if d.changed:
-                break
+        if not rescan:
+            for subdir in subdirs:
+                d = AudioParser(subdir, rescan)
+                if d.changed:
+                    break
 
-        else:
-            # no changes in all subdirs, looks good
-            if fname:
-                if os.stat(dirname)[stat.ST_MTIME] <= os.stat(fname)[stat.ST_MTIME]:
+            else:
+                # no changes in all subdirs, looks good
+                if os.path.isfile(cachefile) and \
+                       os.stat(dirname)[stat.ST_MTIME] <= os.stat(cachefile)[stat.ST_MTIME]:
                     # and no changes in here. Do not parse everything again
                     if force:
                         # forces? We need to load our current values
-                        fxd = util.fxdparser.FXD(fxdfile)
-                        fxd.set_handler('folder', self.fxd_read)
-                        fxd.parse()
-                        if self.length:
-                            # set the stuff to various if not set
-                            for type in ('artist', 'album', 'year'):
-                                if not getattr(self, type):
-                                    setattr(self, type, various)
-                    return
-            else:
-                filelist = util.match_files(dirname, config.AUDIO_SUFFIX)
-                if not filelist:
-                    # no files in here, great
+                        info = mediainfo.get(dirname)
+                        if info:
+                            for type in ('artist', 'album', 'year', 'length'):
+                                if info.has_key(type):
+                                    setattr(self, type, info[type])
                     return
 
         if not filelist:
             filelist = util.match_files(dirname, config.AUDIO_SUFFIX)
             
+        if not filelist and not subdirs:
+            # no files in here? We are done
+            return
+        
         # ok, something changed here, too bad :-(
         self.changed = True
         self.force   = False
 
         # scan all subdirs
         for subdir in subdirs:
-            d = AudioParser(subdir, force=True)
+            d = AudioParser(subdir, force=True, rescan=rescan)
             for type in ('artist', 'album', 'year'):
                 setattr(self, type, self.strcmp(getattr(self, type), getattr(d, type)))
             self.length += d.length
 
         # cache dir first
-        mmpython.cache_dir(dirname)
+        mediainfo.cache_dir(dirname)
 
         for song in filelist:
             try:
-                data = mmpython.parse(song)
+                data = mediainfo.get(song)
                 for type in ('artist', 'album'):
                     setattr(self, type, self.strcmp(getattr(self, type), data[type]))
                 self.year = self.strcmp(self.year, data['date'])
                 if data['length']:
                     self.length += int(data['length'])
-            except:
+            except OSError:
                 pass
 
         if not self.length:
             return
-        
-        fxd = util.fxdparser.FXD(fxdfile)
-        fxd.set_handler('folder', self.fxd_read)
-        fxd.parse()
+
+        for type in ('artist', 'album', 'year', 'length'):
+            if getattr(self, type):
+                mediainfo.set(dirname, type, getattr(self, type))
 
         if config.DEBUG:
             print dirname
@@ -284,12 +275,6 @@ class AudioParser:
                 print '%i:%0.2i' % (int(self.length/60), int(self.length%60))
             print
 
-        fxd.set_handler('folder', self.fxd_callback, mode='w', force=True)
-        try:
-            fxd.save()
-        except IOError, e:
-            print e
-
 
     def strcmp(self, s1, s2):
         if not s1 or not s2:
@@ -302,52 +287,11 @@ class AudioParser:
         return various
 
 
-    def fxd_read(self, fxd, node):
-        info = []
-        for child in fxd.get_children(node, 'info'):
-            info += child.children
-
-        overwrite = True
-        for child in info:
-            if child.name == 'length':
-                if self.force:
-                    # in force mode
-                    self.length = int(fxd.gettext(child))
-                elif str(fxd.gettext(child)) == str(self.length):
-                    overwrite = False
-
-        for child in info:
-            if child.name in ('artist', 'album', 'year'):
-                var = fxd.gettext(child)
-                # if the var is not set, continue
-                if not var:
-                    continue
-                # fxd value is set, let's see what we have here now:
-                # 1. not overwrite, return fxd value
-                # 2. current value is various, return various
-                # 3. current value is nothing, return fxd value
-                # 4. current and fxd value are something, return fxd value
-                if not (overwrite and getattr(self, child.name) == various):
-                    setattr(self, child.name, var)
-
-
-    def fxd_callback(self, fxd, node):
-        info = fxd.get_or_create_child(node, 'info')
-
-        for var in ('artist', 'album', 'length', 'year'):
-            if getattr(self, var) and str(getattr(self, var)) != various:
-                fxd.get_or_create_child(info, var).first_cdata = str(getattr(self, var))
-            else:
-                for child in info.children:
-                    if child.name == var:
-                        info.children.remove(child)
-
-    
 
 ##### Helper to do all of them
 
 def AddExtendedMeta(path):
-    AudioParser(path)
+    AudioParser(path) #, rescan=True)
     extract_image(path)
     if has_db:
         addPathDB(path)

@@ -50,9 +50,6 @@ import os,string,fnmatch,sys
 # The DB stuff
 # import sqlite
 
-# Metadata tools
-import mmpython
-
 import config, util
 
 from util.extendedmeta import AddExtendedMeta

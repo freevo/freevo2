@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2004/01/17 20:30:18  dischi
+# use new metainfo
+#
 # Revision 1.94  2004/01/11 04:04:37  outlyer
 # Ok,  now it shows the "Coming Up" list anywhere in the TV menu. I think
 # it fits, though it looks fairly ugly right now. I'm going to make it more
@@ -79,7 +82,7 @@ import re
 import stat
 import copy
 import rc
-import mmpython
+import util.mediainfo as mediainfo
 
 import config
 import util
@@ -160,7 +163,7 @@ class DirItem(Playlist):
         # variables only for DirItem
         self.dir           = os.path.abspath(directory)
         self.display_type  = display_type
-        self.info          = {}
+        self.info          = mediainfo.get(directory)
         self.mountpoint    = None
         
         if add_args == None and hasattr(parent, 'add_args'): 
@@ -347,6 +350,9 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
+        if self.media:
+            self.media.mount()
+            
         display_type = self.display_type
         if self.display_type == 'tv':
             display_type = 'video'
@@ -379,6 +385,10 @@ class DirItem(Playlist):
 
         if self.folder_fxd.endswith('folder.fxd'):
             items.append((self.configure, _('Configure directory'), 'configure'))
+
+        if self.media:
+            self.media.umount()
+
         return items
     
 
@@ -479,6 +489,9 @@ class DirItem(Playlist):
         self.dir_items  = []
         self.pl_items   = []
 
+        if self.media:
+            self.media.mount()
+
         if hasattr(self, '__dirwatcher_last_time__'):
             del self.__dirwatcher_last_time__
             
@@ -519,23 +532,12 @@ class DirItem(Playlist):
 
         self.all_files = copy.copy(files)
 
-        mmpython_dir = self.dir
-        if self.media:
-            dir_on_disc = self.dir[len(self.media.mountdir)+1:]
-            if self.media.cached and dir_on_disc == '':
-                mmpython_dir = None
-                num_changes = 0
-            else:
-                mmpython_dir = 'cd://%s:%s:%s' % (self.media.devicename,
-                                                  self.media.mountdir, dir_on_disc)
-
-        if mmpython_dir:
-            num_changes = mmpython.check_cache(mmpython_dir)
+        num_changes = mediainfo.check_cache(self.dir)
             
         pop = None
         callback=None
         if (num_changes > 10) or (num_changes and self.media):
-            if self.media and dir_on_disc == '':
+            if self.media:
                 pop = ProgressBox(text=_('Scanning disc, be patient...'), full=num_changes)
             else:
                 pop = ProgressBox(text=_('Scanning directory, be patient...'),
@@ -550,17 +552,8 @@ class DirItem(Playlist):
         
 
         if num_changes > 0:
-            try:
-                mmpython.cache_dir(mmpython_dir, callback=callback)
-            except TypeError:
-                print
-                print 'ERROR:'
-                print 'Your mmpython version is too old, please update'
-                print
-                mmpython.cache_dir(mmpython_dir)
+            mediainfo.cache_dir(self.dir, callback=callback)
 
-            if self.media:
-                self.media.cached = True
 
         #
         # build items
@@ -578,7 +571,6 @@ class DirItem(Playlist):
                         self.dir_items.append(i)
                     else:
                         self.play_items.append(i)
-
 
         # normal DirItems
         for filename in files:

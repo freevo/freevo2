@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/17 20:30:18  dischi
+# use new metainfo
+#
 # Revision 1.13  2004/01/04 17:20:44  dischi
 # support for generating video thumbnails
 #
@@ -87,6 +90,7 @@ def delete_old_files():
     del_list += util.match_files(os.path.join(config.FREEVO_CACHEDIR, 'thumbnails'),
                                  ['jpg', 'raw'])
 
+    del_list += util.recursefolders(config.OVERLAY_DIR,1,'mmpython',1)
     for f in del_list:
         if os.path.isdir(f):
             util.rmrf(f)
@@ -94,7 +98,6 @@ def delete_old_files():
             os.unlink(f)
     print '  deleted %s file(s)' % len(del_list)
     print
-
 
     print 'deleting old cachefiles...'
     num = 0
@@ -118,8 +121,10 @@ def delete_old_files():
     for file in subdirs:
         if not os.path.isdir(file[len(config.OVERLAY_DIR):]) and not \
                file.startswith(config.OVERLAY_DIR + '/disc'):
-            if os.path.isfile(os.path.join(file, 'mmpython')):
-                os.unlink(os.path.join(file, 'mmpython'))
+            if os.path.isfile(os.path.join(file, 'mmpython.cache')):
+                os.unlink(os.path.join(file, 'mmpython.cache'))
+            if os.path.isfile(os.path.join(file, 'freevo.cache')):
+                os.unlink(os.path.join(file, 'freevo.cache'))
             if not os.listdir(file):
                 os.rmdir(file)
             else:
@@ -128,6 +133,17 @@ def delete_old_files():
                 print 'but cachdir %s still contains files.' % file
                 print
     print
+    print 'deleting old entries in metainfo...'
+
+    for filename in util.recursefolders(config.OVERLAY_DIR,1,'freevo.cache',1):
+        if filename.startswith(config.OVERLAY_DIR + '/disc'):
+            continue
+        dirname = os.path.dirname(filename)
+        data    = util.read_pickle(filename)
+        for key in copy.copy(data):
+            if not os.path.exists(dirname + '/' + key):
+                del data[key]
+        util.save_pickle(data, filename)
 
     
 def cache_helper(result, dirname, names):
@@ -138,24 +154,16 @@ def cache_helper(result, dirname, names):
 
 
 def cache_directories(rebuild=True):
-    import mmpython
-
-    mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
-    if not os.path.isdir(mmcache):
-        os.mkdir(mmcache)
-    mmpython.use_cache(mmcache)
-    mmpython.mediainfo.DEBUG = 0
-    mmpython.factory.DEBUG   = 0
-
-    if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
-        _debug_('use OVERLAY_DIR for mmpython cache')
-        mmpython.object_cache.md5_cachedir = False
-        mmpython.object_cache.cachedir     = config.OVERLAY_DIR
+    import util.mediainfo
 
     if rebuild:
         print 'deleting cache files'
-        print 'XXX FIXME: code not written yet'
-
+        for f in util.recursefolders(config.OVERLAY_DIR,1,'mmpython.cache',1):
+            if os.path.isdir(f):
+                util.rmrf(f)
+            else:
+                os.unlink(f)
+        print
 
     all_dirs = []
     print 'caching directories...'
@@ -173,9 +181,7 @@ def cache_directories(rebuild=True):
         if len(dname) > 65:
             dname = dname[:20] + ' [...] ' + dname[-40:]
         print '  %4d/%-4d %s' % (all_dirs.index(d)+1, len(all_dirs), dname)
-        mmpython.cache_dir(d)
-        
-    util.touch('%s/VERSION' % mmcache)
+        util.mediainfo.cache_dir(d)
     print
 
 

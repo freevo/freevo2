@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.116  2004/01/17 20:30:19  dischi
+# use new metainfo
+#
 # Revision 1.115  2004/01/10 13:22:17  dischi
 # reflect self.fxd_file changes
 #
@@ -39,30 +42,6 @@
 #
 # Revision 1.106  2004/01/01 16:15:45  dischi
 # make sure we have a player even for classes inheriting from videoitem
-#
-# Revision 1.105  2003/12/31 16:42:40  dischi
-# changes, related to item.py changes
-#
-# Revision 1.104  2003/12/30 15:36:01  dischi
-# remove unneeded copy function, small bugfix
-#
-# Revision 1.103  2003/12/29 22:08:54  dischi
-# move to new Item attributes
-#
-# Revision 1.102  2003/12/22 13:27:34  dischi
-# patch for better support of fxd files with more discs from Matthieu Weber
-#
-# Revision 1.101  2003/12/09 19:43:01  dischi
-# patch from Matthieu Weber
-#
-# Revision 1.100  2003/12/06 16:25:45  dischi
-# support for type=url and <playlist> and <player>
-#
-# Revision 1.99  2003/11/28 20:08:58  dischi
-# renamed some config variables
-#
-# Revision 1.98  2003/11/25 19:01:37  dischi
-# remove the callback stuff from fxd, it was to complicated
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -105,14 +84,14 @@ from event import *
 
 class VideoItem(Item):
     def __init__(self, url, parent, info=None, parse=True):
+        self.autovars = [ ('deinterlace', 0) ]
         Item.__init__(self, parent)
 
         self.type = 'video'
         self.set_url(url, info=parse)
 
         if info:
-            for key in info:
-                self.info[key] = info[key]
+            self.info.set_variables(info)
 
         self.handle_type       = 'video'
 
@@ -132,7 +111,6 @@ class VideoItem(Item):
         self.selected_subtitle = None
         self.selected_audio    = None
         self.num_titles        = 0
-        self.deinterlace       = 0
         self.elapsed           = 0
         
         self.possible_player   = []
@@ -151,8 +129,7 @@ class VideoItem(Item):
                 from video import tv_show_informations
                 if tv_show_informations.has_key(show_name[0].lower()):
                     tvinfo = tv_show_informations[show_name[0].lower()]
-                    for i in tvinfo[1]:
-                        self.info[i] = tvinfo[1][i]
+                    self.info.set_variables(tvinfo[1])
                     if not self.image:
                         self.image = tvinfo[0]
                     self.skin_fxd = tvinfo[3]
@@ -171,7 +148,6 @@ class VideoItem(Item):
             from video import discset_informations
             if discset_informations.has_key(fid):
                 self.mplayer_options = discset_informations[fid]
-
 
         
     def set_url(self, url, info=True):
@@ -227,7 +203,7 @@ class VideoItem(Item):
         
         if key in ('length', 'geometry', 'aspect'):
             try:
-                video = self.info.video[0]
+                video = self.info.mmdata.video[0]
                 if key == 'length':
                     length = video.length
                     if length / 3600:
@@ -547,8 +523,8 @@ class VideoItem(Item):
             i = copy.copy(self)
             i.possible_player = []
             # copy the attributes from mmpython about this track
-            if self.info.has_key('tracks'):
-                i.info = self.info.tracks[title-1]
+            if self.info.mmdata.has_key('tracks'):
+                i.info = self.info.mmdata.tracks[title-1]
             i.info_type = 'track'
             i.set_url(self.url + str(title), False)
             i.name = _('Play Title %s') % title

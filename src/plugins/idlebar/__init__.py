@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/17 20:30:19  dischi
+# use new metainfo
+#
 # Revision 1.5  2004/01/14 18:08:46  dischi
 # use a working font
 #
@@ -208,13 +211,13 @@ class cdstatus(IdleBarPlugin):
         width = 0
         for media in config.REMOVABLE_MEDIA:
             image = self.cdimages['empty_cdrom']
-            if hasattr(media.info,'type') and hasattr(media.info,'handle_type'):
-                if media.info.type == 'empty_cdrom':
+            if hasattr(media.item,'type') and hasattr(media.item,'handle_type'):
+                if media.item.type == 'empty_cdrom':
                     image = self.cdimages['empty_cdrom']
-                elif not media.info.handle_type and media.info.type:
+                elif not media.item.handle_type and media.item.type:
                     image = self.cdimages['mixed']
-                elif media.info.handle_type: 
-                    image = self.cdimages[media.info.handle_type]
+                elif media.item.handle_type: 
+                    image = self.cdimages[media.item.handle_type]
             width += osd.draw_image(image, (x+width, osd.y + 10, -1, -1))[0] + 10
         if width:
             width -= 10

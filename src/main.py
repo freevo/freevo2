@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2004/01/17 20:30:18  dischi
+# use new metainfo
+#
 # Revision 1.105  2004/01/10 14:56:45  dischi
 # better shutdown handling
 #
@@ -334,12 +337,12 @@ if len(sys.argv) >= 2:
 
 
 
-# setup mmpython
+# # setup mmpython
 mmcache = '%s/mmpython' % config.FREEVO_CACHEDIR
-if not os.path.isdir(mmcache):
-    os.mkdir(mmcache)
+# if not os.path.isdir(mmcache):
+#     os.mkdir(mmcache)
 
-mmpython.use_cache(mmcache)
+# mmpython.use_cache(mmcache)
 if config.DEBUG > 2:
     mmpython.mediainfo.DEBUG = config.DEBUG
     mmpython.factory.DEBUG   = config.DEBUG
@@ -356,13 +359,13 @@ if not os.path.isfile(os.path.join(mmcache, 'VERSION')):
     print 'up usage of freevo'
     print
 
-if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
-    mmpython.object_cache.md5_cachedir = False
-    mmpython.object_cache.cachedir     = config.OVERLAY_DIR
-else:
-    print '\nWARNING'
-    print 'Your mmpython version is too old. Freevo may crash later. Please'
-    print 'update mmpython to mmpython cvs'
+# if mmpython.object_cache and hasattr(mmpython.object_cache, 'md5_cachedir'):
+#     mmpython.object_cache.md5_cachedir = False
+#     mmpython.object_cache.cachedir     = config.OVERLAY_DIR
+# else:
+#     print '\nWARNING'
+#     print 'Your mmpython version is too old. Freevo may crash later. Please'
+#     print 'update mmpython to mmpython cvs'
 
 os.umask(config.UMASK)
 

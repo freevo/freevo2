@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/01/17 20:30:19  dischi
+# use new metainfo
+#
 # Revision 1.21  2004/01/10 18:45:00  dischi
 # check for type first
 #
@@ -142,7 +145,7 @@ def chapter_selection_menu(arg=None, menuw=None):
 #
 
 def toggle(arg=None, menuw=None):
-    setattr(arg[1], arg[2], not getattr(arg[1], arg[2]))
+    arg[1][arg[2]] = not arg[1][arg[2]]
 
     old = menuw.menustack[-1].selected
     pos = menuw.menustack[-1].choices.index(menuw.menustack[-1].selected)
@@ -150,7 +153,7 @@ def toggle(arg=None, menuw=None):
     new = add_toogle(arg[0], arg[1], arg[2])
     new.image = old.image
     new.display_type = old.display_type
-    
+
     menuw.menustack[-1].choices[pos] = new
     menuw.menustack[-1].selected = menuw.menustack[-1].choices[pos]
 
@@ -159,7 +162,7 @@ def toggle(arg=None, menuw=None):
 
 
 def add_toogle(name, item, var):
-    if getattr(item, var):
+    if item[var]:
         return menu.MenuItem(_('Turn off %s') % name, toggle, (name, item, var))
     return menu.MenuItem(_('Turn on %s') % name, toggle, (name, item, var))
 

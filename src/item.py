@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/01/17 20:30:18  dischi
+# use new metainfo
+#
 # Revision 1.50  2004/01/14 01:18:45  outlyer
 # Workaround some weirdness... for some reason these should be of type None, but
 # are instead the string "None" which doesn't help, since the string "None" is
@@ -87,7 +90,7 @@
 import os
 import gettext
 import shutil
-import mmpython
+import util.mediainfo
 
 import config
 from event import *
@@ -175,12 +178,18 @@ class Item:
         """
         if not hasattr(self, 'type'):
             self.type     = None            # e.g. video, audio, dir, playlist
+
+        # set auto variables for this item
+        if hasattr(self, 'autovars'):
+            for var, val in self.autovars:
+                setattr(self, var, val)
+
         self.name         = ''              # name in menu
         self.icon         = None
-        if info:
-            self.info     = info
+        if isinstance(info, util.mediainfo.Info):
+            self.info     = copy.copy(info)
         else:
-            self.info     = {}
+            self.info     = util.mediainfo.Info(None, None, info)
         self.parent       = parent          # parent item to pass unmapped event
         self.menuw        = None
         self.description  = ''
@@ -285,20 +294,17 @@ class Item:
 
             
         if info and self.filename:
-            if self.parent and self.parent.media:
-                mmpython_url = 'cd://%s:%s:%s' % (self.parent.media.devicename,
-                                                  self.parent.media.mountdir,
-                                                  self.filename[len(self.media.mountdir)+1:])
-            else:
-                mmpython_url = self.filename
-            info = mmpython.parse(mmpython_url)
-            if info:
-                self.info = info
-                if self.parent and \
-                       hasattr(self.parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
-                       self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
-                       hasattr(info, 'title'):
-                    self.name = info['title']
+            self.info = util.mediainfo.get(self.filename)
+            if self.parent and \
+                   hasattr(self.parent, 'DIRECTORY_USE_MEDIAID_TAG_NAMES') and \
+                   self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES and \
+                   hasattr(self.info, 'title'):
+                self.name = self.info['title']
+
+            if hasattr(self, 'autovars'):
+                for var, val in self.autovars:
+                    if self.info.has_key('var'):
+                        setattr(var, self.info['var'])
         
         if not self.name:
             if self.filename:
@@ -307,6 +313,41 @@ class Item:
                 self.name = self.url
 
 
+    def __setitem__(self, key, value):
+        """
+        set the value of 'key' to 'val'
+        """
+        if hasattr(self, 'autovars'):
+            for var, val in self.autovars:
+                if key == var:
+                    self.store_info(key, value)
+                    setattr(self, key, value)
+            else:
+                self.info[key] = value
+        else:
+            self.info[key] = value
+
+        
+    def store_info(self, key, value):
+        """
+        store the key/value in metadata
+        """
+        if isinstance(self.info, util.mediainfo.Info):
+            self.info.store(key, value)
+        else:
+            print 'unable to store info for that kind of item'
+
+
+    def delete_info(self, key):
+        """
+        delete entry for metadata
+        """
+        if isinstance(self.info, util.mediainfo.Info):
+            self.info.delete(key)
+        else:
+            print 'unable to delete info for that kind of item'
+
+        
     def id(self):
         """
         Return a unique id of the item. This id should be the same when the
@@ -460,18 +501,13 @@ class Item:
 
         else:
             r = None
-            try:
+            if self.info.has_key(attr):
                 r = self.info[attr]
-            except:
-                pass
             if not r:
-                try:
+                if hasattr(self, attr):
                     r = getattr(self,attr)
-                except:
-                    pass
-                
-            if r != None and str(r):
-                return str(r)
+            if r != None:
+                return r
         return ''
 
 
@@ -479,4 +515,8 @@ class Item:
         """
         wrapper for __getitem__
         """
-        return self.__getitem__(attr)
+        if attr[:4] == 'len(' and attr[-1] == ')':
+            return self.__getitem__(attr)
+        else:
+            return str(self.__getitem__(attr))
+            

@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2004/01/17 20:30:18  dischi
+# use new metainfo
+#
 # Revision 1.91  2004/01/10 13:12:02  dischi
 # create disc and disc-set dirs in OVERLAY_DIR
 #
@@ -828,6 +831,9 @@ if not os.path.isdir(OVERLAY_DIR + '/disc'):
     
 if not os.path.isdir(OVERLAY_DIR + '/disc-set'):
     os.makedirs(OVERLAY_DIR + '/disc-set')
+
+if not os.path.isdir(os.path.join(FREEVO_CACHEDIR, 'disc')):
+    os.makedirs(os.path.join(FREEVO_CACHEDIR, 'disc'))
     
 #
 # delete LD_PRELOAD for all helpers, main.py does it after

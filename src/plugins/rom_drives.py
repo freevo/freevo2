@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/01/17 20:30:18  dischi
+# use new metainfo
+#
 # Revision 1.50  2004/01/10 16:52:19  dischi
 # shut down identify thread before exit to prevent a strange error sometimes
 #
@@ -57,7 +60,7 @@ import thread
 import string
 import copy
 import traceback
-import mmpython
+import util.mediainfo
 from struct import *
 import array
 import rc
@@ -173,10 +176,10 @@ class autostart(plugin.DaemonPlugin):
         if plugin.isevent(event) == 'IDENTIFY_MEDIA' and menuw and \
                len(menuw.menustack) == 1 and not event.arg[1]:
             media = event.arg[0]
-            if media.info:
-                media.info.parent = menuw.menustack[0].selected
-            if media.info and media.info.actions():
-                media.info.actions()[0][0](menuw=menuw)
+            if media.item:
+                media.item.parent = menuw.menustack[0].selected
+            if media.item and media.item.actions():
+                media.item.actions()[0][0](menuw=menuw)
             else:
                 menuw.refresh()
             return True
@@ -215,21 +218,21 @@ class rom_items(plugin.MainMenuPlugin):
         """
         items = []
         for media in config.REMOVABLE_MEDIA:
-            if media.info:
-                if parent.display_type == 'video' and media.videoinfo:
-                    m = media.videoinfo
+            if media.item:
+                if parent.display_type == 'video' and media.videoitem:
+                    m = media.videoitem
                     
                 else:
-                    if media.info.type == 'dir':
-                        media.info.display_type = parent.display_type
-                    m = media.info
+                    if media.item.type == 'dir':
+                        media.item.display_type = parent.display_type
+                    m = media.item
 
             else:
                 m = Item(parent)
                 m.name = _('Drive %s (no disc)') % media.drivename
                 m.type = media.type
                 m.media = media
-                media.info = m
+                media.item = m
 
             m.parent = parent
             m.eventhandler_plugins.append(self.items_eventhandler)
@@ -265,8 +268,8 @@ class RemovableMedia:
 
         self.id        = ''
         self.label     = ''
-        self.info      = None
-        self.videoinfo = None
+        self.item      = None
+        self.videoitem = None
         self.type      = 'empty_cdrom'
         self.cached   = False
 
@@ -420,8 +423,8 @@ class Identify_Thread(threading.Thread):
         media.id        = ''
         media.label     = ''
         media.type      = 'empty_cdrom'
-        media.info      = None
-        media.videoinfo = None
+        media.item      = None
+        media.videoitem = None
         media.cached    = False
 
         # Is there a disc present?
@@ -431,8 +434,9 @@ class Identify_Thread(threading.Thread):
 
         # if there is a disc, the tray can't be open
         media.tray_open = False
-        data = mmpython.parse(media.devicename)
-
+        disc_info = util.mediainfo.disc_info(media)
+        data = disc_info.mmdata
+        
         # try to set the speed
         if config.ROM_SPEED and data and not data.mime == 'video/dvd':
             try:
@@ -443,15 +447,15 @@ class Identify_Thread(threading.Thread):
         if data and data.mime == 'audio/cd':
             os.close(fd)
             disc_id = data.id
-            media.info = AudioDiskItem(disc_id, parent=None,
+            media.item = AudioDiskItem(disc_id, parent=None,
                                        devicename=media.devicename,
                                        display_type='audio')
-            media.type = media.info.type
-            media.info.handle_type = 'audio'
-            media.info.media = media
+            media.type = media.item.type
+            media.item.handle_type = 'audio'
+            media.item.media = media
             if data.title:
-                media.info.name = data.title
-            media.info.info = data
+                media.item.name = data.title
+            media.item.info.mmdata = data
             return
 
         os.close(fd)
@@ -503,35 +507,32 @@ class Identify_Thread(threading.Thread):
                 title = '%s [%s]' % (data.mime[6:].upper(), media.label)
 
             if movie_info:
-                media.info = copy.copy(movie_info)
+                media.item = copy.copy(movie_info)
             else:
-                media.info = VideoItem('', None)
-                media.info.image = util.getimage(os.path.join(config.OVERLAY_DIR,
+                media.item = VideoItem('', None)
+                media.item.image = util.getimage(os.path.join(config.OVERLAY_DIR,
                                                               'disc-set', media.id))
-            media.info.name  = title
-            media.info.set_url(data.mime[6:] + '://')
-            media.info.media = media
+            variables = media.item.info.variables
+            media.item.info = disc_info
+            media.item.info.set_variables(variables)
+
+            media.item.name  = title
+            media.item.set_url(data.mime[6:] + '://')
+            media.item.media = media
 
             media.type  = data.mime[6:]
 
-            if media.info.info:
-                for i in media.info.info:
-                    if media.info.info[i]:
-                        data[i] = media.info.info[i]
-            media.info.info = data
+            media.item.info.mmdata = data
 
             # copy configure options from track[0] to main item
             # for playback
             for k in ('audio', 'subtitles', 'chapters' ):
-                if media.info.info.tracks[0].has_key(k):
-                    if not media.info.info.has_key(k):
-                        media.info.info.keys.append(k)
-                        media.info.info[k] = media.info.info.tracks[0][k]
+                if data.tracks[0].has_key(k):
+                    if not data.has_key(k):
+                        data.keys.append(k)
+                        data[k] = data.tracks[0][k]
 
-            media.info.num_titles = len(data.tracks)
-            # Hack to avoid rescan, remove this when mmpython is used
-            # everytime
-            media.info.scanned = True
+            media.item.num_titles = len(data.tracks)
             return
 
         if data.tracks:
@@ -565,11 +566,11 @@ class Identify_Thread(threading.Thread):
         _debug_('identifymedia: mp3="%s"' % mp3_files, level = 2)
         _debug_('identifymedia: image="%s"' % image_files, level = 2)
             
-        media.info = DirItem(media.mountdir, None)
+        media.item = DirItem(media.mountdir, None)
         
         # Is this a movie disc?
         if mplayer_files and not mp3_files:
-            media.info.handle_type = 'video'
+            media.item.handle_type = 'video'
 
             # try to find out if it is a series cd
             if not title:
@@ -631,54 +632,54 @@ class Identify_Thread(threading.Thread):
 
         # XXX add more intelligence to cds with audio files
         elif (not mplayer_files) and mp3_files:
-            media.info.handle_type = 'audio'
+            media.item.handle_type = 'audio'
             title = '%s [%s]' % (media.drivename, label)
 
         # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
-            media.info.handle_type = 'image'
+            media.item.handle_type = 'image'
             title = '%s [%s]' % (media.drivename, label)
 
         # Mixed media?
         elif mplayer_files or image_files or mp3_files:
-            media.info.handle_type = None
+            media.item.handle_type = None
             title = '%s [%s]' % (media.drivename, label)
         
         # Strange, no useable files
         else:
-            media.info.handle_type = None
+            media.item.handle_type = None
             title = '%s [%s]' % (media.drivename, label)
 
 
         if title:
-            media.info.name = title
+            media.item.name = title
         if image:
-            media.info.image = image
+            media.item.image = image
         if more_info:
-            media.info.info = more_info
-        if fxd_file and not media.info.fxd_file:
-            media.info.set_fxd_file(fxd_file)
+            media.item.info = more_info
+        if fxd_file and not media.item.fxd_file:
+            media.item.set_fxd_file(fxd_file)
             
         if len(mplayer_files) == 1:
             util.mount(media.mountdir)
             if movie_info:
-                media.videoinfo = copy.deepcopy(movie_info)
+                media.videoitem = copy.deepcopy(movie_info)
             else:
-                media.videoinfo = VideoItem(mplayer_files[0], None)
+                media.videoitem = VideoItem(mplayer_files[0], None)
             util.umount(media.mountdir)
-            media.videoinfo.media    = media
-            media.videoinfo.media_id = media.id
+            media.videoitem.media    = media
+            media.videoitem.media_id = media.id
             
             if title:
-                media.videoinfo.name = title
+                media.videoitem.name = title
             if image:
-                media.videoinfo.image = image
+                media.videoitem.image = image
             if more_info:
-                media.videoinfo.info = more_info
+                media.videoitem.info = more_info
             if fxd_file:
-                media.videoinfo.fxd_file = fxd_file
+                media.videoitem.fxd_file = fxd_file
                 
-        media.info.media = media
+        media.item.media = media
         return
 
 

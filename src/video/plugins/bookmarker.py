@@ -20,33 +20,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/17 20:30:19  dischi
+# use new metainfo
+#
 # Revision 1.8  2004/01/10 13:23:23  dischi
 # reflect self.fxd_file changes
 #
 # Revision 1.7  2003/12/29 22:08:54  dischi
 # move to new Item attributes
-#
-# Revision 1.6  2003/12/15 03:45:29  outlyer
-# Added onscreen notification of bookmark being added via mplayer's
-# osd_show_text... older versions of mplayer will ignore the command so
-# it should be a non-issue to add this in without checking the version.
-#
-# Revision 1.5  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.4  2003/09/20 09:50:07  dischi
-# cleanup
-#
-# Revision 1.3  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.2  2003/09/06 21:13:39  mikeruelle
-# fix a crash reported by denRDC
-#
-# Revision 1.1  2003/08/30 17:09:10  dischi
-# o video bookmarks are now handled inside this plugin
-# o support for auto bookmark: save positon when you STOP the playback
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -84,30 +65,10 @@ class PluginInterface(plugin.ItemPlugin):
     """
     class to handle auto bookmarks
     """
-    def __init__(self):
-        plugin.ItemPlugin.__init__(self)
-        self.VERSION = 1
-        self.file = os.path.join(config.FREEVO_CACHEDIR, 'autobookmarks-%s' % os.getuid())
-        try:
-            version, self.bookmarks = util.read_pickle(self.file)
-            if version != self.VERSION:
-                self.bookmarks = {}
-        except:
-            self.bookmarks = {}
-
-
-    def __get_auto_bookmark__(self, item):
-        try:
-            return self.bookmarks[item.getattr('item_id')][1]
-        except KeyError:
-            return 0
-        
-
     def actions(self, item):
         self.item = item
         items = []
-        ab = self.__get_auto_bookmark__(item)
-        if ab:
+        if item['autobookmark_resume']:
             items.append((self.resume, _('Resume playback')))
         if item.type == 'dir' or item.type == 'playlist':
             return items    
@@ -122,11 +83,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         resume playback
         """
-        ab = self.__get_auto_bookmark__(self.item)
-        if ab:
-            t = max(0, ab - 10)
-        else:
-            t = 0
+        t = max(0, self.item['autobookmark_resume'] - 10)
         if menuw:
             menuw.back_one_menu()
         self.item.play(menuw=menuw, arg='-ss %s' % t)
@@ -167,17 +124,13 @@ class PluginInterface(plugin.ItemPlugin):
         if event in (STOP, USER_END):
             if item.mode == 'file' and not item.variants and \
                    not item.subitems and item.elapsed:
-                self.bookmarks[item.getattr('item_id')] = (time.time, item.elapsed)
-                util.save_pickle((self.VERSION, self.bookmarks), self.file)
+                item.store_info('autobookmark_resume', item.elapsed)
             else:
                 _debug_('auto-bookmark not supported for this item')
                 
         if event == PLAY_END:
-            try:
-                del self.bookmarks[item.getattr('item_id')]
-                util.save_pickle((self.VERSION, self.bookmarks), self.file)
-            except:
-                pass
+            item.delete_info('autobookmark_resume')
+
 
         # Bookmark the current time into a file
         if event == STORE_BOOKMARK:
