@@ -41,6 +41,7 @@ __all__ = [ 'TvlistingArea' ]
 import copy
 import os
 import pyepg
+import gui
 
 import time
 import config
@@ -48,6 +49,7 @@ import math
 from area import Area
 from gui import Rectangle
 from record.client import recordings
+from record.types import *
 
 import logging
 log = logging.getLogger('gui')
@@ -74,8 +76,11 @@ class TvlistingArea(Area):
         self.last_settings = None
         self.last_items_geometry = None
         self.last_start_time = 0
+        self.chan_obj = []
+        self.time_obj = []
+        self.last_channels = None
         self.objects = []
-
+        
 
     def get_items_geometry(self, settings, obj):
         if self.last_settings == settings:
@@ -93,9 +98,10 @@ class TvlistingArea(Area):
         selected_val  = content.types['selected']
         default_val   = content.types['default']
         scheduled_val = content.types['scheduled']
+        conflict_val  = content.types['conflict']
 
         self.all_vals = label_val, head_val, selected_val, default_val, \
-                        scheduled_val
+                        scheduled_val, conflict_val
 
         font_h = max(selected_val.font.height, default_val.font.height,
                      label_val.font.height)
@@ -174,10 +180,101 @@ class TvlistingArea(Area):
 
 
     def clear(self):
-        for o in self.objects:
+        for o in self.objects + self.chan_obj + self.time_obj:
             if o:
                 o.unparent()
+        self.objects = []
+        self.chan_obj = []
+        self.time_obj = []
+        self.last_channels = None
 
+
+    def __draw_time_line(self, start_time, content, col_time, x0, y0,
+                         n_cols, col_size, height):
+        if self.last_start_time == start_time and self.time_obj:
+            return
+        for o in self.time_obj:
+            if o:
+                o.unparent()
+        timeformat = config.TV_TIMEFORMAT
+        if not timeformat:
+            timeformat = '%H:%M'
+        head_val = self.all_vals[1]
+
+        geo = Geometry( 0, 0, col_size, height )
+        if head_val.rectangle:
+            geo, rect = self.fit_item_in_rectangle( head_val.rectangle,
+                                                    col_size, height, height )
+
+        for i in range( n_cols ):
+            if head_val.rectangle:
+                self.time_obj.append(self.drawbox( math.floor(x0), y0,
+                                                   math.floor(col_size + x0)- \
+                                                   math.floor( x0 ) + 1,
+                                                   height + 1, rect ))
+
+            t_str = time.strftime( timeformat,
+                                   time.localtime(start_time + col_time*i*60 ))
+            self.time_obj.append(self.drawstring( t_str ,
+                                                 head_val.font, content,
+                                                 x=( x0 + geo.x ),
+                                                 y=( y0 + geo.y ),
+                                                 width=geo.width, height=-1,
+                                                 align_v='center',
+                                                 align_h=head_val.align))
+            x0 += col_size
+
+
+        
+
+    def __draw_channel_list(self, channel_list, content, y0, width, item_h,
+                            font_h):
+        for o in self.chan_obj:
+            if o:
+                o.unparent()
+        self.chan_obj = []
+                
+        label_val = self.all_vals[0]
+        for channel in channel_list:
+            ty0 = y0
+            tx0 = content.x
+
+            logo_geo = [ tx0, ty0, width, font_h ]
+
+            if label_val.rectangle:
+                r = self.calc_rectangle(label_val.rectangle, width,
+                                        item_h)[2]
+                if r.x < 0:
+                    tx0 -= r.x
+                if r.y < 0:
+                    ty0 -= r.y
+
+                self.chan_obj.append(self.drawbox(tx0 + r.x, ty0 + r.y,
+                                                  r.width+1, item_h, r))
+                logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
+                            r.height-2*r.size ]
+
+
+            channel_logo = None
+
+            channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
+            if os.path.isfile(channel_logo):
+                img = gui.imagelib.load(channel_logo, (None, None))
+                i = self.drawimage(img, (logo_geo[0], logo_geo[1]))
+                self.chan_obj.append(i)
+            else:  
+                self.chan_obj.append(self.drawstring(channel.name,
+                                                     label_val.font,
+                                                     content, x=tx0, y=ty0,
+                                                     width=r.width+2*r.x,
+                                                     height=item_h))
+
+            self.chan_obj.append(self.drawbox(tx0 + r.x, ty0 + r.y,
+                                              r.width+1, item_h, r))
+            y0 += item_h - 1
+
+
+    
     def update(self):
         """
         update the listing area
@@ -188,7 +285,11 @@ class TvlistingArea(Area):
         area      = self.area_values
         content   = self.calc_geometry(layout.content, copy_object=True)
 
-        self.clear()
+        for o in self.objects:
+            if o:
+                o.unparent()
+        self.objects = []
+
         # to_listing     = menu.table
         # n_cols   = len(to_listing[0])-1
 
@@ -200,7 +301,7 @@ class TvlistingArea(Area):
 
 
         label_val, head_val, selected_val, default_val, \
-                   scheduled_val = self.all_vals
+                   scheduled_val, conflict_val = self.all_vals
 
         leftarrow = None
         leftarrow_size = (0,0)
@@ -233,9 +334,6 @@ class TvlistingArea(Area):
 
         # Print the Date of the current list page
         dateformat = config.TV_DATEFORMAT
-        timeformat = config.TV_TIMEFORMAT
-        if not timeformat:
-            timeformat = '%H:%M'
         if not dateformat:
             dateformat = '%e-%b'
 
@@ -256,12 +354,6 @@ class TvlistingArea(Area):
         # 1 sec = x pixels
         prop_1sec = float(w_contents) / float(n_cols * col_time * 60)
         col_size = prop_1sec * 1800 # 30 minutes
-
-
-        ig = Geometry( 0, 0, col_size, head_h )
-        if head_val.rectangle:
-            ig, r2 = self.fit_item_in_rectangle( head_val.rectangle, col_size,
-                                                 head_h, head_h )
 
 
         self.objects.append(self.drawbox( x_contents - r.width,
@@ -293,75 +385,25 @@ class TvlistingArea(Area):
             start_time = menu.selected.start / (60 * col_time) * \
                          (60 * col_time)
 
+        # Print the time at the table's top
+        self.__draw_time_line(start_time, content, col_time, x_contents,
+                              y_contents - r.height, n_cols, col_size, head_h)
+
         self.last_start_time = start_time
         stop_time  = start_time + col_time * n_cols * 60
 
-        # Print the time at the table's top
-        x0 = x_contents
-        ty0 = y_contents - r.height
-        for i in range( n_cols ):
-            self.objects.append(self.drawbox( math.floor(x0), ty0,
-                                              math.floor( col_size + x0 ) - \
-                                              math.floor( x0 ) + 1,
-                                              head_h + 1, r2 ))
-
-            t_str = time.strftime( timeformat,
-                                   time.localtime(start_time + col_time*i*60 ))
-            self.objects.append(self.drawstring( t_str ,
-                                                 head_val.font, content,
-                                                 x=( x0 + ig.x ),
-                                                 y=( ty0 + ig.y ),
-                                                 width=ig.width, height=-1,
-                                                 align_v='center',
-                                                 align_h=head_val.align))
-            x0 += col_size
-
-
-        # selected program:
+        # get selected program and channel list:
         selected_prog = menu.selected
         start_channel = pyepg.channels.index(menu.channel)/num_rows*num_rows
+        channel_list  = pyepg.channels[start_channel:start_channel+num_rows]
 
-        for channel in pyepg.channels[start_channel:start_channel+num_rows]:
-            ty0 = y0
-            tx0 = content.x
-
-            logo_geo = [ tx0, ty0, label_width, font_h ]
-
-            if label_val.rectangle:
-                r = self.calc_rectangle(label_val.rectangle, label_width,
-                                        item_h)[2]
-                if r.x < 0:
-                    tx0 -= r.x
-                if r.y < 0:
-                    ty0 -= r.y
-
-                val = default_val
-
-                self.objects.append(self.drawbox(tx0 + r.x, ty0 + r.y,
-                                                 r.width+1, item_h, r))
-                logo_geo =[ tx0+r.x+r.size, ty0+r.y+r.size, r.width-2*r.size,
-                            r.height-2*r.size ]
-
-
-            channel_logo = None
-
-            # FIXME: there is no self.loadimage anymore
-            # channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
-            # if os.path.isfile(channel_logo):
-            #    channel_logo = self.loadimage(channel_logo, \
-            #                  (r.width+1-2*r.size,
-            #                   item_h-2*r.size))
-            # if channel_logo:
-            #    self.objects.append(self.drawimage(channel_logo, \
-            #                (logo_geo[0], logo_geo[1])))
-
-            self.objects.append(self.drawstring(channel.title, label_val.font,
-                                                content, x=tx0, y=ty0,
-                                                width=r.width+2*r.x,
-                                                height=item_h))
-
-            self.objects.append(self.drawbox(tx0 + r.x, ty0 + r.y,
-                                             r.width+1, item_h, r))
+        # draw the channel list
+        if self.last_channels != channel_list:
+            self.__draw_channel_list(channel_list, content, y0, label_width,
+                                     item_h, font_h)
+        self.last_channels = channel_list
+        
+        for channel in channel_list:
             try:
                 for prg in channel[start_time:stop_time]:
                     flag_left   = 0
@@ -388,9 +430,12 @@ class TvlistingArea(Area):
                     if prg == selected_prog:
                         val = selected_val
                     else:
-                        rs = recordings.get(prg.channel.id, prg.start, prg.stop)
-                        if rs and rs.status in ('scheduled', 'recordings', 'saved'):
+                        rs = recordings.get(prg.channel.id, prg.start,
+                                            prg.stop)
+                        if rs and rs.status in (SCHEDULED, RECORDING, SAVED):
                             val = scheduled_val
+                        elif rs and rs.status == CONFLICT:
+                            val = conflict_val
                         else:
                             val = default_val
 
