@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/30 19:14:53  dischi
+# add logo plugin
+#
 # Revision 1.8  2004/01/28 20:11:47  outlyer
 # Added 'dvd' and renamed audio -> audiocd since that's what it reports now.
 #
@@ -460,3 +463,14 @@ class holidays(IdleBarPlugin):
             return osd.draw_image(icon, (x, osd.y + 10, -1, -1))[0]
             
             
+
+class logo(IdleBarPlugin):
+    """
+    Display the freevo logo in the idlebar
+    """
+    def __init__(self, image='logo.png'):
+        IdleBarPlugin.__init__(self)
+        self.image = os.path.join(config.IMAGE_DIR, image)
+        
+    def draw(self, (type, object), x, osd):
+        return osd.draw_image(self.image, (x, osd.y + 5, 163, 80))[0]
