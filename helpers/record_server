@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while true
+do
+  echo "Starting record_server.py"
+  ./freevo execute ./src/tv/record_server.py
+  sleep 10
+done
