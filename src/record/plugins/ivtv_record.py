@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/08/08 19:07:08  rshortt
+# The first new recording plugin:
+#
+# -Asynchronous / non-blocking design, no threads.
+# -Relies on poll().
+# -Impliments an eventhandler.
+# -Will handle recordings on multiple devices.
+#
 # Revision 1.1  2004/08/05 17:35:40  dischi
 # move recordserver and plugins into extra dir
 #
@@ -76,120 +84,147 @@ import tv.ivtv
 import childapp 
 import plugin 
 import eventhandler
+from event import *
 import util.tv_util as tv_util
 
 from event import Event
-from tv.channels import FreevoChannels
+#from tv.channels import FreevoChannels
 
 DEBUG = config.DEBUG
 
 CHUNKSIZE = 65536
+#CHUNKSIZE = 450000
+
+class IVTVRecordSession:
+
+    def __init__(self, prog):
+        self.prog = prog
+        self.v_in = None
+        self.v_out = None
+        self.vdev = None
+        self.mode = 'idle'
 
 
-class PluginInterface(plugin.Plugin):
+    def poll(self):
+        if self.mode == 'idle':
+            pass
+                
+        elif self.mode == 'stop':
+            # do stopping stuff
+            self.v_in.close()
+            self.v_out.close()
+            self.vdev.close()
+            self.vdev = None
+            self.stop_time = 0
+
+            self.mode = 'over'
+
+            eventhandler.post(Event('RECORD_STOP', arg=self.prog))
+            if DEBUG: print('IVTV: finished recording')
+
+        elif self.mode == 'start':
+            eventhandler.post(Event('RECORD_START', arg=self.prog))
+            if DEBUG: print 'IVTV: started recording'
+
+            #fc = FreevoChannels()
+            #if DEBUG: print 'CHAN: %s' % fc.getChannel()
+
+            (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
+
+            self.vdev = tv.ivtv.IVTV(v_dev)
+
+            self.vdev.init_settings()
+            #vg = fc.getVideoGroup(self.prog.tunerid)
+
+            #if DEBUG: print 'Setting Input to %s' % vg.input_num
+            self.vdev.setinput(4)
+
+            if DEBUG: print 'Setting Channel to %s' % self.prog.tunerid
+            #fc.chanSet(str(self.prog.tunerid))
+
+            if DEBUG: self.vdev.print_settings()
+
+            self.stop_time = time.time() + self.prog.rec_duration
+
+            self.v_in  = open(v_dev, 'r', os.O_RDONLY | os.O_NONBLOCK)
+            self.v_out = open(self.prog.filename, 'w')
+
+            self.mode = 'recording'
+
+        elif self.mode == 'recording':
+            if time.time() >= self.stop_time:
+                self.mode = 'stop'
+
+            buf = self.v_in.read(CHUNKSIZE)
+            #buf = self.v_in.read()
+            self.v_out.write(buf)
+
+        else:
+            self.mode = 'idle'
+
+
+class PluginInterface(plugin.DaemonPlugin):
+
     def __init__(self):
-        plugin.Plugin.__init__(self)
+        plugin.DaemonPlugin.__init__(self)
+        self.poll_menu_only = False
+        self.poll_interval = 1
+        self.sessions = {}
+        self.event_listener = True
 
-        plugin.register(Recorder(), plugin.RECORD)
-
-
-class Recorder:
-
-    def __init__(self):
-        # Disable this plugin if not loaded by record_server.
-        if string.find(sys.argv[0], 'recordserver') == -1:
-            return
+        plugin.register(self, plugin.RECORD)
 
         if DEBUG: print 'ACTIVATING IVTV RECORD PLUGIN'
 
-        self.thread = Record_Thread()
-        self.thread.setDaemon(1)
-        self.thread.mode = 'idle'
-        self.thread.start()
-        
 
     def Record(self, rec_prog):
+        if DEBUG: print('IVTV: %s' % rec_prog)
+
         # It is safe to ignore config.TV_RECORDFILE_SUFFIX here.
         rec_prog.filename = os.path.splitext(tv_util.getProgFilename(rec_prog))[0] + '.mpeg'
 
-        self.thread.mode = 'record'
-        self.thread.prog = rec_prog
-        self.thread.mode_flag.set()
+        # XXX TODO:
+        #  1) Find out what URL the prog is on (ivtv:/ivtv0:/ivtv1:).
+        #  2) Key self.sessions based on available devices.
+        #  3) See if the one we'd like to use is free.
+        #  4) Start a recording session if we're allowed.
+        #  5) This should support multiple recordings from different cards.
+
+        if isinstance(self.sessions.get('ivtv'), IVTVRecordSession):
+            print 'Sorry, already recording on ivtv.'
+            return
+
+        self.sessions['ivtv'] = IVTVRecordSession(rec_prog)
+        self.sessions['ivtv'].mode = 'start'
         
-        if DEBUG: print('Recorder::Record: %s' % rec_prog)
-        
 
-    def Stop(self):
-        self.thread.mode = 'stop'
-        self.thread.mode_flag.set()
-
+    def Stop(self, sname):
+        session = self.sessions.get(sname)
+        if isinstance(session, IVTVRecordSession):
+            session.mode = 'stop'
 
 
-class Record_Thread(threading.Thread):
+    def poll(self):
+        # if DEBUG: print 'IVTV: poll!'
+        for s_k, s_v in self.sessions.items():
+            s_v.poll()
+            if s_v.mode == 'over':
+                if DEBUG: print 'IVTV: found a finished job, deleting'
+                del self.sessions[s_k]
+                if DEBUG: print 'IVTV: sessions - %s' % self.sessions.keys()
 
-    def __init__(self):
-        threading.Thread.__init__(self)
-        
-        self.mode = 'idle'
-        self.mode_flag = threading.Event()
-        self.prog = None
-        self.app = None
+
+    def eventhandler(self, event):
+        if DEBUG: print 'IVTV: recorder heard event %s' % str(event)
+
+        if event == RECORD:
+            self.Record(event.arg)
+
+        elif event == STOP_RECORDING:
+            self.Stop('ivtv')
 
 
-    def run(self):
-        while 1:
-            if DEBUG: print('Record_Thread::run: mode=%s' % self.mode)
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-                
-            elif self.mode == 'record':
-                eventhandler.post(Event('RECORD_START', arg=self.prog))
-                if DEBUG: print 'Record_Thread::run: started recording'
 
-                fc = FreevoChannels()
-                if DEBUG: print 'CHAN: %s' % fc.getChannel()
 
-                (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
 
-                v = tv.ivtv.IVTV(v_dev)
 
-                v.init_settings()
-                vg = fc.getVideoGroup(self.prog.tunerid)
-
-                if DEBUG: print 'Setting Input to %s' % vg.input_num
-                v.setinput(vg.input_num)
-
-                if DEBUG: print 'Setting Channel to %s' % self.prog.tunerid
-                fc.chanSet(str(self.prog.tunerid))
-
-                if DEBUG: v.print_settings()
-
-                now = time.time()
-                stop = now + self.prog.rec_duration
-
-                time.sleep(2)
-
-                v_in  = open(v_dev, 'r')
-                v_out = open(self.prog.filename, 'w')
-
-                while time.time() < stop:
-                    buf = v_in.read(CHUNKSIZE)
-                    v_out.write(buf)
-                    if self.mode == 'stop':
-                        break
-
-                v_in.close()
-                v_out.close()
-                v.close()
-                v = None
-
-                self.mode = 'idle'
-
-                eventhandler.post(Event('RECORD_STOP', arg=self.prog))
-                if DEBUG: print('Record_Thread::run: finished recording')
-
-            else:
-                self.mode = 'idle'
-
-            time.sleep(0.5)
