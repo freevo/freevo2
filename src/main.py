@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.126  2004/06/06 10:31:42  dischi
+# make it possible to shut down freevo on crash
+#
 # Revision 1.125  2004/06/06 08:31:15  dischi
 # check for mmpython version
 #
@@ -329,15 +332,21 @@ class MainTread:
                 except:
                     if config.FREEVO_EVENTHANDLER_SANDBOX:
                         traceback.print_exc()
-                        from gui import AlertBox
-                        pop = AlertBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
-                                              'look at the logfile and report the bug to ' \
-                                              'the Freevo mailing list. The state of '\
-                                              'Freevo may be corrupt now and this error '\
-                                              'could cause more errors until you restart '\
-                                              'Freevo.\n\nLogfile: %s\n\n') % \
-                                       (event, sys.stdout.logfile),
-                                       width=osd.width-2*config.OSD_OVERSCAN_X-50)
+                        from gui import ConfirmBox
+                        pop = ConfirmBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
+                                                'look at the logfile and report the bug to ' \
+                                                'the Freevo mailing list. The state of '\
+                                                'Freevo may be corrupt now and this error '\
+                                                'could cause more errors until you restart '\
+                                                'Freevo.\n\nLogfile: %s\n\n') % \
+                                         (event, sys.stdout.logfile),
+                                         width=osd.width-2*config.OSD_OVERSCAN_X-50,
+                                         handler=shutdown,
+                                         handler_message = _('shutting down...'))
+                        pop.b0.set_text(_('Shutdown'))
+                        pop.b0.toggle_selected()
+                        pop.b1.set_text(_('Continue'))
+                        pop.b1.toggle_selected()
                         pop.show()
                     else:
                         raise 
