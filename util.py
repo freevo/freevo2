@@ -80,30 +80,11 @@ def log(str):
 def pngsize(file):
     if not os.path.isfile(file):
         return 200,200
-    
     import Image
     image = Image.open(file)
     width, height = image.size
     return width,height
 
-
-def thumb(file,x0=25,y0=25):
-	import Image
-	import fchksum   # Since the filenames are not unique we need
-			 # to cache them by content, not name.
-	# Cache the thumbnails
-	# thumbnail file is checksum.png
-	#mythumb = config.FREEVO_CACHEDIR + os.path.basename(file) + '.thumb'
-	mythumb = config.FREEVO_CACHEDIR + os.path.basename(fchksum.fcrc32t(file)[0]) + '.png'
-	if os.path.isfile(mythumb):
-		return mythumb
-	else:
-		im = Image.open(file)
-		im.thumbnail((x0,y0))
-		im.save(mythumb,'PNG')
-		return mythumb
-
-		
 def resize(file,x0=25,y0=25):
 	import Image
 	import fchksum   # Since the filenames are not unique we need

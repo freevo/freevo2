@@ -109,8 +109,8 @@ class Skin(skin_test1.Skin):
 	    h = 0
 	    if choice.icon != None: 
  		if choice.scale == 1:
-			w,h = util.pngsize(util.thumb(choice.icon))
-			osd.drawbitmap(util.thumb(choice.icon), x0, y0)
+			w,h = util.pngsize(util.resize(choice.icon))
+			osd.drawbitmap(util.resize(choice.icon), x0, y0)
 		else:
 			w,h = util.pngsize(choice.icon)	
 			osd.drawbitmap(choice.icon,x0,y0)
