@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/11 15:49:12  mikeruelle
+# great patch from tcwan to fix off by one and start the time menus sensibly
+#
 # Revision 1.6  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -37,6 +40,7 @@
 # ----------------------------------------------------------------------- */
 
 
+import calendar
 import time, traceback, sys
 from time import gmtime, strftime
 
@@ -79,6 +83,14 @@ class ManualRecordItem(Item):
 
         self.months = [ _('Jan'), _('Feb'), _('Mar'), _('Apr'), _('May'), _('Jun'), _('Jul'), _('Aug'), _('Sep'), _('Oct'), _('Nov'), _('Dec') ]
     
+        now = time.time()
+        now += 300
+	self.startnow = now
+        self.starttime = time.localtime(now)
+        now += 1900
+	self.stopnow = now
+        self.stoptime = time.localtime(now)
+
     def make_newprog(self):
         self.prog = TvProgram()
 
@@ -90,23 +102,20 @@ class ManualRecordItem(Item):
         self.prog.channel_id = config.TV_CHANNELS[0][0]
 	self.disp_channel = config.TV_CHANNELS[0][1]
 
-        now = time.time()
-        now += 300
-        starttime = time.localtime(now)
-        self.start_month = starttime[1]
-	self.disp_start_month = self.months[self.start_month]
-        self.start_day   = starttime[2]
-        self.start_time  = time.strftime(config.TV_TIMEFORMAT, starttime)
-        self.prog.start  = now
+	#self.start_year = self.starttime[0]
+        self.start_month = self.starttime[1]
+	self.disp_start_month = self.months[self.start_month - 1]
+        self.start_day   = self.starttime[2]
+        self.start_time  = time.strftime(config.TV_TIMEFORMAT, self.starttime)
+        self.prog.start  = self.startnow
 	self.disp_starttime = '%s %s %s' % (self.disp_start_month, self.start_day, self.start_time)
 
-        now += 1900
-        stoptime = time.localtime(now)
-        self.stop_month = stoptime[1]
-	self.disp_stop_month = self.months[self.stop_month]
-        self.stop_day   = stoptime[2]
-        self.stop_time  = time.strftime(config.TV_TIMEFORMAT, stoptime)
-        self.prog.stop  = now
+	#self.stop_year = self.stoptime[0]
+        self.stop_month = self.stoptime[1]
+	self.disp_stop_month = self.months[self.stop_month - 1]
+        self.stop_day   = self.stoptime[2]
+        self.stop_time  = time.strftime(config.TV_TIMEFORMAT, self.stoptime)
+        self.prog.stop  = self.stopnow
 	self.disp_stoptime = '%s %s %s' % (self.disp_stop_month, self.stop_day, self.stop_time)
 
     def actions(self):
@@ -158,9 +167,9 @@ class ManualRecordItem(Item):
         items = []
 
         iter=1
-        for m in self.months:
-            items.append(menu.MenuItem(m, action=self.alter_prop,
-                         arg=('startmonth', (m,iter))))
+	while iter < 13:
+            items.append(menu.MenuItem(self.months[(iter + self.starttime[1] - 1) % 12 - 1], action=self.alter_prop,
+                         arg=('startmonth', (self.months[(iter + self.starttime[1] - 1) % 12 - 1], (iter + self.starttime[1] - 1) % 12))))
             iter = iter + 1
 
         manualrecord_menu = menu.Menu(_('Modify Day'), items,
@@ -173,10 +182,16 @@ class ManualRecordItem(Item):
     def mod_start_day(self, arg=None, menuw=None):
         items = []
 
+	numdays = calendar.monthrange(self.starttime[0], self.start_month)[1]
+	daylimit = numdays + 1
         iter=1
-        while iter < 32:
-            items.append(menu.MenuItem(str(iter), action=self.alter_prop,
-                         arg=('startday', iter)))
+        while iter < daylimit:
+	    newday = (iter + self.starttime[2] - 1)
+	    currday = newday % daylimit
+	    if newday >= daylimit:
+	        currday += 1
+            items.append(menu.MenuItem(str(currday), action=self.alter_prop,
+                         arg=('startday', currday)))
             iter = iter + 1
 
         manualrecord_menu = menu.Menu(_('Modify Day'), items,
@@ -189,8 +204,12 @@ class ManualRecordItem(Item):
     def mod_start_time(self, arg=None, menuw=None):
         items = []
 
+	currminutes = self.starttime[3]*60 + self.starttime[4]
+	minpadding = 5 - (currminutes % 5)
+	if minpadding == 5:
+	    minpadding = 0
         for i in range(288):
-            mod = i * 5
+            mod = (i * 5 + currminutes + minpadding) % 1440
             showtime = strftime(config.TV_TIMEFORMAT, gmtime(float(mod * 60)))
             items.append(menu.MenuItem(showtime, 
                                        action=self.alter_prop,
@@ -207,9 +226,9 @@ class ManualRecordItem(Item):
         items = []
 
         iter=1
-        for m in self.months:
-            items.append(menu.MenuItem(m, action=self.alter_prop,
-                         arg=('stopmonth', (m,iter))))
+	while iter < 13:
+            items.append(menu.MenuItem(self.months[(iter + self.stoptime[1] - 1) % 12 - 1], action=self.alter_prop,
+                         arg=('stopmonth', (self.months[(iter + self.stoptime[1] - 1) % 12 - 1], (iter + self.stoptime[1] - 1) % 12))))
             iter = iter + 1
 
         manualrecord_menu = menu.Menu(_('Modify Day'), items,
@@ -222,10 +241,16 @@ class ManualRecordItem(Item):
     def mod_stop_day(self, arg=None, menuw=None):
         items = []
 
+	numdays = calendar.monthrange(self.stoptime[0], self.stop_month)[1]
+	daylimit = numdays + 1
         iter=1
-        while iter < 32:
-            items.append(menu.MenuItem(str(iter), action=self.alter_prop,
-                         arg=('stopday', iter)))
+        while iter < daylimit:
+	    newday = (iter + self.starttime[2] - 1)
+	    currday = newday % daylimit
+	    if newday >= daylimit:
+	        currday += 1
+            items.append(menu.MenuItem(str(currday), action=self.alter_prop,
+                         arg=('stopday', currday)))
             iter = iter + 1
 
         manualrecord_menu = menu.Menu(_('Modify Day'), items,
@@ -238,8 +263,12 @@ class ManualRecordItem(Item):
     def mod_stop_time(self, arg=None, menuw=None):
         items = []
 
+	currminutes = self.starttime[3]*60 + self.starttime[4]
+	minpadding = 5 - (currminutes % 5)
+	if minpadding == 5:
+	    minpadding = 0
         for i in range(288):
-            mod = i * 5
+            mod = (i * 5 + currminutes + minpadding) % 1440
             showtime = strftime(config.TV_TIMEFORMAT, gmtime(float(mod * 60)))
             items.append(menu.MenuItem(showtime, 
                                        action=self.alter_prop,
