@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/01 12:53:27  dischi
+# added more information to plugin draw()
+#
 # Revision 1.5  2003/04/27 17:59:41  dischi
 # use new poll interface
 #
@@ -87,7 +90,7 @@ class interface(plugin.DaemonPlugin):
         self.plugins = None
 
         
-    def draw(self):
+    def draw(self, (type, object)):
         if not self.toolbar_surface:
             osd.drawbox(0,0,osd.width,75,color=0x80000000,width=-1)
             self.toolbar_surface = osd.getsurface(0,0,osd.width,75)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.96  2003/05/01 12:53:25  dischi
+# added more information to plugin draw()
+#
 # Revision 1.95  2003/04/24 19:57:52  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -492,7 +495,7 @@ class Skin:
 
 
         for p in self.plugin_refresh:
-            p.draw()
+            p.draw((type, object))
 
             
         osd.update()
