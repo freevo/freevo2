@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/05/29 23:01:03  mikeruelle
+# make better use of freevo channels. getting better video group support slowly
+#
 # Revision 1.34  2004/03/22 01:24:40  mikeruelle
 # tv channel padding so that the big number in tvtime is what us cable channel it is. channels must be in order to use this
 #
@@ -430,7 +433,6 @@ class TVTime:
     __igainvol = 0
     
     def __init__(self):
-        self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
 	self.fc = FreevoChannels()
         self.current_vg = None
@@ -439,52 +441,18 @@ class TVTime:
         for pos in range(len(config.TV_CHANNELS)):
             channel = config.TV_CHANNELS[pos]
             if channel[2] == tuner_channel:
-                self.tuner_chidx = pos
-                return
+                return pos
         print 'ERROR: Cannot find tuner channel "%s" in the TV channel listing' % tuner_channel
-        self.tuner_chidx = 0
-
+        return 0
 
     def TunerGetChannelInfo(self):
-        '''Get program info for the current channel'''
-        
-        tuner_id = config.TV_CHANNELS[self.tuner_chidx][2]
-        chan_name = config.TV_CHANNELS[self.tuner_chidx][1]
-        chan_id = config.TV_CHANNELS[self.tuner_chidx][0]
-
-        channels = epg.get_guide().GetPrograms(start=time.time(),
-                                               stop=time.time(), chanids=[chan_id])
-
-        if channels and channels[0] and channels[0].programs:
-            start_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].start))
-            stop_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].stop))
-            ts = '(%s-%s)' % (start_s, stop_s)
-            prog_info = '%s %s' % (ts, channels[0].programs[0].title)
-        else:
-            prog_info = 'No info'
-            
-        return tuner_id, chan_name, prog_info
-
+        return self.fc.getChannelInfo()
 
     def TunerGetChannel(self):
-        return config.TV_CHANNELS[self.tuner_chidx][2]
+        return self.fc.getChannel()
 
-
-    def TunerNextChannel(self):
-        self.tuner_chidx = (self.tuner_chidx+1) % len(config.TV_CHANNELS)
-
-
-    def TunerPrevChannel(self):
-        self.tuner_chidx = (self.tuner_chidx-1) % len(config.TV_CHANNELS)
-
-        
     def Play(self, mode, tuner_channel=None, channel_change=0):
 
-        if tuner_channel != None:
-            try:
-                self.TunerSetChannel(tuner_channel)
-            except ValueError:
-                pass
         if not tuner_channel:
             tuner_channel = self.fc.getChannel()
         vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
@@ -515,10 +483,14 @@ class TVTime:
 		if hasattr(config, "TV_VCR_INPUT_NUM") and config.TV_VCR_INPUT_NUM:
 		    cf_input = config.TV_VCR_INPUT_NUM
 
+            self.fc.chan_index = self.TunerSetChannel(tuner_channel)
+
             if hasattr(config, 'TV_PAD_CHAN_NUMBERS') and config.TV_PAD_CHAN_NUMBERS:
 	        mychan = tuner_channel
             else:
-	        mychan = self.tuner_chidx
+	        mychan = self.fc.chan_index
+
+            _debug_('starting channel is %s' % mychan)
 
             command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s -i %s' % (config.TVTIME_CMD,
                                                                    outputplugin,
@@ -598,31 +570,30 @@ class TVTime:
             if self.mode == 'vcr':
                 return
              
-	    # XXX hazardous to your health. don't use tvtime with anything
-	    # other than one normal video_group.
-	    # we lose track of the channel index at some points and
-	    # chaos ensues
-            #if event == em.TV_CHANNEL_UP:
-            #    nextchan = self.fc.getNextChannel()
-            #elif event == em.TV_CHANNEL_DOWN:
-            #    nextchan = self.fc.getPrevChannel()
-            #nextvg = self.fc.getVideoGroup(nextchan)
-                                                                                
+            if event == em.TV_CHANNEL_UP:
+                nextchan = self.fc.getNextChannel()
+            elif event == em.TV_CHANNEL_DOWN:
+                nextchan = self.fc.getPrevChannel()
+            nextvg = self.fc.getVideoGroup(nextchan)
+            _debug_("nextchan is %s" % nextchan)
+
+            # XXX hazardous to your health. don't use tvtime with anything
+            # other than one normal video_group.
+            # we lose track of the channel index at some points and
+            # chaos ensues
             #if self.current_vg != nextvg:
             #    self.Stop(channel_change=1)
             #    self.Play('tv', nextchan)
             #    return TRUE
 
+	    self.fc.chanSet(nextchan, app=self.app)
+	    #self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
+
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
-                self.TunerPrevChannel()
-                self.app.setchannel('UP')
+                self.app.write('CHANNEL_UP\n')
             else:
-                self.TunerNextChannel()
-                self.app.setchannel('DOWN')
-	    
-	    #self.fc.chanSet(nextchan, app=self.app)
-	    #self.current_vg = self.fc.getVideoGroup(self.fc.getChannel())
+                self.app.write('CHANNEL_DOWN\n')
 
             return True
             
@@ -740,6 +711,3 @@ class TVTimeApp(childapp.ChildApp2):
             except ValueError:
                 pass # File closed
 
-    def setchannel(self, channelno):
-        cmd = 'CHANNEL_%s\n' % channelno
-        self.write(cmd)
