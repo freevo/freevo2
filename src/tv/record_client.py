@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/03/13 18:31:51  rshortt
+# Lets see traceback and exception.  We should clean this file up further.
+#
 # Revision 1.16  2004/03/08 19:15:49  dischi
 # use our marmalade
 #
@@ -111,7 +114,9 @@ def saveScheduledRecordings(scheduledRecordings):
 def connectionTest(teststr='testing'):
     try:
         (status, message) = server.echotest(teststr)
-    except:
+    except Exception, e:
+        print e
+        traceback.print_exc()
         return (FALSE, 'record_client: '+_('connection error'))
 
     return (status, message)
