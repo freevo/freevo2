@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/20 18:31:02  dischi
+# except on IOError if config.LIRCRC doesn't exists
+#
 # Revision 1.6  2003/02/19 17:15:15  outlyer
 # The idletool needs to know what function we're running so it doesn't try
 # to draw when a movie is playing, however, if music is playing, it can still
@@ -167,6 +170,9 @@ class RemoteControl:
                 pylirc.blocking(0)
             except RuntimeError:
                 print 'WARNING: Could not initialize PyLirc!'
+                self.pylirc = 0
+            except IOError:
+                print 'WARNING: %s not found!' % config.LIRCRC
                 self.pylirc = 0
         self.app = None
         self.func = None
