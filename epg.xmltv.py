@@ -96,8 +96,10 @@ def download_guide():
        		   (nowtime <= (strptime.strptime(i['stop'], xmltv.date_format))) :
 			c = string.split(i['channel'])
 			t = i['title'][0][0].encode('Latin-1')
-			d = (calendar.timegm(strptime.strptime(i['start'],xmltv.date_format)),'','0.11')
-		 	lines.append((c[0],c[1],t,d),(c[0],c[1],t,d),(c[0],c[1],t,d))
+			d = calendar.timegm(strptime.strptime(i['start'],xmltv.date_format))
+			program = (int(c[0]),c[1],t,d)
+			channel = program
+		 	lines.append([channel])
 
 	guide = Dummy()
 	guide.timestamp = time.time()
@@ -171,11 +173,12 @@ if __name__ == '__main__':
 
     print g.programs
     for channel in g.programs:
-    	p = channel
         for p in channel:
+		print p
+		#print p[3]
         	hh = time.localtime(p[3])[3]
         	mm = time.localtime(p[3])[4]
         	print '%3d %-10s %-30.30s %2d.%02d' % (p[0], p[1], p[2], hh, mm)
-       	 	print
+       	print
     
 
