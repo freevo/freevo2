@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/01/25 14:55:05  dischi
+# use overlay dir for covers
+#
 # Revision 1.28  2004/01/02 14:17:42  dischi
 # bugfix to reflect latest changes
 #
@@ -85,7 +88,7 @@ class AudioDiskItem(Playlist):
         # variables only for DirItem
         self.display_type = display_type
 
-        cover = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR, disc_id)
+        cover = '%s/disc/metadata/%s.jpg' % (config.OVERLAY_DIR, disc_id)
         if os.path.isfile(cover):
             self.image = cover
             
@@ -106,7 +109,7 @@ class AudioDiskItem(Playlist):
         number = len(self.info['tracks'])
         if hasattr(self.info, 'mixed'):
             number -= 1
-            
+
         for i in range(0, number):
             title=self.info['tracks'][i]['title']
             item = AudioItem('cdda://%d' % (i+1), self, title, scan=False)
