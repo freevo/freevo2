@@ -48,3 +48,9 @@ lib/$(PYNOTIFIER):
 	@echo installing $(PYNOTIFIER)
 	@(cd lib && wget --passive-ftp $(URL)$(PYNOTIFIER).tar.gz && \
 		tar -zxf $(PYNOTIFIER).tar.gz && rm $(PYNOTIFIER).tar.gz )
+
+install:
+	for package in $(PYNOTIFIER) $(PYMBUS) pyepg pyimlib2 mevas; do \
+		(cd lib/$$package; rm -rf build ; python setup.py install); done
+	rm -rf build
+	python setup.py install
