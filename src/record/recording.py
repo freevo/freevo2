@@ -77,10 +77,12 @@ class Recording:
         for i in info:
             if i in ('subtitle', 'url'):
                 setattr(self, i, info[i])
-            if i == 'start-padding':
+            elif i == 'start-padding':
                 i.start_padding = int(info[i])
-            if i == 'stop-padding':
+            elif i == 'stop-padding':
                 i.stop_padding = int(info[i])
+            else:
+                self.info[i] = info[i]
         self.recorder = None
 
 
@@ -100,7 +102,7 @@ class Recording:
         if self.subtitle:
             info['subtitle'] = self.subtitle
         if self.url:
-            info['url'] = url
+            info['url'] = self.url
         return self.id, self.name, self.channel, self.priority, self.start, \
                self.stop, self.status, self.start_padding, self.stop_padding, \
                info
@@ -146,7 +148,7 @@ class Recording:
         return '%3d %10s %-25s %4d %s-%s %s' % \
                (self.id, String(channel), String(name),
                 self.priority, _int2time(self.start)[4:],
-                _int2time(self.stop)[9:], status)
+                _int2time(self.stop)[9:], String(status))
 
 
     def __fxd__(self, fxd):
