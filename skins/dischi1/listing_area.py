@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/04/02 11:53:30  dischi
+# small enhancements
+#
 # Revision 1.19  2003/03/30 14:10:15  dischi
 # Added left/right icons and set the label width to the fixed value specified
 # in the xml file. The channel icons will be scaled to fill that space.
@@ -125,6 +128,9 @@ class Listing_Area(Skin_Area):
         if not len(menu.choices):
             return self.last_get_items_geometry[1]
 
+        if self.last_get_items_geometry[0] == ( menu, settings, display_style ):
+            return self.last_get_items_geometry[1]
+        
         # store the old values in case we are called by ItemsPerMenuPage
         backup = ( self.area_val, self.layout)
 
@@ -136,11 +142,7 @@ class Listing_Area(Skin_Area):
 
         content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
 
-        if self.last_get_items_geometry[0] == ( menu, content, display_style ):
-            self.area_val, self.layout = backup
-            return self.last_get_items_geometry[1]
-        
-        self.last_get_items_geometry[0] = ( menu, content, display_style )
+        self.last_get_items_geometry[0] = ( menu, settings, display_style )
         
         if content.type == 'text':
             items_w = content.width
@@ -291,14 +293,14 @@ class Listing_Area(Skin_Area):
             
         for choice in menuw.menu_items:
             if choice == menu.selected:
-                if content.types.has_key('% selected' % choice.type):
+                try:
                     val = content.types['% selected' % choice.type]
-                else:
+                except:
                     val = content.types['selected']
             else:
-                if content.types.has_key(choice.type):
+                try:
                     val = content.types[choice.type]
-                else:
+                except:
                     val = content.types['default']
 
             text = choice.name
@@ -359,10 +361,9 @@ class Listing_Area(Skin_Area):
                     r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
-                image = format_image(settings, choice, val.width, val.height, force=TRUE)
+                image, i_w, i_h = format_image(settings, choice, val.width,
+                                               val.height, force=TRUE)
                 if image:
-                    i_w, i_h = image.get_size()
-
                     addx = 0
                     addy = 0
                     if val.align == 'center' and i_w < val.width:

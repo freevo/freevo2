@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/04/02 11:53:30  dischi
+# small enhancements
+#
 # Revision 1.6  2003/03/18 09:37:00  dischi
 # Added viewitem and infoitem to the menu to set an item which image/info
 # to take (only for the new skin)
@@ -88,6 +91,7 @@ class View_Area(Skin_Area):
         """
         update the view area
         """
+
         item = self.viewitem
         
         layout    = self.layout
@@ -132,13 +136,11 @@ class View_Area(Skin_Area):
         addx = content.x + content.spacing
         addy = content.y + content.spacing
 
-        image = format_image(self.settings, item, width, height)
+        image, i_w, i_h = format_image(self.settings, item, width, height)
 
         if not image:
             return
         
-        i_w, i_h = image.get_size()
-
         if content.align == 'center' and i_w < width:
             addx += (width - i_w) / 2
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/04/02 11:53:30  dischi
+# small enhancements
+#
 # Revision 1.7  2003/03/19 11:00:29  dischi
 # cache images inside the area and some bugfixes to speed up things
 #
@@ -85,7 +88,7 @@ def format_image(settings, item, width, height, force=0):
 
     if not image:
         if not force:
-            return None
+            return None, 0, 0
 
         if hasattr(item, 'media') and item.media and item.media.info == item and \
            os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)):
@@ -104,11 +107,11 @@ def format_image(settings, item, width, height, force=0):
             image = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
 
         if not image:
-            return
+            return None, 0, 0
 
         image = osd.loadbitmap('thumb://%s' % image)
         if not image:
-            return
+            return None, 0, 0
 
     else:
         force = 0
@@ -130,7 +133,7 @@ def format_image(settings, item, width, height, force=0):
         else:
             height = int(float(width * i_h) / i_w)
 
-    cimage = pygame.transform.scale(image, (width, height))
+    cimage = pygame.transform.scale(image, (width, height)), width, height
     format_imagecache[cname] = cimage
     return cimage
     

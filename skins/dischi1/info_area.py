@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/02 11:53:30  dischi
+# small enhancements
+#
 # Revision 1.10  2003/03/22 22:20:06  dischi
 # fixed table handling
 #
@@ -105,6 +108,7 @@ class Info_Area(Skin_Area):
         """
         update the info area
         """
+
         content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
         item      = self.infoitem
 
