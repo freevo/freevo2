@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/08/11 13:11:32  outlyer
+# Synced with latest xmltv.py; also, use Python 2.3 strptime if it's available
+# since it's better than the version we include, and also beter than 2.2.
+#
+# Please try this new xmltv parser; it worked nicely on my end.
+#
 # Revision 1.21  2003/07/06 14:10:41  outlyer
 # Reclaim stdout from config.
 #
@@ -115,7 +121,13 @@ import config
 import util
 
 # Use the alternate strptime module which seems to handle time zones
-import strptime
+#
+# XXX Remove when we are ready to require Python 2.3
+if float(sys.version[0:3]) < 2.3:
+    import strptime
+else:
+    print "Using Python 2.3 strptime"
+    import _strptime as strptime
 
 # The XMLTV handler from openpvr.sourceforge.net
 import xmltv
@@ -380,7 +392,7 @@ def timestr2secs_utc(str):
         # handle time zones. There is no obvious function that does. Therefore
         # this bug is left in for someone else to solve.
 
-        secs = time.mktime(strptime.strptime(str, xmltv.date_format_tz))
+        secs = time.mktime(strptime.strptime(str, xmltv.date_format))
 
     return secs
 
