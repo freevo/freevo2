@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/07/07 21:51:44  dischi
+# add mmpython info to VideoItems with subitems (take infos from first item)
+#
 # Revision 1.23  2003/06/30 15:30:54  dischi
 # some checking to avoid endless scanning
 #
@@ -603,6 +606,13 @@ def parseMovieFile(file, parent, duplicate_check):
                 if m.info[i]:
                     mminfo[i] = m.info[i]
             m.info = mminfo
+        elif m.subitems and os.path.isfile(m.subitems[0].filename):
+            mminfo = mmpython.parse(m.subitems[0].filename)
+            for i in m.info:
+                if m.info[i]:
+                    mminfo[i] = m.info[i]
+            m.info = mminfo
+
     return movies
 
 
