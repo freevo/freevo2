@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2003/04/17 21:25:59  dischi
+# check for plugins with osd update
+#
 # Revision 1.89  2003/04/13 10:35:40  dischi
 # cleanup of unneeded stuff in menu.py
 #
@@ -78,6 +81,7 @@ from tvlisting_area import TVListing_Area
 from view_area import View_Area
 from info_area import Info_Area
 
+import plugin
 
 
 class Screen_Area(Skin_Area):
@@ -213,8 +217,9 @@ class Skin:
                 if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
                 self.settings.load(local_skin)
                 break
-        
 
+        self.plugin_refresh = None
+                
     
     def LoadSettings(self, dir, copy_content = 1):
         """
@@ -409,6 +414,12 @@ class Skin:
         the audio player
         """
 
+        if self.plugin_refresh == None:
+            self.plugin_refresh = []
+            for p in plugin.get('daemon'):        
+                if p.osd:
+                    self.plugin_refresh.append(p)
+
         if type == 'menu':
             menuw = object
             
@@ -466,6 +477,9 @@ class Skin:
         if type == 'tv':
             self.listing_area = l
 
+        for p in self.plugin_refresh:
+            p.refresh()
+            
         osd.update()
         self.force_redraw = FALSE
 
