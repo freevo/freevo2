@@ -13,6 +13,12 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/08/04 03:02:03  gsbarbieri
+# Changes from Magnus:
+#    * Progress bar
+#    * Animation
+#    * UnicodeError handling
+#
 # Revision 1.1  2003/07/23 07:16:00  gsbarbieri
 # New plugin: LCD
 # This plugin show the selected menu item and some info about it and info
@@ -49,6 +55,11 @@ import config
 
 # Configuration: (Should move to freevo_conf.py?)
 sep_str = " | " # use as separator between two strings. Like: "Length: 123<sep_str>Plot: ..."
+
+# Animaton-Sequence used in audio playback
+# Some displays (like the CrytstalFontz) do display the \ as a /
+animation_audioplayer_chars = ['-','\\','|','/']
+
 
 # menu_info: information to be shown when in menu
 # Structure:
@@ -180,10 +191,18 @@ layouts = { 4 : # 4 lines display
                                 "9 3 %d 3 h 2 \"%s\"",
                                 "( self.width, player.getattr('artist') )" ),
                 "time_v"    : ( "string",
-                                "2 4 '% 2d:%02d/% 2d:%02d (% 2d%%)'",
+                                "2 4 '% 2d:%02d/% 2d:%02d ( %2d%%)'",
                                 "( int(player.length / 60), int(player.length % 60)," +
                                 " int(player.elapsed / 60), int(player.elapsed % 60)," +
-                                " int(player.elapsed * 100 / player.length) )" )
+                                " int(player.elapsed * 100 / player.length) )" ),
+                # If the display is 40 chars wide show a progress bar:
+                "timebar1_v": ( "string", "21 4 '['", None),
+                "timebar2_v": ( "string", "40 4 ']'", None),
+                "timebar3_v": ( "hbar",
+                                "22 4 '%d'","(int(player.elapsed *90 / player.length))"),
+                # animation at the begining of the time line
+                "animation_v": ( "string", "1 4 '%s'",
+                "animation_audioplayer_chars[player.elapsed % len(animation_audioplayer_chars)]")
                 },
               
               "tv"            :
@@ -351,7 +370,18 @@ class PluginInterface( plugin.DaemonPlugin ):
                 pass
 
             self.lsv[ k ] = param
-            self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
+            try:
+                self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
+            except UnicodeError:
+                # Comment from Magnus:
+                # With param.encode python crashes with:
+                # File "src/plugins/lcd.py", line 364, in draw
+                #    self.lcd.widget_set( sname, w, param.encode( 'latin1' ) )
+                # UnicodeError: ASCII decoding error: ordinal not in range(128)
+                # when a file contains a german encoding for an umlaut, eg 'oe',
+                # which is then converted to 'ö', however without the param.encode
+                # the umlaut gets still magically converted ?!
+                self.lcd.widget_set( sname, w, param )
 
         if self.last_screen != sname:
             self.lcd.screen_set( self.last_screen, "-priority 128" )
