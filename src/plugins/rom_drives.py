@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/09/23 13:45:20  outlyer
+# Making more informational text quiet by default.
+#
 # Revision 1.33  2003/09/21 13:32:10  dischi
 # fix smart disc naming
 #
@@ -295,7 +298,7 @@ class RemovableMedia:
                 dir = 'open'
 
         if dir == 'open':
-            _debug_('Ejecting disc in drive %s' % self.drivename)
+            _debug_('Ejecting disc in drive %s' % self.drivename,2)
 
             if notify:
                 pop = PopupBox(text=_('Ejecting disc in drive %s') % self.drivename) 
@@ -328,7 +331,7 @@ class RemovableMedia:
 
         
         elif dir == 'close':
-            _debug_('Inserting %s' % self.drivename)
+            _debug_('Inserting %s' % self.drivename,2)
 
             if notify:
                 pop = PopupBox(text=_('Reading disc in drive %s') % self.drivename)
@@ -364,7 +367,7 @@ class RemovableMedia:
         """Mount the media
         """
 
-        _debug_('Mounting disc in drive %s' % self.drivename)
+        _debug_('Mounting disc in drive %s' % self.drivename,2)
         util.mount(self.mountdir, force=TRUE)
         return
 
@@ -373,7 +376,7 @@ class RemovableMedia:
         """Mount the media
         """
 
-        _debug_('Unmounting disc in drive %s' % self.drivename)
+        _debug_('Unmounting disc in drive %s' % self.drivename,2)
         util.umount(self.mountdir)
         return
     
@@ -700,8 +703,8 @@ class Identify_Thread(threading.Thread):
             self.identify(media)
 
             if last_status != media.drive_status:
-                _debug_('MEDIA: Status=%s' % media.drive_status)
-                _debug_('Posting IDENTIFY_MEDIA event')
+                _debug_('MEDIA: Status=%s' % media.drive_status,2)
+                _debug_('Posting IDENTIFY_MEDIA event',2)
                 if last_status:
                     self.last_media = media
                 rc.post_event(plugin.event('IDENTIFY_MEDIA'))

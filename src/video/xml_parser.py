@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/09/23 13:45:20  outlyer
+# Making more informational text quiet by default.
+#
 # Revision 1.37  2003/09/20 15:08:26  dischi
 # some adjustments to the missing testfiles
 #
@@ -635,7 +638,7 @@ def hash_xml_database():
             print
             return 0
 
-    _debug_("Building the xml hash database...")
+    _debug_("Building the xml hash database...",2)
 
     if not config.ONLY_SCAN_DATADIR:
         for name,dir in config.DIR_MOVIES:
@@ -676,5 +679,5 @@ def hash_xml_database():
                 config.TV_SHOW_INFORMATIONS[k] = (info.image, info.info,
                                                   info.mplayer_options, file)
             
-    _debug_('done')
+    _debug_('done',2)
     return 1
