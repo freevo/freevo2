@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/08/03 10:11:37  dischi
+# remove debug
+#
 # Revision 1.29  2003/08/03 10:03:31  dischi
 # add ONLY_SCAN_DATADIR to speed up startup
 #
@@ -714,12 +717,4 @@ def hash_xml_database():
                                               file)
             
     if DEBUG: print 'done'
-
-
-    print config.MOVIE_INFORMATIONS
-    print config.MOVIE_INFORMATIONS_ID
-    print config.MOVIE_INFORMATIONS_LABEL
-    print config.DISC_SET_INFORMATIONS_ID
-    print config.TV_SHOW_INFORMATIONS
-
     return 1
