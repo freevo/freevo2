@@ -323,6 +323,23 @@ MAME_CACHE = '%s/romlist-%s.pickled' % (FREEVO_CACHEDIR, os.getuid())
 #
 # SKIN_START_LAYOUT = 0
 
+#
+# Select a way when to switch to text view even if a image menu is there
+# Possible values are
+# 1. force text view when all items have the same image and there are no
+#    directories
+# 2. Ignore the directories, always switch to text view when all images
+#    are the same
+#
+SKIN_FORCE_TEXTVIEW_STYLE = 1
+
+#
+# Force text view for the mediamenu (first menu for video, audio, images and
+# games). 
+#
+SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
+
+
 # ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
                            # For standalone boxes.
 

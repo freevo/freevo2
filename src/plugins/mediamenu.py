@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/10/11 12:34:36  dischi
+# Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to config
+# to add more control when to switch to text view.
+#
 # Revision 1.22  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -104,7 +108,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         self.type = type
         if type and not type in directory.possible_display_types:
             directory.possible_display_types.append(type)
-        self.force_text_view = force_text_view
+        self.force_text_view = force_text_view or config.SKIN_MEDIAMENU_FORCE_TEXTVIEW
         
     def items(self, parent):
         import skin
@@ -222,7 +226,7 @@ class MediaMenu(Item):
                                      self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1,
                                      reload_func = self.reload)
-        item_menu._skin_force_text_view = force_text_view
+        item_menu.skin_force_text_view = force_text_view
         self.menuw = menuw
         menuw.pushmenu(item_menu)
 

@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 3.9
+LOCAL_CONF_VERSION  = 3.91
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -160,7 +160,10 @@ LOCAL_CONF_CHANGES = [
      tv_grab helper script. Also added USE_NETWORK to deactivate everything
      that needs a network connection.'''),
     (3.9,
-     '''Add MPLAYER_SET_AUDIO_DELAY to correct AV sync problems''') ]
+     '''Add MPLAYER_SET_AUDIO_DELAY to correct AV sync problems'''),
+    (3.91,
+     '''Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to add
+     more control when to switch to text view.''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -632,6 +635,23 @@ SKIN_XML_FILE = 'noia'
 # be taken
 #
 SKIN_START_LAYOUT = 0
+
+#
+# Select a way when to switch to text view even if a image menu is there
+# Possible values are
+# 1. force text view when all items have the same image and there are no
+#    directories
+# 2. Ignore the directories, always switch to text view when all images
+#    are the same
+#
+SKIN_FORCE_TEXTVIEW_STYLE = 1
+
+#
+# Force text view for the mediamenu (first menu for video, audio, images and
+# games). 
+#
+SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
+
 
 ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
                          # For standalone boxes.

@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/11 12:34:36  dischi
+# Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to config
+# to add more control when to switch to text view.
+#
 # Revision 1.8  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -434,7 +438,11 @@ class Skin_Area:
         """
         try:
             self.use_text_view = menu.skin_force_text_view
-            self.use_images    = menu.skin_default_no_images
+            try:
+                self.use_images    = menu.skin_default_no_images
+            except:
+                menu.skin_default_no_images = FALSE
+                self.use_images    = menu.skin_default_no_images
             return
         except:
             pass
@@ -459,7 +467,8 @@ class Skin_Area:
                 pass
 
             for i in menu.choices:
-                if i.type == 'dir' and not i.media:
+                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and \
+                       i.type == 'dir' and not i.media:
                     # directory with few items and folder:
                     self.use_text_view = FALSE
                     return
@@ -478,7 +487,7 @@ class Skin_Area:
             if i.type == 'dir':
                 folder += 1
                 # directory with mostly folder:
-                if folder > 3 and not i.media:
+                if config.SKIN_FORCE_TEXTVIEW_STYLE == 1 and folder > 3 and not i.media:
                     self.use_text_view = FALSE
                     return
                     
