@@ -197,17 +197,12 @@ class RemoteEntity:
         while not self.result:
             notifier.step(True, False)
 
-        # check for errors / exceptions and raise them
+        # check for error / exception and raise it
         if isinstance(self.result, mbus.types.MError):
             raise MException(str(self.result))
 
-        # check for errors / exceptions and raise them
-        if not self.result.appStatus:
-            raise MException(str(self.result.appDescription))
-
         # normal return handling
-        status = self.result.appResult == 'OK'
-        return status, self.result.arguments
+        return self.result.appStatus, self.result.arguments
 
 
     def __eq__(self, obj):

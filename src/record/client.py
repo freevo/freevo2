@@ -129,7 +129,7 @@ class Recordings:
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
             return
-        if result.appResult != 'OK' or not result.appStatus:
+        if not result.appStatus:
             log.error(str(result.appDescription))
             return
             
@@ -159,7 +159,7 @@ class Recordings:
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
             return
-        if result.appResult != 'OK' or not result.appStatus:
+        if not result.appStatus:
             log.error(str(result.appDescription))
             return
         rec = result.arguments
@@ -297,7 +297,7 @@ class Favorites:
         if isinstance(result, mbus.types.MError):
             log.error(str(result))
             return
-        if result.appResult != 'OK' or not result.appStatus:
+        if not result.appStatus:
             log.error(str(result.appDescription))
             return
 
