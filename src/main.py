@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.145  2004/09/28 18:31:06  dischi
+# check system auto detect
+#
 # Revision 1.144  2004/09/07 18:56:12  dischi
 # internal colors are now lists, not int
 #
@@ -122,6 +125,7 @@ try:
     import Numeric
     
     import config
+    import system
 
     if config.OSD_DISPLAY == 'SDL':
         import pygame
