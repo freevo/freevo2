@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/15 17:09:14  krister
+# Bugfixes for channel number when recording, etc.
+#
 # Revision 1.2  2003/02/08 18:35:26  dischi
 # added new version of freevoweb from Rob Shortt
 #
@@ -153,6 +156,13 @@ def scheduleRecording(prog=None):
         print 'ERROR: cannot record it if it is over'
         return
         
+    guide = epg_xmltv.get_guide()
+
+    for chan in guide.chan_list:
+        if prog.channel_id == chan.id:
+            print 'scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid)
+            prog.tunerid = chan.tunerid
+
     scheduledRecordings = getScheduledRecordings()
     scheduledRecordings.addProgram(prog, getKey(prog))
     saveScheduledRecordings(scheduledRecordings)
@@ -265,7 +275,7 @@ def checkToRecord():
                 return FALSE
             title = '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H%M', time.localtime(prog.start)))
             rec_cmd = '%s %s %s "%s"' % \
-              (config.REC_CMD, string.split(prog.channel_id)[0], duration, title)
+              (config.REC_CMD, prog.tunerid, duration, title)
             print 'REC_CMD: %s' % rec_cmd
             prog.isRecording = TRUE
 

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/15 17:09:14  krister
+# Bugfixes for channel number when recording, etc.
+#
 # Revision 1.2  2003/02/11 06:40:57  krister
 # Applied Robs patch for std fileheaders.
 #
@@ -68,7 +71,7 @@ num_favorites = len(rf.getFavorites())
 
 if action == 'add':
     priority = num_favorites + 1
-    fav = rec_types.Favorite(prog.title, prog, TRUE, FALSE, FALSE, priority)
+    fav = rec_types.Favorite(prog.title, prog, TRUE, TRUE, TRUE, priority)
 elif action == 'edit':
     fav = rf.getFavorite(name)
 else:
