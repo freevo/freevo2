@@ -3,8 +3,9 @@ FREEVO_INSTALL_DIR="${D}/opt/freevo"
 
 IUSE="dxr3 matrox"
 
-FPV=${PV}
 PV=`echo ${PV} | sed 's/_\(pre[0-9]\)/-\1/'`
+S="${WORKDIR}/freevo-${PV}"
+
 SRC_URI="mirror://sourceforge/freevo/freevo-src-${PV}.tgz"
 
 LICENSE="GPL-2"
@@ -13,19 +14,17 @@ SLOT="0"
 
 KEYWORDS="x86"
 
-DEPEND=">=dev-python/pygame-1.5.3
+DEPEND=">=dev-python/pygame-1.5.5
 	>=dev-python/Imaging-1.1.3
 	>=dev-python/PyXML-0.8.1
 	>=media-libs/libsdl-1.2.4
-	>=media-video/mplayer-0.90_rc2
+	>=media-video/mplayer-0.90_rc4
 	>=freevo_runtime-1.3.1
-	>=dev-python/python-fchksum-1.6.1
 	ogg? (>=media-libs/pyvorbis-1.1)"
 
 
 src_unpack() {
 	unpack freevo-src-${PV}.tgz
-	ln -s freevo-${PV} freevo-${FPV}
 	cd freevo-${PV}
 }
 
