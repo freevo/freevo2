@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/10/29 18:17:20  dischi
+# moved usb util functions to this file
+#
 # Revision 1.11  2004/10/08 20:19:55  dischi
 # fix poll intervall
 #
@@ -74,7 +77,7 @@ class PluginInterface(plugin.DaemonPlugin):
     """
     def __init__(self):
         plugin.DaemonPlugin.__init__(self)
-        self.devices = util.list_usb_devices()
+        self.devices = self.list_usb_devices()
         self.poll_interval = 1000
 
 
@@ -82,13 +85,22 @@ class PluginInterface(plugin.DaemonPlugin):
         return [( 'USB_HOTPLUG', [], 'action list when a devices comes up' )]
 
     
+    def list_usb_devices(self):
+        devices = []
+        fd = open('/proc/bus/usb/devices', 'r')
+        for line in fd.readlines():
+            if line[:2] == 'P:':
+                devices.append('%s:%s' % (line[11:15], line[23:27]))
+        fd.close()
+        return devices
+
     def poll(self, menuw=None, arg=None):
         """
         poll to check for devices
         """
         changes = False
 
-        current_devices = util.list_usb_devices()
+        current_devices = self.list_usb_devices()
         for d in current_devices:
             try:
                 self.devices.remove(d)

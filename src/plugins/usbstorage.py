@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/10/29 18:17:20  dischi
+# moved usb util functions to this file
+#
 # Revision 1.3  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -61,8 +64,18 @@ class PluginInterface(plugin.MainMenuPlugin):
         self.name       = name
         self.mountpoint = mountpoint
 
+    def is_usb_storage_device(self):
+        fd = open('/proc/bus/usb/devices', 'r')
+        for line in fd.readlines():
+            if line.lower().find('storage') != -1:
+                fd.close()
+                return 0
+        fd.close()
+        return -1
+
+
     def items(self, parent):
-        if util.is_usb_storage_device() != -1:
+        if self.is_usb_storage_device() != -1:
             d = DirItem(self.mountpoint, parent, self.name, display_type='image')
             d.mountpoint = self.mountpoint
             return [ d ]
