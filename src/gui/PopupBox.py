@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/05/04 22:50:12  rshortt
+# Fix for some crashes with text wrapping.
+#
 # Revision 1.16  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -111,7 +114,7 @@ class PopupBox(Container):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, parent='osd', text=" ", left=None, top=None, width=360, height=60,
+    def __init__(self, parent='osd', text=" ", left=None, top=None, width=360, height=90,
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
@@ -189,7 +192,7 @@ class PopupBox(Container):
             self.label.set_v_margin(self.v_margin)
             label_panel = Panel() 
             label_panel.width = 280
-            label_panel.height = 30
+            label_panel.height = 60
             label_panel.internal_h_align = Align.CENTER
             label_panel.add_child(self.label)
             self.add_child(label_panel)

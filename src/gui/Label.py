@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/04 22:50:12  rshortt
+# Fix for some crashes with text wrapping.
+#
 # Revision 1.6  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -223,9 +226,16 @@ class Label(GUIObject):
 
         if DEBUG: print '       fgc=%s' % fgc
 
+        (pw, ph) = self.parent.get_size()
         if dummy_surface:
-            self.surface = pygame.Surface(self.parent.get_size(), 0, 32)
+            self.surface = pygame.Surface((pw, ph), 0, 32)
         else:
+            if DEBUG: print '       par surf: %s' % self.parent.surface
+            if DEBUG: print '       self.width: %s' % self.width
+            if DEBUG: print '       self.height: %s' % self.height
+            if self.width > pw: self.width = pw
+            if self.height > ph: self.width = ph
+
             self.surface = self.parent.surface.subsurface((0, 0, self.width, self.height))
             if DEBUG: print '      surfaceXX=%s' % self.surface
 
