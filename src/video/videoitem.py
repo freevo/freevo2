@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/11 18:40:09  dischi
+# Fixed bug when the title list wasn't allowed in the item menu
+#
 # Revision 1.11  2003/01/28 11:34:28  dischi
 # Reversed the bugfix in identifymedia and fixed it in videoitem. Track 1
 # should play track 1, track 0 should be dvdnav (in the future, right now
@@ -195,7 +198,7 @@ class VideoItem(Item):
 
         # show DVD/VCD title menu for DVDs, but only when we aren't in a
         # submenu of a such a menu already
-        if not self.filename:
+        if not self.filename or self.filename == '0':
             if self.mode == 'dvd':
                 items += [( self.dvdnav, 'DVD Menu (experimental)' )]
                 items += [( self.dvd_vcd_title_menu, 'DVD title list' )]
