@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/11/27 02:19:12  rshortt
+# -Only say we're adding data for those channels we've just found, not
+#  every channel in the database.
+# -Compare new programs to all the channels we know about (even in DB).
+#
 # Revision 1.3  2004/10/18 01:04:01  rshortt
 # Rework pyepg to use an sqlite database instead of an object pickle.
 # The EPGDB class is the primary interface to the databse, wrapping database
@@ -84,6 +89,8 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         print 'XMLTV file (%s) missing!' % XMLTV_FILE
         gotfile = 0
 
+    new_channels = []
+
     #
     # Add the channels that are in the config list, or all if the
     # list is empty
@@ -124,6 +131,7 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         
         for chan in xmltv_channels:
             id   = chan['id'].encode('latin-1', 'ignore')
+            new_channels.append(id)
             displayname = ''
             tunerid = ''
 
@@ -154,13 +162,13 @@ def load_guide(guide, XMLTV_FILE, TV_CHANNELS=None, verbose=True):
         return 1    # Return the guide, it has the channels at least...
 
 
-    needed_ids = guide.get_channel_ids()
+    known_ids = guide.get_channel_ids()
 
     if verbose:
-        print 'creating guide for %s' % needed_ids
+        print 'creating guide for %s' % new_channels
 
     for p in xmltv_programs:
-        if not p['channel'] in needed_ids:
+        if not p['channel'] in known_ids:
             continue
         try:
             channel_id = p['channel']
