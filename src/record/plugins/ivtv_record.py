@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 01:37:21  rshortt
+# -Use new TV_SETTINGS.
+# -You may now register this plugin with an arg called types which is a list of
+#  all the types it will record for, defaulting to ['ivtv0','ivtv1','ivtv2'].
+# -Change the channel or post an event for another plugin to do so (external tuner).
+# -Honour passthrough mode if recording from an external cable box or something.
+#
 # Revision 1.3  2004/08/09 11:58:15  rshortt
 # Clean comments and add one.
 #
@@ -56,28 +63,28 @@ import plugin
 import eventhandler
 from event import *
 import util.tv_util as tv_util
-
 from event import Event
-#from tv.channels import FreevoChannels
+from tv.channels import get_actual_channel
 
 DEBUG = config.DEBUG
 
-# XXX:  Calculate CHUNKSIZE based on the configured ivtv bitrate/max bitrate
-#       and the poll_interval of the plugin.  The size of the ivtv encoding 
-#       buffer (in the driver or card) does matter here.  If we don't read
-#       enough data on each poll() it will overflow, if we read too much the
-#       plugin will block for too long.  The value of 65536 is working quite
-#       well for me with a constant bitrate of 4.5 Mb/sec and 0.1 sec poll().
+# TODO:  Calculate CHUNKSIZE based on the configured ivtv bitrate/max bitrate
+#        and the poll_interval of the plugin.  The size of the ivtv encoding 
+#        buffer (in the driver or card) does matter here.  If we don't read
+#        enough data on each poll() it will overflow, if we read too much the
+#        plugin will block for too long.  The value of 65536 is working quite
+#        well for me with a constant bitrate of 4.5 Mb/sec and 0.1 sec poll().
 CHUNKSIZE = 65536
 
 
 class IVTVRecordSession:
 
-    def __init__(self, prog):
+    def __init__(self, prog, type):
         self.prog = prog
+        self.type = type
         self.v_in = None
         self.v_out = None
-        self.vdev = None
+        self.ivtv = None
         self.mode = 'idle'
 
 
@@ -88,40 +95,41 @@ class IVTVRecordSession:
         elif self.mode == 'stop':
             self.v_in.close()
             self.v_out.close()
-            self.vdev.close()
-            self.vdev = None
+            self.ivtv.close()
+            self.ivtv = None
             self.stop_time = 0
 
             self.mode = 'over'
 
-            eventhandler.post(Event('RECORD_STOP', arg=self.prog))
+            eventhandler.post(Event('RECORD_STOP', arg=(self.prog, self.type)))
             if DEBUG: print('IVTV: finished recording')
 
         elif self.mode == 'start':
-            eventhandler.post(Event('RECORD_START', arg=self.prog))
+            eventhandler.post(Event('RECORD_START', arg=(self.prog, self.type)))
             if DEBUG: print 'IVTV: started recording'
 
-            #fc = FreevoChannels()
-            #if DEBUG: print 'CHAN: %s' % fc.getChannel()
+            self.ivtv = tv.ivtv.IVTV(self.type)
+            self.ivtv.init_settings()
 
-            (v_norm, v_input, v_clist, v_dev) = config.TV_SETTINGS.split()
+            chan = get_actual_channel(self.type, self.prog.channel_id)
+            if self.ivtv.settings.input_name == 'tuner':
+                passthrough_chan = self.ivtv.settings.passthrough
+                if passthrough_chan:
+                    self.ivtv.setchannel(passthrough_chan)
+                    eventhandler.post(Event('CHAN_SWITCH', arg=(self.type, chan)))
+                else:
+                    self.ivtv.setchannel(self.prog.tunerid)
 
-            self.vdev = tv.ivtv.IVTV(v_dev)
+            else:
+                eventhandler.post(Event('CHAN_SWITCH', arg=(self.type, chan)))
 
-            self.vdev.init_settings()
-            #vg = fc.getVideoGroup(self.prog.tunerid)
 
-            #if DEBUG: print 'Setting Input to %s' % vg.input_num
-            self.vdev.setinput(4)
-
-            if DEBUG: print 'Setting Channel to %s' % self.prog.tunerid
-            #fc.chanSet(str(self.prog.tunerid))
-
-            if DEBUG: self.vdev.print_settings()
+            if DEBUG: self.ivtv.print_settings()
 
             self.stop_time = time.time() + self.prog.rec_duration
 
-            self.v_in  = open(v_dev, 'r', os.O_RDONLY | os.O_NONBLOCK)
+            self.v_in  = open(self.ivtv.settings.vdev, 'r', \
+                              os.O_RDONLY | os.O_NONBLOCK)
             self.v_out = open(self.prog.filename, 'w')
 
             self.mode = 'recording'
@@ -139,23 +147,27 @@ class IVTVRecordSession:
 
 class PluginInterface(plugin.DaemonPlugin):
 
-    def __init__(self):
+    def __init__(self, types=['ivtv0','ivtv1','ivtv2']):
         plugin.DaemonPlugin.__init__(self)
         self.poll_menu_only = False
         self.poll_interval = 1
         self.sessions = {}
         self.event_listener = True
+        self.chan_types = []
+
+        if isinstance(types, list) or isinstance(types, tuple):
+            for t in types:
+                self.chan_types.append(t)
+        else:
+            self.chan_types.append(types)
 
         plugin.register(self, plugin.RECORD)
 
         if DEBUG: print 'ACTIVATING IVTV RECORD PLUGIN'
 
 
-    def Record(self, rec_prog):
-        if DEBUG: print('IVTV: %s' % rec_prog)
-
-        # It is safe to ignore config.TV_RECORDFILE_SUFFIX here.
-        rec_prog.filename = os.path.splitext(tv_util.getProgFilename(rec_prog))[0] + '.mpeg'
+    def Record(self, prog, type):
+        if DEBUG: print('IVTV: %s' % prog)
 
         # XXX TODO:
         #  1) Find out what URL the prog is on (ivtv:/ivtv0:/ivtv1:).
@@ -164,12 +176,15 @@ class PluginInterface(plugin.DaemonPlugin):
         #  4) Start a recording session if we're allowed.
         #  5) This should support multiple recordings from different cards.
 
-        if isinstance(self.sessions.get('ivtv'), IVTVRecordSession):
-            print 'Sorry, already recording on ivtv.'
+        if isinstance(self.sessions.get(type), IVTVRecordSession):
+            print 'Sorry, already recording on %s.' % type
             return
 
-        self.sessions['ivtv'] = IVTVRecordSession(rec_prog)
-        self.sessions['ivtv'].mode = 'start'
+        # It is safe to ignore config.TV_RECORDFILE_SUFFIX here.
+        prog.filename = os.path.splitext(tv_util.getProgFilename(prog))[0] + '.mpeg'
+
+        self.sessions[type] = IVTVRecordSession(prog, type)
+        self.sessions[type].mode = 'start'
         
 
     def Stop(self, sname):
@@ -192,10 +207,19 @@ class PluginInterface(plugin.DaemonPlugin):
         if DEBUG: print 'IVTV: recorder heard event %s' % str(event)
 
         if event == RECORD:
-            self.Record(event.arg)
+            prog = event.arg[0]
+            type = event.arg[1]
+
+            if not type in self.chan_types:
+                _debug_('Ignoring RECORD event for %s' % which)
+                return
+
+            self.Record(prog, type)
 
         elif event == STOP_RECORDING:
-            self.Stop('ivtv')
+            prog = event.arg[0]
+            type = event.arg[1]
+            self.Stop(type)
 
 
 
