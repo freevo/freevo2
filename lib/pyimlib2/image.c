@@ -236,6 +236,8 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
     unsigned long xpos, ypos, dst_pos, mask_pos;
     unsigned char *dst_data, *mask_data;
 
+    unsigned char *mask_chunk, *dst_chunk, avg;
+
     if (!PyArg_ParseTuple(args, "O!ii", &Image_PyObject_Type, &mask, &dst_x, &dst_y))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
@@ -258,18 +260,26 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
             mask_pos = (xpos << 2) + (ypos * mask_w << 2);
             dst_pos = ((dst_x + xpos) << 2) + ((dst_y + ypos) * dst_w << 2);
             
-            unsigned char *mask_chunk = &mask_data[mask_pos],
-                          *dst_chunk = &dst_data[dst_pos],
-                          // Any way to optimize this?
-                          avg = (mask_chunk[0] + mask_chunk[1] + 
-                         mask_chunk[2]) / 3;
+            mask_chunk = &mask_data[mask_pos];
+	    dst_chunk = &dst_data[dst_pos];
+
+	    // Any way to optimize this?
+	    avg = (mask_chunk[0] + mask_chunk[1] + mask_chunk[2]) / 3;
 
             // Blend average (grayscale) pixel from the mask with the 
             // alpha channel of the image
-            int temp = (dst_chunk[3] * avg) + 0x80;
+#if 0
+	    // This is the code from Tack, but it doesn't work 
+	    // like it should ...
+	    int temp = (dst_chunk[3] * avg); // + 0x80;
             dst_chunk[3] = ((temp + (temp >> 8)) >> 8);
             dst_chunk[3] = dst_chunk[3] >> 1;
-        }
+#else
+	    /// ... so this is my guess -- Dischi
+            dst_chunk[3] = (dst_chunk[3] * avg) / 255;
+#endif    
+	}
+	
     }
     imlib_image_put_back_data((DATA32 *)dst_data);
             
