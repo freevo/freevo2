@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/01/22 01:48:26  krister
+# Use slave mode to change channels.
+#
 # Revision 1.3  2002/12/29 19:24:25  dischi
 # Integrated two small fixes from Jens Axboe to support overscan for DXR3
 # and to set MPLAYER_VO_OPTS
@@ -61,6 +64,8 @@ import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
 import tv      # The TV module
 import childapp # Handle child applications
+import epg_xmltv as epg # The Electronic Program Guide
+
 
 # Create the remote control object
 rc = rc.get_singleton()
@@ -104,7 +109,6 @@ class MPlayer:
         self.thread = MPlayer_Thread()
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
-        self.xwin_wid = 0
         
 
     def TunerSetChannel(self, tuner_channel):
@@ -115,6 +119,27 @@ class MPlayer:
                 return
         print 'ERROR: Cannot find tuner channel "%s" in the TV channel listing' % tuner_channel
         self.tuner_chidx = 0
+
+
+    def TunerGetChannelInfo(self):
+        '''Get program info for the current channel'''
+        
+        tuner_id = config.TV_CHANNELS[self.tuner_chidx][2]
+        chan_name = config.TV_CHANNELS[self.tuner_chidx][1]
+        chan_id = config.TV_CHANNELS[self.tuner_chidx][0]
+
+        channels = epg.get_guide().GetPrograms(start=time.time(),
+                                               stop=time.time(), chanids=[chan_id])
+
+        if channels and channels[0] and channels[0].programs:
+            start_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].start))
+            stop_s = time.strftime('%H:%M', time.localtime(channels[0].programs[0].stop))
+            ts = '(%s-%s)' % (start_s, stop_s)
+            prog_info = '%s %s' % (ts, channels[0].programs[0].title)
+        else:
+            prog_info = 'No info'
+            
+        return tuner_id, chan_name, prog_info
 
 
     def TunerGetChannel(self):
@@ -159,12 +184,9 @@ class MPlayer:
                      (device, input, norm, tuner_channel, chanlist, w, h, outfmt))
             
             # Build the MPlayer command
-            mpl = '--prio=%s %s -vo %s%s -fs %s %s' % (config.MPLAYER_NICE,
-                                                       config.MPLAYER_CMD,
-                                                       config.MPLAYER_VO_DEV,
-                                                       config.MPLAYER_VO_DEV_OPTS,
-                                                       tvcmd,
-                                                       config.MPLAYER_ARGS_TVVIEW)
+            args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
+                    config.MPLAYER_VO_DEV_OPTS, tvcmd, config.MPLAYER_ARGS_TVVIEW)
+            mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
 
         elif mode == 'vcr':
             cf_norm, cf_input, tmp, cf_device = config.VCR_SETTINGS.split()
@@ -182,12 +204,11 @@ class MPlayer:
             tvcmd = ('-tv on:driver=v4l:%s:%s:%s:channel=2:'
                      'chanlist=us-cable:width=%s:height=%s:%s' %
                      (device, input, norm, w, h, outfmt))
-            
-            mpl = ('%s -vo %s%s -fs %s %s' % (config.MPLAYER_CMD,
-                                              config.MPLAYER_VO_DEV,
-                                              config.MPLAYER_VO_DEV_OPTS,
-                                              tvcmd,
-                                              config.MPLAYER_ARGS_TVVIEW))
+
+            args = (config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
+                    config.MPLAYER_VO_DEV_OPTS, tvcmd,
+                    config.MPLAYER_ARGS_TVVIEW)
+            mpl = '%s -vo %s%s -fs %s %s' % args
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
@@ -196,13 +217,10 @@ class MPlayer:
             return
 
         # Support for X11, getting the keyboard events
-        if self.xwin_wid:  # This is set to 0 when freevo_xwin is killed
-            # Already got a freevo_xwin up and running
-            wid = self.xwin_wid
-            mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
-        elif os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11' and \
-             config.MPLAYER_USE_WID:
-            if DEBUG: print 'Got freevo_xwin and x11'
+        if (os.path.isfile('./freevo_xwin') and
+            (osd.sdl_driver == 'x11' or osd.sdl_driver == 'xv') and
+            config.MPLAYER_USE_WID):
+            if DEBUG: print 'Got freevo_xwin and x11/xv'
             os.system('rm -f /tmp/freevo.wid')
             os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
                       (osd.width, osd.height))
@@ -226,7 +244,6 @@ class MPlayer:
             if DEBUG: print 'Got freevo.wid'
             try:
                 wid = int(open('/tmp/freevo.wid').read().strip(), 16)
-                self.xwin_wid = wid
                 mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
                 if DEBUG: print 'Got WID = 0x%08x' % wid
             except:
@@ -278,12 +295,10 @@ class MPlayer:
         skin.hold = TRUE  # Prevent the skin from drawing stuff while TV is on
         
         
-    def Stop(self, channel_change=0):
-        # XXX Kludge for now. do real channelchange in mplayer later
-        if not channel_change:
-            mixer.setLineinVolume(0)
-            mixer.setMicVolume(0)
-            mixer.setIgainVolume(0) # Input on emu10k cards.
+    def Stop(self):
+        mixer.setLineinVolume(0)
+        mixer.setMicVolume(0)
+        mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
@@ -298,29 +313,42 @@ class MPlayer:
         if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
             event == rc.SELECT or event == rc.PLAY_END):
             self.Stop()
-            os.system('killall -9 freevo_xwin 2&> /dev/null')
-            self.xwin_wid = 0
             skin.hold = FALSE  # Allow drawing again
             rc.app = tv.eventhandler
             tv.refresh()
 
-        elif event == rc.CHUP:
+        elif event == rc.CHUP or event == rc.CHDOWN:
             if self.mode == 'vcr':
                 return
             
-            # Go to the next channel in the list
-            self.TunerNextChannel()
-            self.Stop(channel_change=1)
-            self.Play(mode='tv')  # Mplayer can only set the channel when starting up
+            # Go to the prev/next channel in the list
+            if event == rc.CHUP:
+                self.TunerPrevChannel()
+            else:
+                self.TunerNextChannel()
+
+            new_channel = self.TunerGetChannel()
+            self.thread.app.write('tv_set_channel %s\n' % new_channel)
+
+            # Display a channel changed message
+            # XXX Experimental, disabled for now
+            #tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
+            #now = time.strftime('%H:%M')
+            #msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
+            #cmd = 'show_osd_msg "%s" 4000\n' % msg
+            #self.thread.app.write(cmd)
             
-        elif event == rc.CHDOWN:
-            if self.mode == 'vcr':
-                return
-            
-            # Go to the previous channel in the list
-            self.TunerPrevChannel()
-            self.Stop(channel_change=1)
-            self.Play(mode='tv')
+        elif event == rc.DISPLAY:
+            return
+        
+            # Display the channel info message
+            # XXX Experimental, disabled for now
+            tuner_id, chan_name, prog_info = self.TunerGetChannelInfo()
+            now = time.strftime('%H:%M')
+            msg = '%s %s (%s): %s' % (now, chan_name, tuner_id, prog_info)
+            cmd = 'show_osd_msg "%s" 4000\n' % msg
+            print 'msg = "%s" %s chars' % (msg, len(msg))
+            self.thread.app.write(cmd)
             
         elif event == rc.VOLUP:
             mixer.incIgainVolume()
@@ -330,17 +358,28 @@ class MPlayer:
 
         elif event == rc.MUTE:
             if self.__muted:
-                mixer.setIgainVolume(self.__igainvol)
                 self.__muted = 0
             else:
-                self.__igainvol = mixer.getIgainVolume()
-                mixer.setIgainVolume(0)
                 self.__muted = 1
+            self.MuteOnOff(mute=self.__muted)
+            
+
+    def MuteOnOff(self, mute=0):
+        if mute:
+            self.__igainvol = mixer.getIgainVolume()
+            mixer.setIgainVolume(0)
+        else:
+            mixer.setIgainVolume(self.__igainvol)
+        
             
 
 # ======================================================================
 class MPlayerApp(childapp.ChildApp):
-        
+    """
+    class controlling the in and output from the mplayer process
+    """
+
+
     def kill(self):
         # This seems to be the only way mplayer is sure to have released
         # /dev/video by the time it returns, and not a second
@@ -351,7 +390,32 @@ class MPlayerApp(childapp.ChildApp):
 
         if DEBUG: print 'Killing mplayer'
 
-    # def stdout_cb
+    def kill(self):
+        # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
+        # down properly and releases all resources before it gets
+        # reaped by childapp.kill().wait()
+        childapp.ChildApp.kill(self, signal.SIGINT)
+
+        # XXX Krister testcode for proper X11 video
+        if DEBUG: print 'Killing mplayer'
+        os.system('killall -9 freevo_xwin 2&> /dev/null')
+        os.system('rm -f /tmp/freevo.wid')
+
+
+    def stdout_cb(self, str):
+
+        if config.MPLAYER_DEBUG:
+            fd = open('./mplayer_stdout.log', 'a')
+            fd.write(str + '\n')
+            fd.close()
+                     
+
+    def stderr_cb(self, str):
+
+        if config.MPLAYER_DEBUG:
+            fd = open('./mplayer_stderr.log', 'a')
+            fd.write(str + '\n')
+            fd.close()
 
 
 # ======================================================================
@@ -407,70 +471,3 @@ class MPlayer_Thread(threading.Thread):
             else:
                 self.mode = 'idle'
 
-
-    def cmd(self, command):
-        print "In cmd going to do: " + command
-        str = ''
-        if command == 'info':
-            str = mplayerKey('INFO')
-        elif command == 'next':
-            str = mplayerKey('NEXT')
-        elif command == 'pause':
-            str = mplayerKey('PAUSE')
-        elif command == 'prev':
-            str = mplayerKey('PREV')
-        elif command == 'stop':
-            str = mplayerKey('STOP')
-        elif command == 'skip_forward':
-            str = mplayerKey('RIGHT')
-        elif command == 'skip_forward2':
-            str = mplayerKey('UP')
-        elif command == 'skip_forward3':
-            str = mplayerKey('PAGEUP')
-        elif command == 'skip_back':
-            str = mplayerKey('LEFT')
-        elif command == 'skip_back2':
-            str = mplayerKey('DOWN')
-        elif command == 'skip_back3':
-            str = mplayerKey('PAGEDOWN')
-
-        print "In cmd going to write: " + str
-        self.app.write(str) 
-
-
-#
-# Translate an abstract remote control command to an mplayer
-# command key
-#
-def mplayerKey(rcCommand):
-    mplayerKeys = {
-        'DOWN'           : '\x1bOB',
-        'INFO'           : 'o',
-        'KEY_1'          : '+',
-        'KEY_7'          : '-',
-        'LEFT'           : '\x1bOD',
-        'NONE'           : '',
-        'NEXT'           : '>',
-        'PAGEUP'         : '\x1b[5~',
-        'PAGEDOWN'       : '\x1b[6~',
-        'PAUSE'          : ' ',
-        'PLAY'           : ' ',
-        'PREV'           : '<',
-        'RIGHT'          : '\x1bOC',
-        'STOP'           : 'q',
-        'UP'             : '\x1bOA',
-        'VOLUMEUP'       : '*',
-        'VOLUMEDOWN'     : '/',
-        'DISPLAY'        : 'o'
-        }
-    
-    key = mplayerKeys.get(rcCommand, '')
-
-    return key
-
-
-# Test code
-if __name__ == '__main__':
-    player = get_singleton()
-
-    player.play('audio', sys.argv[1], None)
