@@ -13,6 +13,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2002/10/24 20:16:46  dischi
+# bugfix
+#
 # Revision 1.23  2002/10/24 06:11:45  krister
 # Changed debug levels for less output. Don't display length in DrawMP3 if not valid.
 #
@@ -127,6 +130,8 @@ rc      = rc.get_singleton()
 osd     = osd.get_singleton()
 skin = skin.get_singleton()
 
+# remember the position of the selected item in the main menu
+main_menu_selected = -1
 
 def play(arg=None, menuw=None, fileinfo=None):
     """
