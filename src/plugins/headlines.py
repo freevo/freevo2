@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/10/16 16:05:31  dischi
+# small i18n patch
+#
 # Revision 1.8  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -222,7 +225,7 @@ class HeadlinesSiteItem(Item):
         # create Reader object
         reader = Sax2.Reader()
 
-        popup = PopupBox(text='Fetching headlines...')
+        popup = PopupBox(text=_('Fetching headlines...'))
         popup.show()
 
         # parse the document
@@ -292,7 +295,7 @@ class HeadlinesMainMenuItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.create_locations_menu , 'Headlines Sites' ) ]
+        items = [ ( self.create_locations_menu , _('Headlines Sites' )) ]
         return items
  
     def create_locations_menu(self, arg=None, menuw=None):
