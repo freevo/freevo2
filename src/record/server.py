@@ -7,6 +7,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/09 12:11:41  rshortt
+# -Add some TODO comments.
+# -Remove .decode() call on prog objects as it isn't there anymore.  It is also possible that we must access the prog object in a different manner now.
+#
 # Revision 1.2  2004/08/08 19:03:18  rshortt
 # -Integrate some things into the Twisted main loop:
 #   -More events.
@@ -170,8 +174,6 @@ class RecordServer(xmlrpc.XMLRPC):
         if prog.stop < time.time():
             return (FALSE, 'cannot record it if it is over')
             
-        self.updateGuide()
-    
         for chan in guide.chan_list:
             if prog.channel_id == chan.id:
                 _debug_('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid))
@@ -243,8 +245,6 @@ class RecordServer(xmlrpc.XMLRPC):
         if not chan or not start:
             return (FALSE, 'no chan or no start')
 
-        self.updateGuide()
-
         for ch in guide.chan_list:
             if chan == ch.id:
                 _debug_('CHANNEL MATCH: %s' % ch.id)
@@ -268,8 +268,6 @@ class RecordServer(xmlrpc.XMLRPC):
             _debug_('nothing to find')
             return (FALSE, 'no search string')
 
-        self.updateGuide()
-
         pattern = '.*' + find + '\ *'
         regex = re.compile(pattern, re.IGNORECASE)
         now = time.time()
@@ -283,14 +281,14 @@ class RecordServer(xmlrpc.XMLRPC):
                     if movies_only:
                         # We can do better here than just look for the MPAA 
                         # rating.  Suggestions are welcome.
-                        if 'MPAA' in prog.decode().getattr('ratings').keys():
-                            matches.append(prog.decode())
-                            _debug_('PROGRAM MATCH: %s' % prog.decode())
+                        if 'MPAA' in prog.getattr('ratings').keys():
+                            matches.append(prog)
+                            _debug_('PROGRAM MATCH: %s' % prog)
                     else:
                         # We should never get here if not find and not 
                         # movies_only.
-                        matches.append(prog.decode())
-                        _debug_('PROGRAM MATCH: %s' % prog.decode())
+                        matches.append(prog)
+                        _debug_('PROGRAM MATCH: %s' % prog)
                 if len(matches) >= max_results:
                     break
 
@@ -302,13 +300,6 @@ class RecordServer(xmlrpc.XMLRPC):
             return (FALSE, 'no matches')
 
 
-    def updateGuide(self):
-        global guide
-
-        # XXX TODO: only do this if the guide has changed?
-        guide = tv_util.get_guide()
-
-        
     def checkToRecord(self):
         _debug_('in checkToRecord')
         rec_cmd = None
@@ -357,7 +348,11 @@ class RecordServer(xmlrpc.XMLRPC):
                         sr.removeProgram(currently_recording, 
                                          tv_util.getKey(currently_recording))
                         eh.post(Event('STOP_RECORDING', arg=prog))
+
+                        # XXX:  Don't sleep (block) if we don't have to.
+                        #       Keep an eye on this.
                         # time.sleep(5)
+
                         _debug_('CALLED RECORD STOP 1')
                     else:
                         # at this moment we must be in the pre-record padding
@@ -577,8 +572,6 @@ class RecordServer(xmlrpc.XMLRPC):
         favs = {}
         favs[fav.name] = fav
 
-        self.updateGuide()
-    
         for ch in guide.chan_list:
             for prog in ch.programs:
                 (isFav, favorite) = self.isProgAFavorite(prog, favs)
@@ -594,8 +587,6 @@ class RecordServer(xmlrpc.XMLRPC):
         #        previously decided not to record it.
 
         guide = tv_util.get_guide()
-    
-        self.updateGuide()
     
         # First get the timeframe of the guide.
         last = 0
@@ -861,6 +852,14 @@ class RecordServer(xmlrpc.XMLRPC):
 
         _debug_('handling event %s' % str(event))
 
+        #  XXX:  Here we're ripping off code from the 'freevo main' event loop.
+        #        I think eventhandler.handle() is made for freevo main and we
+        #        need something different (like below) for recordserver.
+        #        Freevo main plugins register callbacks that get called from
+        #        its MainLoop.  Again, recordserver is different and the old
+        #        style of poll()/plugin.eventhandler() works well here.
+        #        Comments welcome.
+
         if eh.eventhandler_plugins == None:
             import plugin
             _debug_('init')
@@ -877,8 +876,15 @@ class RecordServer(xmlrpc.XMLRPC):
             p.eventhandler(event=event)
 
         if event == OS_EVENT_POPEN2:
+            # XXX TODO:  Test the Twisted process handling.
+
             print 'popen %s' % event.arg[1]
             event.arg[0].child = util.popen3.Popen3(event.arg[1])
+
+
+        # XXX TODO:  Change these for/sleep loops to be more non-blocking.
+        #            We could post another event or use reactor.callLater()
+        #            to call waitpid in a further itteration of the mail loop.
 
         elif event == OS_EVENT_WAITPID:
             pid = event.arg[0]
