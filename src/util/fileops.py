@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/09 19:42:23  dischi
+# more generic resolve_media_mountdir and arg checking for mount functions
+#
 # Revision 1.6  2003/11/22 20:34:08  dischi
 # use new vfs
 #
@@ -319,6 +322,8 @@ def umount(dir):
     """
     umount a directory
     """
+    if not dir:
+        return
     global mounted_dirs
     if os.path.ismount(dir):
         os.system("umount %s" % dir)
@@ -330,6 +335,8 @@ def mount(dir, force=0):
     """
     mount a directory
     """
+    if not dir:
+        return
     global mounted_dirs
     if not os.path.ismount(dir):
         os.system("mount %s 2>/dev/null" % dir)
@@ -348,21 +355,29 @@ def umount_all():
         umount(d)
         
             
-def resolve_media_mountdir(media_id, file):
+def resolve_media_mountdir(*arg):
     """
     get the mount point of the media with media_id
     """
-    mountdir = None
-    full_filename = file
+    if len(arg) == 1 and isinstance(arg[0], dict):
+        media_id = arg[0]['media_id']
+        file     = arg[0]['file']
+    elif len(arg) == 2:
+        media_id = arg[0]
+        file     = arg[1]
+    else:
+        raise KeyError
+
+    mountdir = ''
     # Find on what media it is located
     for media in config.REMOVABLE_MEDIA:
         if media_id == media.id:
             # Then set the filename
             mountdir = media.mountdir
-            full_filename = vfs.join(media.mountdir, file)
+            file     = vfs.join(media.mountdir, file)
             break
 
-    return mountdir, full_filename
+    return mountdir, file
 
 
 def check_media(media_id):
