@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.143  2004/02/27 20:12:16  dischi
+# reworked rc.py to make several classes
+#
 # Revision 1.142  2004/02/19 04:57:55  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -267,19 +270,6 @@ def restart():
     get_singleton().update()
     
 
-def stringproxy(str):
-    """
-    Return a unicode representation of a String or Unicode object
-    """
-    result = str
-    try:
-        if type(str) == StringType:
-            result = unicode(str, 'unicode-escape')
-    except:
-        pass
-    return result
-
-
 class Font:
     def __init__(self, filename='', ptsize=0, font=None):
         self.filename = filename
@@ -513,12 +503,14 @@ class OSD:
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             self.toggle_fullscreen()
 
-        help = [_('z = Toggle Fullscreen')]
-        help += [_('Arrow Keys = Move')]
-        help += [_('Spacebar = Select')]
-        help += [_('Escape = Stop/Prev. Menu')]
-        help += [_('h = Help')]
+        help = [ _('z = Toggle Fullscreen'),
+                 _('Arrow Keys = Move'),
+                 _('Spacebar = Select'),
+                 _('Escape = Stop/Prev. Menu'),
+                 _('h = Help') ]
+
         help_str = '    '.join(help)
+
         pygame.display.set_caption('Freevo' + ' '*7 + String( help_str ) )
         icon = pygame.image.load(os.path.join(config.ICON_DIR,
                                               'misc/freevo_app.png')).convert()
@@ -571,7 +563,7 @@ class OSD:
             rc.set_context(self.focused_app().event_context)
 
 
-    def _cb(self):
+    def _cb(self, map=True):
         """
         callback for SDL event (not Freevo events)
         """
@@ -595,24 +587,39 @@ class OSD:
             event = pygame.event.poll()
 
             if event.type == NOEVENT:
-                return None
-
+                return
+            
             if event.type == KEYDOWN:
+                if not map and event.key > 30:
+                    try:
+                        return chr(event.key)
+                    except:
+                        pass
+                    
                 if event.key in config.KEYMAP.keys():
                     # Turn off the helpscreen if it was on
                     if self._help:
                         self._helpscreen()
                     return config.KEYMAP[event.key]
+
                 elif event.key == K_h:
                     self._helpscreen()
+
                 elif event.key == K_z:
                     self.toggle_fullscreen()
+
                 elif event.key == K_F10:
                     # Take a screenshot
                     pygame.image.save(self.screen,
                                       '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
                     self._screenshotnum += 1
-                
+
+                else:
+                    # don't know what this is, return it as it is
+                    try:
+                        return chr(event.key)
+                    except:
+                        return None
     
     def shutdown(self):
         """
@@ -1342,8 +1349,7 @@ class OSD:
             thumb = None
             _debug_('Trying to load file "%s"' % filename, level=3)
 
-            if (isinstance(filename, str) or isinstance(filename, unicode)) \
-                   and filename.endswith('.raw'):
+            if isstring(filename) and filename.endswith('.raw'):
                 data  = util.read_pickle(filename)
                 image = pygame.image.fromstring(data[0], data[1], data[2])
             elif thumbnail:
@@ -1402,7 +1408,7 @@ class OSD:
                     image = i
                     
         except:
-            print 'Unknown Problem while loading image %s' % url
+            print 'Unknown Problem while loading image %s' % String(url)
             if config.DEBUG:
                 traceback.print_exc()
             return None

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/27 20:12:16  dischi
+# reworked rc.py to make several classes
+#
 # Revision 1.28  2003/12/14 17:24:59  dischi
 # cleanup
 #
@@ -43,22 +46,13 @@
 
 import os
 import copy
-import socket
+import time
+
 import config
 import util
 from event import Event, BUTTON
-import osd
-import time
 
-PYLIRC = 1
-try:
-    import pylirc
-except ImportError:
-    print 'WARNING: PyLirc not found, lirc remote control disabled!'
-    PYLIRC = 0
-
-
-# Module variable that contains an initialized RemoteControl() object
+PYLIRC     = False
 _singleton = None
 
 def get_singleton(**kwargs):
@@ -103,6 +97,169 @@ def set_context(context):
     get_singleton().set_context(context)
 
 
+
+
+# --------------------------------------------------------------------------------
+# internal classes of this module
+# --------------------------------------------------------------------------------
+
+class Lirc:
+    """
+    Class to handle lirc events
+    """
+    def __init__(self):
+        try:
+            import pylirc
+        except ImportError:
+            print 'WARNING: PyLirc not found, lirc remote control disabled!'
+            raise Exception
+        try:
+            if os.path.isfile(config.LIRCRC):
+                pylirc.init('freevo', config.LIRCRC)
+                pylirc.blocking(0)
+            else:
+                raise IOError
+        except RuntimeError:
+            print 'WARNING: Could not initialize PyLirc!'
+            raise Exception
+        except IOError:
+            print 'WARNING: %s not found!' % config.LIRCRC
+            raise Exception
+
+        self.nextcode = pylirc.nextcode
+
+        self.previous_returned_code   = None
+        self.previous_code            = None;
+        self.repeat_count             = 0
+        self.firstkeystroke           = 0.0
+        self.lastkeystroke            = 0.0
+        self.lastkeycode              = ''
+        self.default_keystroke_delay1 = 0.25  # Config
+        self.default_keystroke_delay2 = 0.25  # Config
+
+        global PYLIRC
+        PYLIRC = True
+
+        
+    def get_last_code(self):
+        """
+        read the lirc interface
+        """
+        result = None
+
+        if self.previous_code != None:
+            # Let's empty the buffer and return the most recent code
+            while 1:
+                list = self.nextcode();
+                if list != []:
+                    break
+        else:
+            list = self.nextcode()
+
+        if list == []:
+            # It's a repeat, the flag is 0
+            list   = self.previous_returned_code
+            result = list
+
+        elif list != None:
+            # It's a new code (i.e. IR key was released), the flag is 1
+            self.previous_returned_code = list
+            result = list
+
+        self.previous_code = result
+        return result
+
+
+
+    def poll(self, rc):
+        """
+        return next event
+        """
+        list = self.get_last_code()
+
+        if list == None:
+            nowtime = 0.0
+            nowtime = time.time()
+            if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime) and \
+                   (self.firstkeystroke != 0.0):
+                self.firstkeystroke = 0.0
+                self.lastkeystroke = 0.0
+                self.repeat_count = 0
+
+        if list != None:
+            nowtime = time.time()
+
+            if list:
+                for code in list:
+                    if ( self.lastkeycode != code ):
+                        self.lastkeycode = code
+                        self.lastkeystroke = nowtime
+                        self.firstkeystoke = nowtime
+
+            if self.firstkeystroke == 0.0 :
+                self.firstkeystroke = time.time()
+            else:
+                if (self.firstkeystroke + self.default_keystroke_delay1 > nowtime):
+                    list = []
+                else:
+                    if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime):
+                        self.firstkeystroke = nowtime
+
+            self.lastkeystroke = nowtime
+            self.repeat_count += 1
+
+            for code in list:
+                return code
+
+        
+
+class Keyboard:
+    """
+    Class to handle keyboard input
+    """
+    def __init__(self):
+        """
+        init the keyboard event handler
+        """
+        import osd
+        self.callback = osd.get_singleton()._cb
+
+
+    def poll(self, rc):
+        """
+        return next event
+        """
+        return self.callback(rc.context != 'input')
+
+
+
+class Network:
+    """
+    Class to handle network control
+    """
+    def __init__(self):
+        """
+        init the network event handler
+        """
+        import socket
+        self.port = config.REMOTE_CONTROL_PORT
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.setblocking(0)
+        self.sock.bind(('', self.port))
+        
+
+    def poll(self, rc):
+        """
+        return next event
+        """
+        try:
+            return self.sock.recv(100)
+        except:
+            # No data available
+            return None
+
+
     
 class RemoteControl:
     """
@@ -110,55 +267,24 @@ class RemoteControl:
     also handles the complete event queue (post_event)
     """
     def __init__(self, use_pylirc=1, use_netremote=1):
-        self.osd = osd.get_singleton()
 
-        self.use_pylirc = use_pylirc
-        if self.use_pylirc:
-            self.pylirc = PYLIRC
-        else:
-            # do not use pylirc if we know we don't want it
-            self.pylirc = 0
-
-        if use_netremote and config.ENABLE_NETWORK_REMOTE:
-            port = config.REMOTE_CONTROL_PORT
-        else:
-            port = 0
-            use_netremote = 0
-        self.use_netremote = use_netremote
-
-        if self.pylirc:
+        self.inputs = []
+        if use_pylirc:
             try:
-                if os.path.isfile(config.LIRCRC):
-                    pylirc.init('freevo', config.LIRCRC)
-                    pylirc.blocking(0)
-                else:
-                    raise IOError
-            except RuntimeError:
-                print 'WARNING: Could not initialize PyLirc!'
-                self.pylirc = 0
-            except IOError:
-                print 'WARNING: %s not found!' % config.LIRCRC
-                self.pylirc = 0
+                self.inputs.append(Lirc())
+            except Exception, e:
+                pass
 
-        if self.use_netremote:
-            self.port = port
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.setblocking(0)
-            self.sock.bind(('', self.port))
+        self.inputs.append(Keyboard())
+
+        if use_netremote and config.ENABLE_NETWORK_REMOTE and \
+               config.REMOTE_CONTROL_PORT:
+            self.inputs.append(Network())
 
         self.app                      = None
         self.context                  = 'menu'
         self.queue                    = []
-        self.previous_returned_code   = None
-        self.previous_code            = None;
-        self.repeat_count             = 0
         self.event_callback           = None
-        self.firstkeystroke           = 0.0
-        self.lastkeystroke            = 0.0
-        self.lastkeycode              = ''
-        self.default_keystroke_delay1 = 0.25  # Config
-        self.default_keystroke_delay2 = 0.25  # Config
 
 
     def set_app(self, app, context):
@@ -196,98 +322,24 @@ class RemoteControl:
             except KeyError:
                 pass
 
-        print 'no event mapping for key %s in context %s' % (key, self.context)
-        print 'send button event BUTTON arg=%s' % key
+        if self.context != 'input':
+            print 'no event mapping for key %s in context %s' % (key, self.context)
+            print 'send button event BUTTON arg=%s' % key
         return Event(BUTTON, arg=key)
 
     
-    def get_last_code(self):
-        result = (None, None) # (Code, is_it_new?)
-        if self.previous_code != None:
-            # Let's empty the buffer and return the most recent code
-            while 1:
-                list = pylirc.nextcode();
-                if list != []:
-                    break
-        else:
-            list = pylirc.nextcode()
-        if list == []:
-            # It's a repeat, the flag is 0
-            list = self.previous_returned_code
-            result = (list, 0)
-        elif list != None:
-            self.previous_returned_code = list
-            # It's a new code (i.e. IR key was released), the flag is 1
-            result = (list, 1)
-        self.previous_code = list
-        return result
-
-        
     def poll(self):
         if len(self.queue):
             ret = self.queue[0]
             del self.queue[0]
-            return (ret, None)
+            return ret
 
-        e = self.key_event_mapper(self.osd._cb())
-        if e != None:
-            return (e, None)
-        
-        if self.pylirc:
-            list, flag = self.get_last_code()
+        for i in self.inputs:
+            e = i.poll(self)
+            if e:
+                return self.key_event_mapper(e)
 
-            if list == None:
-                nowtime = 0.0
-                nowtime = time.time()
-                if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime) and \
-                       (self.firstkeystroke != 0.0):
-                    self.firstkeystroke = 0.0
-                    self.lastkeystroke = 0.0
-                    self.repeat_count = 0
-                
-            if list != None:
-                
-                nowtime = time.time()
-
-                if (list != None) and (list != []):
-                    for code in list:
-                        if ( self.lastkeycode != code ):
-                            self.lastkeycode = code
-                            self.lastkeystroke = nowtime
-                            self.firstkeystoke = nowtime
-
-                if self.firstkeystroke == 0.0 :
-                    self.firstkeystroke = time.time()
-                else:
-                    if (self.firstkeystroke + self.default_keystroke_delay1 > nowtime):
-                        list = []
-                    else:
-                        if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime):
-                            self.firstkeystroke = nowtime
-                    
-                self.lastkeystroke = nowtime
-                self.repeat_count += 1
-
-                for code in list:
-                    e = (self.key_event_mapper(code), self.repeat_count)
-
-	            if not e:  e = (self.key_event_mapper(self.osd._cb), None)
-                    if e:
-                        return e
-                
-        if self.use_netremote:
-            try:
-                data = self.sock.recv(100)
-                if data == '':
-                    print 'Lost the connection'
-                    self.conn.close()
-                else:
-                    return self.key_event_mapper(data), None
-            except:
-                # No data available
-                pass
-
-        return (None, None)
+        return None
 
 
     def subscribe(self, event_callback=None):
@@ -296,4 +348,3 @@ class RemoteControl:
             return
 
         self.event_callback = event_callback
-

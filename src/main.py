@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.118  2004/02/27 20:12:16  dischi
+# reworked rc.py to make several classes
+#
 # Revision 1.117  2004/02/23 19:27:07  dischi
 # fix mmpython init
 #
@@ -188,7 +191,7 @@ class MainMenu(Item):
             for name, image, skinfile in skin.get_skins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
-            menuw.pushmenu(menu.Menu('SKIN SELECTOR', items))
+            menuw.pushmenu(menu.Menu(_('Skin Selector'), items))
             return True
 
         # give the event to the next eventhandler in the list
@@ -392,7 +395,7 @@ try:
         # Get next command
         while 1:
 
-            event, event_repeat_count = rc_object.poll()
+            event = rc_object.poll()
             # OK, now we have a repeat_count... to whom could we give it?
             if event:
                 if event == OS_EVENT_POPEN2:
