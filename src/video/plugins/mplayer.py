@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.79  2004/08/23 12:40:24  dischi
+# add bmovl osd info
+#
 # Revision 1.78  2004/08/22 20:13:09  dischi
 # support for display change (bmovl)
 #
@@ -403,9 +406,11 @@ class MPlayer(Application):
             if self.osd_visible:
                 plugin.getbyname('idlebar').show()
                 self.app.write('osd 3\n')
+                self.app.area_handler.show()
             else:
                 plugin.getbyname('idlebar').hide()
                 self.app.write('osd 1\n')
+                self.app.area_handler.hide()
             gui.get_display().update()
             return True
 
@@ -478,6 +483,71 @@ class MPlayer(Application):
 
 # ======================================================================
 
+from gui.areas.area import Area as Area
+
+class Progressbar(Area):
+    def __init__(self):
+        Area.__init__(self, 'content')
+        self.content = []
+        self.bar_border   = self.Rectangle(bgcolor=0xa0ffffffL, radius=4)
+        self.bar_position = self.Rectangle(bgcolor=0x6e9441L, radius=4)
+        self.bar          = None
+        self.last_width   = 0
+
+        
+    def clear(self):
+        """
+        clear all content objects
+        """
+        for c in self.content:
+            c.unparent()
+        self.content = []
+        if self.bar:
+            self.bar.unparent()
+            self.bar = None
+
+
+    def update(self):
+        """
+        update the splashscreen
+        """
+        content = self.calc_geometry(self.layout.content, copy_object=True)
+
+        if not self.content:
+            self.content.append(self.drawbox(content.x, content.y, content.width,
+                                             content.height, self.bar_border))
+
+        try:
+            length = int(self.infoitem.info['length'])
+        except Exception, e:
+            _debug_(e, 0)
+            length = 0
+        start = 0
+        if self.infoitem.info['start']:
+            start = int(self.infoitem.info['start'])
+
+        # get start pos
+        pos = self.infoitem.elapsed - start
+        # make sure the length is ok
+        length = max(pos, length)
+
+        if not length:
+            width = content.width -4 
+        else:
+            width = ((content.width-4) * pos) / length
+
+        width = max(0, min(width, content.width-4))
+
+        if width != self.last_width:
+            self.last_width = width
+            if self.bar:
+                self.bar.unparent()
+            self.bar = self.drawbox(content.x+2, content.y+2, pos,
+                                    content.height-4, self.bar_position)
+        
+
+
+# ======================================================================
 
 class MPlayerApp(childapp.ChildApp2):
     """
@@ -499,12 +569,6 @@ class MPlayerApp(childapp.ChildApp2):
         else:
             self.check_audio = 1
 
-        # FIXME
-        # import osd     
-        # self.osd       = osd.get_singleton()
-        # self.osdfont   = self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
-        #                                   config.OSD_DEFAULT_FONTSIZE)
-
         # check for mplayer plugins
         self.stdout_plugins  = []
         self.elapsed_plugins = []
@@ -517,6 +581,7 @@ class MPlayerApp(childapp.ChildApp2):
         self.width  = 0
         self.height = 0
         self.screen = None
+        self.area_handler = None
         
         # init the child (== start the threads)
         childapp.ChildApp2.__init__(self, app)
@@ -563,13 +628,17 @@ class MPlayerApp(childapp.ChildApp2):
         if line.find("A:") == 0:
             if self.width and self.height and not self.screen:
                 _debug_('starting Bmovl')
-                self.screen = gui.set_display('Bmovl', (self.width, self.height))
+                self.screen  = gui.set_display('Bmovl', (self.width, self.height))
+                self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info', Progressbar()])
+                #self.area_handler.hide()
+                self.area_handler.draw(self.item)
             m = self.RE_TIME(line)
             if hasattr(m,'group') and self.item.elapsed != int(m.group(1))+1:
                 self.item.elapsed = int(m.group(1))+1
                 for p in self.elapsed_plugins:
                     p.elapsed(self.item.elapsed)
-
+                if self.area_handler:
+                    self.area_handler.draw(self.item)
 
         # exit status
         elif line.find("Exiting...") == 0:
@@ -624,6 +693,8 @@ class MPlayerApp(childapp.ChildApp2):
     def stop(self, cmd=''):
         if self.screen:
             gui.remove_display(self.screen)
+            self.area_handler.clear()
+            self.area_handler = None
             self.screen = None
             self.width  = 0
             self.height = 0
