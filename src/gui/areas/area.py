@@ -192,7 +192,7 @@ class Area:
 
 
 
-    def __calc_geometry(self, obj):
+    def __calc_geometry(self, obj, respect_area_geometry=True):
         """
         Calculate the real values of the obj (e.g. content) based
         on the geometry of the area.
@@ -221,13 +221,14 @@ class Area:
         if not obj.height:
             obj.height = self.__area.height
 
-        if obj.width + obj.x > self.__area.width + \
-               self.__area.x:
-            obj.width = self.__area.width - obj.x
+        if respect_area_geometry:
+            if obj.width + obj.x > self.__area.width + \
+                   self.__area.x:
+                obj.width = self.__area.width - obj.x
 
-        if obj.height + obj.y > self.__area.height + \
-               self.__area.y:
-            obj.height = self.__area.height + self.__area.y - obj.y
+            if obj.height + obj.y > self.__area.height + \
+                   self.__area.y:
+                obj.height = self.__area.height + self.__area.y - obj.y
 
         return obj
 
@@ -240,7 +241,8 @@ class Area:
         background_rect  = []
 
         for bg in self.__layout.background:
-            bg = self.__calc_geometry(bg)
+            bg = self.__calc_geometry(bg, False)
+
             if bg.type == 'image' and bg.visible:
                 # if this is the real background image, ignore the
                 # OVERSCAN to fill the whole screen
@@ -260,7 +262,7 @@ class Area:
 
                 if imagefile:
                     background_image.append((imagefile, bg.x, bg.y, bg.width,
-                                             bg.height))
+                                             bg.height, bg.alpha))
 
             elif bg.type == 'rectangle':
                 background_rect.append((bg.x, bg.y, bg.width, bg.height,
@@ -284,10 +286,12 @@ class Area:
 
         for image in background_image:
             # add the new images to the screen
-            imagefile, x, y, width, height = image
+            imagefile, x, y, width, height, alpha = image
             i = self.drawimage(imagefile, (x, y, width, height),
                                background=True)
             if i:
+                if alpha:
+                    i.set_alpha(alpha)
                 self.__background.append(i)
                 i.info = image
                 i.set_zindex(-1)

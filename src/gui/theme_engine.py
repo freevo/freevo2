@@ -160,6 +160,9 @@ def attr_int(node, attr, default, scale=0.0):
             val = node.attrs[('', attr)]
             if val == 'line_height':
                 return -1
+            if not scale:
+                return int(val)
+            
             new_val = ''
 
             while val:
@@ -354,6 +357,7 @@ XML_types = {
     'spacing'  : ('int',  3),
     'hours_per_page': ('int',  3),
     'color'    : ('col',  0),
+    'alpha'    : ('int',  0),
     'bgcolor'  : ('col',  0),
     'size'     : ('int',  3),
     'radius'   : ('int',  3),
@@ -877,8 +881,10 @@ class Image(XML_data):
     def __init__(self):
         self.type = 'image'
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'image',
-                                 'filename', 'label', 'visible'))
+                                 'filename', 'label', 'visible', 'alpha'))
+        self.alpha = None
 
+        
     def prepare(self, color, search_dirs, image_names):
         """
         try to guess the image localtion
@@ -893,7 +899,6 @@ class Image(XML_data):
 
         if self.filename:
             self.filename = search_file(self.filename, search_dirs)
-
 
 
 class Rectangle(XML_data):
@@ -1251,7 +1256,6 @@ class FXDSettings:
         self.images = {}
         for name in self.__images:
             self.images[name] = search_file(self.__images[name], search_dirs)
-
 
 
     def fxd_callback(self, fxd, node):
