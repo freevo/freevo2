@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/16 14:58:20  outlyer
+# Just a change to prevent a crash; this should do something eventually.
+#
 # Revision 1.2  2003/07/14 17:09:15  rshortt
 # User the init_ and print_ functions from the IVTV class.
 #
@@ -295,7 +298,8 @@ class IVTV_TV:
             return TRUE
             
         elif event == em.TOGGLE_OSD:
-            return FALSE
+            # XXX FIX ME
+            return TRUE
         
             # Display the channel info message
             # XXX Experimental, disabled for now
