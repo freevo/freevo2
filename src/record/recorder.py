@@ -75,7 +75,11 @@ class Plugin(plugin.Plugin):
         elif rec.subtitle:
             fxd.info['tagline'] = fxd.str2XML(rec.subtitle)
         for i in rec.info:
-            fxd.info[i] = fxd.str2XML(rec.info[i])
+            if i == 'description':
+                fxd.info['plot'] = fxd.str2XML(rec.info[i])
+            else:
+                fxd.info[i] = fxd.str2XML(rec.info[i])
+                
         fxd.info['runtime'] = '%s min.' % int((rec.stop - rec.start) / 60)
         fxd.info['time'] = str(rec.start)
         fxd.info['year'] = time.strftime('%m-%d %H:%M',
