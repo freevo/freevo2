@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.103  2003/07/05 15:01:49  dischi
+# support for title area in tv mode and prepare the skin if needed
+#
 # Revision 1.102  2003/06/30 20:28:44  outlyer
 # Respect the global DEBUG definition; to enable debugging, you should only
 # need to change DEBUG=1 in config.py
@@ -153,29 +156,10 @@ class Title_Area(Skin_Area):
         
     def update_content_needed(self):
         """
-        check if the content needs an update
+        check if the content needs an update. This function does the same as
+        update_content, so it's faster to return always 1
         """
-        menu      = self.menu
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
-
-        if content.type == 'menu':
-            text = menu.heading
-        elif len(menu.choices) == 0:
-            text = ''
-        elif content.type == 'short item':
-            if menu.selected.image and menu.selected.type == 'video' and \
-               hasattr(menu.selected,'tv_show') and menu.selected.tv_show:
-                sn = menu.selected.show_name
-                text = sn[1] + "x" + sn[2] + " - " + sn[3] 
-            else:
-                text = menu.selected.name
-        else:
-            text = menu.selected.name
-
-        return self.text != text
-
+        return 1
 
     def update_content(self):
         """
@@ -186,20 +170,31 @@ class Title_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        if content.type == 'menu':
-            text = menu.heading
-        elif len(menu.choices) == 0:
-            text = ''
-        elif content.type == 'short item':
-            if menu.selected.image and menu.selected.type == 'video' and \
-               hasattr(menu.selected, 'tv_show') and menu.selected.tv_show:
-                sn = menu.selected.show_name
-                text = sn[1] + "x" + sn[2] + " - " + sn[3] 
+        text = ''
+        try:
+            if content.type == 'menu':
+                text = menu.heading
+            elif len(menu.choices) == 0:
+                text = ''
+            elif content.type == 'short item':
+                if menu.selected.image and menu.selected.type == 'video' and \
+                   hasattr(menu.selected, 'tv_show') and menu.selected.tv_show:
+                    sn = menu.selected.show_name
+                    text = sn[1] + "x" + sn[2] + " - " + sn[3] 
+                else:
+                    text = menu.selected.name
             else:
                 text = menu.selected.name
-        else:
-            text = menu.selected.name
-
+        except AttributeError:
+            try:
+                if menu.type == 'tv':
+                    if content.type == 'item' or content.type == 'short item':
+                        text = menu.table[1].title
+                    else:
+                        text = 'TV GUIDE'
+            except:
+                pass
+            
         self.text = text
         self.write_text(text, content.font, content, height=-1, mode='hard')
 
@@ -262,7 +257,6 @@ class Skin:
         """
         return an object with new skin settings
         """
-            
         if dir and os.path.isfile(os.path.join(dir, 'folder.fxd')):
             file = os.path.join(dir, 'folder.fxd')
 
@@ -480,7 +474,6 @@ class Skin:
         osd.update()
 
 
-
     def draw(self, (type, object)):
         """
         draw the object.
@@ -488,6 +481,9 @@ class Skin:
         the audio player
         """
 
+        if not self.settings.prepared:
+            self.settings.prepare()
+            
         if self.plugin_refresh == None:
             self.plugin_refresh = plugin.get('daemon_draw')
 
