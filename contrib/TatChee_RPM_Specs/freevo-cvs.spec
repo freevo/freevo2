@@ -261,6 +261,7 @@ install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.
 install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/Music
 install -m 644 testfiles/Music/*.png %{buildroot}%{_cachedir}/freevo/testfiles/Music
+install -m 644 testfiles/tv-show-images/*.png %{buildroot}%{_cachedir}/freevo/testfiles/tv-show-images
 
 %clean
 rm -rf $RPM_BUILD_ROOT
