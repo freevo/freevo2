@@ -6,6 +6,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/03/13 22:33:15  dischi
+# changes for the new input widget
+#
 # Revision 1.8  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -136,5 +139,6 @@ class Container(GUIObject):
         for child in self.children:
             if not child == self.border:
                 child.draw()
-        if self.border:
+
+        if self.border and self.border != -1:
             self.border.draw()

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/03/13 22:33:15  dischi
+# changes for the new input widget
+#
 # Revision 1.16  2004/02/24 18:56:09  dischi
 # add hfill to text_prop
 #
@@ -82,12 +85,14 @@ class InputBox(PopupBox):
     """
 
     def __init__(self, text, handler=None, type='text', x=None, y=None, width=0, height=0,
-                 icon=None, vertical_expansion=1, text_prop=None, parent='osd'):
+                 icon=None, vertical_expansion=1, text_prop=None, input_text='',
+                 numboxes=0, parent='osd'):
 
         PopupBox.__init__(self, text, handler, x, y, width, height,
                           icon, vertical_expansion, text_prop, parent)
 
-        self.lbg = LetterBoxGroup(type=type)
+        self.lbg = LetterBoxGroup(type=type, numboxes=numboxes, text=input_text,
+                                  width=self.content.width-self.content.h_margin*2)
         self.add_child(self.lbg)
         
 
