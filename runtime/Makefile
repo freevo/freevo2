@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/31 20:13:01  rshortt
+# Changes for the 1.4 runtime and add runtime_release target.
+#
 # Revision 1.19  2003/08/06 00:34:45  rshortt
 # Adding pylcd.
 #
@@ -100,22 +103,44 @@ PACKAGE_GET=
 TAR1="tar zxvf"
 TAR2="tar jxvf"
 
-PREFIX=$(COPY_BASE)/build
+PREFIX=/usr
 COPY_BASE=$(PREFIX)
 
 CFGFLAGS="--prefix=$(PREFIX)"
 
 PYBIN=/usr/bin/python
-LIRCLIB=/opt/lirc/lib
-LIRCINC=/opt/lirc/include
+LIRCLIB=/usr/local/lib
+LIRCINC=/usr/local/include
+
+LOGDIR=/var/log/freevo
 
 .PHONY: copy build clean src copy_libdeps
 
 
 # There is no default target, you gotta know what you're doing :-)
 all:
+	@echo
 	@echo Please see the Makefile source and the Wiki for more info!
+	@echo
+	@echo Right now this file is only used as a tool to release the binary
+	@echo runtime.
+	@echo
 
+
+runapp_static: src/runapp.c
+	rm -f runapp
+	$(CC) $(CFLAGS) -static -o runapp src/runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\" 
+	strip runapp
+
+runapp_dyn: src/runapp.c
+	rm -f runapp
+	$(CC) $(CFLAGS) -o runapp src/runapp.c -DRUNAPP_LOGDIR=\"$(LOGDIR)\"
+	strip runapp
+
+
+runtime_release: runapp_static copy
+	rm -f runtime.tar.gz
+	tar zcvhf runtime.tar.gz runapp apps lib dll preloads
 
 # Copy the libraries, programs etc to this directory
 # There is no dependency checking, the libs are just copied
@@ -123,8 +148,7 @@ all:
 # all libs are up-to-date.
 # Python programs in lib/ have their execute flag removed since
 # RPM building chokes on them.
-copy: 	python_copy mplayer_copy mplayer_fonts_copy cdparanoia_copy \
-	lame_copy jpegtran_copy copy_libdeps
+copy: 	python_copy jpegtran_copy matroxset_copy copy_libdeps
 	find lib -name "*.so" -exec strip {} \;
 	find dll -name "*.so*" -exec strip {} \;
 	find apps -perm +111 -type f -exec strip {} \;
@@ -152,14 +176,17 @@ clean:
 # The dynamic link loader ld-linux is renamed to freevo-run for
 # easy killing in the main startscript 'freevo'
 copy_libdeps:
+	-rm -rf dll
 	-mkdir -p dll
 	python copy_libdeps.py
 	mv dll/ld-linux.so.2 dll/freevo_loader
+	cp $(PREFIX)/lib/i486/libcrypto.so.0.9.7 dll/
+	cp $(PREFIX)/lib/i486/libssl.so.0.9.7 dll/
 
 
 ################################################################################
 #
-# Python 2.2.2
+# Python 2.3
 #
 ################################################################################
 # This will copy a number of the other packages as well since they're installed
@@ -170,23 +197,22 @@ python_copy:
 	-rm -rf tmp
 	-mkdir -p lib
 	-mkdir -p apps
-	cp -a /usr/lib/python2.2 lib
+	cp -a /usr/lib/python2.3 lib
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
-	rm -rf lib/python2.2/config
-	rm -rf lib/python2.2/lib-tk
-	rm -rf lib/python2.2/lib-old
-	rm -rf lib/python2.2/test
+	rm -rf lib/python2.3/config
+	rm -rf lib/python2.3/lib-tk
+	rm -rf lib/python2.3/lib-old
+	rm -rf lib/python2.3/test
 	-mkdir -p tmp
-	cp -a lib/python2.2/site-packages/{CDDB.py,DiscID.py,Numeric,Numeric.pth} tmp
-	cp -a lib/python2.2/site-packages/{PIL,PIL.pth,_xmlplus,aomodule.so} tmp
-	cp -a lib/python2.2/site-packages/{cdrom.so,mx,ogg,pygame,pygphoto.so} tmp
-	cp -a lib/python2.2/site-packages/{pylircmodule.so,fchksum.so,pylcd.py} tmp
-	cp -a lib/python2.2/site-packages/{_xmms.so,xmms.py} tmp
-	cp -a lib/python2.2/site-packages/{mmpython,twisted,pyshift.so} tmp
-	rm -rf lib/python2.2/site-packages
-	mv tmp lib/python2.2/site-packages
-	cp -a /usr/bin/python2.2 apps/freevo_python
+	cp -a lib/python2.3/site-packages/{Numeric,Numeric.pth} tmp
+	cp -a lib/python2.3/site-packages/{PIL,PIL.pth,_xmlplus,aomodule.so} tmp
+	cp -a lib/python2.3/site-packages/{ogg,pygame,pygphoto.so} tmp
+	cp -a lib/python2.3/site-packages/{pylircmodule.so,fchksum.so,pylcd.py} tmp
+	cp -a lib/python2.3/site-packages/{mmpython,twisted} tmp
+	rm -rf lib/python2.3/site-packages
+	mv tmp lib/python2.3/site-packages
+	cp -a /usr/bin/python2.3 apps/freevo_python
 
 
 ################################################################################
@@ -241,6 +267,16 @@ lame_copy:
 jpegtran_copy:
 	@echo Copying jpegtran
 	cp -a $(PREFIX)/bin/jpegtran apps/
+
+
+################################################################################
+#
+# matroxset, comes with mplayer
+#
+################################################################################
+matroxset_copy:
+	@echo Copying matroxset
+	cp -a $(PREFIX)/bin/matroxset apps/
 
 
 build_all_pkg: build_packageconfig build_libusb build_python build_jpeg build_png build_zlib build_ffmpeg build_dxr3 build_directfb build_sdl build_alsa build_aumix build_cddb build_cdparanoia build_egenix build_expat build_freetype build_lame build_libao build_libexif build_libgphoto build_libogg build_libvorbis build_pyogg build_pyvorbis build_pyao build_pyfchksum build_pyimaging build_pylirc build_pynumeric build_pyxml build_pyxmms build_sdlimage build_sdlttf build_smpeg build_sdlmixer build_pygame build_swig build_pygphoto build_vorbistools build_mp1e build_mplayer get_mplayer_fonts
