@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/27 14:17:55  dischi
+# support holding a key pressed
+#
 # Revision 1.5  2004/08/24 16:42:42  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -66,6 +69,7 @@ class Display(PygameCanvas):
         rc.get_singleton().inputs.append(rc.Keyboard(self.poll))
         self.running = True
         self.animation_possible = True
+        pygame.key.set_repeat(500, 30)
 
         
     def hide(self):
