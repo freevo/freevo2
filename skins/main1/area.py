@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/07/13 12:46:45  dischi
+# bugfix: max-x was calculated as max+x (again at a different place)
+#
 # Revision 1.17  2003/07/13 12:45:53  dischi
 # bugfix: max-x was calculated as max+x
 #
@@ -570,22 +573,22 @@ class Skin_Area:
             r.height = item_h
 
         try:
-            r.x = item_w + int(r.x[4:])
+            r.x = item_w + int(r.x[3:])
         except TypeError:
             pass
             
         try:
-            r.width = item_w + int(r.width[4:])
+            r.width = item_w + int(r.width[3:])
         except TypeError:
             pass
             
         try:
-            r.y = item_h + int(r.y[4:])
+            r.y = item_h + int(r.y[3:])
         except TypeError:
             pass
 
         try:
-            r.height = item_h + int(r.height[4:])
+            r.height = item_h + int(r.height[3:])
         except TypeError:
             pass
             
