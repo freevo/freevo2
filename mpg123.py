@@ -118,8 +118,8 @@ class MPG123:
            
 	
 	    # Allow per mp3 covers. As per Chris' request ;)
-	    if os.path.isfile(filename + '.png'):
-	    	mp3info.image = filename + '.png'
+	    if os.path.isfile(os.path.splitext(filename)[0] + '.png'):
+	    	mp3info.image = os.path.splitext(filename)[0] + '.png'
 
             mp3info.filename = filename
             mp3info.id3 = ID3(filename)
