@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/01 15:53:18  dischi
+# move the shadow code into osd.py
+#
 # Revision 1.5  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -78,6 +81,7 @@ class Screen:
         self.s_content      = osd.screen.convert()
         self.s_alpha        = self.s_content.convert_alpha()
         self.s_bg           = self.s_content.convert()
+        self.s_screen       = self.s_content.convert()
         self.update_bg      = None
         self.update_alpha   = []
         self.update_content = []
@@ -179,9 +183,12 @@ class Screen:
                 self.s_content.blit(self.s_alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
 
-        layer = self.s_content.convert()
         update_area += self.update_content
 
+        layer = self.s_screen
+        for x0, y0, x1, y1 in update_area:
+            layer.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
+        
         # if something changed redraw all content objects
         if update_area:
             ux1, uy1, ux2, uy2 = osd.width, osd.height, 0, 0
@@ -198,17 +205,14 @@ class Screen:
             for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
                     ellipses in self.drawlist.text:
                 if self.in_update(x1, y1, x2, y2, update_area):
-                    width = x2 - x1
                     if font.shadow.visible:
-                        width -= font.shadow.x
-                        osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
-                                             width, height, font.font, font.shadow.color,
-                                             None, align_h = align_h, align_v = align_v,
-                                             mode=mode, ellipses=ellipses, layer=layer)
-                    osd.drawstringframed(text, x1, y1, width, height, font.font,
+                        shadow = (font.shadow.x, font.shadow.y, font.shadow.color)
+                    else:
+                        shadow = None
+                    osd.drawstringframed(text, x1, y1, x2 - x1, height, font.font,
                                          font.color, None, align_h = align_h,
                                          align_v = align_v, mode=mode,
-                                         ellipses=ellipses, layer=layer)
+                                         shadow=shadow, ellipses=ellipses, layer=layer)
 
         for x0, y0, x1, y1 in update_area:
             osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/01/01 15:53:18  dischi
+# move the shadow code into osd.py
+#
 # Revision 1.8  2003/12/14 17:39:52  dischi
 # Change TRUE and FALSE to True and False; vfs fixes
 #
@@ -147,14 +150,12 @@ class Info_Area(Skin_Area):
         or does nothing (return 0)
         """
         update=0
-        try:
-            if self.content.width != self.area_val.width or \
-               self.content.height != self.area_val.height or \
-               self.content.x != self.area_val.x or \
-               self.content.y != self.area_val.y:
-                update=1
-        except:
-            pass
+        if self.content and self.area_val and \
+               (self.content.width != self.area_val.width or \
+                self.content.height != self.area_val.height or \
+                self.content.x != self.area_val.x or \
+                self.content.y != self.area_val.y):
+            update=1
         
         if self.layout_content is not self.layout.content or update:
             types = self.layout.content.types
@@ -368,32 +369,28 @@ class Info_Area(Skin_Area):
                 element.x = x
                 element.y = y
 
-                shadow_x, shadow_y = 0, 0
-                if element.font.shadow.visible == 'yes':
-                    shadow_x = element.font.shadow.x
-                    shadow_y = element.font.shadow.y
-                    
                 # Calculate the geometry
                 r = Geometry( x, y, element.width, element.height)
-                r = self.get_item_rectangle(r, self.content.width - x - shadow_x,
-                                            self.content.height - y - shadow_y )[ 2 ]
+                r = self.get_item_rectangle(r, self.content.width - x,
+                                            self.content.height - y )[ 2 ]
 
                 if element.height > 0:
                     height = min(r.height, element.height)
                 else:
                     height = -1
-                    
+
+                if element.font.shadow.visible:
+                    shadow = (element.font.shadow.x, element.font.shadow.y,
+                              element.font.shadow.color)
+                else:
+                    shadow = None
                 size = osd.drawstringframed( _(element.text), 0, 0,
                                              r.width, r.height,
                                              element.font.font, None, None,
                                              element.align, element.valign,
-                                             element.mode, layer='' )[ 1 ]
-                try:
-                    m_width  = size[ 2 ] - size[ 0 ]
-                    m_height = size[ 3 ] - size[ 1 ]
-                except:
-                    m_width = r.width
-                    m_height = r.height
+                                             element.mode, shadow=shadow, layer='' )[ 1 ]
+                m_width  = size[ 2 ] - size[ 0 ]
+                m_height = size[ 3 ] - size[ 1 ]
 
                 if isinstance( element.width, int ):
                     if element.width <= 0:
@@ -407,11 +404,8 @@ class Info_Area(Skin_Area):
                 else:
                     element.height = min( m_height, r.height )
 
-                element.width += shadow_x
-                element.height += shadow_y
-
                 x += element.width
-                ret_list += [ element ]
+                ret_list.append(element)
             
 
             # We should shrink the width and go next line (overflow)

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2004/01/01 15:53:18  dischi
+# move the shadow code into osd.py
+#
 # Revision 1.113  2003/12/31 16:41:43  dischi
 # cache all thumbnails when config.OVERLAY_DIR_STORE_THUMBNAILS
 #
@@ -769,7 +772,7 @@ class OSD:
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
-                         layer=None, ellipses='...'):
+                         layer=None, shadow=None, ellipses='...'):
         """
         draws a string (text) in a frame. This tries to fit the
         string in lines, if it can't, it truncates the text,
@@ -788,13 +791,28 @@ class OSD:
         - align_v: vertical align. Can be top, bottom, center or middle
         - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
           or 'soft' (based on words)
+        - shadow can be a list of (x, y, color)
         """
         if not string:
             return '', (x,y,x,y)
 
+        if shadow:
+            shadow_x, shadow_y = shadow[:2]
+        else:
+            shadow_x = 0
+            shadow_y = 0
+            
         if height == -1:
             height = font.height
+        else:
+            height -= abs(shadow_y)
 
+        width  -= abs(shadow_x)
+        if shadow_x < 0:
+            x -= shadow_x
+        if shadow_y < 0:
+            y -= shadow_y
+                
         line_height = font.height * 1.1
         if int(line_height) < line_height:
             line_height = int(line_height) + 1
@@ -802,8 +820,8 @@ class OSD:
         if width <= 0 or height < font.height:
             return string, (x,y,x,y)
             
-        num_lines_left = int((height+line_height-font.height) / line_height)
-        lines = []
+        num_lines_left   = int((height+line_height-font.height) / line_height)
+        lines            = []
         current_ellipses = ''
         hard = mode == 'hard'
         
@@ -842,26 +860,31 @@ class OSD:
         elif align_v == 'center':
             y += int((height - height_needed)/2)
 
-        y0 = y
+        y0    = y
         min_x = 10000
         max_x = 0
 
         if not layer and layer != '':
             layer = self.screen
 
+        if layer:
+            fgcolor  = self._sdlcol(fgcolor)
+            if shadow:
+                shadow_color = self._sdlcol(shadow[2])
+
         for w, l in lines:
             if not l:
                 continue
 
             x0 = x
-            if layer != '':
+            if layer:
                 try:
                     # render the string. Ignore all the helper functions for that
                     # in here, it's faster because he have more information
                     # in here. But we don't use the cache, but since the skin only
                     # redraws changed areas, it doesn't matter and saves the time
                     # when searching the cache
-                    render = font.font.render(l, 1, self._sdlcol(fgcolor))
+                    render = font.font.render(l, 1, fgcolor)
                     if align_h == 'right':
                         x0 = x + width - render.get_size()[0]
                     elif align_h == 'center':
@@ -870,6 +893,9 @@ class OSD:
                         self.drawbox(x0, y0, x0+render.get_size()[0],
                                      y0+render.get_size()[1], color=bgcolor, fill=1,
                                      layer=layer)
+                    if shadow:
+                        layer.blit(font.font.render(l, 1, shadow_color),
+                                   (x0+shadow_x, y0+shadow_y))
                     layer.blit(render, (x0, y0))
                 except:
                     print "Render failed, skipping..."    
@@ -879,6 +905,16 @@ class OSD:
                 max_x = x0 + w
             y0 += line_height
 
+        if shadow:
+            if shadow_x < 0:
+                min_x += shadow_x
+            else:
+                max_x += shadow_x
+            if shadow_y < 0:
+                y += shadow_y
+                height_needed -= shadow_y
+            else:
+                height_needed += shadow_y
         return r, (min_x, y, max_x, y+height_needed)
     
 
@@ -1256,6 +1292,8 @@ class OSD:
         
     # Convert a 32-bit TRGB color to a 4 element tuple for SDL
     def _sdlcol(self, col):
+        if col==None:
+            return (0,0,0,255)
         a = 255 - ((col >> 24) & 0xff)
         r = (col >> 16) & 0xff
         g = (col >> 8) & 0xff
