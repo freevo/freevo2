@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# lcd.py - use PyLCD to display menus and music player
+# lcd.py - use PyLCD to display menus and players
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/22 20:21:20  gsbarbieri
+# Added __doc__ string, so plugins helper will be happy, right Dischi? :)
+#
 # Revision 1.10  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -656,6 +659,10 @@ def get_info( item, list ):
 
 
 class PluginInterface( plugin.DaemonPlugin ):
+    """
+    Display context info in LCD using lcdproc daemon.
+    """
+
     def __init__( self ):
         """
         init the lcd
