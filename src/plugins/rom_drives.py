@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/08/23 12:10:00  dischi
+# move to CDROM.py stuff and remove external eject
+#
 # Revision 1.19  2003/08/21 20:54:44  gsbarbieri
 #    *ROM media just shows up when needed, ie: audiocd is not displayed in
 # video main menu.
@@ -72,6 +75,8 @@ import threading
 import thread
 import string
 import copy
+from CDROM import *
+import traceback
 
 import config
 import util
@@ -95,16 +100,6 @@ from directory import DirItem
 DEBUG = config.DEBUG   # 1 = regular debug, 2 = more verbose
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
-
-
-# taken from cdrom.py so we don't need to import cdrom.py
-CDROM_DRIVE_STATUS=0x5326
-CDSL_CURRENT=( (int ) ( ~ 0 >> 1 ) )
-CDS_DISC_OK=4
-CDROM_DISC_STATUS=0x5327
-CDS_AUDIO=100
-CDS_MIXED=105
-CDROM_SELECT_SPEED=0x5322
 
 
 # Identify_Thread
@@ -276,25 +271,54 @@ class RemovableMedia:
                 dir = 'open'
 
         if dir == 'open':
-            if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
+            if DEBUG:
+                print 'Ejecting disc in drive %s' % self.drivename
+
             if notify:
                 pop = PopupBox(text='Ejecting disc in drive %s' % self.drivename) 
                 pop.show()
-            os.system('eject %s' % self.devicename)
+
+            try:
+                fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
+                s = ioctl(fd, CDROMEJECT)
+                os.close(fd)
+            except:
+                traceback.print_exc()
+                # maybe we need to close the fd if ioctl fails, maybe
+                # open fails and there is no fd
+                try:
+                    os.close(fd)
+                except:
+                    pass
+
             self.tray_open = 1
             if notify:
                 pop.destroy()
 
         
         elif dir == 'close':
-            if DEBUG: print 'Inserting %s' % self.drivename
+            if DEBUG:
+                print 'Inserting %s' % self.drivename
+
             if notify:
                 pop = PopupBox(text='Reading disc in drive %s' % self.drivename)
                 pop.show()
 
             # close the tray, identifymedia does the rest,
             # including refresh screen
-            os.system('eject -t %s' % self.devicename)
+            try:
+                fd = os.open(self.devicename, os.O_RDONLY | os.O_NONBLOCK)
+                s = ioctl(fd, CDROMCLOSETRAY)
+                os.close(fd)
+            except:
+                traceback.print_exc()
+                # maybe we need to close the fd if ioctl fails, maybe
+                # open fails and there is no fd
+                try:
+                    os.close(fd)
+                except:
+                    pass
+
             self.tray_open = 0
             global im_thread
             if im_thread:
@@ -335,6 +359,7 @@ class Identify_Thread(threading.Thread):
         """
         # Check drive status (tray pos, disc ready)
         try:
+            CDSL_CURRENT = ( (int ) ( ~ 0 >> 1 ) )
             fd = os.open(media.devicename, os.O_RDONLY | os.O_NONBLOCK)
             s = ioctl(fd, CDROM_DRIVE_STATUS, CDSL_CURRENT)
         except:
