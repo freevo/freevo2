@@ -42,7 +42,7 @@ class Screen:
 
 
 
-    def show(self):
+    def update(self):
         """
         Show the screen using pygame
         """
@@ -84,7 +84,3 @@ class Screen:
 
         if update_area:
             self.renderer.update([rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1]])
-
-    def update(self):
-        _debug_('update')
-        self.show()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/24 17:18:18  dischi
+# rename show to update
+#
 # Revision 1.3  2004/07/24 12:21:30  dischi
 # use new renderer and screen features
 #
@@ -214,7 +217,7 @@ class AreaHandler:
         for a in self.all_areas:
             a.clear()
         if osd_update:
-            self.screen.show()
+            self.screen.update()
 
 
     def redraw(self):
@@ -283,7 +286,7 @@ class AreaHandler:
         try:
             for a in self.all_areas:
                 a.draw(settings, object, menu, style, type)
-            self.screen.show()
+            self.screen.update()
 
         except UnicodeError, e:
             print '******************************************************************'
