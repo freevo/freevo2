@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.124  2004/10/06 19:18:02  dischi
+# add mainloop broken warning
+#
 # Revision 1.123  2004/09/27 18:43:06  dischi
 # import input
 #
@@ -1047,6 +1050,7 @@ os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
 os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
 
 
-REDESIGN_BROKEN  = 'not working while gui redesign'
-REDESIGN_FIXME   = 'not working since gui redesign, feel free to fix this'
-REDESIGN_UNKNOWN = 'plugin may be broken after gui redesign, please check'
+REDESIGN_MAINLOOP = 'not working while mainloop redesign'
+REDESIGN_BROKEN   = 'not working while gui redesign'
+REDESIGN_FIXME    = 'not working since gui redesign, feel free to fix this'
+REDESIGN_UNKNOWN  = 'plugin may be broken after gui redesign, please check'
