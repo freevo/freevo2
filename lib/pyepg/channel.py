@@ -48,6 +48,7 @@
 
 import time
 import logging
+import random
 
 # Try to import the notifier or set the variable notifier to None. If
 # 'notifier' is not None and 'notifier.step' is not None, call the step
@@ -92,6 +93,16 @@ class Channel:
         self.__epg     = epg
         self.name      = display_name
         self.title     = display_name
+        if notifier:
+            # add random timer 100-500ms to fill the
+            # database with init values
+            notifier.addTimer(random.randint(1, 5) * 100,
+                              self.__precache)
+
+    def __precache(self):
+        ctime = int(time.time())
+        self.__import_programs(ctime - 3600 * 4, ctime + 366 * 10)
+        return False
 
 
     def __get_dummy_program(self, start, stop):
