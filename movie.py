@@ -11,6 +11,11 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2002/09/13 17:34:59  dischi
+# Added menu with all tracks for (S)VCDs. Currently I only have one SVCD
+# for testing, but it should work for VCDs, too. We need a way to check
+# if track 1 is playable or not (menu)
+#
 # Revision 1.32  2002/09/13 16:30:45  dischi
 # Fix DVD title scanning, added -cdrom-device for title search and DVD play,
 # menu title is DVD title, added DVD image for all items
@@ -22,45 +27,10 @@
 # Show identified title instead of the disc label for non
 # right-now-playable discs.
 #
-# Revision 1.29  2002/09/08 18:26:03  krister
-# Applied Andrew Drummond's MAME patch. It seems to work OK on X11, but still needs some work before it is ready for prime-time...
-#
-# Revision 1.28  2002/09/07 06:19:45  krister
-# Improved removable media support.
-#
-# Revision 1.27  2002/09/06 05:25:18  krister
-# Fixed a syntax warning.
-#
-# Revision 1.26  2002/09/04 19:47:46  dischi
-# wrap (u)mount to get rid of the error messages
-#
 # Revision 1.25  2002/09/04 19:32:31  dischi
 # Added a new identifymedia. Freevo now polls the rom drives for media
 # change and won't mount the drive unless you want to play a file from cd or
 # you browse it.
-#
-# Revision 1.24  2002/09/01 09:43:45  dischi
-# Added type = 'dir' for directories in MenuItem so that the skin can
-# use the correct style
-#
-# Revision 1.23  2002/08/12 12:42:17  dischi
-# cosmetic changes
-#
-# Revision 1.22  2002/08/11 09:32:59  dischi
-# If the movie title is a tv show (regexp TV_SHOW_REGEXP_MATCH) add \t
-# between name, number and title for a nice alignment with the new SDL
-# osd. This may cause some trouble with the krister1 skin if you have
-# series and other movies in the same dir.
-#
-# Revision 1.21  2002/08/08 03:16:56  krister
-# Changed move playing so that the next movie is not started automatically.
-#
-# Revision 1.20  2002/08/07 18:54:08  dischi
-# changed the "mounting..." box to osd.popup_box
-#
-# Revision 1.19  2002/07/31 08:07:23  dischi
-# Moved the XML movie file parsing in a new file. Both movie.py and
-# config.py use the same code now.
 #
 #
 # ----------------------------------------------------------------------
@@ -150,13 +120,10 @@ def play_movie(arg=None, menuw=None):
     for media in config.REMOVABLE_MEDIA:
         if filename.find(media.mountdir) == 0:
             if mode == 'dvd':
-                dvd_menu_generate(media, menuw)
+                dvd_vcd_menu_generate(media, 'dvd', menuw)
                 return
             if mode == 'vcd' or mode == 'svcd':
-                # XXX A kludge to make (S)VCD work by just playing chapter 1
-                # XXX on the selected drive
-                mplayer_options = mplayer_options + ' -cdrom-device ' + media.devicename
-                mplayer.play(mode, '1', [], 0, mplayer_options)
+                dvd_vcd_menu_generate(media, 'vcd', menuw)
                 return
             else:
                 util.mount(media.mountdir)
@@ -167,37 +134,50 @@ def play_movie(arg=None, menuw=None):
 
 def play_dvd(arg=None, menuw=None):
     titlenum = arg
-
     print 'play_dvd: Got title %s' % titlenum
-                
     mplayer.play('dvd', titlenum, [], 0, '')
 
+def play_vcd(arg=None, menuw=None):
+    titlenum = arg
+    print 'play_vcd: Got title %s' % titlenum
+    mplayer.play('vcd', titlenum, [], 0, '')
 
-#mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 1> /dev/null 2> /tmp/mplayer_dvd.log
-def dvd_menu_generate(media, menuw):
+
+#mplayer -ao null -nolirc -vo null -frames 0 -dvd 1 2> &1 > /tmp/mplayer_dvd.log
+#mplayer -ao null -nolirc -vo null -frames 0 -vcd 99 2> &1 > /tmp/mplayer_dvd.log
+def dvd_vcd_menu_generate(media, type, menuw):
 
     # Figure out the number of titles on this disc
-    osd.popup_box('Scanning DVD, be patient...')
+    osd.popup_box('Scanning disc, be patient...')
     osd.update()
     os.system('rm /tmp/mplayer_dvd.log /tmp/mplayer_dvd_done')
     # XXX Add an option for DVD device to use in case theres more than one!
-    cmd = ('%s -ao null -nolirc -vo null -frames 0 -dvd 1 -cdrom-device %s ' +
+    cmd = ('%s -ao null -nolirc -vo null -frames 0 %s -cdrom-device %s ' +
            '1 2>&1 > /tmp/mplayer_dvd.log')
-    print cmd % (config.MPLAYER_CMD, media.devicename)
-    os.system((cmd % (config.MPLAYER_CMD, media.devicename)) +
-              ' ; touch /tmp/mplayer_dvd_done')
+
+    if type == 'dvd':
+        cmd = cmd % (config.MPLAYER_CMD, '-dvd 1', media.devicename)
+        play_function = play_dvd
+    else:
+        # play track 99 which isn't there (very sure!), scan mplayers list
+        # of found tracks to get the total number of tracks
+        cmd = cmd % (config.MPLAYER_CMD, '-vcd 99', media.devicename)
+        play_function = play_vcd
+
+    os.system(cmd + ' ; touch /tmp/mplayer_dvd_done')
+
     timeout = time.time() + 20.0
     done = 0
     while 1:
         if time.time() >= timeout:
-            print 'DVD disc read failed!'
+            print 'DVD/VCD disc read failed!'
             break
 
         if os.path.isfile('/tmp/mplayer_dvd_done'):
             done = 1
             break
     found = 0
-    if done:
+    if done and type == 'dvd':
         # Look for 'There are NNN titles on this DVD'
         lines = open('/tmp/mplayer_dvd.log').readlines()
         for line in lines:
@@ -207,12 +187,20 @@ def dvd_menu_generate(media, menuw):
                 found = 1
                 break
 
+    elif done:
+        # Look for 'There are NNN titles on this VCD'
+        lines = open('/tmp/mplayer_dvd.log').readlines()
+        for line in lines:
+            if line.find('track ') == 0:
+                num_titles = int(line[6:8])
+                found = 1
+
     if not done or not found:
         num_titles = 100 # XXX Kludge
 
     items = []
     for title in range(1,num_titles+1):
-        m = menu.MenuItem('Play Title %s' % title, play_dvd,
+        m = menu.MenuItem('Play Title %s' % title, play_function,
                           '%s -cdrom-device %s' % (title, media.devicename), 
                           dvd_menu_eventhandler, media)
         m.setImage(('movie', media.info[2]))
