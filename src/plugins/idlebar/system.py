@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/02 18:02:09  dischi
+# fix case temp
+#
 # Revision 1.3  2003/10/28 21:40:15  mikeruelle
 # dischi says move to top. /me salutes and moves import statement
 #
@@ -256,9 +259,9 @@ class sensors(IdleBarPlugin):
     
         if case: 
             if isinstance (case,types.StringType):
-                self.cpu = self.sensor(case, '@', self.hotstack)
+                self.case = self.sensor(case, '@', self.hotstack)
             else:
-                self.cpu = self.sensor(case[0], case[1], self.hotstack)
+                self.case = self.sensor(case[0], case[1], self.hotstack)
 
 
         self.ram = ram
@@ -296,7 +299,7 @@ class sensors(IdleBarPlugin):
         osd.write_text(cputemp, font, None, x + 15, osd.y + 55 - font.h, widthcpu, font.h,
                        'left', 'top')
         widthcpu = max(widthcpu, 32) + 10
-        
+
         if self.case:
             casetemp = self.case.temp()
             
@@ -307,7 +310,7 @@ class sensors(IdleBarPlugin):
                            osd.y + 55 - font.h, widthcase, font.h,
                            'left', 'top')
             widthcase = max(widthcase, 32) + 10
-            
+
         if self.ram:
             text = self.getRamStat()
             widthram = font.font.stringsize(text)
