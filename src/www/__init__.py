@@ -50,6 +50,8 @@ class PluginInterface(plugin.Plugin):
         Start the webserver
         """
         from www.server import Server, RequestHandler
+
+        plugin.Plugin.__init__(self)
         cgi_dir = os.path.join(os.path.dirname(__file__), '../www')
         cgi_dir = os.path.abspath(cgi_dir)
         htdocs  = [ os.path.join(cgi_dir, 'htdocs'),
