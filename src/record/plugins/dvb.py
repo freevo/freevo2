@@ -111,28 +111,27 @@ class PluginInterface(generic.PluginInterface):
         else:
             filename = rec.url
 
-        if self.program == 'mplayer':
-            # use mplayer -dumpstream
-            return [ self.program_file, '-dumpstream', '-dumpfile',
-                     filename, 'dvb://' + String(channel) ]
-        
-        elif self.program == 'tzap' and self.replex:
-            # use tzap + replex
+        if self.replex:
+            # use replex to transform ts to mpeg
             self.record_fifo = '/tmp/record-%s-%s-%s' % \
                                (self.device.number, os.getpid(),
                                 int(time.time()))
-            # create tzap -> replex fifo
+            # create replex fifo
             if os.path.exists(self.record_fifo):
                 os.unlink(self.record_fifo)
             os.mkfifo(self.record_fifo)
 
             # start replex program
-            self.replex_child = Process([ self.replex, '-x', '-t', 'DVD',
+            self.replex_child = Process([ self.replex, '-x', '-k', '-t', 'DVD',
                                           '--of', filename, self.record_fifo ])
-	    return [ self.program_file, '-o', self.record_fifo, '-c',
-                     self.configfile, '-a', self.device.number,
-                     String( channel ) ]
+            # set filename for the real recorder to fifo
+            filename = self.record_fifo
             
+        if self.program == 'mplayer':
+            # use mplayer -dumpstream
+            return [ self.program_file, '-dumpstream', '-dumpfile',
+                     filename, 'dvb://' + String(channel) ]
+        
         elif self.program == 'tzap':
             # use tzap
 	    return [ self.program_file, '-o', filename, '-c', self.configfile,
