@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/08 17:40:53  dischi
+# only register to skin when we are main
+#
 # Revision 1.15  2003/12/15 03:53:18  outlyer
 # Added Viggo Fredriksen's very cool detachbar plugin... it shows a
 # mini-player in the bottom corner of the screen if you detach a music player.
@@ -59,7 +62,6 @@ import plugin
 import event
 
 skin = skin.get_singleton()
-skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))
 
 _player_ = None
 
@@ -202,3 +204,7 @@ class PlayerGUI(GUIObject):
             self.item.remain = self.item.length - self.item.elapsed
         skin.draw('player', self.item)
         return
+
+
+if __freevo_app__ == 'main':
+    skin.register('player', ('screen', 'title', 'view', 'info', 'plugin'))
