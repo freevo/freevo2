@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/10/29 18:12:14  dischi
+# move stdout function to this file, only needed here (FIXME: it blocks)
+#
 # Revision 1.18  2004/10/06 19:13:07  dischi
 # remove util.open3, move run and stdout to misc for now
 #
@@ -63,7 +66,26 @@
 
 
 import sys, os, mmpython, glob, shutil
+import popen2
 from stat import *
+
+def stdout(app):
+    """
+    start app and return the stdout
+    """
+    ret = []
+    child = popen2.Popen3(app, 1, 100)
+    while(1):
+        data = child.fromchild.readline()
+        if not data:
+            break
+        ret.append(data)
+    child.wait()
+    child.fromchild.close()
+    child.childerr.close()
+    child.tochild.close()
+    return ret
+
 
 def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     """
@@ -96,8 +118,8 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     if pos != None:
         args.append(str(pos))
 
-    out = misc.stdout([os.environ['FREEVO_SCRIPT'], 'execute',
-                       os.path.abspath(__file__) ] + args)
+    out = stdout([os.environ['FREEVO_SCRIPT'], 'execute',
+                  os.path.abspath(__file__) ] + args)
     if out:
         for line in out:
             print line
@@ -144,8 +166,6 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
 #
 
 if __name__ == "__main__":
-    import popen2
-    
     mplayer   = os.path.abspath(sys.argv[1])
     filename  = os.path.abspath(sys.argv[2])
     imagefile = os.path.abspath(sys.argv[3])
