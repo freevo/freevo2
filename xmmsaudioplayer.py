@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/11/10 07:29:22  krister
+# Added Alex Polite's bugfix patch.
+#
 # Revision 1.4  2002/10/21 02:31:38  krister
 # Set DEBUG = config.DEBUG.
 #
@@ -24,7 +27,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -58,6 +61,7 @@ import config
 import childapp
 import osd
 import exceptions
+import skin
 
 # This is an external package
 try:
@@ -65,48 +69,53 @@ try:
 except ImportError:
     print
     print
-    print 'The XMMS module is not installed!'
+    print 'pyxmms is not (properly?) installed!'
     print
     sys.exit(1)
     
 
 DEBUG = config.DEBUG
 
-TRUE  = 1
-FALSE = 0
 
 # Setting up the default objects:
-class Globals:pass
+class Globals:
+    pass
+
 globals = Globals()
 
 osd =        globals.osd        = osd.get_singleton()
 rc =         globals.rc         = rc.get_singleton()
 menuwidget = globals.menuwidget = menu.get_singleton()
 mixer =      globals.mixer      = mixer.get_singleton()
+skin =       globals.skin       = skin.get_singleton()
 
 
-#Setting up some constants
-##playermodes
-class Constants:pass
+# Setting up some constants
+
+# Playermodes
+class Constants:
+    pass
+
 constants = Constants()
+
 constants.videomode ='video'
 constants.audiomode ='audio'
 constants.playmode  ='play'
 constants.idlemode  ='idle'
 constants.stopmode  ='stop'
 
-##constants pertaining to unittests
+# Constants pertaining to unittests
 constants.profilestatsfile = "/tmp/stats"
 
 
-
-
-class NotImplementedError(exceptions.Exception):pass
+class NotImplementedError(exceptions.Exception):
+    pass
 
 # Module variable that contains an initialized Xmms() object
 class AbstractAudioPlayerThread(threading.Thread):
     def run(self):
         raise  NotImplementedError
+
 
 class Singleton:
     """
@@ -144,11 +153,14 @@ class AbstractAudioPlayer(Singleton):
         self.mode = None
 
     def file_not_found(self, filename):
-        osd.clearscreen()
-        osd.drawstring('File "%s" not found!' % filename, 30, 280)
-        osd.update()
-        time.sleep(2.0) 
-        menuwidget.refresh()
+	if DEBUG:
+	    print "xmms file_not_found %s " % (filename,)
+	if xmms.is_running():
+	    globals.rc.post_event(globals.rc.RIGHT)
+	else:
+	    skin.PopupBox('File "%s" not found!' % filename)
+	    time.sleep(3.0)
+	    menuwidget.refresh()
 
     def set_mixer_levels(self):
         # XXX A better place for the major part of this code would be
@@ -193,15 +205,6 @@ class AudioPlayerThread(AbstractAudioPlayerThread):
     def _set_app(self):
         if self.app == None:
             self.app = self.__class__.AppClass(self.command)
-            time.sleep(2)
-            notdone = 1
-            while notdone:
-                try:
-                    notdone = 0
-                except:
-                    pass
-                time.sleep(0.1)
-        
         
     def reset_alive(self):
         self.alive_last = 0
@@ -287,19 +290,23 @@ class AudioPlayer(AbstractAudioPlayer):
             else:
                 pos = self.playlist.index(self.filename)
                 last_file = (pos == len(self.playlist)-1)
-                
+                if DEBUG:
+		    print "xmms play pos: %s last_file: %s " % (pos,last_file)
                 # Don't continue if at the end of the list
                 if last_file and not self.repeat:
                     self._return_to_menu()
                 else:
                     # Go to the next song in the list
+
                     pos = (pos+1) % len(self.playlist)
                     filename = self.playlist[pos]
+		    if DEBUG:
+			print "xmms goto next song in list pos: %s filename: %s " % (pos,filename)
                     self.play( self.mode, filename, self.playlist, self.repeat)
         elif event == globals.rc.VOLUP:
             pass
 
-        
+
     def build_play_command(self):
         cmd = '--prio=%s %s' % (config.XMMS_NICE,
                                 config.XMMS_CMD)
@@ -313,27 +320,49 @@ class AudioPlayer(AbstractAudioPlayer):
         self.quoted_filename = '"' + self.filename + '"'
         self.playlist = playlist
         if not os.path.isfile(filename):
-            self.file_not_found(filename)
+	    self.file_not_found(filename)
+	else:
         
-        self.mode = mode # setting global var to mode.
-        self.repeat = repeat # Repeat playlist setting
-
-        globals.osd.clearscreen(color=globals.osd.COL_BLACK)
-        globals.osd.drawstring('Playing  "%s" with xmms' % os.path.basename(filename), 30, 280,
-                               fgcolor=globals.osd.COL_ORANGE, bgcolor=globals.osd.COL_BLACK)
-        globals.osd.update()
-        self.set_mixer_levels()
+	    self.mode = mode # setting global var to mode.
+	    self.repeat = repeat # Repeat playlist setting
+	    
+	    globals.skin.PopupBox("Lanching xmms.")
+	    self.set_mixer_levels()
         
-        self.thread.mode  = constants.playmode
-        self.thread.reset_alive()
-        self.thread.command = self.build_play_command()
-        self.thread.mode_flag.set()
-        globals.rc.app = self.eventhandler
+	    self.thread.mode  = constants.playmode
+	    self.thread.reset_alive()
+	    self.thread.command = self.build_play_command()
+	    self.thread.mode_flag.set()
+	    globals.rc.app = self.eventhandler
 
 
     def load_and_play(self):
-        xmms.play_files((self.filename,))
-        xmms.main_win_toggle(0)
+	timeout = 10.0
+	counter = 0.0
+	increment = 0.1
+	while 1:
+	    if xmms.is_running():
+		if DEBUG:
+		    print "xmms is running"
+		xmms.play_files((self.filename,))
+		xmms.main_win_toggle(0)
+		break
+	    elif counter >= timeout:
+		if DEBUG:
+		    print "xmms timeout"
+		menuwidget.refresh()
+		skin.PopupBox("Timed launching xmms.")
+		time.sleep(3)
+		menuwidget.refresh()
+		break
+	    else:
+		if DEBUG:
+		    print "xmms waiting to come up", counter
+		time.sleep(increment)
+		counter += increment
+		
+		
+
 
 
     def stop(self):
@@ -341,4 +370,4 @@ class AudioPlayer(AbstractAudioPlayer):
         self.thread.mode_flag.set()
         self.thread.cmd('stop')
         while self.thread.mode == constants.stopmode:
-            time.sleep(0.3)
+            time.sleep(0.1)
