@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/02/08 05:35:02  outlyer
+# Remove debug
+#
 # Revision 1.50  2004/01/31 12:39:47  dischi
 # delete unused audio variables
 #
@@ -168,7 +171,6 @@ class AudioItem(Item):
         """
         Start playing the item
         """
-        print self.network_play
         self.parent.current_item = self
         self.elapsed = 0
 
