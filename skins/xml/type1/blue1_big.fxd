@@ -154,8 +154,8 @@
     <font label="main" name="Arial_Bold" size="35" color="0xdddddd"/>
     <font label="main selected" name="Arial_Bold" size="35" color="0xffffff"/>
     <font label="default" name="Arial_Bold" size="20" color="0xffffff"/>
-    <font label="widget" name="Arial_Bold" size="13" color="0xffffff"/>
-    <font label="selected widget" name="Arial_Bold" size="13" color="0x164668"/>
+    <font label="widget" name="Arial_Bold" size="11" color="0xffffff"/>
+    <font label="selected widget" name="Arial_Bold" size="11" color="0x164668"/>
 
 
     <!--
