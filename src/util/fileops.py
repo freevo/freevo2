@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/06/29 18:08:56  dischi
+# use vfs.open to make sure we can write
+#
 # Revision 1.22  2004/06/21 12:00:56  dischi
 # wrap exif call inside the try except
 #
@@ -522,7 +525,7 @@ def create_thumbnail(filename, thumbnail=None):
 
     data = (image.tostring(), image.size, image.mode)
 
-    f = open(thumb, 'w')
+    f = vfs.open(thumb, 'w')
     f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
     f.write(data[0])
     f.close()
