@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-10-18 12:47+0200\n"
+"POT-Creation-Date: 2003-10-20 21:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,85 +26,6 @@ msgstr ""
 #: audio/xmms.py:156 games/game.py:99
 #, python-format
 msgid "File \"%s\" not found!"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:214
-msgid "Rip the CD to the hard drive"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:215
-msgid "Get CDs available for ripping"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:239
-msgid "Backup CD to hard drive in mp3 format"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:242
-msgid "Backup CD to hard drive in Ogg format"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:245
-msgid "Backup CD to hard drive in FLAC format"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:247
-msgid "Backup CD to hard drive in wav format"
-msgstr ""
-
-#: audio/plugins/cdbackup.py:250
-msgid "CD Backup"
-msgstr ""
-
-#: audio/plugins/detach.py:63
-msgid "Show player"
-msgstr ""
-
-#: audio/plugins/mplayer.py:135
-#, python-format
-msgid ""
-"%s\n"
-"not found!"
-msgstr ""
-
-#: audio/plugins/mplayer.py:162
-msgid "Invalid audio file"
-msgstr ""
-
-#: audio/plugins/vux.py:90
-msgid "[VUX] Start playing"
-msgstr ""
-
-#: audio/plugins/vux.py:91
-msgid "[VUX] Stop playing"
-msgstr ""
-
-#: audio/plugins/vux.py:92
-msgid "[VUX] Next (rating down)"
-msgstr ""
-
-#: audio/plugins/vux.py:93
-msgid "[VUX] Next (rating intact)"
-msgstr ""
-
-#: audio/plugins/vux.py:94
-msgid "[VUX] Next (rating up)"
-msgstr ""
-
-#: audio/plugins/vux.py:95
-msgid "[VUX] Playing item rating up"
-msgstr ""
-
-#: audio/plugins/vux.py:96
-msgid "[VUX] Playing item rating down"
-msgstr ""
-
-#: audio/plugins/vux.py:97
-msgid "[VUX] a dir item do not select"
-msgstr ""
-
-#: audio/plugins/vux.py:98
-msgid "[VUX] an audio item, do not select"
 msgstr ""
 
 #: directory.py:118
@@ -236,48 +157,61 @@ msgstr ""
 msgid "Configure"
 msgstr ""
 
-#: main.py:130
+#: main.py:128
 msgid "shutting down..."
 msgstr ""
 
-#: main.py:236
+#: main.py:234
 msgid "Freevo Main Menu"
+msgstr ""
+
+#: main.py:347
+#, python-format
+msgid ""
+"Event '%s' crashed\n"
+"\n"
+"Please take a look at the logfile and report the bug to the Freevo mailing "
+"list. The state of Freevo may be corrupt now and this error could cause more "
+"errors until you restart Freevo.\n"
+"\n"
+"Logfile: %s\n"
+"\n"
 msgstr ""
 
 #: menu.py:565
 msgid "No action defined for this choice!"
 msgstr ""
 
-#: osd.py:408
+#: osd.py:414
 msgid "z = Toggle Fullscreen"
 msgstr ""
 
-#: osd.py:409
+#: osd.py:415
 msgid "Arrow Keys = Move"
 msgstr ""
 
-#: osd.py:410
+#: osd.py:416
 msgid "Spacebar = Select"
 msgstr ""
 
-#: osd.py:411
+#: osd.py:417
 msgid "Escape = Stop/Prev. Menu"
 msgstr ""
 
-#: osd.py:412
+#: osd.py:418
 msgid "h = Help"
 msgstr ""
 
-#: playlist.py:241
+#: playlist.py:244
 msgid "Random Playlist"
 msgstr ""
 
-#: playlist.py:246 playlist.py:250 playlist.py:350 video/configure.py:178
+#: playlist.py:249 playlist.py:253 playlist.py:361 video/configure.py:178
 #: video/videoitem.py:290
 msgid "Play"
 msgstr ""
 
-#: playlist.py:247 playlist.py:249
+#: playlist.py:250 playlist.py:252
 msgid "Browse Playlist"
 msgstr ""
 
@@ -365,12 +299,12 @@ msgstr ""
 msgid "%i of %i Mb free"
 msgstr ""
 
-#: plugins/idlebar.py:479
+#: plugins/idlebar.py:489
 #, python-format
 msgid "%iM"
 msgstr ""
 
-#: plugins/idlebar.py:504
+#: plugins/idlebar.py:514
 #, python-format
 msgid "%s%%"
 msgstr ""
@@ -595,17 +529,17 @@ msgstr ""
 msgid "Set as icecast playlist"
 msgstr ""
 
-#: plugins/rom_drives.py:257
+#: plugins/rom_drives.py:260
 #, python-format
 msgid "Drive %s (no disc)"
 msgstr ""
 
-#: plugins/rom_drives.py:320
+#: plugins/rom_drives.py:323
 #, python-format
 msgid "Ejecting disc in drive %s"
 msgstr ""
 
-#: plugins/rom_drives.py:353
+#: plugins/rom_drives.py:356
 #, python-format
 msgid "Reading disc in drive %s"
 msgstr ""
