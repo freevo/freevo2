@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/10/09 02:39:24  outlyer
+# We were throwing away the return value from parseInfo; now we're keeping it.
+#
 # Revision 1.8  2002/10/08 15:50:54  dischi
 # Parse more infos from the xml file to MovieExtraInformation (maybe we
 # should change that name...)
@@ -174,7 +177,9 @@ def parse(file, dir, mplayer_files):
                     elif node.name == u'video':
                         playlist = parseVideo(dir, mplayer_files, node)
                     elif node.name == u'info':
-                        parseInfo(node)
+                        info = parseInfo(node)
+
+    print info.rating
 
     return MovieInformation(title, image, playlist, id, label, info, file)
 
