@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/24 01:51:13  rshortt
+# Made the license key into an activate argument.  Now you can have:
+# plugin.activate('audio.coversearch', args=('my_key',))
+#
 # Revision 1.7  2003/06/23 19:28:32  dischi
 # cover support for audio cds (only with installed mmpython)
 #
@@ -106,6 +110,16 @@ from gui.PopupBox import PopupBox
 
 
 class PluginInterface(plugin.ItemPlugin):
+    def __init__(self, license=None):
+        plugin.ItemPlugin.__init__(self)
+
+	# You must get your own key!
+	if license:
+	    self.license = license
+        else:
+	    self.license = 'empty'
+
+
     def actions(self, item):
         self.item = item
         if item.type == 'audio' or item.type == 'audiocd':
@@ -130,7 +144,7 @@ class PluginInterface(plugin.ItemPlugin):
             album = self.item.album
             artist = self.item.artist
 
-        amazon.setLicense('...') # must get your own key!
+        amazon.setLicense(self.license) 
         try:
             cover = amazon.searchByKeyword('%s %s' % (artist,album) , product_line="music")
         except amazon.AmazonError:
