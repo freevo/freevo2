@@ -1,73 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # eventhandler.py - Event handling
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes: 
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.16  2004/11/20 18:22:59  dischi
-# use python logger module for debug
-#
-# Revision 1.15  2004/10/08 20:18:17  dischi
-# new eventhandler <-> plugin interface
-#
-# Revision 1.14  2004/10/06 19:18:34  dischi
-# doc update
-#
-# Revision 1.13  2004/09/29 18:27:30  dischi
-# turn off some debug
-#
-# Revision 1.12  2004/09/27 18:41:38  dischi
-# remove key->event mapping, it is in the input plugins now
-#
-# Revision 1.11  2004/09/25 05:08:11  rshortt
-# Disable some now-broken code.
-#
-# Revision 1.10  2004/09/15 20:47:07  dischi
-# better handling of registered events
-#
-# Revision 1.9  2004/09/15 19:38:20  dischi
-# make it possible that the current applications hides
-#
-# Revision 1.8  2004/08/27 14:25:48  dischi
-# small typo bugfix
-#
-# Revision 1.7  2004/08/26 15:28:51  dischi
-# smaller fixes in application/focus handling
-#
-# Revision 1.6  2004/08/25 12:51:20  dischi
-# moved Application for eventhandler into extra dir for future templates
-#
-# Revision 1.5  2004/08/24 16:42:39  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.4  2004/08/23 20:36:42  dischi
-# rework application handling
-#
-# Revision 1.3  2004/08/22 20:12:11  dischi
-# class application doesn't change the display (screen) type anymore
-#
-# Revision 1.2  2004/08/01 10:53:54  dischi
-# o Add class for an Application. This class works together with the
-#   eventhandler itself and can show/hide/destry itself.
-# o Respect the difference between a popup and an application in the
-#   eventhandler focus setting
-# o Make it possible to switch screen backends for an application
-# o Make it possible to register to an event
-# o Notify registered eventhandlers for application change
-#
-# Revision 1.1  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -84,18 +28,20 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
+# python imports
 import time
-import traceback
+import logging
 
+# freevo imports
+import sysconfig
 import config
 import plugin
 
 from event import *
 
-import logging
+# the logging object
 log = logging.getLogger()
 
 GENERIC_HANDLER = 'GENERIC_HANDLER'
@@ -180,7 +126,7 @@ def post(event):
     return get_singleton().post(event)
     
 
-# --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class Eventhandler:
     """
@@ -224,7 +170,8 @@ class Eventhandler:
             if previous.visible:
                 previous.hide()
             fade = fade or previous._animated
-        self.notify(Event(SCREEN_CONTENT_CHANGE, arg=(app, app._evt_fullscreen, fade)))
+        self.notify(Event(SCREEN_CONTENT_CHANGE,
+                          arg=(app, app._evt_fullscreen, fade)))
         self.stack_change = None
         if not app.visible:
             app.show()
@@ -346,13 +293,13 @@ class Eventhandler:
         
         log.debug('handling event %s' % str(event))
         
-        for p in self.registered[EVENT_LISTENER]:
-            p.eventhandler(event=event)
-
         if config.TIME_DEBUG:
             t1 = time.clock()
 
         try:
+            for p in self.registered[EVENT_LISTENER]:
+                p.eventhandler(event=event)
+
             used = False
             if str(event) in self.registered:
                 # event is in the list of registered events. This
@@ -380,7 +327,8 @@ class Eventhandler:
                 # used by registered plugin
                 pass
             
-            elif len(self.popups) and self.popups[-1].eventhandler(event=event):
+            elif len(self.popups) and \
+                     self.popups[-1].eventhandler(event=event):
                 # handled by the current popup
                 pass
                 
@@ -418,28 +366,23 @@ class Eventhandler:
             raise SystemExit
 
         except:
-            # XXX FIXME: this whole statement is broken (new gui code,
-            #            references to osd)
-            if 0 and config.FREEVO_EVENTHANDLER_SANDBOX:
+            if config.FREEVO_EVENTHANDLER_SANDBOX:
 
                 import gui
-                from plugins.shutdown import shutdown
+                import cleanup
 
-                traceback.print_exc()
-                pop = gui.ConfirmBox(text=_('Event \'%s\' crashed\n\nPlease take a ' \
-                                            'look at the logfile and report the bug to ' \
-                                            'the Freevo mailing list. The state of '\
-                                            'Freevo may be corrupt now and this error '\
-                                            'could cause more errors until you restart '\
-                                            'Freevo.\n\nLogfile: %s\n\n') % \
-                                     (event, sys.stdout.logfile),
-                                     width=osd.width-2*config.OSD_OVERSCAN_X-50,
-                                     handler=shutdown,
-                                     handler_message = _('shutting down...'))
-                pop.b0.set_text(_('Shutdown'))
-                pop.b0.toggle_selected()
-                pop.b1.set_text(_('Continue'))
-                pop.b1.toggle_selected()
-                pop.show()
+                log.exception('eventhandler')
+                msg=_('Event \'%s\' crashed\n\nPlease take a ' \
+                      'look at the logfile and report the bug to ' \
+                      'the Freevo mailing list. The state of '\
+                      'Freevo may be corrupt now and this error '\
+                      'could cause more errors until you restart '\
+                      'Freevo.\n\nLogfile: %s') % \
+                      (event, sysconfig.syslogfile)
+
+                pop = gui.ConfirmBox(msg, handler=cleanup.shutdown,
+                                     handler_message = _('shutting down...'),
+                                     button0_text = _('Shutdown'),
+                                     button1_text = _('Continue')).show()
             else:
                 raise 
