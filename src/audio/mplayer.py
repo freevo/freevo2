@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/02/19 06:42:58  krister
+# Thomas Schuppels latest CDDA fixes. I changed some info formatting, made it possible to play unknown disks, added MPlayer 1MB caching (important) of CD tracks.
+#
 # Revision 1.6  2003/02/14 02:51:50  krister
 # Added fix for decimal point vs. comma.
 #
@@ -148,8 +151,9 @@ class MPlayer:
             # Don't include demuxer for network files
             demux = ''
 
-        command = '%s -vo null -ao %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
-                                                  demux, filename)
+        extra_opts = item.mplayer_options
+        command = '%s -vo null -ao %s %s %s "%s"' % (mpl, config.MPLAYER_AO_DEV,
+                                                     demux, extra_opts, filename)
                 
         self.item = item
 
@@ -267,7 +271,6 @@ class MPlayerApp(childapp.ChildApp):
         self.elapsed = 0
         childapp.ChildApp.__init__(self, app)
         self.RE_TIME = re.compile("^A: +([0-9]+)").match
-
               
     def kill(self):
         # Use SIGINT instead of SIGKILL to make sure MPlayer shuts
@@ -278,7 +281,6 @@ class MPlayerApp(childapp.ChildApp):
             self.log_stdout.close()
             self.log_stderr.close()
 
-
     def stdout_cb(self, line):
         if config.MPLAYER_DEBUG:
             try:
@@ -286,14 +288,13 @@ class MPlayerApp(childapp.ChildApp):
             except ValueError:
                 pass # File closed
                      
-        if line.find("A:") == 0:         # get current time
+        if line.startswith("A:"):         # get current time
             m = self.RE_TIME(line) # Convert decimal 
             if m:
                 self.item.elapsed = int(m.group(1))
                 if self.item.elapsed != self.elapsed:
                     self.item.draw()
                 self.elapsed = self.item.elapsed
-
 
     def stderr_cb(self, line):
         if config.MPLAYER_DEBUG:

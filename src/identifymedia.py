@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/02/19 06:42:57  krister
+# Thomas Schuppels latest CDDA fixes. I changed some info formatting, made it possible to play unknown disks, added MPlayer 1MB caching (important) of CD tracks.
+#
 # Revision 1.16  2003/02/17 21:14:02  dischi
 # Bugfix. CD detection now works again
 #
@@ -105,14 +108,11 @@ import copy
 from audio.audiodiskitem import AudioDiskItem
 
 # CDDB Stuff
-# XXX CDDB does not work with the runtime, the network stuff makes it segfault!
-# Trying to figure out why. /Krister
-if not os.path.isfile('./runtime/dll/freevo_loader'):
-    try:
-        import DiscID, CDDB
-    except:
-        print "CDDB not installed."
-        pass
+try:
+    import DiscID, CDDB
+except:
+    print "CDDB not installed."
+    pass
 
 from video import xml_parser, videoitem
 from mediamenu import DirItem
@@ -175,7 +175,7 @@ class Identify_Thread(threading.Thread):
             try:
                 cdrom = DiscID.open(media.devicename)
                 disc_id = DiscID.disc_id(cdrom)
-                media.info = AudioDiskItem(disc_id,None,'nix')
+                media.info = AudioDiskItem(disc_id, None, 'nix')
                 (query_stat, query_info) = CDDB.query(disc_id)
 
                 if query_stat == 200:
@@ -188,7 +188,7 @@ class Identify_Thread(threading.Thread):
                               (i['disc_id'], i['category'], i['title'])
                 else:
                     print "failure getting disc info, status %i" % query_stat
-                    media.info = None
+                    media.info.title = 'Unknown CD Album'
             except:
                 pass
             return

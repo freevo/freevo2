@@ -48,14 +48,11 @@ import games.interface
 from xml.utils import qp_xml
 
 # CDDB Stuff
-# XXX CDDB does not work with the runtime, the network stuff makes it segfault!
-# Trying to figure out why. /Krister
-if not os.path.isfile('./runtime/dll/freevo_loader'):
-    try:
-        import DiscID, CDDB
-    except:
-        print "CDDB not installed."
-        pass
+try:
+    import DiscID, CDDB
+except:
+    print "CDDB not installed."
+    pass
 
             
 class AudioDiskItem(Playlist):
@@ -87,6 +84,10 @@ class AudioDiskItem(Playlist):
     
         if query_stat == 200:
             self.name = query_info['title']
+        elif query_stat == 210 or query_stat == 211:
+            self.name = query_info[0]['title']
+        else:
+            self.name = 'Unknown CD'
 
     def copy(self, obj):
         """
@@ -113,6 +114,7 @@ class AudioDiskItem(Playlist):
         # Problems with disc id:
         # [2114541066, 10, 150, 17220, 36170, 54412, 68800, 91162, 112110, 129230, 141320, 165100, 2392]
         # Returns multiple results
+        print self.disc_id
         (query_stat, query_info) = CDDB.query(self.disc_id)
         
         if query_stat == 200:
@@ -125,19 +127,24 @@ class AudioDiskItem(Playlist):
             for i in query_info:
                  print "ID: %s Category: %s Title: %s" % \
                        (i['disc_id'], i['category'], i['title'])
-            # XXX Need to handle this case too
-            return []
+            # We just pick the first one
+            query_info = query_info[0]
+            (read_stat, read_info) = CDDB.read(query_info['category'], query_info['disc_id'])
+            query_stat = 200 # Good data, used below
+            if read_stat != 210:
+                print "failure getting track info, status: %i" % read_stat
         else:
             print "failure getting disc info, status %i" % query_stat
-            #self.media.info = None   # XXX ???
 
         play_items = []
         for i in range(0, self.disc_id[1]):
             if query_stat == 200 and read_stat == 210:
-                title = "%.02d: %s" % (i+1, read_info['TTITLE' + `i`])
+                title = read_info['TTITLE' + `i`]
             else:
-                title = "%.02d: Unknown Title" % (i+1)
-            item = AudioItem('cdda://%d' % i, self, None, title)
+                title = '(Track %s)' % (i+1)
+            item = AudioItem('cdda://%d' % (i+1), self, None, title)
+            item.set_info('', self.name, title, i+1, self.disc_id[1], '')
+            item.mplayer_options = '-cache 1000'
             play_items.append(item)
 
         # add all playable items to the playlist of the directory
@@ -162,7 +169,6 @@ class AudioDiskItem(Playlist):
         items += play_items
 
         self.play_items = play_items
-
 
         title = self.name
         if title[0] == '[' and title[-1] == ']':
