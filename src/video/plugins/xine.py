@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/04 19:01:57  dischi
+# prevent crash when interlacing
+#
 # Revision 1.6  2003/08/02 16:21:24  dischi
 # wait for child to exit
 #
@@ -196,7 +199,7 @@ class Xine:
         
         if item.deinterlace:
             if (config.XINE_VO_DEV == 'vidix' or self.xine_type == 'fb') and \
-                   self.version > 021:
+                   self.xine_version > 921:
                 command = '%s --post tvtime' % command
             else:
                 command = '%s -D' % command
