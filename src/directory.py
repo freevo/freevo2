@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2003/12/29 22:07:14  dischi
+# renamed xml_file to fxd_file
+#
 # Revision 1.77  2003/12/17 16:43:59  outlyer
 # Prevent a crash if the current directory is removed... just silently move
 # up to the previous directory.
@@ -29,57 +32,6 @@
 #
 # Revision 1.72  2003/12/07 12:26:55  dischi
 # add osd busy icon (work in progress)
-#
-# Revision 1.71  2003/12/06 13:44:11  dischi
-# move more info to the Mimetype
-#
-# Revision 1.70  2003/12/03 21:52:07  dischi
-# rename some skin function calls
-#
-# Revision 1.69  2003/12/01 19:06:46  dischi
-# better handling of the MimetypePlugin
-#
-# Revision 1.68  2003/11/30 14:41:09  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.67  2003/11/28 20:08:55  dischi
-# renamed some config variables
-#
-# Revision 1.66  2003/11/28 19:26:36  dischi
-# renamed some config variables
-#
-# Revision 1.65  2003/11/24 19:23:49  dischi
-# remove all fxd item stuff, it's in fxditem now
-#
-# Revision 1.64  2003/11/23 19:21:55  dischi
-# some cleanup
-#
-# Revision 1.63  2003/11/23 17:04:53  dischi
-# directory.py now handles fxd files itself based on the new fxd parser
-#
-# Revision 1.62  2003/11/22 20:34:44  dischi
-# use new vfs
-#
-# Revision 1.61  2003/11/22 02:31:15  gsbarbieri
-# Please don't use:
-#     _( "string A" + \
-#        "string B" )
-#
-#  that sucks translation, cause it's split in 2 separate strings.
-# Instead, use this:
-#
-#     _( "string A" \
-#        "string B" )
-#
-# Revision 1.60  2003/11/21 11:48:03  dischi
-# Reworked the directory settings: MOVIE_PLAYLISTS and AUDIO_RANDOM_PLAYLIST
-# are removed, the new variables to control a directory style are
-# DIRECTORY_CREATE_PLAYLIST, DIRECTORY_ADD_PLAYLIST_FILES,
-# DIRECTORY_ADD_RANDOM_PLAYLIST and DIRECTORY_AUTOPLAY_ITEMS. The directory
-# updated now uses stat, set DIRECTORY_USE_STAT_FOR_CHANGES = 0 if you have
-# problems with it.
-#
-# The dirwatcher is now a plugin and no thread
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -209,29 +161,29 @@ class DirItem(Playlist):
             p.dirinfo(self)
             
         if vfs.isfile(directory+'/folder.fxd'): 
-            self.xml_file = directory+'/folder.fxd'
+            self.fxd_file = directory+'/folder.fxd'
 
-        if self.xml_file:
-            self.set_xml_file(self.xml_file)
+        if self.fxd_file:
+            self.set_fxd_file(self.fxd_file)
             
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
 
 
 
-    def set_xml_file(self, file):
+    def set_fxd_file(self, file):
         """
-        Set self.xml_file and parse it
+        Set self.fxd_file and parse it
         """
-        self.xml_file = file
-        if self.xml_file and vfs.isfile(self.xml_file):
+        self.fxd_file = file
+        if self.fxd_file and vfs.isfile(self.fxd_file):
             try:
-                parser = util.fxdparser.FXD(self.xml_file)
+                parser = util.fxdparser.FXD(self.fxd_file)
                 parser.set_handler('folder', self.read_folder_fxd)
                 parser.set_handler('skin', self.read_folder_fxd)
                 parser.parse()
             except:
-                print "fxd file %s corrupt" % self.xml_file
+                print "fxd file %s corrupt" % self.fxd_file
                 traceback.print_exc()
 
 
@@ -256,7 +208,7 @@ class DirItem(Playlist):
             return
         
         global all_variables
-        set_all = self.xml_file == self.dir+'/folder.fxd'
+        set_all = self.fxd_file == self.dir+'/folder.fxd'
 
         # read attributes
         if set_all:
@@ -645,7 +597,7 @@ class DirItem(Playlist):
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.skin_settings:
-                item_menu.skin_settings = skin.load(self.xml_file)
+                item_menu.skin_settings = skin.load(self.fxd_file)
 
             if menuw:
                 menuw.pushmenu(item_menu)
@@ -827,14 +779,14 @@ class DirItem(Playlist):
         item.name = item.name[:item.name.find('\t') + 1] + self.configure_set_name(arg)
 
         # write folder.fxd
-        self.xml_file = os.path.join(self.dir, 'folder.fxd')
+        self.fxd_file = os.path.join(self.dir, 'folder.fxd')
 
         try:
-            parser = util.fxdparser.FXD(self.xml_file)
+            parser = util.fxdparser.FXD(self.fxd_file)
             parser.set_handler('folder', self.write_folder_fxd, 'w', True)
             parser.save()
         except:
-            print "fxd file %s corrupt" % self.xml_file
+            print "fxd file %s corrupt" % self.fxd_file
             traceback.print_exc()
 
         # rebuild menu

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/12/29 22:07:14  dischi
+# renamed xml_file to fxd_file
+#
 # Revision 1.73  2003/12/14 17:13:15  dischi
 # call actions() only once
 #
@@ -106,7 +109,7 @@ class MenuItem(Item):
 
 class Menu:
 
-    def __init__(self, heading, choices, xml_file=None, umount_all = 0,
+    def __init__(self, heading, choices, fxd_file=None, umount_all = 0,
                  reload_func = None, item_types = None, force_skin_layout = -1):
 
         self.heading = heading
@@ -120,8 +123,8 @@ class Menu:
         self.previous_page_start.append(0)
         self.umount_all = umount_all    # umount all ROM drives on display?
         self.skin_settings = None
-        if xml_file:
-            self.skin_settings = skin.load(xml_file)
+        if fxd_file:
+            self.skin_settings = skin.load(fxd_file)
 
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
@@ -340,9 +343,9 @@ class MenuWidget(GUIObject):
                 items.append(a)
             else:
                 items.append(MenuItem(a[1], a[0]))
-        xml_file = None
-        if hasattr(item, 'xml_file'):
-            xml_file = item.xml_file
+        fxd_file = None
+        if hasattr(item, 'fxd_file'):
+            fxd_file = item.fxd_file
 
         for i in items:
             try:
@@ -355,7 +358,7 @@ class MenuWidget(GUIObject):
             elif hasattr(item, 'type'):
                 i.display_type = item.type
                 
-        s = Menu(menu_name, items, xml_file=xml_file)
+        s = Menu(menu_name, items, fxd_file=fxd_file)
         s.is_submenu = True
         self.pushmenu(s)
             

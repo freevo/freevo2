@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/12/29 22:07:14  dischi
+# renamed xml_file to fxd_file
+#
 # Revision 1.45  2003/12/18 18:19:27  outlyer
 # If we're using a playlist file, make sure the object has that attribute
 # so we can use fileops on it later.
@@ -29,38 +32,6 @@
 #
 # Revision 1.43  2003/12/13 18:16:34  dischi
 # allow fxd playlists with relative path
-#
-# Revision 1.42  2003/12/10 19:51:51  dischi
-# make playlist files work again
-#
-# Revision 1.41  2003/12/08 20:40:57  dischi
-# add doc
-#
-# Revision 1.40  2003/12/08 20:37:33  dischi
-# merged Playlist and RandomPlaylist into one class
-#
-# Revision 1.39  2003/12/08 16:18:44  mikeruelle
-# getting a lot of crashes. quickfix
-#
-# Revision 1.38  2003/12/07 19:11:22  dischi
-# o add <playlist> fxd support
-# o add background_playlist to a playlist to support playing music
-#   in slideshows
-#
-# Revision 1.37  2003/12/01 19:06:46  dischi
-# better handling of the MimetypePlugin
-#
-# Revision 1.36  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.35  2003/11/28 20:08:56  dischi
-# renamed some config variables
-#
-# Revision 1.34  2003/11/28 19:26:36  dischi
-# renamed some config variables
-#
-# Revision 1.33  2003/11/21 11:43:58  dischi
-# send event if there is not next playlist event
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -121,7 +92,6 @@ class Playlist(Item):
         
         if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
             self.name = util.getname(playlist)
-            self.filename = playlist            # Needed for fileops
             
         # variables only for Playlist
         self.current_item = None
@@ -281,7 +251,7 @@ class Playlist(Item):
                     self.read_m3u(playlist)
             except OSError, e:
                 print 'playlist error: %s' % e
-
+            self.set_url(playlist)
 
         # self.playlist is a list of Items or strings (filenames)
         if not isinstance(playlist, str):
@@ -598,10 +568,10 @@ class Mimetype(plugin.MimetypePlugin):
                       build=True, random=fxd.getattr(node, 'random', 0))
 
         pl.name     = fxd.getattr(node, 'title')
-        pl.xml_file = fxd.getattr(None, 'filename', '')
+        pl.fxd_file = fxd.getattr(None, 'filename', '')
         pl.image    = fxd.childcontent(node, 'cover-img')
         if pl.image:
-            pl.image = vfs.join(vfs.dirname(pl.xml_file), pl.image)
+            pl.image = vfs.join(vfs.dirname(pl.fxd_file), pl.image)
 
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
         fxd.getattr(None, 'items', []).append(pl)

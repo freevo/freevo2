@@ -18,7 +18,7 @@
 #
 # If the fxd files 'covers' a real item like the movie information cover
 # real movie files, please do
-# a) add the fxd file as 'xml_file' memeber variable to the new item
+# a) add the fxd file as 'fxd_file' memeber variable to the new item
 # b) add the files as list _fxd_covered_ to the item
 #
 #
@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/29 22:07:14  dischi
+# renamed xml_file to fxd_file
+#
 # Revision 1.6  2003/12/06 13:45:09  dischi
 # add <info> tag to a container
 #
@@ -123,7 +126,7 @@ class Mimetype(plugin.MimetypePlugin):
         # a fxd files may be removed, 'free' covered files
         for fxd_file in util.find_matches(del_files, ['fxd']):
             for i in current_items:
-                if i.xml_file == fxd_file and hasattr(i, '_fxd_covered_'):
+                if i.fxd_file == fxd_file and hasattr(i, '_fxd_covered_'):
                     for covered in i._fxd_covered_:
                         if not covered in del_files:
                             new_files.append(covered)
@@ -194,15 +197,17 @@ class Container(item.Item):
     a simple container containing for items parsed from the fxd
     """
     def __init__(self, fxd, node):
+        fxd_file = fxd.getattr(None, 'filename', '')
         item.Item.__init__(self, fxd.getattr(None, 'parent', None))
+
         self.items    = []
         self.name     = fxd.getattr(node, 'title', 'no title')
         self.type     = fxd.getattr(node, 'type', '')
-        self.xml_file = fxd.getattr(None, 'filename', '')
+        self.fxd_file = fxd_file
         
         self.image    = fxd.childcontent(node, 'cover-img')
         if self.image:
-            self.image = vfs.join(vfs.dirname(self.xml_file), self.image)
+            self.image = vfs.join(vfs.dirname(self.fxd_file), self.image)
 
         parent_items  = fxd.getattr(None, 'items', [])
         display_type  = fxd.getattr(None, 'display_type', None)
@@ -232,7 +237,7 @@ class Container(item.Item):
         Returns the string how to sort this item
         """
         if mode == 'date':
-            return '%s%s' % (os.stat(self.xml_file).st_ctime, self.xml_file)
+            return '%s%s' % (os.stat(self.fxd_file).st_ctime, self.fxd_file)
         return self.name
 
         
