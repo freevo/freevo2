@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/01/09 19:04:11  dischi
+# new vfs.listdir parameter
+#
 # Revision 1.17  2004/01/03 17:40:27  dischi
 # remove update function
 #
@@ -114,8 +117,8 @@ class PluginInterface(plugin.MimetypePlugin):
         if not diritem.image:
             # Pick an image if it is the only image in this dir, or it matches
             # the configurable regexp
-            files = util.find_matches(vfs.listdir(diritem.dir), ('jpg', 'gif', 'png' ))
-            
+            files = util.find_matches(vfs.listdir(diritem.dir, include_overlay=True),
+                                      ('jpg', 'gif', 'png' ))
             if len(files) == 1:
                 diritem.image = os.path.join(diritem.dir, files[0])
             elif len(files) > 1:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2004/01/09 19:04:11  dischi
+# new vfs.listdir parameter
+#
 # Revision 1.89  2004/01/07 18:18:59  dischi
 # remove update info on build
 #
@@ -888,7 +891,7 @@ class Dirwatcher(plugin.DaemonPlugin):
 
         if not config.DIRECTORY_USE_STAT_FOR_CHANGES:
             try:
-                files = vfs.listdir(self.dir, False)
+                files = vfs.listdir(self.dir, False, include_overlay=True)
             except OSError:
                 # the directory is gone
                 _debug_('Dirwatcher: unable to read directory %s' % self.dir,1)
