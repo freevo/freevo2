@@ -74,3 +74,4 @@ class PluginInterface(plugin.InputPlugin):
         
         if keycode in self.keymap:
             self.post_key( self.keymap[ keycode ] )
+        return True

@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/04 17:40:18  dischi
+# change to new notifier interface
+#
 # Revision 1.4  2004/10/13 20:08:25  dischi
 # fix handle to match notifier callback
 #
@@ -178,21 +181,21 @@ class PluginInterface(plugin.InputPlugin):
         # was it a reset?  if so, ignore
         if type == 0 :
             # print '  ignoring reset from input'
-            return
+            return True
         else :
             pass
         
         # I also want to ignore the "up"
         if value == 0 :
             # print '  ignoring up'
-            return
+            return True
         elif value == 1 :
             # set when we want to start paying attention to repeats
             self.m_ignoreTill = now + self.m_ignore
         elif value == 2 :
             if now < self.m_ignoreTill :
                 print '  ignoring repeat until %d' % self.m_ignoreTill
-                return
+                return True
             else:
                 # we let this one through, but set when we want to start
                 # paying attention to the next repeat 
@@ -205,7 +208,7 @@ class PluginInterface(plugin.InputPlugin):
         key = self.keymap.get(code)
         if not key :
             print ' UNMAPPED KEY'
-            return
+            return True
         else:
             pass
 

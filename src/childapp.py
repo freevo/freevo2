@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/11/04 17:40:17  dischi
+# change to new notifier interface
+#
 # Revision 1.66  2004/11/01 20:14:04  dischi
 # fix debug
 #
@@ -174,7 +177,7 @@ class Instance:
             start_str = app
             
             debug_name = app[ 0 ]
-            _debug_('running', self.binary, 1)
+            _debug_('running %s' % self.binary, 1)
         
         if debug_name.rfind('/') > 0:
             debug_name = debug_name[ debug_name.rfind( '/' ) + 1 : ]
@@ -287,7 +290,7 @@ class Instance:
             cb = notifier.Callback( self._killall, 9 )
             self.__kill_timer = notifier.addTimer( 1000, cb )
         else:
-            _debug_('PANIC', self.binary, 0)
+            _debug_('PANIC %s' % self.binary, 0)
             
         return False
 
@@ -388,7 +391,8 @@ class IO_Handler:
                         if self.logger:
                             self.logger.write( line + '\n' )
                         self.callback( line )
-
+        return True
+    
 
 class _Watcher:
     def __init__( self ):
