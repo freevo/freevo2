@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/07/04 19:48:18  outlyer
+# Whoops, fix path.
+#
 # Revision 1.15  2003/07/04 19:46:51  outlyer
 # Added Rich C's "holidays" plugin for the idlebar.
 #
@@ -322,4 +325,4 @@ class holidays(IdleBarPlugin):
     def draw(self, (type, object)):
         icon = self.get_holiday_icon()
         if icon:
-            osd.drawbitmap( 'skins/icons/holidays/' + icon, 580, 2)        
+            osd.drawbitmap( 'skins/images/holidays/' + icon, 580, 2)        
