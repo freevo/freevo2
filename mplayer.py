@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2002/08/13 04:36:44  krister
+# Started adding testcode for controlling the MPlayer window under X11 (SDL).
+#
 # Revision 1.26  2002/08/13 02:01:02  krister
 # Made EXIT event stop the music player.
 #
@@ -108,7 +111,7 @@ import rc         # The RemoteControl class.
 import audioinfo  # This just for ID3 functions and stuff.
 import skin       # Cause audio handling needs skin functions.
 
-DEBUG = 0
+DEBUG = 1
 TRUE  = 1
 FALSE = 0
 
@@ -193,6 +196,22 @@ class MPlayer:
             if os.path.isfile(filename + '.mplayer'):
                 mpl += (' ' + open(filename + '.mplayer').read().strip())
                 if DEBUG: print 'Read options, mpl = "%s"' % mpl
+
+
+            # XXX Some testcode by Krister:
+            if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':
+                if DEBUG: print 'Got freevo_xwin and x11'
+                os.system('rm -f /tmp/freevo.wid')
+                os.system('./freevo_xwin  0 0 1280 1024 > /tmp/freevo.wid &')
+                time.sleep(1)
+                if os.path.isfile('/tmp/freevo.wid'):
+                    if DEBUG: print 'Got freevo.wid'
+                    try:
+                        wid = int(open('/tmp/freevo.wid').read().strip(), 16)
+                        mpl += ' -wid 0x%08x -xy 1280 ' % wid
+                        if DEBUG: print 'Got WID = 0x%08x' % wid
+                    except:
+                        pass
                 
             command = mpl + ' "' + filename + '"'
             
@@ -424,6 +443,10 @@ class MPlayerApp(childapp.ChildApp):
     def kill(self):
         childapp.ChildApp.kill(self, signal.SIGINT)
 	osd.update()
+        # XXX Krister testcode for proper X11 video
+        if DEBUG: print 'Killing mplayer'
+        os.system('killall -9 freevo_xwin 2&> /dev/null')
+        os.system('rm -f /tmp/freevo.wid')
 
     # def stdout_cb
 
