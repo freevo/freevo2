@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/05/29 21:06:48  rshortt
+# Add a shutdown function to the module which will call possible shutdown methods on daemon plugins.
+#
 # Revision 1.19  2003/05/27 17:53:33  dischi
 # Added new event handler module
 #
@@ -144,6 +147,9 @@ class DaemonPlugin(Plugin):
         this function will be caleed to update the screen
     def eventhandler(self, event):
         events no one else wants will be passed to this functions
+    def shutdown(self):
+        this function may be called to shutdown the plugin and will
+        be called on freevo shutdown
     """
     def __init__(self):
         Plugin.__init__(self)
@@ -282,7 +288,7 @@ def init():
     # sort the daemon plugins in different lists based on the
     # callbacks they have
     if ptl.has_key('daemon'):
-        for type in ('poll', 'draw', 'eventhandler' ):
+        for type in ('poll', 'draw', 'eventhandler', 'shutdown' ):
             ptl['daemon_%s' % type] = []
             for p in ptl['daemon']:
                 if hasattr(p, type):
@@ -305,6 +311,16 @@ def init():
         # sort plugins in extra function (exec doesn't like to be
         # in the same function is 'lambda' 
         sort_plugins()
+
+
+def shutdown(plugin_name=None):
+    """
+    called to shutdown one or all daemon plugins
+    """
+    shutdown_plugins = get('daemon_shutdown')
+    for p in shutdown_plugins:
+        if not plugin_name or p.plugin_name == plugin_name:
+            p.shutdown()
 
             
 def get(type):
