@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 13:02:29  dischi
+# make the rc changes here, too
+#
 # Revision 1.1  2003/03/30 17:21:20  rshortt
 # New classes: PasswordInputBox, PasswordLetterBox.
 # PasswordLetterBox is a subclass of Letterbox, PasswordInputBox does not
@@ -51,6 +54,8 @@ from Border         import *
 from Label          import *
 from LetterBoxGroup import *
 from types          import *
+
+import rc
 
 DEBUG = 0
 
@@ -96,26 +101,26 @@ class PasswordInputBox(PopupBox):
 
     def eventhandler(self, event):
 
-        if event == self.rc.LEFT or event == self.rc.UP:
+        if event == rc.LEFT or event == rc.UP:
             self.lbg.change_selected_box('left')
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())
             return
-        elif event == self.rc.RIGHT or event == self.rc.DOWN:
+        elif event == rc.RIGHT or event == rc.DOWN:
             self.lbg.change_selected_box('right')
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())
             return
-        elif event == self.rc.ENTER or event == self.rc.SELECT:
+        elif event == rc.ENTER or event == rc.SELECT:
             self.destroy()
             if self.handler: self.handler(self.lbg.get_word())
             return
-        elif event == self.rc.EXIT:
+        elif event == rc.EXIT:
             self.destroy()
             return
-        elif [self.rc.K1, self.rc.K2, self.rc.K3, self.rc.K4, self.rc.K5, 
-              self.rc.K6, self.rc.K7, self.rc.K8, self.rc.K9, 
-              self.rc.K0].count(event) > 0:
+        elif [rc.K1, rc.K2, rc.K3, rc.K4, rc.K5, 
+              rc.K6, rc.K7, rc.K8, rc.K9, 
+              rc.K0].count(event) > 0:
             the_box = self.lbg.get_selected_box()
             the_box.cycle_phone_char(event)
             if self.lbg.boxes.index(the_box) != len(self.lbg.boxes)-1:

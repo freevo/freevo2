@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/20 13:02:29  dischi
+# make the rc changes here, too
+#
 # Revision 1.5  2003/03/30 15:54:07  rshortt
 # Added 'parent' as a constructor argument for PopupBox and all of its
 # derivatives.
@@ -71,6 +74,7 @@ from types          import *
 
 DEBUG = 0
 
+import rc
 
 class InputBox(PopupBox):
     """
@@ -113,36 +117,36 @@ class InputBox(PopupBox):
 
     def eventhandler(self, event):
 
-        if event == self.rc.LEFT:
+        if event == rc.LEFT:
             self.lbg.change_selected_box('left')
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())
             return
-        elif event == self.rc.RIGHT:
+        elif event == rc.RIGHT:
             self.lbg.change_selected_box('right')
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())
             return
-        elif event == self.rc.ENTER or event == self.rc.SELECT:
+        elif event == rc.ENTER or event == rc.SELECT:
             self.destroy()
             if self.handler: self.handler(self.lbg.get_word())
             return
-        elif event == self.rc.EXIT:
+        elif event == rc.EXIT:
             self.destroy()
             return
-        elif event == self.rc.UP:
+        elif event == rc.UP:
             self.lbg.get_selected_box().charUp()
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())
             return
-        elif event == self.rc.DOWN:
+        elif event == rc.DOWN:
             self.lbg.get_selected_box().charDown()
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())
             return
-        elif [self.rc.K1, self.rc.K2, self.rc.K3, self.rc.K4, self.rc.K5, 
-              self.rc.K6, self.rc.K7, self.rc.K8, self.rc.K9, 
-              self.rc.K0].count(event) > 0:
+        elif [rc.K1, rc.K2, rc.K3, rc.K4, rc.K5, 
+              rc.K6, rc.K7, rc.K8, rc.K9, 
+              rc.K0].count(event) > 0:
             self.lbg.get_selected_box().cycle_phone_char(event)
             self.lbg.draw()
             self.osd.update(self.lbg.get_rect())

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/20 13:02:30  dischi
+# make the rc changes here, too
+#
 # Revision 1.5  2003/03/30 15:54:07  rshortt
 # Added 'parent' as a constructor argument for PopupBox and all of its
 # derivatives.
@@ -66,6 +69,8 @@ from Border         import *
 from Label          import *
 from types          import *
 
+import rc
+
 DEBUG = 0
 
 
@@ -103,10 +108,10 @@ class scrolldemo(PopupBox):
 
     def eventhandler(self, event):
 
-        scrolldirs = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
+        scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
         if scrolldirs.count(event) > 0:
             return self.pb.eventhandler(event)
-        elif event == self.rc.ENTER or event == self.rc.SELECT or event == self.rc.EXIT:
+        elif event == rc.ENTER or event == rc.SELECT or event == rc.EXIT:
             self.destroy()
         else:
             return self.parent.eventhandler(event)

@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/04/20 13:02:29  dischi
+# make the rc changes here, too
+#
 # Revision 1.16  2003/04/06 21:09:16  dischi
 # Some focus enhancements
 #
@@ -163,7 +166,6 @@ class GUIObject:
     def __init__(self, left=0, top=0, width=0, height=0,
                  bg_color=None, fg_color=None):
 
-        self.rc   = rc.get_singleton()
         self.osd  = osd.get_singleton()
         self.skin = skin.get_singleton()
         self.zir  = ZIndexRenderer.get_singleton()

@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/04/20 13:02:29  dischi
+# make the rc changes here, too
+#
 # Revision 1.13  2003/04/06 21:08:52  dischi
 # Make osd.focusapp the default parent (string "osd").
 # Maybe someone should clean up the paramter, a PopupBox and an Alertbox
@@ -378,12 +381,12 @@ class PopupBox(GUIObject):
     def eventhandler(self, event):
         if DEBUG: print 'PopupBox: event = %s' % event
 
-        trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT,
-                   self.rc.ENTER, self.rc.SELECT]
+        trapped = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT,
+                   rc.ENTER, rc.SELECT]
 
         if trapped.count(event) > 0:
             return
-        elif [self.rc.EXIT, ].count(event) > 0:
+        elif [rc.EXIT, ].count(event) > 0:
             self.destroy()
         else:
             return self.parent.eventhandler(event)

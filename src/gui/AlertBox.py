@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/20 13:02:28  dischi
+# make the rc changes here, too
+#
 # Revision 1.8  2003/04/06 21:08:53  dischi
 # Make osd.focusapp the default parent (string "osd").
 # Maybe someone should clean up the paramter, a PopupBox and an Alertbox
@@ -88,6 +91,7 @@ from types     import *
 
 DEBUG = 0
 
+import rc
 
 class AlertBox(PopupBox):
     """
@@ -130,10 +134,10 @@ class AlertBox(PopupBox):
     def eventhandler(self, event):
         if DEBUG: print 'AlertBox: EVENT = %s for %s' % (event, self)
 
-        trapped = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
+        trapped = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
         if trapped.count(event) > 0:
             return
-        elif [self.rc.ENTER, self.rc.SELECT, self.rc.EXIT].count(event) > 0:
+        elif [rc.ENTER, rc.SELECT, rc.EXIT].count(event) > 0:
             if DEBUG: print 'HIT OK'
             self.destroy()
         else:

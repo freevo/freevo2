@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/20 13:02:29  dischi
+# make the rc changes here, too
+#
 # Revision 1.9  2003/03/30 20:50:00  rshortt
 # Improvements in how we get skin properties.
 #
@@ -332,7 +335,7 @@ class ListBox(RegionScroller):
 
     def eventhandler(self, event):
 
-        scrolldirs = [self.rc.UP, self.rc.DOWN, self.rc.LEFT, self.rc.RIGHT]
+        scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
         if scrolldirs.count(event) > 0:
             self.scroll(event)
             self.draw()

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/04/20 13:02:29  dischi
+# make the rc changes here, too
+#
 # Revision 1.9  2003/04/13 17:50:12  dischi
 # fixed crash by setting the default parent
 #
@@ -82,6 +85,7 @@ from types     import *
 
 DEBUG = 0
 
+import rc
 
 class ConfirmBox(PopupBox):
     """
@@ -141,16 +145,16 @@ class ConfirmBox(PopupBox):
     def eventhandler(self, event):
         if DEBUG: print 'ConfirmBox: EVENT = %s' % event
 
-        trapped = [self.rc.UP, self.rc.DOWN]
+        trapped = [rc.UP, rc.DOWN]
         if trapped.count(event) > 0:
             return
-        elif event == self.rc.LEFT or event == self.rc.RIGHT:
+        elif event == rc.LEFT or event == rc.RIGHT:
             self.b0.toggle_selected()
             self.b1.toggle_selected()
             self.draw()
             self.osd.update(self.get_rect())
             return
-        elif event == self.rc.ENTER or event == self.rc.SELECT:
+        elif event == rc.ENTER or event == rc.SELECT:
             if self.b0.selected:
                 if DEBUG: print 'HIT OK'
                 self.destroy()
