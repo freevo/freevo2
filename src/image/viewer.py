@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/11/21 12:22:15  dischi
+# move blending effect to osd.py
+#
 # Revision 1.31  2003/11/21 11:46:51  dischi
 # blend one image to the next, better rotation support
 #
@@ -48,7 +51,6 @@ import osd    # The OSD class, used to communicate with the OSD daemon
 import event as em
 import objectcache
 import rc
-import pygame
 
 from gui.GUIObject import GUIObject
 from gui.AlertBox import AlertBox
@@ -202,31 +204,22 @@ class ImageViewer(GUIObject):
         last_image = self.last_image[1]
 
         if last_image and self.last_image[0] != item and config.IMAGEVIEWER_BLEND_SPEED:
-            i1 = osd.zoomsurface(last_image[0], last_image[3], last_image[4],
-                                 last_image[5], last_image[6], last_image[7],
-                                 rotation = last_image[8]).convert()
-            i2 = osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
-                                 rotation = self.rotation).convert()
             screen = osd.screen.convert()
-            
-            for i in range(1, ((255-config.IMAGEVIEWER_BLEND_SPEED) /
-                               config.IMAGEVIEWER_BLEND_SPEED)):
-                i1.set_alpha(255 - (i * config.IMAGEVIEWER_BLEND_SPEED))
-                i2.set_alpha(i * config.IMAGEVIEWER_BLEND_SPEED)
-                screen.fill((0,0,0,0))
-                screen.blit(i1, (last_image[1], last_image[2]))
-                screen.blit(i2, (x, y))
-                osd.screen.blit(screen, (0,0))
-                if plugin.getbyname('osd'):
-                    plugin.getbyname('osd').draw(('osd', None), osd)
-                osd.update()
+            screen.fill((0,0,0,0))
+            screen.blit(osd.zoomsurface(image, scale, bbx, bby, bbw, bbh,
+                                        rotation = self.rotation).convert(), (x, y))
+            # update the OSD
+            self.drawosd(layer=screen)
 
-        osd.clearscreen(color=osd.COL_BLACK)
-        osd.drawsurface(image, x, y, scale, bbx, bby, bbw, bbh,
-                       rotation = self.rotation)
+            osd.update(blend_surface=screen, blend_speed=config.IMAGEVIEWER_BLEND_SPEED)
 
-        # update the OSD
-        self.drawosd()
+        else:
+            osd.clearscreen(color=osd.COL_BLACK)
+            osd.drawsurface(image, x, y, scale, bbx, bby, bbw, bbh,
+                            rotation = self.rotation)
+
+            # update the OSD
+            self.drawosd()
 
         if plugin.getbyname('osd'):
             plugin.getbyname('osd').draw(('osd', None), osd)
@@ -336,18 +329,18 @@ class ImageViewer(GUIObject):
             return self.fileitem.eventhandler(event)
 
             
-    def drawosd(self):
+    def drawosd(self, layer=None):
 
         if not self.osd_mode: return
 
         elif self.osd_mode == 1:
 	    # This is where we add a caption.  Only if playlist is empty
             # May need to check the caption too?
-            osdstring = ["Title: " + self.fileitem.name]
+            osdstring = []
 
 	    # Here we set up the tags that we want to put in the display
 	    # Using the following fields
-            tags_check = [[_('Title: '),'name'],
+            tags_check = [[_('Title: '),      'name'],
                           [_('Description: '),'description']
                           ]
 
@@ -357,11 +350,12 @@ class ImageViewer(GUIObject):
            # This is where we add a caption.  Only if playlist is empty
 	   # create an array with Exif tags as above
 	   osdstring = []
-           tags_check = [ ['Date:','date'],
-	                  ['W:','width'],
-			  ['H:','height'],
-			  ['Model:','hardware'],
-			  ['Software:', 'software']
+           tags_check = [ [_('Title: '),   'name'],
+                          [_('Date: ') ,   'date'],
+	                  ['W:',           'width'],
+			  ['H:',           'height'],
+			  [_('Model:'),    'hardware'],
+			  [_('Software:'), 'software']
 			 ]
 
            # FIXME: add this informations to mmpython:
@@ -414,12 +408,12 @@ class ImageViewer(GUIObject):
         osd.drawbox(config.OVERSCAN_X,
                     osd.height - (config.OVERSCAN_X + 25 + (len(prt_line) * 30)),
                     osd.width, osd.height, width=-1, 
-                    color=((60 << 24) | osd.COL_BLACK))
+                    color=((60 << 24) | osd.COL_BLACK), layer=layer)
 
 	# Now print the Text
         for line in range(len(prt_line)):
             h=osd.height - (40 + config.OVERSCAN_Y + ((len(prt_line) - line - 1) * 30))
             osd.drawstring(prt_line[line], 15 + config.OVERSCAN_X, h,
-                           fgcolor=osd.COL_ORANGE)
+                           fgcolor=osd.COL_ORANGE, layer=layer)
 
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2003/11/21 12:22:15  dischi
+# move blending effect to osd.py
+#
 # Revision 1.103  2003/11/21 11:42:06  dischi
 # bgcolor support for drawstringframed
 #
@@ -50,6 +53,7 @@ from fcntl import ioctl
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config, rc
+import plugin
 
 # The PyGame Python SDL interface.
 import pygame
@@ -941,10 +945,28 @@ class OSD:
 
 
 
-    def update(self,rect=None):
+    def update(self,rect=None, blend_surface=None, blend_speed=0):
         """
         update the screen
         """
+        if blend_surface and blend_speed:
+            blend_last_screen = self.screen.convert()
+            blend_next_screen = blend_surface.convert()
+            blend_surface = self.screen.convert()
+
+            for i in range(1, (255 / blend_speed)):
+                blend_last_screen.set_alpha(255 - (i * blend_speed))
+                blend_next_screen.set_alpha(i * blend_speed)
+                blend_surface.fill((0,0,0,0))
+                blend_surface.blit(blend_last_screen, (0, 0))
+                blend_surface.blit(blend_next_screen, (0, 0))
+
+                self.screen.blit(blend_surface, (0,0))
+                if plugin.getbyname('osd'):
+                    plugin.getbyname('osd').draw(('osd', None), self)
+                pygame.display.flip()
+            return
+            
         if not pygame.display.get_init():
             return None
 
