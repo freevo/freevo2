@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2003/06/08 18:09:20  dischi
+# add --doc switch to generate api doc in Docs/api
+#
 # Revision 1.46  2003/05/29 21:17:00  rshortt
 # Make sure we use runapp to avoid linker errors.
 #
@@ -354,7 +357,26 @@ if __name__ == "__main__":
         tracefd = open(os.path.join(os.environ['FREEVO_STARTDIR'],
                                     'trace.txt'), 'w')
         sys.settrace(tracefunc)
-    
+
+    if len(sys.argv) >= 2 and sys.argv[1] == '--doc':
+        import pydoc
+        import re
+        sys.path.append('src/gui')
+        for file in util.match_files_recursively('src/', ['py', ]):
+            # doesn't work for everything :-(
+            if file not in ( 'src/tv/record_server.py', ) and file.find('src/www'):
+                file = re.sub('/', '.', file)
+                pydoc.writedoc(file[4:-3])
+        # now copy the files to Docs/api
+        try:
+            os.mkdir('Docs/api')
+        except:
+            pass
+        for file in util.match_files('.', ['html', ]):
+            print 'moving %s' % file
+            os.rename(file, 'Docs/api/%s' % file)
+        shutdown(allow_sys_shutdown=0)
+
     try:
         main_func()
     except KeyboardInterrupt:
