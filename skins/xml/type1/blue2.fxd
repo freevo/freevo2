@@ -6,12 +6,12 @@
     <!-- special settings for audio. The default style is an image based style -->
     <!-- with an info area. By pressing DISPLAY this can be toggled to the default view -->
     <menu type="audio">
-      <style image="audio menu with info"/>
+      <style image="audio menu with info" text="normal text style"/>
       <style text="normal text style"/>
     </menu>
 
     <menu type="video">
-      <style image="video menu with info"/>
+      <style image="video menu with info" text="normal text style"/>
       <style text="normal text style"/>
       <style image="video details"/>
     </menu>
