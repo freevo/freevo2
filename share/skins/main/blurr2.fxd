@@ -2,123 +2,96 @@
 <freevo>
     
     <skin include="basic" geometry="800x600">
+        
+        <!-- 
+	*******************************************************
+	** DEFAULT ANF GENERAL SETTINGS
+	******************************************************* -->
+
         <iconset theme="blurr"/>
-        <main imagedir="gant">
-            <item label="tv" name="Watch TV"/>
-            <item label="video" name="Watch a Movie" image="gant/movie.png"/>
-            <item label="audio" name="Listen to Music" image="gant/music.png"/>
-            <item label="image" name="Look at Pictures"/>
-            <item label="games" name="Play a Game"/>
-            <item label="weather" name="Weather Forecast"/>
-        </main>
         
         <!-- Redefine of the type default -->
         <menuset label="normal text style">
             <view x="20" y="100" width="300" height="300"/>
-             
+	    
             <listing layout="listing" x="330" y="100" width="430" height="470">
                 <image filename="up.png" label="uparrow" x="760" y="110"/>
                 <image filename="down.png" label="downarrow" x="760" y="max-32"/>
             </listing>
         </menuset>
-        
-        <!-- no special defaults right now -->
+
+        <!-- default without an image -->
         <menuset label="default no image" inherits="normal text style">
             <view visible="no"/>
             <listing x="20" width="740"/>
         </menuset>
         
+        <!-- default with description and image -->
         <menuset label="default description" inherits="normal text style">
             <listing height="350"/>
             <info layout="description" visible="yes" x="20" y="460" width="760" height="130"/>
         </menuset>
         
+        <!-- default with description without an image -->
         <menuset label="default description no image" inherits="default description">
             <view visible="no"/>
             <listing x="20" width="740"/>
         </menuset>
+
+        <!-- default view area -->
+        <layout label="view">
+            <content align="center" valign="center">
+                <item type="default">
+                    <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
+			width="max+20" height="max+20"/>
+                </item>
+            </content>
+        </layout>
         
-        <!-- definition of the main menu -->
-        <menuset label="main menu">
-            <screen layout="screen watermark" visible="yes">
-                <area x="0" y="0" width="800" height="600"/>
-            </screen>
-            <listing layout="main listing" visible="yes">
-                <area x="230" y="280" width="360" height="240"/>
-                 
-            </listing>
-            <listing layout="list_main" x="230" y="180" width="380" height="390"/>
-            <view visible="no"/>
-        </menuset>
+        <!-- default listing area -->
+        <layout label="listing">
+            <background/>
+            <content type="text" spacing="2">
+                <item type="default" font="grey"/>
+                <item type="selected" font="white">
+                    <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
+			height="max+6" radius="15"/>
+                </item>
+            </content>
+        </layout>
         
-        <menuset label="tv menu">
-            <screen layout="screen" x="0" y="0" width="800" height="600"/>
-            <title visible="no"/>
-            <info layout="tv info" x="10" y="80" width="760" height="115"/>
-            <listing layout="tv listing" x="10" y="220" width="750" height="350">
-                <image x="765" y="220" width="32" height="32" label="uparrow"
-	            filename="up.png"/>
-                <image x="765" y="max-32" width="32" height="32" label="downarrow" 
-	            filename="down.png"/>
-                <image width="16" height="16" label="leftarrow" filename="left.png"/>
-                <image width="16" height="16" label="rightarrow" filename="right.png"/>
-            </listing>
-        </menuset>
+        <!-- default info area -->
+        <layout label="description">
+            <background>
+                <rectangle size="0" radius="10" bgcolor="0xaa000000"/>
+            </background>
+            <content x="10" y="10" type="text" height="max-20" width="max-20"
+		spacing="20" font="default">
+                <item type="default">
+                    <if expression="description">
+                        <text font="info value" mode="soft" height="max" 
+			    expression="description"/>
+                    </if>
+                </item>
+		
+            </content>
+        </layout>
+
+        <image label="background" filename="blurrback.jpg"/>
+        <image label="logo" filename="gant/logo.png"/>
         
-        <!-- definition of video/audio/image menu. The same as default, but with a -->
-        <!-- different background -->
+        
+        <!-- 
+	*******************************************************
+	** VIDEO MENU
+	******************************************************* -->
+
         <menu type="video">
             <style text="text with info style"/>
         </menu>
         
-        <menu type="audio">
-            <style text="audio"/>
-        </menu>
-        
-        <menu type="image">
-            <style text="image"/>
-        </menu>
-        
-        <menu type="tv">
-            <style text="text with tv info style"/>
-        </menu>
-        
-        <menu type="tv main menu">
-            <style text="text with tv info style (main)"/>
-        </menu>
-        
-        <menu type="tv program menu">
-          <style text="text with program info style"/>
-        </menu>
-
-        <menu type="tv favorite menu">
-          <style text="text with favorite info style"/>
-        </menu>
-
         <menuset label="video" inherits="normal text style">
             <screen layout="video screen"/>
-        </menuset>
-        
-        <menuset label="audio" inherits="normal text style">
-            <screen layout="audio screen"/>
-            <view layout="view" x="15" y="90" width="280" height="270"/>
-            <info layout="audio info" x="28" y="370" width="273" height="190"/>
-        </menuset>
-        
-        <menuset label="image" inherits="normal text style">
-            <screen layout="image screen"/>
-            <listing y="80" x="60" height="430" width="700" layout="image list"/>
-            <info layout="image info" x="10" y="510" width="780" height="80"/>
-            <view visible="no"/>
-        </menuset>
-        
-        <menuset label="tv" inherits="normal text style"> 
-            <view visible="no"/>
-            <listing x="100" width="680">
-                <image label="uparrow" x="290" y="110"/>
-                <image label="downarrow" x="max-32" y="520"/>
-            </listing>
-            <screen layout="tv menu screen"/>
         </menuset>
         
         <menuset label="text with info style" inherits="normal text style">
@@ -132,163 +105,17 @@
             <info layout="video info" x="300" y="100" width="450" height="300"/>
         </menuset>
         
-        <menuset label="text with tv info style" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-        </menuset>
-        
-        <menuset label="text with tv info style (main)" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-            <info layout="tv extended info" x="50" y="100" width="700" height="230"/>
-            <view visible="no"/>
-        </menuset>
-        
-        <menuset label="text with program info style" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-            <info layout="tv program info" x="50" y="100" width="700" height="230"/>
-            <view visible="no"/>
-        </menuset>
-
-        <menuset label="text with favorite info style" inherits="text with info style">
-            <screen layout="tv screen" visible="yes"/>
-            <info layout="tv favorite info" x="50" y="100" width="700" height="100"/>
-            <view visible="no"/>
-        </menuset>
-
-        
-        <!-- ********************************************** -->
-        <!-- LAYOUT DEFINITIONS -->
-        
-        
-        <image label="background" filename="blurrback.jpg"/>
-        <image label="logo" filename="gant/logo.png"/>
-        
-        <layout label="screen watermark">
-            <background>
-                <image image="background" x="0" y="0" label="background"/>
-                <image x="435" y="230" width="370" height="380" label="watermark"/>
-            </background>
-        </layout>
-        
-        
         <layout label="video screen">
             <background>
                 <image image="background" x="0" y="0" label="background"/>
                 <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
-                 width="750" height="250"/>
+		    width="750" height="250"/>
                 <image filename="gant/movie.png" x="435" y="230" width="370"
-	  height="380"/>
+		    height="380"/>
             </background>
         </layout>
         
-        <layout label="audio screen">
-            <background>
-                <image image="background" x="0" y="0" label="background"/>
-                <image filename="gant/music.png" x="435" y="230" width="370"
-	  height="380"/>
-                <rectangle size="0" bgcolor="0x80000000" radius="10" x="12" y="87"
-                width="290" height="475"/>
-            </background>
-        </layout>
-        
-        <layout label="image screen">
-            <background>
-                <image image="background" x="0" y="0" label="background"/>
-                <image filename="gant/image.png" x="435" y="230" width="370"
-	  height="380"/>
-            </background>
-        </layout>
-        
-        <layout label="tv screen">
-            <background>
-                <image image="background" x="0" y="0" label="background"/>
-                <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
-                 width="750" height="250"/>
-                <image filename="gant/tv.png" x="435" y="230" width="370"
-	  height="380"/>
-            </background>
-        </layout>
-        
-        <layout label="audio info">
-            <content x="0" y="0" type="text" spacing="20" font="default">
-                <!-- audio dir -->
-                <item type="default">
-                    <if expression="display_type == 'audio' and artist">
-                        <text font="info tagline" expression="artist"/>
-                        <newline/>
-                    </if>
-                    <if expression="display_type == 'audio' and album">
-                        <text font="info value" expression="album" mode="soft" />
-                        <newline/>
-                    </if>
-                    <if expression="not type == 'playlist' and not album and not artist">
-                        <text font="info tagline" expression="name" mode="soft" />
-                        <newline/>
-                    </if>
-                    	
-                    <if expression="display_type == 'audio' and year">
-                        <if expression="album or artist">
-                            <text font="info value" expression="year"/>
-                            <newline/>
-                        </if>
-                    </if>
-                    <if expression="display_type == 'audio' and length">
-                        <text font="info value" expression="length"/>
-                        <newline/>
-                    </if>
-                    <if expression="type == 'playlist'">
-                        <text font="info value" width="max" expression="len(playlist)"/>
-                        <text font="info value"> Items</text>
-                        <newline/>
-                    </if>
-                </item>
-                
-                <item type="audio">
-                    <if expression="artist">
-                        <text font="info tagline" expression="artist"/>
-                        <newline/>
-                    </if>
-                    <if expression="album">
-                        <text font="info value" expression="album"/>
-                        <newline/>
-                    </if>
-                    <if expression="not album and not artist">
-                        <text font="info tagline" expression="name" mode="soft" />
-                        <newline/>
-                        <if expression="description"> <!-- e.g. webradio -->
-                            <text font="info value" expression="description" height="max" mode="soft"/>
-                        </if>
-                    </if>
-                    	
-                    <if expression="date">
-                        <text font="info value" expression="date"/>
-                        <newline/>
-                    </if>
-                    <if expression="length">
-                        <text font="info value" expression="length"/>
-                        <newline/>
-                    </if>
-                </item>
-                
-                <item type="audiocd">
-                    <if expression="title">
-                        <text font="info tagline" expression="title"/>
-                        <newline/>
-                    </if>
-                    <if expression="artist">
-                        <text font="info value" expression="artist"/>
-                        <newline/>
-                    </if>
-                    <if expression="len(tracks)">
-                        <text font="info value" expression="len(tracks)"/>
-                        <text width="130" font="info label"> Tracks</text>
-                        <newline/>
-                    </if>
-                </item>
-            </content>
-        </layout>
-        
-        
-        
+
         <layout label="video info">
             <content x="0" y="0" type="text" spacing="20" font="default">
                 <item type="video">
@@ -313,7 +140,7 @@
                     <if expression="plot">
                         <goto_pos x="20" mode="relative"/>
                         <text font="info plot" height="120" mode="soft" 
-	      align="justified" expression="plot"/>
+			    align="justified" expression="plot"/>
                         <newline/>
                     </if>
                     <goto_pos y="5" mode="relative"/>
@@ -340,12 +167,12 @@
                     <if expression="plot">
                         <goto_pos x="10" mode="relative"/>
                         <text font="info plot" height="max" mode="soft" 
-	      align="justified" expression="plot"/>
+			    align="justified" expression="plot"/>
                         <newline/>
                     </if>
                     <if expression="content and not plot">
                         <text font="info plot" height="max" mode="soft" 
-	      align="justified" expression="content"/>
+			    align="justified" expression="content"/>
                         <newline/>
                     </if>
                     <if expression="not content and not plot">
@@ -400,11 +227,339 @@
             </content>
         </layout>
         
+        <!-- 
+	*******************************************************
+	** AUDIO MENU
+	******************************************************* -->
+
+        <menu type="audio">
+            <style text="audio"/>
+        </menu>
+        
+        <menuset label="audio" inherits="normal text style">
+            <screen layout="audio screen"/>
+            <view layout="view" x="15" y="90" width="280" height="270"/>
+            <info layout="audio info" x="28" y="370" width="273" height="190"/>
+        </menuset>
+        
+        <layout label="audio screen">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <image filename="gant/music.png" x="435" y="230" width="370"
+		    height="380"/>
+                <rectangle size="0" bgcolor="0x80000000" radius="10" x="12" y="87"
+		    width="290" height="475"/>
+            </background>
+        </layout>
+        
+        <layout label="audio info">
+            <content x="0" y="0" type="text" spacing="20" font="default">
+                <!-- audio dir -->
+                <item type="default">
+                    <if expression="display_type == 'audio' and artist">
+                        <text font="info tagline" expression="artist"/>
+                        <newline/>
+                    </if>
+                    <if expression="display_type == 'audio' and album">
+                        <text font="info value" expression="album" mode="soft" />
+                        <newline/>
+                    </if>
+                    <if expression="not type == 'playlist' and not album and not artist">
+                        <text font="info tagline" expression="name" mode="soft" />
+                        <newline/>
+                    </if>
+		    
+                    <if expression="display_type == 'audio' and year">
+                        <if expression="album or artist">
+                            <text font="info value" expression="year"/>
+                            <newline/>
+                        </if>
+                    </if>
+                    <if expression="display_type == 'audio' and length">
+                        <text font="info value" expression="length"/>
+                        <newline/>
+                    </if>
+                    <if expression="type == 'playlist'">
+                        <text font="info value" width="max" expression="len(playlist)"/>
+                        <text font="info value"> Items</text>
+                        <newline/>
+                    </if>
+                </item>
+                
+                <item type="audio">
+                    <if expression="artist">
+                        <text font="info tagline" expression="artist"/>
+                        <newline/>
+                    </if>
+                    <if expression="album">
+                        <text font="info value" expression="album"/>
+                        <newline/>
+                    </if>
+                    <if expression="not album and not artist">
+                        <text font="info tagline" expression="name" mode="soft" />
+                        <newline/>
+                        <if expression="description"> <!-- e.g. webradio -->
+                            <text font="info value" expression="description" 
+				height="max" mode="soft"/>
+                        </if>
+                    </if>
+		    
+                    <if expression="date">
+                        <text font="info value" expression="date"/>
+                        <newline/>
+                    </if>
+                    <if expression="length">
+                        <text font="info value" expression="length"/>
+                        <newline/>
+                    </if>
+                </item>
+                
+                <item type="audiocd">
+                    <if expression="title">
+                        <text font="info tagline" expression="title"/>
+                        <newline/>
+                    </if>
+                    <if expression="artist">
+                        <text font="info value" expression="artist"/>
+                        <newline/>
+                    </if>
+                    <if expression="len(tracks)">
+                        <text font="info value" expression="len(tracks)"/>
+                        <text width="130" font="info label"> Tracks</text>
+                        <newline/>
+                    </if>
+                </item>
+            </content>
+        </layout>
+        
+        
+        <!-- 
+	*******************************************************
+	** IMAGE MENU
+	******************************************************* -->
+
+        <menu type="image">
+            <style text="image"/>
+        </menu>
+        
+        <menuset label="image" inherits="normal text style">
+            <screen layout="image screen"/>
+            <listing y="80" x="60" height="430" width="700" layout="image list"/>
+            <info layout="image info" x="10" y="510" width="780" height="80"/>
+            <view visible="no"/>
+        </menuset>
+        
+        <layout label="image screen">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <image filename="gant/image.png" x="435" y="230" width="370"
+		    height="380"/>
+            </background>
+        </layout>
+        
+        <!-- listing area for image with images (preview) -->
+        <layout label="image list">
+            <content type="image" spacing="0">
+                <item type="default" width="140" height="115" align="center"
+		    valign="center">
+                    <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
+                </item>
+                <item type="selected" width="140" height="115"
+		    align="center" valign="center">
+                    <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
+                    <rectangle color="0x00ffffff" bgcolor="0xffffffffff" size="2" x="-8"
+			y="-8" width="max+16" height="max+16"/>
+                </item>
+            </content>
+        </layout>
+        
+        <layout label="image info">
+            <background>
+                <rectangle size="0" radius="10" bgcolor="0xaa000000"/>
+            </background>
+            <content x="10" y="10" type="text" height="max-20" width="max-20"
+		spacing="20" font="default">
+                <item type="dir">
+                    <text font="info tagline" width="max" expression="name"/>
+                    <newline/>
+                    <text font="info value" width="max" expression="num_items"/>
+                    <text font="info value"> Items</text>
+                    <!-- other values are num_play_items and num_dir_items -->
+                </item>
+		
+                <item type="playlist">
+                    <text font="info tagline" width="max" expression="name"/>
+                    <newline/>
+                    <text font="info value" width="max" expression="len(playlist)"/>
+                    <text font="info value"> Items</text>
+                    <!-- other values are num_play_items and num_dir_items -->
+                </item>
+		
+                <item type="image">
+                    <text font="info tagline" expression="name"/>
+                    <goto_pos x="50" mode="relative"/>
+                    <if expression="date">
+                        <text font="info value" width="max" align="right" expression="date"/>
+                    </if>
+                    <newline/>
+                    <if expression="description">
+                        <text font="info plot" height="max" mode="soft" 
+			    expression="description"/>
+                        <newline/>
+                    </if>
+                    <if expression="not description">
+                        <if expression="location">
+                            <text font="info label">Location: </text>
+                            <text font="info value" mode="soft" expression="location"/>
+                        </if>
+                        <if expression="not location">
+                            <if expression="geometry">
+                                <text font="info value" expression="geometry"/>
+                            </if>
+                        </if>
+                    </if>
+                </item>
+            </content>
+        </layout>
+        
+
+        <!-- 
+	*******************************************************
+	** MAIN MENU
+	******************************************************* -->
+
+        <main imagedir="gant">
+            <item label="tv" name="Watch TV"/>
+            <item label="video" name="Watch a Movie" image="gant/movie.png"/>
+            <item label="audio" name="Listen to Music" image="gant/music.png"/>
+            <item label="image" name="Look at Pictures"/>
+            <item label="games" name="Play a Game"/>
+            <item label="weather" name="Weather Forecast"/>
+        </main>
+
+        <!-- definition of the main menu -->
+        <menuset label="main menu">
+            <screen layout="screen watermark" visible="yes">
+                <area x="0" y="0" width="800" height="600"/>
+            </screen>
+            <listing layout="main listing" visible="yes">
+                <area x="230" y="280" width="360" height="240"/>
+            </listing>
+            <listing layout="list_main" x="230" y="180" width="380" height="390"/>
+            <view visible="no"/>
+        </menuset>
+        
+        <layout label="screen watermark">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <image x="435" y="230" width="370" height="380" label="watermark"/>
+            </background>
+        </layout>
+        
+        <!-- main menu listing area -->
+        <layout label="list_main">
+            <content align="center" type="text" spacing="10">
+                <item type="default" font="main"/>
+                <item type="selected" font="main selected">
+                    <rectangle bgcolor="selection" size="0" y="-5" x="-10"
+			width="max+20" height="max+10" radius="15"/>
+                </item>
+            </content>
+        </layout>
+        
+        <!-- redefine the main menu listing area -->
+        <layout label="main listing">
+            <content type="text" spacing="10">
+                <item type="default" font="grey big" align="center"/>
+                <item type="selected" font="white big" align="center">
+                    <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
+			width="max+6" height="max+6" radius="15"/>
+                </item>
+            </content>
+        </layout>
+        
+
+        <!-- 
+	*******************************************************
+	** TV DEFINITIONS
+	******************************************************* -->
+        
+        <menu type="tv">
+            <style text="text with tv info style"/>
+        </menu>
+        
+        <menu type="tv main menu">
+            <style text="text with tv info style (main)"/>
+        </menu>
+        
+        <menu type="tv program menu">
+	    <style text="text with program info style"/>
+        </menu>
+
+        <menu type="tv favorite menu">
+	    <style text="text with favorite info style"/>
+        </menu>
+
+        <menuset label="tv menu">
+            <screen layout="screen" x="0" y="0" width="800" height="600"/>
+            <title visible="no"/>
+            <info layout="tv info" x="10" y="80" width="760" height="115"/>
+            <listing layout="tv listing" x="10" y="220" width="750" height="350">
+                <image x="765" y="220" width="32" height="32" label="uparrow"
+	            filename="up.png"/>
+                <image x="765" y="max-32" width="32" height="32" label="downarrow" 
+	            filename="down.png"/>
+                <image width="16" height="16" label="leftarrow" filename="left.png"/>
+                <image width="16" height="16" label="rightarrow" filename="right.png"/>
+            </listing>
+        </menuset>
+        
+        <menuset label="tv" inherits="normal text style"> 
+            <view visible="no"/>
+            <listing x="100" width="680">
+                <image label="uparrow" x="290" y="110"/>
+                <image label="downarrow" x="max-32" y="520"/>
+            </listing>
+            <screen layout="tv menu screen"/>
+        </menuset>
+        
+        <menuset label="text with tv info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+        </menuset>
+        
+        <menuset label="text with tv info style (main)" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv extended info" x="50" y="100" width="700" height="230"/>
+            <view visible="no"/>
+        </menuset>
+        
+        <menuset label="text with program info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv program info" x="50" y="100" width="700" height="230"/>
+            <view visible="no"/>
+        </menuset>
+
+        <menuset label="text with favorite info style" inherits="text with info style">
+            <screen layout="tv screen" visible="yes"/>
+            <info layout="tv favorite info" x="50" y="100" width="700" height="100"/>
+            <view visible="no"/>
+        </menuset>
+
+        <layout label="tv screen">
+            <background>
+                <image image="background" x="0" y="0" label="background"/>
+                <rectangle size="0" bgcolor="0x80000000" radius="10" x="10" y="90"
+		    width="750" height="250"/>
+                <image filename="gant/tv.png" x="435" y="230" width="370"
+		    height="380"/>
+            </background>
+        </layout>
+        
         <layout label="tv extended info">
             <content x="0" y="0" type="text" spacing="20" font="default">
                 <item type="default">
                     <text font="info tagline" width="max" height="max" 
-	    expression="function:comingup" mode="soft"/>
+			expression="function:comingup" mode="soft"/>
                 </item>
             </content>
         </layout>
@@ -413,43 +568,36 @@
             <content x="0" y="0" type="text" spacing="20" font="default">
                 <item type="default">
                     <if expression="title">
-	                <text font="info value" mode="soft">Title: </text>
-                        <text font="info value" expression="title" mode="soft" />
-                        <newline/>
+                        <text font="tv title" width="550" expression="title"/>
                     </if>
+                    <newline/>
                     <if expression="sub_title">
-	                <text font="info value" mode="soft">Sub-Title: </text>
-                        <text font="info value" expression="sub_title" mode="soft" />
+                        <text font="info tagline">"</text>
+                        <text font="info tagline" expression="sub_title"/>
+                        <text font="info tagline">"</text>
                         <newline/>
                     </if>
                     <if expression="channel">
-	                <text font="info value" mode="soft">Channel: </text>
+	                <text width="150" font="info value" mode="soft">Channel: </text>
+                        <goto_pos x="10" mode="relative"/>
                         <text font="info value" expression="channel" mode="soft" />
                         <newline/>
                     </if>
                     <if expression="start">
-	                <text font="info value" mode="soft">Start: </text>
+	                <text width="150" font="info value" mode="soft">Start: </text>
+                        <goto_pos x="10" mode="relative"/>
                         <text font="info value" expression="start" mode="soft" />
                         <newline/>
                     </if>
                     <if expression="stop">
-	                <text font="info value" mode="soft">Stop: </text>
+	                <text width="150" font="info value" mode="soft">Stop: </text>
+                        <goto_pos x="10" mode="relative"/>
                         <text font="info value" expression="stop" mode="soft" />
                         <newline/>
                     </if>
+	            <goto_pos y="10" mode="relative"/>
                     <if expression="desc">
-	                <text font="info value" mode="soft">Description: </text>
-                        <text font="info value" expression="desc" mode="soft" />
-                        <newline/>
-                    </if>
-                    <if expression="categories">
-	                <text font="info value" mode="soft">Categories: </text>
-                        <text font="info value" expression="categories" mode="soft" />
-                        <newline/>
-                    </if>
-                    <if expression="ratings">
-	                <text font="info value" mode="soft">Ratings: </text>
-                        <text font="info value" expression="ratings" mode="soft" />
+                        <text font="info plot" height="max" mode="soft" expression="desc"/>
                         <newline/>
                     </if>
                 </item>
@@ -473,133 +621,6 @@
             </content>
         </layout>
 
-        
-        <!-- listing area for image with images (preview) -->
-        <layout label="image list">
-            <content type="image" spacing="0">
-                <item type="default" width="140" height="115" align="center"
-          valign="center">
-                    <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
-                </item>
-                <item type="selected" width="140" height="115"
-          align="center" valign="center">
-                    <shadow x="5" y="5" color="0xaa000000" visible="yes"/>
-                    <rectangle color="0x00ffffff" bgcolor="0xffffffffff" size="2" x="-8"
-	    y="-8" width="max+16" height="max+16"/>
-                </item>
-            </content>
-        </layout>
-        
-        <!-- main menu listing area -->
-        <layout label="list_main">
-            <content align="center" type="text" spacing="10">
-                <item type="default" font="main"/>
-                <item type="selected" font="main selected">
-                    <rectangle bgcolor="selection" size="0" y="-5" x="-10"
-	    width="max+20" height="max+10" radius="15"/>
-                </item>
-            </content>
-        </layout>
-        
-        <layout label="image info">
-            <background>
-                <rectangle size="0" radius="10" bgcolor="0xaa000000"/>
-            </background>
-            <content x="10" y="10" type="text" height="max-20" width="max-20"
-	spacing="20" font="default">
-                <item type="dir">
-                    <text font="info tagline" width="max" expression="name"/>
-                    <newline/>
-                    <text font="info value" width="max" expression="num_items"/>
-                    <text font="info value"> Items</text>
-                    <!-- other values are num_play_items and num_dir_items -->
-                </item>
-                 
-                <item type="playlist">
-                    <text font="info tagline" width="max" expression="name"/>
-                    <newline/>
-                    <text font="info value" width="max" expression="len(playlist)"/>
-                    <text font="info value"> Items</text>
-                    <!-- other values are num_play_items and num_dir_items -->
-                </item>
-                 
-                <item type="image">
-                    <text font="info tagline" expression="name"/>
-                    <goto_pos x="50" mode="relative"/>
-                    <if expression="date">
-                        <text font="info value" width="max" align="right" expression="date"/>
-                    </if>
-                    <newline/>
-                    <if expression="description">
-                        <text font="info plot" height="max" mode="soft" expression="description"/>
-                        <newline/>
-                    </if>
-                    <if expression="not description">
-                        <if expression="location">
-                            <text font="info label">Location: </text>
-                            <text font="info value" mode="soft" expression="location"/>
-                        </if>
-                        <if expression="not location">
-                            <if expression="geometry">
-                                <text font="info value" expression="geometry"/>
-                            </if>
-                        </if>
-                    </if>
-                </item>
-            </content>
-        </layout>
-        
-        <!-- default view area -->
-        <layout label="view">
-            <content align="center" valign="center">
-                <item type="default">
-                    <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
-	    width="max+20" height="max+20"/>
-                </item>
-            </content>
-        </layout>
-        
-        <!-- default listing area -->
-        <layout label="listing">
-            <background/>
-            <content type="text" spacing="2">
-                <item type="default" font="grey"/>
-                <item type="selected" font="white">
-                    <rectangle bgcolor="0xaa000000" size="0" x="-10" y="-3" width="max+20"
-	    height="max+6" radius="15"/>
-                </item>
-            </content>
-        </layout>
-        
-        <!-- default info area -->
-        <layout label="description">
-            <background>
-                <rectangle size="0" radius="10" bgcolor="0xaa000000"/>
-            </background>
-            <content x="10" y="10" type="text" height="max-20" width="max-20"
-	spacing="20" font="default">
-                <item type="default">
-                    <if expression="description">
-                        <text font="info value" mode="soft" height="max" expression="description"/>
-                    </if>
-                </item>
-                 
-            </content>
-        </layout>
-        
-        
-        <!-- redefine the main menu listing area -->
-        <layout label="main listing">
-            <content type="text" spacing="10">
-                <item type="default" font="grey big" align="center"/>
-                <item type="selected" font="white big" align="center">
-                    <rectangle bgcolor="0xaa000000" size="0" x="-3" y="-3"
-	    width="max+6" height="max+6" radius="15"/>
-                </item>
-            </content>
-        </layout>
-        
-        
         <!-- tv info area -->
         <layout label="tv info">
             <background>
@@ -627,12 +648,17 @@
             </content>
         </layout>
         
-        
-        
+        <font label="tv" name="Arial_Bold" size="14" color="0xffffff"/>
+        <font label="tv selected" name="Arial_Bold" size="14" color="0x164668">
+            <shadow visible="no" color="0x000000" border="yes"/>
+        </font>
+        <font label="tv time" name="Arial_Bold" size="14" color="0xffffff"/>
+        <font label="tv title" name="Arial_Bold" size="16" color="0xffffff"/>
+
         <!-- 
-    *******************************************************
-    ** AUDIO PLAYER DEFINITIONS
-    ******************************************************* -->
+	*******************************************************
+	** AUDIO PLAYER DEFINITIONS
+	******************************************************* -->
         
         <player>
             <screen layout="player screen" x="0" y="0" width="800" height="600"/>
@@ -645,7 +671,7 @@
             <background>
                 <image image="background" x="0" y="0" label="background"/>
                 <image filename="gant/music.png" x="435" y="230" width="370"
-                  height="380"/>
+		    height="380"/>
                 <image filename="frame.png" x="5" y="100" width="max-10" height="390"/>
             </background>
         </layout>
@@ -709,10 +735,18 @@
             </content>
         </layout>
         
+        <font label="player" name="Arial_Bold" size="18" color="0xffffff">
+            <shadow visible="yes" color="0x000000" border="yes"/>
+        </font>
+        <font label="player title" name="Arial_Bold" size="18" color="0xffffff"/>
+        <font label="player artist" name="Arial_Bold" size="16" color="0xffffff"/>
+        <font label="player info"   name="Arial_Bold" size="14" color="0xffffff"/>
+        
+
         <!-- 
-    *******************************************************
-    ** Splashscreen
-    ******************************************************* -->
+	*******************************************************
+	** Splashscreen
+	******************************************************* -->
         
         <splashscreen>
             <screen layout="screen"/>
@@ -729,10 +763,11 @@
         <font label="splashscreen font" name="Arial_Bold" size="20" color="0xffffff"/>
         
         
-                
-        <!-- ********************************************** -->
-        <!-- POPUP -->
-
+	
+        <!-- 
+	*******************************************************
+	** POPUP DEFINITIONS
+	******************************************************* -->
 
         <layout label="popup">
             <background>
@@ -756,17 +791,19 @@
 	    </content>
         </layout>
         
-        <font label="widget" name="Arial_Bold" size="12">
+        <font label="widget" name="Arial_Bold" size="14">
             <shadow visible="yes" color="0x000000" border="yes"/>
         </font>
-        <font label="selected widget" name="Arial_Bold" size="12">
+
+        <font label="selected widget" name="Arial_Bold" size="14">
             <shadow visible="yes" color="0x000000" border="yes"/>
         </font>
         
 
-
-        <!-- ********************************************** -->
-        <!-- FONT DEFINITIONS -->
+        <!-- 
+	*******************************************************
+	** FONT DEFINITIONS
+	******************************************************* -->
         
         <font label="default" name="Arial_Bold" size="16" color="0xffffff">
             <shadow visible="yes" color="0x000000" border="yes"/>
@@ -776,7 +813,7 @@
         </font>
         <font label="title" name="Arial_Bold" size="18" color="0xffffff">
             <shadow visible="yes" color="0x000000" border="yes"/>
-             
+	    
         </font>
         <font label="subtitle" name="Arial_Bold" size="18" color="0xffffff">
             <shadow visible="yes" color="0x000000" border="yes"/>
@@ -799,10 +836,7 @@
         <font label="white big" name="Arial_Bold" size="18" color="0xffffff">
             <shadow visible="yes" color="0x000000" border="yes"/>
         </font>
-        <font label="player" name="Arial_Bold" size="18" color="0xffffff">
-            <shadow visible="yes" color="0x000000" border="yes"/>
-        </font>
-        
+
         
         <!-- info area -->
         <font label="info plot"    name="Arial_Bold" size="13" color="0xffffff"/>
@@ -810,15 +844,6 @@
         <font label="info label"   name="Arial_Bold" size="14" color="0xffffff"/>
         <font label="info value"   name="Arial_Bold" size="14" color="0xffffff"/>
         
-        <font label="player title" name="Arial_Bold" size="18" color="0xffffff"/>
-        <font label="player artist" name="Arial_Bold" size="16" color="0xffffff"/>
-        <font label="player info"   name="Arial_Bold" size="14" color="0xffffff"/>
-        <font label="tv" name="Arial_Bold" size="14" color="0xffffff"/>
-        <font label="tv selected" name="Arial_Bold" size="14" color="0x164668">
-            <shadow visible="no" color="0x000000" border="yes"/>
-        </font>
-        <font label="tv time" name="Arial_Bold" size="14" color="0xffffff"/>
-        <font label="tv title" name="Arial_Bold" size="16" color="0xffffff"/>
         <font label="clock"   name="Arial_Bold" size="16" color="0xffffff"/>
         
         <!-- Basic Fonts -->
@@ -869,3 +894,9 @@
         
     </skin>
 </freevo>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-indent-step:4
+End:
+-->
