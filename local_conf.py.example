@@ -603,7 +603,7 @@ HIDE_UNUSABLE_DISCS = 1
 # }
 
 
-#
+
 # TV Channels. This list contains a mapping from the displayed channel name
 # to the actual channel name as used by the TV watching application.
 # The display name must match the names from the XMLTV guide,
@@ -614,20 +614,23 @@ HIDE_UNUSABLE_DISCS = 1
 # the available channels.
 #
 # This list also determines the order in which the channels are displayed!
-# N.B.: You must delete the XMLTV cache file (e.g. /tmp/TV.xml.pickled)
+# N.B.: You must delete the XMLTV cache file (e.g. /var/cache/freevo/TV.xml.pickled)
 #       if you make changes here and restart!
 #
 # Format: [('xmltv channel id', 'freevo display name', 'tv channel name'), ...]
 #
-# If you want to generate a list of all the channels in the XMLTV guide in
-# this format you can run the following command:
-#    "freevo execute src/tv/epg_xmltv.py config"
-# You must have an XMLTV listing in /tmp/TV.xml before running it, and
-# TV_CHANNELS below must be set to None. The output contains guesses for the
-# displayed name and TV channel name. You can edit this list, delete lines,
-# reorder it, etc. For instance, put all your favorite channels first.
-# Don't forget to actually update TV_CHANNELS afterwards, it won't work
-# if it is set to None!
+# If this variable is set to None (default), Freevo will try to auto-detect
+# the channel list based on the xmltv file. This doesn't work for all
+# xmltv grabber, e.g. the German list doesn't contain station lists. In this
+# case Freevo will output the possible list for you to add them manually.
+#
+# If auto-detection works and you want to edit the list, set DEBUG=1 and
+# remove the cache file (e.g. /var/cache/freevo/xmltv_channels.pickle) to
+# see the complete list.
+#
+# Setting this variable to [] will deactivate the tv guide. If you don't have
+# a tv card, you may also want to add plugin.remove('tv') to remove the whole
+# tv menu.
 #
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
@@ -656,6 +659,7 @@ HIDE_UNUSABLE_DISCS = 1
 # It will display "Fox Kids" from 06:00 to 16:59 and "TV6" from 17:00 to 03:00. 
 # 03:00 to 06:00 it won't be displayed at all.
 #
+
 
 
 # ======================================================================

@@ -981,20 +981,23 @@ FREQUENCY_TABLE = {
 # the available channels.
 #
 # This list also determines the order in which the channels are displayed!
-# N.B.: You must delete the XMLTV cache file (e.g. /tmp/TV.xml.pickled)
+# N.B.: You must delete the XMLTV cache file (e.g. /var/cache/freevo/TV.xml.pickled)
 #       if you make changes here and restart!
 #
 # Format: [('xmltv channel id', 'freevo display name', 'tv channel name'), ...]
 #
-# If you want to generate a list of all the channels in the XMLTV guide in
-# this format you can run the following command:
-#    "freevo execute src/tv/epg_xmltv.py config"
-# You must have an XMLTV listing in /tmp/TV.xml before running it, and
-# TV_CHANNELS below must be set to None. The output contains guesses for the
-# displayed name and TV channel name. You can edit this list, delete lines,
-# reorder it, etc. For instance, put all your favorite channels first.
-# Don't forget to actually update TV_CHANNELS afterwards, it won't work
-# if it is set to None!
+# If this variable is set to None (default), Freevo will try to auto-detect
+# the channel list based on the xmltv file. This doesn't work for all
+# xmltv grabber, e.g. the German list doesn't contain station lists. In this
+# case Freevo will output the possible list for you to add them manually.
+#
+# If auto-detection works and you want to edit the list, set DEBUG=1 and
+# remove the cache file (e.g. /var/cache/freevo/xmltv_channels.pickle) to
+# see the complete list.
+#
+# Setting this variable to [] will deactivate the tv guide. If you don't have
+# a tv card, you may also want to add plugin.remove('tv') to remove the whole
+# tv menu.
 #
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
@@ -1024,77 +1027,7 @@ FREQUENCY_TABLE = {
 # 03:00 to 06:00 it won't be displayed at all.
 #
 
-TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
-               ('56 HISTORY', 'HISTORY', '56'),
-               ('2 KTVI', 'KTVI', '2'),
-               ('4 KMOV', 'KMOV', '4'),
-               ('5 KSDK', 'KSDK', '5'),
-               ('6 TBS', 'TBS', '6'),
-               ('11 KPLR', 'KPLR', '11'),
-               ('12 KDNL', 'KDNL', '12'),
-               ('29 LIFE', 'LIFE', '29'),
-               ('49 USA', 'USA', '49'),
-               ('30 HALMRK', 'HALMRK', '30'),
-               ('42 TNT', 'TNT', '42'),
-               ('41 FX', 'FX', '41'),
-               ('59 TLC', 'TLC', '59'),
-               ('31 TECHTV', 'TECHTV', '31'),
-               ('57 DSC', 'DSC', '57'),
-               ('66 ETV', 'ETV', '66'),
-               ('75 MTV', 'MTV', '75'),
-               ('77 VH1', 'VH1', '77'),
-               ('32 TNN', 'TNN', '32'),
-               ('43 CNN', 'CNN', '43'),
-               ('44 CNNH', 'CNNH', '44'),
-               ('46 CNBC', 'CNBC', '46'),
-               ('47 MSNBC', 'MSNBC', '47'),
-               ('48 FNC', 'FNC', '48'),
-               ('45 TWC', 'TWC', '45'),
-               ('35 ESPN', 'ESPN', '35'),
-               ('36 ESPN2', 'ESPN2', '36'),
-               ('37 GOLF', 'GOLF', '37'),
-               ('38 SPEED', 'SPEED', '38'),
-               ('40 FSM', 'FSM', '40'),
-               ('7 WGNSAT', 'WGNSAT', '7'),
-               ('8 LOOR008', 'LOOR008', '8'),
-               ('9 KETC', 'KETC', '9'),
-               ('15 CSPAN', 'CSPAN', '15'),
-               ('16 CSPAN2', 'CSPAN2', '16'),
-               ('22 TBN', 'TBN', '22'),
-               ('33 NGC', 'NGC', '33'),
-               ('34 INSP', 'INSP', '34'),
-               ('50 FAM', 'FAM', '50'),
-               ('51 NIK', 'NIK', '51'),
-               ('52 DISN', 'DISN', '52'),
-               ('53 TOOND', 'TOOND', '53'),
-               ('54 TOON', 'TOON', '54'),
-               ('55 ARTS', 'ARTS', '55'),
-               ('58 ANIMAL', 'ANIMAL', '58'),
-               ('60 TCM', 'TCM', '60'),
-               ('61 OXYGEN', 'OXYGEN', '61'),
-               ('62 FOOD', 'FOOD', '62'),
-               ('63 HGTV', 'HGTV', '63'),
-               ('64 TRAV', 'TRAV', '64'),
-               ('65 WE', 'WE', '65'),
-               ('67 SOAP', 'SOAP', '67'),
-               ('68 BET', 'BET', '68'),
-               ('70 TVLAND', 'TVLAND', '70'),
-               ('71 AMC', 'AMC', '71'),
-               ('72 BRAVO', 'BRAVO', '72'),
-               ('73 SCIFI', 'SCIFI', '73'),
-               ('74 COURT', 'COURT', '74'),
-               ('76 CMTV', 'CMTV', '76'),
-               ('78 FMC', 'FMC', '78'),
-               ('96 LOOR096', 'TV Guide', '96'),
-               ('101 Station 1a', 'Station 1a', '101', ('123', '0000', '1759')),
-               ('101 Station 1b', 'Station 1b', '101', ('123', '1800', '2359')),
-               ('102 Station 2a', 'Station 2a', '102',
-                ('12345', '0000', '2359')),
-               ('102 Station 2b', 'Station 2b', '102', ('67', '0000', '2359')),
-               ('103 Station 3a', 'Station 3a', '103',
-                ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
-               ('103 Station 3b', 'Station 3b', '103',
-                ('1234567', '1600', '2159'))]
+TV_CHANNELS = None
 
 # ======================================================================
 # Builtin WWW server settings
