@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/01/11 15:43:16  dischi
+# better display type handling, added type main menu
+#
 # Revision 1.25  2004/01/03 17:43:15  dischi
 # OVERLAY_DIR is always used
 #
@@ -505,23 +508,15 @@ class Skin_Area:
 
         if widget_type == 'menu':
             # get the correct <menu>
-            try:
-                area = settings.menu[display_type]
-            except:
+            if display_type and settings.special_menu.has_key(display_type):
+                area = settings.special_menu[display_type]
+            else:
+                name = 'default'
+                if self.use_description:
+                    name += ' description'
                 if not self.use_images:
-                    if self.use_description and \
-                           settings.menu.has_key('default description no image'):
-                        area = settings.menu['default description no image']
-                    else:
-                        try:
-                            area = settings.menu['default no image']
-                        except:
-                            area = settings.menu['default']
-                elif self.use_description and \
-                         settings.menu.has_key('default description'):
-                    area = settings.menu['default description']
-                else:
-                    area = settings.menu['default']
+                    name += ' no image'
+                area = settings.default_menu[name]
 
             # get the correct style based on display_style
             if len(area.style) > self.display_style:

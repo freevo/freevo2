@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/01/11 15:43:16  dischi
+# better display type handling, added type main menu
+#
 # Revision 1.27  2004/01/10 13:21:19  dischi
 # cleanup
 #
@@ -67,7 +70,7 @@ osd = osd.get_singleton()
 geometry = (config.CONF.width, config.CONF.height)
 
 
-FXD_FORMAT_VERSION = 1
+FXD_FORMAT_VERSION = 2
 
 #
 # Help functions
@@ -935,7 +938,6 @@ class XMLSkin:
 
     def prepare(self):
         self.prepared = True
-        self.menu     = copy.deepcopy(self._menu)
         self.sets     = copy.deepcopy(self._sets)
         
         self.font     = copy.deepcopy(self._font)
@@ -951,17 +953,43 @@ class XMLSkin:
         for l in layout:
             layout[l].prepare(self.font, self._color, search_dirs, self._images)
 
-        for menu in self.menu:
-            self.menu[menu].prepare(self._menuset, layout)
+        all_menus = copy.deepcopy(self._menu)
+        for menu in all_menus:
+            all_menus[menu].prepare(self._menuset, layout)
 
             # prepare listing area images
-            for s in self.menu[menu].style:
+            for s in all_menus[menu].style:
                 for i in range(2):
                     if s[i] and hasattr(s[i], 'listing'):
                         for image in s[i].listing.images:
                             s[i].listing.images[image].prepare(None, search_dirs,
                                                                self._images)
                         
+
+        self.default_menu = {}
+        self.special_menu = {}
+        for k in all_menus:
+            if k.startswith('default'):
+                self.default_menu[k] = all_menus[k]
+            else:
+                self.special_menu[k] = all_menus[k]
+
+        types = []
+        for k in self.special_menu:
+            if k.find('main menu') == -1:
+                types.append(k)
+
+        for t in types:
+            if not self.special_menu.has_key(t + ' main menu'):
+                self.special_menu[t + ' main menu'] = self.special_menu[t]
+
+        for t in ('default no image', 'default description'):
+            if not self.default_menu.has_key(t):
+                self.default_menu[t] = self.default_menu['default']
+
+        t = 'default description'
+        if not self.default_menu.has_key(t + ' no image'):
+            self.default_menu[t + ' no image'] = self.default_menu[t]
                 
         for s in self.sets:
             if isinstance(self.sets[s], AreaSet):
