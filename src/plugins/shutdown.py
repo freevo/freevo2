@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# base.py  -  Some basic plugins
+# shutdown.py  -  shutdown plugin / handling
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,32 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.10  2003/11/30 14:36:42  dischi
-# new skin handling
-#
-# Revision 1.9  2003/10/29 20:47:44  dischi
-# make it possible to bypass confirmation of shutdown
-#
-# Revision 1.8  2003/10/29 03:37:46  krister
-# Added confirmation of shutdown. Do we need an option to disable this?
-#
-# Revision 1.7  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.6  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.5  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.4  2003/08/24 06:58:18  gsbarbieri
-# Partial support for "out" icons in main menu.
-# The missing part is in listing_area, which have other changes to
-# allow box_under_icon feature (I mailed the list asking for opinions on
-# that)
-#
-# Revision 1.3  2003/04/24 19:56:34  dischi
-# comment cleanup for 1.3.2-pre4
+# Revision 1.1  2003/12/30 15:30:08  dischi
+# put all shutdown stuff into one file
 #
 #
 # -----------------------------------------------------------------------
@@ -60,12 +36,86 @@
 #endif
 
 import os
+import time
+import sys
 
 import config
 
 from gui import ConfirmBox
 from item import Item
 from plugin import MainMenuPlugin
+
+
+def shutdown(menuw=None, arg=None, exit=False):
+    """
+    Function to shut down freevo or the whole system. This system will be
+    shut down when arg is True, else only Freevo will be stopped.
+    """
+    import osd
+    import plugin
+    import childapp
+
+    osd = osd.get_singleton()
+    
+    if not osd.active:
+        # this function is called from the signal handler, but
+        # we are dead already.
+        sys.exit(0)
+
+    osd.clearscreen(color=osd.COL_BLACK)
+    osd.drawstringframed(_('shutting down...'), 0, 0, osd.width, osd.height,
+                         osd.getfont(config.OSD_DEFAULT_FONTNAME,
+                                     config.OSD_DEFAULT_FONTSIZE),
+                         fgcolor=osd.COL_ORANGE, align_h='center', align_v='center')
+    osd.update()
+    time.sleep(0.5)
+
+    if arg:  
+        # shutdown dual head for mga
+        if config.CONF.display == 'mga':
+            os.system('%s runapp matroxset -f /dev/fb1 -m 0' % \
+                      os.environ['FREEVO_SCRIPT'])
+            time.sleep(1)
+            os.system('%s runapp matroxset -f /dev/fb0 -m 1' % \
+                      os.environ['FREEVO_SCRIPT'])
+            time.sleep(1)
+
+        plugin.shutdown()
+        childapp.shutdown()
+        osd.shutdown()
+
+        os.system(config.SHUTDOWN_SYS_CMD)
+        # let freevo be killed by init, looks nicer for mga
+        while 1:
+            time.sleep(1)
+        return
+
+    #
+    # Exit Freevo
+    #
+    
+    # Shutdown any daemon plugins that need it.
+    plugin.shutdown()
+
+    # Shutdown all children still running
+    childapp.shutdown()
+
+    # SDL must be shutdown to restore video modes etc
+    osd.clearscreen(color=osd.COL_BLACK)
+    osd.shutdown()
+
+    if exit:
+        # realy exit, we are called by the signal handler
+        sys.exit(0)
+
+    os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
+
+    # Just wait until we're dead. SDL cannot be polled here anyway.
+    while 1:
+        time.sleep(1)
+        
+
+
 
 
 class ShutdownItem(Item):
@@ -114,20 +164,14 @@ class ShutdownItem(Item):
         """
         shutdown freevo, don't shutdown the system
         """
-        import main
-        if not self.menuw:
-            self.menuw = menuw
-        main.shutdown(menuw=self.menuw, arg=False)
+        shutdown(menuw=menuw, arg=False)
 
         
     def shutdown_system(self, arg=None, menuw=None):
         """
         shutdown the complete system
         """
-        import main
-        if not self.menuw:
-            self.menuw = menuw
-        main.shutdown(menuw=self.menuw, arg=True)
+        shutdown(menuw=menuw, arg=True)
         
         
 
@@ -136,7 +180,7 @@ class ShutdownItem(Item):
 # the plugins defined here
 #
 
-class shutdown(MainMenuPlugin):
+class PluginInterface(MainMenuPlugin):
     """
     Plugin to shutdown Freevo from the main menu
     """
