@@ -16,7 +16,9 @@ class CanvasImage(CanvasObject):
 			self.new(image_or_size)
 		else:
 			self.set_image(image_or_size)
-
+			if not self.image.has_alpha:
+				self.set_alpha(256)
+			
 	def needs_blitting(self, blit = None):
 		"""
 		Sets whether or not the image needs blitting (i.e. the actual image
