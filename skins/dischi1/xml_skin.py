@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/03/27 20:10:08  dischi
+# fix missing font definition (default must be defined)
+#
 # Revision 1.31  2003/03/23 21:40:32  dischi
 # small bugfixes for loading a new skin
 #
@@ -547,8 +550,9 @@ class XML_content(XML_data):
             except:
                 print 'can\'t find font %s' % self.font
                 print font
+                self.font = font['default']
         else:
-            self.font = None
+            self.font = font['default']
 
         if color.has_key(self.color):
             self.color = color[self.color]
