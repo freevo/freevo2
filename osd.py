@@ -12,6 +12,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2002/09/24 06:52:03  gsbarbieri
+# Added the new function drawstringframed(). It can draw a string (supporting
+# even '\n' and '\t') in the determinated area, with both horizontal and
+# vertical alignment. If the string doesn't fit, it's truncated and the part
+# that doesn't fit is returned.
+# Note: This function was designated to work with *words*, that is, when
+# truncating or wrapping, it brokes the string where it find spaces ' '.
+# ('\t' is considered a word '   ')
+# BUGS: It doesn't work fully when we have a word that is larger than width,
+# It overflows the area.
+#
 # Revision 1.22  2002/09/24 03:21:46  gsbarbieri
 # Changed stringsize() to _stringsize(). The stringsize() is still avaiable,
 # but now it uses the charsize() to cache values.
@@ -447,7 +458,190 @@ class OSD:
             r = (x0, y0, x1-x0, y1-y0)
             c = self._sdlcol(color)
             pygame.draw.rect(self.screen, c, r, width)
-            
+
+
+    # Gustavo:
+    # drawstringframed: draws a string (text) in a frame. This tries to fit the
+    #                   string in lines, if it can't, it truncates the text,
+    #                   draw the part that fit and returns the other that doesn't
+    # Parameters:
+    #  - string: the string to be drawn. Supports '\n' and '\t' too.
+    #  - x,y: the posistion
+    #  - width, height: the frame dimensions (See TIPS above)
+    #  - fgcolor, bgcolor: the color for the foreground and background
+    #       respectively. (Supports the alpha channel: 0xAARRGGBB)
+    #  - font, ptsize: font and font point size
+    #  - align_h: horizontal align. Can be left, center, right, justified
+    #  - align_v: vertical align. Can be top, bottom, center or middle
+    #
+    # TIPS:
+    #  - height = -1 defaults to the font height size
+    #
+    # TODO:
+    #  - Handle cases that one word is bigger than the width
+    #  - Test it
+    #  - Debug it
+    #  - Improve it
+    def drawstringframed(self, string, x, y, width, height, fgcolor=None, bgcolor=None,
+                         font=None, ptsize=0, align_h='left', align_v='top'):
+
+        if not pygame.display.get_init():
+            return string
+
+        if DEBUG: print 'drawstringframed (%d;%d; w=%d; h=%d) "%s"' % (x, y, w, h, s)
+        
+        if fgcolor == None:
+            fgcolor = self.default_fg_color
+        if font == None:
+            font = config.OSD_DEFAULT_FONTNAME
+
+        if not ptsize:
+            ptsize = config.OSD_DEFAULT_FONTSIZE
+
+        ptsize = int(ptsize / 0.7)  # XXX pygame multiplies by 0.7 for some reason
+
+        if DEBUG: print 'FONT: %s %s' % (font, ptsize)        
+
+        #
+        # calculate words per line
+        #
+        MINIMUM_SPACE_BETWEEN_WORDS, tmp = self.stringsize(' ',font,ptsize)
+        line = []
+        s = string.replace('\t',' \t ')
+        s = s.replace('\n',' \n ')
+        s = s.replace('  ',' ')        
+        words = s.split(' ')
+        occupied_size = 0
+        line_number = 0
+        lines = []
+        lines.append([])
+        lines_size = []
+        lines_size.append(0)
+        len_words = len(words)
+        word_size = 0
+        word_height = 0
+        occupied_height = 0
+        next_word_size = 0
+        next_word_height = 0
+        # First case: height is fewer than the necessary        
+        word_size, word_height = self.stringsize('Agj',font,ptsize)
+        line_height = word_height
+        occupied_height = line_height
+        if height == -1:
+            height = line_height
+        if line_height > height:
+            return string
+        # Fit words in lines
+        rest_words = ''
+        for word_number in range(len_words):
+            if words[word_number] == '\n' and len(lines[line_number]) > 0:
+                line_number += 1
+                lines.append([])
+                lines_size.append(0)
+                occupied_size = 0
+                occupied_height += line_height
+            else:
+                if words[word_number] == '\t':
+                    words[word_number] = '   '
+                word_size, word_height = self.stringsize(words[word_number], font,ptsize)
+                # This word fit in this line?                
+                if (occupied_size + word_size) <= width and ( occupied_height ) <= height:
+                    # Yes, add it to this line word's list
+                    lines[line_number].append(words[word_number])
+                    occupied_size += word_size
+                    lines_size[line_number] = occupied_size
+                    next_word_size , next_word_height = self.stringsize(words[word_number+1], font,ptsize)
+                    occupied_size += MINIMUM_SPACE_BETWEEN_WORDS
+                elif ( occupied_height + line_height ) <= height:
+                    # No, but we can add another line
+                    line_number += 1
+                    lines.append([])
+                    lines[line_number].append(words[word_number])
+                    lines_size.append(word_size)
+                    occupied_size = word_size + MINIMUM_SPACE_BETWEEN_WORDS
+                    occupied_height += line_height
+                else:
+                    # No, and we cannot add another line, truncate this text
+                    # and save text that does not fit
+                    next_word_size , next_word_height = self.stringsize('...', font,ptsize)
+                    # We need to remove the last word to place the '...' ?
+                    if (occupied_size + next_word_size) <= width:
+                        # No, just add it
+                        lines[line_number].append('...')
+                        lines_size[line_number] += next_word_size
+                    else:
+                        # Yes, put '...' in the last word place
+                        tmp_word_size , tmp_word_height = self.stringsize(lines[line_number][len(lines[line_number])-1], font,ptsize)
+                        lines[line_number][len(lines[line_number])-1] = '...'
+                        lines_size[line_number] += next_word_size - tmp_word_size
+                    # save the text that does not fit.
+                    for tmp in range(word_number, len_words):
+                        rest_words += words[tmp]
+                        if tmp < len_words: rest_words += ' '
+                    # quit the loop
+                    break
+
+        # now draw the string
+        y0 = y
+        if align_v == 'top':
+            y0 = y
+        elif align_v == 'center' or align_v == 'middle':
+            y0 = y + (height - line_height * len(lines)) / 2
+        elif align_v == 'bottom':
+            y0 = y + (height - line_height * len(lines))
+        
+        if bgcolor != None:
+            self.drawbox(x,y, x+width, y+height, width=-1, color=bgcolor)
+        for line_number in range(len(lines)):
+            x0 = x
+            spacing = MINIMUM_SPACE_BETWEEN_WORDS
+            if align_h == 'justified':
+                # Calculate the space between words:
+                ## Disconsider the minimum space
+                x0 = x                    
+                lines_size[line_number] -= MINIMUM_SPACE_BETWEEN_WORDS * (len(lines[line_number]) -1 )
+                if len(lines[line_number]) > 1:
+                    spacing = (width - lines_size[line_number]) / ( len(lines[line_number]) -1 )
+                else:
+                    x0 += (width - lines_size[line_number]) / 2
+                for word in lines[line_number]:
+                    self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                    x0 += spacing
+                    word_size, word_height = self.stringsize(word, font,ptsize)
+                    x0 += word_size
+            elif align_h == 'center':
+                x0 = x + (width - lines_size[line_number]) / 2
+                spacing = MINIMUM_SPACE_BETWEEN_WORDS                
+                for word in lines[line_number]:
+                    self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                    x0 += spacing
+                    word_size, word_height = self.stringsize(word, font,ptsize)
+                    x0 += word_size
+            elif align_h == 'left':
+                x0 = x
+                spacing = MINIMUM_SPACE_BETWEEN_WORDS
+                for word in lines[line_number]:
+                    self.drawstring(word, x0, y0, fgcolor, None, font, ptsize)
+                    x0 += spacing
+                    word_size, word_height = self.stringsize(word, font,ptsize)
+                    x0 += word_size
+            elif align_h == 'right':
+                x0 = x + width
+                spacing = MINIMUM_SPACE_BETWEEN_WORDS
+                line_len = len(lines[line_number])
+                for word_number in range(len(lines[line_number])):
+                    pos = line_len - word_number -1
+                    self.drawstring(lines[line_number][pos], x0, y0, fgcolor, None, font, ptsize, 'right')
+                    x0 -= spacing
+                    word_size, word_height = self.stringsize(lines[line_number][pos], font,ptsize)
+                    x0 -= word_size
+            # end if 
+            # go down one line
+            y0 += line_height
+        # end for
+        return rest_words
+
+                    
 
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,
                    font=None, ptsize=0, align='left'):
