@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2004/12/05 13:01:10  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.69  2004/11/20 18:22:58  dischi
 # use python logger module for debug
 #
@@ -98,7 +101,6 @@ import notifier
 
 import config
 import eventhandler
-import gui
 import cleanup
 import util
 
@@ -158,6 +160,7 @@ class Instance:
 
         self.stop_osd = stop_osd
         if self.stop_osd:
+            import gui
             gui.display.hide()
         
         if hasattr(self, 'item'):
@@ -316,6 +319,7 @@ class Instance:
     def finished(self):
         # Ok, we can use the OSD again.
         if self.stop_osd:
+            import gui
             gui.display.show()
 
         if not self.stopping:

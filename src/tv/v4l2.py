@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/12/05 13:01:12  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.25  2004/11/28 16:00:40  dischi
 # delete some bad debug
 #
@@ -32,7 +35,7 @@
 # -Set the card's input based on the current settings.
 #
 # Revision 1.18  2004/08/13 16:17:33  rshortt
-# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+# More work on tv settings, configuration of v4l2 devices based on TV_CARDS.
 #
 # Revision 1.17  2004/08/12 16:52:49  rshortt
 # Work on autodetecting tv cards.
@@ -140,7 +143,7 @@ class Videodev:
             self.basic_info(device)
 
         else:
-            self.settings = config.TV_SETTINGS.get(which)
+            self.settings = config.TV_CARDS.get(which)
             self.init_settings()
 
 

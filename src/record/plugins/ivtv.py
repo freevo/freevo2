@@ -50,7 +50,7 @@ class PluginInterface(generic.PluginInterface):
 
     def __init__(self, device='ivtv0', rating=7):
         self.name = device
-        self.device = config.TV_SETTINGS[device]
+        self.device = config.TV_CARDS[device]
         generic.PluginInterface.__init__(self)
 
         if not isinstance(self.device, IVTVCard):

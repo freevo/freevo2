@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2004/12/05 13:01:11  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.71  2004/12/04 01:22:18  rshortt
 # Detect channels too and move the detect call into the RecordServer object
 # to call after we're an mbus instance.
@@ -25,7 +28,7 @@
 # detect() to system/__init__.py that will call detect() on a system/ module.
 # The general idea here is that only Freevo processes that care about certain
 # things (ie: devices) will request and have the information.  If you want
-# your helper to know about TV_SETTINGS you would:
+# your helper to know about TV_CARDS you would:
 #
 # import config
 # import system

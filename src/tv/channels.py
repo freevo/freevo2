@@ -44,7 +44,6 @@ import pyepg
 import config
 import sysconfig
 import plugin
-import item
 
 log = logging.getLogger('tv')
 
@@ -85,7 +84,7 @@ def get_lockfile(which):
     """
 
     dev_lock = False
-    settings = config.TV_SETTINGS.get(which)
+    settings = config.TV_CARDS.get(which)
 
     if not settings:
         log.info('No settings for %s' % which)
@@ -229,14 +228,12 @@ def get_dummy_programs(channel, start, stop):
 
 
 
-class ChannelItem(item.Item):
+class Channel:
     """
     Information about one specific channel, also containing
     epg informations.
     """
     def __init__(self, id, display_name, access_id):
-        item.Item.__init__(self)
-
         self.chan_id  = id
         self.access_id = ''
         self.uri      = []
@@ -264,32 +261,29 @@ class ChannelItem(item.Item):
         if uri.find(':') == -1:
             self.access_id = uri
             defaults = []
-            if isinstance(config.TV_DEFAULT_SETTINGS, list) or \
-               isinstance(config.TV_DEFAULT_SETTINGS, tuple):
-                for s in config.TV_DEFAULT_SETTINGS:
+            if isinstance(config.TV_DEFAULT_DEVICE, list) or \
+               isinstance(config.TV_DEFAULT_DEVICE, tuple):
+                for s in config.TV_DEFAULT_DEVICE:
                     defaults.append(s)
             else:
-                defaults.append(config.TV_DEFAULT_SETTINGS)
+                defaults.append(config.TV_DEFAULT_DEVICE)
 
             for which in defaults:
                 try:
                     int(which[-1:])
                 except ValueError: 
-                    # This means that TV_DEFAULT_SETTINGS does NOT end with
+                    # This means that TV_DEFAULT_DEVICE does NOT end with
                     # a number (it is dvb/tv/ivtv) so we add this channel
-                    # to all matching TV_SETTINGS.
-                    log.debug('TV_DEFAULT_SETTINGS does NOT end with a number') 
-        
-                    for s in config.TV_SETTINGS.keys():
+                    # to all matching TV_CARDS.
+                    for s in config.TV_CARDS:
                         if s.find(which) == 0:
                             self.__add_uri__('%s:%s' % (s, uri))
-                            return
+                    return
 
-                uri = '%s:%s' % (which, uri)
+                self.uri.append('%s:%s' % (which, uri))
         else:
             self.access_id = uri.split(':')[1]
-
-        self.uri.append(uri)
+            self.uri.append(uri)
 
 
     def player(self):
@@ -316,7 +310,7 @@ class ChannelItem(item.Item):
 
         for u in self.uri:
             type = u.split(':')[0]
-            settings[type] = config.TV_SETTINGS.get(type)
+            settings[type] = config.TV_CARDS.get(type)
 
         return settings
 
@@ -481,33 +475,18 @@ class ChannelList:
             traceback.print_exc()
             return
 
-        # Check the EPGDB for channels.  If some of these exist in TV_CHHANELS
-        # we use that information if not we use the info from the database.
+        # Check TV_CHANNELS and add them to the list
+        for c in config.TV_CHANNELS:
+            self.add_channel(Channel(c[0], c[1], c[2:]))
+
+        # Check the EPGDB for channels. All channels not in the exclude list
+        # will be added if not already in the list
         for c in self.epg.get_channels():
             if String(c['id']) in config.TV_CHANNELS_EXCLUDE:
                 # Skip channels that we explicitly do not want.
                 continue
-
-            override = False
-            for cc in config.TV_CHANNELS:
-                if String(c['id']) == cc[0]:
-                    # Override with config data.
-                    self.add_channel(ChannelItem(cc[0], cc[1], cc[2:]))
-                    override = True
-                    break
-                
-            if not override:
-                self.add_channel(ChannelItem(c['id'], c['display_name'], c['access_id']))
-
-        # Check TV_CHANNELS for any channels that aren't in EPGDB then
-        # at them to the list.
-        for c in config.TV_CHANNELS:
-            if c[0] in config.TV_CHANNELS_EXCLUDE:
-                # Skip channels that we explicitly do not want.
-                continue
-            if not c[0] in self.channel_dict.keys():
-                self.add_channel(ChannelItem(c[0], c[1], c[2:]))
-
+            if not c['id'] in self.channel_dict.keys():
+                self.add_channel(Channel(c['id'], c['display_name'], c['access_id']))
 
     def sort_channels(self):
         pass

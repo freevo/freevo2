@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/12/05 13:01:11  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.5  2004/11/28 17:32:08  dischi
 # use config.detect
 #
@@ -20,7 +23,7 @@
 # more dvb info
 #
 # Revision 1.2  2004/08/13 16:17:33  rshortt
-# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+# More work on tv settings, configuration of v4l2 devices based on TV_CARDS.
 #
 # Revision 1.1  2004/08/12 16:58:58  rshortt
 # Run this helper to see how freevo autodetected your tv/dvb cards.  This will be changing slightly and will be a good tool to get debug information from users.
@@ -61,7 +64,7 @@ config.detect('tvcards')
 
 def main():
 
-    for key, card in config.TV_SETTINGS.items():
+    for key, card in config.TV_CARDS.items():
         print '\n*** %s ***' % key
         v4l2 = None
 

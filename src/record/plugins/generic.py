@@ -78,10 +78,11 @@ class PluginInterface(Plugin):
     item at a time using one specific application to do so.
     """
     def __init__(self):
-        Plugin.__init__(self)
         # set a nice name for debug
         if not hasattr(self, 'name'):
-            self.name = 'generic'
+            self.reason = 'record.generic can\'t be used directly'
+            return
+        Plugin.__init__(self)
         log.info('plugin: activating %s record' % self.name)
         # childapp running the external program
         self.app  = None
@@ -96,32 +97,13 @@ class PluginInterface(Plugin):
         # suffix for filename
         self.suffix = config.TV_RECORDFILE_SUFFIX
 
+
     def get_cmd(self, rec):
         """
         Build the command to record. A class which inherits from the plugin
         should override this function.
         """
-        # FIXME, get the current data
-        frequency = 0 
-        tunerid   = rec.channel
-            
-        duration = rec.stop - rec.start
-        if rec.url.startswith('file:'):
-            filename = rec.url[5:]
-            basename = os.path.basename(filename)
-        else:
-            filename = rec.url
-            basename = ''
-        cl_options = { 'channel'       : tunerid,
-                       'frequency'     : frequency,
-                       'filename'      : filename,
-                       'url'           : filename,
-                       'base_filename' : basename,
-                       'title'         : rec.name,
-                       'subtitle'      : rec.subtitle,
-                       'seconds'       : duration }
-
-        return config.VCR_CMD % cl_options
+        raise Exception('generic: get_cmd() missing')
 
 
     def get_channel_list(self):

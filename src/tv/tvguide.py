@@ -9,8 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/12/05 13:01:12  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.62  2004/12/04 01:46:46  rshortt
-# Use TV_ALL_CHANNELS from config.
+# Use TV_CHANNELLIST from config.
 #
 # Revision 1.61  2004/11/20 18:23:04  dischi
 # use python logger module for debug
@@ -161,7 +164,7 @@ class TVGuide(MenuApplication):
         box = gui.PopupBox(text=_('Preparing the program guide'))
         box.show()
 
-        if not config.TV_ALL_CHANNELS:
+        if not config.TV_CHANNELLIST:
             box.destroy()
             gui.AlertBox(text=_('TV Guide is corrupt!')).show()
             return False
@@ -169,9 +172,9 @@ class TVGuide(MenuApplication):
         self.current_time = int(time.time())
         start_time = self.current_time - 1800
         stop_time  = self.current_time + 3*3600
-        config.TV_ALL_CHANNELS.import_programs(start_time, stop_time)
+        config.TV_CHANNELLIST.import_programs(start_time, stop_time)
 
-        self.channel  = config.TV_ALL_CHANNELS.get()
+        self.channel  = config.TV_CHANNELLIST.get()
         self.selected = self.channel.get(self.current_time)[0]
 
         box.destroy()
@@ -216,8 +219,8 @@ class TVGuide(MenuApplication):
             pass
             
         if event == MENU_UP:
-            config.TV_ALL_CHANNELS.up()
-            self.channel  = config.TV_ALL_CHANNELS.get()
+            config.TV_CHANNELLIST.up()
+            self.channel  = config.TV_CHANNELLIST.get()
             try:
                 self.selected = self.channel.get(self.current_time)[0]
             except Exception, e:
@@ -226,8 +229,8 @@ class TVGuide(MenuApplication):
             self.refresh()
 
         elif event == MENU_DOWN:
-            config.TV_ALL_CHANNELS.down()
-            self.channel  = config.TV_ALL_CHANNELS.get()
+            config.TV_CHANNELLIST.down()
+            self.channel  = config.TV_CHANNELLIST.get()
             try:
                 self.selected = self.channel.get(self.current_time)[0]
             except Exception, e:
@@ -259,7 +262,7 @@ class TVGuide(MenuApplication):
 
         elif event == TV_SHOW_CHANNEL:
             items = []
-            # channel = config.TV_ALL_CHANNELS.get_settings_by_id(self.chan_id)
+            # channel = config.TV_CHANNELLIST.get_settings_by_id(self.chan_id)
             # for prog in channel.get(time.time(), -1):
             for prog in self.selected.get(time.time(), -1):
                 items.append(prog)

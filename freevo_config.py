@@ -468,9 +468,6 @@ plugin.activate('tiny_osd')
 
 # For recording tv
 #
-# generic_record plugin needs VCR_CMD to be set correctly
-# plugin.activate('record.generic_record')
-
 #
 # Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
 # and want freevo to do everthing for you.  To use you need to set the 
@@ -1148,7 +1145,6 @@ if CONF.fbxine:
 #
 # This is where recorded video is written.
 #
-# XXX the path doesn't work from the www cgi scripts!
 TV_RECORD_DIR = None
 
 #
@@ -1160,16 +1156,8 @@ TV_RECORD_DIR = None
 # This is set to a low default because the default buffer location is 
 # under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
 #
-TIMESHIFT_BUFFER_SIZE = 128
-
-TIMESHIFT_ENCODE_CMD = None
-
-TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
-
-TV_CHANNEL_PROG = './chchan %(channel)s %(norm)s %(freqtable)s'
-
-TV_DATEFORMAT = '%e-%b' # Day-Month: 11-Jun
-TV_TIMEFORMAT = '%H:%M' # Hour-Minute 14:05
+TV_DATEFORMAT     = '%e-%b' # Day-Month: 11-Jun
+TV_TIMEFORMAT     = '%H:%M' # Hour-Minute 14:05
 TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
 
 # This is the filename format for files recorded using Freevo.
@@ -1187,13 +1175,6 @@ TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
 # More can be found at: http://www.python.org/doc/current/lib/module-time.html
 
 TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
-TV_RECORDFILE_SUFFIX = '.avi'
-
-# if using the persitant recordserver
-TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
-
-TV_RECORD_SERVER_IP = 'localhost'
-TV_RECORD_SERVER_PORT = 18002
 
 # If the recordserver runs as root, set the uid to the given one
 # after startup. The gui must also match one of the users group ids
@@ -1205,15 +1186,6 @@ TV_RECORD_SERVER_GID = 0
 # This must be a value in seconds although at the moment only has
 # the percision of one minute.
 TV_RECORD_PADDING = 0 * 60
-
-if os.uname()[0] == 'FreeBSD':
-  # FreeBSD's bsdbt848 TV driver doesn't support audio settings?
-  VCR_AUDIO = ''
-else:
-  VCR_AUDIO = (':adevice=%s' % AUDIO_DEVICE +
-               ':audiorate=32000' +         # 44100 for better sound
-               ':forceaudio:forcechan=1:' + # Forced mono for bug in my driver
-               'buffersize=64')             # 64MB capture buffer, change?
 
 # TV capture size for viewing and recording. Max 768x480 for NTSC,
 # 768x576 for PAL. Set lower if you have a slow computer!
@@ -1232,35 +1204,6 @@ TV_REC_SIZE = (320, 240)   # Default for slower computers
 # your computer best.
 TV_VIEW_OUTFMT = 'yuy2'   # Better quality, slower on pure FB/X11
 TV_REC_OUTFMT  = 'yuy2'
-
-# PRE and POST recording commands.  Set these to a runnable command if
-# you wish to have special mixer settings or video post processing.
-VCR_PRE_REC  = None
-VCR_POST_REC = None
-
-# XXX Please see the mencoder docs for more info about the settings
-# XXX below. Some stuff must be changed (adevice), others probably
-# XXX should be ("Change"), or could be in some cases ("change?")
-VCR_CMD = (CONF.mencoder + ' ' +
-           'tv:// ' +                      # New mplayer requires this.
-           '-tv driver=%(driver)s:input=%(input)d' +
-           ':norm=%s' % CONF.tv +
-           ':channel=%(channel)s' +        # Filled in by Freevo
-           ':chanlist=%s' % CONF.chanlist +
-           ':width=%d:height=%d' % (TV_REC_SIZE[0], TV_REC_SIZE[1]) +
-           ':outfmt=%s' % TV_REC_OUTFMT +
-           ':device=%(device)s' +
-           VCR_AUDIO +                     # set above
-           ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
-           'vcodec=mpeg4' +                # lavcodec mpeg-4
-           ':vbitrate=1200:' +             # Change lower/higher, bitrate
-           'keyint=30 ' +                  # Keyframe every 10 secs, change?
-           '-oac mp3lame -lameopts ' +     # Use Lame for MP3 encoding, must be enabled in mencoder!
-           'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
-           '-ffourcc divx ' +              # Force 'divx' ident, better compat.
-           '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
-           '-o %(filename)s')         # Filled in by Freevo
-
 
 #
 # FREQUENCY_TABLE - This is only used when Freevo changes the channel natively.
@@ -1308,9 +1251,6 @@ FREQUENCY_TABLE = {
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
 # 
-#
-# Timedependent channels:
-#
 # The TV_CHANNELS-list can look like this:
 #
 # TV_CHANNELS = [('21', 'SVT1',              'E5'),
@@ -1318,19 +1258,7 @@ FREQUENCY_TABLE = {
 #                ('26', 'TV3',               'E10'),
 #                ('27', 'TV4',               'E6'),
 #                ('10', 'Kanal 5',           'E7'),
-#                ('60', 'Fox Kids',          'E8', ('1234567','0600','1659')),
-#                ('16', 'TV6',               'E8', ('1234567','1700','2359'), 
-#                                                  ('1234567','0000','0300')),
 #                ('14', 'MTV Europe',        'E11') ]
-#
-# As you can see the list takes optional tuples:
-# ( 'DAYS', 'START','END')
-#
-# 1234567 in days means all days.
-# 12345 would mean monday to friday.
-#
-# It will display "Fox Kids" from 06:00 to 16:59 and "TV6" from 17:00 to 03:00. 
-# 03:00 to 06:00 it won't be displayed at all.
 #
 
 TV_CHANNELS = []
@@ -1341,6 +1269,13 @@ TV_CHANNELS = []
 # to explicitly remove from Freevo.
 
 TV_CHANNELS_EXCLUDE = []
+
+# Default device for TV_CHANNELS
+# Set to a device group like dvb, tv or ivtv or a special device like
+# dvb0 or dvb1. Set to None for auto detection
+
+TV_DEFAULT_DEVICE = None
+
 
 
 # Program to grab xmltv listings. To get a grabber, you need to download

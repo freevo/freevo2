@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/12/05 13:01:13  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.13  2004/11/13 16:08:27  dischi
 # remove some old code from tv, some tv plugins do not work anymore
 #
@@ -99,18 +102,6 @@ def progRunning(prog):
     if prog.start <= now and prog.stop >= now:
         return True
     return False
-
-
-def getProgFilename(prog):
-    filename_array = { 'progname': String(prog.title),
-                       'title'   : String(prog.sub_title) }
-
-    filemask = config.TV_RECORDFILE_MASK % filename_array
-    filemask = time.strftime(filemask, time.localtime(prog.start))
-    filename = os.path.join(config.TV_RECORD_DIR, 
-                            progname2filename(filemask).rstrip(' -_:') + 
-                            config.TV_RECORDFILE_SUFFIX)
-    return filename
 
 
 def minToTOD(min):

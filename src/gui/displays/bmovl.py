@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/12/05 13:01:10  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.6  2004/11/20 18:23:01  dischi
 # use python logger module for debug
 #
@@ -72,11 +75,13 @@ class Display(BmovlCanvas):
             print 'THIS IS A TEST, DO NOT USE ANYTHING EXCEPT MENUS'
             print
             self.mplayer_args = "-subfont-text-scale 15 -sws 2 -vf scale=%s:-2,"\
-                                "expand=%s:%s,bmovl=1:0:/tmp/bmovl "\
+                                "expand=%s:%s,bmovl=1:0:/tmp/bmovl-%s "\
                                 "-loop 0 -font /usr/share/mplayer/fonts/"\
                                 "font-arial-28-iso-8859-2/font.desc" % \
                                 ( config.CONF.width, config.CONF.width,
-                                  config.CONF.height )
+                                  config.CONF.height, os.getpid() )
+            if not os.path.exists('/tmp/bmovl-%s' % os.getpid()):
+                os.mkfifo('/tmp/bmovl-%s' % os.getpid())
             self.child = None
             self.restart()
         BmovlCanvas.__init__(self, size)
@@ -93,7 +98,7 @@ class Display(BmovlCanvas):
                   [config.OSD_BACKGROUND_VIDEO]
             self.child = childapp.Instance( arg, stop_osd = 0 )
             if hasattr(self, 'fifo') and not self.fifo:
-                self.fifo = os.open('/tmp/bmovl', os.O_WRONLY)
+                self.fifo = os.open('/tmp/bmovl-%s' % os.getpid(), os.O_WRONLY)
                 log.info('rebuild bmovl')
                 self.rebuild()
 

@@ -87,6 +87,7 @@ class IVTVCard(TVCard):
 
 class DVBCard:
     def __init__(self, number):
+        self.number  = number
         self.adapter = '/dev/dvb/adapter' + number
         self.number = number
         INFO_ST = '128s10i'
@@ -110,24 +111,25 @@ class DVBCard:
         log.debug('register dvb device %s' % self.adapter)
 
 
-# auto-load TV_SETTINGS:
+# auto-load TV_CARDS:
+log.info('Detecting TV cards.')
 tvn = 0
 ivtvn = 0
 for i in range(10):
     if os.uname()[0] == 'FreeBSD':
         if os.path.exists('/dev/bktr%s' % i):
             key = 'tv%s' % i
-            config.TV_SETTINGS[key] = TVCard
-            config.TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
-            config.TV_SETTINGS[key].driver = 'bsdbt848'
-            config.TV_SETTINGS[key].input = 1
+            config.TV_CARDS[key] = TVCard
+            config.TV_CARDS[key].vdev = '/dev/bktr%s' % i
+            config.TV_CARDS[key].driver = 'bsdbt848'
+            config.TV_CARDS[key].input = 1
             log.debug('BSD TV card detected as %s' % key)
 
         continue
 
     if os.path.isdir('/dev/dvb/adapter%s' % i):
         try:
-            config.TV_SETTINGS['dvb%s' % i] = DVBCard
+            config.TV_CARDS['dvb%s' % i] = DVBCard
             log.debug('DVB card detected as dvb%s' % i)
         except OSError:
             # likely no device attached
@@ -159,25 +161,27 @@ for i in range(10):
         if type == 'ivtv':
             key = '%s%s' % (type,ivtvn)
             log.debug('IVTV card detected as %s' % key)
-            config.TV_SETTINGS[key]  = IVTVCard
+            config.TV_CARDS[key]  = IVTVCard
             if ivtvn != i:
-                config.TV_SETTINGS[key].vdev = vdev
+                config.TV_CARDS[key].vdev = vdev
             ivtvn = ivtvn + 1
 
         else:
             # Default to 'tv' type as set above.
             key = '%s%s' % (type,tvn)
             log.debug('TV card detected as %s' % key)
-            config.TV_SETTINGS[key]  = TVCard
+            config.TV_CARDS[key]  = TVCard
             if tvn != i:
-                config.TV_SETTINGS[key].vdev = vdev
+                config.TV_CARDS[key].vdev = vdev
             tvn = tvn + 1
 
-        config.TV_SETTINGS[key].driver = driver
+        config.TV_CARDS[key].driver = driver
 
-if not config.TV_DEFAULT_SETTINGS:
+
+# set default device
+if not config.TV_DEFAULT_DEVICE:
     for type in ['dvb0', 'tv0', 'ivtv0']:
-        if type in config.TV_SETTINGS.keys():
-            config.TV_DEFAULT_SETTINGS = type
+        if type in config.TV_CARDS.keys():
+            config.TV_DEFAULT_DEVICE = type[:-1]
             break
 

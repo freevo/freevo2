@@ -9,16 +9,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/12/05 13:01:12  dischi
+# delete old tv variables, rename some and fix detection
+#
 # Revision 1.17  2004/11/15 22:57:32  rshortt
 # -use util.ioctl for what we can
 # -calculate ioctl numbers instead of hardcoding them, this gets rid of future warnings
 # -add more stream types: IVTV_STREAM_VCD, IVTV_STREAM_SVCD, IVTV_STREAM_DVD_S1, IVTV_STREAM_DVD_S2.
 #
 # Revision 1.16  2004/08/13 16:17:33  rshortt
-# More work on tv settings, configuration of v4l2 devices based on TV_SETTINGS.
+# More work on tv settings, configuration of v4l2 devices based on TV_CARDS.
 #
 # Revision 1.15  2004/08/13 15:25:28  rshortt
-# Remove TV_IVTV_OPTIONS in favour of new TV_SETTINGS.
+# Remove TV_IVTV_OPTIONS in favour of new TV_CARDS.
 #
 # Revision 1.14  2004/08/12 16:52:49  rshortt
 # Work on autodetecting tv cards.

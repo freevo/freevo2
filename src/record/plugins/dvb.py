@@ -8,7 +8,7 @@ class PluginInterface(generic.PluginInterface):
 
     def __init__(self, device='dvb0', rating=0):
         self.name = device
-        self.device = config.TV_SETTINGS[device]
+        self.device = config.TV_CARDS[device]
 
 	home = os.environ[ 'HOME' ]
 	pathes = [ os.path.join( home, '.freevo' ),

@@ -144,10 +144,7 @@ class TVSettings(dict):
         number = key[-1]
         dict.__setitem__(self, key, val(number))
     
-TV_SETTINGS = TVSettings()
-
-TV_DEFAULT_SETTINGS = None
-
+TV_CARDS = TVSettings()
 
 # Internal list of all channels Freevo cares about.  This is a ChannelList
 # object that contains information from the EPGDB and TV_CHANNELS and is 
@@ -155,7 +152,7 @@ TV_DEFAULT_SETTINGS = None
 # by the tvguide, recordserver, webserver, and other helpers and is the
 # definative list of channels that Freevo cares about.
 
-TV_ALL_CHANNELS = None
+TV_CHANNELLIST = None
 
 
 #
