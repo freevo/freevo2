@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/06/06 06:51:55  dischi
+# fix prio handling
+#
 # Revision 1.55  2004/05/31 10:40:57  dischi
 # update to new callback handling in rc
 #
@@ -97,7 +100,7 @@ class ChildApp:
 
             if app[0].find('--prio=') == 0 and not config.RUNAPP:
                 try:
-                    prio = int(app[7:app.find(' ')])
+                    prio = int(app[0][7:])
                 except:
                     pass
                 app = copy.copy(app[1:])
