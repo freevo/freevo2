@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.59  2003/11/20 14:13:08  dischi
+# check for older mmpython version
+#
 # Revision 1.58  2003/11/16 17:41:04  dischi
 # i18n patch from David Sagnol
 #
@@ -570,7 +573,15 @@ class DirItem(Playlist):
             callback=pop.tick
 
         if num_changes > 0:
-            mmpython.cache_dir(mmpython_dir, callback=callback)
+            try:
+                mmpython.cache_dir(mmpython_dir, callback=callback)
+            except TypeError:
+                print
+                print 'ERROR:'
+                print 'Your mmpython version is too old, please update'
+                print
+                mmpython.cache_dir(mmpython_dir)
+
             if self.media:
                 self.media.cached = True
 
