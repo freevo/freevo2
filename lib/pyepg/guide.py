@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/10/23 16:20:07  rshortt
+# Comment out a sometimes spammy debug.
+#
 # Revision 1.4  2004/10/23 14:29:35  rshortt
 # Updates and bugfixes.  Please excuse the mass of commented code and debug.
 #
@@ -282,7 +285,7 @@ class EPGDB:
                 
 
     def get_programs(self, channels, start=0, stop=-1):
-        print 'RLS: get_programs(%s,%d,%d)' % (channels, start, stop)
+        # print 'RLS: get_programs(%s,%d,%d)' % (channels, start, stop)
         if type(channels) != ListType:
             channels = [ channels, ]
     
