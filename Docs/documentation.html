@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<!--
+
+Freevo documentation
+
+$Id$
+
+After chaging this file, please run
+   w3m -dump documentation.html > documentation.txt  
+to update the txt version as well
+
+
+-->
+
+<HTML>
+  
+  <HEAD>
+    <TITLE>Documentation - Freevo</TITLE>
+    <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+      <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+  </HEAD>
+  
+  <BODY>
+    
+    <H1 ALIGN="center">Freevo</H1>
+    
+    
+    <HR></hr>
+      
+    <H2>Table of Contents</H2>
+    
+    <HR></hr>
+    
+    <UL>
+      <LI><A HREF="../INSTALL">1. Installation</A></LI>
+      <LI><A HREF="#config">2. Configuration</A></LI>
+      <LI><A HREF="#usage">3. Usage</A></LI>
+      <UL>
+	<LI><A HREF="#usage_general">3.1 General</A></LI>
+	<LI><A HREF="#usage_tv">3.2 TV</A></LI>
+	<LI><A HREF="#usage_movie">3.3 Movies</A></LI>
+	<LI><A HREF="#usage_music">3.4 Music</A></LI>
+	<LI><A HREF="#usage_images">3.5 Images</A></LI>
+      </ul>
+      <LI><A HREF="#skin">4. Skinning</A></LI>
+    </ul>
+    
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H1><A NAME="install">1. Installation</A></H1>
+    <p>
+      See <A HREF="../INSTALL">INSTALL</a> for detailed information. If you
+      don't want to use the freevo-runtime, read <A
+	HREF="../INSTALL.deps">INSTALL.deps</a> as well
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H1><A NAME="config">2. Configuration</A></H1>
+    <p>
+      Freevos configuration is stored in the file <tt>freevo_config.py</tt> in
+      the freevo directory. You can change the variables there or better, make
+      a new file called <tt>local_conf.py</tt> in the same directory and put
+      all variables you want to change in there.</p>
+    <p>e.g.: you want to set the audio device for mplayer to alsa9, just put
+      <tt>MPLAYER_AO_DEV = 'alsa9'</tt> in <tt>local_conf.py</tt>. 
+    </p>
+    <p>
+      Check the config file carefully, most people will change the following
+      variables:
+      <br></br>
+      <table>
+	<tr>
+	  <td><tt>DIR_MOVIES</tt></td>
+	  <td>Directories where your movies are</td></tr>
+	<tr>
+	  <td><tt>DIR_MP3</tt></td>
+	  <td>Directories where your audio files (mp3, ogg) are</td></tr>
+	<tr>
+	  <td><tt>DIR_IMAGES</tt></td>
+	  <td>Directories where your images are</td></tr>
+	<tr>
+	  <td><tt>RC_CMDS</tt></td>
+	  <td>Comands for your remote control. Check <tt>/etc/lircd.conf</tt>
+	    for the button names of your remote</td></tr>
+      </table>
+      <br></br>
+      Also check the mplayer section to specify the audio device and special
+      paramter for mplayer.
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H1><A NAME="usage">3. Usage</A></H1>
+    <H2><A NAME="usage_general">3.1 General</A></H2>
+    <h3>3.2 Navigation</h3>
+    <p>
+      If you use a keyboard as control device, please press "h" to get the
+      keyboard mappings.
+    </p>
+    <p>
+      You can use UP and DOWN to navigate in the menu, SELECT selects the
+      current item. You can use LEFT and RIGHT to move to the top/bottom of the
+      item list currently displayed. If you press the key again, the list of
+      current shown items will scoll up or down if there are more items in this
+      menu as the menu can display. Use MENU to get to the MAIN MENU, EXIT to
+      go one menu back.
+    </p>
+
+    <h3>3.3 Images</h3>
+    <p>
+      You can specify images for all menu items. For movies, music and images
+      please read the according section in this documentation. For folders you
+      can put a file called <tt>cover.jpg</tt> or <tt>cover.png</tt> inside the
+      folder and this image will be used in the parent menu for this folder. 
+    </p>
+    <p>
+      The size of the image depends on the current type of the menu. For movies
+      you have something like DVD covers or movie poster, for audio a cd
+      cover. So the image will be resized to 280x200 for movies, 200x200 for
+      audio and 200x160 for images. This sizes will also be used for the
+      directory images. You can change the sizes by changing the XML file (see
+      <a href="#skin">Skinning</a> for more details).
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H2><A NAME="usage_tv">3.2 TV</A></H2>
+    <h3>3.2.1 General</h3>
+    <h3>3.2.2 XMLTV</h3>
+    <p>
+      Freevo can use the XMLTV format for TV listings. Please read the file
+      <A HREF="XMLTV">XMLTV</a> for detailed information.
+    </p>
+    <p>
+      German users don't need XMLTV, just start
+      <pre>
+wget http://yasd.cc/xmltv/tv_`date +%Y%m%d`.xml.gz --output-document=- | gzip -d &lt; /tmp/TV.xml</pre>
+      to get the listing for today and set <tt>TV_CHANNELS</tt> in
+      <tt>local_conf.py</tt> to the station you have.
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H2><A NAME="usage_movie">3.3 Movies</A></H2>
+    <h3>3.3.1 General</h3>
+    <h4>DVD/VCD/SVCD/CD support</h4>
+    <p>
+      Freevo shows all you rom drives in the MOVIE MAIN MENU (set the variable
+      <tt>ROM_DRIVES</tt> in the config file). You don't need to mount the
+      disc, freevo will automaticly mount and umount the drive. After you
+      insert a new disc, the MAIN MENU will update. You have complete control
+      over your drive, the EJECT button on the drive should work all the time,
+      except when you play a file from the disc and when you browse the disc
+      with freevo. 
+    </p>
+
+    <h3>3.3.2 Movie images</h3>
+    <p>
+      You can drop an image file with the same basename as the
+      movie into the folder and this image will be used for this
+      movie. The same feature will be added for mp3 in the future. 
+    </p>
+    <p>
+      Example: movie.png will be used for movie.avi
+    </p>
+    <p>
+      There is also a generic way for images of tv shows.
+      Recordings for tv shows have a common name scheme. If you
+      drop an image with the name of the show into the tv show
+      image directory, this image will be taken. The name of the
+      image _must_ be lower case. You can specify a directory for
+      tv show images in freevo_config.py, the default is
+    </p>
+    <p>
+      <tt>TV_SHOW_IMAGES = "tv-show-images/"</tt>
+    </p>
+    <p>
+      Example: if you have tv-show-images/show.png, this image will
+      be used for "Show 2x10 - A cool episode.avi"
+    </p>
+
+    <h3>3.3.4 XML files for movies</h3>
+    <p>
+      A more complex way is the XML support for movies. The XML
+      file is something like a link to a movie. The movie can be on
+      your harddisc, on cdrom or even a DVD or (S)VCD. The XML file
+      contains the title, the image and a list of files. You can
+      use imdb.py in freevos helpers directory to create these XML
+      files.
+    </p>
+    <p>
+      If you store the id of the DVD/VCD/SVCD/CD in the XML file (use --add-id
+      as parameter for imdb.py). Freevo will display the title and the image in
+      the MOVIE MENU menu when you insert the disc. The XML files for this
+      feature are searched in <tt>DIR_MOVIES</tt> and in
+      <tt>MOVIE_DATA_DIR</tt>. 
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H2><A NAME="usage_music">3.4 Music</A></H2>
+    <p>
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H2><A NAME="usage_images">3.5 Images</A></H2>
+    <h3>3.5.1 General</h3>
+    <h4>Navigation</h4>
+    <p>
+      If you view an image you can use UP and DOWN to view the next/prev
+      image. LEFT and RIGHT rotates the image. You can press RECORD on rotated
+      JPEG images and the image will be stored with this rotation (lossless
+      transformation). By pressing DISPLAY you get some information about the
+      picture.
+    </p>
+
+
+    <!-- --------------------------------------------------------------------- -->
+    <HR></hr>
+    
+    <H1><A NAME="skin">4. Skinning</A></H1>
+
+    <h2>4.1 The default XML file</h2>
+    <p>
+      Freevo uses python files to draw the skin. The main skin
+      contains a XML file with attributes like color, font,
+      positions etc. 
+    </p>
+    <p>
+      The file skins/xml/type1/768x576.xml contains the settings for
+      the current skin for 768x576 pixel resolutions. Currently
+      there is only support for the menu and mp3 player in the XML
+      file, the image viewer is unsupported right now.
+    </p>
+    <p>
+      WARNING: 
+      the XML file depends on the python skin. Other skins may have
+      different settings and this is a new feature and maybe some
+      things will change in the future.
+    </p>
+
+    <h2>4.2 Changing the style for specific folders</h2>
+
+    <p>
+      You can have a per folder skin in freevo. The folder can
+      contain a skin.xml file with the same format as the
+      768x576.xml file. You can skip all nodes and attributes you
+      don't want to change.
+    </p>
+    <p>
+      Example: You have images or movies from your last vacation.
+      For this folder you want a specific background picture, let's
+      say a dark picture with sunset at the left side. You can now
+      change the font color to white so that you can read them,
+      move the menu to the right so that the sunset is visible all
+      the time. The title should be "Summer 2002" and not MOVIE
+      MENU or IMAGE MENU. When you move the menu to the right and
+      want to see the sunset all the time, you have no space left
+      for the small images mentioned above. So you disable
+      them. The blue selection doesn't fit the background colors,
+      so you change it to light grey.
+    </p>
+    <p>
+      The skin.xml file for this folder can look like this:
+      <pre>
+   &lt;?xml version="1.0" ?&gt;
+   &lt;freevo&gt;
+     &lt;skin&gt;
+       &lt;menu&gt;
+         &lt;bgbitmap&gt;sunset.png&lt;/bgbitmap&gt;
+         &lt;title&gt;
+           &lt;font color="0xffffff"/&gt;
+           &lt;text&gt;Summer 2002&lt;/text&gt;
+         &lt;/title&gt;
+         &lt;items x="260"&gt;
+           &lt;font color="0xffffff"&gt;
+           &lt;selection length="453" color="0xcccccc"/&gt;
+         &lt;/items&gt;
+         &lt;cover&gt;
+           &lt;movie visible="no"/&gt;
+           &lt;image visible="no"/&gt;
+         &lt;/cover&gt;
+         &lt;submenu&gt;
+           &lt;selection color="0xcccccc"/&gt;
+         &lt;/submenu&gt;
+       &lt;/menu&gt;
+     &lt;/skin&gt;
+   &lt;/freevo&gt;
+      </pre>
+    </p>
+
+    <h2>4.3 CD-ROM support</h2>
+    <p>
+      Don't put a skin.xml file on a cd. The format may change. The
+      best way to customize a skin for a cd is a directory on your
+      harddisc with links or IMDB XML files. I'm working on a way
+      to associate a cd based on it's label to a skin.
+    </p>
+
+    <h2>4.4 Python skins</h2>
+    <p>
+      If you don't like the current skin at all, you can write your own skin in
+      python and you have all the freedom you want in designing the look of
+      freevo. Please take a look at skin.py to get the needed callbacks your
+      skin needs.
+    </p>
+  </body>
+</html>
