@@ -37,7 +37,6 @@ import logging
 
 # freevo imports
 import config
-import util.tv_util as tv_util
 import record.client as rc
 from www.base import HTMLResource, FreevoResource
 
@@ -110,12 +109,12 @@ class SearchResource(FreevoResource):
                 fv.tableCell(p.title, 'class="'+status+'" colspan="1"')
                 fv.tableCell(p.subtitle, 'class="'+status+'" colspan="1"')
     
-                if p.description == u'':
+                if Unicode(p.description) == u'':
                     cell = \
                      _('Sorry, the program description for %s is unavailable.')\
                      % ('<b>'+p.title+'</b>')
                 else:
-                    cell = p.description
+                    cell = Unicode(p.description)
 
                 fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
