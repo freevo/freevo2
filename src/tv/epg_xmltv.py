@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/02/06 20:54:26  dischi
+# fix for undefined timezone
+#
 # Revision 1.41  2004/02/05 19:26:42  dischi
 # fix unicode handling
 #
@@ -382,13 +385,13 @@ def load_guide():
 # The format is either one of these two:
 # '20020702100000 CDT'
 # '200209080000 +0100'
-def timestr2secs_utc(str):
+def timestr2secs_utc(timestr):
     # This is either something like 'EDT', or '+1'
     try:
-        tval, tz = str.split()
+        tval, tz = timestr.split()
     except ValueError:
-        # The time value couldn't be decoded
-        raise EPG_TIME_EXC
+        tval = timestr
+        tz   = str(-time.timezone/3600)
 
     if tz == 'CET':
         tz='+1'
@@ -419,10 +422,10 @@ def timestr2secs_utc(str):
         # this bug is left in for someone else to solve.
 
         try:
-            secs = time.mktime(strptime.strptime(str, xmltv.date_format))
+            secs = time.mktime(strptime.strptime(timestr, xmltv.date_format))
         except ValueError:
-            str  = str.replace('EST', '')
-            secs = time.mktime(strptime.strptime(str, xmltv.date_format))
+            timestr = timestr.replace('EST', '')
+            secs    = time.mktime(strptime.strptime(timestr, xmltv.date_format))
     return secs
 
 
