@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/08/24 05:03:36  gsbarbieri
+# List empty roms in video|audio menus.
+#
 # Revision 1.14  2003/08/23 19:42:09  dischi
 # make a config option HIDE_UNUSABLE_DISCS
 #
@@ -116,8 +119,8 @@ class MediaMenu(Item):
 
         if config.HIDE_UNUSABLE_DISCS:
             dir_types = {
-                'audio': [ 'dir', 'audiocd', 'audio' ],
-                'video': [ 'dir', 'video', 'vcd', 'dvd' ],
+                'audio': [ 'dir', 'audiocd', 'audio', None ],
+                'video': [ 'dir', 'video', 'vcd', 'dvd', None ],
                 'image': [ 'dir', None ],
                 'games': [ 'dir', None ],
                 }
