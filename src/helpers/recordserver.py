@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/11 21:24:04  outlyer
+# Move most of the verbose logging into "DEBUG" since logs were growing at
+# a drastic rate ( > 250k per hour)
+#
 # Revision 1.6  2003/09/08 19:58:21  dischi
 # run servers in endless loop in case of a crash
 #
@@ -124,11 +128,11 @@ class RecordServer(xmlrpc.XMLRPC):
                     log.debug('Got ScheduledRecordings (version %s).' % file_ver)
     
         if not scheduledRecordings:
-            log.debug('GET: making a new ScheduledRecordings')
+            if DEBUG: log.debug('GET: making a new ScheduledRecordings')
             scheduledRecordings = ScheduledRecordings()
             self.saveScheduledRecordings(scheduledRecordings)
     
-        log.debug('ScheduledRecordings has %s items.' % len(scheduledRecordings.programList))
+        if DEBUG: log.debug('ScheduledRecordings has %s items.' % len(scheduledRecordings.programList))
     
         return scheduledRecordings
     
@@ -161,7 +165,7 @@ class RecordServer(xmlrpc.XMLRPC):
     
         for chan in guide.chan_list:
             if prog.channel_id == chan.id:
-                log.debug('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid))
+                if DEBUG: log.debug('scheduleRecording: prog.channel_id="%s" chan.id="%s" chan.tunerid="%s"' % (prog.channel_id, chan.id, chan.tunerid))
                 prog.tunerid = chan.tunerid
     
         scheduledRecordings = self.getScheduledRecordings()
@@ -200,7 +204,7 @@ class RecordServer(xmlrpc.XMLRPC):
     def findProg(self, chan=None, start=None):
         global guide
 
-        log.debug('findProg: %s, %s' % (chan, start))
+        if DEBUG: log.debug('findProg: %s, %s' % (chan, start))
 
         if not chan or not start:
             return (FALSE, 'no chan or no start')
@@ -209,10 +213,10 @@ class RecordServer(xmlrpc.XMLRPC):
 
         for ch in guide.chan_list:
             if chan == ch.id:
-                log.debug('CHANNEL MATCH')
+                if DEBUG: log.debug('CHANNEL MATCH')
                 for prog in ch.programs:
                     if start == '%s' % prog.start:
-                        log.debug('PROGRAM MATCH')
+                        if DEBUG: log.debug('PROGRAM MATCH')
                         return (TRUE, prog)
 
         return (FALSE, 'prog not found')
@@ -221,12 +225,12 @@ class RecordServer(xmlrpc.XMLRPC):
     def findMatches(self, find=None):
         global guide
 
-        log.debug('findMatches: %s' % find)
+        if DEBUG: log.debug('findMatches: %s' % find)
     
         matches = []
 
         if not find:
-            log.debug('nothing to find')
+            if DEBUG: log.debug('nothing to find')
             return []
 
         self.updateGuide()
@@ -240,7 +244,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 if prog.stop < now:
                     continue
                 if regex.match(prog.title) or regex.match(prog.desc):
-                    log.debug('PROGRAM MATCH: %s' % prog)
+                    if DEBUG: log.debug('PROGRAM MATCH: %s' % prog)
                     matches.append(prog)
 
         if matches:
@@ -257,7 +261,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         
     def checkToRecord(self):
-        log.debug('in checkToRecord')
+        if DEBUG: log.debug('in checkToRecord')
         rec_cmd = None
         rec_prog = None
         cleaned = None
@@ -267,7 +271,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
         now = time.time()
         for prog in progs.values():
-            log.debug('checkToRecord: progloop = %s' % prog)
+            if DEBUG: log.debug('checkToRecord: progloop = %s' % prog)
 
             try:
                 recording = prog.isRecording
@@ -285,7 +289,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 if duration < 10:
                     return FALSE
 
-                log.debug('going to record: %s' % prog)
+                if DEBUG: log.debug('going to record: %s' % prog)
                 prog.isRecording = TRUE
                 prog.rec_duration = duration
                 prog.filename = tv.tv_util.getProgFilename(prog)
@@ -295,7 +299,7 @@ class RecordServer(xmlrpc.XMLRPC):
         for prog in progs.values():
             # If the program is over remove the entry.
             if prog.stop < now:
-                log.debug('found a program to clean')
+                if DEBUG: log.debug('found a program to clean')
                 cleaned = TRUE
                 del progs[tv.tv_util.getKey(prog)]
 
@@ -383,7 +387,7 @@ class RecordServer(xmlrpc.XMLRPC):
         oldprio = int(me.priority)
         newprio = oldprio + mod
     
-        log.debug('ap: mod=%s\n' % mod)
+        if DEBUG: log.debug('ap: mod=%s\n' % mod)
        
         sr = self.getScheduledRecordings()
         favs = sr.getFavorites().values()
@@ -393,24 +397,25 @@ class RecordServer(xmlrpc.XMLRPC):
             fav.priority = int(fav.priority)
     
             if fav.name == me.name:
-                log.debug('MATCH')
+                if DEBUG: log.debug('MATCH')
                 fav.priority = newprio
                 log.debug('moved prio of %s: %s => %s\n' % (fav.name, oldprio, newprio))
                 continue
             if mod < 0:
                 if fav.priority < newprio or fav.priority > oldprio:
-                    log.debug('fp: %s, old: %s, new: %s\n' % (fav.priority, oldprio, newprio))
-                    log.debug('skipping: %s\n' % fav.name)
+                    if DEBUG:
+                        log.debug('fp: %s, old: %s, new: %s\n' % (fav.priority, oldprio, newprio))
+                        log.debug('skipping: %s\n' % fav.name)
                     continue
                 fav.priority = fav.priority + 1
-                log.debug('moved prio of %s: %s => %s\n' % (fav.name, fav.priority-1, fav.priority))
+                if DEBUG: log.debug('moved prio of %s: %s => %s\n' % (fav.name, fav.priority-1, fav.priority))
                 
             if mod > 0:
                 if fav.priority > newprio or fav.priority < oldprio:
-                    log.debug('skipping: %s\n' % fav.name)
+                    if DEBUG: log.debug('skipping: %s\n' % fav.name)
                     continue
                 fav.priority = fav.priority - 1
-                log.debug('moved prio of %s: %s => %s\n' % (fav.name, fav.priority+1, fav.priority))
+                if DEBUG: log.debug('moved prio of %s: %s => %s\n' % (fav.name, fav.priority+1, fav.priority))
     
         sr.setFavoritesList(favs)
         self.saveScheduledRecordings(sr)
@@ -678,7 +683,7 @@ class RecordServer(xmlrpc.XMLRPC):
 
     def startMinuteCheck(self):
         next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
-        log.debug('top of the minute in %s seconds' % next_minute)
+        if DEBUG: log.debug('top of the minute in %s seconds' % next_minute)
         reactor.callLater(next_minute, self.minuteCheck)
 
 
