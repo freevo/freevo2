@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/23 23:19:39  rshortt
+# When selected these objects now use skin properties as well.
+#
 # Revision 1.10  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -148,15 +151,16 @@ class GUIObject:
         self.skin = skin.get_singleton()
         self.zir  = ZIndexRenderer.get_singleton()
 
-        self.label      = None
-        self.icon       = None
-        self.bg_surface = None
-        self.bg_image   = None
-        self.parent     = None
-        self.children   = []
-        self.enabled    = 1
-        self.selected   = 0
-        self.visible    = 1
+        self.label          = None
+        self.selected_label = None
+        self.icon           = None
+        self.bg_surface     = None
+        self.bg_image       = None
+        self.parent         = None
+        self.children       = []
+        self.enabled        = 1
+        self.selected       = 0
+        self.visible        = 1
 
         self.left     = left
         self.top      = top

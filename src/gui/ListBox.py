@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/23 23:19:39  rshortt
+# When selected these objects now use skin properties as well.
+#
 # Revision 1.5  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -123,32 +126,32 @@ class ListBox(RegionScroller):
         # I am commenting a lot of this out until I get alpha
         # transparencies working correctly.
         if not self.bg_color:
-            self.bg_color = Color(self.osd.default_bg_color)
-            # if button_default.rectangle.bgcolor:
-            #     self.bg_color = Color(button_default.rectangle.bgcolor)
-            # else:
-            #     self.bg_color = Color(self.osd.default_bg_color)
+            # self.bg_color = Color(self.osd.default_bg_color)
+            if button_default.rectangle.bgcolor:
+                self.bg_color = Color(button_default.rectangle.bgcolor)
+            else:
+                self.bg_color = Color(self.osd.default_bg_color)
 
         if not self.fg_color:
-            self.fg_color = Color(self.osd.default_fg_color)
-            # if button_default.font.color:
-            #     self.fg_color = Color(button_default.font.color)
-            # else:
-            #     self.fg_color = Color(self.osd.default_fg_color)
+            # self.fg_color = Color(self.osd.default_fg_color)
+            if button_default.font.color:
+                self.fg_color = Color(button_default.font.color)
+            else:
+                self.fg_color = Color(self.osd.default_fg_color)
 
         if not self.selected_bg_color:
-            self.selected_bg_color = Color((0,255,0,128))
-            # if button_selected.rectangle.bgcolor:
-            #     self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
-            # else:
-            #     self.selected_bg_color = Color((0,255,0,128))
+            # self.selected_bg_color = Color((0,255,0,128))
+            if button_selected.rectangle.bgcolor:
+                self.selected_bg_color = Color(button_selected.rectangle.bgcolor)
+            else:
+                self.selected_bg_color = Color((0,255,0,128))
 
         if not self.selected_fg_color:
-            self.fg_color = Color(self.osd.default_fg_color)
-            # if button_selected.font.color:
-            #     self.selected_fg_color = Color(button_selected.font.color)
-            # else:
-            #     self.selected_fg_color = Color(self.osd.default_fg_color)
+            # self.fg_color = Color(self.osd.default_fg_color)
+            if button_selected.font.color:
+                self.selected_fg_color = Color(button_selected.font.color)
+            else:
+                self.selected_fg_color = Color(self.osd.default_fg_color)
 
 
         if self.show_h_scrollbar != 0 and not self.show_h_scrollbar:
@@ -164,8 +167,9 @@ class ListBox(RegionScroller):
 
         self.h_margin                 = 2
         self.v_margin                 = 2
+        self.items_height             = 25
         self.x_scroll_interval        = 25
-        self.y_scroll_interval        = 25
+        self.y_scroll_interval        = self.items_height
         if not self.items: self.items = []
 
         if self.items: self.set_items(self.items)
@@ -242,7 +246,7 @@ class ListBox(RegionScroller):
             if not value: 
                 value = text
 
-            item = ListItem(text, value, self.width, None, 
+            item = ListItem(text, value, self.width, self.items_height, 
                             self.bg_color, self.fg_color, 
                             self.selected_bg_color, self.selected_fg_color)
 
@@ -318,7 +322,6 @@ class ListBox(RegionScroller):
 
     def destroy(self):
         for item in self.items:
-            print 'LB.destroy: destroying %s' % item
             item.destroy()
             item = None
         self.items = []

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/23 23:19:39  rshortt
+# When selected these objects now use skin properties as well.
+#
 # Revision 1.4  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -159,13 +162,23 @@ class Button(GUIObject):
         else:
             raise TypeError, text
 
-        # going to support sel_font soon!
         if button_default.font:       
-            self.set_font(button_default.font.name, 
+            self.set_font(self.label,
+                          button_default.font.name, 
                           button_default.font.size, 
                           Color(button_default.font.color))
         else:
             self.set_font(config.OSD_DEFAULT_FONTNAME,
+                          config.OSD_DEFAULT_FONTSIZE)
+
+        if button_selected.font:       
+            self.set_font(self.selected_label,
+                          button_selected.font.name, 
+                          button_selected.font.size, 
+                          Color(button_selected.font.color))
+        else:
+            self.set_font(self.selected_label,
+                          config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
 
         self.set_v_align(Align.BOTTOM)
@@ -189,7 +202,11 @@ class Button(GUIObject):
 
         self.osd.screen.blit(box, self.get_position())
 
-        if self.label:  self.label.draw()
+        if self.selected:
+            self.selected_label.draw()
+        else:
+            self.label.draw()
+
         if self.border: self.border.draw()
 
     
@@ -215,8 +232,20 @@ class Button(GUIObject):
         else:
             self.label.set_text(text)
 
+        if not self.selected_label:
+            self.selected_label = Label(text)
+            self.selected_label.set_parent(self)
+            # XXX Set the background color to none so it is transparent.
+            self.selected_label.set_background_color(None)
+            self.selected_label.set_h_margin(self.h_margin)
+            self.selected_label.set_v_margin(self.v_margin)
+        else:
+            self.selected_label.set_text(text)
+
         self.label.set_v_align(Align.MIDDLE)
         self.label.set_h_align(Align.CENTER)
+        self.selected_label.set_v_align(Align.MIDDLE)
+        self.selected_label.set_h_align(Align.CENTER)
 
 
     def get_font(self):
@@ -226,16 +255,13 @@ class Button(GUIObject):
         return (self.label.font.filename, self.label.font.ptsize)
 
 
-    def set_font(self, file, size, color):
+    def set_font(self, label, file, size, color):
         """
         Set the font.
 
         Just hands the info down to the label. Might raise an exception.
         """
-        if self.label:
-            self.label.set_font(file, size, color)
-        else:
-            raise TypeError, file
+        label.set_font(file, size, color)
 
 
     def set_border(self, bs):
