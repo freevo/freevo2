@@ -9,6 +9,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/08/18 21:23:29  tfmalt
+# o Added a comment when trying to figure out config.py <-> movie_xml.py
+#   dependencies.
+#
 # Revision 1.3  2002/08/14 02:39:45  krister
 # Polished the debug output.
 #
@@ -47,6 +51,7 @@
 
 
 import os
+# XXX Dirk, this is _really circular. Any other way you can do it? :^)
 import config
 import util
 
