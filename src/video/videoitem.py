@@ -454,10 +454,7 @@ class VideoItem(MediaItem):
         """
         create a thumbnail as image icon
         """
-        pop = PopupBox(text=_('Please wait....'))
-        pop.show()
         util.videothumb.snapshot(self.filename)
-        pop.destroy()
         if menuw.menustack[-1].selected != self:
             menuw.back_one_menu()
 
