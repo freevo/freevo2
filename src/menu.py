@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2004/10/08 20:20:17  dischi
+# remove unneeded eventhandler calls
+#
 # Revision 1.108  2004/08/26 15:31:15  dischi
 # improve menu/menuapplication handling
 #
@@ -170,7 +173,6 @@ class MenuWidget(Application):
     def __init__(self, engine=None):
         Application.__init__(self, 'menu widget', 'menu', False, True)
         self.menustack = []
-        self.eventhandler_plugins = None
         if not engine:
             engine = gui.AreaHandler('menu', ('screen', 'title', 'subtitle', 'view',
                                               'listing', 'info'))
@@ -429,9 +431,6 @@ class MenuWidget(Application):
                 elif event == MENU_RIGHT:
                     event = MENU_PAGEDOWN
             
-        if self.eventhandler_plugins == None:
-            self.eventhandler_plugins = plugin.get('daemon_eventhandler')
-
         if event == MENU_GOTO_MAINMENU:
             self.goto_main_menu()
             return True
@@ -457,22 +456,11 @@ class MenuWidget(Application):
             if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
                 if menu.selected.eventhandler(event = event, menuw=self):
                     return True
-            for p in self.eventhandler_plugins:
-                if p.eventhandler(event=event, menuw=self):
-                    return True
-            return True
+            return False
 
         # handle menu not instance of class Menu
         if not isinstance(menu, Menu):
-            if self.eventhandler_plugins == None:
-                self.eventhandler_plugins = plugin.get('daemon_eventhandler')
-
-            for p in self.eventhandler_plugins:
-                if p.eventhandler(event=event, menuw=self):
-                    return True
-
-            _debug_('no eventhandler for event %s' % event, 2)
-            return True
+            return False
 
         if event == MENU_UP:
             menu.change_selection(-menu.cols)
@@ -601,11 +589,6 @@ class MenuWidget(Application):
             if menu.selected.eventhandler(event = event, menuw=self):
                 return True
             
-        for p in self.eventhandler_plugins:
-            if p.eventhandler(event=event, menuw=self):
-                return True
-
-        _debug_('no eventhandler for event %s' % str(event), 2)
         return False
 
 
