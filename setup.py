@@ -22,7 +22,8 @@ check_libs((('mmpython', 'http://www.sf.net/projects/mmpython' ),
 
 
 # check if everything is in place
-if not os.path.isdir('./Docs/installation/html'):
+if (not os.path.isdir('./Docs/installation/html')) and \
+   (len(sys.argv) < 2 or sys.argv[1].lower() not in ('i18n', '--help', '--help-commands')):
     print 'Docs/howto not found. Looks like you are using the CVS version'
     print 'of Freevo. Please run ./autogen.sh first'
     sys.exit(0)
