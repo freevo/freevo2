@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2003/09/21 13:16:35  dischi
+# small bugfix
+#
 # Revision 1.62  2003/09/13 10:08:21  dischi
 # i18n support
 #
@@ -208,7 +211,7 @@ class MenuWidget(GUIObject):
             self.visible = 0
             self.skin.clear()
         
-    def delete_menu(self, arg=None, menuw=None):
+    def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
@@ -216,7 +219,7 @@ class MenuWidget(GUIObject):
             if not isinstance(menu, Menu):
                 return TRUE
             
-            if menu.reload_func:
+            if menu.reload_func and allow_reload:
                 reload = menu.reload_func()
                 if reload:
                     self.menustack[-1] = reload
@@ -362,6 +365,9 @@ class MenuWidget(GUIObject):
     def eventhandler(self, event):
         menu = self.menustack[-1]
 
+        if self.eventhandler_plugins == None:
+            self.eventhandler_plugins = plugin.get('daemon_eventhandler')
+
         if event == MENU_GOTO_MAINMENU:
             self.goto_main_menu()
             return
@@ -385,6 +391,14 @@ class MenuWidget(GUIObject):
         if not self.menu_items:
             if event in ( MENU_SELECT, MENU_SUBMENU, MENU_PLAY_ITEM):
                 self.back_one_menu()
+                return
+            menu = self.menustack[-2]
+            if hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
+                if menu.selected.eventhandler(event = event, menuw=self):
+                    return
+            for p in self.eventhandler_plugins:
+                if p.eventhandler(event=event, menuw=self):
+                    return
             return
             
         if not isinstance(menu, Menu):
@@ -591,9 +605,6 @@ class MenuWidget(GUIObject):
             if menu.selected.eventhandler(event = event, menuw=self):
                 return
             
-        if self.eventhandler_plugins == None:
-            self.eventhandler_plugins = plugin.get('daemon_eventhandler')
-
         for p in self.eventhandler_plugins:
             if p.eventhandler(event=event, menuw=self):
                 return
