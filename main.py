@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2002/08/13 01:21:42  krister
+# Hide output from the shutdown commands.
+#
 # Revision 1.46  2002/08/12 11:36:33  dischi
 # removed some unneeded code
 #
@@ -134,11 +137,11 @@ def shutdown(menuw=None, arg=None):
     # XXX kludge to signal startup.py to abort
     os.system('touch /tmp/freevo-shutdown') 
     # XXX kludge to shutdown the runtime version (linker)
-    os.system('killall -9 freevo_rt/ld-linux.so.2') 
+    os.system('killall -9 freevo_rt/ld-linux.so.2 2&> /dev/null') 
     # XXX kludge to shutdown the runtime version (no linker)
-    os.system('killall -9 freevo_rt/freevo_rt') 
+    os.system('killall -9 freevo_rt/freevo_rt 2&> /dev/null') 
     # XXX Kludge to shutdown if started with "python main.py"
-    os.system('kill -9 `pgrep -f "python main.py" -d" "`') 
+    os.system('kill -9 `pgrep -f "python main.py" -d" "` 2&> /dev/null') 
 
 
 def autostart():
