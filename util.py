@@ -170,7 +170,7 @@ def proc_mount(dir):
     while(l):
         m = PROC_MOUNT_REGEXP(l)
         if m:
-            if m.group(2) == dir:
+            if m.group(2) == dir and m.group(1).encode() != 'none':
                 f.close()
                 return m.group(1).encode()
         l = f.readline()
