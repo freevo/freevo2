@@ -56,7 +56,8 @@ def make_schedule (b=None):
 
 
     len_secs = int(b.stop-b.start)
-    temp = len_secs - 1
+    len_secs = len_secs - 10
+    temp = len_secs
     hour = int(temp/3600)
     minu = int(temp/60)
     seco = int(temp%60)

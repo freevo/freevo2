@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/07/12 06:23:44  outlyer
+# Fix the gap for consecutive recordings. Only "timecode" formats were getting
+# the buffer time before, now both timecode and seconds type recording get the
+# 10 second buffer.
+#
 # Revision 1.22  2003/07/11 20:21:15  outlyer
 # Actually, 10 seconds makes more sense than 60.
 #
@@ -323,6 +328,7 @@ def set_schedule(arg=None, menuw=None):
  
     # Length in seconds
     len_secs = int(recinfo.length.selected) * 60
+    len_secs = len_secs-10
 
     # Recording filename
     rec_name = recinfo.program_name.selected
@@ -338,10 +344,9 @@ def set_schedule(arg=None, menuw=None):
     rec_name = os.path.join(config.DIR_RECORD, rec_name)
 
     # Calculate timecode for mp1e and similar encoders
-    temp = len_secs - 10
-    hour = int(temp/3600)
-    minu = int(temp/60)
-    seco = int(temp%60)
+    hour = int(len_secs/3600)
+    minu = int(len_secs/60)
+    seco = int(len_secs%60)
     timecode_format = '%0.2i:%0.2i:%0.2i' % (hour,minu,seco)
 
     # Flexible command-line options
