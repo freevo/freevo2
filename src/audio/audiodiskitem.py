@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.20  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -58,7 +61,7 @@ class AudioDiskItem(Playlist):
         self.media = None
         self.disc_id = disc_id
         self.devicename = devicename
-        self.name = 'Unknown CD Album'
+        self.name = _('Unknown CD Album')
         
         # variables only for Playlist
         self.current_item = 0
@@ -93,7 +96,7 @@ class AudioDiskItem(Playlist):
         """
         return a list of actions for this item
         """
-        items = [ ( self.cwd, 'Browse directory' ) ]
+        items = [ ( self.cwd, _('Browse directory') ) ]
         return items
     
 

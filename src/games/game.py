@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.10  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -93,7 +96,7 @@ class Game:
 
         if not os.path.isfile(self.filename):
             osd.clearscreen()
-            osd.drawstring('File "%s" not found!' % self.filename, 30, 280)
+            osd.drawstring(_('File "%s" not found!') % self.filename, 30, 280)
             osd.update()
             time.sleep(2.0) 
             menuwidget.refresh()

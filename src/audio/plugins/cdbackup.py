@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.16  2003/09/10 18:15:11  dischi
 # o use plugin config() function to set defaults to freevo_config.py
 # o show current ripping status in itemmenu while ripping
@@ -200,8 +203,9 @@ class PluginInterface(plugin.ItemPlugin):
                     self.device = self.item.devicename
                     if DEBUG:
                         print 'devicename = %s' %self.device
-                    return [ ( self.create_backup_menu, 'Rip the CD to the hard drive',
-                               'Get CDs available for ripping') ]
+                    return [ ( self.create_backup_menu,
+                               _('Rip the CD to the hard drive'),
+                               _('Get CDs available for ripping')) ]
         except:
             print 'Error: Item is not an AudioCD'
         return []
@@ -226,18 +230,18 @@ class PluginInterface(plugin.ItemPlugin):
         items = []
 
         if config.LAME_CMD:
-            items.append(menu.MenuItem('Backup CD to hard drive in mp3 format',
+            items.append(menu.MenuItem(_('Backup CD to hard drive in mp3 format'),
                                        self.cd_backup, arg=(arg, 'mp3')))
         if config.OGGENC_CMD:
-            items.append(menu.MenuItem('Backup CD to hard drive in Ogg format',
+            items.append(menu.MenuItem(_('Backup CD to hard drive in Ogg format'),
                                        self.cd_backup, arg=(arg, 'ogg')))
         if config.FLAC_CMD:
-            items.append(menu.MenuItem('Backup CD to hard drive in FLAC format',
+            items.append(menu.MenuItem(_('Backup CD to hard drive in FLAC format'),
                                        self.cd_backup, arg=(arg, 'flac')))
-        items.append(menu.MenuItem('Backup CD to hard drive in wav format',
+        items.append(menu.MenuItem(_('Backup CD to hard drive in wav format'),
                                    self.cd_backup, arg=(arg, 'wav')))
 
-        backupmenu = menu.Menu('CD Backup', items, reload_func=self.create_backup_menu)
+        backupmenu = menu.Menu(_('CD Backup'), items, reload_func=self.create_backup_menu)
         return backupmenu
         
 

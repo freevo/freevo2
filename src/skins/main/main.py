@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.9  2003/09/07 16:02:11  dischi
 # fix hiding for idlebar
 #
@@ -164,7 +167,7 @@ class Title_Area(Skin_Area):
                     if content.type == 'item' or content.type == 'short item':
                         text = menu.table[1].title
                     else:
-                        text = 'TV GUIDE'
+                        text = _('TV GUIDE')
             except:
                 pass
             
@@ -294,7 +297,7 @@ class Splashscreen(BlankScreen):
                 image = pygame.transform.scale(image, (x1-x0, y1-y0))
                 osd.drawbitmap(image, x0, y0)
 
-            osd.drawstringframed('Starting Freevo, please wait ...',
+            osd.drawstringframed(_('Starting Freevo, please wait ...'),
                                  x0, y1-180, x1-x0, 40,
                                  osd.getfont(config.OSD_DEFAULT_FONTNAME, 20),
                                  fgcolor=0xffffff, align_h='center',
@@ -543,7 +546,7 @@ class Skin:
         rows         for the tv menu
         """
         if not object:
-            osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+            osd.drawstring(_('INTERNAL ERROR, NO MENU!'), 100, osd.height/2)
             return
         
         if type == 'tv':
@@ -611,7 +614,7 @@ class Skin:
             menu = menuw.menustack[-1]
 
             if not menu:
-                osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
+                osd.drawstring(_('INTERNAL ERROR, NO MENU!'), 100, osd.height/2)
                 return
 
             if menu.skin_settings:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.3  2003/04/24 19:56:02  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -150,7 +153,7 @@ class AbstractAudioPlayer(Singleton):
 	if xmms.is_running():
 	    globals.rc.post_event(globals.rc.RIGHT)
 	else:
-	    skin.PopupBox('File "%s" not found!' % filename)
+	    skin.PopupBox(_('File "%s" not found!') % filename)
 	    time.sleep(3.0)
 	    menuwidget.refresh()
 

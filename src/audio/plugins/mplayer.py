@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.15  2003/09/03 17:54:38  dischi
 # Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
 # doesn't exist anymore.
@@ -124,7 +127,7 @@ class MPlayer:
             network_play = 0
 
         if not os.path.isfile(filename) and not network_play:
-            return '%s\nnot found!' % os.path.basename(filename)
+            return _('%s\nnot found!') % os.path.basename(filename)
             
         # Build the MPlayer command
         mpl = '--prio=%s %s -slave %s' % (config.MPLAYER_NICE,
@@ -152,7 +155,7 @@ class MPlayer:
 
         if not self.thread.item.valid:
             # Invalid file, show an error and survive.
-            return 'Invalid audio file'
+            return _('Invalid audio file')
 
         self.thread.play_mode = self.mode
 

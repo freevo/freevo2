@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.22  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -325,7 +328,7 @@ class Playlist(Item):
 
 
 class RandomPlaylist(Playlist):
-    def __init__(self, playlist, parent):
+    def __init__(self, playlist, parent, add_args = None):
         Item.__init__(self, parent)
         self.type     = 'playlist'
 

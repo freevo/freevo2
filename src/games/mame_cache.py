@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.14  2003/09/05 20:48:34  mikeruelle
 # new game system
 #
@@ -164,7 +167,7 @@ def getMameItemInfoList(mame_files, mame_cmd):
     print "Call MAME command : %s" % mame_cmd
     # Only build the cache if it doesn't exis.
     if not os.path.isfile(config.MAME_CACHE):
-        waitmsg = PopupBox(text='Generating MAME cache, please wait.')
+        waitmsg = PopupBox(text=_('Generating MAME cache, please wait.'))
 	waitmsg.show()
         mame_ok = updateMameRomList(mame_cmd)
 	waitmsg.destroy()

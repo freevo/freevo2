@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.71  2003/09/10 19:28:41  dischi
 # add USE_NETWORK
 #
@@ -95,12 +98,30 @@ os.environ['LD_PRELOAD'] = ''
 import sys, time
 import traceback
 
-sys.path.append('.')
+
+# i18n support
+
+# First load the xml module. It's not needed here but it will mess
+# up with the domain we set (set it from freevo 4Suite). By loading it
+# first, Freevo will override the 4Suite setting to freevo
+
+from xml.utils import qp_xml
+from xml.dom import minidom
+
+# For Internationalization purpose
+# an exception is raised with Python 2.1 if LANG is unavailable.
+import gettext
+try:
+    gettext.install('freevo', os.environ['FREEVO_LOCALE'])
+except: # unavailable, define '_' for all modules
+    import __builtin__
+    __builtin__.__dict__['_']= lambda m: m
+
 
 # Gentoo runtime has some python files in runtime/python
 if os.path.exists('./runtime/python'):
     sys.path.append('./runtime/python')
-    
+
 import config
 
 import util    # Various utilities
@@ -113,7 +134,6 @@ import signal
 
 from item import Item
 import event as em
-
 
 skin    = skin.get_singleton()
 
@@ -140,7 +160,7 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     import plugin
 
     osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
+    osd.drawstring(_('shutting down...'), osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
     osd.update()
 
@@ -242,7 +262,7 @@ class MainMenu(Item):
         
         items = get_main_menu(self)
 
-        mainmenu = menu.Menu('Freevo Main Menu', items, item_types='main', umount_all = 1)
+        mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
         menuwidget.pushmenu(mainmenu)
         osd.add_app(menuwidget)
 

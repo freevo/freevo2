@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.3  2003/09/09 18:54:59  dischi
 # Add some doc
 #
@@ -147,7 +150,7 @@ class CommandOptions(PopupBox):
                  bd_width=None, vertical_expansion=1):
         
         if not text:
-            text = 'Command finished'
+            text = _('Command finished')
         
         PopupBox.__init__(self, parent, text, handler, left, top, width, height,
                           bg_color, fg_color, icon, border, bd_color, bd_width,
@@ -162,9 +165,9 @@ class CommandOptions(PopupBox):
         
         self.results.set_h_align(Align.CENTER)
         self.add_child(self.results)
-        self.results.add_item(text='OK', value='ok')
-        self.results.add_item(text='Show Stderr', value='err')
-        self.results.add_item(text='Show Stdout', value='out')
+        self.results.add_item(text=_('OK'), value='ok')
+        self.results.add_item(text=_('Show Stderr'), value='err')
+        self.results.add_item(text=_('Show Stdout'), value='out')
         self.results.toggle_selected_index(0)
         
     def eventhandler(self, event, menuw=None):
@@ -178,11 +181,11 @@ class CommandOptions(PopupBox):
                 self.destroy()
             elif selection == 'out':
                 LogScroll(os.path.join(config.LOGDIR,'command_stdout.log'),
-                          text='Stdout File').show()
+                          text=_('Stdout File')).show()
                 return
             elif selection == 'err':
                 LogScroll(os.path.join(config.LOGDIR,'command_stderr.log'),
-                          text='Stderr File').show()
+                          text=_('Stderr File')).show()
                 return
         elif event == em.INPUT_EXIT:
             self.destroy()
@@ -236,7 +239,7 @@ class CommandItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.flashpopup , 'Run Command' ) ]
+        items = [ ( self.flashpopup , _('Run Command') ) ]
         return items
 
     #  1) make running popup
@@ -259,10 +262,10 @@ class CommandItem(Item):
         message=""
         if status:
             icon='bad'
-            message='Command Failed'
+            message=_('Command Failed')
         else:
             icon='ok'
-            message='Command Completed'
+            message=_('Command Completed')
         pop.destroy()
         CommandOptions(text=message).show()
         
@@ -287,8 +290,8 @@ class CommandMainMenuItem(Item):
             cmd_item.cmd = os.path.join(config.COMMANDS_DIR, command)
             command_items += [ cmd_item ]
         if (len(command_items) == 0):
-            command_items += [menu.MenuItem('No Commands found', menuwidget.goto_prev_page, 0)]
-        command_menu = menu.Menu('Commands', command_items, reload_func=menuwidget.goto_main_menu)
+            command_items += [menu.MenuItem(_('No Commands found'), menuwidget.goto_prev_page, 0)]
+        command_menu = menu.Menu(_('Commands'), command_items, reload_func=menuwidget.goto_main_menu)
         rc.app(None)
         menuwidget.pushmenu(command_menu)
         menuwidget.refresh()
@@ -314,7 +317,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         menu_items = skin.settings.mainmenu.items
 
         item = CommandMainMenuItem()
-        item.name = 'Commands'
+        item.name = _('Commands')
         if menu_items.has_key('commands') and menu_items['commands'].icon:
             item.icon = os.path.join(skin.settings.icon_dir, menu_items['commands'].icon)
         if menu_items.has_key('commands') and menu_items['commands'].image:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.12  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -104,7 +107,7 @@ class ImageItem(Item):
         """
         return a list of possible actions on this item.
         """
-        return [ ( self.view, 'View Image' ) ]
+        return [ ( self.view, _('View Image') ) ]
 
 
     def cache(self):

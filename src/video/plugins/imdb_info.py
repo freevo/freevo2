@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/13 10:08:24  dischi
+# i18n support
+#
 # Revision 1.7  2003/08/30 12:21:13  dischi
 # small changes for the changed xml_parser
 #
@@ -61,7 +64,7 @@ class PluginInterface(plugin.ItemPlugin):
         self.item = item
         if item.type == 'video' and item.info:
             if item.mode == 'file':
-                return [ ( self.info_showdata, 'Show info for this file',
+                return [ ( self.info_showdata, _('Show info for this file'),
                            'info_show') ]
         return []
 
@@ -75,7 +78,7 @@ class PluginInterface(plugin.ItemPlugin):
         file = self.item.xml_file
         
         if not file:
-            box = AlertBox(text='There is no IMDB information for this file.')
+            box = AlertBox(text=_('There is no IMDB information for this file.'))
             box.show()
             return
 

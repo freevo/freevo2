@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.80  2003/08/31 17:14:20  dischi
 # Move delete file from VideoItem into a global plugin. Now it's also
 # possible to remove audio and image files.
@@ -264,7 +267,7 @@ class VideoItem(Item):
         if not self.filename or self.filename == '0':
             if self.mode == 'dvd':
                 if plugin.getbyname(plugin.DVD_PLAYER):
-                    items = [ (self.play, 'Play DVD'),
+                    items = [ (self.play, _('Play DVD')),
                               ( self.dvd_vcd_title_menu, 'DVD title list' ) ]
                 else:
                     items = [ ( self.dvd_vcd_title_menu, 'DVD title list' ),
@@ -272,11 +275,11 @@ class VideoItem(Item):
                     
             elif self.mode == 'vcd':
                 if plugin.getbyname(plugin.VCD_PLAYER):
-                    items = [ (self.play, 'Play VCD'),
+                    items = [ (self.play, _('Play VCD')),
                               ( self.dvd_vcd_title_menu, 'VCD title list' ) ]
                 else:
                     items = [ ( self.dvd_vcd_title_menu, 'VCD title list' ),
-                              (self.play, 'Play default track') ]
+                              (self.play, _('Play default track')) ]
 
 
         items += configure.get_items(self)
@@ -356,7 +359,7 @@ class VideoItem(Item):
                     
                     def do_tryagain():                        
                         # TODO: force to identify media instead of wait
-                        box = PopupBox( text="Wait while detecting media..." )
+                        box = PopupBox( text=_("Wait while detecting media...") )
                         box.show()
                         l=1
                         for i in range( 10 ): # 10 times
@@ -378,8 +381,8 @@ class VideoItem(Item):
                     # do_tryagain()
                         
                     
-                    ConfirmBox( text=('Media not found for file "%s".\n'+
-                                      'Please insert the media.') % file,
+                    ConfirmBox( text=(_('Media not found for file "%s".\n')+
+                                      _('Please insert the media.')) % file,
                                 handler=do_tryagain ).show()
                     
                     rc.post_event( em.PLAY_END )
@@ -395,7 +398,7 @@ class VideoItem(Item):
                 if media:
                     self.media = media
                 else:
-                    AlertBox(text='Media not found for %s track %s' % \
+                    AlertBox(text=_('Media not found for %s track %s') % \
                              (self.mode, file)).show()
                     rc.post_event(em.PLAY_END)
                     return
@@ -515,7 +518,7 @@ class VideoItem(Item):
                 file.info = self.info.tracks[title-1]
             file.info_type = 'track'
             file.filename = '%s' % title
-            file.name = 'Play Title %s' % title
+            file.name = _('Play Title %s') % title
             items += [file]
 
         moviemenu = menu.Menu(self.name, items, umount_all = 1, xml_file=self.xml_file)

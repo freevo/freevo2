@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.4  2003/08/24 06:58:18  gsbarbieri
 # Partial support for "out" icons in main menu.
 # The missing part is in listing_area, which have other changes to
@@ -64,8 +67,8 @@ class ShutdownItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.shutdown_freevo, 'Shutdown Freevo' ),
-                  ( self.shutdown_system, 'Shutdown system' ) ]
+        items = [ ( self.shutdown_freevo, _('Shutdown Freevo') ),
+                  ( self.shutdown_system, _('Shutdown system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
             items.reverse()
         return items

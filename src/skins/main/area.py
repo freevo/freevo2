@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.6  2003/09/07 15:43:06  dischi
 # tv guide can now also have different styles
 #
@@ -771,7 +774,7 @@ class Skin_Area:
         if height2 == -1:
             height2 = font.h + 2
 
-        self.tmp_objects.text.append((x, y, x+width, y+height2, text, font, height,
+        self.tmp_objects.text.append((x, y, x+width, y+height2, _(text), font, height,
                                             align_h, align_v, mode, ellipses))
 
 

@@ -54,7 +54,7 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
         if item.type == 'audio':
-            return [ ( self.info_show, 'Show database information for this file',
+            return [ ( self.info_show, _('Show database information for this file'),
                            'info_showdata') ]
         return []
 

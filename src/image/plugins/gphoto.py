@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.3  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -113,7 +116,7 @@ class CameraFile( Item ):
         """
         Retrieve and Show the Image
         """
-        items = [ ( self.view, 'View Image' ) ]
+        items = [ ( self.view, _('View Image') ) ]
 	return items
 
     def cache(self):
@@ -149,7 +152,7 @@ class CameraFolder( Item ):
         self.name = obj.name
 
     def actions(self):
-        items = [ ( self.cwd, 'Browse directory' ) ]
+        items = [ ( self.cwd, _('Browse directory') ) ]
         return items
 
     def cwd(self, arg=None, menuw=None):

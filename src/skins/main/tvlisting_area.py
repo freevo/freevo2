@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.7  2003/09/07 15:43:06  dischi
 # tv guide can now also have different styles
 #
@@ -352,7 +355,7 @@ class TVListing_Area(Skin_Area):
                             if (prg.channel_id, prg.start, prg.stop) == recprogs:
                                 val = selected_val
 
-                    if prg.title == 'This channel has no data loaded':
+                    if prg.title == _('This channel has no data loaded'):
                         val = copy.copy(val)
                         val.align='center'
 

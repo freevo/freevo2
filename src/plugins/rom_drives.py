@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.27  2003/08/29 23:41:32  outlyer
 # Revert the warning-fix that was a function-breaker
 #
@@ -222,7 +225,7 @@ class rom_items(plugin.MainMenuPlugin):
 
             else:
                 m = Item(parent)
-                m.name = 'Drive %s (no disc)' % media.drivename
+                m.name = _('Drive %s (no disc)') % media.drivename
                 m.type = media.type
                 m.media = media
                 media.info = m
@@ -286,7 +289,7 @@ class RemovableMedia:
                 print 'Ejecting disc in drive %s' % self.drivename
 
             if notify:
-                pop = PopupBox(text='Ejecting disc in drive %s' % self.drivename) 
+                pop = PopupBox(text=_('Ejecting disc in drive %s') % self.drivename) 
                 pop.show()
 
             try:
@@ -315,7 +318,7 @@ class RemovableMedia:
                 print 'Inserting %s' % self.drivename
 
             if notify:
-                pop = PopupBox(text='Reading disc in drive %s' % self.drivename)
+                pop = PopupBox(text=_('Reading disc in drive %s') % self.drivename)
                 pop.show()
 
             # close the tray, identifymedia does the rest,

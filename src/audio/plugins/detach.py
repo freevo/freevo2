@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.5  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -54,7 +57,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         config.EVENTS['audio']['DISPLAY'] = em.Event(em.FUNCTION_CALL, arg=self.detach)
         self.player = None
-        self.show_item = menu.MenuItem('Show player', action=self.show)
+        self.show_item = menu.MenuItem(_('Show player'), action=self.show)
         
     def detach(self):
         gui   = plugin.getbyname(plugin.AUDIO_PLAYER).playerGUI

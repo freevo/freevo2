@@ -3,10 +3,12 @@ Freevo Changelog
 
 $Id$
 
-Release 1.3.x (2003-??-??):
----------------------------
+Release 1.4.0-rc1 (2003-??-??):
+-------------------------------
  * changes in the directory structure
  * setup.py for normal python installation
+ * i18n support
+ * new record server
  * idlebar plugin for lmsensors
  * Merged latest xmltv parsing support
  * Preliminary FreeBSD support from Lars Eggert

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.89  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.88  2003/09/10 19:05:05  dischi
 # move osd keybindings into the config file
 #
@@ -368,11 +371,11 @@ class OSD:
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             self.toggle_fullscreen()
 
-        help = ['z = Toggle Fullscreen']
-        help += ['Arrow Keys = Move']
-        help += ['Spacebar = Select']
-        help += ['Escape = Stop/Prev. Menu']
-        help += ['h = Help']
+        help = [_('z = Toggle Fullscreen')]
+        help += [_('Arrow Keys = Move')]
+        help += [_('Spacebar = Select')]
+        help += [_('Escape = Stop/Prev. Menu')]
+        help += [_('h = Help')]
         help_str = '    '.join(help)
         pygame.display.set_caption('Freevo' + ' '*7 + help_str)
         icon = pygame.image.load(os.path.join(config.ICON_DIR,

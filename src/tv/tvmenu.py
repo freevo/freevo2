@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.5  2003/09/05 20:07:08  dischi
 # don't show tv guide item when there are no channels
 #
@@ -138,7 +141,7 @@ def get_tunerid(channel_id):
         if tv_channel_id == channel_id:
             return tv_tuner_id
 
-    AlertBox(text='Could not find TV channel %s' % channel_id).show()
+    AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
     return None
 
 
@@ -146,7 +149,7 @@ def get_friendly_channel(channel_id):
     channel_name = tv.tv_util.get_chan_displayname(channel_id)
 
     if not channel_name: 
-        AlertBox(text='Could not find TV channel %s' % channel_id).show()
+        AlertBox(text=_('Could not find TV channel %s') % channel_id).show()
 
     return channel_name
 
@@ -171,15 +174,15 @@ class TVMenu(Item):
     def main_menu(self, arg, menuw):
         items = []
         if config.TV_CHANNELS:
-            items.append(menu.MenuItem('TV Guide', action=self.start_tvguide))
-        items.append(DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
+            items.append(menu.MenuItem(_('TV Guide'), action=self.start_tvguide))
+        items.append(DirItem(config.DIR_RECORD, None, name = _('Recorded Shows'),
                              display_type='tv'))
-        items.append(menu.MenuItem('Scheduled Recordings', 
+        items.append(menu.MenuItem(_('Scheduled Recordings'), 
                                    action=self.view_schedule))
-        items.append(menu.MenuItem('Search Guide', action=self.show_search))
+        items.append(menu.MenuItem(_('Search Guide'), action=self.show_search))
         # items.append(menu.MenuItem('View Favorites', action=self.show_favorites))
 
-        menuw.pushmenu(menu.Menu('TV Main Menu', items, item_types = 'tv'))
+        menuw.pushmenu(menu.Menu(_('TV Main Menu'), items, item_types = 'tv'))
 
 
     def show_search(self, arg, menuw):
@@ -215,8 +218,8 @@ class TVMenu(Item):
 
         # Check that the TV channel list is not None
         if not config.TV_CHANNELS:
-            msg = 'The list of TV channels is invalid!\n'
-            msg += 'Please check the config file.'
+            msg = _('The list of TV channels is invalid!\n')
+            msg += _('Please check the config file.')
             AlertBox(text=msg).show()
             return
 

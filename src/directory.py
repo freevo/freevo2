@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.33  2003/09/05 16:10:46  mikeruelle
 # add an additional arg so new games system is happy
 #
@@ -309,8 +312,8 @@ class DirItem(Playlist):
         """
         if attr == 'type':
             if self.media:
-                return 'Directory on disc [%s]' % self.media.label
-            return 'Directory'
+                return _('Directory on disc [%s]') % self.media.label
+            return _('Directory')
 
         if attr in ( 'freespace', 'totalspace' ):
             if self.media:
@@ -328,20 +331,20 @@ class DirItem(Playlist):
         """
         return a list of actions for this item
         """
-        items = [ ( self.cwd, 'Browse directory' ) ]
+        items = [ ( self.cwd, _('Browse directory') ) ]
 
         # this doen't work right now because we have no playlist
         # at this point :-(
         
         # if self.playlist and len(self.playlist) > 1:
         #     items += [ (RandomPlaylist(self.playlist, self),
-        #                 'Random play all items' ) ]
+        #                 _('Random play all items') ) ]
 
         if ((not self.display_type or self.display_type == 'audio') and
             config.AUDIO_RANDOM_PLAYLIST == 1):
             items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES),
                                        self),
-                        'Recursive random play all items') ]
+                        _('Recursive random play all items')) ]
         return items
     
 
@@ -364,7 +367,7 @@ class DirItem(Playlist):
             
 	if os.path.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
-	    pb = PasswordInputBox(text='Enter Password', handler=self.pass_cmp_cb)
+	    pb = PasswordInputBox(text=_('Enter Password'), handler=self.pass_cmp_cb)
 	    pb.show()
 	    # save these so the InputBox callback can pass them to do_cwd
 	    self.arg = arg
@@ -389,7 +392,7 @@ class DirItem(Playlist):
 	if word == password:
 	    self.do_cwd(self.arg, self.menuw)
 	else:
-	    pb = AlertBox(text='Password incorrect')
+	    pb = AlertBox(text=_('Password incorrect'))
 	    pb.show()
             return
 
@@ -432,9 +435,10 @@ class DirItem(Playlist):
         callback=None
         if (num_changes > 10) or (num_changes and self.media):
             if self.media and dir_on_disc == '':
-                pop = ProgressBox(text='Scanning disc, be patient...', full=num_changes)
+                pop = ProgressBox(text=_('Scanning disc, be patient...'), full=num_changes)
             else:
-                pop = ProgressBox(text='Scanning directory, be patient...', full=num_changes)
+                pop = ProgressBox(text=_('Scanning directory, be patient...'),
+                                  full=num_changes)
             pop.show()
             callback=pop.tick
 

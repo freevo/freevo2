@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.15  2003/09/07 15:44:29  dischi
 # add em.MENU_CHANGE_STYLE to toggle styles
 #
@@ -62,13 +65,12 @@ import tv.program_display
 
 skin = skin.get_singleton() # Create the Skin object
 
-
 TRUE = 1
 FALSE = 0
 
 DEBUG = config.DEBUG
 
-CHAN_NO_DATA = 'This channel has no data loaded'
+CHAN_NO_DATA = _('This channel has no data loaded')
 
 
 class TVGuide(gui.GUIObject):
@@ -78,11 +80,11 @@ class TVGuide(gui.GUIObject):
         self.n_items, hours_per_page = skin.items_per_page(('tv', self))
         stop_time = start_time + hours_per_page * 60 * 60
 
-        guide = tv.epg_xmltv.get_guide(PopupBox(text='Preparing the program guide'))
+        guide = tv.epg_xmltv.get_guide(PopupBox(text=_('Preparing the program guide')))
         channels = guide.GetPrograms(start=start_time+1, stop=stop_time-1)
 
         if not channels:
-            AlertBox(text='TV Guide is corrupt!').show()
+            AlertBox(text=_('TV Guide is corrupt!')).show()
             return
 
         selected = None
@@ -485,9 +487,9 @@ class TVGuide(gui.GUIObject):
             prg.channel_id = channel.id            
             prg.start = 0
             prg.stop = 2147483647   # Year 2038
-            prg.title = 'This channel has no data loaded'
+            prg.title = _('This channel has no data loaded')
             prg.desc = ''
-            to_info = 'This channel has no data loaded'
+            to_info = _('This channel has no data loaded')
 
             
         self.rebuild(start_time, stop_time, start_channel, prg)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.28  2003/09/01 19:46:02  dischi
 # add menuw to eventhandler, it may be needed
 #
@@ -115,7 +118,7 @@ class ImageViewer(GUIObject):
             osd.clearscreen(color=osd.COL_BLACK)
             osd.update()
             self.alertbox = AlertBox(parent=self,
-                                     text="Can't Open Image\n'%s'" % (filename))
+                                     text=_("Can't Open Image\n'%s'") % (filename))
             self.alertbox.show()
             return
         
@@ -348,8 +351,8 @@ class ImageViewer(GUIObject):
 
 	    # Here we set up the tags that we want to put in the display
 	    # Using the following fields
-            tags_check = [['Title: ','name'],
-                          ['Description: ','description']
+            tags_check = [[_('Title: '),'name'],
+                          [_('Description: '),'description']
                           ]
 
 
@@ -383,7 +386,7 @@ class ImageViewer(GUIObject):
 
 	# If after all that there is nothing then tell the users that
 	if osdstring == []:
-	    osdstring = ['No information available']
+	    osdstring = [_('No information available')]
 	
 	# Now sort the text into lines of length line_length
         line = 0

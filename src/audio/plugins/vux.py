@@ -35,15 +35,15 @@ class PluginInterface(plugin.ItemPlugin):
 		plugin.ItemPlugin.__init__(self)
 
 		# create actions and corresponding functions
-		self.commands = [('default', '[VUX] Start playing',           'vuxctl start'),
-		                 ('default', '[VUX] Stop playing',            'vuxctl stop'),
-				 ('default', '[VUX] Next (rating down)',      'vuxctl down next'),
-				 ('default', '[VUX] Next (rating intact)',    'vuxctl next'),
-				 ('default', '[VUX] Next (rating up)',        'vuxctl up next'),
-				 ('default', '[VUX] Playing item rating up',  'vuxctl up'),
-				 ('default', '[VUX] Playing item rating down','vuxctl down'),
-				 ('dir',     '[VUX] a dir item do not select', None),
-				 ('audio',   '[VUX] an audio item, do not select', None) ]
+		self.commands = [('default', _('[VUX] Start playing'),           'vuxctl start'),
+		                 ('default', _('[VUX] Stop playing'),            'vuxctl stop'),
+				 ('default', _('[VUX] Next (rating down)'),      'vuxctl down next'),
+				 ('default', _('[VUX] Next (rating intact)'),    'vuxctl next'),
+				 ('default', _('[VUX] Next (rating up)'),        'vuxctl up next'),
+				 ('default', _('[VUX] Playing item rating up'),  'vuxctl up'),
+				 ('default', _('[VUX] Playing item rating down'),'vuxctl down'),
+				 ('dir',     _('[VUX] a dir item do not select'), None),
+				 ('audio',   _('[VUX] an audio item, do not select'), None) ]
 
 
 	def actions(self, item): 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2003/09/13 10:08:21  dischi
+# i18n support
+#
 # Revision 1.61  2003/08/30 07:58:57  dischi
 # Fix item plugin handling
 #
@@ -525,7 +528,7 @@ class MenuWidget(GUIObject):
                     
             if action == None:
                 print 'No action.. '
-                AlertBox(text='No action defined for this choice!').show()
+                AlertBox(text=_('No action defined for this choice!')).show()
             else:
                 action( arg=arg, menuw=self )
             return

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.18  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
@@ -155,7 +158,7 @@ class AlertBox(PopupBox):
                           bg_color, fg_color, icon, border, bd_color, bd_width,
                           vertical_expansion, text_prop=text_prop )
 
-        b1 = Button('OK')
+        b1 = Button(_('OK'))
         b1.toggle_selected()
 
         self.add_child(b1)

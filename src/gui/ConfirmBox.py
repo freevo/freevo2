@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/09/13 10:08:22  dischi
+# i18n support
+#
 # Revision 1.18  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
@@ -152,11 +155,11 @@ class ConfirmBox(PopupBox):
         # XXX: It may be nice if we could choose between
         #      OK/CANCEL and YES/NO
 
-        self.b0 = Button('OK', width=(width-60)/2)
+        self.b0 = Button(_('OK'), width=(width-60)/2)
         self.b0.set_h_align(Align.NONE)
         self.add_child(self.b0)
 
-        self.b1 = Button('CANCEL', width=(width-60)/2)
+        self.b1 = Button(_('CANCEL'), width=(width-60)/2)
         self.b1.set_h_align(Align.NONE)
         self.add_child(self.b1)
         select = 'self.b%s.toggle_selected()' % default_choice

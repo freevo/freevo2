@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.7  2003/09/02 19:13:05  dischi
 # move box_under_icon as variable into the skin fxd file
 #
@@ -240,7 +243,7 @@ class Listing_Area(Skin_Area):
 
         if not len(menu.choices):
             val = content.types['default']
-            self.write_text('This directory is empty', content.font, content)
+            self.write_text(_('This directory is empty'), content.font, content)
             
         if content.align == 'center':
             item_x0 = content.x + (content.width - cols * hspace) / 2

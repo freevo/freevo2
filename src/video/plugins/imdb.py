@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.19  2003/09/10 19:30:08  dischi
 # add deactivation when something is wrong
 #
@@ -97,13 +100,13 @@ class PluginInterface(plugin.ItemPlugin):
                 self.disc_set = TRUE
                 s = self.imdb_get_disc_searchstring(self.item)
                 if s:
-                    return [ ( self.imdb_search , 'Search IMDB for [%s]' % s,
+                    return [ ( self.imdb_search , _('Search IMDB for [%s]') % s,
                                'imdb_search_or_cover_search') ]
         if item.type == 'dir' and item.media and item.media.mountdir.find(item.dir) == 0:
             self.disc_set = TRUE
             s = self.imdb_get_disc_searchstring(self.item)
             if s:
-                return [ ( self.imdb_search , 'Search IMDB for [%s]' % s,
+                return [ ( self.imdb_search , _('Search IMDB for [%s]') % s,
                            'imdb_search_or_cover_search') ]
         return []
 
@@ -114,7 +117,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         fxd = FxdImdb()
         
-        box = PopupBox(text='searching IMDB...')
+        box = PopupBox(text=_('searching IMDB...'))
         box.show()
 
         items = []
@@ -133,7 +136,7 @@ class PluginInterface(plugin.ItemPlugin):
                                            self.imdb_create_fxd, (id, year)))
         except:
             box.destroy()
-            box = PopupBox(text='Unknown error while connecting to IMDB')
+            box = PopupBox(text=_('Unknown error while connecting to IMDB'))
             box.show()
             time.sleep(2)
             box.destroy()
@@ -155,7 +158,7 @@ class PluginInterface(plugin.ItemPlugin):
             menuw.pushmenu(moviemenu)
             return
 
-        box = PopupBox(text='No information available from IMDB')
+        box = PopupBox(text=_('No information available from IMDB'))
         box.show()
         time.sleep(2)
         box.destroy()
@@ -194,7 +197,7 @@ class PluginInterface(plugin.ItemPlugin):
         """
         fxd = FxdImdb()
         
-        box = PopupBox(text='getting data...')
+        box = PopupBox(text=_('getting data...'))
         box.show()
 
         #if this exists we got a cdrom/dvdrom

@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.8  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -92,11 +95,11 @@ class ScheduleEdit(Item):
     
     def generate_main(self):
         items = []
-        items += [menu.MenuItem('View Recording Schedule',
+        items += [menu.MenuItem(_('View Recording Schedule'),
                                 self.view_schedule,0)]
-        items += [menu.MenuItem('Delete Scheduled Item',
+        items += [menu.MenuItem(_('Delete Scheduled Item'),
                                 self.view_schedule,1)]
-        recmenu = menu.Menu('RECORDING SCHEDULE', items,
+        recmenu = menu.Menu(_('RECORDING SCHEDULE'), items,
                              reload_func=self.generate_main, item_types = 'tv')
         rc.app(None)
         return recmenu
@@ -169,14 +172,14 @@ class ScheduleEdit(Item):
         fd.close()
     
         if arg == 0:
-            submenu = menu.Menu('VIEW RECORDING SCHEDULE', items,
+            submenu = menu.Menu(_('VIEW RECORDING SCHEDULE'), items,
                                  reload_func=self.view_schedule, item_types='tv')
         else:
-            submenu = menu.Menu('DELETE SCHEDULED ITEM', items,
+            submenu = menu.Menu(_('DELETE SCHEDULED ITEM'), items,
                                  reload_func=self.view_schedule, item_types='tv')
         menuwidget.pushmenu(submenu)
         if killflag and arg == 1:
-            AlertBox(text='All Currently Recording Items Have Been Killed!').show()
+            AlertBox(text=_('All Currently Recording Items Have Been Killed!')).show()
             killflag = 0
     
     

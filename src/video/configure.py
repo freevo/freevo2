@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/13 10:08:23  dischi
+# i18n support
+#
 # Revision 1.14  2003/08/23 12:51:43  dischi
 # removed some old CVS log messages
 #
@@ -74,7 +77,7 @@ def audio_selection_menu(arg=None, menuw=None):
         txt = '%s (channels=%s, codec=%s, id=%s)' % (a['language'], a['channels'],
                                                      a['codec'], a['id'])
         items.append(menu.MenuItem(txt, audio_selection, (arg, a['id'])))
-    moviemenu = menu.Menu('AUDIO MENU', items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('AUDIO MENU'), items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
         
 
@@ -93,7 +96,7 @@ def subtitle_selection_menu(arg=None, menuw=None):
     items += [ menu.MenuItem("no subtitles", subtitle_selection, (arg, None)) ]
     for s in range(len(arg.info['subtitles'])):
         items.append(menu.MenuItem(arg.info['subtitles'][s], subtitle_selection, (arg, s)))
-    moviemenu = menu.Menu('SUBTITLE MENU', items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('SUBTITLE MENU'), items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
 
         
@@ -111,7 +114,7 @@ def chapter_selection_menu(arg=None, menuw=None):
     for c in range(1, arg.info['chapters']):
         items += [ menu.MenuItem("play chapter %s" % c, chapter_selection,
                                  (arg, ' -chapter %s' % c)) ]
-    moviemenu = menu.Menu('CHAPTER MENU', items, xml_file=current_xml_file)
+    moviemenu = menu.Menu(_('CHAPTER MENU'), items, xml_file=current_xml_file)
     menuw.pushmenu(moviemenu)
 
 
@@ -169,5 +172,5 @@ def get_menu(item, menuw, xml_file):
     current_xml_file = xml_file
 
     items = get_items(item) + [ menu.MenuItem("Play", play_movie, (item, '')) ]
-    return menu.Menu('CONFIG MENU', items, xml_file=xml_file)
+    return menu.Menu(_('CONFIG MENU'), items, xml_file=xml_file)
     
