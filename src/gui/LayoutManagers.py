@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/04 23:03:12  rshortt
+# Fix for a crash with a row with no cols.
+#
 # Revision 1.4  2003/05/02 01:09:02  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -198,6 +201,7 @@ class FlowLayout(LayoutManager):
 
 
         for row in self.table:
+            if not len(row): continue
             row_width = 0
             for child in row:
                 row_width += child.width
