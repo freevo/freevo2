@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/07 17:28:18  dischi
+# small fixes
+#
 # Revision 1.2  2003/03/06 21:45:24  dischi
 # Added mp3 player view area. You can set the infos you want to see in the
 # skin. @VAR@ means insert a variable from the item object here, \t means
@@ -82,6 +85,11 @@ class Info_Area(Skin_Area):
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
         item      = self.item
 
+        if content.types.has_key(item.type):
+            val = content.types[item.type]
+        else:
+            val = content.types['default']
+
         if not settings.font.has_key(content.font):
             print '*** font <%s> not found' % content.font
             return
@@ -91,7 +99,7 @@ class Info_Area(Skin_Area):
         table = [ [], [] ]
         self.auto_update = []
 
-        for line in content.cdata.encode('Latin-1').split('\n'):
+        for line in val.cdata.encode('Latin-1').split('\n'):
             m = self.re_space.match(line)
             if m:
                 line = m.groups(1)[0]

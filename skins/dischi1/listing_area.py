@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/07 17:28:19  dischi
+# small fixes
+#
 # Revision 1.4  2003/03/05 21:56:10  dischi
 # Small changes to integrate the audio player
 #
@@ -96,7 +99,7 @@ class Listing_Area(Skin_Area):
         self.last_choices = ( None, None )
 
 
-    def get_items_geometry(self, settings, menu):
+    def get_items_geometry(self, settings, menu, display_style):
         """
         get the geometry of the items. How many items per row/col, spaces
         between each item, etc
@@ -104,7 +107,8 @@ class Listing_Area(Skin_Area):
 
         # store the old values in case we are called by ItemsPerMenuPage
         backup = ( self.area_val, self.layout)
-        
+
+        self.display_style = display_style
         self.init_vars(settings, menu.item_types)
 
         layout    = self.layout
@@ -207,7 +211,7 @@ class Listing_Area(Skin_Area):
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
         cols, rows, hspace, vspace, hskip, vskip, width = \
-              self.get_items_geometry(settings, menu)
+              self.get_items_geometry(settings, menu, self.display_style)
 
         x0 = content.x
         y0 = content.y
