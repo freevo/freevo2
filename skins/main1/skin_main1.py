@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2002/10/06 14:35:19  dischi
+# log message cleanup and removed a debug message
+#
 # Revision 1.34  2002/10/05 18:16:37  dischi
 # Don't copy settings, we want to override it
 #
@@ -59,29 +62,6 @@
 # o added ItemsPerMenuPage and adapted some stuff that it works
 # o integrated the tv show alignment from dischi1 (testfiles needed to show
 #   that feature)
-#
-# Revision 1.21  2002/09/15 12:32:02  dischi
-# The DVD/VCD/SCVD/CD description file for the automounter can now also
-# contain skin informations. An announcement will follow. For this the
-# paramter dir in menu.py is renamed to xml_file since the only use
-# was to find the xml file. All other modules are adapted (dir -> xml_file)
-#
-# Revision 1.20  2002/09/08 23:19:06  krister
-# Cleaned up.
-#
-# Revision 1.19  2002/09/01 09:41:03  dischi
-# switched from eventhandler_args to type by choosing which item
-# style. Please don't abuse the eventhandler_args for something that has
-# nothing to do with the eventhandler.
-#
-# Revision 1.17  2002/08/31 17:33:49  dischi
-# The selection will be shorten if there is a image for an item to avoid
-# overlapping. If the item name is too long it will be shorten, too and "..."
-# will be added at the end.
-#
-# Revision 1.16  2002/08/19 05:52:08  krister
-# Changed to Gustavos new XML code for more settings in the skin. Uses columns
-# for the TV guide.
 #
 #
 # -----------------------------------------------------------------------
@@ -394,8 +374,6 @@ class Skin:
             spacing = height / max(len(menuw.menu_items),1)
             icon_size = 64
 
-
-        if DEBUG: print 'DrawMenu_Selection()'
 
         for choice in menuw.menu_items:
             
