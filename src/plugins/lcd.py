@@ -13,6 +13,11 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/10/07 04:35:27  gsbarbieri
+# Applied patch from: Immo Goltz <immo [At] nothrix.org>
+# It fixes screens for 2-line LCD and now it uses "marquee" scrolling instead
+# of the previous "ping-pong" one. Much better!
+#
 # Revision 1.12  2003/09/22 21:21:54  gsbarbieri
 # Better doc and handling for lack of pylcd module.
 #
@@ -91,6 +96,7 @@ except:
 
 # Configuration: (Should move to freevo_conf.py?)
 sep_str = " | " # use as separator between two strings. Like: "Length: 123<sep_str>Plot: ..."
+sep_str_mscroll = "   " # if string > width of lcd add this 
 
 # Animaton-Sequence used in audio playback
 # Some displays (like the CrytstalFontz) do display the \ as a /
@@ -179,8 +185,8 @@ layouts = { 4 : # 4 lines display
                                  "Freevo",
                                  None ),
                   "calendar" : ( "scroller",
-                                 "1 2 %d 2 h 2 \"Today is %s.\"",
-                                 "( self.width, time.strftime('%A, %d-%B') )" ),
+                                 "1 2 %d 2 m 3 \"Today is %s.%s\"",
+                                 "( self.width, time.strftime('%A, %d-%B'), self.get_sepstrmscroll(time.strftime('%A, %d-%B')) )" ),
                   "clock"    : ( "string",
                                  "%d 3 \"%s\"",
                                  "( ( self.width - len( time.strftime('%T') ) ) / 2 + 1 ," + \
@@ -201,17 +207,17 @@ layouts = { 4 : # 4 lines display
                                  "1 4 'INFO: '",
                                  None ),                
                   "title_v"  : ( "scroller",
-                                 "7 1 %d 1 h 2 \"%s\"",
-                                 "( self.width, menu.heading )" ),
+                                 "7 1 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, menu.heading, self.get_sepstrmscroll(menu.heading) )" ),
                   "item_v"   : ( "scroller",
-                                 "7 2 %d 2 h 2 \"%s\"",
-                                 "( self.width, title )" ),
+                                 "7 2 %d 2 m 3 \"%s%s\"",
+                                 "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "type_v"   : ( "scroller",
-                                 "7 3 %d 3 h 2 \"%s\"",
-                                 "( self.width, typeinfo )" ),
+                                 "7 3 %d 3 m 3 \"%s%s\"",
+                                 "( self.width, typeinfo, self.get_sepstrmscroll(typeinfo) )" ),
                   "info_v"   : ( "scroller",
-                                 "7 4 %d 1 h 2 \"%s\"",
-                                 "( self.width, info )" )
+                                 "7 4 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, info, self.get_sepstrmscroll(info) )" )
                   },
                 
                 "audio_player"  :
@@ -225,14 +231,14 @@ layouts = { 4 : # 4 lines display
                                   "1 3 'ARTIST: '",
                                   None ),
                   "music_v"   : ( "scroller",
-                                  "9 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
+                                  "9 1 %d 1 m 3 \"%s%s\"",
+                                "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "album_v"   : ( "scroller",
-                                  "9 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, player.getattr('album') )" ),
+                                  "9 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('album'), self.get_sepstrmscroll(player.getattr('album')) )" ),
                   "artist_v"  : ( "scroller",
-                                  "9 3 %d 3 h 2 \"%s\"",
-                                  "( self.width, player.getattr('artist') )" ),
+                                  "9 3 %d 3 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('artist'), self.get_sepstrmscroll(player.getattr('artist')) )" ),
                   "time_v1"   : ( "string",
                                   "2 4 '% 2d:%02d/'",
                                   "( int(player.length / 60), int(player.length % 60) )" ),
@@ -263,14 +269,14 @@ layouts = { 4 : # 4 lines display
                                   "1 3 'GENRE: '",
                                   None ),
                   "video_v"   : ( "scroller",
-                                  "9 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
+                                  "9 1 %d 1 m 3 \"%s%s\"",
+                                "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "tag_v"     : ( "scroller",
-                                  "9 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, player.getattr('tagline') )" ),
+                                  "9 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('tagline'), self.get_sepstrmscroll(player.getattr('tagline')) )" ),
                   "genre_v"   : ( "scroller",
-                                  "9 3 %d 3 h 2 \"%s\"",
-                                  "( self.width, player.getattr('genre') )" ),
+                                  "9 3 %d 3 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('genre'), self.get_sepstrmscroll(player.getattr('genre')) )" ),
                   "time_v1"   : ( "string",
                                   "2 4 '%s/'",
                                   "( length )" ),
@@ -305,17 +311,17 @@ layouts = { 4 : # 4 lines display
                                 "1 4 'DESC: '",
                                 None ),                
                   "chan_v"   : ( "scroller",
-                                 "7 1 %d 1 h 2 \"%s\"",
-                                 "( self.width, tv.channel_id )" ),
+                                 "7 1 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, tv.channel_id, self.get_sepstrmscroll(tv.channel_id) )" ),
                   "prog_v"   : ( "scroller",
-                                 "7 2 %d 2 h 2 \"%s\"",
-                                 "( self.width, tv.title )" ),
+                                 "7 2 %d 2 m 3 \"%s%s\"",
+                                 "( self.width, tv.title, self.get_sepstrmscroll(tv.title) )" ),
                   "time_v"   : ( "scroller",
-                                 "7 3 %d 3 h 2 \"%s-%s\"",
-                                 "( self.width, tv.start, tv.stop )" ),
+                                 "7 3 %d 3 m 3 \"%s-%s%s\"",
+                                 "( self.width, tv.start, tv.stop, self.get_sepstrmscroll(tv.start+'-'+tv.stop) )" ),
                   "desc_v"   : ( "scroller",
-                                 "7 4 %d 4 h 2 \"%s\"",
-                                 "( self.width, tv.desc )" )
+                                 "7 4 %d 4 m 3 \"%s%s\"",
+                                 "( self.width, tv.desc, self.get_sepstrmscroll(tv.desc) )" )
                   }
                 },              
 
@@ -327,8 +333,8 @@ layouts = { 4 : # 4 lines display
                                  "Freevo",
                                  None ),
                   "calendar" : ( "scroller",
-                                 "1 2 %d 2 h 2 \"Today is %s.\"",
-                                 "( self.width, time.strftime('%A, %d-%B') )" ),
+                                 "1 2 %d 2 m 3 \"Today is %s.%s\"",
+                                 "( self.width, time.strftime('%A, %d-%B'), self.get_sepstrmscroll(time.strftime('%A, %d-%B')) )" ),
                   "clock"    : ( "string",
                                  "%d 3 \"%s\"",
                                  "( ( self.width - len( time.strftime('%T') ) ) / 2 + 1 ," + \
@@ -337,29 +343,29 @@ layouts = { 4 : # 4 lines display
                 
                 "menu"    :
                 { "title_v"  : ( "scroller",
-                                 "1 1 %d 1 h 2 \"%s\"",
-                                 "( self.width, menu.heading )" ),
+                                 "1 1 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, menu.heading, self.get_sepstrmscroll(menu.heading) )" ),
                   "item_v"   : ( "scroller",
-                                 "1 2 %d 2 h 2 \"%s\"",
-                                 "( self.width, title )" ),
+                                 "1 2 %d 2 m 3 \"%s%s\"",
+                                 "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "type_v"   : ( "scroller",
-                                 "1 3 %d 3 h 2 \"%s\"",
-                                 "( self.width, typeinfo )" ),
+                                 "1 3 %d 3 m 3 \"%s%s\"",
+                                 "( self.width, typeinfo, self.get_sepstrmscroll(typeinfo) )" ),
                   "info_v"   : ( "scroller",
-                                 "1 4 %d 1 h 2 \"%s\"",
-                                 "( self.width, info )" )
+                                 "1 4 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, info, self.get_sepstrmscroll(info) )" )
                   },
                 
                 "audio_player"  :
                 { "music_v"   : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                  "( self.width, title )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                  "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "album_v"   : ( "scroller",
-                                  "1 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, player.getattr('album') )" ),
+                                  "1 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('album'), self.get_sepstrmscroll(player.getattr('album')) )" ),
                   "artist_v"  : ( "scroller",
-                                  "1 3 %d 3 h 2 \"%s\"",
-                                  "( self.width, player.getattr('artist') )" ),
+                                  "1 3 %d 3 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('artist'), self.get_sepstrmscroll(player.getattr('artist')) )" ),
                   "time_v1"   : ( "string",
                                   "2 4 '% 2d:%02d/'",
                                   "( int(player.length / 60), int(player.length % 60) )" ),
@@ -376,14 +382,14 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_v"   : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "tag_v"     : ( "scroller",
-                                  "1 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, player.getattr('tagline') )" ),
+                                  "1 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('tagline'), self.get_sepstrmscroll(player.getattr('tagline')) )" ),
                   "genre_v"   : ( "scroller",
-                                  "1 3 %d 3 h 2 \"%s\"",
-                                  "( self.width, player.getattr('genre') )" ),
+                                  "1 3 %d 3 m 3 \"%s%s\"",
+                                  "( self.width, player.getattr('genre'), self.get_sepstrmscroll(player.getattr('genre')) )" ),
                   "time_v1"   : ( "string",
                                   "3 4 '%s /'",
                                   "( length )" ),
@@ -398,17 +404,17 @@ layouts = { 4 : # 4 lines display
                 
                 "tv"            :
                 { "chan_v"   : ( "scroller",
-                                 "1 1 %d 1 h 2 \"%s\"",
-                                 "( self.width, tv.channel_id )" ),
+                                 "1 1 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, tv.channel_id, self.get_sepstrmscroll(tv.channel_id) )" ),
                   "prog_v"   : ( "scroller",
-                                 "1 2 %d 2 h 2 \"%s\"",
-                                 "( self.width, tv.title )" ),
+                                 "1 2 %d 2 m 3 \"%s%s\"",
+                                 "( self.width, tv.title, self.get_sepstrmscroll(tv.title) )" ),
                   "time_v"   : ( "scroller",
-                                 "1 3 %d 3 h 2 \"%s-%s\"",
-                                 "( self.width, tv.start, tv.stop )" ),
+                                 "1 3 %d 3 m 3 \"%s-%s%s\"",
+                                 "( self.width, tv.start, tv.stop, self.get_sepstrmscroll(tv.start+'-'+tv.stop) )" ),
                   "desc_v"   : ( "scroller",
-                                 "1 4 %d 4 h 2 \"%s\"",
-                                 "( self.width, tv.desc )" )
+                                 "1 4 %d 4 m 3 \"%s%s\"",
+                                 "( self.width, tv.desc, self.get_sepstrmscroll(tv.desc) )" )
                   }              
                 } # screens
               }, # chars per line
@@ -425,17 +431,17 @@ layouts = { 4 : # 4 lines display
 
                  "menu"    :
                  { "title_v"  : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                  "( self.width, menu.heading )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                  "( self.width, menu.heading, self.get_sepstrmscroll(menu.heading) )" ),
                    "item_v"   : ( "scroller",
-                                  "1 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, title )" )
+                                  "1 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, title, self.get_sepstrmscroll(title) )" )
                    },
 
                  "audio_player"  :
                  { "music_v"   : ( "scroller",
-                                   "1 1 %d 1 h 2 \"%s\"",
-                                   "( self.width, title )" ),
+                                   "1 1 %d 1 m 3 \"%s%s\"",
+                                   "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "time_v1"   : ( "string",
                                   "2 2 '% 2d:%02d/'",
                                   "( int(player.length / 60), int(player.length % 60) )" ),
@@ -450,8 +456,8 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_v"   : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"" ,
-                                  "( self.width, title )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"" ,
+                                  "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "time_v2"   : ( "string",
                                   "2 2 '%s'",
                                   "( elapsed )" ),
@@ -467,11 +473,11 @@ layouts = { 4 : # 4 lines display
 
                  "tv"            :
                  { "chan_v"   : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                  "( self.width, tv.display_name) )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                  "( self.width, tv.channel_id, self.get_sepstrmscroll(tv.channel_id) )" ),
                    "prog_v"   : ( "scroller",
-                                  "1 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, tv.title )" )
+                                  "1 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, tv.title, self.get_sepstrmscroll(tv.title) )" )
                    }
                 },
               
@@ -485,17 +491,17 @@ layouts = { 4 : # 4 lines display
 
                  "menu"    :
                  { "title_v"  : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                  "( self.width, menu.heading )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                  "( self.width, menu.heading, self.get_sepstrmscroll(menu.heading) )" ),
                    "item_v"   : ( "scroller",
-                                  "1 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, title )" )
+                                  "1 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, title, self.get_sepstrmscroll(title) )" )
                    },
 
                  "audio_player":
                  { "music_v"   : ( "scroller",
-                                   "1 1 %d 1 h 2 \"%s\"",
-                                   "( self.width, title )" ),
+                                   "1 1 %d 1 m 3 \"%s%s\"",
+                                   "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "time_v1"   : ( "string",
                                   "2 2 '% 2d:%02d/'",
                                   "( int(player.length / 60), int(player.length % 60) )" ),
@@ -513,8 +519,8 @@ layouts = { 4 : # 4 lines display
 
                 "video_player"  :
                 { "video_v"   : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "time_v1"   : ( "string",
                                   "3 2 '%s /'",
                                   "( length )" ),
@@ -530,11 +536,11 @@ layouts = { 4 : # 4 lines display
 
                  "tv":
                  { "chan_v"   : ( "scroller",
-                                  "1 1 %d 1 h 2 \"%s\"",
-                                  "( self.width, tv.display_name) )" ),
+                                  "1 1 %d 1 m 3 \"%s%s\"",
+                                  "( self.width, tv.channel_id, self.get_sepstrmscroll(tv.channel_id) )" ),
                    "prog_v"   : ( "scroller",
-                                  "1 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, tv.title )" )
+                                  "1 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, tv.title, self.get_sepstrmscroll(tv.title) )" )
                    }
                  },
               
@@ -554,11 +560,11 @@ layouts = { 4 : # 4 lines display
                                  "1 2 'ITEM: '",
                                  None ),
                    "title_v"  : ( "scroller",
-                                  "7 1 %d 1 h 2 \"%s\"",
-                                  "( self.width, menu.heading )" ),
+                                  "7 1 %d 1 m 3 \"%s%s\"",
+                                  "( self.width, menu.heading, self.get_sepstrmscroll(menu.heading) )" ),
                    "item_v"   : ( "scroller",
-                                  "7 2 %d 2 h 2 \"%s\"",
-                                  "( self.width, title )" )
+                                  "7 2 %d 2 m 3 \"%s%s\"",
+                                  "( self.width, title, self.get_sepstrmscroll(title) )" )
                    },
 
                  "audio_player":
@@ -566,8 +572,8 @@ layouts = { 4 : # 4 lines display
                                   "1 1 'MUSIC: '",
                                   None ),
                   "music_v"   : ( "scroller",
-                                  "8 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
+                                  "8 1 %d 1 m 3 \"%s%s\"",
+                                "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "time_v1"   : ( "string",
                                   "2 2 '% 2d:%02d/'",
                                   "( int(player.length / 60), int(player.length % 60) )" ),
@@ -593,8 +599,8 @@ layouts = { 4 : # 4 lines display
                                   "2 1 'VIDEO: '",
                                   None ),
                   "video_v"   : ( "scroller",
-                                  "9 1 %d 1 h 2 \"%s\"",
-                                "( self.width, title )" ),
+                                  "9 1 %d 1 m 3 \"%s%s\"",
+                                "( self.width, title, self.get_sepstrmscroll(title) )" ),
                   "time_v1"   : ( "string",
                                   "2 2 '%s/'",
                                   "( length )" ),
@@ -624,14 +630,14 @@ layouts = { 4 : # 4 lines display
                                  "1 2 'PROG: '",
                                  None ),
                   "chan_v"   : ( "scroller",
-                                 "7 1 %d 1 h 2 \"%s\"",
-                                 "( self.width, tv.channel_id )" ),
+                                 "7 1 %d 1 m 3 \"%s%s\"",
+                                 "( self.width, tv.channel_id, self.get_sepstrmscroll(tv.channel_id) )" ),
                   "prog_v"   : ( "scroller",
-                                 "7 2 %d 2 h 2 \"%s\"",
-                                 "( self.width, tv.title )" ),
+                                 "7 2 %d 2 m 3 \"%s%s\"",
+                                 "( self.width, tv.title, self.get_sepstrmscroll(tv.title) )" ),
                   "time_v"   : ( "scroller",
-                                 "%d 1 %d 3 h 2 \"[%s-%s]\"",
-                                 "( self.width - 13, 13, tv.start, tv.stop )" ),
+                                 "%d 1 %d 3 m 3 \"[%s-%s%s]\"",
+                                 "( self.width - 13, 13, tv.start, tv.stop, self.get_sepstrmscroll(tv.start+'-'+tv.stop) )" ),
                   }
                 } # screens
               } # chars per line
@@ -662,7 +668,6 @@ def get_info( item, list ):
             info += l[ 1 ] % v
 
     return info
-
 
 
 class PluginInterface( plugin.DaemonPlugin ):
@@ -882,7 +887,7 @@ class PluginInterface( plugin.DaemonPlugin ):
             
             for w in widgets:
                 type, param, val = self.screens[ s ][ w ]
-                
+
                 if val: param = param % eval( val )
                 try:
                     self.lcd.widget_set( s, w, param.encode( 'latin1' ) )
@@ -953,3 +958,13 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.playitem = None
 
         return 0
+
+    def get_sepstrmscroll( self, mscrolldata ):
+        """
+        used for marquee scroller; returns seperator if info is wider then lcd
+        """
+        if len(mscrolldata) > self.width:
+            return sep_str_mscroll
+        else:
+            return ''
+
