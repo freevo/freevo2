@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/11/30 14:34:29  dischi
+# but the skin parsing (e.g. outicon) in Item to avoid duplicate code
+#
 # Revision 1.33  2003/11/28 20:08:56  dischi
 # renamed some config variables
 #
@@ -55,20 +58,20 @@ class Item:
     Item class. This is the base class for all items in the menu. It's a template
     for MenuItem and for other info items like VideoItem, AudioItem and ImageItem
     """
-    def __init__(self, parent = None, info = None):
+    def __init__(self, parent = None, info = None, skin_type = None):
         """
         Init the item. Sets all needed variables, if parent is given also inherit
         some settings from there. Set self.info to info if given.
         """
-        self.image = None               # imagefile
-        
-        self.type   = None              # type: e.g. video, audio, dir, playlist
-        self.icon     = None
-        self.parent   = parent          # parent item to pass unmapped event
-        self.xml_file = None            # skin informationes etc.
-        self.menuw    = None
-        self.eventhandler_plugins = []
+        self.image       = None            # imagefile
+        self.type        = None            # type: e.g. video, audio, dir, playlist
+        self.icon        = None
+        self.parent      = parent          # parent item to pass unmapped event
+        self.xml_file    = None            # skin informationes etc.
+        self.menuw       = None
         self.description = ''
+
+        self.eventhandler_plugins = []
         
         if not info:
             self.info = {}
@@ -102,10 +105,10 @@ class Item:
 
         self.rom_id    = []
         self.rom_label = []
-        self.media = None
+        self.media     = None
 
         # interactive stuff for video, parsed by mplayer
-        self.elapsed = 0
+        self.elapsed   = 0
 
         if parent:
             self.image = parent.image
@@ -119,6 +122,19 @@ class Item:
             if hasattr(parent, '_'):
                 self._ = parent._
 
+        if skin_type:
+            import skin
+            settings  = skin.get_singleton().settings
+            skin_info = settings.mainmenu.items
+            if skin_info.has_key(skin_type):
+                skin_info  = skin_info[skin_type]
+                self.name  = skin_info.name
+                self.image = skin_info.image
+                if skin_info.icon:
+                    self.icon = os.path.join(settings.icon_dir, skin_info.icon)
+                if skin_info.outicon:
+                    self.outicon = os.path.join(settings.icon_dir, skin_info.icon)
+            
 
     def copy(self, obj):
         """

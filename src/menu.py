@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2003/11/30 14:35:02  dischi
+# but the skin parsing (e.g. outicon) in Item to avoid duplicate code
+#
 # Revision 1.67  2003/11/29 11:40:24  dischi
 # remove singleton(), menuw is passed to all objects
 #
@@ -17,33 +20,6 @@
 #
 # Revision 1.65  2003/10/12 09:49:46  dischi
 # make option how much "one menu" is and go back 2 for configure directory
-#
-# Revision 1.64  2003/10/04 18:37:28  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.63  2003/09/21 13:16:35  dischi
-# small bugfix
-#
-# Revision 1.62  2003/09/13 10:08:21  dischi
-# i18n support
-#
-# Revision 1.61  2003/08/30 07:58:57  dischi
-# Fix item plugin handling
-#
-# Revision 1.60  2003/08/24 06:58:18  gsbarbieri
-# Partial support for "out" icons in main menu.
-# The missing part is in listing_area, which have other changes to
-# allow box_under_icon feature (I mailed the list asking for opinions on
-# that)
-#
-# Revision 1.59  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.58  2003/08/22 17:51:29  dischi
-# Some changes to make freevo work when installed into the system
-#
-# Revision 1.55  2003/08/02 10:08:46  dischi
-# make it possible to return MenuItems in the list of actions()
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -64,25 +40,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+# ----------------------------------------------------------------------- */
+#endif
+
 
 import config
 import plugin
-
-# Various utilities
 import util
-
-# The skin class
 import skin
 
-# eventnames
 from event import *
-
-# Item
 from item import Item
-
-# GUI objects
 from gui import GUIObject, AlertBox
-
 
 
 class MenuItem(Item):
@@ -90,16 +59,20 @@ class MenuItem(Item):
     Default item for the main menu actions
     """
     def __init__( self, name, action=None, arg=None, type=None, image=None,
-                  icon=None, parent=None, outicon=None):
-        Item.__init__(self, parent)
-        self.name     = name
-        self.icon     = icon
+                  icon=None, parent=None, skin_type=None):
+        Item.__init__(self, parent, skin_type = skin_type)
+        if name:
+            self.name  = name
+        if icon:
+            self.icon  = icon
+        if image:
+            self.image = image
+
         self.function = action
         self.arg      = arg
         self.type     = type
-        self.image    = image
-        self.outicon  = outicon
-        
+
+            
     def setImage(self, image):
         self.type  = image[0]
         self.image = image[1]
@@ -190,11 +163,10 @@ class Menu:
 
 
 
-#
-# The MenuWidget handles a stack of Menu:s
-#
 class MenuWidget(GUIObject):
-
+    """
+    The MenuWidget handles a stack of Menus
+    """
     def __init__(self):
         GUIObject.__init__(self)
         self.menustack = []
