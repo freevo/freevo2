@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/07/18 19:46:36  dischi
+# function to get the datadir of a given directory
+#
 # Revision 1.37  2003/07/04 16:51:39  outlyer
 # Added a 'title_case' case normalizing function to use with data returned
 # from CDDB. Not used anywhere yet.
@@ -555,6 +558,19 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None, tracktota
     tag.update()
     return
 
+
+def getdatadir(item):
+    directory = item.dir
+    if item.media:
+        directory = directory[len(item.media.mountdir):]
+        if len(directory) and directory[0] == '/':
+            directory = directory[1:]
+        return os.path.join(config.MOVIE_DATA_DIR, 'disc', item.media.id, directory)
+    else:
+        if len(directory) and directory[0] == '/':
+            directory = directory[1:]
+        return os.path.join(config.MOVIE_DATA_DIR, directory)
+    
 
 #
 # synchronized objects and methods.
