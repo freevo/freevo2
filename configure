@@ -8,7 +8,53 @@
 # $Id$
 #
 
-# Required runtime version
+#
+# At the moment we can use either version 1 or 2 of the runtime.
+# This ugly hack contains a lot of redundant code, we'll switch
+# over to version 2 only as soon as it is tested and released.
+#
+
+# Desired runtime version
+RUNTIME_VERSION=2
+
+# The runtime is stored in a directory one level up
+RT_DIR=../freevo_runtime$RUNTIME_VERSION
+
+# First check if the runtime is installed
+if test -a $RT_DIR/freevo_python ; then
+
+    # Double-check that we have the correct runtime version
+    rt_ver=`cat $RT_DIR/VERSION`
+    if [[ "$rt_ver" != "$RUNTIME_VERSION" ]] ; then
+        echo Runtime version $rt_ver found, but version $RUNTIME_VERSION is required!
+        echo Please install the required version in $RT_DIR/
+        exit
+    fi
+
+    # Setup the Python environment variables
+    export PYTHONHOME=$RT_DIR
+    
+    # Prevent the linker from using other libraries than the ones
+    # in freevo_runtime
+    export LD_PRELOAD=`cat $RT_DIR/preloads`
+
+    # Execute using the runtime:
+    echo "Using the Freevo runtime ($RT_DIR)"
+    
+    # Start the setup_build.py application
+    $RT_DIR/freevo_python setup_build.py $*
+
+    # Setup exited, make sure all children are killed
+    sleep 1
+    killall -9 freevo_python &> /dev/null
+    exit 0
+fi
+
+echo
+echo Runtime version 2 not found, trying version 1...
+echo 
+
+# Desired runtime version
 RUNTIME_VERSION=1
 
 # The runtime is stored in a directory one level up
@@ -35,7 +81,7 @@ if test -a $RT_DIR/freevo_rt ; then
     # Start the setup_build.py application
     $RT_DIR/freevo_rt setup_build.py $*
 
-    # Freevo exited, make sure all children are killed
+    # Setup exited, make sure all children are killed
     sleep 1
     killall -9 freevo_rt &> /dev/null
     exit 0
@@ -56,9 +102,12 @@ echo
 
 PYTHON_VERSION=`python -c "import sys ; ok = sys.version_info[:3] >= (2,2,0) ; print ok"`
 
-if python -V 2>/dev/null >/dev/null  && \
+if python -V &> /dev/null  && \
     [[ "$PYTHON_VERSION" -eq "1" ]]; then
 	python setup_build.py $*
 else
-    echo "Installed python version is outdated. Please upgrade to 2.2.0 or better"
+    echo "Installed python version is outdated. Please upgrade to 2.2.0 or better."
+    echo "Please use the Freevo runtime for the easiest installation!"
 fi
+
+exit 0
