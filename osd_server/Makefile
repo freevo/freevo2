@@ -19,7 +19,7 @@ else
 	DFLAGS = -DOSD_X11
 endif
 				
-all: osds_fb
+all: osds_fb vtrelease
 
 osds_fb: main.c ft.c ft.h fb.c fb.h readpng.c readpng.h
 	gcc -DOSD_FB $(CFLAGS) -Wall main.c ft.c fb.c readpng.c -o osds_fb $(LIBS)
