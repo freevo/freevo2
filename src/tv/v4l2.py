@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/11/14 19:41:57  dischi
+# fix future warning the better way, always use util.ioctl please
+#
 # Revision 1.21  2004/11/13 16:07:54  dischi
 # fix ioctl future warning for now
 #
@@ -60,9 +63,8 @@ import string
 import freq
 import os
 import struct
-import fcntl
 import sys
-from util.ioctl import _IOC
+from util.ioctl import ioctl, _IOC
 import config
 
 DEBUG = config.DEBUG
@@ -190,7 +192,7 @@ class Videodev:
     def getfreq(self):
         val = struct.pack( FREQUENCY_ST, 0,0,0 )
         try:
-            r = fcntl.ioctl(self.devfd, GETFREQ_NO, val)
+            r = ioctl(self.devfd, GETFREQ_NO, val)
             (junk,junk, freq, ) = struct.unpack(FREQUENCY_ST, r)
             return freq
         except IOError:
@@ -233,56 +235,56 @@ class Videodev:
 
     def setfreq_old(self, freq):
         val = struct.pack( "L", freq)
-        r = fcntl.ioctl(self.devfd, long(SETFREQ_NO_V4L), val)        
+        r = ioctl(self.devfd, long(SETFREQ_NO_V4L), val)        
 
 
     def setfreq(self, freq):
         val = struct.pack( FREQUENCY_ST, long(0), long(0), freq)
-        r = fcntl.ioctl(self.devfd, long(SETFREQ_NO), val)
+        r = ioctl(self.devfd, long(SETFREQ_NO), val)
 
 
     def getinput(self):
-        r = fcntl.ioctl(self.devfd, GETINPUT_NO, struct.pack(INPUT_ST,0))
+        r = ioctl(self.devfd, GETINPUT_NO, struct.pack(INPUT_ST,0))
         return struct.unpack(INPUT_ST,r)[0]
   
 
     def setinput(self,value):
-        r = fcntl.ioctl(self.devfd, SETINPUT_NO, struct.pack(INPUT_ST,value))
+        r = ioctl(self.devfd, SETINPUT_NO, struct.pack(INPUT_ST,value))
 
 
     def querycap(self):
         val = struct.pack( QUERYCAP_ST, "", "", "", 0, 0 )
-        r = fcntl.ioctl(self.devfd, QUERYCAP_NO, val)
+        r = ioctl(self.devfd, QUERYCAP_NO, val)
         return struct.unpack( QUERYCAP_ST, r )
 
 
     def enumstd(self, no):
         val = struct.pack( ENUMSTD_ST, no, 0, "", 0, 0, 0)
-        r = fcntl.ioctl(self.devfd,ENUMSTD_NO,val)
+        r = ioctl(self.devfd,ENUMSTD_NO,val)
         return struct.unpack( ENUMSTD_ST, r )
 
 
     def getstd(self):
         val = struct.pack( STANDARD_ST, 0 )
-        r = fcntl.ioctl(self.devfd,GETSTD_NO, val)
+        r = ioctl(self.devfd,GETSTD_NO, val)
         return struct.unpack( STANDARD_ST, r )[0]
 
 
     def setstd(self, value):
         val = struct.pack( STANDARD_ST, value )
-        r = fcntl.ioctl(self.devfd,SETSTD_NO, val)
+        r = ioctl(self.devfd,SETSTD_NO, val)
 
 
     def enuminput(self,index):
         val = struct.pack( ENUMINPUT_ST, index, "", 0,0,0,0,0)
-        r = fcntl.ioctl(self.devfd,ENUMINPUT_NO,val)
+        r = ioctl(self.devfd,ENUMINPUT_NO,val)
         return struct.unpack( ENUMINPUT_ST, r )
 
 
     def getfmt(self):  
         val = struct.pack( FMT_ST, 0,0,0,0,0,0,0,0)
         try:
-            r = fcntl.ioctl(self.devfd,GET_FMT_NO,val)
+            r = ioctl(self.devfd,GET_FMT_NO,val)
             return struct.unpack( FMT_ST, r )
         except IOError:
             print "Failed to get format, not supported by device?" 
@@ -291,29 +293,29 @@ class Videodev:
 
     def setfmt(self, width, height):
         val = struct.pack( FMT_ST, 1L, width, height, 0L, 4L, 0L, 131072L, 0L)
-        r = fcntl.ioctl(self.devfd,SET_FMT_NO,val)
+        r = ioctl(self.devfd,SET_FMT_NO,val)
 
 
     def gettuner(self,index):
         val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,0,0,0)
-        r = fcntl.ioctl(self.devfd,GET_TUNER_NO,val)
+        r = ioctl(self.devfd,GET_TUNER_NO,val)
         return struct.unpack( TUNER_ST, r )
 
 
     def settuner(self,index,audmode):
         val = struct.pack( TUNER_ST, index, "", 0,0,0,0,0,audmode,0,0)
-        r = fcntl.ioctl(self.devfd,SET_TUNER_NO,val)
+        r = ioctl(self.devfd,SET_TUNER_NO,val)
 
 
     def getaudio(self,index):
         val = struct.pack( AUDIO_ST, index, "", 0,0)
-        r = fcntl.ioctl(self.devfd,GET_AUDIO_NO,val)
+        r = ioctl(self.devfd,GET_AUDIO_NO,val)
         return struct.unpack( AUDIO_ST, r )
 
 
     def setaudio(self,index,mode):
         val = struct.pack( AUDIO_ST, index, "", mode, 0)
-        r = fcntl.ioctl(self.devfd,SET_AUDIO_NO,val)
+        r = ioctl(self.devfd,SET_AUDIO_NO,val)
 
 
     def init_settings(self):

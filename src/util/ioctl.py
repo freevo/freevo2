@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/11/14 19:41:58  dischi
+# fix future warning the better way, always use util.ioctl please
+#
 # Revision 1.4  2004/11/14 19:20:59  dischi
 # fix future warning
 #
@@ -67,19 +70,11 @@ _IOC_NONE = 0
 _IOC_WRITE = 1
 _IOC_READ = 2
 
-def unsiged(x):
-    if x > sys.maxint:
-        return int(~(-x % sys.maxint) - 1)
-    return int(x)
-
-def lshift(x, y):
-    return unsiged(long(x) << y)
-
 def _IOC(dir,type,nr,size):
     # Note: this functions uses lshift to avoid future warnings. It
     # may not work every time and is more or less a bad hack
-    return (lshift(dir, _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT) | 
-            (nr << _IOC_NRSHIFT) | (size << _IOC_SIZESHIFT))
+    return (long(dir) << _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT) | \
+           (nr << _IOC_NRSHIFT) | (size << _IOC_SIZESHIFT)
 
 def IO(type,nr):
     return _IOC(_IOC_NONE,(type),(nr),0)
@@ -99,6 +94,10 @@ def IOC_TYPE(nr): return (((nr) >> _IOC_TYPESHIFT) & _IOC_TYPEMASK)
 def IOC_NR(nr): return (((nr) >> _IOC_NRSHIFT) & _IOC_NRMASK)
 def IOC_SIZE(nr): return (((nr) >> _IOC_SIZESHIFT) & _IOC_SIZEMASK)
 
-ioctl  = fcntl.ioctl
+def ioctl(fd, code, *args, **kargs):
+    if code > sys.maxint:
+        code = int(~(-code % sys.maxint) - 1)
+    return fcntl.ioctl(fd, code, *args, **kargs)
+    
 pack   = struct.pack
 unpack = struct.unpack
