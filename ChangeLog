@@ -3,6 +3,12 @@ Freevo Changelog
 
 $Id$
 
+
+Release 1.3.4 (2003-08-03) -- Bugfix release:
+ * Fixed bug that causes some helper scripts like webserver to crash
+ * Webradio is working again
+
+
 Release 1.3.3 (2003-08-02):
 --------------------
  * Moved all metadata parsing into mmpython
