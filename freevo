@@ -17,7 +17,7 @@ fi
 # Is freevo.conf present? If not, ./configure is needed
 # Check the possible locations in prio order
 if ! [ -e $FREEVO_STARTDIR/freevo.conf ]; then
-    if ! [ -e $HOME/freevo.conf ]; then
+    if ! [ -e $HOME/.freevo/freevo.conf ]; then
         if ! [ -e /etc/freevo/freevo.conf ]; then
             if ! [ -e ./freevo.conf ]; then
                 echo "Please run ./configure first (freevo.conf not found)"
