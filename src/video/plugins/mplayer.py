@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/02/02 22:15:53  outlyer
+# Support for mirrors of DVDs...
+#
+# (1) Make one using vobcopy, run 'vobcopy -m'
+# (2) Put it in your movie directory and it'll look like a single file, and can
+#     be played with XINE with all of the features of the original DVD (chapters,
+#     audio tracks, etc) and works with dvdnav.
+#
 # Revision 1.59  2004/01/24 19:16:24  dischi
 # clean up autovar handling
 #
@@ -163,7 +171,7 @@ class MPlayer:
         1 = possible, but not good
         0 = unplayable
         """
-        if item.url in ('dvd://', 'vcd://'):
+        if item.url[:6] in ('dvd://', 'vcd://') and item.url.endswith('/'): 
             return 1
         if item.mode in ('dvd', 'vcd'):
             return 2
@@ -231,9 +239,10 @@ class MPlayer:
                 # if defined
                 additional_args += [ '-slang', config.DVD_SUBTITLE_PREF ]
 
+        if hasattr(item.media,'devicename'):
             additional_args += [ '-dvd-device', item.media.devicename ]
 
-        if item.media:
+        if item.media and hasattr(item.media,'devicename'):
             additional_args += [ '-cdrom-device', item.media.devicename ]
 
         if item.selected_subtitle == -1:

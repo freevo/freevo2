@@ -17,6 +17,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/02/02 22:15:53  outlyer
+# Support for mirrors of DVDs...
+#
+# (1) Make one using vobcopy, run 'vobcopy -m'
+# (2) Put it in your movie directory and it'll look like a single file, and can
+#     be played with XINE with all of the features of the original DVD (chapters,
+#     audio tracks, etc) and works with dvdnav.
+#
 # Revision 1.36  2004/01/24 19:17:10  dischi
 # clean up autovar handling
 #
@@ -199,9 +207,11 @@ class Xine:
             for track in item.info['tracks']:
                 self.max_subtitle = max(self.max_subtitle, len(track['subtitles']))
 
-        if item.mode == 'dvd':
+        if item.mode == 'dvd' and hasattr(item.media,'devicename'):
             # dvd:///dev/dvd/2
             command.append('dvd://%s/%s' % (item.media.devicename, item.url[6:]))
+        elif item.mode == 'dvd':                # no devicename? Probably a mirror image on the HD
+            command.append(item.url)
 
         elif item.mode == 'vcd':
             # vcd:///dev/cdrom -- NO track support (?)

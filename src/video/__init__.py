@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/02/02 22:15:53  outlyer
+# Support for mirrors of DVDs...
+#
+# (1) Make one using vobcopy, run 'vobcopy -m'
+# (2) Put it in your movie directory and it'll look like a single file, and can
+#     be played with XINE with all of the features of the original DVD (chapters,
+#     audio tracks, etc) and works with dvdnav.
+#
 # Revision 1.25  2004/02/01 19:47:13  dischi
 # some fixes by using new mmpython data
 #
@@ -108,6 +116,18 @@ class PluginInterface(plugin.MimetypePlugin):
         return a list of items based on the files
         """
         items = []
+
+        for i in copy.copy(files):
+            if os.path.isdir(i+'/VIDEO_TS'):
+                # DVD Image
+                x = VideoItem('', None)
+                x.set_url('dvd://' + i[1:] + '/VIDEO_TS/')  # Trailing slash is important for Xine
+                x.type = 'dvd'
+                x.media = 'file'
+                x.devicename = ''
+                x.name = os.path.basename(i)
+                items += [ x ]
+                files.remove(i)
 
         for file in util.find_matches(files, config.VIDEO_SUFFIX):
             if parent and parent.type == 'dir' and \
