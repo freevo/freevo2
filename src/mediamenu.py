@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/02/19 13:04:32  dischi
+# Only active the new auto-cover for audio
+#
 # Revision 1.31  2003/02/19 07:16:11  krister
 # Matthieu Weber's patch for smart music cover search, modified the logic slightly.
 #
@@ -318,7 +321,7 @@ class DirItem(Playlist):
             if self.display_type:
                 self.handle_type = self.display_type
             
-        if not self.image:
+        if not self.image and self.display_type == 'audio':
             images = ()
             covers = ()
             files =()
