@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/12/16 08:02:19  dischi
+# dxr3 patch
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -363,7 +366,12 @@ class MPlayer_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'play':
-
+                # The DXR3 device cannot be shared between our SDL session
+                # and MPlayer.
+                if (osd.sdl_driver == 'dxr3'):
+                    if DEBUG:
+                        print "Stopping Display for Video Playback on DXR3"
+                    osd.stopdisplay()			
                 if DEBUG:
                     print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -376,6 +384,12 @@ class MPlayer_Thread(threading.Thread):
                     time.sleep(0.1)
 
                 self.app.kill()
+
+                # Ok, we can use the OSD again.
+                if osd.sdl_driver == 'dxr3':
+                    osd.restartdisplay()
+                    osd.update()
+                    print "Display back online"
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
