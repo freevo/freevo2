@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------------
 # default_areas.py - Some small areas for the skin
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
 # This file includes some simple areas for the area code:
@@ -36,6 +36,7 @@
 __all__ = [ 'ScreenArea', 'TitleArea', 'SubtitleArea' ]
 
 from area import Area
+from gui import Progressbar
 
 class ScreenArea(Area):
     """
