@@ -1,7 +1,37 @@
-#
+#if 0 /*
+# -----------------------------------------------------------------------
 # menu.py - freevo menu handling system
-#
+# -----------------------------------------------------------------------
 # $Id$
+#
+# Notes:
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.41  2002/11/24 06:34:04  krister
+# Added an option to reload a parent menu when returning from a submenu, useful for setting options etc.
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
 
 import sys, os, time
 
@@ -74,7 +104,8 @@ class MenuItem:
 
 class Menu:
 
-    def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0):
+    def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0,
+                 reload_func = None):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
@@ -87,6 +118,7 @@ class Menu:
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
+        self.reload_func = reload_func  # Called when a child menu returns
 
 
 #
@@ -106,13 +138,24 @@ class MenuWidget:
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
+
+            if menu.reload_func:
+                self.menustack[-1] = menu.reload_func()
+                
             self.init_page()
 
     def back_one_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
-            self.init_page()
+
+            if menu.reload_func:
+                menu = self.menustack[-1] = menu.reload_func()
+                self.init_page()
+                menu.selected = self.all_items[0]
+            else:
+                self.init_page()
+
             self.refresh()
 
     def goto_main_menu(self, arg=None, menuw=None):
@@ -144,7 +187,7 @@ class MenuWidget:
     
     def pushmenu(self, menu):
         menu.page_start = 0
-        self.menustack += [menu]
+        self.menustack.append(menu)
         self.init_page()
         menu.selected = self.all_items[0]
         self.refresh()
