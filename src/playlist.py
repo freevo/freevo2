@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/01/05 13:05:26  dischi
+# fix DOWN for random recursive playlists
+#
 # Revision 1.5  2002/12/11 16:06:54  dischi
 # First version of a RandomPlaylist. You can access the random playlist
 # from the item menu of the directory. The non-recursive random playlist
@@ -392,6 +395,8 @@ class RandomPlaylist(Playlist):
         if (event == rc.DOWN or event == rc.PLAY_END) and self.unplayed:
             if self.current_item:
                 self.current_item.parent = self.parent
+                if hasattr(self.current_item, 'stop'):
+                    self.current_item.stop()
             return self.play_next(menuw=menuw)
         
         # end and no next item
