@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/01 17:05:28  dischi
+# popup support
+#
 # Revision 1.5  2004/01/10 18:45:23  dischi
 # always use thumbnail
 #
@@ -54,7 +57,7 @@
 import sys, os, mmpython, glob, shutil
 from stat import *
 
-def snapshot(videofile, imagefile=None, pos=None, update=True):
+def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     """
     make a snapshot of the videofile at position pos to imagefile
     """
@@ -63,6 +66,8 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
     import Image
     import util
     import vfs
+    import gui.PopupBox
+    import osd
     
     if not imagefile:
         imagefile = vfs.getoverlay(videofile + '.raw')
@@ -71,6 +76,12 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
            os.stat(videofile)[ST_MTIME] <= os.stat(imagefile)[ST_MTIME]:
         return
 
+    if popup:
+        pop = gui.PopupBox(text='Creating thumbnail for \'%s\'...' % \
+                           os.path.basename(videofile),
+                           width=osd.get_singleton().width-config.OSD_OVERSCAN_X*2-80)
+        pop.show()
+        
     args = [ config.MPLAYER_CMD, videofile, imagefile ]
     if pos != None:
         args.append(str(pos))
@@ -94,7 +105,9 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
         except OSError:
             pass
 
-
+    if popup:
+        pop.destroy()
+        
 #
 # main function, will be called when this file is executed, not imported
 # args: mplayer, videofile, imagefile, [ pos ]
