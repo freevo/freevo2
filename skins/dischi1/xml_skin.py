@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/02/26 19:18:53  dischi
+# Added blue1_small and changed the coordinates. Now there is no overscan
+# inside the skin, it's only done via config.OVERSCAN_[XY]. The background
+# images for the screen area should have a label "background" to override
+# the OVERSCAN resizes.
+#
 # Revision 1.11  2003/02/25 23:27:36  dischi
 # changed max usage
 #
@@ -137,10 +143,10 @@ def attr_file(node, attr, default, c_dir):
                 return "%s_768x576.png" % dfile
             if config.CONF.width == 720 and os.path.isfile("%s_768x576.jpg" % dfile):
                 return "%s_768x576.jpg" % dfile
-            if os.path.isfile("%s_800x600.png" % dfile):
-                return "%s_800x600.png" % dfile
-            if os.path.isfile("%s_800x600.jpg" % dfile):
-                return "%s_800x600.jpg" % dfile
+            if os.path.isfile("%s.png" % dfile):
+                return "%s.png" % dfile
+            if os.path.isfile("%s.jpg" % dfile):
+                return "%s.jpg" % dfile
         return file
     return default
 
@@ -222,7 +228,7 @@ XML_types = {
     'bgcolor'  : ('hex',  0),
     'size'     : ('int',  3),
     'radius'   : ('int',  3),
-    'base'     : ('str',  0),
+    'label'    : ('str',  0),
     'font'     : ('str',  0),
     'layout'   : ('str',  0),
     'type'     : ('str',  0),
@@ -251,9 +257,9 @@ class XML_data:
 
             if c in self.content:
                 this_scale = 0
-                if XML_types[c][1] == '1': this_scale = scale[0]
-                if XML_types[c][1] == '2': this_scale = scale[1]
-                if XML_types[c][1] == '3': this_scale = min(scale[0], scale[1])
+                if XML_types[c][1] == 1: this_scale = scale[0]
+                if XML_types[c][1] == 2: this_scale = scale[1]
+                if XML_types[c][1] == 3: this_scale = min(scale[0], scale[1])
 
                 if this_scale:
                     e = 'attr_int(node, "%s", self.%s, %s)' % (c, c, this_scale)
@@ -276,25 +282,17 @@ class XML_data:
 class XML_area(XML_data):
     def __init__(self):
         XML_data.__init__(self, ('visible', 'layout', 'x', 'y', 'width', 'height'))
-        self.area2   = None
         pass
     
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
-        area = 1
         for subnode in node.children:
-            if subnode.name == u'area' and area == 1:
+            if subnode.name == u'area':
                 XML_data.parse(self, subnode, scale, current_dir)
-                area = 2
-            elif subnode.name == u'area' and area == 2:
-                if not self.area2:
-                    self.area2 = XML_data('x', 'y', 'width', 'height')
-                    self.area2.parse(subnode, scale, current_dir)
+                self.x += config.OVERSCAN_X
+                self.y += config.OVERSCAN_Y
+                
 
-    def __cmp__(self, other):
-        return not (not XML_data.__cmp__(self, other) and self.area2 == other.area2)
-
-    
 class XML_menu:
     def __init__(self):
         self.content = ( 'screen', 'title', 'view', 'listing', 'info' )
@@ -314,13 +312,13 @@ class XML_menu:
 
 class XML_image(XML_data):
     def __init__(self):
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename'))
+        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
 
 
 class XML_rectangle(XML_data):
     def __init__(self):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
-                                 'bgcolor', 'size', 'radius', 'base' ))
+                                 'bgcolor', 'size', 'radius' ))
 
 
 class XML_content(XML_data):
@@ -456,7 +454,7 @@ class XMLSkin:
             if os.path.isfile(file+".xml"):
                 file += ".xml"
             else:
-                file = "skins/dischi/%s" % file
+                file = "skins/dischi1/%s" % file
                 if os.path.isfile(file+".xml"):
                     file += ".xml"
 
@@ -480,7 +478,6 @@ class XMLSkin:
                     scale = (float(config.CONF.width-2*config.OVERSCAN_X)/float(w),
                              float(config.CONF.height-2*config.OVERSCAN_Y)/float(h))
 
-                        
                     include  = attr_file(freevo_type, "include", "", \
                                          os.path.dirname(file))
                     if include:

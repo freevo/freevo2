@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <!-- 
+  this skin is very simple. It's the same as blue1_big.xml,
+  only the fonts are smaller
+   -->
+
+  <skin include="blue1_big" geometry="800x600">
+
+    <!--
+    This skin only redefines the font sizes for each font
+    blue1_big defines, that's it
+    -->
+
+    <font label="list">
+      <definition size="16"/>
+    </font>
+
+    <font label="list selected">
+      <definition size="16"/>
+    </font>
+
+    <font label="main">
+      <definition size="30"/>
+    </font>
+
+    <font label="main selected">
+      <definition size="30"/>
+    </font>
+
+  </skin>
+</freevo>

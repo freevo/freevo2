@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/26 19:18:52  dischi
+# Added blue1_small and changed the coordinates. Now there is no overscan
+# inside the skin, it's only done via config.OVERSCAN_[XY]. The background
+# images for the screen area should have a label "background" to override
+# the OVERSCAN resizes.
+#
 # Revision 1.2  2003/02/25 23:27:36  dischi
 # changed max usage
 #
@@ -42,8 +48,11 @@
 
 
 import copy
+import pygame
 
 import osd
+import config
+
 import xml_skin
 
 
@@ -163,7 +172,17 @@ class Skin_Area:
             if isinstance(bg, xml_skin.XML_image):
                 self.calc_geometry(bg)
                 image = osd.loadbitmap(bg.filename)
-                osd.screen.blit(image, (bg.x, bg.y))
+
+                # if this is the real background image, ignore the
+                # OVERSCAN to fill the whole screen
+                if bg.label == 'background':
+                    bg.x -= config.OVERSCAN_X
+                    bg.y -= config.OVERSCAN_Y
+                    bg.width  += 2 * config.OVERSCAN_X
+                    bg.height += 2 * config.OVERSCAN_Y
+                if image:
+                    osd.screen.blit(pygame.transform.scale(image,(bg.width,bg.height)),
+                                    (bg.x, bg.y))
             elif isinstance(bg, xml_skin.XML_rectangle):
                 self.calc_geometry(bg, fit_area=FALSE)
                 if not self.alpha:

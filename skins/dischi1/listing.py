@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/26 19:18:53  dischi
+# Added blue1_small and changed the coordinates. Now there is no overscan
+# inside the skin, it's only done via config.OVERSCAN_[XY]. The background
+# images for the screen area should have a label "background" to override
+# the OVERSCAN resizes.
+#
 # Revision 1.2  2003/02/25 23:27:36  dischi
 # changed max usage
 #
@@ -100,10 +106,7 @@ class Skin_Listing(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        hspace = area.width
-        vspace = area.height
-
-        items_w = area.width
+        items_w = area.width - content.spacing
         items_h = 0
 
         possible_types = {}
@@ -147,6 +150,9 @@ class Skin_Listing(Skin_Area):
 
         # restore
         self.area_val, self.layout = backup
+
+        items_w += content.spacing
+        items_h += content.spacing
 
         # return cols, rows, item_w, item_h
         return (content.width/items_w, content.height/items_h,

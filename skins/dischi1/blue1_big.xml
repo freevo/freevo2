@@ -35,7 +35,7 @@
 	<area x="560" y="115" width="200" height="300"/> 
       </view>
       <listing layout="list0" visible="yes">
-	<area x="60" y="120" width="680" height="390"/> 
+	<area x="20" y="110" width="760" height="450"/>
       </listing>
       <info visible="no"/>
     </menu>
@@ -57,16 +57,16 @@
     <!-- background -->
     <layout label="screen0">
       <background>
-	<image filename="../images/aubin_bg2" x="0" y="0"/>
-	<image filename="../images/logo.png" x="20" y="20"/>
+	<image filename="../images/aubin_bg2" x="0" y="0" label="background"/>
+	<image filename="../images/logo.png" x="10" y="10" width="200" height="98"/>
       </background>
     </layout>
 
     <!-- default listing area -->
     <layout label="list0">
-      <content type="text" spacing="10">
-	<item type="default" font="font_list"/>
-	<item type="selected" font="font_list_selected">
+      <content type="text" spacing="2">
+	<item type="default" font="list"/>
+	<item type="selected" font="list selected">
 	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-3" width="max+10"
 	    height="max+6"/>
 	</item>
@@ -75,9 +75,9 @@
 
     <!-- main menu listing area -->
     <layout label="list_main">
-      <content type="text" spacing="20">
-	<item type="default" font="font_main"/>
-	<item type="selected" font="font_main_selected">
+      <content type="text" spacing="10">
+	<item type="default" font="main"/>
+	<item type="selected" font="main selected">
 	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
 	    width="max+20" height="max+10"/>
 	</item>
@@ -89,23 +89,23 @@
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
-    <font label="font_list">
-      <definition name="Arial_Bold" size="19" color="0xdddddd"/>
+    <font label="list">
+      <definition name="Arial_Bold" size="20" color="0xdddddd"/>
       <shadow visible="no"/>
     </font>
 
-    <font label="font_list_selected">
-      <definition name="Arial_Bold" size="19" color="0xffffff"/>
+    <font label="list selected">
+      <definition name="Arial_Bold" size="20" color="0xffffff"/>
       <shadow visible="no"/>
     </font>
 
-    <font label="font_main">
-      <definition name="Arial_Bold" size="34" color="0xdddddd"/>
+    <font label="main">
+      <definition name="Arial_Bold" size="35" color="0xdddddd"/>
       <shadow visible="no"/>
     </font>
 
-    <font label="font_main_selected">
-      <definition name="Arial_Bold" size="34" color="0xffffff"/>
+    <font label="main selected">
+      <definition name="Arial_Bold" size="35" color="0xffffff"/>
       <shadow visible="no"/>
     </font>
 
