@@ -1168,7 +1168,3 @@ else:
         os.makedirs('/tmp/freevo/xmltv/logos')
     TV_LOGOS = '/tmp/freevo/xmltv/logos'
 
-
-# If skin boxes (for example, selection box), should also be under
-# icons or just the text
-SKIN_BOX_UNDER_ICON = 1

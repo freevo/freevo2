@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/02 19:13:05  dischi
+# move box_under_icon as variable into the skin fxd file
+#
 # Revision 1.9  2003/08/25 18:44:32  dischi
 # Moved HOURS_PER_PAGE into the skin fxd file, default=2
 #
@@ -842,6 +845,9 @@ class XMLSkin:
         self.skin_directories = []
         self.icon_dir = ""
 
+        # variables set by set_var
+        self.all_variables  = ('box_under_icon', )
+        self.box_under_icon = 0
         
     def parse(self, freevo_type, scale, c_dir, copy_content):
         for node in freevo_type.children:
@@ -910,7 +916,14 @@ class XMLSkin:
             if node.name == u'tv':
                 self._tv.parse(node, scale, c_dir)
 
-
+            if node.name == u'setvar':
+                for v in self.all_variables:
+                    if node.attrs[('', 'name')].upper() == v.upper():
+                        try:
+                            setattr(self, v, int(node.attrs[('', 'val')]))
+                        except ValueError:
+                            setattr(self, v, node.attrs[('', 'val')])
+                
     def prepare(self):
         self.prepared = TRUE
         self.menu   = copy.deepcopy(self._menu)

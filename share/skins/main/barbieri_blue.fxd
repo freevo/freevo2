@@ -3,7 +3,7 @@
    <skin geometry="800x600">
       <iconset theme="tuxntosh" />
 
-
+      <setvar name="box_under_icon" val="1"/>
 
       <!-- Main -->
 

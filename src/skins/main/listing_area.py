@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/02 19:13:05  dischi
+# move box_under_icon as variable into the skin fxd file
+#
 # Revision 1.6  2003/08/24 19:12:31  gsbarbieri
 # Added:
 #   * support for different icons in main menu (final part)
@@ -62,8 +65,6 @@ import config
 
 TRUE  = 1
 FALSE = 0
-
-BOX_UNDER_ICON = config.SKIN_BOX_UNDER_ICON
 
 class Listing_Area(Skin_Area):
     """88
@@ -235,6 +236,7 @@ class Listing_Area(Skin_Area):
         cols, rows, hspace, vspace, hskip, vskip, width = \
               self.get_items_geometry(settings, menu, self.display_style)
 
+        BOX_UNDER_ICON = self.xml_settings.box_under_icon
 
         if not len(menu.choices):
             val = content.types['default']
