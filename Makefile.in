@@ -4,6 +4,8 @@
 # $Id$
 #
 
+CC=gcc
+
 SUBDIRS = matrox_g400 rc_client osd_server
 
 all: subdirs runapp
@@ -21,7 +23,11 @@ osds_sdl:
 	cd osd_server ; $(MAKE) osds_sdl
 
 runapp:
-	gcc -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
+	$(CC) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
+
+cdrom.so:
+	$(CC) -DNDEBUG -g -O3 -Wall -Wstrict-prototypes -fPIC -I/usr/include/python2.2 -c cdrommodule.c -o cdrommodule.o
+	$(CC) -shared cdrommodule.o -o cdrom.so
 
 subdirs: $(SUBDIRS)
 
@@ -29,7 +35,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 clean:
-	-rm -f *.pyc *.o log_main_out log_main_err log.txt runapp
+	-rm -f *.pyc *.o log_main_out log_main_err log.txt runapp cdrom.so cdrommodule.o
 	cd matrox_g400 ; make clean
 	cd rc_client ; make clean
 	cd osd_server ; make clean
