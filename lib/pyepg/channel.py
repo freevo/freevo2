@@ -47,6 +47,7 @@
 # -----------------------------------------------------------------------------
 
 import time
+import logging
 
 # Try to import the notifier or set the variable notifier to None. If
 # 'notifier' is not None and 'notifier.step' is not None, call the step
@@ -58,6 +59,12 @@ except ImportError:
     notifier = None
     
 from program import Program
+
+# get logging object
+log = logging.getLogger('pyepg')
+
+START_TIME = 0
+STOP_TIME  = 2147483647
 
 
 class Channel:
@@ -92,6 +99,7 @@ class Channel:
         Return some default Program with intervals no longer than a
         set default.
         """
+        log.info('create dummy for id=%s, %s-%s' % (self.id, start, stop))
         return Program(-1, u'NO DATA', start, stop, '', '', '', self)
 
 
@@ -101,6 +109,7 @@ class Channel:
         add them to our local list.  If there are gaps between the programs
         we will add dummy programs to fill it (TODO).
         """
+        log.debug('import for id=%s, %s-%s' % (self.id, start, stop))
         new_progs = []
         dummy_progs = []
         # keep the notifier alive
@@ -120,7 +129,19 @@ class Channel:
 
         l = len(new_progs)
         if not l:
-            dummy_progs.append(self.__get_dummy_program(start, stop))
+            # No programs found? That's bad. Try to find the last before start
+            # and the first after end and create a dummy.
+            before = self.__epg.sql_get_programs(self.id, 0, start)
+            if before:
+                d_start = before[-1].stop
+            else:
+                d_start = START_TIME
+            after = self.__epg.sql_get_programs(self.id, stop, -1)
+            if after:
+                d_stop = after[0].start
+            else:
+                d_stop = STOP_TIME
+            dummy_progs.append(self.__get_dummy_program(d_start, d_stop))
         else:
             p0 = new_progs[0]
             p1 = new_progs[-1]
@@ -130,19 +151,28 @@ class Channel:
                 notifier_counter = (notifier_counter + 1) % 500
                 if not notifier_counter and notifier and notifier.step:
                     notifier.step(False, False)
-                if p == p0:
-                    # fill gaps before
-                    if p.start > start:
-                        dummy_progs.append(self.__get_dummy_program(start, p.start))
-                elif p == p1:
-                    # fill gaps at the end
-                    if p.stop < stop:
-                        dummy_progs.append(self.__get_dummy_program(p.stop, 
-                                            (int(time.time())/86400*86400)))
-                else:
+                if p == p0 and p.start > start:
+                    # gap at the beginning, find first program before this
+                    # item and fill the space with a dummy
+                    more = self.__epg.sql_get_programs(self.id, 10, start)
+                    if more:
+                        d = self.__get_dummy_program(more[-1].stop, p.start)
+                    else:
+                        d = self.__get_dummy_program(START_TIME, p.start)
+                    dummy_progs.append(d)
+                elif p == p1 and p.stop < stop:
+                    # gap at the end, try to find next program and fill
+                    # the gap or create an 'endless' entry
+                    more = self.__epg.sql_get_programs(self.id, stop, -1)
+                    if more:
+                        d = self.__get_dummy_program(p.stop, more[0].start)
+                    else:
+                        d = self.__get_dummy_program(p.stop, STOP_TIME)
+                    dummy_progs.append(d)
+                elif p != p0 and p != p1 and last.stop < p.start:
                     # fill gaps between programs
-                    if last.stop < p.start:
-                        dummy_progs.append(self.__get_dummy_program(last.stop, p.start))
+                    d = self.__get_dummy_program(last.stop, p.start)
+                    dummy_progs.append(d)
                 last = p
                 # Add program. Because of some bad jitter from 60 seconds in
                 # __import_programs calling the first one and the last could
@@ -151,7 +181,7 @@ class Channel:
                    p in self.programs:
                     continue
                 self.programs.append(p)
-
+                
         for p in dummy_progs:
             # Add program. Because of some bad jitter from 60 seconds in
             # __import_programs calling the first one and the last could
@@ -178,6 +208,11 @@ class Channel:
         else:
             start = key
             stop  = 0
+
+        if start < START_TIME + 120:
+            start = START_TIME + 120
+        if stop > 0 and stop > STOP_TIME - 120:
+            stop = STOP_TIME - 120
 
         # get programs
         if self.programs:

@@ -125,14 +125,16 @@ class TVGuide(MenuApplication):
         if event == MENU_LEFT:
             epg_prog = self.channel[self.selected.program.start - 1]
             self.selected = ProgramItem(epg_prog)
-            self.current_time = self.selected.start + 1
+            if self.selected.start > 0:
+                self.current_time = self.selected.start + 1
             self.refresh()
             return True
 
         if event == MENU_RIGHT:
             epg_prog = self.channel[self.selected.program.stop+1]
             self.selected = ProgramItem(epg_prog)
-            self.current_time = self.selected.start + 1
+            if self.selected.start > 0:
+                self.current_time = self.selected.start + 1
             self.refresh()
             return True
 
