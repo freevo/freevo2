@@ -67,7 +67,7 @@ function ebuild_upload {
 
 	tar --atime-preserve -zcvf /tmp/freevo-ebuild.tgz \
 	    media-tv/freevo media-tv/freevo-snapshot dev-python/mmpython-snapshot \
-	    dev-python/mmpython media-video/xine-ui media-libs/libsdl >/dev/null
+	    media-video/xine-ui media-libs/libsdl >/dev/null
     )
     scp -r contrib/gentoo/ChangeLog contrib/gentoo/rsync-freevo /tmp/freevo-ebuild.tgz \
 	dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-11-15 18:25+0100\n"
+"POT-Creation-Date: 2003-11-15 20:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -505,8 +505,27 @@ msgstr ""
 msgid "CANCEL"
 msgstr ""
 
-#: image/plugins/gphoto.py:122
+#: image/plugins/gphoto.py:122 image/imageitem.py:110
 msgid "View Image"
+msgstr ""
+
+#: image/viewer.py:118
+#, python-format
+msgid ""
+"Can't Open Image\n"
+"'%s'"
+msgstr ""
+
+#: image/viewer.py:351
+msgid "Title: "
+msgstr ""
+
+#: image/viewer.py:352
+msgid "Description: "
+msgstr ""
+
+#: image/viewer.py:386
+msgid "No information available"
 msgstr ""
 
 #: plugins/idlebar/system.py:116
