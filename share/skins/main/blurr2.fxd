@@ -91,7 +91,7 @@
       
     <menuset label="image" inherits="normal text style">
       <screen layout="image screen"/>
-      <listing y="100" x="60" height="400" width="700" layout="image list"/>
+      <listing y="80" x="60" height="450" width="700" layout="image list"/>
       <info layout="image info" x="70" y="525" width="750" height="75"/>
       <view visible="no"/>
     </menuset>
@@ -230,7 +230,7 @@
 	    <newline/>
 	  </if>
 	  <text font="info value" expression="len(tracks)"/>
-          <text width="130" font="info label"> Tracks</text>
+          <text width="130" font="info label"> Tracks:</text>
 	  <newline/>
  	</item>
       </content>
