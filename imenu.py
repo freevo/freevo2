@@ -76,7 +76,7 @@ def cwd(arg=None, menuw=None):
     
     number = 0
     for file in files:
-        title = os.path.basename(file)[:-4]
+        title = os.path.splitext(os.path.basename(file))[0]
         items += [menu.MenuItem(title, view_image, (file, number, files))]
         number += 1
 
