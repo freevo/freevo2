@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2005/02/02 02:14:03  rshortt
+# Small cleanup.
+#
 # Revision 1.3  2005/01/13 20:19:33  rshortt
 # Place the authentication into www/server.py to protect mote than just
 # the .py files.
@@ -231,31 +234,34 @@ class RecordResource(FreevoResource):
             #    pass
 
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(p.start)), 'class="'+status+'" colspan="1"')
-            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(p.stop)), 'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
+                                       time.localtime(p.start)), 
+                         'class="'+status+'" colspan="1"')
+            fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, 
+                                       time.localtime(p.stop)), 
+                         'class="'+status+'" colspan="1"')
 
-            chan = pyepg.get_channel(p.channel)
-            if not chan: 
-                chan_name = _('UNKNOWN')
-            else:
-                chan_name = chan.name
-
-            fv.tableCell(chan_name, 'class="'+status+'" colspan="1"')
-            fv.tableCell(Unicode(p.title), 'class="'+status+'" colspan="1"')
-
-            #if p.sub_title == '':
-            #    cell = '&nbsp;'
+            #chan = pyepg.get_channel(p.channel)
+            #if not chan: 
+            #    chan_name = _('UNKNOWN')
             #else:
-            #    cell = Unicode(p.sub_title)
-            cell = '&nbsp;'
-            fv.tableCell(cell,'class="'+status+'" colspan="1"')
+            #    chan_name = chan.name
+
+            fv.tableCell(Unicode(p.channel.title), 
+                         'class="'+status+'" colspan="1"')
+            fv.tableCell(Unicode(p.title), 
+                         'class="'+status+'" colspan="1"')
+
+            fv.tableCell(Unicode(p.subtitle),
+                         'class="'+status+'" colspan="1"')
 
     
-            # if p.desc == '':
-            if 1:
-                cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+p.title+'</b>')
+            if p.description == u'':
+                cell = \
+                     _('Sorry, the program description for %s is unavailable.')\
+                       % ('<b>'+p.title+'</b>')
             else:
-                cell = Unicode(p.desc)
+                cell = Unicode(p.description)
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
             cell = ('<a href="rec?chan=%s&amp;start=%s&amp;action=remove" title="Remove Scheduled Recording">'+_('Remove')+'</a>'+'<br/>' + '<a href="search?find=%s" title="Search for other airings">' + _('Search') + '</a>') % (p.channel.id, p.start, Unicode(p.title))
