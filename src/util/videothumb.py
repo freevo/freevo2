@@ -208,9 +208,11 @@ if __name__ == "__main__":
             try:
                 import config
                 import vfs
-                shutil.copy(capture, vfs.getoverlay(imagefile[1:]))
-            except:
-                print 'unable to write file'
+                if not os.path.isdir(os.path.dirname(imagefile)):
+                    os.makedirs(os.path.dirname(imagefile))
+                shutil.copy(capture, imagefile)
+            except Exception, e:
+                print 'unable to write file %s: %s' % (vfs.getoverlay(imagefile), e)
     else:
         print "error creating capture for %s" % filename
 
