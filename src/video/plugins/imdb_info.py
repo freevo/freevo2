@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/14 03:19:42  outlyer
+# Fixed to accomodate changes in xml_parser.py; works again.
+#
 # Revision 1.8  2003/09/13 10:08:24  dischi
 # i18n support
 #
@@ -82,7 +85,7 @@ class PluginInterface(plugin.ItemPlugin):
             box.show()
             return
 
-        infolist = xml_parser.parseMovieFile(file, os.path.dirname(file),[])
+        infolist = xml_parser.parseMovieFile(file)
         for info in infolist:
             box = AlertBox(icon=info.image, width=550, height=400, text='%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s' % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
             box.show()
