@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/09/22 11:49:18  dischi
+# Bugfix
+#
 # Revision 1.6  2002/09/22 09:54:31  dischi
 # XML cleanup. Please take a look at the new skin files to see the new
 # structure. The 640x480 skin is also workin now, only one small bug
@@ -248,19 +251,20 @@ class XMLSkin:
                     # default content, override all settings for pl and dir:
                     if copy_content:
                         self.menu.items = copy.copy(self.menu.items)
-                        self.menu.items = copy.copy(self.menu.item_dir)
-                        self.menu.items = copy.copy(self.menu.item_pl)
+                        self.menu.items.default = copy.copy(self.menu.items.default)
+                        self.menu.items.dir = copy.copy(self.menu.items.dir)
+                        self.menu.items.pl = copy.copy(self.menu.items.pl)
 
                     self.parse_node(subnode, self.menu.items.default)
                     self.parse_node(subnode, self.menu.items.dir)
                     self.parse_node(subnode, self.menu.items.pl)
 
                 elif type == 'dir':
-                    if copy_content: self.menu.item_dir = copy.copy(self.menu.item_dir)
+                    if copy_content: self.menu.items.dir = copy.copy(self.menu.items.dir)
                     self.parse_node(subnode, self.menu.items.dir)
 
                 elif type == 'playlist':
-                    if copy_content: self.menu.item_pl = copy.copy(self.menu.item_pl)
+                    if copy_content: self.menu.items.pl = copy.copy(self.menu.items.pl)
                     self.parse_node(subnode, self.menu.items.pl)
         
     #
