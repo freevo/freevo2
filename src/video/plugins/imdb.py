@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/06/27 11:34:09  dischi
+# some small fixes for movies on rom drive
+#
 # Revision 1.11  2003/06/26 13:23:21  dischi
 # remove 'the' and 'a' from the imdb search string (add more in local_conf.py
 # if you like) because they mess up the results. Also fixed the filename
@@ -137,7 +140,7 @@ class PluginInterface(plugin.ItemPlugin):
         create fxd file for the disc item
         """
         import helpers.imdb
-        
+
         box = PopupBox(text='getting data...')
         box.show()
         
@@ -217,8 +220,17 @@ class PluginInterface(plugin.ItemPlugin):
         box = PopupBox(text='getting data...')
         box.show()
         
-        filename = os.path.splitext(self.item.filename)[0]
-        helpers.imdb.get_data_and_write_fxd(arg[0], filename, None, None,
+        if self.item.media and self.item.media.id: #if this exists we got a cdrom/dvdrom
+            filename = os.path.join(config.MOVIE_DATA_DIR, self.item.media.id)
+            device   = self.item.media.devicename
+            # bad hack to set the drive, helpers/imdb.py really needs
+            # a bigger update
+            helpers.imdb.drive = self.item.media.devicename
+        else:
+            filename = os.path.splitext(self.item.filename)[0]
+            device   = None
+
+        helpers.imdb.get_data_and_write_fxd(arg[0], filename, device, None,
                                             (os.path.basename(self.item.filename), ), None)
 
         # check if we have to go one menu back (called directly) or
