@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/09/07 18:45:17  dischi
+# some design improvements, needs still much works
+#
 # Revision 1.8  2004/08/24 16:42:41  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -57,8 +60,32 @@
 
 
 import copy
+from mevas.image import CanvasImage
 from area import Area
 
+
+class ItemImage(CanvasImage):
+    """
+    An image object that can be drawn onto a layer. The difference between this
+    and a normal object is that it also has a parameter for shadow values.
+    """
+    def __init__(self, image, pos, shadow):
+        if shadow and shadow.visible and not image.has_alpha:
+            # there are shadow informations and the image has no alpha
+            # values, so draw a shadow. Bug: this only works for shadow.x
+            # and shadow.y both greater 0
+            CanvasImage.__init__(self, (image.width + shadow.x, image.height + shadow.y))
+            self.draw_rectangle((shadow.x, shadow.y), (image.width, image.height),
+                                shadow.color, 1)
+            self.draw_image(image)
+        else:
+            # normal image
+            CanvasImage.__init__(self, image)
+        # set position of the object
+        self.set_pos(pos)
+
+
+    
 class Listing_Area(Area):
     """
     this call defines the listing area
@@ -576,15 +603,8 @@ class Listing_Area(Area):
                     if val.valign == 'bottom' and i_h < val.height:
                         addy = val.height - i_h
 
-                    if val.shadow and val.shadow.visible and not image.has_alpha:
-                        box = self.drawbox(x0 + addx + val.shadow.x,
-                                           y0 + addy + val.shadow.y,
-                                           image.width, image.height,
-                                           (val.shadow.color, 0, 0, 0))
-                        box.layer = -1
-                        gui_objects.append(box)
-                        
-                    i = self.drawimage(image, (x0 + addx, y0 + addy))
+                    i = ItemImage(image, (x0 + addx, y0 + addy), val.shadow)
+                    self.layer.add_child(i)
                     gui_objects.append(i)
                         
                 if content.type == 'image+text':
