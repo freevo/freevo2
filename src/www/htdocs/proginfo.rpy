@@ -48,12 +48,7 @@ class ProgInfoResource(FreevoResource):
         chanid = id[:id.find(":")]
         starttime = int( id[id.find(":")+1:] )
 
-        t0=time.time()
         guide = tv_util.get_guide()
-        t1=time.time()
-        (got_schedule, schedule) = ri.getScheduledRecordings()
-        if got_schedule:
-            schedule = schedule.getProgramList()
 
         chan = guide.chan_dict[chanid]
         for prog in chan.programs:
