@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/23 12:37:13  dischi
+# remove osd import
+#
 # Revision 1.3  2004/08/22 20:06:17  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -53,7 +56,6 @@
 # ----------------------------------------------------------------------- */
 
 import pygame.time
-import osd
 import render
 
 class BaseAnimation:
