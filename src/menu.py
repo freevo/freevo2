@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/06/07 11:30:27  dischi
+# support for MENU_CALL_ITEM_ACTION
+#
 # Revision 1.49  2003/06/07 04:36:18  outlyer
 # Prevent a crash.
 #
@@ -546,13 +549,32 @@ class MenuWidget(GUIObject):
                 actions_plugins = '_%s' % menu.selected.type
             
             for p in plugin.get('item%s' % actions_plugins):
-                actions += p.actions(menu.selected)
+                for a in p.actions(menu.selected):
+                    actions.append(a[:2])
 
             if actions and len(actions) > 1:
                 self.make_submenu(menu.selected.name, actions, menu.selected)
             return
             
 
+        elif event == em.MENU_CALL_ITEM_ACTION:
+            print 'calling action %s', event.arg
+            if hasattr(menu.selected, 'display_type'):
+                if menu.selected.display_type:
+                    actions_plugins = '_%s' % menu.selected.display_type
+                else:
+                    actions_plugins = ''
+            else:
+                actions_plugins = '_%s' % menu.selected.type
+            
+            for p in plugin.get('item%s' % actions_plugins):
+                for a in p.actions(menu.selected):
+                    if len(a) > 2 and a[2] == event.arg:
+                        a[0](arg=None, menuw=self)
+                        return
+            print 'action %s not found' % event.arg
+
+                    
         elif event == em.MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
             if skin.ToggleDisplayStyle(menu):
