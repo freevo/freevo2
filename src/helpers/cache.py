@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/31 16:43:28  dischi
+# also cache thumbnails for config.OVERLAY_DIR_STORE_THUMBNAILS:
+#
 # Revision 1.10  2003/12/30 15:36:42  dischi
 # support OVERLAY_DIR_STORE_MMPYTHON_DATA
 #
@@ -59,6 +62,7 @@ import config
 import util
 import stat
 import time
+import copy
 
 def delete_old_files():
     print 'deleting old cache files from older freevo version...'
@@ -143,9 +147,13 @@ def cache_directories(rebuild=True):
 
     if rebuild:
         print 'deleting cache files'
-        for f in ([ os.path.join(mmcache, fname) for fname in os.listdir(mmcache) ]):
-            if os.path.isfile(f):
-                os.unlink(f)
+        if config.OVERLAY_DIR_STORE_MMPYTHON_DATA:
+            print 'XXX FIXME: code not written yet'
+        else:
+            for f in ([ os.path.join(mmcache, fname) for fname in os.listdir(mmcache) ]):
+                if os.path.isfile(f):
+                    os.unlink(f)
+
     all_dirs = []
     print 'caching directories...'
     for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
@@ -156,6 +164,7 @@ def cache_directories(rebuild=True):
         if not os.path.isdir(d):
             continue
         os.path.walk(d, cache_helper, all_dirs)
+
     for d in all_dirs:
         dname = d
         if len(dname) > 65:
@@ -164,6 +173,77 @@ def cache_directories(rebuild=True):
         mmpython.cache_dir(d)
         
     util.touch('%s/VERSION' % mmcache)
+    print
+
+
+def cache_thumbnails():
+    from mmpython.image import EXIF as exif
+    import cStringIO
+    import stat
+    import Image
+    
+    print 'caching thumbnails'
+
+    files = []
+    for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
+        try:
+            d = d[1]
+        except:
+            pass
+        if not os.path.isdir(d):
+            continue
+        files += util.match_files_recursively(d, config.IMAGE_SUFFIX)
+
+    for filename in copy.copy(files):
+        sinfo = os.stat(filename)
+        thumb = vfs.getoverlay(filename + '.raw')
+        try:
+            if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                files.remove(filename)
+        except OSError:
+            pass
+
+    for filename in files:
+        fname = filename
+        if len(fname) > 65:
+            fname = fname[:20] + ' [...] ' + fname[-40:]
+        print '  %4d/%-4d %s' % (files.index(filename)+1, len(files), fname)
+
+        sinfo = os.stat(filename)
+        thumb = vfs.getoverlay(filename + '.raw')
+        try:
+            if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
+                continue
+        except OSError:
+            pass
+
+        f=open(filename, 'rb')
+        tags=exif.process_file(f)
+        f.close()
+
+        try:
+            if tags.has_key('JPEGThumbnail'):
+                image = Image.open(cStringIO.StringIO(tags['JPEGThumbnail']))
+            else:
+                # convert with Imaging
+                image = Image.open(filename)
+        except:
+            continue
+        
+        if image.size[0] > 300 and image.size[1] > 300:
+            image.thumbnail((300,300))
+
+        if image.mode == 'P':
+            image = image.convert('RGB')
+
+        # save for future use
+        if config.OVERLAY_DIR_STORE_THUMBNAILS:
+            data = (image.tostring(), image.size, image.mode)
+            util.save_pickle(data, thumb)
+        else:
+            data = (filename, image.tostring(), image.size, image.mode)
+            util.save_pickle(data, thumb)
+
 
 
 if __name__ == "__main__":
@@ -186,3 +266,6 @@ if __name__ == "__main__":
     else:
         delete_old_mmpython_cache()
         cache_directories(0)
+
+    if config.OVERLAY_DIR_STORE_THUMBNAILS:
+        cache_thumbnails()
