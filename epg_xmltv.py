@@ -145,6 +145,9 @@ def load_guide():
 if __name__ == '__main__':
     guide = get_guide()
 
+    if len(sys.argv) == 1:
+        sys.exit(0)
+        
     print '\nXML TV Guide Listing:'
     print guide
 
