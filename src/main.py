@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2003/12/10 19:01:29  dischi
+# changes to the new Event.handler and Childapp2
+#
 # Revision 1.98  2003/12/07 19:40:30  dischi
 # convert OVERSCAN variable names
 #
@@ -357,6 +360,8 @@ def main_func():
     # Kick off the main menu loop
     _debug_('Main loop starting...',2)
 
+    from childapp import running_children
+
     while 1:
 
         # Get next command
@@ -378,14 +383,12 @@ def main_func():
                     if p.poll_counter == p.poll_interval:
                         p.poll_counter = 0
                         p.poll()
+
+            for child in running_children:
+                child.poll()
+
             time.sleep(0.01)
 
-        for p in poll_plugins:
-            if not (rc_object.app and p.poll_menu_only):
-                p.poll_counter += 1
-                if p.poll_counter == p.poll_interval:
-                    p.poll_counter = 0
-                    p.poll()
 
         for p in eventlistener_plugins:
             p.eventhandler(event=event)
@@ -393,6 +396,9 @@ def main_func():
         if event == FUNCTION_CALL:
             event.arg()
 
+        elif event.handler:
+            event.handler(event=event)
+            
         # Send events to either the current app or the menu handler
         elif rc_object.app:
             if not rc_object.app(event):
