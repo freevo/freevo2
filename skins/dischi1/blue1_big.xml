@@ -44,7 +44,7 @@
       <!-- definition of the main menu -->
       <view layout="view0" visible="no"/>
       <listing layout="list_main" visible="yes">
-	<area x="230" y="120" width="320" height="390"/> 
+	<area x="230" y="120" width="380" height="390"/> 
       </listing>
     </menu>
 
@@ -64,17 +64,23 @@
 
     <!-- default listing area -->
     <layout label="list0">
-      <content font="font_list" type="text" spacing="10">
-	<selection visible="yes" font="font_list_selected" bgcolor="0xa0000000"
-	  size="0" spacing="5"/>
+      <content type="text" spacing="10">
+	<item type="default" font="font_list"/>
+	<item type="selected" font="font_list_selected">
+	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-3" width="max+10"
+	    height="max+6"/>
+	</item>
       </content>
     </layout>
 
     <!-- main menu listing area -->
     <layout label="list_main">
-      <content font="font_main" type="text" spacing="10">
-	<selection visible="yes" font="font_main_selected" bgcolor="0xa0000000"
-	  size="0" spacing="5"/>
+      <content type="text" spacing="20">
+	<item type="default" font="font_main"/>
+	<item type="selected" font="font_main_selected">
+	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
+	    width="max+20" height="max+10"/>
+	</item>
       </content>
     </layout>
 

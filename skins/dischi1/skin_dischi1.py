@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/02/25 22:56:00  dischi
+# New version of the new skin. It still looks the same (except that icons
+# are working now), but the internal structure has changed. Now it will
+# be easier to do the next steps.
+#
 # Revision 1.18  2003/02/23 18:42:20  dischi
 # Current status of my skin redesign. Currently only the background and
 # the listing area is working, the listing without icons. Let me know what
@@ -77,276 +82,41 @@ TRUE = 1
 FALSE = 0
 
 
-PADDING=5   # Padding/spacing between items
-
-###############################################################################
-
 # Set up the mixer
 mixer = mixer.get_singleton()
 
 # Create the remote control object
 rc = rc.get_singleton()
 
-###############################################################################
 
 
 
-# Draws a text inside a frame based on the settings in the XML file
-def write_text(text, font, area, x=-1, y=-1, width=None, height=None,
-               mode='hard', ellipses='...'):
-    
-    if x == -1: x = area.x
-    if y == -1: y = area.y
+#
+# We have five areas, all inherit from Skin_Area (file area.py)
+#
+# Skin_Screen   (this file)
+# Skin_Title    (not implemented yet)
+# Skin_Listing  (listing.py)
+# Skin_View     (not implemented yet)
+# Skin_Info     (not implemented yet)
 
-    if width == None:
-        width  = area.width
-    if height == None:
-        height = area.height
+from area import Skin_Area
+from listing import Skin_Listing
 
-    if font.shadow.visible:
-        osd.drawstringframed(text, x+font.shadow.x, y+font.shadow.y,
-                             width, height, font.shadow.color, None,
-                             font=font.name, ptsize=font.size,
-                             mode=mode, ellipses=ellipses)
-    osd.drawstringframed(text, x, y, width, height, font.color, None,
-                         font=font.name, ptsize=font.size,
-                         mode=mode, ellipses=ellipses)
-
-
-
-
-###############################################################################
-
-class Skin_Area:
-    def __init__(self, name):
-        self.area_name = name
-        self.alpha     = None           # alpha layer for rectangles
-        self.screen    = None           # backup of the final screen
-        self.area_val  = None
-        self.redraw    = TRUE
-
-    def calc_geometry(self, object, copy_object=0, fit_area=1):
-        if copy_object:
-            object = copy.deepcopy(object)
-            
-        try:
-            if object.width[:3] == 'max':
-                object.width = self.area_val.width + int(object.width[3:])
-        except TypeError:
-            pass
-        
-        try:
-            if object.height[:3] == 'max':
-                object.height = self.area_val.height + int(object.height[3:])
-        except TypeError:
-            pass
-
-        if fit_area:
-            object.x += self.area_val.x
-            object.y += self.area_val.y
-
-        if not object.width:
-            object.width = self.area_val.width
-
-        if not object.height:
-            object.height = self.area_val.height
-
-        return object
-
-        
-    def init_vars(self, settings, display_type):
-        dep_redraw = self.redraw
-        
-        if settings.menu.has_key(display_type):
-            area_val = settings.menu[display_type][0]
-        else:
-            area_val = settings.menu['default'][0]
-
-        area_val = eval('area_val.%s' % self.area_name)
-        
-        if (not self.area_val) or area_val != self.area_val:
-            self.area_val = area_val
-            self.redraw = TRUE
-            
-        if not settings.layout.has_key(area_val.layout):
-            print '*** layout <%s> not found' % area_val.layout
-            return 0
-
-        if not self.redraw:
-            return
-        
-        self.layout = settings.layout[area_val.layout]
-
-        # we need to redraw the area we want to draw in
-        if not dep_redraw and self.redraw and hasattr(self, 'bg'):
-            osd.screen.blit(self.bg[0][0], self.bg[0][1:])
-
-
-    def draw_background(self):
-        if not self.redraw:
-            return
-
-        area = self.area_val
-
-        if hasattr(self, 'bg') and hasattr(self, 'depends'):
-            self.bg = [ [ None, area.x, area.y ], None ]
-            self.bg[0][0] = osd.createlayer(area.width, area.height)
-            self.bg[0][0].blit(osd.screen, (0,0), (area.x, area.y,
-                                                   area.x + area.width,
-                                                   area.y + area.height))
-                
-        self.alpha = None
-        for bg in copy.deepcopy(self.layout.background):
-            if isinstance(bg, xml_skin.XML_image):
-                self.calc_geometry(bg)
-                image = osd.loadbitmap(bg.filename)
-                osd.screen.blit(image, (bg.x, bg.y))
-            elif isinstance(bg, xml_skin.XML_rectangle):
-                self.calc_geometry(bg, fit_area=FALSE)
-                if not self.alpha:
-                    self.alpha = osd.createlayer(area.width, area.height)
-                    # clear surface
-                    self.alpha.fill((0,0,0,0))
-                osd.drawroundbox(bg.x, bg.y, bg.x+bg.width, bg.y+bg.height, bg.bgcolor,
-                                 bg.size, bg.color, bg.radius, layer=self.alpha)
-
-        if self.alpha:
-            osd.screen.blit(self.alpha, (area.x, area.y))
-
-        if hasattr(self, 'bg'):
-            self.bg[1] = osd.createlayer(area.width, area.height)
-            self.bg[1].blit(osd.screen, (0,0), (area.x, area.y,
-                                                area.x + area.width,
-                                                area.y + area.height))
-
-
-
-    def drawroundbox(self, x, y, width, height, rect):
-        area = self.area_val
-        if self.alpha:
-            osd.screen.blit(self.bg[0][0], (x, y), (x-area.x, y-area.y, width, height))
-            a = osd.createlayer(width, height)
-            a.blit(self.alpha, (0,0), (x - area.x, y - area.y, width, height))
-
-            osd.drawroundbox(0, 0, width, height,
-                             color = rect.bgcolor, border_size=rect.size,
-                             border_color=rect.color, radius=rect.radius, layer=a)
-            osd.screen.blit(a, (x, y))
-        else:
-            osd.drawroundbox(x, y, x+width, y+height,
-                             color = rect.bgcolor, border_size=rect.size,
-                             border_color=rect.color, radius=rect.radius)
-
-        
-    
-###############################################################################
-        
 class Skin_Screen(Skin_Area):
     def __init__(self, parent):
         Skin_Area.__init__(self, 'screen')
 
-    def __call__(self, settings, menuw):
-        menu = menuw.menustack[-1]
+    def update_content_needed(self, settings, menuw):
+        return FALSE
 
-        self.redraw = FALSE
-        self.init_vars(settings, menu.item_types)
-        self.draw_background()
+    def update_content(self, settings, menuw):
+        pass
+
 
 ###############################################################################
 
 
-class Skin_Listing(Skin_Area):
-    def __init__(self, parent):
-        Skin_Area.__init__(self, 'listing')
-        self.bg = [ None, None ]
-        self.last_choices = ( None, None )
-        self.depends = ( parent.screen_area, )
-        
-    def __call__(self, settings, menuw):
-        menu = menuw.menustack[-1]
-
-        self.redraw = FALSE
-        for d in self.depends:
-            self.redraw = d.redraw or self.redraw
-
-        self.init_vars(settings, menu.item_types)
-
-        layout    = self.layout
-        area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
-        selection = content.selection
-
-        self.draw_background()
-        menu_redraw = self.redraw
-        
-        if not settings.font.has_key(content.font):
-            print '*** font <%s> not found' % content.font
-            return 0
-
-        font1 = settings.font[content.font]
-
-        if not settings.font.has_key(selection.font):
-            print '*** font <%s> not found' % selection.font
-            font2 = font1
-        else:
-            font2 = settings.font[selection.font]
-
-        if not self.redraw:
-            self.redraw = self.last_choices[0] != menu.selected
-            
-        if not self.redraw:
-            i = 0
-            for choice in menuw.menu_items:
-                if self.last_choices[1][i] != choice:
-                    self.redraw = TRUE
-                    break
-                i += 1
-                
-        if not self.redraw:
-            return
-
-        if not menu_redraw:
-            osd.screen.blit(self.bg[1], (area.x, area.y))
-
-        x0 = content.x + selection.spacing
-        y0 = content.y + selection.spacing
-
-        width  = content.width - 2* selection.spacing
-
-        for choice in menuw.menu_items:
-            font = font1
-            if choice == menu.selected:
-                font = font2
-
-
-            text = choice.name
-            if not text:
-                print "no text to display ... strange. Use default"
-                text = "unknown"
-
-            if choice.type == 'playlist':
-                text = 'PL: %s' % text
-
-            font_w, font_h = osd.stringsize(text, font=font.name, ptsize=font.size)
-            spacing = font_h + content.spacing     
-        
-            if choice == menu.selected and selection.visible:
-                self.drawroundbox(x0 - selection.spacing,
-                                  y0 - selection.spacing,
-                                  2*selection.spacing + width,
-                                  2*selection.spacing + font_h,
-                                  selection)
-                                  
-                    
-            write_text(text, font, area, x=x0, y=y0, width=width,
-                       height=-1, mode='hard')
-
-            y0 += spacing
-
-        self.last_choices = (menu.selected, copy.copy(menuw.menu_items))
-
-
-        
 ###############################################################################
 # Skin main functions
 ###############################################################################
@@ -418,11 +188,17 @@ class Skin:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return (0,0)
 
+        if menu.skin_settings:
+            settings = menu.skin_settings
+        else:
+            settings = self.settings
+
         # hack for the main menu to fit all in one screen
         if not menu.packrows:
-            return (5,1)
-        
-        return (5, 1)
+            menu.item_types = 'main'
+
+        rows, cols = self.listing_area.get_items_geometry(settings, menu)[:2]
+        return (cols, rows)
         
 
 
@@ -470,7 +246,7 @@ class Skin:
             
         for a in self.area_names:
             area = eval('self.%s_area' % a)
-            area(settings, menuw)
+            area.draw(settings, menuw)
 
         osd.update()
         

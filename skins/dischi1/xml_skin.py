@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/25 22:56:00  dischi
+# New version of the new skin. It still looks the same (except that icons
+# are working now), but the internal structure has changed. Now it will
+# be easier to do the next steps.
+#
 # Revision 1.9  2003/02/23 18:42:20  dischi
 # Current status of my skin redesign. Currently only the background and
 # the listing area is working, the listing without icons. Let me know what
@@ -281,7 +286,7 @@ class XML_area(XML_data):
                     self.area2.parse(subnode, scale, current_dir)
 
     def __cmp__(self, other):
-        return XML_data.__cmp__(self, other) and self.area2 == other.area2
+        return not (not XML_data.__cmp__(self, other) and self.area2 == other.area2)
 
     
 class XML_menu:
@@ -314,19 +319,25 @@ class XML_rectangle(XML_data):
 
 class XML_content(XML_data):
     def __init__(self):
-        XML_data.__init__(self, ('type', 'font', 'spacing', 'x', 'y',
+        XML_data.__init__(self, ('type', 'spacing', 'x', 'y',
                                  'width', 'height'))
-        self.selection = XML_data(('visible', 'font', 'color', 'bgcolor',
-                                   'size', 'radius', 'spacing'))
-
+        self.types = {}
+        
     def parse(self, node, scale, current_dir):
         XML_data.parse(self, node, scale, current_dir)
         for subnode in node.children:
-            if subnode.name == u'selection':
-                self.selection.parse(subnode, scale, current_dir)
+            if subnode.name == u'item':
+                type = attr_str(subnode, "type", '')
+                if type and not self.types.has_key(type):
+                    self.types[type] = XML_data(('font',))
+                    self.types[type].rectangle = None
+                if type:
+                    self.types[type].parse(subnode, scale, current_dir)
+                    for rnode in subnode.children:
+                        if rnode.name == u'rectangle':
+                            self.types[type].rectangle = XML_rectangle()
+                            self.types[type].rectangle.parse(rnode, scale, current_dir)
 
-    def __cmp__(self, other):
-        return XML_data.__cmp__(self, other) and self.selection == other.selection
 
         
 class XML_layout:
@@ -348,7 +359,7 @@ class XML_layout:
                 self.content.parse(subnode, scale, current_dir)
 
     def __cmp__(self, other):
-        return self.background == other.background and self.content == other.content
+        return not (self.background == other.background and self.content == other.content)
 
 
 # ======================================================================
@@ -367,7 +378,7 @@ class XML_font(XML_data):
                 self.shadow.parse(node, scale, current_dir)
 
     def __cmp__(self, other):
-        return XML_data.__cmp__(self, other) and self.shadow == other.shadow
+        return not (not XML_data.__cmp__(self, other) and self.shadow == other.shadow)
 
     
 # ======================================================================
