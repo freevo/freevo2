@@ -207,7 +207,7 @@ class Process:
             
         return False
 
-    def __child_died( self, proc ):
+    def __child_died( self ):
         """
         Callback from watcher when the child died.
         """
@@ -352,12 +352,12 @@ class _Watcher:
                 log.error('error retrieving process information from %d' % p)
             elif os.WIFEXITED( status ) or os.WIFSIGNALED( status ) or \
                      os.WCOREDUMP( status ):
-                self.__processes[ p ]( p )
                 remove_proc.append( p )
 
         # remove dead processes
         for p in remove_proc:
             if p in self.__processes:
+	    	self.__processes[ p ]()
                 del self.__processes[ p ]
 
     def killall( self ):
