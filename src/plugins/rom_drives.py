@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/04/26 15:09:19  dischi
+# changes for the new mount/umount
+#
 # Revision 1.5  2003/04/24 19:56:38  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -248,6 +251,9 @@ class RemovableMedia:
         self.type      = 'empty_cdrom'
 
     def is_tray_open(self):
+        if self.tray_open and self.info:
+            # if we have an info, the tray can't be open
+            self.tray_open = FALSE
         return self.tray_open
 
     def move_tray(self, dir='toggle', notify=1):
@@ -255,7 +261,7 @@ class RemovableMedia:
         """
 
         if dir == 'toggle':
-            if self.tray_open:
+            if self.is_tray_open():
                 dir = 'close'
             else:
                 dir = 'open'
@@ -290,7 +296,7 @@ class RemovableMedia:
         """
 
         if DEBUG: print 'Mounting disc in drive %s' % self.drivename
-        util.mount(self.mountdir)
+        util.mount(self.mountdir, force=TRUE)
         return
 
     
@@ -439,7 +445,7 @@ class Identify_Thread(threading.Thread):
             image = movie_info.image
                         
         # Disc is data of some sort. Mount it to get the file info
-        util.mount(media.mountdir)
+        util.mount(media.mountdir, force=TRUE)
 
         # Check for DVD/VCD/SVCD
         for mediatype in mediatypes:
