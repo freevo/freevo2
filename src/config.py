@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2003/11/01 16:28:43  dischi
+# encode program names to avoid a crash in the web guide
+#
 # Revision 1.65  2003/10/24 03:28:08  krister
 # Fixed a bug where the ROM drives autodetection would crash if ROM_DRIVES=None
 #
@@ -716,12 +719,12 @@ def detect_channels():
 
         for a in xmltv_channels:
             if (a['display-name'][1][0][0].isdigit()):
-                display_name = a['display-name'][0][0]
-                tunerid = a['display-name'][1][0]
+                display_name = a['display-name'][0][0].encode(LOCALE, 'ignore')
+                tunerid = a['display-name'][1][0].encode(LOCALE, 'ignore')
             else:
-                display_name = a['display-name'][1][0]
-                tunerid = a['display-name'][0][0]
-            id = a['id']
+                display_name = a['display-name'][1][0].encode(LOCALE, 'ignore')
+                tunerid = a['display-name'][0][0].encode(LOCALE, 'ignore')
+            id = a['id'].encode(LOCALE, 'ignore')
 
             chanlist += [(id,display_name,int(tunerid))]
 
