@@ -9,6 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/02/04 13:14:12  dischi
+# o fixed some problems with the eventhandler (and cleaned up that part)
+# o DirectoryItem now reads skin.xml to get personal settings for the
+#   variables MOVIE_PLAYLISTS, DIRECTORY_SORT_BY_DATE and
+#   DIRECTORY_AUTOPLAY_SINGLE_ITEM
+# o reformat to 80 chars/line
+#
 # Revision 1.22  2003/01/21 14:16:53  dischi
 # Fix to avoid a crash if bins fails (xml parser broken or invalid xml file)
 #
@@ -36,28 +43,8 @@
 # items based on the directory cahnges.
 #
 # Revision 1.16  2003/01/09 05:04:06  krister
-# Added an option to play all movies in a dir, and generate random playlists for them.
-#
-# Revision 1.15  2003/01/05 11:48:53  dischi
-# ignore .xvpics directories
-#
-# Revision 1.14  2002/12/31 04:02:18  krister
-# Bugfix for mismatched variable names.
-#
-# Revision 1.13  2002/12/22 12:59:34  dischi
-# Added function sort() to (audio|video|games|image) item to set the sort
-# mode. Default is alphabetical based on the name. For mp3s and images
-# it's based on the filename. Sort by date is in the code but deactivated
-# (see mediamenu.py how to enable it)
-#
-# Revision 1.12  2002/12/11 16:06:54  dischi
-# First version of a RandomPlaylist. You can access the random playlist
-# from the item menu of the directory. The non-recursive random playlist
-# should be added there, too, but there are some problems, so it's still
-# inside the directory.
-#
-# Revision 1.11  2002/12/11 10:25:28  dischi
-# Sort directories and playlists, too
+# Added an option to play all movies in a dir, and generate random playlists
+# for them.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -83,6 +70,8 @@
 
 
 import os
+import traceback
+
 import util
 import config
 import menu
@@ -99,10 +88,13 @@ import audio.interface
 import image.interface
 import games.interface
 
+# XML support
+from xml.utils import qp_xml
+            
 try:
     import image.camera
     USE_CAMERA = 1
-except:
+except ImportError:
     USE_CAMERA = 0
 
     
@@ -125,7 +117,6 @@ class MediaMenu(Item):
     
     def __init__(self):
         Item.__init__(self)
-        self.main_menu_selected = -1
 
     def main_menu_generate(self):
         """
@@ -148,11 +139,11 @@ class MediaMenu(Item):
         for d in dirs:
             try:
                 (title, dir) = d
-                d = DirItem(dir, self, name = title, display_type = self.display_type)
+                d = DirItem(dir, self, name = title,
+                            display_type = self.display_type)
                 items += [ d ]
             except:
-                # XXX catch other stuff like playlists and files here later
-                pass
+                traceback.print_exc()
 
         # DigiCam
         if USE_CAMERA:
@@ -219,14 +210,13 @@ class MediaMenu(Item):
             if not menuw:               # this shouldn't happen
                 menuw = menu.get_singleton() 
 
-            if menuw.menustack[1] == menuw.menustack[-1]:
-                self.main_menu_selected = menuw.all_items.index(menuw.menustack[1].selected)
+            menu = menuw.menustack[1]
 
+            sel = menu.choices.index(menu.selected)
             menuw.menustack[1].choices = self.main_menu_generate()
+            menu.selected = menu.choices[sel]
 
-            menuw.menustack[1].selected = menuw.menustack[1].choices[self.main_menu_selected]
-
-            if menuw.menustack[1] == menuw.menustack[-1]:
+            if menu == menuw.menustack[-1] and not rc.app:
                 menuw.init_page()
                 menuw.refresh()
             return TRUE
@@ -236,6 +226,7 @@ class MediaMenu(Item):
 
 
 
+# ======================================================================
     
 class DirItem(Playlist):
     """
@@ -279,6 +270,30 @@ class DirItem(Playlist):
             self.xml_file = dir+'/skin.xml'
 
 
+        # set directory variables to default
+        all_variables = ( 'MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
+                          'DIRECTORY_AUTOPLAY_SINGLE_ITEM' )
+        for v in all_variables:
+            setattr ( self, v, eval('config.%s' % v))
+
+        # set variables to values in xml file
+        if self.xml_file and os.path.isfile(self.xml_file):
+            try:
+                parser = qp_xml.Parser()
+                var_def = parser.parse(open(self.xml_file).read())
+            except:
+                print "Skin XML file %s corrupt" % self.xml_file
+                traceback.print_exc()
+                return
+
+            for top in var_def.children:
+                if top.name == 'variables':
+                    for var_names in top.children:
+                        for v in all_variables:
+                            if var_names.name.upper() == v.upper():
+                                setattr(self, v, int(var_names.textof()))
+
+        
     def copy(self, obj):
         """
         Special copy value DirItem
@@ -303,8 +318,9 @@ class DirItem(Playlist):
         #                 'Random play all items' ) ]
 
         if not self.display_type or self.display_type == 'audio':
-            items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES), self),
-                        'Recursive random play all items' ) ]
+            items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES),
+                                       self),
+                        'Recursive random play all items') ]
         return items
     
 
@@ -337,10 +353,12 @@ class DirItem(Playlist):
             if not self.display_type or self.display_type == t:
                 play_items += eval(t + '.interface.cwd(self, files)')
 
-        if 0: # sort by date
-            play_items.sort(lambda l, o: cmp(l.sort('date').upper(), o.sort('date').upper()))
+        if self.DIRECTORY_SORT_BY_DATE:
+            play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
+                                             o.sort('date').upper()))
         else:
-            play_items.sort(lambda l, o: cmp(l.sort().upper(), o.sort().upper()))
+            play_items.sort(lambda l, o: cmp(l.sort().upper(),
+                                             o.sort().upper()))
 
         files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
@@ -348,14 +366,15 @@ class DirItem(Playlist):
         # to play one files after the other
         if (not self.display_type or self.display_type == 'audio' or \
             self.display_type == 'image' or \
-            (config.MOVIE_PLAYLISTS and self.display_type == 'video')):
+            (self.MOVIE_PLAYLISTS and self.display_type == 'video')):
             self.playlist = play_items
 
         # build items for sub-directories
         dir_items = []
         for dir in files:
             if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
-                dir_items += [ DirItem(dir, self, display_type = self.display_type) ]
+                dir_items += [ DirItem(dir, self, display_type =
+                                       self.display_type) ]
 
         dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
 
@@ -398,7 +417,8 @@ class DirItem(Playlist):
             title = self.name[1:-1]
 
         # autoplay
-        if len(items) == 1 and items[0].actions():
+        if len(items) == 1 and items[0].actions() and \
+           self.DIRECTORY_AUTOPLAY_SINGLE_ITEM:
             items[0].actions()[0][0](menuw=menuw)
         else:
             item_menu = menu.Menu(title, items, reload_func=self.reload)
@@ -442,7 +462,8 @@ class DirItem(Playlist):
         for t in ( 'video', 'audio', 'image', 'games' ):
             if not self.display_type or self.display_type == t:
                 eval(t + '.interface.update')(self, new_files, del_files, \
-                                              new_items, del_items, self.play_items)
+                                              new_items, del_items, \
+                                              self.play_items)
                 
         # delete play items from the menu
         for i in del_items:
@@ -468,7 +489,7 @@ class DirItem(Playlist):
         # add new play items to the menu
         if new_items:
             self.play_items += new_items
-            if 0: # sort by date
+            if self.DIRECTORY_SORT_BY_DATE:
                 self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
                                                       o.sort('date').upper()))
             else:
@@ -480,7 +501,8 @@ class DirItem(Playlist):
         new_dir_items = []
         for dir in new_files:
             if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
-                new_dir_items += [ DirItem(dir, self, display_type = self.display_type) ]
+                new_dir_items += [ DirItem(dir, self,
+                                           display_type = self.display_type) ]
 
         if new_dir_items:
             self.dir_items += new_dir_items
@@ -490,7 +512,8 @@ class DirItem(Playlist):
         # add new playlist items to the menu
         new_pl_items = []
         if not self.display_type or self.display_type == 'audio':
-            for pl in util.find_matches(new_files, config.SUFFIX_AUDIO_PLAYLISTS):
+            for pl in util.find_matches(new_files,
+                                        config.SUFFIX_AUDIO_PLAYLISTS):
                 new_pl_items += [ Playlist(pl, self) ]
 
         if not self.display_type or self.display_type == 'image':
@@ -536,6 +559,7 @@ class DirItem(Playlist):
 
 
 
+# ======================================================================
 
 import threading
 import thread
@@ -598,7 +622,8 @@ class DirwatcherThread(threading.Thread):
     
     def run(self):
         while 1:
-            if self.dir and self.menuw and self.menuw.menustack[-1] == self.item_menu and \
+            if self.dir and self.menuw and \
+               self.menuw.menustack[-1] == self.item_menu and \
                not rc.app:
                 self.scan()
             time.sleep(2)
