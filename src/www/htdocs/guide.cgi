@@ -12,6 +12,8 @@ sys.stdout = sys.stderr
 import config 
 import xmltv
 import epg_xmltv 
+import rec_interface as ri
+import rec_favorites as rf
 
 # Set to 1 for debug output
 DEBUG = 0
@@ -23,6 +25,9 @@ INTERVAL = web.INTERVAL
 n_cols = web.n_cols
 
 guide = epg_xmltv.get_guide()
+schedule = ri.getScheduledRecordings().getProgramList()
+favs = rf.getFavorites()
+
 
 sys.stdout = so
 
@@ -62,6 +67,17 @@ for chan in guide.chan_list:
 
     for prog in chan.programs:
         if c_left > 0:
+
+            status = 'program'
+
+            if ri.isProgScheduled(prog, schedule):
+                status = 'scheduled'
+                really_now = time.time()
+                if prog.start <= really_now and prog.stop >= really_now:
+                    # in the future we should REALLY see if it is 
+                    # recording instead of just guessing
+                    status = 'recording'
+
             if prog.start <= now and prog.stop >= now:
                 cell = ""
                 if prog.start <= now - INTERVAL:
@@ -91,14 +107,14 @@ for chan in guide.chan_list:
                 pops += '        <td class="popbottom" '
                 pops += 'onClick="document.location=\'record.cgi?chan=%s&start=%s\'">Record</td>\n' % (prog.channel_id, prog.start)
                 pops += '        <td class="popbottom" '
-                pops += 'onClick="document.location=\'favorites.cgi?chan=%s&start=%s\'">Add to Favorites</td>\n' % (prog.channel_id, prog.start)
+                pops += 'onClick="document.location=\'edit_favorite.cgi?chan=%s&start=%s&action=add\'">Add to Favorites</td>\n' % (prog.channel_id, prog.start)
                 pops += '        <td class="popbottom" '
                 pops += 'onClick="javascript:closePop(\'%s\');">Close Window</td>\n' % popid
                 pops += '      </tr>\n'
                 pops += '    </table>\n'
                 pops += '  </div>\n'
                 pops += '</div>\n'
-                fv.tableCell(cell, 'class="program" onclick="showPop(\'%s\', this)" colspan=%s' % (popid, colspan))
+                fv.tableCell(cell, 'class="'+status+'" onclick="showPop(\'%s\', this)" colspan=%s' % (popid, colspan))
                 now += INTERVAL*colspan
                 c_left -= colspan
     fv.tableRowClose()

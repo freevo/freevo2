@@ -9,8 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/01/29 05:29:34  krister
-# Rob Shortts WWW server scripts for Freevo recording.
+# Revision 1.2  2003/02/08 18:35:26  dischi
+# added new version of freevoweb from Rob Shortt
 #
 #
 # -----------------------------------------------------------------------
@@ -56,6 +56,7 @@ class ScheduledRecordings:
 
     def __init__(self):
         self.programList = {}
+	self.favorites = {}
         self.TYPES_VERSION = TYPES_VERSION
         
 
@@ -91,13 +92,78 @@ class ScheduledRecordings:
         self.programList = pl
 
 
+    def addFavorite(self, fav):
+        if not self.favorites.has_key(fav.name):
+            print 'addFavorites: actually adding "%s"' % fav.name
+            self.favorites[fav.name] = fav
+        else:
+            print 'We already have a favorite called "%s".' % fav.name
+
+
+    def removeFavorite(self, name):
+        if self.favorites.has_key(name):
+            del self.favorites[name]
+            print 'removed favorite: %s' % name
+        else:
+            print 'We do not have a favorite called "%s".' % name
+
+
+    def getFavorites(self):
+        return self.favorites
+
+
+    def setFavorites(self, favs):
+        self.favorites = favs
+
+
+    def setFavoritesList(self, favs):
+        newfavs = {}
+
+        for fav in favs:
+            if not newfavs.has_key(fav.name):
+                newfavs[fav.name] = fav
+
+        self.setFavorites(newfavs)
+
+
+    def clearFavorites(self):
+        self.favorites = {}
+
+
 
 class Favorite:
 
 
-    def __init__(self, prio=0, prog=None):
+    def __init__(self, name=None, prog=None, exactchan=FALSE, exactdow=FALSE, exacttod=FALSE, priority=0):
         self.TYPES_VERSION = TYPES_VERSION
-        self.title = prog.title
+        self.name = name
+        self.priority = priority
 
+        if prog:
+            self.title = prog.title
 
+	    if exactchan:
+                self.channel_id = prog.channel_id
+            else:
+                self.channel_id = 'ANY'
+          
+	    if exactdow:
+	        lt = time.localtime(prog.start)
+                self.dow = lt[6]
+            else:
+                self.dow = 'ANY'
+          
+	    if exacttod:
+	        # TODO: translate the TOD from prog.start
+	        lt = time.localtime(prog.start)
+                # self.tod = '%s:%s' % (lt[3], lt[4])
+                self.mod = (lt[3]*60)+lt[4]
+            else:
+                self.mod = 'ANY'
+
+        else:
+            self.title = 'NONE'
+            self.channel_id = 'NONE'
+            self.dow = 'NONE'
+            self.mod = 'NONE'
 

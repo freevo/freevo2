@@ -1,0 +1,38 @@
+#!/bin/bash
+
+CHAN=$1
+TIME=$2
+NAME=$3
+PROG=$4
+PROG="ffmpegrec"
+
+# WIDTH=640
+# HEIGHT=480
+# HEIGHT=494
+WIDTH=496
+HEIGHT=368
+
+DIR=/var/media/Video/Recorded
+OUT="$DIR/$NAME"
+NICE="nice -n -20"
+
+
+case "$PROG" in
+  mencoder)
+  AUDIO="-oac copy"
+  VIDEO="-ovc lavc -lavcopts vcodec=mpeg1video:vhq:vbitrate=4000"
+  DSP="adevice=/dev/dsp1:amode=1:audiorate=32000:forcechan=2"
+  TV1="-tv on:driver=v4l:chanlist=us-cable:norm=NTSC"
+  TV2="channel=$CHAN:$DSP:width=$WIDTH:height=$HEIGHT:outfmt=yuy2"
+  $NICE mencoder $TV1:$TV2 $VIDEO $AUDIO -endpos $TIME -o "$OUT.avi"
+  ;;
+
+  ffmpegrec)
+  AUDIO="-d /dev/dsp1 -r 32000 -b 16 -s -ac mp2 -ab 128 -ap 1"
+  VIDEO="-input Television -norm NTSC -vb 4000 -vq 100 -w $WIDTH -h $HEIGHT -vp 1" 
+  TIME=`echo $TIME*30 | bc`
+  v4lctl setchannel $CHAN
+  sleep 1
+  $NICE ffmpegrec $VIDEO $AUDIO -F $TIME -ff mpeg -o "$OUT.mpeg"
+  ;;
+esac

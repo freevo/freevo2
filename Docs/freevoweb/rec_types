@@ -1,0 +1,143 @@
+rec_types.py:
+-------------
+
+class ScheduledRecordings:
+
+    This object that get pickled to save data on scheduled recordings and
+    favorites is of this class.
+
+
+    def __init__(self):
+        The programList and favorites (dictionaries) are initialized.
+ 
+
+    def addProgram(self, prog, key=None):
+
+        Adds a program (object from epg_types.py) to the programList 
+        dictionary.
+
+        You must pass to it the program to add and may also pass its key for
+        the dictionary.  If the key is left out then it creates one that is
+        the same format as the one which should be passed to it 
+        (channel:start).  This function will not overwrite an entry with 
+        an identical key.
+
+        Returns: nothing
+
+
+    def removeProgram(self, prog, key=None):
+
+        Removes a program from the programList.
+
+        You must pass to it the program to remove and may also pass its
+        key.  If the key is left out then it creates one that is the 
+        expected format (channel:start).  If no such program is in the
+        dictionary it does nothing.
+
+        Returns: nothing
+
+
+    def getProgramList(self):
+
+        Returns: the programList disctionary containing all programs
+        that are scheduled to be recorded.
+
+
+    def setProgramList(self, pl):
+
+        This function takes in a dictionary that explicitly overwrites
+        the programList dictionary.  This is useful when you want to
+        modify all of the programs that are recorded: get them, modify,
+        set them back.  
+
+        Returns: nothing
+
+
+    def addFavorite(self, fav):
+
+        This function takes in a favorite object then adds it to the
+        favorites dictionary.  The key is the name the user gave the
+        favorite.
+
+        Returns: nothing
+
+
+    def removeFavorite(self, name):
+
+        This function takes in the name of a favorite then removes
+        that favorite from the dictionary.
+
+        Returns: nothing
+
+
+    def getFavorites(self):
+ 
+        Returns: A dictionary containing all of the favorites keyed 
+        by name.
+
+
+    def setFavorites(self, favs):
+
+        This function takes in a dictionary that explicitly overwrites
+        the favorites dictionary.  This is useful when you want to
+        modify all of the favorites at once: get them, modify,
+        set them back. 
+
+        Returns: nothing
+
+
+    def setFavoritesList(self, favs):
+
+        This function is similar to setFavorites but it takes in a list
+        of favorites instead of a dictionary.  It creates a dictionary
+        then uses setFavorites to set it.
+
+        Returns: nothing
+
+
+    def clearFavorites(self):
+
+        This function will set the favorites dictionary to nothing.
+
+        Returns: nothing
+
+
+class Favorite:
+
+    This object is used to match patterns on programs in the guide to
+    decide if we want to automaticly record them.
+
+    Properties:
+
+        name: A name to personalize the favorite.  Acts as its key.
+
+        title: The title of the show to record.  Must be an exact match.
+
+        channel_id: The channel to record the show on.  This matches both
+            a TvProgram channel_id and a TvChannel id.  If this is set
+            to 'ANY' is doesn't matter what channel the show is on.
+
+        dow: The day of week to record the show on, 0-6, 0 being Monday.  If
+            set to 'ANY' then it doesn't matter what day the show is on.
+               
+        mod: The minute of day to record the show on, 0-1439, 0 being 12:00 AM
+            and 1439 being 11:59 PM.  rec_interface.py has a function to
+            convert the minute into a logical string.
+
+        priority: An integer stating the priority of this favorite over others.
+            If two shows matching favorites are on at the same time then the
+            show that matched the favorite with the highest priority will
+            be recorded.  A lower number means higher priority.
+
+
+    def __init__(self, name=None, prog=None, exactchan=FALSE, 
+                 exactdow=FALSE, exacttod=FALSE, priority=0):
+
+        The contructor is set up to that you can pass it a program
+        object and create a favorite from it.  The favorite pattern
+        may be as narrow to only record that show on that channel
+        on that day and only on that time of day, or as broad as
+        to record that program any time that it comes on regardless
+        of the channel, day, or time of day.
+
+

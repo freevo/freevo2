@@ -6,8 +6,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/01/29 05:29:34  krister
-# Rob Shortts WWW server scripts for Freevo recording.
+# Revision 1.2  2003/02/08 18:35:26  dischi
+# added new version of freevoweb from Rob Shortt
 #
 #
 # -----------------------------------------------------------------------
@@ -57,6 +57,10 @@ TRUE = 1
 FALSE = 0
 
 
+def logger(stuff, fp=sys.stderr):
+    fp.write(stuff+'\n')
+
+
 #
 #
 # note: add locking and r/rw options to get/save funs
@@ -65,7 +69,7 @@ def getScheduledRecordings():
     scheduledRecordings = None
 
     if os.path.isfile(config.REC_SCHEDULE):
-        print 'GET: reading cached file (%s)' % config.REC_SCHEDULE
+        logger('GET: reading cached file (%s)' % config.REC_SCHEDULE)
         scheduledRecordings = pickle.load(open(config.REC_SCHEDULE, 'r'))
 
         try:
@@ -74,17 +78,17 @@ def getScheduledRecordings():
             print 'The cache does not have a version and must be recreated.'
 
         if file_ver != rec_types.TYPES_VERSION:
-            print (('ScheduledRecordings version number %s is stale (new is %s), must ' +
+            logger(('ScheduledRecordings version number %s is stale (new is %s), must ' +
                     'be reloaded') % (file_ver, rec_types.TYPES_VERSION))
         else:
             if DEBUG:
-                print 'Got ScheduledRecordings (version %s).' % file_ver
+                logger('Got ScheduledRecordings (version %s).' % file_ver)
 
     if scheduledRecordings == None:
         print 'GET: making a new ScheduledRecordings'
         scheduledRecordings = rec_types.ScheduledRecordings()
 
-    print "ScheduledRecordings has %s items." % len(scheduledRecordings.programList)
+    logger('ScheduledRecordings has %s items.' % len(scheduledRecordings.programList))
 
     return scheduledRecordings
 
@@ -120,11 +124,35 @@ def progRunning(prog=None):
     return FALSE
 
 
+def minToTOD(min):
+    min = int(min)
+
+    hour = min/60
+    rem = min - (hour*60)
+
+    ap = 'AM'
+    if hour > 12:
+        hour = hour - 12
+        ap = 'PM'
+
+    if hour == 0:
+        hour = 12
+
+    if rem == 0:
+        rem = '00'
+
+    return '%s:%s %s' % (hour, rem, ap)
+
+
 def scheduleRecording(prog=None):
     if not prog:
         print 'ERROR: no prog'
         return
 
+    if prog.stop < time.time():
+        print 'ERROR: cannot record it if it is over'
+        return
+        
     scheduledRecordings = getScheduledRecordings()
     scheduledRecordings.addProgram(prog, getKey(prog))
     saveScheduledRecordings(scheduledRecordings)
@@ -153,6 +181,21 @@ def cleanScheduledRecordings():
 
     scheduledRecordings.setProgramList(progs)
     saveScheduledRecordings(scheduledRecordings)
+
+
+def isProgScheduled(prog, schedule=None):
+    
+    if schedule == {}:
+        return FALSE
+
+    if not schedule:
+        schedule = getScheduledRecordings().getProgramList()
+
+    for me in schedule.values():
+        if me.start == prog.start and me.channel_id == prog.channel_id:
+            return TRUE
+
+    return FALSE
 
 
 def findProg(chan=None, start=None):
@@ -211,10 +254,16 @@ def checkToRecord():
             recording = FALSE
 
         if prog.start <= now and prog.stop >= now and recording == FALSE:
-            duration = int(prog.stop - now)
-            if duration < 10:
+            # just add to the 'we want to record this' list
+            # then end the loop, and figure out which has priority,
+            # remember to take into account the full length of the shows
+            # and how much they overlap, or chop one short
+            # yeah thats a good idea but make sure its not like 5 mins
+
+            duration = int(prog.stop - now - 10)
+            if duration < 60:
                 return FALSE
-            title = '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H:%M', time.localtime(prog.start)))
+            title = '%s--%s' % (prog.title, time.strftime('%Y-%m-%d-%H%M', time.localtime(prog.start)))
             rec_cmd = '%s %s %s "%s"' % \
               (config.REC_CMD, string.split(prog.channel_id)[0], duration, title)
             print 'REC_CMD: %s' % rec_cmd
@@ -228,7 +277,8 @@ def checkToRecord():
 def main():
     rec_cmd = checkToRecord()
     cleanScheduledRecordings()
-    os.system(rec_cmd)
+    if rec_cmd:
+        os.system(rec_cmd)
 
 
 if __name__ == '__main__':

@@ -7,28 +7,42 @@ so = sys.stdout
 sys.stdout = sys.stderr
 
 import rec_interface as ri
+import rec_favorites as rf
 
 TRUE = 1
 FALSE = 0
 
 form = cgi.FieldStorage()
 
-find = fv.formValue(form, 'find')
+chan = fv.formValue(form, 'chan')
+start = fv.formValue(form, 'start')
+action = fv.formValue(form, 'action')
 
-progs = ri.findMatches(find)
+prog = ri.findProg(chan, start)
+
+if prog:
+    print 'PROG: %s' % prog
+
+if prog:
+    if action == 'remove':
+       print 'want to remove prog: %s' % prog
+       ri.removeScheduledRecording(prog)
+    else:
+       ri.scheduleRecording(prog)
 
 recordings = ri.getScheduledRecordings()
-rec_progs = recordings.getProgramList()
+progs = recordings.getProgramList()
+favs = rf.getFavorites()
 
 sys.stdout = so
 
 fv.printContentType()
-fv.printHeader('Search Results', 'styles/main.css')
+fv.printHeader('Scheduled Recordings', 'styles/main.css')
 
 fv.tableOpen('border=0 cellpadding=4 cellspacing=1 width="100%"')
 fv.tableRowOpen('class="chanrow"')
 fv.tableCell('<img src="images/logo_200x100.png">', 'align=left')
-fv.tableCell('Search Results', 'class="heading" align="left"')
+fv.tableCell('Scheduled Recordings', 'class="heading" align="left"')
 fv.tableRowClose()
 fv.tableClose()
 
@@ -42,17 +56,20 @@ fv.tableCell('Program Description', 'class="guidehead" align="center" colspan="1
 fv.tableCell('Actions', 'class="guidehead" align="center" colspan="1"')
 fv.tableRowClose()
 
-for prog in progs:
-
+f = lambda a, b: cmp(a.start, b.start)
+progl = progs.values()
+progl.sort(f)
+for prog in progl:
     status = 'basic'
-    for rp in rec_progs.values():
-        if rp.start == prog.start and rp.channel_id == prog.channel_id:
-            status = 'scheduled'
-            try:
-                if rp.isRecording == TRUE:
-                    status = 'recording'
-            except:
-                sys.stderr.write('isRecording not set')
+
+    if rf.isProgAFavorite(prog, favs):
+        status = 'favorite'
+    try:
+        if prog.isRecording == TRUE:
+            status = 'recording'
+    except:
+        # sorry, have to pass without doing anything.
+        pass
 
     fv.tableRowOpen('class="chanrow"')
     fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" align="left" colspan="1"')
@@ -66,13 +83,7 @@ for prog in progs:
         cell = prog.desc
     fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
 
-    if status == 'scheduled':
-        cell = '<a href="record.cgi?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
-    elif status == 'recording':
-        cell = '<a href="record.cgi?chan=%s&start=%s">Record</a>' % (prog.channel_id, prog.start)
-    else:
-        cell = '<a href="record.cgi?chan=%s&start=%s">Record</a>' % (prog.channel_id, prog.start)
-
+    cell = '<a href="record.cgi?chan=%s&start=%s&action=remove">Remove</a>' % (prog.channel_id, prog.start)
     fv.tableCell(cell, 'class="'+status+'" align="left" colspan="1"')
 
     fv.tableRowClose()

@@ -51,14 +51,20 @@ TD.basic {
 }
 
 TD.recording { 
-    background: #FF0000; 
+    background: #993333; 
     color: white; 
     text-align: left 
 }
 
 TD.scheduled { 
-    background: #00FF00; 
-    color: black; 
+    background: #996600; 
+    color: white; 
+    text-align: left 
+}
+
+TD.favorite { 
+    background: #006666; 
+    color: white; 
     text-align: left 
 }
 

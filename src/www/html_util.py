@@ -9,8 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2003/01/29 05:29:34  krister
-# Rob Shortts WWW server scripts for Freevo recording.
+# Revision 1.2  2003/02/08 18:35:26  dischi
+# added new version of freevoweb from Rob Shortt
 #
 #
 # -----------------------------------------------------------------------
@@ -123,6 +123,7 @@ def printLinks(fp=sys.stdout):
   <tr>
     <td class="tablelink" onClick="document.location=\'guide.cgi\'">TV Guide</td>
     <td class="tablelink" onClick="document.location=\'record.cgi\'">Scheduled Recordings</td>
+    <td class="tablelink" onClick="document.location=\'favorites.cgi\'">Favorites</td>
   </tr>
 </table>
 </center>

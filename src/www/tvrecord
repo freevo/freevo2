@@ -1,9 +1,0 @@
-#!/bin/bash
-
-CHAN=$1
-TIME=$2
-NAME=$3
-
-DIR=/var/media/Video/Recorded
-
-nice -n -20 mencoder -tv on:driver=v4l:chanlist=us-cable:channel=$CHAN:norm=NTSC:adevice=/dev/dsp1:amode=1:audiorate=32000:forcechan=2:width=496:height=372:outfmt=yuy2 -ovc lavc -lavcopts vcodec=mpeg1video:vhq:vbitrate=4000 -oac copy -endpos $TIME -o "$DIR/$NAME".avi
