@@ -15,6 +15,8 @@ o Fixed a bug in XML that could cause Freevo to crash.
 o Replaced all fonts with the free Larabie fonts.
 o Added a 640x480 mode. The skin is not adapted yet.
 o Improved the handling of removable media (CDROM/DVD)
+o DVD/VCD/SVCD title selecting
+o mplayer hwac3 support
 o Added Andrew Drummond's Mame code. Kinda works, but not done yet.
 o Updated the XMLTV handling to deal with the new German format as well.
 	
