@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: freevo 1.4.0 cvs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-06-02 20:56+0200\n"
+"POT-Creation-Date: 2004-06-03 20:19+0200\n"
 "PO-Revision-Date: 2003-11-10 00:58+0200\n"
 "Last-Translator: Dirk Meyer <dmeyer@tzi.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -15,6 +15,34 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-15\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
+
+#: ../freevo_config.py:758 ../freevo_config.py:763 tv/edit_favorite.py:143
+#: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:191
+#: www/htdocs/search.rpy:184 share/skins/main/info.fxd:390
+msgid "Title"
+msgstr "Titel"
+
+#: ../freevo_config.py:759 plugins/lcd.py:150 plugins/lcd.py:152
+#: plugins/lcd.py:329
+msgid "Description"
+msgstr "Beschreibung"
+
+#: ../freevo_config.py:760
+msgid "Author"
+msgstr "Autor"
+
+#: ../freevo_config.py:764 plugins/lcd.py:149 share/skins/main/info.fxd:331
+#: share/skins/main/noia.fxd:92
+msgid "Date"
+msgstr "Datum"
+
+#: ../freevo_config.py:767
+msgid "Model"
+msgstr "Model"
+
+#: ../freevo_config.py:768
+msgid "Software"
+msgstr ""
 
 #: audio/audiodiskitem.py:83 audio/plugins/cdbackup.py:554
 msgid "Unknown CD Album"
@@ -51,7 +79,7 @@ msgstr "Die CDs zum einlesen werden gesucht"
 #: audio/plugins/cdbackup.py:266 audio/plugins/cdbackup.py:623
 #: audio/plugins/xine.py:88 audio/plugins/xine.py:107 childapp.py:291
 #: plugins/lcd.py:110 plugins/lcd.py:731 plugins/lcd.py:933 plugins/lcd.py:944
-#: plugins/lcd.py:955 skins/main/info_area.py:156 tv/channels.py:149
+#: plugins/lcd.py:955 skins/main/info_area.py:159 tv/channels.py:149
 #: tv/channels.py:186 tv/channels.py:189 tv/record_client.py:133
 #: video/plugins/xine.py:110 video/plugins/xine.py:134
 #: www/htdocs/help/howto.rpy:132 www/htdocs/help/doc.rpy:108
@@ -207,7 +235,7 @@ msgstr "Cover-Suchergebnisse"
 msgid "No covers available from Amazon"
 msgstr "Bei Amazon wurden keine Covers gefunden"
 
-#: audio/plugins/coversearch.py:327 video/plugins/imdb.py:215
+#: audio/plugins/coversearch.py:327 video/plugins/imdb.py:218
 msgid "getting data..."
 msgstr "Daten werden geholt..."
 
@@ -624,7 +652,7 @@ msgstr "Kein weiterer Eintrag in dieser Playliste"
 msgid "no previous item in playlist"
 msgstr "Kein vorheriger Eintrag in dieser Playliste"
 
-#: menu.py:588
+#: menu.py:591
 msgid "No action defined for this choice!"
 msgstr "Es wurde keine Aktion für diese Auswahl festgelegt!"
 
@@ -771,35 +799,7 @@ msgstr ""
 msgid "play"
 msgstr "Abspielen"
 
-#: image/viewer.py:441 image/viewer.py:452 tv/edit_favorite.py:143
-#: www/htdocs/manualrecord.rpy:222 www/htdocs/record.rpy:191
-#: www/htdocs/search.rpy:184 share/skins/main/info.fxd:390
-msgid "Title"
-msgstr "Titel"
-
-#: image/viewer.py:442 plugins/lcd.py:150 plugins/lcd.py:152
-#: plugins/lcd.py:329
-msgid "Description"
-msgstr "Beschreibung"
-
-#: image/viewer.py:443
-msgid "Author"
-msgstr "Autor"
-
-#: image/viewer.py:453 plugins/lcd.py:149 share/skins/main/info.fxd:331
-#: share/skins/main/noia.fxd:92
-msgid "Date"
-msgstr "Datum"
-
-#: image/viewer.py:456
-msgid "Model"
-msgstr "Model"
-
-#: image/viewer.py:457
-msgid "Software"
-msgstr ""
-
-#: image/viewer.py:478
+#: image/viewer.py:444
 msgid "No information available"
 msgstr "Keine Informationen verfügbar"
 
@@ -1198,7 +1198,7 @@ msgstr "Lese Scheibe in Laufwerk %s"
 msgid "TV GUIDE"
 msgstr "TV-Guide"
 
-#: skins/main/info_area.py:156
+#: skins/main/info_area.py:159
 msgid "missing 'src' attribute in skin tag!"
 msgstr ""
 
@@ -1727,28 +1727,28 @@ msgstr "Lesezeichen"
 msgid "Jump to %s"
 msgstr "Zu '%s' springen"
 
-#: video/plugins/imdb.py:105
+#: video/plugins/imdb.py:108
 msgid "Search IMDB for this file"
 msgstr "IMDB nach dieser Datei durchsuchen"
 
-#: video/plugins/imdb.py:112 video/plugins/imdb.py:119
+#: video/plugins/imdb.py:115 video/plugins/imdb.py:122
 #, python-format
 msgid "Search IMDB for [%s]"
 msgstr "IMDB nach [%s] durchsuchen"
 
-#: video/plugins/imdb.py:130
+#: video/plugins/imdb.py:133
 msgid "searching IMDB..."
 msgstr "IMDB wird durchsucht..."
 
-#: video/plugins/imdb.py:154
+#: video/plugins/imdb.py:157
 msgid "Unknown error while connecting to IMDB"
 msgstr "Unbekannter Fehler beim Verbinden zu IMDB"
 
-#: video/plugins/imdb.py:172
+#: video/plugins/imdb.py:175
 msgid "IMDB Query"
 msgstr "IMDB-Abfrage"
 
-#: video/plugins/imdb.py:176
+#: video/plugins/imdb.py:179
 msgid "No information available from IMDB"
 msgstr "Keine Informationen von IMDB verfügbar"
 
@@ -1801,11 +1801,11 @@ msgstr "Informationen über diesen Eintrag anzeigen"
 msgid "Details"
 msgstr ""
 
-#: video/__init__.py:181
+#: video/__init__.py:224
 msgid "Directory Autobuild Thumbnails "
 msgstr ""
 
-#: video/__init__.py:182
+#: video/__init__.py:225
 msgid "Build video thumbnails for all items (may take a while when entering)."
 msgstr ""
 
