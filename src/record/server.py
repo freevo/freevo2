@@ -201,6 +201,8 @@ class RecordServer(RPCServer):
                 r = Recording(self.rec_id, title, channel, f.priority,
                               start, stop)
                 r.favorite = True
+                r.start_padding = f.start_padding
+                r.stop_padding = f.stop_padding
                 if r in self.recordings:
                     # This does not only avoids adding recordings twice, it
                     # also prevents from added a deleted favorite as active

@@ -37,18 +37,22 @@ class Device:
         if not self.rec[-1].channel in self.all_channels:
             # channel not supported
             return False
-        if scan(self.rec):
+        if scan(self.rec, False):
             # conflict not possible
             # FIXME: maybe ok
             return False
         return True
     
         
-def scan(recordings):
+def scan(recordings, include_padding):
     """
     Scan the schedule for conflicts. A conflict is a list of recordings
     with overlapping times.
     """
+    if include_padding:
+        for r in recordings:
+            r.start -= r.start_padding
+            r.stop  += r.stop_padding
     # Sort by start time
     recordings.sort(lambda l, o: cmp(l.start,o.start))
 
@@ -93,6 +97,10 @@ def scan(recordings):
             # [] for the next scanning to get groups of conflicts
             conflicts.append([ r ] + current)
 
+    if include_padding:
+        for r in recordings:
+            r.start += r.start_padding
+            r.stop  -= r.stop_padding
     return conflicts
 
 
@@ -101,6 +109,8 @@ def rate(devices, best_rating):
     for d in devices[:-1]:
         for r in d.rec:
             rating += r.priority * d.rating
+        # overlapping padding gives minus points
+        rating -= 5 * (len(scan(d.rec, True)) - len(scan(d.rec, False)))
     if rating > best_rating:
         # remember
         best_rating = rating
@@ -146,7 +156,7 @@ def resolve(recordings):
     global call_notifier
     call_notifier = 0
 
-    conflicts = scan(recordings)
+    conflicts = scan(recordings, True)
     if conflicts:
         # create 'devices'
         devices = [ Device() ]

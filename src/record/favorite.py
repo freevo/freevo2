@@ -58,6 +58,9 @@ class Favorite:
             start = int(m[0])*100 + int(m[1])
             stop  = int(m[2])*100 + int(m[3])
             self.times.append((start, stop))
+        self.start_padding = config.TV_RECORD_PADDING
+        self.stop_padding  = config.TV_RECORD_PADDING
+
 
     def short_list(self):
         """
@@ -100,6 +103,9 @@ class Favorite:
                     start = int(m[0])*100 + int(m[1])
                     stop  = int(m[2])*100 + int(m[3])
                     self.times.append((start, stop))
+            if child.name == 'padding':
+                self.start_padding = int(parser.getattr(child, 'start'))
+                self.stop_padding  = int(parser.getattr(child, 'stop'))
             if child.name == 'priority':
                 setattr(self, 'priority', int(parser.gettext(child)))
 
@@ -161,6 +167,9 @@ class Favorite:
         if self.once:
             subnode = fxdparser.XMLnode('once')
             fxd.add(subnode, node)
+        padding = fxdparser.XMLnode('padding', [ ('start', self.start_padding),
+                                                 ('stop', self.stop_padding) ])
+        fxd.add(padding, node)
         return node
 
     def __cmp__(self, obj):

@@ -71,7 +71,7 @@ class Recording:
 
         self.subtitle = ''
         self.url      = ''
-        self.start_padding  = config.TV_RECORD_PADDING
+        self.start_padding = config.TV_RECORD_PADDING
         self.stop_padding  = config.TV_RECORD_PADDING
         for i in info:
             if i in ('subtitle', 'url'):
