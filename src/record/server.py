@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/11/04 19:14:08  dischi
+# add mbus parameter parsing
+#
 # Revision 1.9  2004/11/04 17:37:55  dischi
 # update to new mcomm interface
 #
@@ -40,14 +43,18 @@ import notifier
 import mcomm
 
 class RecordServer(mcomm.RPCServer):
-                
-    def __rpc_list_recordings__(self, addr, val):
-        print 'request from', addr
-        print 'val', val
-        print
+
+    def __rpc_recording_list__(self, addr, val):
         self.parse_parameter(val, () )
         return mcomm.RPCReturn()
-    
+
+    def __rpc_recording_add__(self, addr, val):
+        name, channel, prio, start, stop, info = \
+              self.parse_parameter(val, ( unicode, unicode, int, int, int, dict ) )
+        print 'RecordRequest: %s' % String(name)
+        return mcomm.RPCReturn()
+
+        
 #     def saveScheduledRecordings(self, scheduledRecordings=None):
 #         pass
 

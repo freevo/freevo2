@@ -1,9 +1,6 @@
 # test code, replacing record_client and record_server in the future
 
-if __name__ == '__main__':
-    import notifier
-    notifier.init( notifier.GENERIC )
-    
+import sys
 import mcomm
 
 server = None
@@ -22,12 +19,16 @@ def notification(entity):
         print 'recordserver found'
         server = entity
         try:
-            print server.list_recordings()  # wait
+            print server.recording_list()  # wait
         except mcomm.MException, e:
             print 'recordings.notification:', e
+        info = { 'description': 'foo', 'sub_title': 1 }
+        print server.recording_add(String('Umlaut ö'), Unicode('ÖRF'), 2, 78, 100, info)
+        sys.exit(0)
         return
     
 mcomm.register_entity_notification(notification)
 
 if __name__ == '__main__':
+    import notifier
     notifier.loop()

@@ -148,7 +148,7 @@ class RemoteEntity:
         """
         if attr in ('has_key', ) or attr.startswith('__'):
             return getattr(self.addr, attr)
-        self.cmd  = attr.replace('_', '-')
+        self.cmd  = attr.replace('_', '.')
         return self.__call
 
 
@@ -159,6 +159,30 @@ class RemoteEntity:
         self.result = return_list
 
 
+    def __build_args(self, args):
+        """
+        Internal function to build argument list
+        """
+        ret     = []
+        is_dict = False
+        if args.__class__ == dict:
+            is_dict = True
+        for a in args:
+            if is_dict:
+                var = args[a]
+            else:
+                var = a
+            if var.__class__ == unicode:
+                var = String(var)
+            if var.__class__ in (list, tuple, dict):
+                var = self.__build_args(var)
+            if is_dict:
+                ret.append((String(a), var))
+            else:
+                ret.append(var)
+        return ret
+    
+    
     def __call(self, *args, **kargs):
         """
         Internal function to do the real RPC call.
@@ -177,7 +201,7 @@ class RemoteEntity:
             wait        = True
             self.result = None
         self.mbus_instance.sendRPC(self.addr, 'home-theatre.' + self.cmd,
-                                   cmdargs, callback)
+                                   self.__build_args(cmdargs), callback)
 
         if self.result == True:
             return True
@@ -188,12 +212,11 @@ class RemoteEntity:
 
         # check for errors / exceptions and raise them
         if isinstance(self.result, mbus.types.MError):
-            raise MException(self.result.descr)
+            raise MException(str(self.result))
 
         status, args = self.result[0][1:]
         r = self.result[0][1:]
         if status[0] == 'FAILED':
-            print status
             if status[1] in ('TypeError', ):
                 raise eval(status[1])(status[2])
             else:
@@ -227,19 +250,41 @@ class RPCServer:
         add_callback = instance(mbus_instance).addRPCCallback
         for f in dir(self):
             if f.startswith('__rpc_'):
-                cmdname = 'home-theatre.' + f[6:-2].replace('_', '-')
+                cmdname = 'home-theatre.' + f[6:-2].replace('_', '.')
                 add_callback(cmdname, getattr(self, f))
 
 
+    def __check_list(self, val, pattern):
+        """
+        check parameter against pattern
+        """
+        ret = []
+        for i in range(len(val)):
+            if pattern[i] == str:
+                ret.append(String(val[i]))
+            elif pattern[i] == unicode:
+                ret.append(Unicode(val[i]))
+            elif pattern[i].__class__ in (list, tuple):
+                ret.append(self.__check_list(val[i], pattern[i]))
+            else:
+                ret.append(pattern[i](val[i]))
+        return ret
+            
+            
     def parse_parameter(self, val, pattern):
         """
         Parse the given parameter and send a TypeError if the parameters
         don't match the pattern.
         """
         if len(pattern) == len(val):
-            if len(val) == 1:
-                return val[0]
-            return val
+            try:
+                if len(val) == 1:
+                    return self.__check_list(val, pattern)[0]
+                return self.__check_list(val, pattern)
+            except Exception, e:
+                function = traceback.extract_stack(limit = 2)[0][2][6:-2]
+                msg = 'Argument parsing error in %s(): %s' % (function, e)
+                raise mbus.RPCException('TypeError', msg)
         if len(pattern) == 1:
             arg = '1 argument'
         else:
