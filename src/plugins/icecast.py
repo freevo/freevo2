@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/08/25 15:49:51  mikeruelle
+# shutdown ices first since it can cause both to not shutdown and make zombie processes
+#
 # Revision 1.5  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -107,8 +110,8 @@ class PluginInterface(plugin.DaemonPlugin):
     def shutdown(self):
         # print 'icecast server::shutdown: pid=%s' % self.pid
         print 'Stopping icecast server plugin.'
-        os.kill(self.icecast_pid, signal.SIGTERM)
-        os.waitpid(self.icecast_pid, 0)
         os.kill(self.ices_pid, signal.SIGTERM)
         os.waitpid(self.ices_pid, 0)
+        os.kill(self.icecast_pid, signal.SIGTERM)
+        os.waitpid(self.icecast_pid, 0)
 
