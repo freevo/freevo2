@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.00
+LOCAL_CONF_VERSION  = 5.01
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -186,7 +186,9 @@ LOCAL_CONF_CHANGES = [
     (5.00,
      '''Changed some config variables. From now on until told otherwise in this log
      always run \'./freevo convert_config\' to convert your local_conf.py to
-     change the variable names''')]
+     change the variable names'''),
+    (5.01,
+     '''Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu''')]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -324,6 +326,17 @@ PLAYLIST_SUFFIX = [ 'm3u' ]
 #   menus
 
 
+# Items in the main menu.
+plugin.activate('tv', level=10)
+plugin.activate('video', level=20)
+plugin.activate('audio', level=30)
+plugin.activate('image', level=40)
+plugin.activate('base.shutdown', level=50)
+
+if CONF.xmame or CONF.snes:
+    plugin.activate('games', level=45)
+
+
 # ROM drive support
 
 # autostarter when inserting roms while Freevo is in the MAIN MENU
@@ -331,21 +344,9 @@ plugin.activate('rom_drives.autostart')
 
 # add the rom drives to each sub main menu
 rom_plugins = {}
-for type in ('video', 'audio', 'image', 'games'):
-    rom_plugins[type] = plugin.activate('rom_drives.rom_items',
-                                        type=type, level=50)
+for t in ('video', 'audio', 'image', 'games'):
+    rom_plugins[t] = plugin.activate('rom_drives.rom_items', type=t, level=50)
 
-
-
-# Items in the main menu.
-plugin_tv       = plugin.activate('tv', level=10)
-plugin_video    = plugin.activate('mediamenu', level=20, args='video')
-plugin_audio    = plugin.activate('mediamenu', level=30, args='audio')
-plugin_image    = plugin.activate('mediamenu', level=40, args=('image', True))
-plugin_shutdown = plugin.activate('base.shutdown', level=50)
-
-if CONF.xmame or CONF.snes:
-    plugin_games = plugin.activate('mediamenu', level=45, args='games')
 
 # mixer
 plugin.activate('mixer')
@@ -582,6 +583,10 @@ AUDIO_COVER_REGEXP = 'front|-f'
 #
 AUDIO_PREFERED_PLAYER = 'mplayer'
 
+#
+# Also show video files in the audio menu (for musicvideos)
+#
+AUDIO_SHOW_VIDEOFILES = False
 
 # ======================================================================
 # Freevo image viewer settings:
