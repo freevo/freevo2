@@ -1,25 +1,6 @@
---- mencoder.c	Mon Mar 10 12:12:11 2003
-+++ mencoder.c.fb	Sat Apr 19 16:00:52 2003
-@@ -363,7 +363,16 @@
-   mp_msg_init();
-   mp_msg_set_level(MSGL_STATUS);
-   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
-+  
-+  {
-+    static char msg_freevo[] =
-+      "\n\n\n\nFREEVO (http://www.freevo.org) VERSION!!!!!\n\n"
-+      "DO NOT REQUEST SUPPORT FROM THE MPLAYER PROJECT WHEN "
-+      "USING THIS VERSION OF MENCODER!!!!\n\n\n";
- 
-+    mp_msg(MSGT_CPLAYER,MSGL_INFO,msg_freevo);
-+  }
-+    
-   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
-   GetCpuCaps(&gCpuCaps);
- #ifdef ARCH_X86
---- mplayer.c	Mon Mar 10 10:02:18 2003
-+++ mplayer.c.fb	Sat Apr 19 16:01:11 2003
-@@ -670,6 +670,16 @@
+--- mplayer.c	Thu Jun  5 22:45:01 2003
++++ mplayer.c.fb	Thu Jun  5 22:40:09 2003
+@@ -759,6 +759,16 @@
    mp_msg_set_level(MSGL_STATUS);
  
    mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
@@ -36,10 +17,30 @@
    /* Test for cpu capabilities (and corresponding OS support) for optimizing */
    GetCpuCaps(&gCpuCaps);
  #ifdef ARCH_X86
---- version.sh	Sun Apr  6 18:55:58 2003
-+++ version.sh.fb	Sat Apr 19 16:04:12 2003
-@@ -1,3 +1,3 @@
- #!/bin/sh
+--- mencoder.c	Thu Jun  5 22:45:00 2003
++++ mencoder.c.fb	Thu Jun  5 22:40:09 2003
+@@ -365,7 +365,16 @@
+   mp_msg_init();
+   mp_msg_set_level(MSGL_STATUS);
+   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
++  
++  {
++    static char msg_freevo[] =
++      "\n\n\n\nFREEVO (http://www.freevo.org) VERSION!!!!!\n\n"
++      "DO NOT REQUEST SUPPORT FROM THE MPLAYER PROJECT WHEN "
++      "USING THIS VERSION OF MENCODER!!!!\n\n\n";
  
--echo "#define VERSION \"0.90rc5-$1 \"" >version.h
-+echo "#define VERSION \"0.90-FREEVO \"" >version.h
++    mp_msg(MSGT_CPLAYER,MSGL_INFO,msg_freevo);
++  }
++    
+   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
+   GetCpuCaps(&gCpuCaps);
+ #ifdef ARCH_X86
+--- version.sh	Thu Jun  5 22:43:35 2003
++++ version.sh.fb	Thu Jun  5 22:42:44 2003
+@@ -28,4 +28,4 @@
+ if test "$1" ; then
+  extra="-$1"
+ fi
+-echo "#define VERSION \"dev-CVS-${last_cvs_update}${extra} \"" >version.h
++echo "#define VERSION \"dev-CVS-${last_cvs_update}${extra}-FREEVO \"" >version.h
