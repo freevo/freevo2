@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/10/04 18:37:48  dischi
+# fix to changed PopupBox __init__
+#
 # Revision 1.5  2004/10/03 15:54:00  dischi
 # make PopupBoxes work again as they should
 #
@@ -60,7 +63,7 @@ class AlertBox(PopupBox):
     """
 
     def __init__(self, text, handler=None):
-        PopupBox.__init__(self, text, handler)
+        PopupBox.__init__(self, text)
         self.handler = handler
         c = self.content_pos
 
