@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/07 17:38:16  outlyer
+# Whoops. Fixed a nasty crash about a missing file, and changed the ID3
+# display in the 'cover' view to be 'mm:ss' instead of 'mm:s' like it was.
+#
 # Revision 1.11  2003/03/07 17:21:21  outlyer
 # Highlight shows being recorded in red; I would have put this in the skin, but
 # with the current flux around the XML format, I figured it would be better to
@@ -185,7 +189,7 @@ import aubin1_tv as main1_tv
 import main1_image
 
 # Video browser support
-import aubin1_video as main1_video
+import main1_video
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -753,7 +757,7 @@ class Skin:
             #osd.drawstring(alb,50,335,fgcolor=0xdddddd,ptsize=12)
             #osd.drawstring(year,50,355,fgcolor=0xdddddd,ptsize=12)
             #osd.drawstring('%i:%i' % (int(length/60),int(length%60)),50,375,fgcolor=0xdddddd,ptsize=12)
-            osd.drawstringframedsoft('%s\n%s\n%s\n%i:%i' % (art,alb,year,int(length/60),int(length%60)), 50,315,
+            osd.drawstringframedsoft('%s\n%s\n%s\n%0.2i:%0.2i' % (art,alb,year,int(length/60),int(length%60)), 50,315,
                 image_val.width + image_val.border_size, image_val.height + image_val.border_size,
                 fgcolor=0xdddddd,ptsize=12)
             
