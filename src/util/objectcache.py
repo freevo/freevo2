@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/04 17:20:24  dischi
+# fix crash when object is None
+#
 # Revision 1.4  2004/01/30 20:40:28  dischi
 # make key an unicode object to prevent crash
 #
@@ -92,15 +95,20 @@ class ObjectCache:
         if isinstance(key, str):
             key = unicode(key, config.LOCALE)
 
+        # remove old one if key is already in cache
+        if key in self.cache:
+            del self.lru[self.lru.index(key)]
+            
         # Do we need to delete the oldest item?
         if len(self.cache) > self.cachesize:
             # Yes
             lru_key = self.lru[0]
             del self.cache[lru_key]
             del self.lru[0]
+            
         self.cache[key] = object
         self.lru.append(key)
-        
+
 
     def __delitem__(self, key):
         if isinstance(key, str):
