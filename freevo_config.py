@@ -917,6 +917,15 @@ WWW_VHOST = 'localhost'
 #
 WWW_IP_ALLOW = ['127.0.0.1']
 
+#
+# Username / Password combinations to login to the web interface.
+# These should be overridden in local_conf.py
+# 
+# WWW_USERS = { "user1" : "changeme", 
+#            "optional" : "changeme2" }
+#
+WWW_USERS = { 0 : 0 }
+
 
 # ======================================================================
 # Internal stuff, you shouldn't change anything here unless you know

@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/12 23:02:41  rshortt
+# Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
+# in local_conf.py.  This does not work for directories yet.
+#
 # Revision 1.2  2003/05/12 11:21:51  rshortt
 # bugfixes
 #
@@ -47,15 +51,15 @@ import sys, time
 import record_client as ri
 import tv_util
 
-from twisted.web.resource import Resource
-from web_types import HTMLResource
+from web_types import HTMLResource, FreevoResource
 
 TRUE = 1
 FALSE = 0
 
-class FavoritesResource(Resource):
 
-    def render(self, request):
+class FavoritesResource(FreevoResource):
+
+    def _render(self, request):
         fv = HTMLResource()
         form = request.args
 

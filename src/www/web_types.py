@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 23:02:41  rshortt
+# Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
+# in local_conf.py.  This does not work for directories yet.
+#
 # Revision 1.1  2003/05/11 23:04:04  rshortt
 # Classes used by the web interface.
 #
@@ -38,7 +42,15 @@
 
 import os, sys, time
 
+import config
+
 from twisted.web.woven import page
+from twisted.web.resource import Resource
+
+DEBUG = 1
+TRUE = 1
+FALSE = 0
+
 
 class FreevoPage(page.Page):
     
@@ -53,6 +65,31 @@ class FreevoPage(page.Page):
         page.Page.__init__(self, model, template=template)
 
         self.addSlash = 0
+
+
+class FreevoResource(Resource):
+
+    def render(self, request):
+        username = request.getUser()
+        password = request.getPassword()
+
+        if not self.auth_user(username, password):
+            request.setResponseCode(401, 'Authentication needed')
+            request.setHeader('Connection', 'close')
+            request.setHeader('WWW-Authenticate', 'Basic realm="unknown"')
+            request.setHeader('Content-Length', str(len('401: = Authorization needed.')))
+            request.setHeader('Content-Type', 'text/html')
+            return '<h1>401 Authentication required</h1>'
+        else:
+            return self._render(request)
+
+
+    def auth_user(self, username, password):
+        realpass = config.WWW_USERS.get(username)
+        if password == realpass:
+            return TRUE
+        else:
+            return FALSE
 
 
 class HTMLResource:

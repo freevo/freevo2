@@ -32,14 +32,11 @@
 
 import sys, time
 
-
 import epg_xmltv
 import epg_types
 import record_client as ri
 
-from twisted.web.resource import Resource
-from web_types import HTMLResource
-
+from web_types import HTMLResource, FreevoResource
 
 TRUE = 1
 FALSE = 0
@@ -52,9 +49,10 @@ MAXDAYS = 7
 # runs every minute and to allow for processing time.
 MINCRONPICKUP = 70
 
-class ManualRecordResource(Resource):
 
-    def render(self, request):
+class ManualRecordResource(FreevoResource):
+
+    def _render(self, request):
         fv = HTMLResource()
         form = request.args
 

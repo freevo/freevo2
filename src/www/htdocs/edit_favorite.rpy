@@ -11,6 +11,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/12 23:02:41  rshortt
+# Adding HTTP BASIC Authentication.  In order to use you must override WWW_USERS
+# in local_conf.py.  This does not work for directories yet.
+#
 # Revision 1.1  2003/05/11 22:48:21  rshortt
 # Replacements for the cgi files to be used with the new webserver.  These
 # already use record_client / record_server.
@@ -44,16 +48,16 @@ import sys, time
 import rec_types
 import epg_xmltv
 import record_client as ri
-from twisted.web.resource import Resource
-from web_types import HTMLResource, FreevoPage
 
+from web_types import HTMLResource, FreevoResource
 
 TRUE = 1
 FALSE = 0
 
-class EditFavoriteResource(Resource):
 
-    def render(self, request):
+class EditFavoriteResource(FreevoResource):
+
+    def _render(self, request):
         fv = HTMLResource()
         form = request.args
 
