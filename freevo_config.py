@@ -890,7 +890,7 @@ SKIN_MEDIAMENU_FORCE_TEXTVIEW = 0
 #
 # OSD default font. It is only used for debug/error stuff, not regular skinning.
 #
-OSD_DEFAULT_FONTNAME = 'Vera.ttf'
+OSD_DEFAULT_FONTNAME = 'Vera'
 OSD_DEFAULT_FONTSIZE = 18
 
 #
@@ -902,7 +902,7 @@ OSD_EXTRA_FONT_PATH  = [ '/usr/X11R6/lib/X11/fonts/truetype/' ]
 # Font aliases 
 # All names must be lowercase! All alternate fonts must be in './share/fonts/'
 #
-OSD_FONT_ALIASES = { 'arial_bold.ttf' : 'VeraBd.ttf' }
+OSD_FONT_ALIASES = { 'Arial_Bold' : 'VeraBd' }
 
 #
 # Number of seconds to wait until the busy icon is shown in the menu.
