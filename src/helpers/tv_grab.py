@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/14 01:18:07  rshortt
+# Make tv_grab helper work again, now with pyepg.
+#
 # Revision 1.7  2004/07/10 12:33:39  dischi
 # header cleanup
 #
@@ -44,6 +47,8 @@ import os
 import shutil
 
 import config
+import pyepg
+
 
 def usage():
     print 'Downloads the listing for xmltv and cache the data'
@@ -74,16 +79,15 @@ def grab():
                                               xmltvtmp+'.1',
                                               xmltvtmp ))
 
-            shutil.copyfile(xmltvtmp+'.1', xmltvtmp)
-            os.unlink(xmltvtmp+'.1')
+            shutil.move(xmltvtmp+'.1', xmltvtmp)
 
         else:
             print 'Not configured to use tv_sort, skipping.'
 
         print 'caching data, this may take a while'
 
-        import tv.epg_xmltv
-        tv.epg_xmltv.get_guide(XMLTV_FILE=xmltvtmp)
+        epg = pyepg.load(xmltvtmp, os.path.join(config.FREEVO_CACHEDIR, 'epg'))
+        shutil.move(xmltvtmp, config.XMLTV_FILE)
 
 
 if __name__ == '__main__':
