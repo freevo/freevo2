@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/04 18:25:17  dischi
+# again, better tv show handling
+#
 # Revision 1.2  2004/01/04 18:18:16  dischi
 # exclude raw images by shorten the tv show name
 #
@@ -105,9 +108,13 @@ class Title_Area(Skin_Area):
             elif len(menu.choices) == 0:
                 text = ''
             elif content.type == 'short item':
-                if menu.selected.image and menu.selected.type == 'video' and \
-                   hasattr(menu.selected, 'tv_show') and menu.selected.tv_show and \
-                   not menu.selected.image.endswith('.raw'):
+                if menu.selected.type == 'video' and \
+                       hasattr(menu.selected, 'tv_show') and \
+                       menu.selected.tv_show and \
+                       ((menu.selected.image and not \
+                         menu.selected.image.endswith('.raw')) or \
+                        (menu.selected.parent and \
+                         menu.selected.parent.name == menu.selected.show_name[0])):
                     sn = menu.selected.show_name
                     text = sn[1] + "x" + sn[2] + " - " + sn[3] 
                 else:
