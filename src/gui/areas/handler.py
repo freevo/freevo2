@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/08/23 12:35:42  dischi
+# make it possible to hide the Areahandler
+#
 # Revision 1.2  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -63,13 +66,16 @@ class AreaScreen:
             self.layer.append(c)
         self.imagelib = imagelib
         self.visible  = False
-
+        self.width    = 0
+        self.height   = 0
 
     def show(self, canvas):
         for l in self.layer:
             canvas.add_child(l)
         self.visible = True
         self.canvas  = canvas
+        self.width   = canvas.width
+        self.height  = canvas.height
 
 
     def hide(self):
@@ -77,6 +83,8 @@ class AreaScreen:
             l.unparent()
         self.visible = False
         self.canvas  = None
+        self.width   = 0
+        self.height  = 0
 
 
     def fade_out(self):
@@ -91,6 +99,8 @@ class AreaScreen:
             l.unparent()
         self.canvas  = None
         self.visible = False
+        self.width   = 0
+        self.height  = 0
 
         
 class AreaHandler:
@@ -106,6 +116,7 @@ class AreaHandler:
         self.settings      = settings
         self.display_style = { 'menu' : 0 }
         self.areas         = []
+        self.visible       = True
 
         self.canvas = screen
         self.screen = AreaScreen(imagelib)
@@ -290,6 +301,24 @@ class AreaHandler:
         self.screen.fade_out()
 
 
+    def hide(self):
+        """
+        hide the screen
+        """
+        if self.visible:
+            self.screen.hide()
+        self.visible = False
+        
+
+    def show(self):
+        """
+        hide the screen
+        """
+        if not self.visible:
+            self.screen.show(self.canvas)
+        self.visible = True
+        
+
     def draw(self, object):
         """
         draw the object.
@@ -297,7 +326,7 @@ class AreaHandler:
         the audio player
         """
         settings = self.settings
-        if not self.screen.visible:
+        if not self.screen.visible and self.visible:
             self.screen.show(self.canvas)
             
         if self.type == 'menu':
