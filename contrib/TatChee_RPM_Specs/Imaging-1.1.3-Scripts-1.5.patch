@@ -1,0 +1,45 @@
+diff -Naur Scripts.orig/bdf2pil.py Scripts/bdf2pil.py
+--- Scripts.orig/bdf2pil.py	Mon Mar 11 00:57:39 2002
++++ Scripts/bdf2pil.py	Mon Jul 15 15:54:55 2002
+@@ -1,4 +1,4 @@
+-#! /usr/local/bin/python
++#! /usr/bin/env python
+ #
+ # $Id$
+ #
+diff -Naur Scripts.orig/pilconvert.py Scripts/pilconvert.py
+--- Scripts.orig/pilconvert.py	Mon Mar 11 00:57:39 2002
++++ Scripts/pilconvert.py	Mon Jul 15 15:54:44 2002
+@@ -1,4 +1,4 @@
+-#! /usr/local/bin/python
++#! /usr/bin/env python
+ #
+ # The Python Imaging Library.
+ # $Id$
+diff -Naur Scripts.orig/pildriver.py Scripts/pildriver.py
+--- Scripts.orig/pildriver.py	Mon Mar 11 00:57:39 2002
++++ Scripts/pildriver.py	Mon Jul 15 15:55:51 2002
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#! /usr/bin/env python
+ """PILdriver, an image-processing calculator using PIL.
+ 
+ An instance of class PILDriver is essentially a software stack machine
+diff -Naur Scripts.orig/pilfile.py Scripts/pilfile.py
+--- Scripts.orig/pilfile.py	Mon Mar 11 00:57:39 2002
++++ Scripts/pilfile.py	Mon Jul 15 15:55:36 2002
+@@ -1,4 +1,4 @@
+-#! /usr/local/bin/python
++#! /usr/bin/env python
+ #
+ # The Python Imaging Library.
+ # $Id$
+diff -Naur Scripts.orig/pilprint.py Scripts/pilprint.py
+--- Scripts.orig/pilprint.py	Mon Mar 11 00:57:39 2002
++++ Scripts/pilprint.py	Mon Jul 15 15:56:40 2002
+@@ -1,4 +1,4 @@
+-#! /usr/local/bin/python
++#! /usr/bin/env python
+ #
+ # The Python Imaging Library.
+ # $Id$

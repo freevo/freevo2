@@ -1,0 +1,11 @@
+--- freevo-1.2.4/Makefile.orig	Tue Jul 16 11:35:46 2002
++++ freevo-1.2.4/Makefile	Tue Jul 16 11:35:51 2002
+@@ -4,7 +4,7 @@
+ # $Id$
+ #
+ 
+-SUBDIRS = matrox_g400 rc_client osd_server
++SUBDIRS = rc_client osd_server
+ 
+ all: subdirs runapp
+ 
