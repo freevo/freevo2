@@ -4,6 +4,10 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2002/10/13 14:08:31  dischi
+# Don't show crash screen on keyboard interrupt
+# Don't show "reading cdrom info" popup at startup
+#
 # Revision 1.73  2002/10/09 03:03:03  krister
 # Updated for new runtime (freevo_rt -> freevo_python). Added debug info at crash.
 #
@@ -303,7 +307,7 @@ class RemovableMedia:
     def is_tray_open(self):
         return self.tray_open
 
-    def move_tray(self, dir='toggle'):
+    def move_tray(self, dir='toggle', notify=1):
         """Move the tray. dir can be toggle/open/close
         """
 
@@ -315,16 +319,18 @@ class RemovableMedia:
 
         if dir == 'open':
             if DEBUG: print 'Ejecting disc in drive %s' % self.drivename
-            skin.PopupBox('Ejecting disc in drive %s' % self.drivename)
-            osd.update()
+            if notify:
+                skin.PopupBox('Ejecting disc in drive %s' % self.drivename)
+                osd.update()
             os.system('eject %s' % self.mountdir)
             self.tray_open = 1
             rc.post_event(rc.REFRESH_SCREEN)
         
         elif dir == 'close':
             if DEBUG: print 'Inserting %s' % self.drivename
-            skin.PopupBox('Reading disc in drive %s' % self.drivename)
-            osd.update()
+            if notify:
+                skin.PopupBox('Reading disc in drive %s' % self.drivename)
+                osd.update()
 
             # close the tray, identifymedia does the rest,
             # including refresh screen
@@ -377,7 +383,8 @@ def main_func():
             (dir, device, name) = config.ROM_DRIVES[i]
             media = RemovableMedia(mountdir=dir, devicename=device,
                                    drivename=name)
-            media.move_tray(dir='close')
+            # close the tray without popup message
+            media.move_tray(dir='close', notify=0)
             osd.clearscreen(color=osd.COL_BLACK)
             osd.update()
             config.REMOVABLE_MEDIA.append(media)
@@ -412,6 +419,11 @@ def main_func():
 if __name__ == "__main__":
     try:
         main_func()
+    except KeyboardInterrupt:
+        print 'Shutdown by keyboard interrupt'
+        # Shutdown the application
+        shutdown(allow_sys_shutdown=0)
+
     except:
         print 'Crash!'
         try:
