@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/08/04 19:46:35  dischi
+# force sdl to x11 when using x11. Sometimes detection fails
+#
 # Revision 1.74  2003/07/30 15:13:01  outlyer
 # Add encoding to remove some warnings from Python 2.3. Has no effect on
 # Python < 2.3
@@ -325,6 +328,10 @@ class OSD:
 
         if config.CONF.display == 'dfbmga':
             os.environ['SDL_VIDEODRIVER'] = 'directfb'
+
+        # sometimes this fails
+        if config.CONF.display == 'x11':
+            os.environ['SDL_VIDEODRIVER'] = 'x11'
 
         # Initialize the PyGame modules.
         pygame.display.init()
