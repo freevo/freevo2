@@ -269,8 +269,19 @@
 	</item>
 
 	<item type="dir">
-	  <text font="info label">Directory</text>
+	  <text font="info label" expression="type"/>
 	  <newline/>
+	  <goto_pos y="20" mode="relative"/>
+	  <if expression="tagline">
+	    <text font="info tagline" width="max" expression="tagline"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="plot"/>
+	    <newline/>
+	  </if>
 	</item>
 
 	<item type="playlist">
