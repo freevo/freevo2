@@ -5,10 +5,13 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:        Change the signal stuff for slideshows
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/12/07 19:08:15  dischi
+# Add blending for slideshows.
+#
 # Revision 1.36  2003/12/07 11:12:56  dischi
 # small bugfix
 #
@@ -57,7 +60,7 @@ import plugin
 
 import config # Configuration file. 
 import osd    # The OSD class, used to communicate with the OSD daemon
-import event as em
+from event import *
 import util
 import rc
 
@@ -86,11 +89,11 @@ class ImageViewer(GUIObject):
         GUIObject.__init__(self)
         self.osd_mode = 0    # Draw file info on the image
         self.zoom = 0   # Image zoom
-        self.zoom_btns = { str(em.IMAGE_NO_ZOOM):0, str(em.IMAGE_ZOOM_GRID1):1,
-                           str(em.IMAGE_ZOOM_GRID2):2, str(em.IMAGE_ZOOM_GRID3):3,
-                           str(em.IMAGE_ZOOM_GRID4):4, str(em.IMAGE_ZOOM_GRID5):5,
-                           str(em.IMAGE_ZOOM_GRID6):6, str(em.IMAGE_ZOOM_GRID7):7,
-                           str(em.IMAGE_ZOOM_GRID8):8, str(em.IMAGE_ZOOM_GRID9):9 }
+        self.zoom_btns = { str(IMAGE_NO_ZOOM):0, str(IMAGE_ZOOM_GRID1):1,
+                           str(IMAGE_ZOOM_GRID2):2, str(IMAGE_ZOOM_GRID3):3,
+                           str(IMAGE_ZOOM_GRID4):4, str(IMAGE_ZOOM_GRID5):5,
+                           str(IMAGE_ZOOM_GRID6):6, str(IMAGE_ZOOM_GRID7):7,
+                           str(IMAGE_ZOOM_GRID8):8, str(IMAGE_ZOOM_GRID9):9 }
 
         self.slideshow   = TRUE  # currently in slideshow mode
         self.alertbox    = None  # AlertBox active
@@ -98,6 +101,7 @@ class ImageViewer(GUIObject):
         self.bitmapcache = util.objectcache.ObjectCache(3, desc='viewer')
         self.last_image  = (None, None)
         
+
     def view(self, item, zoom=0, rotation=0):
         filename = item.filename
 
@@ -252,6 +256,7 @@ class ImageViewer(GUIObject):
 
     def redraw(self):
         self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
+
         
     def cache(self, fileitem):
         # cache the next image (most likely we need this)
@@ -260,9 +265,8 @@ class ImageViewer(GUIObject):
 
     def signalhandler(self, signum, frame):
         if rc.app() == self.eventhandler and self.slideshow:
-            self.last_image  = None, None
             rc.app(None)
-            self.eventhandler(em.PLAY_END)
+            self.eventhandler(PLAY_END)
 
 
     def eventhandler(self, event, menuw=None):
@@ -271,46 +275,48 @@ class ImageViewer(GUIObject):
         #    self.alertbox = None
         #    return TRUE
         
-        if event == em.PAUSE or event == em.PLAY:
+        if event == PAUSE or event == PLAY:
             if self.slideshow:
-                self.slideshow = FALSE
+                rc.post_event(Event(OSD_MESSAGE, arg=_('pause')))
+                self.slideshow = False
                 signal.alarm(0)
             else:
-                self.slideshow = TRUE
+                rc.post_event(Event(OSD_MESSAGE, arg=_('play')))
+                self.slideshow = True
                 signal.alarm(1)
-            return TRUE
+            return True
         
-        elif event == em.STOP:
+        elif event == STOP:
             self.last_image  = None, None
             rc.app(None)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
-            return TRUE
+            return True
 
         # up and down will stop the slideshow and pass the
         # event to the playlist
-        elif event == em.PLAYLIST_NEXT or event == em.PLAYLIST_PREV:
+        elif event == PLAYLIST_NEXT or event == PLAYLIST_PREV:
             self.slideshow = FALSE
             signal.alarm(0)
             self.fileitem.eventhandler(event)
-            return TRUE
+            return True
             
         # rotate image
-        elif event == em.IMAGE_ROTATE:
+        elif event == IMAGE_ROTATE:
             if event.arg == 'left':
                 self.rotation = (self.rotation + 270) % 360
             else:
                 self.rotation = (self.rotation + 90) % 360
             self.fileitem.rotation = self.rotation
             self.view(self.fileitem, zoom=self.zoom, rotation=self.rotation)
-            return TRUE
+            return True
 
         # print image information
-        elif event == em.TOGGLE_OSD:
+        elif event == TOGGLE_OSD:
             self.osd_mode = {0:1, 1:2, 2:0}[self.osd_mode] # Toggle on/off
             # Redraw
             self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
-            return TRUE
+            return True
 
         # zoom to one third of the image
         # 1 is upper left, 9 is lower right, 0 zoom off
@@ -328,7 +334,7 @@ class ImageViewer(GUIObject):
             return TRUE                
 
         # save the image with the current rotation
-        elif event == em.IMAGE_SAVE:
+        elif event == IMAGE_SAVE:
             if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
                 cmd = 'jpegtran -copy all -rotate %s -outfile /tmp/freevo-iview %s' \
                       % ((self.rotation + 180) % 360, self.filename)
@@ -336,7 +342,7 @@ class ImageViewer(GUIObject):
                 os.system('mv /tmp/freevo-iview %s' % self.filename)
                 self.rotation = 0
                 osd.bitmapcache.__delitem__(self.filename)
-                return TRUE                
+                return True                
 
         else:
             return self.fileitem.eventhandler(event)
