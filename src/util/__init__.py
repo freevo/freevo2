@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/08/26 15:30:39  dischi
+# add weakref
+#
 # Revision 1.18  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -77,7 +80,8 @@ if sys.argv[0].find('setup.py') == -1:
     import vfs
     from misc import *
     from fileops import *
-
+    from weakref import *
+    
     import fxdparser
     import objectcache
     import popen3
