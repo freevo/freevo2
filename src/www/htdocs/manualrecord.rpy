@@ -133,7 +133,7 @@ class ManualRecordResource(FreevoResource):
             guide = tv.epg_xmltv.get_guide()
             channelselect = '<select name="chan">'
             for ch in guide.chan_list:
-                channelselect = channelselect + '<option value="'+ch.id+'">'+str(ch.tunerid)+"\n"
+                channelselect = channelselect + '<option value="'+ch.id+'">'+str(ch.displayname)+"\n"
             channelselect = channelselect + "</select>\n"
 
             #build some reusable date inputs
