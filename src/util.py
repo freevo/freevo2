@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/04/26 15:08:51  dischi
+# o better mount/umount, also for directories who are no rom drive.
+# o added list_usb_devices to util
+#
 # Revision 1.23  2003/04/24 19:55:57  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -79,6 +83,7 @@ import os
 import string, fnmatch, re
 import md5
 import Image # PIL
+import copy
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -343,15 +348,32 @@ def recursefolders(root, recurse=0, pattern='*', return_folders=0):
         return result
 
 
+mounted_dirs = []
+
 def umount(dir):
+    global mounted_dirs
     if os.path.ismount(dir):
         os.system("umount %s" % dir)
+        if not os.path.ismount(dir) and dir in mounted_dirs:
+            mounted_dirs.remove(dir)
 
 
-def mount(dir):
+def mount(dir, force=0):
+    global mounted_dirs
     if not os.path.ismount(dir):
         os.system("mount %s 2>/dev/null" % dir)
-
+        if os.path.ismount(dir) and not dir in mounted_dirs:
+            mounted_dirs.append(dir)
+    if force and not dir in mounted_dirs:
+        mounted_dirs.append(dir)
+        
+    
+def umount_all():
+    global mounted_dirs
+    for d in copy.copy(mounted_dirs):
+        umount(d)
+        
+            
 def gzopen(file):
     import gzip
     m = open(file)
@@ -455,6 +477,16 @@ def readfile(filename):
     ret = fd.readlines()
     fd.close()
     return ret
+
+
+def list_usb_devices():
+    devices = []
+    lines = readfile('/proc/bus/usb/devices')
+    for line in lines:
+        if line[:2] == 'P:':
+            devices.append(line[11:15]+line[23:27])
+    return devices
+
 
 #
 # synchronized objects and methods.

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/26 15:08:51  dischi
+# o better mount/umount, also for directories who are no rom drive.
+# o added list_usb_devices to util
+#
 # Revision 1.8  2003/04/24 19:55:45  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -119,7 +123,8 @@ class DirItem(Playlist):
         self.dir          = dir
         self.display_type = display_type
         self.info         = {}
-
+        self.mountpoint   = None
+        
         # set directory variables to default
 	all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
                          'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
@@ -281,6 +286,9 @@ class DirItem(Playlist):
                 util.mount(self.dir)
                 self.media = media
 
+        if self.mountpoint:
+            util.mount(self.mountpoint)
+            
 	if os.path.isfile(self.dir + '/.password'):
 	    print 'password protected dir'
 	    pb = PasswordInputBox(text='Enter Password', handler=self.pass_cmp_cb)

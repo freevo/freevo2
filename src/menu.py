@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/04/26 15:08:51  dischi
+# o better mount/umount, also for directories who are no rom drive.
+# o added list_usb_devices to util
+#
 # Revision 1.44  2003/04/24 19:55:48  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -324,9 +328,8 @@ class MenuWidget(GUIObject):
             return skin.draw((menu.type, menu))
 
         if self.menustack[-1].umount_all == 1:
-            for media in config.REMOVABLE_MEDIA:
-                util.umount(media.mountdir)
-
+            util.umount_all()
+                    
         if reload:
             if menu.reload_func:
                 reload = menu.reload_func()
