@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/07 13:07:55  dischi
+# fix unicode/encoding problem with sqlite
+#
 # Revision 1.4  2004/02/01 16:58:34  rshortt
 # Catch some exceptions probably having to do with bad data.
 #
@@ -117,7 +120,7 @@ class MetaDatabase:
     def __init__(self):
         # Private Variables
         DATABASE = os.path.join(config.FREEVO_CACHEDIR, 'freevo.sqlite')
-        self.db = sqlite.connect(DATABASE)
+        self.db = sqlite.connect(DATABASE, client_encoding=config.LOCALE)
         self.cursor = self.db.cursor()
 
     def runQuery(self,query, close=False):

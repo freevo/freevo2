@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/07 13:07:55  dischi
+# fix unicode/encoding problem with sqlite
+#
 # Revision 1.24  2004/02/07 11:54:29  dischi
 # handle html code as unicode
 #
@@ -193,11 +196,12 @@ def hexify(str):
 
 def escape(sql):
     """
-    Escape a SQL query in a manner suitable for sqlite
+    Escape a SQL query in a manner suitable for sqlite. Also convert
+    Unicode to normal string object.
     """
     if sql:
         sql = sql.replace('\'','\'\'')
-        return sql
+        return String(sql)
     else:
         return 'null'
     
