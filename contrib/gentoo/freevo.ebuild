@@ -20,7 +20,6 @@ DEPEND=">=dev-python/pygame-1.5.6
 	>=dev-python/mmpython-0.3
 	matrox? ( >=media-video/matroxset-0.3 )
 	>=media-video/mplayer-0.92
-	>=media-tv/xmltv-0.5.19
 	>=sys-apps/sed-4
 	dvd? ( >=media-video/xine-ui-0.9.22 )
 	encode? ( >=media-sound/cdparanoia-3.9.8 >=media-sound/lame-3.93.1 )
