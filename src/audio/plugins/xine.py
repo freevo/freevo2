@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/08/26 20:24:07  outlyer
+# Apparently some files have spaces in them... D'oh :)
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -154,7 +157,7 @@ class Xine:
             print 'Xine.play(): Starting thread, cmd=%s' % command
 
         self.thread.mode    = 'play'
-        self.thread.command = '%s %s' % (command, filename)
+        self.thread.command = '%s "%s"' % (command, filename)
         self.thread.mode_flag.set()
         return None
     
