@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/08/22 19:18:08  gsbarbieri
+# Now it shows empty ROMs again.
+#
 # Revision 1.11  2003/08/21 20:54:44  gsbarbieri
 #    *ROM media just shows up when needed, ie: audiocd is not displayed in
 # video main menu.
@@ -96,10 +99,10 @@ import plugins
 # Types that will be displayed when in 'key' display_type
 # Use this to avoid displaying empty cdroms, audiocd in video menu, ...
 dir_types = {
-    'audio': [ 'dir', 'audiocd' ],
-    'video': [ 'dir', 'video', 'vcd', 'dvd' ],
-    'image': [ 'dir' ],
-    'mame' : [ 'dir' ],
+    'audio': [ 'dir', 'audiocd', None ],
+    'video': [ 'dir', 'video', 'vcd', 'dvd', None ],
+    'image': [ 'dir', None ],
+    'mame' : [ 'dir', None ],
     }
 
 #
@@ -159,10 +162,10 @@ class MediaMenu(Item):
         for p in plugins_list:
             
             if isinstance( p, plugins.rom_drives.rom_items ):
-                # do not show empty rom drives and media from other menus
+                # do not show media from other menus
                 l = p.items( self )
                 for i in l:
-                    if i.type and i.type in dir_type:
+                    if i.type in dir_type:
                         items += [ i ]
             else:
                 items += p.items( self )
