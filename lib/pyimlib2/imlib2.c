@@ -22,7 +22,7 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
 	Image_PyObject *o;
 
 	if (!PyArg_ParseTuple(args, "(ii)|s#s", &w, &h, &bytes, &num_bytes, &from_format))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	if (bytes) {
 		if (!strcmp(from_format, "BGRA"))
@@ -59,7 +59,7 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
 	Image_PyObject *o;
 
 	if (!PyArg_ParseTuple(args, "s", &file))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 		
 	// FIXME: use imlib_load_image_with_error_return instead.
 	image = imlib_load_image(file);
@@ -80,7 +80,7 @@ PyObject *imlib2_add_font_path(PyObject *self, PyObject *args)
 	char *font_path;
 
 	if (!PyArg_ParseTuple(args, "s", &font_path))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_add_path_to_font_path(font_path);
 	Py_INCREF(Py_None);
@@ -93,7 +93,7 @@ PyObject *imlib2_load_font(PyObject *self, PyObject *args)
 	Font_PyObject *o;
 
 	if (!PyArg_ParseTuple(args, "s", &font_spec))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	font = imlib_load_font(font_spec);
 	if (!font) {
@@ -110,7 +110,7 @@ PyObject *imlib2_new_display(PyObject *self, PyObject *args)
 	int w, h;
 
 	if (!PyArg_ParseTuple(args, "ii", &w, &h))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	return display_new(w, h);
 } 
@@ -119,7 +119,7 @@ PyObject *imlib2__shm_unlink(PyObject *self, PyObject *args)
 	char *name;
 
 	if (!PyArg_ParseTuple(args, "s", &name))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	shm_unlink(name);
 	Py_INCREF(Py_None);
@@ -131,7 +131,7 @@ PyObject *imlib2__free_buffer(PyObject *self, PyObject *args)
 	void *buffer;
 
 	if (!PyArg_ParseTuple(args, "l", &buffer))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 	
 	if (buffer)
 		free(buffer);

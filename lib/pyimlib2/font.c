@@ -49,7 +49,7 @@ PyObject *Font_PyObject__get_text_size(PyObject *self, PyObject *args)
 	int w, h, advance_w, advance_h;
 
 	if (!PyArg_ParseTuple(args, "s", &text))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_font( ((Font_PyObject *)self)->font );
 	imlib_get_text_size(text, &w, &h);

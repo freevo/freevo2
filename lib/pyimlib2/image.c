@@ -64,7 +64,7 @@ PyObject *Image_PyObject__clear(PyObject *self, PyObject *args)
 	
 
 	if (!PyArg_ParseTuple(args, "iiii", &x, &y, &w, &h))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	data = (unsigned char *)imlib_image_get_data();
@@ -92,7 +92,7 @@ PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
 	Image_PyObject *o;
 
 	if (!PyArg_ParseTuple(args, "iiiiii", &x, &y, &src_w, &src_h, &dst_w, &dst_h))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	image = imlib_create_cropped_scaled_image(x, y, src_w, src_h, dst_w, dst_h);
@@ -124,7 +124,7 @@ PyObject *Image_PyObject__rotate(PyObject *self, PyObject *args)
 	double angle;
 
 	if (!PyArg_ParseTuple(args, "d", &angle))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	fprintf(stderr, "Rotate image by %f\n", angle);
 	imlib_context_set_image(((Image_PyObject *)self)->image);
@@ -146,7 +146,7 @@ PyObject *Image_PyObject__orientate(PyObject *self, PyObject *args)
 	int orientation;
 
 	if (!PyArg_ParseTuple(args, "i", &orientation))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_image_orientate(orientation);
@@ -160,7 +160,7 @@ PyObject *Image_PyObject__flip(PyObject *self, PyObject *args)
 	int horiz, vert, diag;
 
 	if (!PyArg_ParseTuple(args, "iii", &horiz, &vert, &diag))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	if (horiz) imlib_image_flip_horizontal();
@@ -180,7 +180,7 @@ PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
 	image = imlib_clone_image();
 	if (!image) {
 		PyErr_Format(PyExc_RuntimeError, "Failed to clone image");
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 	}
 	
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
@@ -198,13 +198,14 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 	Imlib_Color_Modifier cmod;
 
 	if (!PyArg_ParseTuple(args, "O!(ii)(ii)(ii)(ii)ii", &Image_PyObject_Type, &src, &src_x, &src_y, &src_w, &src_h, &dst_x, &dst_y, &dst_w, &dst_h, &src_alpha, &merge_alpha))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
-	Py_INCREF(Py_None);
 
-	if (src_alpha == 0)
+	if (src_alpha == 0) {
+	        Py_INCREF(Py_None);
 		return Py_None;
-
+	}
+	
 	src_img = ((Image_PyObject *)src)->image;
 
 	if (src_alpha < 255) {
@@ -229,6 +230,7 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 	imlib_context_set_blend(1);
 	imlib_context_set_color_modifier(NULL);
 
+	Py_INCREF(Py_None);
 	return Py_None;
 }
 
@@ -240,9 +242,7 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
 	unsigned char *dst_data, *mask_data;
 
 	if (!PyArg_ParseTuple(args, "O!ii", &Image_PyObject_Type, &mask, &dst_x, &dst_y))
-		return NULL;
-
-	Py_INCREF(Py_None);
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)mask)->image);
 	mask_w = imlib_image_get_width();
@@ -276,6 +276,7 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
 	}
 	imlib_image_put_back_data((DATA32 *)dst_data);
 			
+	Py_INCREF(Py_None);
 	return Py_None;
 }
 
@@ -286,7 +287,7 @@ PyObject *Image_PyObject__draw_text(PyObject *self, PyObject *args)
 	Font_PyObject *font;
 
 	if (!PyArg_ParseTuple(args, "O!iis(iiii)", &Font_PyObject_Type, &font, &x, &y, &text, &r, &g, &b, &a))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_context_set_font(((Font_PyObject *)font)->font);
@@ -305,7 +306,7 @@ PyObject *Image_PyObject__draw_rectangle(PyObject *self, PyObject *args)
 	int x, y, w, h, r, g, b, a, fill = 0;
 
 	if (!PyArg_ParseTuple(args, "iiii(iiii)|i", &x, &y, &w, &h, &r, &g, &b, &a, &fill))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_image_set_has_alpha(1);
@@ -326,7 +327,7 @@ PyObject *Image_PyObject__draw_ellipse(PyObject *self, PyObject *args)
 	int xc, yc, ea, eb, r, g, b, a, fill = 0;
 
 	if (!PyArg_ParseTuple(args, "iiii(iiii)|i", &xc, &yc, &ea, &eb, &r, &g, &b, &a, &fill))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_context_set_color(r, g, b, a);
@@ -346,7 +347,7 @@ PyObject *Image_PyObject__set_alpha(PyObject *self, PyObject *args)
 	int alpha = 0;
 
 	if (!PyArg_ParseTuple(args, "i", &alpha))
-	        return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_image_set_has_alpha(alpha);
 	Py_INCREF(Py_None);
@@ -358,7 +359,7 @@ PyObject *Image_PyObject__copy_rect(PyObject *self, PyObject *args)
 { 
 	int src_x, src_y, w, h, dst_x, dst_y;
 	if (!PyArg_ParseTuple(args, "(ii)(ii)(ii)", &src_x, &src_y, &w, &h, &dst_x, &dst_y))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_image_copy_rect(src_x, src_y, w, h, dst_x, dst_y);
@@ -374,7 +375,7 @@ PyObject *Image_PyObject__move_to_shmem(PyObject *self, PyObject *args)
 	int fd;
 
 	if (!PyArg_ParseTuple(args, "|ss", &format, &shmem_name))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	size = get_raw_bytes_size(format);
@@ -386,8 +387,10 @@ PyObject *Image_PyObject__move_to_shmem(PyObject *self, PyObject *args)
 	}
 	ftruncate(fd, size);
 	buf = mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	if (!buf)
-		return NULL;
+	if (!buf) {
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
 
 	get_raw_bytes(format, buf);
 
@@ -405,7 +408,7 @@ PyObject *Image_PyObject__get_bytes(PyObject *self, PyObject *args)
 	PyObject *ret;
 
 	if (!PyArg_ParseTuple(args, "|s", &format))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	size = get_raw_bytes_size(format);
@@ -436,7 +439,7 @@ PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
 	}
 
 	if (!PyArg_ParseTuple(args, "O!", &PySurface_Type, &pysurf))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 	
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	get_raw_bytes("BGRA", pysurf->surf->pixels);
@@ -455,7 +458,7 @@ PyObject *Image_PyObject__save(PyObject *self, PyObject *args)
 	unsigned char *filename, *ext;
 	
 	if (!PyArg_ParseTuple(args, "ss", &filename, &ext))
-		return NULL;
+                return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	// TODO: call imlib_save_image_with_error_return
