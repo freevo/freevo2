@@ -191,7 +191,7 @@ static int
 put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 	int buf_x=0, buf_y=0, buf_pos=0;
 	int xpos=0, ypos=0, pos=0;
-	unsigned char red, green, blue;
+	unsigned char red=0, green=0, blue=0;
 	int  alpha;
 	mp_image_t* dmpi;
 
@@ -213,7 +213,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			// We've got new data from the FIFO
 
 			char cmd[20], args[100];
-			int  imgw,imgh,imgx,imgy,clear,imgalpha,pxsz,command;
+			int  imgw,imgh,imgx,imgy,clear,imgalpha,pxsz=1,command;
 			unsigned char *buffer = NULL;
 
 			if(! _read_cmd( vf->priv->stream_fd, cmd, args) ) {
