@@ -73,6 +73,7 @@ u       PAUSE
 s       STOP
 F6      REC
 PERIOD  EJECT
+F10     Screenshot
 """
 
 
@@ -115,7 +116,7 @@ cmds_sdl = {
     K_f           : 'FFWD',
     K_u           : 'PAUSE',
     K_s           : 'STOP',
-    K_F6           : 'REC',
+    K_F6          : 'REC',
     K_PERIOD      : 'EJECT'
     }
 
@@ -208,6 +209,10 @@ class OSD:
         self._help = 0  # Is the helpscreen displayed or not
         self._help_saved = pygame.Surface((self.width, self.height), 0, 32)
         self._help_last = 0
+
+        # Remove old screenshots
+        os.system('rm -f /tmp/freevo_ss*.bmp')
+        self._screenshotnum = 1
         
 
     def _cb(self):
@@ -232,6 +237,11 @@ class OSD:
                 self._helpscreen()
             elif event.key == K_z:
                 pygame.display.toggle_fullscreen()
+            elif event.key == K_F10:
+                # Take a screenshot
+                pygame.image.save(self.screen,
+                                  '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
+                self._screenshotnum += 1
             elif event.key in cmds_sdl.keys():
                 # Turn off the helpscreen if it was on
                 if self._help:
