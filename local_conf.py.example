@@ -185,11 +185,11 @@ CACHE_IMAGES = 1
 
 #
 # Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
-# and want freevo to do everthing for you. TV_SETTINGS must be set 
-# correctly. To use you need to set the following two lines:
+# and want freevo to do everthing for you.  To use you need to set the 
+# following two lines:
 #
-# plugin.remove('tv.generic_record')
-# plugin_record = plugin.activate('tv.ivtv_record')
+# plugin.remove('record.generic_record')
+# plugin.activate('record.ivtv_record')
 
 #
 # Enable this for joystick support:
@@ -698,38 +698,6 @@ IMAGEVIEWER_BLEND_MODE = -1
 #
 # Watching TV
 #
-# XXX You must change this to fit your local conditions!
-#
-# NORM: ntsc, pal, secam
-# INPUT: television, composite1
-# CHANLIST: One of the following:
-#
-# us-bcast, us-cable, us-cable-hrc, japan-bcast, japan-cable, europe-west,
-# europe-east, italy, newzealand, australia, ireland, france, china-bcast,
-# southafrica, argentina, canada-cable
-#
-# TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
-
-#
-# Video input device
-#
-# Usually /dev/video0, but might be /dev/video1 instead for multiple boards.
-#
-# FreeBSD uses the Brooktree TV-card driver, not V4L.
-#
-# TV_DRIVER = 'v4l'
-# TV_DEVICE = '/dev/video0'
-# TV_INPUT = 0
-
-#
-# Additional options to pass to mplayer in TV mode.
-#
-# eg. To turn off deinterlacing:
-# TV_OPTS = '-vop pp=ci'
-#
-# TV_OPTS = ''
-
-# TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 #
 # Size (in MB) of the timeshift buffer. (ie: how long you can pause tv for.)  
@@ -737,8 +705,7 @@ IMAGEVIEWER_BLEND_MODE = -1
 # under FREEVO_CACHEDIR and we don't want to blow /var or /tmp.
 # TIMESHIFT_BUFFER_SIZE = 128
 
-# TIMESHIFT_ENCODE_CMD = 'mp1e -m3 -c%s -p%s -r14,100' % \
-#                        (TV_SETTINGS.split()[3], AUDIO_INPUT_DEVICE) 
+# TIMESHIFT_ENCODE_CMD = None
 
 # TIMESHIFT_BUFFER = '%s/timeshift.mpeg' % FREEVO_CACHEDIR
 
@@ -867,21 +834,6 @@ IMAGEVIEWER_BLEND_MODE = -1
 # FREQUENCY_TABLE = {
 #     'tuner_id'   :    55250,
 # }
-
-
-# VIDEO_GROUPS is a new setting to handle multiple arbitrary groups of devices
-# for viewing or recording.  It will be possible to have different Freevo
-# channels use different Video Groups.
-
-# VIDEO_GROUPS = [
-#     VideoGroup(vdev=TV_DEVICE,
-#                adev=AUDIO_DEVICE,
-#                input_type='tuner',
-#                tuner_norm=CONF.tv,
-#                tuner_chanlist=CONF.chanlist,
-#                desc='Default Video Group',
-#                recordable=True),
-# ]
 
 
 #

@@ -493,8 +493,8 @@ plugin.activate('tiny_osd')
 
 #
 # Use ivtv_record instead if you have an ivtv based card (PVR-250/350)
-# and want freevo to do everthing for you. TV_SETTINGS must be set 
-# correctly. To use you need to set the following two lines:
+# and want freevo to do everthing for you.  To use you need to set the 
+# following two lines:
 #
 # plugin.remove('record.generic_record')
 # plugin.activate('record.ivtv_record')
@@ -1151,37 +1151,6 @@ TV_RECORD_DIR = None
 #
 # Watching TV
 #
-# XXX You must change this to fit your local conditions!
-#
-# TV_SETTINGS  = 'NORM INPUT CHANLIST DEVICE'
-#
-# NORM: ntsc, pal, secam
-# INPUT: television, composite1
-# CHANLIST: One of the following:
-#
-# us-bcast, us-cable, us-cable-hrc, japan-bcast, japan-cable, europe-west,
-# europe-east, italy, newzealand, australia, ireland, france, china-bcast,
-# southafrica, argentina, canada-cable
-#
-# DEVICE: Usually /dev/video0, but might be /dev/video1 instead for multiple
-# boards.
-#
-# FreeBSD uses the Brooktree TV-card driver, not V4L.
-#
-if os.uname()[0] == 'FreeBSD':
-    TV_DRIVER = 'bsdbt848'
-    TV_DEVICE = '/dev/bktr0'
-    TV_INPUT = 1
-else:
-    TV_DRIVER = 'v4l'
-    TV_DEVICE = '/dev/video0'
-    TV_INPUT = 0
-
-# Additional options to pass to mplayer in TV mode.
-# For example, TV_OPTS = '-vop pp=ci' would turn on deinterlacing.
-TV_OPTS = ''
-
-# TV_SETTINGS = '%s television %s %s' % (CONF.tv, CONF.chanlist, TV_DEVICE)
 
 #
 # Size (in MB) of the timeshift buffer. (ie: how long you can pause tv for.)  
@@ -1271,13 +1240,13 @@ VCR_POST_REC = None
 # XXX should be ("Change"), or could be in some cases ("change?")
 VCR_CMD = (CONF.mencoder + ' ' +
            'tv:// ' +                      # New mplayer requires this.
-           '-tv driver=%s:input=%d' % (TV_DRIVER, TV_INPUT) +
+           '-tv driver=%(driver)s:input=%(input)d' +
            ':norm=%s' % CONF.tv +
            ':channel=%(channel)s' +        # Filled in by Freevo
            ':chanlist=%s' % CONF.chanlist +
            ':width=%d:height=%d' % (TV_REC_SIZE[0], TV_REC_SIZE[1]) +
            ':outfmt=%s' % TV_REC_OUTFMT +
-           ':device=%s' % TV_DEVICE +
+           ':device=%(device)s' +
            VCR_AUDIO +                     # set above
            ' -ovc lavc -lavcopts ' +       # Mencoder lavcodec video codec
            'vcodec=mpeg4' +                # lavcodec mpeg-4
@@ -1333,21 +1302,6 @@ TV_IVTV_OPTIONS = {
 FREQUENCY_TABLE = {
     'tuner_id'   :    55250,
 }
-
-
-# VIDEO_GROUPS is a new setting to handle multiple arbitrary groups of devices
-# for viewing or recording.  It will be possible to have different Freevo
-# channels use different Video Groups.
-
-VIDEO_GROUPS = [
-    VideoGroup(vdev=TV_DEVICE,
-               adev=AUDIO_DEVICE,
-               input_type='tuner',
-               tuner_norm=CONF.tv,
-               tuner_chanlist=CONF.chanlist,
-               desc='Default Video Group',
-               recordable=True),
-]
 
 
 #
