@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/03/07 22:54:12  dischi
+# First version of the extended menu with image support. Try the music menu
+# and press DISPLAY
+#
 # Revision 1.21  2003/03/07 17:28:40  dischi
 # added support for extended menus
 #
@@ -411,7 +415,8 @@ class XML_content(XML_data):
             if subnode.name == u'item':
                 type = attr_str(subnode, "type", '')
                 if type and not self.types.has_key(type):
-                    self.types[type] = XML_data(('font', 'align', 'valign'))
+                    self.types[type] = XML_data(('font', 'align', 'valign', 'height',
+                                                 'width'))
                     self.types[type].rectangle = None
                     self.types[type].cdata = ''
                 if type:

@@ -69,13 +69,13 @@
       <screen layout="screen0" visible="yes">
 	<area x="0" y="0" width="800" height="600"/>
       </screen>
-      <title layout="title0" visible="yes">
+      <title layout="title1" visible="yes">
 	<area x="10" y="10" width="780" height="60"/> 
       </title>
       <view layout="view0" visible="yes">
 	<area x="580" y="110" width="200" height="300"/> 
       </view>
-      <listing layout="list0" visible="yes">
+      <listing layout="image list" visible="yes">
 	<area x="20" y="110" width="540" height="250"/>
       </listing>
       <info visible="yes" layout="info">
@@ -123,6 +123,10 @@
       <content x="210" type="menu" font="white big" align="center"/>
     </layout>
 
+    <layout label="title1">
+      <content x="210" type="item" font="white big" align="center"/>
+    </layout>
+
     <!-- default listing area -->
     <layout label="list0">
       <content type="text" spacing="2">
@@ -130,6 +134,17 @@
 	<item type="selected" font="white">
 	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-3" width="max+10"
 	    height="max+6"/>
+	</item>
+      </content>
+    </layout>
+
+    <!-- listing area with images -->
+    <layout label="image list">
+      <content type="image" spacing="4">
+	<item type="default" width="100" height="100"/>
+	<item type="selected" width="100" height="100">
+	  <rectangle bgcolor="0xa0000000" size="0" x="-5" y="-5" width="max+10"
+	    height="max+10"/>
 	</item>
       </content>
     </layout>

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/07 22:54:12  dischi
+# First version of the extended menu with image support. Try the music menu
+# and press DISPLAY
+#
 # Revision 1.3  2003/03/05 21:56:12  dischi
 # Small changes to integrate the audio player
 #: view_area.py,v $
@@ -121,7 +125,7 @@ class View_Area(Skin_Area):
         addx = content.x + content.spacing
         addy = content.y + content.spacing
 
-        image = format_image(item, width, height)
+        image = format_image(self.settings, item, width, height)
 
         if not image:
             return

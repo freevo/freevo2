@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/07 22:54:11  dischi
+# First version of the extended menu with image support. Try the music menu
+# and press DISPLAY
+#
 # Revision 1.5  2003/03/07 17:28:19  dischi
 # small fixes
 #
@@ -78,9 +82,11 @@ import copy
 import osd
 import pygame
 
-from area import Skin_Area
-
 osd = osd.get_singleton()
+
+from area import Skin_Area
+from skin_utils import *
+
 
 # Set to 1 for debug output
 DEBUG = 1
@@ -115,8 +121,12 @@ class Listing_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        items_w = content.width
-        items_h = 0
+        if content.type == 'text':
+            items_w = content.width
+            items_h = 0
+        elif content.type == 'image':
+            items_w = 0
+            items_h = 0
 
         possible_types = {}
 
@@ -137,26 +147,40 @@ class Listing_Area(Skin_Area):
                 possible_types['selected'] = content.types['selected']
                 
         # get the max height of a text item
-        for t in possible_types:
-            ct = possible_types[t]
+        if content.type == 'text':
+            for t in possible_types:
+                ct = possible_types[t]
 
-            if not settings.font.has_key(ct.font):
-                print '*** font <%s> not found' % ct.font
-                break
+                if not settings.font.has_key(ct.font):
+                    print '*** font <%s> not found' % ct.font
+                    break
 
-            font = settings.font[ct.font]
-            font_w, font_h = osd.stringsize('Arj', font=font.name, ptsize=font.size)
+                font = settings.font[ct.font]
+                font_w, font_h = osd.stringsize('Arj', font=font.name, ptsize=font.size)
 
-            rh = 0
-            rw = 0
-            if ct.rectangle:
-                rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width, font_h)
-                hskip = min(hskip, r.x)
-                vskip = min(vskip, r.y)
+                rh = 0
+                rw = 0
+                if ct.rectangle:
+                    rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width, font_h)
+                    hskip = min(hskip, r.x)
+                    vskip = min(vskip, r.y)
 
-            items_h = max(items_h, font_h, rh)
-            items_w = max(items_w, font_w, rw)
+                items_h = max(items_h, font_h, rh)
+                items_w = max(items_w, font_w, rw)
 
+        elif content.type == 'image':
+            for t in possible_types:
+                ct = possible_types[t]
+                rh = 0
+                rw = 0
+                if ct.rectangle:
+                    rw, rh, r = self.get_item_rectangle(ct.rectangle, ct.width, ct.height)
+                    hskip = min(hskip, r.x)
+                    vskip = min(vskip, r.y)
+
+                items_h = max(items_h, ct.height, rh)
+                items_w = max(items_w, ct.width, rw)
+            
         # restore
         self.area_val, self.layout = backup
 
@@ -216,6 +240,12 @@ class Listing_Area(Skin_Area):
         x0 = content.x
         y0 = content.y
 
+        current_col = 1
+        
+        if content.type == 'image':
+            width  = hspace - content.spacing
+            height = vspace - content.spacing
+            
         for choice in menuw.menu_items:
             if choice == menu.selected:
                 if content.types.has_key('% selected' % choice.type):
@@ -229,10 +259,12 @@ class Listing_Area(Skin_Area):
                     val = content.types['default']
                 
             if not settings.font.has_key(val.font):
-                print '*** font <%s> not found' % val.font
-                break
+                if content.type == 'text':
+                    print '*** font <%s> not found' % val.font
+                    break
 
-            font = settings.font[val.font]
+            else:
+                font = settings.font[val.font]
 
 
             text = choice.name
@@ -258,19 +290,38 @@ class Listing_Area(Skin_Area):
                     icon_x = 0
 
                 if val.rectangle:
-                    None, None, r = self.get_item_rectangle(val.rectangle, width, font_h)
+                    r = self.get_item_rectangle(val.rectangle, width, font_h)[2]
                     self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
                                       r.width - icon_x, r.height, r)
 
-                self.write_text(text, font, content, x=x0 + hskip + icon_x, y=y0 + vskip,
-                                width=width-icon_x, height=-1, align_h=val.align,
-                                mode='hard')
+                if content.type == 'text':
+                    self.write_text(text, font, content, x=x0 + hskip + icon_x,
+                                    y=y0 + vskip, width=width-icon_x, height=-1,
+                                    align_h=val.align, mode='hard')
 
+
+            elif content.type == 'image':
+                if val.rectangle:
+                    r = self.get_item_rectangle(val.rectangle, val.width, val.height)[2]
+                    self.drawroundbox(x0 + hskip + r.x, y0 + vskip + r.y,
+                                      r.width, r.height, r)
+
+
+                image = format_image(settings, choice, val.width, val.height, force=TRUE)
+                if image:
+                    self.draw_image(image, (x0 + hskip, y0+vskip))
+                    
             else:
                 print 'no support for content type %s' % content.type
 
-            y0 += vspace
-
+            if current_col == cols:
+                x0 = content.x
+                y0 += vspace
+                current_col = 1
+            else:
+                x0 += hspace
+                current_col += 1
+                
         self.last_choices = (menu.selected, copy.copy(menuw.menu_items))
 
 

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/07 22:54:12  dischi
+# First version of the extended menu with image support. Try the music menu
+# and press DISPLAY
+#
 # Revision 1.2  2003/03/02 11:46:32  dischi
 # Added GetPopupBoxStyle to return popup box styles to the gui
 #
@@ -44,21 +48,41 @@
 
 import pygame
 import osd
-
+import os
 
 osd = osd.get_singleton()
 
-def format_image(item, width, height):
+def format_image(settings, item, width, height, force=0):
     if hasattr(item, 'display_type'):
         type = item.display_type
     else:
         type = item.type
-        
+
+    image = None
     if item.image:
         image = osd.loadbitmap('thumb://%s' % item.image)
-        if not image:
+
+    if not image:
+        if not force:
             return None
-        
+
+        if item.type == 'dir':
+            if os.path.isfile('%s/mimetypes/folder_%s.png' % \
+                              (settings.icon_dir, item.display_type)):
+                image = '%s/mimetypes/folder_%s.png' % \
+                        (settings.icon_dir, item.display_type)
+            else:
+                image = '%s/mimetypes/folder.png' % settings.icon_dir
+    
+        elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.type)):
+            image = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
+
+        if not image:
+            return
+
+        image = osd.loadbitmap('thumb://%s' % image)
+
+    
     if type == 'audio':
         m = min(height, width)
         height = m
