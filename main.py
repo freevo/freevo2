@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2002/10/09 03:03:03  krister
+# Updated for new runtime (freevo_rt -> freevo_python). Added debug info at crash.
+#
 # Revision 1.72  2002/10/06 14:58:51  dischi
 # Lots of changes:
 # o removed some old cvs log messages
@@ -125,7 +128,7 @@ osd = osd.get_singleton()
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
 
-def shutdown(menuw=None, arg=None):
+def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     osd.clearscreen(color=osd.COL_BLACK)
     osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
@@ -135,7 +138,7 @@ def shutdown(menuw=None, arg=None):
     osd.shutdown() # SDL must be shutdown to restore video modes etc
     
     # XXX temporary kludge so it won't break on old config files
-    if 'ENABLE_SHUTDOWN_SYS' in dir(config):  
+    if allow_sys_shutdown and 'ENABLE_SHUTDOWN_SYS' in dir(config):  
         if config.ENABLE_SHUTDOWN_SYS:
             os.system(config.SHUTDOWN_SYS_CMD)
             # let freevo be killed by init, looks nicer if the picture
@@ -148,7 +151,7 @@ def shutdown(menuw=None, arg=None):
     #
     
     # XXX kludge to shutdown the runtime version (no linker)
-    os.system('killall -9 freevo_rt 2&> /dev/null') 
+    os.system('killall -9 freevo_python 2&> /dev/null') 
     os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
     # XXX Kludge to shutdown if started with "python main.py"
     os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
@@ -356,7 +359,7 @@ def signal_handler(sig, frame):
         osd.shutdown() # SDL must be shutdown to restore video modes etc
 
         # XXX kludge to shutdown the runtime version (no linker)
-        os.system('killall -9 freevo_rt 2&> /dev/null') 
+        os.system('killall -9 freevo_python 2&> /dev/null') 
         os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
         # XXX Kludge to shutdown if started with "python main.py"
         os.system('kill -9 `pgrep -f "python.*main.py" -d" "` 2&> /dev/null') 
@@ -411,4 +414,34 @@ if __name__ == "__main__":
         main_func()
     except:
         print 'Crash!'
+        try:
+            tb = sys.exc_info()[2]
+            fname, lineno, funcname, text = traceback.extract_tb(tb)[-1]
+            
+            for i in range(5, 0, -1):
+                osd.clearscreen(color=osd.COL_BLACK)
+                osd.drawstring('Freevo crashed!', 70, 70,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.drawstring('Filename: %s' % fname, 70, 130,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.drawstring('Lineno: %s' % lineno, 70, 160,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.drawstring('Function: %s' % funcname, 70, 190,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.drawstring('Text: %s' % text, 70, 220,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.drawstring('Please see the logfiles for more info', 70, 280,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                
+                osd.drawstring('Exit in %s seconds' % i, 70, 340,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.update()
+                time.sleep(1)
+                
+        except:
+            pass
         traceback.print_exc()
+
+        # Shutdown the application, but not the system even if that is
+        # enabled
+        shutdown(allow_sys_shutdown=0)
