@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/11/24 01:59:59  rshortt
+# Adding support for the padding of recordings with X minutes before and
+# after the show.  Thanks to Eirik Meland for the initial patch.
+#
 # Revision 1.17  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
 #
@@ -230,7 +234,8 @@ class RecordServer(xmlrpc.XMLRPC):
         except:
             recording = FALSE
 
-        if prog.start <= now and prog.stop >= now and recording:
+        # if prog.start <= now and prog.stop >= now and recording:
+        if recording:
             plugin.getbyname('RECORD').Stop()
        
         return (TRUE, 'recording removed')
@@ -315,9 +320,21 @@ class RecordServer(xmlrpc.XMLRPC):
         rec_cmd = None
         rec_prog = None
         cleaned = None
-        scheduledRecordings = self.getScheduledRecordings()
+        delay_recording = FALSE
+        total_padding = 0
 
-        progs = scheduledRecordings.getProgramList()
+        sr = self.getScheduledRecordings()
+        progs = sr.getProgramList()
+
+        currently_recording = None
+        for prog in progs.values():
+            try:
+                recording = prog.isRecording
+            except:
+                recording = FALSE
+
+            if recording:
+                currently_recording = prog
 
         now = time.time()
         for prog in progs.values():
@@ -328,34 +345,69 @@ class RecordServer(xmlrpc.XMLRPC):
             except:
                 recording = FALSE
 
-            if prog.start <= now and prog.stop >= now and recording == FALSE:
+            if (prog.start - config.RECORD_PADDING) <= now \
+                   and (prog.stop + config.RECORD_PADDING) >= now \
+                   and recording == FALSE:
                 # just add to the 'we want to record this' list
                 # then end the loop, and figure out which has priority,
                 # remember to take into account the full length of the shows
                 # and how much they overlap, or chop one short
-                # yeah thats a good idea but make sure its not like 5 mins
 
-                duration = int(prog.stop - now - 10)
+                duration = int((prog.stop + config.RECORD_PADDING ) - now - 10)
                 if duration < 10:
                     return FALSE
 
-                if DEBUG: log.debug('going to record: %s' % prog)
-                prog.isRecording = TRUE
-                prog.rec_duration = duration
-                prog.filename = tv_util.getProgFilename(prog)
-                rec_prog = prog
+                if currently_recording:
+                    # Hey, something is already recording!
+                    if prog.start - 10 <= now:
+                        # our new recording should start no later than now!
+                        sr.removeProgram(currently_recording, 
+                                         tv_util.getKey(currently_recording))
+                        plugin.getbyname('RECORD').Stop()
+                        time.sleep(5)
+                        log.debug('CALLED RECORD STOP 1')
+                    else:
+                        # at this moment we must be in the pre-record padding
+                        if currently_recording.stop - 10 <= now:
+                            # The only reason we are still recording is because of
+                            # the post-record padding.
+                            # Therefore we have overlapping paddings but not
+                            # real stop / start times.
+                            overlap = (currently_recording.stop + \
+                                       config.RECORD_PADDING) - \
+                                      (prog.start - config.RECORD_PADDING)
+                            if overlap <= (config.RECORD_PADDING/2):
+                                sr.removeProgram(currently_recording, 
+                                                 tv_util.getKey(currently_recording))
+                                plugin.getbyname('RECORD').Stop()
+                                time.sleep(5)
+                                log.debug('CALLED RECORD STOP 2')
+                            else: 
+                                delay_recording = TRUE
+                        else: 
+                            delay_recording = TRUE
+                             
+                        
+                if delay_recording:
+                    if DEBUG: log.debug('delaying: %s' % prog)
+                else:
+                    if DEBUG: log.debug('going to record: %s' % prog)
+                    prog.isRecording = TRUE
+                    prog.rec_duration = duration
+                    prog.filename = tv_util.getProgFilename(prog)
+                    rec_prog = prog
 
 
         for prog in progs.values():
             # If the program is over remove the entry.
-            if prog.stop < now:
+            if ( prog.stop + config.RECORD_PADDING) < now:
                 if DEBUG: log.debug('found a program to clean')
                 cleaned = TRUE
                 del progs[tv_util.getKey(prog)]
 
         if rec_prog or cleaned:
-            scheduledRecordings.setProgramList(progs)
-            self.saveScheduledRecordings(scheduledRecordings)
+            sr.setProgramList(progs)
+            self.saveScheduledRecordings(sr)
             return rec_prog
 
         return FALSE
