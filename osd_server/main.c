@@ -25,6 +25,7 @@
 
 #include "portable.h"
 #include "readpng.h"
+#include "readjpeg.h"
 #include "osd.h"
 #include "ft.h"
 #include "fb.h"
@@ -33,17 +34,17 @@
 
 
 #ifdef OSD_X11
-   #define SCREEN_WIDTH 800
-   #define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 #else
-   #define SCREEN_WIDTH 768
-   #define SCREEN_HEIGHT 576
+#define SCREEN_WIDTH 768
+#define SCREEN_HEIGHT 576
 #endif
 
 #ifndef OSD_FB
 #ifndef OSD_X11
 #ifndef OSD_SDL
-#error Either OSD_FB or OSD_X11 must be defined!
+#error Either OSD_FB, OSD_SDL or OSD_X11 must be defined!
 #endif
 #endif
 #endif
@@ -56,8 +57,6 @@
 #define COL_BLACK   0x000000
 #define COL_WHITE   0xffffff
 
-#define ARRAY_LENGTH(a)  (sizeof(a)/sizeof(a[0]))
-
 static uint8 framebuffer[SCREEN_HEIGHT][SCREEN_WIDTH][4]; /* BGR0 */
 
 void osd_close (void);
@@ -68,6 +67,7 @@ void osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color);
 void osd_clearscreen (int color);
 void osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
                      uint32 fgcol, int *width);
+static int strcasecmp_tail (char *str, char *tail);
 
 
 void
@@ -334,7 +334,29 @@ osd_setpixel (uint16 x, uint16 y, uint32 color)
 }
 
 
-/* Draw a bitmap at the specified x0;y0. Only PNG for now... */
+/* Check if "str" ends in "tail", case ignored. Returns TRUE or FALSE */
+static int
+strcasecmp_tail (char *str, char *tail)
+{
+  int pos;
+
+  
+  /* str can't end in tail if it is shorter than tail */
+  if (strlen (str) < strlen (tail)) {
+    return (FALSE);
+  }
+  
+  pos = strlen (str) - strlen (tail);
+
+  if (strcasecmp (&(str[pos]), tail) == 0) {
+    return (TRUE);
+  } else {
+    return (FALSE);
+  }
+  
+}
+
+/* Draw a bitmap at the specified x0;y0. PNG and JPEG are supported */
 void
 osd_drawbitmap (char *filename, int x0, int y0)
 {
@@ -342,12 +364,23 @@ osd_drawbitmap (char *filename, int x0, int y0)
    uint16 w, h, bmx, bmy;
    int x, y;
    
-   
-   if (read_png (filename, (uint8 **) &pBM, &w, &h) != OK) {
-      fprintf (stderr, "cannot load bitmap '%s'!\n", filename);
-      return;
-   }
 
+   if (strcasecmp_tail (filename, ".png")) {
+     if (read_png (filename, (uint8 **) &pBM, &w, &h) != OK) {
+       DBG ("cannot load bitmap '%s'!\n", filename);
+       return;
+     }
+   } else if (strcasecmp_tail (filename, ".jpg") ||
+              strcasecmp_tail (filename, ".jpeg")) {
+     if (read_jpeg (filename, (uint8 **) &pBM, &w, &h) != OK) {
+       DBG ("cannot load bitmap '%s'!\n", filename);
+       return;
+     }
+   } else {
+     DBG ("Filename '%s', unrecognized suffix!", filename);
+     return;
+   }
+   
    pBMorg = pBM;
 
    /* Should the bitmap be tiled? */
