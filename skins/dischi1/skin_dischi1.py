@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/03/13 21:02:05  dischi
+# misc cleanups
+#
 # Revision 1.35  2003/03/13 19:57:08  dischi
 # add font height information to font
 #
@@ -146,22 +149,15 @@ rc = rc.get_singleton()
 
 
 
-#
-# We have five areas, all inherit from Skin_Area (file area.py)
-#
-# Screen_Area   (this file)
-# Title_Area    (this file)
-# View_Area     (view_area.py)
-# Listing_Area  (listing_area.py)
-# Info_Area     (not implemented yet)
-
 from area import Skin_Area
 from area import Screen
+from area import default_font
 
 from listing_area import Listing_Area
 from tvlisting_area import TVListing_Area
 from view_area import View_Area
 from info_area import Info_Area
+
 
 
 class Screen_Area(Skin_Area):
@@ -226,12 +222,7 @@ class Title_Area(Skin_Area):
             text = menu.selected.name
 
         self.text = text
-
-        if not self.settings.font.has_key(content.font):
-            print '*** font <%s> not found' % content.font
-            return
-
-        self.write_text(text, self.settings.font[content.font], content, mode='hard')
+        self.write_text(text, self.get_font(content.font), content, mode='hard')
 
 
 
@@ -242,11 +233,13 @@ class Title_Area(Skin_Area):
 # Skin main functions
 ###############################################################################
 
-XML_SKIN_DIRECTORY = 'skins/dischi1'
-
 class Skin:
-
+    """
+    main skin class
+    """
+    
     def __init__(self):
+        self.XML_SKIN_DIRECTORY = 'skins/dischi1'
         self.display_style = 0
         self.force_redraw = TRUE
         self.last_draw = None
@@ -265,7 +258,7 @@ class Skin:
         # try to find the skin xml file
         if not self.settings.load(config.SKIN_XML_FILE):
             print "skin not found, using fallback skin"
-            self.settings.load("%s/blue1_big.xml" % XML_SKIN_DIRECTORY)
+            self.settings.load("%s/blue1_big.xml" % self.XML_SKIN_DIRECTORY)
         
         for dir in config.cfgfilepath:
             local_skin = '%s/local_skin.xml' % dir
@@ -280,10 +273,13 @@ class Skin:
             font.h = osd.stringsize('Ajg', font.name, font.size)[1]
             if font.shadow.visible:
                 font.h += font.shadow.y
-            
-    # Parse XML files with additional settings
-    # TODO: parse also parent directories
+
+
+    
     def LoadSettings(self, dir, copy_content = 1):
+        """
+        return an object with new skin settings
+        """
         if copy_content:
             settings = copy.copy(self.settings)
         else:
@@ -291,6 +287,7 @@ class Skin:
             
         if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
             settings.load(os.path.join(dir, "skin.xml"), copy_content)
+
             # add the height to each font
             for font_name in settings.font:
                 font = settings.font[font_name]
@@ -301,6 +298,7 @@ class Skin:
 
         elif dir and os.path.isfile(dir):
             settings.load(dir, copy_content)
+
             # add the height to each font
             for font_name in settings.font:
                 font = settings.font[font_name]
@@ -311,9 +309,13 @@ class Skin:
         return None
 
 
+
     def GetSkins(self):
+        """
+        return a list of all possible skins with name, image and filename
+        """
         ret = []
-        for skin in util.match_files(XML_SKIN_DIRECTORY, ['xml']):
+        for skin in util.match_files(self.XML_SKIN_DIRECTORY, ['xml']):
             name  = os.path.splitext(os.path.basename(skin))[0]
             if '%s.png' % os.path.splitext(skin)[0]:
                 image = '%s.png' % os.path.splitext(skin)[0]
@@ -323,13 +325,31 @@ class Skin:
         return ret
     
         
-    # Got DISPLAY event from menu
     def ToggleDisplayStyle(self, menu):
+        """
+        Toggle display style
+        """
         self.display_style = not self.display_style
         return 1
 
+
     def GetDisplayStyle(self):
+        """
+        return current display style
+        """
         return self.display_style
+
+
+    def get_font(self, name):
+        """
+        return the font object from the settings with that name. If not found,
+        print an error message and return the default font
+        """
+        if self.settings.font.has_key(name):
+            return self.settings.font[name]
+        print '*** font <%s> not found' % name
+        return default_font
+
 
     def GetPopupBoxStyle(self, menu=None):
         """
@@ -377,30 +397,15 @@ class Skin:
         spacing = layout.content.spacing
         color   = layout.content.color
 
-        if not settings.font.has_key(layout.content.font):
-            print '*** font <%s> not found' % layout.content.font
-            font = None
-        else:
-            font = settings.font[layout.content.font]
+        font = self.get_font(layout.content.font)
                 
         if layout.content.types.has_key('default'):
             button_default = copy.copy(layout.content.types['default'])
+            button_default.font = self.get_font(button_default.font)
 
-            if not settings.font.has_key(button_default.font):
-                print '*** font <%s> not found' % button_default.font
-                button_default.font = None
-            else:
-                button_default.font = settings.font[button_default.font]
-
-            
         if layout.content.types.has_key('selected'):
             button_selected = copy.copy(layout.content.types['selected'])
-
-            if not settings.font.has_key(button_selected.font):
-                print '*** font <%s> not found' % button_selected.font
-                button_selected.font = None
-            else:
-                button_selected.font = settings.font[button_selected.font]
+            button_selected.font = self.get_font(button_selected.font)
 
         return (background, spacing, color, font, button_default, button_selected)
 
@@ -452,6 +457,11 @@ class Skin:
 
 
     def items_per_page(self, (type, object)):
+        """
+        returns the number of items per menu page
+        (cols, rows) for normal menu and
+        rows         for the tv menu
+        """
         if not object:
             osd.drawstring('INTERNAL ERROR, NO MENU!', 100, osd.height/2)
             return
@@ -484,6 +494,12 @@ class Skin:
 
 
     def draw(self, (type, object)):
+        """
+        draw the object.
+        object may be a menu widget, a table for the tv menu are an audio item for
+        the audio player
+        """
+
         if type == 'menu':
             menuw = object
             

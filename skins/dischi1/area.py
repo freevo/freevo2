@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/03/13 21:02:03  dischi
+# misc cleanups
+#
 # Revision 1.20  2003/03/11 20:38:47  dischi
 # some speed ups
 #
@@ -144,6 +147,15 @@ TRUE = 1
 FALSE = 0
 
 
+
+default_font = xml_skin.XML_font('none')
+default_font.name = config.OSD_DEFAULT_FONTNAME
+default_font.size = config.OSD_DEFAULT_FONTSIZE
+default_font.h = config.OSD_DEFAULT_FONTSIZE
+default_font.shadow.visible = 0
+
+
+
 class Screen:
     """
     this call is a set of surfaces for the area to do it's job
@@ -239,10 +251,9 @@ class Screen:
                     osd.screen.blit(o[1], o[2:])
 
                 elif o[0] == 'text':
-                    ( text, font, x, y, width, height, align_h, align_v,
+                    ( text, font, x, y, width, height, update_height, align_h, align_v,
                       mode, ellipses ) = o[1:]
-                    ### FIXME: font calc height
-                    if self.in_update(x, y, x+width+10, osd.height,
+                    if self.in_update(x, y, x+width+10, y+update_height,
                                       self.updatelist['background'] + \
                                       self.updatelist['content']):
                         if font.shadow.visible:
@@ -257,7 +268,9 @@ class Screen:
                                              mode=mode, ellipses=ellipses)
 
 
-            
+
+
+
 class Skin_Area:
     """
     the base call for all areas. Each child needs two functions:
@@ -311,7 +324,6 @@ class Skin_Area:
         self.mode = 0                   # start draw
         
         area = self.area_val
-        self.settings = settings
         if area:
             visible = area.visible
         else:
@@ -471,6 +483,7 @@ class Skin_Area:
         check which layout is used and set variables for the object
         """
         redraw = self.redraw
+        self.settings = settings
 
         if widget_type == 'player':
             area = settings.player
@@ -576,7 +589,17 @@ class Skin_Area:
             self.redraw = TRUE
             
 
+    def get_font(self, name):
+        """
+        return the font object from the settings with that name. If not found,
+        print an error message and return the default font
+        """
+        if self.settings.font.has_key(name):
+            return self.settings.font[name]
+        print '*** font <%s> not found' % name
+        return default_font
 
+    
     def drawroundbox(self, x, y, width, height, rect, redraw=TRUE):
         """
         draw a round box ... or better stores the information about this call
@@ -618,18 +641,18 @@ class Skin_Area:
             if not align_v:
                 align_v = 'top'
 
-        self.screen.draw('content', ('text', text, font, x, y, width, height, align_h,
-                                     align_v, mode, ellipses ))
+        height2 = height
+        if height2 == -1:
+            height2 = font.h + 10
+
+        self.screen.draw('content', ('text', text, font, x, y, width, height, height2,
+                                     align_h, align_v, mode, ellipses ))
 
         if return_area:
             ret = osd.drawstringframed(text, x, y, width, height, None, None,
                                        font=font.name, ptsize=font.size,
                                        align_h = align_h, align_v = align_v,
                                        mode=mode, ellipses=ellipses, layer=self.dummy_layer)
-        height2 = height
-        if height2 == -1:
-            height2 = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] + 10
-
         self.content_objects += [ ( 'text', x, y, width, height2, height, text, font, align_h,
                                   align_v, mode, ellipses ) ]
 

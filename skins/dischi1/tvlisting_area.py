@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/13 21:02:08  dischi
+# misc cleanups
+#
 # Revision 1.2  2003/03/08 19:54:41  dischi
 # make it look nicer
 #
@@ -104,11 +107,6 @@ class TVListing_Area(Skin_Area):
         self.all_vals = label_val, label_font, head_val, head_font, selected_val, \
                         selected_font, default_val, default_font
         
-        for font in (label_font, head_font, selected_font, default_font): 
-            font.h = osd.stringsize('Ajg', font.name, font.size)[1]
-            if font.shadow.visible:
-                font.h += font.shadow.y
-
         font_h = max(selected_font.h, default_font.h, label_font.h)
 
 

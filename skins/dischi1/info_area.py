@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/13 21:02:04  dischi
+# misc cleanups
+#
 # Revision 1.5  2003/03/11 20:38:48  dischi
 # some speed ups
 #
@@ -97,11 +100,7 @@ class Info_Area(Skin_Area):
         else:
             val = content.types['default']
 
-        if not settings.font.has_key(content.font):
-            print '*** font <%s> not found' % content.font
-            return
-
-        font = settings.font[content.font]
+        font = self.get_font(content.font)
 
         table = [ [], [] ]
         self.auto_update = []
@@ -156,7 +155,7 @@ class Info_Area(Skin_Area):
 
         x0 = content.x
 
-        y_spacing = osd.stringsize('Arj', font=font.name, ptsize=font.size)[1] * 1.1
+        y_spacing = font.h * 1.1
             
         w = 0
         for row in table[0]:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/13 21:02:05  dischi
+# misc cleanups
+#
 # Revision 1.6  2003/03/07 22:54:11  dischi
 # First version of the extended menu with image support. Try the music menu
 # and press DISPLAY
@@ -150,23 +153,16 @@ class Listing_Area(Skin_Area):
         if content.type == 'text':
             for t in possible_types:
                 ct = possible_types[t]
-
-                if not settings.font.has_key(ct.font):
-                    print '*** font <%s> not found' % ct.font
-                    break
-
-                font = settings.font[ct.font]
-                font_w, font_h = osd.stringsize('Arj', font=font.name, ptsize=font.size)
+                font = self.get_font(ct.font)
 
                 rh = 0
                 rw = 0
                 if ct.rectangle:
-                    rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width, font_h)
+                    rw, rh, r = self.get_item_rectangle(ct.rectangle, content.width, font.h)
                     hskip = min(hskip, r.x)
                     vskip = min(vskip, r.y)
 
-                items_h = max(items_h, font_h, rh)
-                items_w = max(items_w, font_w, rw)
+                items_h = max(items_h, font.h, rh)
 
         elif content.type == 'image':
             for t in possible_types:
@@ -258,13 +254,7 @@ class Listing_Area(Skin_Area):
                 else:
                     val = content.types['default']
                 
-            if not settings.font.has_key(val.font):
-                if content.type == 'text':
-                    print '*** font <%s> not found' % val.font
-                    break
-
-            else:
-                font = settings.font[val.font]
+            font = self.get_font(val.font)
 
 
             text = choice.name
@@ -279,18 +269,17 @@ class Listing_Area(Skin_Area):
                 text = '[%s]' % text
 
             if content.type == 'text':
-                font_w, font_h = osd.stringsize('Arj', font=font.name, ptsize=font.size)
                 if choice.icon:
                     image = osd.loadbitmap(choice.icon)
                     if image:
-                        image = pygame.transform.scale(image, (font_h, font_h))
+                        image = pygame.transform.scale(image, (font.h, font.h))
                         self.draw_image(image, (x0, y0))
-                        icon_x = font_h + content.spacing
+                        icon_x = font.h + content.spacing
                 else:
                     icon_x = 0
 
                 if val.rectangle:
-                    r = self.get_item_rectangle(val.rectangle, width, font_h)[2]
+                    r = self.get_item_rectangle(val.rectangle, width, font.h)[2]
                     self.drawroundbox(x0 + hskip + r.x + icon_x, y0 + vskip + r.y,
                                       r.width - icon_x, r.height, r)
 
@@ -323,6 +312,3 @@ class Listing_Area(Skin_Area):
                 current_col += 1
                 
         self.last_choices = (menu.selected, copy.copy(menuw.menu_items))
-
-
-        
