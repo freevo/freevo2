@@ -426,12 +426,12 @@ get_frame2 (void)
       goto error1;
    }
    
-#define COLS 768
-#define ROWS 288
+#define COLS2 768
+#define ROWS2 288
 
    mm.frame = 0;
-   mm.width = COLS;
-   mm.height = ROWS;
+   mm.width = COLS2;
+   mm.height = ROWS2;
    mm.format = VIDEO_PALETTE_RGB32;
    
    printf ("mcap = %d\n", ioctl (fd, VIDIOCMCAPTURE, &mm));
@@ -446,13 +446,13 @@ get_frame2 (void)
       
       if (res < 0 && errno == EINTR) continue;
 
-      for (i = 0; i < ROWS; i++) {
+      for (i = 0; i < ROWS2; i++) {
          row = i*2;
-         bcopy (&(mmbuf[vmb.offsets[frame] + i*COLS*4]),
-                &(fb_mem[row * 768*4]), COLS*4);
+         bcopy (&(mmbuf[vmb.offsets[frame] + i*COLS2*4]),
+                &(fb_mem[row * 768*4]), COLS2*4);
          row = i*2+1;
-         bcopy (&(mmbuf[vmb.offsets[frame] + i*COLS*4]),
-                &(fb_mem[row * 768*4]), COLS*4);
+         bcopy (&(mmbuf[vmb.offsets[frame] + i*COLS2*4]),
+                &(fb_mem[row * 768*4]), COLS2*4);
       }
    
       mm.frame = frame;
