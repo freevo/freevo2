@@ -16,7 +16,10 @@ SDL
 ===
 Uses specially patched versions:
   o SDL-1.2.4-freevo1.tgz:  Makes it possible to start fbcon remotely
+    o The patch is in WIP/Krister/SDL-1.2.4-patch1
   o SDL_ttf2-freevo2.tgz: Fixes a bug where the lib will crash for some fonts
+    o The crash can be reproduced by using "SDL_ttf/showfont Cultstup.ttf 20"
+    o The patch is in WIP/Krister/SDL_ttf2-patch2
   o SDL_image-CVS20020805.tgz: Snapshot from the SDL CVS, can display JPEG EXIF
 
 
@@ -83,6 +86,10 @@ The fbcon driver has been patched by me to ignore the keyboard if
 the environment variable is set since it cannot be accessed unless
 SDL is started from the physical console.
 
+Also of interest:
+SDL_NOMOUSE
+
+If set, the linux fbcon driver will not use a mouse at all.
 
 
 Other stuff:
