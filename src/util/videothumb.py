@@ -53,17 +53,17 @@ log = logging.getLogger()
 
 # do not import freevo stuff when running this file
 if __name__ != "__main__":
-    import childapp
+    from util.popen import Process
     import config
     import vfs
 
-    class MplayerThumbnail(childapp.Instance):
+    class MplayerThumbnail(Process):
         """
-        Mplayer thumbnailing childapp
+        Mplayer thumbnailing process
         """
         def __init__( self, app, imagefile):
             self.imagefile = imagefile
-            childapp.Instance.__init__(self, app, stop_osd=0)
+            Process.__init__(self, app)
 
         def stdout_cb(self, line):
             if line[:-1]:
