@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/09/10 19:50:06  outlyer
+# Copy fix from 1.5.1 to HEAD branch.
+#
 # Revision 1.61  2004/08/27 14:24:25  dischi
 # AudioItem is now based on MediaItem
 #
@@ -129,7 +132,7 @@ class AudioItem(MediaItem):
         if mode == 'advanced':
             # sort by track number
             try:
-                return '%0.3i-%s' % (int(self['trackno']), Unicode(self.url))
+                return '%s %0.3i-%s' % (self['discs'],int(self['trackno']), Unicode(self.url))
             except ValueError:
                 return '%s-%s' % (Unicode(self['trackno']), Unicode(self.url))
         return Unicode(self.url)
