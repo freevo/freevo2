@@ -148,20 +148,21 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         except:
             type = item.type
 
-    key = '%s-%s-%s-%s-%s-%s-%s-%s' % (icon_dir, item.image, type,
-                                       item.type, width, height, force,
-                                       os.stat(item.image)[stat.ST_MTIME])
-
-    if item['rotation']:
-        key = '%s-%s' % (key, item['rotation'])
+    if isinstance(item.image, (str, unicode)):
+        key = '%s-%s-%s-%s-%s-%s-%s-%s' \
+              % (icon_dir, item.image, type, item.type, width, height, force,
+                 os.stat(item.image)[stat.ST_MTIME])
+                
+        if item['rotation']:
+            key = '%s-%s' % (key, item['rotation'])
             
-    if item.media and item.media.item == item:
-        key = '%s-%s' % (key, item.media)
+        if item.media and item.media.item == item:
+            key = '%s-%s' % (key, item.media)
         
-    image = cache[key]
+        image = cache[key]
 
-    if image:
-        return image
+        if image:
+            return image
 
     image     = None
     imagefile = None
@@ -244,5 +245,6 @@ def item_image(item, size, icon_dir, force=False, cache=True):
         height = int(float(width * i_h) / i_w)
 
     image.scale((width, height))
-    cache[key] = image
+    if isinstance(item.image, (str, unicode)):
+        cache[key] = image
     return image
