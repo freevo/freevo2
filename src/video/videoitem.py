@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2003/08/31 17:14:20  dischi
+# Move delete file from VideoItem into a global plugin. Now it's also
+# possible to remove audio and image files.
+#
 # Revision 1.79  2003/08/30 17:05:41  dischi
 # remove bookmark support, add support for ItemPlugin eventhandler
 #
@@ -277,35 +281,10 @@ class VideoItem(Item):
 
         items += configure.get_items(self)
  
-        if self.filename and self.mode == 'file' and not self.media:
-            items += [ (self.confirm_delete, 'Delete file') ]
-
-
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, 'Show variants') ] + items
 
         return items
-
-
-    def confirm_delete(self, arg=None, menuw=None):
-        if not self.menuw:
-            self.menuw = menuw
-        ConfirmBox(text='Do you wish to delete\n %s?' % self.name,
-                   handler=self.delete_file, default_choice=1).show()
-
-
-    def delete_file(self):
-        if DEBUG: print 'Deleting %s' % self.filename
-        base = os.path.splitext(self.filename)[0] + '.'
-        if os.path.isfile(base + 'jpg'):
-            os.remove(base + 'jpg')
-        if os.path.isfile(base + 'png'):
-            os.remove(base + 'png')
-        if os.path.isfile(self.filename):
-            os.unlink(self.filename)
-        if hasattr(self, 'fxd_file') and os.path.isfile(self.fxd_file):
-            os.unlink(self.fxd_file)
-        self.menuw.back_one_menu(arg='reload')
 
 
     def show_variants(self, arg=None, menuw=None):
