@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2002/08/13 04:35:53  krister
+# Removed the 1.5s delay at startup. Removed obsolete code.
+#
 # Revision 1.47  2002/08/13 01:21:42  krister
 # Hide output from the shutdown commands.
 #
@@ -265,12 +268,6 @@ def main_func():
             config.ROM_DRIVES[pos] = (dir, name, 0)
             pos += 1
 
-    # Parse the command-line arguments
-    video = 'sim'
-    for arg in sys.argv[1:]:
-        if arg == '--videotools=real':
-            video = 'real'
-
     # Make sure there's no mplayer process lying around.
     os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
     						  # my mplayer command is actually
@@ -280,8 +277,6 @@ def main_func():
 						  # If I'm the only one, add this:
 						  # ...-9 %s... ' % config.MPLAYER_CMD)
 
-    time.sleep(1.5)
-    
     # Kick off the main menu loop
     print 'Main loop starting...'
     getcmd()
