@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2003/12/14 12:49:37  dischi
+# supermount patch for mandrake
+#
 # Revision 1.79  2003/11/29 18:37:29  dischi
 # build config.VIDEO_SUFFIX in config on startup
 #
@@ -634,7 +637,7 @@ if ROM_DRIVES == None:
         re_cdrec     = re.compile( '^(/dev/cdrecorder[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_dvd       = re.compile( '^(/dev/dvd[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_iso       = re.compile( '^([^ \t]+)[ \t]+([^ \t]+)[ \t]+(iso|cd)9660', re.I )
-        re_automount = re.compile( '^none[ \t]+([^ \t]+) supermount dev=([^,]+)', re.I )
+        re_automount = re.compile( '^none[ \t]+([^ \t]+).*supermount.*dev=([^,]+).*', re.I )
         re_bymountcd = re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*cdrom[0-9]*)[ \t]+', re.I )
         re_bymountdvd= re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*dvd[0-9]*)[ \t]+', re.I )
         fd_fstab = open('/etc/fstab')
