@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/01/18 21:09:50  dischi
+# better title guessing
+#
 # Revision 1.20  2004/01/17 21:20:15  dischi
 # try to generate a better title
 #
@@ -132,15 +135,25 @@ class PluginInterface(plugin.MimetypePlugin):
                 if covers:
                     diritem.image = os.path.join(diritem.dir, covers[0])
 
-        if not diritem.info.has_key('title'):
+        if not diritem.info.has_key('title') and diritem.parent:
             # ok, try some good name creation
-            if diritem['album']:
-                diritem.name = diritem['album']
-            else:
-                # maybe we can use the artist
-                if diritem['artist'] and diritem.parent and \
-                   diritem.parent['artist'] != diritem['artist']:
-                    diritem.name = diritem['artist']
+            p_album  = diritem.parent['album']
+            p_artist = diritem.parent['artist']
+            album    = diritem['album']
+            artist   = diritem['artist']
+
+            if artist and p_artist == artist and album and not p_album:
+                # parent has same artist, but no album, but item has:
+                diritem.name = album
+
+            elif not p_artist and artist:
+                # item has artist, parent not
+                diritem.name = artist
+
+            elif not p_artist and not p_album and not artist and album:
+                # parent has no info, item no artist but album (== collection)
+                diritem.name = album
+
                 
     def fxdhandler(self, fxd, node):
         """
