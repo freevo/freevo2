@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/16 17:56:22  dischi
+# helper function for cmp
+#
 # Revision 1.28  2004/02/13 17:18:39  dischi
 # do not skip after . for directories
 #
@@ -390,6 +393,14 @@ def encode(str, code):
             except UnicodeError:
                 pass
         return result
+
+
+def ucmp(val1, val2):
+    """
+    cmp function taking care of encoding
+    """
+    return cmp(Unicode(val1), Unicode(val2))
+
 
 def htmlenties2txt(string):
     """
