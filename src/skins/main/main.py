@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/02/14 13:00:39  dischi
+# function to return the settings
+#
 # Revision 1.38  2004/02/06 18:24:39  dischi
 # make to possible to override busy icon with skin
 #
@@ -85,7 +88,6 @@ import screen
 # Create the OSD object
 osd = osd.get_singleton()
 
-
 ###############################################################################
 # Skin main functions
 ###############################################################################
@@ -100,7 +102,6 @@ class Skin:
     Image    = xml_skin.Image
     Area     = Skin_Area
 
-    
     def __init__(self):
         """
         init the skin engine
@@ -313,6 +314,13 @@ class Skin:
                 image = None
             ret += [ ( name, image, skin ) ]
         return ret
+
+
+    def get_settings(self):
+        """
+        return the current loaded settings
+        """
+        return self.settings
     
         
     def toggle_display_style(self, menu):
