@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/12/01 20:02:15  dischi
+# only show when needed
+#
 # Revision 1.27  2003/10/21 21:17:42  gsbarbieri
 # Some more i18n improvements.
 #
@@ -109,7 +112,9 @@ class PluginInterface(plugin.ItemPlugin):
 
     def actions(self, item):
         self.item = item
-        if item.type == 'video'  and not hasattr(item, 'fxd_file'):
+
+        if item.type == 'video' and (item.xml_file.endswith('folder.fxd') or \
+                                     not item.xml_file):
             if item.mode == 'file':
                 self.disc_set = False
                 return [ ( self.imdb_search , _('Search IMDB for this file'),
@@ -121,6 +126,7 @@ class PluginInterface(plugin.ItemPlugin):
                 if s:
                     return [ ( self.imdb_search , _('Search IMDB for [%s]') % s,
                                'imdb_search_or_cover_search') ]
+
         if item.type == 'dir' and item.media and item.media.mountdir.find(item.dir) == 0:
             self.disc_set = True
             s = self.imdb_get_disc_searchstring(self.item)
