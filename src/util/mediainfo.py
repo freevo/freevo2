@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/04/11 08:39:54  dischi
+# warn about old cache
+#
 # Revision 1.41  2004/03/28 03:14:53  krister
 # oops
 #
@@ -736,7 +739,8 @@ mmpython.disc.discinfo.CREATE_MD5_ID = config.MMPYTHON_CREATE_MD5_ID
 if __freevo_app__ == 'main':
     try:
         import mmpython.version
-
+        import time
+        
         cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
         info = util.read_pickle(cachefile)
         if not info:
@@ -761,7 +765,11 @@ if __freevo_app__ == 'main':
                 print 'Warning: mmpython as changed.'
                 print 'Please rerun \'freevo cache\' to get the latest updates'
                 print
-                
+            elif (int(time.time()) - part_update) / (3600 * 24) > 7:
+                print
+                print 'Warning: cache is older than 7 days'
+                print 'Running \'freevo cache\' is recommended.'
+                print
     except:
         print
         print 'Error: unable to read mmpython version information'
