@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/12 22:25:00  dischi
+# prevent a possible crash
+#
 # Revision 1.5  2003/09/05 20:48:34  mikeruelle
 # new game system
 #
@@ -54,6 +57,9 @@ def cwd(parent, files):
     """
     items = []
 
+    if not hasattr(parent, 'add_args'):
+        return []
+    
     (type, cmd, args, imgpath, suffixlist) = parent.add_args[0]
     if type == 'MAME':
         print 'Type : %s' % type
