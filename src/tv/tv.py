@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/06/02 21:29:22  outlyer
+# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
+# "Recorded Shows" which makes a lot more sense then where it was before, which was
+# also exceptionally well hidden.
+#
+# To do this properly, I also had to move record_schedule into a class, subclassing
+# from Item, and so problems may and possibly will arise. I've tested it a little,
+# but please bang on this, because while it's a relatively minor change, it does
+# get things working inside the properly model, at least for a start.
+#
+# Bug reports are expected and welcome :)
+#
 # Revision 1.12  2003/04/24 19:56:42  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -64,6 +76,8 @@ from directory import DirItem
 from gui.AlertBox import AlertBox
 from gui.PopupBox import PopupBox
 
+import record_schedule
+
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
@@ -71,6 +85,10 @@ TRUE = 1
 FALSE = 0
 
 import plugin
+
+from record_schedule import ScheduleEdit
+
+m = ScheduleEdit()
 
 
 def get_tunerid(channel_id):
@@ -104,8 +122,8 @@ class TVMenu(Item):
     def main_menu(self, arg, menuw):
         items = [ menu.MenuItem('TV Guide', action=self.start_tvguide),
                   DirItem(config.DIR_RECORD, None, name = 'Recorded Shows',
-                          display_type='tv') ]
-
+                          display_type='tv'),
+                  menu.MenuItem('Scheduled Recordings',action=self.view_schedule)       ]
         menuw.pushmenu(menu.Menu('TV MAIN MENU', items, item_types = 'tv'))
 
 
@@ -122,6 +140,9 @@ class TVMenu(Item):
 
         return time.mktime(stime)
 
+    def view_schedule(self,arg, menuw):
+        m.main_menu()
+        return
 
     def start_tvguide(self, arg, menuw):
 

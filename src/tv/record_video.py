@@ -9,6 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/06/02 21:29:22  outlyer
+# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
+# "Recorded Shows" which makes a lot more sense then where it was before, which was
+# also exceptionally well hidden.
+#
+# To do this properly, I also had to move record_schedule into a class, subclassing
+# from Item, and so problems may and possibly will arise. I've tested it a little,
+# but please bang on this, because while it's a relatively minor change, it does
+# get things working inside the properly model, at least for a start.
+#
+# Bug reports are expected and welcome :)
+#
 # Revision 1.16  2003/05/31 20:53:03  outlyer
 # Fix what I hope is the last event-related crash. Choosing shows to record
 # works again.
@@ -114,7 +126,7 @@ import tv
 import record_daemon
 
 # Schedule editor
-import record_schedule
+#import record_schedule
 
 import event as em
 
@@ -340,9 +352,9 @@ def set_schedule(arg=None, menuw=None):
 def eventhandler( event):
     print 'using record_video event handler'
     # XXX Hack, make it better!!!!
-    if event == em.MENU_CHANGE_STYLE:
-        record_schedule.main_menu()
-    elif event == em.MENU_BACK_ONE_MENU or event == em.MENU_GOTO_MAINMENU:
+    #if event == em.MENU_CHANGE_STYLE:
+    #    record_schedule.main_menu()
+    if event == em.MENU_BACK_ONE_MENU or event == em.MENU_GOTO_MAINMENU:
         menu.MenuWidget.eventhandler( menuwidget, event )
         rc.app(None) #give control back to the main program
     else:

@@ -15,6 +15,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/02 21:29:21  outlyer
+# Changed the "Schedule Editor" to show up in the TV Submenu, along with "Guide" and
+# "Recorded Shows" which makes a lot more sense then where it was before, which was
+# also exceptionally well hidden.
+#
+# To do this properly, I also had to move record_schedule into a class, subclassing
+# from Item, and so problems may and possibly will arise. I've tested it a little,
+# but please bang on this, because while it's a relatively minor change, it does
+# get things working inside the properly model, at least for a start.
+#
+# Bug reports are expected and welcome :)
+#
 # Revision 1.3  2003/04/20 12:43:33  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -86,187 +98,187 @@ DEBUG = config.DEBUG
 TRUE = 1
 FALSE = 0
 
+from item import Item
+
 menuwidget = menu.get_singleton()
 
 killflag = 0
 
-def main_menu():
+class ScheduleEdit(Item):
 
-    recmenu = generate_main()
+    def __init__ (self):
+        Item.__init__(self)
+        self.type = 'tv'
+   
 
-    menuwidget.pushmenu(recmenu)
-    menuwidget.refresh()
-
-
-def generate_main():
-    if DEBUG:
-        print 'Recording Schedule: generate_main'
+    def main_menu(self):
+        recmenu = self.generate_main()
     
-    items = []
-
-    items += [menu.MenuItem('View Recording Schedule',
-                            view_schedule,0)]
-
-    items += [menu.MenuItem('Delete Scheduled Item',
-                            view_schedule,1)]
-
-    recmenu = menu.Menu('RECORDING SCHEDULE', items,
-                         reload_func=generate_main)
-
-    rc.app(None)
-
-    return recmenu
-
-
-def view_schedule(arg=None, menuw=None):
-    '''Set up the view recording menu or the delete scheduled
-    item menu'''
-
-    items = []
-    line = '0'
-    itemcount = 0
-    global killflag
-
-    fd = open(record_daemon.SCHEDULE,'r')
-
-    #delete old scheduled items from the file since we wont need them
-    #this could be done more efficiently from record_daemon
-    if arg == 0:
-        newstringlist = fd.readline()
-        oldchecker = fd.readlines()
-	fd.close()
+        menuwidget.pushmenu(recmenu)
+        menuwidget.refresh()
+    
+    
+    def generate_main(self):
+        items = []
+        items += [menu.MenuItem('View Recording Schedule',
+                                self.view_schedule,0)]
+        items += [menu.MenuItem('Delete Scheduled Item',
+                                self.view_schedule,1)]
+        recmenu = menu.Menu('RECORDING SCHEDULE', items,
+                             reload_func=self.generate_main, item_types = 'tv')
+        rc.app(None)
+        return recmenu
+    
+    
+    def view_schedule(self,arg=None, menuw=None):
+        '''Set up the view recording menu or the delete scheduled
+        item menu'''
+    
+        items = []
+        line = '0'
+        itemcount = 0
+        global killflag
+    
+        fd = open(record_daemon.SCHEDULE,'r')
+    
+        #delete old scheduled items from the file since we wont need them
+        #this could be done more efficiently from record_daemon
+        if arg == 0:
+            newstringlist = fd.readline()
+            oldchecker = fd.readlines()
+    	    fd.close()
+            fd = open(record_daemon.SCHEDULE,'w')
+    
+            for st in oldchecker:
+                #check if item is recording
+                timecomp= st[st.find('-'): st.rfind(',')].split(',')
+    	        timecomp[0] = timecomp[0].replace('-','').replace(':','').replace(' ','')
+    	        length = string.atoi(timecomp[1])
+                currenttime = string.atoi(time.strftime('%m%d%H%M%S', time.localtime()))
+    	        recording = currenttime < self.addtime(string.atoi(timecomp[0]),length)
+    
+    	        #delete old items that are not recording
+    	        if st.find('#') == -1 or (recording and killflag != 1):
+    	            newstringlist += st
+    	    killflag = 0
+            fd.write(newstringlist)
+            fd.close()
+    	    fd = open(record_daemon.SCHEDULE,'r')
+    
+        fd.readline()
+    
+        while line != '':
+            oldline = line
+    	    line = fd.readline()
+    	    if line.find('#') != -1:
+    	        recordingflag = 1
+    	    else:
+    	        recordingflag = 0
+    
+    	    #get only the title, the record time and the channel
+    	    line = line[ line.rfind('/') +1: line.find('.avi')]
+            #line = line[ line.rfind('/') +1: line.find('.mpg')]
+    	    line = line.replace('_',' ')
+    
+            #skip multiple occurences of the same thing
+            if oldline != line and line != '':
+                itemline = line
+                if recordingflag:
+    	            itemline += ' (currently recording)'
+    	        if arg == 0:                
+    	            items += [ menu.MenuItem(itemline)]
+    	        elif arg == 1:
+    	            items += [ menu.MenuItem(itemline, self.delete_selection,itemline)]
+        fd.close()
+    
+        if arg == 0:
+            submenu = menu.Menu('VIEW RECORDING SCHEDULE', items,
+                                 reload_func=self.view_schedule, item_types='tv')
+        else:
+            submenu = menu.Menu('DELETE SCHEDULED ITEM', items,
+                                 reload_func=self.view_schedule, item_types='tv')
+        menuwidget.pushmenu(submenu)
+        if killflag and arg == 1:
+            AlertBox(text='All Currently Recording Items Have Been Killed!').show()
+            killflag = 0
+    
+    
+    
+    
+    def delete_selection(self,arg=None, menuw=None):
+      
+        global killflag
+        #stop all recordings if needed
+        if arg.find(' (currently recording)') != -1:
+            os.system('pkill mencoder')
+            killflag = 1 #blood has been spilt today
+    
+        arg = arg.replace(' (currently recording)','').replace(' ','_')
+        fd = open(record_daemon.SCHEDULE,'r')
+    
+        stringlist = fd.readlines()
+        fd.close()
+    
         fd = open(record_daemon.SCHEDULE,'w')
-
-        for st in oldchecker:
-            #check if item is recording
-            timecomp= st[st.find('-'): st.rfind(',')].split(',')
-	    timecomp[0] = timecomp[0].replace('-','').replace(':','').replace(' ','')
-	    length = string.atoi(timecomp[1])
-            currenttime = string.atoi(time.strftime('%m%d%H%M%S', time.localtime()))
-	    recording = currenttime < addtime(string.atoi(timecomp[0]),length)
-
-	    #delete old items that are not recording
-	    if st.find('#') == -1 or (recording and killflag != 1):
-	        newstringlist += st
-	killflag = 0
+        newstringlist = ''
+    
+        for item in stringlist:
+            if item.find(arg) == -1:
+    	        print item
+    	        print arg
+    	        newstringlist += item
         fd.write(newstringlist)
         fd.close()
-	fd = open(record_daemon.SCHEDULE,'r')
-
-    fd.readline()
-
-    while line != '':
-        oldline = line
-	line = fd.readline()
-	if line.find('#') != -1:
-	    recordingflag = 1
-	else:
-	    recordingflag = 0
-
-	#get only the title, the record time and the channel
-	line = line[ line.rfind('/') +1: line.find('.avi')]
-        #line = line[ line.rfind('/') +1: line.find('.mpg')]
-	line = line.replace('_',' ')
-
-        #skip multiple occurences of the same thing
-        if oldline != line and line != '':
-            itemline = line
-            if recordingflag:
-	        itemline += ' (currently recording)'
-	    if arg == 0:                
-	        items += [ menu.MenuItem(itemline)]
-	    elif arg == 1:
-	        items += [ menu.MenuItem(itemline, delete_selection,itemline)]
-    fd.close()
-
-    if arg == 0:
-        submenu = menu.Menu('VIEW RECORDING SCHEDULE', items,
-                             reload_func=view_schedule)
-    else:
-        submenu = menu.Menu('DELETE SCHEDULED ITEM', items,
-                             reload_func=view_schedule)
-    menuwidget.pushmenu(submenu)
-    if killflag and arg == 1:
-        AlertBox(text='All Currently Recording Items Have Been Killed!').show()
-	killflag = 0
-
-
-
-
-def delete_selection(arg=None, menuw=None):
-  
-    global killflag
-    #stop all recordings if needed
-    if arg.find(' (currently recording)') != -1:
-        os.system('pkill mencoder')
-        killflag = 1 #blood has been spilt today
-
-    arg = arg.replace(' (currently recording)','').replace(' ','_')
-    fd = open(record_daemon.SCHEDULE,'r')
-
-    stringlist = fd.readlines()
-    fd.close()
-
-    fd = open(record_daemon.SCHEDULE,'w')
-    newstringlist = ''
-
-    for item in stringlist:
-        if item.find(arg) == -1:
-	    print item
-	    print arg
-	    newstringlist += item
-    fd.write(newstringlist)
-    fd.close()
-    menuwidget.back_one_menu()
-    view_schedule(1)
-
-
-
- 
-
-
-def addtime(rtime,length):
-    '''This function will add two time integers together
-    where one is in localtime and the other is a length in
-    seconds,
-    example:
-    rtime = 0305235900
-    length = 3650
-    addtime(rtime,length)
-    will return 0306005950'''
-
-    lhour =  (length / 3600)*10000
-    lminute = ((length % 3600) / 60)*100
-    lsecond = length % 60
+        menuwidget.back_one_menu()
+        self.view_schedule(1)
     
-    rmonth = (rtime / 100000000)*100000000
-    rday = (rtime % 100000000 / 1000000)*1000000
-    rhour =( rtime % 1000000 / 10000)*10000
-    rminute = (rtime % 10000 / 100)*100
-    rsecond = rtime % 100
     
-    months = 0
-    days = 0
-    hours = 0
-    minutes = 0
-    seconds = 0
     
-    if lsecond + rsecond >= 60:
-        minutes += 100
-    seconds = (lsecond + rsecond) % 60
-
-    minutes += lminute + rminute
-    if minutes >= 6000:
-        hours += 10000
-        minutes = minutes % 6000
-
-    hours += lhour + rhour
-    if hours >= 240000:
-        days += 1000000
-        hours = hours % 240000
-
-    days += rday
-
-    return  rmonth + days + hours + minutes + seconds
-
+     
     
+    
+    def addtime(self,rtime,length):
+        '''This function will add two time integers together
+        where one is in localtime and the other is a length in
+        seconds,
+        example:
+        rtime = 0305235900
+        length = 3650
+        addtime(rtime,length)
+        will return 0306005950'''
+    
+        lhour =  (length / 3600)*10000
+        lminute = ((length % 3600) / 60)*100
+        lsecond = length % 60
+        
+        rmonth = (rtime / 100000000)*100000000
+        rday = (rtime % 100000000 / 1000000)*1000000
+        rhour =( rtime % 1000000 / 10000)*10000
+        rminute = (rtime % 10000 / 100)*100
+        rsecond = rtime % 100
+        
+        months = 0
+        days = 0
+        hours = 0
+        minutes = 0
+        seconds = 0
+        
+        if lsecond + rsecond >= 60:
+            minutes += 100
+        seconds = (lsecond + rsecond) % 60
+    
+        minutes += lminute + rminute
+        if minutes >= 6000:
+            hours += 10000
+            minutes = minutes % 6000
+    
+        hours += lhour + rhour
+        if hours >= 240000:
+            days += 1000000
+            hours = hours % 240000
+    
+        days += rday
+    
+        return  rmonth + days + hours + minutes + seconds
+    
+        
