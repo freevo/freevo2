@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.111  2004/04/12 05:34:14  dischi
+# extend PATH and set HOME and USER
+#
 # Revision 1.110  2004/02/10 00:17:52  rshortt
 # Use env from /usr/bin rather than /bin.  I beleive it is standard in /usr/bin,
 # looking in /bin breaks Debian and others while it is available in both places
@@ -332,6 +335,15 @@ if os.environ.has_key('PYTHONPATH'):
 else:
     os.environ['PYTHONPATH'] = freevo_python
 
+# extend PATH to make sure the basics are there
+os.environ['PATH'] = '%s:/usr/bin:/bin:/usr/local/bin:' % os.environ['PATH'] + \
+                     '/usr/X11R6/bin/:/sbin:/usr/sbin'
+
+# set basic env variables
+if not os.environ.has_key('HOME') or not os.environ['HOME']:
+    os.environ['HOME'] = '/root'
+if not os.environ.has_key('USER') or not os.environ['USER']:
+    os.environ['USER'] = 'root'
 
 # now check what and how we should start freevo
 bg    = 0 # start in background
