@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/10 18:45:23  dischi
+# always use thumbnail
+#
 # Revision 1.4  2004/01/10 04:12:02  outlyer
 # Take a snapshot/thumbnail after a file is recorded...
 #
@@ -79,8 +82,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
     if vfs.isfile(imagefile):
         try:
             image = Image.open(imagefile)
-            if image.size[0] > 300 and image.size[1] > 300:
-                image.thumbnail((300,300), Image.ANTIALIAS)
+            image.thumbnail((300,300), Image.ANTIALIAS)
             if image.mode == 'P':
                 image = image.convert('RGB')
             image = image.crop((5, 0, image.size[0]-10, image.size[1]))
