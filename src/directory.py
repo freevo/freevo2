@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/08/05 17:27:13  dischi
+# changed debug
+#
 # Revision 1.23  2003/07/18 19:47:24  dischi
 # add files from datadir to the current directory
 #
@@ -674,7 +677,7 @@ class DirwatcherThread(threading.Thread):
                        for fname in os.listdir(self.dir) ])
         except OSError:
             # the directory is gone
-            print 'unable to read directory'
+            print 'DirwatcherThread: unable to read directory %s' % self.dir
 
             # send EXIT to go one menu up:
             rc.post_event(em.MENU_BACK_ONE_MENU)
