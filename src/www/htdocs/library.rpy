@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/11/28 19:31:52  dischi
+# renamed some config variables
+#
 # Revision 1.15  2003/10/20 02:24:17  rshortt
 # more tv_util fixes
 #
@@ -21,7 +24,7 @@
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
 # Revision 1.12  2003/08/23 19:21:29  mikeruelle
-# fixing an error that appends items to DIR_MOVIES when downloading an item
+# fixing an error that appends items to VIDEO_ITEMS when downloading an item
 #
 # Revision 1.11  2003/07/24 11:55:38  rshortt
 # Removed the menu images for now because they are missing and I am not even
@@ -77,7 +80,7 @@
 #
 # Revision 1.1  2003/02/20 21:48:13  rshortt
 # New cgi contributed by Mike Ruelle.  This lets you view files inside
-# config.DIR_RECORD and let you rename or delete them.
+# config.TV_RECORD_DIR and let you rename or delete them.
 #
 #
 # -----------------------------------------------------------------------
@@ -122,10 +125,10 @@ class LibraryResource(FreevoResource):
     def get_suffixes (self, media):
         suffixes = []
         if media == 'music':
-            suffixes.extend(config.SUFFIX_AUDIO_FILES)
-            suffixes.extend(config.SUFFIX_AUDIO_PLAYLISTS)
+            suffixes.extend(config.AUDIO_SUFFIX)
+            suffixes.extend(config.PLAYLIST_SUFFIX)
         if media == 'images':
-            suffixes.extend(config.SUFFIX_IMAGE_FILES)
+            suffixes.extend(config.IMAGE_SUFFIX)
         if media == 'movies':
             suffixes.extend(config.SUFFIX_VIDEO_FILES)
         if media == 'rectv':
@@ -137,23 +140,23 @@ class LibraryResource(FreevoResource):
         dirs2 = []
 
         if media == 'movies':
-            dirs.extend(config.DIR_MOVIES)
+            dirs.extend(config.VIDEO_ITEMS)
         elif media == 'music':
-            dirs.extend(config.DIR_AUDIO)
+            dirs.extend(config.AUDIO_ITEMS)
         elif media == 'rectv':
-            dirs = [ ('Recorded TV', config.DIR_RECORD) ]
+            dirs = [ ('Recorded TV', config.TV_RECORD_DIR) ]
         elif media == 'images':
-            dirs2.extend(config.DIR_IMAGES)
+            dirs2.extend(config.IMAGE_ITEMS)
             #strip out ssr files
             for d in dirs2:
                 (title, tdir) = d
                 if os.path.isdir(tdir):
                     dirs.append(d)
         elif media == 'download':
-            dirs.extend(config.DIR_MOVIES)
-            dirs.extend(config.DIR_AUDIO)
-            dirs.extend( [ ('Recorded TV', config.DIR_RECORD) ])
-            dirs2.extend(config.DIR_IMAGES)
+            dirs.extend(config.VIDEO_ITEMS)
+            dirs.extend(config.AUDIO_ITEMS)
+            dirs.extend( [ ('Recorded TV', config.TV_RECORD_DIR) ])
+            dirs2.extend(config.IMAGE_ITEMS)
             #strip out ssr files
             for d in dirs2:
                 (title, tdir) = d
@@ -247,7 +250,7 @@ class LibraryResource(FreevoResource):
             fv.tableCell(movmuslink % (action_script, "movies","Movies"), 'align=center')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
-            fv.tableCell(rectvlink % (action_script, "rectv", config.DIR_RECORD, "Recorded TV"), 'align=center')
+            fv.tableCell(rectvlink % (action_script, "rectv", config.TV_RECORD_DIR, "Recorded TV"), 'align=center')
             fv.tableRowClose()
             fv.tableRowOpen('class="chanrow"')
             fv.tableCell(movmuslink % (action_script,"music","Music"), 'align=center')

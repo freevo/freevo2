@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/28 19:31:52  dischi
+# renamed some config variables
+#
 # Revision 1.2  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -62,7 +65,7 @@ class IceslistchangerResource(FreevoResource):
         fv = HTMLResource()
         form = request.args
  
-        directories = config.DIR_AUDIO
+        directories = config.AUDIO_ITEMS
         rpyscript = 'iceslistchanger.rpy'
         #rpyscript = os.path.basename(os.environ['SCRIPT_FILENAME'])
         rpydir = fv.formValue(form, 'dir')
@@ -88,7 +91,7 @@ class IceslistchangerResource(FreevoResource):
             fv.tableCell('Pick a Music List', 'class="guidehead" align="center" colspan="1"')
             fv.tableRowClose()
             # find m3u's
-            rpym3ulist = util.match_files_recursively(rpydir, config.SUFFIX_AUDIO_PLAYLISTS)
+            rpym3ulist = util.match_files_recursively(rpydir, config.PLAYLIST_SUFFIX)
             for m3u in rpym3ulist:
                 title = os.path.basename(m3u)
                 link = '<a href="' + rpyscript +'?m3u='+urllib.quote(m3u)+'">'+title+'</a>'

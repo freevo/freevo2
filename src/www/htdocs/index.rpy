@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/11/28 19:31:52  dischi
+# renamed some config variables
+#
 # Revision 1.8  2003/10/20 02:24:17  rshortt
 # more tv_util fixes
 #
@@ -120,7 +123,7 @@ class IndexResource(FreevoResource):
         else:
             fv.res += '<p><font color="white" >No programs scheduled to record.</font></p>'
 
-        diskfree = '%i of %i Mb free in %s'  % ( (( util.freespace(config.DIR_RECORD) / 1024) / 1024), ((util.totalspace(config.DIR_RECORD) /1024) /1024), config.DIR_RECORD)
+        diskfree = '%i of %i Mb free in %s'  % ( (( util.freespace(config.TV_RECORD_DIR) / 1024) / 1024), ((util.totalspace(config.TV_RECORD_DIR) /1024) /1024), config.TV_RECORD_DIR)
         fv.res += '<p><font color="white" >' + diskfree + '</font></p>'
 
         fv.printSearchForm()
