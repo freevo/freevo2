@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/12/09 20:23:00  dischi
+# merged freevo/src/tv/channels.py into the guide, needs much cleanup
+#
 # Revision 1.12  2004/12/05 17:08:53  dischi
 # wait when db is locked
 #
@@ -25,41 +28,6 @@
 # -add_data_xmltv(): pass along which channels to exclude.  Call expire_programs()
 # -add_data_vdr(): accept more VDR properties, also support SVDRP.  This also
 #  checks which channels to exclude. Call expire_programs().
-#
-# Revision 1.10  2004/11/27 15:00:37  dischi
-# create db if missing
-#
-# Revision 1.9  2004/11/27 02:22:38  rshortt
-# -Some verbose prints for debug.
-# -Debugging and changes to add_program().
-# -Impliment add_data_vdr() which uses vdrpylib to get guide info from VDR.
-#  This is still full of debug and is a work in progress but its working
-#  well at this point.  You can find vdrpylib at http://vdrpylib.sf.net/ and
-#  a CVS snapshot is available:  http://vdrpylib.sf.net/vdrpylib-20041126.tar.gz
-#
-# Revision 1.8  2004/11/19 19:03:29  dischi
-# add get_program_by_id
-#
-# Revision 1.7  2004/11/13 16:10:21  dischi
-# replace compat.py and config.py with a sysconfig variante
-#
-# Revision 1.6  2004/11/12 20:40:36  dischi
-# support program get from all channels
-#
-# Revision 1.5  2004/10/23 16:20:07  rshortt
-# Comment out a sometimes spammy debug.
-#
-# Revision 1.4  2004/10/23 14:29:35  rshortt
-# Updates and bugfixes.  Please excuse the mass of commented code and debug.
-#
-# Revision 1.3  2004/10/20 01:06:30  rshortt
-# Unicode changes.
-#
-# Revision 1.2  2004/10/18 01:04:01  rshortt
-# Rework pyepg to use an sqlite database instead of an object pickle.
-# The EPGDB class is the primary interface to the databse, wrapping database
-# queries in method calls.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -94,6 +62,8 @@ except:
     # Fallback for stand alone epg usage
     import config
 
+from channel import Channel
+from program import Program
 
 def escape_query(sql):
     """
@@ -174,14 +144,34 @@ class EPGDB:
     """ 
     Class for working with the EPG database 
     """
+    def __init__(self):
+        self.channel_list = []
+        self.channel_dict = {}
 
-    def __init__(self, dbpath):
+    def connect(self, dbpath):
         if not os.path.isfile(dbpath):
             print 'epg database missing, creating it'
             scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
             os.system('sqlite %s < %s 2>/dev/null >/dev/null' % (dbpath, scheme))
             print 'done'
         self.db = _SQLite(dbpath)
+
+
+    def init(self, TV_CHANNELS=[], TV_CHANNELS_EXCLUDE=[]):
+
+        # Check TV_CHANNELS and add them to the list
+        for c in TV_CHANNELS:
+            self.add_channel(Channel(c[0], c[1], c[2:], self))
+
+        # Check the EPGDB for channels. All channels not in the exclude list
+        # will be added if not already in the list
+        for c in self.get_channels():
+            if String(c['id']) in TV_CHANNELS_EXCLUDE:
+                # Skip channels that we explicitly do not want.
+                continue
+            if not c['id'] in self.channel_dict.keys():
+                self.add_channel(Channel(c['id'], c['display_name'], c['access_id'], self))
+
 
 
     def execute(self, query, close=False):
@@ -220,7 +210,7 @@ class EPGDB:
         return table
 
 
-    def add_channel(self, id, display_name, access_id):
+    def db_add_channel(self, id, display_name, access_id):
         query = 'insert or replace into channels (id, display_name, access_id) \
                  values ("%s", "%s", "%s")' % (id, display_name, access_id)
 
@@ -501,21 +491,6 @@ class EPGDB:
         self.commit()
 
 
-    def search_programs(self, subs, by_chan=None):
-        now = time.time()
-        clause = 'where stop > %d' % now
-        if by_chan:
-            clause = '%s and channel_id="%s"' % (clause, by_chan)
-
-        clause = '%s and title like "%%%s%%"' % (clause, subs)
-
-        query = 'select * from programs %s order by channel_id, start' % clause
-        # print 'QUERY: %s' % query
-        rows = self.execute(query)
-
-        return rows
-
-
     def add_data_xmltv(self, xmltv_file, exclude_channels=None, verbose=1):
         import xmltv
         xmltv.load_guide(self, xmltv_file, exclude_channels, verbose)
@@ -578,7 +553,7 @@ class EPGDB:
             if verbose:
                 print 'Adding channel: %s as %s' % (c.id, access_id)
 
-            self.add_channel(c.id, c.name, access_id)
+            self.db_add_channel(c.id, c.name, access_id)
             for e in c.events:
                 subtitle = e.subtitle
                 if not subtitle: subtitle = ''
@@ -591,4 +566,51 @@ class EPGDB:
         self.expire_programs()
 
         return True
+
+    # channel list code
+
+    def sort_channels(self):
+        pass
+
+
+    def add_channel(self, channel):
+        """
+        add a channel to the list
+        """
+        if not self.channel_dict.has_key(channel.id):
+            # Add the channel to both the dictionary and the list. This works
+            # well in Python since they will both point to the same object!
+            self.channel_dict[channel.id] = channel
+            self.channel_list.append(channel)
+
+
+    def __getitem__(self, key):
+        return self.channel_list[key]
+
+
+    def get_channel(self, pos, start=None):
+        if not start:
+            start = self.channel_list[0]
+        cpos = self.channel_list.index(start)
+        pos  = (cpos + pos) % len(self.channel_list)
+        return self.channel_list[pos]
+    
+        
+    def search_programs(self, subs, by_chan=None):
+        now = time.time()
+        clause = 'where stop > %d' % now
+        if by_chan:
+            clause = '%s and channel_id="%s"' % (clause, by_chan)
+
+        clause = '%s and title like "%%%s%%"' % (clause, subs)
+
+        query = 'select * from programs %s order by channel_id, start' % clause
+        result = []
+        for p in self.execute(query):
+            if self.channel_dict.has_key(p.channel_id):
+                result.append(Program(p.id, p.title, p.start, p.stop, p.episode,
+                                      p.subtitle, description=p['description'], 
+                                      channel=self.channel_dict[p.channel_id]))
+        return result
+
 

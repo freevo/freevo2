@@ -1,5 +1,10 @@
 from guide import EPGDB
+from program import Program
 
-def get_epg(dbfile = '/tmp/epgdb'):
-    return EPGDB(dbfile)
+guide = EPGDB()
+
+connect = guide.connect
+load    = guide.init
+
+channels = guide.channel_list
 
