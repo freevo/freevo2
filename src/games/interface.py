@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/13 14:30:12  dischi
+# Added patch from Rob Shortt to support the removal of items
+#
 # Revision 1.4  2003/01/12 13:51:51  dischi
 # Added the feature to remove items for videos, too. For that the interface
 # was modified (update instead of remove).
@@ -76,7 +79,17 @@ def update(parent, new_files, del_files, new_items, del_items, current_items):
     del_files or add them to new_items based on new_files
     """
 
-    # XXX the remove stuff is missing right now, can someone who knows the mame
-    # XXX code please add it?
-    
+    for item in current_items:
+        for file in util.find_matches(del_files, config.SUFFIX_MAME_FILES):
+            if item.type == 'mame' and item.filename == file:
+                # In the future will add code to remove the mame rom
+                # from the cache.
+                del_items += [ item ]
+                del_files.remove(file)
+ 
+        for file in util.find_matches(del_files, config.SUFFIX_SNES_FILES):
+            if item.type == 'snes' and item.filename == file:
+                del_items += [ item ]
+                del_files.remove(file)
+ 
     new_items += cwd(parent, new_files)
