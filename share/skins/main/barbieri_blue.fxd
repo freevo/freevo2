@@ -438,6 +438,12 @@
 		        mode="hard" expression="title" />
    	          <newline />
 	       </if>
+	       <if expression="not title and name">
+  	          <text height="line_height"
+	                align="left" font="info title" 
+		        mode="hard" expression="name" />
+   	          <newline />
+	       </if>	       
 	       <if expression="tagline">
 	          <text font="info tagline" height="max" mode="soft" expression="tagline"/>
 	          <newline/>
@@ -677,6 +683,8 @@
       <layout label="player screen">
 	 <background>
 	    <image image="background" x="0" y="0" label="background"/>
+	    <image filename="logo_david.png" x="633" y="10" width="127" height="141" 
+	           visible="not idlebar" />
 	 </background>
       </layout>
 
