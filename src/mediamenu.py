@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/12/09 14:23:53  dischi
+# Added games patch from Rob Shortt to use the interface.py and snes support
+#
 # Revision 1.9  2002/12/07 11:32:59  dischi
 # Added interface.py into video/audio/image/games. The file contains a
 # function cwd to return the items for the list of files. games support
@@ -81,10 +84,6 @@ import audio.interface
 import image.interface
 import games.interface
 
-# XXX remove this when the games interface is finished
-import games.mame_cache as mame_cache
-from games.mameitem import MameItem
-
 # Add support for bins album files
 from image import bins
 
@@ -118,8 +117,8 @@ class MediaMenu(Item):
             dirs += config.DIR_AUDIO
         if self.display_type == 'image':
             dirs += config.DIR_IMAGES
-        if self.display_type == 'game':
-            dirs += config.DIR_MAME
+        if self.display_type == 'games':
+            dirs += config.DIR_GAMES
 
         # add default items
         for d in dirs:
@@ -168,7 +167,7 @@ class MediaMenu(Item):
             title = 'AUDIO'
         elif self.display_type == 'image':
             title = 'IMAGE'
-        elif self.display_type == 'game':
+        elif self.display_type == 'games':
             title = 'GAMES'
         else:
             title = 'MEDIA'
@@ -287,15 +286,6 @@ class DirItem(Playlist):
             if not self.display_type or self.display_type == t:
                 play_items += eval(t + '.interface.cwd(self, files)')
         play_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
-
-
-        # XXX BEGIN remove this when games interface is finished
-        if not self.display_type or self.display_type == 'game':
-            mame_list = mame_cache.getMameItemInfoList(self.dir)
-            for ml in mame_list:
-                play_items += [ MameItem(ml[0], ml[1], ml[2], self) ]
-            self.playlist = play_items
-        # XXX END remove this when games interface is finished
 
 
         # add sub-directories

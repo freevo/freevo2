@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2002/12/09 14:23:53  dischi
+# Added games patch from Rob Shortt to use the interface.py and snes support
+#
 # Revision 1.21  2002/10/24 03:16:18  krister
 # Added DXR3 support.
 #
@@ -134,6 +137,8 @@ def main():
     check_program(conf, "mplayer", "mplayer", 1)
     check_program(conf, "jpegtran", "jpegtran", 0)
     check_program(conf, "xmame.SDL", "xmame_SDL", 0)
+    check_program(conf, "ssnes9x", "snes", 0)
+    check_program(conf, "zsnes", "snes", 0)
 
     print
     print

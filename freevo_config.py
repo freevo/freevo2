@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.99  2002/12/09 14:23:52  dischi
+# Added games patch from Rob Shortt to use the interface.py and snes support
+#
 # Revision 1.98  2002/12/03 21:29:39  dischi
 # added dvdnav options
 #
@@ -270,7 +273,7 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 
 
 # ======================================================================
-# Freevo mame settings:
+# Freevo games settings:
 # ======================================================================
 
 #
@@ -280,32 +283,38 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 # website is at http://www.mame.net, but the version that is used here
 # is at http://x.mame.net since the regular MAME is for Windows.
 #
-
-#
-# Where the mame files can be found.
-#
 # Note: You must have the "rominfo" app from rominfosrc compiled and
 # placed in the main freevo dir first. This is not done by the regular
 # Makefile, you must do it by hand. Read the rominfosrc/rominfo.txt
 # for further instructions on more steps that are required to use MAME!
-#
-DIR_MAME = [ ('Test Games', './testfiles/Mame') ]
+# 
+# SNES stands for Super Nintendo Entertainment System.  Freevo relies
+# on other programs that are not included in Freevo to play these games.
+# 
+# Where the mame and snes files can be found.
+# 
+
+DIR_GAMES = [ ('Test Games', './testfiles/Mame') ]
 
 #
 # The list of filename suffixes that are used to match the files that
 # are used for the Mame arcade emulator. 
 # 
 SUFFIX_MAME_FILES = [ 'zip' ]
+SUFFIX_SNES_FILES = [ 'smc', 'fig' ]
 
 MAME_CMD         = CONF.xmame_SDL
+SNES_CMD         = CONF.snes
 
-MAME_NICE        = -20           # Priority of mplayer process. 0 is unchanged,
-                                 # <0 is higher prio, >0 lower prio. 
-                                 # prio <0 has no effect unless run as root.
+GAMES_NICE        = -20       # Priority of the game process. 0 is unchanged,
+                              # <0 is higher prio, >0 lower prio. 
+                              # prio <0 has no effect unless run as root.
 
 # XXX Removed '-ef 1', doesn't work on my older version of mame...  /Krister
 MAME_ARGS_DEF     = ('-nosound -fullscreen -modenumber 6 ')
 
+# This example is a set of arguments for zsnes.
+SNES_ARGS_DEF     = ("-m -r 3 -k 100 -1 3 -2 3 -cs -t")
 
 
 # ======================================================================

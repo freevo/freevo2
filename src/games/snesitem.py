@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# mameitem.py - Item for mame objects
+# snesitem.py - Item for snes objects
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,13 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2002/12/09 14:23:53  dischi
+# Revision 1.1  2002/12/09 14:23:53  dischi
 # Added games patch from Rob Shortt to use the interface.py and snes support
-#
-# Revision 1.1  2002/11/24 19:10:19  dischi
-# Added mame support to the new code. Since the hole new code is
-# experimental, mame is activated by default. Change local_skin.xml
-# to deactivate it after running ./cleanup
 #
 #
 # -----------------------------------------------------------------------
@@ -67,42 +62,31 @@ osd        = osd.get_singleton()
 from item import Item
 
 
-class MameItem(Item):
-    def __init__(self, title, file, image = None, parent = None):
+class SnesItem(Item):
+    def __init__(self, file, parent = None):
         Item.__init__(self)
-        self.type  = 'mame'            # fix value
+        self.type  = 'snes'            # fix value
         self.mode  = 'file'            # file, dvd or vcd
-        self.image = image
-        self.name = title
         self.filename = file
         self.files = [ file, ]
 
+        self.name = os.path.splitext(os.path.basename(file))[0]
         self.xml_file = None
         self.parent = parent
         
         # find image for this file
-        if image == None:
-            if os.path.isfile(os.path.splitext(file)[0] + ".png"):
-                self.image = os.path.splitext(file)[0] + ".png"
-            elif os.path.isfile(os.path.splitext(file)[0] + ".jpg"):
-                self.image = os.path.splitext(file)[0] + ".jpg"
+        if os.path.isfile(os.path.splitext(file)[0] + ".png"):
+            self.image = os.path.splitext(file)[0] + ".png"
+        elif os.path.isfile(os.path.splitext(file)[0] + ".jpg"):
+            self.image = os.path.splitext(file)[0] + ".jpg"
 
         command = '--prio=%s %s %s' % (config.GAMES_NICE,
-                                       config.MAME_CMD,
-                                       config.MAME_ARGS_DEF)
-
-        # Some files needs special arguments to mame, they can be
-        # put in a <file>.mame options file. The <file>
-        # includes the suffix (.zip, etc)!
-        # The arguments in the options file are added at the end of the
-        # regular mame arguments.
-        if os.path.isfile(file + '.mame'):
-            command += (' ' + open(filename + '.mame').read().strip())
-            if DEBUG: print 'Read options, command = "%s"' % command
+                                       config.SNES_CMD,
+                                       config.SNES_ARGS_DEF)
 
         romname = os.path.basename(file)
         romdir = os.path.dirname(file)
-        command = '%s -rp %s "%s"' % (command, romdir, romname)
+        command = '%s "%s"' % (command, file)
 
         self.command = command
 

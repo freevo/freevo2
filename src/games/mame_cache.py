@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/09 14:23:53  dischi
+# Added games patch from Rob Shortt to use the interface.py and snes support
+#
 # Revision 1.3  2002/12/07 11:23:52  dischi
 # moved rominfo into the games subdir
 #
@@ -129,19 +132,34 @@ def updateMameRomList(mame_files):
         # about the rom in question.
 
         if not cache.has_key(mame_file):
+
             # If there is a real game title available 
             # title will get overwritten.
             title = os.path.splitext(os.path.basename(mame_file))[0]
 
             dirname = '' # not supported yet
             image = None
-            rominfo = os.popen('./src/games/rominfo/rominfo ' + mame_file , 'r')
+
+            # This replace stuff is a bit crude, someone may like to clean
+            # it up.  The popen will barf on these characters if they
+            # are not escaped.
+            ri_args = string.replace(mame_file, " ", "\ ")
+            ri_args = string.replace(ri_args, "(", "\(")
+            ri_args = string.replace(ri_args, ")", "\)")
+
+            rominfo = os.popen('./src/games/rominfo/rominfo ' + ri_args, 'r')
             matched = 0
             partial = 0
 
             for line in rominfo.readlines():
                 if string.find(line, 'Error:') != -1:
                     print 'MAME:rominfosrc: "%s"' % line.strip()
+                    print 'we do not care about (Error): %s' % mame_file
+                    continue
+                if string.find(line, 'ERROR:') != -1:
+                    print 'MAME:rominfosrc: "%s"' % line.strip()
+                    print 'we do not care about (ERROR): %s' % mame_file
+                    continue
                 if string.find(line, 'KNOWN:') != -1:
                     print 'MAME:rominfosrc: "%s"' % line.strip()
                     matched = 1
@@ -156,6 +174,7 @@ def updateMameRomList(mame_files):
                     title = string.replace(title, 'DESCRIPTION:  ', '')
 
             rominfo.close()
+
 
             if matched == 1 or partial == 1:
                 # find image for this file
@@ -183,15 +202,14 @@ def updateMameRomList(mame_files):
 
 #
 # This will return a list of things relevant to MameItem based on 
-# which directory's contents we are interested in.
+# which mame files we have cached.  It ignores files we don't.
 # Returns: title, filename, and image file for each mame_file.
 #
-def getMameItemInfoList(mamedir):
-
-    mame_files = util.match_files(mamedir, config.SUFFIX_MAME_FILES)
-
+def getMameItemInfoList(mame_files):
     items = []
+    rm_files = []
 
+    # make sure the rom list is up to date.
     updateMameRomList(mame_files)
     mameRomList = getMameRomList()
     roms = mameRomList.getMameRoms()
@@ -200,11 +218,7 @@ def getMameItemInfoList(mamedir):
     for romkey in mame_files:
         if roms.has_key(romkey):
             rom = roms[romkey]
-        else:
-           # Something is broken if we end up here!
-           print "Error: %s should be cached by now." % romkey
-           continue
-
-        items += [(rom.getTitle(), rom.getFilename(), rom.getImageFile())]
+            items += [(rom.getTitle(), rom.getFilename(), rom.getImageFile())]
+            rm_files.append(romkey)
     
-    return items    
+    return (rm_files, items)

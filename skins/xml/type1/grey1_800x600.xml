@@ -13,7 +13,7 @@
         visible="yes" icon="icons/64x64/mp3.png"  />
       <item pos="3" name="Images"   action="MediaMenu().main_menu" arg="image" 
         visible="yes" icon="icons/64x64/images.png"  />
-      <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="game" 
+      <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
         visible="no" icon="icons/64x64/package_games.png"  />
       <item pos="5" name="Shutdown" action="shutdown" arg="" 
 	visible="yes" icon="icons/64x64/shutdown.png"  />
