@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/24 20:30:52  dischi
+# automouter still not working :-(
+#
 # Revision 1.1  2002/11/24 13:58:44  dischi
 # code cleanup
 #
@@ -142,6 +145,9 @@ def eventhandler(event = None, menuw=None, arg=None):
     """
 
     print 'main.py:eventhandler(): event=%s, arg=%s' % (event, arg)
+
+    return FALSE
+
     global im_thread
     if event == rc.IDENTIFY_MEDIA and im_thread and im_thread.last_media:
         media = im_thread.last_media
