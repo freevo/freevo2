@@ -47,6 +47,7 @@ from xml.utils import qp_xml
 import vfs
 import fileops
 import cache
+import sysconfig
 
 class XMLnode:
     """
@@ -116,8 +117,8 @@ class FXDtree(qp_xml.Parser):
             filename = self.filename
         if vfs.isfile(filename):
             vfs.unlink(filename)
-        f = vfs.codecs_open(filename, 'wb', encoding='utf-8')
-        f.write('<?xml version="1.0" encoding="utf-8" ?>\n')
+        f = vfs.codecs_open(filename, 'wb', sysconfig.ENCODING)
+        f.write('<?xml version="1.0" encoding="%s" ?>\n' % sysconfig.ENCODING)
         self._dump_recurse(f, self.tree)
 
         f.write('\n')
