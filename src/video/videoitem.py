@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.129  2004/02/27 20:15:03  dischi
+# more unicode fixes
+#
 # Revision 1.128  2004/02/22 20:33:48  dischi
 # some unicode fixes
 #
@@ -637,6 +640,6 @@ class VideoItem(Item):
             return True
         
         # give the event to the next eventhandler in the list
-        if isinstance( self.parent, str ):
+        if isstring(self.parent):
             self.parent = None
         return Item.eventhandler(self, event, menuw)

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/02/27 20:15:02  dischi
+# more unicode fixes
+#
 # Revision 1.25  2004/02/14 19:31:31  dischi
 # also cache playlist dir
 #
@@ -474,7 +477,7 @@ if __name__ == "__main__":
             
     for type in 'VIDEO', 'AUDIO', 'IMAGE':
         for d in copy.copy(getattr(config, '%s_ITEMS' % type)):
-            if not (isinstance(d, str) or isinstance(d, unicode)):
+            if not isstring(d):
                 d = d[1]
             if d == '/':
                 print 'ERROR: %s_ITEMS contains root directory, skipped.' % type

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/27 20:15:03  dischi
+# more unicode fixes
+#
 # Revision 1.13  2004/02/25 19:50:51  dischi
 # fix unicode problem for utf-8
 #
@@ -66,7 +69,7 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
     import __builtin__
 
     def Unicode(string, encoding=config.encoding):
-        if type(string) == str:
+        if string.__class__ == str:
             try:
                 return unicode(string, encoding)
             except Exception, e:
@@ -79,7 +82,7 @@ if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
         return string
 
     def String(string, encoding=config.encoding):
-        if type(string) == unicode:
+        if string.__class__ == unicode:
             return string.encode(encoding, 'replace')
         return string
 

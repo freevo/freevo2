@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/27 20:15:03  dischi
+# more unicode fixes
+#
 # Revision 1.31  2004/02/23 19:27:07  dischi
 # fix mmpython init
 #
@@ -288,7 +291,7 @@ class MMCache(Cache):
         for k in object.keys:
             if not k in self.uncachable_keys and getattr(object,k) != None:
                 value = getattr(object,k)
-                if isinstance(value, str) or isinstance(value, unicode):
+                if isstring(value):
                     value = Unicode(value.replace('\0', '').lstrip().rstrip())
                 if value:
                     ret[k] = value

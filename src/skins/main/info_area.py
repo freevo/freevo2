@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/27 20:15:03  dischi
+# more unicode fixes
+#
 # Revision 1.19  2004/02/23 16:34:27  dischi
 # better skin i18n support
 #
@@ -296,7 +299,7 @@ class Info_Area(Skin_Area):
                     # evaluate the expression:
                     if exp:
                         exp = eval(exp, {'attr': item.getattr}, function_calls)
-                        if type( exp ) != unicode and type( exp )!= str:
+                        if not isstring(exp):
                             exp = str( exp )
                         if exp:
                             list[ i ].text = exp

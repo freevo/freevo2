@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/02/27 20:15:03  dischi
+# more unicode fixes
+#
 # Revision 1.25  2004/02/24 21:20:30  dischi
 # unicode fix
 #
@@ -405,8 +408,7 @@ class Listing_Area(Skin_Area):
                         if table_text[i].find('ICON_') == 0:
                             x_mod, table_text[i] = text_or_icon(settings, table_text[i],
                                                                 table_x, table_w, val.font)
-                            if not (isinstance(table_text[i], str) or
-                                    isinstance(table_text[i], unicode)):
+                            if not isstring(table_text[i]):
                                 self.drawimage(table_text[i], (table_x + x_mod, y0 + vskip))
                                 table_text[i] = ''
                                 

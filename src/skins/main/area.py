@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/02/27 20:15:03  dischi
+# more unicode fixes
+#
 # Revision 1.35  2004/02/23 15:32:12  dischi
 # fix translation/unicode bug
 #
@@ -729,11 +732,11 @@ class Skin_Area:
         if not image:
             return 0,0
 
-        if isinstance(image, str):
+        if isstring(image):
             if isinstance(val, tuple):
-                image = self.loadimage(image, val[2:])
+                image = self.loadimage(String(image), val[2:])
             else:
-                image = self.loadimage(image, val)
+                image = self.loadimage(String(image), val)
 
         if not image:
             return 0,0

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/02/27 20:15:02  dischi
+# more unicode fixes
+#
 # Revision 1.34  2004/02/15 11:33:19  dischi
 # auto select item if there is only one
 #
@@ -192,8 +195,8 @@ class MediaMenu(Item):
         for item in items:
             try:
                 add_args = None
-                if isinstance(item, str):
-                    title, filename = '', item
+                if isstring(item):
+                    title, filename = u'', item
                 else:
                     (title, filename) = item[:2]
                     if len(item) > 2:

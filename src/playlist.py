@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.67  2004/02/27 20:15:02  dischi
+# more unicode fixes
+#
 # Revision 1.66  2004/02/23 19:59:34  dischi
 # unicode fixes
 #
@@ -152,7 +155,7 @@ class Playlist(Item):
         self.menuw    = None
         self.name     = Unicode(name)
 
-        if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
+        if isstring(playlist) and not name:
             self.name = util.getname(playlist)
             
         # variables only for Playlist
@@ -300,7 +303,7 @@ class Playlist(Item):
             self.suffixlist += p.suffix()
             self.get_plugins.append(p)
                 
-        if isinstance(playlist, str) or isinstance(playlist, unicode):
+        if isstring(playlist):
             # it's a filename with a playlist
             try:
                 f=open(playlist, "r")
@@ -317,7 +320,7 @@ class Playlist(Item):
             self.set_url(playlist)
 
         # self.playlist is a list of Items or strings (filenames)
-        if not isinstance(playlist, str):
+        if not isstring(playlist):
             for i in playlist:
                 if isinstance(i, Item):
                     # Item object, correct parent
