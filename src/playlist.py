@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/05/11 17:44:13  dischi
+# load playlist only when really needed
+#
 # Revision 1.18  2003/04/24 19:54:20  dischi
 # bugfix
 #
@@ -222,18 +225,22 @@ class Playlist(Item):
             self.filename = file
             self.name    = os.path.splitext(os.path.basename(file))[0]
         
-            (curdir, playlistname) = os.path.split(file)
 
-            f=open(file, "r")
+    def read_playlist(self):
+        """
+        Read the playlist from file and create the items
+        """
+        if self.filename and not self.playlist:
+            f=open(self.filename, "r")
             line = f.readline()
             f.close
             if line.find("[playlist]") > -1:
-                self.read_pls(file)
+                self.read_pls(self.filename)
             elif line.find("[Slides]") > -1:
-                self.read_ssr(file)
+                self.read_ssr(self.filename)
             else:
-                self.read_m3u(file)
-
+                self.read_m3u(self.filename)
+        
 
     def copy(self, obj):
         """
@@ -269,11 +276,13 @@ class Playlist(Item):
 
 
     def browse(self, arg=None, menuw=None):
+        self.read_playlist()
         moviemenu = menu.Menu(self.name, self.playlist)
         menuw.pushmenu(moviemenu)
         
         
     def play(self, arg=None, menuw=None):
+        self.read_playlist()
         if not self.menuw:
             self.menuw = menuw
 
