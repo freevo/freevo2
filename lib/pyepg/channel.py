@@ -103,7 +103,7 @@ class Channel:
         return Program(-1, u'NO DATA', start, stop, '', '', '', self)
 
 
-    def __import_programs(self, start, stop=-1, progs=[]):
+    def __import_programs(self, start, stop=-1):
         """
         Get programs from the database to create Program from then
         add them to our local list.  If there are gaps between the programs
@@ -114,9 +114,7 @@ class Channel:
         dummy_progs = []
         # keep the notifier alive
         notifier_counter = 0
-        if not progs:
-            progs = self.__epg.sql_get_programs(self.id, start, stop)
-        for p in progs:
+        for p in self.__epg.sql_get_programs(self.id, start, stop):
             i = Program(p.id, p.title, p.start, p.stop, p.episode, p.subtitle,
                         p['description'], channel=self)
             new_progs.append(i)
@@ -127,8 +125,7 @@ class Channel:
             #       comes from another DB table - same with categories,
             #       ratings and advisories.
 
-        l = len(new_progs)
-        if not l:
+        if not new_progs:
             # No programs found? That's bad. Try to find the last before start
             # and the first after end and create a dummy.
             before = self.__epg.sql_get_programs(self.id, 0, start)
@@ -177,8 +174,7 @@ class Channel:
                 # Add program. Because of some bad jitter from 60 seconds in
                 # __import_programs calling the first one and the last could
                 # already be in self.programs
-                if (p == new_progs[0] or p == new_progs[-1]) and \
-                   p in self.programs:
+                if (p == p0 or p == p1) and p in self.programs:
                     continue
                 self.programs.append(p)
                 
@@ -211,6 +207,8 @@ class Channel:
 
         if start < START_TIME + 120:
             start = START_TIME + 120
+        if start > STOP_TIME - 120:
+            start = STOP_TIME - 120
         if stop > 0 and stop > STOP_TIME - 120:
             stop = STOP_TIME - 120
 
