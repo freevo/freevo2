@@ -9,35 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2004/10/06 19:16:29  dischi
+# o rename __variable__ to _variable
+# o notifier support
+# o use 80 chars/line max
+#
 # Revision 1.74  2004/09/27 18:41:06  dischi
 # add input plugin class
 #
 # Revision 1.73  2004/08/29 18:38:15  dischi
 # make cache helper work again
-#
-# Revision 1.72  2004/08/05 17:36:46  dischi
-# support for special plugin loading
-#
-# Revision 1.71  2004/08/01 10:55:27  dischi
-# cosmetic change for debug
-#
-# Revision 1.70  2004/07/26 18:10:16  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.69  2004/07/25 19:47:38  dischi
-# use application and not rc.app
-#
-# Revision 1.68  2004/07/10 12:33:36  dischi
-# header cleanup
-#
-# Revision 1.67  2004/06/24 14:56:19  dischi
-# make it possible to put a subplugin into main
-#
-# Revision 1.66  2004/06/07 16:10:45  rshortt
-# Change 'RECORD' to plugin.RECORD.
-#
-# Revision 1.65  2004/05/31 10:40:57  dischi
-# update to new callback handling in rc
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -66,10 +47,11 @@ import traceback
 import gettext
 import copy
 
+import cleanup
 from event import Event
 
 import eventhandler
-import rc
+import notifier
 
 DEBUG = 0
 
@@ -112,7 +94,8 @@ class Plugin:
         of the global _().
         """
         try:
-            self._ = gettext.translation(application, os.environ['FREEVO_LOCALE'],
+            self._ = gettext.translation(application,
+                                         os.environ['FREEVO_LOCALE'],
                                          fallback=1).gettext
         except:
             self._ = lambda m: m
@@ -164,7 +147,7 @@ class DaemonPlugin(Plugin):
 
     A DaemonPlugin can have the following functions:
     def poll(self):
-        this function will be called every poll_intervall*0.1 seconds
+        this function will be called every poll_interval milliseconds
     def draw(self(type, object), osd):
         this function will be called to update the screen
     def eventhandler(self, event, menuw=None):
@@ -178,15 +161,19 @@ class DaemonPlugin(Plugin):
     def __init__(self):
         Plugin.__init__(self)
         self.poll_counter   = 0         # poll counter, don't change this
-        self.poll_interval  = 1         # poll every x*0.1 seconds
+        self.poll_interval  = 100       # poll every x milliseconds
         self.poll_menu_only = True      # poll only when menu is active
         self.event_listener = False     # process all events
 
 
-    def poll_wrapper(self):
+    def _poll(self):
+        """
+        wrapper for the poll function
+        """
         if self.poll_menu_only and not eventhandler.is_menu():
-            return
-        self.real_poll()
+            return True
+        self.poll()
+        return True
 
         
 class MimetypePlugin(Plugin):
@@ -292,24 +279,25 @@ def activate(name, type=None, level=10, args=None):
     """
     activate a plugin
     """
-    global __plugin_number__
-    global __all_plugins__
-    global __initialized__
+    global _plugin_number
+    global _all_plugins
+    global _initialized
 
-    __plugin_number__ += 1
+    _plugin_number += 1
 
-    for p in __all_plugins__:
-        if not isinstance(name, Plugin) and p[0] == name and p[1] == type and p[3] == args:
+    for p in _all_plugins:
+        if not isinstance(name, Plugin) and p[0] == name and \
+               p[1] == type and p[3] == args:
             print 'WARNING: duplicate plugin activation, ignoring:'
             print '<%s %s %s>' % (name, type, args)
             print
             return
-    if __initialized__:
-        __load_plugin__(name, type, level, args, __plugin_number__)
-        __sort_plugins__()
+    if _initialized:
+        _load_plugin(name, type, level, args, _plugin_number)
+        _sort_plugins()
     else:
-        __all_plugins__.append((name, type, level, args, __plugin_number__))
-    return __plugin_number__
+        _all_plugins.append((name, type, level, args, _plugin_number))
+    return _plugin_number
 
 
 def remove(id):
@@ -317,24 +305,24 @@ def remove(id):
     remove a plugin from the list. This can only be done in local_config.py
     and not while Freevo is running
     """
-    global __all_plugins__
-    global __initialized__
+    global _all_plugins
+    global _initialized
 
-    if __initialized__:
+    if _initialized:
         return
 
     # remove by plugin id
     if isinstance(id, int):
-        for p in __all_plugins__:
+        for p in _all_plugins:
             if p[4] == id:
-                __all_plugins__.remove(p)
+                _all_plugins.remove(p)
                 return
 
     # remove by name
     r = [] 
-    for p in copy.copy(__all_plugins__):
+    for p in copy.copy(_all_plugins):
         if p[0] == id:
-            __all_plugins__.remove(p)
+            _all_plugins.remove(p)
 
 
 def is_active(name, arg=None):
@@ -342,8 +330,8 @@ def is_active(name, arg=None):
     search the list if the given plugin is active. If arg is set,
     check arg, too.
     """
-    global __all_plugins__
-    for p in __all_plugins__:
+    global _all_plugins
+    for p in _all_plugins:
         if p[0] == name:
             if not arg:
                 return p
@@ -365,26 +353,26 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
     """
     load and init all the plugins
     """
-    global __all_plugins__
-    global __initialized__
-    global __plugin_basedir__
+    global _all_plugins
+    global _initialized
+    global _plugin_basedir
     
-    __initialized__ = True
-    __plugin_basedir__ = os.environ['FREEVO_PYTHON']
+    _initialized = True
+    _plugin_basedir = os.environ['FREEVO_PYTHON']
 
     current = 0
-    for name, type, level, args, number in __all_plugins__:
+    for name, type, level, args, number in _all_plugins:
         current += 1
         if callback:
-            callback(int((float(current) / len(__all_plugins__)) * 100))
+            callback(int((float(current) / len(_all_plugins)) * 100))
         if exclusive:
             # load only plugins from exclusive list
             for e in exclusive:
                 if not isinstance(name, str):
-                    __load_plugin__(name, type, level, args, number)
+                    _load_plugin(name, type, level, args, number)
                     break
                 if name.startswith('%s.' % e):
-                    __load_plugin__(name, type, level, args, number)
+                    _load_plugin(name, type, level, args, number)
                     break
         else:
             # load all plugin except rejected once
@@ -392,12 +380,12 @@ def init(callback = None, reject=['record', 'www'], exclusive=[]):
                 if isinstance(name, str) and name.startswith('%s.' % r):
                     break
             else:
-                __load_plugin__(name, type, level, args, number)
+                _load_plugin(name, type, level, args, number)
 
 
     # sort plugins in extra function (exec doesn't like to be
     # in the same function is 'lambda' 
-    __sort_plugins__()
+    _sort_plugins()
 
 
 
@@ -405,26 +393,26 @@ def init_special_plugin(id):
     """
     load only the plugin 'id'
     """
-    global __all_plugins__
-    global __initialized__
-    global __plugin_basedir__
+    global _all_plugins
+    global _initialized
+    global _plugin_basedir
     
-    __plugin_basedir__ = os.environ['FREEVO_PYTHON']
+    _plugin_basedir = os.environ['FREEVO_PYTHON']
 
     try:
         id = int(id)
     except ValueError:
         pass
-    for i in range(len(__all_plugins__)):
-        name, type, level, args, number = __all_plugins__[i]
+    for i in range(len(_all_plugins)):
+        name, type, level, args, number = _all_plugins[i]
         if number == id or name == id:
-            __load_plugin__(name, type, level, args, number)
-            del __all_plugins__[i]
+            _load_plugin(name, type, level, args, number)
+            del _all_plugins[i]
             break
         
     # sort plugins in extra function (exec doesn't like to be
     # in the same function is 'lambda' 
-    __sort_plugins__()
+    _sort_plugins()
     
 
 
@@ -432,9 +420,10 @@ def shutdown(plugin_name=None):
     """
     called to shutdown one or all daemon plugins
     """
-    for key in __plugin_type_list__:
-        for p in __plugin_type_list__[key]:
-            if (not plugin_name or p.plugin_name == plugin_name) and hasattr(p, 'shutdown'):
+    for key in _plugin_type_list:
+        for p in _plugin_type_list[key]:
+            if (not plugin_name or p.plugin_name == plugin_name) and \
+                   hasattr(p, 'shutdown'):
                 _debug_('shutdown plugin %s' % p.plugin_name, 2)
                 p.shutdown()
 
@@ -443,12 +432,12 @@ def get(type):
     """
     get the plugin list 'type'
     """
-    global __plugin_type_list__
+    global _plugin_type_list
 
-    if not __plugin_type_list__.has_key(type):
-        __plugin_type_list__[type] = []
+    if not _plugin_type_list.has_key(type):
+        _plugin_type_list[type] = []
 
-    return __plugin_type_list__[type]
+    return _plugin_type_list[type]
 
 
 def mimetype(display_type):
@@ -457,9 +446,9 @@ def mimetype(display_type):
     None, return all MimetypePlugins.
     """
     if not display_type:
-        return __plugin_type_list__['mimetype']
+        return _plugin_type_list['mimetype']
     ret = []
-    for p in __plugin_type_list__['mimetype']:
+    for p in _plugin_type_list['mimetype']:
         if not p.display_type or display_type in p.display_type:
             ret.append(p)
     return ret
@@ -469,9 +458,9 @@ def getall():
     """
     return a list of all plugins
     """
-    global __all_plugins__
+    global _all_plugins
     ret = []
-    for t in __all_plugins__:
+    for t in _all_plugins:
         ret.append(t[0])
     return ret
 
@@ -480,9 +469,9 @@ def getbyname(name, multiple_choises=0):
     """
     get a plugin by it's name
     """
-    global __named_plugins__
-    if __named_plugins__.has_key(name):
-        return __named_plugins__[name]
+    global _named_plugins
+    if _named_plugins.has_key(name):
+        return _named_plugins[name]
     if multiple_choises:
         return []
     return None
@@ -492,13 +481,13 @@ def register(plugin, name, multiple_choises=0):
     """
     register an object as a named plugin
     """
-    global __named_plugins__
+    global _named_plugins
     if multiple_choises:
-        if not __named_plugins__.has_key(name):
-            __named_plugins__[name] = []
-        __named_plugins__[name].append(plugin)
+        if not _named_plugins.has_key(name):
+            _named_plugins[name] = []
+        _named_plugins[name].append(plugin)
     else:
-        __named_plugins__[name] = plugin
+        _named_plugins[name] = plugin
 
 
 def register_callback(name, *args):
@@ -506,20 +495,20 @@ def register_callback(name, *args):
     register a callback to the callback handler 'name'. The format of
     *args depends on the callback
     """
-    global __callbacks__
-    if not __callbacks__.has_key(name):
-        __callbacks__[name] = []
-    __callbacks__[name].append(args)
+    global _callbacks
+    if not _callbacks.has_key(name):
+        _callbacks[name] = []
+    _callbacks[name].append(args)
 
 
 def get_callbacks(name):
     """
     return all callbacks registered with 'name'
     """
-    global __callbacks__
-    if not __callbacks__.has_key(name):
-        __callbacks__[name] = []
-    return __callbacks__[name]
+    global _callbacks
+    if not _callbacks.has_key(name):
+        _callbacks[name] = []
+    return _callbacks[name]
 
     
 def event(name, arg=None):
@@ -547,29 +536,29 @@ def isevent(event):
 # internal stuff
 #
 
-__initialized__        = False
-__all_plugins__        = []
-__plugin_number__      = 0
-__plugin_type_list__   = {}
-__named_plugins__      = {}
-__callbacks__          = {}
-__plugin_basedir__     = ''
+_initialized        = False
+_all_plugins        = []
+_plugin_number      = 0
+_plugin_type_list   = {}
+_named_plugins      = {}
+_callbacks          = {}
+_plugin_basedir     = ''
 
 
-def __add_to_ptl__(type, object):
+def _add_to_ptl(type, object):
     """
     small helper function to add a plugin to the PluginTypeList
     """
-    global __plugin_type_list__
-    if not __plugin_type_list__.has_key(type):
-        __plugin_type_list__[type] = []
-    __plugin_type_list__[type].append(object)
+    global _plugin_type_list
+    if not _plugin_type_list.has_key(type):
+        _plugin_type_list[type] = []
+    _plugin_type_list[type].append(object)
     
 
 
-def __find_plugin_file__(filename):
-    global __plugin_basedir__
-    full_filename = os.path.join(__plugin_basedir__, filename)
+def _find_plugin_file(filename):
+    global _plugin_basedir
+    full_filename = os.path.join(_plugin_basedir, filename)
 
     if os.path.isfile(full_filename + '.py'):
         return filename.replace('/', '.'), None
@@ -577,7 +566,7 @@ def __find_plugin_file__(filename):
     if os.path.isdir(full_filename):
         return filename.replace('/', '.'), None
 
-    full_filename = os.path.join(__plugin_basedir__, 'plugins', filename)
+    full_filename = os.path.join(_plugin_basedir, 'plugins', filename)
 
     if os.path.isfile(full_filename + '.py'):
         return 'plugins.' + filename.replace('/', '.'), None
@@ -587,8 +576,9 @@ def __find_plugin_file__(filename):
 
     if filename.find('/') > 0:
         special = filename[:filename.find('/')]
-        filename = os.path.join(special, 'plugins', filename[filename.find('/')+1:])
-        full_filename = os.path.join(__plugin_basedir__, filename)
+        filename = os.path.join(special, 'plugins',
+                                filename[filename.find('/')+1:])
+        full_filename = os.path.join(_plugin_basedir, filename)
 
         if os.path.isfile(full_filename + '.py'):
             return filename.replace('/', '.'), special
@@ -600,15 +590,15 @@ def __find_plugin_file__(filename):
 
         
 
-def __load_plugin__(name, type, level, args, number):
+def _load_plugin(name, type, level, args, number):
     """
     load the plugin and add it to the lists
     """
     
     
-    global __plugin_type_list__
-    global __named_plugins__
-    global __plugin_basedir__
+    global _plugin_type_list
+    global _named_plugins
+    global _plugin_basedir
 
     # fallback
     module  = name
@@ -619,11 +609,12 @@ def __load_plugin__(name, type, level, args, number):
     files = []
 
     if not isinstance(name, Plugin):
-        module, special = __find_plugin_file__(name.replace('.', '/'))
+        module, special = _find_plugin_file(name.replace('.', '/'))
         if module:
             object = module + '.PluginInterface'
         elif name.find('.') > 0:
-            module, special = __find_plugin_file__(name[:name.rfind('.')].replace('.', '/'))
+            pname = name[:name.rfind('.')].replace('.', '/')
+            module, special = _find_plugin_file(pname)
             if module:
                 object = module + '.%s' % name[name.rfind('.')+1:]
             else:
@@ -655,8 +646,9 @@ def __load_plugin__(name, type, level, args, number):
                 if hasattr(p, 'reason'):
                     reason = p.reason
                 else:
-                    reason = 'unknown\nThe plugin neither called __init__ nor set a '\
-                             'reason why\nPlease contact the plugin author or the freevo list'
+                    reason = 'unknown\nThe plugin neither called __init__ '\
+                             'nor set a reason why\nPlease contact the plugin'\
+                             'author or the freevo list'
                 print 'plugin %s deactivated\nreason: %s' % (name, reason)
                 return
         else:
@@ -677,39 +669,35 @@ def __load_plugin__(name, type, level, args, number):
 
         # special plugin type (e.g. idlebar)
         if p._type:
-            __add_to_ptl__(p._type, p)
+            _add_to_ptl(p._type, p)
 
         else: 
             if isinstance(p, DaemonPlugin):
-                __add_to_ptl__('daemon', p)
+                _add_to_ptl('daemon', p)
                 for type in ('poll', 'draw', 'eventhandler', 'shutdown' ):
                     if hasattr(p, type):
-                        __add_to_ptl__('daemon_%s' % type, p)
+                        _add_to_ptl('daemon_%s' % type, p)
                 if hasattr(p, 'poll'):
-                    if p.poll_menu_only:
-                        # replace poll with the poll wrapper to handle
-                        # poll_menu_only
-                        p.real_poll = p.poll
-                        p.poll      = p.poll_wrapper
-                    rc.register(p.poll, True, p.poll_interval)
+                    notifier.addTimer( p.poll_interval,
+                                       notifier.Callback( p._poll ) )
 
             if isinstance(p, MainMenuPlugin):
-                __add_to_ptl__('mainmenu%s' % special, p)
+                _add_to_ptl('mainmenu%s' % special, p)
                 if hasattr(p, 'eventhandler'):
-                    __add_to_ptl__('daemon_eventhandler', p)
+                    _add_to_ptl('daemon_eventhandler', p)
 
             if isinstance(p, ItemPlugin):
-                __add_to_ptl__('item%s' % special, p)
+                _add_to_ptl('item%s' % special, p)
 
             if isinstance(p, MimetypePlugin):
-                __add_to_ptl__('mimetype', p)
+                _add_to_ptl('mimetype', p)
 
             if hasattr(p, 'shutdown'):
                 # register shutdown handler
-                rc.register(p.shutdown, True, rc.SHUTDOWN)
+                cleanup.register( p.shutdown )
                 
         if p.plugin_name:
-            __named_plugins__[p.plugin_name] = p
+            _named_plugins[p.plugin_name] = p
 
 
     except:
@@ -718,11 +706,11 @@ def __load_plugin__(name, type, level, args, number):
         traceback.print_exc()
 
 
-def __sort_plugins__():
+def _sort_plugins():
     """
     sort all plugin lists based on the level
     """
-    global __plugin_type_list__
-    for key in __plugin_type_list__:
-        __plugin_type_list__[key].sort(lambda l, o: cmp(l._level, o._level))
+    global _plugin_type_list
+    for key in _plugin_type_list:
+        _plugin_type_list[key].sort(lambda l, o: cmp(l._level, o._level))
 
