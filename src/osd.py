@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.130  2004/02/01 17:11:31  dischi
+# cosmetic changes
+#
 # Revision 1.129  2004/01/30 20:42:38  dischi
 # add debug
 #
@@ -429,9 +432,12 @@ class OSD:
 
         if config.CONF.display == 'dxr3':
             self.depth = 32
-            
-        self.screen = pygame.display.set_mode((self.width, self.height),
-                                              self.hw, self.depth)
+
+        try:
+            self.screen = pygame.display.set_mode((self.width, self.height),
+                                                  self.hw, self.depth)
+        except:
+            self.screen = pygame.display.set_mode((self.width, self.height))
 
         self.depth = self.screen.get_bitsize()
         self.must_lock = self.screen.mustlock()
@@ -497,9 +503,6 @@ class OSD:
         """
         callback for SDL event (not Freevo events)
         """
-        if not pygame.display.get_init():
-            return None
-
         # Check if mouse should be visible or hidden
         mouserel = pygame.mouse.get_rel()
         mousedist = (mouserel[0]**2 + mouserel[1]**2) ** 0.5
@@ -534,7 +537,7 @@ class OSD:
                     pygame.image.save(self.screen,
                                       '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
                     self._screenshotnum += 1
-
+                
     
     def shutdown(self):
         """
@@ -1180,14 +1183,17 @@ class OSD:
         """
         update the screen
         """
+        if not pygame.display.get_init():
+            return None
+
         if self.busyicon.active and stop_busyicon:
             self.busyicon.stop()
-            
+
         # XXX New style blending
         if blend_surface and blend_steps:
             blend_last_screen = self.screen.convert()
             blend_next_screen = blend_surface.convert()
-            blend_surface = self.screen.convert()
+            blend_surface     = self.screen.convert()
 
             blend_start_time = time.time()
             time_step = float(blend_time) / (blend_steps+1) 
@@ -1197,9 +1203,9 @@ class OSD:
 
             for i in range(len(blend_alphas)):
                 alpha = blend_alphas[i]
-                blend_last_screen.set_alpha(255 - alpha)
+                #blend_surface.fill((255,0,0,0))
+                #blend_last_screen.set_alpha(255 - alpha)
                 blend_next_screen.set_alpha(alpha)
-                blend_surface.fill((0,0,0,0))
                 blend_surface.blit(blend_last_screen, (0, 0))
                 blend_surface.blit(blend_next_screen, (0, 0))
 
@@ -1218,37 +1224,11 @@ class OSD:
                         time.sleep(t_rem)
             return
             
-        if blend_surface and blend_speed:
-            blend_last_screen = self.screen.convert()
-            blend_next_screen = blend_surface.convert()
-            blend_surface = self.screen.convert()
-
-            blend_num_steps = 255 / blend_speed
-            for i in range(1, blend_num_steps+1):
-                if i == blend_num_steps:
-                    blend_last_screen.set_alpha(0)
-                    blend_next_screen.set_alpha(255)
-                else:
-                    blend_last_screen.set_alpha(255 - (i * blend_speed))
-                    blend_next_screen.set_alpha(i * blend_speed)
-                blend_surface.fill((0,0,0,0))
-                blend_surface.blit(blend_last_screen, (0, 0))
-                blend_surface.blit(blend_next_screen, (0, 0))
-
-                self.screen.blit(blend_surface, (0,0))
-                if plugin.getbyname('osd'):
-                    plugin.getbyname('osd').draw(('osd', None), self)
-                pygame.display.flip()
-            return
-            
-        if not pygame.display.get_init():
-            return None
-
         if rect:
             try:
                 pygame.display.update(rect)
             except:
-                _debug_('osd.update(rect) failed, bad rect? - (%s,%s,%s,%s)' % rect)
+                _debug_('osd.update(rect) failed, bad rect? - %s' % rect, 1)
                 _debug_('updating whole screen')
                 pygame.display.flip()
         else:

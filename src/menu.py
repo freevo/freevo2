@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.81  2004/02/01 17:07:13  dischi
+# cosmetic changes
+#
 # Revision 1.80  2004/01/19 20:26:41  dischi
 # free image viewer cache on menuw.show()
 #
@@ -115,10 +118,10 @@ class Menu:
 
         # Called when a child menu returns. This function returns a new menu
         # or None and the old menu will be reused
-        self.reload_func = reload_func  
-        self.item_types = item_types
+        self.reload_func       = reload_func  
+        self.item_types        = item_types
         self.force_skin_layout = force_skin_layout
-        self.display_style = skin.get_display_style(self)
+        self.display_style     = skin.get_display_style(self)
 
         # How many menus to go back when 'BACK_ONE_MENU' is called
         self.back_one_menu = 1
@@ -639,12 +642,12 @@ class MenuWidget(GUIObject):
             return
 
         # Create the list of main selection items (menu_items)
-        menu_items = []
-        first = menu.page_start
+        menu_items           = []
+        first                = menu.page_start
         self.rows, self.cols = menu.items_per_page()
         
         for choice in menu.choices[first : first+(self.rows*self.cols)]:
-            menu_items += [choice]
+            menu_items.append(choice)
      
         self.rows, self.cols = menu.items_per_page()
 
