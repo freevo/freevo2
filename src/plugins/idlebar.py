@@ -21,6 +21,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/05/02 05:50:31  outlyer
+# Stopgap to workaround a crash...
+#
 # Revision 1.6  2003/05/01 12:53:27  dischi
 # added more information to plugin draw()
 #
@@ -105,7 +108,8 @@ class interface(plugin.DaemonPlugin):
 
 
     def poll(self):
-        self.draw()
+        # XXX This probably shouldn't be None,None, but at least it doesn't crash
+        self.draw((None,None))
 
 
 class IdleBarPlugin(plugin.Plugin):
