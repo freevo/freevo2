@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/03/27 17:44:39  krister
+# Fixed divide by zero bug.
+#
 # Revision 1.38  2004/03/22 11:04:51  dischi
 # improve caching
 #
@@ -573,7 +576,11 @@ class CacheStatus:
         self.callback()
         
     def callback(self):
-        print '\r%-70s %3d%%' % (self.txt, (self.pos * 100 / self.num_changes)),
+        if self_num_changes != 0:
+            progress = '%3d%%' % (self.pos * 100 / self.num_changes)
+        else:
+            progress = '??%%'
+        print '\r%-70s %s' % (self.txt, progress),
         sys.__stdout__.flush()
         self.pos += 1
 
