@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/01/14 20:38:07  mikeruelle
+# it's still broken. help dischi.
+#
 # Revision 1.6  2004/01/10 21:27:37  mikeruelle
 # forgot the little  q in the arg. really need to get a card with radio to test
 #
@@ -69,12 +72,30 @@ class PluginInterface(plugin.Plugin):
 
     """
     def __init__(self):
-        # create the mplayer object
         plugin.Plugin.__init__(self)
 
         # register it as the object to play audio
-        plugin.register(self, plugin.RADIO_PLAYER)
+        plugin.register(RadioPlayer(), plugin.AUDIO_PLAYER, True)
+
+class RadioPlayer:
+
+    def __init__(self):
         self.mode = 'idle'
+        self.name = 'radioplayer'
+        self.app_mode = 'audio'
+        self.app = None
+
+    def rate(self, item):
+        """
+        How good can this player play the file:
+        2 = good
+        1 = possible, but not good
+        0 = unplayable
+        """
+        if item.url.startswith('radio://'):
+            return 0
+        return 2
+
 
     def play(self, item, playerGUI):
         """
