@@ -7,6 +7,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/06/23 20:23:57  dischi
+# handle crash
+#
 # Revision 1.2  2004/06/13 19:21:39  dischi
 # prevent strange crash
 #
@@ -68,7 +71,7 @@ class Window(GUIObject):
             parent = self.osd.app_list[0]
 
         parent.add_child(self)
-
+        
         self.osd.add_app(self)
 
         self.event_context = 'input'
@@ -91,6 +94,9 @@ class Window(GUIObject):
         self.internal_v_align = Align.CENTER
 
 
+    def add_child(self, child):
+        if self.content:
+            self.content.add_child(child)
 
     def __init__content__(self):
         x, y, width, height = self.content_layout.x, self.content_layout.y, \
@@ -100,7 +106,6 @@ class Window(GUIObject):
 
         self.content = Container('frame', x, y, width, height, vertical_expansion=1)
         GUIObject.add_child(self, self.content)
-        self.add_child = self.content.add_child
 
         # adjust left to content
         self.left += (self.width - width-x) / 2
@@ -174,6 +179,15 @@ class Window(GUIObject):
             print 'freevo@dischi-home.de.'
             print '******************************************************************'
             self.content.parent = self
+            
+        if not self.parent:
+            print '******************************************************************'
+            print 'Error: window has no parent, not showing...'
+            print 'If you can reproduce this error message, please send a'
+            print 'mail with the subject \'[Freevo-Bugreport] GUI\' to'
+            print 'freevo@dischi-home.de.'
+            print '******************************************************************'
+            return
             
         self.content.surface = self.content.get_surface()
         self.content.draw()
