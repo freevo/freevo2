@@ -35,6 +35,9 @@ o Core developer
 Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
 o Core developer
 
+Rob Shortt <rob@infointeractive.com>
+o Core developer
+
 Jason Ball <jason.ball@ce.com.au>:
 o SDL support in the OSD
 
@@ -66,10 +69,8 @@ o Various contribs and patches for TV listings
 Travis Shirk <travis@pobox.com>
 o ID3v2.x support
 
-Rob Shortt <rob@infointeractive.com>
-o Enhancements to Mame support
-o Freevo web interface for recording
-
 John M Cooper <john.cooper@yourcommunications.co.uk>
 o Bins support
 
+Matthieu Weber <mweber@mit.jyu.fi>
+o DTD and implementation of fxd movie informations
