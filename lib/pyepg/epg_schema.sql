@@ -1,9 +1,10 @@
 
-drop table admin;
-create table admin (
-    version text primary key
+drop table versioning;
+create table versioning (
+    thing text primary key,
+    version text,
 );
-insert into admin (version) values ("0.1.0");
+insert into versioning (thing, version) values ("sql", "0.1.1");
 
 drop table channels;
 create table channels (
@@ -42,6 +43,7 @@ create unique index programs_channel_start_stop on programs (channel_id, start, 
 create index programs_start_stop on programs (start, stop);
 create index programs_start on programs (start);
 create index programs_stop on programs (stop);
+create index programs_title on programs (title);
 
 drop table categories;
 create table categories (
