@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/03/23 21:40:32  dischi
+# small bugfixes for loading a new skin
+#
 # Revision 1.30  2003/03/23 20:50:07  dischi
 # bugfix
 #
@@ -755,7 +758,7 @@ class XMLSkin:
 
 
 
-    def load(self, file, copy_content = 0, prepare = TRUE):
+    def load(self, file, copy_content = 0, prepare = TRUE, clear=FALSE):
         """
         load and parse the skin file
         """
@@ -793,6 +796,17 @@ class XMLSkin:
                     include  = attr_str(freevo_type, 'include', '')
 
                     if include:
+                        if clear:
+                            self._layout = {}
+                            self._font = {}
+                            self._color = {}
+                            self._menuset = {}
+                            self._menu = {}
+                            self._popup = ''
+                            self._player = XML_player()
+                            self._tv = XML_tv()
+                            self._mainmenu = XML_mainmenu()
+                            
                         self.load(include, copy_content, prepare = FALSE)
 
                     self.parse(freevo_type, scale, os.path.dirname(file), copy_content)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/03/23 21:40:31  dischi
+# small bugfixes for loading a new skin
+#
 # Revision 1.41  2003/03/23 19:57:11  dischi
 # Moved skin xml files to skins/xml/type1 and all stuff for blue_round2 to
 # skins/xml/blue_round2
@@ -325,11 +328,11 @@ class Skin:
             settings = xml_skin.XMLSkin()
             
         if dir and os.path.isfile(os.path.join(dir, 'folder.fxd')):
-            settings.load(os.path.join(dir, 'folder.fxd'), copy_content)
+            settings.load(os.path.join(dir, 'folder.fxd'), copy_content, clear=TRUE)
             return settings
 
         elif dir and os.path.isfile(dir):
-            settings.load(dir, copy_content)
+            settings.load(dir, copy_content, clear=TRUE)
             return settings
         return None
 

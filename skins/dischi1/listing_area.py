@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/03/23 21:40:31  dischi
+# small bugfixes for loading a new skin
+#
 # Revision 1.15  2003/03/23 11:38:49  dischi
 # fixed some alignments
 #
@@ -379,8 +382,8 @@ class Listing_Area(Skin_Area):
                 self.draw_image(area.images['uparrow'].filename, area.images['uparrow'])
             if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
                 self.draw_image(area.images['downarrow'].filename, area.images['downarrow'])
-        except IndexError:
-            # empty menu
+        except:
+            # empty menu / missing images
             pass
         
         self.last_choices = (menu.selected, copy.copy(menuw.menu_items))
