@@ -6,6 +6,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/06/29 03:46:54  outlyer
+# Hide some print statements. If these were supposed to go into debug, I can
+# change that.
+#
 # Revision 1.48  2004/06/28 20:40:16  dischi
 # make it possible to switch uid
 #
@@ -829,16 +833,14 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def eventNotice(self):
-        print 'RECORDSERVER GOT EVENT NOTICE'
-
+        #print 'RECORDSERVER GOT EVENT NOTICE'
         # Use callLater so that handleEvents will get called the next time
         # through the main loop.
         reactor.callLater(0, self.handleEvents) 
 
 
     def handleEvents(self):
-        print 'RECORDSERVER HANDLING EVENT'
-
+        #print 'RECORDSERVER HANDLING EVENT'
         event = rc_object.get_event()
 
         if event:
@@ -898,7 +900,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 print 'recorderver: After wait()'
 
             elif event == RECORD_START:
-                print 'Handling event RECORD_START'
+                #print 'Handling event RECORD_START'
                 prog = event.arg
                 open(tv_lock_file, 'w').close()
                 self.create_fxd(prog)
@@ -906,7 +908,7 @@ class RecordServer(xmlrpc.XMLRPC):
                     util.popen3.Popen3(config.VCR_PRE_REC)
 
             elif event == RECORD_STOP:
-                print 'Handling event RECORD_STOP'
+                #print 'Handling event RECORD_STOP'
                 os.remove(tv_lock_file)
                 prog = event.arg
                 try:
