@@ -9,7 +9,7 @@ import sys
 import socket, glob
 import random
 import termios, tty, time, os
-import string, popen2, fcntl, select, struct
+import string, popen2, fcntl, select, struct, fnmatch
 import time
 import threading
 import fcntl
@@ -111,3 +111,46 @@ def getExifThumbnail(file, x0=0, y0=0):
         print "TIFF thumbnail not supported yet"
 
     
+def recursefolders(root, recurse=0, pattern='*', return_folders=0):
+	# Before anyone asks why I didn't use os.path.walk; it's simple, 
+	# os.path.walk is difficult, clunky and doesn't work right in my
+	# mind. 
+	#
+	# Here's how you use this function:
+	#
+	# songs = recursefolders('/media/Music/Guttermouth',1,'*.mp3',1):
+	# for song in songs:
+	#	print song	
+	#
+	# Should be easy to add to the mp3.py app.
+
+	# initialize
+	result = []
+
+	# must have at least root folder
+	try:
+		names = os.listdir(root)
+	except os.error:
+		return result
+
+	# expand pattern
+	pattern = pattern or '*'
+	pat_list = string.splitfields( pattern , ';' )
+	
+	# check each file
+	for name in names:
+		fullname = os.path.normpath(os.path.join(root, name))
+
+		# grab if it matches our pattern and entry type
+		for pat in pat_list:
+			if fnmatch.fnmatch(name, pat):
+				if os.path.isfile(fullname) or (return_folders and os.path.isdir(fullname)):
+					result.append(fullname)
+				continue
+				
+		# recursively scan other folders, appending results
+		if recurse:
+			if os.path.isdir(fullname) and not os.path.islink(fullname):
+				result = result + recursefolders( fullname, recurse, pattern, return_folders )
+			
+	return result
