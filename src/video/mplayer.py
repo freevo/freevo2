@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/23 15:19:39  gsbarbieri
+# Fixed a bug when ESC was pressed while watching a movie. Freevo used to crash.
+# Fixed key conflict, rc.SELECT was used to exit and seek to a specifc position, now rc.ENTER (e) is used to seek.
+#
 # Revision 1.27  2003/03/17 18:54:44  outlyer
 # Some changes for the bookmarks
 #     o videoitem.py - Added bookmark menu, bookmark "parser" and menu generation,
@@ -415,7 +419,6 @@ class MPlayer:
             self.stop()
             self.thread.item = None
             rc.app = None
-            menuwidget.refresh(reload=1)
             return self.item.eventhandler(event)
         
         if event == rc.PLAY_END or event == rc.USER_END:
@@ -488,10 +491,11 @@ class MPlayer:
                 self.thread.app.write('seek 60\n')
             return TRUE
         
-        if event == rc.SELECT:
+        if event == rc.ENTER:
             self.seek_timer.cancel()
             self.seek *= 60
             self.thread.app.write('seek ' + str(self.seek) + ' 2\n')
+            print "seek "+str(self.seek)+" 2\n"
             self.seek = 0
             return TRUE
         
@@ -500,7 +504,7 @@ class MPlayer:
             self.seek *= 10;
             return TRUE
         
-        if event == rc.K1:
+        elif event == rc.K1:
             self.reset_seek_timeout()
             self.seek += self.seek * 10 + 1
             return TRUE
