@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/03/04 05:43:39  krister
+# Added port settings for the builtin webserver. This is still work in progress!
+#
 # Revision 1.1  2003/02/28 17:52:41  krister
 # First version of an internal python webserver. Work in progress.
 #
@@ -174,14 +177,14 @@ class FreevoCGIHTTPRequestHandler(CGIHTTPRequestHandler):
         sys.stdout = self.wfile
         self.send_response(200, "Script output follows")
 
+        t0 = time.time()
         cgi_app()
-
-        self.log_message('CGI script done')
+        self.log_message('CGI script done (%1.1f seconds)', (time.time() - t0))
         
 
 def run():
     os.chdir('src/www/htdocs')
-    srvaddr = ('', 8080)
+    srvaddr = ('', config.WWW_PORT)
 
     while 1:
         try:

@@ -699,6 +699,15 @@ TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
 # you will not get your local settings!
 #
 
+#
+# Web server port number. 80 is the standard port, but is often
+# taken already by apache, and cannot be used unless the server
+# runs as root. Use port 8080 as the default, change to 80 if
+# needed.
+#
+WWW_PORT = 8080
+
+#
 # Allowed IP addresses list. Set to [] to allow all addresses.
 #
 WWW_IP_ALLOW = ['127.0.0.1']
