@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/13 00:29:46  rshortt
+# Renaming works again.  It will choke on filenames with single quotes though.
+#
 # Revision 1.3  2003/05/13 00:18:07  rshortt
 # Bugfix, but rename still doesn't work!
 #
@@ -117,13 +120,13 @@ class LibraryResource(FreevoResource):
 
         fv.printHeader('Video Library', 'styles/main.css')
 
-        fv.res += '<script language="JavaScript"><!--'
-        fv.res += 'function renameFile(file) {'
-        fv.res += '   newfile=window.prompt("New name please.");'
-        fv.res += '   if(newfile == "" || newfile == null) return;'
-        fv.res += '   document.location="library.rpy?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile);'
-        fv.res += '}'
-        fv.res += '//--></script>'
+        fv.res += '<script language="JavaScript"><!--\n'
+        fv.res += 'function renameFile(file) {\n'
+        fv.res += '   newfile=window.prompt("New name please.");\n'
+        fv.res += '   if(newfile == "" || newfile == null) return;\n'
+        fv.res += '   document.location="library.rpy?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile);\n'
+        fv.res += '}\n'
+        fv.res += '//--></script>\n'
 
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
