@@ -19,6 +19,7 @@ class MplayerMovieInfo:
         self.time = ""
         self.audio = []
         self.subtitles = []
+        self.chapters = 1
         self.audio_selected = None
         self.subtitle_selected = None
 
@@ -26,7 +27,8 @@ class MplayerMovieInfo:
                                    "(.*)aid: ([0-9]*)").match
         self.re_subtitle = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
                                       "([a-z][a-z])").match
-
+        self.re_chapter = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
+    
     def parse(self, str):
         m = self.re_audio(str)
         if m:
@@ -34,7 +36,9 @@ class MplayerMovieInfo:
         m = self.re_subtitle(str)
         if m:
             self.subtitles += [ (m.group(1), m.group(2)) ]
-
+        m = self.re_chapter(str)
+        if m:
+            self.chapters = int(m.group(1))
 
     def to_string(self):
         ret = ""
@@ -49,10 +53,11 @@ class MplayerMovieInfo:
 #
 
 def play_movie(arg=None, menuw=None):
-    (mode, file, playlist, repeat, start_time, mpinfo) = arg
+    (mode, file, playlist, repeat, one_time_options, start_time, mpinfo) = arg
     if not isinstance(file, FileInformation):
         file = FileInformation(mode, file)
-    file.mplayer_config = mpinfo
+    file.mplayer_options[1] = mpinfo
+    file.mplayer_options[2] = one_time_options
     menuw.delete_menu()
     mplayer.get_singleton().play(mode, file, playlist, repeat, start_time)
 
@@ -93,8 +98,21 @@ def subtitle_selection_menu(arg=None, menuw=None):
         items += [ menu.MenuItem(s[1], subtitle_selection, (mpinfo, s[0])) ]
     moviemenu = menu.Menu('SUBTITLE MENU', items)
     menuw.pushmenu(moviemenu)
-        
 
+        
+#
+# Chapter selection
+#
+
+def chapter_selection_menu(arg=None, menuw=None):
+    items = []
+    (mode, file, playlist, repeat, repeat, mpinfo) = arg
+    for c in range(1, mpinfo.chapters+1):
+        items += [ menu.MenuItem("play chapter %s" % c, play_movie,
+                                 (mode, file, playlist, repeat,
+                                  '-chapter %s' % c, 0, mpinfo)) ]
+    moviemenu = menu.Menu('CHAPTER MENU', items)
+    menuw.pushmenu(moviemenu)
 
 #
 # config main menu
@@ -110,22 +128,26 @@ def config_main_menu(mode, file, playlist, repeat, mpinfo):
     if mpinfo.subtitles:
         items += [ menu.MenuItem("Subtitle selection", subtitle_selection_menu, mpinfo) ]
         
-
+    if mpinfo.chapters > 1:
+        items += [ menu.MenuItem("Chapter selection", chapter_selection_menu,
+                                 (mode, file, playlist, repeat, 0, mpinfo)) ]
+        
     if mpinfo.time:
+        print mpinfo.time
         m = re.compile("^A[: -]*([0-9]+)\.").match(mpinfo.time)
         if m:
             next_start = max(0, int(m.group(1)) - 1)
-        if next_start:
-            # XXX continue doesn't work good. We save the position where we stopped
-            # XXX mplayer, but -ss seems to start on the next i-frame or so :-(
-            items += [ menu.MenuItem("play: continue", play_movie,
-                                     (mode, file, playlist, repeat, next_start, mpinfo)) ]
-    
-            items += [ menu.MenuItem("play: restart", play_movie,
-                                     (mode, file, playlist, repeat, 0, mpinfo)) ]
+    if next_start:
+        # XXX continue doesn't work good. We save the position where we stopped
+        # XXX mplayer, but -ss seems to start on the next i-frame or so :-(
+        items += [ menu.MenuItem("play: continue", play_movie,
+                                 (mode, file, playlist, repeat, '', next_start, mpinfo)) ]
+        
+        items += [ menu.MenuItem("play: restart", play_movie,
+                                 (mode, file, playlist, repeat, '', 0, mpinfo)) ]
     else:
         items += [ menu.MenuItem("play", play_movie,
-                                 (mode, file, playlist, repeat, 0, mpinfo)) ]
+                                 (mode, file, playlist, repeat, '', 0, mpinfo)) ]
         
     moviemenu = menu.Menu('CONFIG MENU', items)
     menuw.pushmenu(moviemenu)
