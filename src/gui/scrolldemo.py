@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/21 00:02:47  rshortt
+# Updates for changes elsewhere.
+#
 # Revision 1.8  2003/05/02 01:09:03  rshortt
 # Changes in the way these objects draw.  They all maintain a self.surface
 # which they then blit onto their parent or in some cases the screen.  Label
@@ -100,7 +103,9 @@ class scrolldemo(PopupBox):
                  height=350, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self, parent, text, left, top, width, height, 
+        handler = None
+
+        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
 

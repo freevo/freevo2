@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/05/21 00:02:47  rshortt
+# Updates for changes elsewhere.
+#
 # Revision 1.8  2003/05/15 02:21:54  rshortt
 # got RegionScroller, ListBox, ListItem, OptionBox working again, although
 # they suffer from the same label alignment bouncing bug as everything else
@@ -101,7 +104,9 @@ class listboxdemo(PopupBox):
                  height=350, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self, parent, text, left, top, width, height, 
+        handler = None
+
+        PopupBox.__init__(self, parent, text, handler, left, top, width, height, 
                           bg_color, fg_color, icon, border, bd_color, bd_width)
 
 
