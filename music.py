@@ -13,6 +13,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2002/11/01 21:48:29  outlyer
+# Crash fix: Remove playlist entries that point to non-existant files, URLs
+# excepted.
+#
 # Revision 1.26  2002/10/31 21:13:09  dischi
 # Improved playlist support. A playlist can contain both audio and video
 # files. In most cases that will be music mp3s mixed with music videos.
@@ -408,13 +412,15 @@ def parse_entry(arg=None, menuw=None):
         for fname in files:
             if DEBUG > 1:
                 print 'music: getting info for "%s"' % fname
-
-            a = AudioInfo(fname)
-            if a.artist and artist == None:
-                artist = a.artist
-            elif a.artist and artist != a.artist:
-                artist = ''
-            alist += [a]
+	    if os.path.exists(fname) or fname.find("://"):
+                a = AudioInfo(fname)
+                if a.artist and artist == None:
+                    artist = a.artist
+                elif a.artist and artist != a.artist:
+                    artist = ''
+                alist += [a]
+	    else:
+	        print 'music: %s is missing, removing from playlist' % fname
 
         for a in alist:
 
