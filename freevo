@@ -11,6 +11,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2003/08/24 01:35:59  outlyer
+# These two changes reduce the amount of stuff being emailed to people when they
+# use cron.
+#
+# (In both cases, outputting text to a command run from cron sends an email to
+# root, which is very annoying)
+#
 # Revision 1.72  2003/08/23 09:07:56  dischi
 # small fix when displaying the list of helpers
 #
@@ -215,7 +222,7 @@ if [ "$1" = "execute" ] ; then
 
     trap './freevo stop $APP' 1 2 15
     $RUNAPP python $@ &
-    echo PID is $!
+    #echo PID is $!
     echo $! > $PID_FILE
     wait `cat $PID_FILE`
     rm $PID_FILE > /dev/null 2>&1

@@ -22,6 +22,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2003/08/24 01:35:59  outlyer
+# These two changes reduce the amount of stuff being emailed to people when they
+# use cron.
+#
+# (In both cases, outputting text to a command run from cron sends an email to
+# root, which is very annoying)
+#
 # Revision 1.42  2003/08/23 22:27:06  gsbarbieri
 # Match (CD|DVD) by mount point
 #
@@ -290,7 +297,7 @@ for dirname in cfgfilepath:
         break
 
 else:
-    print 'No overrides loaded'
+    if DEBUG: print 'No overrides loaded'
 
     
 if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
