@@ -36,11 +36,14 @@
 
 # python imports
 import os
-import traceback
 import codecs
+import logging
 from stat import ST_MTIME
 
 import sysconfig
+
+# the logging object
+log = logging.getLogger('vfs')
 
 _VFS_DIR = sysconfig.VFS_DIR
 
@@ -121,12 +124,13 @@ def open(name, mode='r'):
             if not os.path.isdir(os.path.dirname(overlay)):
                 os.makedirs(os.path.dirname(overlay), mode=04775)
         except IOError:
-            print 'vfs.open: error creating dir %s' % os.path.dirname(overlay)
+            log.error('vfs.open: error creating dir %s' % \
+                      os.path.dirname(overlay))
             raise IOError
         try:
             return file(overlay, mode)
         except IOError:
-            print 'vfs.open: error opening file %s' % overlay
+            log.error('vfs.open: error opening file %s' % overlay)
             raise IOError
 
 
@@ -144,12 +148,13 @@ def codecs_open(name, mode, encoding):
             if not os.path.isdir(os.path.dirname(overlay)):
                 os.makedirs(os.path.dirname(overlay))
         except IOError:
-            print 'vfs.codecs_open: error creating dir %s' % os.path.dirname(overlay)
+            log.error('vfs.codecs_open: error creating dir %s' % \
+                      os.path.dirname(overlay))
             raise IOError
         try:
             return codecs.open(overlay, mode, encoding=encoding)
         except IOError, e:
-            print 'vfs.codecs_open: error opening file %s' % overlay
+            log.error('vfs.codecs_open: error opening file %s' % overlay)
             raise IOError, e
 
 
@@ -185,8 +190,7 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
         return files
 
     except OSError:
-        print 'vfs.listdir: Error in dir %s' % directory
-        traceback.print_exc()
+        log.exception('vfs.listdir: Error in dir %s' % directory)
         if not handle_exception:
             raise OSError
         return []

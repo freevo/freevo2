@@ -38,6 +38,10 @@ __all__ = ( 'create', 'get_name', 'load' )
 
 # python imports
 import os
+import logging
+
+# the logging object
+log = logging.getLogger('util')
 
 # mevas for imlib2 support
 import mevas
@@ -47,7 +51,7 @@ try:
     import epeg
     USE_EPEG = True
 except ImportError:
-    print 'thumbnail: pyepeg not found'
+    log.warning('thumbnail: pyepeg not found')
     USE_EPEG = False
 
 # freevo utils
@@ -135,7 +139,7 @@ def create(filename):
     try:
         return create_raw_thumbnail(filename, thumb)
     except Exception, e:
-        print 'thumbnail.create: %s' % e
+        log.exception('thumbnail.create error')
         fileops.touch(thumb)
         return None
 
