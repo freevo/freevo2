@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/10/07 14:04:07  dischi
+# set correct timer for notifier
+#
 # Revision 1.8  2004/10/06 19:24:00  dischi
 # switch from rc.py to pyNotifier
 #
@@ -128,7 +131,8 @@ class Render:
         notifier.removeTimer( self.__timer_id )
         self.__timer_id = None
         timer = time.time()
-
+        next  = 0
+        
         update_screen = False
         for a in copy.copy(self.animations):
             # XXX something should be done to clean up the mess
@@ -144,7 +148,7 @@ class Render:
                     update_screen = True
                 else:
                     update_screen = a.poll(timer) or update_screen
-                    
+                    next = min(next, a.next_update) or a.next_update
             # XXX something might be done to handle stopped animations
             else:
                 pass
@@ -152,7 +156,8 @@ class Render:
         if update_screen:
             self.display.update()
         if len( self.animations ):
-            self.__timer_id = notifier.addTimer( 10, self.update )
+            next = max(0, int((next - time.time()) * 1000))
+            self.__timer_id = notifier.addTimer( next, self.update )
 
 
     def kill(self, anim_object):
@@ -216,11 +221,8 @@ class Render:
         """
         wait until the given animations are finished
         """
-        import notifier
-        
         if anim_objects == None:
             # wait for all application show/hide animations
             anim_objects = filter(lambda a: a.application, self.animations)
         while filter(lambda a: a.running(), anim_objects):
-            self.update()
-            notifier.step( False, False )
+            notifier.step( True, False )
