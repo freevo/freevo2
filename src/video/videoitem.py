@@ -83,6 +83,9 @@ class VideoItem(MediaItem):
         self.selected_audio    = None
         self.elapsed           = 0
 
+        self.player        = None
+        self.player_rating = 0
+
         self.possible_player   = []
 
         # set url and parse the name

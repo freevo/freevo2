@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2005/01/20 16:37:36  dischi
+# fix crash
+#
 # Revision 1.18  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -77,7 +80,6 @@ class PluginInterface(plugin.DaemonPlugin):
     SOUND_MASK_LINE = 64
     
     def __init__(self):
-        plugin.DaemonPlugin.__init__(self)
         self.plugin_name = 'MIXER'
         self.mixfd = None
         self.muted = 0
@@ -91,6 +93,7 @@ class PluginInterface(plugin.DaemonPlugin):
                 log.error('Couldn\'t open mixer %s' % config.DEV_MIXER)
                 return
 
+        plugin.DaemonPlugin.__init__(self)
         if 0:
             self.mainVolume   = 0
             self.pcmVolume    = 0
