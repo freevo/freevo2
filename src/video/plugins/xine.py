@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/11/01 19:54:18  dischi
+# port to new xine-lib
+#
 # Revision 1.18  2003/10/21 21:17:42  gsbarbieri
 # Some more i18n improvements.
 #
@@ -199,7 +202,7 @@ class Xine:
         if item.mode == 'dvd':
             command = '%s dvd://' % command
         else:
-            command = '%s vcdx:/%s:' % (command, item.media.devicename)
+            command = '%s vcd://%s' % (command, item.media.devicename)
 
         _debug_('Xine.play(): Starting thread, cmd=%s' % command)
 
