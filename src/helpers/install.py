@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/12/01 20:07:27  dischi
+# fix missing vfs for plugin installation
+#
 # Revision 1.6  2003/11/10 01:14:09  rshortt
 # Only remove the parts of the runtime that we ship so we don't overwrite any
 # files that are part of any particular release.
@@ -103,7 +106,13 @@ if len(sys.argv) == 2 and os.path.isfile(sys.argv[1]):
             util.fileops.rmrf('runtime/runapp')
             os.system('tar -zxf %s' % tgz)
         sys.exit(0)
-        
+
+
+    # when we have a runtime, we can include the vfs
+    from util import vfs
+    import __builtin__
+    __builtin__.__dict__['vfs'] = vfs
+
     # create tmp directory
     if os.path.isdir('tmp'):
         print 'directory tmp exists, please remove it'
