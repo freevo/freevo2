@@ -287,63 +287,63 @@
          <content type="text" spacing="2" align="right" valign="center">
 	    <item type="default" font="item" />
 	    <item type="selected" font="selected">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="audio" font="item" image="mimetypes/audio.png"/>
-	    <item type="audio selected" font="selected" image="mimetypes/audio.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="audio" font="audio item" icon="mimetypes/out_audio.png"/>
+	    <item type="audio selected" font="audio selected" icon="mimetypes/audio.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="audiocd" font="item" image="mimetypes/audiocd.png"/>
-	    <item type="audiocd selected" font="selected" image="mimetypes/audiocd.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="audiocd" font="audiocd item" icon="mimetypes/out_audiocd.png"/>
+	    <item type="audiocd selected" font="dvd selected" icon="mimetypes/audiocd.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="dvd" font="item" image="mimetypes/dvd.png"/>
-	    <item type="dvd selected" font="selected" image="mimetypes/dvd.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="dvd" font="dvd item" icon="mimetypes/out_dvd.png"/>
+	    <item type="dvd selected" font="dvd selected" icon="mimetypes/dvd.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="vcd" font="item" image="mimetypes/vcd.png"/>
-	    <item type="vcd selected" font="selected" image="mimetypes/vcd.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="vcd" font="vcd item" icon="mimetypes/out_vcd.png"/>
+	    <item type="vcd selected" font="vcd selected" icon="mimetypes/vcd.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
-	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="empty_cdrom" font="empty_cdrom item" icon="mimetypes/out_empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="empty_cdrom selected" icon="mimetypes/empty_cdrom.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="video" font="item" image="mimetypes/video.png"/>
-	    <item type="video selected" font="selected" image="mimetypes/video.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="video" font="video item" icon="mimetypes/out_video.png"/>
+	    <item type="video selected" font="video selected" icon="mimetypes/video.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
 
-	    <item type="playlist" font="item" image="mimetypes/playlist.png"/>
-	    <item type="playlist selected" font="selected"  image="mimetypes/playlist.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="playlist" font="playlist item" icon="mimetypes/out_playlist.png"/>
+	    <item type="playlist selected" font="playlist selected"  icon="mimetypes/playlist.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="dir" font="item" image="mimetypes/folder.png"/>
-	    <item type="dir selected" font="selected" image="mimetypes/folder.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="dir" font="folder item" icon="mimetypes/out_folder.png"/>
+	    <item type="dir selected" font="folder selected" icon="mimetypes/folder.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="image" font="item" image="mimetypes/image.png"/>
-	    <item type="image selected" font="selected" image="mimetypes/image.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="image" font="image item" icon="mimetypes/out_image.png"/>
+	    <item type="image selected" font="image selected" icon="mimetypes/image.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
          </content>
       </layout>
@@ -353,32 +353,32 @@
          <content type="text" spacing="2" align="right" valign="center">
 	    <item type="default" font="item" />
 	    <item type="selected" font="selected">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="playlist" font="item" image="mimetypes/playlist_image.png"/>
-	    <item type="playlist selected" font="selected"  image="mimetypes/playlist_image.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="playlist" font="playlist_image item" icon="mimetypes/out_playlist_image.png"/>
+	    <item type="playlist selected" font="playlist_image selected"  icon="mimetypes/playlist_image.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="dir" font="item" image="mimetypes/folder_image.png"/>
-	    <item type="dir selected" font="selected" image="mimetypes/folder_image.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="dir" font="folder_image item" icon="mimetypes/out_folder_image.png"/>
+	    <item type="dir selected" font="folder_image selected" icon="mimetypes/folder_image.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="image" font="item" image="mimetypes/image.png"/>
-	    <item type="image selected" font="selected" image="mimetypes/image.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="image" font="image item" icon="mimetypes/out_image.png"/>
+	    <item type="image selected" font="image selected" icon="mimetypes/image.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
-	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="empty_cdrom" font="empty_cdrom item" icon="mimetypes/out_empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="empty_cdrom selected" icon="mimetypes/empty_cdrom.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
          </content>        
       </layout>
@@ -387,38 +387,38 @@
          <content type="text" spacing="2" align="right" valign="center">
 	    <item type="default" font="item" />
 	    <item type="selected" font="selected">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="playlist" font="item" image="mimetypes/playlist_audio.png"/>
-	    <item type="playlist selected" font="selected"  image="mimetypes/playlist_audio.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="playlist" font="playlist_audio item" icon="mimetypes/out_playlist_audio.png"/>
+	    <item type="playlist selected" font="playlist_audio selected"  icon="mimetypes/playlist_audio.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="dir" font="item" image="mimetypes/folder_audio.png"/>
-	    <item type="dir selected" font="selected" image="mimetypes/folder_audio.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="dir" font="folder_audio item" icon="mimetypes/out_folder_audio.png"/>
+	    <item type="dir selected" font="folder_audio selected" icon="mimetypes/folder_audio.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="audio" font="item" image="mimetypes/audio.png"/>
-	    <item type="audio selected" font="selected" image="mimetypes/audio.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="audio" font="audio item" icon="mimetypes/out_audio.png"/>
+	    <item type="audio selected" font="audio selected" icon="mimetypes/audio.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="audiocd" font="item" image="mimetypes/audiocd.png"/>
-	    <item type="audiocd selected" font="selected" image="mimetypes/audiocd.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="audiocd" font="audiocd item" icon="mimetypes/out_audiocd.png"/>
+	    <item type="audiocd selected" font="audiocd selected" icon="mimetypes/audiocd.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
-	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="empty_cdrom" font="empty_cdrom item" icon="mimetypes/out_empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="empty_cdrom selected" icon="mimetypes/empty_cdrom.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
          </content>
       </layout>
@@ -427,44 +427,44 @@
          <content type="text" spacing="2" align="right" valign="center">
 	    <item type="default" font="item" />
 	    <item type="selected" font="selected">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="playlist" font="item" image="mimetypes/playlist_video.png"/>
-	    <item type="playlist selected" font="selected"  image="mimetypes/playlist_video.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="playlist" font="playlist_video item" icon="mimetypes/out_playlist_video.png"/>
+	    <item type="playlist selected" font="folder_audio selected"  icon="mimetypes/playlist_video.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="dir" font="item" image="mimetypes/folder_video.png"/>
-	    <item type="dir selected" font="selected" image="mimetypes/folder_video.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="dir" font="folder_video item" icon="mimetypes/out_folder_video.png"/>
+	    <item type="dir selected" font="folder_audio selected" icon="mimetypes/folder_video.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="video" font="item" image="mimetypes/video.png"/>
-	    <item type="video selected" font="selected" image="mimetypes/video.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="video" font="video item" icon="mimetypes/out_video.png"/>
+	    <item type="video selected" font="video selected" icon="mimetypes/video.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="vcd" font="item" image="mimetypes/vcd.png"/>
-	    <item type="vcd selected" font="selected" image="mimetypes/vcd.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="vcd" font="vcd item" icon="mimetypes/out_vcd.png"/>
+	    <item type="vcd selected" font="vcd selected" icon="mimetypes/vcd.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="dvd" font="item" image="mimetypes/dvd.png"/>
-	    <item type="dvd selected" font="selected" image="mimetypes/dvd.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="dvd" font="dvd item" icon="mimetypes/out_dvd.png"/>
+	    <item type="dvd selected" font="dvd selected" icon="mimetypes/dvd.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
 
-	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
-	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
+	    <item type="empty_cdrom" font="empty_cdrom item" icon="mimetypes/out_empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="empty_cdrom selected" icon="mimetypes/empty_cdrom.png">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
          </content>
       </layout>
@@ -480,16 +480,8 @@
 	          align="center" valign="center"/>
 	    <item type="selected" width="128" height="128" 
 	          align="center" valign="center">
-
-	    <item type="dir" font="item" image="mimetypes/image.png"/>
-	    <item type="dir selected" font="selected" image="mimetypes/image.png">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
-	               width="max+20" height="max+6" radius="10"/>
-	    </item>
-
-
-	       <rectangle bgcolor="list selection bg" color="list selection fg" 
-	                   size="1" x="-10" y="-10" 
+	       <rectangle bgcolor="list selection bg" color="list selection fg"
+	                   size="1" x="-10" y="-10"
 	                  width="max+20" height="max+20" radius="20"/>
 	    </item>
          </content>
@@ -506,6 +498,52 @@
 	                   size="1" x="-10" y="max-font_h-10" 
 	                  width="max+20" height="font_h+20" radius="20"/>
 	    </item>
+
+	    <item type="video" width="108" height="150" font="video item small" 
+	          align="center" valign="center"/>
+	    <item type="video selected" width="128" height="177" font="video selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="vcd" width="108" height="150" font="vcd item small" 
+	          align="center" valign="center"/>
+	    <item type="vcd selected" width="128" height="177" font="vcd selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="dvd" width="108" height="150" font="dvd item small" 
+	          align="center" valign="center"/>
+	    <item type="dvd selected" width="128" height="177" font="dvd selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="dir" width="108" height="150" font="folder_video item small" 
+	          align="center" valign="center"/>
+	    <item type="dir selected" width="128" height="177" font="folder_video selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="empty_cdrom" width="108" height="150" font="empty_cdrom item small" 
+	          align="center" valign="center"/>
+	    <item type="empty_cdrom selected" width="128" height="177" font="empty_cdrom selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
          </content>
       </layout>
 
@@ -520,6 +558,52 @@
 	                   size="1" x="-10" y="-10" 
 	                  width="max+20" height="max+20" radius="20"/>
 	    </item>
+
+	    <item type="video" width="77" height="108" font="video item small" 
+	          align="center" valign="center"/>
+	    <item type="video selected" width="92" height="128" font="video selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="vcd" width="77" height="108" font="vcd item small" 
+	          align="center" valign="center"/>
+	    <item type="vcd selected" width="92" height="128" font="vcd selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="dvd" width="77" height="128" font="dvd item small" 
+	          align="center" valign="center"/>
+	    <item type="dvd selected" width="92" height="128" font="dvd selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="dir" width="77" height="128" font="folder_video item small" 
+	          align="center" valign="center"/>
+	    <item type="dir selected" width="92" height="128" font="folder_video selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="empty_cdrom" width="77" height="128" font="empty_cdrom item small" 
+	          align="center" valign="center"/>
+	    <item type="empty_cdrom selected" width="92" height="128" font="empty_cdrom selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
          </content>
       </layout>
 
@@ -533,6 +617,43 @@
 	       <rectangle bgcolor="list selection bg" color="list selection fg" 
 	                   size="1" x="-10" y="-10" 
 	                  width="max+20" height="max+20" radius="20"/>
+	    </item>
+
+	    <item type="image" width="104" height="104" font="image item small" 
+	          align="center" valign="center"/>
+	    <item type="image selected" width="128" height="128" font="image selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="dir" width="104" height="104" font="folder_image item small" 
+	          align="center" valign="center"/>
+	    <item type="dir selected" width="128" height="128" font="folder_image selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+	    <item type="playlist" width="104" height="104" font="playlist_image item small" 
+	          align="center" valign="center"/>
+	    <item type="playlist selected" width="128" height="128" font="playlist_image selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
+	    </item>
+
+
+	    <item type="empty_cdrom" width="104" height="104" font="empty_cdrom item small" 
+	          align="center" valign="center"/>
+	    <item type="empty_cdrom selected" width="128" height="128" font="empty_cdrom selected small"
+	          align="center" valign="center">
+<!-- 	       <rectangle bgcolor="list selection bg" color="list selection fg"  -->
+<!-- 	                   size="1" x="-10" y="max-font_h-10"  -->
+<!-- 	                  width="max+20" height="font_h+20" radius="20"/> -->
 	    </item>
          </content>
       </layout>
@@ -912,6 +1033,8 @@
          <content type="text" spacing="5">
 	    <item type="default" font="main" />
 	    <item type="selected" font="main selected">
+<!-- 	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3" -->
+<!-- 	               width="max+20" height="max+6" radius="10"/> -->
 	    </item>
          </content>
       </layout>
@@ -1076,14 +1199,226 @@
       </font>
       <font label="subtitle" name="arialbd" size="20" color="0x505050"/>
 
-      <font label="item" name="tahomabd" size="18" color="0x303030"/>
-      <font label="selected" name="tahomabd" size="18" color="0xffffff">
-         <shadow x="1" y="1" color="0x000000" visible="yes"/>         
+      <font label="item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
       </font>
       <font label="item small" name="tahomabd" size="13" color="0x303030"/>
       <font label="selected small" name="tahomabd" size="13" color="0xffffff">
          <shadow x="1" y="1" color="0x000000" visible="yes"/>         
       </font>
+
+      <font label="audio item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="audio selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="audio selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+      <font label="audio item small" name="tahomabd" size="13" color="0x303030"/>
+<!--       <font label="audio selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="audio selected small" name="tahomabd" size="13" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+
+      <font label="image item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="image selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="image selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+      <font label="image item small" name="tahomabd" size="13" color="0x303030"/>
+<!--       <font label="image selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="image selected small" name="tahomabd" size="13" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+
+      <font label="video item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="video selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="video selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+      <font label="video item small" name="tahomabd" size="13" color="0x303030"/>
+<!--       <font label="video selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="video selected small" name="tahomabd" size="13" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+
+      <font label="audiocd item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="audiocd selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="audiocd selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+      <font label="audiocd item small" name="tahomabd" size="13" color="0x303030"/>
+<!--       <font label="audiocd selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="audiocd selected small" name="tahomabd" size="13" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+
+      <font label="vcd item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="vcd selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="vcd selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+      <font label="vcd item small" name="tahomabd" size="13" color="0x303030"/>
+<!--       <font label="vcd selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="vcd selected small" name="tahomabd" size="13" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+
+      <font label="dvd item" name="tahomabd" size="22" color="0x303030"/>
+<!--       <font label="dvd selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="dvd selected" name="tahomabd" size="22" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+      <font label="dvd item small" name="tahomabd" size="13" color="0x303030"/>
+<!--       <font label="dvd selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="dvd selected small" name="tahomabd" size="13" color="0xd59215">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x734F0B" visible="yes"/>
+      </font>
+
+
+      <font label="empty_cdrom item" name="tahomabd" size="22" color="0x606060"/>
+<!--       <font label="empty_cdrom selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="empty_cdrom selected" name="tahomabd" size="22" color="0x909090">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x606060" visible="yes"/>
+      </font>
+      <font label="empty_cdrom item small" name="tahomabd" size="13" color="0x606060"/>
+<!--       <font label="empty_cdrom selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="empty_cdrom selected small" name="tahomabd" size="13" color="0x909090">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x606060" visible="yes"/>
+      </font>
+
+
+      <font label="folder item" name="tahomabd" size="22" color="0x503030"/>
+<!--       <font label="folder selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="folder selected" name="tahomabd" size="22" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+      <font label="folder item small" name="tahomabd" size="13" color="0x503030"/>
+<!--       <font label="folder selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="folder selected small" name="tahomabd" size="13" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+
+
+      <font label="folder_audio item" name="tahomabd" size="22" color="0x503030"/>
+<!--       <font label="folder_audio selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="folder_audio selected" name="tahomabd" size="22" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+      <font label="folder_audio item small" name="tahomabd" size="13" color="0x503030"/>
+<!--       <font label="folder_audio selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="folder_audio selected small" name="tahomabd" size="13" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+
+
+      <font label="folder_image item" name="tahomabd" size="22" color="0x503030"/>
+<!--       <font label="folder_image selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="folder_image selected" name="tahomabd" size="22" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+      <font label="folder_image item small" name="tahomabd" size="13" color="0x503030"/>
+<!--       <font label="folder_image selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="folder_image selected small" name="tahomabd" size="13" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+
+
+      <font label="folder_video item" name="tahomabd" size="22" color="0x503030"/>
+<!--       <font label="folder_video selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="folder_video selected" name="tahomabd" size="22" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+      <font label="folder_video item small" name="tahomabd" size="13" color="0x503030"/>
+<!--       <font label="folder_video selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="folder_video selected small" name="tahomabd" size="13" color="0xCE4949">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x503030" visible="yes"/>
+      </font>
+
+
+      <font label="playlist item" name="tahomabd" size="22" color="0x303050"/>
+<!--       <font label="playlist selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="playlist selected" name="tahomabd" size="22" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+      <font label="playlist item small" name="tahomabd" size="13" color="0x303050"/>
+<!--       <font label="playlist selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="playlist selected small" name="tahomabd" size="13" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+
+      <font label="playlist_audio item" name="tahomabd" size="22" color="0x303050"/>
+<!--       <font label="playlist_audio selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="playlist_audio selected" name="tahomabd" size="22" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+      <font label="playlist_audio item small" name="tahomabd" size="13" color="0x303050"/>
+<!--       <font label="playlist_audio selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="playlist_audio selected small" name="tahomabd" size="13" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+
+
+      <font label="playlist_image item" name="tahomabd" size="22" color="0x303050"/>
+<!--       <font label="playlist_image selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="playlist_image selected" name="tahomabd" size="22" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+      <font label="playlist_image item small" name="tahomabd" size="13" color="0x303050"/>
+<!--       <font label="playlist_image selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="playlist_image selected small" name="tahomabd" size="13" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+
+
+      <font label="playlist_video item" name="tahomabd" size="22" color="0x303050"/>
+<!--       <font label="playlist_video selected" name="tahomabd" size="22" color="0xffffff"> -->
+      <font label="playlist_video selected" name="tahomabd" size="22" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+      <font label="playlist_video item small" name="tahomabd" size="13" color="0x303050"/>
+<!--       <font label="playlist_video selected small" name="tahomabd" size="13" color="0xffffff"> -->
+      <font label="playlist_video selected small" name="tahomabd" size="13" color="0x5660CE">
+<!--          <shadow x="1" y="1" color="0x000000" visible="yes"/>          -->
+         <shadow x="1" y="1" color="0x303050" visible="yes"/>
+      </font>
+
+
 
       <font label="main" name="tahomabd" size="26" color="main fg"/>
       <font label="main selected" name="tahomabd" size="26" color="main selection fg">
@@ -1126,6 +1461,8 @@
 
       <!-- Colors -->
       <color label="main fg" value="0x333333"/>
+<!--       <color label="main selection fg" value="0xe9e9e9"/> -->
+<!--       <color label="main selection fg shadow" value="0x000000"/> -->
       <color label="main selection fg" value="0xD59215"/>
       <color label="main selection fg shadow" value="0x734F0B"/>
       <color label="main selection bg" value="0x703333d9"/>
@@ -1137,6 +1474,7 @@
 
       <color label="list selection bg" value="0x703333d9" />
       <color label="list selection fg" value="0x606060"/>
+
       <color label="list bg" value="0xa0333333" />
       <color label="list border" value="0x303030" />
 
