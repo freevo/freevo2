@@ -4,7 +4,8 @@
 # $Id$
 #
 
-CC=gcc
+CC = gcc
+XLIBS = -L/usr/X11R6/lib -lX11
 
 # XXX plugins/cddb breaks the compile on my (Krister) machine 
 # XXX since it cannot find Python.h. We should have some way of 
@@ -13,7 +14,7 @@ CC=gcc
 
 SUBDIRS = matrox_g400 rc_client osd_server
 
-all: subdirs runapp
+all: subdirs runapp freevo_xwin
 
 x11: all osds_x11
 
@@ -34,6 +35,9 @@ osds_dxr3:
 
 runapp: runapp.c
 	$(CC) -o runapp runapp.c -DRUNAPP_LOGDIR=\"/var/log/freevo\"
+
+freevo_xwin: freevo_xwin.c
+	$(CC) -o freevo_xwin freevo_xwin.c $(XLIBS)
 
 subdirs: $(SUBDIRS)
 
