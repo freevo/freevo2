@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2003/10/19 11:17:37  dischi
+# move gettext into config so that everything has _()
+#
 # Revision 1.62  2003/10/18 21:37:53  rshortt
 # Fixing some logic for HELPERS because recordserver and webserver are also
 # helpers.
@@ -82,6 +85,16 @@ if float(sys.version[0:3]) >= 2.3:
     warnings.simplefilter("ignore", category=FutureWarning)
 
 VERSION = version.__version__
+
+# For Internationalization purpose
+# an exception is raised with Python 2.1 if LANG is unavailable.
+import gettext
+try:
+    gettext.install('freevo', os.environ['FREEVO_LOCALE'])
+except: # unavailable, define '_' for all modules
+    import __builtin__
+    __builtin__.__dict__['_']= lambda m: m
+
 
 class Logger:
     """
