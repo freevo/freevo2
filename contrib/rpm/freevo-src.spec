@@ -5,7 +5,7 @@
 %define freevoname freevo
 %define sourceonly yes
 %define freevover 1.3.2
-%define freevorel pre5
+%define freevorel 1
 %define runtimever 7
 
 # Set default freevo parameters
@@ -151,7 +151,7 @@ AutoReqProv: no
 
 %description apps
 This directory contains the following external applications used by Freevo:
-  mplayer mencoder tvtime oggenc mpe1 lame jpegtran cdparanoia fceu aumix 
+  mplayer mencoder tvtime oggenc mpe1 lame jpegtran cdparanoia aumix 
   
 NOTICE: Please do not bug the mplayer developers with issues regarding the
         freevo distributed version of mplayer and mencoder.
@@ -278,7 +278,6 @@ find %{_prefix}/runtime -name "*.pyc" |xargs rm -f
 %defattr(755,root,root,755)
 %{_prefix}/runtime/apps/aumix
 %{_prefix}/runtime/apps/cdparanoia
-%{_prefix}/runtime/apps/fceu
 %{_prefix}/runtime/apps/jpegtran
 %{_prefix}/runtime/apps/lame
 %{_prefix}/runtime/apps/mp1e
@@ -321,6 +320,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Mon Jun 30 2003 TC Wan <tcwan@cs.usm.my>
+- 1.3.2 release cleanup
+                                                                                
 * Tue Jun 24 2003 TC Wan <tcwan@cs.usm.my>
 - 1.3.2-preX and runtime v.7 cleanup
 
