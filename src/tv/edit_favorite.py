@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/08/14 16:54:23  rshortt
+# Use cached channel list.
+#
 # Revision 1.15  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -61,8 +64,9 @@ import config
 import record_client
 import event as em
 
+from channels import get_channels
 from record_types import Favorite
-# from epg_types import TvProgram
+from pyepg.program import TvProgram
 from view_favorites import ViewFavorites
 
 from gui      import *
@@ -118,9 +122,6 @@ class EditFavorite(PopupBox):
         if not self.left:     self.left   = self.osd.width/2 - self.width/2
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
-        # FIXME!!!!!!!!!!!!!!!!!!
-        # guide = epg_xmltv.get_guide()
-
         name = Label(_('Name')+':', self, Align.LEFT)
         self.name_input = LetterBoxGroup(text=self.fav.name)
         self.name_input.h_align = Align.NONE
@@ -137,9 +138,9 @@ class EditFavorite(PopupBox):
       
         i = 1
         chan_index = 0
-        for ch in guide.chan_list:
+        for ch in get_channels():
             #if ch.id == self.fav.channel_id:
-            if ch.displayname == self.fav.channel:
+            if ch.name == self.fav.channel:
                 chan_index = i
             i += 1
             self.chan_box.add_item(text=ch.displayname, value=ch.displayname)
