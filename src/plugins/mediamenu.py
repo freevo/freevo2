@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/04 12:05:45  dischi
+# make it possible to force the mediamenu to text or image view
+#
 # Revision 1.4  2003/04/24 19:56:36  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -73,10 +76,11 @@ class PluginInterface(plugin.MainMenuPlugin):
     Plugin to integrate a meniamenu (video/audio/image/games) into
     the Freevo main menu
     """
-    def __init__(self, type=None):
+    def __init__(self, type=None, force_text_view=FALSE):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type
-
+        self.force_text_view = force_text_view
+        
     def items(self, parent):
         import skin
 
@@ -88,7 +92,7 @@ class PluginInterface(plugin.MainMenuPlugin):
             icon = os.path.join(skin.settings.icon_dir, menu_items[self.type].icon)
         return ( menu_module.MenuItem(menu_items[self.type].name, icon=icon,
                                       action=MediaMenu().main_menu,
-                                      arg=self.type, type='main',
+                                      arg=(self.type,self.force_text_view), type='main',
                                       image=menu_items[self.type].image, parent=parent), )
 
 
@@ -126,7 +130,7 @@ class MediaMenu(Item):
         """
         display the (IMAGE|VIDEO|AUDIO|GAMES) main menu
         """
-        self.display_type = arg
+        self.display_type, force_text_view = arg
         title = 'MEDIA'
         dirs  = []
 
@@ -160,6 +164,7 @@ class MediaMenu(Item):
         item_menu = menu_module.Menu('%s MAIN MENU' % title, self.main_menu_generate(),
                                      item_types = self.display_type, umount_all=1,
                                      reload_func = self.reload)
+        item_menu._skin_force_text_view = force_text_view
         self.menuw = menuw
         menuw.pushmenu(item_menu)
 
