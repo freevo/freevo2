@@ -4,6 +4,10 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2002/08/05 00:45:50  tfmalt
+# o Started work in a popup widget / dialog box type thing.
+#   Changed the "mouting /mnt/cdrom" entry on EJECT and put it in osd.py
+#
 # Revision 1.39  2002/08/04 22:17:44  tfmalt
 # o Fixed autostart so that it handles CD's of type AUDIO properly again.
 #
@@ -33,28 +37,23 @@ import config
 import sys, socket, random, time, os
 import traceback
 
+import util    # Various utilities
+import menu    # The menu widget class
+import skin    # The skin class
+import mixer   # The mixer class
+import osd     # The OSD class, used to communicate with the OSD daemon
+import rc      # The RemoteControl class.
+import music   # The Music module
+import movie   # The Movie module
+import tv      # The TV module
+import imenu   # The Image viewer module
+import mplayer
 
-import util  # Various utilities
-import menu  # The menu widget class
-import skin  # The skin class
-import mixer # The mixer class
-import osd   # The OSD class, used to communicate with the OSD daemon
 
-# The RemoteControl class, sets up a UDP daemon that the remote control client
-# sends commands to
-import rc
-import music # The Music module
-import movie # The Movie module
-import tv    # The TV module
-import imenu # The Image viewer module
-
-# Set to 1 for debug output
-DEBUG = 1
-
-TRUE = 1
+DEBUG = 1 # Set to 1 for debug output
+TRUE  = 1
 FALSE = 0
 
-import mplayer
 
 # Create the mplayer object
 mplayer = mplayer.get_singleton()
@@ -157,6 +156,7 @@ def getcmd():
 
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
+            print "Got VOLUP in main!"
             if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
                 mixer.incMainVolume()
             elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
@@ -189,15 +189,16 @@ def getcmd():
             config.ROM_DRIVES[0] = (rom_dir, name, (tray + 1) % 2)
             if tray_open:
                 if DEBUG: print 'Inserting %s' % rom_dir
-
                 # XXX FIXME: this doesn't look very good, we need
                 # XXX some sort of a pop-up widget
-                osd.drawbox(osd.width/2 - 180, osd.height/2 - 30, osd.width/2 + 180,\
-                            osd.height/2+30, width=-1,
-                            color=((60 << 24) | osd.COL_BLACK))
-                osd.drawstring('mounting %s' % rom_dir, \
-                               osd.width/2 - 160, osd.height/2 - 10,
-                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                # osd.drawbox(osd.width/2 - 180, osd.height/2 - 30,
+                # osd.width/2 + 180,\
+                #            osd.height/2+30, width=-1,
+                #            color=((60 << 24) | osd.COL_BLACK))
+                # osd.drawstring('mounting %s' % rom_dir, \
+                #               osd.width/2 - 160, osd.height/2 - 10,
+                #               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.popup_box( 'mounting %s' % rom_dir )
                 osd.update()
 
                 # close the tray and mount the cd
