@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/30 15:54:07  rshortt
+# Added 'parent' as a constructor argument for PopupBox and all of its
+# derivatives.
+#
 # Revision 1.6  2003/03/24 01:53:15  rshortt
 # Added support in the contructor to have either button selected by default instead of assuming 'OK' to be the default all the time.
 #
@@ -89,14 +93,15 @@ class ConfirmBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text=" ", handler=None, default_choice=0, left=None, 
-                 top=None, width=300, height=110, bg_color=None, fg_color=None, 
-                 icon=None, border=None, bd_color=None, bd_width=None):
+    def __init__(self, parent=None, text=" ", handler=None, default_choice=0, 
+                 left=None, top=None, width=300, height=110, bg_color=None, 
+                 fg_color=None, icon=None, border=None, bd_color=None, 
+                 bd_width=None):
 
         self.handler = handler
 
-        PopupBox.__init__(self, text, left, top, width, height, bg_color, 
-                          fg_color, icon, border, bd_color, bd_width)
+        PopupBox.__init__(self, parent, text, left, top, width, height, 
+                          bg_color, fg_color, icon, border, bd_color, bd_width)
 
 
         self.set_v_align(Align.NONE)

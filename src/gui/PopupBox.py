@@ -10,6 +10,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/03/30 15:54:07  rshortt
+# Added 'parent' as a constructor argument for PopupBox and all of its
+# derivatives.
+#
 # Revision 1.8  2003/03/23 23:11:10  rshortt
 # Better default height now.
 #
@@ -126,11 +130,15 @@ class PopupBox(GUIObject):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, text=" ", left=None, top=None, width=360, height=60,
+    def __init__(self, parent=None, text=" ", left=None, top=None, width=360, height=60,
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
         GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
+
+        if parent:
+            parent.add_child(self)
+            self.osd.focused_app = self
 
 
         self.border   = border

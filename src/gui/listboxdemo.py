@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/30 15:54:07  rshortt
+# Added 'parent' as a constructor argument for PopupBox and all of its
+# derivatives.
+#
 # Revision 1.4  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -81,12 +85,12 @@ class listboxdemo(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text=" ", left=None, top=None, width=500, 
+    def __init__(self, parent=None, text=" ", left=None, top=None, width=500, 
                  height=350, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self, text, left, top, width, height, bg_color, 
-                          fg_color, icon, border, bd_color, bd_width)
+        PopupBox.__init__(self, parent, text, left, top, width, height, 
+                          bg_color, fg_color, icon, border, bd_color, bd_width)
 
 
         self.set_h_align(Align.CENTER)

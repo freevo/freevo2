@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/03/30 15:54:07  rshortt
+# Added 'parent' as a constructor argument for PopupBox and all of its
+# derivatives.
+#
 # Revision 1.6  2003/03/23 23:11:10  rshortt
 # Better default height now.
 #
@@ -94,11 +98,11 @@ class AlertBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text=" ", left=None, top=None, width=300, height=110, 
-                 bg_color=None, fg_color=None, icon=None, border=None, 
-                 bd_color=None, bd_width=None):
+    def __init__(self, parent=None, text=" ", left=None, top=None, width=300,
+                 height=110, bg_color=None, fg_color=None, icon=None, 
+                 border=None, bd_color=None, bd_width=None):
 
-        PopupBox.__init__(self, text, left, top, width, height, bg_color, 
+        PopupBox.__init__(self, parent, text, left, top, width, height, bg_color, 
                           fg_color, icon, border, bd_color, bd_width)
 
 

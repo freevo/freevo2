@@ -7,6 +7,10 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/03/30 15:54:07  rshortt
+# Added 'parent' as a constructor argument for PopupBox and all of its
+# derivatives.
+#
 # Revision 1.11  2003/03/23 23:19:39  rshortt
 # When selected these objects now use skin properties as well.
 #
@@ -168,8 +172,8 @@ class GUIObject:
         self.height   = height
         self.bg_color = bg_color
         self.fg_color = fg_color
-
         
+
         if DEBUG: print "inside GUIOBJECT INIT"
 
         # XXX: skin settings
@@ -366,10 +370,6 @@ class GUIObject:
             self.selected = 0
         else:
             self.selected = 1
-        # I just figured out that we do not always want to
-        # draw here.  If a child gets drawn before the parent
-        # its bg_surface will be wrong!
-        # self.draw()
 
 
     def redraw(self):
@@ -427,7 +427,6 @@ class GUIObject:
         """
         self.children.append(child)
         child.set_parent(self)
-        # child.draw()
 
 
     def get_children(self):
