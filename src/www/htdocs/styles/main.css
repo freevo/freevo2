@@ -209,11 +209,11 @@ pre {
     color: #000000;
 }
 
-p {     padding-left: 2em;
-        padding-right: 1em;
+p {     padding-left: 0em;
+        padding-right: 0em;
         }
     
-h2 {    padding-left: 1em;
+h2 {    padding-left: 0em;
         font-weight: bold;
        } 
 
@@ -245,11 +245,13 @@ table.guideForm { margin-left: 1em;
 
 /* WIKI */
 ol a { text-decoration: none; }
-h1 { padding-left: 1em; padding-right: 1em; }
+h1 { padding-left: 0em; padding-right: 0em; }
 pre.code { padding-left: 3em; }
 
-h3.AUTHOR { padding-left: 2em; }
-h2.SUBTITLE { padding-left: 2em; }
+h3.AUTHOR { padding-left: 0em; }
+h2.SUBTITLE { padding-left: 0em; }
+
+#help { padding-left: 2em; padding-right: 2em; }
 
 .TOC { padding-left: 2em; }
 

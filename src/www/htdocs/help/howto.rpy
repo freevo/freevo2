@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/02/06 20:30:33  dischi
+# some layout updates
+#
 # Revision 1.5  2003/11/06 19:56:45  mikeruelle
 # remove hard links so we can run when proxied
 #
@@ -136,6 +139,7 @@ class HowtoResource(FreevoResource):
                 elif pos == 1:
                     fv.printHeader('%s: %s' % (name, line[1:line.find('<')]),
                                    '/styles/main.css')
+                    fv.res += '<table id="help" width="100%"><tr><td>\n'
                     pos = 2
                 elif pos == 2 and line.find('><BODY') == 0:
                     pos = 3
@@ -148,6 +152,7 @@ class HowtoResource(FreevoResource):
                     else:
                         fv.res += line
         fv.res += '<br><br>'
+        fv.res += '</td></tr></table>\n'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')

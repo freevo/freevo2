@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/06 20:30:32  dischi
+# some layout updates
+#
 # Revision 1.2  2003/11/06 19:56:14  mikeruelle
 # remove hard links so we can run when proxied
 #
@@ -86,14 +89,15 @@ class WikiResource(FreevoResource):
                     title = title_reg(line).group(1).replace('DocumentationPage/', '')
                     fv.printHeader('Freevo Documentation -- %s' % title,
                                    '/styles/main.css')
+                    fv.res += '<table id="help" width="100%"><tr><td>\n'
                     source = 'http://freevo.sourceforge.net/cgi-bin/moin.cgi/'
                     if file == 'faq':
                         source += 'FrequentlyAskedQuestions'
                     else:
                         source += 'DocumentationPage_2f%s' % file
 
-                    fv.res += 'This page is generated from the Freevo WiKi. The current '\
-                              'Version can be found <a href="%s">here</a>.' % source
+                    fv.res += '<p>This page is generated from the Freevo WiKi. The current '\
+                              'Version can be found <a href="%s">here</a>.</p>' % source
                 if file == 'faq':
                     line = line.replace('<H1>', '<H3>').replace('</H1>', '</H3>')
                 line = line.replace('/wiki/img/', '/images/').\
@@ -111,6 +115,7 @@ class WikiResource(FreevoResource):
                 if line.find('<hr>') != -1 and pos == 0:
                     pos = 1
         fv.res += '<br><br>'
+        fv.res += '</td></tr></table>\n'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
         fv.res+=('</ul>')

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/02/06 20:30:33  dischi
+# some layout updates
+#
 # Revision 1.4  2003/11/06 19:57:54  mikeruelle
 # remove hard links so we can run when proxied
 #
@@ -71,6 +74,7 @@ class HelpResource(FreevoResource):
         
         fv.res += '<li><a href="howto.rpy">Freevo Installation Howto</a></li>'
         fv.res += '<li><a href="doc.rpy?file=faq">Frequently Asked Questions</a></li>'
+        fv.res += '<li><a href="doc.rpy?file=recording">Recording Information</a></li>'
         fv.res += '<li><a href="plugins.rpy">Plugin List</a></li>'
         fv.res += '<li><a href="doc.rpy?file=FxdFiles">FXD files</a></li>'
         fv.res += '<li><a href="doc.rpy?file=SkinInfo">Skinning Informations</a></li>'

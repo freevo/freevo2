@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/02/06 20:30:33  dischi
+# some layout updates
+#
 # Revision 1.2  2003/11/06 19:58:17  mikeruelle
 # remove hard links so we can run when proxied
 #
@@ -59,19 +62,17 @@ from helpers.plugins import info_html
 TRUE = 1
 FALSE = 0
 
-all_plugins = None
-
 class PluginResource(FreevoResource):
 
     def _render(self, request):
-        global all_plugins
         
         fv = HTMLResource()
         form = request.args
 
-        if not all_plugins:
-            all_plugins = parse_plugins()
+        if not hasattr(config, 'all_plugins'):
+            config.all_plugins = parse_plugins()
 
+        all_plugins = config.all_plugins
         special_plugins = ('tv', 'video', 'audio', 'image', 'idlebar')
 
         type = fv.formValue(form, 'type')
@@ -80,6 +81,7 @@ class PluginResource(FreevoResource):
             page_link = '<li><a href="plugins.rpy?type=%s">%s plugins</a></li>\n<ol>'
 
             fv.printHeader('Freevo Plugin List', '/styles/main.css')
+            fv.res += '<table id="help" width="100%"><tr><td>\n'
             fv.res += '<p><b>Index</b><ol>'
 
             fv.res += page_link % ( 'global', 'Global')
@@ -99,6 +101,7 @@ class PluginResource(FreevoResource):
         else:
             fv.printHeader('Freevo Plugin List - %s Plugins' % type.capitalize(),
                            '/styles/main.css')
+            fv.res += '<table id="help" width="100%"><tr><td>\n'
             fv.res += '<a name="top"></a>'
 
             if type == 'global':
@@ -117,6 +120,7 @@ class PluginResource(FreevoResource):
                         fv.res += '<a href="plugins.rpy">index</a>&nbsp;]<hr>\n'
 
 
+        fv.res += '</td></tr></table>\n'
         fv.res += '<br><br>'
         fv.printLinks(request.path.count('/')-1)
         fv.printFooter()
