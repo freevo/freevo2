@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/09/23 20:05:29  dischi
+# imdb patch from Eirik Meland
+#
 # Revision 1.23  2003/09/20 15:46:48  dischi
 # fxd and imdb patches from Eirik Meland
 #
@@ -66,6 +69,7 @@ import time
 from video.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 
 from gui.PopupBox import PopupBox
+from util import htmlenties2txt
 
 class PluginInterface(plugin.ItemPlugin):
     def __init__(self, license=None):
@@ -138,7 +142,7 @@ class PluginInterface(plugin.ItemPlugin):
                                 duplicates.append(i)
                 except:
                     pass
-                items.append(menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                items.append(menu.MenuItem('%s (%s, %s)' % (htmlenties2txt(name), year, type),
                                            self.imdb_create_fxd, (id, year)))
         except:
             box.destroy()

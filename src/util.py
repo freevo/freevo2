@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/09/23 20:05:29  dischi
+# imdb patch from Eirik Meland
+#
 # Revision 1.53  2003/09/21 16:45:47  dischi
 # add function to convert a string with html entities
 #
@@ -229,8 +232,8 @@ def find_matches(files, suffix_list):
 
 def match_files_recursively_helper(result, dirname, names):
     for name in names:
-	fullpath = os.path.join(dirname, name)
-	result.append(fullpath)
+        fullpath = os.path.join(dirname, name)
+        result.append(fullpath)
     return result
 
 
@@ -629,7 +632,7 @@ def touch(file):
 
 def rmrf_helper(result, dirname, names):
     for name in names:
-	fullpath = os.path.join(dirname, name)
+        fullpath = os.path.join(dirname, name)
         if os.path.isfile(fullpath):
             result[0].append(fullpath)
     result[1] = [dirname] + result[1]
@@ -699,7 +702,7 @@ def htmlenties2txt(string):
             except KeyError:
                 continue
         string = string.replace(entity, replacement)
-    string = string.encode('Latin-1', 'ignore')
+    #string = string.encode('Latin-1', 'ignore')
     return string
 
 

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/23 20:05:29  dischi
+# imdb patch from Eirik Meland
+#
 # Revision 1.16  2003/09/20 15:46:01  dischi
 # adjust to new imdb webpage
 #
@@ -147,51 +150,64 @@ class FxdImdb:
             raise FxdImdb_Net_Error("IMDB unreachable : " + error) 
             return None
             
-        regexp_title = re.compile('.*<LI><A HREF="/Title\?([0-9]*)">(.*) '+
-                                   '\(([12][0-9][0-9][0-9].*)\)</A>')
-        regexp_title_new = re.compile('.*<LI><A HREF="/title/tt([0-9]*)/">(.*) '+
-                                      '\(([12][0-9][0-9][0-9].*)\)</A>', re.I)
-        regexp_type  = re.compile('<H2><A NAME=.*>(.*)</A></H2>')
-        
-        type = ''
+        regexp_get_imdb_id = re.compile(r'''
+        http://.*imdb\.com/
+        (?:Title\?|title/tt) # ( old style | new style )
+        (?P<id>\d+)          # imdb id
+        ''', re.VERBOSE)
 
-        m = re.match('http://.*imdb.com/Title\?([0-9]*)', response.geturl())
-        if not m:
-            m = re.match('http://.*imdb.com/title/tt([0-9]*)', response.geturl())
+        m = re.match(regexp_get_imdb_id, response.geturl())
         if m:
             data = self.parsedata(response)
-            self.imdb_id_list = [ ( m.group(1), data[0], data[1]['year'], '' ) ]
+            #print 'data[0]: ' + data[0]
+            self.imdb_id_list = [ ( m.group('id'),
+                                    data[0], 
+                                    data[1]['year'],
+                                    "Movie/TV-Movie") ]
             return self.imdb_id_list
+        
+        regexp_type  = re.compile(r'''
+        <H2><A[ ]NAME=.*?>
+        (?P<type>.*?)     # Most popular searches/Movies/TV-Movies/Video Games etc.
+        </A></H2>
+        ''', re.VERBOSE)
 
+        regexp_imdb_list_entry = re.compile(r'''
+        <LI><A[ ]HREF="/(?:Title\?|title/tt)  # match both old and new style 
+        (?P<id>      \d+)/">                  # imdb id
+        (?P<title>   .*?)\s*                  # imdb movie title
+        \(
+        (?P<year>    \d{4}.*?)                # year and possibly /I, /II etc.
+        \)</A>
+        ''', re.VERBOSE)
+
+        type = ''
         for line in response.read().split("\n"):
             m = regexp_type.match(line)
             if m:
-                type = m.group(1)
-                if type == 'Movies':
-                    type = 'Movie'
-                elif type == 'TV-Movies':
-                    type = 'TV-Movie'
+                type = m.group('type')
+                # delete plural s
+                if type in ('Movies', 'TV-Movies'):
+                    type = type[:-1]
     
-            m = regexp_title.match(line)
-            if not m:
-                m = regexp_title_new.match(line)
-                
+            m = regexp_imdb_list_entry.search(line)
+
             if m and not type == 'Video Games':
-                id   = m.group(1)
-                name = m.group(2)
-                year = m.group(3)
+                id   = m.group('id')
+                name = m.group('title')
+                year = m.group('year')
     
+                # delete " before and after name
                 if name[0] == '"' and name [-1] == '"':
                     name=name[1:-1]
-                if year.find(')') > 0:
-                    year = year[:year.find(')')]
     
+                # only add entries that hasn't been added before
                 for i in self.imdb_id_list:
                     if i[0] == id:
                         break
                 else:
-                    self.imdb_id_list += [ ( id , name, year, type ) ]
-        
+                    self.imdb_id_list += [ ( id, name, year, type ) ]
+
         response.close()
         if len(self.imdb_id_list) > 20:
             # too much results, check if there are stupid results in the
@@ -206,11 +222,13 @@ class FxdImdb:
             # at least one word has to be in the result
             new_list = []
             for result in self.imdb_id_list:
+                appended = False
                 for search_word in words:
-                    if result[1].lower().find(search_word.lower()) != -1:
+                    if appended == False and \
+                           result[1].lower().find(search_word.lower()) != -1:
                         new_list.append(result)
+                        appended = True
             self.imdb_id_list = new_list
-
         return self.imdb_id_list
     
     
@@ -406,6 +424,7 @@ class FxdImdb:
         name  = re.sub('([a-z])([A-Z])', point_maker, name)
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
+        name  = re.sub(',', ' ', name)
 
         if label == True:
             for r in config.IMDB_REMOVE_FROM_LABEL:
@@ -415,7 +434,9 @@ class FxdImdb:
         name = ''
         for p in parts:
             if not p.lower() in config.IMDB_REMOVE_FROM_SEARCHSTRING and \
-                   not re.search(p, '[A-Za-z]'):
+                   not re.search('[^0-9A-Za-z]', p):
+                # originally: not re.search(p, '[A-Za-z]'):
+                # not sure what's meant with that
                 name += '%s ' % p
         return self.searchImdb(name)
 
