@@ -150,6 +150,7 @@ TV_CARDS = TVSettings()
 # Read the environment set by the start script
 #
 SHARE_DIR   = os.path.abspath(os.environ['FREEVO_SHARE'])
+DOC_DIR     = os.path.abspath(os.environ['FREEVO_DOC'])
 CONTRIB_DIR = os.path.abspath(os.environ['FREEVO_CONTRIB'])
 
 SKIN_DIR  = os.path.join(SHARE_DIR, 'skins')
