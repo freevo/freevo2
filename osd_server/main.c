@@ -417,6 +417,18 @@ getmtime (char *filename)
 }
 
 
+struct cache_data {
+  uint8 *pBitmapCache;
+  char bitmapFilename[256];
+  uint16 bitmapWidth, bitmapHeight;
+  time_t bitmapModtime;     /* File timestamp */
+
+  uint16 bitmapBBX, bitmapBBY, bitmapBBW, bitmapBBH;
+  int bitmapScalefactor;
+
+  struct cache_data *next, *prev;
+};
+
 /* Load a bitmap from file to memory. Keeps the last loaded file in
  * memory for fast redisplaying, zooming, etc.
  *
@@ -432,49 +444,84 @@ void
 osd_loadbitmap (char *filename, uint8 **ppBitmap,
                 uint16 *pWidth, uint16 *pHeight)
 {
-  /* This is the last loaded raw bitmap file */
-  static uint8 *pBitmapCache = NULL;
-  static char bitmapFilename[256] = "";
-  static uint16 bitmapWidth, bitmapHeight;
-  static time_t bitmapModtime = 0;     /* File timestamp */
-   
+  static struct cache_data *start = NULL;
+  
+  struct cache_data *cache = NULL;
+  int cache_length = 0;
+
+  cache = start;
+
+  while (cache) {
+    /* Is the bitmap already loaded? */
+    if (!strcmp (filename, cache->bitmapFilename)) {
+      /* Same filename, same modtime? */
+      if (getmtime (filename) == cache->bitmapModtime) {
+	/* Yep, return the old buffer */
+	DBG ("Returning cached data");
+	if (ppBitmap) *ppBitmap = cache->pBitmapCache;
+	if (pWidth) *pWidth = cache->bitmapWidth;
+	if (pHeight) *pHeight = cache->bitmapHeight;
+
+	if (cache != start) {
+	  
+	  /* put old buffer at the beginning */
+	  if (cache->prev)
+	    cache->prev->next = cache->next;
+	  if (cache->next)
+	    cache->next->prev = cache->prev;
+	  cache->prev = NULL;
+	  cache->next = start;
+	  start->prev = cache;
+	  start = cache;
+	}
+	return;
+      }
+    }
+
+
+    /* prevent a memory leek */
+    if (cache_length++ == 10) {
+      if (cache->pBitmapCache)
+	free (cache->pBitmapCache);
+      if (cache->next)
+	free(cache->next);
+      cache->next = NULL;
+    }
+    
+    cache = cache->next;
+  }
+
+
+  /* build new cache struct */
+  cache = (struct cache_data*) malloc(sizeof(struct cache_data));
+  cache->pBitmapCache = NULL;
+  strcpy (cache->bitmapFilename, filename);
+  cache->bitmapModtime = 0;
+  if (start)
+    start->prev = cache;
+  cache->next = start;
+  cache->prev = NULL;
+  start = cache;
+  
 
   /* Result (OK, ERROR) is signified by this output parameter, which is
    * ERROR by default. */
   if (ppBitmap) *ppBitmap = NULL;
   
-  /* Is the bitmap already loaded? */
-  if (!strcmp (filename, bitmapFilename)) {
-    /* Same filename, same modtime? */
-    if (getmtime (filename) == bitmapModtime) {
-      /* Yep, return the old buffer */
-      DBG ("Returning cached data");
-      if (ppBitmap) *ppBitmap = pBitmapCache;
-      if (pWidth) *pWidth = bitmapWidth;
-      if (pHeight) *pHeight = bitmapHeight;
-      return;
-    }
-  }
 
   DBG ("Loading new bitmap");
   
-  /* No, other bitmap than the cached one wanted. Free the cache, if used. */
-  if (pBitmapCache) {
-    free (pBitmapCache);
-    pBitmapCache = NULL;
-  }
-  
   /* Load the new bitmap */
   if (strcasecmp_tail (filename, ".png")) {
-    if (read_png (filename, &pBitmapCache, &bitmapWidth,
-                  &bitmapHeight) != OK) {
+    if (read_png (filename, &(cache->pBitmapCache), &(cache->bitmapWidth),
+                  &(cache->bitmapHeight)) != OK) {
       DBG ("cannot load bitmap '%s'!\n", filename);
       return;
     }
   } else if (strcasecmp_tail (filename, ".jpg") ||
              strcasecmp_tail (filename, ".jpeg")) {
-    if (read_jpeg (filename, &pBitmapCache, &bitmapWidth,
-                   &bitmapHeight) != OK) {
+    if (read_jpeg (filename, &(cache->pBitmapCache), &(cache->bitmapWidth),
+                   &(cache->bitmapHeight)) != OK) {
       DBG ("cannot load bitmap '%s'!\n", filename);
       return;
     }
@@ -484,16 +531,16 @@ osd_loadbitmap (char *filename, uint8 **ppBitmap,
   }
 
   /* Ok, we got the new bitmap. Set the cache parameters. */
-  strcpy (bitmapFilename, filename);
-  bitmapModtime = getmtime (filename);
+  strcpy (cache->bitmapFilename, filename);
+  cache->bitmapModtime = getmtime (filename);
 
   /* Output parameters. */
-  if (ppBitmap) *ppBitmap = pBitmapCache;
-  if (pWidth) *pWidth = bitmapWidth;
-  if (pHeight) *pHeight = bitmapHeight;
+  if (ppBitmap) *ppBitmap = cache->pBitmapCache;
+  if (pWidth) *pWidth = cache->bitmapWidth;
+  if (pHeight) *pHeight = cache->bitmapHeight;
 
-  DBG ("Loaded bitmap 0x%08x, %dx%d", (uint32) pBitmapCache,
-       bitmapWidth, bitmapHeight);
+  DBG ("Loaded bitmap 0x%08x, %dx%d", (uint32) cache->pBitmapCache,
+       cache->bitmapWidth, cache->bitmapHeight);
   
   /* Done */
   return;
@@ -523,17 +570,13 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
                 int scalefactor, uint8 **ppScaledBM,
                 uint16 *pScaledWidth, uint16 *pScaledHeight)
 {
-  /* This is the cached version of the zoomed bitmap */
-  static uint8 *pBitmapCache = NULL;
-  static char bitmapFilename[256] = "";
-  static uint16 bitmapWidth, bitmapHeight;
-  static uint16 bitmapBBX, bitmapBBY, bitmapBBW, bitmapBBH;
-  static int bitmapScalefactor;
-  static time_t bitmapModtime = 0;     /* File timestamp */
+  static struct cache_data *start = NULL;
+  struct cache_data *cache = NULL;
+  int cache_length = 0;
+
   uint8 *pBM;  /* Raw bitmap buffer */
   uint16 width, height;  /* Raw bitmap */
-  
-  
+
   /* Result (OK, ERROR) is signified by this output parameter, which is
    * ERROR by default. */
   if (ppScaledBM) *ppScaledBM = NULL;
@@ -556,33 +599,66 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
     bbh = height;
   }
     
-  /* Does the cached bitmap have the same zoom etc? */
-  if (!strcmp (filename, bitmapFilename)) {
-    /* Same filename, same modtime? */
-    if (getmtime (filename) == bitmapModtime) {
-      /* Same bounding box and zoom? */
-      if ((bbx == bitmapBBX) && (bby == bitmapBBY) &&
-          (bbw == bitmapBBW) && (bbh == bitmapBBH) &&
-          (scalefactor == bitmapScalefactor)) {
-        /* Yep, return the old buffer */
-        DBG ("Returning cached data. 0x%08x, %dx%d", (uint32) pBitmapCache,
-             bitmapWidth, bitmapHeight);
-        if (ppScaledBM) *ppScaledBM = pBitmapCache;
-        if (pScaledWidth) *pScaledWidth = bitmapWidth;
-        if (pScaledHeight) *pScaledHeight = bitmapHeight;
-        return;
+  cache = start;
+
+  while (cache) {
+    /* Does the cached bitmap have the same zoom etc? */
+    if (!strcmp (filename, cache->bitmapFilename)) {
+      /* Same filename, same modtime? */
+      if (getmtime (filename) == cache->bitmapModtime) {
+	/* Same bounding box and zoom? */
+	if ((bbx == cache->bitmapBBX) && (bby == cache->bitmapBBY) &&
+	    (bbw == cache->bitmapBBW) && (bbh == cache->bitmapBBH) &&
+	    (scalefactor == cache->bitmapScalefactor)) {
+	  /* Yep, return the old buffer */
+	  DBG ("Returning cached data. 0x%08x, %dx%d", (uint32) cache->pBitmapCache,
+	       cache->bitmapWidth, cache->bitmapHeight);
+	  if (ppScaledBM) *ppScaledBM = cache->pBitmapCache;
+	  if (pScaledWidth) *pScaledWidth = cache->bitmapWidth;
+	  if (pScaledHeight) *pScaledHeight = cache->bitmapHeight;
+
+	  if (cache != start) {
+	    
+	    /* put old buffer at the beginning */
+	    if (cache->prev)
+	      cache->prev->next = cache->next;
+	    if (cache->next)
+	      cache->next->prev = cache->prev;
+	    cache->prev = NULL;
+	    cache->next = start;
+	    start->prev = cache;
+	    start = cache;
+	  }
+	  
+	  return;
+	}
       }
     }
+    
+    /* prevent a memory leek */
+    if (cache_length++ == 10) {
+      if (cache->pBitmapCache)
+	free (cache->pBitmapCache);
+      if (cache->next)
+	free(cache->next);
+      cache->next = NULL;
+    }
+    
+    cache = cache->next;
   }
+
 
   DBG ("Creating new zoomed bitmap");
 
-  /* No, other bitmap than the cached one wanted. Free the cache, if used. */
-  if (pBitmapCache) {
-    free (pBitmapCache);
-    pBitmapCache = NULL;
-    bitmapFilename[0] = 0;
-  }
+  /* build new cache struct */
+  cache = (struct cache_data*) malloc(sizeof(struct cache_data));
+  cache->pBitmapCache = NULL;
+  cache->bitmapFilename[0] = 0;
+  if (start)
+    start->prev = cache;
+  cache->next = start;
+  cache->prev = NULL;
+  start = cache;
 
   /* Does the bitmap actually need to be zoomed? */
   if (bbw || bbh || (scalefactor != 1000)) {
@@ -590,32 +666,32 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
     
 
     /* Yes, perform the zoom operation */
-    zoombitmap (pBM, width, height, bbx, bby, bbw, bbh, zoom, &pBitmapCache,
-                &bitmapWidth, &bitmapHeight);
+    zoombitmap (pBM, width, height, bbx, bby, bbw, bbh, zoom, &(cache->pBitmapCache),
+                &(cache->bitmapWidth), &(cache->bitmapHeight));
 
     /* Error checking */
-    if (!pBitmapCache) {
+    if (!cache->pBitmapCache) {
       DBG ("Zoom failed!");
       return;
     }
     
     /* Ok, we zoomed the bitmap. Set the cache parameters. */
-    strcpy (bitmapFilename, filename);
-    bitmapModtime = getmtime (filename);
-    bitmapBBX = bbx;
-    bitmapBBY = bby;
-    bitmapBBW = bbw;
-    bitmapBBH = bbh;
-    bitmapScalefactor = scalefactor;
+    strcpy (cache->bitmapFilename, filename);
+    cache->bitmapModtime = getmtime (filename);
+    cache->bitmapBBX = bbx;
+    cache->bitmapBBY = bby;
+    cache->bitmapBBW = bbw;
+    cache->bitmapBBH = bbh;
+    cache->bitmapScalefactor = scalefactor;
     
     
     /* Output parameters. */
-    if (ppScaledBM) *ppScaledBM = pBitmapCache;
-    if (pScaledWidth) *pScaledWidth = bitmapWidth;
-    if (pScaledHeight) *pScaledHeight = bitmapHeight;
+    if (ppScaledBM) *ppScaledBM = cache->pBitmapCache;
+    if (pScaledWidth) *pScaledWidth = cache->bitmapWidth;
+    if (pScaledHeight) *pScaledHeight = cache->bitmapHeight;
     
-    DBG ("Zoomed data. 0x%08x, %dx%d", (uint32) pBitmapCache,
-         bitmapWidth, bitmapHeight);
+    DBG ("Zoomed data. 0x%08x, %dx%d", (uint32) (cache->pBitmapCache),
+         cache->bitmapWidth, cache->bitmapHeight);
     
     /* Done */
     return;
@@ -629,8 +705,8 @@ osd_zoombitmap (char *filename, uint16 bbx, uint16 bby, uint16 bbw, uint16 bbh,
     if (pScaledWidth) *pScaledWidth = width;
     if (pScaledHeight) *pScaledHeight = height;
     
-    DBG ("Non-zoomed data. 0x%08x, %dx%d", (uint32) pBitmapCache,
-         bitmapWidth, bitmapHeight);
+    DBG ("Non-zoomed data. 0x%08x, %dx%d", (uint32) (cache->pBitmapCache),
+         cache->bitmapWidth, cache->bitmapHeight);
     
     /* Done */
     return;
