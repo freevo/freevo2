@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.148  2004/08/27 14:23:39  dischi
+# VideoItem is now based on MediaItem
+#
 # Revision 1.147  2004/08/24 16:42:44  dischi
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
@@ -23,39 +26,6 @@
 #
 # Revision 1.144  2004/07/21 11:34:59  dischi
 # disable one track auto-play for dvd
-#
-# Revision 1.143  2004/07/17 08:18:56  dischi
-# unicode fixes
-#
-# Revision 1.142  2004/07/11 10:22:28  dischi
-# fix bug for auto joined files on disc
-#
-# Revision 1.141  2004/07/11 10:14:12  dischi
-# reset current_subitem on play start
-#
-# Revision 1.140  2004/07/10 12:33:43  dischi
-# header cleanup
-#
-# Revision 1.139  2004/07/04 08:05:13  dischi
-# auto deinterlace mpeg files
-#
-# Revision 1.138  2004/06/23 12:22:16  outlyer
-# Allow the user to create a thumbnail for a file even if a folder or file
-# image already exists. For example, I have a generic "cover.jpg" in my
-# movie folder, but I will occaisonally use the thumbnailing for a file in
-# that directory. This 'if' clause prevents that from being possible.
-#
-# Revision 1.137  2004/05/29 13:10:55  dischi
-# re-use string for better translation
-#
-# Revision 1.136  2004/05/28 15:50:28  dischi
-# configure menu items cleanup
-# support chapters as ChapterInfo in mmpython (e.g. ogm files)
-#
-# Revision 1.135  2004/05/13 13:49:24  outlyer
-# The much appreciated 'alternate player' patch from den_RDC. Allows you to
-# switch between your default player and an alternate without restarting
-# Freevo.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -93,15 +63,13 @@ import configure
 import plugin
 
 from gui   import PopupBox, AlertBox, ConfirmBox
-from item  import Item, FileInformation
+from item  import MediaItem, FileInformation
 from event import *
 
-class VideoItem(Item):
+class VideoItem(MediaItem):
     def __init__(self, url, parent, info=None, parse=True):
         self.autovars = [ ('deinterlace', 0) ]
-        Item.__init__(self, parent)
-
-        self.type = 'video'
+        MediaItem.__init__(self, 'video', parent)
         self.set_url(url, info=parse)
 
         if info:
@@ -174,7 +142,7 @@ class VideoItem(Item):
         directly because this functions also changes other attributes, like
         filename, mode and network_play
         """
-        Item.set_url(self, url, info)
+        MediaItem.set_url(self, url, info)
         if url.startswith('dvd://') or url.startswith('vcd://'):
             self.network_play = False
             self.mimetype = self.url[:self.url.find('://')].lower()
@@ -261,7 +229,7 @@ class VideoItem(Item):
                 return ''
             return length
 
-        return Item.__getitem__(self, key)
+        return MediaItem.__getitem__(self, key)
 
     
     def sort(self, mode=None):
@@ -670,4 +638,4 @@ class VideoItem(Item):
         # give the event to the next eventhandler in the list
         if isstring(self.parent):
             self.parent = None
-        return Item.eventhandler(self, event, menuw)
+        return MediaItem.eventhandler(self, event, menuw)
