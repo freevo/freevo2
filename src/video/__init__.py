@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/11/25 19:13:19  dischi
+# fix xml file location
+#
 # Revision 1.13  2003/11/24 19:24:58  dischi
 # move the handler for fxd from xml_parser to fxdhandler
 #
@@ -157,7 +160,8 @@ def hash_fxd_movie_database():
                                     '*'+config.SUFFIX_VIDEO_DEF_FILES[0],1)
         for info in fxditem.getitems(None, files, display_type='video'):
             k = vfs.splitext(vfs.basename(info.xml_file))[0]
-            tv_show_informations[k] = (info.image, info.info, info.mplayer_options, file)
+            tv_show_informations[k] = (info.image, info.info, info.mplayer_options,
+                                       info.xml_file)
             
     _debug_('done',1)
     return 1
