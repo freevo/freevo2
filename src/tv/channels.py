@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/03/05 04:04:10  rshortt
+# Only call setChannel on an external tuner plugin if we really have one.
+#
 # Revision 1.16  2004/02/23 05:40:35  gsbarbieri
 # BUGFIX: fix bug printing strings with 'chan', a unicode object.
 # i18n: Help translators job.
@@ -151,7 +154,8 @@ class FreevoChannels:
 
         if vg.tuner_type == 'external':
             tuner = plugin.getbyname('EXTERNAL_TUNER')
-            tuner.setChannel(new_chan)
+            if tuner:
+                tuner.setChannel(new_chan)
 
             if vg.input_type == 'tuner' and vg.tuner_chan:
                 freq = self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
