@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/25 20:20:13  dischi
+# save on scan (stupid bug!)
+#
 # Revision 1.7  2004/01/25 14:50:39  dischi
 # add attribute getting from mmpython
 #
@@ -210,6 +213,7 @@ class Cache:
             objects[key] = (info, timestamp)
 
         self.current_objects   = objects
+        self.cache_modified    = True
         self.save_cache()
         return objects
 
