@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/12 19:11:48  dischi
+# fix typo to prevent crash
+#
 # Revision 1.7  2004/01/10 13:23:09  dischi
 # use item.files to move
 #
@@ -141,7 +144,7 @@ class PluginInterface(plugin.ItemPlugin):
             _debug_("%s is not a dir" % local_to_dir)
             return
 
-        if self.items.files:
-            self.items.files.move(local_to_dir)
+        if self.item.files:
+            self.item.files.move(local_to_dir)
 
         menuw.delete_menu(menuw=menuw)
