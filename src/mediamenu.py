@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2003/03/02 19:01:16  dischi
+# removed [] from the directory name
+#
 # Revision 1.38  2003/02/25 05:31:48  krister
 # Made CD audio playing use -cdrom-device for mplayer.
 #
@@ -170,6 +173,7 @@ class MediaMenu(Item):
     
     def __init__(self):
         Item.__init__(self)
+        self.type = 'mediamenu'
 
     def main_menu_generate(self):
         """
@@ -316,9 +320,6 @@ class DirItem(Playlist):
         else:
             self.name = os.path.basename(dir)
 
-        if not name and skin.GetDisplayStyle() == 0:
-            self.name = '[%s]' % (self.name)
-        
         # Check for cover in COVER_DIR
         if os.path.isfile(config.COVER_DIR+os.path.basename(dir)+'.png'):
             self.image = config.COVER_DIR+os.path.basename(dir)+'.png'
@@ -510,8 +511,6 @@ class DirItem(Playlist):
 
 
         title = self.name
-        if title[0] == '[' and title[-1] == ']':
-            title = self.name[1:-1]
 
         # autoplay
         if len(items) == 1 and items[0].actions() and \
