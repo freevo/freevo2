@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/31 16:08:08  rshortt
+# Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
+# (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
+#
 # Revision 1.10  2003/11/25 16:32:33  rshortt
 # Make plugin_external_tuner work again.
 #
@@ -122,7 +126,7 @@ class FreevoChannels:
             chan_info = config.TV_CHANNELS[i]
             if chan_info[2] == chan:
                 try:
-                    group = chan_info[3]
+                    group = int(chan_info[4])
                 except:
                     # XXX: put a better exception here
                     group = 0
@@ -160,13 +164,14 @@ class FreevoChannels:
         vg = self.getVideoGroup(new_chan)
 
         if vg.tuner_type == 'external':
-            if vg.input_type == 'tuner' and vg.tuner_chan:
-                freq = self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
-
             tuner = plugin.getbyname('EXTERNAL_TUNER')
             tuner.setChannel(new_chan)
 
-            return freq
+            if vg.input_type == 'tuner' and vg.tuner_chan:
+                freq = self.tunerSetFreq(vg.tuner_chan, app, app_cmd)
+                return freq
+
+            return 0
 
         else:
             return self.tunerSetFreq(chan, app, app_cmd)

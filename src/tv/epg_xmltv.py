@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2003/12/31 16:08:08  rshortt
+# Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
+# (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
+#
 # Revision 1.39  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
@@ -287,8 +291,8 @@ def load_guide():
 
             # Handle the optional time-dependent station info
             c.times = []
-            if len(data) > 3:
-                for (days, start_time, stop_time) in data[3:]:
+            if len(data) > 3 and len(data[3:4]) == 3:
+                for (days, start_time, stop_time) in data[3:4]:
                     c.times.append((days, int(start_time), int(stop_time)))
             guide.AddChannel(c)
     else: # Add all channels in the XMLTV file
