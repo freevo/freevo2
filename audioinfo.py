@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2002/10/23 14:47:48  dischi
+# Removed (disabled) some debug
+#
 # Revision 1.14  2002/10/21 05:09:50  krister
 # Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
 #
@@ -121,7 +124,7 @@ import mp3_id3
 import skin
 import imghdr
 
-DEBUG=1
+DEBUG=0
 
 skin = skin.get_singleton()
 
