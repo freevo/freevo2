@@ -15,6 +15,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2003/01/29 19:19:22  outlyer
+# Added LIRCRC directive, unused in mainline code for now, but can be used by
+# the rc.py and main.py in WIP/Aubin
+#
 # Revision 1.109  2003/01/28 03:45:18  krister
 # Changed for new runtime
 #
@@ -335,6 +339,19 @@ if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
 # Please send files for other remotes to the freevo mailing list
 #
 REMOTE = ''
+
+
+#
+# If you use the new lirc client library method of remote control, you need a
+# lircrc file, like this:
+#
+# begin
+#       prog = freevo
+#       button = select
+#       config = SELECT
+# end
+#
+LIRCRC = '/etc/freevo/lircrc'
 
 #
 # Remote control commands translation table. Replace this with the commands that
