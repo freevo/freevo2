@@ -332,6 +332,9 @@ plugin.activate('tv.mplayer')
 # auto bookmarking when playback is stopped
 plugin.activate('video.bookmarker', level=0)
 
+# show some messages on the screen
+plugin.activate('tiny_osd')
+
 # For recording tv
 #
 # generic_record plugin needs VCR_CMD to be set correctly
@@ -515,7 +518,7 @@ DIR_AUDIO = None
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
 # 
-SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a' ,'fxd', 'wma', 'aac', 'flac']
+SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac']
 SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 
 #

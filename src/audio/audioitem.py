@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/09/21 13:15:56  dischi
+# handle audio fxd files correctly
+#
 # Revision 1.37  2003/09/20 15:08:26  dischi
 # some adjustments to the missing testfiles
 #
@@ -151,6 +154,9 @@ class AudioItem(Item):
 
         if os.path.splitext(file)[1] == '.fxd':
             self.set_info_radio(file)
+            if not self.url:
+                self.valid = 0
+
 
     def copy(self, obj):
         """
@@ -211,12 +217,11 @@ class AudioItem(Item):
             global glob_name
             glob_name = name
         def e_el(name):
-            print "   (attribute", name, "ends)"
+            pass
         def c_data(data):
             global glob_name
             global glob_val
             global glob_url
-            print glob_name, data
             if data:
                 if glob_name == 'title':
                     self.title = data
@@ -229,7 +234,6 @@ class AudioItem(Item):
                     glob_name = 0
                 if glob_name == 'url':
                     self.url = data
-                    print "URL:", self.url
                     glob_name = 0
                 if glob_name == 'mplayer_options':
                     self.mplayer_options = data

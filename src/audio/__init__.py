@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/21 13:15:56  dischi
+# handle audio fxd files correctly
+#
 # Revision 1.6  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -47,9 +50,11 @@ def cwd(parent, files):
     """
     items = []
 
-    for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES):
-        items.append(AudioItem(file, parent))
-        files.remove(file)
+    for file in util.find_matches(files, config.SUFFIX_AUDIO_FILES + [ 'fxd' ]):
+        a = AudioItem(file, parent)
+        if a.valid:
+            items.append(a)
+            files.remove(file)
 
     return items
 
