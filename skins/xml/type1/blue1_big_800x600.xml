@@ -151,6 +151,12 @@
 	    <shadow visible="no"/>
 	  </label>
 
+	  <head bgcolor="0x88000066">
+	    <font name="Arial_Bold" size="19" color="0xffffff" align="left" 
+	      valign="center"/>
+	    <shadow visible="no"/>
+	  </head>
+
 	  <content>
 	    <font name="Arial_Bold" size="19" color="0xffffff" align="left"/>
 	    <shadow visible="no"/>

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/10/24 04:31:44  gsbarbieri
+# Now it handle a new tag <head> into the <listing> tag from extendedmenu.
+#
 # Revision 1.15  2002/10/19 17:09:32  dischi
 # Lot of restructuring. Every object now has a function parse to fill
 # the internal variables from the xml file. I also fixed scaling when
@@ -526,6 +529,7 @@ class XML_listingmenuitem(XML_menuitem):
     def __init__(self):
         XML_menuitem.__init__(self)
         self.label = XML_data()
+        self.head = XML_data()
         self.expand = XML_data()
         self.border_color = 0
         self.border_size = 1
@@ -564,6 +568,8 @@ class XML_listingmenuitem(XML_menuitem):
                 for subsubnode in subnode.children:
                     if subsubnode.name == u'label':
                         self.label.parse(subsubnode, scale)
+                    if subsubnode.name == u'head':
+                        self.head.parse(subsubnode, scale)
                     elif subsubnode.name == u'content':
                         self.parse_content(subsubnode, scale)
 

@@ -99,6 +99,20 @@
 	<background radius="10"/>
       </view>
 
+      <listing>
+        <table border_size="0"> 
+	   <label>
+	      <background radius="10"/>
+	   </label>
+	   <head>
+	      <background radius="3" />
+	   </head>
+	   <content>
+	      <background radius="5"/>
+	   </content>
+        </table>
+      </listing>
+
     </extendedmenu>
   </skin>
   
