@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/30 23:04:01  rshortt
+# Work around an msp3400 bug where it will lose sound when doing a few things,
+# one of which is setting the video standard.  Right now it calls the newly added
+# mspSetMatrix() method with no args -- it is possible the default input and
+# output values here are not valid for some users.  This should be fixed in
+# the driver soon but I will make these values configurable if it becomes a
+# problem for users in the meantime.
+#
 # Revision 1.6  2003/07/24 00:57:30  rshortt
 # Remove framespergop setting for now.  We don't want to hardcode an NTSC
 # setting for anyone in PAL or SECAM land.
@@ -56,7 +64,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import string, struct, fcntl
+import string, struct, fcntl, time
 
 import v4l2, config
 
@@ -77,10 +85,6 @@ IVTV_STREAM_DVD    = 10
 # structs
 CODEC_ST = '15I'
 MSP_MATRIX_ST = '2i'
-
-NORMS = { 'NTSC'  : 0,
-          'PAL  ' : 1, 
-          'SECAM' : 2  }
 
 
 class IVTV(v4l2.Videodev):
@@ -109,11 +113,18 @@ class IVTV(v4l2.Videodev):
         r = fcntl.ioctl(self.device, IVTV_IOC_S_CODEC, val)
 
 
+    def setstd(self, value):
+        v4l2.Videodev.setstd(self, value)
+        time.sleep(0.3)
+        self.mspSetMatrix()
+
+
     def getCodecInfo(self):
         val = struct.pack( CODEC_ST, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 )
         r = fcntl.ioctl(self.device, IVTV_IOC_G_CODEC, val)
         codec_list = struct.unpack(CODEC_ST, r)
         return IVTVCodec(codec_list)
+
 
     def mspSetMatrix(self, input=None, output=None):
         if not input: input = 3
