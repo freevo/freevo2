@@ -6,10 +6,17 @@ $Id$
 
 Release 1.2.5 (2002-XX-XX):
 ---------------------------
+Features, bugfixes:
 o Added JPEG support to the OSD server
 o Added bitmap scaling support to the OSD server
 o Added image display to main menu. JPEG/PNG are supported at 
-  the moment, more will be added later.
+  the moment, more will be added later. Images can be rotated.
+  Exif files (jpg with digital camera info) are supported, including 
+  thumbnails which are displayed when using the file browser.
+
+Internal:
+o Changed v4l1_to_mga to use /dev/video instead of /dev/video0. Also
+  exits on errors when opening the device.
 
 
 Release 1.2.4 (2002-07-10):
