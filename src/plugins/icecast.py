@@ -44,7 +44,8 @@ class PluginInterface(plugin.DaemonPlugin):
             try:
                 mycmd = os.path.basename(config.ICES_CMD)
                 newm3ufile = file(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'), 'rb').read()
-                os.unlink(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'))
+                if os.path.exists(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt')):
+                    os.unlink(os.path.join(config.FREEVO_CACHEDIR, 'changem3u.txt'))
                 os.kill(self.ices_pid, signal.SIGTERM)
                 os.waitpid(self.ices_pid, 0)
                 time.sleep(1)

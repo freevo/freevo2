@@ -13,6 +13,9 @@
 #   human readable size rather than bytes from os
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/01 21:47:35  outlyer
+# Made a check to see if file exists before unlinking.
+#
 # Revision 1.6  2003/05/22 21:33:23  outlyer
 # Lots of cosmetic changes:
 #
@@ -123,7 +126,7 @@ class LibraryResource(FreevoResource):
                         fv.res += 'Error: no newfile specified.'
                 elif action == 'delete':
                     print 'delete %s' % file_loc
-                    os.unlink(file_loc)
+                    if os.path.exists(file_loc): os.unlink(file_loc)
             else:
                 fv.res += '%s does not exist. no action taken.' % file_loc
         else:

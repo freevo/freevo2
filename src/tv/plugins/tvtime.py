@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/07/01 21:47:34  outlyer
+# Made a check to see if file exists before unlinking.
+#
 # Revision 1.11  2003/07/01 20:38:51  outlyer
 # system->unlink
 #
@@ -366,7 +369,7 @@ class TVTimeApp(childapp.ChildApp):
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing tvtime'
         util.killall('freevo_xwin')
-        os.unlink('/tmp/freevo.wid')
+        if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
         if config.MPLAYER_DEBUG:
             self.log_stdout.close()
             self.log_stderr.close()
