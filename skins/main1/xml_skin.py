@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/07/05 15:00:30  dischi
+# the global prepare is now an extra function. visible can now be 'yes',
+# 'no' and '<pluginname>' and 'not <pluginname'>. With that it is possible
+# to make things invisible when the idlebar is loaded.
+#
 # Revision 1.9  2003/07/05 09:25:00  dischi
 # use new osd font class for stringsize
 #
@@ -51,6 +56,7 @@ import traceback
 import config
 
 import osd
+import plugin
 
 # XML support
 from xml.utils import qp_xml
@@ -308,6 +314,27 @@ class XML_data:
                 setattr(self, c, eval(e))
 
 
+    def prepare(self):
+        """
+        basic prepare function
+        """
+        try:
+            if self.visible not in ('', 'yes'):
+                if len(self.visible) > 4 and self.visible[:4] == 'not ':
+                    p = plugin.getbyname(self.visible[4:])
+                else:
+                    p = plugin.getbyname(self.visible)
+                try:
+                    p = p.visible
+                except:
+                    pass
+                if len(self.visible) > 4 and self.visible[:4] == 'not ':
+                    self.visible = not p
+                else:
+                    self.visible = p
+        except (TypeError, AttributeError):
+            pass
+            
     def __cmp__(self, other):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
@@ -407,6 +434,7 @@ class XML_area(XML_data):
                         self.images[label].y += config.OVERSCAN_Y
 
     def prepare(self, layout):
+        XML_data.prepare(self)
         if self.visible:
             self.layout = layout[self.layout]
         else:
@@ -481,13 +509,16 @@ class XML_content(XML_data):
                 if type:
                     self.types[type].parse(subnode, scale, current_dir)
                     self.types[type].cdata = subnode.textof()
+                    delete_fcontent = TRUE
                     for rnode in subnode.children:
                         if rnode.name == u'rectangle':
                             self.types[type].rectangle = XML_rectangle()
                             self.types[type].rectangle.parse(rnode, scale, current_dir)
                         elif rnode.name in ( u'if', u'text', u'newline', u'goto_pos' ):
-                            if not hasattr( self.types[ type ], 'fcontent' ):
+                            if (not hasattr( self.types[ type ], 'fcontent' )) or \
+                                   delete_fcontent:
                                 self.types[ type ].fcontent = [ ]
+                            delete_fcontent = FALSE
                             child = None
                             if rnode.name == u'if':
                                 child = XML_FormatIf()
@@ -499,7 +530,7 @@ class XML_content(XML_data):
                                 child = XML_FormatGotopos()
 
                             self.types[ type ].fcontent += [ child ]
-                            self.types[ type ].fcontent[ -1 ].parse( rnode, scale, current_dir )
+                            self.types[ type ].fcontent[-1].parse(rnode, scale, current_dir)
                             
         if not self.types.has_key('default'):
             self.types['default'] = XML_data(('font',))
@@ -508,6 +539,7 @@ class XML_content(XML_data):
         
 
     def prepare(self, font, color):
+        XML_data.prepare(self)
         if self.font:
             try:
                 self.font = font[self.font]
@@ -540,7 +572,9 @@ class XML_content(XML_data):
 class XML_FormatText(XML_data):
     def __init__( self ):
         XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height' ) )
-        self.mode = 'hard'
+        self.mode   = 'hard'
+        self.align  = 'left'
+        self.height = -1
         self.text = ''
         self.expression = None
         self.expression_analized = 0
@@ -638,12 +672,14 @@ class XML_image(XML_data):
     an image
     """
     def __init__(self):
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'image', 'filename', 'label'))
+        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'image', 'filename',
+                                 'label', 'visible'))
 
     def prepare(self, color, search_dirs, image_names):
         """
         try to guess the image localtion
         """
+        XML_data.prepare(self)
         if self.image:
             try:
                 self.filename = image_names[self.image]
@@ -665,6 +701,7 @@ class XML_rectangle(XML_data):
                                  'bgcolor', 'size', 'radius' ))
 
     def prepare(self, color, search_dirs=None, image_names=None):
+        XML_data.prepare(self)
         if color.has_key(self.color):
             self.color = color[self.color]
         if color.has_key(self.bgcolor):
@@ -841,12 +878,53 @@ class XMLSkin:
                 self._tv.parse(node, scale, c_dir)
 
 
+    def prepare(self):
+        self.prepared = TRUE
+        self.menu   = copy.deepcopy(self._menu)
+        self.tv     = copy.deepcopy(self._tv)
+        self.player = copy.deepcopy(self._player)
+        
+        font        = copy.deepcopy(self._font)
+        layout      = copy.deepcopy(self._layout)
+        
+        search_dirs = self.skin_directories + [ 'skins/images', self.icon_dir, '.' ]
+        
+        for f in font:
+            font[f].prepare(self._color, scale=self.font_scale)
+            
+        for l in layout:
+            layout[l].prepare(font, self._color, search_dirs, self._images)
+        for menu in self.menu:
+            self.menu[menu].prepare(self._menuset, layout)
 
+            # prepare listing area images
+            for s in self.menu[menu].style:
+                for i in range(2):
+                    if s[i] and hasattr(s[i], 'listing'):
+                        for image in s[i].listing.images:
+                            s[i].listing.images[image].prepare(None, search_dirs,
+                                                               self._images)
+                        
+                
+        self.player.prepare(layout)
+        self.tv.prepare(layout)
+        # prepare listing area images
+        for image in self.tv.listing.images:
+            self.tv.listing.images[image].prepare(None, search_dirs, self._images)
+
+        self.popup = layout[self._popup]
+
+        self.mainmenu = copy.deepcopy(self._mainmenu)
+        self.mainmenu.prepare(search_dirs, self._images)
+        return 1
+
+        
     def load(self, file, copy_content = 0, prepare = TRUE, clear=FALSE):
         """
         load and parse the skin file
         """
 
+        self.prepared = FALSE
         if not os.path.isfile(file):
             if os.path.isfile(file+".fxd"):
                 file += ".fxd"
@@ -906,44 +984,11 @@ class XMLSkin:
                     
             if not prepare:
                 return 1
-        
-            self.menu   = copy.deepcopy(self._menu)
-            self.tv     = copy.deepcopy(self._tv)
-            self.player = copy.deepcopy(self._player)
-
-            font        = copy.deepcopy(self._font)
-            layout      = copy.deepcopy(self._layout)
-
-            search_dirs = self.skin_directories + [ 'skins/images', self.icon_dir, '.' ]
-
-            for f in font:
-                font[f].prepare(self._color, scale=font_scale)
-                
-            for l in layout:
-                layout[l].prepare(font, self._color, search_dirs, self._images)
-            for menu in self.menu:
-                self.menu[menu].prepare(self._menuset, layout)
-
-                # prepare listing area images
-                for s in self.menu[menu].style:
-                    for i in range(2):
-                        if s[i] and hasattr(s[i], 'listing'):
-                            for image in s[i].listing.images:
-                                s[i].listing.images[image].prepare(None, search_dirs,
-                                                                   self._images)
-                        
-                
-            self.player.prepare(layout)
-            self.tv.prepare(layout)
-            # prepare listing area images
-            for image in self.tv.listing.images:
-                self.tv.listing.images[image].prepare(None, search_dirs, self._images)
-
-            self.popup = layout[self._popup]
-
-            self.mainmenu = copy.deepcopy(self._mainmenu)
-            self.mainmenu.prepare(search_dirs, self._images)
+            self.font_scale = font_scale
+            self.prepare()
+            self.prepared = FALSE
             return 1
+        
 
         except:
             print "ERROR: XML file corrupt"
