@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/03 03:05:23  outlyer
+# We raise an exception in _renderstring, but we don't seem to do anything
+# with it, which of course equals horrifying crash. I'm trapping it, printing
+# an error to the logs and skipping... it only seemed to happen with a few
+# mp3s I have, but a crash is a crash...
+#
 # Revision 1.9  2003/01/31 02:09:00  krister
 # Changed the X11 display option to automatically select between xv,x11,etc.
 #
@@ -1007,8 +1013,12 @@ class OSD:
 
         if DEBUG >= 3:
             print 'FONT: %s %s' % (font, ptsize)
-        
-        ren = self._renderstring(s, font, ptsize, fgcolor, bgcolor)
+
+        try:        
+            ren = self._renderstring(s, font, ptsize, fgcolor, bgcolor)
+        except:
+            print "Render failed, skipping..."    
+            return None
         
         # Handle horizontal alignment
         w, h = ren.get_size()
