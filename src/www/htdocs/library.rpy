@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/06/09 01:46:30  rshortt
+# Finally add confirm delete.
+#
 # Revision 1.24  2004/05/15 02:08:34  mikeruelle
 # yet another unicode fix
 #
@@ -255,14 +258,21 @@ class LibraryResource(FreevoResource):
                             os.rename(file_loc, newfile_loc)
                     else:
                         messages += [ '<b>'+_('ERROR') + '</b>: ' +_('No new file specified.') ]
+
                 elif action == 'delete':
                     messages += [ _( 'Delete %s.' ) % ('<b>'+file_loc+'</b>') ]
                     if os.path.exists(file_loc): os.unlink(file_loc)
+                    file_loc_fxd = os.path.splitext(file_loc)[0] + '.fxd'
+                    if os.path.exists(file_loc_fxd): 
+                        os.unlink(file_loc_fxd)
+                        messages += [ _('Delete %s.') % file_loc_fxd ]
+
                 elif action == 'download':
                     sys.stderr.write('download %s\n' % String(file_loc))
                     sys.stderr.flush()
                     return static.File(file_loc).render(request)
                     #request.finish()
+
             else:
                 messages += [ '<b>'+_('ERROR') + '</b>: ' + _( '%s does not exist. No action taken.') % ('<b>'+file_loc+'</b>') ]
         elif action_file and action != 'view':
@@ -276,11 +286,20 @@ class LibraryResource(FreevoResource):
         if action and action != "download":
             fv.printHeader(_('Media Library'), 'styles/main.css', selected=_("Media Library"))
             fv.res += '<script language="JavaScript"><!--' + "\n"
+
+            fv.res += 'function deleteFile(basedir, file, mediatype) {' + "\n"
+            fv.res += '   okdelete=window.confirm("Do you wish to delete "+file+" and its fxd?");' + "\n"
+            fv.res += '   if(!okdelete) return;' + "\n"
+            fv.res += '   document.location="' + action_script +'?action=delete&file=" + escape(file) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
+                    #filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
+            fv.res += '}' + "\n"
+
             fv.res += 'function renameFile(basedir, file, mediatype) {' + "\n"
             fv.res += '   newfile=window.prompt("New name please.", file);' + "\n"
             fv.res += '   if(newfile == "" || newfile == null) return;' + "\n"
             fv.res += '   document.location="' + action_script +'?action=rename&file=" + escape(file) + "&newfile=" + escape(newfile) + "&dir=" + basedir + "&media=" + mediatype;' + "\n"
             fv.res += '}' + "\n"
+
             fv.res += '//--></script>' + "\n"
             fv.res += '&nbsp;<br/>\n'
 
@@ -445,8 +464,9 @@ class LibraryResource(FreevoResource):
                 else:
                     file_esc = urllib.quote(String(file))
                     dllink = ('<a href="'+action_script+'%s">'+_('Download')+'</a>') %  Unicode(os.path.join(basedir,file))
-                    filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
-                    delete = filelink % (action_mediatype, basedir, 'delete', file_esc,_('Delete'))
+                    #filelink = '<a href="'+action_script+'?media=%s&dir=%s&action=%s&file=%s">%s</a>'
+                    # delete = filelink % (action_mediatype, basedir, 'delete', file_esc,_('Delete'))
+                    delete = ('<a href="javascript:deleteFile(\'%s\',\'%s\',\'%s\')">'+_("Delete")+'</a>') % (basedir, file_esc, action_mediatype)
                     rename = ('<a href="javascript:renameFile(\'%s\',\'%s\',\'%s\')">'+_("Rename")+'</a>') % (basedir, file_esc, action_mediatype)
                     fv.tableCell(rename + '&nbsp;&nbsp;' + delete + '&nbsp;&nbsp;' + dllink, 'class="'+status+'" colspan="1"')
                 fv.tableRowClose()
