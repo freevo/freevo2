@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/10 08:44:20  dischi
+# fix crash
+#
 # Revision 1.10  2004/07/09 21:12:18  dischi
 # more bmovl fixes, still unstable
 #
@@ -258,7 +261,10 @@ class PluginInterface(plugin.Plugin):
             return
 
         bg = self.bmovl.loadbitmap(skin.get_singleton().settings.images['background'])
-        bg = pygame.transform.scale(bg, (self.bmovl.width, self.bmovl.height))
+        if bg:
+            bg = pygame.transform.scale(bg, (self.bmovl.width, self.bmovl.height))
+        else:
+            print 'Strange, no background, this will look bad!'
 
         self.clockfont = skin.get_singleton().get_font('bmovl timer')
 
@@ -268,8 +274,9 @@ class PluginInterface(plugin.Plugin):
         self.x0      = config.OSD_OVERSCAN_X + 10
         self.width   = self.bmovl.width - 2 * self.x0
         
-        self.bmovl.screenblit(bg, (0, self.y0), (0, self.y0, self.bmovl.width,
-                                                 self.bmovl.height - self.y0))
+        if bg:
+            self.bmovl.screenblit(bg, (0, self.y0), (0, self.y0, self.bmovl.width,
+                                                     self.bmovl.height - self.y0))
 
         self.bmovl.drawbox(0, self.y0 + 1, self.bmovl.width, self.y0 + 1,
                            width=1, color=0x000000)
