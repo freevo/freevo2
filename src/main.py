@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2003/08/26 20:28:05  outlyer
+# Black the screen on shutdown
+#
 # Revision 1.65  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -162,7 +165,8 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     
     # Shutdown any daemon plugins that need it.
     plugin.shutdown()
-
+    osd.clearscreen(color=osd.COL_BLACK)
+    osd.shutdown()
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
