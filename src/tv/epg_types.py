@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/01 22:49:49  rshortt
+# Unicode fix.
+#
 # Revision 1.18  2004/06/22 01:07:49  rshortt
 # Move stuff into __init__() and fix a bug for twisted's serialization.
 #
@@ -240,7 +243,7 @@ class TvGuide:
                 # the last entry
                 if config.DEBUG > 1:
                     print 'wrong stop time: %s' % \
-                          self.chan_dict[program.channel_id].programs[-1]
+                          String(self.chan_dict[program.channel_id].programs[-1])
                 self.chan_dict[program.channel_id].programs[-1].stop = program.start
                 
             if len(p) and p[-1].start == p[-1].stop:
