@@ -9,6 +9,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/08/14 02:39:45  krister
+# Polished the debug output.
+#
 # Revision 1.2  2002/08/12 11:34:59  dischi
 # Changed IMDb support:
 # o informations are now stored in hashes (Python dict)
@@ -147,7 +150,7 @@ def hash_xml_database():
     if os.path.exists("/tmp/freevo-rebuild-database"):
         os.system('rm -f /tmp/freevo-rebuild-database')
 
-    if DEBUG: print "building xml hash databse"
+    if DEBUG: print "Building the xml hash database...",
 
     for name,dir in config.DIR_MOVIES:
         for file in util.recursefolders(dir,1,'*.xml',1):
@@ -167,3 +170,4 @@ def hash_xml_database():
                 config.MOVIE_INFORMATIONS[i] = (title, image, file)
 
 
+    if DEBUG: print 'done'
