@@ -21,7 +21,7 @@ diff -Naur mplayer-orig/mencoder.c mplayer/mencoder.c
 diff -Naur mplayer-orig/mplayer.c mplayer/mplayer.c
 --- mplayer-orig/mplayer.c	Mon Jan 27 18:59:15 2003
 +++ mplayer/mplayer.c	Wed Jan 29 00:00:56 2003
-@@ -652,6 +652,16 @@
+@@ -670,6 +670,16 @@
    mp_msg_set_level(MSGL_STATUS);
  
    mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
@@ -44,5 +44,5 @@ diff -Naur mplayer-orig/mplayer.c mplayer/mplayer.c
  if test "$1" ; then
   extra="-$1"
  fi
--echo "#define VERSION \"CVS-${last_cvs_update}${extra} \"" >version.h
-+echo "#define VERSION \"CVS-${last_cvs_update}${extra}-FREEVO \"" >version.h
+-echo "#define VERSION \"dev-CVS-${last_cvs_update}${extra} \"" >version.h
++echo "#define VERSION \"dev-CVS-${last_cvs_update}${extra}-FREEVO \"" >version.h

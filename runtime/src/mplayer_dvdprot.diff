@@ -1,6 +1,6 @@
 diff -Naur mplayer-orig/cfg-common.h mplayer/cfg-common.h
---- mplayer-orig/cfg-common.h	Mon Jan 27 17:41:38 2003
-+++ mplayer/cfg-common.h	Tue Jan 28 23:54:25 2003
+--- mplayer-orig/cfg-common.h	Sat Feb  8 14:52:25 2003
++++ mplayer/cfg-common.h	Thu Feb 13 22:43:25 2003
 @@ -22,6 +22,8 @@
  	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
  	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -12,7 +12,7 @@ diff -Naur mplayer-orig/cfg-common.h mplayer/cfg-common.h
  #endif
 diff -Naur mplayer-orig/libmpdemux/stream.h mplayer/libmpdemux/stream.h
 --- mplayer-orig/libmpdemux/stream.h	Sat Jan  4 14:11:06 2003
-+++ mplayer/libmpdemux/stream.h	Tue Jan 28 23:54:30 2003
++++ mplayer/libmpdemux/stream.h	Thu Feb 13 22:43:55 2003
 @@ -206,6 +206,13 @@
  
  #ifdef USE_DVDREAD
@@ -28,29 +28,30 @@ diff -Naur mplayer-orig/libmpdemux/stream.h mplayer/libmpdemux/stream.h
  #if (USE_MPDVDKIT == 2)
  #include "../libmpdvdkit2/dvd_reader.h"
 diff -Naur mplayer-orig/libmpdvdkit2/libdvdcss.c mplayer/libmpdvdkit2/libdvdcss.c
---- mplayer-orig/libmpdvdkit2/libdvdcss.c	Wed Jan  8 10:10:39 2003
-+++ mplayer/libmpdvdkit2/libdvdcss.c	Tue Jan 28 23:54:35 2003
-@@ -97,6 +97,8 @@
- #   include <unistd.h>
- #endif
+--- mplayer-orig/libmpdvdkit2/libdvdcss.c	Tue Feb 11 09:25:23 2003
++++ mplayer/libmpdvdkit2/libdvdcss.c	Thu Feb 13 22:41:41 2003
+@@ -105,6 +105,8 @@
+ #include <unistd.h>
+ #include <limits.h>
  
 +#include "../mp_msg.h"
 +
  #include "dvdcss.h"
  
  #include "common.h"
-@@ -119,6 +121,9 @@
- 
- char * dvdcss_cache_dir = NULL;
+@@ -129,6 +131,10 @@
+  */
+ char * dvdcss_interface_2 = VERSION;
  
 +/* Override DVD protection (=DeCSS). Default is on. */
 +int dvdprotection_override = 1;
 +
++
  /**
   * \brief Open a DVD device or directory and return a dvdcss instance.
   *
-@@ -245,6 +250,20 @@
- 	}
+@@ -272,6 +278,20 @@
+         }
      }
  
 +    /* Check the global DVD protection override flag */

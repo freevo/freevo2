@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/02/14 05:10:14  krister
+# Updated for a fresh mplayer version
+#
 # Revision 1.5  2003/02/05 20:02:16  krister
 # Runtime fixes for the preloads. Disable locale stuff in mplayer.
 #
@@ -250,8 +253,8 @@ libgphoto2_build:
 # mplayer/mencoder
 #
 ################################################################################
-MPLAYER_DATE = "2003-01-27 22:45 CST"
-FFMPEG_DATE = "2003-01-27 22:45 CST"
+MPLAYER_DATE = "2003-02-13 22:30 CST"
+FFMPEG_DATE = "2003-02-13 22:30 CST"
 MPLAYER_CVS = cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -D $(MPLAYER_DATE) main
 FFMPEG_CVS = cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co -D $(FFMPEG_DATE) ffmpeg
 MPLAYER_CONF = 	--enable-tv-v4l --enable-mga --enable-xmga \
@@ -263,14 +266,14 @@ MPLAYER_CONF = 	--enable-tv-v4l --enable-mga --enable-xmga \
 # Build mplayer
 # Patch mplayer_dvdprot.diff: Adds -nodvdprotection-override flag
 # Patch mplayer_freevobanner.diff: Adds a Freevo notice
-mplayer: Archive/mplayer-CVS200301272245.tgz
+mplayer: Archive/mplayer-CVS200302132230.tgz
 	@echo Building mplayer/mencoder
 	tar xvzf $<
 	(cd mplayer ; patch -p1 < ../../src/mplayer_dvdprot.diff ; \
 	patch -p1 < ../../src/mplayer_freevobanner.diff ; \
 	./configure $(MPLAYER_CONF) ; make)
 
-Archive/mplayer-CVS200301272245.tgz:
+Archive/mplayer-CVS200302132230.tgz:
 	(export CVS_PASSFILE cvspass ; $(MPLAYER_CVS) ; \
 	$(FFMPEG_CVS) ; mv ffmpeg/libavcodec main ; \
 	rm -rf ffmpeg ; mv main mplayer ; tar cvzf $@ mplayer ; rm -rf mplayer)
