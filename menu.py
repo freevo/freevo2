@@ -58,8 +58,8 @@ class MenuItem:
         self.image             = None
 
     def setImage(self, image):
-        self.image = image[0]
-        self.type  = image[1]
+        self.type  = image[0]
+        self.image = image[1]
     
     # XXX do we need this function?
     def select(self):
