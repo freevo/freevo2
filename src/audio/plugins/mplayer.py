@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2004/01/31 12:39:47  dischi
+# delete unused audio variables
+#
 # Revision 1.33  2004/01/14 20:36:16  mikeruelle
 # they guys do not play radio
 #
@@ -187,10 +190,6 @@ class MPlayer:
             plugin.getbyname('MIXER').reset()
 
         self.item = item
-
-        if not self.item.valid:
-            # Invalid file, show an error and survive.
-            return _('Invalid audio file')
 
         _debug_('MPlayer.play(): Starting cmd=%s' % command)
             

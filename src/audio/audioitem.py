@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/01/31 12:39:47  dischi
+# delete unused audio variables
+#
 # Revision 1.49  2004/01/31 11:43:55  dischi
 # fixed bad crash
 #
@@ -20,30 +23,6 @@
 #
 # Revision 1.46  2004/01/25 11:20:09  dischi
 # make sure length is an int
-#
-# Revision 1.45  2003/12/31 16:42:40  dischi
-# changes, related to item.py changes
-#
-# Revision 1.44  2003/12/30 15:34:42  dischi
-# remove unneeded copy function
-#
-# Revision 1.43  2003/12/29 22:09:18  dischi
-# move to new Item attributes
-#
-# Revision 1.42  2003/12/12 19:20:46  dischi
-# use util functions to get the image
-#
-# Revision 1.41  2003/11/28 20:08:57  dischi
-# renamed some config variables
-#
-# Revision 1.40  2003/11/23 17:03:43  dischi
-# Removed fxd handling from AudioItem and created a new FXDHandler class
-# in __init__.py to let the directory handle the fxd files. The format
-# of audio fxd files changed a bit to match the video fxd format. See
-# __init__.py for details.
-#
-# Revision 1.39  2003/11/22 20:36:34  dischi
-# use new vfs
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -87,23 +66,18 @@ class AudioItem(Item):
     """
     
     def __init__(self, url, parent, name=None, scan=True):
+        self.type = 'audio'
         Item.__init__(self, parent)
 
-        self.type       = 'audio'
         self.set_url(url, info=scan)
 
         if name:
             self.name   = name
 
-        if self.info['title'] and config.DIRECTORY_USE_MEDIAID_TAG_NAMES:
-            self.name = self.info['title']
-
         self.start      = 0
         self.elapsed    = 0
         self.remain     = 0
-        self.done       = 0.0
         self.pause      = 0
-	self.valid	= 1
 
         self.mplayer_options = ''
             

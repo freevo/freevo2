@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/01/31 12:39:47  dischi
+# delete unused audio variables
+#
 # Revision 1.2  2004/01/21 15:51:42  mikeruelle
 # make sure always on top is not set
 #
@@ -214,9 +217,6 @@ class FXMMS:
             plugin.getbyname('MIXER').reset()
 
         self.item = item
-        if not self.item.valid:
-            # Invalid file, show an error and survive.
-            return _('Invalid audio file')
 
         #reset idle timeout so update thread doesn't kill xmms after I start a song
         self.idle = 0

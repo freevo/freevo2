@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/31 12:39:47  dischi
+# delete unused audio variables
+#
 # Revision 1.22  2004/01/29 16:57:20  outlyer
 # This logic doesn't work. Any directory that has even one subdirectory with
 # multiple artists will show the artist name for all the directories...
@@ -116,9 +119,8 @@ class PluginInterface(plugin.MimetypePlugin):
 
         for file in util.find_matches(files, config.AUDIO_SUFFIX):
             a = AudioItem(file, parent)
-            if a.valid:
-                items.append(a)
-                files.remove(file)
+            items.append(a)
+            files.remove(file)
 
         return items
 
