@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/05/27 01:04:37  mikeruelle
+# fix bug with search for more like this. need better stack pop but this fixes things for now.
+#
 # Revision 1.35  2004/03/13 22:29:39  dischi
 # improve input select dialog
 #
@@ -205,10 +208,13 @@ class ProgramItem(Item):
     def schedule_program(self, arg=None, menuw=None):
         (result, msg) = record_client.scheduleRecording(self.prog)
         if result:
+            if menuw:
+	        if self.context=='search':
+                    menuw.back_one_menu()
+                    menuw.back_one_menu()
+                menuw.back_one_menu(arg='reload')
             AlertBox(text=_('"%s" has been scheduled for recording') % \
                      self.prog.title).show()
-            if menuw:  
-                menuw.back_one_menu(arg='reload')
         else:
             AlertBox(text=_('Scheduling Failed')+(': %s' % msg)).show()
         # then menu back one or refresh the menu with remove option
