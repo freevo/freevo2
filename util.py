@@ -83,10 +83,10 @@ def log(str):
 # installed.
 
 def pngsize(file):
-	try:
-		import Image
-	except ImportError:
-		return '200','200'
+	#try:
+	import Image
+	#except ImportError:
+	#	return '200','200'
 	image = Image.open(file)
 	width, height = image.size
 	return width,height

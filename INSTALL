@@ -38,7 +38,8 @@ o Compile Freevo
     o http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz?download
   o Requires Python >= version 2.1 (We've had reports of problems with 1.5.x)
     o http://www.python.org/ftp/python/2.2.1/Python-2.2.1.tgz
-  o Optionally install Python Imaging Library for cover art.
+  o Python Imaging Library (Tested with 1.1.3)
+    o http://www.pythonware.com/downloads/Imaging-1.1.3.tar.gz
   o Test the remote using the lirc application irw, and using the 
     remote_control_lirc.py Freevo application
   o Test the text OSD test driver
