@@ -4,15 +4,22 @@
       <iconset theme="tuxntosh" />
 
 
+
       <!-- Main -->
 
       <main>
-         <item label="tv"       name="TV  "     icon="mainmenu/54x54/tv.png" />
-         <item label="video"    name="Movies"   icon="mainmenu/54x54/movies.png" />
-         <item label="audio"    name="Music"    icon="mainmenu/54x54/music.png" />
-         <item label="image"    name="Pictures" icon="mainmenu/54x54/images.png" />
-         <item label="shutdown" name="Shutdown" icon="mainmenu/54x54/shutdown.png" />
+         <item label="tv"       name="TV  "     icon="mainmenu/54x54/tv.png" 
+	       outicon="mainmenu/54x54/out_tv.png" />
+         <item label="video"    name="Movies"   icon="mainmenu/54x54/movies.png"
+	       outicon="mainmenu/54x54/out_movies.png"/>
+         <item label="audio"    name="Music"    icon="mainmenu/54x54/music.png"
+	       outicon="mainmenu/54x54/out_music.png"/>
+         <item label="image"    name="Pictures" icon="mainmenu/54x54/images.png"
+	       outicon="mainmenu/54x54/out_images.png"/>
+         <item label="shutdown" name="Shutdown" icon="mainmenu/54x54/shutdown.png" 
+	       outicon="mainmenu/54x54/out_shutdown.png"/>
       </main>
+
 
 
       <!-- TV -->
@@ -21,7 +28,6 @@
          <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
          <info   layout="tv info" x="10" y="70" width="780" height="140"/>
          <title  visible="no"/>
-
          <listing layout="tv listing" x="10" y="220" width="750" height="370">
 	    <image x="765" y="220" width="32" height="32" label="uparrow"
 	           filename="up.png"/>
@@ -45,15 +51,23 @@
 
 
 
+      <!-- Popup -->
+
+      <popup type="default" layout="popup"/>
+
+
+
       <!-- Menus -->
 
       <menu type="all">
          <style text="default textual" />
       </menu>
 
+
       <menu type="main">
          <style text="main menu" />
       </menu>
+
 
       <menu type="audio">
          <style image="audio iconified with info big" text="audio textual"/>
@@ -61,17 +75,21 @@
          <style text="audio textual" />
       </menu>
 
+
       <menu type="video">
          <style image="video iconified with info big" text="video textual"/>
          <style image="video iconified with info small" text="video textual"/>
          <style image="video full info" />
          <style text="video textual" />
       </menu>
+
       
       <menu type="image">
          <style image="image iconified with info big" text="image textual"/>
          <style text="image textual" />
       </menu>
+
+
 
       <!-- Menusets: Menu style -->
 
@@ -83,12 +101,13 @@
          <view layout="default view" 
 	       x="10" y="171" width="336" height="336" />
          <listing layout="default list" 
-	          x="346" y="151" width="412" height="439">
+	          x="346" y="151" width="412" height="439">            
 	    <image label="uparrow" x="760" y="171" width="32" height="32" filename="up.png"/>
 	    <image label="downarrow" x="760" y="538" width="32" height="32" filename="down.png"/>
          </listing>
          <info visible="no"/>
       </menuset>
+
 
       <menuset label="main menu">
          <screen layout="default screen" 
@@ -100,29 +119,34 @@
          <title visible="no"/>
       </menuset>
 
+
       <menuset label="audio textual" inherits="default textual">
          <view visible="yes" layout="audio view" x="10" y="171" width="250" height="250" />
          <info visible="yes" layout="audio info" x="10" y="441" width="780" height="150" />
-	 <listing height="290">
+	 <listing height="290" layout="audio text list">
 	    <image label="downarrow" y="389" />
 	 </listing>
       </menuset>
+
 
       <menuset label="video textual" inherits="default textual">
          <view visible="yes" layout="video view" x="10" y="171" width="180" height="250" />
          <info visible="yes" layout="video info" x="10" y="441" width="780" height="150" />
-	 <listing height="290">
+	 <listing height="290" layout="video text list">
 	    <image label="downarrow" y="389" />
+	    
 	 </listing>
       </menuset>
+
 
       <menuset label="image textual" inherits="default textual">
          <view visible="yes" layout="image view" x="10" y="171" width="326" height="250" />
          <info visible="yes" layout="image info" x="10" y="441" width="780" height="150" />
-	 <listing height="290">
+	 <listing height="290" layout="image text list">
 	    <image label="downarrow" y="389" />
 	 </listing>
       </menuset>
+
 
       <menuset label="audio iconified with info big">
          <screen layout="audio screen" 
@@ -137,6 +161,7 @@
          <view layout="audio view" x="10" y="171" width="250" height="250" />
          <info layout="audio info" x="10" y="441" width="336" height="150" />
       </menuset>
+
       
       <menuset label="audio iconified with info small" inherits="audio iconified with info big">
          <info visible="yes" layout="audio info" x="10" y="441" width="780" height="160" />
@@ -160,12 +185,14 @@
          <info layout="video info" x="10" y="441" width="336" height="150" />
       </menuset>
 
+
       <menuset label="video iconified with info small" inherits="video iconified with info big">
          <info visible="yes" layout="video info" x="10" y="441" width="780" height="160" />
 	 <listing height="290">
 	    <image label="downarrow" y="389" />
 	 </listing>
       </menuset>
+
 
       <menuset label="video full info">
          <screen layout="video screen" 
@@ -181,6 +208,7 @@
          </listing>
       </menuset>
 
+
       <menuset label="image iconified with info big">
          <screen layout="image screen" 
 	         x="0" y="0" width="800" height="600" />
@@ -195,11 +223,6 @@
          <view visible="no" />
       </menuset>
 
-
-      <!-- Popup -->
-
-
-      <popup type="default" layout="popup"/>
       
 
       <!-- Layout -->
@@ -212,6 +235,7 @@
          </background>
       </layout>
 
+
       <layout label="audio screen">
          <background>
             <image image="background" x="0" y="0" />
@@ -219,6 +243,7 @@
 	           visible="not idlebar" />
          </background>
       </layout>
+
 
       <layout label="video screen">
          <background>
@@ -228,6 +253,7 @@
          </background>
       </layout>
 
+
       <layout label="image screen">
          <background>
             <image image="background" x="0" y="0" />
@@ -235,32 +261,214 @@
 	           visible="not idlebar" />
          </background>
       </layout>
+
       
       <layout label="default title">
          <content x="0" y="0" type="menu" font="title" align="left" valign="bottom"/>
       </layout>
 
+
       <layout label="audio title">
          <content x="0" y="0" type="menu" font="title" align="left" valign="bottom"/>
       </layout>
+
 
       <layout label="video title">
          <content x="0" y="0" type="menu" font="title" align="left" valign="bottom"/>
       </layout>
 
+
       <layout label="image title">
          <content x="0" y="0" type="menu" font="title" align="left" valign="bottom"/>
       </layout>
+
 
       <layout label="default list">
          <content type="text" spacing="2" align="right" valign="center">
 	    <item type="default" font="item" />
 	    <item type="selected" font="selected">
-	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-5" y="-3"
-	               width="max+10" height="max+6" radius="10"/>
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="audio" font="item" image="mimetypes/audio.png"/>
+	    <item type="audio selected" font="selected" image="mimetypes/audio.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="audiocd" font="item" image="mimetypes/audiocd.png"/>
+	    <item type="audiocd selected" font="selected" image="mimetypes/audiocd.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="dvd" font="item" image="mimetypes/dvd.png"/>
+	    <item type="dvd selected" font="selected" image="mimetypes/dvd.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="vcd" font="item" image="mimetypes/vcd.png"/>
+	    <item type="vcd selected" font="selected" image="mimetypes/vcd.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="video" font="item" image="mimetypes/video.png"/>
+	    <item type="video selected" font="selected" image="mimetypes/video.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+
+	    <item type="playlist" font="item" image="mimetypes/playlist.png"/>
+	    <item type="playlist selected" font="selected"  image="mimetypes/playlist.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="dir" font="item" image="mimetypes/folder.png"/>
+	    <item type="dir selected" font="selected" image="mimetypes/folder.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="image" font="item" image="mimetypes/image.png"/>
+	    <item type="image selected" font="selected" image="mimetypes/image.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
 	    </item>
          </content>
       </layout>
+
+      
+      <layout label="image text list">
+         <content type="text" spacing="2" align="right" valign="center">
+	    <item type="default" font="item" />
+	    <item type="selected" font="selected">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="playlist" font="item" image="mimetypes/playlist_image.png"/>
+	    <item type="playlist selected" font="selected"  image="mimetypes/playlist_image.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="dir" font="item" image="mimetypes/folder_image.png"/>
+	    <item type="dir selected" font="selected" image="mimetypes/folder_image.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="image" font="item" image="mimetypes/image.png"/>
+	    <item type="image selected" font="selected" image="mimetypes/image.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+         </content>        
+      </layout>
+
+      <layout label="audio text list">
+         <content type="text" spacing="2" align="right" valign="center">
+	    <item type="default" font="item" />
+	    <item type="selected" font="selected">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="playlist" font="item" image="mimetypes/playlist_audio.png"/>
+	    <item type="playlist selected" font="selected"  image="mimetypes/playlist_audio.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="dir" font="item" image="mimetypes/folder_audio.png"/>
+	    <item type="dir selected" font="selected" image="mimetypes/folder_audio.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="audio" font="item" image="mimetypes/audio.png"/>
+	    <item type="audio selected" font="selected" image="mimetypes/audio.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="audiocd" font="item" image="mimetypes/audiocd.png"/>
+	    <item type="audiocd selected" font="selected" image="mimetypes/audiocd.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+         </content>
+      </layout>
+
+      <layout label="video text list">
+         <content type="text" spacing="2" align="right" valign="center">
+	    <item type="default" font="item" />
+	    <item type="selected" font="selected">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="playlist" font="item" image="mimetypes/playlist_video.png"/>
+	    <item type="playlist selected" font="selected"  image="mimetypes/playlist_video.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="dir" font="item" image="mimetypes/folder_video.png"/>
+	    <item type="dir selected" font="selected" image="mimetypes/folder_video.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="video" font="item" image="mimetypes/video.png"/>
+	    <item type="video selected" font="selected" image="mimetypes/video.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="vcd" font="item" image="mimetypes/vcd.png"/>
+	    <item type="vcd selected" font="selected" image="mimetypes/vcd.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="dvd" font="item" image="mimetypes/dvd.png"/>
+	    <item type="dvd selected" font="selected" image="mimetypes/dvd.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+	    <item type="empty_cdrom" font="item" image="mimetypes/empty_cdrom.png"/>
+	    <item type="empty_cdrom selected" font="selected" image="mimetypes/empty_cdrom.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+         </content>
+      </layout>
+
 
       <layout label="audio list">
 <!--          <background> -->
@@ -272,12 +480,21 @@
 	          align="center" valign="center"/>
 	    <item type="selected" width="128" height="128" 
 	          align="center" valign="center">
+
+	    <item type="dir" font="item" image="mimetypes/image.png"/>
+	    <item type="dir selected" font="selected" image="mimetypes/image.png">
+	        <rectangle bgcolor="selection bg" color="selection border" size="1" x="-10" y="-3"
+	               width="max+20" height="max+6" radius="10"/>
+	    </item>
+
+
 	       <rectangle bgcolor="list selection bg" color="list selection fg" 
 	                   size="1" x="-10" y="-10" 
 	                  width="max+20" height="max+20" radius="20"/>
 	    </item>
          </content>
       </layout>
+
 
       <layout label="video list">
          <content type="image+text" spacing="-17" align="center" valign="center">
@@ -291,6 +508,7 @@
 	    </item>
          </content>
       </layout>
+
 
       <layout label="video small list">
          <content type="image+text" spacing="-15" align="center" valign="center">
@@ -319,6 +537,7 @@
          </content>
       </layout>
 
+
       <layout label="default view">
          <content align="center" valign="top">
 	    <item type="default">
@@ -326,6 +545,7 @@
 	    </item>
          </content>
       </layout>
+
 
       <layout label="audio view">
          <content align="center" valign="top">
@@ -335,6 +555,7 @@
          </content>
       </layout>
 
+
       <layout label="video view">
          <content align="center" valign="top">
 	    <item type="default">
@@ -342,6 +563,7 @@
 	    </item>
          </content>
       </layout>
+
 
       <layout label="image view">
          <content align="center" valign="top">
@@ -351,8 +573,10 @@
          </content>
       </layout>
 
+
       <layout label="audio info">
          <content x="0" y="0">
+
    	    <item type="audio">
 	       <if expression="title">
 	          <if expression="track">
@@ -366,6 +590,7 @@
 		        mode="hard" expression="title" />
    	          <newline />
 	       </if>
+
 	       <if expression="artist">
   	          <text height="line_height" width="75"
 	                align="right" font="info label" 
@@ -376,6 +601,7 @@
 		        mode="hard" expression="artist" />
    	          <newline />	  
 	       </if>
+
 	       <if expression="album">
   	          <text height="line_height" width="75"
 	                align="right" font="info label" 
@@ -394,6 +620,7 @@
    	          <newline />
 	       </if>
 	    </item>
+
             <item type="dir">
 	       <if expression="name">
   	          <text height="line_height"
@@ -401,6 +628,7 @@
 		        mode="hard" expression="name" />
    	          <newline />
 	       </if>
+
 	       <if expression="dir">
   	          <text height="line_height"
 	                align="left" font="info value" 
@@ -415,10 +643,12 @@
 		  <text font="info value"> musics in this playlist.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==1">
 		  <text font="info value">Just one music in this playlist.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==0">
 	          <text font="info value">This playlist is empty!</text>
 	          <newline/>
@@ -428,9 +658,11 @@
           </content>
       </layout>
 
+
       <layout label="video info">
          <content x="0" y="0">
 	    <item type="default" font="default" />
+
             <item type="video">
 	       <if expression="title">
   	          <text height="line_height"
@@ -438,17 +670,20 @@
 		        mode="hard" expression="title" />
    	          <newline />
 	       </if>
+
 	       <if expression="not title and name">
   	          <text height="line_height"
 	                align="left" font="info title" 
 		        mode="hard" expression="name" />
    	          <newline />
 	       </if>	       
+
 	       <if expression="tagline">
 	          <text font="info tagline" height="max" mode="soft" expression="tagline"/>
 	          <newline/>
 	       </if>
             </item>
+
             <item type="dir">
 	       <if expression="name">
   	          <text height="line_height"
@@ -456,6 +691,7 @@
 		        mode="hard" expression="name" />
    	          <newline />
 	       </if>
+
 	       <if expression="dir">
   	          <text height="line_height"
 	                align="left" font="info value" 
@@ -470,22 +706,25 @@
 		  <text font="info value"> movies in this playlist.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==1">
 		  <text font="info value">Just one movie in this playlist.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==0">
 	          <text font="info value">This playlist is empty!</text>
 	          <newline/>
 	       </if>
 	    </item>
-
 	 </content>
       </layout>
+
 
       <layout label="video full info">
          <content x="0" y="0">
 	    <item type="default" font="default" />
+
 	    <item type="video">
 	       <if expression="title">
   	          <text height="line_height"
@@ -493,23 +732,27 @@
 		        mode="hard" expression="title" />
    	          <newline />
 	       </if>
+
 	       <if expression="not title and name">
   	          <text height="line_height"
 	                align="left" font="info title" 
 		        mode="hard" expression="name" />
    	          <newline />
 	       </if>	       
+
 	       <if expression="tagline">
 	          <text font="info small tagline" mode="soft" 
 		        width="max" height="max" expression="tagline"/>
 		  <newline/>
 		  <goto_pos y="10" mode="relative"/>
 	       </if>
+
 	       <if expression="plot">
 	          <text font="info small plot" height="max" mode="soft" width="max"
 		        align="justified" expression="plot"/>
 	          <newline/>
 	       </if>
+
 	       <goto_pos y="10" mode="relative"/>
 	       <if expression="year">
 	          <text width="120" align="right" font="info small value">Year:</text>
@@ -517,24 +760,28 @@
 		  <text font="info small value" expression="year"/>
 		  <newline/>
 	       </if>
+
 	       <if expression="genre">
 	          <text width="120" align="right" font="info small value">Genre:</text>
 	          <goto_pos x="10" mode="relative"/>
 	          <text font="info small value" expression="genre"/>
 	          <newline/>
 	       </if>
+
 	       <if expression="rating">
 	          <text width="120" align="right" font="info small value">Rating:</text>
 	          <goto_pos x="10" mode="relative"/>
 	          <text font="info small value" expression="rating"/>
 	          <newline/>
 	       </if>
+
 	       <if expression="length">
 	          <text width="120" align="right" font="info small value">Runtime:</text>
 		  <goto_pos x="10" mode="relative"/>
 		  <text font="info small value" expression="length"/>
 		  <newline/>
 	       </if>
+
 	       <text width="120" align="right" font="info small value">Type:</text>
                <goto_pos x="10" mode="relative"/>
 	       <text font="info small value" expression="type"/>
@@ -550,6 +797,7 @@
 		  </if>
 	          <newline/>
 	       </if>
+
 	       <if expression="copyright">
 	          <text width="120" align="right" font="info small value">Copyright:</text>
 	          <goto_pos x="10" mode="relative"/>
@@ -565,6 +813,7 @@
 		        mode="hard" expression="name" />
    	          <newline />
 	       </if>
+
 	       <if expression="dir">
   	          <text height="line_height"
 	                align="left" font="info value" 
@@ -579,10 +828,12 @@
 		  <text font="info value"> movies in this playlist.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==1">
 		  <text font="info value">Just one movie in this playlist.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==0">
 	          <text font="info value">This playlist is empty!</text>
 	          <newline/>
@@ -596,6 +847,7 @@
       <layout label="image info">
          <content x="0" y="0">
 	    <item type="default" font="default" />
+
             <item type="image">
 	       <if expression="width and height">
 	          <text width="120" font="info label" align="right">Geometry:</text>
@@ -605,17 +857,20 @@
 		  <text font="info value" expression="height"/>
 		  <newline/>
 	       </if>
+
 	       <if expression="date">
 	          <text width="120" font="info label" align="right">Date:</text>
 		  <goto_pos x="10" mode="relative"/>
 		  <text font="info value" expression="date"/>
 		  <newline/>
 	       </if>
+
 	       <if expression="description">
 	          <text font="info plot" height="max" mode="soft" expression="description"/>
 		  <newline/>
 	       </if>
 	    </item>
+
             <item type="dir">
 	       <if expression="name">
   	          <text height="line_height"
@@ -623,6 +878,7 @@
 		        mode="hard" expression="name" />
    	          <newline />
 	       </if>
+
 	       <if expression="dir">
   	          <text height="line_height"
 	                align="left" font="info value" 
@@ -637,32 +893,28 @@
 		  <text font="info value"> pictures in this slideshow.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==1">
 		  <text font="info value">Just one picture in this slideshow.</text>
 		  <newline/>
 	       </if>
+
 	       <if expression="len(playlist)==0">
 	          <text font="info value">This slideshow is empty!</text>
 	          <newline/>
 	       </if>
 	    </item>
-
 	 </content>
       </layout>
-
 
 
       <layout label="main list">
          <content type="text" spacing="5">
 	    <item type="default" font="main" />
 	    <item type="selected" font="main selected">
-	       <rectangle bgcolor="main selection bg" color="main selection border"
-	                  size="1" x="-5" y="-2" 
-	                  width="max+10" height="max+4" radius="10"/>
 	    </item>
          </content>
       </layout>
-
 
 
       <layout label="popup">
@@ -688,6 +940,7 @@
 	 </background>
       </layout>
 
+
       <layout label="player view">
 	 <content>
 	    <item type="default">
@@ -696,6 +949,7 @@
 	    </item>
 	 </content>
       </layout>
+
 
       <layout label="player info">
 	 <background>
@@ -708,10 +962,12 @@
 		<text font="info title" expression="title"/>
 		<newline/>
 	      </if>
+
 	      <if expression="artist">
 		<text font="info tagline" expression="artist"/>
 		<newline/>
 	      </if>
+
 	      <goto_pos y="15" mode="relative"/>
 	      <if expression="album">
 		 <text width="100" align="right" font="info value">Album:</text>
@@ -724,12 +980,14 @@
 		</if>
 		<newline/>
 	      </if>
+
 	      <if expression="trackno">
 		<text width="100" align="right" font="info value">Track:</text>
 		<goto_pos x="10" mode="relative"/>
 		<text font="info value" expression="trackno"/>
 		<newline/>
 	      </if>
+
 	      <goto_pos y="15" mode="relative"/>
 	      <if expression="length">
 		<text width="100" align="right" font="info value">Length:</text>
@@ -737,6 +995,7 @@
 		<text font="info value" expression="length"/>
 		<newline/>
 	      </if>
+
 	      <if expression="elapsed">
 		<text width="100" align="right" font="info value">Elapsed:</text>
 		<goto_pos x="10" mode="relative"/>
@@ -810,8 +1069,6 @@
 
 
 
-
-    
       <!-- Fonts -->
 
       <font label="title" name="impact" size="35" color="0x8080dc">
@@ -830,7 +1087,7 @@
 
       <font label="main" name="tahomabd" size="26" color="main fg"/>
       <font label="main selected" name="tahomabd" size="26" color="main selection fg">
-         <shadow x="2" y="2" color="0x000000" visible="yes" />
+         <shadow x="1" y="1" color="main selection fg shadow" visible="yes" />
       </font>
 
       <font label="default" name="tahomabd" size="18" color="0x303030"/>
@@ -869,7 +1126,8 @@
 
       <!-- Colors -->
       <color label="main fg" value="0x333333"/>
-      <color label="main selection fg" value="0xf9f9f9"/>
+      <color label="main selection fg" value="0xD59215"/>
+      <color label="main selection fg shadow" value="0x734F0B"/>
       <color label="main selection bg" value="0x703333d9"/>
       <color label="main selection border" value="0x606060"/>
 
@@ -892,8 +1150,5 @@
       <!-- Images -->
       <image label="background" filename="barbieri/bg.png"/>
       <image label="audio_menu" filename="barbieri/audio_menu.png"/>
-
-
-
    </skin>
 </freevo>
