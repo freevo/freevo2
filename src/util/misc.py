@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/06/23 12:11:59  outlyer
+# Apparently TvProgram instances without a sub_title no longer define that
+# property anymore, so make sure it exists before trying to access it.
+#
 # Revision 1.37  2004/04/20 17:13:34  dischi
 # fix strange crash
 #
@@ -463,7 +467,7 @@ def comingup(items=None):
         result = result + _('Today') + u':\n'
         for m in today:
             sub_title = ''
-            if m.sub_title:
+            if asattr(m,'sub_title') and m.sub_title:
                 sub_title = u' "' + Unicode(m.sub_title) + u'" '
             result = result + u"- %s%s at %s\n" % \
                      ( Unicode(m.title), Unicode(sub_title),
@@ -473,7 +477,7 @@ def comingup(items=None):
         result = result + _('Tomorrow') + u':\n'
         for m in tomorrow:
             sub_title = ''
-            if m.sub_title:
+            if asattr(m,'sub_title') and m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
             result = result + u"- %s%s at %s\n" % \
                      ( Unicode(m.title), Unicode(sub_title),
@@ -483,7 +487,7 @@ def comingup(items=None):
         result = result + _('This Week') + u':\n'
         for m in later:
             sub_title = ''
-            if m.sub_title:
+            if hasattr(m,'sub_title') and m.sub_title:
                 sub_title = ' "' + m.sub_title + '" '
             result = result + u"- %s%s at %s\n" % \
                      ( Unicode(m.title), Unicode(sub_title),
