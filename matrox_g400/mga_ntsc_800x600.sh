@@ -13,6 +13,9 @@
 # I'm only using a TV on vga-connector 2
 # /Krister
 
+# goto the matrox_g400 dir
+cd `dirname $0`
+
 ./fbset/fbset -fb /dev/fb0 > /dev/null 2> /dev/null
 ./fbset/fbset -fb /dev/fb1 > /dev/null 2> /dev/null
 

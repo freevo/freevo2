@@ -13,6 +13,9 @@
 # I'm only using a TV on vga-connector 2
 # /Krister
 
+# goto the matrox_g400 dir
+cd `dirname $0`
+
 # disconnect both heads
 ./matroxset/matroxset -f /dev/fb0 -m 0 > /dev/null 2> /dev/null
 ./matroxset/matroxset -f /dev/fb1 -m 0 > /dev/null 2> /dev/null
