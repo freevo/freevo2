@@ -1,0 +1,9 @@
+# $Id$
+
+FREEVO_HOME="/usr/local/freevo"
+FBSET="/usr/sbin/fbset"
+MATROXSET="/usr/local/bin/matroxset"
+FBSETDB="/usr/local/freevo/matrox_g400/fbset.db"
+FREEVO_LOG="/var/log/freevo.log"
+FREEVO_OPTIONS="--freevo=main-quiet --osd=fb  --remote=lirc-quiet --videotools=real"
+FREEVO_RES="v4l1_to_mga startup.py main.py remote.py osd_fb"
