@@ -1,18 +1,6 @@
-# This file holds the configuration for the freevo init script located
-# in /etc/init.d/freevo.
-#
-# Before using this, make sure your settings in /etc/freevo are
-# correct, test Freevo outside init before. You may also need to
-# change the dependencies in /etc/init.d/freevo. If you don't have a
-# lirc remote control, remove 'need lirc', if you use Freevo on
-# framebuffer or your X server doesn't need the font server, you can
-# remove 'need xfs'. 
+# /etc/conf.d/freevo: configuration options for the freevo init script.
+# Before using this, make sure your settings in /etc/freevo are correct.
 
-
-# Location of the freevo start script. Don't change it unless you know
-# what you are doing
-
-freevo_bin=/usr/bin/freevo
 
 # Mode to start Freevo itself. Possible values are
 #
@@ -30,15 +18,12 @@ freevo_bin=/usr/bin/freevo
 freevo="no"
 
 
-# Mode the start the webserver. Possible values are again "no" and
-# "yes". If you start the webserver with Freevo itself, you should say
-# no here.
+# Mode the start the webserver. Possible values are "no" and "yes".
+# If you start the webserver with Freevo itself, you should say "no" here.
 
 webserver="no"
 
 
-# Mode the start the recordserver. Possible values are again "no" and
-# "yes". 
+# Mode the start the recordserver. Possible values are "no" and "yes". 
 
 recordserver="no"
-
