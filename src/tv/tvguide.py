@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/12/04 21:48:11  dischi
+# also add the plugin area
+#
 # Revision 1.20  2003/12/03 21:51:31  dischi
 # register to the skin and rename some skin function calls
 #
@@ -79,7 +82,7 @@ import program_display
 import record_client as ri
 
 skin = skin.get_singleton()
-skin.register('tv', ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info'))
+skin.register('tv', ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info', 'plugin'))
 
 CHAN_NO_DATA = _('This channel has no data loaded')
 

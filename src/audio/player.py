@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/12/04 21:48:11  dischi
+# also add the plugin area
+#
 # Revision 1.11  2003/12/03 21:51:31  dischi
 # register to the skin and rename some skin function calls
 #
@@ -75,7 +78,7 @@ import event
 
 skin = skin.get_singleton()
 
-skin.register('player', ('screen', 'title', 'subtitle', 'view', 'info'))
+skin.register('player', ('screen', 'title', 'subtitle', 'view', 'info', 'plugin'))
 
 
 class PlayerGUI(GUIObject):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2003/12/04 21:48:10  dischi
+# also add the plugin area
+#
 # Revision 1.70  2003/12/03 21:51:31  dischi
 # register to the skin and rename some skin function calls
 #
@@ -60,7 +63,7 @@ from item import Item
 from gui import GUIObject, AlertBox
 
 skin = skin.get_singleton()
-skin.register('menu', ('screen', 'title', 'subtitle', 'view', 'listing', 'info'))
+skin.register('menu', ('screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'))
 
 
 class MenuItem(Item):
