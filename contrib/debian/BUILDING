@@ -4,7 +4,5 @@ debbuild as usual.
 
 Currently, there are some things missing:
 
-1. No configuration is placed anywhere; you'll need to make /etc/freevo
-and put stuff there.
-2. No init.d script, though the one in the boot/ directory works nicely
+1. No init.d script, though the one in the boot/ directory works nicely
 on my system

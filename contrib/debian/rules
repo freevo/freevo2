@@ -25,6 +25,8 @@ clean:
 	rm -f build-stamp configure-stamp
 	-python2.3 setup.py clean
 	rm -f `find . | grep freevo.mo`
+	rm -rf Docs/howto 
+	rm -rf src/www/htdocs/help/wiki
 	rm -f *.pyc
 	rm -fr build
 	rm -f Setup
@@ -45,7 +47,8 @@ install: build
 	mkdir -p `pwd`/debian/freevo/usr/share/freevo/init/ || true
 	cp `pwd`/boot/webserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
 	cp `pwd`/boot/recordserver_init		       `pwd`/debian/freevo/usr/share/freevo/init/
-
+	echo 'FREEVO_HOME="/usr/bin"'	>	`pwd`/debian/freevo/etc/freevo/
+    
 # Build architecture-independent files here.
 binary-indep: build install
 # We have nothing to do by default.
