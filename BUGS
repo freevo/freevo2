@@ -4,22 +4,9 @@ Known bugs for the Freevo project
 $Id$
 
 
-o The EPG should be reloaded automatically to allow program end/start
-o Remote command events cannot be handled fast enough, e.g. when scrolling
-  through menu items.
-o There are some problems with some of the included fonts when linked against 
-  libfreetype >= 2.1.1; 2.0.9 is recommended for now.
-  o The runtime contains a version of libfreetype known to work.
-o Left/Right does not goto prev/next movie. It works for music.
-o Mount checking does not work with supermount
-o Identifymedia fails on some drives (still? report to dmeyer@tzi.de please)
-o Freevo fails on drives that are not valid devices for freevo_config.ROM_DRIVES
-o Some Python modules like PyXMMS, OGG are missing from the 
-  runtime.
-o DVD number of titles returns 100 (default) for some disks, why?
-o osd.py doesn't work with X11 (probably FB too) if the screen depth isn't 32:
-    "icon = pygame.image.load('icons/freevo_app.png').convert()"
-  raises an exception. Can probably be fixed by changing the PyGame init to 
-  allow other settings than 32 bits.
-o Framebuffer mode seems to have problems, especially using freevo_apps
-  MPlayer. See Wan Tat Chee's email to freevo-devel dated 2002-10-17 09:05.
+This file is now only available on the Freevo Wiki:
+
+http://freevo.sourceforge.net/cgi-bin/moin.cgi/BugList
+
+
+
