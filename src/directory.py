@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2004/02/08 17:40:09  dischi
+# remember number of items, calc when needed
+#
 # Revision 1.111  2004/02/07 13:24:21  dischi
 # better directory name building
 #
@@ -166,6 +169,14 @@ class DirItem(Playlist):
     class for handling directories
     """
     def __init__(self, directory, parent, name = '', display_type = None, add_args = None):
+        dt = display_type
+        if display_type == 'tv':
+            dt = 'video'
+        elif not dt:
+            dt = 'all'
+        self.autovars = [ ('num_dir_items', 0), ('num_timestamp', 0),
+                          ('num_%s_items' % dt, 0)]
+
         Playlist.__init__(self, parent=parent, display_type=display_type)
         self.type = 'dir'
         self.menu  = None
@@ -230,6 +241,8 @@ class DirItem(Playlist):
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
 
+        # create some extra info
+        self.create_metainfo()
 
 
     def set_fxd_file(self, file):
@@ -336,6 +349,18 @@ class DirItem(Playlist):
                 return _('Directory on disc [%s]') % self.media.label
             return _('Directory')
 
+        if key == 'num_items':
+            display_type = self.display_type
+            if self.display_type == 'tv':
+                display_type = 'video'
+            return self['num_%s_items' % display_type] + self['num_dir_items']
+
+        if key == 'num_play_items':
+            display_type = self.display_type
+            if self.display_type == 'tv':
+                display_type = 'video'
+            return self['num_%s_items' % display_type]
+
         if key in ( 'freespace', 'totalspace' ):
             if self.media:
                 return None
@@ -379,7 +404,47 @@ class DirItem(Playlist):
         return Playlist.eventhandler(self, event, menuw)
         
 
+    # ======================================================================
+    # metainfo
+    # ======================================================================
 
+    def create_metainfo(self):
+        """
+        create some metainfo for the directory
+        """
+        timestamp     = os.stat(self.dir)[stat.ST_MTIME]
+        num_timestamp = self.info['num_timestamp']
+
+        if num_timestamp != timestamp:
+            num_dir_items  = 0
+            num_play_items = 0
+            files          = vfs.listdir(self.dir, include_overlay=True)
+            display_type   = self.display_type
+
+            if self.display_type == 'tv':
+                display_type = 'video'
+
+            # play items and playlists
+            for p in plugin.mimetype(display_type):
+                num_play_items += p.count(self, files)
+
+            # normal DirItems
+            for filename in files:
+                if os.path.isdir(filename):
+                    num_dir_items += 1
+
+            # store info
+            if self.display_type:
+                if num_play_items != self['num_%s_items' % display_type]:
+                    self['num_%s_items' % display_type] = num_play_items
+            else:
+                if num_play_items != self['num_all_items']:
+                    self['num_all_items'] = num_play_items
+            if self['num_dir_items'] != num_dir_items:
+                self['num_dir_items'] = num_dir_items
+            self['num_timestamp'] = timestamp
+
+        
     # ======================================================================
     # actions
     # ======================================================================
@@ -397,33 +462,15 @@ class DirItem(Playlist):
 
         items = [ ( self.cwd, _('Browse directory')) ]
 
-        timestamp     = os.stat(self.dir)[stat.ST_MTIME]
-        num_timestamp = self.info['num_timestamp']
-
-        if num_timestamp == timestamp:
-            num_subdirs   = self.info['num_subdirs']
-            num_files     = self.info['num_files']
-        else:
-            num_subdirs = 0
-            num_files   = 0
-            for f in vfs.listdir(self.dir):
-                if os.path.isdir(f):
-                    num_subdirs += 1
-                if os.path.isfile(f):
-                    num_files += 1
-            self.store_info('num_subdirs', num_subdirs)
-            self.store_info('num_files', num_files)
-            self.store_info('num_timestamp', timestamp)
-            
-        if num_files:
+        if self['num_%s_items' % display_type]:
             items.append((self.play, _('Play all files in directory')))
 
-        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not num_subdirs:
+        if display_type in self.DIRECTORY_AUTOPLAY_ITEMS and not self['num_dir_items']:
             items.reverse()
 
-        if num_files:
+        if self['num_%s_items' % display_type]:
             items.append((self.play_random, _('Random play all items')))
-        if num_subdirs:
+        if self['num_dir_items']:
             items += [ (self.play_random_recursive, _('Recursive random play all items')),
                        (self.play_recursive, _('Recursive play all items')) ]
 
@@ -632,6 +679,12 @@ class DirItem(Playlist):
             self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                                   o.sort().upper()))
 
+        if self['num_dir_items'] != len(self.dir_items):
+            self['num_dir_items'] = len(self.dir_items)
+            
+        if self['num_%s_items' % display_type] != len(self.play_items) + len(self.pl_items):
+            self['num_%s_items' % display_type] = len(self.play_items) + len(self.pl_items)
+            
         if self.DIRECTORY_REVERSE_SORT:
             self.dir_items.reverse()
             self.play_items.reverse()
