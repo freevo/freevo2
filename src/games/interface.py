@@ -26,3 +26,8 @@ def cwd(parent, files):
 
 
     return items
+
+
+def remove(files, items):
+    # XXX not implemented yet
+    return []
