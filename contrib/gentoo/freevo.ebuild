@@ -25,6 +25,7 @@ DEPEND=">=dev-python/pygame-1.5.3
 src_unpack() {
 	unpack freevo-src-${PV}.tgz
 	ln -s freevo-${PV} freevo-${FPV}
+	cd freevo-${PV}
 }
 
 src_compile() {
@@ -40,6 +41,9 @@ src_compile() {
 }
 
 src_install() {
+	# patch setup_freevo to use /etc/freevo
+	patch -p1 < ${FILESDIR}/setup.patch
+
 	install -d ${D}/etc/freevo
 	install -m 644 freevo.conf local_conf.py ${D}/etc/freevo
 
@@ -62,7 +66,8 @@ src_install() {
 pkg_postinst() {
 	einfo
 	einfo "Please check /etc/freevo/freevo.conf and /etc/freevo/local_conf.py and"
-	einfo "before starting freevo."
+	einfo "before starting freevo. To rebuild freevo.conf with different parameters"
+        einfo "run /opt/freevo/freevo setup"
 	einfo
 
 	if [ -e /etc/freevo/freevo_config.py ]; then

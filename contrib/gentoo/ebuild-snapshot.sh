@@ -76,7 +76,7 @@ function ebuild_upload {
     sudo rm -rf /tmp/ebuild*
     cd /usr/local/portage/media-video
 
-    tar -zcvf /tmp/ebuild-devel.tgz freevo freevo_runtime >/dev/null
+    tar --atime-preserve -zcvf /tmp/ebuild-devel.tgz freevo freevo_runtime >/dev/null
     cd /tmp
     sudo rm -rf freevo freevo-runtime
     tar -zxvf ebuild-devel.tgz >/dev/null
@@ -85,7 +85,7 @@ function ebuild_upload {
 	mv /tmp/$$ $i
 	touch $i
     done
-    tar -zcvf ebuild.tgz freevo freevo_runtime >/dev/null
+    tar --atime-preserve -zcvf ebuild.tgz freevo freevo_runtime >/dev/null
     rm -rf freevo freevo-runtime
 
     scp -r /tmp/ebuild*.tgz dischi@freevo.sf.net:/home/groups/f/fr/freevo/htdocs/gentoo
