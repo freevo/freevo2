@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2002/09/15 12:44:31  dischi
+# skin support for DVD/VCD/SVCD was missing
+#
 # Revision 1.35  2002/09/15 12:32:01  dischi
 # The DVD/VCD/SCVD/CD description file for the automounter can now also
 # contain skin informations. An announcement will follow. For this the
@@ -216,7 +219,7 @@ def dvd_vcd_menu_generate(media, type, menuw):
         items += [m]
 
     label = media.info.label
-    moviemenu = menu.Menu(label, items, umount_all = 1)
+    moviemenu = menu.Menu(label, items, xml_file = media.info.xml_file, umount_all = 1)
     menuw.pushmenu(moviemenu)
 
     return
