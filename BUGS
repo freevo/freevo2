@@ -24,4 +24,6 @@ o osd.py doesn't work with X11 (probably FB too) if the screen depth isn't 32:
   allow other settings than 32 bits.
 o Framebuffer mode seems to have problems, especially using freevo_apps
   MPlayer. See Wan Tat Chee's email to freevo-devel dated 2002-10-17 09:05.
+o If an MP3 has a tag, but the tag itself is empty (length=0), the id3 parser 
+  will crash
 
