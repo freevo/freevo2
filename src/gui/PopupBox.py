@@ -10,75 +10,15 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/09/01 18:50:56  dischi
+# Set default width and height based on screen size and size of the text
+# in it. This avoids ugly line breaks
+#
 # Revision 1.23  2003/07/20 09:46:11  dischi
 # Some default width fixes to match the current new default font. It would
 # be great if a box without width and height could be as big as needed
 # automaticly (with a max width). Right now, the buttons in the ConfirmBox
 # are not at the bottom of the box, that should be fixed.
-#
-# Revision 1.22  2003/07/13 19:35:44  rshortt
-# Change osd.focused_app to a function that returns the last object in
-# app_list.  Maintaining this list is helpfull for managing 'toplevel'
-# GUIObject based apps (popup types).
-#
-# Revision 1.21  2003/06/25 02:27:39  rshortt
-# Allow 'frame' containers to grow verticly to hold all contents.  Also
-# better control of object's background images.
-#
-# Revision 1.20  2003/05/27 17:53:34  dischi
-# Added new event handler module
-#
-# Revision 1.19  2003/05/21 00:02:02  rshortt
-# Labels are now handled better and there is no need for the Panel class here.
-#
-# Revision 1.18  2003/05/04 23:18:19  rshortt
-# Change some height values (temporarily) to avoid some crashes.
-#
-# Revision 1.17  2003/05/04 22:50:12  rshortt
-# Fix for some crashes with text wrapping.
-#
-# Revision 1.16  2003/05/02 01:09:02  rshortt
-# Changes in the way these objects draw.  They all maintain a self.surface
-# which they then blit onto their parent or in some cases the screen.  Label
-# should also wrap text semi decently now.
-#
-# Revision 1.15  2003/04/24 19:56:27  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.14  2003/04/20 13:02:29  dischi
-# make the rc changes here, too
-#
-# Revision 1.13  2003/04/06 21:08:52  dischi
-# Make osd.focusapp the default parent (string "osd").
-# Maybe someone should clean up the paramter, a PopupBox and an Alertbox
-# needs no colors because they come from the skin and parent should be
-# the last parameter.
-#
-# Revision 1.12  2003/03/30 20:50:00  rshortt
-# Improvements in how we get skin properties.
-#
-# Revision 1.11  2003/03/30 18:02:31  dischi
-# set parent before calling the parent constructor
-#
-# Revision 1.10  2003/03/30 17:42:20  rshortt
-# Now passing self along to skin.GetPopupBoxStyle in an attempt to get the
-# skin propertied of the current menu in case we are using a menu based skin.
-#
-# Revision 1.2  2002/08/18 21:57:00  tfmalt
-# o Added margin handling.
-# o Added support for Icons in popupboxes.
-# o Addes support for vertical and horizontal alignment.
-# o Added a ton more errorhandling.
-# o Let Labels draw themselves independently.
-#
-# Revision 1.1  2002/08/15 22:45:42  tfmalt
-# o Inital commit of Freevo GUI library. Files are put in directory 'gui'
-#   under Freevo.
-# o At the moment the following classes are implemented (but still under
-#   development):
-#     Border, Color, Label, GUIObject, PopupBox, ZIndexRenderer.
-# o These classes are fully workable, any testing and feedback will be
-#   appreciated.
 #
 #-----------------------------------------------------------------------
 #
@@ -138,18 +78,18 @@ class PopupBox(Container):
     """
     
     def __init__(self, parent='osd', text=' ', handler=None, left=None, 
-                 top=None, width=400, height=120, bg_color=None, fg_color=None,
+                 top=None, width=0, height=0, bg_color=None, fg_color=None,
                  icon=None, border=None, bd_color=None, bd_width=None,
                  vertical_expansion=1):
 
         self.handler = handler
-
         Container.__init__(self, 'frame', left, top, width, height, bg_color, 
                            fg_color, None, None, border, bd_color, bd_width,
                            vertical_expansion)
 
         if not parent or parent == 'osd':
             parent = self.osd.app_list[0]
+
         parent.add_child(self)
 
         if DEBUG: print 'set focus to %s' % self
@@ -158,16 +98,12 @@ class PopupBox(Container):
         self.event_context = 'input'
         rc.set_context(self.event_context) 
 
-
         self.internal_h_align = Align.CENTER
+        self.internal_v_align = Align.CENTER
 
         # In the future we will support duration where the popup
         # will destroy() after x seconds.
         self.duration = 0
-
-        if not self.left:     self.left   = self.osd.width/2 - self.width/2
-        if not self.top:      self.top    = self.osd.height/2 - self.height/2
-
 
         self.font = None
         if self.skin_info_font:       
@@ -178,6 +114,23 @@ class PopupBox(Container):
             self.set_font(config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
                 
+        if not width:
+            tw = self.osd.getfont(self.font.filename, self.font.size).stringsize(text) + \
+                 self.h_margin*2
+            if tw < self.osd.width * 2 / 3:
+                self.width = max(self.osd.width / 2, tw)
+            else:
+                self.width  = self.osd.width / 2
+            
+        if not height:
+            self.height = self.osd.height / 4
+
+        if not self.left:
+            self.left = self.osd.width/2 - self.width/2
+        if not self.top:
+            self.top  = self.osd.height/2 - self.height/2
+
+
         if type(text) is StringType:
             self.label = Label(text, self, Align.CENTER, Align.CENTER)
         else:
