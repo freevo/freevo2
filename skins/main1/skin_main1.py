@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2002/10/05 18:16:37  dischi
+# Don't copy settings, we want to override it
+#
 # Revision 1.33  2002/10/05 18:10:56  dischi
 # Added support for a local_skin.xml file. See Docs/documentation.html
 # section 4.1 for details. An example is also included.
@@ -179,7 +182,7 @@ class Skin:
 
     if os.path.isfile("local_skin.xml"):
         if DEBUG: print 'Skin: Add local config to skin'
-        settings.load("local_skin.xml", 1)
+        settings.load("local_skin.xml")
 
     hold = 0
 
