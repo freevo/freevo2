@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/05/28 02:27:59  mikeruelle
+# add pre and post recording script variables. you could say put your aumix junk here for line in recording.
+#
 # Revision 1.15  2004/01/10 04:12:02  outlyer
 # Take a snapshot/thumbnail after a file is recorded...
 #
@@ -184,6 +187,10 @@ class Record_Thread(threading.Thread):
             elif self.mode == 'record':
                 if DEBUG: print('Record_Thread::run: cmd=%s' % self.command)
 
+                tv_lock_file = config.FREEVO_CACHEDIR + '/record'
+                open(tv_lock_file, 'w').close()
+		
+		# should prolly be replaced with new pre recording command
 		# The FreeBSD bsdbt848 driver does not support the adevice
 		# setting, so we must switch the mixer to the correct record
 		# source before starting mencoder. I'm not sure how to do
@@ -191,8 +198,8 @@ class Record_Thread(threading.Thread):
                 if os.uname()[0] == 'FreeBSD':
                     os.system('mixer =rec line rec 100 > /dev/null 2>&1')
 
-                tv_lock_file = config.FREEVO_CACHEDIR + '/record'
-                open(tv_lock_file, 'w').close()
+                if hasattr(config, "VCR_PRE_REC") and config.VCR_PRE_REC:
+		    os.system(config.VCR_PRE_REC)
 
                 self.app = RecordApp(self.command)
                 
@@ -204,6 +211,9 @@ class Record_Thread(threading.Thread):
                 rc.post_event(Event(OS_EVENT_KILL, (self.app.child.pid, 15)))
 
                 self.app.kill()
+
+                if hasattr(config, "VCR_POST_REC") and config.VCR_POST_REC:
+		    os.system(config.VCR_POST_REC)
 
                 os.remove(tv_lock_file)
 
