@@ -11,47 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/20 09:50:07  dischi
+# cleanup
+#
 # Revision 1.13  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.12  2003/09/14 16:14:25  dischi
-# Oops, remove debug
-#
-# Revision 1.11  2003/09/14 16:14:02  dischi
-# fix imdb redirect
-#
-# Revision 1.10  2003/09/03 18:00:24  dischi
-# use mmpython to get the disc label
-#
-# Revision 1.9  2003/08/30 12:21:13  dischi
-# small changes for the changed xml_parser
-#
-# Revision 1.8  2003/08/27 19:24:08  dischi
-# smarter search
-#
-# Revision 1.7  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.6  2003/08/23 10:41:24  dischi
-# Oops, remove debug
-#
-# Revision 1.5  2003/08/23 10:39:13  dischi
-# fixed "&" handling
-#
-# Revision 1.4  2003/08/20 21:54:13  outlyer
-# Use my Python version of 'touch'
-#
-# Revision 1.3  2003/07/20 16:09:19  dischi
-# & -> &amp;
-#
-# Revision 1.2  2003/07/18 19:48:24  dischi
-# support for datadir
-#
-# Revision 1.1  2003/07/12 11:19:49  dischi
-# add new fxdimdb from den_RDC
-#
-# Revision 0.1  2003/07/08 22:31:00  den_RDC
-# Initial release.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -90,13 +54,12 @@ __license__ = "GPL"
 import re
 import urllib, urllib2, urlparse
 import sys
-import string
 import codecs
 import os
-import util
-
 
 import config 
+import util
+
 from xml_parser import parseMovieFile
 from mmpython.disc.discinfo import cdrom_disc_id
 #Constants
@@ -130,7 +93,7 @@ class FxdImdb:
         
         self.imdb_id_list = []
         self.imdb_id = None
-        self.isdiscset = FALSE
+        self.isdiscset = False
         self.title = ''
         self.info = {}
         
@@ -140,7 +103,7 @@ class FxdImdb:
         
         self.fxdfile = None # filename, full path, WITHOUT extension
 
-        self.append = FALSE
+        self.append = False
         self.device = None
         self.regexp = None
         self.mpl_global_opt = None
@@ -260,11 +223,11 @@ class FxdImdb:
         idpage.close()
 
     
-    def setFxdFile(self, fxdfilename = None, overwrite = FALSE):
+    def setFxdFile(self, fxdfilename = None, overwrite = False):
         """
         fxdfilename (string, full path)
         Set fxd file to write to, may be omitted, may be an existing file
-        (data will be added) unless overwrite = TRUE
+        (data will be added) unless overwrite = True
         """
         
         if fxdfilename: 
@@ -273,7 +236,7 @@ class FxdImdb:
             else: self.fxdfile = fxdfilename
         
         else:
-            if self.isdiscset == TRUE:
+            if self.isdiscset == True:
                 self.fxdfile = os.path.join(config.MOVIE_DATA_DIR, 'disc-set',
                                             self.getmedia_id(self.device))
             else:
@@ -283,15 +246,15 @@ class FxdImdb:
                 else: self.fxdfile = os.path.join(config.MOVIE_DATA_DIR ,
                                                   self.getmedia_id(device))
         
-        if overwrite == FALSE:
+        if overwrite == False:
             try:
                 open(self.fxdfile + '.fxd')
-                self.append = TRUE
+                self.append = True
             except: 
                 pass
-        else: self.append = FALSE
+        else: self.append = False
 
-        if self.append == TRUE and \
+        if self.append == True and \
            parseMovieFile(self.fxdfile + '.fxd', None, []) == []:
             raise FxdImdb_XML_Error("FXD file to be updated is invalid, please correct it.")
 
@@ -306,7 +269,7 @@ class FxdImdb:
         global_mplayer_opts
         Set media file(s) for fxd
         """
-        if self.isdiscset == TRUE:
+        if self.isdiscset == True:
             raise FxdImdb_XML_Error("<disc-set> already used, can't use both "+
                                     "<movie> and <disc-set>")
         
@@ -322,7 +285,7 @@ class FxdImdb:
         var_mplayer_opts
         Set Variants & parts
         """
-        if self.isdiscset == TRUE:
+        if self.isdiscset == True:
             raise FxdImdb_XML_Error("<disc-set> already used, can't use both "+
                                     "<movie> and <disc-set>")
  
@@ -340,15 +303,15 @@ class FxdImdb:
         
         try:
             #should we add to an existing file?
-            if self.append == TRUE :
-                if self.isdiscset == TRUE:
+            if self.append == True :
+                if self.isdiscset == True:
                     self.update_discset()
                 else: self.update_movie()
             else:
                 #fetch images
                 self.fetch_image()
                 #should we write a disc-set ?
-                if self.isdiscset == TRUE:
+                if self.isdiscset == True:
                     self.write_discset()
                 else:
                     self.write_movie()
@@ -390,7 +353,7 @@ class FxdImdb:
             raise FxdImdb_XML_Error("<movie> already used, can't use both "+
                                     "<movie> and <disc-set>")
         
-        self.isdiscset = TRUE
+        self.isdiscset = True
         if (not device and not regexp) or (device and regexp):
             raise FxdImdb_XML_Error("Can't use both media-id and regexp")
             
@@ -418,7 +381,7 @@ class FxdImdb:
         return 0
 
         
-    def guessImdb(self, filename, label=FALSE):
+    def guessImdb(self, filename, label=False):
         """Guess possible imdb movies from filename. Same return as searchImdb"""
 
         name = filename
@@ -428,7 +391,7 @@ class FxdImdb:
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
 
-        if label == TRUE:
+        if label == True:
             for r in config.IMDB_REMOVE_FROM_LABEL:
                 name  = re.sub(r, '', name)
                 
@@ -544,7 +507,7 @@ class FxdImdb:
         
     def update_movie(self):
         """Updates an existing file, adds exftra dvd|vcd|file and variant tags"""
-        passedvid = FALSE
+        passedvid = False
         #read existing file in memory
         try:
             file = open(self.fxdfile + '.fxd')
@@ -566,20 +529,20 @@ class FxdImdb:
     
 
         for line in content.split('\n'):
-            if passedvid == TRUE and content.find('<variants>') == -1:
+            if passedvid == True and content.find('<variants>') == -1:
                 #there is no variants tag
                 if len(self.variant) != 0:
                     file.write('    <variants>\n')
                     file.write(self.print_variant())
                     file.write('    </variants>\n')
                 file.write(line + '\n')
-                passedvid = FALSE
+                passedvid = False
                 
             elif regexp_video_end.match(line):
                 if len(self.video) != 0:
                     file.write(self.print_video())
                 file.write(line + '\n')
-                passedvid = TRUE
+                passedvid = True
                 
             elif regexp_variant_end.match(line):
                 if len(self.variant) != 0:

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.84  2003/09/20 09:50:07  dischi
+# cleanup
+#
 # Revision 1.83  2003/09/19 22:10:56  dischi
 # clear osd before playing with xine
 #
@@ -63,25 +66,23 @@
 import os
 import re
 import md5
-
-import config
-import util
-
-import rc
-import event as em
-import menu
 import time
 import copy
 import mmpython
+
+import config
+import util
+import rc
+import menu
+import configure
+import plugin
 
 from gui.PopupBox import PopupBox
 from gui.AlertBox import AlertBox
 from gui.ConfirmBox import ConfirmBox
 
 from item import Item
-
-import configure
-import plugin
+from event import *
 
 
 class VideoItem(Item):
@@ -117,7 +118,7 @@ class VideoItem(Item):
         if not self.name:
             self.name     = util.getname(filename)
         self.basename = os.path.basename(os.path.splitext(filename)[0])
-        self.tv_show  = FALSE
+        self.tv_show  = False
         self.mplayer_options = ''
         self.xml_file = None
         
@@ -140,7 +141,7 @@ class VideoItem(Item):
                         self.xml_file = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
 
-                self.tv_show = TRUE
+                self.tv_show = True
                 self.show_name = show_name
             
         # find image for this file
@@ -307,7 +308,7 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
-        self.plugin_eventhandler(em.PLAY, menuw)
+        self.plugin_eventhandler(PLAY, menuw)
 
         # dvd playback for whole dvd
         if (not self.filename or self.filename == '0') and \
@@ -389,7 +390,7 @@ class VideoItem(Item):
                                       _('Please insert the media.')) % file,
                                 handler=do_tryagain ).show()
                     
-                    rc.post_event( em.PLAY_END )
+                    rc.post_event( PLAY_END )
 
                     return
 
@@ -404,7 +405,7 @@ class VideoItem(Item):
                 else:
                     AlertBox(text=_('Media not found for %s track %s') % \
                              (self.mode, file)).show()
-                    rc.post_event(em.PLAY_END)
+                    rc.post_event(PLAY_END)
                     return
 
         if not self.filename or self.filename == '0':
@@ -488,7 +489,7 @@ class VideoItem(Item):
 
         if error:
             AlertBox(text=error).show()
-            rc.post_event(em.PLAY_END)
+            rc.post_event(PLAY_END)
 
 
     def stop(self, arg=None, menuw=None):
@@ -547,29 +548,29 @@ class VideoItem(Item):
             menuw = self.menuw
 
         if self.plugin_eventhandler(event, menuw):
-            return TRUE
+            return True
 
         # PLAY_END: do have have to play another file?
         if self.subitems:
-            if event == em.PLAY_END:
+            if event == PLAY_END:
                 try:
                     pos = self.subitems.index(self.current_subitem)
                     if pos < len(self.subitems)-1:
                         self.current_subitem = self.subitems[pos+1]
                         print "playing next item"
                         self.current_subitem.play(menuw=menuw)
-                        return TRUE
+                        return True
                 except:
                     pass
-            elif event == em.USER_END:
+            elif event == USER_END:
                 pass
 
         # show configure menu
-        if event == em.MENU:
+        if event == MENU:
             self.video_player.stop()
             self.settings(menuw=menuw)
             menuw.show()
-            return TRUE
+            return True
         
         # give the event to the next eventhandler in the list
         if isinstance( self.parent, str ):

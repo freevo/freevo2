@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/20 09:50:07  dischi
+# cleanup
+#
 # Revision 1.3  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -169,7 +172,7 @@ class PluginInterface(plugin.ItemPlugin):
             handle.write(str(item.elapsed))
             handle.write('\n')
             handle.close()
-            return TRUE
+            return True
 
-        return FALSE
+        return False
     

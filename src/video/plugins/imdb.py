@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/09/20 09:50:07  dischi
+# cleanup
+#
 # Revision 1.21  2003/09/14 20:09:37  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -92,18 +95,18 @@ class PluginInterface(plugin.ItemPlugin):
         self.item = item
         if item.type == 'video'  and not hasattr(item, 'fxd_file'):
             if item.mode == 'file':
-                self.disc_set = FALSE
+                self.disc_set = False
                 return [ ( self.imdb_search , 'Search IMDB for this file',
                            'imdb_search_or_cover_search') ]
             
             if item.mode in ('dvd', 'vcd'):
-                self.disc_set = TRUE
+                self.disc_set = True
                 s = self.imdb_get_disc_searchstring(self.item)
                 if s:
                     return [ ( self.imdb_search , _('Search IMDB for [%s]') % s,
                                'imdb_search_or_cover_search') ]
         if item.type == 'dir' and item.media and item.media.mountdir.find(item.dir) == 0:
-            self.disc_set = TRUE
+            self.disc_set = True
             s = self.imdb_get_disc_searchstring(self.item)
             if s:
                 return [ ( self.imdb_search , _('Search IMDB for [%s]') % s,
