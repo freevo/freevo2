@@ -9,7 +9,10 @@ Release 1.3.X (???):
  * Added CD->MP3 or CD->OGG Backup plugin from Rich C.
  * Initial database support for music via sqlite
  * Added holidays and Rom drive status plugins to idlebar
-
+ * New info area
+ * New skin 'info' which uses the new info area
+ * Major speed enhancements in the skin drawing code
+	
 
 
 Release 1.3.2 (2003-06-29):
