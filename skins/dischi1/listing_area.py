@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/03/02 19:03:42  dischi
+# Add [] for directories
+#
 # Revision 1.2  2003/03/01 00:12:18  dischi
 # Some bug fixes, some speed-ups. blue_round2 has a correct main menu,
 # but on the main menu the idle bar still flickers (stupid watermarks),
@@ -230,6 +233,10 @@ class Listing_Area(Skin_Area):
 
             if choice.type == 'playlist':
                 text = 'PL: %s' % text
+
+            if choice.type == 'dir' and choice.parent and \
+               choice.parent.type != 'mediamenu':
+                text = '[%s]' % text
 
             if content.type == 'text':
                 font_w, font_h = osd.stringsize('Arj', font=font.name, ptsize=font.size)
