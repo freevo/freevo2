@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/07/12 17:17:45  dischi
+# update doc
+#
 # Revision 1.22  2003/07/09 19:12:57  dischi
 # A plugin can now inherit from more than one basic plugin type. Basic
 # types are the types known to this file: MainMenuPlugin, ItemPlugin and
@@ -106,8 +109,8 @@ class DaemonPlugin(Plugin):
     A DaemonPlugin can have the following functions:
     def poll(self):
         this function will be called every poll_intervall*0.1 seconds
-    def draw(self):
-        this function will be caleed to update the screen
+    def draw(self(type, object), osd):
+        this function will be called to update the screen
     def eventhandler(self, event):
         events no one else wants will be passed to this functions
     def shutdown(self):
