@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.75  2003/08/23 10:28:47  dischi
+# fixed some variants handling
+#
 # Revision 1.74  2003/08/22 18:47:06  gsbarbieri
 # - Added more time to retry to check for media.
 # - Corrected a bug when playing variant from CD when the parent is a string
@@ -28,133 +31,6 @@
 #
 # Also, the minute calculation wasn't working. I don't know why I thought
 # the old one would, but this works for bookmarks > 3600
-#
-# Revision 1.71  2003/08/16 23:53:32  outlyer
-# Fix a typo causing a crash.
-#
-# Revision 1.70  2003/08/03 13:46:04  dischi
-# fix tv show detection
-#
-# Revision 1.69  2003/08/02 10:09:52  dischi
-# Don't add 'Settings' with a submenu to the list of actions, add the
-# settings directly (max 4 items, mostly 1)
-#
-# Revision 1.68  2003/07/29 19:07:25  dischi
-# cleanup and use VCD_PLAYER plugin if defined
-#
-# Revision 1.67  2003/07/25 20:54:03  dischi
-# prevent some crashes
-#
-# Revision 1.65  2003/07/20 17:46:59  dischi
-# special handling if there is a DVD_PLAYER plugin
-#
-# Revision 1.64  2003/07/19 11:45:11  dischi
-# moved mmpython parsing to VideoItem
-#
-# Revision 1.63  2003/07/13 13:11:17  dischi
-# show xml info on variants, too
-#
-# Revision 1.62  2003/07/07 21:56:24  dischi
-# preserve mmpython info
-#
-# Revision 1.61  2003/07/07 21:39:50  dischi
-# add special handling for mmpython video informations
-#
-# Revision 1.60  2003/07/05 15:53:25  outlyer
-# Quiet some debugging stuff.
-#
-# Revision 1.59  2003/07/02 20:08:36  dischi
-# make variants the default action
-#
-# Revision 1.58  2003/06/29 21:31:55  gsbarbieri
-# subtitle and audio now use the path to files and are quoted.
-#
-# Revision 1.57  2003/06/29 20:43:30  dischi
-# o mmpython support
-# o mplayer is now a plugin
-#
-# Revision 1.56  2003/06/28 02:01:58  outlyer
-# Mplayer won't play a file on a CD rom if -dvd-device is specified and it isn't a
-# DVD rom drive, so just pass -dvd-device if playing an actual DVD.
-#
-# Revision 1.55  2003/06/20 19:38:31  dischi
-# moved getattr to item.py
-#
-# Revision 1.54  2003/06/20 18:46:53  dischi
-# set menu type to video and info_item type to track for DVD/VCD menu
-#
-# Revision 1.53  2003/06/20 17:48:01  dischi
-# Title menu is now the default action for DVD/VCD. Autoplay is done by
-# pressing PLAY and not SELECT. This file is also prepared for the use of
-# mmpython.
-#
-# Revision 1.52  2003/06/07 11:32:17  dischi
-# added id to find the item if it changes
-#
-# Revision 1.51  2003/05/27 17:53:36  dischi
-# Added new event handler module
-#
-# Revision 1.50  2003/05/05 21:11:15  dischi
-# save video width and height
-#
-# Revision 1.49  2003/05/05 15:14:55  outlyer
-# Fixed a crash in the bookmarks submenu, and fixed the long standing bug
-# where times greater than 999 seconds (16m39s) wouldn't be recorded, because
-# mplayer logs time like this:
-#
-# A: XXX
-#
-# but after it reaches 1000,
-#
-# A:XXXX
-#
-# and the regular expression that got the time used a space.
-#
-# Revision 1.48  2003/05/04 11:52:51  dischi
-# small sort bugfix
-#
-# Revision 1.47  2003/04/26 16:46:25  dischi
-# added refresh bugfix from Matthieu Weber
-#
-# Revision 1.46  2003/04/26 16:38:57  dischi
-# added patch from Matthieu Weber for mplayer options in disc
-#
-# Revision 1.45  2003/04/24 19:56:43  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.44  2003/04/24 19:22:10  dischi
-# xml_file fix again
-#
-# Revision 1.39  2003/04/20 17:36:50  dischi
-# Renamed TV_SHOW_IMAGE_DIR to TV_SHOW_DATA_DIR. This directory can contain
-# images like before, but also fxd files for the tv show with global
-# informations (plot/tagline/etc) and mplayer options.
-#
-# Revision 1.37  2003/04/20 12:43:34  dischi
-# make the rc events global in rc.py to avoid get_singleton. There is now
-# a function app() to get/set the app. Also the events should be passed to
-# the daemon plugins when there is no handler for them before. Please test
-# it, especialy the mixer functions.
-#
-# Revision 1.35  2003/04/14 14:14:14  gsbarbieri
-# Fix crash when using "Change Play Settings" with files instead of VCD/DVD/...
-#
-# Revision 1.33  2003/04/12 18:30:04  dischi
-# add support for audio/subtitle selection for avis, too
-#
-# Revision 1.23  2003/03/19 05:40:58  outlyer
-# Bugfixes to the 'bookmark' facility.
-#
-# 1. Why was I opening the file twice?
-# 2. Clobboring the sub_item variable for use as a temporary holder was a bad idea.
-# 3. Likewise, I shouldn't have clobbered file.filename in the bookmark function.
-# 4. This wasn't working properly for single AVI files, only for XML-style movies.
-#
-# I've tried it some more, and while I think it works well enough, we really need a way to
-# provide feedback. I don't actually know how without trying to use bmovl which might be
-# too much.
-#
-# I think I may resurrect Krister's slave mode code to pass text to the screen.
 #
 # Revision 1.22  2003/03/17 19:22:31  outlyer
 # Bookmarks are working now.
@@ -424,7 +300,7 @@ class VideoItem(Item):
             items += [ (self.confirm_delete, 'Delete file') ]
 
 
-        if self.variants:
+        if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, 'Show variants') ] + items
 
         if not self.filename or self.filename == '0':
@@ -483,16 +359,25 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
 
+        # dvd playback for whole dvd
         if (not self.filename or self.filename == '0') and \
                self.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER):
             plugin.getbyname(plugin.DVD_PLAYER).play(self)
             return
-        
+
+        # vcd playback for whole vcd
         if (not self.filename or self.filename == '0') and \
                self.mode == 'vcd' and plugin.getbyname(plugin.VCD_PLAYER):
             plugin.getbyname(plugin.VCD_PLAYER).play(self)
             return
-        
+
+        # if we have variants, play the first one as default
+        if self.variants:
+            self.variants[0].play(arg, menuw)
+            return
+
+        # if we have subitems (a movie with more than one file),
+        # we start playing the first
         if self.subitems:
             self.current_subitem = self.subitems[0]
             # Pass along the options, without loosing the subitem's own
@@ -512,6 +397,8 @@ class VideoItem(Item):
             self.current_subitem.play(arg, self.menuw)
             return
 
+
+        # normal plackback of one file
         file = self.filename
         if self.mode == "file":
             if self.media_id:
@@ -686,11 +573,6 @@ class VideoItem(Item):
         """
         if not self.menuw:
             self.menuw = menuw
-
-
-        #
-        # Done scanning the disc, set up the menu.
-        #
 
         # only one track, play it
         if self.num_titles == 1:
