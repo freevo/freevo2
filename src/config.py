@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.58  2003/09/26 10:02:26  dischi
+# no auto debug to file to keep Aubin from changing all debugs to 2
+#
 # Revision 1.57  2003/09/23 19:41:31  dischi
 # add more help
 #
@@ -212,15 +215,14 @@ if not HELPER:
     sys.stdout.log('-' * 79 + '\n')
 
 def _debug_function_(s, level=1):
-    if DEBUG > 0:
-        # add the current trace to the string
-        where =  traceback.extract_stack(limit = 2)[0]
-        s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
-    if DEBUG >= level:
-        print s
-    elif DEBUG == 0 and level == 1:
-        if isinstance(sys.stderr, Logger):
-            sys.stderr.log(s+'\n')
+    if DEBUG < level:
+        return
+    # add the current trace to the string
+    where =  traceback.extract_stack(limit = 2)[0]
+    s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
+    # print debug message
+    print s
+
             
 __builtin__.__dict__['_debug_']= _debug_function_
 
