@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/10/20 20:48:21  dischi
+# wrong exception handled
+#
 # Revision 1.45  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
 #
@@ -98,7 +101,7 @@ class PluginInterface(plugin.DaemonPlugin):
 	# Getting current LOCALE
         try:
             locale.resetlocale()
-        except ValueError:
+        except:
             pass
         
     def draw(self, (type, object), osd):
