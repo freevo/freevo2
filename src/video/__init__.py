@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/03/27 00:46:23  outlyer
+# Fixed a crash. It occured when I used the "Configure Directory" option to
+# show "all types" in a music directory.
+#
 # Revision 1.29  2004/03/22 03:04:28  krister
 # Fixed a typo
 #
@@ -127,7 +131,7 @@ class PluginInterface(plugin.MimetypePlugin):
         items = []
 
         for file in util.find_matches(files, config.VIDEO_SUFFIX):
-            if parent and parent.type == 'dir' and \
+            if parent and parent.type == 'dir' and hasattr(parent,'VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS') and \
                    parent.VIDEO_DIRECTORY_AUTOBUILD_THUMBNAILS:
                 util.videothumb.snapshot(file, update=False, popup=True)
 
