@@ -1000,7 +1000,7 @@ OSD_FADE_STEPS = 10
 #
 LIRCRC = '/etc/freevo/lircrc'
 
-if os.path.exists('/dev/lirc'):
+if os.path.exists('/dev/lircd'):
     plugin.activate('input.lirc')
     
 #
