@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2003/12/06 13:44:11  dischi
+# move more info to the Mimetype
+#
 # Revision 1.70  2003/12/03 21:52:07  dischi
 # rename some skin function calls
 #
@@ -92,15 +95,11 @@ import util
 import menu
 import skin
 import plugin
-import video
 
 from item import Item
 from playlist import Playlist, RandomPlaylist
 from event import *
 from gui import PasswordInputBox, AlertBox, ProgressBox
-
-# Add support for bins album files
-from mmpython.image import bins
 
 skin = skin.get_singleton()
 
@@ -154,6 +153,10 @@ class DirItem(Playlist):
         self.type = 'dir'
         self.menuw = None
         self.menu  = None
+        self.name  = vfs.basename(directory)
+
+        if name:
+            self.name = name
         
         # variables only for Playlist
         self.current_item = 0
@@ -177,72 +180,16 @@ class DirItem(Playlist):
             setattr(self, v, eval('config.%s' % v))
         self.modified_vars = []
 
-        if name:
-            self.name = name
-	elif vfs.isfile(directory + '/album.xml'):
-            try:
-                self.name = bins.get_bins_desc(directory)['desc']['title']
-            except:
-                self.name = vfs.basename(directory)
-        else:
-            self.name = vfs.basename(directory)
-
-        
-        # check for image in album.xml
-        if vfs.isfile(directory + '/album.xml'):
-            try:
-                image = bins.get_bins_desc(directory)['desc']['sampleimage']
-                image = vfs.join(directory, image)
-                if vfs.isfile(image):
-                    self.image = image
-                    self.handle_type = self.display_type
-            except:
-                pass
-
         # Check for a cover in current dir
-        image = util.getimage(directory+'/cover')
+        image = util.getimage(vfs.join(directory, 'cover'))
         if image:
-            self.image = image
+            self.image       = image
             self.handle_type = self.display_type
             
-        if not self.image and self.display_type == 'audio':
-            images = ()
-            covers = ()
-            files =()
-            def image_filter(x):
-                return re.match('.*(jpg|png)$', x, re.IGNORECASE)
-            def cover_filter(x):
-                return re.search(config.AUDIO_COVER_REGEXP, x, re.IGNORECASE)
-
-            # Pick an image if it is the only image in this dir, or it matches
-            # the configurable regexp
-            try:
-                files = vfs.listdir(directory)
-            except OSError:
-                print "oops, os.listdir() error"
-                traceback.print_exc()
-            images = filter(image_filter, files)
-            image = None
-            if len(images) == 1:
-                image = vfs.join(directory, images[0])
-            elif len(images) > 1:
-                covers = filter(cover_filter, images)
-                if covers:
-                    image = vfs.join(directory, covers[0])
-            self.image = image
-
-        if not self.image and config.VIDEO_SHOW_DATA_DIR:
-            self.image = util.getimage(vfs.join(config.VIDEO_SHOW_DATA_DIR,
-                                                    vfs.basename(directory).lower()))
-
-            if video.tv_show_informations.has_key(vfs.basename(directory).lower()):
-                tvinfo = video.tv_show_informations[vfs.basename(directory).lower()]
-                self.info = tvinfo[1]
-                if not self.image:
-                    self.image = tvinfo[0]
-                if not self.xml_file:
-                    self.xml_file = tvinfo[3]
-
+        # Check mimetype plugins if they want to add something
+        for p in plugin.mimetype(display_type):
+            p.dirinfo(self)
+            
         if vfs.isfile(directory+'/folder.fxd'): 
             self.xml_file = directory+'/folder.fxd'
 
@@ -251,6 +198,7 @@ class DirItem(Playlist):
             
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
+
 
 
     def set_xml_file(self, file):

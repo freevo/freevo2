@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/12/06 13:44:11  dischi
+# move more info to the Mimetype
+#
 # Revision 1.17  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -141,6 +144,24 @@ class PluginInterface(plugin.MimetypePlugin):
             new_files.remove(file)
 
 
+    def dirinfo(self, diritem):
+        """
+        set informations for a diritem based on the content, etc.
+        """
+        global tv_show_informations
+        if not diritem.image and config.VIDEO_SHOW_DATA_DIR:
+            diritem.image = util.getimage(vfs.join(config.VIDEO_SHOW_DATA_DIR,
+                                                   vfs.basename(diritem.dir).lower()))
+
+        if tv_show_informations.has_key(vfs.basename(diritem.dir).lower()):
+            tvinfo = tv_show_informations[vfs.basename(diritem.dir).lower()]
+            diritem.info = tvinfo[1]
+            if not diritem.image:
+                diritem.image = tvinfo[0]
+            if not diritem.xml_file:
+                diritem.xml_file = tvinfo[3]
+
+        
 
 
 def hash_fxd_movie_database():

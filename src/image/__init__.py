@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/06 13:44:12  dischi
+# move more info to the Mimetype
+#
 # Revision 1.5  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -36,6 +39,9 @@
 #
 # ----------------------------------------------------------------------- */
 #endif
+
+# Add support for bins album files
+from mmpython.image import bins
 
 import config
 import util
@@ -85,3 +91,23 @@ class PluginInterface(plugin.MimetypePlugin):
                     del_files.remove(file)
 
         new_items += cwd(parent, new_files)
+
+
+    def dirinfo(self, diritem):
+        """
+        set informations for a diritem based on album.xml
+        """
+        if vfs.isfile(diritem.dir + '/album.xml'):
+            info  = bins.get_bins_desc(diritem.dir)
+            if not info.has_key('desc'):
+                return
+
+            info = info['desc']
+            if info.has_key('sampleimage'):
+                image = vfs.join(diritem.dir, info['sampleimage'])
+                if vfs.isfile(image):
+                    diritem.image       = image
+                    diritem.handle_type = diritem.display_type
+
+            if info.has_key('title'):
+                diritem.name = info['title']

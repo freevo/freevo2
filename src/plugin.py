@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2003/12/06 13:45:26  dischi
+# move more info to the Mimetype
+#
 # Revision 1.55  2003/12/01 19:06:46  dischi
 # better handling of the MimetypePlugin
 #
@@ -212,6 +215,13 @@ class MimetypePlugin(Plugin):
         pass
 
 
+    def dirinfo(self, diritem):
+        """
+        set informations for a diritem based on the content, etc.
+        """
+        pass
+
+    
 #
 # Some plugin names to avoid typos
 #
