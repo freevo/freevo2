@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/09 19:03:39  dischi
+# make it possible to exclude dot files and overlay dir
+#
 # Revision 1.10  2004/01/06 19:25:46  dischi
 # added mtime function using stat
 #
@@ -188,7 +191,8 @@ def codecs_open(name, mode, encoding):
             raise IOError, e
     
 
-def listdir(directory, handle_exception=True):
+def listdir(directory, handle_exception=True, include_dot_files=False,
+            include_overlay=False):
     """
     get a directory listing (including OVERLAY_DIR)
     """
@@ -197,9 +201,18 @@ def listdir(directory, handle_exception=True):
             directory = directory + '/'
             
         files = []
-        for f in os.listdir(directory):
-            if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
-                files.append(directory + f)
+        if include_dot_files:
+            for f in os.listdir(directory):
+                if not f in ('CVS', '.xvpics', '.thumbnails', '.pics', '.', '..'):
+                    files.append(directory + f)
+        else:
+            for f in os.listdir(directory):
+                if not f.startswith('.') and f != 'CVS':
+                    files.append(directory + f)
+
+        if not include_overlay:
+            return files
+
         overlay = getoverlay(directory)
         if overlay and os.path.isdir(overlay):
             for f in ([ overlay + fname for fname in os.listdir(overlay) ]):
