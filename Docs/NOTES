@@ -178,3 +178,21 @@ the samplerate cannot be set to exactly 44100, it becomes 44800 instead. 32000 w
 NUVrec cannot do samplerates other than 44100, stereo, 16 bits.
 
 ----------------------------------------------------------------------
+
+ISOLINUX:
+Use rootcd=1 to use the CD for root.
+rootfstype=iso9660
+
+Linux root:
+
+As root:
+
+cp -dpR /dev/fd[01]* dev
+cp -dpR /dev/tty[0-6] dev
+cp -dpR /dev/console dev
+cp -dpR /dev/kmem dev
+cp -dpR /dev/mem dev
+cp -dpR /dev/null dev
+cp -dpR /dev/ram0 dev
+cp -dpR /dev/hd* dev
+cp -dpR /dev/fd* dev
