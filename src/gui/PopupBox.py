@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/09/06 17:12:50  rshortt
+# For Label use parent's text_prop if available before resorting to defaults.
+#
 # Revision 1.27  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
@@ -108,7 +111,7 @@ class PopupBox(Container):
                            fg_color, None, None, border, bd_color, bd_width,
                            vertical_expansion)
 
-        text_prop = text_prop or { 'align_h': 'left',
+        self.text_prop = text_prop or { 'align_h': 'left',
                                    'align_v': 'top',
                                    'mode'   : 'soft' }
 
@@ -157,7 +160,7 @@ class PopupBox(Container):
 
         if type(text) in StringTypes:
             self.label = Label(text, self, Align.CENTER, Align.CENTER,
-                               text_prop=text_prop )
+                               text_prop=self.text_prop )
         else:
             raise TypeError, text
 

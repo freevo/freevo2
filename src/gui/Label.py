@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/06 17:12:50  rshortt
+# For Label use parent's text_prop if available before resorting to defaults.
+#
 # Revision 1.19  2003/09/06 13:29:00  gsbarbieri
 # PopupBox and derivates now support you to choose mode (soft/hard) and
 # alignment (vertical/horizontal).
@@ -183,10 +186,6 @@ class Label(GUIObject):
         self.v_margin = 0
         self.h_margin = 0
         self.set_background_color(None)
-        self.text_prop = text_prop or { 'align_h': 'left',
-                                        'align_v': 'top',
-                                        'mode'   : 'hard' }
-
 
 
         if parent:
@@ -195,7 +194,13 @@ class Label(GUIObject):
             self.set_h_margin(parent.h_margin)
             self.set_v_margin(parent.v_margin)
             parent.add_child(self)
-        
+            if not text_prop and hasattr(parent, 'text_prop'):
+                text_prop = parent.text_prop
+
+        self.text_prop = text_prop or { 'align_h': 'left',
+                                        'align_v': 'top',
+                                        'mode'   : 'hard' }
+
         if text:    self.set_text(text)
 
 
