@@ -9,8 +9,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.27  2003/11/25 09:36:13  krister
-# Manual merge of rshortt:s new channel handling code
+# Revision 1.28  2003/11/25 09:37:00  krister
+# Bugfixes, works for me now
 #
 # Revision 1.26.2.3  2003/11/25 01:24:12  rshortt
 # Some further fixes and improvements, aldo removed MPLAYER_DEBUG since
@@ -142,12 +142,13 @@ class MPlayer:
         if not tuner_channel:
             tuner_channel = self.fc.getChannel()
             
-        tuner_freq = self.fc.chanSet(tuner_channel, app='mplayer')
+        freq_khz = self.fc.chanSet(tuner_channel, app='mplayer')
+        tuner_freq = '%1.3f' % (freq_khz / 1000.0)
         vg = self.current_vg = self.fc.getVideoGroup(tuner_channel)
 
 
         # Convert to MPlayer TV setting strings
-        norm = 'norm=%s' % vg.norm
+        norm = 'norm=%s' % vg.tuner_norm
         input = 'input=%s' % vg.input_num
         device= 'device=%s' % vg.vdev
             
@@ -255,10 +256,11 @@ class MPlayer:
             
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
-                new_freq = self.fc.chanUp(app=self.thread.app)
+                freq_khz = self.fc.chanUp(app=self.thread.app)
             else:
-                new_freq = self.fc.chanDown(app=self.thread.app)
+                freq_khz = self.fc.chanDown(app=self.thread.app)
 
+            new_freq = '%1.3f' % (freq_khz / 1000.0)
             self.thread.app.write('tv_set_freq %s\n' % new_freq)
 
             # Display a channel changed message
