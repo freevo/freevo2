@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.92  2004/12/18 13:36:08  dischi
+# adjustments to new bmovl display
+#
 # Revision 1.91  2004/11/20 18:23:05  dischi
 # use python logger module for debug
 #
@@ -18,32 +21,6 @@
 #
 # Revision 1.89  2004/10/06 19:01:32  dischi
 # use new childapp interface
-#
-# Revision 1.88  2004/09/14 20:05:44  dischi
-# bmovl updates, remove mplayer 0.90 support
-#
-# Revision 1.87  2004/09/13 19:40:02  dischi
-# fix non vobsub subtitle handling
-#
-# Revision 1.86  2004/09/07 18:56:13  dischi
-# internal colors are now lists, not int
-#
-# Revision 1.85  2004/08/27 14:24:04  dischi
-# more bmovl support
-#
-# Revision 1.84  2004/08/25 12:51:46  dischi
-# moved Application for eventhandler into extra dir for future templates
-#
-# Revision 1.83  2004/08/24 16:42:44  dischi
-# Made the fxdsettings in gui the theme engine and made a better
-# integration for it. There is also an event now to let the plugins
-# know that the theme is changed.
-#
-# Revision 1.82  2004/08/23 20:36:44  dischi
-# rework application handling
-#
-# Revision 1.81  2004/08/23 15:54:15  dischi
-# hide osd on startup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -186,8 +163,7 @@ class MPlayer(Application):
        
 
         # Build the MPlayer command
-        command = [ '--prio=%s' % config.MPLAYER_NICE, config.MPLAYER_CMD ] + \
-                  config.MPLAYER_ARGS_DEF.split(' ') + \
+        command = [ config.MPLAYER_CMD ] + config.MPLAYER_ARGS_DEF.split(' ') + \
                   [ '-slave', '-ao'] + config.MPLAYER_AO_DEV.split(' ')
 
         additional_args = []
@@ -325,9 +301,8 @@ class MPlayer(Application):
                 self.overlay = MPlayerOverlay()
                 command += [ '-vf', 'bmovl2=%s' % self.overlay.fifo_fname ]
             else:
-                if not os.path.exists('/tmp/bmovl-%s' % os.getpid()):
-                    os.mkfifo('/tmp/bmovl-%s' % os.getpid())
-                command += [ '-vf', 'bmovl=1:0:/tmp/bmovl-%s' % os.getpid() ]
+                self.overlay = gui.set_display('Bmovl', (1, 1))
+                command += [ '-vf', 'bmovl=1:0:%s' % self.overlay.get_fname() ]
 
         self.plugins = plugin.get('mplayer_video')
 
@@ -357,8 +332,6 @@ class MPlayer(Application):
             return
         self.app.stop('quit\n')
         self.app = None
-        if os.path.exists('/tmp/bmovl-%s' % os.getpid()):
-            os.unlink('/tmp/bmovl-%s' % os.getpid())
 
 
     def hide_osd(self):
@@ -539,7 +512,7 @@ class MPlayerApp( childapp.Instance ):
         self.area_handler = None
         
         # init the child (== start the threads)
-        childapp.Instance.__init__( self, app )
+        childapp.Instance.__init__( self, app, prio=config.MPLAYER_NICE )
 
                 
     def stop_event(self):
@@ -567,8 +540,9 @@ class MPlayerApp( childapp.Instance ):
             self.screen = gui.set_display('Bmovl2', (self.width, self.height))
             self.screen.set_overlay(self.mplayer.overlay)
         else:
-            log.info('starting Bmovl')
-            self.screen = gui.set_display('Bmovl', (self.width, self.height))
+            log.info('activating bmovl')
+            self.screen = self.mplayer.overlay
+            self.screen.set_size((self.width, self.height))
         self.area_handler = gui.AreaHandler('video', ['screen', 'view', 'info',
                                                       'progress'])
         self.area_handler.hide(False)
