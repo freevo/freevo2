@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.119  2004/04/20 17:33:57  dischi
+# lsdvd check
+#
 # Revision 1.118  2004/02/27 20:12:16  dischi
 # reworked rc.py to make several classes
 #
@@ -80,10 +83,23 @@ try:
     from xml.dom import minidom
     
     # now load other modules to check if all requirements are installed
-    import mmpython
     import Image
     import pygame
     import twisted
+
+    import config
+
+    if not config.CONF.lsdvd:
+        print
+        print 'Can\'t find lsdvd. DVD support will be limited and maybe not'
+        print 'all discs are detected. Please install lsdvd, you can get it'
+        print 'from http://acidrip.thirtythreeandathird.net/lsdvd.html'
+        print
+    else:
+        os.environ['LSDVD'] = config.CONF.lsdvd
+        
+    import mmpython
+
     
 except ImportError, i:
     print 'Can\'t find all Python dependencies:'
@@ -104,8 +120,6 @@ except ImportError, i:
     sys.exit(0)
 
     
-import config
-
 import util    # Various utilities
 import osd     # The OSD class, used to communicate with the OSD daemon
 import menu    # The menu widget class

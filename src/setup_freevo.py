@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/04/20 17:33:59  dischi
+# lsdvd check
+#
 # Revision 1.15  2004/02/21 03:16:18  gsbarbieri
 # MPAV support
 #
@@ -100,6 +103,7 @@ EXTERNAL_PROGRAMS = (("mplayer", "mplayer", 1),
                      ("tvtime", "tvtime", 0),
                      ("xine", "xine", 0),
                      ("fbxine", "fbxine", 0),
+                     ("lsdvd", "lsdvd", 0),
                      ("jpegtran", "jpegtran", 0),
                      ("xmame.x11", "xmame", 0),
                      ("xmame.SDL", "xmame", 0),
