@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/20 21:26:36  dischi
+# use $FREEVO_PYTHON if set to find the plugins
+#
 # Revision 1.26  2003/08/12 19:39:05  dischi
 # Added event_lister to get all events
 #
@@ -206,8 +209,14 @@ def init():
     """
     global __all_plugins__
     global __initialized__
+    global __plugin_basedir__
     
     __initialized__ = TRUE
+
+    if os.environ.has_key('FREEVO_PYTHON') and os.environ['FREEVO_PYTHON']:
+        __plugin_basedir__ = os.environ['FREEVO_PYTHON']
+    else:
+        __plugin_basedir__ ='src'
 
     for name, type, level, args, number in __all_plugins__:
         __load_plugin__(name, type, level, args, number)
@@ -288,6 +297,7 @@ __plugin_number__      = 0
 __plugin_type_list__   = {}
 __named_plugins__      = {}
 
+__plugin_basedir__     = ''
 
 def __add_to_ptl__(type, object):
     """
@@ -306,23 +316,25 @@ def __load_plugin__(name, type, level, args, number):
     """
     global __plugin_type_list__
     global __named_plugins__
+    global __plugin_basedir__
 
     module = name[:name.rfind('.')]
 
     # locate the plugin
-    if os.path.isfile('src/plugins/%s.py' % module):
+    if os.path.isfile(os.path.join(__plugin_basedir__, 'plugins/%s.py' % module)):
         module  = 'plugins.%s' % module
         object  = 'plugins.%s' % name
         special = None
-    elif os.path.isfile('src/plugins/%s.py' % name):
+    elif os.path.isfile(os.path.join(__plugin_basedir__, 'plugins/%s.py' % name)):
         module  = 'plugins.%s' % name
         object  = 'plugins.%s.PluginInterface' % name
         special = None
-    elif os.path.isfile('src/%s/plugins/%s.py' % (module, name[name.rfind('.')+1:])):
+    elif os.path.isfile(os.path.join(__plugin_basedir__, '%s/plugins/%s.py' % \
+                                     (module, name[name.rfind('.')+1:]))):
         special = module
         module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
         object  = '%s.PluginInterface' % module
-    elif os.path.isdir('src/%s' % name):
+    elif os.path.isdir(os.path.join(__plugin_basedir__, '%s' % name)):
         module  = name
         object  = '%s.PluginInterface' % module
         special = None
