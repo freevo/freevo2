@@ -231,6 +231,21 @@ CONFIG_VERSION = 3.4
 #TV_VIEW_SIZE = (640, 480)
 
 #
+# FREQUENCY_TABLE - This is only used when Freevo changes the channel natively.
+# This is only the case if you are using V4L2 and any of the following plugins:
+# timeshift, ivtv_record, ivtv_basic_tv.
+# For the standard frequancy tables see src/tv/freq.py.  To add your own just
+# replace tuner_id in the following example with a valid tuner id (ie: '5' or
+# 'BBC1') and a frequency in KHz.  You may have as many entries as you like,
+# anything here will simply override a coresponding entry in your standard
+# frequency table and you can also have entries here that are not present i
+# there.
+# FREQUENCY_TABLE = {
+#     'tuner_id'   :    55250,
+# }
+
+
+#
 # TV Channels. This list contains a mapping from the displayed channel name
 # to the actual channel name as used by the TV watching application.
 # The display name must match the names from the XMLTV guide,
