@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/03/07 17:21:21  outlyer
+# Highlight shows being recorded in red; I would have put this in the skin, but
+# with the current flux around the XML format, I figured it would be better to
+# wait.
+#
 # Revision 1.10  2003/03/03 03:17:47  outlyer
 # Added a Clear() function to match Dischi's changes.
 #
@@ -160,6 +165,7 @@ import rc
 
 # XML parser for skin informations
 sys.path.append('skins/xml/type1')
+sys.path.append('skins/aubin1')
 sys.path.append('skins/main1')
 
 
@@ -172,13 +178,14 @@ osd = osd.get_singleton()
 from main1_utils import *
 
 # TV guide support
-import main1_tv
+import aubin1_tv as main1_tv
+#import main1_tv
 
 # Image browser support
 import main1_image
 
 # Video browser support
-import main1_video
+import aubin1_video as main1_video
 
 # Set to 1 for debug output
 DEBUG = 1
