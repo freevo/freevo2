@@ -216,18 +216,24 @@
 	     <text font="info value"> min.</text>
    	     <newline />
 	  </if>
-	  <text height="line_height"
-	    align="left" font="info value"
-	    mode="hard" expression="len(audio)" />
-	  <text font="info value"> Audiotracks, </text>
-	  <text height="line_height"
-	    align="left" font="info value"
-	    mode="hard" expression="len(subtitles)" />
-	  <text font="info value"> Subtitles, </text>
-	  <text height="line_height"
-	    align="left" font="info value"
-	    mode="hard" expression="chapters" />
-	  <text font="info value"> Chapter</text>
+	  <if expression="len(audio)">
+	    <text height="line_height"
+	      align="left" font="info value"
+	      mode="hard" expression="len(audio)" />
+	    <text font="info value"> Audiotracks, </text>
+	  </if>
+	  <if expression="len(subtitles)">
+	    <text height="line_height"
+	      align="left" font="info value"
+	      mode="hard" expression="len(subtitles)" />
+	    <text font="info value"> Subtitles, </text>
+	  </if>
+	  <if expression="chapters">
+	    <text height="line_height"
+	      align="left" font="info value"
+	      mode="hard" expression="chapters" />
+	    <text font="info value"> Chapter</text>
+	  </if>
 	</item>
 
 	<item type="image">
