@@ -4,6 +4,24 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# FIXME: this is a bug, paddings are calculated wrong:
+# 2004-11-29 20:04:36,094 INFO     [conflict] conflict.py 215: found conflict:
+#  23     vox.de "Hör mal, wer da hämm..."   60 1203.19:15-19:45
+#  24     vox.de "Hör mal, wer da hämm..."   60 1203.19:45-20:15
+#  25     ard.de "Tagesschau"                50 1203.20:00-20:15
+#  26    sat1.de "Genial daneben - Die..."   50 1203.20:15-21:15
+#  27    kika.de "Bravo Bernd"               50 1203.20:55-21:00
+# 
+# 2004-11-29 20:04:36,095 INFO     [conflict] conflict.py 219: solved by setting:
+#  23     vox.de "Hör mal, wer da hämm..."   60 1203.19:15-19:45 dvb0
+#  24     vox.de "Hör mal, wer da hämm..."   60 1203.19:45-20:15 dvb0
+#  25     ard.de "Tagesschau"                50 1203.20:00-20:15 dvb1
+#  26    sat1.de "Genial daneben - Die..."   50 1203.20:15-21:15 dvb0
+#  27    kika.de "Bravo Bernd"               50 1203.20:55-21:00 dvb1
+#
+# First of all, why not use dvb1 for 23, that looks much better
+# Second: missing feature, 24 has a higher priority than 25 and should not
+# conflict in padding with 26.
 #
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
