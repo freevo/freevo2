@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/01/16 16:23:07  dischi
+# made a ugly unicode fix...I will never understand python character encoding
+#
 # Revision 1.12  2004/01/15 04:33:34  outlyer
 # Check for  the filename before trying to read it... without it, I couldn't
 # use fxd files which were only in my overlay, but not in the path.
@@ -79,7 +82,7 @@ from xml.utils import qp_xml
 
 import config
 import util
-
+import codecs
 
 
 class XMLnode:
@@ -151,7 +154,16 @@ class FXDtree(qp_xml.Parser):
             vfs.unlink(filename)
         f = vfs.codecs_open(filename, 'w', encoding='utf-8')
         f.write('<?xml version="1.0" ?>\n')
-        self._dump_recurse(f, self.tree)
+        try:
+            self._dump_recurse(f, self.tree)
+        except UnicodeDecodeError:
+            # sigh, some strange encoding errors again, make it slower
+            # but it should work now
+            f.close()
+            f = vfs.codecs_open(filename, 'w', encoding='utf-8')
+            f.write('<?xml version="1.0" ?>\n')
+            self._dump_recurse(f, self.tree, encoding_problem=True)
+
         f.write('\n')
         f.close()
 
@@ -162,7 +174,7 @@ class FXDtree(qp_xml.Parser):
             util.save_pickle(self.tree, vfs.getoverlay(filename + '.raw'))
 
         
-    def _dump_recurse(self, f, elem, depth=0):
+    def _dump_recurse(self, f, elem, depth=0, encoding_problem=False):
         """
         Help function to dump all elements
         """
@@ -177,10 +189,17 @@ class FXDtree(qp_xml.Parser):
                 for i in range(depth):
                     f.write('  ')
             else:
-                f.write('>' + elem.first_cdata.replace('&', '&amp;'))
-
+                data = elem.first_cdata.replace('&', '&amp;')
+                if encoding_problem:
+                    unidata = unicode()
+                    for c in data:
+                        unidata += unichr(ord(c))
+                    data = unidata
+                f.write('>' + data)
+                    
             for child in elem.children:
-                self._dump_recurse(f, child, depth=depth+1)
+                self._dump_recurse(f, child, depth=depth+1,
+                                   encoding_problem=encoding_problem)
                 if child.following_cdata == None:
                     if child == elem.children[-1]:
                         f.write('\n')
