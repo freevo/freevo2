@@ -74,3 +74,12 @@ o Bins support
 
 Matthieu Weber <mweber@mit.jyu.fi>
 o DTD and implementation of fxd movie informations
+
+Thomas Schueppel <stain@acm.org>
+o v4l2 python interface
+o video channel frequencies
+o timeshift plugin, pyshift modules and mplayer timefhifting patch
+
+Michael Ruelle <mikeruelle@attbi.com>
+o Freevo web interface enhancements
+
