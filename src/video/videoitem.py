@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.120  2004/01/31 16:38:24  dischi
+# changes because of mediainfo changes
+#
 # Revision 1.119  2004/01/24 19:16:14  dischi
 # clean up autovar handling
 #
@@ -211,7 +214,7 @@ class VideoItem(Item):
         
         if key in ('length', 'geometry', 'aspect'):
             try:
-                video = self.info.mmdata.video[0]
+                video = self.info['video'][0]
                 if key == 'length':
                     length = video.length
                     if length / 3600:
@@ -529,10 +532,11 @@ class VideoItem(Item):
         items = []
         for title in range(1,self.num_titles+1):
             i = copy.copy(self)
+            i.info = copy.copy(self.info)
             i.possible_player = []
             # copy the attributes from mmpython about this track
-            if self.info.mmdata.has_key('tracks'):
-                i.info.mmdata = self.info.mmdata.tracks[title-1]
+            if self.info.has_key('tracks'):
+                i.info.mmdata = self.info.mmdata['tracks'][title-1]
             i.info_type = 'track'
             i.set_url(self.url + str(title), False)
             i.name = _('Play Title %s') % title

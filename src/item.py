@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/01/31 16:38:23  dischi
+# changes because of mediainfo changes
+#
 # Revision 1.56  2004/01/31 12:38:47  dischi
 # remove \0 checking, fixed mmpython
 #
@@ -55,30 +58,6 @@
 #
 # Ideally, we need a different way to have "default" information in an info
 # area, as opposed to putting it in the item.
-#
-# Revision 1.47  2004/01/10 16:49:37  dischi
-# add long to possible length
-#
-# Revision 1.46  2004/01/10 13:14:17  dischi
-# o set self.fxd_file to None as default. It's very confusing to have one
-#   fxd_file, but maybe different files with skin settings, so I added
-# o self.skin_fxd to point to the updated skin informations
-# o add runtime attribute
-#
-# Revision 1.45  2004/01/08 17:03:31  rshortt
-# Bugfix for outicons.
-#
-# Revision 1.44  2004/01/07 18:13:25  dischi
-# respect overlay files and create dir if needed
-#
-# Revision 1.43  2004/01/04 18:19:16  dischi
-# fix len() calc
-#
-# Revision 1.42  2004/01/04 10:20:05  dischi
-# fix missing DIRECTORY_USE_MEDIAID_TAG_NAMES for all kinds of parents
-#
-# Revision 1.41  2004/01/01 16:47:31  dischi
-# do not replace name with None
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -442,7 +421,7 @@ class Item:
                 length = self.info['runtime']
             elif self.info['length'] and self.info['length'] != 'None':
                 length = self.info['length']
-            elif hasattr(self.info.mmdata, 'video') and self.info.mmdata.video:
+            elif self.info['video']:
                 length = self.info['video'][0]['length']
             if not length and hasattr(self, 'length'):
                 length = self.length

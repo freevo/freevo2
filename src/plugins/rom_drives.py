@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.53  2004/01/31 16:38:23  dischi
+# changes because of mediainfo changes
+#
 # Revision 1.52  2004/01/18 16:51:05  dischi
 # (re)move unneeded variables
 #
@@ -441,37 +444,33 @@ class Identify_Thread(threading.Thread):
         data = disc_info.mmdata
         
         # try to set the speed
-        if config.ROM_SPEED and data and not data.mime == 'video/dvd':
+        if config.ROM_SPEED and data and not data['mime'] == 'video/dvd':
             try:
                 ioctl(fd, CDROM_SELECT_SPEED, config.ROM_SPEED)
             except:
                 pass
 
-        if data and data.mime == 'audio/cd':
+        if data and data['mime'] == 'audio/cd':
             os.close(fd)
-            disc_id = data.id
+            disc_id = data['id']
             media.item = AudioDiskItem(disc_id, parent=None,
                                        devicename=media.devicename,
                                        display_type='audio')
             media.type = media.item.type
             media.item.media = media
-            if data.title:
-                media.item.name = data.title
+            if data['title']:
+                media.item.name = data['title']
             media.item.info.mmdata = data
             return
 
         os.close(fd)
         image = title = movie_info = more_info = fxd_file = None
 
-        if not data:
-            # this should never happen
-            return
-
-        media.id    = data.id
-        media.label = data.label
+        media.id    = data['id']
+        media.label = data['label']
         media.type  = 'cdrom'
 
-        label = data.label
+        label = data['label']
 
         # is the id in the database?
         if media.id in video.fxd_database['id']:
@@ -504,9 +503,9 @@ class Identify_Thread(threading.Thread):
 
         # DVD/VCD/SVCD:
         # There is data from mmpython for these three types
-        if data.mime in ('video/vcd', 'video/dvd'):
+        if data['mime'] in ('video/vcd', 'video/dvd'):
             if not title:
-                title = '%s [%s]' % (data.mime[6:].upper(), media.label)
+                title = '%s [%s]' % (data['mime'][6:].upper(), media.label)
 
             if movie_info:
                 media.item = copy.copy(movie_info)
@@ -519,22 +518,21 @@ class Identify_Thread(threading.Thread):
             media.item.info.set_variables(variables)
 
             media.item.name  = title
-            media.item.set_url(data.mime[6:] + '://')
+            media.item.set_url(data['mime'][6:] + '://')
             media.item.media = media
 
-            media.type  = data.mime[6:]
+            media.type  = data['mime'][6:]
 
             media.item.info.mmdata = data
 
             # copy configure options from track[0] to main item
             # for playback
             for k in ('audio', 'subtitles', 'chapters' ):
-                if data.tracks[0].has_key(k):
+                if data['tracks'][0].has_key(k):
                     if not data.has_key(k):
-                        data.keys.append(k)
-                        data[k] = data.tracks[0][k]
+                        data[k] = data['tracks'][0][k]
 
-            media.item.num_titles = len(data.tracks)
+            media.item.num_titles = len(data['tracks'])
             return
 
         # Disc is data of some sort. Mount it to get the file info
