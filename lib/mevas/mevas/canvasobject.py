@@ -197,12 +197,13 @@ class CanvasObject(object):
 		to the specified ancestor container.  If container is none, it 
 		defaults to the top-most container (i.e. the canvas).
 		"""
+		# FIXME: calculating relative zindex is broken.
 		x, y, zindex = self.x, self.y, self.zindex
 		visible, alpha = self.visible, self.alpha
 		parent = self.parent
 		while check_weakref(parent):
 			x, y = parent().x + x, parent().y + y
-			zindex += parent().zindex
+			zindex += parent().zindex + 1
 			visible = visible and parent().visible
 
 			# Apply parent alpha
