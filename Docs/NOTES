@@ -128,9 +128,35 @@ Aspect ratio resolutions:
 1.78  688x384
 
 FFMPEG encoder for DVDs
-/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900:vratetol=100000:keyint=100:vhq \
-  -oac mp3lame -lameopts br=80:cbr -sws 2 -vop scale=576:432 -o tst.avi -dvd 1 \
-  -ffourcc divx -alang en
+MP3 constant bitrate, 112 kbps
+
+1) Check aspect ratio:
+/usr/local/bin/mplayer -dvd 1 -frames 0
+( mplayer -dvd 1 -vo null -ao null -frames 0 >& /dev/stdout ) | grep Movie-Aspect
+
+You should see something like:
+Movie-Aspect is 1.78:1 - prescaling to correct movie aspect.
+
+2) Scaling values
+1.33    576:432
+1.78    688:384
+
+
+2) Crop detect:
+/usr/local/bin/mencoder -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900:vratetol=100000:keyint=100:vhq -oac mp3lame -lameopts br=112:cbr -sws 2 -vop cropdetect -o tst.avi -dvd 1 -ffourcc divx -alang en -ss 0:14:00 -frames 100
+
+Example crop detect output value:
+-vop crop=716:364:2:56
+
+Start with the number of lines, and make it divisible by 16 for better encoding.
+Y: (364/16) * 16 = 352. 12 pixels less, add 6 to the y offset which was 56 = 62.
+
+X: (716 / 16) * 16 = 704. 12 pixels less, add 6 to the x offset which was 2 = 8
+
+Check new aspect ratio: 704/352=
+New values: -vop crop=704:352:8:62
+
+
 
 Add "-ofps 23.976" if there are a lot of "skip frame!!!" messages (inverse telecine).
 
