@@ -9,6 +9,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/11 14:10:20  outlyer
+# Fix a crash if you press up/down in certain 'record' screens.
+# Also, disable debug information by default; allow the global variable
+# to decide.
+#
 # Revision 1.13  2003/09/07 11:18:27  dischi
 # many optical improvements
 #
@@ -66,7 +71,7 @@ from gui.Label     import *
 from gui.ListBox   import *
 from gui.AlertBox  import *
 
-DEBUG = 1
+DEBUG = config.DEBUG
 
 
 class ProgramDisplay(PopupBox):
@@ -188,7 +193,10 @@ class ProgramDisplay(PopupBox):
 
         if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
             if DEBUG: print 'ProgramDisplay: should scroll'
-            return self.options.eventhandler(event)
+            if hasattr(self,'options'):
+                return self.options.eventhandler(event)
+            else:
+                return
 
         elif event == em.INPUT_ENTER:
             if self.b0.selected and self.context == 'guide':
