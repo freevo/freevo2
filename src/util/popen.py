@@ -356,7 +356,9 @@ class _Watcher:
                 remove_proc.append( p )
 
         # remove dead processes
-        for p in remove_proc: del self.__processes[ p ]
+        for p in remove_proc:
+            if p in self.__processes:
+                del self.__processes[ p ]
 
     def killall( self ):
         for p in copy.copy(self.__processes):
