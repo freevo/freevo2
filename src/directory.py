@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.115  2004/02/14 12:06:29  dischi
+# fix unicode crash
+#
 # Revision 1.114  2004/02/13 17:18:38  dischi
 # do not skip after . for directories
 #
@@ -749,7 +752,7 @@ class DirItem(Playlist):
 
             if selected_pos != -1:
                 for i in items:
-                    if i.id() == selected_id:
+                    if Unicode(i.id()) == Unicode(selected_id):
                         self.menu.selected = i
                         break
                 else:
