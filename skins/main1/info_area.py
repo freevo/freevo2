@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/20 18:47:37  dischi
+# support for info_type to display, not normal item.type
+#
 # Revision 1.3  2003/04/24 19:57:52  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -78,7 +81,9 @@ class Info_Area(Skin_Area):
         content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
         item      = self.infoitem
 
-        if hasattr(item, 'type') and content.types.has_key(item.type):
+        if hasattr(item, 'info_type') and content.types.has_key(item.info_type):
+            val = content.types[item.info_type]
+        elif hasattr(item, 'type') and content.types.has_key(item.type):
             val = content.types[item.type]
         else:
             val = content.types['default']
