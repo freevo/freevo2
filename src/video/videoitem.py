@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.101  2003/12/09 19:43:01  dischi
+# patch from Matthieu Weber
+#
 # Revision 1.100  2003/12/06 16:25:45  dischi
 # support for type=url and <playlist> and <player>
 #
@@ -121,7 +124,7 @@ class VideoItem(Item):
         self.current_subitem = None
 
         self.subtitle_file = {}         # text subtitles
-        self.audio_file = {}            # audio dubbing
+        self.audio_file    = {}         # audio dubbing
 
         self.item_id         = None
         self.mplayer_options = ''
@@ -142,12 +145,16 @@ class VideoItem(Item):
         
         self.possible_player = []
 
+        self.file_id          = ''
+        if parent and parent.media:
+            self.file_id = parent.media.id + filename[len(os.path.join(parent.media.mountdir,"")):]
 
         self.filename = filename
         self.id       = filename
 
         if not self.name:
             self.name     = util.getname(filename)
+    
 
         # find image for tv show and build new title
         if config.VIDEO_SHOW_REGEXP_MATCH(self.name) and filename.find('://') == -1 and \
@@ -170,6 +177,9 @@ class VideoItem(Item):
                     if not self.xml_file:
                         self.xml_file = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
+                from video import discset_informations
+                if discset_informations.has_key(self.file_id):
+                    self.mplayer_options = discset_informations[self.file_id]
 
                 self.tv_show = True
                 self.show_name = show_name
@@ -455,20 +465,6 @@ class VideoItem(Item):
         mplayer_options = self.mplayer_options
         if not mplayer_options:
             mplayer_options = ""
-
-        if self.subtitle_file:
-            d, f = util.resolve_media_mountdir(self.subtitle_file['media-id'],
-                                               self.subtitle_file['file'])
-            if d:
-                util.mount(d)
-            mplayer_options += ' -sub "%s"' % f
-
-        if self.audio_file:
-            d, f = util.resolve_media_mountdir(self.audio_file['media-id'],
-                                               self.audio_file['file'])
-            if d:
-                util.mount(d)
-            mplayer_options += ' -audiofile "%s"' % f
 
         if arg:
             mplayer_options += ' %s' % arg

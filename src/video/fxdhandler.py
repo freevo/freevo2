@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/09 19:43:01  dischi
+# patch from Matthieu Weber
+#
 # Revision 1.5  2003/12/07 12:28:25  dischi
 # bugfix
 #
@@ -72,10 +75,12 @@ def parse_movie(fxd, node):
         parse a subitem from <video>
         """
         filename   = fxd.gettext(node)
+        media_id   = fxd.getattr(node, 'media-id')
+        if media_id == '':
+            filename = vfs.join(dirname, filename)
         mode       = node.name
         id         = fxd.getattr(node, 'id')
-        media_id   = fxd.getattr(node, 'media_id')
-        options    = fxd.getattr(node, 'mplayer_options')
+        options    = fxd.getattr(node, 'mplayer-options')
         player     = fxd.childcontent(node, 'player')
         playlist   = False
 
@@ -131,21 +136,7 @@ def parse_movie(fxd, node):
             id[info[0]] = info
 
         for variant in variants:
-            audio    = fxd.get_children(variant, 'audio')
-            subtitle = fxd.get_children(variant, 'subtitle')
-
-            if audio:
-                audio = { 'media_id': fxd.getattr(audio[0], 'media_id'),
-                          'file'    : fxd.gettext(audio[0]) }
-            else:
-                audio = {}
-
-            if subtitle:
-                subtitle = { 'media_id': fxd.getattr(subtitle[0], 'media_id'),
-                             'file'    : fxd.gettext(subtitle[0]) }
-            else:
-                subtitle = {}
-
+            mplayer_options += " " + fxd.getattr(variant, 'mplayer-options');
             parts = fxd.get_children(variant, 'part')
             if len(parts) == 1:
                 # a variant with one file
@@ -157,8 +148,25 @@ def parse_movie(fxd, node):
                 if is_playlist:
                     v.is_playlist  = True
 
-                v.subtitle_file = subtitle
+                audio    = fxd.get_children(parts[0], 'audio')
+                if audio:
+                    audio = { 'media_id': fxd.getattr(audio[0], 'media-id'),
+                              'file'    : fxd.gettext(audio[0]) }
+                    if audio['media_id'] == '':
+                        audio['file'] = vfs.join(dirname, audio['file'])
+                else:
+                    audio = {}
                 v.audio_file    = audio
+
+                subtitle = fxd.get_children(parts[0], 'subtitle')
+                if subtitle:
+                    subtitle = { 'media_id': fxd.getattr(subtitle[0], 'media-id'),
+                                 'file'    : fxd.gettext(subtitle[0]) }
+                    if subtitle['media_id'] == '':
+                        subtitle['file'] = vfs.join(dirname, subtitle['file'])
+                else:
+                    subtitle = {}
+                v.subtitle_file = subtitle
 
                 # global <video> mplayer_options
                 if mplayer_options:
@@ -166,17 +174,36 @@ def parse_movie(fxd, node):
             else:
                 # a variant with a list of files
                 v = VideoItem('', parent=item, parse=False)
-                v.subtitle_file = subtitle
-                v.audio_file    = audio
                 for p in parts:
                     ref = fxd.getattr(p ,'ref')
+                    audio    = fxd.get_children(p, 'audio')
+                    subtitle = fxd.get_children(p, 'subtitle')
+    
+                    if audio:
+                        audio = { 'media_id': fxd.getattr(audio[0], 'media-id'),
+                                  'file'    : fxd.gettext(audio[0]) }
+                        if audio['media_id'] == '':
+                            audio['file'] = vfs.join(dirname, audio['file'])
+                    else:
+                        audio = {}
+                        
+                    if subtitle:
+                        subtitle = { 'media_id': fxd.getattr(subtitle[0], 'media-id'),
+                                     'file'    : fxd.gettext(subtitle[0]) }
+                        if subtitle['media_id'] == '':
+                            subtitle['file'] = vfs.join(dirname, subtitle['file'])
+                    else:
+                        subtitle = {}
+
                     sub = VideoItem(id[ref][1], parent=v, parse=False)
-                    sub.mode, sub.media_id, sub.mplayer_options = id[ref][2:]
+                    sub.mode, sub.media_id, sub.mplayer_options, player, is_playlist = id[ref][2:]
+                    sub.subtitle_file = subtitle
+                    sub.audio_file    = audio
                     # global <video> mplayer_options
                     if mplayer_options:
                         sub.mplayer_options += mplayer_options
                     v.subitems.append(sub)
-
+ 
             v.name = fxd.getattr(variant, 'name')
             item.variants.append(v)
 
@@ -198,7 +225,7 @@ def parse_movie(fxd, node):
         for s in video:
             info = parse_video_child(fxd, s, item, dirname)
             v = VideoItem(info[1], parent=item, parse=False)
-            v.mode, v.media_id, v.mplayer_options = info[2:]
+            v.mode, v.media_id, v.mplayer_options, player, is_playlist = info[2:]
             if info[-2]:
                 v.force_player = info[-2]
             if info[-1]:
@@ -207,14 +234,14 @@ def parse_movie(fxd, node):
             if mplayer_options:
                 v.mplayer_options += mplayer_options
             item.subitems.append(v)
-        
+
     item.xml_file = fxd_file
     fxd.getattr(None, 'items', []).append(item)
 
 
 
 
-    
+
 def parse_disc_set(fxd, node):
     """
     Callback for VideoItem <disc-set>
@@ -244,11 +271,26 @@ def parse_disc_set(fxd, node):
 
         # what to do with the mplayer_options? We can't use them for
         # one disc, or can we? And file_ops? Also only on a per disc base.
+        # Answer: it applies to all the files of the disc, unless there
+        #         are <file-opt> which specify to what files the
+        #         mplayer_options apply. <file-opt> is not such a good
+        #         name,  though.
         # So I ignore that we are in a disc right now and use the 'item'
-        item.mplayer_options = fxd.getattr(disc, 'mplayer_options')
-        for f in fxd.get_children(disc, 'file-opts'):
-            opt = { 'file-d': f.getattr(f, 'media-id'),
-                    'mplayer_options': f.getattr(f, 'mplayer_options') }
+        item.mplayer_options = fxd.getattr(disc, 'mplayer-options')
+        there_are_file_opts = 0
+        for f in fxd.get_children(disc, 'file-opt'):
+            there_are_file_opts = 1
+            file_media_id = fxd.getattr(f, 'media-id')
+            if not file_media_id:
+                file_media_id = id
+            mpl_opts = item.mplayer_options + ' ' + fxd.getattr(f, 'mplayer-options')
+            opt = { 'file-id' : file_media_id + fxd.gettext(f),
+                    'mplayer-options': mpl_opts }
             item.files_options.append(opt)
+        if there_are_file_opts:
+            # in this case, the disc/@mplayer_options is retricted to the set
+            # of files defined in the file-opt elements
+            item.mplayer_options = ''
+    
     item.xml_file = fxd_file
     fxd.getattr(None, 'items', []).append(item)

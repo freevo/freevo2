@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/12/09 19:43:01  dischi
+# patch from Matthieu Weber
+#
 # Revision 1.18  2003/12/06 13:44:11  dischi
 # move more info to the Mimetype
 #
@@ -161,9 +164,6 @@ class PluginInterface(plugin.MimetypePlugin):
             if not diritem.xml_file:
                 diritem.xml_file = tvinfo[3]
 
-        
-
-
 def hash_fxd_movie_database():
     """
     hash fxd movie files in some directories. This is used e.g. by the
@@ -217,6 +217,8 @@ def hash_fxd_movie_database():
             k = vfs.splitext(vfs.basename(info.xml_file))[0]
             tv_show_informations[k] = (info.image, info.info, info.mplayer_options,
                                        info.xml_file)
+            for fo in info.files_options:
+                discset_informations[fo['file-id']] = fo['mplayer-options']
             
     _debug_('done',1)
     return 1
