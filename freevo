@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.100  2004/01/04 11:18:09  dischi
+# fix args handling for execute
+#
 # Revision 1.99  2003/12/07 15:42:19  dischi
 # cleanup
 #
@@ -387,7 +390,7 @@ if [ "$1" = "execute" ] ; then
     fi
 
     trap './freevo stop $APP' 1 2 15
-    $RUNAPP $PYTHON $@ &
+    $RUNAPP $PYTHON "$@" &
     echo $! > $PID_FILE
     wait `cat $PID_FILE` >/dev/null 2>/dev/null
     rm $PID_FILE > /dev/null 2>&1
