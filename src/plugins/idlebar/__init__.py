@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/05/31 10:43:20  dischi
+# redraw not only in main, redraw when skin is active
+#
 # Revision 1.16  2004/04/25 12:38:22  dischi
 # move idlebar image to background
 #
@@ -126,7 +129,8 @@ class PluginInterface(plugin.DaemonPlugin):
         init the idlebar
         """
         plugin.DaemonPlugin.__init__(self)
-        self.poll_interval   = 3000
+        self.poll_interval  = 3000
+        self.poll_menu_only = False
         self.plugins = None
         plugin.register(self, 'idlebar')
         self.visible = True
@@ -158,10 +162,11 @@ class PluginInterface(plugin.DaemonPlugin):
                 
         # draw the cached barimage
         if self.bar:
-            osd.drawimage(self.bar, (0, 0, w, h), background=True )
+            osd.drawimage(self.bar, (0, 0, w, h), background=True)
 
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
+
         x = osd.x + 10
         for p in self.plugins:
             add_x = p.draw((type, object), x, osd)
@@ -175,15 +180,17 @@ class PluginInterface(plugin.DaemonPlugin):
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
         plugin wants to redraw)
         """
-        if plugin.isevent(event) == 'IDENTIFY_MEDIA':
-            skin.get_singleton().redraw()
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and skin.active():
+            skin.redraw()
         return False
+
 
     def poll(self):
         """
         update the idlebar every 30 secs even if nothing happens
         """
-        skin.get_singleton().redraw()
+        if skin.active():
+            skin.redraw()
 
 
 
@@ -522,4 +529,4 @@ class logo(IdleBarPlugin):
             image = osd.settings.images['logo']
         else:
             image = os.path.join(config.IMAGE_DIR, self.image)
-        return osd.draw_image(image, (x, osd.y + 5, -1, 75))[0]
+        return osd.drawimage(image, (x, osd.y + 5, -1, 75))[0]
