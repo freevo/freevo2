@@ -6,6 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/06/18 12:12:02  outlyer
+# Patch from Brian J.Murrel to compensate for timer drift. It will do nothing
+# if your system doesn't suffer from this problem, so it should be safe. Any
+# problems, please let me know.
+#
 # Revision 1.40  2004/06/10 02:32:17  rshortt
 # Add RECORD_START/STOP events along with VCR_PRE/POST_REC commands.
 #
@@ -912,7 +917,13 @@ class RecordServer(xmlrpc.XMLRPC):
 
 
     def minuteCheck(self):
-        reactor.callLater(60, self.minuteCheck)
+        next_minute = (int(time.time()/60) * 60 + 60) - int(time.time())
+        if next_minute != 60:
+            # Compensate for timer drift 
+            if DEBUG: log.debug('top of the minute in %s seconds' % next_minute)
+            reactor.callLater(next_minute, self.minuteCheck)
+        else:
+            reactor.callLater(60, self.minuteCheck)
         rec_prog = self.checkToRecord()
         if rec_prog:
             self.record_app = plugin.getbyname('RECORD')
