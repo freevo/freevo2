@@ -1,56 +1,25 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
-# util/misc.py - Some Misc Utilities
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# misc.py - misc utilities helper functions
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# Notes:
-# Todo:
+# This file contains some smaller helper functions needed in Freevo and other
+# util modules.
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.48  2004/10/28 19:33:38  dischi
-# cleanup utils:
-# o remove config dependency when possible
-# o add sysconfig support
-# o shorten to 80 chars/line
-# o add new header
-# o add more docs
+# TODO: More cleanups here. What need to be here? What is not needed anymore?
+#       Split into different files?
 #
-# Revision 1.47  2004/10/26 19:14:52  dischi
-# adjust to new sysconfig file
+# Note: I removed some functiosn we don't need anymore to clean up this file.
+#       Other functions only needed once are moved to the file were they
+#       are needed.
 #
-# Revision 1.46  2004/10/06 19:13:07  dischi
-# remove util.open3, move run and stdout to misc for now
-#
-# Revision 1.45  2004/08/27 14:27:31  dischi
-# prevent crash for bad files
-#
-# Revision 1.44  2004/07/11 19:33:35  dischi
-# make mass storage only storage to cover all forms
-#
-# Revision 1.43  2004/07/11 18:43:52  dischi
-# fix usb storage detection
-#
-# Revision 1.42  2004/07/11 11:46:03  dischi
-# decrease record server calling
-#
-# Revision 1.41  2004/07/10 12:33:42  dischi
-# header cleanup
-#
-# Revision 1.40  2004/07/04 08:10:50  dischi
-# make sure upsoon is written
-#
-# Revision 1.39  2004/06/23 20:29:42  dischi
-# fix typo in hasattr
-#
-# Revision 1.38  2004/06/23 12:11:59  outlyer
-# Apparently TvProgram instances without a sub_title no longer define that
-# property anymore, so make sure it exists before trying to access it.
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al.
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -67,22 +36,26 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
+# -----------------------------------------------------------------------------
 
-
-import glob
-import os, sys
-import string, re
+# python imports
+import os
+import string
+import re
 import copy
 import htmlentitydefs
-import popen2
 
+# freevo imports
 import sysconfig
+
+# util imports
+import vfs
 from vfs import abspath as vfs_abspath
 
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52560
 def unique(s):
-    """Return a list of the elements in s, but without duplicates.
+    """
+    Return a list of the elements in s, but without duplicates.
 
     For example, unique([1,2,3,1,2,3]) is some permutation of [1,2,3],
     unique("abcabc") some permutation of ["a", "b", "c"], and
@@ -150,21 +123,6 @@ def unique(s):
     return u
 
 
-# Helper function for the md5 routine; we don't want to
-# write filenames that aren't in lower ascii so we uhm,
-# hexify them.
-def hexify(str):
-    """
-    return the string 'str' as hex string
-    """
-    hexStr = string.hexdigits
-    r = ''
-    for ch in str:
-        i = ord(ch)
-        r = r + hexStr[(i >> 4) & 0xF] + hexStr[i & 0xF]
-    return r
-
-
 def escape(sql):
     """
     Escape a SQL query in a manner suitable for sqlite. Also convert
@@ -221,95 +179,7 @@ def getname(file, skip_ext=True):
     return Unicode(name)
 
 
-def killall(appname, sig=9):
-    '''kills all applications with the string <appname> in their commandline.
-
-    The <sig> parameter indicates the signal to use.
-    This implementation uses the /proc filesystem, it might be Linux-dependent.
-    '''
-
-    unify_name = re.compile('[^A-Za-z0-9]').sub
-    appname = unify_name('', appname)
-
-    cmdline_filenames = glob.glob('/proc/[0-9]*/cmdline')
-
-    for cmdline_filename in cmdline_filenames:
-
-        try:
-            fd = vfs.open(cmdline_filename)
-            cmdline = fd.read()
-            fd.close()
-        except IOError:
-            continue
-
-        if unify_name('', cmdline).find(appname) != -1:
-            # Found one, kill it
-            pid = int(cmdline_filename.split('/')[2])
-            try:
-                os.kill(pid, sig)
-            except:
-                pass
-    return
-
-
-def title_case(phrase):
-    """
-    Return a text string (i.e. from CDDB) with
-    the case normalized into title case.
-    This is because people frequently put in ugly
-    information, and we can avoid it here'
-    """
-
-    s = ''
-    for letter in phrase:
-        if s and s[-1] == ' ' or s == '' or s[-1] == '-' or s[-1] == '.':
-            s += string.upper(letter)
-        elif letter == '_':
-                s += ' '
-        else:
-            s += string.lower(letter)
-    return s
-
-
-
-
-def get_bookmarkfile(filename):
-    myfile = vfs.basename(filename)
-    myfile = sysconfig.CACHEDIR + "/" + myfile + '.bookmark'
-    return myfile
-
-
-
-def format_text(text):
-    while len(text) and text[0] in (u' ', u'\t', u'\n'):
-        text = text[1:]
-    text = re.sub(u'\n[\t *]', u' ', text)
-    while len(text) and text[-1] in (u' ', u'\t', u'\n'):
-        text = text[:-1]
-    return text
-
-
-def list_usb_devices():
-    devices = []
-    fd = open('/proc/bus/usb/devices', 'r')
-    for line in fd.readlines():
-        if line[:2] == 'P:':
-            devices.append('%s:%s' % (line[11:15], line[23:27]))
-    fd.close()
-    return devices
-
-
-def is_usb_storage_device():
-    fd = open('/proc/bus/usb/devices', 'r')
-    for line in fd.readlines():
-           if line.lower().find('storage') != -1:
-               fd.close()
-               return 0
-    fd.close()
-    return -1
-
-
-def smartsort(x,y): # A compare function for use in list.sort()
+def smartsort(x,y):
     """
     Compares strings after stripping off 'The' and 'A' to be 'smarter'
     Also obviously ignores the full path when looking for 'The' and 'A'
@@ -358,27 +228,6 @@ def remove_start_string(string, start):
     return string[0].upper() + string[1:]
 
 
-def tagmp3 (filename, title=None, artist=None, album=None, track=None,
-            tracktotal=None, year=None):
-    """
-    use eyeD3 directly from inside mmpython to
-    set the tag. We default to 2.3 since even
-    though 2.4 is the accepted standard now, more
-    players support 2.3
-    """
-    import mmpython.audio.eyeD3 as eyeD3   # Until mmpython has an interface for this.
-
-    tag = eyeD3.Tag(String(filename))
-    tag.header.setVersion(eyeD3.ID3_V2_3)
-    if artist: tag.setArtist(String(artist))
-    if album:  tag.setAlbum(String(album))
-    if title:  tag.setTitle(String(title))
-    if track:  tag.setTrackNum((track,tracktotal))   # eyed3 accepts None for tracktotal
-    if year:   tag.setDate(year)
-    tag.update()
-    return
-
-
 def htmlenties2txt(string):
     """
     Converts a string to a string with all html entities resolved.
@@ -415,195 +264,3 @@ def htmlenties2txt(string):
                 continue
         string = string.replace(entity, replacement)
     return string
-
-
-#
-# Coming Up for TV schedule
-#
-
-def comingup(items=None, ScheduledRecordings=None):
-    import tv.record_client as ri
-    import time
-    import codecs
-
-    result = u''
-
-    cachefile = '%s/upsoon' % sysconfig.CACHEDIR
-    if not ScheduledRecordings:
-        if (os.path.exists(cachefile) and \
-            (abs(time.time() - os.path.getmtime(cachefile)) < 600)):
-            cache = codecs.open(cachefile,'r', sysconfig.ENCODING)
-            for a in cache.readlines():
-                result = result + a
-            cache.close()
-            return result
-
-        (status, recordings) = ri.getScheduledRecordings()
-    else:
-        (status, recordings) = ScheduledRecordings
-
-    if not status:
-        result = _('The recordserver is down')
-        return result
-
-    progs = recordings.getProgramList()
-
-    f = lambda a, b: cmp(a.start, b.start)
-    progl = progs.values()
-    progl.sort(f)
-
-    today = []
-    tomorrow = []
-    later = []
-
-    for what in progl:
-        if time.localtime(what.start)[2] == time.localtime()[2]:
-            today.append(what)
-        if time.localtime(what.start)[2] == (time.localtime()[2] + 1):
-            tomorrow.append(what)
-        if time.localtime(what.start)[2] > (time.localtime()[2] + 1):
-            later.append(what)
-
-    if len(today) > 0:
-        result = result + _('Today') + u':\n'
-        for m in today:
-            sub_title = ''
-            if hasattr(m,'sub_title') and m.sub_title:
-                sub_title = u' "' + Unicode(m.sub_title) + u'" '
-            result = result + u"- %s%s at %s\n" % \
-                     ( Unicode(m.title), Unicode(sub_title),
-                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
-
-    if len(tomorrow) > 0:
-        result = result + _('Tomorrow') + u':\n'
-        for m in tomorrow:
-            sub_title = ''
-            if hasattr(m,'sub_title') and m.sub_title:
-                sub_title = ' "' + m.sub_title + '" '
-            result = result + u"- %s%s at %s\n" % \
-                     ( Unicode(m.title), Unicode(sub_title),
-                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
-
-    if len(later) > 0:
-        result = result + _('This Week') + u':\n'
-        for m in later:
-            sub_title = ''
-            if hasattr(m,'sub_title') and m.sub_title:
-                sub_title = ' "' + m.sub_title + '" '
-            result = result + u"- %s%s at %s\n" % \
-                     ( Unicode(m.title), Unicode(sub_title),
-                       Unicode(time.strftime('%I:%M%p',time.localtime(m.start))) )
-
-    if not result:
-        result = _('No recordings are scheduled')
-
-    if os.path.isfile(cachefile):
-        os.unlink(cachefile)
-    cache = codecs.open(cachefile,'w', sysconfig.ENCODING)
-    cache.write(result)
-    cache.close()
-
-    return result
-
-
-
-#
-# synchronized objects and methods.
-# By André Bjärby
-# From http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/65202
-#
-from types import *
-def _get_method_names (obj):
-    if type(obj) == InstanceType:
-        return _get_method_names(obj.__class__)
-
-    elif type(obj) == ClassType:
-        result = []
-        for name, func in obj.__dict__.items():
-            if type(func) == FunctionType:
-                result.append((name, func))
-
-        for base in obj.__bases__:
-            result.extend(_get_method_names(base))
-
-        return result
-
-
-class _SynchronizedMethod:
-
-    def __init__ (self, method, obj, lock):
-        self.__method = method
-        self.__obj = obj
-        self.__lock = lock
-
-    def __call__ (self, *args, **kwargs):
-        self.__lock.acquire()
-        try:
-            #print 'Calling method %s from obj %s' % (self.__method, self.__obj)
-            return self.__method(self.__obj, *args, **kwargs)
-        finally:
-            self.__lock.release()
-
-
-class SynchronizedObject:
-
-    def __init__ (self, obj, ignore=[], lock=None):
-        import threading
-
-        self.__methods = {}
-        self.__obj = obj
-        lock = lock and lock or threading.RLock()
-        for name, method in _get_method_names(obj):
-            if not name in ignore:
-                self.__methods[name] = _SynchronizedMethod(method, obj, lock)
-
-    def __getattr__ (self, name):
-        try:
-            return self.__methods[name]
-        except KeyError:
-            return getattr(self.__obj, name)
-
-def stdout(app):
-    """
-    start app and return the stdout
-    """
-    ret = []
-    child = popen2.Popen3(app, 1, 100)
-    while(1):
-        data = child.fromchild.readline()
-        if not data:
-            break
-        ret.append(data)
-    child.wait()
-    child.fromchild.close()
-    child.childerr.close()
-    child.tochild.close()
-    return ret
-
-
-def run(app, object, signal=15):
-    """
-    run a child until object.abort is True. Than kill the child with
-    the given signal
-    """
-    if isinstance(app, str) or isinstance(app, unicode):
-        print 'WARNING: popen.run with string as app'
-        print 'This may cause some problems with threads'
-
-    child = popen2.Popen3(app, 1, 100)
-    child.childerr.close()
-    child.fromchild.close()
-    while(1):
-        time.sleep(0.1)
-        if object.abort:
-            os.kill(child.pid, signal)
-
-        try:
-            pid = os.waitpid(child.pid, os.WNOHANG)[0]
-        except OSError:
-            break
-
-        if pid:
-            break
-
-    child.tochild.close()
