@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/08/23 14:33:45  dischi
+# oops, revert last change
+#
 # Revision 1.63  2004/08/23 14:31:38  dischi
 # support new animation code
 #
@@ -298,7 +301,7 @@ class ImageViewer(Application):
                                      (gui.width, gui.height))
             a.start()
             while a.running():
-                animation.render.update()
+                animation.render().update()
 
             if 0:
                 t2 = time.time()
@@ -542,4 +545,4 @@ class ImageViewer(Application):
             a = animation.Move([self.osd_box, self.osd_text], animation.VERTICAL, 20, -move_y)
             a.start()
             while a.running():
-                animation.render.update()
+                animation.render().update()
