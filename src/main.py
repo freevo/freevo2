@@ -45,7 +45,7 @@ import signal
 try:
     import notifier
     if notifier.VERSION < '0.3.0':
-        raise ImportError('found version %s', notifier.VERSION)
+        raise ImportError('found version %s' % notifier.VERSION)
     notifier.init(notifier.GENERIC)
 except Exception, e:
     print 'Error: This version of Freevo requires pyNotifier >= 0.3.0'
@@ -114,7 +114,7 @@ else:
 try:
     import mmpython.version
     if mmpython.version.CHANGED < 20040629:
-        raise ImportError('found version %s', mmpython.version.VERSION)
+        raise ImportError('found version %s' % mmpython.version.VERSION)
 except ImportError:
     print 'Error: This version of Freevo requires mmpython >= 0.4.3'
     print 'You can download the latest release from'
@@ -129,7 +129,7 @@ except ImportError:
 try:
     import mbus
     if mbus.VERSION < '0.8.1':
-        raise ImportError('found version %s', mbus.VERSION)
+        raise ImportError('found version %s' % mbus.VERSION)
 except Exception, e:
     print 'Error: This version of Freevo requires pyMbus >= 0.8.1'
     print 'To download and install pyMbus to ./site-packages run \'make\''
