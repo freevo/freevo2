@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/05/29 21:17:00  rshortt
+# Make sure we use runapp to avoid linker errors.
+#
 # Revision 1.45  2003/05/29 21:10:18  rshortt
 # Remove the 'killall' kludge and save and use process id's.  The freevo script accepts a stop command that can be used alone to stop freevo or with an extra argument to stop a process that was started with 'execute'.  That extra argument must be the .py file or the path to the .py file.
 #
@@ -157,7 +160,7 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     # Shutdown any daemon plugins that need it.
     plugin.shutdown()
 
-    os.system('./freevo stop')
+    os.system('./runapp ./freevo stop')
 
     # XXX kludge to shutdown freevo_xwin
     util.killall('freevo_xwin')
@@ -253,6 +256,8 @@ def signal_handler(sig, frame):
 
         # Shutdown any daemon plugins that need it.
         plugin.shutdown()
+
+        os.system('./runapp ./freevo stop')
 
         # XXX kludge to shutdown freevo_xwin
         util.killall('freevo_xwin')
