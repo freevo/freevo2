@@ -35,9 +35,8 @@ mkdir -p %{buildroot}%{_prefix}
 
 %install
 #cp -av . %{buildroot}%{_prefix}
-install -s -m 755 *.so* %{buildroot}%{_prefix}
+install -s -m 755 freevo_python *.so* %{buildroot}%{_prefix}
 install -m 644 preloads VERSION %{buildroot}%{_prefix}
-cp -av freevo_python %{buildroot}%{_prefix}
 cp -av lib %{buildroot}%{_prefix}/lib
 
 %clean
