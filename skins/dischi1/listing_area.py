@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/03/22 22:20:22  dischi
+# fixed a redraw bug
+#
 # Revision 1.13  2003/03/22 20:08:30  dischi
 # Lots of changes:
 # o blue2_big and blue2_small are gone, it's only blue2 now
@@ -111,6 +114,7 @@ class Listing_Area(Skin_Area):
         content   = self.calc_geometry(self.layout.content, copy_object=TRUE)
 
         if self.last_get_items_geometry[0] == ( menu, content, display_style ):
+            self.area_val, self.layout = backup
             return self.last_get_items_geometry[1]
         
         self.last_get_items_geometry[0] = ( menu, content, display_style )
@@ -175,6 +179,7 @@ class Listing_Area(Skin_Area):
 
         else:
             print 'unknown content type %s' % content.type
+            self.area_val, self.layout = backup
             return None
         
         # restore
@@ -216,10 +221,13 @@ class Listing_Area(Skin_Area):
 
         i = 0
         for choice in self.menuw.menu_items:
-            if self.last_choices[1][i] != choice:
+            try:
+                if self.last_choices[1][i] != choice:
+                    return TRUE
+                i += 1
+            except IndexError:
                 return TRUE
-            i += 1
-
+            
         
     def update_content(self):
         """

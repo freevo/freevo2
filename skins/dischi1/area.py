@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/03/22 22:19:01  dischi
+# fixed a redraw bug
+#
 # Revision 1.30  2003/03/22 20:08:30  dischi
 # Lots of changes:
 # o blue2_big and blue2_small are gone, it's only blue2 now
@@ -407,6 +410,8 @@ class Skin_Area:
             # no update needed: return
             if not self.update_content_needed():
                 self.content_objects = self.last_content_objects
+                for o in self.content_objects:
+                    self.screen.draw(o[5][0], o[5][1])
                 return
 
         self.mode = 1 # content
@@ -467,7 +472,7 @@ class Skin_Area:
                 self.screen.update('content', c_rect)
         elif c_rect[0] < c_rect[2]:
             self.screen.update('content', c_rect)
-        
+
         self.last_bg_objects = self.bg_objects
         self.last_content_objects = self.content_objects
 
@@ -681,13 +686,13 @@ class Skin_Area:
         draw a round box ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
         """
+
+        draw = ('background', ('rectangle', x, y, x+width, y+height, rect.bgcolor,
+                               rect.size, rect.color, rect.radius))
         if self.mode == 1:
-            self.content_objects += [ ( 'rectangle', x, y, width,
-                                      height, rect.bgcolor, rect.size, rect.color,
-                                      rect.radius ) ]
+            self.content_objects += [ ( 'rectangle', x, y, width, height, draw ) ]
             
-        self.screen.draw('background', ('rectangle', x, y, x+width, y+height, rect.bgcolor,
-                                        rect.size, rect.color, rect.radius))
+        self.screen.draw(draw[0], draw[1])
 
 
             
@@ -721,16 +726,17 @@ class Skin_Area:
         if height2 == -1:
             height2 = font.h + 2
 
-        self.screen.draw('content', ('text', text, font, x, y, width, height, height2,
-                                     align_h, align_v, mode, ellipses ))
+        draw = ('content', ('text', text, font, x, y, width, height, height2,
+                            align_h, align_v, mode, ellipses ))
 
         if return_area:
             ret = osd.drawstringframed(text, x, y, width, height, None, None,
                                        font=font.name, ptsize=font.size,
                                        align_h = align_h, align_v = align_v,
                                        mode=mode, ellipses=ellipses, layer=self.dummy_layer)
-        self.content_objects += [ ( 'text', x, y, width, height2, height, text, font, align_h,
-                                  align_v, mode, ellipses ) ]
+
+        self.screen.draw(draw[0], draw[1])
+        self.content_objects += [ ( 'text', x, y, width, height2, draw) ]
 
         if return_area:
             return ret[1]
@@ -742,21 +748,30 @@ class Skin_Area:
         in a variable. The real drawing is done inside draw()
         """
         if isinstance(image, str):
-            image = pygame.transform.scale(osd.loadbitmap(image), (val.width, val.height))
-            
+            cname = '%s-%s-%s' % (image, val.width, val.height)
+            cimage = self.imagecache[cname]
+            if not cimage:
+                image = pygame.transform.scale(osd.loadbitmap(image), (val.width, val.height))
+                self.imagecache[cname] = image
+            else:
+                image = cimage
+                
         if isinstance(val, tuple):
-            self.screen.draw('content', ('image', image, val[0], val[1], image.get_width(),
-                                         image.get_height()))
+            draw = ( 'content', ('image', image, val[0], val[1], image.get_width(),
+                                 image.get_height()) )
+            
+            self.screen.draw(draw[0], draw[1])
             self.content_objects += [ ( 'image', val[0], val[1], image.get_width(),
-                                      image.get_height(), image ) ]
+                                      image.get_height(), draw ) ]
             return
         
         elif hasattr(val, 'label') and val.label == 'background':
-            self.screen.draw('background', ('image', image, val.x, val.y, val.width,
-                                            val.height))
+            draw = ( 'background', ('image', image, val.x, val.y, val.width,
+                                    val.height) )
         else:
-            self.screen.draw('content', ('image', image, val.x, val.y, val.width,
+            draw = ( 'content', ('image', image, val.x, val.y, val.width,
                                          val.height))
 
+        self.screen.draw(draw[0], draw[1])
         self.content_objects += [ ( 'image', val.x, val.y, val.width,
-                                    val.height, image ) ]
+                                    val.height, draw ) ]
