@@ -1,7 +1,0 @@
-AuthUserFile /etc/apache/passwd
-AuthGroupFile /etc/apache/group
-AuthName "ettin"
-AuthType Basic
-<Limit GET>
-        require group ETTIN_INTERNAL
-</Limit>
