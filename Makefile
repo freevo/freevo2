@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/02/24 05:15:35  krister
+# Added trace.txt to the clean target.
+#
 # Revision 1.25  2003/02/15 03:31:21  krister
 # Updated for new setup app.
 #
@@ -102,7 +105,7 @@ $(SUBDIRS):
 clean:
 	find . -name "*.pyo" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
-	-rm -f *.o log_main_out 
+	-rm -f *.o log_main_out trace.txt
 	-rm -f log_main_err log.txt runapp freevo_xwin mplayer_std*.log
 	cd fbcon ; $(MAKE) clean
 
