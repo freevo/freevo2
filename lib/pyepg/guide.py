@@ -10,6 +10,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/11/27 02:22:38  rshortt
+# -Some verbose prints for debug.
+# -Debugging and changes to add_program().
+# -Impliment add_data_vdr() which uses vdrpylib to get guide info from VDR.
+#  This is still full of debug and is a work in progress but its working
+#  well at this point.  You can find vdrpylib at http://vdrpylib.sf.net/ and
+#  a CVS snapshot is available:  http://vdrpylib.sf.net/vdrpylib-20041126.tar.gz
+#
 # Revision 1.8  2004/11/19 19:03:29  dischi
 # add get_program_by_id
 #
@@ -90,6 +98,7 @@ def escape_value(val):
         return val
 
     val = val.replace('"', '')
+    val = val.replace('\'', '')
     # print 'RLS: val2 - %s' % val
     return val
 
@@ -110,6 +119,8 @@ try:
     import sqlite
 except:
     print "Python SQLite not installed!"
+
+from sqlite import IntegrityError
 
 
 class EPGDB:
@@ -204,6 +215,7 @@ class EPGDB:
 
     def add_program(self, channel_id, title, start, stop, subtitle='', 
                     description='', episode=''):
+        now = time.time()
         title = escape_value(title)
         subtitle = escape_value(subtitle)
         description = escape_value(description)
@@ -214,10 +226,15 @@ class EPGDB:
 
         del_list = []
 
+        #print 'add_program step 1: %f' % float(time.time()-now)
         rows = self.execute('select * from programs where channel_id="%s" \
                             and start=%s' % (channel_id, start))
+        #print 'add_program step 2: %f, %d rows' % (float(time.time()-now), len(rows))
 
         if len(rows) > 1:
+            # With the current schema this should NOT be possible.  If we stay
+            # with it this may be removed.
+            #
             # Bad. We should only have one program for each chanid:start
             # Lets end this right here.
             #rows = self.execute('select id from programs where channel_id="%s" \
@@ -228,7 +245,6 @@ class EPGDB:
                 del_list.append(row.id)
 
             self.remove_programs(del_list)
-            del_list = []
 
         elif len(rows) == 1:
             old_prog = rows[0]
@@ -238,30 +254,36 @@ class EPGDB:
             pass
 
 
-        if old_prog and old_prog.title == title:
-            # program timeslot is unchanged, see if there's anything
-            # that we should update
-            if old_prog.subtitle != subtitle:
-                self.execute('update programs set subtitle="%s" \
-                              where id="%s"' % (subtitle, old_prog.id))
-                self.commit()
-            if old_prog.description != description:
-                self.execute('update programs set description="%s" \
-                              where id="%s"' % (description, old_prog.id))
-                self.commit()
-            if old_prog.episode != episode:
-                self.execute('update programs set episode="%s" \
-                              where id="%s"' % (episode, old_prog.id))
-                self.commit()
+        if old_prog:
+            if old_prog['title'] == title:
+                # program timeslot is unchanged, see if there's anything
+                # that we should update
+                if old_prog['subtitle'] != subtitle:
+                    print 'different subtitles: %s - %s' % (old_prog['subtitle'], subtitle)
+                    self.execute('update programs set subtitle="%s" where id=%d' % (subtitle, old_prog.id))
+                    self.commit()
+                if old_prog['description'] != description:
+                    print 'different descs: %s - %s' % (old_prog['description'], description)
+                    self.execute('update programs set description="%s" where id=%d' % (description, old_prog.id))
+                    self.commit()
+                if old_prog['episode'] != episode:
+                    print 'different episodes: %s - %s' % (old_prog['episode'], episode)
+                    self.execute('update programs set episode="%s" where id=%d' % (episode, old_prog.id))
+                    self.commit()
+    
+                #print 'add_program step 3 (replace) took %f' % float(time.time()-now)
+                return
 
-            return
+            else:
+                print 'different titles: %s - %s' % (old_prog.title, title)
+                # old prog and new prog have same times but different title,
+                # this is probably a schedule change, remove the old one
+                # TODO: check for shifting times and program overlaps
 
-        else:
-            # old prog and new prog have same times but different title,
-            # this is probably a schedule change, remove the old one
-            # TODO: check for shifting times and program overlaps
-
-            self.remove_program(old_prog)
+                #print 'add_program step 4: %f' % float(time.time()-now)
+                print 'got old_prog with different title: %s - %s' % \
+                      (old_prog['title'], title)
+                self.remove_program(old_prog['id'])
 
         #
         # If we made it here there's no identical program in the table 
@@ -285,6 +307,7 @@ class EPGDB:
         # If we got this far all we need to do now is insert a new
         # program row.
         #
+        #print 'add_program step 5 took %f' % float(time.time()-now)
 
         query = 'insert into programs (channel_id, title, start, stop, \
                                        subtitle, episode, description) \
@@ -292,10 +315,18 @@ class EPGDB:
                         (channel_id, title, start, stop, 
                          subtitle, episode, description)
 
-        # print 'RLS: no dupes of %s at %d on %s' % (title, start, channel_id)
-        # print 'QUERY: "%s"' % query
-        self.execute(query)
-        self.commit()
+        try:
+            self.execute(query)
+            self.commit()
+        except IntegrityError:
+            print 'Program for (%s, %s) exists:' % (channel_id, start)
+            rows = self.execute('select * from programs where channel_id="%s" \
+                                 and start=%s' % (channel_id, start))
+            for row in rows:
+                print '    %s' % row
+            traceback.print_exc()
+            
+        #print 'add_program step 6 took %f' % float(time.time()-now)
                 
 
     def get_programs(self, channels, start=0, stop=-1):
@@ -344,9 +375,9 @@ class EPGDB:
 
 
     def remove_program(self, id):
-        query = 'delete from programs where id="%s"' % id
+        query = 'delete from programs where id=%d' % id
 
-        # print 'REMOVE: %s' % escape_query(query)
+        print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
         self.commit()
 
@@ -354,11 +385,11 @@ class EPGDB:
     def remove_programs(self, ids):
         query = 'delete from programs where'
         for id in ids:
-            query = '%s id="%s"' % (query, id)
+            query = '%s id=%d' % id
             if ids.index(id) < len(ids)-1: 
                 query = '%s or' % query
 
-        # print 'REMOVE: %s' % escape_query(query)
+        print 'REMOVE: %s' % escape_query(query)
         self.execute(query)
         self.commit()
 
@@ -391,13 +422,41 @@ class EPGDB:
         return False
 
 
-    def add_data_vdr(self, vdr_epg_file):
+    def add_data_vdr(self, epg_file=None, host=None, port=None):
         try:
-            import vdrpylib
+            import vdr.vdr
         except:
-            print 'vdrpylib not installed'
+            print 'vdrpylib is not installed:'
+            print 'http://sourceforge.net/projects/vdrpylib/'
 
-        return False
+        print 'pyepg epgfile1 is %s' % epg_file
+        if os.path.isfile(epg_file):
+            (vdr_dir, epg_file) = os.path.split(epg_file)
+            vdr = vdr.vdr.VDR(epgfile=epg_file, videopath=vdr_dir)
+            print 'pyepg epgfile is %s' % vdr.epgfile
+            epg = vdr.readepg()
+            chans = vdr.channels.values()
+            for c in chans:
+                # print '%s has %d events' % (c.__str__(), len(c.events))
+                print 'Adding channel: %s' % c.id
+                self.add_channel(c.id, c.name, c.rid)
+                for e in c.events:
+                    subtitle = e.subtitle
+                    if not subtitle: subtitle = ''
+                    desc = e.desc
+                    if not desc: desc = ''
+       
+                    self.add_program(c.id, e.title, e.start, int(e.start+e.dur),
+                                     subtitle=subtitle, description=desc)
+
+
+        elif host and port:
+            # ss = s.SVDRP(host='localhost')
+            print 'VDR EPG from SVDRP not yet implimented.'
+            return False
+        else:
+            print 'No source for VDR EPG.'
+            return False
 
 
 
