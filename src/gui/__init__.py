@@ -24,6 +24,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 19:15:46  dischi
+# remove import of debug
+#
 # Revision 1.13  2004/02/21 19:33:24  dischi
 # enhance input box, merge password and normal input
 #
@@ -80,5 +83,3 @@ from LayoutManagers    import *
 from exceptions        import *
 from ProgressBox       import *
 
-if config.DEBUG > 1:
-    from debug import *
