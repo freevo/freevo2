@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+
+CONFIG_FILE=/etc/freevo/local_conf.py
+SYSTEM_CONF=/etc/freevo/freevo.conf
+LIRCRC=/etc/freevo/lircrc
+
+case "$1" in
+    configure)
+        if [ ! -f $CONFIG_FILE ] ; then cp /usr/share/doc/freevo/local_conf.py.example $CONFIG_FILE; fi
+        if [ ! -f $SYSTEM_CONF ] ; then echo "Make sure you run 'freevo setup' after the package is installed"; fi
+        if [ ! -f $LIRCRC ];       then echo "Make sure you run 'freevo makelircrc' after the package is installed"; fi
+    ;;
+esac
