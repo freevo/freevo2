@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/24 12:23:38  dischi
+# deactivate plugin
+#
 # Revision 1.7  2004/07/22 21:21:47  dischi
 # small fixes to fit the new gui code
 #
@@ -46,7 +49,7 @@ except:
 
 
 # pygame  modules
-from pygame import Rect, image, transform, Surface
+# from pygame import Rect, image, transform, Surface
 
 # freevo modules
 import plugin, config, rc, skin, osd, time
@@ -231,6 +234,9 @@ class PluginInterface(plugin.Plugin):
     detached = False
 
     def __init__(self):
+        self.reason = 'not working while gui rebuild'
+        return
+
         plugin.Plugin.__init__(self)
         self._type    = 'mplayer_audio'
         self.app_mode = 'audio'

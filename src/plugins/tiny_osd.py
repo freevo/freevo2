@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/24 12:23:39  dischi
+# deactivate plugin
+#
 # Revision 1.11  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -67,6 +70,8 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         init the osd
         """
+        self.reason = 'not working while gui rebuild'
+        return
         plugin.DaemonPlugin.__init__(self)
         self.poll_interval   = 200
         self.plugins = None
