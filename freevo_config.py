@@ -107,6 +107,11 @@ REMOTE_CONTROL_PORT = 16310
 MPG123_APP = 'mpg123'
 
 #
+# Mixer device
+#
+DEV_MIXER = '/dev/mixer'
+
+#
 # The list of filename suffixes that are used to match the files that
 # are played wih mpg123. They are used as the argument to glob.glob()
 # 
@@ -206,3 +211,4 @@ RC_CMDS = {
     'stop'        : 'STOP',
     'rec'         : 'REC'
     }
+

@@ -47,7 +47,7 @@ class task:
     # kill -9 application
     def kill(self):
         if self.pid:
-            os.kill(self.pid, signal.SIGKILL)
+            os.kill(self.pid, signal.SIGTERM)
 
         if DEBUG: print 'Killed %s, pid %s' % (self.appname, self.pid)
 
@@ -84,7 +84,7 @@ osd_fb_quiet = ('osd_fb', 'sh', ['-c',
 
 # The X11 framebuffer driver
 osd_x11 = ('osd_x11', 'sh', ['-c',
-                             './osd_server/osds_x11 > /dev/null'])
+                             './osd_server/osds_x11'])
 
 # The Freevo main application, debug output in an Xterm
 freevo_main_xterm = ('freevo', 'xterm',

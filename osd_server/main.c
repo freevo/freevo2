@@ -31,8 +31,13 @@
 #include "x11.h"
 
 
-#define SCREEN_WIDTH 768
-#define SCREEN_HEIGHT 576
+#ifdef OSD_X11
+   #define SCREEN_WIDTH 800
+   #define SCREEN_HEIGHT 600
+#else
+   #define SCREEN_WIDTH 768
+   #define SCREEN_HEIGHT 576
+#endif
 
 #ifndef OSD_FB
 #ifndef OSD_X11
@@ -513,6 +518,7 @@ osd_drawstring (char *pFont, int ptsize, char str[], int x, int y,
 static void doexit (int dummy1, siginfo_t *pInfo, void *pDummy)
 {
    fprintf (stderr, "Got CTRL-C, exiting...\n");
+   osd_close();
    exit (0);
 }
 
@@ -530,7 +536,8 @@ main (int ac, char *av[])
    act.sa_flags = SA_SIGINFO;
 
    sigaction (SIGINT, &act, (struct sigaction *) NULL);
-
+   sigaction (SIGTERM, &act, (struct sigaction *) NULL);
+   
    if (ac < 2) {
       fn = (char *) NULL;
    } else {

@@ -6,7 +6,13 @@
 #include <assert.h>
 
 #include "x11.h"
+#ifdef OSD_X11_FULLSCREEN
+   #include <X11/extensions/xf86vmode.h>
+   XF86VidModeModeLine old_mode;
+   int old_dotclock;
+#endif
 
+      
 static Display *dpy;
 static Window w;
 static GC gc;
@@ -51,11 +57,44 @@ x11_open (int width, int height)
    
    attr.backing_store = Always;
    attr.background_pixel = 0xffffff;
-   w = XCreateWindow (dpy, DefaultRootWindow(dpy), 0, 0, 
+#ifdef OSD_X11_FULLSCREEN
+{
+   XF86VidModeModeInfo **modelines;
+   int numModes;
+   int i;
+
+   printf( "Using fullscreen mode. %i %i\n", xres, yres);
+   attr.override_redirect = True;
+   w = XCreateWindow (dpy, DefaultRootWindow(dpy), 0, 0,
                       xres, yres, 0, 24, InputOutput,
                       visinf.visual,
-                      CWBackingStore | CWBackPixel,
+                      CWBackingStore | CWBackPixel | CWOverrideRedirect,
                       &attr);
+   memset(&old_mode, 0, sizeof(old_mode));
+   XF86VidModeGetModeLine(dpy, DefaultScreen(dpy),
+                          &old_dotclock, &old_mode);
+   XF86VidModeGetAllModeLines( dpy, DefaultScreen(dpy), &numModes, &modelines );
+   for (i = 0; i < numModes; i += 1) {
+      if ((modelines[i]->hdisplay == xres) &&
+         (modelines[i]->vdisplay == yres)) {
+            printf("Switching to mode %i x %i\n", xres, yres);
+            XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy),
+                                    modelines[i]);
+            XF86VidModeSetViewPort(dpy, DefaultScreen(dpy),0, 0);
+            XF86VidModeLockModeSwitch(dpy, DefaultScreen(dpy), 1);
+            break;
+      }
+   }
+   XFree(modelines);
+}
+#else
+   printf( "Using windowed mode. %i %i\n", xres, yres);
+   w = XCreateWindow (dpy, DefaultRootWindow(dpy), xres/4, yres/4,
+                         xres, yres, 0, 24, InputOutput,
+                         visinf.visual,
+                         CWBackingStore | CWBackPixel,
+                         &attr);
+#endif
 
    XSelectInput (dpy, w, StructureNotifyMask | KeyPressMask |
                  ExposureMask);
@@ -149,6 +188,9 @@ x11_update (uint8 *pFB)
    }
 
    XPutImage (dpy, w, gc, pImage, 0, 0, 0, 0, xres, yres);
+#ifdef OSD_X11_FULLSCREEN
+   XF86VidModeSetViewPort(dpy, DefaultScreen(dpy),0, 0);
+#endif
    
    XFlush (dpy);
 }
@@ -186,6 +228,25 @@ void
 x11_close (void)
 {
    /* XXX */
+#ifdef OSD_X11_FULLSCREEN
+	
+   XF86VidModeModeInfo info;
+   XF86VidModeModeInfo **modelines;
+   int numModes;
+   // This is a bit ugly - a quick hack to copy the ModeLine structure
+   // into the modeInfo structure.
+   memcpy((XF86VidModeModeLine *)((char *)&info + sizeof(info.dotclock)), &old_mode, sizeof(XF86VidModeModeLine));
+   info.dotclock = old_dotclock;
+   XF86VidModeLockModeSwitch(dpy, DefaultScreen(dpy), 0);
+   printf("Restoring mode %i x %i dotclock %i\n", info.hdisplay, info.vdisplay, info.dotclock );
+   XF86VidModeSwitchToMode(dpy, DefaultScreen(dpy), &info);
+
+   /* XXX This is retarded but it seems to need it */
+   XF86VidModeGetAllModeLines( dpy, DefaultScreen(dpy), &numModes, &modelines );
+   XFree(modelines);
+   /* XXX Should save viewport too */
+   XF86VidModeSetViewPort(dpy, DefaultScreen(dpy),0, 0);
+#endif
    return;
 }
 

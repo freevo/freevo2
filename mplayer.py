@@ -204,7 +204,7 @@ class MPlayerApp(childapp.ChildApp):
     def kill(self):
         
         childapp.ChildApp.kill(self, signal.SIGINT)
-        
+	osd.update() 
         
         
 class MPlayer_Thread(threading.Thread):
