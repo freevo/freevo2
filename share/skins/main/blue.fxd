@@ -230,15 +230,27 @@
 	    <newline/>
 	    <goto_pos y="10" mode="relative"/>
 	  </if>
-	  <if expression="plot">
+	  <if expression="plot and not tv_show_name">
 	    <text height="max" font="info plot" mode="soft" expression="plot"/>
 	    <newline/>
 	  </if>
-	  <if expression="not plot">
-	    <text width="140" font="info label">Type:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="type"/>
-	    <newline/>
+
+	  <if expression="not plot or tv_show_name">
+	    <if expression="len(name)>25">
+	      <if expression="tv_show_ep">
+		<text width="140" font="info label">Episode:</text>
+		<goto_pos x="10" mode="relative"/>
+		<text font="info value" expression="tv_show_ep"/>
+		<newline/>
+	      </if>
+	      <if expression="not tv_show_ep">
+		<text width="140" font="info label">Name:</text>
+		<goto_pos x="10" mode="relative"/>
+		<text font="info value" expression="name"/>
+		<newline/>
+	      </if>
+	    </if>
+
 	    <if expression="length">
 	      <text width="140" font="info label">Runtime:</text>
 	      <goto_pos x="10" mode="relative"/>
@@ -246,6 +258,10 @@
 	      <text font="info value"> min.</text>
 	      <newline/>
 	    </if>
+	    <text width="140" font="info label">Type:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="type"/>
+	    <newline/>
 	    <if expression="geometry">
 	      <text width="140" font="info label">Resolution:</text>
 	      <goto_pos x="10" mode="relative"/>
