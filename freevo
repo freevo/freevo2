@@ -17,7 +17,7 @@ fi
 #
 
 # Required runtime version
-RUNTIME_VERSION=2
+RUNTIME_VERSION=3
 
 # The runtime is stored in a directory one level up
 RT_DIR=../freevo_runtime$RUNTIME_VERSION

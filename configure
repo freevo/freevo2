@@ -8,13 +8,8 @@
 # $Id$
 #
 
-#
-# Only version 2 is supported now, it fixes bugs in loading modules, stringsizes
-# etc...
-#
-
 # Required runtime version
-RUNTIME_VERSION=2
+RUNTIME_VERSION=3
 
 # The runtime is stored in a directory one level up
 RT_DIR=../freevo_runtime$RUNTIME_VERSION
@@ -47,32 +42,6 @@ if test -a $RT_DIR/freevo_python ; then
     sleep 1
     killall -9 freevo_python &> /dev/null
     exit 0
-fi
-
-echo
-echo Runtime version 2 not found, checking for version 1...
-echo 
-
-# Old runtime version
-RUNTIME_VERSION=1
-
-# The runtime is stored in a directory one level up
-RT_DIR=../freevo_runtime$RUNTIME_VERSION
-
-# Check if the old runtime is installed
-if test -a $RT_DIR/freevo_rt ; then
-    
-    # The new runtime is not released on sourceforge yet.
-    echo 
-    echo
-    echo You have an old version of the Freevo runtime!
-    echo You must download and use version 2 from the website:
-    echo 
-    echo http://freevo.sourceforge.net/freevo_runtime2-pre1.tgz
-    echo
-    echo
-    exit 1
-
 fi
 
 echo
