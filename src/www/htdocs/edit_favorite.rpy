@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/02/22 07:10:52  gsbarbieri
+# Fix bug introduced by i18n changes.
+#
 # Revision 1.10  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -183,23 +186,22 @@ class EditFavoriteResource(FreevoResource):
         cell += '</select>\n'
         fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
-        cell = '\n<select name="dow">\n' 
-        cell += """
-          <option value="ANY">"""+_('ANY DAY')+"""</option>
-          <option value="0">"""+_('Mon')+"""</option>
-          <option value="1">"""+_('Tue')+"""</option>
-          <option value="2">"""+_('Wed')+"""</option>
-          <option value="3">"""+_('Thu')+"""</option>
-          <option value="4">"""+_('Fri')+"""</option>
-          <option value="5">"""+_('Sat')+"""</option>
-          <option value="6">"""+_('Sun')+"""</option>
-        </select>
-        """
+        cell = '\n<select name="dow">\n' \
+               '   <option value="ANY">'+_('ANY DAY')+'</option>\n' \
+               '   <option value="0">'+_('Mon')+'</option>\n' \
+               '   <option value="1">'+_('Tue')+'</option>\n' \
+               '   <option value="2">'+_('Wed')+'</option>\n' \
+               '   <option value="3">'+_('Thu')+'</option>\n' \
+               '   <option value="4">'+_('Fri')+'</option>\n' \
+               '   <option value="5">'+_('Sat')+'</option>\n' \
+               '   <option value="6">'+_('Sun')+'</option>\n' \
+               '</select>\n'
+        
         fv.tableCell(cell, 'class="'+status+'" colspan="1"')
 
         cell = '\n<select name="mod" selected="%s">\n' % fav.mod
+        cell += '          <option value="ANY">'+_('ANY TIME')+'</option>\n'
         cell += """
-          <option value="ANY">"""+_('ANY TIME')+"""</option>
           <option value="0">12:00 AM</option>
           <option value="30">12:30 AM</option>
           <option value="60">1:00 AM</option>
