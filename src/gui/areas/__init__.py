@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 12:21:30  dischi
+# use new renderer and screen features
+#
 # Revision 1.2  2004/07/23 19:43:31  dischi
 # move most of the settings code out of the skin engine
 #
@@ -46,10 +49,9 @@ import util
 from area import Skin_Area
 
 # Bad: import back in directory tree
-from gui import GUIObject
 from gui import fxdparser as fxdparser
 
-class Skin:
+class AreaHandler:
     """
     main skin class
     """
@@ -64,7 +66,6 @@ class Skin:
         """
         self.settings      = settings
         self.display_style = { 'menu' : 0 }
-        self.force_redraw  = True
         self.last_draw     = None, None, None
         self.screen        = None
         self.areas         = {}
@@ -210,7 +211,8 @@ class Skin:
         clean the screen
         """
         self.screen.clear()
-        self.force_redraw = True
+        for a in self.all_areas:
+            a.clear()
         if osd_update:
             self.screen.show()
 
@@ -233,6 +235,8 @@ class Skin:
         if not self.screen:
             return
         
+        # FIXME: 
+        from gui import GUIObject
         if isinstance(object, GUIObject):
             # handling for gui objects: are they visible? what about children?
             if not object.visible:
@@ -243,7 +247,6 @@ class Skin:
                 draw_allowed = draw_allowed and not child.visible
 
             if not draw_allowed:
-                self.force_redraw = True
                 return
 
         settings = self.settings
@@ -267,7 +270,6 @@ class Skin:
 
 
         if self.last_draw[0] != type:
-            self.force_redraw = True
             areas = getattr(self, '%s_areas' % type)
             for a in self.all_areas:
                 if not a in areas:
@@ -279,14 +281,10 @@ class Skin:
         self.last_draw = type, object, menu
 
         try:
-            if self.force_redraw:
-                self.screen.clear()
-                for a in self.all_areas:
-                    a.clear()
             for a in self.all_areas:
-                a.draw(settings, object, menu, style, type, self.force_redraw)
+                a.draw(settings, object, menu, style, type)
             self.screen.show()
-            self.force_redraw = False
+
         except UnicodeError, e:
             print '******************************************************************'
             print 'Unicode Error: %s' % e

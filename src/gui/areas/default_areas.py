@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:21:30  dischi
+# use new renderer and screen features
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
 #
@@ -43,13 +46,9 @@
 
 
 import config
-import osd
 import plugin
 
 from area import Skin_Area
-
-# Create the OSD object
-osd = osd.get_singleton()
 
 
 class Screen_Area(Skin_Area):
@@ -164,8 +163,6 @@ class Plugin_Area(Skin_Area):
         self.plugins = None
         self.x = config.OSD_OVERSCAN_X
         self.y = config.OSD_OVERSCAN_Y
-        self.width   = osd.width  - 2 * config.OSD_OVERSCAN_X
-        self.height  = osd.height - 2 * config.OSD_OVERSCAN_Y
 
         
     def get_font(self, name):
@@ -179,6 +176,9 @@ class Plugin_Area(Skin_Area):
         """
         there is no content in this area
         """
+        self.width   = self.screen.width  - 2 * config.OSD_OVERSCAN_X
+        self.height  = self.screen.height - 2 * config.OSD_OVERSCAN_Y
+
         if self.plugins == None:
             self.plugins = plugin.get('daemon_draw')
 

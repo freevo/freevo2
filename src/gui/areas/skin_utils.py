@@ -9,14 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:21:31  dischi
+# use new renderer and screen features
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
-#
-# Revision 1.17  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.16  2004/02/01 17:51:14  dischi
-# respect item.rotation of images
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -40,21 +37,17 @@
 # -----------------------------------------------------------------------
 
 
-import pygame
-from pygame.locals import *
-import ImageFile
-
-import osd
+import ImageFile # from PIL
 import os
+
 import util
 
-osd = osd.get_singleton()
 
 format_imagecache = util.objectcache.ObjectCache(30, desc='format_image')
 load_imagecache   = util.objectcache.ObjectCache(20, desc='load_image')
 
 
-def format_image(settings, item, width, height, force=0):
+def format_image(renderer, settings, item, width, height, force=0):
     try:
         type = item.display_type
     except:
@@ -64,34 +57,31 @@ def format_image(settings, item, width, height, force=0):
             type = item.type
 
     
-    cname = '%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
+    key = '%s-%s-%s-%s-%s-%s-%s' % (settings.icon_dir, item.image, type,
                                       item.type, width, height, force)
 
     if item['rotation']:
-        cname = '%s-%s' % (cname, item['rotation'])
+        key = '%s-%s' % (key, item['rotation'])
             
     if item.media and item.media.item == item:
-        cname = '%s-%s' % (cname, item.media)
+        key = '%s-%s' % (key, item.media)
         
-    cimage = format_imagecache[cname]
+    image = format_imagecache[key]
 
-    if cimage:
-        return cimage
+    if image:
+        return image
 
     image     = None
     imagefile = None
     
     if item.image:
         if isinstance(item.image, ImageFile.ImageFile):
-            image = osd.loadbitmap(item.image)
+            image = renderer.loadbitmap(item.image)
         else:
-            image = load_imagecache['thumb://%s' % item.image]
-            if not image:
-                image = osd.loadbitmap('thumb://%s' % item.image)
-                load_imagecache['thumb://%s' % item.image] = image
+            image = renderer.loadbitmap('thumb://%s' % item.image, load_imagecache)
 
         if item['rotation']:
-            image = pygame.transform.rotate(image, item['rotation'])
+            image = renderer.zoombitmap(image, rotation=item['rotation'])
             
     if not image:
         if not force:
@@ -130,10 +120,7 @@ def format_image(settings, item, width, height, force=0):
         if not imagefile:
             return None, 0, 0
 
-        image = load_imagecache['thumb://%s' % imagefile]
-        if not image:
-            image = osd.loadbitmap('thumb://%s' % imagefile)
-            load_imagecache['thumb://%s' % imagefile] = image
+        image = renderer.loadbitmap('thumb://%s' % imagefile, load_imagecache)
 
         if not image:
             return None, 0, 0
@@ -163,13 +150,14 @@ def format_image(settings, item, width, height, force=0):
     else:
         height = int(float(width * i_h) / i_w)
 
-    cimage = pygame.transform.scale(image, (width, height))
+    image = renderer.resizebitmap(image, width=width, height=height)
 
-    format_imagecache[cname] = cimage, width, height
-    return cimage, width, height
+    format_imagecache[key] = image, width, height
+    return image, width, height
     
 
-def text_or_icon(settings, string, x, width, font):
+
+def text_or_icon(settings, string, x, width, font, renderer):
     l = string.split('_')
     if len(l) != 4:
         return string
@@ -183,12 +171,12 @@ def text_or_icon(settings, string, x, width, font):
         else:
             image = None
         if image:
-            cname = '%s-%s-%s-%s-%s' % (image, x, l[2], width, height)
-            cimage = format_imagecache[cname]
+            key = '%s-%s-%s-%s-%s' % (image, x, l[2], width, height)
+            cimage = format_imagecache[key]
             if cimage:
                 return cimage
 
-            image = osd.loadbitmap(image)
+            image = renderer.loadbitmap(image)
             if not image:
                 raise KeyError
             i_w, i_h = image.get_size()
@@ -198,15 +186,16 @@ def text_or_icon(settings, string, x, width, font):
             else:
                 height = int(float(width * i_h) / i_w)
         
-            cimage = pygame.transform.scale(image, (width, height))
-            cimage.set_alpha(cimage.get_alpha(), RLEACCEL)
+            cimage = renderer.resizebitmap(image, width, height)
+
             x_mod = 0
             if l[1] == 'CENTER':
                 x_mod = (original_width - width) / 2
             if l[1] == 'RIGHT':
                 x_mod = original_width - width
-            format_imagecache[cname] = x_mod, cimage
+            format_imagecache[key] = x_mod, cimage
             return x_mod, cimage
+
     except KeyError:
         _debug_('no image %s' % l[2])
         pass

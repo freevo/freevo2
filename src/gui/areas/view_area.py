@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:21:31  dischi
+# use new renderer and screen features
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
 #
@@ -115,7 +118,8 @@ class View_Area(Skin_Area):
         addx = content.x + content.spacing
         addy = content.y + content.spacing
 
-        image, i_w, i_h = format_image(self.settings, item, width, height)
+        image, i_w, i_h = format_image(self.screen.renderer, self.settings, item,
+                                       width, height)
 
         if not image:
             return

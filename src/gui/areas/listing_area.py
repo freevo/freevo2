@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:21:31  dischi
+# use new renderer and screen features
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
 #
@@ -388,7 +391,8 @@ class Listing_Area(Skin_Area):
                         x_mod = 0
                         if table_text[i].find('ICON_') == 0:
                             x_mod, table_text[i] = text_or_icon(settings, table_text[i],
-                                                                table_x, table_w, val.font)
+                                                                table_x, table_w, val.font,
+                                                                self.screen.renderer)
                             if not isstring(table_text[i]):
                                 self.drawimage(table_text[i], (table_x + x_mod, y0 + vskip))
                                 table_text[i] = ''
@@ -429,8 +433,8 @@ class Listing_Area(Skin_Area):
                         r = self.get_item_rectangle(val.rectangle, val.width, rec_h)[2]
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
-                image, i_w, i_h = format_image(settings, choice, val.width,
-                                               val.height, force=True)
+                image, i_w, i_h = format_image(self.screen.renderer, settings,
+                                               choice, val.width, val.height, force=True)
                 if image:
                     addx = 0
                     addy = 0
@@ -447,13 +451,12 @@ class Listing_Area(Skin_Area):
                         addy = val.height - i_h
 
                     if val.shadow and val.shadow.visible and image.get_alpha() == None:
-                        # XXX Bad Hack but works:
-                        # XXX force update when we have a rectangle to keep
-                        # XXX stack in place. FIXME!!!
-                        self.drawroundbox(x0 + addx + val.shadow.x,
-                                          y0 + addy + val.shadow.y,
-                                          image.get_width(), image.get_height(),
-                                          (val.shadow.color, 0, 0, 0), redraw=val.rectangle)
+                        box = self.drawroundbox(x0 + addx + val.shadow.x,
+                                                y0 + addy + val.shadow.y,
+                                                image.get_width(), image.get_height(),
+                                                (val.shadow.color, 0, 0, 0))
+                        box.position = 10
+                        
                     self.drawimage(image, (x0 + addx, y0 + addy))
                         
                 if content.type == 'image+text':

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:21:30  dischi
+# use new renderer and screen features
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
 #
@@ -63,18 +66,12 @@
 
 import copy
 import os
-import pygame
-import stat
 
-import osd
 import config
 import util
 
 import gui.fxdparser as fxdparser
 from gui import Rectangle, Text, Image
-
-# Create the OSD object
-osd = osd.get_singleton()
 
 
 class SkinObjects:
@@ -111,7 +108,6 @@ class Skin_Area:
     def __init__(self, name, imagecachesize=5):
         self.area_name = name
         self.area_val  = None
-        self.redraw    = True
         self.layout    = None
         self.name      = name
         self.screen    = None
@@ -161,8 +157,7 @@ class Skin_Area:
         self.objects = SkinObjects()
             
 
-    def draw(self, settings, obj, menu, display_style=0, widget_type='menu',
-             force_redraw=False):
+    def draw(self, settings, obj, menu, display_style=0, widget_type='menu'):
         """
         this is the main draw function. This function draws the background,
         checks if redraws are needed and calls the two update functions
@@ -202,27 +197,18 @@ class Skin_Area:
                 self.viewitem = obj
                 self.infoitem = obj
 
-        self.redraw = force_redraw
-        
         area = self.area_val
         if area:
             visible = area.visible
         else:
             visible = False
 
-        self.redraw = self.init_vars(settings, item_type, widget_type)
-            
-        if area and area != self.area_val:
-            old_area = area
-        else:
-            old_area = None
-            
-        area = self.area_val
+        redraw = self.init_vars(settings, item_type, widget_type)
+        area   = self.area_val
 
         # maybe we are NOW invisible
-        if visible and not area.visible and old_area:
+        if visible and not area.visible:
             print 'FIXME area.py:', area.name
-
 
         if not self.area_name == 'plugin':
             if not area.visible or not self.layout:
@@ -230,85 +216,57 @@ class Skin_Area:
                 return
 
             self.tmp_objects = SkinObjects()
-            self.__draw_background__()
+            redraw = self.__draw_background__() or redraw
         else:
             self.tmp_objects = SkinObjects()
             
         # dependencies haven't changed, if no update needed: return
-        if not self.redraw and not self.update_content_needed():
+        if not redraw and not self.update_content_needed():
             return
 
-
         self.update_content()
-        current_objects = SkinObjects()
-
 
         for b in self.tmp_objects.bgimages:
-            for t in self.objects.bgimages:
-                if b == t:
-                    self.objects.bgimages.remove(t)
-                    current_objects.bgimages.append(t)
-                    break
-            else:
+            try:
+                self.objects.bgimages.remove(b)
+            except:
                 self.screen.add('bg', b)
-                current_objects.bgimages.append(b)
 
         for b in self.objects.bgimages:
             self.screen.remove('bg', b)
 
 
-
-        # XXX this code is bad, we should update all
-        # XXX areas. Problem is the image viewer shadow for the
-        # XXX images and the selection rectangle. On movement
-        # XXX the selections is appended to the layer and overwrites
-        # XXX the shadow. We need some sort of position in layer here
-        # XXX or update all areas to avoid this
-            
         for b in self.tmp_objects.rectangles:
-            for t in self.objects.rectangles:
-                if b == t:
-                    self.objects.rectangles.remove(t)
-                    current_objects.rectangles.append(t)
-                    break
-            else:
+            try:
+                self.objects.rectangles.remove(b)
+            except:
                 self.screen.add('alpha', b)
-                current_objects.rectangles.append(b)
 
         for b in self.objects.rectangles:
             self.screen.remove('alpha', b)
 
 
-
         for b in self.tmp_objects.images:
-            for t in self.objects.images:
-                if b == t:
-                    self.objects.images.remove(t)
-                    current_objects.images.append(t)
-                    break
-            else:
+            try:
+                self.objects.images.remove(b)
+            except:
                 self.screen.add('content', b)
-                current_objects.images.append(b)
 
         for b in self.objects.images:
             self.screen.remove('content', b)
 
 
         for b in self.tmp_objects.text:
-            for t in self.objects.text:
-                if b == t:
-                    self.objects.text.remove(t)
-                    current_objects.text.append(t)
-                    break
-            else:
+            try:
+                self.objects.text.remove(t)
+            except:
                 self.screen.add('content', b)
-                current_objects.text.append(b)
 
         for b in self.objects.text:
             self.screen.remove('content', b)
 
         # save and exit
-        self.objects = current_objects
+        self.objects = self.tmp_objects
 
 
     def scan_for_text_view(self, menu):
@@ -470,11 +428,12 @@ class Skin_Area:
         return max(item_w, r.width), max(item_h, r.height), r
     
 
+
     def init_vars(self, settings, display_type, widget_type = 'menu'):
         """
         check which layout is used and set variables for the object
         """
-        redraw = self.redraw
+        redraw = False
         self.settings = settings
 
         if widget_type == 'menu':
@@ -520,7 +479,7 @@ class Skin_Area:
             if not self.area_val:
                 self.area_val = fxdparser.Area(self.area_name)
                 self.area_val.visible = True
-                self.area_val.r = (0, 0, osd.width, osd.height)
+                self.area_val.r = (0, 0, self.screen.width, self.screen.height)
             return True
         else:
             try:
@@ -555,23 +514,9 @@ class Skin_Area:
         """
         draw the <background> of the area
         """
-        area = self.area_val
+        area   = self.area_val
+        redraw = True
 
-        last_watermark = None
-
-        try:
-            if self.watermark:
-                last_watermark = self.watermark
-
-                try:
-                    if self.menu.selected.image != self.watermark:
-                        self.watermark = None
-                        self.redraw = True
-                except:
-                    pass
-        except:
-            pass
-        
         for bg in self.layout.background:
             bg = copy.copy(bg)
             if isinstance(bg, fxdparser.Image) and bg.visible:
@@ -588,9 +533,7 @@ class Skin_Area:
 
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
-                    if last_watermark != imagefile:
-                        self.redraw = True
-                    self.watermark = imagefile
+                    redraw    = True    # bg changed
                 else:
                     imagefile = bg.filename
 
@@ -599,34 +542,15 @@ class Skin_Area:
                     bg.label = 'background'
                     
                 if imagefile:
-                    cname = '%s-%s-%s' % (imagefile, bg.width, bg.height)
-                    image = self.imagecache[cname]
-                    if not image:
-                        cache = vfs.getoverlay('%s.raw-%sx%s' % (imagefile, bg.width,
-                                                                 bg.height))
-                        if os.path.isfile(cache) and \
-                               os.stat(cache)[stat.ST_MTIME] > \
-                               os.stat(imagefile)[stat.ST_MTIME]:
-                            f = open(cache, 'r')
-                            image = pygame.image.fromstring(str().join(f.readlines()),
-                                                            (bg.width,bg.height), 'RGBA')
-                            f.close()
-                            self.imagecache[cname] = image
-                    if not image:
-                        image = osd.loadbitmap(imagefile)
-                        if image:
-                            image = pygame.transform.scale(image,(bg.width,bg.height))
-                            f = vfs.open(cache, 'w')
-                            f.write(pygame.image.tostring(image, 'RGBA'))
-                            f.close()
-                        self.imagecache[cname] = image
+                    image = self.screen.renderer.loadbitmap(imagefile, self.imagecache,
+                                                            bg.width, bg.height, True)
                     if image:
                         self.drawimage(image, bg)
                             
             elif isinstance(bg, fxdparser.Rectangle):
                 self.calc_geometry(bg)
                 self.drawroundbox(bg.x, bg.y, bg.width, bg.height, bg)
-
+        return redraw
             
 
 
@@ -636,7 +560,7 @@ class Skin_Area:
     # drawimage
     # drawstring
 
-    def drawroundbox(self, x, y, width, height, rect, redraw=False):
+    def drawroundbox(self, x, y, width, height, rect):
         """
         draw a round box ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
@@ -647,19 +571,9 @@ class Skin_Area:
         except AttributeError:
             r = Rectangle(x, y, x + width, y + height, rect[0], rect[1], rect[2], rect[3])
 
-        if redraw:
-            # XXX Bad hack to make redrawing work
-            # XXX This places the rectangle on top of the stack again
-            try:
-                self.screen.remove('alpha', r)
-            except:
-                pass
-            try:
-                self.objects.rectangles.remove(r)
-            except:
-                pass
         self.tmp_objects.rectangles.append(r)
-
+        return r
+    
             
     def drawstring(self, text, font, content, x=-1, y=-1, width=None, height=None,
                    align_h = None, align_v = None, mode='hard', ellipses='...',
@@ -701,7 +615,7 @@ class Skin_Area:
                                           align_h, align_v, mode, ellipses, dim))
 
 
-    def loadimage(self, image, val, redraw=True):
+    def loadimage(self, image, val):
         """
         load an image (use self.imagecache)
         """
@@ -716,21 +630,16 @@ class Skin_Area:
         else:
             w = val.width
             h = val.height
-            
-        cname = '%s-%s-%s' % (image, w, h)
-        cimage = self.imagecache[cname]
-        if not cimage:
-            cimage = osd.loadbitmap(image)
-            if not cimage:
-                return
-            if w == -1:
-                w = h  * cimage.get_width() / cimage.get_height()
-            if h == -1:
-                h = w  * cimage.get_height() / cimage.get_width()
-            if w > 0 and h > 0:
-                cimage = pygame.transform.scale(cimage, (w, h))
-            self.imagecache[cname] = cimage
-        return cimage
+
+        if w == -1:
+            w = None
+        if h == -1:
+            h = None
+
+        if h == None and w == None:
+            return None
+
+        return self.screen.renderer.loadbitmap(image, self.imagecache, w, h)
 
         
     def drawimage(self, image, val, background=False):

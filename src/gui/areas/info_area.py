@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/24 12:21:31  dischi
+# use new renderer and screen features
+#
 # Revision 1.1  2004/07/22 21:13:39  dischi
 # move skin code to gui, update to new interface started
 #
@@ -354,7 +357,7 @@ class Info_Area(Skin_Area):
                     my_y = y
 
                 if element.width == None or element.height == None:
-                    image = osd.loadbitmap( element.src, True )
+                    image = self.screen.renderer.loadbitmap( element.src, True )
                     size = image.get_size()
 
                     if element.width == None:
@@ -390,7 +393,7 @@ class Info_Area(Skin_Area):
                 else:
                     height = -1
 
-                size = osd.drawstringframed( element.text, 0, 0,
+                size = self.screen.renderer.drawstringframed( element.text, 0, 0,
                                              r.width, r.height,
                                              element.font, None, None,
                                              element.align, element.valign,
