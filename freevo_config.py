@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.109  2003/01/28 03:45:18  krister
+# Changed for new runtime
+#
 # Revision 1.108  2003/01/19 15:56:30  dischi
 # New option ROM_SPEED to set the drive speed. Default is 0 (don't set
 # speed), a good value seems to be 8.
@@ -393,12 +396,8 @@ JOY_CMDS = {
 # ./mplayer_stderr.log
 MPLAYER_DEBUG = 0
 
-if os.path.isfile('../freevo_apps/mplayer/mplayer'):
-    MPLAYER_CMD = '../freevo_apps/mplayer/mplayer' # Binary dist
-    print 'Using ../freevo_apps/mplayer'
-else:
-    MPLAYER_CMD = CONF.mplayer
-    print 'Using system MPlayer'
+MPLAYER_CMD = CONF.mplayer
+print 'Using MPlayer: %s' % MPLAYER_CMD
     
 MPLAYER_AO_DEV       = 'oss:/dev/dsp'  # e.g.: oss,sdl,alsa, see mplayer docs
 MPLAYER_AO_HWAC3_DEV = ''              # set this to an audio device which is
