@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/04/28 18:07:45  dischi
+# restore the correct item
+#
 # Revision 1.45  2003/04/26 15:08:51  dischi
 # o better mount/umount, also for directories who are no rom drive.
 # o added list_usb_devices to util
@@ -248,10 +251,7 @@ class MenuWidget(GUIObject):
                 reload = menu.reload_func()
                 if reload:
                     self.menustack[-1] = reload
-                    self.init_page()
-                    menu.selected = self.all_items[0]
-                else:
-                    self.init_page()
+                self.init_page()
             else:
                 self.init_page()
 
@@ -614,7 +614,7 @@ class MenuWidget(GUIObject):
             self.all_items = menu_items + [ MenuItem('Back', self.back_one_menu) ]
         else:
             self.all_items = menu_items
-            
+
         if not menu.selected in self.all_items:
             menu.selected = self.all_items[0]
 
