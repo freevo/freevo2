@@ -91,7 +91,7 @@ picklefile = config.XMLTV_FILE + '-0.pickled'
 
 # Ugly.
 
-if (len(sys.argv) > 2) and ((sys.argv[2] == '-listing') or (sys.argv[2] == '-schedule')):
+if (len(sys.argv) > 2) and ((sys.argv[1] == '-listing') or (sys.argv[1] == '-schedule')):
     pattern = sys.argv[2]
     for m in sys.argv[3:]:
         pattern += '\ ' + m
