@@ -445,21 +445,21 @@ class Tag:
                self.setYear(year);
 
             comment = re.sub("\x00+$", "", id3tag[97:127].strip())
-            TRACE_MSG("Comment: " + comment);
-            if comment:
-               # Parse track number (added to ID3v1.1) if present in
-               # comment field.
-               if comment[28:29] == "\x00":
-                  TRACE_MSG("Comment contains track number per v1.1 spec");
-                  track = ord(comment[29:30])
-                  TRACE_MSG("Track: " + str(track));
-                  comment = re.sub("\x00+$", "", comment[0:28].rstrip())
-                  self.setTrackNum((track, None));
-                  self.header.minorVersion = 1;
-               else:
-                  track = None
-                  self.header.minorVersion = 0;
-               self.setComment(comment);
+	    
+	    if ord(comment[-2]) == 0 and ord(comment[-1]) != 0:
+	        # Parse track number (added to ID3v1.1) if present
+	        track = ord(comment[-1])
+		TRACE_MSG("Contains track per v1.1 spec")
+		comment = comment[:2]
+		TRACE_MSG("Track: " + str(track))
+		self.setTrackNum((track, None));
+		TRACE_MSG("Setting minor version to 1")
+		self.header.minorVersion = 1
+            else:
+                track = None
+                self.header.minorVersion = 0;
+            
+	    self.setComment(comment);
 
             genre = ord(id3tag[127:128])
             TRACE_MSG("Genre ID: " + str(genre));
