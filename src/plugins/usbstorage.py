@@ -1,6 +1,18 @@
 #if 0 /*
 # -----------------------------------------------------------------------
 # usb-storage.py - Special handling for usb storage devices
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes: 
+#
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.2  2004/01/31 13:15:26  dischi
+# fixed doc
+#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -38,9 +50,9 @@ class PluginInterface(plugin.MainMenuPlugin):
     
     Example:
     plugin.activate('usb')
-    plugin.activate('image.usbstorage', args=('USB Key', '/mnt/hd'))
-    plugin.activate('video.usbstorage', args=('USB Key', '/mnt/hd'))
-    plugin.activate('audio.usbstorage', args=('USB Key', '/mnt/hd'))
+    plugin.activate('usbstorage', type='video', args=('USB Key', '/mnt/hd'))
+    plugin.activate('usbstorage', type='audio', args=('USB Key', '/mnt/hd'))
+    plugin.activate('usbstorage', type='image', args=('USB Key', '/mnt/hd'))
     """
     def __init__(self, name, mountpoint):
         plugin.MainMenuPlugin.__init__(self)
