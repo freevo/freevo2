@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2002/11/17 02:30:17  krister
+# Re-added the radio station example URL. Fixed a playlist handling bug.
+#
 # Revision 1.50  2002/11/15 02:49:15  krister
 # Added a config option for saving MPlayer output to a logfile.
 #
@@ -183,6 +186,10 @@ class MPlayer:
                          
     def play(self, mode, file, playlist, repeat=0, start_time = 0):
 
+        # The playlist must be a list type
+        if playlist == None:
+            playlist = []
+            
         filename = file
         if isinstance(filename, FileInformation):
             mplayer_options = file.mplayer_options

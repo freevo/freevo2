@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2002/11/17 02:30:17  krister
+# Re-added the radio station example URL. Fixed a playlist handling bug.
+#
 # Revision 1.93  2002/11/15 02:49:15  krister
 # Added a config option for saving MPlayer output to a logfile.
 #
@@ -204,7 +207,10 @@ MUSICPLAYER          = 'MPLAYER'   # Must be 'XMMS' or 'MPLAYER'
 #           ('Title2', 'directory2'), ... ]
 # The 'mplayer options' field can be omitted.
 #
-DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
+DIR_AUDIO = [ ('Test Files', 'testfiles/Music'),
+              ('Radio City 107.3 (Göteborg/Sweden)',
+               'http://www.minradio.no/asx/radiocitygb2.asx',
+               '-cache 100') ]
 
 #
 # The list of filename suffixes that are used to match the files that
