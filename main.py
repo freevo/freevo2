@@ -126,7 +126,7 @@ def getcmd():
     
     muted = 0
     mainVolume = 0
-    tray_open = 1
+    tray_open = 0
     while 1:
         
         # Get next command
