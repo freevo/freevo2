@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2002/09/08 16:40:33  krister
+# Added some docs for the new ROM_DRIVES format.
+#
 # Revision 1.62  2002/09/07 06:15:30  krister
 # Added wav-files to the list of music-formats.
 #
@@ -138,6 +141,9 @@ DEV_MIXER           = '/dev/mixer'    # mixer device
 #
 # Physical ROM drives, multiple ones can be specified
 # by adding comma-seperated and quoted entries.
+#
+# Format [ ('mountdir1', 'devicename1', 'displayed name1'),
+#          ('mountdir2', 'devicename2', 'displayed name2'), ...]
 #
 ROM_DRIVES = [ ('/mnt/cdrom', '/dev/cdrom', 'CD-1'),
                ('/mnt/dvd', '/dev/dvd', 'CD-2') ]
