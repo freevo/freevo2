@@ -609,7 +609,13 @@ OSD_SDL_EXEC_AFTER_CLOSE = ""
 if CONF.display == 'mga':
     OSD_SDL_EXEC_AFTER_CLOSE='./contrib/fbcon/mgafb restore'
 
+# Stop the osd before playing a movie with xine or mplayer. Some output
+# devices need this. After playback, the osd will be restored
+STOP_OSD_WHEN_PLAYING = 0
 
+if CONF.display in ( 'dfbmga', 'dxr3', 'dga' ):
+    STOP_OSD_WHEN_PLAYING = 1
+    
 # ======================================================================
 # Remote control section
 # ======================================================================

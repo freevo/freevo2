@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/08/20 19:01:16  dischi
+# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
+#
 # Revision 1.9  2003/08/16 13:10:03  dischi
 # bugfix in DEBUG
 #
@@ -394,6 +397,9 @@ class Xine_Thread(threading.Thread):
                 self.mode_flag.clear()
 
             elif self.mode == 'play':
+                if config.STOP_OSD_WHEN_PLAYING:
+                    osd.stopdisplay()			
+
                 if DEBUG:
                     print 'Xine_Thread.run(): Started, cmd=%s' % self.command
                     
@@ -414,6 +420,10 @@ class Xine_Thread(threading.Thread):
                         
                 if DEBUG:
                     print 'Xine_Thread.run(): Stopped'
+
+                if config.STOP_OSD_WHEN_PLAYING:
+                    osd.restartdisplay()
+                    osd.update()
 
                 self.mode = 'idle'
                 skin.get_singleton().redraw()

@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/20 19:01:15  dischi
+# added dga support and STOP_OSD_WHEN_PLAYING to shutdown down osd
+#
 # Revision 1.6  2003/08/06 19:32:39  dischi
 # removed freevo_xwin support. Most users have problems with it and it works without it
 #
@@ -360,11 +363,7 @@ class MPlayer_Thread(threading.Thread):
                 self.mode_flag.clear()
                 
             elif self.mode == 'play':
-                # The DXR3 device cannot be shared between our SDL session
-                # and MPlayer.
-                if (osd.sdl_driver == 'dxr3'):
-                    if DEBUG:
-                        print "Stopping Display for Video Playback on DXR3"
+                if config.STOP_OSD_WHEN_PLAYING:
                     osd.stopdisplay()			
 
                 if DEBUG:
@@ -381,10 +380,9 @@ class MPlayer_Thread(threading.Thread):
                 self.app.kill()
 
                 # Ok, we can use the OSD again.
-                if osd.sdl_driver == 'dxr3':
+                if config.STOP_OSD_WHEN_PLAYING:
                     osd.restartdisplay()
                     osd.update()
-                    print "Display back online"
 
                 if self.mode == 'play':
                     if DEBUG: print 'posting play_end'
