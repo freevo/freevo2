@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2004/07/25 19:47:38  dischi
+# use application and not rc.app
+#
 # Revision 1.97  2004/07/25 18:22:27  dischi
 # changes to reflect gui update
 #
@@ -172,7 +175,6 @@ class MenuWidget:
             self.refresh(reload=1)
             for callback in copy.copy(self.show_callbacks):
                 callback()
-        rc.app(None)
 
                 
     def hide(self, clear=True):
@@ -692,10 +694,6 @@ class MenuWidget:
 
         if not menu.choices:
             menu.selected = self.all_items[0]
-
-        # make sure we are in context 'menu'
-        rc.set_context(self.event_context)
-
 
 
 # register menu to the skin

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/25 19:47:38  dischi
+# use application and not rc.app
+#
 # Revision 1.37  2004/07/24 12:22:37  dischi
 # move focus handling to rc for now
 #
@@ -89,28 +92,6 @@ def post_event(event):
     return get_singleton().post_event(event)
 
 
-def app(application=0):
-    """
-    set or get the current app/eventhandler
-    """
-    if not application == 0:
-        context = 'menu'
-        if hasattr(application, 'app_mode'):
-            context = application.app_mode
-        if hasattr(application, 'eventhandler'):
-            application = application.eventhandler
-        get_singleton().set_app(application, context)
-
-    return get_singleton().get_app()
-
-
-def set_context(context):
-    """
-    set the context (map with button->event transformation
-    """
-    return get_singleton().set_context(context)
-
-
 def register(function, repeat, timer, *arg):
     """
     register an function to be called
@@ -147,47 +128,6 @@ def get_event(blocking=False):
     there is a new event (also call all registered callbacks while waiting)
     """
     return get_singleton().get_event(blocking)
-
-
-# --------------------------------------------------------------------------------
-# focus handling
-# FIXME: move somewere else
-# --------------------------------------------------------------------------------
-
-app_list = []
-
-def focused_app():
-    """
-    get current app
-    """
-    global app_list
-    if len(app_list):
-        return app_list[-1]
-    else:
-        return None
-
-def add_app(app):
-    """
-    set focus to app
-    """
-    global app_list
-    app_list.append(app)
-
-
-def remove_app(app):
-    """
-    remove app from list
-    """
-    global app_list
-    _times = app_list.count(app)
-    for _time in range(_times):
-        app_list.remove(app)
-    if _times and hasattr(focused_app(), 'event_context'):
-            _debug_('app is %s' % focused_app(),2)
-            _debug_('Setting context to %s' % focused_app().get_event_context(),2)
-            import rc
-            rc.set_context(focused_app().get_event_context())
-
 
 
 # --------------------------------------------------------------------------------

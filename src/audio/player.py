@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/07/25 19:47:38  dischi
+# use application and not rc.app
+#
 # Revision 1.21  2004/07/25 18:22:27  dischi
 # changes to reflect gui update
 #
@@ -105,12 +108,12 @@ class PlayerGUI:
             print error
             self.running = False
             if self.visible:
-                rc.app(None)
+                application.remove(self.player)
             self.item.eventhandler(event.PLAY_END)
             
         else:
             if self.visible:
-                rc.app(self.player)
+                application.append(self.player)
             self.refresh()
 
 
@@ -140,21 +143,21 @@ class PlayerGUI:
         self.player.stop()
         self.running = False
         if self.visible:
-            rc.app(None)
+            application.remove(self.player)
         
 
     def show(self):
         if not self.visible:
             self.visible = 1
             self.refresh()
-            rc.app(self.player)
+            application.append(self.player)
             
 
     def hide(self):
         if self.visible:
             self.visible = 0
             skin.clear()
-            rc.app(None)
+            application.remove(self.player)
             
 
     def refresh(self):

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/25 19:47:40  dischi
+# use application and not rc.app
+#
 # Revision 1.8  2004/07/22 21:21:50  dischi
 # small fixes to fit the new gui code
 #
@@ -74,7 +77,6 @@ class ScheduledRecordingsItem(Item):
                                   reload_func = self.reload,
                                   item_types = 'tv program menu')
         self.menuw = menuw
-        rc.app(None)
         menuw.pushmenu(schedule_menu)
         menuw.refresh()
 

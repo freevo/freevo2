@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/07/25 19:47:39  dischi
+# use application and not rc.app
+#
 # Revision 1.63  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -52,7 +55,7 @@ import util.mediainfo
 from struct import *
 import array
 import rc
-
+import application
 
 try:
     from CDROM import *
@@ -689,7 +692,7 @@ class Identify_Thread(threading.Thread):
         """
         check all drives
         """
-        if rc.app():
+        if not application.is_menu():
             # Some app is running, do not scan, it's not necessary
             return
         
@@ -734,7 +737,7 @@ class Identify_Thread(threading.Thread):
                 for media in config.REMOVABLE_MEDIA:
                     media.drive_status = None
 
-            if not rc.app():
+            if application.is_menu():
                 # check only in the menu
                 self.check_all()
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.135  2004/07/25 19:47:37  dischi
+# use application and not rc.app
+#
 # Revision 1.134  2004/07/24 12:24:02  dischi
 # reflect gui changes
 #
@@ -58,6 +61,7 @@ import menu
 import skin
 import plugin
 import fxditem
+import application
 
 from item import Item, FileInformation
 from playlist import Playlist
@@ -1029,7 +1033,7 @@ class Dirwatcher(plugin.DaemonPlugin):
     
     def poll(self):
         if self.dir and self.menuw and \
-               self.menuw.menustack[-1] == self.item_menu and not rc.app():
+               self.menuw.menustack[-1] == self.item_menu and application.is_menu():
             self.scan()
 
 # and activate that DaemonPlugin

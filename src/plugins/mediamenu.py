@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/25 19:47:39  dischi
+# use application and not rc.app
+#
 # Revision 1.37  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -46,6 +49,7 @@ import config
 import menu
 import rc
 import directory
+import application
 
 import plugin
 import plugins.rom_drives
@@ -252,7 +256,7 @@ class MediaMenu(Item):
                 else:
                     menu.selected = None
 
-            if menu == menuw.menustack[-1] and not rc.app():
+            if menu == menuw.menustack[-1] and application.is_menu():
                 menuw.init_page()
                 menuw.refresh()
             # others may need this event, too

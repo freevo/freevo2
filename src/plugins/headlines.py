@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/25 19:47:39  dischi
+# use application and not rc.app
+#
 # Revision 1.18  2004/07/22 21:21:49  dischi
 # small fixes to fit the new gui code
 #
@@ -60,7 +63,7 @@ import urllib
 import config, menu, rc, plugin, skin, osd, util
 from gui import PopupBox
 from item import Item
-
+import application
 
 #get the singletons so we get skin info and access the osd
 skin = skin.get_singleton()
@@ -109,7 +112,7 @@ class ShowHeadlineDetails:
     def __init__(self, (item, menuw)):
         self.menuw = menuw
         self.menuw.hide(clear=False)
-        rc.app(self)
+        application.append(self)
         skin.draw('headlines', item)
 
 
@@ -118,7 +121,7 @@ class ShowHeadlineDetails:
         eventhandler
         """
         if event in ('MENU_SELECT', 'MENU_BACK_ONE_MENU'):
-            rc.app(None)
+            application.remove(self)
             self.menuw.show()
             return True
         
@@ -232,7 +235,7 @@ class HeadlinesSiteItem(Item):
             headlines += [menu.MenuItem(_('No Headlines found'), menuw.goto_prev_page, 0)]
 
         headlines_menu = menu.Menu(_('Headlines'), headlines)
-        rc.app(None)
+        application.remove(self)
         menuw.pushmenu(headlines_menu)
         menuw.refresh()
 

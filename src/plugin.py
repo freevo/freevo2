@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/07/25 19:47:38  dischi
+# use application and not rc.app
+#
 # Revision 1.68  2004/07/10 12:33:36  dischi
 # header cleanup
 #
@@ -50,6 +53,7 @@ import copy
 
 from event import Event
 import rc
+import application
 
 DEBUG = 0
 
@@ -164,7 +168,7 @@ class DaemonPlugin(Plugin):
 
 
     def poll_wrapper(self):
-        if self.poll_menu_only and rc.app():
+        if self.poll_menu_only and not application.is_menu():
             return
         self.real_poll()
 

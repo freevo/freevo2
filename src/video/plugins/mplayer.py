@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2004/07/25 19:47:41  dischi
+# use application and not rc.app
+#
 # Revision 1.73  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -58,6 +61,7 @@ import config     # Configuration handler. reads config file.
 import util       # Various utilities
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
+import application
 import plugin
 
 from event import *
@@ -325,7 +329,7 @@ class MPlayer:
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        rc.app(self)
+        application.append(self)
 
         self.app = MPlayerApp(command, self)
         return None
@@ -342,7 +346,7 @@ class MPlayer:
             return
         
         self.app.stop('quit\n')
-        rc.app(None)
+        application.remove(self)
         self.app = None
 
 
@@ -360,7 +364,7 @@ class MPlayer:
 
         if event == VIDEO_MANUAL_SEEK:
             self.seek = 0
-            rc.set_context('input')
+            application.set_context('input')
             return True
         
         if event.context == 'input':
@@ -375,14 +379,14 @@ class MPlayer:
                 self.app.write('seek ' + str(self.seek) + ' 2\n')
                 _debug_("seek "+str(self.seek)+" 2\n")
                 self.seek = 0
-                rc.set_context('video')
+                application.set_context('video')
                 return True
 
             elif event == INPUT_EXIT:
                 _debug_('seek stopped')
                 self.seek_timer.cancel()
                 self.seek = 0
-                rc.set_context('video')
+                application.set_context('video')
                 return True
 
         if event == STOP:
@@ -451,7 +455,7 @@ class MPlayer:
     def reset_seek(self):
         _debug_('seek timeout')
         self.seek = 0
-        rc.set_context('video')
+        application.set_context('video')
 
         
     def reset_seek_timeout(self):

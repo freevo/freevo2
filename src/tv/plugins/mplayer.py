@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/07/25 19:47:40  dischi
+# use application and not rc.app
+#
 # Revision 1.39  2004/07/24 12:24:03  dischi
 # reflect gui changes
 #
@@ -72,6 +75,7 @@ import tv.epg_xmltv as epg # The Electronic Program Guide
 from tv.channels import FreevoChannels
 import tv.ivtv as ivtv
 import plugin
+import application
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -200,11 +204,7 @@ class MPlayer:
         # Start up the TV task
         self.app = childapp.ChildApp2(command)
         
-        self.prev_app = rc.app()
-        rc.app(self)
-
-        if rc.focused_app():
-            rc.focused_app().hide()
+        application.append(self)
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -233,9 +233,10 @@ class MPlayer:
 
         self.app.stop('quit\n')
 
-        rc.app(self.prev_app)
-        if rc.focused_app() and not channel_change:
-            rc.focused_app().show()
+        application.remove(self)
+
+#         if rc.focused_app() and not channel_change:
+#             rc.focused_app().show()
 
         if os.path.exists('/tmp/freevo.wid'): os.unlink('/tmp/freevo.wid')
 

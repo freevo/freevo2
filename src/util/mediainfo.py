@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/07/25 19:47:40  dischi
+# use application and not rc.app
+#
 # Revision 1.55  2004/07/11 10:05:14  dischi
 # fix crash for bad discs
 #
@@ -58,6 +61,7 @@ from mmpython.disc.discinfo import cdrom_disc_id
 
 import config
 import util
+import application
 
 class FileOutdatedException(Exception):
     pass
@@ -702,7 +706,7 @@ def check_cache_status():
     check if cache got updated with helper while freevo is running
     """
     global __last_status_check__
-    if rc.app():
+    if not application.is_menu():
         return
     try:
         cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')

@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/25 19:47:38  dischi
+# use application and not rc.app
+#
 # Revision 1.4  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
@@ -35,8 +38,8 @@
 
 import copy
 
-import rc
 import gui
+import application
 
 from base import GUIObject
 
@@ -122,15 +125,9 @@ class Window(GUIObject):
     def show(self):
         if self.screen:
             return
-        
-        # FIXME: Begin clean this up
-        self.prev_app = rc.app()
-        self.parent_handler = rc.app()
-        if not self.parent_handler:
-            self.parent_handler = rc.focused_app().eventhandler
-        self.parent = rc.focused_app()
-        rc.app(self)
-        # FIXME: End clean this up
+        self.parent = application.get()
+        self.parent_handler = self.parent.eventhandler
+        application.append(self)
 
         self.screen = gui.get_screen()
 
@@ -140,9 +137,7 @@ class Window(GUIObject):
         
 
     def destroy(self):
-        # FIXME: Begin clean this up
-        rc.app(self.prev_app)
-        # FIXME: End clean this up
+        application.remove(self)
 
         for o in self.objects:
             self.screen.remove('content', o)

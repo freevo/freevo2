@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/07/25 19:47:39  dischi
+# use application and not rc.app
+#
 # Revision 1.39  2004/07/25 18:22:28  dischi
 # changes to reflect gui update
 #
@@ -77,6 +80,7 @@ import epg_xmltv, epg_types
 from item import Item
 from program_display import ProgramItem
 import record_client as ri
+import application
 
 skin = skin.get_singleton()
 skin.register('tv', ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info', 'plugin'))
@@ -260,7 +264,6 @@ class TVGuide(Item):
 
     def refresh(self):
         self.update_schedules(force=True)
-        rc.set_context(self.event_context)
         self.menuw.refresh()
 
 

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/07/25 19:47:38  dischi
+# use application and not rc.app
+#
 # Revision 1.55  2004/07/25 18:18:30  dischi
 # use new gui code
 #
@@ -61,6 +64,7 @@ import os
 import config 
 import util
 import rc
+import application
 
 from event import *
 
@@ -121,7 +125,7 @@ class ImageViewer:
         else:
             self.app_mode    = 'image'
 
-        rc.app(self)
+        application.append(self)
 
         swidth  = gui.get_screen().width
         sheight = gui.get_screen().height
@@ -337,8 +341,8 @@ class ImageViewer:
 
     def signalhandler(self, signum, frame):
         print 'signal'
-        if rc.app() == self.eventhandler and self.slideshow:
-            rc.app(None)
+        if application.get() == self and self.slideshow:
+            application.remove(self)
             self.eventhandler(PLAY_END)
 
 
@@ -370,7 +374,7 @@ class ImageViewer:
                 self.osd_box = None
 
             self.filename = None
-            rc.app(None)
+            application.remove(self)
             signal.alarm(0)
             self.fileitem.eventhandler(event)
             return True

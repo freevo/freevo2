@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/25 19:47:40  dischi
+# use application and not rc.app
+#
 # Revision 1.2  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -49,6 +52,7 @@ import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
 import osd
+import application
 
 from tv.channels import FreevoChannels
 
@@ -159,7 +163,7 @@ class Xine:
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        rc.app(self)
+        application.append(self)
 
         self.app = childapp.ChildApp2(command)
         return None
@@ -171,7 +175,7 @@ class Xine:
         """
         if self.app:
             self.app.stop('quit\n')
-            rc.app(None)
+            application.remove(self)
 
             if not channel_change:
                 pass

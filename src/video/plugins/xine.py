@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/07/25 19:47:41  dischi
+# use application and not rc.app
+#
 # Revision 1.45  2004/07/21 11:35:19  dischi
 # xine can play iso files
 #
@@ -75,6 +78,7 @@ import config     # Configuration handler. reads config file.
 import childapp   # Handle child applications
 import rc         # The RemoteControl class.
 import util
+import application
 
 from event import *
 import plugin
@@ -228,7 +232,7 @@ class Xine:
             
         _debug_('Xine.play(): Starting cmd=%s' % command)
 
-        rc.app(self)
+        application.append(self)
         self.app = childapp.ChildApp2(command)
         return None
     
@@ -239,7 +243,7 @@ class Xine:
         """
         if self.app:
             self.app.stop('quit\n')
-            rc.app(None)
+            application.remove(self)
             
 
     def eventhandler(self, event, menuw=None):

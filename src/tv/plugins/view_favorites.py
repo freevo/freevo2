@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/25 19:47:40  dischi
+# use application and not rc.app
+#
 # Revision 1.6  2004/07/22 21:21:50  dischi
 # small fixes to fit the new gui code
 #
@@ -73,7 +76,6 @@ class ViewFavoritesItem(Item):
                                   reload_func = self.reload,
                                   item_types = 'tv favorite menu')
         self.menuw = menuw
-        rc.app(None)
         menuw.pushmenu(favorite_menu)
         menuw.refresh()
 

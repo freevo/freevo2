@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/25 19:47:40  dischi
+# use application and not rc.app
+#
 # Revision 1.5  2004/07/10 12:33:42  dischi
 # header cleanup
 #
@@ -54,6 +57,7 @@ import event as em
 from tv.channels import FreevoChannels
 
 import plugin
+import application
 
 # Set to 1 for debug output
 DEBUG = config.DEBUG
@@ -202,8 +206,7 @@ class Xawtv:
 	    self.app.sendcmd('setstation %s' % tuner_channel)
         #XXX use remote to change the input we want
 
-        self.prev_app = rc.app()
-        rc.app(self)
+        application.append(self)
 
         # Suppress annoying audio clicks
         time.sleep(0.4)
@@ -230,7 +233,7 @@ class Xawtv:
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.app.stop()
-        rc.app(self.prev_app)
+        application.remove(self)
 
     def eventhandler(self, event, menuw=None):
         _debug_('%s: %s app got %s event' % (time.time(), self.mode, event))
