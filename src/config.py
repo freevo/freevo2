@@ -22,6 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/08/15 17:23:06  dischi
+# Added a new command line parameter -fs (Fullscreen). This will start Freevo
+# in a new xsession (even if one is running). Freevo will get _all_ keys
+# and there are no problems with other applications when switching fullscreen
+#
 # Revision 1.35  2003/08/04 18:36:49  dischi
 # o use FREEVO_HOME if defined to find freevo_config.py
 # o check if main is called. If not be very quite and don't log to file
@@ -318,6 +323,9 @@ for dirname in cfgfilepath:
 else:
     print 'No overrides loaded'
     
+if len(sys.argv) >= 2 and sys.argv[1] == '--force-fs':
+    START_FULLSCREEN_X = 1
+        
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 if not ROM_DRIVES:
     if os.path.isfile('/etc/fstab'):

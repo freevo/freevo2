@@ -49,6 +49,18 @@ if ! [ -e "$FREEVO_HOME/runapp" ]; then
     exit 1
 fi
 
+# call new x session if needed
+if [ "$call" == "freevo" ] && [ "$1" == "-fs" ]; then
+    servernum=0
+
+    while true; do
+	test -e /tmp/.X11-unix/X$servernum || break
+	let servernum+=1
+    done
+
+    exec xinit $0 --force-fs -- :$servernum >/dev/null 2>/dev/null
+fi
+
 # call helper if the script is called as wrapper
 if [ "$call" == "freevo" ]; then
     script="$FREEVO_HOME/$helpers/$1.py"
@@ -97,6 +109,7 @@ fi
 if [ "$1" = "--help" ] || [ "$1" = "-" ] ; then
     echo "freevo [ script | options]"
     echo "options:"
+    echo "  -fs            start freevo in a new x session in fullscreen"
     echo "  setup          run freevo setup to scan your environment"
     echo "  execute [file] execute a script inside the freevo environment"
     echo "  stop           stop the current freevo process"
