@@ -3,9 +3,7 @@
 
 
 depend() {
-	need lircd
-	need net
-	need xfs
+	use lircd net xfs
 }
 
 checkconfig() {
