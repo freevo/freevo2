@@ -22,6 +22,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/12/30 15:07:40  dischi
+# Small but important changes to the remote control. There is a new variable
+# RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
+# the variable REMOTE to a file in rc_clients to contain settings for a
+# remote. The only one right now is realmagic, feel free to add more.
+# RC_MPLAYER_CMDS uses the slave commands from mplayer, src/video/mplayer.py
+# now uses -slave and not the key bindings.
+#
 # Revision 1.3  2002/12/09 14:25:58  dischi
 # Added default for snes
 #
@@ -223,6 +231,10 @@ else:
                                      'not 3 elements!\n')
                 sys.exit(1)
 
+
+if REMOTE and os.path.isfile('rc_client/%s.py' % REMOTE):
+    execfile('rc_client/%s.py' % REMOTE, globals(), locals())
+    
 
 #
 # List of objects representing removable media, e.g. CD-ROMs,

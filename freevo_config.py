@@ -15,6 +15,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.102  2002/12/30 15:07:36  dischi
+# Small but important changes to the remote control. There is a new variable
+# RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
+# the variable REMOTE to a file in rc_clients to contain settings for a
+# remote. The only one right now is realmagic, feel free to add more.
+# RC_MPLAYER_CMDS uses the slave commands from mplayer, src/video/mplayer.py
+# now uses -slave and not the key bindings.
+#
 # Revision 1.101  2002/12/29 19:24:25  dischi
 # Integrated two small fixes from Jens Axboe to support overscan for DXR3
 # and to set MPLAYER_VO_OPTS
@@ -28,99 +36,6 @@
 #
 # Revision 1.98  2002/12/03 21:29:39  dischi
 # added dvdnav options
-#
-# Revision 1.97  2002/11/26 22:02:09  dischi
-# Added key to enable/disable subtitles. This works only with mplayer pre10
-# (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
-#
-# Revision 1.96  2002/11/24 19:10:19  dischi
-# Added mame support to the new code. Since the hole new code is
-# experimental, mame is activated by default. Change local_skin.xml
-# to deactivate it after running ./cleanup
-#
-# Revision 1.95  2002/11/18 13:36:44  krister
-# Applied Rob Shortt's patch for starting in fullscreen under X11.
-#
-# Revision 1.94  2002/11/17 02:30:17  krister
-# Re-added the radio station example URL. Fixed a playlist handling bug.
-#
-# Revision 1.93  2002/11/15 02:49:15  krister
-# Added a config option for saving MPlayer output to a logfile.
-#
-# Revision 1.92  2002/11/15 02:11:37  krister
-# Applied Bob Pauwes latest image slideshow patches.
-#
-# Revision 1.91  2002/11/14 04:38:47  krister
-# Added Bob Pauwe's image slideshow patches.
-#
-# Revision 1.90  2002/11/14 01:31:35  krister
-# Cleaned up default skin def and mga fbcon init.
-#
-# Revision 1.89  2002/11/13 14:34:21  krister
-# Fixed a bug in music playing (the file type was mistaken for video for songs without an absolute path) by changing the way file suffixes are handled. The format of suffixes in freevo_config.py changed, local_conf.py must be updated!
-#
-# Revision 1.88  2002/11/12 06:20:39  krister
-# Removed the radio station from the audio list since it doesn't work dur to someones changes.
-#
-# Revision 1.87  2002/10/25 20:03:32  dischi
-# Added *.m2p as video filetype
-#
-# Revision 1.86  2002/10/21 18:34:16  dischi
-# TV_SHOW_IMAGES points to the new example dir
-#
-# Revision 1.85  2002/10/21 05:09:50  krister
-# Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
-#
-# Revision 1.84  2002/10/21 02:04:41  krister
-# Added video input device selection.
-#
-# Revision 1.83  2002/10/21 01:20:25  krister
-# Clarified TV_CHANNELS updates.
-#
-# Revision 1.82  2002/10/17 04:16:16  krister
-# Changed the 'nice' command so that it is built into runapp instead. Made default prio -20.
-#
-# Revision 1.81  2002/10/16 18:04:28  krister
-# Made it easier to use epg_xmltv.py to generate the list of channels for freevo_config.py.
-#
-# Revision 1.80  2002/10/16 04:58:16  krister
-# Changed the main1 skin to use Gustavos new extended menu for TV guide, and Dischis new XML code. grey1 is now the default skin, I've tested all resolutions. I have not touched the blue skins yet, only copied from skin_dischi1 to skins/xml/type1.
-#
-# Revision 1.79  2002/10/15 21:44:31  krister
-# Added a font alias list, substitute missing non-free fonts with free alternates.
-#
-# Revision 1.78  2002/10/09 12:52:40  dischi
-# made infor(mation) complete
-#
-# Revision 1.77  2002/10/08 12:19:27  krister
-# Added more remote control info
-#
-# Revision 1.76  2002/10/08 04:32:36  krister
-# Reformatted comments.
-#
-# Revision 1.75  2002/10/07 05:26:25  outlyer
-# Added recursive playlist support from Alex Polite <m2@plusseven.com>
-#
-# Revision 1.74  2002/10/06 14:39:53  dischi
-# Removed older log messages and added MPLAYER_USE_WID to turn on/off
-# the usage of -wid (on by default)
-#
-# Revision 1.73  2002/10/03 17:34:37  dischi
-# Small update to support more resolutions. I tried to get 720x576 working,
-# but for some reason I can't see a freevo on my tv, mplayer works fine.
-# Strange....
-#
-# Revision 1.72  2002/10/02 02:40:55  krister
-# Applied Alex Polite's patch for using XMMS instead of MPlayer for
-# music playing and visualization.
-#
-# Revision 1.71  2002/10/01 01:55:06  krister
-# Changed the TV channel list to contain examples for Per Wigren's
-# patch for multiple TV stations on the same channel on different
-# times.
-#
-# Revision 1.70  2002/09/29 19:57:59  dischi
-# Added SHUTDOWN_SYS_CMD to freevo_config to set the shutdown command
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -370,7 +285,73 @@ OVERSCAN_Y = 0
 if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
     OVERSCAN_X = 30
     OVERSCAN_Y = 30
-    
+
+
+# ======================================================================
+# remote control section
+# ======================================================================
+
+
+#
+# Config file for the remote. This file should contain RC_CMDS and RC_MPLAYER_CMDS
+# The location of the file is rc_client, right now the only remote in there is
+# realmagic.py. The choose this remote, set the variable to 'realmagic'
+# Please send files for other remotes to the freevo mailing list
+#
+REMOTE = ''
+
+#
+# Remote control commands translation table. Replace this with the commands that
+# lirc sends for your remote. NB: The .lircrc file is not used.
+#
+# Change the commands in the *LEFT* column, the right column is what Freevo
+# expects to see! If the lirc command is identical (case insensitiv) with the
+# Freevo commands, the commands don't need to be in this list
+#
+# Universal remote "ONE FOR ALL", model "Cinema 7" (URC-7201B00 on the back),
+# bought from Walmart ($17.00).
+# Programmed to code TV "0150". (VCR needs to be programmed too?)
+#
+# There is a config file for lirc for this remote in freevo/boot/URC-7201B00.
+# Please see the Freevo website for information about buying or building a remote
+# control receiver.
+#
+RC_CMDS = {
+    'prog_guide'  : 'GUIDE',
+    'sel'         : 'SELECT',
+    'tv_vcr'      : 'EJECT',
+    'ff'          : 'FFWD',
+    }
+
+#
+# List of mplayer commands
+#
+RC_MPLAYER_CMDS = {}
+
+# XXX This is experimental, please send in testreports!
+# XXX If you want to use it you need to uncomment a line
+# XXX in the "freevo" start-script!
+# 
+#
+# Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
+# Supports as many buttons as your controller has,
+# but make sure there is a corresponding entry in your config
+# FYI: new kernels use /dev/input/jsX, but joy.py will fall back on /dev/jsX
+#
+JOY_DEV = 0
+JOY_CMDS = {
+    'up'             : 'UP',
+    'down'           : 'DOWN',
+    'left'           : 'LEFT',
+    'right'          : 'RIGHT',
+    'button 1'       : 'PLAY',
+    'button 2'       : 'PAUSE',
+    'button 3'       : 'STOP',
+    'button 4'       : 'ENTER',
+    }
+
+
+
 # ======================================================================
 # MPlayer section:
 # ======================================================================
@@ -648,84 +629,4 @@ else:
     if not os.path.isdir('/tmp/freevo/xmltv/logos'):
         os.makedirs('/tmp/freevo/xmltv/logos')
     TV_LOGOS = '/tmp/freevo/xmltv/logos'
-
-#
-# Remote control commands translation table. Replace this with the commands that
-# lirc sends for your remote. NB: The .lircrc file is not used.
-#
-# Change the commands in the *LEFT* column, the right column is what Freevo
-# expects to see!
-#
-# Universal remote "ONE FOR ALL", model "Cinema 7" (URC-7201B00 on the back),
-# bought from Walmart ($17.00).
-# Programmed to code TV "0150". (VCR needs to be programmed too?)
-#
-# There is a config file for lirc for this remote in freevo/boot/URC-7201B00.
-# Please see the Freevo website for information about buying or building a remote
-# control receiver.
-#
-RC_CMDS = {
-    'sleep'       : 'SLEEP',
-    'menu'        : 'MENU',
-    'prog_guide'  : 'GUIDE',
-    'exit'        : 'EXIT',
-    'up'          : 'UP',
-    'down'        : 'DOWN',
-    'left'        : 'LEFT',
-    'right'       : 'RIGHT',
-    'sel'         : 'SELECT',
-    'power'       : 'POWER',
-    'mute'        : 'MUTE',
-    'vol+'        : 'VOL+',
-    'vol-'        : 'VOL-',
-    'ch+'         : 'CH+',
-    'ch-'         : 'CH-',
-    '1'           : '1',
-    '2'           : '2',
-    '3'           : '3',
-    '4'           : '4',
-    '5'           : '5',
-    '6'           : '6',
-    '7'           : '7',
-    '8'           : '8',
-    '9'           : '9',
-    '0'           : '0',
-    'display'     : 'DISPLAY',
-    'enter'       : 'ENTER',
-    'prev_ch'     : 'PREV_CH',
-    'pip_onoff'   : 'PIP_ONOFF',
-    'pip_swap'    : 'PIP_SWAP',
-    'pip_move'    : 'PIP_MOVE',
-    'tv_vcr'      : 'EJECT',
-    'rew'         : 'REW',
-    'play'        : 'PLAY',
-    'ff'          : 'FFWD',
-    'pause'       : 'PAUSE',
-    'stop'        : 'STOP',
-    'rec'         : 'REC',
-    'eject'       : 'EJECT',
-    'subtitle'    : 'SUBTITLE'
-    }
-
-# XXX This is experimental, please send in testreports!
-# XXX If you want to use it you need to uncomment a line
-# XXX in the "freevo" start-script!
-# 
-#
-# Set the Joy device to 0 to disable, 1 for js0, 2 for js1, etc...
-# Supports as many buttons as your controller has,
-# but make sure there is a corresponding entry in your config
-# FYI: new kernels use /dev/input/jsX, but joy.py will fall back on /dev/jsX
-#
-JOY_DEV = 0
-JOY_CMDS = {
-    'up'             : 'UP',
-    'down'           : 'DOWN',
-    'left'           : 'LEFT',
-    'right'          : 'RIGHT',
-    'button 1'       : 'PLAY',
-    'button 2'       : 'PAUSE',
-    'button 3'       : 'STOP',
-    'button 4'       : 'ENTER',
-    }
 

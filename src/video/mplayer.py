@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2002/12/30 15:07:42  dischi
+# Small but important changes to the remote control. There is a new variable
+# RC_MPLAYER_CMDS to specify mplayer commands for a remote. You can also set
+# the variable REMOTE to a file in rc_clients to contain settings for a
+# remote. The only one right now is realmagic, feel free to add more.
+# RC_MPLAYER_CMDS uses the slave commands from mplayer, src/video/mplayer.py
+# now uses -slave and not the key bindings.
+#
 # Revision 1.10  2002/12/29 19:24:26  dischi
 # Integrated two small fixes from Jens Axboe to support overscan for DXR3
 # and to set MPLAYER_VO_OPTS
@@ -154,9 +162,9 @@ class MPlayer:
        
 
         # Build the MPlayer command
-        mpl = '--prio=%s %s %s' % (config.MPLAYER_NICE,
-                                   config.MPLAYER_CMD,
-                                   config.MPLAYER_ARGS_DEF)
+        mpl = '--prio=%s %s %s -slave' % (config.MPLAYER_NICE,
+                                          config.MPLAYER_CMD,
+                                          config.MPLAYER_ARGS_DEF)
 
         # XXX find a way to enable this for AVIs with ac3, too
         if (mode == 'dvdnav' or mode == 'dvd' or os.path.splitext(filename)[1] == '.vob')\
@@ -266,11 +274,10 @@ class MPlayer:
         eventhandler for mplayer control. If an event is not bound in this
         function it will be passed over to the items eventhandler
         """
-        print event
 
         if event == rc.STOP or event == rc.SELECT:
             if self.mode == 'dvdnav':
-                self.thread.app.write('S')
+                self.thread.app.write('dvdnav 6\n')
             else:
                 self.stop()
                 self.thread.item = None
@@ -293,52 +300,54 @@ class MPlayer:
 
         if event == rc.MENU:
             if self.mode == 'dvdnav':
-                self.thread.app.write('M')
+                self.thread.app.write('dvdnav 5\n')
                 return TRUE
 
         if event == rc.DISPLAY:
-            self.thread.cmd( 'info' )
+            self.thread.app.write('osd\n')
             return TRUE
 
         if event == rc.PAUSE or event == rc.PLAY:
-            self.thread.cmd('pause')
+            self.thread.app.write('pause\n')
             return TRUE
 
         if event == rc.FFWD:
-            self.thread.cmd('skip_forward')
+            self.thread.app.write('seek 10\n')
             return TRUE
 
         if event == rc.UP:
             if self.mode == 'dvdnav':
-                self.thread.app.write('K')
+                self.thread.app.write('dvdnav 1\n')
                 return TRUE
 
         if event == rc.REW:
-            self.thread.cmd('skip_back')
+            self.thread.app.write('seek -10\n')
             return TRUE
 
         if event == rc.DOWN:
             if self.mode == 'dvdnav':
-                self.thread.app.write('J')
+                self.thread.app.write('dvdnav 2\n')
                 return TRUE
 
         if event == rc.LEFT:
             if self.mode == 'dvdnav':
-                self.thread.app.write('H')
+                self.thread.app.write('dvdnav 3\n')
             else:
-                self.thread.cmd('skip_back2')
+                self.thread.app.write('seek -60\n')
             return TRUE
 
         if event == rc.RIGHT:
             if self.mode == 'dvdnav':
-                self.thread.app.write('L')
+                self.thread.app.write('dvdnav 4\n')
             else:
-                self.thread.cmd('skip_forward2')
+                self.thread.app.write('seek 60\n')
             return TRUE
 
-        if event == rc.SUBTITLE:
-            print "SUBBB"
-            self.thread.cmd('subtitle')
+
+        # try to find the event in RC_MPLAYER_CMDS 
+        e = config.RC_MPLAYER_CMDS.get(event, None)
+        if e:
+            self.thread.app.write('%s\n' % config.RC_MPLAYER_CMDS[event][0])
             return TRUE
 
         # nothing found? Try the eventhandler of the object who called us
@@ -476,71 +485,5 @@ class MPlayer_Thread(threading.Thread):
                 
             else:
                 self.mode = 'idle'
-
-
-    def cmd(self, command):
-        #print "In cmd going to do: " + command
-        str = ''
-        if command == 'info':
-            str = mplayerKey('INFO')
-        elif command == 'next':
-            str = mplayerKey('NEXT')
-        elif command == 'pause':
-            str = mplayerKey('PAUSE')
-        elif command == 'prev':
-            str = mplayerKey('PREV')
-        elif command == 'stop':
-            str = mplayerKey('STOP')
-        elif command == 'skip_forward':
-            str = mplayerKey('RIGHT')
-        elif command == 'skip_forward2':
-            str = mplayerKey('UP')
-        elif command == 'skip_forward3':
-            str = mplayerKey('PAGEUP')
-        elif command == 'skip_back':
-            str = mplayerKey('LEFT')
-        elif command == 'skip_back2':
-            str = mplayerKey('DOWN')
-        elif command == 'skip_back3':
-            str = mplayerKey('PAGEDOWN')
-        elif command == 'subtitle':
-            print "sub"
-            str = mplayerKey('SUBTITLE')
-
-        #print "In cmd going to write: " + str
-        self.app.write(str) 
-
-
-#
-# Translate an abstract remote control command to an mplayer
-# command key
-#
-def mplayerKey(rcCommand):
-    mplayerKeys = {
-        'DOWN'           : '\x1bOB',
-        'INFO'           : 'o',
-        'KEY_1'          : '+',
-        'KEY_7'          : '-',
-        'LEFT'           : '\x1bOD',
-        'NONE'           : '',
-        'NEXT'           : '>',
-        'QUIT'           : 'q',
-        'PAGEUP'         : '\x1b[5~',
-        'PAGEDOWN'       : '\x1b[6~',
-        'PAUSE'          : ' ',
-        'PLAY'           : ' ',
-        'PREV'           : '<',
-        'RIGHT'          : '\x1bOC',
-        'STOP'           : 'q',
-        'UP'             : '\x1bOA',
-        'VOLUMEUP'       : '*',
-        'VOLUMEDOWN'     : '/',
-        'SUBTITLE'       : 'v',
-        'DISPLAY'        : 'o'
-        }
-    
-    key = mplayerKeys.get(rcCommand, '')
-
-    return key
 
 

@@ -109,16 +109,16 @@ class RemoteLirc:
             cntx = str.split()[1]
             cntd = int(cntx, 16)
             cmd = self.cmds.get(button, '')
+            if cmd == '':
+                cmd = button.upper()
+                
             print 'cnt: %s=%s' % (cntx, cntd)
-            if cmd != '':
-                # Slow down start of autorepeat
-                if cntd == 0 or cntd > 6:
-                    # Only get every other code, slows down autorepeat
-                    if not cntd % 3:
-                        print 'Translation: "%s" -> "%s"' % (button, cmd)
-                        return cmd
-            else:
-                print 'Translation: "%s" not found!' % (button,)
+            # Slow down start of autorepeat
+            if cntd == 0 or cntd > 6:
+                # Only get every other code, slows down autorepeat
+                if not cntd % 3:
+                    print 'Translation: "%s" -> "%s"' % (button, cmd)
+                    return cmd
             time.sleep(0.1)
 
 
