@@ -49,7 +49,10 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+import mplayer
 
+# Create the mplayer object
+mplayer = mplayer.get_singleton()
 
 ###############################################################################
 
@@ -73,10 +76,35 @@ def shutdown(menuw=None, arg=None):
     osd.clearscreen(color=osd.COL_BLACK)
     osd.drawstring('shutting down', osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
-    os.system("sutdown -h now")
     osd.update()
+    os.system("sutdown -h now")
 
     
+
+def autostart():
+    if os.path.exists(config.CD_MOUNT_POINT + "/mpegav/"):
+        if DEBUG: print 'Autstart VCD'
+        mplayer.play('vcd', '1', [])
+    elif os.path.exists(config.CD_MOUNT_POINT + "/video_ts/"):
+        if DEBUG: print 'Autstart DVD'
+        mplayer.play('dvd', '1', [])
+    else:
+        mplayer_files = util.match_files(config.CD_MOUNT_POINT, \
+                                         config.SUFFIX_MPLAYER_FILES)
+        mp3_files = util.match_files(config.CD_MOUNT_POINT, \
+                                     config.SUFFIX_MPG123_FILES)
+        image_files = util.match_files(config.CD_MOUNT_POINT, \
+                                       config.SUFFIX_IMAGE_FILES)
+        if mplayer_files and not mp3_files and not image_files:
+            if DEBUG: print 'Autstart movie cd'
+            movie.cwd(config.CD_MOUNT_POINT, menuwidget)
+        elif not mplayer_files and mp3_files and not image_files:
+            if DEBUG: print 'Autstart mp3 cd'
+            mp3.cwd(config.CD_MOUNT_POINT, menuwidget)
+        elif not mplayer_files and not mp3_files and image_files:
+            if DEBUG: print 'Autstart image cd'
+            imenu.cwd(config.CD_MOUNT_POINT, menuwidget)
+
     
 #
 # Setup the main menu and handle events (remote control, etc)
@@ -98,7 +126,7 @@ def getcmd():
     
     muted = 0
     mainVolume = 0
-    tray_open = 0
+    tray_open = 1
     while 1:
         
         # Get next command
@@ -125,9 +153,25 @@ def getcmd():
         elif event == rc.EJECT:
             if tray_open:
                 if DEBUG: print 'Inserting %s' % config.CD_MOUNT_POINT
+
+                # XXX FIXME: this doesn't look very good, we need
+                # XXX some sort of a pop-up widget
+                osd.drawbox(osd.width/2 - 180, osd.height/2 - 30, osd.width/2 + 180,\
+                            osd.height/2+30, width=-1,
+                            color=((60 << 24) | osd.COL_BLACK))
+                osd.drawstring('mounting %s' % config.CD_MOUNT_POINT, \
+                               osd.width/2 - 160, osd.height/2 - 10,
+                               fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+                osd.update()
+
+                # close the tray and mount the cd
                 os.system('eject -t %s' % config.CD_MOUNT_POINT)
                 os.system('mount %s' % config.CD_MOUNT_POINT)
+                menuwidget.refresh()
                 tray_open = 0
+                if len(menuwidget.menustack) == 1:
+                    autostart()
+
             else:
                 if DEBUG: print 'Ejecting %s' % config.CD_MOUNT_POINT
                 os.system('eject %s' % config.CD_MOUNT_POINT)
