@@ -9,13 +9,12 @@
     ******************************************************* -->
 
     <!-- definition of the main menu item names and watermarks -->
-    <main>
-      <item label="tv" name="Watch TV" image="watermarks/tv.png"/>
+    <main imagedir="watermarks">
+      <item label="tv" name="Watch TV"/>
       <item label="video" name="Watch a Movie" image="watermarks/movie.png"/>
       <item label="audio" name="Listen to Music" image="watermarks/music.png"/>
-      <item label="image" name="Look at Pictures" image="watermarks/image.png"/>
-      <item label="games" name="Games" image=""/>
-      <item label="shutdown" name="Shutdown" image="watermarks/shutdown.png"/> 
+      <item label="image" name="Look at Pictures"/>
+      <item label="games" name="Games"/>
     </main>
 
     <!-- change the menuset to use a new background and listing area -->

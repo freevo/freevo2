@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/02/12 17:18:48  dischi
+# Move watermark information to python ocde to avoid duplicate code here
+#
 # Revision 1.31  2004/02/12 03:32:41  outlyer
 # Fixes for OSD_EXTRA_FONT:
 #
@@ -270,9 +273,11 @@ class MainMenuItem:
 
 class MainMenu:
     def __init__(self):
-        self.items = {}
+        self.items    = {}
+        self.imagedir = ''
 
     def parse(self, menu_node, scale, c_dir=''):
+        self.imagedir = attr_str(menu_node, "imagedir", self.imagedir)
         for node in menu_node.children:
             if node.name == u'item':
                 item = MainMenuItem()
@@ -280,6 +285,7 @@ class MainMenu:
                 self.items[item.label] = item                
 
     def prepare(self, search_dirs, image_names):
+        self.imagedir = os.path.join(config.IMAGE_DIR, self.imagedir)
         for i in self.items:
             self.items[i].prepare(search_dirs, image_names)
     
