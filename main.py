@@ -57,11 +57,29 @@ mplayer = mplayer.get_singleton()
 ###############################################################################
 
 # Set up the mixer
+# XXX Doing stuff to select correct device to manipulate.
 mixer = mixer.get_singleton()
-mixer.setMainVolume(40)
-mixer.setPcmVolume(100)
-mixer.setLineinVolume(0)
-mixer.setMicVolume(0)
+
+if config.MAJOR_AUDIO_CTRL == 'VOL':
+    mixer.setMainVolume( config.DEFAULT_VOLUME )
+    if config.CONTROL_ALL_AUDIO:
+        mixer.setPcmVolume( config.MAX_VOLUME )
+        # XXX This is for SB Live cards should do nothing to others
+        # XXX Please tell if you have problems with this.
+        mixer.setOgainVolume( config.MAX_VOLUME )
+elif config.MAJOR_AUDIO_CTRL == 'PCM':
+    mixer.setPcmVolume( config.DEFAULT_VOLUME )
+    if config.CONTROL_ALL_AUDIO:
+        mixer.setMainVolume( config.MAX_VOLUME )
+        # XXX This is for SB Live cards should do nothing to others
+        # XXX Please tell if you have problems with this.
+        mixer.setOgainVolume( config.MAX_VOLUME )
+else:
+    if DEBUG: print "No appropriate audio channel found for mixer"
+
+if config.CONTROL_ALL_AUDIO:
+    mixer.setLineinVolume(0)
+    mixer.setMicVolume(0)
 
 # Create the remote control object
 rc = rc.get_singleton()
@@ -114,7 +132,7 @@ def getcmd():
     menuwidget.pushmenu(mainmenu)
 
     muted = 0
-    mainVolume = 0
+    mainVolume = 0 # XXX We are using this for PcmVolume as well.
     while 1:
         
         # Get next command
@@ -132,16 +150,31 @@ def getcmd():
 
         # Handle volume control   XXX move to the skin
         if event == rc.VOLUP:
-            mixer.incMainVolume()
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                mixer.incMainVolume()
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                mixer.incPcmVolume()
+                
         elif event == rc.VOLDOWN:
-            mixer.decMainVolume()
+            if( config.MAJOR_AUDIO_CTRL == 'VOL' ):
+                mixer.decMainVolume()
+            elif( config.MAJOR_AUDIO_CTRL == 'PCM' ):
+                mixer.decPcmVolume()
+                
         elif event == rc.MUTE:
             if muted:
-                mixer.setMainVolume(mainVolume)
+                if config.MAJOR_AUDIO_CTRL == 'VOL':
+                    mixer.setMainVolume( mainVolume )
+                elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                    mixer.setPcmVolume( mainVolume )
                 muted = 0
             else:
-                mainVolume = mixer.getMainVolume()
-                mixer.setMainVolume(0)
+                if config.MAJOR_AUDIO_CTRL == 'VOL':
+                    mainVolume = mixer.getMainVolume()
+                    mixer.setMainVolume(0)
+                elif config.MAJOR_AUDIO_CTRL == 'PCM':
+                    mainVolume = mixer.getPcmVolume()
+                    mixer.setPcmVolume(0)
                 muted = 1
         elif event == rc.EJECT and len(menuwidget.menustack) == 1 and config.ROM_DRIVES:
             (rom_dir, name, tray) = config.ROM_DRIVES[0]
@@ -197,9 +230,6 @@ def main_func():
         if arg == '--videotools=real':
             video = 'real'
 
-    # Run-time configuration settings
-    config.ConfigInit(videotools = video)
-    
     # Make sure there's no mplayer process lying around.
     os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
     						  # my mplayer command is actually
