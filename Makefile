@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2003/04/28 07:54:23  tcwan
+# Changed 'make release' to exclude .cvsignore files
+#
 # Revision 1.31  2003/04/14 07:11:06  tcwan
 # Changed tgz filename for 'make release' to be freevo-src-YYYYMMDD.tar.gz
 # to distinguish between source only and full binary releases
@@ -142,7 +145,7 @@ distclean:
 
 release: clean
 	cd ..; tar czvf freevo-src-`cat freevo/VERSION`-`date +%Y%m%d`.tar.gz \
-	  --exclude CVS freevo
+	  --exclude CVS --exclude .cvsignore freevo
 
 
 
