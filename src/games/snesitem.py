@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/01/10 21:25:01  mikeruelle
+# zipped rom support for snes and genesis
+#
 # Revision 1.13  2003/12/29 22:30:35  dischi
 # move to new Item attributes
 #
@@ -67,6 +70,10 @@ import event as em
 from struct import *
 from string import *
 from re import *
+from zipped_rom import unzip_rom
+
+# Extensions used by SNES ROMs
+snesromExtensions = ['smc', 'sfc', 'fig']
 
 # Used to detect the internal rome information, as described in 'SNESKART.DOC v1.3'
 snesromFileOffset = [33216, 32704, 65472, 65984]
@@ -214,8 +221,14 @@ class SnesItem(Item):
         self.type  = 'snes'            # fix value
         self.mode  = 'file'            # file, dvd or vcd
         self.filename = file
+        
+        snesFile = None
+        unzipped = unzip_rom(file, snesromExtensions)
+        if unzipped:
+            snesFile = open(unzipped, 'rb')
+        else:
+            snesFile = open(file, 'rb')
 
-        snesFile = open(file, 'rb')
         for offset in snesromFileOffset:
             snesFile.seek(offset)
             romHeader = snesFile.read(32)
@@ -236,6 +249,9 @@ class SnesItem(Item):
                         print 'SNES rom header detected by ASCII name : %d!!!!' % offset
                     break
         snesFile.close()
+        if unzipped:
+            os.unlink(unzipped)
+
         if DEBUG:
             print 'SNES rom name : %s - %s -> %s' % (ord(romCountry),os.path.basename(file), romName)
 

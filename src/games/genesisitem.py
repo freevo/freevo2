@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/01/10 21:25:01  mikeruelle
+# zipped rom support for snes and genesis
+#
 # Revision 1.4  2003/12/29 22:30:35  dischi
 # move to new Item attributes
 #
@@ -63,6 +66,10 @@ import event as em
 from struct import *
 from string import *
 from re import *
+from zipped_rom import unzip_rom
+
+# Extensions used by GENESIS ROMs
+genesisromExtensions = ['smd', 'bin']
 
 class GenesisItem(Item):
     def __init__(self, file, cmd = None, args = None, imgpath = None, parent = None):
@@ -72,7 +79,13 @@ class GenesisItem(Item):
         self.filename = file
         romName = ''
 
-        genesisFile = open(file, 'rb')
+        genesisFile = None
+        unzipped = unzip_rom(file, genesisromExtensions)
+        if unzipped:
+            genesisFile = open(unzipped, 'rb')
+        else:
+            genesisFile = open(file, 'rb')
+
         fileExt = lower(os.path.splitext(os.path.basename(file))[1])
         if  fileExt == '.bin':
             genesisFile.seek(0x120)
@@ -85,6 +98,9 @@ class GenesisItem(Item):
                 romName += genesisFile.read(1)
         else:
             romName = os.path.splitext(os.path.basename(file))[0]
+        genesisFile.close()
+        if unzipped:
+            os.unlink(unzipped)
         # Some guys modify the internal rom name with som crap -> detect it now
         if lower(romName[0:6]) == 'dumped' or lower(romName[0:6]) == 'copied':
             self.name =  os.path.splitext(os.path.basename(file))[0]
