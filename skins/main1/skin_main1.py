@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2002/10/07 04:16:35  outlyer
+# The rough draft of the skin I showed some screenshots of. It uses the images
+# I just added to create some nice alpha masking. You'll also need a bunch of
+# things which I can't commit if you want to get the exact look:
+# 1. Arial_Bold.ttf - get it from a Windows box, or if you have the Truetype font
+# package from Microsoft
+# 2. the MythTV background - get it from them; they won't let us use it.
+#
+# There will also be a seperate XML file which I'll commit in a minute.
+#
 # Revision 1.35  2002/10/06 14:35:19  dischi
 # log message cleanup and removed a debug message
 #
@@ -101,7 +111,7 @@ import util
 import mixer
 
 # The OSD class, used to communicate with the OSD daemon
-import osd
+import osd,pygame
 
 
 # XXX Krister, please change this to 1 and start freevo with and
@@ -341,6 +351,7 @@ class Skin:
                         osd.drawbitmap(util.resize(image, val.cover_movie.width, \
                                                    val.cover_movie.height),\
                                        val.cover_movie.x, val.cover_movie.y)
+			osd.drawbitmap('skins/images/moviebox.png',-1,-1)
                         i_val = val.cover_movie
 
                 elif type == 'music' and val.cover_music.visible:
@@ -516,7 +527,8 @@ class Skin:
 
         if val.bgbitmap[0]:
             apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-        
+       
+
         # Menu heading
         if val.title.visible:
             if val.title.text:
@@ -524,7 +536,7 @@ class Skin:
 
             self.DrawText(menu.heading, val.title)
             
-
+	osd.drawbitmap('skins/images/logo.png',550,30)
         # Draw the menu choices for the main selection
         y0 = val.items.y
 
@@ -609,6 +621,9 @@ class Skin:
         height = val.items.height
 
         fontsize = val.items.default.size
+
+
+	osd.drawbitmap('skins/images/tvmask.png',-1,-1)
 
         if menu.packrows:
             w, h = osd.stringsize('Ajg', font=val.items.default.font,
@@ -728,14 +743,10 @@ class Skin:
 
             if val.bgbitmap[0]:
                 apply(osd.drawbitmap, (val.bgbitmap, -1, -1))
-            
-            if val.title.visible:
-                osd.drawstring('Playing Music', val.title.x, val.title.y,
-                               val.title.color, font=val.title.font,
-                               ptsize=val.title.size, align=val.title.align)
+        
+	    osd.drawbitmap('skins/images/highlight.png',-1,-1)
 
-
-            # Display the cover image file if it is present
+            #Display the cover image file if it is present
             if info.image:
                 osd.drawbox(465,190, 755, 480, width=1, color=0x000000)   
                 osd.drawbitmap(util.resize(info.image, 289, 289), 466, 191)
@@ -747,10 +758,9 @@ class Skin:
 
             file_name = file_name[i+1]
             py = val.progressbar.y
-            self.DrawText('Dir: '+dir_name, val, x=5, y=(py + 20))
-            self.DrawText('File: '+file_name, val, 5, y=(py + 40))
                 
             self.DrawText('Title: ', val2, x=left, y=100)
+
             self.DrawText('%s ' % info.title, val, x=left, y=100)
  
             self.DrawText('Artist: ', val2, x=left, y=130)
@@ -772,7 +782,13 @@ class Skin:
             # Erase the portion that will be redrawn
             if val.bgbitmap[0]:
                 osd.drawbitmap( val.bgbitmap, left, 250, None, left,
-                                250, 300, 30 )
+                                250, 100, 30 )
+	        #osd.drawbitmap('skins/images/highlight.png', left, 250, None, left,
+		#		250, 100, 30)
+		box = pygame.Surface((100,30),0,32)
+		box.fill ((0,0,0))
+		box.set_alpha(128)
+		osd.screen.blit(box,(left,250))
 
         # XXX I changed this because round rounds up on 3.58 etc. instead
         # XXX of giving us the desired "round down modulo" effect.
@@ -781,8 +797,7 @@ class Skin:
         rem_min = int(info.remain)/60
         rem_sec = int(info.remain)%60
 
-        str = '%s:%02d/-%s:%02d (%0.1f%%) ' % (el_min, el_sec, rem_min,
-                                               rem_sec, info.done)
+        str = '%s:%02d ' % (el_min, el_sec)
         self.DrawText(str, val, x=left, y=250)
 
         # Draw the progress bar
