@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/27 15:07:36  dischi
+# added basic bins support to the osd
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -289,12 +292,33 @@ class ImageViewer:
         if self.osd_mode == 1:
             # This is where we add a caption.  Only if playlist is empty
             # May need to check the caption too?
-            if self.caption:
-                osd.drawstring(self.caption, 10, osd.height - 25, fgcolor=osd.COL_ORANGE, 
+	    osdstring = []
+
+	    # Use the bins caption if it exists
+            if self.fileinfo.binsdesc.has_key('title'):
+                osdstring.append('Title: ' + self.fileinfo.binsdesc['title'])
+            elif self.caption:
+	        osdstring = [self.caption]
+            else:
+	        osdstring = ['No Title']
+
+            if self.fileinfo.binsdesc.has_key('description'):
+                osdstring.append('Description: ' + self.fileinfo.binsdesc['description'])
+
+            # Now print the string on screen
+	    # First reverse the list
+	    osdstring.reverse()
+	    # Create a black box for text
+            osd.drawbox(0, osd.height - (25 + (len(osdstring) * 30)),
+                    osd.width, osd.height, width=-1,
+                    color=((60 << 24) | osd.COL_BLACK))
+
+	    for line in range(len(osdstring)):
+	        h=osd.height - (50 + ( line * 30))
+                osd.drawstring(osdstring[line], 10, h, fgcolor=osd.COL_ORANGE, 
                                bgcolor=osd.COL_BLACK)
             return
             
-        
         f = open(self.filename, 'r')
         tags = exif.process_file(f)
 
