@@ -33,20 +33,20 @@ ALSA_GET=ftp://ftp.alsa-project.org/pub/lib/$(ALSA).tar.bz2
 
 SDL=SDL-freevo-20030420
 # SDL_GET=http://www.libsdl.org/release/$(SDL).tar.gz 
-SDL_GET=http://ettin.danicar.net/$(SDL).tar.gz 
+SDL_GET=http://freevo.sourceforge.net/runtime/$(SDL).tar.gz 
 
 SDLIMAGE=SDL_image-CVS20020805
 SDLIMAGE_GET=http://freevo.sourceforge.net/$(SDLIMAGE).tgz  
 
 SDLTTF=SDL_ttf-2.0.5-freevo
 # SDLTTF_GET=http://freevo.sourceforge.net/$(SDLTTF).tar.gz
-SDLTTF_GET=http://ettin.danicar.net/$(SDLTTF).tar.gz
+SDLTTF_GET=http://freevo.sourceforge.net/runtime/$(SDLTTF).tar.gz
 
 SDLMIXER=SDL_mixer-1.2.4
 SDLMIXER_GET=http://www.libsdl.org/projects/SDL_mixer/release/$(SDLMIXER).tar.gz 
 
 SMPEG=smpeg-0.4.4-freevo
-SMPEG_GET=http://ettin.danicar.net/$(SMPEG).tar.gz 
+SMPEG_GET=http://freevo.sourceforge.net/runtime/$(SMPEG).tar.gz 
 
 PYNUMERIC=Numeric-22.0
 PYNUMERIC_GET=http://unc.dl.sourceforge.net/sourceforge/numpy/$(PYNUMERIC).tar.gz 
@@ -88,7 +88,7 @@ LIBGPHOTO=libgphoto2-2.1.1
 LIBGPHOTO_GET=http://unc.dl.sourceforge.net/sourceforge/gphoto/$(LIBGPHOTO).tar.gz 
 
 PYGPHOTO=pygphoto-freevo
-PYGPHOTO_GET=http://ettin.danicar.net/$(PYGPHOTO).tar.gz
+PYGPHOTO_GET=http://freevo.sourceforge.net/runtime/$(PYGPHOTO).tar.gz
 
 # wget http://unc.dl.sourceforge.net/sourceforge/gphoto/gphoto2-2.1.1).tar.gz 
 # tar xvzf gphoto2-2.1.1).tar.gz 
@@ -120,20 +120,20 @@ PYFCHKSUM=python-fchksum-1.6.1
 PYFCHKSUM_GET=http://www.azstarnet.com/~donut/programs/fchksum/$(PYFCHKSUM).tar.gz 
 
 MP1E=mp1e-20030419-freevo
-MP1E_GET=http://ettin.danicar.net/$(MP1E).tar.gz
+MP1E_GET=http://freevo.sourceforge.net/runtime/$(MP1E).tar.gz
 
 DXR3=em8300-0.13.0
 DXR3_GET=http://dxr3.sourceforge.net/download/$(DXR3).tar.gz
 
 DIRECTFB=DirectFB-20030420
-DIRECTFB_GET=http://ettin.danicar.net/$(DIRECTFB).tar.gz
+DIRECTFB_GET=http://freevo.sourceforge.net/runtime/$(DIRECTFB).tar.gz
 
 FFMPEG=ffmpeg-0.4.6-fixed
 # FFMPEG_GET=http://unc.dl.sourceforge.net/sourceforge/ffmpeg/$(FFMPEG).tar.gz
-FFMPEG_GET=http://ettin.danicar.net/$(FFMPEG).tar.gz
+FFMPEG_GET=http://freevo.sourceforge.net/runtime/$(FFMPEG).tar.gz
 
 MPLAYER=MPlayer-0.90-freevo
-MPLAYER_GET=http://ettin.danicar.net/$(MPLAYER).tar.gz
+MPLAYER_GET=http://freevo.sourceforge.net/runtime/$(MPLAYER).tar.gz
 
 MFONTS=font-arial-iso-8859-1
 MFONTS_GET=http://www1.mplayerhq.hu/MPlayer/releases/fonts/$(MFONTS).tar.bz2
