@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2003/08/02 10:09:52  dischi
+# Don't add 'Settings' with a submenu to the list of actions, add the
+# settings directly (max 4 items, mostly 1)
+#
 # Revision 1.68  2003/07/29 19:07:25  dischi
 # cleanup and use VCD_PLAYER plugin if defined
 #
@@ -356,31 +360,34 @@ class VideoItem(Item):
         """
         return a list of possible actions on this item.
         """
-        items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
+        items = [ (self.play, 'Play'), ]
+        if not self.filename or self.filename == '0':
+            if self.mode == 'dvd':
+                if plugin.getbyname(plugin.DVD_PLAYER):
+                    items = [ (self.play, 'Play DVD'),
+                              ( self.dvd_vcd_title_menu, 'DVD title list' ) ]
+                else:
+                    items = [ ( self.dvd_vcd_title_menu, 'DVD title list' ),
+                              (self.play, 'Play default track') ]
+                    
+            elif self.mode == 'vcd':
+                if plugin.getbyname(plugin.VCD_PLAYER):
+                    items = [ (self.play, 'Play VCD'),
+                              ( self.dvd_vcd_title_menu, 'VCD title list' ) ]
+                else:
+                    items = [ ( self.dvd_vcd_title_menu, 'VCD title list' ),
+                              (self.play, 'Play default track') ]
+
+
+        items += configure.get_items(self)
+ 
         if self.filename and self.mode == 'file' and not self.media:
             items += [ (self.confirm_delete, 'Delete file') ]
 
         if self.variants:
             items = [ (self.show_variants, 'Show variants') ] + items
 
-        # show DVD/VCD title menu for DVDs, but only when we aren't in a
-        # submenu of a such a menu already
         if not self.filename or self.filename == '0':
-
-            if self.mode == 'dvd':
-                title_list = ( self.dvd_vcd_title_menu, 'DVD title list' )
-                if plugin.getbyname(plugin.DVD_PLAYER):
-                    items = [ items[0], title_list ] + items[1:]
-                else:
-                    items = [ title_list ] + items
-
-            if self.mode == 'vcd':
-                title_list = ( self.dvd_vcd_title_menu, 'VCD title list' )
-                if plugin.getbyname(plugin.VCD_PLAYER):
-                    items = [ items[0], title_list ] + items[1:]
-                else:
-                    items = [ title_list ] + items
-
             for m in self.subitems:
                 # Allow user to watch one of the subitems instead of always both
                 # XXX Doesn't work
@@ -389,7 +396,7 @@ class VideoItem(Item):
                     myfilename = util.get_bookmarkfile(m.filename)
                     self.bookmarkfile = myfilename
                     items += [( self.bookmark_menu, 'Bookmarks')]
-                    # % (os.path.basename(m.filename)))]
+
         else:
             if os.path.exists(util.get_bookmarkfile(self.filename)):
                 self.bookmarkfile = util.get_bookmarkfile(self.filename) 
@@ -638,7 +645,7 @@ class VideoItem(Item):
     def settings(self, arg=None, menuw=None):
         if not self.menuw:
             self.menuw = menuw
-        confmenu = configure.get_main_menu(self, self.menuw, self.xml_file)
+        confmenu = configure.get_menu(self, self.menuw, self.xml_file)
         self.menuw.pushmenu(confmenu)
         
 

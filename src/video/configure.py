@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/08/02 10:09:52  dischi
+# Don't add 'Settings' with a submenu to the list of actions, add the
+# settings directly (max 4 items, mostly 1)
+#
 # Revision 1.12  2003/07/25 20:54:29  dischi
 # make audio selection work for files, too
 #
@@ -52,6 +56,7 @@
 
 # The menu widget class
 import menu
+import plugin
 
 # RegExp
 import re
@@ -134,12 +139,17 @@ def chapter_selection_menu(arg=None, menuw=None):
 #
 
 def toggle(arg=None, menuw=None):
-    setattr(arg[0], arg[1], not getattr(arg[0], arg[1]))
+    setattr(arg[1], arg[2], not getattr(arg[1], arg[2]))
 
-    sel = menuw.all_items.index(menuw.menustack[-1].selected)
+    old = menuw.menustack[-1].selected
+    pos = menuw.menustack[-1].choices.index(menuw.menustack[-1].selected)
 
-    menuw.menustack[-1].choices = main_menu_generate(arg[0])
-    menuw.menustack[-1].selected = menuw.menustack[-1].choices[sel]
+    new = add_toogle(arg[0], arg[1], arg[2])
+    new.image = old.image
+    new.display_type = old.display_type
+    
+    menuw.menustack[-1].choices[pos] = new
+    menuw.menustack[-1].selected = menuw.menustack[-1].choices[pos]
 
     menuw.init_page()
     menuw.refresh()
@@ -147,33 +157,36 @@ def toggle(arg=None, menuw=None):
 
 def add_toogle(name, item, var):
     if getattr(item, var):
-        return menu.MenuItem("Turn off %s" % name, toggle, (item, var))
-    return menu.MenuItem("Turn on %s" % name, toggle, (item, var))
+        return menu.MenuItem("Turn off %s" % name, toggle, (name, item, var))
+    return menu.MenuItem("Turn on %s" % name, toggle, (name, item, var))
 
     
 #
 # config main menu
 #
 
-def main_menu_generate(item):
+def get_items(item):
     next_start = 0
     items = []
 
-    if item.info.has_key('audio') and len(item.info['audio']) > 1:
-        items.append(menu.MenuItem("Audio selection", audio_selection_menu, item))
-    if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
-        items.append(menu.MenuItem("Subtitle selection", subtitle_selection_menu, item))
-    if item.info.has_key('chapters') and item.info['chapters'] > 1:
-        items.append(menu.MenuItem("Chapter selection", chapter_selection_menu, item))
+    if not ((not item.filename or item.filename == '0') and \
+            item.mode == 'dvd' and plugin.getbyname(plugin.DVD_PLAYER)):
+
+        if item.info.has_key('audio') and len(item.info['audio']) > 1:
+            items.append(menu.MenuItem("Audio selection", audio_selection_menu, item))
+        if item.info.has_key('subtitles') and len(item.info['subtitles']) > 1:
+            items.append(menu.MenuItem("Subtitle selection", subtitle_selection_menu, item))
+        if item.info.has_key('chapters') and item.info['chapters'] > 1:
+            items.append(menu.MenuItem("Chapter selection", chapter_selection_menu, item))
 
     items += [ add_toogle('deinterlacing', item, 'deinterlace') ]
-    items += [ menu.MenuItem("Play", play_movie, (item, '')) ]
-
     return items
 
         
-def get_main_menu(item, menuw, xml_file):
+def get_menu(item, menuw, xml_file):
     global current_xml_file
     current_xml_file = xml_file
-    return menu.Menu('CONFIG MENU', main_menu_generate(item), xml_file=xml_file)
+
+    items = get_items(item) + [ menu.MenuItem("Play", play_movie, (item, '')) ]
+    return menu.Menu('CONFIG MENU', items, xml_file=xml_file)
     
