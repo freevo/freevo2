@@ -6,7 +6,7 @@
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.1
-Release:	rc2d
+Release:	pre3
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
