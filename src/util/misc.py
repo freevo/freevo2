@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/misc.py - Some Misc Utilities
@@ -10,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.40  2004/07/04 08:10:50  dischi
 # make sure upsoon is written
 #
@@ -19,43 +21,6 @@
 # Revision 1.38  2004/06/23 12:11:59  outlyer
 # Apparently TvProgram instances without a sub_title no longer define that
 # property anymore, so make sure it exists before trying to access it.
-#
-# Revision 1.37  2004/04/20 17:13:34  dischi
-# fix strange crash
-#
-# Revision 1.36  2004/04/12 05:44:34  dischi
-# unicode problems with mp3 tag fix
-#
-# Revision 1.35  2004/03/22 11:04:51  dischi
-# improve caching
-#
-# Revision 1.34  2004/02/28 21:04:17  dischi
-# unicode fixes
-#
-# Revision 1.33  2004/02/27 20:08:42  dischi
-# add function to check for identical string beginnings
-#
-# Revision 1.32  2004/02/23 19:59:35  dischi
-# unicode fixes
-#
-# Revision 1.31  2004/02/23 16:34:48  dischi
-# bugfix
-#
-# Revision 1.30  2004/02/22 05:27:01  gsbarbieri
-# comingup to support i18n and unicode.
-#
-# Revision 1.29  2004/02/16 17:56:22  dischi
-# helper function for cmp
-#
-# Revision 1.28  2004/02/13 17:18:39  dischi
-# do not skip after . for directories
-#
-# Revision 1.27  2004/02/08 06:12:31  outlyer
-# Missing the text... it looks like other shows are tomorrow, when they're
-# really not.
-#
-# Revision 1.26  2004/02/07 13:24:21  dischi
-# better directory name building
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -77,7 +42,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import glob

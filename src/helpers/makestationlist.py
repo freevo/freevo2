@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # makestationlist.py - Generates stationlist.xml for use with tvtime
 # -----------------------------------------------------------------------
@@ -12,11 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
-#
-# Revision 1.1  2003/08/23 09:09:18  dischi
-# moved some helpers to src/helpers
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -38,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

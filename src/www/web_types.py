@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # web_types.py - Classes useful for the web interface.
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.24  2004/03/09 00:14:35  rshortt
 # Add advanced search and link to search page.  Next will probably add genre
 # options.
@@ -18,58 +21,6 @@
 # Please use them to print messages to user.
 # printMessagesFinish() should be used to generate the page ending stuff (links,
 # foot, ...)
-#
-# Revision 1.22  2004/02/19 04:57:59  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.21  2004/02/10 18:32:57  outlyer
-# Anyone notice that the entire content was missing? Apparently Mozilla is
-# more forgiving than IE... this <span> was used to hide some text so people
-# who wanted to make a different skin could do so. I didn't close it and it
-# was styled to "display: none" so it made the whole page invisible.
-#
-# Revision 1.20  2004/02/09 21:29:32  outlyer
-# New web functions...
-#
-# Revision 1.19  2004/01/28 03:35:01  outlyer
-# Cleanup...
-#
-# o Indent paragraphs
-# o Use normal 'href' links in the main bar as well as the javascript so
-# non-javascript browsers can still work.
-#
-# Revision 1.18  2004/01/14 22:07:26  outlyer
-# The new header code...
-#
-# Revision 1.17  2004/01/09 19:35:49  outlyer
-# Inherit DEBUG parameter from config, move some prints into DEBUG
-#
-# Revision 1.16  2003/11/06 19:55:28  mikeruelle
-# remove hard links so we can run when proxied
-#
-# Revision 1.15  2003/09/23 18:22:42  dischi
-# use absolute path names
-#
-# Revision 1.14  2003/09/12 20:34:16  dischi
-# start internal help system
-#
-# Revision 1.13  2003/09/12 19:39:35  gsbarbieri
-# <thead>, <tbody> and <tfoot> support.
-#
-# Revision 1.12  2003/09/06 22:11:40  gsbarbieri
-# Rewoked Popup box so it looks better in Internet Exploder.
-# Guide now has configurable precision, defaults to 5 minutes.
-#
-# Revision 1.11  2003/09/02 22:41:08  mikeruelle
-# adding icecast if the user asks for it.
-#
-# Revision 1.10  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.9  2003/07/14 19:30:36  rshortt
-# Library update from Mike Ruelle.  Now you can view other media types and
-# download as well.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -91,7 +42,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os, sys, time
 

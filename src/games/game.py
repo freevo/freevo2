@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # game.py - Freevo module to run games. 
 # -----------------------------------------------------------------------
@@ -9,30 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.15  2004/06/06 17:23:37  mikeruelle
 # remove bad kill command
-#
-# Revision 1.14  2004/01/14 18:29:49  mikeruelle
-# .
-#
-# Revision 1.13  2003/11/29 11:39:38  dischi
-# use the given menuw abd not a global one
-#
-# Revision 1.12  2003/10/23 00:30:42  rshortt
-# Bugfix for xmame.x11.  Since our new process code xmame will go defunct after
-# exit and Freevo will hang.  This used to happen with xmame.SDL and the
-# wait() call I am removing was the solution.  I hope that is no longer needed
-# without runapp.
-#
-# Revision 1.11  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.10  2003/09/01 19:46:02  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.9  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -54,7 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

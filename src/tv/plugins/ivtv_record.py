@@ -1,5 +1,4 @@
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # ivtv_record.py - A plugin to record tv using an ivtv based card.
 # -----------------------------------------------------------------------
@@ -10,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.26  2004/06/28 18:23:34  rshortt
 # I guess this shouldn't be in here since its back in recordserver.
 #
@@ -35,45 +37,6 @@
 # Florian Demmer's patch for consecutive recordings and a patch to move the
 # snapshot to after we set the flag to idle, just to be safe.
 #
-# Revision 1.19  2004/01/10 04:12:02  outlyer
-# Take a snapshot/thumbnail after a file is recorded...
-#
-# Revision 1.18  2004/01/09 19:25:21  outlyer
-# Since the recordserver has been stable for some time, we can remove some
-# of the original DEBUG messages...
-#
-# Revision 1.17  2003/12/31 16:09:32  rshortt
-# Use the VideoGroup for this channel to change to the correct input on the
-# v4l device.
-#
-# Revision 1.16  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.15  2003/11/23 19:55:27  rshortt
-# Changes to use src/tv/channels.py and VIDEO_GROUPS.
-#
-# Revision 1.14  2003/10/15 12:49:53  rshortt
-# Patch from Eirik Meland that stops recording when you remove a recording
-# program from the recording schedule.  There exists a race condition where
-# removing a recording right before it starts recording the entry in the
-# schedule will go away but recording will start anyways.  We should figure
-# out a good way to eliminate this.
-#
-# A similar method should be created for the generic_record.py plugin.
-#
-# Revision 1.13  2003/09/14 03:22:47  outlyer
-# Move some output into 'DEBUG:'
-#
-# Revision 1.12  2003/09/06 15:12:04  rshortt
-# recordserver's name changed.
-#
-# Revision 1.11  2003/09/05 02:48:13  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.10  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2003 Krister Lagerstrom, et al. 
@@ -94,7 +57,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, string
 import random

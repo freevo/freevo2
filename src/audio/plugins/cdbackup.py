@@ -1,4 +1,4 @@
-# if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # cdbackup.py - CD Backup plugin for ripping/backing up CDs to
 # your hard drive
@@ -28,81 +28,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/07/10 12:33:37  dischi
+# header cleanup
+#
 # Revision 1.32  2004/05/28 20:23:19  dischi
 # o Fix bug when AlertBox has no input focus
 # o Make it possible to abort a ripping session
-#
-# Revision 1.31  2004/01/18 16:51:48  dischi
-# (re)move unneeded variables
-#
-# Revision 1.30  2004/01/17 20:29:12  dischi
-# renamed media.info to media.item
-#
-# Revision 1.29  2004/01/02 14:20:10  dischi
-# send OSD_MESSAGE when ripping is complete
-#
-# Revision 1.28  2003/11/28 19:26:36  dischi
-# renamed some config variables
-#
-# Revision 1.27  2003/11/09 12:10:14  dischi
-# do not rip last track for mixed cds
-#
-# Revision 1.26  2003/11/02 13:48:19  outlyer
-# My first post 1.4rc2 commit... allows you to make sure your ripped mp3's had
-# properly case'd tags.
-#
-# Revision 1.1  2003/10/29 19:00:50  outlyer
-# Presumably this will have to wait until after the freeze. It's a minor
-# change but it includes a preference to allow the user to make sure all
-# CD track information is in normalized title case so you can deal with the
-# annoying ways people submit CDDB data.
-#
-# It's self contained, so it can go in before 1.4, but not before 1.4rc2.
-#
-# Revision 1.24  2003/10/22 18:37:41  mikeruelle
-# if we have the coverart might as well copy it over
-#
-# Revision 1.23  2003/10/21 21:17:41  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.22  2003/10/20 18:26:01  outlyer
-# No CDDB data is a warning at best; sometimes a CD is just not listed there.
-# Convert the rest of the 'print' into _debug_ with errors getting 0
-#
-# Revision 1.21  2003/10/08 02:57:41  outlyer
-# Get rid of the global variables; keep the thread inside the class.
-#
-# I still don't know why ripping CDs breaks audio playback, but I'm hoping
-# these changes will help.
-#
-# Revision 1.20  2003/10/08 02:06:18  outlyer
-# Just some cleanup of commented out or disabled code.
-#
-# Revision 1.19  2003/09/20 09:42:32  dischi
-# cleanup
-#
-# Revision 1.18  2003/09/14 20:47:48  outlyer
-# * TRUE/FALSE wasn't working in Python 2.3...
-# * Wrapped the tagging function in a try: except because it failed on a data
-#    track and Freevo needed to be restarted to rip another CD.
-#
-# Revision 1.17  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.16  2003/09/10 18:15:11  dischi
-# o use plugin config() function to set defaults to freevo_config.py
-# o show current ripping status in itemmenu while ripping
-# o some cleanup and restructuring
-#
-# Revision 1.15  2003/09/09 18:54:59  dischi
-# Add some doc
-#
-# Revision 1.14  2003/08/26 18:47:29  outlyer
-# Initial FLAC support (for encoding) Xine is required for playback.
-#
-# Revision 1.13  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -124,7 +55,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-# endif
+
 
 import os
 import time

@@ -1,5 +1,4 @@
-#if 0 /*
-#  -*- coding: iso-8859-1 -*-
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # idlebar/system - IdleBar plugins for monitoring the system
 # -----------------------------------------------------------------------
@@ -13,33 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.9  2004/05/13 12:30:53  dischi
 # 2.6 fix from Viggo Fredriksen
-#
-# Revision 1.8  2004/02/08 18:45:23  dischi
-# do not use font.font.stringsize, there is no border calculated, use font.stringsize
-#
-# Revision 1.7  2004/02/01 20:29:38  rshortt
-# Use small0 instead of weather font.
-#
-# Revision 1.6  2004/02/01 20:28:52  rshortt
-# Use small0 instead of weather font.
-#
-# Revision 1.5  2003/11/02 20:06:44  mikeruelle
-# some fixes from den_RDC. adds 2.6 support too
-#
-# Revision 1.4  2003/11/02 18:02:09  dischi
-# fix case temp
-#
-# Revision 1.3  2003/10/28 21:40:15  mikeruelle
-# dischi says move to top. /me salutes and moves import statement
-#
-# Revision 1.2  2003/10/28 20:38:36  mikeruelle
-# fix a crash
-#
-# Revision 1.1  2003/10/27 20:11:12  dischi
-# move idlebar.py to a directory
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -61,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import time

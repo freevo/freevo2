@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # fxdhandler - handler for <movie> and <disc-set> tags in a fxd file
 # -----------------------------------------------------------------------
@@ -9,35 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.20  2004/05/13 12:50:21  dischi
 # fix duplicate removal for fxd files in vfs
 #
 # Revision 1.19  2004/03/02 20:56:59  dischi
 # fxd files are always right about the name
-#
-# Revision 1.18  2004/02/14 12:59:26  dischi
-# make sure url is a string
-#
-# Revision 1.17  2004/02/08 05:33:30  outlyer
-# Removed some debug print.
-#
-# Revision 1.16  2004/02/03 20:51:12  dischi
-# fix/enhance dvd on disc
-#
-# Revision 1.15  2004/02/01 19:47:13  dischi
-# some fixes by using new mmpython data
-#
-# Revision 1.14  2004/01/19 20:20:35  dischi
-# fix missing url problem
-#
-# Revision 1.13  2004/01/17 20:30:19  dischi
-# use new metainfo
-#
-# Revision 1.12  2004/01/10 13:22:17  dischi
-# reflect self.fxd_file changes
-#
-# Revision 1.11  2004/01/04 11:16:53  dischi
-# do not override image with nothing
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 from videoitem import VideoItem

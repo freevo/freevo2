@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # configure.py - Configure video playing
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.26  2004/05/28 15:50:27  dischi
 # configure menu items cleanup
 # support chapters as ChapterInfo in mmpython (e.g. ogm files)
@@ -18,38 +21,6 @@
 #
 # Revision 1.24  2004/03/13 23:44:02  dischi
 # audio stream selection fixes
-#
-# Revision 1.23  2004/01/31 16:39:03  dischi
-# fix function to check if we have to show configure
-#
-# Revision 1.22  2004/01/17 20:30:19  dischi
-# use new metainfo
-#
-# Revision 1.21  2004/01/10 18:45:00  dischi
-# check for type first
-#
-# Revision 1.20  2003/12/29 22:08:54  dischi
-# move to new Item attributes
-#
-# Revision 1.19  2003/12/01 20:09:24  dischi
-# only show deinterlace when it makes sense
-#
-# Revision 1.18  2003/11/21 17:56:50  dischi
-# Plugins now 'rate' if and how good they can play an item. Based on that
-# a good player will be choosen.
-#
-# Revision 1.17  2003/11/09 16:24:30  dischi
-# fix subtitle selection
-#
-# Revision 1.16  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.15  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.14  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -71,7 +42,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 # The menu widget class
 import menu

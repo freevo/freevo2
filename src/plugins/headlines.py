@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # headlines.py - a simple plugin to listen to headlines
 # -----------------------------------------------------------------------
@@ -15,59 +15,14 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.16  2004/06/21 12:21:00  outlyer
 # Ouch... there isn't a <bt> tag, but supporting the <br> tag would be a
 # good idea ;) Ditto for the 'XHTML' version, <br/>
 #
 # Works properly now.
-#
-# Revision 1.15  2003/12/06 13:47:28  dischi
-# changes to the new draw function in skin
-#
-# Revision 1.14  2003/12/04 21:49:53  dischi
-# change to new plugin code
-#
-# Revision 1.13  2003/12/03 21:52:08  dischi
-# rename some skin function calls
-#
-# Revision 1.12  2003/11/30 14:35:43  dischi
-# new skin handling
-#
-# Revision 1.11  2003/11/22 12:02:11  dischi
-# make the skin blankscreen a real plugin area
-#
-# Revision 1.10  2003/10/27 20:14:24  mikeruelle
-# allow use of outicon
-#
-# Revision 1.9  2003/10/16 16:05:31  dischi
-# small i18n patch
-#
-# Revision 1.8  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.7  2003/09/30 17:21:22  mikeruelle
-# add some default news sites
-#
-# Revision 1.6  2003/09/21 16:47:15  dischi
-# use utils html2txt function now
-#
-# Revision 1.5  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.4  2003/09/14 11:12:47  dischi
-# Show details when selecting the item. The cache dir is now a subdir of
-# CACHE_DIR.
-#
-# Revision 1.3  2003/09/09 18:55:00  dischi
-# Add some doc
-#
-# Revision 1.2  2003/09/03 21:40:38  dischi
-# o use util pickle function
-# o show popup while getting the data
-#
-# Revision 1.1  2003/08/30 15:23:39  mikeruelle
-# RDF headlines plugin. does pretty much anysite listed in evolution's summary section
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -89,7 +44,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 #python modules
 import os, time, stat, re, copy

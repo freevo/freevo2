@@ -1,14 +1,17 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # ProgramDisplay - Information and actions for TvPrograms.
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # Todo: 
 # Notes: 
 #
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.38  2004/06/23 12:18:54  outlyer
 # More crashe fixes for assumed variables that don't exist.
 #
@@ -16,41 +19,10 @@
 # better backoff so we do not see intermediate menu
 #
 # Revision 1.36  2004/05/27 01:04:37  mikeruelle
-# fix bug with search for more like this. need better stack pop but this fixes things for now.
+# fix bug with search for more like this. need better stack pop but this
+# fixes things for now.
 #
-# Revision 1.35  2004/03/13 22:29:39  dischi
-# improve input select dialog
-#
-# Revision 1.34  2004/03/13 20:14:12  rshortt
-# Add 'add to favorites' capabilities.  This needs more work and error handling still.
-# 'remove from favorites' isn't implimented yet either.
-#
-# Revision 1.33  2004/03/13 03:28:06  rshortt
-# More favorites support... almost there!
-#
-# Revision 1.32  2004/02/24 05:08:11  rshortt
-# Differentiate between name and title.
-#
-# Revision 1.31  2004/02/24 04:42:03  rshortt
-# Add FavoriteItem class here but we could find a better place for them both.
-# One possability is merging the types in here, epg_types, and record_types
-# into one module.
-#
-# Revision 1.30  2004/02/23 23:34:10  rshortt
-# More acurate handling of when to display schedule or remove options.
-#
-# Revision 1.29  2004/02/23 21:41:10  dischi
-# start some unicode fixes, still not working every time
-#
-# Revision 1.28  2004/02/23 08:22:10  gsbarbieri
-# i18n: help translators job.
-#
-# Revision 1.27  2004/02/23 03:43:23  rshortt
-# Ditch the popup-gui style in favour of a faster and more freevo-like menu.
-#
-#
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #
@@ -71,6 +43,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
+
 
 import time, traceback
 from time import gmtime, strftime

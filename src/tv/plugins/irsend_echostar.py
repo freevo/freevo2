@@ -1,5 +1,4 @@
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # irsend_echostar.py - Send IR commands to an echostar receiver used by
 #                       Dish and ExpressVu sattelite service.  Tested 
@@ -36,11 +35,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.1  2003/10/11 15:07:49  rshortt
 # Changed this into a plugin.  It is working well but I will be gixing it up
 # some more.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -62,7 +62,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os, sys, fcntl, struct, time, string, StringIO
 import array

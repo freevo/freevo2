@@ -1,5 +1,4 @@
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # tiny_xosd.py - Implementation of an OSD function using PyOSD
 # -----------------------------------------------------------------------
@@ -10,11 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.1  2004/01/07 02:03:10  rshortt
 # An osd plugin by Cyril Lacoux that uses pyosd and therefore libxosd.
 # This will display over Freevo and child applications while running in X.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -36,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 """
 Plugin for PyOSDd which facilitates controling Freevo

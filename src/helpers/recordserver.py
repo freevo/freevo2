@@ -1,4 +1,5 @@
-#if 0 /*
+#!/usr/bin/env python
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # record_server.py - A network aware TV recording server.
 # -----------------------------------------------------------------------
@@ -6,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.54  2004/07/09 21:05:46  rshortt
 # Add warnings in case the recording plugin isn't there.
 #
@@ -39,35 +43,6 @@
 # Revision 1.47  2004/06/23 21:20:10  dischi
 # put snapshot in again with a try except
 #
-# Revision 1.46  2004/06/23 20:57:14  dischi
-# fix recording stopping
-#
-# Revision 1.45  2004/06/23 19:07:05  outlyer
-# The snapshot in the event doesn't work. I've tried it numerous times, and it
-# is being killed before completing.
-#
-# Did no one else actually try this change?
-#
-# Revision 1.44  2004/06/22 01:15:15  rshortt
-# Make checkToRecord() void, start the recording plugin from there, call it
-# from multiple places.
-#
-# Also make movie search work again, using ratings instead of the date property
-# which totally blew up using zap2it datadirect (everything had date).  Right
-# now we just look for 'MPAA' rating for movies but if anyone knows of other
-# movies only rating systems we can add please speak up.
-#
-# Revision 1.43  2004/06/20 21:51:38  dischi
-# do call minutecheck, check yourself
-#
-# Revision 1.42  2004/06/20 13:56:24  dischi
-# add self.minuteCheck right after scheduling
-#
-# Revision 1.41  2004/06/18 12:12:02  outlyer
-# Patch from Brian J.Murrel to compensate for timer drift. It will do nothing
-# if your system doesn't suffer from this problem, so it should be safe. Any
-# problems, please let me know.
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -88,7 +63,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, string, random, time, os, re, pwd
 import config

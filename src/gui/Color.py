@@ -1,10 +1,13 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # color - A color handling object
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.4  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -16,18 +19,7 @@
 #
 # Some parts of Freevo may be broken now, please report it to be fixed
 #
-# Revision 1.3  2003/03/02 20:15:41  rshortt
-# GUIObject and PopupBox now get skin settings from the new skin.  I put
-# a test for config.NEW_SKIN in GUIObject because this object is used by
-# MenuWidget, so I'll remove this case when the new skin is finished.
-#
-# PopupBox can not be used by the old skin so anywhere it is used should
-# be inside a config.NEW_SKIN check.
-#
-# PopupBox -> GUIObject now has better OOP behaviour and I will be doing the
-# same with the other objects as I make them skinnable.
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #
@@ -48,6 +40,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
+
+
 """
 A color handling object.
 """

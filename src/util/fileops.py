@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/fileops.py - Some File Operation Utilities
@@ -10,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.24  2004/07/04 08:04:21  dischi
 # handle PIL exception
 #
@@ -21,19 +23,6 @@
 #
 # Revision 1.21  2004/06/13 18:49:39  dischi
 # do not take care of install.py
-#
-# Revision 1.20  2004/06/13 18:47:46  dischi
-# expect errors when loading image
-#
-# Revision 1.19  2004/06/09 20:09:10  dischi
-# cleanup
-#
-# Revision 1.18  2004/06/09 19:50:32  dischi
-# change thumbnail caching format to be much faster: do not use pickle and
-# also reduce the image size from max 300x300 to 255x255
-#
-# Revision 1.17  2004/03/22 11:04:51  dischi
-# improve caching
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -55,7 +44,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import sys

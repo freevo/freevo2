@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # tv.py - This is the Freevo TV module. 
 # -----------------------------------------------------------------------
@@ -9,32 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.16  2004/02/24 19:34:19  dischi
 # make it possible to start a plugin guide
 #
 # Revision 1.15  2004/02/24 04:40:23  rshortt
 # Make 'View Favorites' a menu based plugin, still incomplete.
 #
-# Revision 1.14  2004/02/23 03:51:22  rshortt
-# Remove scheduled recordings because it is now a plugin.  Also comment out
-# view favorites because it is next as well as search because search is now
-# menu and item based, we just need a text input for the skin based UI.
-# View/Edit favorites and search will be plugins as well.
-#
-# Revision 1.13  2004/02/04 14:11:18  outlyer
-# Cleanup and fixup:
-#
-# o Now uses the mplayer OSD to show channel information when changing channels,
-#     or you press the 'display' key.
-# o Removed many old CVS log messages
-# o Removed many debug-related 'print' statements
-#
-# Revision 1.12  2004/01/11 15:44:01  dischi
-# changed menu display type to 'x main menu'
-#
-# Revision 1.11  2004/01/09 02:10:00  rshortt
-# Patch from Matthieu Weber to revive add/edit favorites support from the
-# TV interface.
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -55,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import time

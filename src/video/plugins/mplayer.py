@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mplayer.py - the Freevo MPlayer module for video
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.72  2004/07/10 10:36:31  dischi
 # reset elapsed time on restart
 #
@@ -23,79 +26,6 @@
 # a burned DVD-R with some AVI files on it, but mplayer breaks if I try to play
 # something because the devicename is being passed and mplayer becomes
 # confused.
-#
-# Revision 1.68  2004/05/31 17:15:20  dischi
-# support strange config.MPLAYER_AO_DEV
-#
-# Revision 1.67  2004/05/02 08:55:52  dischi
-# dvd as .iso support
-#
-# Revision 1.66  2004/03/13 23:44:02  dischi
-# audio stream selection fixes
-#
-# Revision 1.65  2004/02/23 19:17:53  dischi
-# bugfix
-#
-# Revision 1.63  2004/02/11 20:13:46  dischi
-# do not seek beyond file length
-#
-# Revision 1.62  2004/02/06 19:28:51  dischi
-# fix/cleanup dvd on hd handling
-#
-# Revision 1.61  2004/02/03 20:51:12  dischi
-# fix/enhance dvd on disc
-#
-# Revision 1.60  2004/02/02 22:15:53  outlyer
-# Support for mirrors of DVDs...
-#
-# (1) Make one using vobcopy, run 'vobcopy -m'
-# (2) Put it in your movie directory and it'll look like a single file, and can
-#     be played with XINE with all of the features of the original DVD (chapters,
-#     audio tracks, etc) and works with dvdnav.
-#
-# Revision 1.59  2004/01/24 19:16:24  dischi
-# clean up autovar handling
-#
-# Revision 1.58  2004/01/13 15:03:45  dischi
-# add version detection patch
-#
-# Revision 1.57  2004/01/11 23:21:58  outlyer
-# Fix for this crash:
-#
-# Traceback (most recent call last):
-#   File "/usr/lib/python2.3/site-packages/freevo/main.py", line 435, in ?
-#     child.poll()
-#   File "/usr/lib/python2.3/site-packages/freevo/childapp.py", line 610, in poll
-#     rc.post_event(self.stop_event())
-#   File "/usr/lib/python2.3/site-packages/freevo/video/plugins/mplayer.py"
-#     print _( 'ERROR' ) + ': ' + self.exit_type + \
-# TypeError: cannot concatenate 'str' and 'NoneType' objects
-#
-# Revision 1.56  2004/01/02 11:17:35  dischi
-# cleanup
-#
-# Revision 1.55  2004/01/01 19:37:31  dischi
-# dvd and interlace fixes
-#
-# Revision 1.54  2003/12/29 22:29:09  dischi
-# remove debug
-#
-# Revision 1.53  2003/12/29 22:08:54  dischi
-# move to new Item attributes
-#
-# Revision 1.52  2003/12/22 13:27:34  dischi
-# patch for better support of fxd files with more discs from Matthieu Weber
-#
-# Revision 1.51  2003/12/15 03:45:29  outlyer
-# Added onscreen notification of bookmark being added via mplayer's
-# osd_show_text... older versions of mplayer will ignore the command so
-# it should be a non-issue to add this in without checking the version.
-#
-# Revision 1.50  2003/12/10 19:47:49  dischi
-# make it possible to bypass version checking
-#
-# Revision 1.49  2003/12/10 19:06:06  dischi
-# move to new ChildApp2 and remove the internal thread
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -117,7 +47,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os, re

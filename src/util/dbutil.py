@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/dbutil.py - database wrapper
@@ -10,38 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.5  2004/02/07 13:07:55  dischi
 # fix unicode/encoding problem with sqlite
 #
 # Revision 1.4  2004/02/01 16:58:34  rshortt
 # Catch some exceptions probably having to do with bad data.
-#
-# Revision 1.3  2004/01/18 19:06:00  outlyer
-# Add a "commit" function...call it to make sure the insert/updates are
-# written to disc.
-#
-# Revision 1.2  2004/01/16 14:40:33  outlyer
-# (Don't you love it when your neighbours make enough noise to wake you up
-# early on your day off)
-#
-# Just some fixes from the code I commited last night.
-#
-# o Use the proper db instead of my test db
-# o use md5
-# o Remove some unnecessary 'print'
-# o remove mp3.py and smartimage.py as they are both merged into extendedmeta
-# o Remove musicsqlimport as it's all being done in extendedadd.py now.
-#
-# Revision 1.1  2004/01/16 08:14:04  outlyer
-# Forgot to commit this earlier. This is:
-#
-# extendedmeta: Parser for embedded covers, folder cache, and sqlite scoring
-# dbutil:       Helper class for dealing with the sqlite db
-# extendedadd:  A tool which calls the extendedmeta functions on a path, an
-#               example of how to add all three types of data from the
-#               command-line. Since the data is already used in blurr2, and
-#               the info skins, it's nice to have.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os, traceback
 import config

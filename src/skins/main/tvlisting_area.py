@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # listing_area.py - A listing area for the Freevo skin
 # -----------------------------------------------------------------------
@@ -9,29 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.21  2004/03/14 17:22:47  dischi
 # seperate ellipses and dim in drawstringframed
-#
-# Revision 1.20  2004/03/14 11:17:38  dischi
-# remove old stuff
-#
-# Revision 1.19  2004/02/21 20:03:45  dischi
-# unicode fix (again)
-#
-# Revision 1.18  2004/02/21 19:50:39  dischi
-# unicode fix
-#
-# Revision 1.17  2004/02/04 23:01:10  outlyer
-# Remove some debugging Dischi left in... but the good news is the @*!
-# bug is fixed!
-#
-# You people have stood in my way long enough! I'm going to clown college.
-#
-# Yes, I'm happy about it.
-#
-# Revision 1.16  2004/02/04 19:04:49  dischi
-# o fix item rectange calculation
-# o remove bad log message
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
 
 
 import copy

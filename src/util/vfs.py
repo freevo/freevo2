@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/vfs.py - virtual filesystem
@@ -16,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.18  2004/06/09 20:09:10  dischi
 # cleanup
 #
@@ -28,59 +30,6 @@
 # Revision 1.15  2004/02/05 05:44:26  gsbarbieri
 # Fixes some bugs related to handling unicode internally.
 # NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
-#
-# Revision 1.14  2004/02/05 02:52:26  gsbarbieri
-# Handle filenames internally as unicode objects.
-#
-# This does *NOT* affect filenames that have only ASCII chars, since the
-# translation ASCII -> Unicode is painless. However this *DOES* affect files with
-# accents, like é (e acute, \xe9) and others.
-#
-# I tested with Video, Images and Music modules, but *NOT* with Games, so if you
-# have the games modules, give it a try.
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL,
-# which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
-#
-# Revision 1.13  2004/02/04 11:54:27  dischi
-# check if directory is not overlay_dir
-#
-# Revision 1.12  2004/01/18 16:47:16  dischi
-# more verbose
-#
-# Revision 1.11  2004/01/09 19:03:39  dischi
-# make it possible to exclude dot files and overlay dir
-#
-# Revision 1.10  2004/01/06 19:25:46  dischi
-# added mtime function using stat
-#
-# Revision 1.9  2004/01/05 17:39:22  dischi
-# make overlay abspath before getting the dirname
-#
-# Revision 1.8  2004/01/03 17:38:17  dischi
-# Freevo now needs the vfs active. OVERLAY_DIR is set to ~/.freevo/vfs as
-# default value.
-#
-# Revision 1.7  2003/12/31 16:43:49  dischi
-# major speed enhancements
-#
-# Revision 1.6  2003/12/30 22:30:50  dischi
-# major speedup in vfs using
-#
-# Revision 1.5  2003/12/30 15:28:48  dischi
-# remove old code
-#
-# Revision 1.4  2003/12/18 18:21:33  outlyer
-# I'm assuming these were supposed to be debug messages.
-#
-# Revision 1.3  2003/12/07 11:06:45  dischi
-# small bugfix
-#
-# Revision 1.2  2003/11/23 16:57:08  dischi
-# small fixes
-#
-# Revision 1.1  2003/11/22 20:33:53  dischi
-# new vfs
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -102,7 +51,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
             
 
 import os

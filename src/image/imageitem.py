@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # imageitem.py - Item for image files
 # -----------------------------------------------------------------------
@@ -9,36 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.23  2004/02/13 20:27:30  dischi
 # fix attr geometry and add formated date
 #
 # Revision 1.22  2004/01/24 18:56:45  dischi
 # rotation is now stored in mediainfo
-#
-# Revision 1.21  2003/12/31 16:42:39  dischi
-# changes, related to item.py changes
-#
-# Revision 1.20  2003/12/30 21:24:08  dischi
-# prevent crash because True is no dict
-#
-# Revision 1.19  2003/12/30 15:35:16  dischi
-# remove unneeded copy function
-#
-# Revision 1.18  2003/12/29 22:09:19  dischi
-# move to new Item attributes
-#
-# Revision 1.17  2003/12/10 19:08:43  dischi
-# no need for the eventhandler anymore
-#
-# Revision 1.16  2003/12/07 19:09:24  dischi
-# add <slideshow> fxd support with background music
-#
-# Revision 1.15  2003/12/07 11:12:56  dischi
-# small bugfix
-#
-# Revision 1.14  2003/11/21 11:46:07  dischi
-# moved rotation info into the item
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -60,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import util
 import os

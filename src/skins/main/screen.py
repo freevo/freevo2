@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # screen.py - The screen for the Freevo areas to draw on
 # -----------------------------------------------------------------------
@@ -6,20 +6,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.11  2004/04/25 11:23:59  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
-#
-# Revision 1.10  2004/03/14 17:22:47  dischi
-# seperate ellipses and dim in drawstringframed
-#
-# Revision 1.9  2004/02/01 17:03:58  dischi
-# speedup
-#
-# Revision 1.8  2004/01/11 20:23:31  dischi
-# move skin font handling to osd to avoid duplicate code
-#
-# Revision 1.7  2004/01/01 17:41:05  dischi
-# add border support for Font
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -41,7 +32,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
+
 
 import config
 import osd

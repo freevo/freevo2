@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # coverserarch.py - Plugin for album cover support
 # -----------------------------------------------------------------------
@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/07/10 12:33:37  dischi
+# header cleanup
+#
 # Revision 1.32  2004/07/09 11:09:56  dischi
 # use vfs.open to make sure we can write the image
 #
@@ -31,33 +34,6 @@
 #     before downloading and remove those entries from the list.
 #
 # I've also removed the example, since the plugin itself works better.
-#
-# Revision 1.2  2003/06/10 13:13:55  outlyer
-# Initial revision is complete, current main problem is that it only
-# writes 'cover.jpg' someone could add a submenu to choose between
-# per-file or per-directory images, but I have to go to class now.
-#
-# I've tested this, but please let me know if you find problems.
-#
-# Revision 1.1  2003/06/07 18:43:26  outlyer
-# The beginnings of a cover search plugin to complement Dischi's IMDB plugin
-# for video. Currently, it uses the ID3 tag to find the album cover from
-# amazon and prints the url on the screen.
-#
-# It doesn't do anything with it yet, because I still need to add a submenu
-# to allow the user to choose:
-#
-# 1. Write a per-song cover (i.e. song_filename.jpg)
-# 2. Write a per-album/directory cover (i.e. cover.jpg)
-#
-# If you want to see it in action, you can do a:
-#
-# plugin.activate('audio.coversearch')
-#
-# This only uses Amazon now, but could easily be extended to use allmusic.com
-# if someone writes something to interface with it. Amazon was dead-simple
-# to use, so I did it first, though Amazon is pretty weak, selection-wise
-# compared to allmusic.com
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -79,7 +55,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 

@@ -1,5 +1,4 @@
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # generic_record.py - A plugin to record tv using VCR_CMD.
 # -----------------------------------------------------------------------
@@ -10,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.21  2004/06/22 01:05:52  rshortt
 # Get the filename from tv_util.getProgFilename().
 #
@@ -25,43 +27,6 @@
 #
 # Revision 1.17  2004/06/07 16:10:51  rshortt
 # Change 'RECORD' to plugin.RECORD.
-#
-# Revision 1.16  2004/05/28 02:27:59  mikeruelle
-# add pre and post recording script variables. you could say put your aumix junk here for line in recording.
-#
-# Revision 1.15  2004/01/10 04:12:02  outlyer
-# Take a snapshot/thumbnail after a file is recorded...
-#
-# Revision 1.14  2004/01/09 19:37:48  outlyer
-# Inherit config.DEBUG
-#
-# Revision 1.13  2003/12/05 02:26:34  rshortt
-# Add some new cl_options: frequency, base_filename, title, and sub-title.
-#
-# Revision 1.12  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.11  2003/10/19 16:17:03  rshortt
-# Post event OS_EVENT_KILL for recordserver to do the deed (kill and wait).
-#
-# Stop() command now works for me using this plugin / VCR_CMD.
-#
-# Revision 1.10  2003/10/12 09:54:27  dischi
-# BSD patches from Lars
-#
-# Revision 1.9  2003/09/06 15:12:04  rshortt
-# recordserver's name changed.
-#
-# Revision 1.8  2003/09/05 14:28:01  rshortt
-# Oops.  We don't need tv_util here anymore.
-#
-# Revision 1.7  2003/09/03 17:54:38  dischi
-# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
-# doesn't exist anymore.
-#
-# Revision 1.6  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -83,7 +48,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, string
 import random

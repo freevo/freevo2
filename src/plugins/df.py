@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # df.py - really simple diskfree plugin for freevo
 # created by den_RDC
@@ -12,18 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.8  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
-#
-# Revision 1.7  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.6  2003/09/09 18:55:00  dischi
-# Add some doc
-#
-# Revision 1.5  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import plugin

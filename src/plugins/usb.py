@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # usb.py - the Freevo usb plugin
 # -----------------------------------------------------------------------
@@ -10,21 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.7  2004/05/31 10:42:50  dischi
 # change poll intervall
-#
-# Revision 1.6  2004/02/28 11:28:56  dischi
-# add hotplugging
-#
-# Revision 1.5  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.4  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.3  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 

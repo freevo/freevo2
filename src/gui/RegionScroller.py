@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # RegionScroller.py - A class that will scroll another surface.
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.21  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -19,13 +22,6 @@
 # o added special button skin settings
 #
 # Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.20  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.19  2003/09/24 18:21:27  outlyer
-# Fix assignment to None. I screwed up the first time I did it, but this
-# should be correct.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -47,7 +43,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 from event import *

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # genericitem.py - Item for generic objects
 # -----------------------------------------------------------------------
@@ -9,26 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.7  2004/06/06 16:53:39  mikeruelle
-# use list version of command for better options parsing regarding things with spaces in there names
-#
-# Revision 1.6  2004/01/19 21:32:58  mikeruelle
-#  a patch from Sylvian to use the new set_url stuff
-#
-# Revision 1.5  2004/01/14 18:29:49  mikeruelle
-# .
-#
-# Revision 1.4  2003/12/29 22:30:35  dischi
-# move to new Item attributes
-#
-# Revision 1.3  2003/11/29 11:39:38  dischi
-# use the given menuw abd not a global one
-#
-# Revision 1.2  2003/09/25 21:19:57  mikeruelle
-# fix crash for missing arg
-#
-# Revision 1.1  2003/09/05 20:47:29  mikeruelle
-# new games system additions
+# use list version of command for better options parsing regarding things
+# with spaces in there names
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -50,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 

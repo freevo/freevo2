@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # webserver.py - start the webserver
 # -----------------------------------------------------------------------
@@ -11,40 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.10  2004/07/09 16:20:54  outlyer
 # Remove the request logging for 0-level debug. Exceptions will still be
 # logged, but standard requests will not.
 #
 # (i.e. this removes the Apache-style access logging for DEBUG = 0)
-#
-# Revision 1.9  2004/01/09 18:57:06  dischi
-# stop on normal exit
-#
-# Revision 1.8  2003/10/18 08:33:36  dischi
-# do not restart if the server crashed in 10 secs
-#
-# Revision 1.7  2003/09/24 00:21:05  mikeruelle
-# rewrite for styles too
-#
-# Revision 1.6  2003/09/23 19:37:54  mikeruelle
-# a patch to help dischi see images without those nasty hard links
-#
-# Revision 1.5  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.4  2003/09/08 19:58:21  dischi
-# run servers in endless loop in case of a crash
-#
-# Revision 1.3  2003/09/06 14:59:38  gsbarbieri
-# Fixed to work in non system-wide installs
-#
-# Revision 1.2  2003/09/05 16:20:11  dischi
-# take care for installed version
-#
-# Revision 1.1  2003/08/31 09:18:41  dischi
-# Move webserver start script to helpers. Use 'freevo webserver start'
-# and 'freevo webserver stop'.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -66,7 +40,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, os
 

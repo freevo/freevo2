@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mplayervbr.py - the Freevo MPlayer plugin for audio
 # -----------------------------------------------------------------------
@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.2  2004/07/09 04:08:50  outlyer
 # Fixed webradio support for shoutcast streams using the 'pls' extension. Most
 # use m3u, but some (including ones in the webradio.fxd file) use pls.
@@ -34,6 +37,7 @@
 #
 # Revision 1.4  2004/05/17 04:21:51  outlyer
 # Updated the plugin to match current Freevo CVS
+#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -54,7 +58,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import re

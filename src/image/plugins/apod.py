@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # apod.py - download the Astronomy Picture of the Day
 # -----------------------------------------------------------------------
@@ -8,18 +8,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.4  2004/06/29 01:39:20  mikeruelle
 # added some userproofing to apod
-#
-# Revision 1.3  2004/02/24 16:29:19  mikeruelle
-# make the plugin name and description show in the menu
-#
-# Revision 1.2  2003/12/01 05:12:02  mikeruelle
-# remove a couple debug statements
-#
-# Revision 1.1  2003/12/01 04:11:03  mikeruelle
-# grab the astronomy picture of the day
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -41,7 +34,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import config

@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # area.py - An area for the Freevo skin
 # -----------------------------------------------------------------------
@@ -27,35 +27,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.40  2004/04/25 12:38:22  dischi
 # move idlebar image to background
-#
-# Revision 1.39  2004/03/14 17:22:46  dischi
-# seperate ellipses and dim in drawstringframed
-#
-# Revision 1.38  2004/03/14 12:55:11  dischi
-# dim support for texts
-#
-# Revision 1.37  2004/03/14 10:52:53  dischi
-# Make it possible to have a background image above the background rect.
-#
-# Revision 1.36  2004/02/27 20:15:03  dischi
-# more unicode fixes
-#
-# Revision 1.35  2004/02/23 15:32:12  dischi
-# fix translation/unicode bug
-#
-# Revision 1.34  2004/02/19 04:57:57  gsbarbieri
-# Support i18n.
-#
-# Revision 1.33  2004/02/12 16:59:12  dischi
-# keep aspect for scaling
-#
-# Revision 1.32  2004/02/11 14:41:05  dischi
-# add all <background> images to the bgimage list
-#
-# Revision 1.31  2004/02/07 11:52:17  dischi
-# always show submenus "with image"
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -77,7 +53,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
 
 
 import copy

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # record_types.py - Some classes that are important to recording.
 # -----------------------------------------------------------------------
@@ -9,20 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.13  2004/07/01 19:06:41  dischi
 # fix unicode crash in debug
 #
 # Revision 1.12  2004/06/21 22:41:44  rshortt
 # Small cleanup, use config.DEBUG.
-#
-# Revision 1.11  2004/02/22 06:23:51  gsbarbieri
-# Unicode support: name could be an unicode object and unicode doesn't provide
-# translate() method.
-#
-# Revision 1.10  2004/01/09 19:43:56  outlyer
-# Was that \x0 supposed to be there? If so, sorry. I didn't think it was
-# supposed to be there and it was causing warnings in the recordserver
-# and the OSD interface.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -44,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, time, os, string
 import config

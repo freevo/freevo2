@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # __init__.py - interface between mediamenu and games
 # -----------------------------------------------------------------------
@@ -9,35 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.18  2004/03/13 09:23:46  dischi
 # fix doc
-#
-# Revision 1.17  2004/02/24 18:05:19  mikeruelle
-# make the info retreival a lot better
-#
-# Revision 1.16  2004/01/11 18:34:02  mikeruelle
-# oops forgot this for zipped roms
-#
-# Revision 1.15  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.14  2003/12/08 15:57:32  mikeruelle
-# change cwd to get
-#
-# Revision 1.13  2003/12/03 05:14:46  mikeruelle
-# fixing dischis cut and paste error
-#
-# Revision 1.12  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.11  2003/11/29 11:39:38  dischi
-# use the given menuw abd not a global one
-#
-# Revision 1.10  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.9  2003/11/16 17:41:04  dischi
-# i18n patch from David Sagnol
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 import util

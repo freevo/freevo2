@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # extendedmeta.py - Extended Metadata Reader/Cacher
@@ -10,68 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.12  2004/05/29 12:32:23  dischi
 # try to find out if all items in a dir belong to one album
-#
-# Revision 1.11  2004/02/24 18:55:38  dischi
-# unicode fix
-#
-# Revision 1.10  2004/02/22 20:20:06  dischi
-# unicode fix again
-#
-# Revision 1.9  2004/02/21 19:44:05  dischi
-# unicode fix
-#
-# Revision 1.8  2004/02/13 17:33:42  dischi
-# no defaults for addPathDB
-#
-# Revision 1.7  2004/02/08 17:37:15  dischi
-# add playlist parser
-#
-# Revision 1.6  2004/01/19 17:56:30  outlyer
-# Write cover images to the overlay directory, not the current one.
-#
-# Revision 1.5  2004/01/18 16:47:35  dischi
-# cleanup
-#
-# Revision 1.4  2004/01/17 20:28:12  dischi
-# use new metainfo
-#
-# Revision 1.3  2004/01/16 17:15:29  dischi
-# Many improvements to AudioParser
-# o try to detect if we should overwrite an existing fxd file
-# o Various is not included anymore, the value is not set in the fxd
-#   Aubin: the skin now doesn't need to check for 'Various', it needs
-#   to write 'Various' if Album/Artist is not set
-# o make it much faster by comparing timestamps to avoid rechecking
-#
-# Warning: I made the changes to mp3info which was removed while I was
-# working. I hope I didn't forgot something to copy
-#
-# Also made the db optional
-#
-# Revision 1.2  2004/01/16 14:40:33  outlyer
-# (Don't you love it when your neighbours make enough noise to wake you up
-# early on your day off)
-#
-# Just some fixes from the code I commited last night.
-#
-# o Use the proper db instead of my test db
-# o use md5
-# o Remove some unnecessary 'print'
-# o remove mp3.py and smartimage.py as they are both merged into extendedmeta
-# o Remove musicsqlimport as it's all being done in extendedadd.py now.
-#
-# Revision 1.1  2004/01/16 08:14:04  outlyer
-# Forgot to commit this earlier. This is:
-#
-# extendedmeta: Parser for embedded covers, folder cache, and sqlite scoring
-# dbutil:       Helper class for dealing with the sqlite db
-# extendedadd:  A tool which calls the extendedmeta functions on a path, an
-#               example of how to add all three types of data from the
-#               command-line. Since the data is already used in blurr2, and
-#               the info skins, it's nice to have.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -93,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 # The basics
 import os,string,fnmatch,sys,md5,stat

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # install.py - install external plugins or themes into Freevo
 # -----------------------------------------------------------------------
@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.9  2004/06/10 11:03:23  dischi
 # remove runtime installing support
 #
@@ -37,7 +40,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # radioplayer.py - the Freevo Radioplayer plugin for radio
 # -----------------------------------------------------------------------
@@ -9,32 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.9  2004/01/20 00:24:20  mikeruelle
 # update elapsed time for radio in a thread
-#
-# Revision 1.8  2004/01/14 20:54:02  mikeruelle
-# umm that's a little bit better
-#
-# Revision 1.7  2004/01/14 20:38:07  mikeruelle
-# it's still broken. help dischi.
-#
-# Revision 1.6  2004/01/10 21:27:37  mikeruelle
-# forgot the little  q in the arg. really need to get a card with radio to test
-#
-# Revision 1.5  2003/12/10 19:10:35  dischi
-# AUDIO_PLAY_END is not needed anymore
-#
-# Revision 1.4  2003/09/22 20:36:18  mikeruelle
-# more web interface help descriptions
-#
-# Revision 1.3  2003/09/20 09:42:32  dischi
-# cleanup
-#
-# Revision 1.2  2003/09/01 19:46:02  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.1  2003/08/27 15:30:12  mikeruelle
-# Start of Radio Support
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -56,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import time, os
 import string

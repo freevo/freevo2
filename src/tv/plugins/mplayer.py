@@ -1,6 +1,6 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# mplayer.py - Temporary implementation of a TV function using MPlayer
+# mplayer.py - implementation of a TV function using MPlayer
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.36  2004/07/04 08:15:29  dischi
 # add config.MPLAYER_ARGS_DEF (why was that missing?)
 #
@@ -26,22 +29,6 @@
 #
 # o Move to ChildApp2 for mplayer TV plugin
 # o Channel changing via the number pad on the remote
-#
-# Revision 1.31  2004/02/04 14:11:19  outlyer
-# Cleanup and fixup:
-#
-# o Now uses the mplayer OSD to show channel information when changing channels,
-#     or you press the 'display' key.
-# o Removed many old CVS log messages
-# o Removed many debug-related 'print' statements
-#
-# Revision 1.30  2003/12/31 16:13:15  rshortt
-# Make it possible to change channels between those that have different
-# VideoGroups.  For example, on my setup channel 3 is my webcam, 4-50 is
-# analog cable, and 200+ is my satellite system.  I can start on channel 3,
-# see my webcam on the tv (security cam), channel+ and instantly view my
-# cable channels and channel+ through to my satellite channels.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,7 +50,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc

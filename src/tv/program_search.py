@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # ProgramSearch - a popup that allows the user to search the EPG
 #                 using a remote.
@@ -11,20 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.14  2004/02/23 08:22:10  gsbarbieri
 # i18n: help translators job.
 #
 # Revision 1.13  2004/02/21 19:33:56  dischi
 # use eventhandler from letter box
-#
-# Revision 1.12  2004/02/18 21:55:11  dischi
-# update to new gui code
-#
-# Revision 1.11  2003/11/16 17:38:48  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.10  2003/10/20 01:41:55  rshortt
-# Moving tv_util from src/tv/ to src/util/.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,7 +40,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import time
 

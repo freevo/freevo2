@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # tv_grab.py - wrapper for xmltv
 # -----------------------------------------------------------------------
@@ -11,30 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.6  2004/03/28 15:04:42  rshortt
 # Bugfix.
-#
-# Revision 1.5  2004/03/16 01:04:18  rshortt
-# Changes to stop two processes tripping over the creation of the epg pickle file.
-#
-# Revision 1.4  2003/10/20 00:32:11  rshortt
-# Placed most of the work into functions and added a check for '__main__' for
-# the command line.  I'm planning on importing this module from recordserver
-# and calling functions to grab and sort listings at a configurable time.
-#
-# Alco changed '-query' to '--query' for consistency's sake.
-#
-# Revision 1.3  2003/10/15 19:26:55  rshortt
-# The channel number portion of TV_CHANNELS entries is handled as a string,
-# this is especially important for some European channels ie: E8.
-#
-# Revision 1.2  2003/10/14 02:44:11  rshortt
-# Adding an option for tv_grab to use tv_sort on the listings and also to
-# update your favorites schedule.
-#
-# Revision 1.1  2003/09/08 19:44:00  dischi
-# *** empty log message ***
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -56,7 +37,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

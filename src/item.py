@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # item.py - Template for an item
 # -----------------------------------------------------------------------
@@ -9,35 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.73  2004/05/29 12:33:16  dischi
 # make it possible to access parent data
-#
-# Revision 1.72  2004/02/23 19:59:34  dischi
-# unicode fixes
-#
-# Revision 1.71  2004/02/23 16:34:26  dischi
-# better skin i18n support
-#
-# Revision 1.70  2004/02/15 15:23:55  dischi
-# some attr fixes/movements
-#
-# Revision 1.69  2004/02/14 15:06:25  dischi
-# add basic sort function
-#
-# Revision 1.68  2004/02/14 13:04:46  dischi
-# do not call skin.get_singleton() anymore
-#
-# Revision 1.67  2004/02/12 17:17:08  dischi
-# get image dir from skin
-#
-# Revision 1.66  2004/02/12 16:26:59  dischi
-# fix watermark problem once and for all
-#
-# Revision 1.65  2004/02/08 17:39:39  dischi
-# small cosmetic fixes
-#
-# Revision 1.64  2004/02/05 19:26:41  dischi
-# fix unicode handling
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import gettext

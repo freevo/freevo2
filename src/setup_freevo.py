@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # setup_freevo.py - Autoconfigure Freevo
 #
@@ -12,55 +12,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.17  2004/07/08 12:44:40  rshortt
 # Add directfb as a display option.
 #
 # Revision 1.16  2004/04/20 17:33:59  dischi
 # lsdvd check
-#
-# Revision 1.15  2004/02/21 03:16:18  gsbarbieri
-# MPAV support
-#
-# Revision 1.14  2004/02/21 03:09:16  gsbarbieri
-# This file doesn't use gettext( ... unicode=True ), so we don't need String().
-#
-# Revision 1.13  2004/02/19 04:57:56  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.12  2003/11/20 14:06:01  dischi
-# add i18n support
-#
-# Revision 1.11  2003/11/16 17:41:04  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.10  2003/10/12 09:54:27  dischi
-# BSD patches from Lars
-#
-# Revision 1.9  2003/08/26 18:03:32  outlyer
-# Adding FLAC support for the cdbackup plugin
-#
-# Revision 1.8  2003/08/25 14:12:07  outlyer
-# Unify the app finder.
-#
-# Revision 1.7  2003/08/25 12:08:20  outlyer
-# Additional compatibility patches for FreeBSD from Lars Eggert
-#
-# Revision 1.6  2003/08/23 12:51:41  dischi
-# removed some old CVS log messages
-#
-# Revision 1.5  2003/08/23 09:19:01  dischi
-# merged blanking helper into osd.py
-#
-# Revision 1.4  2003/08/22 18:03:27  dischi
-# write freevo.conf to /etc/freevo or ~/.freevo
-#
-# Revision 1.12  2003/08/01 17:54:05  dischi
-# xine support and cleanups.
-# o xine support and configuration in freevo_config.py
-# o cleanup in setup_freevo: use one variable to store all needed
-#   programs
-# o config.py uses setup_freevo to search for missing programs at startup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -82,7 +41,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys
 import os

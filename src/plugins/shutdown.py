@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # shutdown.py  -  shutdown plugin / handling
 # -----------------------------------------------------------------------
@@ -9,28 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.6  2004/06/09 19:42:08  dischi
 # fix crash
 #
 # Revision 1.5  2004/06/06 14:16:08  dischi
 # small fix for confirm and enable shutdown sys
-#
-# Revision 1.4  2004/05/30 18:28:15  dischi
-# More event / main loop cleanup. rc.py has a changed interface now
-#
-# Revision 1.3  2004/03/14 11:50:02  dischi
-# added restart
-#
-# 
-# Revision 1.3  2004/03/12 02:45:44 dopeflish
-# add system restart function
-#
-# Revision 1.2  2004/01/19 20:25:53  dischi
-# sync metainfo before stopping
-#
-# Revision 1.1  2003/12/30 15:30:08  dischi
-# put all shutdown stuff into one file
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -52,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import time

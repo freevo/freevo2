@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # fxditem.py - Create items out of fxd files
 # -----------------------------------------------------------------------
@@ -26,45 +26,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.13  2004/02/14 19:28:07  dischi
 # store display_type in Container to build nicer menu
-#
-# Revision 1.12  2004/02/08 17:39:11  dischi
-# add count to Mimetype
-#
-# Revision 1.11  2004/01/31 16:38:49  dischi
-# removed unneeded attr
-#
-# Revision 1.10  2004/01/10 13:19:23  dischi
-# use fxd.filename
-#
-# Revision 1.9  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.8  2003/12/31 16:40:25  dischi
-# small speed enhancements
-#
-# Revision 1.7  2003/12/29 22:07:14  dischi
-# renamed xml_file to fxd_file
-#
-# Revision 1.6  2003/12/06 13:45:09  dischi
-# add <info> tag to a container
-#
-# Revision 1.5  2003/12/01 19:06:46  dischi
-# better handling of the MimetypePlugin
-#
-# Revision 1.4  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.3  2003/11/26 18:30:49  dischi
-# <container> support
-#
-# Revision 1.2  2003/11/25 19:00:52  dischi
-# make fxd item parser _much_ simpler
-#
-# Revision 1.1  2003/11/24 19:22:01  dischi
-# a module with callbacks to create items out of an fxd file
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -86,8 +52,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
-
 
 
 import copy

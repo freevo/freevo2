@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # wap_types.py - Classes useful for the wap interface.
 # -----------------------------------------------------------------------
@@ -9,22 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.3  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.2  2004/01/09 19:35:49  outlyer
-# Inherit DEBUG parameter from config, move some prints into DEBUG
-#
-# Revision 1.1  2003/09/02 22:36:27  mikeruelle
-# commit bart heremans wap recording page
-#
-# Revision 1.1  2003/09/02 21:14:22  mikeruelle
-# First rev of a wap recording interface contributed by Bart Heremans
-#
-# Revision 1.0  2003/07/14 19:30:36  BHeremans
 # 
-# First Version
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2003 Krister Lagerstrom, et al. 
@@ -45,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os, sys, time
 

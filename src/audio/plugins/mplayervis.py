@@ -1,10 +1,18 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mplayervis.py - Native Freevo MPlayer Audio Visualization Plugin
 # Author: Viggo Fredriksen <viggo@katatonic.org>
 # -----------------------------------------------------------------------
+# $Id$
+#
 # Notes: - I'm no fan of all the skin.clear() being done :(
 # Todo:  - Migrate with Gustavos pygoom when done and change name to mpav
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.6  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al.
@@ -25,7 +33,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
+
 try:
     import pygoom
 except:

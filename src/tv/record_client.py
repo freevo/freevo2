@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # record_client.py - A client interface to the Freevo recording server.
 # -----------------------------------------------------------------------
@@ -11,44 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.18  2004/03/13 20:11:36  rshortt
 # Some quick debug for addEditedFavorite()
 #
 # Revision 1.17  2004/03/13 18:31:51  rshortt
 # Lets see traceback and exception.  We should clean this file up further.
-#
-# Revision 1.16  2004/03/08 19:15:49  dischi
-# use our marmalade
-#
-# Revision 1.15  2004/03/05 20:49:11  rshortt
-# Add support for searching by movies only.  This uses the date field in xmltv
-# which is what tv_imdb uses and is really acurate.  I added a date property
-# to TvProgram for this and updated findMatches in the record_client and
-# recordserver.
-#
-# Revision 1.14  2004/02/23 21:41:10  dischi
-# start some unicode fixes, still not working every time
-#
-# Revision 1.13  2004/02/23 08:22:10  gsbarbieri
-# i18n: help translators job.
-#
-# Revision 1.12  2004/01/09 02:07:05  rshortt
-# Marmalade name and title for favorites.  Thanks Matthieu Weber.
-#
-# Revision 1.11  2003/11/30 16:30:58  rshortt
-# Convert some tv variables to new format (TV_).
-#
-# Revision 1.10  2003/11/16 17:38:48  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.9  2003/09/05 02:32:46  rshortt
-# Getting rid of the hack to strip out "tv." because it is now safe to import the tv namespace.
-#
-# This hack also messed up any new xmltv data that had "tv." in a channel id.
-#
-# Revision 1.8  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -70,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 

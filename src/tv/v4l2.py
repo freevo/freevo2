@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # v4l2.py - V4L2 python interface.
 # -----------------------------------------------------------------------
@@ -9,31 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.14  2004/01/13 15:08:22  outlyer
 # Removed an extraneous 'print'
-#
-# Revision 1.13  2003/10/11 15:09:41  rshortt
-# Make sure channel is a string.
-#
-# Revision 1.12  2003/10/08 03:29:22  outlyer
-# Just move all FutureWarnings to config. This removes all the silly hex
-# constant warnings.
-#
-# Revision 1.11  2003/10/08 03:14:17  outlyer
-# Filter out annoying warnings in Python >= 2.3
-#
-# Revision 1.10  2003/09/25 03:00:45  outlyer
-# Rollback...
-#
-# Revision 1.8  2003/09/18 00:50:12  rshortt
-# FutureWarning isn't a class of python 2.2, is there another one we can use?  This one crashes.
-#
-# Revision 1.7  2003/09/11 14:16:21  outlyer
-# Filter out the warnings about the ioctl's. We can't do much with it just yet.
-#
-# Revision 1.6  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -55,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import string
 import freq

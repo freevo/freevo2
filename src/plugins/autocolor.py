@@ -1,5 +1,4 @@
-#if 0 /*
-#  -*- coding: iso-8859-1 -*-
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # autocolor.py - An tool for Freevo
 # -----------------------------------------------------------------------
@@ -15,15 +14,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.2  2003/11/30 14:37:10  dischi
-# do not iclude stuff you don't need
-#
-# Revision 1.1  2003/09/25 14:07:02  outlyer
-# My autocolor plugin which allows me to run a system command before plaaying
-# video. It doesn't have to be a color command, you can change mixer settings
-# or anything else you can do in a shell script.
-#
-#
+# do not include stuff you don't need
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,7 +40,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import sys

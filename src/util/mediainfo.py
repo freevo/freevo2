@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/mediainfo.py - media info storage/parsing
@@ -10,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.53  2004/07/09 14:34:52  dischi
 # inverse the rc.app() call. One line, two bugs :-(
 #
@@ -21,15 +23,6 @@
 #
 # Revision 1.50  2004/06/29 18:07:03  dischi
 # reload cache if cache helper runs while running freevo
-#
-# Revision 1.49  2004/06/09 20:09:10  dischi
-# cleanup
-#
-# Revision 1.48  2004/06/06 06:52:37  dischi
-# cache updates
-#
-# Revision 1.47  2004/06/06 06:41:47  dischi
-# delete cache on mmpython update
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -51,7 +44,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os, stat

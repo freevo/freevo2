@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # view_favorites.py - A plugin to view your list of favorites. 
 # -----------------------------------------------------------------------
@@ -9,19 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.4  2004/03/13 20:12:40  rshortt
 # Remove debug.
 #
 # Revision 1.3  2004/03/13 18:34:19  rshortt
 # Refresh the list of favorites from the server properly.
-#
-# Revision 1.2  2004/03/13 03:28:06  rshortt
-# More favorites support... almost there!
-#
-# Revision 1.1  2004/02/24 04:40:16  rshortt
-# Make 'View Favorites' a menu based plugin, still incomplete.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -43,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import config, plugin, menu, rc

@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/__init__.py - Some Utilities
@@ -10,20 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.17  2004/06/13 18:49:39  dischi
 # do not take care of install.py
-#
-# Revision 1.16  2004/03/13 22:30:02  dischi
-# better string transformation
-#
-# Revision 1.15  2004/02/28 21:04:17  dischi
-# unicode fixes
-#
-# Revision 1.14  2004/02/27 20:15:03  dischi
-# more unicode fixes
-#
-# Revision 1.13  2004/02/25 19:50:51  dischi
-# fix unicode problem for utf-8
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys
 

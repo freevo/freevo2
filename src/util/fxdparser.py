@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # fxdparser.py - Parser for fxd files
 # -----------------------------------------------------------------------
@@ -9,18 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.15  2004/03/06 10:15:22  dischi
 # patches from Sylvain
-#
-# Revision 1.14  2004/02/28 21:04:17  dischi
-# unicode fixes
-#
-# Revision 1.13  2004/01/16 16:23:07  dischi
-# made a ugly unicode fix...I will never understand python character encoding
-#
-# Revision 1.12  2004/01/15 04:33:34  outlyer
-# Check for  the filename before trying to read it... without it, I couldn't
-# use fxd files which were only in my overlay, but not in the path.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -42,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import stat

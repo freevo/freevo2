@@ -1,15 +1,18 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # PopupBox - A dialog box for freevo.
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # Todo: o Add sanitychecking on all arguments.
 #       o Add actual support for icons, not just brag about it.
 #       o Start using the OSD imagecache for rectangles.
 #
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.39  2004/02/24 18:56:09  dischi
 # add hfill to text_prop
 #
@@ -27,10 +30,7 @@
 #
 # Some parts of Freevo may be broken now, please report it to be fixed
 #
-# Revision 1.36  2003/10/20 19:31:06  dischi
-# center popup box on screen as default
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #
@@ -51,6 +51,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
+
 
 import config
 import rc

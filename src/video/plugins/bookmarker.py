@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # bookmarker.py - Plugin to handle bookmarking
 # -----------------------------------------------------------------------
@@ -20,20 +20,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.11  2004/02/22 20:33:48  dischi
 # some unicode fixes
-#
-# Revision 1.10  2004/02/11 20:12:29  dischi
-# use new mmpython mpeg seek feature
-#
-# Revision 1.9  2004/01/17 20:30:19  dischi
-# use new metainfo
-#
-# Revision 1.8  2004/01/10 13:23:23  dischi
-# reflect self.fxd_file changes
-#
-# Revision 1.7  2003/12/29 22:08:54  dischi
-# move to new Item attributes
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -55,7 +46,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os, time, copy
 import mmpython

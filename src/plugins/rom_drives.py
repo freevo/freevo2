@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # rom_drives.py - the Freevo identifymedia/automount plugin
 # -----------------------------------------------------------------------
@@ -9,60 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.62  2004/06/20 13:06:19  dischi
 # move freevo-rebuild-database to cache dir
 #
 # Revision 1.61  2004/05/25 17:35:29  dischi
 # make nicer title for discs
-#
-# Revision 1.60  2004/03/21 14:49:00  dischi
-# Bufix to set the correct skin display type. Great, just after 1.5.0-pre1
-# is out. :-(
-#
-# Revision 1.59  2004/03/02 21:01:52  dischi
-# better typoe detection, autostart
-#
-# Revision 1.58  2004/02/27 20:07:28  dischi
-# add function to check if a media is mounted
-#
-# Revision 1.57  2004/02/15 15:29:47  dischi
-# remove old stuff
-#
-# Revision 1.56  2004/02/12 12:20:55  dischi
-# some media info fixes for directory
-#
-# Revision 1.55  2004/02/07 19:03:01  dischi
-# handle bad disc like blank once
-#
-# Revision 1.54  2004/02/05 20:47:33  dischi
-# fix audio disc info
-#
-# Revision 1.53  2004/01/31 16:38:23  dischi
-# changes because of mediainfo changes
-#
-# Revision 1.52  2004/01/18 16:51:05  dischi
-# (re)move unneeded variables
-#
-# Revision 1.51  2004/01/17 20:30:18  dischi
-# use new metainfo
-#
-# Revision 1.50  2004/01/10 16:52:19  dischi
-# shut down identify thread before exit to prevent a strange error sometimes
-#
-# Revision 1.49  2004/01/03 17:43:15  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.48  2003/12/30 15:30:56  dischi
-# IDENTIFY_MEDIA now sends the media as arg
-#
-# Revision 1.47  2003/12/29 22:09:38  dischi
-# move to new Item attributes
-#
-# Revision 1.46  2003/12/14 17:15:19  dischi
-# check if CDROM.py is complete
-#
-# Revision 1.45  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -84,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import time, os
 from fcntl import ioctl

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # icecast.py - icecaset plugin for freevo
 # -----------------------------------------------------------------------
@@ -10,27 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.11  2004/02/14 19:18:31  mikeruelle
 # move the icecast changer into icecast.py
-#
-# Revision 1.10  2003/09/30 16:51:22  mikeruelle
-# add some default options
-#
-# Revision 1.9  2003/09/22 20:28:46  mikeruelle
-# adding help document strings for the web interface
-#
-# Revision 1.8  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.7  2003/09/05 02:36:12  mikeruelle
-# load the item plugin automatically so we can change the playlist from inside freevo
-#
-# Revision 1.6  2003/08/25 15:49:51  mikeruelle
-# shutdown ices first since it can cause both to not shutdown and make zombie processes
-#
-# Revision 1.5  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -52,7 +36,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # webradio.py - webradio plugin
 # -----------------------------------------------------------------------
@@ -10,24 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.6  2003/11/16 17:41:05  dischi
 # i18n patch from David Sagnol
-#
-# Revision 1.5  2003/10/28 19:32:59  dischi
-# set type to linkbrowser
-#
-# Revision 1.4  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.3  2003/09/21 17:05:12  dischi
-# make it better :-)
-#
-# Revision 1.2  2003/09/20 17:02:49  dischi
-# do not scan with mmpython
-#
-# Revision 1.1  2003/09/20 12:58:44  dischi
-# small browser to get video from the web
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -49,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 from xml.utils import qp_xml

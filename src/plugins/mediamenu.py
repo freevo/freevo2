@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mediamenu.py - Basic menu for all kinds of media
 # -----------------------------------------------------------------------
@@ -9,55 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.36  2004/03/18 15:38:18  dischi
 # Automouter patch to check for hosts in mediamenu from Soenke Schwardt.
 # See doc of VIDEO_ITEMS for details
-#
-# Revision 1.35  2004/02/27 20:15:02  dischi
-# more unicode fixes
-#
-# Revision 1.34  2004/02/15 11:33:19  dischi
-# auto select item if there is only one
-#
-# Revision 1.33  2004/02/05 19:48:49  dischi
-# handle directory stuff as strings
-#
-# Revision 1.32  2004/01/31 13:15:56  dischi
-# do not use eval
-#
-# Revision 1.31  2004/01/25 11:40:56  dischi
-# fix handling of share filenames
-#
-# Revision 1.30  2004/01/13 19:12:48  dischi
-# Small bugfix
-#
-# Revision 1.29  2004/01/11 15:44:01  dischi
-# changed menu display type to 'x main menu'
-#
-# Revision 1.28  2003/12/06 13:47:11  dischi
-# better fxd handling
-#
-# Revision 1.27  2003/12/01 19:09:37  dischi
-# better handling of the MimetypePlugin
-#
-# Revision 1.26  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.25  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.24  2003/11/26 18:30:22  dischi
-# make it possible to add fxd items and not only directories
-#
-# Revision 1.23  2003/10/11 12:34:36  dischi
-# Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to config
-# to add more control when to switch to text view.
-#
-# Revision 1.22  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.21  2003/09/21 13:19:13  dischi
-# make it possible to change between video, audio, image and games view
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -79,7 +36,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os

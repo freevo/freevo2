@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # ivtv.py - Python interface to ivtv based capture cards.
 # -----------------------------------------------------------------------
@@ -9,20 +9,13 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.12  2003/12/31 16:05:34  rshortt
 # No longer override setstd because the mspSetMatrix() call was only to work
 # around a (fixed) ivtv bug.  Also removed the setinput call because that is
 # now taken care of by the VideoGroup and channels.py.
-#
-# Revision 1.11  2003/11/30 16:30:58  rshortt
-# Convert some tv variables to new format (TV_).
-#
-# Revision 1.10  2003/09/05 02:48:12  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.9  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -44,7 +37,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import string, struct, fcntl, time
 

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # LetterBoxGroup.py - a class that combines LetterBox's so the user
 #                     can input words.
@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.17  2004/04/25 18:19:10  mikeruelle
 # missing comma causes 8 to not show
 #
@@ -18,27 +21,6 @@
 # o support upper and lower case
 # o variable box width up to a length of 60 chars
 # o keyboard input
-#
-# Revision 1.15  2004/02/21 19:33:24  dischi
-# enhance input box, merge password and normal input
-#
-# Revision 1.14  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.13  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.12  2003/06/25 02:27:39  rshortt
-# Allow 'frame' containers to grow verticly to hold all contents.  Also
-# better control of object's background images.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -60,7 +42,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 import copy

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # xine.py - the Freevo XINE module for audio
 # -----------------------------------------------------------------------
@@ -12,35 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.15  2004/02/19 04:57:56  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
+# Revision 1.16  2004/07/10 12:33:38  dischi
+# header cleanup
 #
-# Revision 1.14  2004/01/14 20:36:16  mikeruelle
-# they guys do not play radio
-#
-# Revision 1.13  2003/12/29 22:09:19  dischi
-# move to new Item attributes
-#
-# Revision 1.12  2003/12/13 14:27:19  outlyer
-# Since ChildApp2 defaults to stopping the OSD, stop_osd=0 needs to be defined
-# here or the audio player will try to stop the display and then try to write
-# to the screen (and crash)
-#
-# Revision 1.11  2003/12/10 19:47:49  dischi
-# make it possible to bypass version checking
-#
-# Revision 1.10  2003/12/10 19:02:38  dischi
-# move to new ChildApp2 and remove the internal thread
-#
-# Revision 1.9  2003/11/22 15:30:55  dischi
-# support more than one player
-#
-# Revision 1.8  2003/11/08 13:20:26  dischi
-# support for AUDIOCD plugin type
-#
-# Revision 1.7  2003/11/08 10:00:59  dischi
-# fix cd playback
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -62,7 +36,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import re

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # ProgressBox.py - simple box with progress bar
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.4  2004/02/21 19:32:32  dischi
 # bugfix when setting width
 #
@@ -22,12 +25,6 @@
 # o added special button skin settings
 #
 # Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.2  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.1  2003/09/01 18:52:55  dischi
-# Add progressbar and box with progressbar
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -49,7 +46,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
+
 import config
 
 from GUIObject   import *

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # helpers/fxdimdb.py - class and helpers for fxd/imdb generation
 # -----------------------------------------------------------------------
@@ -11,46 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.6  2004/06/20 13:06:20  dischi
 # move freevo-rebuild-database to cache dir
-#
-# Revision 1.5  2004/02/28 21:11:20  dischi
-# more unicode fixes
-#
-# Revision 1.4  2004/01/24 19:53:41  dischi
-# better search
-#
-# Revision 1.3  2004/01/09 19:49:04  dischi
-# looks like imdb changed the interface again
-#
-# Revision 1.2  2004/01/09 06:30:49  outlyer
-# Two fixes:
-#
-# o the 'str2XML' function is a method of the FxdImdb() class, so call it as
-#     part of the object
-# o Don't say "Image downloading failed" since an image url isn't always
-#     provided. If it actually is provided and fails, show the message.
-#
-# Revision 1.1  2004/01/08 17:33:15  outlyer
-# Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
-# makes it import video/__init__...
-#
-# There is a reason for this to follow shortly :)
-#
-# Revision 1.23  2004/01/03 17:43:15  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.22  2003/11/24 19:24:59  dischi
-# move the handler for fxd from xml_parser to fxdhandler
-#
-# Revision 1.21  2003/11/22 20:35:50  dischi
-# use new vfs
-#
-# Revision 1.20  2003/11/09 12:51:21  dischi
-# fix poster download
-#
-# Revision 1.19  2003/10/03 16:46:13  dischi
-# moved the encoding type (latin-1) to the config file config.LOCALE
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -72,7 +37,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 # python has no data hiding, but this is the intended use...

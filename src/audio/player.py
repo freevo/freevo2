@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # player.py - the Freevo audio player GUI
 # -----------------------------------------------------------------------
@@ -9,33 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/10 12:33:37  dischi
+# header cleanup
+#
 # Revision 1.18  2004/02/15 11:18:47  dischi
 # better detachbar plugin, does not need stuff in other files now
-#
-# Revision 1.17  2004/02/14 13:05:03  dischi
-# do not call skin.get_singleton() anymore
-#
-# Revision 1.16  2004/02/08 17:40:53  dischi
-# only register to skin when we are main
-#
-# Revision 1.15  2003/12/15 03:53:18  outlyer
-# Added Viggo Fredriksen's very cool detachbar plugin... it shows a
-# mini-player in the bottom corner of the screen if you detach a music player.
-#
-# Revision 1.14  2003/12/09 20:31:58  dischi
-# keep track of current player
-#
-# Revision 1.13  2003/12/06 13:43:34  dischi
-# expand the <audio> parsing in fxd files
-#
-# Revision 1.12  2003/12/04 21:48:11  dischi
-# also add the plugin area
-#
-# Revision 1.11  2003/12/03 21:51:31  dischi
-# register to the skin and rename some skin function calls
-#
-# Revision 1.10  2003/11/22 15:30:55  dischi
-# support more than one player
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -57,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 from gui.GUIObject import GUIObject
 

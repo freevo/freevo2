@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # base.py - The basic animation class for freevo
@@ -11,12 +10,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.2  2004/05/13 12:33:42  dischi
 # animation damage patch from Viggo Fredriksen
 #
 # Revision 1.1  2004/04/25 11:23:58  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -38,7 +39,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 from pygame import Rect, Surface, constants
 

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # skin.py - This is the Freevo top-level skin code.
 # -----------------------------------------------------------------------
@@ -22,20 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.13  2004/05/31 10:41:22  dischi
 # add function to get info about skin status
-#
-# Revision 1.12  2004/03/14 11:42:34  dischi
-# make idlebar have a background image
-#
-# Revision 1.11  2004/02/24 19:36:25  dischi
-# add function to change a skin area
-#
-# Revision 1.10  2004/02/14 13:01:08  dischi
-# copy all needed function from the skin implementation to this module
-#
-# Revision 1.9  2003/12/06 16:49:09  dischi
-# do not create a skin object for helpers
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -57,7 +48,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 import sys

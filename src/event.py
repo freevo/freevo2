@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # event.py - Global events for Freevo
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.46  2004/06/28 15:55:10  dischi
 # angle switching
 #
@@ -17,36 +20,6 @@
 #
 # Revision 1.44  2004/05/12 18:56:36  dischi
 # add keys to move inside a zoom image in image viewer
-#
-# Revision 1.43  2004/03/05 04:01:37  rshortt
-# Make comment match example and fix typo.
-#
-# Revision 1.42  2004/02/27 20:13:01  dischi
-# add global events to avoid duplicate code
-#
-# Revision 1.41  2004/02/25 17:44:13  dischi
-# add special event mapping for tvmenu
-#
-# Revision 1.40  2004/02/13 18:32:57  dischi
-# add event to toggle playlist repeat
-#
-# Revision 1.39  2004/02/06 01:10:23  mikeruelle
-# it is nice to have zero in tvtime
-#
-# Revision 1.38  2004/02/05 14:23:49  outlyer
-# Patch from Viggo Fredriksen
-#
-# o Move to ChildApp2 for mplayer TV plugin
-# o Channel changing via the number pad on the remote
-#
-# Revision 1.37  2004/01/15 21:15:28  outlyer
-# Fixed to use proper audio context buttons.
-#
-# Note: Is is possible to do this without adding code to playlist.py? All I need
-# is the filename and an event, but because no existing event sends the filename,
-# and the plugin doesn't know about it, I have to pass it along somehow.
-#
-# Anyone want to chime in with an idea on how?
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -68,7 +41,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 class Event:

@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # skin_main1.py - Freevo default skin
 # -----------------------------------------------------------------------
@@ -9,66 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.46  2004/07/09 11:20:12  dischi
 # do not load outdated skins
 #
 # Revision 1.45  2004/03/14 11:42:34  dischi
 # make idlebar have a background image
-#
-# Revision 1.44  2004/02/24 19:50:35  dischi
-# change extra area location to skins/plugins
-#
-# Revision 1.43  2004/02/24 19:36:25  dischi
-# add function to change a skin area
-#
-# Revision 1.42  2004/02/22 20:46:46  dischi
-# oops, remove test code
-#
-# Revision 1.41  2004/02/22 20:46:09  dischi
-# add Unicode error warning
-#
-# Revision 1.40  2004/02/18 21:54:03  dischi
-# small update needed for the new gui code
-#
-# Revision 1.39  2004/02/14 13:00:39  dischi
-# function to return the settings
-#
-# Revision 1.38  2004/02/06 18:24:39  dischi
-# make to possible to override busy icon with skin
-#
-# Revision 1.37  2004/02/02 23:06:03  outlyer
-# This probably isn't neccessary to show every startup.
-#
-# Revision 1.36  2004/02/01 17:03:58  dischi
-# speedup
-#
-# Revision 1.35  2004/01/18 16:45:32  dischi
-# store last skin information
-#
-# Revision 1.34  2004/01/13 19:12:02  dischi
-# support for basic.fxd
-#
-# Revision 1.33  2004/01/13 17:20:54  dischi
-# fixed display toggle
-#
-# Revision 1.32  2004/01/13 15:46:19  outlyer
-# Temporary fix for a crash.... probably not the ideal solution, but I don't
-# have the time right now to investigate fully.
-#
-# To reproduce the crash, remove the "hasattr()" line and click 'display'
-# when in any 'feature' menu (TV, Movies, Music, etc.)
-#
-# Revision 1.31  2004/01/10 13:20:52  dischi
-# better skin cache function and set_base_fxd to load a basic skin
-#
-# Revision 1.30  2004/01/09 20:04:18  dischi
-# add overscan to cache name
-#
-# Revision 1.29  2004/01/05 18:03:43  dischi
-# support for extra fxd files for plugins
-#
-# Revision 1.28  2004/01/01 12:26:15  dischi
-# use pickle to cache parsed skin files
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -90,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
 
 
 import os, copy

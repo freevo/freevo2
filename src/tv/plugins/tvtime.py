@@ -1,6 +1,6 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# tvtime.py - Temporary implementation of a TV function using tvtime
+# tvtime.py - implementation of a TV function using tvtime
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,86 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.37  2004/07/08 12:44:40  rshortt
 # Add directfb as a display option.
 #
 # Revision 1.36  2004/06/06 17:15:10  mikeruelle
-# removed some old bad code. mplayer debug has been superceded by childapp debug. the kill method is just plain bad.
+# removed some old bad code. mplayer debug has been superceded by childapp debug.
+# the kill method is just plain bad.
 #
 # Revision 1.35  2004/05/29 23:01:03  mikeruelle
 # make better use of freevo channels. getting better video group support slowly
-#
-# Revision 1.34  2004/03/22 01:24:40  mikeruelle
-# tv channel padding so that the big number in tvtime is what us cable channel it is. channels must be in order to use this
-#
-# Revision 1.33  2004/03/21 18:30:04  mikeruelle
-# allow for some special options during setup
-#
-# Revision 1.32  2004/02/23 17:56:39  mikeruelle
-# add stop_osd=1 for vcr viewing to work. make vcr viewing work. add some commented out ch+/ch- video group handling. it is broken when you use numeric channel changing.
-#
-# Revision 1.31  2004/02/20 17:41:36  mikeruelle
-# initial videogroups support.
-#
-# Revision 1.30  2004/02/06 01:15:06  mikeruelle
-# use new events in tv context
-#
-# Revision 1.29  2004/01/14 18:39:45  mikeruelle
-# suppress debug always showing
-#
-# Revision 1.28  2004/01/08 22:17:55  mikeruelle
-# not needed and is now annoying because of new osd behavior in new tvtime releases.
-#
-# Revision 1.27  2004/01/06 00:58:40  mikeruelle
-# better osd message support
-#
-# Revision 1.26  2004/01/06 00:29:45  mikeruelle
-# fix regex for version detect and start osd message support
-#
-# Revision 1.25  2003/12/17 16:58:37  mikeruelle
-# xmltv autochannel detect still occasionally sets things to numbers instead of strings
-#
-# Revision 1.24  2003/12/10 20:40:57  mikeruelle
-# remove childthread use new childapp2 class
-#
-# Revision 1.23  2003/12/03 20:40:34  mikeruelle
-# a hack for those who do not use freevo -fs
-#
-# Revision 1.22  2003/11/16 17:04:13  mikeruelle
-# remove stupid found it message
-#
-# Revision 1.21  2003/11/08 13:23:56  dischi
-# use os.path.join for configcmd
-#
-# Revision 1.20  2003/10/22 17:21:28  mikeruelle
-# adding numeric channel changing and previous channel support
-#
-# Revision 1.19  2003/10/22 00:01:38  mikeruelle
-# found another 4suite probelm, gonna look at minidom instead
-#
-# Revision 1.18  2003/10/15 20:17:07  mikeruelle
-#
-# new in this release:
-# -use new childthread
-# -writes tvtime.xml and stationlist.xml files to keep in sync
-#  with freevo channels
-# -merges stationlist.xml and tvtime.xml if they exist already
-# -set tvtime xml parameters if you have 0.9.10 or newer
-# -added support for custom tuned channels using FREQUENCY_TABLE
-#
-# Revision 1.12  2003/10/15 19:00:41  mikeruelle
-# ok it should be ready for merge.
-#
-# Revision 1.17  2003/09/03 17:54:38  dischi
-# Put logfiles into LOGDIR not $FREEVO_STARTDIR because this variable
-# doesn't exist anymore.
-#
-# Revision 1.16  2003/09/01 19:46:03  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.15  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -110,7 +42,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc

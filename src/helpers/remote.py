@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-#if 0 /*
+#!/usr/bin/env python
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # FreevoRemote.py - a small tkinter example remote program
 # -----------------------------------------------------------------------
@@ -11,15 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.3  2003/11/01 05:09:43  krister
 # Fixed typos in the usage text
-#
-# Revision 1.2  2003/10/22 23:05:43  mikeruelle
-# well it really does have two options
-#
-# Revision 1.1  2003/08/23 09:09:18  dischi
-# moved some helpers to src/helpers
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -41,7 +37,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys
 import socket

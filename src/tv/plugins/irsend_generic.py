@@ -1,5 +1,4 @@
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # irsend_generic.py - Send commands to an external tv receiver using a
 #                     shell command like irsend from Lirc.  
@@ -12,24 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.3  2004/02/02 22:22:14  outlyer
 # For most cable boxes/satellite boxes, just punching in the channel isn't
 # enough, you typically have to press 'enter' or 'select' afterwards. You
 # can specify the NAME of the key to press after sending the command using
 # enterkey.
-#
-# Revision 1.2  2003/11/25 16:32:33  rshortt
-# Make plugin_external_tuner work again.
-#
-# Revision 1.1  2003/11/23 20:32:05  rshortt
-# This is a plugin for sending IR commands to an external tuner.  You can
-# specify your irsend command when you plugin.activate.
-#
-# This is totally untested as irsend doesn't work with my receiver.  If you
-# would like to use this give it a try and notify of any problems or modify
-# it to work correctly.  It is now merely a proof of concept.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -51,7 +40,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os, sys, time, string
 import plugin

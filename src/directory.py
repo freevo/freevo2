@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # directory.py - Directory handling
 # -----------------------------------------------------------------------
@@ -9,29 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.132  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.131  2004/06/10 09:19:12  dischi
 # only remove start strings => 10
-#
-# Revision 1.130  2004/06/09 20:09:09  dischi
-# cleanup
-#
-# Revision 1.129  2004/06/06 07:19:47  dischi
-# fix crash if dir does not exist
-#
-# Revision 1.128  2004/05/29 12:32:57  dischi
-# use advanced sort for audio items (by trackno)
-#
-# Revision 1.127  2004/05/09 14:18:20  dischi
-# remove comments
-#
-# Revision 1.126  2004/03/13 22:35:52  dischi
-# more debug, will be removed later
-#
-# Revision 1.125  2004/03/04 05:10:06  rshortt
-# Bugfix.  I think this is the desired behaviour.
-#
-# Revision 1.124  2004/03/02 20:29:34  dischi
-# support for show all files in directory
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import traceback

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # radio.py - a simple plugin to listen to radio
 # -----------------------------------------------------------------------
@@ -18,27 +18,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.7  2004/01/14 21:08:27  mikeruelle
 # makes detach audio work.
-#
-# Revision 1.6  2004/01/14 20:37:11  mikeruelle
-# add url for preffered player stuff.
-#
-# Revision 1.5  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.4  2003/10/21 21:17:41  gsbarbieri
-# Some more i18n improvements.
-#
-# Revision 1.3  2003/09/22 20:36:17  mikeruelle
-# more web interface help descriptions
-#
-# Revision 1.2  2003/09/20 09:42:32  dischi
-# cleanup
-#
-# Revision 1.1  2003/08/27 15:30:12  mikeruelle
-# Start of Radio Support
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -60,7 +44,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 #python modules
 import os, popen2, fcntl, select, time

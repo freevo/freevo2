@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # info_area.py - An info area for the Freevo skin
 # -----------------------------------------------------------------------
@@ -9,30 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.23  2004/06/02 19:04:35  dischi
 # translation updates
-#
-# Revision 1.22  2004/03/14 17:22:47  dischi
-# seperate ellipses and dim in drawstringframed
-#
-# Revision 1.21  2004/03/14 13:10:41  dischi
-# more dim/ellipse fixes
-#
-# Revision 1.20  2004/02/27 20:15:03  dischi
-# more unicode fixes
-#
-# Revision 1.19  2004/02/23 16:34:27  dischi
-# better skin i18n support
-#
-# Revision 1.17  2004/02/13 20:28:35  dischi
-# fix alignment right/center with MAX
-#
-# Revision 1.16  2004/02/12 12:21:36  dischi
-# support "0" as result
-#
-# Revision 1.15  2004/02/05 05:44:26  gsbarbieri
-# Fixes some bugs related to handling unicode internally.
-# NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -54,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
+
 
 import copy
 import util

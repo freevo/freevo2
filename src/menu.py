@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # menu.py - freevo menu handling system
 # -----------------------------------------------------------------------
@@ -9,45 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.94  2004/06/02 21:38:02  dischi
 # fix crash
 #
 # Revision 1.93  2004/05/09 09:58:43  dischi
 # make it possible to force a page rebuild
-#
-# Revision 1.92  2004/03/19 21:03:39  dischi
-# fix tvguide context bug
-#
-# Revision 1.91  2004/03/14 19:43:27  dischi
-# make it possible to create a submenu inside a plugin
-#
-# Revision 1.90  2004/02/25 17:44:30  dischi
-# add special event mapping for tvmenu
-#
-# Revision 1.87  2004/02/14 19:29:07  dischi
-# send osd message when not using a submenu
-#
-# Revision 1.86  2004/02/14 13:02:34  dischi
-# o remove unneeded functions
-# o add function to delete the submenu or do nothing (avoid duplicate code)
-# o use new skin functions and do not call get_singleton()
-#
-# Revision 1.85  2004/02/12 16:27:06  dischi
-# fix watermark problem once and for all
-#
-# Revision 1.84  2004/02/06 20:42:55  dischi
-# fix LEFT and RIGHT for tv guide
-#
-# Revision 1.83  2004/02/05 19:56:40  dischi
-# make it possible to change back to the old navigation style
-#
-# Revision 1.82  2004/02/04 22:32:42  gsbarbieri
-# Changed LEFT/RIGHT behaviour.
-# Now in single column mode it behaves like BACK_ONE_MENU/SELECT and in
-# multi-column mode (2d menus) it goes one item LEFT/RIGHT (as before).
-#
-# This was asked in freevo-devel because it improve usability and it really
-# does, since you just have to use arrows (UP/DOWN,LEFT/RIGHT) to navigate.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -69,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import copy

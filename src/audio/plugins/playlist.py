@@ -1,15 +1,10 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # playlist.py - Plugin for playlist support
 # -----------------------------------------------------------------------
 # $Id: 
 #
 # Notes: This plugin will allow you to make playlists.
-#
-# -----------------------------------------------------------------------
-# $Log: 
-#
-#
 #
 # TODO:
 #       Make it possible to remove items from the playlist
@@ -19,6 +14,8 @@
 #         stuff
 #       Ability to add entire folders or even other playlists
 #
+# -----------------------------------------------------------------------
+# $Log: 
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -39,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import menu

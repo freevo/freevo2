@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # gui - First attempt at a freevo gui library
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # The goal is to make a OO GUI library for use with freevo. The main
@@ -22,29 +22,15 @@
 #
 # Initial version: Thomas Malt <thomas@malt.no>
 #
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.14  2004/02/23 19:15:46  dischi
 # remove import of debug
 #
-# Revision 1.13  2004/02/21 19:33:24  dischi
-# enhance input box, merge password and normal input
-#
-# Revision 1.12  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.11  2003/11/30 14:40:21  dischi
-# add ProgressBox
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #

@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # skin_utils.py - some utils for the skin
 # -----------------------------------------------------------------------
@@ -9,23 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.16  2004/02/01 17:51:14  dischi
 # respect item.rotation of images
-#
-# Revision 1.15  2004/02/01 17:03:58  dischi
-# speedup
-#
-# Revision 1.14  2004/01/31 16:35:26  dischi
-# moved shadow code to listing area, it is much faster now
-#
-# Revision 1.13  2004/01/25 20:16:54  dischi
-# fix mime handling
-#
-# Revision 1.12  2004/01/17 20:28:47  dischi
-# renamed media.info to media.item
-#
-# Revision 1.11  2004/01/17 12:36:29  dischi
-# add shadow support for image listing
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -47,7 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
 
 
 import pygame

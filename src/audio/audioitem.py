@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # audioitem - Item for mp3 and ogg files
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2004/07/10 12:33:37  dischi
+# header cleanup
+#
 # Revision 1.54  2004/06/25 23:11:43  outlyer
 # Fix the advanced sort. Since 'trackno' is a number, but the sort is alphabetical,
 # we pad the numbers with 0's to make it sort properly. Fixed my problem with
@@ -26,30 +29,6 @@
 # 9
 # 10
 # 11
-#
-# Revision 1.53  2004/06/09 20:16:16  dischi
-# fix crash
-#
-# Revision 1.52  2004/05/29 12:32:57  dischi
-# use advanced sort for audio items (by trackno)
-#
-# Revision 1.51  2004/02/08 05:35:02  outlyer
-# Remove debug
-#
-# Revision 1.50  2004/01/31 12:39:47  dischi
-# delete unused audio variables
-#
-# Revision 1.49  2004/01/31 11:43:55  dischi
-# fixed bad crash
-#
-# Revision 1.48  2004/01/31 11:20:15  dischi
-# cdda is not network play
-#
-# Revision 1.47  2004/01/27 17:24:43  outlyer
-# Use the tag title if available and DIRECTORY_USE_MEDIAID_TAG_NAMES is set.
-#
-# Revision 1.46  2004/01/25 11:20:09  dischi
-# make sure length is an int
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -71,7 +50,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # channels.py - Freevo module to handle channel changing.
 # -----------------------------------------------------------------------
@@ -9,41 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.17  2004/03/05 04:04:10  rshortt
 # Only call setChannel on an external tuner plugin if we really have one.
-#
-# Revision 1.16  2004/02/23 05:40:35  gsbarbieri
-# BUGFIX: fix bug printing strings with 'chan', a unicode object.
-# i18n: Help translators job.
-#
-# Revision 1.15  2004/02/22 21:22:01  rshortt
-# Make sure chan is a string and add better error handling for clist and freq.
-#
-# Revision 1.14  2004/02/19 04:57:57  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.13  2004/02/05 14:23:50  outlyer
-# Patch from Viggo Fredriksen
-#
-# o Move to ChildApp2 for mplayer TV plugin
-# o Channel changing via the number pad on the remote
-#
-# Revision 1.12  2004/02/04 14:11:19  outlyer
-# Cleanup and fixup:
-#
-# o Now uses the mplayer OSD to show channel information when changing channels,
-#     or you press the 'display' key.
-# o Removed many old CVS log messages
-# o Removed many debug-related 'print' statements
-#
-# Revision 1.11  2003/12/31 16:08:08  rshortt
-# Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
-# (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
-#
-# Revision 1.10  2003/11/25 16:32:33  rshortt
-# Make plugin_external_tuner work again.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -65,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config, plugin
 import tv.freq, tv.v4l2

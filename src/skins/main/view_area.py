@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # view_area.py - A view area for the Freevo skin
 # -----------------------------------------------------------------------
@@ -9,14 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.6  2004/02/04 19:05:36  dischi
 # remove bad log message
-#
-# Revision 1.5  2004/02/04 18:37:14  dischi
-# <removed wrong log message>
-#
-# Revision 1.4  2003/12/06 13:43:03  dischi
-# more cleanup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -38,7 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
 
 
 from area import Skin_Area

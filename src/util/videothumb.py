@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # videothumb - create a thumbnail for video files
 # -----------------------------------------------------------------------
@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.12  2004/07/08 11:03:02  dischi
 # use .tmp filename and new freevo raw format
 #
@@ -21,35 +24,6 @@
 #
 # Revision 1.10  2004/05/02 09:21:57  dischi
 # better python code
-#
-# Revision 1.9  2004/02/09 20:04:33  dischi
-# better error handling
-#
-# Revision 1.8  2004/02/08 12:16:27  dischi
-# chdir to tmp to call mplayer
-#
-# Revision 1.7  2004/02/08 12:09:01  dischi
-# o let mplayer keep the aspect of the movie
-# o add bars/resize to fit 4:3 so all thumbnails have the same geometry
-#
-# Revision 1.6  2004/02/01 17:05:28  dischi
-# popup support
-#
-# Revision 1.5  2004/01/10 18:45:23  dischi
-# always use thumbnail
-#
-# Revision 1.4  2004/01/10 04:12:02  outlyer
-# Take a snapshot/thumbnail after a file is recorded...
-#
-# Revision 1.3  2004/01/04 17:19:57  dischi
-# store image as .raw file if no filename is given
-#
-# Revision 1.2  2004/01/04 13:07:14  dischi
-# make image max 300x300
-#
-# Revision 1.1  2004/01/04 11:16:32  dischi
-# add function to create a thumbnail from videofiles
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -71,7 +45,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, os, mmpython, glob, shutil
 from stat import *

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # ListItem.py - the primary component of a ListBox
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.14  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -19,12 +22,6 @@
 # o added special button skin settings
 #
 # Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.13  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.12  2003/09/13 10:32:56  dischi
-# fix a font problem and cleanup some unneeded stuff
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -46,7 +43,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 

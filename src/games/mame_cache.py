@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mame_cache.py - Module for caching MAME rom information for Freevo.
 # -----------------------------------------------------------------------
@@ -9,24 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.18  2004/02/24 18:05:19  mikeruelle
 # make the info retreival a lot better
-#
-# Revision 1.17  2004/02/24 17:04:39  mikeruelle
-# Add some info to the info area where we have it
-#
-# Revision 1.16  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.15  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.14  2003/09/05 20:48:34  mikeruelle
-# new game system
-#
-# Revision 1.13  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -48,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys
 import random

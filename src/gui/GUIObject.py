@@ -1,51 +1,19 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # GUIObject - Common object for all GUI Classes
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # Todo: o Add move function 
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.38  2004/07/10 10:43:57  dischi
 # use screenblit
 #
-# Revision 1.37  2004/03/19 21:03:40  dischi
-# fix tvguide context bug
-#
-# Revision 1.36  2004/03/13 22:30:58  dischi
-# fix crash on debug
-#
-# Revision 1.35  2004/03/07 18:31:08  dischi
-# even more debug
-#
-# Revision 1.34  2004/03/07 18:25:49  dischi
-# more debug
-#
-# Revision 1.33  2004/02/22 20:53:12  dischi
-# add bugreport text
-#
-# Revision 1.32  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.31  2003/12/03 21:52:08  dischi
-# rename some skin function calls
-#
-# Revision 1.30  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.29  2003/10/08 03:14:51  outlyer
-# Make sure get_size() always returns int
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #
@@ -66,6 +34,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
+
+
 """
 A Object Oriented GUI Widget library for Freevo
 

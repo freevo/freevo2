@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # snesitem.py - Item for snes objects
 # -----------------------------------------------------------------------
@@ -9,39 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.19  2004/06/06 16:53:39  mikeruelle
-# use list version of command for better options parsing regarding things with spaces in there names
-#
-# Revision 1.18  2004/02/24 17:04:39  mikeruelle
-# Add some info to the info area where we have it
-#
-# Revision 1.17  2004/02/24 16:03:11  mikeruelle
-# contributed patch from Andraes Leitner. i changed the values used to legit ones but this patch allows some broken roms to play
-#
-# Revision 1.16  2004/01/19 21:33:02  mikeruelle
-#  a patch from Sylvian to use the new set_url stuff
-#
-# Revision 1.15  2004/01/14 18:29:49  mikeruelle
-# .
-#
-# Revision 1.14  2004/01/10 21:25:01  mikeruelle
-# zipped rom support for snes and genesis
-#
-# Revision 1.13  2003/12/29 22:30:35  dischi
-# move to new Item attributes
-#
-# Revision 1.12  2003/12/03 17:25:05  mikeruelle
-# they seem to have lost a patch i put in.
-#
-# Revision 1.11  2003/09/11 17:38:59  mikeruelle
-# fix a snes crash
-#
-# Revision 1.10  2003/09/05 20:48:35  mikeruelle
-# new game system
-#
-# Revision 1.9  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
+# use list version of command for better options parsing regarding things with
+# spaces in there names
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # tvguide.py - This is the Freevo TV Guide module. 
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.34  2004/06/28 15:56:42  dischi
 # fix off by one error on scrolling down
 #
@@ -20,32 +23,6 @@
 #
 # Revision 1.31  2004/06/13 00:28:19  outlyer
 # Fix a crash.
-#
-# Revision 1.30  2004/06/05 18:15:46  dischi
-# cleanup
-#
-# Revision 1.29  2004/03/19 21:03:40  dischi
-# fix tvguide context bug
-#
-# Revision 1.28  2004/03/08 19:15:14  dischi
-# fix popup input focus
-#
-# Revision 1.27  2004/02/25 17:44:30  dischi
-# add special event mapping for tvmenu
-#
-# Revision 1.26  2004/02/23 21:51:15  dischi
-# fix unicode problem
-#
-# Revision 1.25  2004/02/23 03:54:25  rshortt
-# Use ProgramItem and display_program rather than clunky popup-gui.  Because
-# of this the tvguide does no longer need to extend GUIObject.  For now it
-# needs to extend Item unless we make each program block into a distinctive
-# ProgramItem which may unnesseccarily increase overhead.
-#
-# Revision 1.24  2004/02/16 18:10:54  outlyer
-# Patch from James A. Laska to make the TV Guide behave intuitively when
-# clicking on a future program. As you would expect, it now pops up the record
-# dialog.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -67,7 +44,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import time

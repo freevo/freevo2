@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # file_ops.py - Small file operations (currently only delete)
 # -----------------------------------------------------------------------
@@ -9,24 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.19  2004/02/18 21:54:34  dischi
 # use new gui ConfirmBox feature to show handler message
-#
-# Revision 1.18  2004/02/14 13:03:32  dischi
-# o make it possible to turn off the menu item for delete image/info
-# o use new menu delete_submenu function
-#
-# Revision 1.17  2004/01/31 13:15:14  dischi
-# only add the plugin if the parent is a dir
-#
-# Revision 1.16  2004/01/30 20:42:03  dischi
-# set item.image to parent when deleting it
-#
-# Revision 1.15  2004/01/09 21:11:45  dischi
-# crash on debug: item may have no url
-#
-# Revision 1.14  2004/01/04 11:17:38  dischi
-# make it possible to delete only the image
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -48,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import config

@@ -1,5 +1,4 @@
-#if 0 /*
-#  -*- coding: iso-8859-1 -*-
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # idlebar.py - IdleBar plugin
 # -----------------------------------------------------------------------
@@ -18,70 +17,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.18  2004/06/24 08:37:20  dischi
 # add speed warning
 #
 # Revision 1.17  2004/05/31 10:43:20  dischi
 # redraw not only in main, redraw when skin is active
-#
-# Revision 1.16  2004/04/25 12:38:22  dischi
-# move idlebar image to background
-#
-# Revision 1.15  2004/03/14 11:42:35  dischi
-# make idlebar have a background image
-#
-# Revision 1.14  2004/02/19 04:57:57  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.13  2004/02/12 16:58:49  dischi
-# smaller logo, keep aspect
-#
-# Revision 1.12  2004/02/12 16:31:32  dischi
-# use skin logo as default
-#
-# Revision 1.11  2004/02/08 18:45:23  dischi
-# do not use font.font.stringsize, there is no border calculated, use font.stringsize
-#
-# Revision 1.10  2004/01/31 14:41:55  dischi
-# make it possible that the detachbar draws inside the idlebar
-#
-# Revision 1.9  2004/01/30 19:14:53  dischi
-# add logo plugin
-#
-# Revision 1.8  2004/01/28 20:11:47  outlyer
-# Added 'dvd' and renamed audio -> audiocd since that's what it reports now.
-#
-# Revision 1.7  2004/01/18 16:51:05  dischi
-# (re)move unneeded variables
-#
-# Revision 1.6  2004/01/17 20:30:19  dischi
-# use new metainfo
-#
-# Revision 1.5  2004/01/14 18:08:46  dischi
-# use a working font
-#
-# Revision 1.4  2003/11/22 21:06:41  outlyer
-# Merge of the new version of the pymetar library from upstream.
-#
-# Changes:
-#     * (to upstream) Added back timeoutsocket code which upstream doesn't use,
-#         and removed some print statements
-#     * We now use the pymetar Fahrenheit function instead of doing it in the idle
-#         bar; it was already being calculated by pymetar anyway.
-#     * When we don't have a temperature, use '?' instead of '0' which is misleading
-#         since it's Winter now :)
-#     * minor cleanups
-#
-# Revision 1.3  2003/11/15 17:22:48  dischi
-# format patch from Davin Sagnol
-#
-# Revision 1.2  2003/11/15 11:25:32  dischi
-# check for crash
-#
-# Revision 1.1  2003/10/27 20:11:12  dischi
-# move idlebar.py to a directory
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -103,7 +46,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import time

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # playlist.py - This is the Freevo playlist reading module. 
 # -----------------------------------------------------------------------
@@ -9,26 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.71  2004/06/28 15:51:21  dischi
 # catch IOError
 #
 # Revision 1.70  2004/05/09 16:44:13  dischi
 # fix crash in m3u parsing
-#
-# Revision 1.69  2004/05/09 14:18:20  dischi
-# remove comments
-#
-# Revision 1.68  2004/03/02 20:28:54  dischi
-# prefer "play" function in playlist mode
-#
-# Revision 1.67  2004/02/27 20:15:02  dischi
-# more unicode fixes
-#
-# Revision 1.66  2004/02/23 19:59:34  dischi
-# unicode fixes
-#
-# Revision 1.64  2004/02/13 18:32:57  dischi
-# add event to toggle playlist repeat
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -50,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import random
 import os

@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/popen3.py - popen2 warpper
@@ -10,38 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.10  2004/05/28 20:22:32  dischi
 # add run function as better os.system
 #
 # Revision 1.9  2004/01/04 13:07:32  dischi
 # close file handlers
-#
-# Revision 1.8  2003/12/10 19:46:35  dischi
-# add function to get the stdout of a command call
-#
-# Revision 1.7  2003/10/19 14:19:44  rshortt
-# Added OS_EVENT_WAITPID event for popen3.waitpid() to post so that recordserver
-# can pick it up and wait on its own child.  Child processes from recordserver
-# now get signals and clean up properly.
-#
-# Revision 1.6  2003/10/19 12:42:19  rshortt
-# Oops.
-#
-# Revision 1.5  2003/10/19 12:41:13  rshortt
-# in waitpid handle recordserver like main.
-#
-# Revision 1.4  2003/10/19 09:08:14  dischi
-# support for changing the working directory before exec, some cleanup changes
-#
-# Revision 1.3  2003/10/18 21:34:19  rshortt
-# recordserver now handles events like main.
-#
-# Revision 1.2  2003/10/18 17:56:58  dischi
-# more childapp fixes
-#
-# Revision 1.1  2003/10/18 10:45:46  dischi
-# our own thread working version of popen and waitpid
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import time

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # lcd.py - use PyLCD to display menus and players
 # -----------------------------------------------------------------------
@@ -13,67 +13,12 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.17  2004/02/23 05:30:28  gsbarbieri
 # Better i18n support. Changed a lot of strings to cooperate with translators
 # and made the menu items (not dirs, audio or video ones!) to use translations.
-#
-# Revision 1.16  2004/02/19 04:57:56  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.15  2004/02/10 20:08:03  mikeruelle
-# fix some crashing
-#
-# Revision 1.14  2003/10/14 21:05:52  gsbarbieri
-# i18n
-#
-# Revision 1.13  2003/10/07 04:35:27  gsbarbieri
-# Applied patch from: Immo Goltz <immo [At] nothrix.org>
-# It fixes screens for 2-line LCD and now it uses "marquee" scrolling instead
-# of the previous "ping-pong" one. Much better!
-#
-# Revision 1.12  2003/09/22 21:21:54  gsbarbieri
-# Better doc and handling for lack of pylcd module.
-#
-# Revision 1.11  2003/09/22 20:21:20  gsbarbieri
-# Added __doc__ string, so plugins helper will be happy, right Dischi? :)
-#
-# Revision 1.10  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.9  2003/09/01 20:35:28  gsbarbieri
-# Video Player support
-#
-# Revision 1.8  2003/09/01 16:55:42  gsbarbieri
-# Better support for broken MP3 tags
-#
-# Revision 1.7  2003/08/27 13:02:31  gsbarbieri
-# 2x20 and 2x40 screens.
-# Also, fixed some crashes
-#
-# Revision 1.6  2003/08/24 19:42:25  gsbarbieri
-# Support 2x16 displays
-#
-# Revision 1.5  2003/08/20 22:48:25  gsbarbieri
-# Try-Except to avoid crashes + MAME items handling
-#
-# Revision 1.4  2003/08/04 20:30:33  gsbarbieri
-# Added some clauses to avoid exceptions.
-#
-# Revision 1.3  2003/08/04 04:08:10  gsbarbieri
-# Now you can have screens for Lines x Columns, before we could just have screens for Lines.
-#
-# Revision 1.2  2003/08/04 03:02:03  gsbarbieri
-# Changes from Magnus:
-#    * Progress bar
-#    * Animation
-#    * UnicodeError handling
-#
-# Revision 1.1  2003/07/23 07:16:00  gsbarbieri
-# New plugin: LCD
-# This plugin show the selected menu item and some info about it and info
-# about the item being played using a LCD display (using pyLCD: http://www.schwarzvogel.de/software-pylcd.shtml)
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -95,7 +40,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 from menu import MenuItem
 import copy

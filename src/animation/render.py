@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # render.py - The render part of Freevo animation extensions
@@ -17,12 +16,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.2  2004/05/31 10:46:18  dischi
 # update to new callback handling in rc
 #
 # Revision 1.1  2004/04/25 11:23:58  dischi
 # Added support for animations. Most of the code is from Viggo Fredriksen
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -44,7 +45,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 # freevo modules

@@ -1,5 +1,4 @@
-
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/lirc.py - A module to help with some lirc tasks.
 # -----------------------------------------------------------------------
@@ -10,11 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.1  2003/10/11 11:57:11  rshortt
 # A new module to help with lirc.  This contains a lircd.conf file parser which
 # I will be using for some infrared transmitting modules.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -36,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import string, os, re
 

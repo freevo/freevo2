@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # xml_skin.py - XML reader for the skin
 # -----------------------------------------------------------------------
@@ -9,29 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.34  2004/03/14 17:22:47  dischi
 # seperate ellipses and dim in drawstringframed
-#
-# Revision 1.33  2004/03/14 13:10:41  dischi
-# more dim/ellipse fixes
-#
-# Revision 1.32  2004/02/12 17:18:48  dischi
-# Move watermark information to python ocde to avoid duplicate code here
-#
-# Revision 1.31  2004/02/12 03:32:41  outlyer
-# Fixes for OSD_EXTRA_FONT:
-#
-# o Filesystems are case sensitive; we can't arbitrarily set them to lower.
-# o If we're using the extra font path for osd.py, we need to use it in xml_skin
-#
-# Revision 1.30  2004/02/08 18:45:49  dischi
-# font shadow fixes
-#
-# Revision 1.29  2004/01/17 12:36:29  dischi
-# add shadow support for image listing
-#
-# Revision 1.28  2004/01/11 15:43:16  dischi
-# better display type handling, added type main menu
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,8 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
-
 
 
 # some python stuff

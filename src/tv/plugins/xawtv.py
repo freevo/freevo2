@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # xawtv.py - use xawtv for tv viewing
 # -----------------------------------------------------------------------
@@ -9,18 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.4  2004/06/06 17:18:39  mikeruelle
 # removing unnecessary and bad kill method
 #
 # Revision 1.3  2004/03/21 23:03:23  mikeruelle
 # docs fro devels, this is not for newbs yet
-#
-# Revision 1.2  2004/03/21 22:58:16  mikeruelle
-# make start channel work and messages display fully
-#
-# Revision 1.1  2004/03/21 21:21:54  mikeruelle
-# start of an xawtv plugin. it works sorta
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -42,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import config

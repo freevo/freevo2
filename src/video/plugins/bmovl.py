@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # bmovl.py - bmovl plugin for Freevo MPlayer module for video
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.12  2004/07/10 10:36:53  dischi
 # fix more crashes
 #
@@ -28,27 +31,6 @@
 #
 # Revision 1.7  2004/01/11 20:01:28  dischi
 # make bmovl work again
-#
-# Revision 1.6  2003/12/07 19:40:30  dischi
-# convert OVERSCAN variable names
-#
-# Revision 1.5  2003/12/03 21:52:08  dischi
-# rename some skin function calls
-#
-# Revision 1.4  2003/11/28 20:08:58  dischi
-# renamed some config variables
-#
-# Revision 1.3  2003/11/19 05:41:30  krister
-# Spelling fixes, usage note
-#
-# Revision 1.2  2003/11/04 17:57:50  dischi
-# add doc
-#
-# Revision 1.1  2003/11/04 17:53:23  dischi
-# Removed the unstable bmovl part from mplayer.py and made it a plugin.
-# Even if we are in a code freeze, this is a major cleanup to put the
-# unstable stuff in a plugin to prevent mplayer from crashing because of
-# bmovl.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -70,8 +52,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
-
 
 
 import os

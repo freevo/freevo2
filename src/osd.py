@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # osd.py - Low level graphics routines
@@ -11,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.165  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.164  2004/07/08 12:44:40  rshortt
 # Add directfb as a display option.
 #
@@ -50,7 +52,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 # Python modules
 import time

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # AlertBox.py - simple alert popup box class
 # -----------------------------------------------------------------------
@@ -9,29 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.22  2004/02/24 18:56:09  dischi
 # add hfill to text_prop
-#
-# Revision 1.21  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.20  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.19  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.18  2003/09/06 13:29:00  gsbarbieri
-# PopupBox and derivates now support you to choose mode (soft/hard) and
-# alignment (vertical/horizontal).
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +35,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
+
 import config
 from event import *
 

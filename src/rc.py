@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # rc.py - Remote control / Event and Callback handling
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.35  2004/05/31 10:39:55  dischi
 # Again some interface changes. There is now only one function
 # handling all callbacks, including repeating calls with timer
@@ -45,7 +48,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import copy

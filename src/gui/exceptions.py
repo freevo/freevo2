@@ -1,13 +1,16 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # GUI Exceptions - Various Exeptions for use with Freevo GUI.
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # Todo: o Make a ShowWhenVisibleError
 #
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.2  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -17,15 +20,7 @@
 # o removed unneeded files/functions/variables/parameter
 # o added special button skin settings
 #
-# Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.1  2002/12/07 15:21:31  dischi
-# moved subdir gui into src
-#
-# Revision 1.2  2002/08/18 22:16:21  tfmalt
-# o Added another exception for object handling
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #

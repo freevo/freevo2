@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # freevoscreensaver.py - quick hurry and save the screen!!!
 # -----------------------------------------------------------------------
@@ -9,31 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.1  2004/01/10 21:32:53  mikeruelle
 # ok this works well enough now.
-#
-# Revision 1.8  2004/01/07 19:52:07  mikeruelle
-# close to done. now for some stress testing
-#
-# Revision 1.7  2004/01/07 18:28:13  mikeruelle
-# now no sound and loop go through the play arg methodi for movies
-#
-# Revision 1.6  2004/01/07 17:38:51  mikeruelle
-#
-# Well it worked sorta. I can now use videos as screen savers. gotta figure out a mute and we can't seem to set the mplayer options in the mplayer_options attribute of the file tag in the movie tag setup. I had to manually add this to the videoitem that i got back from parse.
-#
-# Revision 1.4  2004/01/06 19:59:45  mikeruelle
-# remove games_items popup from showing
-#
-# Revision 1.3  2004/01/06 18:13:24  mikeruelle
-# now we have ssr screen savers with pictures
-#
-# Revision 1.2  2004/01/05 19:59:35  mikeruelle
-# first two types done. now for looping ssr and possible a looping image slideshow.
-#
-# Revision 1.1  2004/01/01 00:27:39  mikeruelle
-# first cut at a screensaver
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -55,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import time
 import os

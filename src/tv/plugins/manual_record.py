@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # manual_record.py - A plugin to manually record programs
 # -----------------------------------------------------------------------
@@ -9,12 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.5  2004/04/12 14:58:38  dischi
 # prevent crash for bad TV.xml
-#
-# Revision 1.4  2004/03/14 01:14:39  mikeruelle
-# not really the same file but the name got reused for new skin version
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -36,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import time, traceback, sys
 from time import gmtime, strftime

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # commands.py - a simple plugin to run arbitrary commands from a directory.
 #               it determines success or failure of command based on its
@@ -14,34 +14,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.12  2004/06/11 00:35:57  mikeruelle
 # move config method to where it can do some good
 #
 # Revision 1.11  2004/05/30 18:28:15  dischi
 # More event / main loop cleanup. rc.py has a changed interface now
-#
-# Revision 1.10  2004/02/18 23:52:20  mikeruelle
-# reflect dischi's changes
-#
-# Revision 1.9  2004/02/15 03:09:28  mikeruelle
-# make things a little more xml like
-#
-# Revision 1.8  2004/02/14 19:47:27  mikeruelle
-# set the skin type
-#
-# Revision 1.7  2004/02/14 19:01:49  mikeruelle
-# move main menu item into this file.
-#
-# Revision 1.6  2004/02/14 15:44:21  dischi
-# add more doc and add <stdout> to supress showing the stdout
-#
-# Revision 1.5  2004/02/14 15:05:49  dischi
-# make it possible to put command fxd files in every menu
-#
-# Revision 1.4  2004/01/13 20:40:55  mikeruelle
-# We now use childapp2 to run the commands and store our output. We now have
-# an fxd file format to run commands in X which people wanted (aka firebird
-# plugin).
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,7 +43,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 #python modules
 import os, time

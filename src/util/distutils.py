@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/distutils.py - Freevo distutils for installing plugins
@@ -67,26 +66,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.11  2003/11/10 18:46:09  dischi
 # bugfix for freevo.pot
-#
-# Revision 1.10  2003/11/05 19:19:34  dischi
-# Oops
-#
-# Revision 1.9  2003/11/05 19:14:52  dischi
-# enhance i18n support and better doc
-#
-# Revision 1.8  2003/11/01 15:21:20  dischi
-# better howto support
-#
-# Revision 1.7  2003/10/31 18:56:14  dischi
-# Add framework for plugin writing howto
-#
-# Revision 1.6  2003/10/19 17:30:30  dischi
-# looks nicer
-#
-# Revision 1.5  2003/10/19 16:40:09  dischi
-# i18n support function for plugins
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -108,7 +92,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import sys

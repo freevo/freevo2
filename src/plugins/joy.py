@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # joy.py - A joystick control plugin for Freevo.
 # -----------------------------------------------------------------------
@@ -11,17 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.11  2004/07/08 12:30:51  dischi
 # only activate plugin when joystick is working
-#
-# Revision 1.10  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.9  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.8  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -43,7 +37,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys
 import os

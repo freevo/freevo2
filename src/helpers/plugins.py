@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # plugins.py - list all plugins and prints help about them
 # -----------------------------------------------------------------------
@@ -13,40 +13,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.10  2004/02/14 15:06:59  dischi
 # make sure all regexps end
-#
-# Revision 1.9  2004/01/31 13:20:38  dischi
-# maybe there is no config string, do not crash on that
-#
-# Revision 1.8  2003/11/21 11:48:49  dischi
-# Show config(), too
-#
-# Revision 1.1  2003/11/15 20:16:12  dischi
-# show config() return on command line, too
-#
-# Revision 1.7  2003/10/27 20:12:10  dischi
-# adjust length
-#
-# Revision 1.6  2003/09/22 20:16:57  gsbarbieri
-# Now handle my coding practices (a lot of spaces!)
-# So "class PluginInterface( plugin.DaemonPlugin )" is now parsed.
-#
-# Revision 1.5  2003/09/12 20:56:03  dischi
-# again small cosmetic changes
-#
-# Revision 1.4  2003/09/12 20:40:04  dischi
-# cosmetic change
-#
-# Revision 1.3  2003/09/12 20:33:18  dischi
-# add html output
-#
-# Revision 1.2  2003/09/09 20:26:35  dischi
-# add short description for -l
-#
-# Revision 1.1  2003/09/09 18:36:11  dischi
-# add a plugin helper to get more informations about the plugins
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -68,7 +39,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 import plugin

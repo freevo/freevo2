@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # shoppingcart.py - Example item plugin
 # -----------------------------------------------------------------------
@@ -15,23 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.5  2004/01/31 13:15:14  dischi
 # only add the plugin if the parent is a dir
-#
-# Revision 1.4  2004/01/19 21:18:53  mikeruelle
-# missing self. that's positively freudian
-#
-# Revision 1.3  2003/12/29 22:28:13  dischi
-# move to new Item attributes
-#
-# Revision 1.2  2003/12/14 11:53:03  dischi
-# o use os.system to move because Python 2.2.3 has no shutil.move
-# o add menu shortcuts
-# o add support to add directories to the cart
-#
-# Revision 1.1  2003/12/09 23:29:46  mikeruelle
-# make it a little easier to move multiple files around
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -53,7 +41,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os

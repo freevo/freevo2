@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # __init__.py - interface between mediamenu and audio
 # -----------------------------------------------------------------------
@@ -9,51 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/07/10 12:33:37  dischi
+# header cleanup
+#
 # Revision 1.24  2004/02/13 17:26:25  dischi
 # save coversearch result
-#
-# Revision 1.23  2004/01/31 12:39:47  dischi
-# delete unused audio variables
-#
-# Revision 1.22  2004/01/29 16:57:20  outlyer
-# This logic doesn't work. Any directory that has even one subdirectory with
-# multiple artists will show the artist name for all the directories...
-#
-# Revision 1.21  2004/01/18 21:09:50  dischi
-# better title guessing
-#
-# Revision 1.20  2004/01/17 21:20:15  dischi
-# try to generate a better title
-#
-# Revision 1.19  2004/01/10 13:16:15  dischi
-# remove self.fxd_file, not needed anymore
-#
-# Revision 1.18  2004/01/09 19:04:11  dischi
-# new vfs.listdir parameter
-#
-# Revision 1.17  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.16  2003/12/31 16:42:40  dischi
-# changes, related to item.py changes
-#
-# Revision 1.15  2003/12/29 22:09:18  dischi
-# move to new Item attributes
-#
-# Revision 1.14  2003/12/08 15:59:39  mikeruelle
-# change cwd to get
-#
-# Revision 1.13  2003/12/06 13:43:34  dischi
-# expand the <audio> parsing in fxd files
-#
-# Revision 1.12  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
-#
-# Revision 1.11  2003/11/28 19:26:36  dischi
-# renamed some config variables
-#
-# Revision 1.10  2003/11/25 19:00:52  dischi
-# make fxd item parser _much_ simpler
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -75,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import re

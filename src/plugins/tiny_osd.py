@@ -1,5 +1,4 @@
-#if 0 /*
-#  -*- coding: iso-8859-1 -*-
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # time_osd.py - An osd for Freevo
 # -----------------------------------------------------------------------
@@ -15,27 +14,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.10  2004/02/14 13:05:04  dischi
 # do not call skin.get_singleton() anymore
-#
-# Revision 1.9  2004/02/01 09:18:06  dischi
-# fix drawing for skin objects
-#
-# Revision 1.8  2004/01/11 20:23:31  dischi
-# move skin font handling to osd to avoid duplicate code
-#
-# Revision 1.7  2004/01/02 10:26:07  dischi
-# add border support
-#
-# Revision 1.6  2004/01/01 17:41:42  dischi
-# call correct stringsize function
-#
-# Revision 1.5  2003/11/28 20:08:57  dischi
-# renamed some config variables
-#
-# Revision 1.4  2003/11/21 11:45:02  dischi
-# render option for appliactions (not perfect)
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -57,7 +40,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import sys

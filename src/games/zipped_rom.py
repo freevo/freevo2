@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # zipped_rom.py - Handles game roms that are zipped
 # -----------------------------------------------------------------------
@@ -9,9 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.1  2004/01/10 21:25:01  mikeruelle
 # zipped rom support for snes and genesis
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -33,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #   
 # ----------------------------------------------------------------------- */
-#endif
+
 
 from zipfile import *
 import os.path

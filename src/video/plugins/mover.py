@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mover.py - Example item plugin
 # -----------------------------------------------------------------------
@@ -12,29 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.8  2004/01/12 19:11:48  dischi
 # fix typo to prevent crash
-#
-# Revision 1.7  2004/01/10 13:23:09  dischi
-# use item.files to move
-#
-# Revision 1.6  2003/11/28 19:26:37  dischi
-# renamed some config variables
-#
-# Revision 1.5  2003/10/16 09:18:20  dischi
-# patch from Eirik Meland
-#
-# Revision 1.4  2003/10/14 18:15:59  dischi
-# patch from Eirik Meland
-#
-# Revision 1.3  2003/09/13 10:08:24  dischi
-# i18n support
-#
-# Revision 1.2  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.1  2003/04/20 11:45:42  dischi
-# add an example item plugin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -56,7 +38,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # epg_types.py - This file contains the types for the Freevo Electronic
 #                Program Guide module.
@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.19  2004/07/01 22:49:49  rshortt
 # Unicode fix.
 #
@@ -21,41 +24,6 @@
 # which is what tv_imdb uses and is really acurate.  I added a date property
 # to TvProgram for this and updated findMatches in the record_client and
 # recordserver.
-#
-# Revision 1.16  2004/02/23 21:41:10  dischi
-# start some unicode fixes, still not working every time
-#
-# Revision 1.15  2004/02/23 20:05:36  dischi
-# increase EPG_VERSION because of the unicode fixes
-#
-# Revision 1.14  2004/02/23 19:59:34  dischi
-# unicode fixes
-#
-# Revision 1.13  2004/02/22 06:18:20  gsbarbieri
-# Better unicode support.
-#
-# Revision 1.12  2003/10/18 09:32:40  dischi
-# add var scheduled to TvProgram
-#
-# Revision 1.11  2003/09/07 13:36:43  dischi
-# bugfix for German tv movie listing
-#
-# Revision 1.10  2003/08/28 18:02:22  dischi
-# fix guide correction for unsorted listings
-#
-# Revision 1.9  2003/08/24 18:28:39  mikeruelle
-# add space to store ratings and categories
-#
-# Revision 1.8  2003/08/24 17:08:15  dischi
-# added attr date and use config formatstrings
-#
-# Revision 1.7  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-# Revision 1.6  2003/08/16 18:41:10  dischi
-# Fix overlapping programs. The German listing sometimes has a program with
-# a wrong stop time so that is overlapps the next entries (mostly the wrong
-# entry stops at the end of the day)
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -77,7 +45,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

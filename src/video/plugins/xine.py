@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # xine.py - the Freevo XINE module for video
 # -----------------------------------------------------------------------
@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.43  2004/06/28 15:53:59  dischi
 # angle switching
 #
@@ -40,30 +43,6 @@
 #     be played with XINE with all of the features of the original DVD (chapters,
 #     audio tracks, etc) and works with dvdnav.
 #
-# Revision 1.36  2004/01/24 19:17:10  dischi
-# clean up autovar handling
-#
-# Revision 1.35  2004/01/10 13:22:54  dischi
-# fix mimetype = cue
-#
-# Revision 1.34  2004/01/02 11:17:35  dischi
-# cleanup
-#
-# Revision 1.33  2003/12/29 22:08:55  dischi
-# move to new Item attributes
-#
-# Revision 1.32  2003/12/10 19:47:49  dischi
-# make it possible to bypass version checking
-#
-# Revision 1.31  2003/12/10 19:06:06  dischi
-# move to new ChildApp2 and remove the internal thread
-#
-# Revision 1.30  2003/12/07 08:57:20  dischi
-# add config.XINE_ARGS_DEF
-#
-# Revision 1.29  2003/12/07 08:32:14  dischi
-# make keybindings work for files and urls
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002 Krister Lagerstrom, et al. 
@@ -84,7 +63,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import time, os, re

@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/distutils.py - Freevo distutils for installing plugins
@@ -62,32 +61,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.9  2004/06/10 11:06:40  dischi
 # make it possible to give a cmdclass to setup
-#
-# Revision 1.8  2004/06/03 18:20:27  dischi
-# add freevo_config.py to translation list, cleanup
-#
-# Revision 1.7  2004/06/02 19:04:35  dischi
-# translation updates
-#
-# Revision 1.6  2004/06/02 18:11:57  dischi
-# get real skin text strings for i18n
-#
-# Revision 1.5  2004/02/25 19:51:17  dischi
-# add helpers to __init__ del list
-#
-# Revision 1.4  2004/02/25 19:19:36  dischi
-# add skins/plugins from which not to install __init__
-#
-# Revision 1.3  2004/02/19 04:57:58  gsbarbieri
-# Support i18n.
-#
-# Revision 1.2  2003/11/22 12:03:31  dischi
-# do not install __init__ files from freevo
-#
-# Revision 1.1  2003/11/18 15:56:38  dischi
-# distutils.py replacement after 1.4
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -109,7 +87,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import sys

@@ -1,4 +1,4 @@
-#if 0
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # listing_area.py - A listing area for the Freevo skin
 # -----------------------------------------------------------------------
@@ -9,14 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.27  2004/03/14 17:22:47  dischi
 # seperate ellipses and dim in drawstringframed
-#
-# Revision 1.26  2004/02/27 20:15:03  dischi
-# more unicode fixes
-#
-# Revision 1.25  2004/02/24 21:20:30  dischi
-# unicode fix
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -38,7 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # -----------------------------------------------------------------------
-#endif
 
 
 import copy

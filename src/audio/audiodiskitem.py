@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # audiodiskitem.py - Item for CD Audio Disks
 # -----------------------------------------------------------------------
@@ -9,33 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/07/10 12:33:37  dischi
+# header cleanup
+#
 # Revision 1.29  2004/01/25 14:55:05  dischi
 # use overlay dir for covers
-#
-# Revision 1.28  2004/01/02 14:17:42  dischi
-# bugfix to reflect latest changes
-#
-# Revision 1.27  2003/12/30 15:34:42  dischi
-# remove unneeded copy function
-#
-# Revision 1.26  2003/12/18 21:13:20  outlyer
-# Crash Fix: The self. variable didn't exist, but the config one did. It would
-# crash when I put in a CD.
-#
-# Revision 1.25  2003/12/08 20:37:34  dischi
-# merged Playlist and RandomPlaylist into one class
-#
-# Revision 1.24  2003/11/08 12:58:41  dischi
-# better support for mixed discs
-#
-# Revision 1.23  2003/11/05 21:18:42  dischi
-# mixed disc support (needs mmpython cvs)
-#
-# Revision 1.22  2003/09/20 09:44:23  dischi
-# cleanup
-#
-# Revision 1.21  2003/09/13 10:08:21  dischi
-# i18n support
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -57,7 +35,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import config

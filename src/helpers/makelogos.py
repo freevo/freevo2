@@ -1,4 +1,5 @@
-#if 0 /*
+#!/usr/bin/env python
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # makelogos.py - Download TV station logos using the XMLTV info
 # -----------------------------------------------------------------------
@@ -9,28 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.2  2004/06/23 11:11:18  dischi
 # bufix
-#
-# Revision 1.1  2003/11/11 01:56:57  outlyer
-# Move makelogos into the helpers directory. This works with
-# "freevo makelogos"
-# now
-#
-# Revision 1.1  2003/08/23 09:19:59  dischi
-# move makelogos here for now
-#
-# Revision 1.2  2003/05/26 18:44:26  outlyer
-# Makelogos was supposed to import the xmltv parser directly, but since
-# it is "inside" the 'tv' module, it was importing a whole bunch of other
-# stuff from the __init__ of the tv module.
-#
-# The small changes force makelogos to directly import xmltv and thus not
-# require a graphical output, which isn't used anyway.
-#
-# Revision 1.1  2002/12/08 18:38:27  krister
-# Updated for new src dir layout. Moved to ./helpers.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -52,7 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import sys

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # util/tv.py - A module to make some tasks related to TV easier.
 # -----------------------------------------------------------------------
@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.5  2004/06/23 21:10:20  dischi
 # make nicer filename
 #
@@ -15,19 +18,6 @@
 #
 # Revision 1.3  2004/06/20 13:56:54  dischi
 # remove -_ at the end of the filename
-#
-# Revision 1.2  2004/04/28 21:19:19  rshortt
-# String / Unicode fix.
-#
-# Revision 1.1  2003/10/11 17:57:39  rshortt
-# Sorry, there was a namespace issue with having a tv.py module here.  For
-# example the save_pickle function was bombing because it was looking in this
-# tv namespace for the TVGuide object.
-#
-# Revision 1.1  2003/10/11 12:04:46  rshortt
-# Moving tv/tv_util.py to util/tv.py.  I will remove te old one once I am
-# sure everthing else is working fine with the new location.
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -49,7 +39,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, string, re
 import time, os, string

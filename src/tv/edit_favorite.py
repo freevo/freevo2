@@ -1,49 +1,21 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # EditFavorite - 
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # Todo: 
 # Notes: 
 #
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.12  2004/06/06 07:23:16  dischi
 # do not import tv.xxx, use xxx, we are in tv
 #
-# Revision 1.11  2004/02/23 21:41:10  dischi
-# start some unicode fixes, still not working every time
-#
-# Revision 1.10  2004/02/23 08:22:10  gsbarbieri
-# i18n: help translators job.
-#
-# Revision 1.9  2004/02/19 04:57:57  gsbarbieri
-# Support i18n.
-#
-# Revision 1.8  2004/02/18 21:55:11  dischi
-# update to new gui code
-#
-# Revision 1.7  2004/01/09 19:35:49  outlyer
-# Inherit DEBUG parameter from config, move some prints into DEBUG
-#
-# Revision 1.6  2004/01/09 02:10:00  rshortt
-# Patch from Matthieu Weber to revive add/edit favorites support from the
-# TV interface.
-#
-# Revision 1.5  2003/11/16 17:38:48  dischi
-# i18n patch from David Sagnol
-#
-# Revision 1.4  2003/09/05 02:48:12  rshortt
-# Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
-#
-# Revision 1.3  2003/09/01 19:46:02  dischi
-# add menuw to eventhandler, it may be needed
-#
-# Revision 1.2  2003/08/23 12:51:43  dischi
-# removed some old CVS log messages
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #
@@ -64,6 +36,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
+
 
 from time import gmtime, strftime
 

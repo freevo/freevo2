@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # __init__.py - interface between mediamenu and video
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.32  2004/06/20 13:06:19  dischi
 # move freevo-rebuild-database to cache dir
 #
@@ -18,50 +21,6 @@
 # Revision 1.30  2004/03/27 00:46:23  outlyer
 # Fixed a crash. It occured when I used the "Configure Directory" option to
 # show "all types" in a music directory.
-#
-# Revision 1.29  2004/03/22 03:04:28  krister
-# Fixed a typo
-#
-# Revision 1.28  2004/02/15 15:22:42  dischi
-# better dvd disc support
-#
-# Revision 1.27  2004/02/03 20:51:12  dischi
-# fix/enhance dvd on disc
-#
-# Revision 1.26  2004/02/02 22:15:53  outlyer
-# Support for mirrors of DVDs...
-#
-# (1) Make one using vobcopy, run 'vobcopy -m'
-# (2) Put it in your movie directory and it'll look like a single file, and can
-#     be played with XINE with all of the features of the original DVD (chapters,
-#     audio tracks, etc) and works with dvdnav.
-#
-# Revision 1.25  2004/02/01 19:47:13  dischi
-# some fixes by using new mmpython data
-#
-# Revision 1.24  2004/02/01 17:10:09  dischi
-# add thumbnail generation as directory config variable
-#
-# Revision 1.23  2004/01/10 13:22:17  dischi
-# reflect self.fxd_file changes
-#
-# Revision 1.22  2004/01/09 21:05:27  dischi
-# set directory skin_settings for tv shows
-#
-# Revision 1.21  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.20  2003/12/29 22:08:54  dischi
-# move to new Item attributes
-#
-# Revision 1.19  2003/12/09 19:43:01  dischi
-# patch from Matthieu Weber
-#
-# Revision 1.18  2003/12/06 13:44:11  dischi
-# move more info to the Mimetype
-#
-# Revision 1.17  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -83,7 +42,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os

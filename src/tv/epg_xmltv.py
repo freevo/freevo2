@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # epg_xmltv.py - Freevo Electronic Program Guide module for XMLTV
 # -----------------------------------------------------------------------
@@ -9,46 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/07/10 12:33:41  dischi
+# header cleanup
+#
 # Revision 1.51  2004/06/23 20:22:19  dischi
 # fix popup crash
 #
 # Revision 1.50  2004/06/22 01:10:21  rshortt
 # Add ratings and advisories.
-#
-# Revision 1.49  2004/03/16 01:04:18  rshortt
-# Changes to stop two processes tripping over the creation of the epg pickle file.
-#
-# Revision 1.48  2004/03/13 22:28:41  dischi
-# better handling of bad programs
-#
-# Revision 1.47  2004/03/05 20:49:11  rshortt
-# Add support for searching by movies only.  This uses the date field in xmltv
-# which is what tv_imdb uses and is really acurate.  I added a date property
-# to TvProgram for this and updated findMatches in the record_client and
-# recordserver.
-#
-# Revision 1.46  2004/02/23 21:41:10  dischi
-# start some unicode fixes, still not working every time
-#
-# Revision 1.45  2004/02/22 06:22:16  gsbarbieri
-# Handle info in unicode (don't need to convert to string anymore).
-# People envolved to Record & Favorites, please test it and ensure it works.
-#
-# Revision 1.44  2004/02/19 04:57:57  gsbarbieri
-# Support i18n.
-#
-# Revision 1.43  2004/02/09 20:14:06  dischi
-# add verbose flag
-#
-# Revision 1.42  2004/02/06 20:54:26  dischi
-# fix for undefined timezone
-#
-# Revision 1.41  2004/02/05 19:26:42  dischi
-# fix unicode handling
-#
-# Revision 1.40  2003/12/31 16:08:08  rshortt
-# Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
-# (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -70,7 +38,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys
 import time

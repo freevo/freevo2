@@ -1,14 +1,17 @@
-#!/usr/bin/env python
-#-----------------------------------------------------------------------
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------
 # Label - A class for text labels
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Id$
 #
 # Todo: o Do check to see if font has changed on draw to let people
 #         change font between updates.
 #
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.25  2004/02/24 18:56:09  dischi
 # add hfill to text_prop
 #
@@ -23,23 +26,7 @@
 #
 # Some parts of Freevo may be broken now, please report it to be fixed
 #
-# Revision 1.23  2004/01/09 02:08:07  rshortt
-# GUI fixes from Matthieu Weber.
-#
-# Revision 1.22  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.21  2003/09/13 10:32:55  dischi
-# fix a font problem and cleanup some unneeded stuff
-#
-# Revision 1.20  2003/09/06 17:12:50  rshortt
-# For Label use parent's text_prop if available before resorting to defaults.
-#
-# Revision 1.19  2003/09/06 13:29:00  gsbarbieri
-# PopupBox and derivates now support you to choose mode (soft/hard) and
-# alignment (vertical/horizontal).
-#
-#-----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 #
 # Freevo - A Home Theater PC framework
 #
@@ -60,6 +47,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------
+
 
 from GUIObject import *
 

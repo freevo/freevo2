@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # plugin.py - Plugin interface
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.68  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.67  2004/06/24 14:56:19  dischi
 # make it possible to put a subplugin into main
 #
@@ -17,59 +20,6 @@
 #
 # Revision 1.65  2004/05/31 10:40:57  dischi
 # update to new callback handling in rc
-#
-# Revision 1.64  2004/05/29 19:06:46  dischi
-# register poll function to rc
-#
-# Revision 1.63  2004/02/08 17:39:09  dischi
-# add count to Mimetype
-#
-# Revision 1.62  2004/02/01 17:07:42  dischi
-# add dirconfig for mimetype plugins
-#
-# Revision 1.61  2004/01/31 16:38:49  dischi
-# removed unneeded attr
-#
-# Revision 1.60  2004/01/10 16:49:04  dischi
-# make it possible to shut down all kinds of plugins
-#
-# Revision 1.59  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.58  2003/12/31 16:39:43  dischi
-# flag if the mimetype returns something else than play files
-#
-# Revision 1.57  2003/12/30 15:31:43  dischi
-# support args for plugin events
-#
-# Revision 1.56  2003/12/06 13:45:26  dischi
-# move more info to the Mimetype
-#
-# Revision 1.55  2003/12/01 19:06:46  dischi
-# better handling of the MimetypePlugin
-#
-# Revision 1.54  2003/11/30 14:38:36  dischi
-# o new plugin type: MimetypePlugin to handle what files to display in
-#   what kinds of menus
-# o new functions to register and get callbacks to avoid duplicate code
-#
-# Revision 1.53  2003/11/29 18:37:29  dischi
-# build config.VIDEO_SUFFIX in config on startup
-#
-# Revision 1.52  2003/11/29 11:20:30  dischi
-# doc update, remove AUDIOCD_PLAYER
-#
-# Revision 1.51  2003/11/22 12:02:51  dischi
-# better plugin remove
-#
-# Revision 1.50  2003/11/21 17:55:47  dischi
-# support a list of named plugins
-#
-# Revision 1.49  2003/11/21 11:43:00  dischi
-# don't try to 'load' plugins that are already a python object
-#
-# Revision 1.1  2003/11/16 09:57:23  dischi
-# bugfix and make the DirwatcherThread a plugin
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -91,7 +41,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import os, sys

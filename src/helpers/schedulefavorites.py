@@ -1,4 +1,5 @@
-#if 0 /*
+#!/usr/bin/env python
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # schedulefavorites.py - A helper to run in order to schedule any favories
 #                        for recording.  This should be ran after updating
@@ -12,13 +13,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.2  2004/06/06 07:32:02  dischi
 # fix crash
-#
-# Revision 1.1  2003/09/08 19:41:55  rshortt
-# A helper to schedule your favorites for recording.
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -40,7 +39,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 import tv.record_client as rc

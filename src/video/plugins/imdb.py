@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # imdb.py - Plugin for IMDB support
 # -----------------------------------------------------------------------
@@ -15,26 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2004/07/10 12:33:43  dischi
+# header cleanup
+#
 # Revision 1.35  2004/06/02 21:36:50  dischi
 # auto detect movies with more than one file
-#
-# Revision 1.34  2004/02/03 20:51:12  dischi
-# fix/enhance dvd on disc
-#
-# Revision 1.33  2004/01/10 13:23:23  dischi
-# reflect self.fxd_file changes
-#
-# Revision 1.32  2004/01/08 17:33:15  outlyer
-# Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
-# makes it import video/__init__...
-#
-# There is a reason for this to follow shortly :)
-#
-# Revision 1.31  2004/01/03 17:43:15  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.30  2003/12/29 22:08:54  dischi
-# move to new Item attributes
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -56,7 +41,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 

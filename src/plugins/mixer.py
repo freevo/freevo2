@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # mixer.py - The mixer interface for freevo.
 # -----------------------------------------------------------------------
@@ -9,33 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/10 12:33:40  dischi
+# header cleanup
+#
 # Revision 1.13  2004/01/02 14:03:32  dischi
 # use osd to display volume
-#
-# Revision 1.12  2003/11/09 16:04:09  dischi
-# add step size in VOL+- an arg
-#
-# Revision 1.11  2003/10/20 19:37:39  dischi
-# better exception handling for ioctl
-#
-# Revision 1.10  2003/10/20 19:36:04  dischi
-# ioctl may fail
-#
-# Revision 1.9  2003/10/12 11:05:48  dischi
-# respect config.CONTROL_ALL_AUDIO
-#
-# Revision 1.8  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.7  2003/09/23 13:31:24  outlyer
-# More FreeBSD patches from Lars
-#
-# Revision 1.6  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.5  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -57,7 +35,8 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
+
 """For manipulating the mixer.
 """
 

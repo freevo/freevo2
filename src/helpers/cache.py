@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # cache.py - delete old cache files and update the cache
 # -----------------------------------------------------------------------
@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.36  2004/06/06 08:31:37  dischi
 # fix crash
 #
@@ -22,42 +25,6 @@
 #
 # Revision 1.33  2004/05/02 11:46:13  dischi
 # make it possible to turn off image caching
-#
-# Revision 1.32  2004/04/18 08:14:31  dischi
-# fix crash for bad paths
-#
-# Revision 1.31  2004/03/22 11:04:51  dischi
-# improve caching
-#
-# Revision 1.30  2004/03/21 09:39:54  dischi
-# check for updated mmpython
-#
-# Revision 1.29  2004/03/13 22:36:16  dischi
-# do not remove num_ infos we already have
-#
-# Revision 1.28  2004/02/27 20:41:38  dischi
-# better rebuild
-#
-# Revision 1.27  2004/02/27 20:27:45  dischi
-# increase cache version
-#
-# Revision 1.26  2004/02/27 20:15:02  dischi
-# more unicode fixes
-#
-# Revision 1.25  2004/02/14 19:31:31  dischi
-# also cache playlist dir
-#
-# Revision 1.23  2004/02/12 12:22:03  dischi
-# update cache to new directory metainfo
-#
-# Revision 1.22  2004/02/09 20:14:40  dischi
-# add xmltv
-#
-# Revision 1.21  2004/02/08 17:41:55  dischi
-# add more caching:
-# o playlist metainfo
-# o directory metainfo (e.g. number of items)
-# cleanup
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -79,7 +46,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

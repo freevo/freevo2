@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # __init__.py - interface between mediamenu and image
 # -----------------------------------------------------------------------
@@ -9,47 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.19  2004/03/14 17:32:39  dischi
 # unicode fix
-#
-# Revision 1.18  2004/03/13 09:23:46  dischi
-# fix doc
-#
-# Revision 1.17  2004/01/18 16:51:48  dischi
-# (re)move unneeded variables
-#
-# Revision 1.16  2004/01/10 13:16:15  dischi
-# remove self.fxd_file, not needed anymore
-#
-# Revision 1.15  2004/01/06 19:31:18  dischi
-# add repeat support
-#
-# Revision 1.14  2004/01/03 17:40:27  dischi
-# remove update function
-#
-# Revision 1.13  2003/12/29 22:09:19  dischi
-# move to new Item attributes
-#
-# Revision 1.12  2003/12/13 18:18:02  dischi
-# allow slideshows with relative path, fix background music
-#
-# Revision 1.11  2003/12/13 14:46:58  outlyer
-# Fix the example XML
-#
-# Revision 1.10  2003/12/08 20:37:34  dischi
-# merged Playlist and RandomPlaylist into one class
-#
-# Revision 1.9  2003/12/08 15:58:50  mikeruelle
-# change cwd to get
-#
-# Revision 1.8  2003/12/07 19:09:24  dischi
-# add <slideshow> fxd support with background music
-#
-# Revision 1.7  2003/12/07 11:13:53  dischi
-# small bugfix
-#
-# Revision 1.6  2003/12/06 13:44:12  dischi
-# move more info to the Mimetype
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -71,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 

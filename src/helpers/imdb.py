@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # imdbp.py - IMDB helper script to generate fxd files
 # -----------------------------------------------------------------------
@@ -11,24 +11,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.6  2004/01/08 17:33:14  outlyer
 # Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
 # makes it import video/__init__...
 #
 # There is a reason for this to follow shortly :)
-#
-# Revision 1.5  2003/11/17 19:44:43  dischi
-# fix disc set support
-#
-# Revision 1.4  2003/09/26 11:28:34  dischi
-# small warning when executed outside freevo env
-#
-# Revision 1.3  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.2  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -50,7 +40,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import sys

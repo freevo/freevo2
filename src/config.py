@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # config.py - Handle the configuration file init. Also start logging.
 # -----------------------------------------------------------------------
@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2004/07/10 12:33:36  dischi
+# header cleanup
+#
 # Revision 1.109  2004/06/28 20:39:27  dischi
 # make sure HOME and USER are set
 #
@@ -55,7 +58,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import sys, os, time, re, string, pwd
 import setup_freevo

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # view_line_in.py - view the line in in VCR mode
 # -----------------------------------------------------------------------
@@ -9,9 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.1  2004/02/23 18:07:10  mikeruelle
 # add this as a plugin instead of the funky if in tvmenu.py
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -33,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 import plugin

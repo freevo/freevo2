@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # scheduled_recordings.py - A plugin to view your list of scheduled 
 #                           recordings.
@@ -10,29 +10,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.6  2004/03/13 20:13:02  rshortt
 # Fix return.
 #
 # Revision 1.5  2004/03/13 18:33:17  rshortt
 # Handle an empty list better (still needs improving).
-#
-# Revision 1.4  2004/03/13 17:31:01  rshortt
-# Fix the menu index.
-#
-# Revision 1.3  2004/03/13 17:12:49  rshortt
-# Refresh the list of scheduled recordings when we reload the menu.
-#
-# Revision 1.2  2004/02/23 08:22:10  gsbarbieri
-# i18n: help translators job.
-#
-# Revision 1.1  2004/02/23 03:48:14  rshortt
-# A plugin to view a list of scheduled recordings instead of hardcoding it
-# into tvmenu.py.  This uses ProgramItem and blurr2 will present an info area
-# with details of the program in question.
-#
-# plugin.activate('tv.scheduled_recordings')
-#
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -54,7 +39,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import os
 import config, plugin, menu, rc

@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # Button.py - a simple button class
 # -----------------------------------------------------------------------
@@ -9,34 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/07/10 12:33:38  dischi
+# header cleanup
+#
 # Revision 1.20  2004/02/24 18:56:09  dischi
 # add hfill to text_prop
-#
-# Revision 1.19  2004/02/21 19:37:01  dischi
-# only draw border when needed
-#
-# Revision 1.18  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
-#
-# Revision 1.17  2004/01/09 02:08:07  rshortt
-# GUI fixes from Matthieu Weber.
-#
-# Revision 1.16  2003/10/12 10:56:19  dischi
-# change debug to use _debug_ and set level to 2
-#
-# Revision 1.15  2003/09/13 10:32:55  dischi
-# fix a font problem and cleanup some unneeded stuff
-#
-# Revision 1.14  2003/09/06 13:59:19  gsbarbieri
-# Now buttons try to get height from font if no value was given as argument.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -58,7 +35,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 

@@ -1,4 +1,3 @@
-#if 0 /*
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # objectcache.py - A cache for objects identified by a string
@@ -10,6 +9,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/07/10 12:33:42  dischi
+# header cleanup
+#
 # Revision 1.8  2004/06/23 20:05:16  dischi
 # fix bad bug in the object cache, much faster again
 #
@@ -21,33 +23,6 @@
 #
 # Revision 1.5  2004/02/04 17:20:24  dischi
 # fix crash when object is None
-#
-# Revision 1.4  2004/01/30 20:40:28  dischi
-# make key an unicode object to prevent crash
-#
-# Revision 1.3  2004/01/19 20:24:51  dischi
-# remove unneeded try except blocks
-#
-# Revision 1.2  2003/12/07 16:04:50  dischi
-# speed up
-#
-# Revision 1.1  2003/11/29 11:27:41  dischi
-# move objectcache to util
-#
-# Revision 1.5  2003/09/14 20:09:36  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.4  2003/08/26 20:07:50  outlyer
-# Declare encoding, remove another warning.
-#
-# Revision 1.3  2003/08/22 19:22:50  dischi
-# small check to prevent crashes
-#
-# Revision 1.2  2003/04/24 19:55:51  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.1  2003/01/07 07:17:07  krister
-# Added Thomas Schüppels objectcache layer for the OSD objects.
 # 
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -69,7 +44,7 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
+
 
 import config
 

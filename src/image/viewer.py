@@ -1,4 +1,4 @@
-#if 0 /*
+# -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
 # viewer.py - Freevo image viewer
 # -----------------------------------------------------------------------
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.51  2004/07/10 12:33:39  dischi
+# header cleanup
+#
 # Revision 1.50  2004/06/03 18:23:31  dischi
 # put image viewer osd into config
 #
@@ -17,27 +20,6 @@
 #
 # Revision 1.48  2004/05/12 18:56:36  dischi
 # add keys to move inside a zoom image in image viewer
-#
-# Revision 1.47  2004/05/11 19:01:50  dischi
-# make sure we have a menu
-#
-# Revision 1.46  2004/05/09 10:00:37  dischi
-# update selected item in the menu when showing an image
-#
-# Revision 1.45  2004/05/07 17:46:53  dischi
-# Make it possible to choose the image viewer blend effect
-#
-# Revision 1.44  2004/05/02 09:21:16  dischi
-# no need to convert layer
-#
-# Revision 1.43  2004/04/25 11:23:58  dischi
-# Added support for animations. Most of the code is from Viggo Fredriksen
-#
-# Revision 1.42  2004/02/23 08:13:54  gsbarbieri
-# i18n: Help translators job.
-#
-# Revision 1.41  2004/01/24 18:57:14  dischi
-# rotation is now stored in mediainfo
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -59,7 +41,6 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # ----------------------------------------------------------------------- */
-#endif
 
 
 import signal
