@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/09/13 10:34:19  dischi
+# map EXIT to close the box
+#
 # Revision 1.19  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -176,6 +179,9 @@ class ConfirmBox(PopupBox):
             self.osd.update(self.get_rect())
             return
         
+        elif event == em.INPUT_EXIT:
+            self.destroy()
+
         elif event == em.INPUT_ENTER:
             if self.b0.selected:
                 if DEBUG: print 'HIT OK'
