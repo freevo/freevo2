@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/11/24 04:41:14  krister
+# Commented out a part that crashes the TV viewer plugin. Please fix!
+#
 # Revision 1.6  2003/11/23 21:19:57  rshortt
 # Bugfix - it returned to early if using an external tuner with the v4l
 # tuner as the input.
@@ -103,7 +106,8 @@ class FreevoChannels:
         #      more than once.  Also it might be better to move
         #      this init line into the recordserver since in the TV
         #      interface it will already be initialized in main.
-        plugin.init_special_plugin(config.plugin_external_tuner)
+        if 0: # XXX Crashes!
+            plugin.init_special_plugin(config.plugin_external_tuner)
 
 
     def getVideoGroup(self, chan):
