@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/12/18 18:19:27  outlyer
+# If we're using a playlist file, make sure the object has that attribute
+# so we can use fileops on it later.
+#
 # Revision 1.44  2003/12/18 17:07:52  outlyer
 # Two bugfixes for the previously broken playlist stuff:
 #
@@ -117,6 +121,7 @@ class Playlist(Item):
         
         if (isinstance(playlist, str) or isinstance(playlist, unicode)) and not name:
             self.name = util.getname(playlist)
+            self.filename = playlist            # Needed for fileops
             
         # variables only for Playlist
         self.current_item = None
