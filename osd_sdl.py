@@ -489,6 +489,7 @@ class OSD:
             if font.filename == filename and font.ptsize == ptsize:
                 return font.font
 
+        if DEBUG: print 'OSD: Loading font "%s"' % filename
         font = pygame.font.Font(filename, ptsize)
         f = Font()
         f.filename = filename
