@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/08 18:45:49  dischi
+# font shadow fixes
+#
 # Revision 1.29  2004/01/17 12:36:29  dischi
 # add shadow support for image listing
 #
@@ -811,9 +814,10 @@ class Font(XML_data):
         if self.shadow.visible:
             if color.has_key(self.shadow.color):
                 self.shadow.color = color[self.shadow.color]
+            if self.shadow.border:
                 self.h += (self.size / 10) * 2
             else:
-                self.h += self.shadow.y
+                self.h += abs(self.shadow.y)
         self.height = self.h
         
 
