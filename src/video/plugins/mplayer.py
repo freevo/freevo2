@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.72  2004/07/10 10:36:31  dischi
+# reset elapsed time on restart
+#
 # Revision 1.71  2004/07/08 19:29:43  dischi
 # make sure plugins are stopped
 #
@@ -226,9 +229,10 @@ class MPlayer:
         mode         = item.mode
         url          = item.url
 
-        self.item_info   = None
-        self.item_length = -1
-        
+        self.item_info    = None
+        self.item_length  = -1
+        self.item.elapsed = 0        
+
         if mode == 'file':
             url = item.url[6:]
             self.item_info = mmpython.parse(url)
