@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2003/12/09 20:40:13  dischi
+# fixed copy paste error
+#
 # Revision 1.47  2003/12/09 19:43:22  dischi
 # subtitle file and audio file support
 #
@@ -293,8 +296,8 @@ class MPlayer:
             util.mount(d)
             command += ['-sub', f]
 
-        if self.audio_file:
-            d, f = util.resolve_media_mountdir(self.audio_file)
+        if item.audio_file:
+            d, f = util.resolve_media_mountdir(item.audio_file)
             util.mount(d)
             command += ['-audiofile', f]
 
