@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/03 18:00:24  dischi
+# use mmpython to get the disc label
+#
 # Revision 1.9  2003/08/30 12:21:13  dischi
 # small changes for the changed xml_parser
 #
@@ -86,7 +89,7 @@ import util
 
 import config 
 from xml_parser import parseMovieFile
-
+from mmpython.disc.discinfo import cdrom_disc_id
 #Constants
 
 freevo_version = '1.3.2'
@@ -815,25 +818,7 @@ class FxdImdb:
         return a unique identifier for the disc"""
 
         if not os.path.exists(drive): return drive
-        
-        try:
-            img = open(drive)
-            img.seek(0x0000832d)
-            id = img.read(16)
-            img.seek(32808, 0)
-            label = img.read(32)
-            
-            LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
-            m = LABEL_REGEXP(label)
-        except IOError:
-            raise FxdImdb_IO_Error('No disc in drive %s' % drive)
-            
-            
-        if m:
-            label = m.group(1)
-        img.close()
-        
-        return id+label
+        return cdrom_disc_id(drive)
         
     def print_info(self):
         """return info part for FXD writing""" 
