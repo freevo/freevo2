@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/23 12:39:30  dischi
+# adjust to new display code
+#
 # Revision 1.7  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -57,25 +60,22 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     shut down when argshutdown is True, restarted when argrestart is true,
     else only Freevo will be stopped.
     """
-    import osd
     import plugin
     import rc
     import util.mediainfo
+    import gui
     
-    osd = osd.get_singleton()
-
     util.mediainfo.sync()
-    if not osd.active:
+    if not gui.displays.active():
         # this function is called from the signal handler, but
         # we are dead already.
         sys.exit(0)
 
-    osd.clearscreen(color=osd.COL_BLACK)
-    osd.drawstringframed(_('shutting down...'), 0, 0, osd.width, osd.height,
-                         osd.getfont(config.OSD_DEFAULT_FONTNAME,
-                                     config.OSD_DEFAULT_FONTSIZE),
-                         fgcolor=osd.COL_ORANGE, align_h='center', align_v='center')
-    osd.update()
+    gui.display.clear()
+    msg = gui.Text(_('shutting down...'), (0, 0), (gui.width, gui.height),
+                   gui.get_font('default'), align_h='center', align_v='center')
+    gui.display.add_child(msg)
+    gui.display.update()
     time.sleep(0.5)
 
     if argshutdown or argrestart:  
@@ -90,7 +90,7 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
 
         plugin.shutdown()
         rc.shutdown()
-        osd.shutdown()
+        gui.displays.shutdown()
 
         if argshutdown and not argrestart:
             os.system(config.SHUTDOWN_SYS_CMD)
@@ -111,9 +111,8 @@ def shutdown(menuw=None, argshutdown=None, argrestart=None, exit=False):
     # Shutdown all children still running
     rc.shutdown()
 
-    # SDL must be shutdown to restore video modes etc
-    osd.clearscreen(color=osd.COL_BLACK)
-    osd.shutdown()
+    # Shutdown the display
+    gui.displays.shutdown()
 
     if exit:
         # realy exit, we are called by the signal handler

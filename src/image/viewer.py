@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.62  2004/08/23 12:38:44  dischi
+# adjust to new display code
+#
 # Revision 1.61  2004/08/22 20:16:52  dischi
 # update to new mevas based gui code
 #
@@ -53,7 +56,6 @@ import util
 import rc
 import plugin
 import gui
-import gui.imagelib as imagelib
 
 from event import *
 from eventhandler import Application
@@ -119,31 +121,27 @@ class ImageViewer(Application):
         else:
             self.evt_context = 'image'
 
-        self.screen = gui.get_display()
-        swidth  = self.screen.width
-        sheight = self.screen.height
-
         filename      = item.filename
         self.fileitem = item
 
         self.show()
 
         if not self.last_image[0]:
-            self.screen.update()
+            gui.display.update()
 
         # only load new image when the image changed
         if self.filename == filename and self.zoom == zoom and \
            self.rotation == rotation and len(filename) > 0:
             # same image, only update the osd and the timer
             self.drawosd()
-            self.screen.update()
+            gui.display.update()
             return
         
         self.filename = filename
         self.rotation = rotation
             
         if filename and len(filename) > 0:
-            image = imagelib.load(filename, cache=self.bitmapcache)
+            image = gui.imagelib.load(filename, cache=self.bitmapcache)
         else:
             # Using Container-Image
             image = item.loadimage()
@@ -152,14 +150,12 @@ class ImageViewer(Application):
             # txt = gui.Text(_('Can\'t Open Image\n\'%s\'') % (filename),
             #                config.OSD_OVERSCAN_X + 20,
             #                config.OSD_OVERSCAN_Y + 20,
-            #                swidth - 2 * config.OSD_OVERSCAN_X - 40,
-            #                sheight - 2 * config.OSD_OVERSCAN_Y - 40,
+            #                gui.width - 2 * config.OSD_OVERSCAN_X - 40,
+            #                gui.height - 2 * config.OSD_OVERSCAN_Y - 40,
             #                self.osd.getfont(config.OSD_DEFAULT_FONTNAME,
             #                                 config.OSD_DEFAULT_FONTSIZE),
             #                fgcolor=self.osd.COL_ORANGE,
             #                align_h='center', align_v='center', mode='soft')
-            # gui.get_display.add('content', txt)
-            # gui.get_display.update()
             return
         
         width, height = image.width, image.height
@@ -197,24 +193,24 @@ class ImageViewer(Application):
 
             if self.rotation % 180:
                 # different calculations because image width is screen height
-                scale_x = float(swidth) / (height / 3)
-                scale_y = float(sheight) / (width / 3)
+                scale_x = float(gui.width) / (height / 3)
+                scale_y = float(gui.height) / (width / 3)
                 scale = min(scale_x, scale_y)
 
                 # read comment for the bbw and bbh calculations below
-                bbw = min(max((width / 3) * scale, sheight), width) / scale
-                bbh = min(max((height / 3) * scale, swidth), height) / scale
+                bbw = min(max((width / 3) * scale, gui.height), width) / scale
+                bbh = min(max((height / 3) * scale, gui.width), height) / scale
 
             else:
-                scale_x = float(swidth) / (width / 3)
-                scale_y = float(sheight) / (height / 3)
+                scale_x = float(gui.width) / (width / 3)
+                scale_y = float(gui.height) / (height / 3)
                 scale = min(scale_x, scale_y)
 
                 # the bb width is the width / 3 * scale, to avoid black bars left
                 # and right exapand it to the osd.width but not if this is more than the
                 # image width (same for height)
-                bbw = min(max((width / 3) * scale, swidth), width) / scale
-                bbh = min(max((height / 3) * scale, sheight), height) / scale
+                bbw = min(max((width / 3) * scale, gui.width), width) / scale
+                bbh = min(max((height / 3) * scale, gui.height), height) / scale
                 
 
             # calculate the beginning of the bounding box
@@ -232,8 +228,8 @@ class ImageViewer(Application):
         else:
             if self.rotation % 180:  
                 height, width = width, height
-            scale_x = float(swidth) / width
-            scale_y = float(sheight) / height
+            scale_x = float(gui.width) / width
+            scale_y = float(gui.height) / height
             scale   = min(scale_x, scale_y)
             new_w, new_h = int(scale*width), int(scale*height)
 
@@ -241,8 +237,8 @@ class ImageViewer(Application):
         # Now we have all necessary informations about zoom yes/no and
         # the kind of rotation
         
-        x = (swidth - new_w) / 2
-        y = (sheight - new_h) / 2
+        x = (gui.width - new_w) / 2
+        y = (gui.height - new_h) / 2
         
         last_image = self.last_image[1]
 
@@ -271,7 +267,7 @@ class ImageViewer(Application):
 
         image = image.copy()
         # get bounding box
-        if bbw and bbh and (bbw != swidth or bbh != sheight):
+        if bbw and bbh and (bbw != gui.width or bbh != gui.height):
             image.crop((bbx, bby), (bbw, bbh))
 
         # scale to fit
@@ -288,7 +284,7 @@ class ImageViewer(Application):
 
         if (last_image and self.last_image[0] != item and
             config.IMAGEVIEWER_BLEND_MODE != None):
-            self.screen.add_child(image)
+            gui.display.add_child(image)
 
             if 0:
                 import time
@@ -296,7 +292,7 @@ class ImageViewer(Application):
 
             frames = 20
             a = animation.Transition([self.last_image[1]], [image], frames,
-                                     (swidth, sheight))
+                                     (gui.width, gui.height))
             a.start()
             while a.running():
                 animation.render().update()
@@ -312,10 +308,10 @@ class ImageViewer(Application):
         else:
             if self.last_image[1]:
                 self.last_image[1].unparent()
-            self.screen.add_child(image)
+            gui.display.add_child(image)
         
         self.drawosd()
-        self.screen.update()
+        gui.display.update()
         
         # start timer
         if self.fileitem.duration:
@@ -346,7 +342,7 @@ class ImageViewer(Application):
         cache the next image (most likely we need this)
         """
         if fileitem.filename and len(fileitem.filename) > 0:
-            imagelib.load(fileitem.filename, cache=self.bitmapcache)
+            gui.imagelib.load(fileitem.filename, cache=self.bitmapcache)
         
 
     def signalhandler(self):
@@ -415,7 +411,7 @@ class ImageViewer(Application):
         if event == TOGGLE_OSD:
             self.osd_mode = (self.osd_mode + 1) % (len(config.IMAGEVIEWER_OSD) + 1)
             self.drawosd()
-            self.screen.update()
+            gui.display.update()
             return True
 
         # zoom to one third of the image
@@ -489,17 +485,17 @@ class ImageViewer(Application):
             
         self.osd_text = gui.Textbox(osdstring,
                                     (config.OSD_OVERSCAN_X + 10, config.OSD_OVERSCAN_Y + 10),
-                                    (self.screen.width - 2 * config.OSD_OVERSCAN_X - 20,
-                                     self.screen.height - 2 * config.OSD_OVERSCAN_Y - 20),
+                                    (gui.width - 2 * config.OSD_OVERSCAN_X - 20,
+                                     gui.height - 2 * config.OSD_OVERSCAN_Y - 20),
                                     gui.get_font('default'), 'left', 'bottom', mode='soft')
         self.osd_text.set_zindex(2)
-        self.screen.add_child(self.osd_text)
+        gui.display.add_child(self.osd_text)
 
         rect = self.osd_text.get_size()
 
         if rect[1] < 100:
             # text too small, set to a minimum position
-            self.osd_text.set_pos((self.osd_text.get_pos()[0], self.screen.height - \
+            self.osd_text.set_pos((self.osd_text.get_pos()[0], gui.height - \
                                    config.OSD_OVERSCAN_Y - 100))
             rect = rect[0], 100
             
@@ -514,8 +510,8 @@ class ImageViewer(Application):
 
         # build a new rectangle.
         pos  = (0, self.osd_text.get_pos()[1] - 10)
-        size = (self.screen.width, rect[1] + 20)
-        background = imagelib.load('background', (self.screen.width, self.screen.height))
+        size = (gui.width, rect[1] + 20)
+        background = gui.imagelib.load('background', (gui.width, gui.height))
         if background:
             background.crop(pos, size)
             self.osd_box = gui.Image(background, pos)
@@ -524,7 +520,7 @@ class ImageViewer(Application):
             self.osd_box = gui.Rectangle(pos, size, 0xaa000000)
 
         self.osd_box.set_zindex(1)
-        self.screen.add_child(self.osd_box)
+        gui.display.add_child(self.osd_box)
         
         # FIXME: better integration, just a performance test
         if newosd:
