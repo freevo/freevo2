@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/12/13 10:47:11  dischi
+# better stop for new ChildApp2 children
+#
 # Revision 1.45  2003/12/10 18:58:44  dischi
 # Added ChildApp2 which is a ChildApp including the code in ChildThread to
 # avoid threads when they are not needed to prevert crashes because of bad
@@ -16,7 +19,8 @@
 # ChildThread should be removed after that.
 #
 # Revision 1.44  2003/12/06 17:50:52  mikeruelle
-# a small change. gonna use childapp in command.py soon. allows me to change filenames to ones command.py looks for
+# a small change. gonna use childapp in command.py soon. allows me to change
+# filenames to ones command.py looks for
 #
 # Revision 1.43  2003/11/28 20:23:43  dischi
 # renamed more config variables
@@ -94,13 +98,18 @@ def shutdown():
     shutdown all running childapps
     """
     global __all_childapps__
+    global running_children
     global freevo_shutdown
     
     if not len(__all_childapps__):
         return
         
     print '%d child(s) still running, terminate them' % len(__all_childapps__)
+
     freevo_shutdown = True
+    while running_children:
+        print 'shutting down %s' % running_children[0].binary
+        running_children[0].stop()
     while __all_childapps__:
         print 'shutting down %s' % __all_childapps__[0].binary
         __all_childapps__[0].kill()
