@@ -154,20 +154,22 @@ class MenuWidget:
                             font=config.OSD_FONTNAME_ITEMS,
                             ptsize=fontsize)
             if menu.selected == choice:
-                self.osd.drawbox(x0 - 8, y0 - 3, 705, y0 + fontsize*1.4, width=3,
-                             color=self.osd.COL_ORANGE)
+                self.osd.drawbox(x0 - 8, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
+                             color=((160 << 24) | self.osd.COL_ORANGE))
             y0 += spacing
 
         # Draw the menu choices for the meta selection
         x0 = 40
         y0 = 505
         for item in self.nav_items:
+            fontsize = config.OSD_FONTSIZE_BTNS*ptscale
             self.osd.drawstring(item.name, x0, y0,
                             font=config.OSD_FONTNAME_BTNS,
-                            ptsize=config.OSD_FONTSIZE_BTNS)
+                            ptsize=fontsize)
             if menu.selected == item:
-                self.osd.drawbox(x0 - 4, y0 - 3, x0 + 150, y0 + 24, width=3,
-                             color=self.osd.COL_ORANGE)
+                self.osd.drawbox(x0 - 4, y0 - 3, x0 + 150, y0 + fontsize*1.5,
+                                 width=-1,
+                                 color=((160 << 24) | self.osd.COL_ORANGE))
             x0 += 190
 
         self.osd.update()

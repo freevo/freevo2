@@ -102,17 +102,21 @@ class OSD:
         args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';' + str(color)
         self._send('drawline;' + args1 + args2)
 
-        
-    def drawbox(self, x0, y0, x1, y1, width=None, color=None):
+
+    def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0):
         if width == None:
             width = 1
 
+        if fill:
+            width = -1   # This means that the box should be filled
+            
         if color == None:
             color = self.default_fg_color
             
         args1 = str(x0) + ';' + str(y0) + ';'
-        args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';' + str(color)
-        self._send('drawbox;' + args1 + args2)
+        args2 = str(x1) + ';' + str(y1) + ';' + str(width) + ';'
+        args3 = str(color)
+        self._send('drawbox;' + args1 + args2 + args3)
 
         
     def drawstring(self, string, x, y, fgcolor=None, bgcolor=None,

@@ -1,3 +1,8 @@
+/* main.c  -  OSD system main file
+ *
+ * $Id$
+ */
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -312,7 +317,7 @@ osd_drawbitmap (char *filename, uint16 x0, uint16 y0)
    
    for (y = 0; y < h; y++) {
       for (x = 0; x < w; x++) {
-         osd_setpixel (x0 + x, y0 + y, (*pBM++) & 0x00ffffff);
+         osd_setpixel (x0 + x, y0 + y, *pBM++);
       }
    }
 
@@ -414,13 +419,29 @@ void
 osd_drawbox (int x0, int y0, int x1, int y1, int width, uint32 color)
 {
 
-   x0 -= width - 1;
-   y0 -= width - 1;
-   
-   osd_drawline (x0, y0, x1, y0, width, color);
-   osd_drawline (x1, y0, x1, y1 + width - 1, width, color);
-   osd_drawline (x0, y0, x0, y1, width, color);
-   osd_drawline (x0, y1, x1, y1, width, color);
+   /* Is this a filled box? */
+   if (width == -1) {
+      /* Yes */
+      int row, col;
+
+
+      for (row = y0; row <= y1; row++) {
+         for (col = x0; col <= x1; col++) {
+            osd_setpixel (col, row, color);
+         }
+      }
+      
+   } else {
+
+      /* Outlined box with variable width lines */
+      x0 -= width - 1;
+      y0 -= width - 1;
+      
+      osd_drawline (x0, y0, x1, y0, width, color);
+      osd_drawline (x1, y0, x1, y1 + width - 1, width, color);
+      osd_drawline (x0, y0, x0, y1, width, color);
+      osd_drawline (x0, y1, x1, y1, width, color);
+   }
 
 }
 
