@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/05 02:55:55  rshortt
+# I have to back out the python 2.3 warning fix because it breaks RegionScroller.  I will have a closer look at why when I have a moment.
+#
 # Revision 1.16  2003/08/26 20:06:14  outlyer
 # Another Python warning down.
 #
@@ -234,8 +237,8 @@ class RegionScroller(Container):
     def set_surface(self, surface):
         self.region_surface = surface
 
-        (self.s_w, self.s_h) = self.region_surface_rect \
-                                         = self.region_surface.get_rect()[2:3]
+        (None, None, self.s_w, self.s_h) = self.region_surface_rect \
+                                         = self.region_surface.get_rect()
 
         self.v_x = 0
         self.v_y = 0
