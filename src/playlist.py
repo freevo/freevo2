@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2004/08/01 10:55:08  dischi
+# do not show the menu, it can do that itself
+#
 # Revision 1.73  2004/07/26 18:10:16  dischi
 # move global event handling to eventhandler.py
 #
@@ -465,8 +468,6 @@ class Playlist(Item):
             if self.background_playlist:
                 self.background_playlist.stop()
             self.current_item = None
-            if menuw:
-                menuw.show()
             return True
             
 
