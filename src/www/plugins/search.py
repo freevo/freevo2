@@ -119,13 +119,13 @@ class SearchResource(FreevoResource):
                 fv.tableCell(cell, 'class="'+status+'" colspan="1"')
     
                 if status == 'scheduled':
-                    cell = ('<a href="rec?chan=%s&start=%s&action=remove">'+
+                    cell = ('<a href="recordings?chan=%s&start=%s&action=remove">'+
                             _('Remove')+'</a>') % (p.channel.id, p.start)
                 elif status == 'recording':
-                    cell = ('<a href="rec?chan=%s&start=%s&action=add">'+
+                    cell = ('<a href="recordings?chan=%s&start=%s&action=add">'+
                            _('Record')+'</a>') % (p.channel.id, p.start)
                 else:
-                    cell = ('<a href="rec?chan=%s&start=%s&action=add">'+
+                    cell = ('<a href="recordings?chan=%s&start=%s&action=add">'+
                            _('Record')+'</a>') % (p.channel.id, p.start)
     
                 cell += \

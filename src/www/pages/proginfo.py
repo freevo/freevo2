@@ -84,7 +84,7 @@ class ProgInfoResource(FreevoResource):
               time.strftime(config.TV_TIMEFORMAT,
                             time.localtime( prog.stop ) ),
               int( ( prog.stop - prog.start ) / 60 ),
-              "function() { doc.location=\"rec?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
+              "function() { doc.location=\"recordings?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
               "function() { doc.location=\"edit_favorite?chan=%s&start=%s&action=add\"; }" % (chanid, starttime),
 
         )

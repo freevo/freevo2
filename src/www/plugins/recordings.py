@@ -157,7 +157,7 @@ class RecordResource(FreevoResource):
                 cell = _('no description available')
             fv.tableCell(cell, colspan)
 
-            cell = ('<a href="rec?chan=%s&amp;start=%s&amp;action=remove" '+\
+            cell = ('<a href="recordings?chan=%s&amp;start=%s&amp;action=remove" '+\
                     'title="Remove Scheduled Recording">'+_('Remove')+'</a>'+\
                     '|' + '<a href="search?find=%s&search_title=on" ' +\
                     'title="Search for other airings">' + _('Search') +
