@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/27 20:15:58  mikeruelle
+# make use of outicon
+#
 # Revision 1.7  2003/10/16 17:49:59  mikeruelle
 # put in a small i18n change
 #
@@ -328,7 +331,8 @@ class PluginInterface(plugin.MainMenuPlugin):
             item.icon = os.path.join(skin.settings.icon_dir, menu_items['commands'].icon)
         if menu_items.has_key('commands') and menu_items['commands'].image:
             item.image = menu_items['commands'].image
-
+        if menu_items.has_key('commands') and menu_items['commands'].outicon:
+            item.outicon = os.path.join(skin.settings.icon_dir, menu_items['commands'].outicon)
         item.parent = parent
         return [ item ]
 
