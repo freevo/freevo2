@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/08/29 23:41:32  outlyer
+# Revert the warning-fix that was a function-breaker
+#
 # Revision 1.26  2003/08/26 19:53:38  outlyer
 # Quiet another Python 2.4 warning
 #
@@ -103,7 +106,7 @@ if os.uname()[0] == 'FreeBSD':
     # FreeBSD ioctls - there is no CDROM.py...
     CDIOCEJECT = 0x20006318
     CDIOCCLOSE = 0x2000631c
-    CDIOREADTOCENTRYS = 0xc0086305L
+    CDIOREADTOCENTRYS = 0xc0086305
     CD_LBA_FORMAT = 1
     CD_MSF_FORMAT = 2
     CDS_NO_DISC = 1
