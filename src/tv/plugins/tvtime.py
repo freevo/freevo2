@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/11/08 13:23:56  dischi
+# use os.path.join for configcmd
+#
 # Revision 1.20  2003/10/22 17:21:28  mikeruelle
 # adding numeric channel changing and previous channel support
 #
@@ -200,8 +203,7 @@ class PluginInterface(plugin.Plugin):
 
     def writeTvtimeXML(self):
         tvtimexml = os.path.join(os.environ['HOME'], '.tvtime', 'tvtime.xml')
-	configcmd = os.path.dirname(config.TVTIME_CMD)
-        configcmd += "tvtime-configure"
+	configcmd = os.path.join(os.path.dirname(config.TVTIME_CMD), "tvtime-configure")
         cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
         s_norm = cf_norm.upper()
 	daoptions = ''
