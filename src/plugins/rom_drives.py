@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/09/19 22:12:59  dischi
+# kill some debug for level 1
+#
 # Revision 1.30  2003/09/19 16:04:37  outlyer
 # Ugly, ugly change to work around a crash.
 #
@@ -699,7 +702,7 @@ class Identify_Thread(threading.Thread):
                     self.last_media = media
                 rc.post_event(plugin.event('IDENTIFY_MEDIA'))
             else:
-                _debug_('MEDIA: Status=%s' % media.drive_status)
+                _debug_('MEDIA: Status=%s' % media.drive_status, 2)
         self.lock.release()
 
                 
