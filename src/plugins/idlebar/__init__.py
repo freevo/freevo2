@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/10/12 13:55:23  dischi
+# fix plugin position handling
+#
 # Revision 1.31  2004/10/07 14:02:48  dischi
 # fix redraw when one plugin changes the width
 #
@@ -152,13 +155,15 @@ class PluginInterface(plugin.DaemonPlugin):
         y2 = h
 
         for p in plugin.get('idlebar'):
-            if changed:
-                p.clear()
             width = p.draw(x2 - x1, y2 - y1)
             if width == p.NO_CHANGE:
                 if p.align == 'left':
+                    if changed:
+                        p.set_pos((x1, y1))
                     x1 = x1 + p.width
                 else:
+                    if changed:
+                        p.set_pos((x2 - width, y1))
                     x2 = x2 - p.width
                 continue
 
@@ -167,15 +172,13 @@ class PluginInterface(plugin.DaemonPlugin):
                 continue
 
             if p.align == 'left':
+                p.set_pos((x1, y1))
                 for o in p.objects:
-                    x, y = o.get_pos()
-                    o._idlebar_pos = x, y
-                    o.set_pos((x + x1, y + y1))
                     self.container.add_child(o)
                 x1 = x1 + width
             else:
+                p.set_pos((x2 - width, y1))
                 for o in p.objects:
-                    o.set_pos((o.get_pos()[0] + x2 - width, o.get_pos()[1] + y1))
                     self.container.add_child(o)
                 x2 = x2 - width
             p.width = width
@@ -289,13 +292,31 @@ class IdleBarPlugin(plugin.Plugin):
         self.objects   = []
         self.NO_CHANGE = -1
         self.align     = 'left'
-
-
+        self.__x       = 0
+        self.__y       = 0
+        self.width     = 0
+        
+        
     def draw(self, width, height):
         return self.NO_CHANGE
 
 
+
     def clear(self):
+        self.__x = 0
+        self.__y = 0
         for o in self.objects:
             o.unparent()
         self.objects = []
+
+
+    def set_pos(self, (x, y)):
+        """
+        move to x position
+        """
+        if x == self.__x and y == self.__y:
+            return
+        for o in self.objects:
+            o.move_relative(((x - self.__x), (y - self.__y)))
+        self.__x = x
+        self.__y = y
