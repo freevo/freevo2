@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/03/30 16:15:30  dischi
+# make it possible to define image filenames extra
+#
 # Revision 1.32  2003/03/27 20:10:08  dischi
 # fix missing font definition (default must be defined)
 #
@@ -274,7 +277,7 @@ class XML_mainmenuitem:
         self.icon  = attr_str(node, "icon",  self.icon)
         self.image = attr_str(node, "image", self.image)
 
-    def prepaire(self, search_dirs):
+    def prepaire(self, search_dirs, image_names):
         if self.image:
             self.image = search_file(self.image, search_dirs)
             
@@ -292,9 +295,9 @@ class XML_mainmenu:
                 item.parse(node, scale, c_dir)
                 self.items[item.label] = item                
 
-    def prepare(self, search_dirs):
+    def prepare(self, search_dirs, image_names):
         for i in self.items:
-            self.items[i].prepaire(search_dirs)
+            self.items[i].prepaire(search_dirs, image_names)
     
 # ======================================================================
 # ======================================================================
@@ -316,6 +319,7 @@ XML_types = {
     'align'    : ('str',  0),
     'valign'   : ('str',  0),
     'filename' : ('str', 0),
+    'image'    : ('str', 0),
     'name'     : ('font',  0),
     'visible'  : ('visible', 0)
 }
@@ -499,10 +503,10 @@ class XML_layout:
             if subnode.name == u'content':
                 self.content.parse(subnode, scale, current_dir)
 
-    def prepare(self, font, color, search_dirs):
+    def prepare(self, font, color, search_dirs, image_names):
         self.content.prepare(font, color)
         for b in self.background:
-            b.prepare(color, search_dirs)
+            b.prepare(color, search_dirs, image_names)
             
     def __cmp__(self, other):
         return not (self.background == other.background and self.content == other.content)
@@ -572,15 +576,22 @@ class XML_image(XML_data):
     an image
     """
     def __init__(self):
-        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'filename', 'label'))
+        XML_data.__init__(self, ('x', 'y', 'width', 'height', 'image', 'filename', 'label'))
 
-    def prepare(self, color, search_dirs):
+    def prepare(self, color, search_dirs, image_names):
         """
         try to guess the image localtion
         """
+        if self.image:
+            try:
+                self.filename = image_names[self.image]
+            except KeyError:
+                print 'can\'t find image definition %s' % self.image
+                pass
+
         if self.filename:
             self.filename = search_file(self.filename, search_dirs)
-    
+
 
 
 class XML_rectangle(XML_data):
@@ -591,7 +602,7 @@ class XML_rectangle(XML_data):
         XML_data.__init__(self, ('x', 'y', 'width', 'height', 'color',
                                  'bgcolor', 'size', 'radius' ))
 
-    def prepare(self, color, search_dirs=None):
+    def prepare(self, color, search_dirs=None, image_names=None):
         if color.has_key(self.color):
             self.color = color[seld.color]
         if color.has_key(self.bgcolor):
@@ -615,7 +626,7 @@ class XML_font(XML_data):
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
 
-    def prepare(self, color, search_dirs=None):
+    def prepare(self, color, search_dirs=None, image_names=None):
         if color.has_key(self.color):
             self.color = color[self.color]
         self.h = osd.stringsize('Ajg', self.name, self.size)[1]
@@ -688,6 +699,7 @@ class XMLSkin:
         self._layout = {}
         self._font = {}
         self._color = {}
+        self._images = {}
         self._menuset = {}
         self._menu = {}
         self._popup = ''
@@ -747,7 +759,12 @@ class XMLSkin:
                     value = attr_col(node, 'value', '')
                     self._color[label] = value
                         
-
+            if node.name == u'image':
+                label = attr_str(node, 'label', '')
+                if label:
+                    value = attr_col(node, 'filename', '')
+                    self._images[label] = value
+                        
             if node.name == u'iconset':
                 self.icon_dir = attr_str(node, 'dir', self.icon_dir)
 
@@ -804,6 +821,7 @@ class XMLSkin:
                             self._layout = {}
                             self._font = {}
                             self._color = {}
+                            self._images = {}
                             self._menuset = {}
                             self._menu = {}
                             self._popup = ''
@@ -830,7 +848,7 @@ class XMLSkin:
                 font[f].prepare(self._color)
                 
             for l in layout:
-                layout[l].prepare(font, self._color, search_dirs)
+                layout[l].prepare(font, self._color, search_dirs, self._images)
             for menu in self.menu:
                 self.menu[menu].prepare(self._menuset, layout)
 
@@ -839,19 +857,20 @@ class XMLSkin:
                     for i in range(2):
                         if s[i] and hasattr(s[i], 'listing'):
                             for image in s[i].listing.images:
-                                s[i].listing.images[image].prepare(None, search_dirs)
+                                s[i].listing.images[image].prepare(None, search_dirs,
+                                                                   self._images)
                         
                 
             self.player.prepare(layout)
             self.tv.prepare(layout)
             # prepare listing area images
             for image in self.tv.listing.images:
-                self.tv.listing.images[image].prepare(None, search_dirs)
+                self.tv.listing.images[image].prepare(None, search_dirs, self._images)
 
             self.popup = layout[self._popup]
 
             self.mainmenu = copy.deepcopy(self._mainmenu)
-            self.mainmenu.prepare(search_dirs)
+            self.mainmenu.prepare(search_dirs, self._images)
             return 1
 
         except:
