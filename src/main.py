@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.143  2004/09/02 00:12:46  rshortt
+# Only import pygame is config.OSD_DISPLAY is 'SDL'.
+#
 # Revision 1.142  2004/08/24 19:23:36  dischi
 # more theme updates and design cleanups
 #
@@ -112,11 +115,13 @@ try:
     
     # now load other modules to check if all requirements are installed
     import Image
-    import pygame
     import twisted
     import Numeric
     
     import config
+
+    if config.OSD_DISPLAY == 'SDL':
+        import pygame
 
     if not config.CONF.lsdvd:
         print
