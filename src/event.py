@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/06/02 22:56:19  rshortt
+# Need a pageup/pagedown for input events.
+#
 # Revision 1.7  2003/06/01 18:32:08  rshortt
 # INPUT_EXIT was the same as INPUT_ENTER
 #
@@ -277,6 +280,8 @@ INPUT_EVENTS = {
     '8'         : INPUT_8,
     '9'         : INPUT_9,
     '0'         : INPUT_0,
+    'CH+'       : MENU_PAGEUP,
+    'CH-'       : MENU_PAGEDOWN,
     }
 
 TV_EVENTS = {
