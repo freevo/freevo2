@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/03/28 02:46:00  krister
+# Fixed a typo
+#
 # Revision 1.39  2004/03/27 17:44:39  krister
 # Fixed divide by zero bug.
 #
@@ -576,7 +579,7 @@ class CacheStatus:
         self.callback()
         
     def callback(self):
-        if self_num_changes != 0:
+        if self_num.changes != 0:
             progress = '%3d%%' % (self.pos * 100 / self.num_changes)
         else:
             progress = '??%%'
