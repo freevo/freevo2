@@ -9,57 +9,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/07/09 19:12:57  dischi
+# A plugin can now inherit from more than one basic plugin type. Basic
+# types are the types known to this file: MainMenuPlugin, ItemPlugin and
+# DaemonPlugin. This doesn't work for special plugins like IdleBarPlugins
+#
+# Second a plugin can be activated during runtime (e.g. by another plugin).
+# It's not possible to remove a plugin during runtime, this only works on
+# startup.
+#
 # Revision 1.21  2003/05/30 00:53:19  rshortt
 # Various event bugfixes.
-#
-# Revision 1.20  2003/05/29 21:06:48  rshortt
-# Add a shutdown function to the module which will call possible shutdown methods on daemon plugins.
-#
-# Revision 1.19  2003/05/27 17:53:33  dischi
-# Added new event handler module
-#
-# Revision 1.18  2003/04/27 17:59:07  dischi
-# better plugin poll() handling
-#
-# Revision 1.17  2003/04/24 19:55:53  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.16  2003/04/24 11:46:30  dischi
-# fixed 'to many open files' bug
-#
-# Revision 1.15  2003/04/23 10:41:05  dischi
-# fixed item plugin list
-#
-# Revision 1.14  2003/04/22 19:33:35  dischi
-# o Added TV has plugin name
-# o support for remove by name
-#
-# Revision 1.12  2003/04/21 18:19:54  dischi
-# make it possible that whole directories can be a plugin
-#
-# Revision 1.11  2003/04/21 13:28:54  dischi
-# Make it possible to inherit a plugin from Plugin(). This plugin will only
-# be loaded, nothing else!
-#
-# Revision 1.10  2003/04/21 13:00:06  dischi
-# mainmenu plugins can also have global eventhandlers
-#
-# Revision 1.9  2003/04/20 20:58:49  dischi
-# scan for plugins and print them
-#
-# Revision 1.8  2003/04/20 11:44:45  dischi
-# add item plugins
-#
-# Revision 1.7  2003/04/20 10:54:04  dischi
-# add getbyname and add some more load paths
-#
-# Revision 1.4  2003/04/18 10:22:07  dischi
-# You can now remove plugins from the list and plugins know the list
-# they belong to (can be overwritten). level and args are optional.
-#
-# Revision 1.3  2003/04/17 21:21:57  dischi
-# Moved the idle bar to plugins and changed the plugin interface
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -113,7 +73,7 @@ class MainMenuPlugin(Plugin):
     """
     def __init__(self):
         Plugin.__init__(self)
-        self._type = 'mainmenu'
+
 
     def items(self, parent):
         """
@@ -128,7 +88,7 @@ class ItemPlugin(Plugin):
     """
     def __init__(self):
         Plugin.__init__(self)
-        self._type = 'item'
+
 
     def actions(self, item):
         """
@@ -156,7 +116,6 @@ class DaemonPlugin(Plugin):
     """
     def __init__(self):
         Plugin.__init__(self)
-        self._type   = 'daemon'
         self.poll_counter   = 0         # poll counter, don't change this
         self.poll_interval  = 1         # poll every x*0.1 seconds
         self.poll_menu_only = TRUE      # poll only when menu is active
@@ -182,138 +141,65 @@ def activate(name, type=None, level=0, args=None):
     """
     activate a plugin
     """
-    global plugin_number
-    global all_plugins
-    global initialized
+    global __plugin_number__
+    global __all_plugins__
+    global __initialized__
 
-    if initialized:
-        return 0
-    
-    plugin_number += 1
-    all_plugins.append((name, type, level, args, plugin_number))
-    return plugin_number
+    __plugin_number__ += 1
+
+    if __initialized__:
+        __load_plugin__(name, type, level, args, __plugin_number__)
+        __sort_plugins__()
+    else:
+        __all_plugins__.append((name, type, level, args, __plugin_number__))
+    return __plugin_number__
 
 
 def remove(id):
     """
-    remove a plugin from the list
+    remove a plugin from the list. This can only be done in local_config.py
+    and not while Freevo is running
     """
-    global all_plugins
-    global initialized
+    global __all_plugins__
+    global __initialized__
 
-    if initialized:
+    if __initialized__:
         return
 
     # remove by plugin id
     if isinstance(id, int):
-        for p in all_plugins:
+        for p in __all_plugins__:
             if p[4] == id:
-                all_plugins.remove(p)
+                __all_plugins__.remove(p)
                 return
 
     # remove by name
     r = [] 
-    for p in all_plugins:
+    for p in __all_plugins__:
         if p[0] == id:
             r.append(p)
 
     for p in r:
-        all_plugins.remove(p)
+        __all_plugins__.remove(p)
 
-    
+
+
     
 def init():
     """
     load and init all the plugins
     """
-    global ptl
-    global all_plugins
-    global initialized
-    global named_plugins
+    global __all_plugins__
+    global __initialized__
     
-    initialized = TRUE
+    __initialized__ = TRUE
 
-    for name, type, level, args, number in all_plugins:
-        module = name[:name.rfind('.')]
+    for name, type, level, args, number in __all_plugins__:
+        __load_plugin__(name, type, level, args, number)
 
-        # locate the plugin
-        if os.path.isfile('src/plugins/%s.py' % module):
-            module  = 'plugins.%s' % module
-            object  = 'plugins.%s' % name
-            special = None
-        elif os.path.isfile('src/plugins/%s.py' % name):
-            module  = 'plugins.%s' % name
-            object  = 'plugins.%s.PluginInterface' % name
-            special = None
-        elif os.path.isfile('src/%s/plugins/%s.py' % (module, name[name.rfind('.')+1:])):
-            special = module
-            module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
-            object  = '%s.PluginInterface' % module
-        elif os.path.isdir('src/%s' % name):
-            module  = name
-            object  = '%s.PluginInterface' % module
-            special = None
-        else:
-            module  = name
-            object  = '%s.PluginInterface' % module
-            special = None
-
-        try:
-            exec('import %s' % module)
-            if args:
-                p = eval('%s%s' % (object, str(args)))
-            else:
-                p = eval('%s()' % object)
-
-            p._number = number
-
-            # set the correct type
-            if type:
-                p._type  = type
-            elif special:
-                p._type  = '%s_%s' % (p._type, special)
-            if level:
-                p._level = level
-
-            if p._type:
-                if not ptl.has_key(p._type):
-                    ptl[p._type] = []
-                type = ptl[p._type].append(p)
-
-            if p.plugin_name:
-                named_plugins[p.plugin_name] = p
-                
-                
-        except:
-            print 'failed to load plugin %s' % name
-            traceback.print_exc()
-
-    # sort the daemon plugins in different lists based on the
-    # callbacks they have
-    if ptl.has_key('daemon'):
-        for type in ('poll', 'draw', 'eventhandler', 'shutdown' ):
-            ptl['daemon_%s' % type] = []
-            for p in ptl['daemon']:
-                if hasattr(p, type):
-                    ptl['daemon_%s' % type].append(p)
-
-    for mtype in ( '', '_video', '_audio', '_image', '_games' ):
-        # add mainmenu plugins to 'daemon_eventhandler' if they have one
-        if ptl.has_key('mainmenu%s' % mtype):
-            for p in ptl['mainmenu%s' % mtype]:
-                if hasattr(p, 'eventhandler'):
-                    ptl['daemon_eventhandler'].append(p)
-
-        # add 'item' to all types of items
-        if ptl.has_key('item') and mtype:
-            if not ptl.has_key('item%s' % mtype):
-                ptl['item%s' % mtype] = []
-            for p in ptl['item']:
-                ptl['item%s' % mtype].append(p)
-
-        # sort plugins in extra function (exec doesn't like to be
-        # in the same function is 'lambda' 
-        sort_plugins()
+    # sort plugins in extra function (exec doesn't like to be
+    # in the same function is 'lambda' 
+    __sort_plugins__()
 
 
 def shutdown(plugin_name=None):
@@ -330,21 +216,21 @@ def get(type):
     """
     get the plugin list 'type'
     """
-    global ptl
+    global __plugin_type_list__
 
-    if not ptl.has_key(type):
-        ptl[type] = []
+    if not __plugin_type_list__.has_key(type):
+        __plugin_type_list__[type] = []
 
-    return ptl[type]
+    return __plugin_type_list__[type]
 
 
 def getbyname(name):
     """
     get a plugin by it's name
     """
-    global named_plugins
-    if named_plugins.has_key(name):
-        return named_plugins[name]
+    global __named_plugins__
+    if __named_plugins__.has_key(name):
+        return __named_plugins__[name]
     return None
 
 
@@ -352,8 +238,8 @@ def register(plugin, name):
     """
     register an object as a named plugin
     """
-    global named_plugins
-    named_plugins[name] = plugin
+    global __named_plugins__
+    __named_plugins__[name] = plugin
 
     
 def event(name):
@@ -381,21 +267,112 @@ def isevent(event):
 # internal stuff
 #
 
-initialized   = FALSE
-all_plugins   = []
-plugin_number = 0
+__initialized__        = FALSE
+__all_plugins__        = []
+__plugin_number__      = 0
+__plugin_type_list__   = {}
+__named_plugins__      = {}
 
-ptl           = {}
-named_plugins = {}
+
+def __add_to_ptl__(type, object):
+    """
+    small helper function to add a plugin to the PluginTypeList
+    """
+    global __plugin_type_list__
+    if not __plugin_type_list__.has_key(type):
+        __plugin_type_list__[type] = []
+    __plugin_type_list__[type].append(object)
+    
 
 
-def sort_plugins():
+def __load_plugin__(name, type, level, args, number):
+    """
+    load the plugin and add it to the lists
+    """
+    global __plugin_type_list__
+    global __named_plugins__
+
+    module = name[:name.rfind('.')]
+
+    # locate the plugin
+    if os.path.isfile('src/plugins/%s.py' % module):
+        module  = 'plugins.%s' % module
+        object  = 'plugins.%s' % name
+        special = None
+    elif os.path.isfile('src/plugins/%s.py' % name):
+        module  = 'plugins.%s' % name
+        object  = 'plugins.%s.PluginInterface' % name
+        special = None
+    elif os.path.isfile('src/%s/plugins/%s.py' % (module, name[name.rfind('.')+1:])):
+        special = module
+        module  = '%s.plugins.%s' % (module, name[name.rfind('.')+1:])
+        object  = '%s.PluginInterface' % module
+    elif os.path.isdir('src/%s' % name):
+        module  = name
+        object  = '%s.PluginInterface' % module
+        special = None
+    else:
+        module  = name
+        object  = '%s.PluginInterface' % module
+        special = None
+
+    try:
+        exec('import %s' % module)
+        if args:
+            p = eval('%s%s' % (object, str(args)))
+        else:
+            p = eval('%s()' % object)
+
+        p._number = number
+
+        if type:
+            special = type
+
+        if special:
+            special = '_%s' % special
+        else:
+            special = ''
+
+        # special plugin type (e.g. idlebar)
+        if p._type:
+            __add_to_ptl__(p._type, p)
+
+        else: 
+            if isinstance(p, DaemonPlugin):
+                __add_to_ptl__('daemon', p)
+                for type in ('poll', 'draw', 'eventhandler', 'shutdown' ):
+                    if hasattr(p, type):
+                        __add_to_ptl__('daemon_%s' % type, p)
+
+            if isinstance(p, MainMenuPlugin):
+                __add_to_ptl__('mainmenu%s' % special, p)
+                if hasattr(p, 'eventhandler'):
+                    __add_to_ptl__('daemon_eventhandler', p)
+
+            if isinstance(p, ItemPlugin):
+                __add_to_ptl__('item%s' % special, p)
+                if not special:
+                    for mtype in ( '_video', '_audio', '_image', '_games' ):
+                        __add_to_ptl__('item%s' % mtype, p)
+
+        if p.plugin_name:
+            __named_plugins__[p.plugin_name] = p
+
+
+    except:
+        print 'failed to load plugin %s' % name
+        traceback.print_exc()
+
+
+def __sort_plugins__():
     """
     sort all plugin lists based on the level
     """
-    global ptl
-    for key in ptl:
-        ptl[key].sort(lambda l, o: cmp(l._level, o._level))
+    global __plugin_type_list__
+    for key in __plugin_type_list__:
+        __plugin_type_list__[key].sort(lambda l, o: cmp(l._level, o._level))
+
+
 
 
 #
