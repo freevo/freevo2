@@ -22,6 +22,7 @@ import util
 # XML support
 import movie_xml
 
+DEBUG = 0
 
 
 if os.path.isdir('/var/log/freevo'):
@@ -82,7 +83,11 @@ class Logger:
 
 #
 # Redirect stdout and stderr to stdout and /tmp/freevo.log
-# 
+#
+
+if DEBUG:
+    print 'In config.py. sys.argv[] = %s' % sys.argv
+    
 sys.stdout = Logger(sys.argv[0] + ':stdin')
 sys.stderr = Logger(sys.argv[0] + ':stderr')
 

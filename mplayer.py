@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2002/08/11 19:25:20  krister
+# Added more debug output.
+#
 # Revision 1.24  2002/08/08 03:15:57  krister
 # Tidied up some code.
 #
@@ -102,7 +105,7 @@ import rc         # The RemoteControl class.
 import audioinfo  # This just for ID3 functions and stuff.
 import skin       # Cause audio handling needs skin functions.
 
-DEBUG = 1
+DEBUG = 0
 TRUE  = 1
 FALSE = 0
 
@@ -145,6 +148,9 @@ class MPlayer:
                          
     def play(self, mode, filename, playlist, repeat=0, mplayer_options=""):
 
+        if DEBUG:
+            print 'MPlayer.play(): mode=%s, filename=%s' % (mode, filename)
+            
         self.mode   = mode   # setting global var to mode.
         self.repeat = repeat # Repeat playlist setting
 
@@ -243,6 +249,9 @@ class MPlayer:
             
         self.mplayer_options = mplayer_options
 
+        if DEBUG:
+            print 'MPlayer.play(): Starting thread, cmd=%s' % command
+            
         self.thread.mode    = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
@@ -436,6 +445,9 @@ class MPlayer_Thread(threading.Thread):
                 
             elif self.mode == 'play':
 
+                if DEBUG:
+                    print 'MPlayer_Thread.run(): Started, cmd=%s' % self.command
+                    
                 self.app = MPlayerApp(self.command)
                 
                 while self.mode == 'play' and self.app.isAlive():
@@ -516,3 +528,10 @@ def mplayerKey(rcCommand):
     key = mplayerKeys.get(rcCommand, '')
 
     return key
+
+
+# Test code
+if __name__ == '__main__':
+    player = get_singleton()
+
+    player.play('audio', sys.argv[1], None)

@@ -14,7 +14,7 @@ import string, popen2, fcntl, select, struct
 import threading
 import signal
 
-DEBUG = 1
+DEBUG = 0
 
 class ChildApp:
 
@@ -30,7 +30,11 @@ class ChildApp:
         
         self.t2 = Read_Thread('stderr', self.errfile, self.stderr_cb)
         self.t2.start()
-        
+
+        if DEBUG:
+            time.sleep(0.5)
+            print 'ChildApp.__init__(), pid=%s, app=%s, poll=%s' % (self.child.pid, app, self.child.poll())
+            
 
     # Write a string to the app. 
     def write(self, str):
@@ -151,8 +155,9 @@ if __name__ == '__main__':
     #cmd = '/usr/local/bin/DIVX4rec -F 300000 -norm NTSC -input Television -m -r '
     #cmd += '22050 -w 320 -h 240 -ab 80 -vg 300 -vb 800 -H 50 -o tst3.avi'
     #cmd = './matrox_g400/v4l1_to_mga ntsc television us-cable 2'
-    cmd = '/usr/local/bin/mplayer -nolirc -nobps -idx -framedrop -cache 512 -vo mga -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0 /movies_local/recorded/0_rec_2002-04-22_210228.avi'
-
+    #cmd = '/usr/local/bin/mplayer -vo null -ao oss:/dev/dsp0 testfiles/Music/ThomasRusiak-Hiphopper.mp3'
+    cmd = '/usr/bin/nice -0 mplayer -vo xv -ao oss:/dev/dsp -nobps -framedrop -nolirc -screenw 768 -screenh 576 -fs -demuxer 17 "/hdc/krister_mp3/mp3/(216)_sweet_-_ballroom_blitz-idm.mp3"'
+    
     Test_Thread(cmd).start()
 
     while 1:
