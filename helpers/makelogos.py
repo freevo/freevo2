@@ -9,6 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/05/26 18:44:26  outlyer
+# Makelogos was supposed to import the xmltv parser directly, but since
+# it is "inside" the 'tv' module, it was importing a whole bunch of other
+# stuff from the __init__ of the tv module.
+#
+# The small changes force makelogos to directly import xmltv and thus not
+# require a graphical output, which isn't used anyway.
+#
 # Revision 1.1  2002/12/08 18:38:27  krister
 # Updated for new src dir layout. Moved to ./helpers.
 #
@@ -41,8 +49,10 @@ import urllib2
 import cStringIO
 import Image
 
-sys.path.append('./src')
-from tv import xmltv
+sys.path.append('./src/tv')
+sys.path.append('./src/')
+#from tv import xmltv
+import xmltv
 import config
 
 # Check if the logos directory exists, if not, make it before
