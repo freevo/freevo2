@@ -42,4 +42,5 @@ class IdleTool:
             self.drawclock()
             self.drawmail()
             osd.update()
+            self.idlecount = -1
         self.idlecount = self.idlecount + 1
