@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.7  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -55,21 +58,9 @@ import os
 class PluginInterface(plugin.MainMenuPlugin):
 
     def items(self, parent):
-        import skin
         import tvmenu
-
-        skin = skin.get_singleton()
-        menu_items = skin.settings.mainmenu.items
-
-        icon = ""
-        outicon = ""
-        if menu_items['tv'].icon:
-            icon = os.path.join(skin.settings.icon_dir, menu_items['tv'].icon)
-        if menu_items['tv'].outicon:
-            outicon = os.path.join(skin.settings.icon_dir, menu_items['tv'].outicon)
-        return ( menu.MenuItem(menu_items['tv'].name, icon=icon,
-                               action=tvmenu.TVMenu().main_menu, type='main',
-                               image=menu_items['tv'].image, parent=parent, outicon=outicon), )
+        return [ menu.MenuItem('', action=tvmenu.TVMenu().main_menu,
+                               type='main', parent=parent, skin_type='tv') ]
 
 
 

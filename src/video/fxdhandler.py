@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.2  2003/11/25 19:00:52  dischi
 # make fxd item parser _much_ simpler
 #
@@ -224,12 +227,3 @@ def parse_disc_set(fxd, node):
             item.files_options.append(opt)
     item.xml_file = fxd_file
     fxd.getattr(None, 'items', []).append(item)
-
-
-
-
-
-# register the callbacks
-import fxditem
-fxditem.register(['video'], 'movie', parse_movie)
-fxditem.register(['video'], 'disc-set', parse_disc_set)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.11  2003/11/28 19:26:36  dischi
 # renamed some config variables
 #
@@ -51,74 +54,91 @@
 
 import config
 import util
+import plugin
 
 from audioitem import AudioItem
+from audiodiskitem import AudioDiskItem
 
 
-def cwd(parent, files):
+class PluginInterface(plugin.MimetypePlugin):
     """
-    return a list of items based on the files
+    Plugin to handle all kinds of audio items
     """
-    items = []
+    def __init__(self):
+        plugin.MimetypePlugin.__init__(self)
+        self.display_type = [ 'audio' ]
 
-    for file in util.find_matches(files, config.AUDIO_SUFFIX):
-        a = AudioItem(file, parent)
-        if a.valid:
-            items.append(a)
-            files.remove(file)
+        # register the callbacks
+        plugin.register_callback('fxditem', ['audio'], 'audio', self.fxdhandler)
 
-    return items
+        # activate the mediamenu for audio
+        plugin.activate('mediamenu', level=plugin.is_active('audio')[2], args='audio')
+        
 
-
-
-def update(parent, new_files, del_files, new_items, del_items, current_items):
-    """
-    update a directory. Add items to del_items if they had to be removed based on
-    del_files or add them to new_items based on new_files
-    """
-    for item in current_items:
-        for file in util.find_matches(del_files, config.AUDIO_SUFFIX):
-            if item.type == 'audio' and item.filename == file:
-                del_items += [ item ]
-                del_files.remove(file)
-
-    new_items += cwd(parent, new_files)
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return config.AUDIO_SUFFIX
 
 
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        items = []
+
+        for file in util.find_matches(files, config.AUDIO_SUFFIX):
+            a = AudioItem(file, parent)
+            if a.valid:
+                items.append(a)
+                files.remove(file)
+
+        return items
 
 
-def audio_handler(fxd, node):
-    """
-    parse audio specific stuff from fxd files
+    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
+        """
+        update a directory. Add items to del_items if they had to be removed based on
+        del_files or add them to new_items based on new_files
+        """
+        for item in current_items:
+            for file in util.find_matches(del_files, config.AUDIO_SUFFIX):
+                if item.type == 'audio' and item.filename == file:
+                    del_items += [ item ]
+                    del_files.remove(file)
 
-    <?xml version="1.0" ?>
-    <freevo>
-      <audio title="Smoothjazz">
-        <cover-img>foo.jpg</cover-img>
-        <mplayer_options></mplayer_options>
-        <url>http://64.236.34.141:80/stream/1005</url>
-    
-        <info>
-          <genre>JAZZ</genre>
-          <description>A nice description</description>
-        </info>
-    
-      </audio>
-    </freevo>
-    """
-    a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
-    a.name     = fxd.getattr(node, 'title', a.name)
-    a.xml_file = fxd.getattr(None, 'filename', '')
-    a.image    = fxd.childcontent(node, 'cover-img')
-    if a.image:
-        a.image = vfs.join(vfs.dirname(a.xml_file), a.image)
-
-    a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
-    a.url = fxd.childcontent(node, 'url')
-    fxd.parse_info(fxd.get_children(node, 'info', 1), a)
-    fxd.getattr(None, 'items', []).append(a)
+        new_items += cwd(parent, new_files)
 
 
-# register the audio fxd parser as parser to build items
-import fxditem
-fxditem.register(['audio'], 'audio', audio_handler)
+
+    def fxdhandler(self, fxd, node):
+        """
+        parse audio specific stuff from fxd files
+
+        <?xml version="1.0" ?>
+        <freevo>
+            <audio title="Smoothjazz">
+                <cover-img>foo.jpg</cover-img>
+                <mplayer_options></mplayer_options>
+                <url>http://64.236.34.141:80/stream/1005</url>
+
+                <info>
+                    <genre>JAZZ</genre>
+                    <description>A nice description</description>
+                </info>
+
+            </audio>
+        </freevo>
+        """
+        a = AudioItem('', fxd.getattr(None, 'parent', None), scan=False)
+        a.name     = fxd.getattr(node, 'title', a.name)
+        a.xml_file = fxd.getattr(None, 'filename', '')
+        a.image    = fxd.childcontent(node, 'cover-img')
+        if a.image:
+            a.image = vfs.join(vfs.dirname(a.xml_file), a.image)
+
+        a.mplayer_options = fxd.childcontent(node, 'mplayer_options')
+        a.url = fxd.childcontent(node, 'url')
+        fxd.parse_info(fxd.get_children(node, 'info', 1), a)
+        fxd.getattr(None, 'items', []).append(a)

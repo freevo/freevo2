@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.44  2003/11/28 20:08:57  dischi
 # renamed some config variables
 #
@@ -26,74 +29,6 @@
 #
 # Revision 1.39  2003/11/09 13:05:04  dischi
 # support for disc images without fxd file
-#
-# Revision 1.38  2003/11/08 12:57:54  dischi
-# also set speed for audio discs
-#
-# Revision 1.37  2003/10/18 17:57:22  dischi
-# remove debug
-#
-# Revision 1.36  2003/10/04 18:37:29  dischi
-# i18n changes and True/False usage
-#
-# Revision 1.35  2003/09/25 09:48:42  dischi
-# handling if CDROM.py is missing
-#
-# Revision 1.34  2003/09/23 13:45:20  outlyer
-# Making more informational text quiet by default.
-#
-# Revision 1.33  2003/09/21 13:32:10  dischi
-# fix smart disc naming
-#
-# Revision 1.32  2003/09/20 15:08:26  dischi
-# some adjustments to the missing testfiles
-#
-# Revision 1.31  2003/09/19 22:12:59  dischi
-# kill some debug for level 1
-#
-# Revision 1.30  2003/09/19 16:04:37  outlyer
-# Ugly, ugly change to work around a crash.
-#
-# Revision 1.29  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.28  2003/09/13 10:08:22  dischi
-# i18n support
-#
-# Revision 1.27  2003/08/29 23:41:32  outlyer
-# Revert the warning-fix that was a function-breaker
-#
-# Revision 1.26  2003/08/26 19:53:38  outlyer
-# Quiet another Python 2.4 warning
-#
-# Revision 1.25  2003/08/25 12:08:20  outlyer
-# Additional compatibility patches for FreeBSD from Lars Eggert
-#
-# Revision 1.24  2003/08/24 05:20:15  gsbarbieri
-# Empty cdroms type is now 'empty_cdrom' instead of None
-#
-# Revision 1.23  2003/08/23 19:57:41  dischi
-# fix audiocd type setting
-#
-# Revision 1.22  2003/08/23 18:35:40  dischi
-# use new set_xml_file function in DirItem
-#
-# Revision 1.21  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
-# Revision 1.20  2003/08/23 12:10:00  dischi
-# move to CDROM.py stuff and remove external eject
-#
-# Revision 1.19  2003/08/21 20:54:44  gsbarbieri
-#    *ROM media just shows up when needed, ie: audiocd is not displayed in
-# video main menu.
-#    * ROM media is able to use variants, subtitles and more.
-#    * When media is not present, ask for it and wait until media is
-# identified. A better solution is to force identify media and BLOCK until
-# it's done.
-#
-# Revision 1.18  2003/08/20 21:51:34  outlyer
-# Use Python 'touch' rather than system call
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -124,6 +59,11 @@ import threading
 import thread
 import string
 import copy
+import traceback
+import mmpython
+from struct import *
+import array
+
 try:
     from CDROM import *
 except ImportError:
@@ -145,34 +85,25 @@ except ImportError:
         CDS_NO_DISC = 1
         CDS_DISC_OK = 4
         
-import traceback
 
 import config
 import util
 import rc
-import event as em
 import plugin
-
 import video
 
-from audio.audiodiskitem import AudioDiskItem
-from video.videoitem import VideoItem
-from item import Item
-
-import mmpython
-
-
+from event import *
 from directory import DirItem
+from gui import PopupBox
+from item import Item
+from audio import AudioDiskItem
+from video import VideoItem
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
-from struct import *
-import array
 
 # Identify_Thread
 im_thread = None
-
-from gui.PopupBox import PopupBox
 
 
 def init():
@@ -230,7 +161,7 @@ class autostart(plugin.DaemonPlugin):
             return True
 
         # Handle the EJECT key for the main menu
-        elif event == em.EJECT and len(menuw.menustack) == 1:
+        elif event == EJECT and len(menuw.menustack) == 1:
 
             # Are there any drives defined?
             if config.REMOVABLE_MEDIA:
@@ -296,7 +227,7 @@ class rom_items(plugin.MainMenuPlugin):
         """
         handle EJECT for the rom drives
         """
-        if event == em.EJECT and item.media and menuw and \
+        if event == EJECT and item.media and menuw and \
            menuw.menustack[1] == menuw.menustack[-1]:
             item.media.move_tray(dir='toggle')
             return True

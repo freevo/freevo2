@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.3  2003/11/26 18:30:49  dischi
 # <container> support
 #
@@ -66,118 +69,116 @@ import traceback
 import config
 import util
 import item
+import plugin
 
 
-_callbacks_ = []
-
-
-def register(types, tag, handler):
+class Mimetype(plugin.MimetypePlugin):
     """
-    register handler classes for types to the list of callbacks
+    class to handle fxd files in directories
     """
-    global _callbacks_
-    _callbacks_.append((types, tag, handler))
+    def __init__(self):
+        plugin.MimetypePlugin.__init__(self)
 
 
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        if not hasattr(parent, 'display_type'):
+            # don't know what to do here
+            return []
 
-def getitems(parent, fxd_files, duplicate_check=[], display_type=None):
-    """
-    return a list of items that belong to a fxd files
-    """
-    if not display_type:
-        display_type = parent.display_type
-        if display_type == 'tv':
-            display_type = 'video'
+        # get the list of fxd files
+        fxd_files = util.find_matches(files, ['fxd'])
+        for d in copy.copy(files):
+            if vfs.isdir(d) and vfs.isfile(vfs.join(d, vfs.basename(d) + '.fxd')):
+                fxd_files.append(vfs.join(d, vfs.basename(d) + '.fxd'))
+                files.remove(d)
 
-    items = []
-    for fxd_file in fxd_files:
-        try:
-            # create a basic fxd parser
-            parser = util.fxdparser.FXD(fxd_file)
-
-            # create items attr for return values
-            parser.setattr(None, 'items', [])
-            parser.setattr(None, 'parent', parent)
-            parser.setattr(None, 'filename', fxd_file)
-            parser.setattr(None, 'duplicate_check', duplicate_check)
-            parser.setattr(None, 'display_type', display_type)
-
-            for types, tag, handler in _callbacks_:
-                if not display_type or not types or display_type in types:
-                    parser.set_handler(tag, handler)
-
-            # start the parsing
-            parser.parse()
-
-            # return the items
-            items += parser.getattr(None, 'items')
-        
-        except:
-            print "fxd file %s corrupt" % fxd_file
-            traceback.print_exc()
-    return items
-
-
-
-def cwd(parent, files):
-    """
-    return a list of items based on the files
-    """
-    if not hasattr(parent, 'display_type'):
-        # don't know what to do here
-        return
-
-    # get the list of fxd files
-    fxd_files = util.find_matches(files, ['fxd'])
-    for d in copy.copy(files):
-        if vfs.isdir(d) and vfs.isfile(vfs.join(d, vfs.basename(d) + '.fxd')):
-            fxd_files.append(vfs.join(d, vfs.basename(d) + '.fxd'))
-            files.remove(d)
-
-    # removed covered files from the list
-    for f in fxd_files:
-        if f in files:
-            files.remove(f)
-
-    # return items
-    return getitems(parent, fxd_files, files)
-
-
-
-def update(parent, new_files, del_files, new_items, del_items, current_items):
-    """
-    update a directory. Add items to del_items if they had to be removed based on
-    del_files or add them to new_items based on new_files
-    """
-    if parent.type != 'dir':
-        # don't know what to do here
-        return
-
-    # a fxd files may be removed, 'free' covered files
-    for fxd_file in util.find_matches(del_files, ['fxd']):
-        for i in current_items:
-            if i.xml_file == fxd_file and hasattr(i, '_fxd_covered_'):
-                for covered in i._fxd_covered_:
-                    if not covered in del_files:
-                        new_files.append(covered)
-                del_items.append(i)
-                del_files.remove(fxd_file)
-
-
-    # a new fxd file may cover items
-    fxd_files = util.find_matches(new_files, ['fxd'])
-    if fxd_files:
+        # removed covered files from the list
         for f in fxd_files:
-            new_files.remove(f)
-        copy_all = copy.copy(parent.all_files)
-        new_items += getitems(parent, fxd_files, copy_all)
-        for f in parent.all_files:
-            if not f in copy_all:
-                # covered by fxd now
-                if not f in new_files:
-                    del_files.append(f)
-                else:
-                    new_files.remove(f)
+            if f in files:
+                files.remove(f)
+
+        # return items
+        return self.parse(parent, fxd_files, files)
+
+
+
+    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
+        """
+        update a directory. Add items to del_items if they had to be removed based on
+        del_files or add them to new_items based on new_files
+        """
+        if parent.type != 'dir':
+            # don't know what to do here
+            return
+
+        # a fxd files may be removed, 'free' covered files
+        for fxd_file in util.find_matches(del_files, ['fxd']):
+            for i in current_items:
+                if i.xml_file == fxd_file and hasattr(i, '_fxd_covered_'):
+                    for covered in i._fxd_covered_:
+                        if not covered in del_files:
+                            new_files.append(covered)
+                    del_items.append(i)
+                    del_files.remove(fxd_file)
+
+
+        # a new fxd file may cover items
+        fxd_files = util.find_matches(new_files, ['fxd'])
+        if fxd_files:
+            for f in fxd_files:
+                new_files.remove(f)
+            copy_all = copy.copy(parent.all_files)
+            new_items += self.parse(parent, fxd_files, copy_all)
+            for f in parent.all_files:
+                if not f in copy_all:
+                    # covered by fxd now
+                    if not f in new_files:
+                        del_files.append(f)
+                    else:
+                        new_files.remove(f)
+
+
+    def parse(self, parent, fxd_files, duplicate_check=[], display_type=None):
+        """
+        return a list of items that belong to a fxd files
+        """
+        if not display_type:
+            display_type = parent.display_type
+            if display_type == 'tv':
+                display_type = 'video'
+
+        callbacks = plugin.get_callbacks('fxditem')
+        items = []
+        for fxd_file in fxd_files:
+            try:
+                # create a basic fxd parser
+                parser = util.fxdparser.FXD(fxd_file)
+
+                # create items attr for return values
+                parser.setattr(None, 'items', [])
+                parser.setattr(None, 'parent', parent)
+                parser.setattr(None, 'filename', fxd_file)
+                parser.setattr(None, 'duplicate_check', duplicate_check)
+                parser.setattr(None, 'display_type', display_type)
+
+                for types, tag, handler in callbacks:
+                    if not display_type or not types or display_type in types:
+                        parser.set_handler(tag, handler)
+
+                # start the parsing
+                parser.parse()
+
+                # return the items
+                items += parser.getattr(None, 'items')
+
+            except:
+                print "fxd file %s corrupt" % fxd_file
+                traceback.print_exc()
+        return items
+
 
 
 # -------------------------------------------------------------------------------------
@@ -204,8 +205,10 @@ class Container(item.Item):
         fxd.setattr(None, 'parent', self)
         fxd.setattr(None, 'items', self.items)
 
+        callbacks = plugin.get_callbacks('fxditem')
+
         for child in node.children:
-            for types, tag, handler in _callbacks_:
+            for types, tag, handler in callbacks:
                 if (not display_type or not types or display_type in types) and \
                        child.name == tag:
                     handler(fxd, child)
@@ -252,4 +255,8 @@ def container_callback(fxd, node):
         fxd.getattr(None, 'items', []).append(c)
     
 
-register(None, 'container', container_callback)
+
+# -------------------------------------------------------------------------------------
+
+plugin.register_callback('fxditem', None, 'container', container_callback)
+mimetype = Mimetype()

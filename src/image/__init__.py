@@ -9,14 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.4  2003/11/28 19:26:37  dischi
 # renamed some config variables
-#
-# Revision 1.3  2003/04/24 19:56:32  dischi
-# comment cleanup for 1.3.2-pre4
-#
-# Revision 1.2  2003/04/21 18:17:47  dischi
-# Moved the code from interface.py for video/audio/image/games to __init__.py
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -42,31 +39,49 @@
 
 import config
 import util
+import plugin
 
 from imageitem import ImageItem
 
-
-def cwd(parent, files):
+class PluginInterface(plugin.MimetypePlugin):
     """
-    return a list of items based on the files
+    Plugin to handle all kinds of audio items
     """
-    items = []
-    for file in util.find_matches(files, config.IMAGE_SUFFIX):
-        items += [ ImageItem(file, parent) ]
-        files.remove(file)
-    return items
+    def __init__(self):
+        plugin.MimetypePlugin.__init__(self)
+        self.display_type = [ 'image' ]
+
+        # activate the mediamenu for image
+        plugin.activate('mediamenu', level=plugin.is_active('image')[2], args='image')
+        
+
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return config.IMAGE_SUFFIX
 
 
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        items = []
+        for file in util.find_matches(files, config.IMAGE_SUFFIX):
+            items += [ ImageItem(file, parent) ]
+            files.remove(file)
+        return items
 
-def update(parent, new_files, del_files, new_items, del_items, current_items):
-    """
-    update a directory. Add items to del_items if they had to be removed based on
-    del_files or add them to new_items based on new_files
-    """
-    for item in current_items:
-        for file in util.find_matches(del_files, config.IMAGE_SUFFIX):
-            if item.type == 'image' and item.filename == file:
-                del_items += [ item ]
-                del_files.remove(file)
 
-    new_items += cwd(parent, new_files)
+    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
+        """
+        update a directory. Add items to del_items if they had to be removed based on
+        del_files or add them to new_items based on new_files
+        """
+        for item in current_items:
+            for file in util.find_matches(del_files, config.IMAGE_SUFFIX):
+                if item.type == 'image' and item.filename == file:
+                    del_items += [ item ]
+                    del_files.remove(file)
+
+        new_items += cwd(parent, new_files)

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.16  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -59,11 +62,9 @@ import re
 
 import config
 import util
+import plugin
 
 from videoitem import VideoItem
-
-# load the fxd part of video
-import fxdhandler
 
 # variables for the hashing function
 fxd_database         = {}
@@ -71,45 +72,73 @@ discset_informations = {}
 tv_show_informations = {}
 
 
-def cwd(parent, files):
+class PluginInterface(plugin.MimetypePlugin):
     """
-    return a list of items based on the files
+    Plugin to handle all kinds of video items
     """
-    items = []
+    def __init__(self):
+        plugin.MimetypePlugin.__init__(self)
+        self.display_type = [ 'video' ]
+        if config.AUDIO_SHOW_VIDEOFILES:
+            self.display_type = [ 'video', 'audio' ]
 
-    for file in util.find_matches(files, config.VIDEO_SUFFIX):
-        x = VideoItem(file, parent)
-        if parent.media:
-            file_id = parent.media.id + file[len(os.path.join(parent.media.mountdir,"")):]
-            try:
-                x.mplayer_options = discset_informations[file_id]
-            except KeyError:
-                pass
-        items += [ x ]
-        files.remove(file)
+        # load the fxd part of video
+        import fxdhandler
 
-    return items
+        plugin.register_callback('fxditem', ['video'], 'movie', fxdhandler.parse_movie)
+        plugin.register_callback('fxditem', ['video'], 'disc-set', fxdhandler.parse_disc_set)
+
+        # activate the mediamenu for video
+        plugin.activate('mediamenu', level=plugin.is_active('video')[2], args='video')
+        
+
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return config.VIDEO_SUFFIX
+
+
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        items = []
+
+        for file in util.find_matches(files, config.VIDEO_SUFFIX):
+            x = VideoItem(file, parent)
+            if parent.media:
+                file_id = parent.media.id + \
+                          file[len(os.path.join(parent.media.mountdir,"")):]
+                try:
+                    x.mplayer_options = discset_informations[file_id]
+                except KeyError:
+                    pass
+            items += [ x ]
+            files.remove(file)
+
+        return items
 
 
 
-def update(parent, new_files, del_files, new_items, del_items, current_items):
-    """
-    update a directory. Add items to del_items if they had to be removed based on
-    del_files or add them to new_items based on new_files
-    """
-    for item in current_items:
+    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
+        """
+        update a directory. Add items to del_items if they had to be removed based on
+        del_files or add them to new_items based on new_files
+        """
+        for item in current_items:
 
-        # remove 'normal' files
-        for file in util.find_matches(del_files, config.VIDEO_SUFFIX):
-            if item.type == 'video' and item.filename == file and not \
-               item in del_items:
-                del_items += [ item ]
-                del_files.remove(file)
+            # remove 'normal' files
+            for file in util.find_matches(del_files, config.VIDEO_SUFFIX):
+                if item.type == 'video' and item.filename == file and not \
+                   item in del_items:
+                    del_items += [ item ]
+                    del_files.remove(file)
 
-    # add new 'normal' files
-    for file in util.find_matches(new_files, config.VIDEO_SUFFIX):
-        new_items += [ VideoItem(file, parent) ]
-        new_files.remove(file)
+        # add new 'normal' files
+        for file in util.find_matches(new_files, config.VIDEO_SUFFIX):
+            new_items += [ VideoItem(file, parent) ]
+            new_files.remove(file)
 
 
 
@@ -153,7 +182,7 @@ def hash_fxd_movie_database():
         for subdir in ('disc', 'disc-set'):
             files += util.recursefolders(vfs.join(config.OVERLAY_DIR, subdir), 1, '*.fxd', 1)
 
-    for info in fxditem.getitems(None, files, display_type='video'):
+    for info in fxditem.mimetype.parse(None, files, display_type='video'):
         for i in info.rom_id:
             fxd_database['id'][i] = info
         for l in info.rom_label:
@@ -163,7 +192,7 @@ def hash_fxd_movie_database():
 
     if config.VIDEO_SHOW_DATA_DIR:
         files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
-        for info in fxditem.getitems(None, files, display_type='video'):
+        for info in fxditem.mimetype.parse(None, files, display_type='video'):
             k = vfs.splitext(vfs.basename(info.xml_file))[0]
             tv_show_informations[k] = (info.image, info.info, info.mplayer_options,
                                        info.xml_file)

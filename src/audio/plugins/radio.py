@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.4  2003/10/21 21:17:41  gsbarbieri
 # Some more i18n improvements.
 #
@@ -57,21 +60,24 @@
 import os, popen2, fcntl, select, time
 
 #freevo modules
-import config, menu, rc, plugin, skin, util
+import config, menu, rc, plugin, util
 from audio.player import PlayerGUI
 from item import Item
 
 
-# This is the class that actually runs the commands. Eventually
-# hope to add actions for different ways of running commands
-# and for displaying stdout and stderr of last command run.
 class RadioItem(Item):
+    """
+    This is the class that actually runs the commands. Eventually
+    hope to add actions for different ways of running commands
+    and for displaying stdout and stderr of last command run.
+    """
     def actions(self):
         """
         return a list of actions for this item
         """
         items = [ ( self.play , _( 'Listen to Radio Station' ) ) ]
         return items
+
 
     def play(self, arg=None, menuw=None):
         print self.station+" "+str(self.station_index)+" "+self.name
@@ -96,16 +102,23 @@ class RadioItem(Item):
         self.player.stop()
 
 
-# this is the item for the main menu and creates the list
-# of commands in a submenu.
+
 class RadioMainMenuItem(Item):
+    """
+    this is the item for the main menu and creates the list
+    of commands in a submenu.
+    """
+    def __init__(self, parent):
+        Item.__init__(self, parent, skin_type='radio')
+        self.name = _( 'Radio' )
+
 
     def actions(self):
         """
         return a list of actions for this item
         """
-        items = [ ( self.create_stations_menu , 'stations' ) ]
-        return items
+        return [ ( self.create_stations_menu , 'stations' ) ]
+
  
     def create_stations_menu(self, arg=None, menuw=None):
         station_items = []
@@ -120,13 +133,15 @@ class RadioMainMenuItem(Item):
             radio_item.elapsed = 0
             station_items += [ radio_item ]
         if (len(station_items) == 0):
-            station_items += [menu.MenuItem( _( 'No Radio Stations found' ), menwu.goto_prev_page, 0)]
+            station_items += [menu.MenuItem( _( 'No Radio Stations found' ),
+                                             menwu.goto_prev_page, 0)]
         station_menu = menu.Menu( _( 'Radio Stations' ), station_items)
         rc.app(None)
         menuw.pushmenu(station_menu)
         menuw.refresh()
 
-# our plugin wrapper, just creates the main menu item and adds it.
+
+
 class PluginInterface(plugin.MainMenuPlugin):
     """
     This plugin uses the command line program radio to tune a
@@ -148,17 +163,6 @@ class PluginInterface(plugin.MainMenuPlugin):
 
     """
     def items(self, parent):
-        menu_items = skin.get_singleton().settings.mainmenu.items
-
-        item = RadioMainMenuItem()
-        item.name = _( 'Radio' )
-        if menu_items.has_key('radio') and menu_items['radio'].icon:
-            item.icon = os.path.join(skin.get_singleton().settings.icon_dir,
-                                     menu_items['radio'].icon)
-        if menu_items.has_key('radio') and menu_items['radio'].image:
-            item.image = menu_items['radio'].image
-
-        item.parent = parent
-        return [ item ]
+        return [ RadioMainMenuItem(parent) ]
 
 

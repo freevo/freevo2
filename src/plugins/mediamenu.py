@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.25  2003/11/28 19:26:37  dischi
 # renamed some config variables
 #
@@ -53,50 +56,33 @@ import traceback
 import copy
 
 import config
-import menu as menu_module
+import menu
 import rc
-import event as em
-
-from item import Item
 import directory
-import fxditem
 
 import plugin
 import plugins.rom_drives
 
-#
-# Plugin interface to integrate the MediaMenu into Freevo
-#
+from event import *
+from item import Item
+
+
 class PluginInterface(plugin.MainMenuPlugin):
     """
-    Plugin to integrate a meniamenu (video/audio/image/games) into
-    the Freevo main menu
+    Plugin to integrate a mediamenu (video/audio/image/games) into
+    the Freevo main menu. This plugin is auto-loaded when you activate
+    the 'video', 'audio', 'image' or 'games' plugin.
     """
     def __init__(self, type=None, force_text_view=FALSE):
         plugin.MainMenuPlugin.__init__(self)
         self.type = type
-        if type and not type in directory.possible_display_types:
-            directory.possible_display_types.append(type)
         self.force_text_view = force_text_view or config.SKIN_MEDIAMENU_FORCE_TEXTVIEW
-        
+
+
     def items(self, parent):
-        import skin
-
-        skin = skin.get_singleton()
-        menu_items = skin.settings.mainmenu.items
-
-        icon = ""
-        outicon = ""
-        if menu_items[self.type].icon:
-            icon = os.path.join(skin.settings.icon_dir, menu_items[self.type].icon)
-        if menu_items[self.type].outicon:
-            outicon = os.path.join(skin.settings.icon_dir, menu_items[self.type].outicon)
-            
-        return ( menu_module.MenuItem(menu_items[self.type].name, icon=icon,
-                                      action=MediaMenu().main_menu,
-                                      arg=(self.type,self.force_text_view), type='main',
-                                      image=menu_items[self.type].image, parent=parent,
-                                      outicon=outicon), )
+        return [ menu.MenuItem('', action=MediaMenu().main_menu,
+                               arg=(self.type,self.force_text_view), type='main',
+                               parent=parent, skin_type = self.type) ]
 
 
 
@@ -177,8 +163,11 @@ class MediaMenu(Item):
         for d in dirs:
             try:
                 if isinstance(d, str):
-                    # it has to be an fxd file
-                    self.normal_items += fxditem.cwd(self, [ d ])
+                    # normal file
+                    for p in plugin.getbyname(plugin.MIMETYPE, True):
+                        if not p.display_type or not self.display_type or \
+                               self.display_type in p.display_type:
+                            self.normal_items += p.get(self, [ d ])
                 else:
                     (t, dir) = d[:2]
                     if len(d) > 2:
@@ -193,10 +182,10 @@ class MediaMenu(Item):
                 traceback.print_exc()
 
 
-        item_menu = menu_module.Menu(_('%s Main Menu') % title,
-                                     self.main_menu_generate(),
-                                     item_types = self.display_type, umount_all=1,
-                                     reload_func = self.reload)
+        item_menu = menu.Menu(_('%s Main Menu') % title,
+                              self.main_menu_generate(),
+                              item_types = self.display_type, umount_all=1,
+                              reload_func = self.reload)
         item_menu.skin_force_text_view = force_text_view
         self.menuw = menuw
         menuw.pushmenu(item_menu)
@@ -244,7 +233,7 @@ class MediaMenu(Item):
                 menuw.refresh()
             return True
 
-        if event in (em.PLAY_END, em.USER_END, em.STOP) and event.context != 'menu':
+        if event in (PLAY_END, USER_END, STOP) and event.context != 'menu':
             menuw.show()
             return True
 

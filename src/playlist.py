@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/11/30 14:41:10  dischi
+# use new Mimetype plugin interface
+#
 # Revision 1.35  2003/11/28 20:08:56  dischi
 # renamed some config variables
 #
@@ -17,7 +20,6 @@
 #
 # Revision 1.33  2003/11/21 11:43:58  dischi
 # send event if there is not next playlist event
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -45,21 +47,16 @@ import random
 import os
 import re
 import copy
+
+import config
 import menu
 import util
-import config
-from event import *
 import rc
+import plugin
 
+from event import *
 from item import Item
 
-import video
-import audio
-import image
-
-from audio import AudioItem
-from video import VideoItem
-from image import ImageItem
 
 class Playlist(Item):
     def read_m3u(self, plsname):
@@ -84,11 +81,10 @@ class Playlist(Item):
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
             if os.path.exists(os.path.join(curdir,line)):
-                # skip files that don't exist
-                if util.match_suffix(line, config.AUDIO_SUFFIX):
-                    self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-                elif util.match_suffix(line, config.VIDEO_SUFFIX):
-                    self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
+                for p in plugin.getbyname(plugin.MIMETYPE, True):
+                    for i in p.get(self, [os.path.join(curdir, line)]):
+                        self.playlist.append(i)
+                        break
             
 
     def read_pls(self, plsname):
@@ -118,10 +114,10 @@ class Playlist(Item):
         for line in playlist_lines:
             if line.endswith('\r\n'):
                 line = line.replace('\\', '/') # Fix MSDOS slashes
-            if util.match_suffix(line, config.AUDIO_SUFFIX):
-                self.playlist += [ AudioItem(os.path.join(curdir, line), self) ]
-            elif util.match_suffix(line, config.VIDEO_SUFFIX):
-                self.playlist += [ VideoItem(os.path.join(curdir, line), self) ]
+            for p in plugin.getbyname(plugin.MIMETYPE, True):
+                for i in p.get(self, [os.path.join(curdir, line)]):
+                    self.playlist.append(i)
+                    break
             
 
 
@@ -167,9 +163,13 @@ class Playlist(Item):
                 if ss_delay == []:
                     ss_delay += [5]
 
-                self.playlist += [ ImageItem(os.path.join(curdir, ss_name[0]), self,
-                                             ss_caption[0], int(ss_delay[0])) ]
-
+                for p in plugin.getbyname(plugin.MIMETYPE, True):
+                    for i in p.get(self, [os.path.join(curdir, ss_name[0])]):
+                        if i.type == 'image':
+                            i.name     = ss_caption[0]
+                            i.duration = int(ss_delay[0])
+                            self.playlist.append(i)
+                            break
 
 
     def __init__(self, file, parent):
@@ -361,12 +361,15 @@ class RandomPlaylist(Playlist):
         else:
             element = self.unplayed[0]
         self.unplayed.remove(element)
+
         if not callable(element):
             # try to get the item for this file
             files = [ element, ]
             play_items = []
-            for t in ( 'video', 'audio', 'image' ):
-                play_items += eval(t + '.cwd(self, files)')
+
+            for p in plugin.getbyname(plugin.MIMETYPE, True):
+                for i in p.get(self, files):
+                    play_items.append(i)
 
             if not play_items:
                 print 'FIXME: this should never happen'
@@ -433,3 +436,50 @@ class RandomPlaylist(Playlist):
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
     
+
+
+class Mimetype(plugin.MimetypePlugin):
+    """
+    Plugin class for playlist items
+    """
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return config.PLAYLIST_SUFFIX + config.IMAGE_SSHOW_SUFFIX
+
+    
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        items = []
+
+        for filename in util.find_matches(files, self.suffix()):
+            items.append(Playlist(filename, parent))
+            files.remove(filename)
+
+        return items
+
+
+    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
+        """
+        update a directory. Add items to del_items if they had to be removed based on
+        del_files or add them to new_items based on new_files
+        """
+        for item in current_items:
+            # remove 'normal' files
+            for file in util.find_matches(del_files, self.suffix()):
+                if item.type == 'playlist' and item.filename == file and not \
+                   item in del_items:
+                    del_items += [ item ]
+                    del_files.remove(file)
+
+        # add new 'normal' files
+        for file in util.find_matches(new_files, self.suffix()):
+            new_items.append(Playlist(file, parent))
+            new_files.remove(file)
+
+
+# load the MimetypePlugin
+mimetype = Mimetype()
