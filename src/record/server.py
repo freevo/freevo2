@@ -325,12 +325,19 @@ class RecordServer(RPCServer):
             # add by dbid
             dbid, priority, info = \
                   self.parse_parameter(val, ( int, int, dict ))
-            channel, name, subtitle, descr, episode, \
-                     start, stop = pyepg.guide.get_programs_by_id(dbid)[1:8]
-            if subtitle and not info.has_key('subtitle'):
-                info['subtitle'] = subtitle
-            if descr and not info.has_key('description'):
-                info['description'] = descr
+            prog = pyepg.guide.get_program_by_id(dbid)
+            if not prog:
+                return RPCError('Unknown id')
+            channel = prog.channel.id
+            name = prog.name
+            start = prog.start
+            stop = prog.stop
+            if prog.subtitle and not info.has_key('subtitle'):
+                info['subtitle'] = prog.subtitle
+            if prog.episode and not info.has_key('episode'):
+                info['episode'] = prog.episode
+            if prog.description and not info.has_key('description'):
+                info['description'] = prog.description
         else:
             name, channel, priority, start, stop, info = \
                   self.parse_parameter(val, ( unicode, unicode, int, int, int,

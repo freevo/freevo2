@@ -81,7 +81,7 @@ class TVGuide(MenuApplication):
         self.channel  = pyepg.channels[0]
 
         # current program is the current running
-        self.selected = ProgramItem(self.channel.get(self.current_time))
+        self.selected = ProgramItem(self.channel[self.current_time])
 
         return True
     
@@ -110,33 +110,27 @@ class TVGuide(MenuApplication):
             
         if event == MENU_UP:
             self.channel = pyepg.guide.get_channel(-1, self.channel)
-            self.selected = ProgramItem(self.channel.get(self.current_time))
+            self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True
 
         if event == MENU_DOWN:
             self.channel = pyepg.guide.get_channel(1, self.channel)
-            self.selected = ProgramItem(self.channel.get(self.current_time))
+            self.selected = ProgramItem(self.channel[self.current_time])
             self.refresh()
             return True
 
         if event == MENU_LEFT:
-            epg_prog = self.channel.get_relative(-1, self.selected.program)
+            epg_prog = self.channel[self.selected.program.start - 1]
             self.selected = ProgramItem(epg_prog)
-            if self.selected.start:
-                self.current_time = self.selected.start + 1
-            else:
-                self.current_time -= 60 * 30
+            self.current_time = self.selected.start + 1
             self.refresh()
             return True
 
         if event == MENU_RIGHT:
-            epg_prog = self.channel.get_relative(1, self.selected.program)
+            epg_prog = self.channel[self.selected.program.stop+1]
             self.selected = ProgramItem(epg_prog)
-            if self.selected.start:
-                self.current_time = self.selected.start + 1
-            else:
-                self.current_time -= 60 * 30
+            self.current_time = self.selected.start + 1
             self.refresh()
             return True
 

@@ -198,7 +198,7 @@ class ProgramItem(Item):
         items = []
         # keep the notifier alive
         notifier_counter = 0
-        for prog in self.channel.get(time.time(), -1):
+        for prog in self.channel[time.time():]:
             if not prog.id == -1:
                 items.append(ProgramItem(prog))
             notifier_counter = (notifier_counter + 1) % 500

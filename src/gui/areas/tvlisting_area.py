@@ -318,11 +318,9 @@ class TvlistingArea(Area):
 
         # selected program:
         selected_prog = menu.selected
-        all_channels = pyepg.channels
+        start_channel = pyepg.channels.index(menu.channel)/num_rows*num_rows
 
-        start_channel = all_channels.index(menu.channel) / num_rows * num_rows
-
-        for channel in all_channels[start_channel:start_channel+num_rows]:
+        for channel in pyepg.channels[start_channel:start_channel+num_rows]:
             ty0 = y0
             tx0 = content.x
 
@@ -364,7 +362,7 @@ class TvlistingArea(Area):
             self.objects.append(self.drawbox(tx0 + r.x, ty0 + r.y,
                                              r.width+1, item_h, r))
             try:
-                for prg in channel.get(start_time, stop_time):
+                for prg in channel[start_time:stop_time]:
                     flag_left   = 0
                     flag_right  = 0
 
@@ -388,8 +386,8 @@ class TvlistingArea(Area):
 
                     if prg == selected_prog:
                         val = selected_val
-                    elif prg.scheduled:
-                        val = scheduled_val
+#                     elif prg.scheduled:
+#                         val = scheduled_val
                     else:
                         val = default_val
 
@@ -451,7 +449,7 @@ class TvlistingArea(Area):
             ar = self.drawimage(area.images['uparrow'].filename,
                                 area.images['uparrow'])
             self.objects.append(ar)
-        if len(all_channels) >= start_channel+num_rows and \
+        if len(pyepg.channels) >= start_channel+num_rows and \
                area.images['downarrow']:
             if isinstance(area.images['downarrow'].y, str):
                 v = copy.copy(area.images['downarrow'])
