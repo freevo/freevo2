@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/20 11:01:01  dischi
+# use mixer plugin, please test
+#
 # Revision 1.1  2003/04/17 04:44:12  krister
 # Added a quick hack to support tvtime. It uses stdin on tvtime for commands, this is not supported in tvtime yet.
 #
@@ -46,12 +49,12 @@ import threading
 import signal
 
 import util    # Various utilities
-import mixer   # The mixer class
 import osd     # The OSD class, used to communicate with the OSD daemon
 import rc      # The RemoteControl class.
 import childapp # Handle child applications
 import epg_xmltv as epg # The Electronic Program Guide
 
+import plugin
 
 # Create the remote control object
 rc = rc.get_singleton()
@@ -66,10 +69,6 @@ FALSE = 0
 
 # Create the OSD object
 osd = osd.get_singleton()
-
-# Set up the mixer
-mixer = mixer.get_singleton()
-
 
 # Module variable that contains an initialized V4L1TV() object
 _singleton = None
@@ -182,14 +181,16 @@ class TVTime:
 
         self.mode = mode
 
+        mixer = plugin.getbyname('MIXER')
+
         # XXX Mixer manipulation code.
         # TV is on line in
         # VCR is mic in
         # btaudio (different dsp device) will be added later
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
+        if mixer and config.MAJOR_AUDIO_CTRL == 'VOL':
             mixer_vol = mixer.getMainVolume()
             mixer.setMainVolume(0)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+        elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
             mixer_vol = mixer.getPcmVolume()
             mixer.setPcmVolume(0)
 
@@ -207,15 +208,15 @@ class TVTime:
         # Suppress annoying audio clicks
         time.sleep(0.4)
         # XXX Hm.. This is hardcoded and very unflexible.
-        if mode == 'vcr':
+        if mixer and mode == 'vcr':
             mixer.setMicVolume(config.VCR_IN_VOLUME)
-        else:
+        elif mixer:
             mixer.setLineinVolume(config.TV_IN_VOLUME)
             mixer.setIgainVolume(config.TV_IN_VOLUME)
             
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
+        if mixer and config.MAJOR_AUDIO_CTRL == 'VOL':
             mixer.setMainVolume(mixer_vol)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+        elif mixer and config.MAJOR_AUDIO_CTRL == 'PCM':
             mixer.setPcmVolume(mixer_vol)
 
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
@@ -224,9 +225,11 @@ class TVTime:
         
         
     def Stop(self):
-        mixer.setLineinVolume(0)
-        mixer.setMicVolume(0)
-        mixer.setIgainVolume(0) # Input on emu10k cards.
+        mixer = plugin.getbyname('MIXER')
+        if mixer:
+            mixer.setLineinVolume(0)
+            mixer.setMicVolume(0)
+            mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
@@ -282,26 +285,28 @@ class TVTime:
             print 'msg = "%s" %s chars' % (msg, len(msg))
             self.thread.app.write(cmd)
             
-        elif event == rc.VOLUP:
-            mixer.incIgainVolume()
 
-        elif event == rc.VOLDOWN:
-            mixer.decIgainVolume()
+        # this should work from within the plugin:
+        #elif event == rc.VOLUP:
+        #    mixer.incIgainVolume()
 
-        elif event == rc.MUTE:
-            if self.__muted:
-                self.__muted = 0
-            else:
-                self.__muted = 1
-            self.MuteOnOff(mute=self.__muted)
+        #elif event == rc.VOLDOWN:
+        #    mixer.decIgainVolume()
+
+        #elif event == rc.MUTE:
+        #    if self.__muted:
+        #        self.__muted = 0
+        #    else:
+        #        self.__muted = 1
+        #    self.MuteOnOff(mute=self.__muted)
             
 
-    def MuteOnOff(self, mute=0):
-        if mute:
-            self.__igainvol = mixer.getIgainVolume()
-            mixer.setIgainVolume(0)
-        else:
-            mixer.setIgainVolume(self.__igainvol)
+    #def MuteOnOff(self, mute=0):
+    #    if mute:
+    #        self.__igainvol = mixer.getIgainVolume()
+    #        mixer.setIgainVolume(0)
+    #    else:
+    #        mixer.setIgainVolume(self.__igainvol)
         
             
 
