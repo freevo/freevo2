@@ -491,7 +491,7 @@ TV_SETTINGS = '%s television %s /dev/video0' % (CONF.tv, CONF.chanlist)
 # XXX You also need to have the recording daemon running, see
 # XXX the website docs or the mailing lists if that fails.
 # XXX Example cron script:
-# XXX * * * * * /usr/local/freevo execute src/tv/record_daemon.py
+# XXX * * * * * /usr/local/freevo/freevo execute src/tv/record_daemon.py
 #
 # XXX Please see the mencoder docs for more info about the settings
 # XXX below. Some stuff must be changed (adevice), others probably
