@@ -27,7 +27,6 @@ case "$1" in
 	$MATROXSET -f /dev/fb1 -m 1 > /dev/null 2> /dev/null
 	$MATROXSET -f /dev/fb0 2 2 > /dev/null 2> /dev/null
 	$FBSET -db $FBSETDB -fb /dev/fb0 "ntsc-768x576" > /dev/null 2> /dev/null
-	$FBSET -db $FBSETDB -fb /dev/fb1 "640x480-60" > /dev/null 2> /dev/null
 
 	# Define TVNORM in boot_config
 	if [ "$TVNORM" = "PAL" ]; then

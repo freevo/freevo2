@@ -4,6 +4,12 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2002/08/08 06:05:32  outlyer
+# Small changes:
+#  o Made Images menu a config file option "ENABLE_IMAGES"
+#  o Removed the redundant fbset 640x480-60 which doesn't even exist in the
+#    fbset.db (?)
+#
 # Revision 1.41  2002/08/07 04:53:01  krister
 # Changed shutdown to just exit freevo. A new config variable can be set to shutdown the entire machine.
 #
@@ -137,7 +143,8 @@ def getcmd():
         items += [menu.MenuItem('TV', tv.main_menu, 'tv', None, None, 'icons/tv.png',0)]
     items += [menu.MenuItem('MOVIES', movie.main_menu,'', None, None, 'icons/movies.png',0)]
     items += [menu.MenuItem('MUSIC', music.main_menu,'', None, None, 'icons/mp3.png',0)]
-    items += [menu.MenuItem('IMAGES', imenu.main_menu,'',None, None, 'icons/images.png',0)]
+    if config.ENABLE_IMAGES:
+        items += [menu.MenuItem('IMAGES', imenu.main_menu,'',None, None, 'icons/images.png',0)]
     if config.ENABLE_SHUTDOWN:
         items += [menu.MenuItem('SHUTDOWN', shutdown, None, None, None, \
                                 'icons/shutdown.png', 0) ]

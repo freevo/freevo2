@@ -16,6 +16,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2002/08/08 06:05:32  outlyer
+# Small changes:
+#  o Made Images menu a config file option "ENABLE_IMAGES"
+#  o Removed the redundant fbset 640x480-60 which doesn't even exist in the
+#    fbset.db (?)
+#
 # Revision 1.41  2002/08/07 04:53:01  krister
 # Changed shutdown to just exit freevo. A new config variable can be set to shutdown the entire machine.
 #
@@ -126,6 +132,7 @@ VIDREC_HQ = ''
 ENABLE_TV = 1            # Disable this if you don't have a tv card
 ENABLE_SHUTDOWN = 1      # Enable main menu choice for Linux shutdown. Exits Freevo.
 ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown! For standalone boxes.
+ENABLE_IMAGES = 1	 # Disable this if you don't want/use the Image Browser
 
 #
 # The list of filename suffixes that are used to match the files that
