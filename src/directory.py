@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/06/03 19:10:28  outlyer
+# Prevent a crash if a directory is removed while you're inside it. This just
+# wasn't adapted to the new event framework, the bulk was there.
+#
 # Revision 1.12  2003/05/30 00:53:19  rshortt
 # Various event bugfixes.
 #
@@ -93,6 +97,8 @@ import video
 import audio
 import image
 import games
+
+import event as em
 
 from item import Item
 
