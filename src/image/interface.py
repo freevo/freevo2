@@ -10,3 +10,14 @@ def cwd(parent, files):
         items += [ ImageItem(file, parent) ]
         files.remove(file)
     return items
+
+
+def remove(files, items):
+    del_items = []
+    for item in items:
+        for file in files:
+            if item.type == 'image' and item.filename == file:
+                del_items += [ item ]
+                files.remove(file)
+                
+    return del_items
