@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/06/23 21:20:10  dischi
+# put snapshot in again with a try except
+#
 # Revision 1.46  2004/06/23 20:57:14  dischi
 # fix recording stopping
 #
@@ -918,7 +921,10 @@ class RecordServer(xmlrpc.XMLRPC):
                 print 'Handling event RECORD_STOP'
                 os.remove(tv_lock_file)
                 prog = event.arg
-                #snapshot(prog.filename)
+                try:
+                    snapshot(prog.filename)
+                except:
+                    pass
                 if config.VCR_POST_REC:
                     util.popen3.Popen3(config.VCR_POST_REC)
 
