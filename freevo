@@ -17,9 +17,15 @@ fi
 # Is runapp present? If not it needs to be compiled
 if ! [ -e runapp ]; then
     echo
-    echo "Please use the binary release of Freevo!"
+    echo "*************************************************************"
+    echo "* Please note that there is a standalone binary release     *"
+    echo "* of Freevo with all dependencies included. Use that unless *"
+    echo "* you are really capable of installing Freevo from source   *"
+    echo "* without assistance from the mailing lists or irc!         *"
+    echo "*************************************************************"
     echo
     echo "Freevo not compiled (runapp executable not found)"
+    echo
     exit 1
 fi
 
