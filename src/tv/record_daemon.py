@@ -93,7 +93,7 @@ def main():
 
     if schedule[0].find('#TIMESTAMP') != 0:
         log('Schedule corrupt! Please fix! Exiting')
-        sys.exit()
+        sys.exit(1)
     else:
         schedule[0] = '#TIMESTAMP ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n'
     
