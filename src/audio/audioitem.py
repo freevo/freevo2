@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/05/19 19:00:08  outlyer
+# Trapping the IOError that Fridtjof Busse was getting with Ogg files,
+# hopefully we can track down the problem this way, and avoid crashes at the
+# same time.
+#
 # Revision 1.24  2003/05/16 13:17:45  outlyer
 # Bugfix for web radio station caching from Urmet J?nes <urmet@uninet.ee>
 #
@@ -319,6 +324,10 @@ class AudioItem(Item):
         except ogg.vorbis.VorbisError:
             if DEBUG: print "Got VorbisError.. not an ogg file."
 	    self.valid = 0
+            return 0
+        except IOError:
+            if DEBUG: print "Couldn't read the file %s." % (file)
+            self.valid = 0
             return 0
         
         try:
