@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2003/09/05 20:09:30  dischi
+# add function to auto detect channels and some help messages
+#
 # Revision 1.45  2003/09/03 20:03:34  dischi
 # toggle between x11 and fbdev based on $DISPLAY
 #
@@ -402,6 +405,131 @@ if not ROM_DRIVES:
 #
 
 REMOVABLE_MEDIA = []
+
+
+
+def sortchannels(list, key):
+    # This should be more generic, but I couldn't get it
+    # to sort properly without specifying the nested array
+    # index for the tunerid and forcing 'int'
+    for l in list:
+        if len(l[key]) == 1:
+            l[key].append(('0',))
+    nlist = map(lambda x, key=key: (int(x[key][1][0]), x), list)
+    nlist.sort()
+    return map(lambda (key, x): x, nlist)
+
+
+
+if TV_CHANNELS == None:
+    # auto detect them
+    
+    from tv import xmltv
+    import sys,os
+    import codecs
+    import cPickle, pickle # pickle because sometimes cPickle doesn't work
+
+    file = XMLTV_FILE
+    path = FREEVO_CACHEDIR
+    pfile = 'xmltv_channels.pickle'
+
+    pname = os.path.join(path,pfile)
+
+    if not os.path.isfile(file):
+        print
+        print 'ERROR: can\'t find %s' % file
+        print 'Use xmltv to create this file or when you don\'t want '\
+              'to use the tv module at all,'
+        print 'add TV_CHANNELS = [] and plugin.remove(\'tv\') to your local_conf.py'
+        print 'TVguide is deactivted now.'
+        print
+        TV_CHANNELS = []
+        
+    elif os.path.isfile(pname) and (os.path.getmtime(pname) >
+                                    os.path.getmtime(file)):
+        try:
+            f = open(pname, 'r')
+            try:
+                data = cPickle.load(f)
+            except:
+                data = pickle.load(f)
+            f.close()
+            TV_CHANNELS = data
+        except:
+            print 'unable to read cachefile %s' % pname
+            TV_CHANNELS = []
+
+    else:
+        input = open(file, 'r')
+        tmp   = open('/tmp/xmltv_parser', 'w')
+        while(1):
+            line =input.readline()
+            if not line:
+                break
+            if line.find('<programme') > 0:
+                tmp.write('</tv>\n')
+                break
+            tmp.write(line)
+
+        input.close()
+        tmp.close()
+
+        tmp   = open('/tmp/xmltv_parser', 'r')
+        xmltv_channels = xmltv.read_channels(tmp)
+        tmp.close()
+
+        xmltv_channels = sortchannels(xmltv_channels,'display-name')
+        chanlist = []
+
+        for a in xmltv_channels:
+            if (a['display-name'][1][0][0].isdigit()):
+                display_name = a['display-name'][0][0]
+                tunerid = a['display-name'][1][0]
+            else:
+                display_name = a['display-name'][1][0]
+                tunerid = a['display-name'][0][0]
+            id = a['id']
+
+            chanlist += [(id,display_name,int(tunerid))]
+
+        try:
+            if os.path.isfile(pname):
+                os.unlink(pname)
+            f = open(pname, 'w')
+            cPickle.dump(chanlist, f, 1)
+            f.close()
+        except IOError:
+            print 'unable to save to cachefile %s' % pname
+
+        print_list = DEBUG
+        for c in chanlist:
+            if c[2] == 0:
+                print_list = 1
+                print
+                print 'XMLTV ERROR: Audo-detection failed'
+                print 'some channels in the channel list have no station id'
+                print 'Please add it by putting the list in your local_conf.py'
+                print
+                break
+
+        if print_list:
+            print
+            print 'Possible list of tv channels. If you want to change the station'
+            print 'id, copy the next statement into your local_conf.py and edit it.'
+            print 'You can also remove lines or resort them'
+            print
+            print 'TV_CHANNELS = ['
+            for c in chanlist[:-1]:
+                print '    ( \'%s\', \'%s\', %s ), ' % c
+            print '    ( \'%s\', \'%s\', %s ) ] ' % chanlist[-1]
+
+        else:
+            print 'XMTV: Auto-detected channel list, remove %s and set DEBUG=1'\
+                  'to see it' % file
+
+        TV_CHANNELS = chanlist
+         
+
 
 #
 # Movie information database.
