@@ -356,7 +356,7 @@ class Instance(mbus.Guides):
         # set callbacks
         self.newEntityFunction = self.new_entity
         self.lostEntityFunction = self.lost_entity
-        self.errorFunction = None
+        self.errorFunction = self.mbus_error
         self.onErrorInvokeRPCCallback = True
         
         # application short name
@@ -369,6 +369,13 @@ class Instance(mbus.Guides):
         self.__entities = []
 
 
+    def mbus_error(self, error):
+        """
+        Small errorhandler for debugging mbus
+        """
+        print 'mcomm error:', error
+
+        
     def register_entity_notification(self, func):
         """
         Register to callback to get notification when an entity joins or leaves
