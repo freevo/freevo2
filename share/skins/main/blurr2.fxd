@@ -230,7 +230,7 @@
 	    <newline/>
 	  </if>
 	  <text font="info value" expression="len(tracks)"/>
-          <text width="130" font="info label"> Tracks:</text>
+          <text width="130" font="info label"> Tracks</text>
 	  <newline/>
  	</item>
       </content>
