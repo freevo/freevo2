@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/09/07 13:03:12  mikeruelle
+# Remove rating for now. System is optional, need code to store ratings in tuple
+#
 # Revision 1.32  2003/09/06 11:19:45  dischi
 # o use str.encode() with 'replace' and not our own function
 # o only cache the data from channels we want (major speed enhancement)
@@ -318,12 +321,6 @@ def load_guide():
         prog = epg_types.TvProgram()
         prog.channel_id = p['channel'].encode('Latin-1', 'replace')
         prog.title = p['title'][0][0].encode('Latin-1', 'replace')
-        if p.has_key('rating'):
-            try:
-                for darating in p['rating']:
-                    prog.ratings[darating['system'].encode('Latin-1', 'replace')] = darating['value'].encode('Latin-1', 'replace')
-            except KeyError:
-                pass
         if p.has_key('category'):
              prog.categories = [ cat[0].encode('Latin-1', 'replace') for cat in p['category'] ]
         if p.has_key('desc'):
