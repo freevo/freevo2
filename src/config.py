@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/02/12 16:20:31  krister
+# Fixed stupid bugs in rom-drives autodetect for cdrecorder and automounted drives.
+#
 # Revision 1.13  2003/02/12 06:32:28  krister
 # Added cdrecord and supermounted drives autodetection for ROM_DRIVES.
 #
@@ -301,8 +304,8 @@ if not ROM_DRIVES:
                 devname = match_cd.group(1)
                 dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
             elif match_cdrec: 
-                mntdir = match_cd.group(2)
-                devname = match_cd.group(1)
+                mntdir = match_cdrec.group(2)
+                devname = match_cdrec.group(1)
                 dispname = 'CDREC-%s' % (len(ROM_DRIVES)+1)
             elif match_dvd:
                 mntdir = match_dvd.group(2)
@@ -313,8 +316,8 @@ if not ROM_DRIVES:
                 devname = match_iso.group(1)
                 dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
             elif match_automount:
-                mntdir = match_iso.group(1)
-                devname = match_iso.group(2)
+                mntdir = match_automount.group(1)
+                devname = match_automount.group(2)
                 # Must check that the supermount device is cd or dvd
                 if devname.lower().find('cdrom') != -1:
                     dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
