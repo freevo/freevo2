@@ -13,7 +13,7 @@
 	</mask>
       </background>
 
-      <title visible="yes" x="460" y="25">
+      <title visible="yes" x="500" y="25" width="600">
 	<font name="oliversb" size="28" color="0xffffff" align="center"/>
 	<shadow visible="yes" color="0x80000000" x="3" y="3"/>
       </title>
