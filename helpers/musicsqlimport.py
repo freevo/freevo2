@@ -83,6 +83,18 @@ def mainloop(path='/media/Music',dirtitle='',type='*.mp3'):
     cursor = db.cursor()
 
     songs = util.recursefolders(path,1,type,1)
+
+    # TODO
+    # Check the database and generate a list and then use
+    # songs.remove(os.path.join(path,filename)) 
+    # to remove it so # we can speed up the whole process. We just 
+    # need a function that returns a list of files with full paths
+    # from the database.
+    #
+    # It's not a necessity, but it'll make large directories less 
+    # time consuming to do.
+
+
     tempvar = ''
     for song in songs:
         cursor.execute(make_query(song,dirtitle))
