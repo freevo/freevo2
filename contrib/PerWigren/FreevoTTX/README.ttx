@@ -1,0 +1,9 @@
+This is a pre-release of FreevoTTX, which will add Teletext-support
+to Freevo, using bmovl to display.
+
+It needs a post-0.2.2 (read: CVS) version of libzvbi which is part of Zapping,
+and Imlib2.
+
+When I have sorted out the last few bugs I'll try to integrate it
+into Freevo!
+
