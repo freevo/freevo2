@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/23 20:05:36  dischi
+# increase EPG_VERSION because of the unicode fixes
+#
 # Revision 1.14  2004/02/23 19:59:34  dischi
 # unicode fixes
 #
@@ -68,7 +71,7 @@ import config
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
-EPG_VERSION = 2
+EPG_VERSION = 3
 
 TRUE = 1
 FALSE = 0
