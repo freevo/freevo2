@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/09/23 13:39:51  outlyer
+# Remove more informational chatter.
+#
 # Revision 1.24  2003/09/20 17:03:20  dischi
 # draw status while connecting and caching for network files
 #
@@ -103,7 +106,7 @@ class PluginInterface(plugin.Plugin):
         if data:
             data = re.search( "^MPlayer (?P<version>\S+)", data )
             if data:                
-                _debug_("MPlayer version is: %s" % data.group( "version" ))
+                _debug_("MPlayer version is: %s" % data.group( "version" ),2)
                 data = data.group( "version" )
                 if data[ 0 ] == "1":
                     mplayer_version = 1.0
@@ -111,7 +114,7 @@ class PluginInterface(plugin.Plugin):
                     mplayer_version = 0.9
                 elif data[ 0 : 7 ] == "dev-CVS":
                     mplayer_version = 9999
-                _debug_("MPlayer version set to: %s" % mplayer_version)
+                _debug_("MPlayer version set to: %s" % mplayer_version,2)
                     
         child.wait()
         mplayer = util.SynchronizedObject(MPlayer(mplayer_version))
