@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.77  2004/08/09 14:38:08  dischi
+# fix mplayer version detection
+#
 # Revision 1.76  2004/08/01 10:45:19  dischi
 # make the player an "Application"
 #
@@ -90,8 +93,9 @@ class PluginInterface(plugin.Plugin):
             while data:
                 data = child.fromchild.readline()
                 if data:
-                    data = re.search( "^MPlayer (?P<version>\S+)", data )
-                    if data:                
+                    res = re.search( "^MPlayer (?P<version>\S+)", data )
+                    if res:
+                        data = res
                         break
 
             if data:                
@@ -135,6 +139,7 @@ class MPlayer(Application):
         self.version    = version
         self.seek       = 0
         self.app        = None
+        self.plugins    = []
 
 
     def rate(self, item):
