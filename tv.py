@@ -53,8 +53,16 @@ rc = rc.get_singleton()
 # Set up the mixer
 mixer = mixer.get_singleton()
 
-# Set up the TV application
-v4l1tv = v4l1tv.get_singleton()
+# XXX TEST CODE BY KRISTER! This code fragment will load the experimental
+# MPlayer TV module if the symbol MPLAYER_TV is in the config module
+# namespace, but will work fine if it is not.
+if 'MPLAYER_TV' in dir(config):
+    import mplayer_tv
+    # Set up the TV application
+    v4l1tv = mplayer_tv.get_singleton()
+else:
+    # Set up the TV application
+    v4l1tv = v4l1tv.get_singleton()
 
 
 def start_tv(menuw=None, arg=None):
