@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.98  2004/01/18 21:10:51  dischi
+# first load fxd file, than call plugins
+#
 # Revision 1.97  2004/01/18 16:50:34  dischi
 # watcher improvements
 #
@@ -167,13 +170,13 @@ class DirItem(Playlist):
         if image:
             self.image       = image
             
-        # Check mimetype plugins if they want to add something
-        for p in plugin.mimetype(display_type):
-            p.dirinfo(self)
-            
         self.folder_fxd = directory+'/folder.fxd'
         if vfs.isfile(directory+'/folder.fxd'): 
             self.set_fxd_file(self.folder_fxd)
+            
+        # Check mimetype plugins if they want to add something
+        for p in plugin.mimetype(display_type):
+            p.dirinfo(self)
             
         if self.DIRECTORY_SORT_BY_DATE == 2 and self.display_type != 'tv':
             self.DIRECTORY_SORT_BY_DATE = 0
