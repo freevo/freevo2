@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/01 21:22:51  outlyer
+# Reflect the changed pickle file name
+#
 # Revision 1.2  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -124,7 +127,7 @@ def make_schedule (b=None):
 #
 # hardcoded to -0, some people might not process the guide as root.
 #
-picklefile = config.FREEVO_CACHEDIR + '/TV.xml-0.pickled'
+picklefile = config.FREEVO_CACHEDIR + '/TV.xml.pickled'
 
 # Ugly.
 
