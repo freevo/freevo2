@@ -68,11 +68,11 @@ def makeNonBlocking(fd):
 
 write_lock = threading.Lock()
 
-def log(str):
-    global write_lock, fp
-    write_lock.acquire()
-    fp.write(str + '\n')
-    write_lock.release()
+#def log(str):
+#    global write_lock, fp
+#    write_lock.acquire()
+#    fp.write(str + '\n')
+#    write_lock.release()
 
 # Helper function for the md5 routine; we don't want to
 # write filenames that aren't in lower ascii so we uhm,
@@ -110,8 +110,6 @@ def resize(file,x0=25,y0=25):
 	import Image
 	# Since the filenames are not unique we need
 	# to cache them by content, not name.
-	# Cache the thumbnails
-	# thumbnail file is checksum.png
 	mythumb = config.FREEVO_CACHEDIR + os.path.basename(md5file(file)) + '.png'
 	if os.path.isfile(mythumb):
 		return mythumb

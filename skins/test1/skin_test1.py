@@ -203,7 +203,7 @@ class Skin:
         # Draw the progress bar
         osd.drawbox(33, 440, 635, 460, width = 3)
         pixels = int(round((info.done) * 6.0))
-        osd.drawbox(34, 441, 34 + pixels, 459, width = -1, color = 0x038D11)
+        osd.drawbox(34, 441, 34 + pixels, 459, width = -1, color = osd.COL_BLUE)
 
         osd.update()
     
