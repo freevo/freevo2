@@ -18,4 +18,7 @@ o The menus do not have the same number of files per page.
 o Some Python modules like PyXMMS, OGG are missing from the 
   runtime.
 o DVD number of titles returns 100 (default) for some disks, why?
-
+o osd.py doesn't work with X11 (probably FB too) if the screen depth isn't 32:
+    "icon = pygame.image.load('icons/freevo_app.png').convert()"
+  raises an exception. Can probably be fixed by changing the PyGame init to 
+  allow other settings than 32 bits.
