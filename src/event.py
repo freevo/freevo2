@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/06/07 11:30:02  dischi
+# Readded INPUT_[0-9] event args (why were they gone, we need them).
+# Also added MENU_CALL_ITEM_ACTION to call an action directly
+#
 # Revision 1.10  2003/06/05 02:21:40  rshortt
 # Forgot PAUSE for TV.
 #
@@ -141,6 +145,7 @@ MENU_BACK_ONE_MENU     = Event('MENU_BACK_ONE_MENU')
 MENU_SELECT            = Event('MENU_SELECT')
 MENU_PLAY_ITEM         = Event('MENU_PLAY_ITEM')
 MENU_SUBMENU           = Event('MENU_SUBMENU')
+MENU_CALL_ITEM_ACTION  = Event('MENU_CALL_ITEM_ACTION')
 MENU_CHANGE_STYLE      = Event('MENU_CHANGE_STYLE')
                        
 #
@@ -218,16 +223,16 @@ INPUT_LEFT             = Event('INPUT_LEFT')
 INPUT_RIGHT            = Event('INPUT_RIGHT')
 INPUT_UP               = Event('INPUT_UP')
 INPUT_DOWN             = Event('INPUT_DOWN')
-INPUT_1                = Event('INPUT_1')
-INPUT_2                = Event('INPUT_2')
-INPUT_3                = Event('INPUT_3')
-INPUT_4                = Event('INPUT_4')
-INPUT_5                = Event('INPUT_5')
-INPUT_6                = Event('INPUT_6')
-INPUT_7                = Event('INPUT_7')
-INPUT_8                = Event('INPUT_8')
-INPUT_9                = Event('INPUT_9')
-INPUT_0                = Event('INPUT_0')
+INPUT_1                = Event('INPUT_1', arg=1)
+INPUT_2                = Event('INPUT_2', arg=2)
+INPUT_3                = Event('INPUT_3', arg=3)
+INPUT_4                = Event('INPUT_4', arg=4)
+INPUT_5                = Event('INPUT_5', arg=5)
+INPUT_6                = Event('INPUT_6', arg=6)
+INPUT_7                = Event('INPUT_7', arg=7)
+INPUT_8                = Event('INPUT_8', arg=8)
+INPUT_9                = Event('INPUT_9', arg=9)
+INPUT_0                = Event('INPUT_0', arg=0)
 
 INPUT_ALL_NUMBERS = (INPUT_0, INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5,
                      INPUT_6, INPUT_7, INPUT_8, INPUT_9, INPUT_0 )
