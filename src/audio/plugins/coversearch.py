@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/10/20 14:23:08  outlyer
+# Tolerate 404 errors from Amazon without crashing. Sorry this is so ugly,
+# this whole algorithm needs to be cleaned up.
+#
 # Revision 1.19  2003/09/10 19:30:08  dischi
 # add deactivation when something is wrong
 #
@@ -222,25 +226,37 @@ class PluginInterface(plugin.ItemPlugin):
         # Check if they're valid before presenting the list to the user
         # Grrr I wish Amazon wouldn't return an empty gif (807b)
 
+        MissingFile = False
+        m = None
+        n = None
+
         for i in range(len(cover)):
-            m = urllib2.urlopen(cover[i].ImageUrlLarge)
-            if not (m.info()['Content-Length'] == '807'):
+            try:
+                m = urllib2.urlopen(cover[i].ImageUrlLarge)
+            except urllib2.HTTPError:
+                # Amazon returned a 404
+                MissingFile = True
+            if not MissingFile and not (m.info()['Content-Length'] == '807'):
                 image = Image.open(cStringIO.StringIO(m.read()))
                 items += [ menu.MenuItem('%s' % cover[i].ProductName,
                                          self.cover_create, cover[i].ImageUrlLarge,
                                          image=image) ]
                 m.close()
             else:
-                m.close()
+                if m: m.close()
+                MissingFile = False
                 # see if a small one is available
-                n = urllib2.urlopen(cover[i].ImageUrlMedium)
-                if not (n.info()['Content-Length'] == '807'):
+                try:
+                    n = urllib2.urlopen(cover[i].ImageUrlMedium)
+                except urllib2.HTTPError:
+                    MissingFile = True
+                if not MissingFile and not (n.info()['Content-Length'] == '807'):
                     image = Image.open(cStringIO.StringIO(n.read()))
                     items += [ menu.MenuItem('%s [small]' % cover[i].ProductName,
                                     self.cover_create, cover[i].ImageUrlMedium) ]
                     n.close()
                 else:
-                    n.close()
+                    if n: n.close()
                     # maybe the url is wrong, try to change '.01.' to '.03.'
                     cover[i].ImageUrlLarge = cover[i].ImageUrlLarge.replace('.01.', '.03.')
                     n = urllib2.urlopen(cover[i].ImageUrlLarge)
