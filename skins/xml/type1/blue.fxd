@@ -440,7 +440,7 @@
       <listing layout="tv listing" x="10" y="100" width="750" height="300">
 	<image x="765" y="100" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
-	<image x="765" y="350" width="32" height="32" label="downarrow"
+	<image x="765" y="354" width="32" height="32" label="downarrow"
 	  filename="down.png"/>
 	<image width="16" height="16" label="leftarrow" filename="left.png"/>
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>
@@ -452,7 +452,7 @@
     <layout label="tv listing">
       <content type="text" spacing="0">
 
-	<item type="label" font="tv" width="60">
+	<item type="label" font="tv" width="80">
 	  <rectangle bgcolor="tv label" size="1" color="0x000000" x="-5" y="-5"
 	    width="max+10" height="max+10"/>
 	</item>
