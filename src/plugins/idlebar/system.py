@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/02/01 20:29:38  rshortt
+# Use small0 instead of weather font.
+#
 # Revision 1.6  2004/02/01 20:28:52  rshortt
 # Use small0 instead of weather font.
 #
@@ -324,7 +327,7 @@ class sensors(IdleBarPlugin):
         widthcase = 0
         widthram  = 0
 
-        font  = osd.get_font('weather')
+        font  = osd.get_font('small0')
         if self.hotstack != 0:
             font.color = 0xff0000
         elif font.color == 0xff0000 and self.hotstack == 0:
