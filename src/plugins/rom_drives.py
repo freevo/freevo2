@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/03/21 14:49:00  dischi
+# Bufix to set the correct skin display type. Great, just after 1.5.0-pre1
+# is out. :-(
+#
 # Revision 1.59  2004/03/02 21:01:52  dischi
 # better typoe detection, autostart
 #
@@ -263,6 +267,7 @@ class rom_items(plugin.MainMenuPlugin):
                 else:
                     if media.item.type == 'dir':
                         media.item.display_type = parent.display_type
+                        media.item.skin_display_type = parent.display_type
                         media.item.create_metainfo()
                     m = media.item
 
