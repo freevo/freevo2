@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/05/28 23:38:21  mikeruelle
+# better backoff so we do not see intermediate menu
+#
 # Revision 1.36  2004/05/27 01:04:37  mikeruelle
 # fix bug with search for more like this. need better stack pop but this fixes things for now.
 #
@@ -210,8 +213,8 @@ class ProgramItem(Item):
         if result:
             if menuw:
 	        if self.context=='search':
-                    menuw.back_one_menu()
-                    menuw.back_one_menu()
+                    menuw.delete_menu()
+                    menuw.delete_menu()
                 menuw.back_one_menu(arg='reload')
             AlertBox(text=_('"%s" has been scheduled for recording') % \
                      self.prog.title).show()
