@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/08/22 20:13:44  dischi
+# renamed get_screen to get_display
+#
 # Revision 1.15  2004/08/01 10:51:10  dischi
 # use new gui code for popup
 #
@@ -80,7 +83,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     if popup:
         pop = gui.PopupBox(text='Creating thumbnail for \'%s\'...' % \
                            os.path.basename(videofile),
-                           width=gui.get_screen().width-config.OSD_OVERSCAN_X*2-80)
+                           width=gui.get_display().width-config.OSD_OVERSCAN_X*2-80)
         pop.show()
         
     args = [ config.MPLAYER_CMD, videofile, imagefile ]
