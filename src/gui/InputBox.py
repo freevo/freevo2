@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/24 18:56:09  dischi
+# add hfill to text_prop
+#
 # Revision 1.15  2004/02/21 19:33:24  dischi
 # enhance input box, merge password and normal input
 #
@@ -70,11 +73,12 @@ class InputBox(PopupBox):
     text      String to print.
     type      'normal' or 'password'
     icon      icon
-    text_prop A dict of 3 elements composing text proprieties:
-              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+    text_prop A dict of 4 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode, 'hfill': hfill }
                  align_v = text vertical alignment
                  align_h = text horizontal alignment
                  mode    = hard (break at chars); soft (break at words)
+                 hfill   = True (don't shorten width) or False
     """
 
     def __init__(self, text, handler=None, type='text', x=None, y=None, width=0, height=0,

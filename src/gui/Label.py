@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/24 18:56:09  dischi
+# add hfill to text_prop
+#
 # Revision 1.24  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -66,11 +69,12 @@ class Label(GUIObject):
     align   Integer, h_align of text. Label.CENTER, Label.RIGHT,
             Label, LEFT
     parent  GUIObject, Reference to object containing this label.
-    text_prop A dict of 3 elements composing text proprieties:
-              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+    text_prop A dict of 4 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode, 'hfill': hfill }
                  align_v = text vertical alignment
                  align_h = text horizontal alignment
                  mode    = hard (break at chars); soft (break at words)
+                 hfill   = True (don't shorten width) or False
     
     Displays a single line of text. Really it maintains a surface with a
     rendered text. If text is updated text is rerendered and reblitted to
@@ -113,7 +117,8 @@ class Label(GUIObject):
 
         self.text_prop = text_prop or { 'align_h': 'left',
                                         'align_v': 'top',
-                                        'mode'   : 'hard' }
+                                        'mode'   : 'hard',
+                                        'hfill'  : False }
         if text:
             self.set_text(text)
 
@@ -173,13 +178,15 @@ class Label(GUIObject):
         align_h = self.text_prop.setdefault( 'align_h', 'left' )
         align_v = self.text_prop.setdefault( 'align_v', 'top' )
         mode    = self.text_prop.setdefault( 'mode', 'hard' )
+        hfill   = self.text_prop.setdefault( 'hfill', False )
         data = self.osd.drawstringframed(self.text, 0, 0, self.width, self.height,
                                          self.osd.getfont(self.font_name, self.font_size),
                                          fgcolor=None, bgcolor=None, align_h=align_h,
                                          align_v=align_v, mode=mode, layer='')[1]
 
         (ret_x0,ret_y0, ret_x1, ret_y1) = data
-        self.width  = ret_x1 - ret_x0
+        if not hfill:
+            self.width  = ret_x1 - ret_x0
         self.height = ret_y1 - ret_y0
 
         return self.width, self.height
@@ -218,5 +225,6 @@ class Label(GUIObject):
                                       layer=self.surface)[1]
 
         return_x0,return_y0, return_x1, return_y1 = r
-        self.width  = return_x1 - return_x0
+        if not self.text_prop.setdefault( 'hfill', False ):
+            self.width  = return_x1 - return_x0
         self.height = return_y1 - return_y0

@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/02/24 18:56:09  dischi
+# add hfill to text_prop
+#
 # Revision 1.38  2004/02/19 19:39:50  dischi
 # more gui cleanup
 #
@@ -66,11 +69,12 @@ class PopupBox(Window):
     height    Integer
     text      String to print.
     icon      icon
-    text_prop A dict of 3 elements composing text proprieties:
-              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode }
+    text_prop A dict of 4 elements composing text proprieties:
+              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode, 'hfill': hfill }
                  align_v = text vertical alignment
                  align_h = text horizontal alignment
                  mode    = hard (break at chars); soft (break at words)
+                 hfill   = True (don't shorten width) or False
     
     Trying to make a standard popup/dialog box for various usages.
     """
@@ -80,9 +84,10 @@ class PopupBox(Window):
 
         self.handler = handler
         Window.__init__(self, parent, x, y, width, height)
-        self.text_prop = text_prop or { 'align_h': 'left',
-                                        'align_v': 'top',
-                                        'mode'   : 'soft' }
+        self.text_prop = text_prop or { 'align_h': 'center',
+                                        'align_v': 'center',
+                                        'mode'   : 'soft',
+                                        'hfill'  : True }
 
         self.font = None
         if self.skin_info_font:

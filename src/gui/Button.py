@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2004/02/24 18:56:09  dischi
+# add hfill to text_prop
+#
 # Revision 1.19  2004/02/21 19:37:01  dischi
 # only draw border when needed
 #
@@ -176,7 +179,8 @@ class Button(Container):
             self.label = Label(h_align = Align.CENTER, v_align = Align.CENTER,
                                text_prop = { 'align_h': 'center',
                                              'align_v': 'center',
-                                             'mode': 'hard' } )
+                                             'mode' : 'hard',
+                                             'hfill': False } )
             self.label.set_text(text)
             self.add_child(self.label)
         else:
