@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/12/12 19:20:46  dischi
+# use util functions to get the image
+#
 # Revision 1.41  2003/11/28 20:08:57  dischi
 # renamed some config variables
 #
@@ -48,7 +51,6 @@ import os
 import string
 import time
 import re
-import imghdr
 import traceback
 import config
 import util
@@ -95,23 +97,10 @@ class AudioItem(Item):
         except:
             self.length = 0
             
-        cover_logo = os.path.dirname(file)+'/cover.'
-
-        # Only draw the cover if the file exists. We'll
-        # use the standard imghdr function to check if
-        # it's a real png, and not a lying one :)
-
-        # Check for cover in local dir
-        if os.path.isfile(cover_logo+'png') and imghdr.what(cover_logo+'png'):
-            self.image = cover_logo+'png'
-        elif os.path.isfile(cover_logo+'jpg') and imghdr.what(cover_logo+'jpg'):
-            self.image = cover_logo+'jpg'
+        self.image = util.getimage(os.path.dirname(file)+'/cover', self.image)
 
         # Allow per mp3 covers. As per Chris' request ;)
-        if os.path.isfile(os.path.splitext(file)[0] + '.png'):
-            self.image = os.path.splitext(file)[0] + '.png'
-        elif os.path.isfile(os.path.splitext(file)[0] + '.jpg'):
-            self.image = os.path.splitext(file)[0] + '.jpg'
+        self.image = util.getimage(file[:file.rfind('.')], self.image)
 
         # Let's try to find if there is any image in the current directory
         # that could be used as a cover
