@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2002/10/24 05:28:40  outlyer
+# Modified to match the new stuff included in the audioinfo library. We can
+# now show the track number for an id3v2.x track, and we truncate the title,
+# album and artist if they fall outside of the mask.
+#
 # Revision 1.46  2002/10/21 20:30:50  dischi
 # The new alpha layer support slows the system down. For that, the skin
 # now saves the last background/alpha layer combination and can reuse it.
@@ -629,24 +634,28 @@ class Skin:
 
             top = iv.y
             DrawText('Title: ', iv, x=left, y=top, align='right')
-            DrawText('%s ' % info.title, iv, x=left, y=top)
+            DrawTextFramed('%s ' % info.title, iv, x=left, y=top, width=500, height=35, mode='soft')
 
             if info.artist:
                 top += spacing
                 DrawText('Artist: ', iv, x=left, y=top, align='right')
-                DrawText('%s ' % info.artist, iv, x=left, y=top)
+                DrawTextFramed('%s ' % info.artist, iv, x=left, y=top, width=500,height=35, mode='soft')
 
             if info.album:
                 top += spacing
                 DrawText('Album: ', iv, x=left, y=top, align='right')
-                DrawText('%s ' % info.album, iv, x=left, y=top)
+                DrawTextFramed('%s ' % info.album, iv, x=left, y=top, width=500,height=35, mode='soft')
 
             if info.year:
                 top += spacing
                 DrawText('Year: ', iv, x=left, y=top, align='right')
                 DrawText('%s ' % info.year, iv, x=left, y=top)
 
-            if info.track:
+	    if info.trackof > 0:
+	    	top += spacing
+		DrawText('Track: ', iv, x=left, y=top, align='right')
+		DrawText('%s/%s' % (info.track, info.trackof), iv, x=left, y=top)
+            elif info.track:
                 top += spacing
                 DrawText('Track: ', iv, x=left, y=top, align='right')
                 DrawText('%s ' % info.track, iv, x=left, y=top)
