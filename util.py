@@ -172,8 +172,11 @@ def proc_mount(dir):
 
 LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
+# returns (type, label, image)
 def identifymedia(dir):
     mediatypes = [('VCD','/mpegav/'), ('SVCD','/SVCD/'), ('DVD','/video_ts/') ]
+
+    image = title = None
 
     device = proc_mount(dir)
     if device:
@@ -188,25 +191,32 @@ def identifymedia(dir):
         img.close()
     else:
         return None, None, None
-    
+
+    for ( title_db, image_db, id_db ) in config.MOVIE_INFORMATIONS:
+        if id_db == id:
+            title = title_db
+            image = image_db
+            
     for media in mediatypes:
         if os.path.exists(dir + media[1]):
-                return media[0],id,label
-
+            if title:
+                return media[0], title, image
+            return media[0], '%s [%s]' % (media[0], label), image
+        
     mplayer_files = match_files(dir, config.SUFFIX_MPLAYER_FILES)
     mp3_files = match_files(dir, config.SUFFIX_MPG123_FILES)
     image_files = match_files(dir, config.SUFFIX_IMAGE_FILES)
     
     if mplayer_files and not mp3_files:
-        return "DIVX", id, label
+        return "DIVX", label, None
     if not mplayer_files and mp3_files:
-        return "MP3" , id, label
+        return "MP3" , label, None
     if not mplayer_files and not mp3_files and image_files:
-        return "IMAGE", id, label
+        return "IMAGE", label, None
     
     if mplayer_files or image_files or mp3_files:
-        return "DATA", id, label
+        return "DATA", label, None
 
-    return "AUDIO", id, label
+    return "AUDIO", label, None
 
 
