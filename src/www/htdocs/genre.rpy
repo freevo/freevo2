@@ -11,8 +11,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.4  2003/09/07 13:25:25  mikeruelle
-# update css to match guide.rpy
+# Revision 1.5  2003/09/07 13:34:10  mikeruelle
+# show info message if we don't find any matching categories
 #
 # Revision 1.2  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
@@ -145,7 +145,7 @@ class GenreResource(FreevoResource):
 
         pops = ''
         desc = ''
-
+        gotdata = 0
         for chan in guide.chan_list:
             for prog in chan.programs:
                 if prog.stop > mfrguidestart and prog.start < mfrnextguide:
@@ -159,6 +159,8 @@ class GenreResource(FreevoResource):
 
                     # figure out if in progress
 
+                    # use counter to see if we have data
+                    gotdata += 1
                     if got_schedule:
                         (result, message) = ri.isProgScheduled(prog, schedule)
                         if result:
@@ -243,6 +245,11 @@ class GenreResource(FreevoResource):
                     fv.tableCell(time.strftime('%H:%M', time.localtime(prog.start)), 'class="channel"')
                     fv.tableCell(time.strftime('%H:%M', time.localtime(prog.stop)), 'class="channel"')
                     fv.tableRowClose()
+
+        if gotdata == 0:
+            fv.tableRowOpen('class="chanrow"')
+            fv.tableCell('<center>NO SHOWS MATCHING CATEGORY</center>', 'class="utilhead" colspan="4"')
+            fv.tableRowClose()
         fv.tableClose()
         fv.res += pops
 
