@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2004/05/29 12:33:16  dischi
+# make it possible to access parent data
+#
 # Revision 1.72  2004/02/23 19:59:34  dischi
 # unicode fixes
 #
@@ -421,7 +424,9 @@ class Item:
                 return ''
             return '%d min' % (length / 60)
 
-
+        if attr[:7] == 'parent(' and attr[-1] == ')' and self.parent:
+            return self.parent[attr[7:-1]]
+            
         if attr[:4] == 'len(' and attr[-1] == ')':
             r = None
             if self.info.has_key(attr[4:-1]):
