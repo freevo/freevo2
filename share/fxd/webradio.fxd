@@ -182,6 +182,15 @@
 	  <link>http://www.mostlyclassical.com</link>
 	</info>
       </audio>
+      <audio title="Classical 96.3 FM Toronto">
+        <url>mms://38.112.16.114/c96</url>
+        <info>
+          <genre>Classical</genre>
+          <description>Making Life Sound Better</description>
+          <bitrate>128</bitrate>
+          <link>http://www.cfmx.com</link>
+        </info>
+      </audio>
       <info>
 	<genre>Classical</genre>
       </info>
