@@ -1,3 +1,8 @@
+#
+# menu.py - freevo menu handling system
+#
+# $Id$
+
 import sys, os, time
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc

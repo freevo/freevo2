@@ -3,6 +3,8 @@
 #
 # This file contains utility functions for Freevo
 #
+# $Id$
+
 import sys
 import socket, glob
 import random

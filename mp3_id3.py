@@ -1,7 +1,14 @@
+#
+# mp3_id3.py - MP3 ID handling
+#
+# $Id$
+
+
+
+
 # ID3.py version 1.2
 
 # Module for manipulating ID3 informational tags in MP3 audio files
-# $Id$
 
 # Written 2 May 1999 by Ben Gertzfield <che@debian.org>
 # This work is released under the GNU GPL, version 2 or later.

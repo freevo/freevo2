@@ -4,6 +4,7 @@
 # This is the class for using the OSD server. It sends simple text commands
 # over UDP/IP to the OSD server.
 #
+# $Id$
 
 import socket, time, sys
 

@@ -1,6 +1,10 @@
+#
+# rc.py - Remote control handling
+# 
 # This is the class for setting a up the remote control server.
 # It accepts simple text commands from the remote control client over UDP/IP.
 #
+# $Id$
 
 import socket, time, sys
 

@@ -1,3 +1,14 @@
+/*
+ * runapp.c - start a child app with signals enabled.
+ *
+ * The motivation for this simple application is that Python threads
+ * disables pretty much all signals. This leads to problems when spawning
+ * external children processes which will also have their signals disabled,
+ * and that's bad for many reasons.
+ *
+ * $Id$
+ */
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
