@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/07/01 19:10:45  dischi
+# add TV_RECORD_SERVER_GID
+#
 # Revision 1.49  2004/06/29 03:46:54  outlyer
 # Hide some print statements. If these were supposed to go into debug, I can
 # change that.
@@ -74,6 +77,7 @@ import config
 if __name__ == '__main__':
     try:
         if config.TV_RECORD_SERVER_UID and os.getuid() == 0:
+            os.setgid(config.TV_RECORD_SERVER_GID)
             os.setuid(config.TV_RECORD_SERVER_UID)
             os.environ['USER'] = pwd.getpwuid(os.getuid())[0]
             os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]

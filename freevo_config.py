@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.12
+LOCAL_CONF_VERSION  = 5.13
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -217,7 +217,10 @@ LOCAL_CONF_CHANGES = [
     (5.12,
      '''Added TV_RECORD_SERVER_UID to set the uid for the recordserver and
      TV_RECORDFILE_SUFFIX for the suffix. If your TV_RECORDFILE_MASK contains
-     the suffix, please remove it here''') ]
+     the suffix, please remove it here'''),
+    (5.13,
+     '''Added TV_RECORD_SERVER_GID to set the gid for the recordserver. If you
+     use TV_RECORD_SERVER_UID, the gui _must_ match one of the users gids''' ) ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -1216,8 +1219,9 @@ TV_RECORD_SERVER_IP = 'localhost'
 TV_RECORD_SERVER_PORT = 18001
 
 # If the recordserver runs as root, set the uid to the given one
-# after startup.
+# after startup. The gui must also match one of the users group ids
 TV_RECORD_SERVER_UID = 0
+TV_RECORD_SERVER_GID = 0
 
 # start every recording X minutes before scheduled,
 # and stop X minutes after scheduled - default to zero minutes.
