@@ -271,4 +271,4 @@ def umount(dir):
 
 def mount(dir):
     if not proc_mount(dir):
-        os.system("mount %s" % dir)
+        os.system("mount %s 2>/dev/null" % dir)
