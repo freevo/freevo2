@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/11 16:04:32  dischi
+# make an item callable (actions()[0][0])
+#
 # Revision 1.4  2002/11/27 20:22:19  dischi
 # Fixed some playlist problems. Sometimes the playlist stopped playing
 # after one item is finished. By playling a playlist again, it will start
@@ -133,6 +136,10 @@ class Item(MenuItem):
     def actions(self):
         return None
 
+    def __call__(self, arg=None, menuw=None):
+        if self.actions():
+            return self.actions()[0][0](arg=arg, menuw=menuw)
+        
     # eventhandler for this item
     def eventhandler(self, event, menuw=None):
         if event == rc.EJECT and self.media and menuw and \
