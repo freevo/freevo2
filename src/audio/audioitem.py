@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/05/16 13:17:45  outlyer
+# Bugfix for web radio station caching from Urmet J?nes <urmet@uninet.ee>
+#
 # Revision 1.23  2003/05/11 18:08:06  dischi
 # added AUDIO_FORMAT_STRING to format the audio items
 #
@@ -193,6 +196,7 @@ class AudioItem(Item):
                 print "   Year: " + str(self.year)
                 print " Length: " + str(self.length)
                 print "  Image: " + str(self.image)
+                print "    URL: " + str(self.url)
             except UnicodeError:
                 print "Oops.. Got UnicodeError.. doing nothing.. :)"
 
@@ -217,15 +221,16 @@ class AudioItem(Item):
             self.done       = obj.done
             self.pause      = obj.pause
             self.valid	    = obj.valid
+            self.url        = obj.url
 
 
     def dump(self):
         return ( self.title, self.album, self.artist, self.length,
-                 self.track, self.trackof, self.year )
+                 self.track, self.trackof, self.year, self.url )
 
     def restore(self, data):
         self.title, self.album, self.artist, self.length, self.track, \
-                    self.trackof, self.year = data
+                    self.trackof, self.year, self.url = data
 
     def sort(self, mode=None):
         """
@@ -254,7 +259,7 @@ class AudioItem(Item):
 
     def set_info_radio(self, filename):
         """
-        Sets the info variables with info from the mp3
+        Sets the info variables with info from the fxd
 
         Arguments: filename
           Returns: 1 if success
