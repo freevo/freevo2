@@ -37,15 +37,22 @@ init_rgb2yuv_tables()
 	for (i = 0; i < 256; i++) {
 		Y_R[i] = myround(0.299 * (double)i * 219.0 / 255.0 * (double)(1<<FP_BITS));
 		Y_G[i] = myround(0.587 * (double)i * 219.0 / 255.0 * (double)(1<<FP_BITS));
-		Y_B[i] = myround((0.114 * (double)i * 219.0 / 255.0 * (double)(1<<FP_BITS)) + (double)(1<<(FP_BITS-1)) + (16.0 * (double)(1<<FP_BITS)));
-                                                                                
-		U_R[i] = myround(-0.168736 * (double)i * 224.0 / 255.0 * (double)(1<<FP_BITS));
-		U_G[i] = myround(-0.331264 * (double)i * 224.0 / 255.0 * (double)(1<<FP_BITS));
-		U_B[i] = myround((0.500 * (double)i * 224.0 / 255.0 * (double)(1<<FP_BITS)) + (double)(1<<(FP_BITS-1)) + (128.0 * (double)(1<<FP_BITS))); 
-
+		Y_B[i] = myround((0.114 * (double)i * 219.0 / 255.0 * 
+				  (double)(1<<FP_BITS)) + (double)(1<<(FP_BITS-1)) + 
+				 (16.0 * (double)(1<<FP_BITS)));
+		U_R[i] = myround(-0.168736 * (double)i * 224.0 / 255.0 * 
+				 (double)(1<<FP_BITS));
+		U_G[i] = myround(-0.331264 * (double)i * 224.0 / 255.0 * 
+				 (double)(1<<FP_BITS));
+		U_B[i] = myround((0.500 * (double)i * 224.0 / 255.0 * 
+				  (double)(1<<FP_BITS)) + (double)(1<<(FP_BITS-1)) + 
+				 (128.0 * (double)(1<<FP_BITS))); 
 		V_R[i] = myround(0.500 * (double)i * 224.0 / 255.0 * (double)(1<<FP_BITS));
-		V_G[i] = myround(-0.418688 * (double)i * 224.0 / 255.0 * (double)(1<<FP_BITS));
-		V_B[i] = myround((-0.081312 * (double)i * 224.0 / 255.0 * (double)(1<<FP_BITS)) + (double)(1<<(FP_BITS-1)) + (128.0 * (double)(1<<FP_BITS))); 
+		V_G[i] = myround(-0.418688 * (double)i * 224.0 / 255.0 * 
+				 (double)(1<<FP_BITS));
+		V_B[i] = myround((-0.081312 * (double)i * 224.0 / 255.0 * 
+				  (double)(1<<FP_BITS)) + (double)(1<<(FP_BITS-1)) + 
+				 (128.0 * (double)(1<<FP_BITS))); 
 	}
 
 }
@@ -84,7 +91,8 @@ convert_raw_rgba_bytes(char *from_format, char *to_format,
 
 
 #define LOOP_START \
-	for (from_ptr = from_buf, to_ptr = to_buf; from_ptr < from_buf + w*h*from_bpp; from_ptr += from_bpp)
+	for (from_ptr = from_buf, to_ptr = to_buf; from_ptr < from_buf + \
+	       w*h*from_bpp; from_ptr += from_bpp)
 
 
 	// FIXME: pointless code duplication follows.

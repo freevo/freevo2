@@ -32,7 +32,8 @@ PyObject *imlib2_create(PyObject *self, PyObject *args)
 		if (!strcmp(from_format, "BGRA"))
 			image = imlib_create_image_using_copied_data(w, h, (void *)bytes);
 		else {
-			bytes = convert_raw_rgba_bytes(from_format, "BGRA", bytes, NULL, w, h);
+			bytes = convert_raw_rgba_bytes(from_format, "BGRA", bytes, 
+						       NULL, w, h);
 			image = imlib_create_image_using_copied_data(w, h, (void *)bytes);
 			free(bytes);
 		}
@@ -73,9 +74,6 @@ PyObject *imlib2_open(PyObject *self, PyObject *args)
 		    PyErr_Format(PyExc_IOError, "no loader for file format");
 		return NULL;
 	}
-	//imlib_context_set_image(image);
-	//imlib_image_set_has_alpha(1);
-	//imlib_image_get_data_for_reading_only();
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
 	o->image = image;
 	return (PyObject *)o;
@@ -159,7 +157,7 @@ PyMethodDef Imlib2_methods[] = {
     { "open", imlib2_open, METH_VARARGS }, 
     { "_shm_unlink", imlib2__shm_unlink, METH_VARARGS }, 
     { "_free_buffer", imlib2__free_buffer, METH_VARARGS }, 
-	{ NULL }
+    { NULL }
 };
 
 void init_Imlib2()
@@ -168,10 +166,10 @@ void init_Imlib2()
 
 	init_rgb2yuv_tables();
 	m = Py_InitModule("_Imlib2", Imlib2_methods);
-    Image_PyObject_Type.tp_new = PyType_GenericNew;
-    if (PyType_Ready(&Image_PyObject_Type) < 0)
-        return;
-    PyModule_AddObject(m, "Image", (PyObject *)&Image_PyObject_Type);
+	Image_PyObject_Type.tp_new = PyType_GenericNew;
+	if (PyType_Ready(&Image_PyObject_Type) < 0)
+	    return;
+	PyModule_AddObject(m, "Image", (PyObject *)&Image_PyObject_Type);
 	imlib_set_cache_size(1024*1024*4);
 	imlib_set_font_cache_size(1024*1024*2);
 }

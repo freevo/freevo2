@@ -46,7 +46,8 @@ PyObject *Display_PyObject__render( Display_PyObject *self, PyObject *args)
     Image_PyObject *img;
 	int dst_x = 0, dst_y = 0, src_x = 0, src_y = 0, 
 	    w = -1, h = -1, img_w, img_h, dither = 1, blend = 0;
-    if (!PyArg_ParseTuple(args, "O!|(ii)(ii)(ii)ii", &Image_PyObject_Type, &img, &dst_x, &dst_y, &src_x, &src_y, &w, &h, &dither, &blend))
+    if (!PyArg_ParseTuple(args, "O!|(ii)(ii)(ii)ii", &Image_PyObject_Type, 
+			  &img, &dst_x, &dst_y, &src_x, &src_y, &w, &h, &dither, &blend))
         return NULL;
 
 	imlib_context_set_image(((Image_PyObject *)img)->image);
@@ -63,7 +64,8 @@ PyObject *Display_PyObject__render( Display_PyObject *self, PyObject *args)
 	if (src_x == 0 && src_y == 0 && w == img_w && h == img_h)
 		imlib_render_image_on_drawable(dst_x, dst_y);
 	else
-		imlib_render_image_part_on_drawable_at_size(src_x, src_y, w, h, dst_x, dst_y, w, h);
+		imlib_render_image_part_on_drawable_at_size(src_x, src_y, w, h, dst_x, 
+							    dst_y, w, h);
 
 	Py_INCREF(Py_None);
 	return Py_None;

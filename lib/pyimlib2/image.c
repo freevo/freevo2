@@ -51,7 +51,6 @@ PyTypeObject Image_PyObject_Type = {
 void Image_PyObject__dealloc(Image_PyObject *self)
 {
 	imlib_context_set_image(self->image);
-//	fprintf(stderr, "IMLIB free image %s\n", imlib_image_get_filename());
 	imlib_free_image();
 	PyMem_DEL(self);
 }
@@ -74,22 +73,19 @@ PyObject *Image_PyObject__clear(PyObject *self, PyObject *args)
 	if (x+w > max_w) w = max_w-x;
 	if (y+h > max_h) h = max_h-y;
 
-	// TODO: make this faster.
+	/* FIXME: make it faster */
 	for (cur_y = y; cur_y < y + h; cur_y++)
 		memset(&data[cur_y*max_w*4+(x*4)], 0, 4*w);
-
 	imlib_image_put_back_data((DATA32 *)data);
+
 	Py_INCREF(Py_None);
 	return Py_None;
 }
 
+
 PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
 { 
 	int x, y, dst_w, dst_h, src_w, src_h;
-#if 0
-	int i;
-	unsigned char *imgbuf;
-#endif
 	Imlib_Image *image;
 	Image_PyObject *o;
 
@@ -99,21 +95,11 @@ PyObject *Image_PyObject__scale(PyObject *self, PyObject *args)
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	image = imlib_create_cropped_scaled_image(x, y, src_w, src_h, dst_w, dst_h);
 	if (!image) {
-		PyErr_Format(PyExc_RuntimeError, "Failed scaling image (%d, %d)", dst_w, dst_h);
+		PyErr_Format(PyExc_RuntimeError, "Failed scaling image (%d, %d)", 
+			     dst_w, dst_h);
 		return NULL;
 	}
 
-#if 0
-	// Imlib2 is broken.  It divides by 256 instead of 255 when blending.
-	// As a result, scaling an image where all pixels have alpha=255 will
-	// result in an image with alpha=254.
-	imlib_context_set_image(image);
-	imgbuf = imlib_image_get_data();
-	for (i = 3; i < (dst_w*dst_h*4); i += 4) {
-		if (*(imgbuf+i) == 254) *(imgbuf+i)+=1;
-	}
-	imlib_image_put_back_data((DATA32 *)imgbuf);
-#endif
 	o = PyObject_NEW(Image_PyObject, &Image_PyObject_Type);
 	o->image = image;
 	return (PyObject *)o;
@@ -128,7 +114,6 @@ PyObject *Image_PyObject__rotate(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "d", &angle))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
-	fprintf(stderr, "Rotate image by %f\n", angle);
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 
 	image = imlib_create_rotated_image(angle);
@@ -170,6 +155,7 @@ PyObject *Image_PyObject__flip(PyObject *self, PyObject *args)
 	Py_INCREF(Py_None);
 	return Py_None;
 }
+
 PyObject *Image_PyObject__clone(PyObject *self, PyObject *args)
 { 
 	Imlib_Image *image;
@@ -196,7 +182,9 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 	Imlib_Image *src_img;
 	Imlib_Color_Modifier cmod;
 
-	if (!PyArg_ParseTuple(args, "O!(ii)(ii)(ii)(ii)ii", &Image_PyObject_Type, &src, &src_x, &src_y, &src_w, &src_h, &dst_x, &dst_y, &dst_w, &dst_h, &src_alpha, &merge_alpha))
+	if (!PyArg_ParseTuple(args, "O!(ii)(ii)(ii)(ii)ii", &Image_PyObject_Type, 
+			      &src, &src_x, &src_y, &src_w, &src_h, &dst_x, &dst_y, 
+			      &dst_w, &dst_h, &src_alpha, &merge_alpha))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 
@@ -224,8 +212,8 @@ PyObject *Image_PyObject__blend(PyObject *self, PyObject *args)
 
 	imlib_context_set_blend( src_alpha == 256 ? 0 : 1);
 	imlib_blend_image_onto_image(src_img, merge_alpha, 
-			src_x, src_y, src_w, src_h, 
-			dst_x, dst_y, dst_w, dst_h);
+				     src_x, src_y, src_w, src_h, 
+				     dst_x, dst_y, dst_w, dst_h);
 	imlib_context_set_blend(1);
 	imlib_context_set_color_modifier(NULL);
 
@@ -265,9 +253,11 @@ PyObject *Image_PyObject__draw_mask(PyObject *self, PyObject *args)
 			unsigned char *mask_chunk = &mask_data[mask_pos],
 			              *dst_chunk = &dst_data[dst_pos],
 			              // Any way to optimize this?
-			              avg = (mask_chunk[0] + mask_chunk[1] + mask_chunk[2]) / 3;
+			              avg = (mask_chunk[0] + mask_chunk[1] + 
+					     mask_chunk[2]) / 3;
 
-			// Blend average (grayscale) pixel from the mask with the alpha channel of the image
+			// Blend average (grayscale) pixel from the mask with the 
+			// alpha channel of the image
 			int temp = (dst_chunk[3] * avg) + 0x80;
 			dst_chunk[3] = ((temp + (temp >> 8)) >> 8);
 			dst_chunk[3] = dst_chunk[3] >> 1;
@@ -285,17 +275,14 @@ PyObject *Image_PyObject__draw_text(PyObject *self, PyObject *args)
 	char *text;
 	Font_PyObject *font;
 
-	if (!PyArg_ParseTuple(args, "O!iis(iiii)", &Font_PyObject_Type, &font, &x, &y, &text, &r, &g, &b, &a))
+	if (!PyArg_ParseTuple(args, "O!iis(iiii)", &Font_PyObject_Type, &font, &x, 
+			      &y, &text, &r, &g, &b, &a))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_context_set_font(((Font_PyObject *)font)->font);
 	
 	imlib_context_set_color(r, g, b, a);
-	//descent = imlib_get_maximum_font_descent();
-	//inset = imlib_get_text_inset(text);
-//	y = y + descent + inset + 2;
-	//printf("TEXT INSET: %d ASC %d  DESC %d\n", imlib_get_text_inset(text), imlib_get_font_ascent(), imlib_get_font_descent());
 	imlib_text_draw_with_return_metrics(x, y, text, &w, &h, &advance_w, &advance_h);
 	return Py_BuildValue("(llll)", w, h, advance_w, advance_h);
 }
@@ -309,14 +296,12 @@ PyObject *Image_PyObject__draw_rectangle(PyObject *self, PyObject *args)
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
 	imlib_image_set_has_alpha(1);
-//	imlib_context_set_operation(IMLIB_OP_SUBTRACT);
 	imlib_context_set_color(r, g, b, a);
 	if (!fill)
 		imlib_image_draw_rectangle(x, y, w, h);
 	else
 		imlib_image_fill_rectangle(x, y, w, h);
 
-//	imlib_image_set_has_alpha(1);
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -325,7 +310,8 @@ PyObject *Image_PyObject__draw_ellipse(PyObject *self, PyObject *args)
 { 
 	int xc, yc, ea, eb, r, g, b, a, fill = 0;
 
-	if (!PyArg_ParseTuple(args, "iiii(iiii)|i", &xc, &yc, &ea, &eb, &r, &g, &b, &a, &fill))
+	if (!PyArg_ParseTuple(args, "iiii(iiii)|i", &xc, &yc, &ea, &eb, 
+			      &r, &g, &b, &a, &fill))
                 return PyErr_SetString(PyExc_AttributeError, ""), (PyObject*)NULL;
 
 	imlib_context_set_image(((Image_PyObject *)self)->image);
@@ -456,9 +442,6 @@ PyObject *Image_PyObject__to_sdl_surface(PyObject *self, PyObject *args)
 	return PyErr_SetString(PyExc_ValueError, "pygame support missing"), (PyObject*)NULL;
 #endif
 }
-
-////////////////////////////////////////////////////////////////////////////
-
 
 PyObject *Image_PyObject__save(PyObject *self, PyObject *args)
 {
