@@ -37,6 +37,7 @@ import pyepg
 
 import sysconfig
 import config
+import plugin
 
 log = logging.getLogger('config')
 
@@ -74,6 +75,30 @@ def add_uri(channel, uri):
         channel.uri.append(uri)
 
 
+def get_uri(channel, card):
+    """
+    Return something to access this channel with based on a particular
+    card.
+    """
+    for u in channel.uri:
+        device, uri = u.split(':')
+        if device == card:
+            return uri
+
+    # If all else fails.
+    return channel.access_id
+
+
+def player(channel):
+    for u in channel.uri:
+        device, uri = u.split(':')
+        # try all internal URIs
+        for p in plugin.getbyname(plugin.TV, True):
+            # FIXME: better handling for rate == 1 or 2
+            if p.rate(channel, device, uri):
+                return p, device, uri
+    return None
+
 
 def refresh():
     log.info('Detecting TV channels.')
@@ -83,6 +108,8 @@ def refresh():
     
     for c in pyepg.channels:
         c.uri = []
+        c.get_uri = get_uri
+        c.player  = player
         if isinstance(c.access_id, (list, tuple)):
             for a_id in c.access_id:
                 add_uri(c, a_id)
