@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/08/02 12:52:41  rshortt
+# Don't need to set height.
+#
 # Revision 1.6  2003/07/13 19:58:01  rshortt
 # Fix some display bugs and remove access to favorites until I fix some bugs.
 #
@@ -274,7 +277,7 @@ class ScheduledRecordings(PopupBox):
             return self.results.eventhandler(event)
         elif event == em.INPUT_ENTER:
             ProgramDisplay(prog=self.results.get_selected_item().value,
-                           context='recording', height=360).show()
+                           context='recording').show()
             return
         elif event == em.INPUT_EXIT:
             self.destroy()
