@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2002/08/07 18:54:08  dischi
+# changed the "mounting..." box to osd.popup_box
+#
 # Revision 1.19  2002/07/31 08:07:23  dischi
 # Moved the XML movie file parsing in a new file. Both movie.py and
 # config.py use the same code now.
@@ -119,15 +122,7 @@ def eventhandler(event = None, menuw=None, arg=None):
 
         if tray_open:
             if DEBUG: print 'Inserting %s' % rom
-
-            # XXX FIXME: this doesn't look very good, we need
-            # XXX some sort of a pop-up widget
-            osd.drawbox(osd.width/2 - 180, osd.height/2 - 30, osd.width/2 + 180,\
-                        osd.height/2+30, width=-1,
-                        color=((60 << 24) | osd.COL_BLACK))
-            osd.drawstring('mounting %s' % rom, \
-                           osd.width/2 - 160, osd.height/2 - 10,
-                           fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+            osd.popup_box( 'mounting %s' % rom )
             osd.update()
             
             # close the tray and mount the cd
