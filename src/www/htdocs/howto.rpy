@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/20 14:11:11  dischi
+# find docs for an installed version
+#
 # Revision 1.1  2003/09/12 22:00:00  dischi
 # add more documentation
 #
@@ -39,10 +42,12 @@
 
 import sys, os
 
+import config
+import version
 from www.web_types import HTMLResource, FreevoResource
 import util, config
 
-SEARCH_PATH = (os.path.join(config.SHARE_DIR, 'doc'),
+SEARCH_PATH = (os.path.join(config.SHARE_DIR, '../freevo-%s' % version.__version__),
                os.path.join(config.SHARE_DIR, '../Docs'))
 
 class HowtoResource(FreevoResource):
