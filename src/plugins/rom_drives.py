@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2004/02/05 20:47:33  dischi
+# fix audio disc info
+#
 # Revision 1.53  2004/01/31 16:38:23  dischi
 # changes because of mediainfo changes
 #
@@ -460,7 +463,7 @@ class Identify_Thread(threading.Thread):
             media.item.media = media
             if data['title']:
                 media.item.name = data['title']
-            media.item.info.mmdata = data
+            media.item.info = disc_info
             return
 
         os.close(fd)
