@@ -641,7 +641,8 @@ VIDEO_SHOW_DATA_DIR = None
 # 
 VIDEO_MPLAYER_SUFFIX = [ 'avi', 'mpg', 'mpeg', 'wmv', 'bin', 'rm',
                          'divx', 'ogm', 'vob', 'asf', 'm2v', 'm2p',
-                         'mp4', 'viv', 'nuv', 'mov', 'iso' ]
+                         'mp4', 'viv', 'nuv', 'mov', 'iso',
+                         'nsv', 'mkv' ]
 
 #
 # The list of filename suffixes that are used to match the files that
@@ -682,7 +683,7 @@ AUDIO_ITEMS = None
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
 # 
-AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac']
+AUDIO_SUFFIX     = [ 'mp3', 'ogg', 'wav','m4a', 'wma', 'aac', 'flac', 'mka' ]
 
 #
 # Regular expression used to recognize filenames which are likely to be 
