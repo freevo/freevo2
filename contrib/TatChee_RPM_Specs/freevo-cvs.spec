@@ -1,7 +1,7 @@
 %define geometry 800x600
-%define display  x11
-%define tv_norm  ntsc
-%define chanlist us-cable
+%define display  sdl
+%define tv_norm  pal
+%define chanlist europe-west
 %define _cvsdate 20021024
 Summary:	Freevo
 Name:		freevo
@@ -124,7 +124,6 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %dir %{_prefix}/fbcon
 %attr(755,root,root) %dir %{_prefix}/gui
 %attr(755,root,root) %dir %{_prefix}/helpers
-%attr(755,root,root) %dir %{_prefix}/icons
 %attr(755,root,root) %dir %{_prefix}/plugins
 %attr(755,root,root) %dir %{_prefix}/plugins/cddb
 %attr(755,root,root) %dir %{_prefix}/plugins/weather
@@ -154,7 +153,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(644,root,root) %{_prefix}/gui/*
 %attr(644,root,root) %{_prefix}/tv/*
 %attr(644,root,root) %{_prefix}/helpers/*
-%attr(644,root,root) %{_prefix}/icons/*
+%attr(755,root,root) %{_prefix}/icons
 %attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
 %attr(644,root,root) %{_prefix}/plugins/cddb/*.py
 %attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
@@ -209,6 +208,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Sat Oct 26 2002 TC Wan <tcwan@cs.usm.my>
+- Fixed permissions problem for icons/64x64 directory
+
 * Tue Oct 15 2002 TC Wan <tcwan@cs.usm.my>
 - Moved freevo.conf to /etc/freevo where freevo_config.py resides
 - Defaulted TV settings to ntsc, us-cable to match TV guide

@@ -5,7 +5,7 @@
 Summary:	Freevo
 Name:		freevo
 Version:	1.2.6
-Release:	2
+Release:	3
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
@@ -126,7 +126,6 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %dir %{_prefix}/fbcon
 %attr(755,root,root) %dir %{_prefix}/gui
 %attr(755,root,root) %dir %{_prefix}/helpers
-%attr(755,root,root) %dir %{_prefix}/icons
 %attr(755,root,root) %dir %{_prefix}/plugins
 %attr(755,root,root) %dir %{_prefix}/plugins/cddb
 %attr(755,root,root) %dir %{_prefix}/plugins/weather
@@ -154,7 +153,7 @@ find %{_prefix} -name "*.pyc" |xargs rm -f
 %attr(755,root,root) %{_prefix}/fbcon/matroxset
 %attr(644,root,root) %{_prefix}/gui/*
 %attr(644,root,root) %{_prefix}/helpers/*
-%attr(644,root,root) %{_prefix}/icons/*
+%attr(755,root,root) %{_prefix}/icons
 %attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
 %attr(644,root,root) %{_prefix}/plugins/cddb/*.py
 %attr(644,root,root) %{_prefix}/plugins/weather/librarydoc.txt
@@ -209,6 +208,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Sat Oct 26 2002 TC Wan <tcwan@cs.usm.my>
+- Fixed permissions problem for icons/64x64 directory
+
 * Tue Oct 15 2002 TC Wan <tcwan@cs.usm.my>
 - Moved freevo.conf to /etc/freevo where freevo_config.py resides
 - Defaulted TV settings to ntsc, us-cable to match TV guide
