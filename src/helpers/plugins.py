@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/09/12 20:40:04  dischi
+# cosmetic change
+#
 # Revision 1.3  2003/09/12 20:33:18  dischi
 # add html output
 #
@@ -198,7 +201,7 @@ def info_html(plugin_name, all_plugins):
                         type = p[1]
                         if not type:
                             type = 'default'
-                        ret += 'type=%s, level=%s, args=%s' % (type, p[2], p[3])
+                        ret += 'type=%s, level=%s, args=%s<br>' % (type, p[2], p[3])
                 ret += '</p><br>'
             else:
                 ret += '<p>The plugin is not activated in the current setting</p>'
