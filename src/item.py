@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2003/07/13 12:45:03  dischi
+# fixed getattr when the attr is in info but empty
+#
 # Revision 1.20  2003/07/09 20:36:49  gsbarbieri
 # anged Item.getattr() behaviour, now "len(attr)" returns an integer.
 # There should be no problems here since it's only used in info_area
@@ -210,20 +213,22 @@ class Item:
                 try:
                     r = getattr(self,attr[4:-1])
                 except:
-                    return ''
+                    return 0
                 
             if r != None:
-                #return str(len(r))
                 return len(r)
 
         else:
+            r = None
             try:
                 r = self.info[attr]
             except:
+                pass
+            if not r:
                 try:
                     r = getattr(self,attr)
                 except:
-                    return ''
+                    pass
                 
             if r != None and str(r):
                 return str(r)
