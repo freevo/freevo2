@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/28 17:54:12  dischi
+# take icons from theme if available
+#
 # Revision 1.11  2003/10/17 18:51:33  dischi
 # check for default with description area
 #
@@ -80,6 +83,7 @@
 
 
 import copy
+import os
 import pygame
 
 import osd
@@ -807,8 +811,13 @@ class Skin_Area:
 
     def load_image(self, image, val, redraw=TRUE):
         """
-        load an image (use self.imagecache
+        load an image (use self.imagecache)
         """
+        if image.find(config.ICON_DIR) == 0 and image.find(self.settings.icon_dir) == -1:
+            new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
+            if os.path.isfile(new_image):
+                image = new_image
+
         if isinstance(val, tuple) or isinstance(val, list):
             w = val[0]
             h = val[1]
