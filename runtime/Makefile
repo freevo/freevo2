@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/11/10 01:17:04  rshortt
+# Incriment runtime version.
+#
 # Revision 1.23  2003/11/10 01:09:42  rshortt
 # Turn the runapp's DEBUG on.
 #
@@ -104,7 +107,7 @@
 
 include package_list.mk
 
-RUNTIME_VERSION="0.2"
+RUNTIME_VERSION="0.3"
 
 COPY_BASE=`pwd`
 
