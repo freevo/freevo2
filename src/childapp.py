@@ -9,65 +9,18 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/05/09 14:16:16  dischi
+# let the child stdout handled by main
+#
 # Revision 1.51  2004/03/14 11:43:08  dischi
 # prevent crash
 #
 # Revision 1.50  2004/02/19 04:43:47  gsbarbieri
-# Fix string problems and add a work around to avoid isAlive() being called during __init__()
+# Fix string problems and add a work around to avoid isAlive() being called
+# during __init__()
 #
 # Revision 1.49  2004/01/12 19:52:46  dischi
 # store return value for ChildApp2
-#
-# Revision 1.48  2003/12/13 14:34:43  outlyer
-# Make this clear; we are using stop_osd to figure out if we're playing
-# video or not. It's got nothing to do with stopping the actual OSD :)
-#
-# Revision 1.47  2003/12/13 14:29:45  outlyer
-# The purpose of checking for "stop_osd" is to figure out if it's a video
-# file; it's not to do with the config variable, because we need to post
-# VIDEO_START/VIDEO_END for the autocolor plugin regardless of whether or
-# not we're going to shut down the display.
-#
-# Revision 1.46  2003/12/13 10:47:11  dischi
-# better stop for new ChildApp2 children
-#
-# Revision 1.45  2003/12/10 18:58:44  dischi
-# Added ChildApp2 which is a ChildApp including the code in ChildThread to
-# avoid threads when they are not needed to prevert crashes because of bad
-# thread timing. ALL plugins using ChildThread should convert the code and
-# ChildThread should be removed after that.
-#
-# Revision 1.44  2003/12/06 17:50:52  mikeruelle
-# a small change. gonna use childapp in command.py soon. allows me to change
-# filenames to ones command.py looks for
-#
-# Revision 1.43  2003/11/28 20:23:43  dischi
-# renamed more config variables
-#
-# Revision 1.42  2003/11/22 15:30:33  dischi
-# childapp can now log. Please remove the MPLAYER_DEBUG from the players
-#
-# Revision 1.41  2003/11/11 17:59:03  dischi
-# remove empty vals from app list
-#
-# Revision 1.40  2003/11/08 13:18:23  dischi
-# support for unicode start strings
-#
-# Revision 1.39  2003/11/02 12:01:37  dischi
-# remove debug
-#
-# Revision 1.38  2003/11/02 09:24:34  dischi
-# Check for libs and make it possible to install runtime from within
-# freevo
-#
-# Revision 1.37  2003/10/27 17:39:35  dischi
-# just to be save
-#
-# Revision 1.36  2003/10/23 17:57:23  dischi
-# add kill() function to kill the thread
-#
-# Revision 1.35  2003/10/22 17:22:36  dischi
-# better stop() exception handling
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -108,9 +61,12 @@ import util
 from event import *
 import rc
 
+# list of all ChildApp (internal use)
 __all_childapps__ = []
 
-freevo_shutdown = False
+# list of all running ChildApp2 children
+running_children = []
+
 
 def shutdown():
     """
@@ -118,14 +74,12 @@ def shutdown():
     """
     global __all_childapps__
     global running_children
-    global freevo_shutdown
     
     if not len(__all_childapps__):
         return
         
     print '%d child(s) still running, terminate them' % len(__all_childapps__)
 
-    freevo_shutdown = True
     while running_children:
         print 'shutting down %s' % running_children[0].binary
         running_children[0].stop()
@@ -133,9 +87,15 @@ def shutdown():
         print 'shutting down %s' % __all_childapps__[0].binary
         __all_childapps__[0].kill()
 
+
+
         
 class ChildApp:
+    """
+    Base class for started child processes
+    """
     ready = False
+
     def __init__(self, app, debugname=None, doeslogging=0):
         global __all_childapps__
         __all_childapps__.append(self)
@@ -257,7 +217,6 @@ class ChildApp:
         return self.t1.isAlive() or self.t2.isAlive()
         
 
-
     def wait(self):
         return util.popen3.waitpid(self.child.pid)
 
@@ -355,7 +314,9 @@ class ChildApp:
 
         
 class Read_Thread(threading.Thread):
-
+    """
+    Thread for reading stdout or stderr from the child
+    """
     def __init__(self, name, fp, callback, logger=None, doeslogging=0):
         threading.Thread.__init__(self)
         self.name = name
@@ -373,17 +334,16 @@ class Read_Thread(threading.Thread):
                 print String(_( 'logging child to "%s"' )) % logger
             except IOError:
                 print
-                print String(_('ERROR')) + ': ' + String(_( 'Cannot open "%s" for logging!')) % logger
-                print String(_('Set CHILDAPP_DEBUG=0 in local_conf.py, or make %s writable!' )) % \
-                      config.LOGDIR
+                print String(_('ERROR')) + ': ' + \
+                      String(_( 'Cannot open "%s" for logging!')) % logger
+                print String(_('Set CHILDAPP_DEBUG=0 in local_conf.py, '+\
+                               'or make %s writable!' )) % config.LOGDIR
             
         
     def run(self):
         try:
             self._handle_input()
-        except IOError:
-            pass
-        except ValueError:
+        except (IOError, ValueError):
             pass
 
 
@@ -400,7 +360,7 @@ class Read_Thread(threading.Thread):
                     self.logger.close()
                 break
             else:
-                data = data.replace('\r', '\n')
+                data  = data.replace('\r', '\n')
                 lines = data.split('\n')
 
                 # Only one partial line?
@@ -410,7 +370,7 @@ class Read_Thread(threading.Thread):
                     # Combine saved data and first line, send to app
                     if self.logger:
                         self.logger.write(saved + lines[0]+'\n')
-                    self.callback(saved + lines[0])
+                    rc.callback(self.callback, saved + lines[0])
                     saved = ''
 
                     # There's one or more lines + possibly a partial line
@@ -422,154 +382,21 @@ class Read_Thread(threading.Thread):
                         for line in lines[1:-1]:
                             if self.logger:
                                 self.logger.write(line+'\n')
-                            self.callback(line)
+                            rc.callback(self.callback, line)
                     else:
                         # Send all lines to the app
                         for line in lines[1:]:
                             if self.logger:
                                 self.logger.write(line+'\n')
-                            self.callback(line)
+                            rc.callback(self.callback, line)
                         
 
 
-class DummyApp:
-    def __init__(self, name=None, parameter=None):
-        self.app_name  = name
-        self.parameter = parameter
-        
-    def write(self, string):
-        pass
-
-        
-class ChildThread(threading.Thread):
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.mode        = 'idle'
-        self.mode_flag   = threading.Event()
-        self.stop_osd    = False
-        self.app         = DummyApp()
-        self.manual_stop = False
-        
-        self.setDaemon(1)
-        threading.Thread.start(self)
-
-
-    def start(self, app, param):
-        """
-        set thread to play mode
-        """
-        self.app         = DummyApp(app, param)
-        self.mode        = 'play'
-        self.manual_stop = False
-        self.mode_flag.set()
-
-
-    def stop(self, cmd=None):
-        if not hasattr(self.app, 'child'):
-            for t in traceback.extract_stack():
-                if t[0].find('playlist') >= 0:
-                    raise OSError
-
-            print 'Tried to stop child when no child is running right now'
-            print 'Please send a bug report with the following trace to the'
-            print 'Freevo developers'
-            traceback.print_stack()
-            return
-
-        if config.DEBUG > 1:
-            _debug_('got stop command')
-            traceback.print_stack()
-            
-        if cmd and self.app.isAlive():
-            self.manual_stop = True
-            _debug_('sending exit command to app')
-            self.app.write(cmd)
-            # wait for the app to terminate itself
-            for i in range(20):
-                if not self.app.isAlive():
-                    break
-                time.sleep(0.1)
-
-        self.mode = 'stop'
-        self.mode_flag.set()
-        while self.mode == 'stop':
-            # we are the main thread, we should call the real waitpid()
-            util.popen3.waitpid()
-            time.sleep(0.1)
-
-
-    def kill(self):
-        try:
-            self.stop()
-        except OSError:
-            pass
-        self.mode = 'kill'
-        self.mode_flag.set()
-        while self.mode != 'killed':
-            pass
-        
-
-    def run(self):
-        global freevo_shutdown
-        while 1:
-            if self.mode == 'idle':
-                self.mode_flag.wait()
-                self.mode_flag.clear()
-
-            elif self.mode == 'kill':
-                self.mode = 'killed'
-                return
-            
-            elif self.mode == 'play':
-
-                if self.stop_osd and config.OSD_STOP_WHEN_PLAYING:
-                    osd.stop()
-
-                self.app = self.app.app_name(self.app.parameter)
-                
-                if hasattr(self.app, 'item'):
-                    rc.post_event(Event(PLAY_START, arg=self.app.item))
-               
-                if self.stop_osd:       # Implies a video file
-                    rc.post_event(Event(VIDEO_START))
-
-                while self.mode == 'play' and self.app.isAlive():
-                    time.sleep(0.1)
-
-                # inform Freevo that the app stopped itself
-                if self.mode == 'play' and not self.manual_stop:
-                    if hasattr(self.app, 'stopped'): 
-                        self.app.stopped()
-                    else:
-                        _debug_('app has no stopped function, send PLAY_END')
-                        rc.post_event(PLAY_END)
-
-                if not freevo_shutdown:
-                    while self.mode == 'play':
-                        _debug_('waiting for main to be ready for the killing', 2)
-                        time.sleep(0.1)
-
-                    # kill the app
-                    self.app.kill()
-
-                    # Ok, we can use the OSD again.
-                    if self.stop_osd and config.OSD_STOP_WHEN_PLAYING:
-                        osd.restart()
-
-                    if self.stop_osd:       # Implies a video file
-                        rc.post_event(Event(VIDEO_END))
-
-                self.mode = 'idle'
-
-            else:
-                self.mode = 'idle'
-
-
-
-running_children = []
 
 class ChildApp2(ChildApp):
+    """
+    Enhanced version of ChildApp handling most playing stuff
+    """
     def __init__(self, app, debugname=None, doeslogging=0, stop_osd=2):
         global running_children
         running_children.append(self)
@@ -595,10 +422,16 @@ class ChildApp2(ChildApp):
 
 
     def stop_event(self):
+        """
+        event to send on stop
+        """
         return PLAY_END
 
 
     def wait(self):
+        """
+        wait for the child process to stop
+        """
         try:
             pid, status = os.waitpid(self.child.pid, os.WNOHANG)
         except OSError:
@@ -612,6 +445,9 @@ class ChildApp2(ChildApp):
     
         
     def stop(self, cmd=''):
+        """
+        stop the child
+        """
         try:
             global running_children
             running_children.remove(self)
@@ -639,6 +475,9 @@ class ChildApp2(ChildApp):
 
         
     def poll(self):
+        """
+        stop everything when child is dead
+        """
         if not self.isAlive():
             rc.post_event(self.stop_event())
             self.stop()

@@ -1,6 +1,6 @@
 #if 0 /*
 # -----------------------------------------------------------------------
-# rc.py - Remote control handling
+# rc.py - Remote control / Event and Callback handling
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/05/09 14:16:16  dischi
+# let the child stdout handled by main
+#
 # Revision 1.30  2004/02/28 17:30:59  dischi
 # fix crash for helper
 #
@@ -100,7 +103,11 @@ def set_context(context):
     get_singleton().set_context(context)
 
 
+def callback(function, *arg):
+    get_singleton().one_time_callbacks.append((function, arg))
+    
 
+# --------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------
 # internal classes of this module
@@ -215,6 +222,7 @@ class Lirc:
                 return code
 
         
+# --------------------------------------------------------------------------------
 
 class Keyboard:
     """
@@ -235,6 +243,7 @@ class Keyboard:
         return self.callback(rc.context != 'input')
 
 
+# --------------------------------------------------------------------------------
 
 class Network:
     """
@@ -263,6 +272,7 @@ class Network:
             return None
 
 
+# --------------------------------------------------------------------------------
     
 class RemoteControl:
     """
@@ -291,7 +301,8 @@ class RemoteControl:
         self.context                  = 'menu'
         self.queue                    = []
         self.event_callback           = None
-
+        self.one_time_callbacks       = []
+        
 
     def set_app(self, app, context):
         self.app     = app
@@ -335,6 +346,11 @@ class RemoteControl:
 
     
     def poll(self):
+        while self.one_time_callbacks:
+            callback, arg = self.one_time_callbacks[0]
+            self.one_time_callbacks.pop()
+            callback(*arg)
+        
         if len(self.queue):
             ret = self.queue[0]
             del self.queue[0]
