@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/10/06 19:13:07  dischi
+# remove util.open3, move run and stdout to misc for now
+#
 # Revision 1.45  2004/08/27 14:27:31  dischi
 # prevent crash for bad files
 #
@@ -61,7 +64,7 @@ import os, sys
 import string, re
 import copy
 import htmlentitydefs
-
+import popen2
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
 import config
@@ -553,3 +556,47 @@ class SynchronizedObject:
         except KeyError:
             return getattr(self.__obj, name)
 
+def stdout(app):
+    """
+    start app and return the stdout
+    """
+    ret = []
+    child = popen2.Popen3(app, 1, 100)
+    while(1):
+        data = child.fromchild.readline()
+        if not data:
+            break
+        ret.append(data)
+    child.wait()
+    child.fromchild.close()
+    child.childerr.close()
+    child.tochild.close()
+    return ret
+
+
+def run(app, object, signal=15):
+    """
+    run a child until object.abort is True. Than kill the child with
+    the given signal
+    """
+    if isinstance(app, str) or isinstance(app, unicode):
+        print 'WARNING: popen.run with string as app'
+        print 'This may cause some problems with threads'
+        
+    child = popen2.Popen3(app, 1, 100)
+    child.childerr.close()
+    child.fromchild.close()
+    while(1):
+        time.sleep(0.1)
+        if object.abort:
+            os.kill(child.pid, signal)
+
+        try:
+            pid = os.waitpid(child.pid, os.WNOHANG)[0]
+        except OSError:
+            break
+        
+        if pid:
+            break
+        
+    child.tochild.close()

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/10/06 19:13:07  dischi
+# remove util.open3, move run and stdout to misc for now
+#
 # Revision 1.20  2004/09/07 18:52:51  dischi
 # move thumbnail to extra file
 #
@@ -87,7 +90,6 @@ if sys.argv[0].find('setup.py') == -1:
     
     import fxdparser
     import objectcache
-    import popen3
     
     __builtin__.__dict__['vfs']     = vfs
     __builtin__.__dict__['Unicode'] = Unicode

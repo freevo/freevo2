@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2004/10/06 19:13:07  dischi
+# remove util.open3, move run and stdout to misc for now
+#
 # Revision 1.17  2004/10/03 15:55:26  dischi
 # adjust to new popup code
 #
@@ -67,7 +70,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     make a snapshot of the videofile at position pos to imagefile
     """
     import config
-    import popen3
+    import misc
     import Image
     import util
     import vfs
@@ -93,8 +96,8 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     if pos != None:
         args.append(str(pos))
 
-    out = popen3.stdout([os.environ['FREEVO_SCRIPT'], 'execute',
-                         os.path.abspath(__file__) ] + args)
+    out = misc.stdout([os.environ['FREEVO_SCRIPT'], 'execute',
+                       os.path.abspath(__file__) ] + args)
     if out:
         for line in out:
             print line

@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/10/06 19:14:08  dischi
+# remove util.open3, move run and stdout to misc for now
+#
 # Revision 1.38  2004/08/13 02:24:25  outlyer
 # Bugfix for a crash; a fairly annoying place to have a problem since it's not
 # even functional code, just a debug with the wrong variable.
@@ -89,8 +92,6 @@ import eventhandler
 
 from gui import AlertBox
 from event import *
-
-from util import popen3
 
 # Included to be able to access the info for Audio CDs
 import mmpython
@@ -398,7 +399,7 @@ class main_backup_thread(threading.Thread):
             _debug_('cdparanoia:  %s' % cdparanoia_command)
 
             # Have the OS execute the CD Paranoia rip command
-            popen3.run(cdparanoia_command, self, 9)
+            util.run(cdparanoia_command, self, 9)
             if self.abort:
                 eventhandler.post(Event(OSD_MESSAGE, arg=_('Ripping aborted')))
                 self.current_track = -1
@@ -416,7 +417,7 @@ class main_backup_thread(threading.Thread):
                 cmd = cmd.split(' ') + [ wav_file, output ]
 
                 _debug_('lame: %s' % cmd)
-                popen3.run(cmd, self, 9)
+                util.run(cmd, self, 9)
 
                 try:
                     if not self.abort:
@@ -439,7 +440,7 @@ class main_backup_thread(threading.Thread):
                         '-l', album, wav_file, '-o', output ]
 
                 _debug_('oggenc_command: %s' % cmd)
-                popen3.run(cmd, self, 9)
+                util.run(cmd, self, 9)
 
 
             # Build the flacenc command
@@ -456,7 +457,7 @@ class main_backup_thread(threading.Thread):
 
                 _debug_('flac_command: %s' % (config.FLAC_CMD))
                 _debug_('metaflac    : %s' % (metaflac_command))
-                popen3.run(cmd, self, 9)
+                util.run(cmd, self, 9)
 
                 if not self.abort:
                     os.system(metaflac_command)
