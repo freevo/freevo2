@@ -145,16 +145,15 @@ ft_puts (char *pFontFilename, int ptsize, int x, int y,
   
 #ifdef TEST
 
-#define DEF_FONT "./AOASWFTE.TTF"
-
 int
 main (int ac, char *av[])
 {
-   char *pFont = DEF_FONT;
+   char *pFont = av[1];
 
 
-   if (ac == 2) {
-      pFont = av[1];
+   if (ac != 2) {
+      fprintf (stderr, "Usage: %s <fontname.ttf>\n", av[0]);
+      exit (1);
    }
 
    ft_puts (pFont, 64, 0, 0, 0, "TESTing...");
