@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.110  2004/02/05 19:55:24  dischi
+# make name a unicode object
+#
 # Revision 1.109  2004/02/02 19:59:38  dischi
 # fixed a crash for tv recorded shows
 #
@@ -171,9 +174,9 @@ class DirItem(Playlist):
         self.files.append(directory)
         
         if name:
-            self.name = name
+            self.name = Unicode(name)
         else:
-            self.name = os.path.basename(directory)
+            self.name = Unicode(os.path.basename(directory))
             
         self.dir  = os.path.abspath(directory)
         self.info = mediainfo.get_dir(directory)
@@ -261,7 +264,7 @@ class DirItem(Playlist):
             return
         
         # read attributes
-        self.name = fxd.getattr(node, 'title', self.name)
+        self.name = Unicode(fxd.getattr(node, 'title', self.name))
 
         image = fxd.childcontent(node, 'cover-img')
         if image and vfs.isfile(os.path.join(self.dir, image)):
