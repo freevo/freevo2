@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2002/10/28 21:52:20  dischi
+# Fixed a bug that DrawMP3 is called when we start a movie and
+# prev. listened to music and it stopped by itself (rc.PLAY_END).
+#
 # Revision 1.42  2002/10/24 05:27:10  outlyer
 # Updated audioinfo to use new ID3v2, ID3v1 support. Much cleaner, and uses
 # the eyed3 library included. Notable changes:
@@ -357,6 +361,7 @@ class MPlayer:
                 self.play(self.mode, file, self.playlist, self.repeat)
         elif event == rc.PLAY_END or event == rc.RIGHT:
             self.stop()
+            self.thread.audioinfo = None
             if self.playlist == []:
                 rc.app = None
                 menuwidget.refresh()
