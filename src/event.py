@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.39  2004/02/06 01:10:23  mikeruelle
+# it is nice to have zero in tvtime
+#
 # Revision 1.38  2004/02/05 14:23:49  outlyer
 # Patch from Viggo Fredriksen
 #
@@ -357,6 +360,7 @@ TV_EVENTS = {
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
     'MUTE'      : MIXER_MUTE,
+    '0'         : INPUT_0,
     '1'         : INPUT_1,
     '2'         : INPUT_2,
     '3'         : INPUT_3,
