@@ -260,7 +260,8 @@ if image:
 
 # insert filenames and video type
 
-i.write("    <video>\n")
+i.write("    <video>\n\
+      <mplayer_options></mplayer_options>\n")
 
 try:
     if sys.argv[index] == "-vcd":
@@ -274,6 +275,7 @@ try:
         index += 1
 except IndexError:
     pass
+
 
 if index > 0:
     i.write  ("      <files>\n")
