@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/08/11 10:36:23  dischi
+# bugfix
+#
 # Revision 1.3  2002/08/11 09:37:04  dischi
 # A test skin for the pyGame interface. Some code is taken from
 # krister1:
@@ -174,7 +177,8 @@ class Skin(skin_main1.Skin):
                     if menu.selected == item:
                         thumb = util.getExifThumbnail(image, val.cover_image.width, \
                                                       val.cover_image.height)
-                        osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
+                        if thumb:
+                            osd.drawbitmap(thumb, val.cover_image.x, val.cover_image.y)
                 elif type == 'movie' and val.cover_movie.visible:
                     image_x = val.cover_movie.x
                     if menu.selected == item:
