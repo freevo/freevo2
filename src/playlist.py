@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/04/21 13:01:48  dischi
+# handle events without eventhandler
+#
 # Revision 1.14  2003/04/20 12:43:32  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -298,6 +301,7 @@ class Playlist(Item):
 
 
     def eventhandler(self, event, menuw=None):
+        
         if not menuw:
             menuw = self.menuw
             
@@ -316,7 +320,8 @@ class Playlist(Item):
         # end and no next item
         if event in (rc.PLAY_END, rc.USER_END, rc.EXIT, rc.STOP):
             self.current_item = None
-            menuw.show()
+            if menuw:
+                menuw.show()
             return TRUE
             
 
@@ -396,6 +401,9 @@ class RandomPlaylist(Playlist):
 
 
     def eventhandler(self, event, menuw=None):
+        if not menuw:
+            menuw = self.menuw
+
         if (event == rc.DOWN or event == rc.PLAY_END) and self.unplayed:
             if self.current_item:
                 self.current_item.parent = self.parent
@@ -408,13 +416,12 @@ class RandomPlaylist(Playlist):
             if self.current_item:
                 self.current_item.parent = self.parent
             self.current_item = None
-            menuwidget = menu.get_singleton()
-            menuwidget.refresh(reload=1)
+            if menuw:
+                menuw.show()
             return TRUE
             
         if event == rc.UP:
             print 'random playlist up: not implemented yet'
-            return FALSE
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
