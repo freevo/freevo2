@@ -87,3 +87,8 @@ class Image(CanvasImage):
         if pos:
             # set position on parent
             self.set_pos(pos)
+
+
+    def __str__(self):
+        return 'Image pos=%sx%s, size=%sx%s, zindex=%s' % \
+               (self.get_pos() + self.get_size() + (self.get_zindex(), ))
