@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/11/15 22:54:29  rshortt
+# Use util.ioctl for everything we can.
+#
 # Revision 1.22  2004/11/14 19:41:57  dischi
 # fix future warning the better way, always use util.ioctl please
 #
@@ -64,77 +67,46 @@ import freq
 import os
 import struct
 import sys
-from util.ioctl import ioctl, _IOC
+from util.ioctl import ioctl, IOR, IOW, IOWR
 import config
 
 DEBUG = config.DEBUG
 
 
-_IOC_NRBITS = 8
-_IOC_TYPEBITS = 8
-_IOC_SIZEBITS = 14
-_IOC_DIRBITS = 2
-
-_IOC_NRMASK = ((1 << _IOC_NRBITS)-1)
-_IOC_TYPEMASK = ((1 << _IOC_TYPEBITS)-1)
-_IOC_SIZEMASK = ((1 << _IOC_SIZEBITS)-1)
-_IOC_DIRMASK = ((1 << _IOC_DIRBITS)-1)
-
-_IOC_NRSHIFT = 0 
-_IOC_TYPESHIFT = (_IOC_NRSHIFT+_IOC_NRBITS)
-_IOC_SIZESHIFT = (_IOC_TYPESHIFT+_IOC_TYPEBITS)
-_IOC_DIRSHIFT = (_IOC_SIZESHIFT+_IOC_SIZEBITS)
-
-# Direction bits.
-_IOC_NONE = 0
-_IOC_WRITE = 1
-_IOC_READ = 2
-
-def _IO(type,nr): return _IOC(_IOC_NONE,(type),(nr),0)
-def _IOR(type,nr,size): return _IOC(_IOC_READ,(type),(nr),struct.calcsize(size))
-def _IOW(type,nr,size): return _IOC(_IOC_WRITE,(type),(nr),struct.calcsize(size))
-def _IOWR(type,nr,size): return _IOC(_IOC_READ|_IOC_WRITE,(type),(nr),struct.calcsize(size))
-
-# used to decode ioctl numbers..
-def _IOC_DIR(nr): return (((nr) >> _IOC_DIRSHIFT) & _IOC_DIRMASK)
-def _IOC_TYPE(nr): return (((nr) >> _IOC_TYPESHIFT) & _IOC_TYPEMASK)
-def _IOC_NR(nr): return (((nr) >> _IOC_NRSHIFT) & _IOC_NRMASK)
-def _IOC_SIZE(nr): return (((nr) >> _IOC_SIZESHIFT) & _IOC_SIZEMASK)
-
 FREQUENCY_ST = "III32x"
-GETFREQ_NO   = _IOWR('V', 56, FREQUENCY_ST)
-SETFREQ_NO   = _IOW('V', 57, FREQUENCY_ST)
+GETFREQ_NO   = IOWR('V', 56, FREQUENCY_ST)
+SETFREQ_NO   = IOW('V', 57, FREQUENCY_ST)
 
-SETFREQ_NO_V4L = _IOW('v', 15, "L")
+SETFREQ_NO_V4L = IOW('v', 15, "L")
 
 QUERYCAP_ST  = "16s32s32sLL16x"
-QUERYCAP_NO  = _IOR('V',  0, QUERYCAP_ST)
+QUERYCAP_NO  = IOR('V',  0, QUERYCAP_ST)
 
 ENUMSTD_ST   = "LQ24s2LL16x"
-ENUMSTD_NO   = _IOWR('V', 25, ENUMSTD_ST)
+ENUMSTD_NO   = IOWR('V', 25, ENUMSTD_ST)
 
 STANDARD_ST  = "Q"
-GETSTD_NO    = _IOR('V', 23, STANDARD_ST)
-SETSTD_NO    = _IOW('V', 24, STANDARD_ST)
+GETSTD_NO    = IOR('V', 23, STANDARD_ST)
+SETSTD_NO    = IOW('V', 24, STANDARD_ST)
 
 ENUMINPUT_ST = "L32sLLLQL16x"
-ENUMINPUT_NO = _IOWR('V', 26, ENUMINPUT_ST)
+ENUMINPUT_NO = IOWR('V', 26, ENUMINPUT_ST)
 
 INPUT_ST  = "L";
-GETINPUT_NO  = _IOR('V', 38, INPUT_ST)
-SETINPUT_NO  = _IOWR('V', 39, INPUT_ST)
+GETINPUT_NO  = IOR('V', 38, INPUT_ST)
+SETINPUT_NO  = IOWR('V', 39, INPUT_ST)
 
 FMT_ST = "L7L4x168x"
-GET_FMT_NO = _IOWR ('V',  4, FMT_ST)
-SET_FMT_NO = _IOWR ('V',  5, FMT_ST)
+GET_FMT_NO = IOWR ('V',  4, FMT_ST)
+SET_FMT_NO = IOWR ('V',  5, FMT_ST)
 
 TUNER_ST = "L32sLLLLLLll16x"
-GET_TUNER_NO = _IOWR ('V', 29, TUNER_ST)
-SET_TUNER_NO = _IOW  ('V', 30, TUNER_ST)
+GET_TUNER_NO = IOWR ('V', 29, TUNER_ST)
+SET_TUNER_NO = IOW  ('V', 30, TUNER_ST)
 
 AUDIO_ST = "L32sLL8x"
-GET_AUDIO_NO = _IOWR ('V', 33, AUDIO_ST)
-SET_AUDIO_NO = _IOW  ('V', 34, AUDIO_ST)
+GET_AUDIO_NO = IOWR ('V', 33, AUDIO_ST)
+SET_AUDIO_NO = IOW  ('V', 34, AUDIO_ST)
 
 
 V4L2_TUNER_CAP_LOW    = 0x0001
