@@ -73,10 +73,10 @@ SUFFIX_MPLAYER_FILES = [ '/*.[aA][vV][iI]',
 			 '/*.[rR][mM]' ]
 
 #
-# Skin dir. It must contain a file 'freevo_skin.py' that contains the
-# actual skin code.
+# Skin file that contains the actual skin code. This is imported
+# from skin.py
 #
-OSD_SKIN_DIR = 'skins/test1'
+OSD_SKIN = 'skins/test2/skin_test2.py'
 
 # OSD default font. It is only used for debug/error stuff, not regular
 # skinning.
@@ -96,7 +96,7 @@ OSD_PORT = 16480            # The daemon port, osd_server/osd_fb/main.c has
 #
 REMOTE_CONTROL_HOST = '127.0.0.1'
 REMOTE_CONTROL_PORT = 16310
-        
+
 #
 # The mpg123 application
 #
