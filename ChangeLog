@@ -14,6 +14,8 @@ Release 1.x.x (200x-xx-xx):
  * New, reworked bluetooth plugin for controlling Freevo
  * detachbar plugin to see what Freevo is playing when detaching the audio player
  * Support for Rendezvous/Zeroconf based service announcement
+ * Freevoscreensaver plugin. loop your favorite movie or slideshow to be your screensaver. And it only will show when in menus so no annoying savers popup while watching movies.
+ * Update command plugin to allow for X users to run X based apps (Mozilla etc) via a FXD file.
 	
 Release 1.4.0 (2003-11-20):
 ---------------------------
