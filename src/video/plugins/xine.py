@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2003/12/07 08:32:14  dischi
+# make keybindings work for files and urls
+#
 # Revision 1.28  2003/12/06 16:25:45  dischi
 # support for type=url and <playlist> and <player>
 #
@@ -195,7 +198,10 @@ class Xine:
         """
         play a dvd with xine
         """
-        self.app_mode = item.mode       # dvd or vcd keymap
+        # set keymap
+        self.app_mode = item.mode
+        if item.mode in ('file', 'url'):
+             self.app_mode = 'video'
         self.item     = item
 
         if plugin.getbyname('MIXER'):
