@@ -64,7 +64,7 @@ def main_menu(arg=None, menuw=None):
     items = []
 
     for (title, dir) in config.DIR_IMAGES:
-        items += [menu.MenuItem('[%s]' % title, cwd, dir)]
+        items += [menu.MenuItem(title, cwd, dir, type = 'dir')]
     
     imagemenu = menu.Menu('IMAGE VIEWER MAIN MENU', items)
     menuw.pushmenu(imagemenu)
@@ -95,7 +95,7 @@ def cwd(arg=None, menuw=None):
 
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
-        items += [menu.MenuItem(title, cwd, dirname)]
+        items += [menu.MenuItem(title, cwd, dirname, type = 'dir')]
     
     number = 0
     print files

@@ -11,6 +11,10 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2002/09/01 09:43:45  dischi
+# Added type = 'dir' for directories in MenuItem so that the skin can
+# use the correct style
+#
 # Revision 1.23  2002/08/12 12:42:17  dischi
 # cosmetic changes
 #
@@ -175,7 +179,7 @@ def main_menu(arg=None, menuw=None):
     items = []
 
     for (title, dir) in config.DIR_MOVIES:
-        items += [menu.MenuItem('[%s]' % title, cwd, dir)]
+        items += [menu.MenuItem(title, cwd, dir, type = 'dir')]
 
 
     if config.ROM_DRIVES != None: 
@@ -208,7 +212,7 @@ def cwd(arg=None, menuw=None):
 
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
-        m = menu.MenuItem(title, cwd, dirname)
+        m = menu.MenuItem(title, cwd, dirname, type = 'dir')
         if os.path.isfile(dirname+'/cover.png'): 
             m.setImage(('movie', (dirname+'/cover.png')))
         if os.path.isfile(dirname+'/cover.jpg'): 
@@ -236,7 +240,7 @@ def cwd(arg=None, menuw=None):
         # find image for tv show and build new title
         if config.TV_SHOW_REGEXP_MATCH(title):
             show_name = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(title))
-            title = show_name[0] + "\t" + show_name[1] + "x" + show_name[2] + "\t-\t" + \
+            title = show_name[0] + " " + show_name[1] + "x" + show_name[2] + " - " + \
                     show_name[3] 
 
             if os.path.isfile((config.TV_SHOW_IMAGES + show_name[0] + ".png").lower()):
