@@ -40,6 +40,11 @@ distclean:
 	find . -name "*.pyc*" -exec rm -f {} \;
 	make -C fbcon distclean
 
+release: clean
+	cd ..; tar czvf freevo-`cat freevo/VERSION`-`date +%Y%m%d`.tar.gz \
+	  --exclude CVS freevo
+
+
 # XXX Real simple install procedure for now, but freevo is so small it doesn't really
 # XXX matter
 install: all
