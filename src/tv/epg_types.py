@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/07 13:36:43  dischi
+# bugfix for German tv movie listing
+#
 # Revision 1.10  2003/08/28 18:02:22  dischi
 # fix guide correction for unsorted listings
 #
@@ -188,6 +191,9 @@ class TvGuide:
                           self.chan_dict[program.channel_id].programs[-1]
                 self.chan_dict[program.channel_id].programs[-1].stop = program.start
                 
+            if len(p) and p[-1].start == p[-1].stop:
+                # Oops, something is broken here
+                self.chan_dict[program.channel_id].programs = p[:-1]
             self.chan_dict[program.channel_id].programs += [program]
 
 
