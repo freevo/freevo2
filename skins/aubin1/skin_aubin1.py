@@ -9,20 +9,24 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.6  2003/02/17 20:52:14  outlyer
-# Updated to show context-aware background images, based on which function
-# you're using. For example, if you go into movie mode, it'll show the
-# film strip watermark thing, etc.
+# Revision 1.7  2003/02/21 21:15:41  outlyer
+# Fixed flicker; not configurable, and confined to 768x576, but it works.
 #
-# Thanks to Dischi for making this possible :)
+# Revision 1.84  2003/02/21 19:42:21  outlyer
+# Added a small note/reminder to figure out why we do this.
+#
+# Revision 1.83  2003/02/21 18:31:22  dischi
+# Small fix for Aubin
+#
+# Revision 1.82  2003/02/20 02:54:20  krister
+# Made an except statement specific for the error it handles.
 #
 # Revision 1.81  2003/02/17 19:41:11  dischi
 # make it possible to have special 'video', 'audio' ... sections in the
 # xml file.
 #
-# Revision 1.5  2003/02/17 18:03:44  outlyer
-# This should be a diff against main1, but it'll be a diff against my
-# ancient skin. It's probably going to be a lot of stuff that I didn't change.
+# Revision 1.80  2003/02/17 18:54:26  dischi
+# Make it possible to have borders around a selection
 #
 # Revision 1.79  2003/02/17 05:40:45  gsbarbieri
 # main1_image: now the image_{width,height} are not hardcoded anymore
@@ -133,6 +137,7 @@ import rc
 # XML parser for skin informations
 sys.path.append('skins/xml/type1')
 sys.path.append('skins/main1')
+
 
 import xml_skin
 
@@ -295,8 +300,8 @@ class Skin:
                                               ptsize=pref_item.selection.size)
 
             item_icon_size_x = item_icon_size_y = 0
-            #if item.icon != None:
-            #    item_icon_size_x, item_icon_size_y = osd.bitmapsize(item.icon)
+            if item.icon != None:
+                item_icon_size_x, item_icon_size_y = osd.bitmapsize(item.icon)
             
             # add the size used
             used_height += max(ns_str_h, s_str_h, item_icon_size_y) + PADDING + \
@@ -543,27 +548,26 @@ class Skin:
             if icon != None and icon != '':
                 icon_present = 1
 
-            icon_size = 0
+
 
             # Draw the selection bar for selected items
             if menu.selected == choice and obj.visible:
                 drawroundbox(x0 - obj.spacing + icon_present * icon_size * 1.2,
                              top - 2, x0 + obj.spacing + width,
                              top + font_h + 2, color = obj.bgcolor,
+                             border_size=obj.border_size, border_color=obj.border_color,
                              radius=obj.radius)
-                osd.drawbitmap(icon)
 
             if not text:
                 print "no text to display ... strange. Use default"
                 text = "unknown"
 
             # Draw icon
-            #if icon_present==1:
-            #    icon_x = x0
-            #    icon_y = y0 - (icon_size - font_h) / 2
-                #osd.drawbitmap(util.resize(icon, icon_size, icon_size), icon_x,
-                               #icon_y)
-                #osd.drawbitmap(icon)
+            if icon_present==1:
+                icon_x = x0
+                icon_y = y0 - (icon_size - font_h) / 2
+                osd.drawbitmap(util.resize(icon, icon_size, icon_size), icon_x,
+                               icon_y)
 
 
             show_name = (None, None, None, None)
@@ -617,8 +621,9 @@ class Skin:
         if self.hold:
             print 'skin.drawmenu() hold!'
             return
-        
-        osd.clearscreen(osd.COL_BLACK)
+       
+        # XXX Is this necessary? We're re-initializing the screen later.
+        #osd.clearscreen(osd.COL_BLACK)
 
         menu = menuw.menustack[-1]
 
@@ -655,10 +660,14 @@ class Skin:
 
         image_object, image_x, image_val = self.DrawMenu_Cover(menuw, val)
 
-        if image_val:
-            InitScreen(val, (val.background.mask, image_val.mask), image_x)
+        if not menu.surface:
+            if image_val:
+                InitScreen(val, (val.background.mask, image_val.mask), image_x)
+            else:
+                InitScreen(val, (val.background.mask, None), image_x)
+            menu.surface = osd.getsurface(0,76,768,500)
         else:
-            InitScreen(val, (val.background.mask, None), image_x)
+            osd.putsurface(menu.surface,0,76)
 
         # Menu heading
         if val.title.visible:
@@ -698,8 +707,9 @@ class Skin:
         # if there is an image and the selection will be cover the image
         # shorten the selection
 
-        #if image_x and val.items.x + val.items.width > image_x:
-        #    selection_length = image_x - val.items.x
+        if image_x and val.items.x + val.items.width > image_x and \
+           val.items.x < image_x:
+            selection_length = image_x - val.items.x
 
         self.DrawMenu_Selection(menuw, val, val.items.x, val.items.y, selection_length, \
                                 val.items.height)
@@ -934,7 +944,7 @@ class Skin:
         if array.track:
             try:
     	        mytrack = ('%0.2d' % int(array.track))
-            except:
+            except ValueError:
     	        mytrack = None
         else:
            mytrack = None
