@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2002/10/01 01:55:06  krister
+# Changed the TV channel list to contain examples for Per Wigren's patch for multiple TV stations on the same channel on different times.
+#
 # Revision 1.70  2002/09/29 19:57:59  dischi
 # Added SHUTDOWN_SYS_CMD to freevo_config to set the shutdown command
 #
@@ -217,7 +220,7 @@ DIR_MAME = [ ('Test Games', './testfiles/Mame') ]
 # 
 SUFFIX_MAME_FILES = [ '/*.[zZ][iI][pP]' ]
 
-MAME_CMD	 = CONF.xmame_SDL
+MAME_CMD         = CONF.xmame_SDL
 
 MAME_NICE        = '0'             # Priority of mplayer process. 0 is unchanged,
                                       # <0 is higher prio, >0 lower prio. You must run
@@ -356,59 +359,99 @@ TV_REC_OUTFMT = 'yuy2'
 # All channels listed here will be displayed on the TV menu, even if they're
 # not present in the XMLTV listing.
 # 
-TV_CHANNELS = [('2 KTVI', 'KTVI', '2'),
+#
+# Timedependent channels:
+#
+# The TV_CHANNELS-list can look like this:
+#
+# TV_CHANNELS = [('21', 'SVT1',              'E5'),
+#                ('22', 'SVT2',              'E3'),
+#                ('26', 'TV3',               'E10'),
+#                ('27', 'TV4',               'E6'),
+#                ('10', 'Kanal 5',           'E7'),
+#                ('60', 'Fox Kids',          'E8', ('1234567','0600','1659')),
+#                ('16', 'TV6',               'E8', ('1234567','1700','2359'), 
+#                                                  ('1234567','0000','0300')),
+#                ('14', 'MTV Europe',        'E11') ]
+#
+# As you can see the list takes optional tuples:
+# ( 'DAYS', 'START','END')
+#
+# 1234567 in days means all days.
+# 12345 would mean monday to friday.
+#
+# It will display "Fox Kids" from 06:00 to 16:59 and "TV6" from 17:00 to 03:00. 
+# 03:00 to 06:00 it won't be displayed at all.
+#
+
+TV_CHANNELS = [('69 COMEDY', 'COMEDY', '69'),
+               ('56 HISTORY', 'HISTORY', '56'),
+               ('2 KTVI', 'KTVI', '2'),
                ('4 KMOV', 'KMOV', '4'),
                ('5 KSDK', 'KSDK', '5'),
                ('6 TBS', 'TBS', '6'),
-               ('8 KDNL', 'KDNL', '8'),
-               ('9 KETC', 'KETC', '9'),
-               ('10 KNLC', 'KNLC', '10'),
                ('11 KPLR', 'KPLR', '11'),
-               ('13 GOAC013', 'GOAC013', '13'),
-               ('16 WGNSAT', 'WGNSAT', '16'),
-               ('17 FNC', 'FNC', '17'),
-               ('18 LIFE', 'LIFE', '18'),
-               ('20 DSC', 'DSC', '20'),
-               ('21 FX', 'FX', '21'),
-               ('22 FAM', 'FAM', '22'),
-               ('23 AMC', 'AMC', '23'),
-               ('24 HALMRK', 'HALMRK', '24'),
-               ('25 USA', 'USA', '25'),
-               ('26 TNN', 'TNN', '26'),
-               ('27 ESPN2', 'ESPN2', '27'),
-               ('28 ESPN', 'ESPN', '28'),
-               ('29 ARTS', 'ARTS', '29'),
+               ('12 KDNL', 'KDNL', '12'),
+               ('29 LIFE', 'LIFE', '29'),
+               ('49 USA', 'USA', '49'),
+               ('30 HALMRK', 'HALMRK', '30'),
+               ('42 TNT', 'TNT', '42'),
+               ('41 FX', 'FX', '41'),
+               ('59 TLC', 'TLC', '59'),
                ('31 TECHTV', 'TECHTV', '31'),
-               ('32 TWC', 'TWC', '32'),
-               ('33 TNT', 'TNT', '33'),
-               ('34 NIK', 'NIK', '34'),
-               ('35 CNN', 'CNN', '35'),
-               ('36 CNBC', 'CNBC', '36'),
-               ('37 TLC', 'TLC', '37'),
-               ('38 DISN', 'DISN', '38'),
-               ('41 ETV', 'ETV', '41'),
-               ('42 FSM', 'FSM', '42'),
-               ('43 HISTORY', 'HISTORY', '43'),
-               ('44 COMEDY', 'COMEDY', '44'),
-               ('45 VH1', 'VH1', '45'),
-               ('46 TVGOS', 'TVGOS', '46'),
-               ('50 CNNH', 'CNNH', '50'),
-               ('53 EWTN', 'EWTN', '53'),
-               ('', 'MSNBC 1', '56'),
-               ('58 LOOR058', 'LOOR058', '58'),
-               ('61 WPXS', 'WPXS', '61'),
-               ('64 MSNBC', 'MSNBC 2', '64'),
-               ('65 OXYGEN', 'OXYGEN', '65'),
-               ('66 LOOR066', 'LOOR066', '66'),
-               ('67 MTV', 'MTV', '67'),
-               ('69 HGTV', 'HGTV', '69'),
+               ('57 DSC', 'DSC', '57'),
+               ('66 ETV', 'ETV', '66'),
+               ('75 MTV', 'MTV', '75'),
+               ('77 VH1', 'VH1', '77'),
+               ('32 TNN', 'TNN', '32'),
+               ('43 CNN', 'CNN', '43'),
+               ('44 CNNH', 'CNNH', '44'),
+               ('46 CNBC', 'CNBC', '46'),
+               ('47 MSNBC', 'MSNBC', '47'),
+               ('48 FNC', 'FNC', '48'),
+               ('45 TWC', 'TWC', '45'),
+               ('35 ESPN', 'ESPN', '35'),
+               ('36 ESPN2', 'ESPN2', '36'),
+               ('37 GOLF', 'GOLF', '37'),
+               ('38 SPEED', 'SPEED', '38'),
+               ('40 FSM', 'FSM', '40'),
+               ('7 WGNSAT', 'WGNSAT', '7'),
+               ('8 LOOR008', 'LOOR008', '8'),
+               ('9 KETC', 'KETC', '9'),
+               ('15 CSPAN', 'CSPAN', '15'),
+               ('16 CSPAN2', 'CSPAN2', '16'),
+               ('22 TBN', 'TBN', '22'),
+               ('33 NGC', 'NGC', '33'),
+               ('34 INSP', 'INSP', '34'),
+               ('50 FAM', 'FAM', '50'),
+               ('51 NIK', 'NIK', '51'),
+               ('52 DISN', 'DISN', '52'),
+               ('53 TOOND', 'TOOND', '53'),
+               ('54 TOON', 'TOON', '54'),
+               ('55 ARTS', 'ARTS', '55'),
+               ('58 ANIMAL', 'ANIMAL', '58'),
+               ('60 TCM', 'TCM', '60'),
+               ('61 OXYGEN', 'OXYGEN', '61'),
+               ('62 FOOD', 'FOOD', '62'),
+               ('63 HGTV', 'HGTV', '63'),
+               ('64 TRAV', 'TRAV', '64'),
+               ('65 WE', 'WE', '65'),
+               ('67 SOAP', 'SOAP', '67'),
+               ('68 BET', 'BET', '68'),
                ('70 TVLAND', 'TVLAND', '70'),
-               ('71 ESPNCL', 'ESPNCL', '71'),
-               ('72 OLN', 'OLN', '72'),
+               ('71 AMC', 'AMC', '71'),
+               ('72 BRAVO', 'BRAVO', '72'),
                ('73 SCIFI', 'SCIFI', '73'),
-               ('74 BRAVO', 'BRAVO', '74'),
-               ('75 TOOND', 'TOOND', '75'),
-               ('99', 'TEST', '99')]
+               ('74 COURT', 'COURT', '74'),
+               ('76 CMTV', 'CMTV', '76'),
+               ('78 FMC', 'FMC', '78'),
+               ('96 LOOR096', 'TV Guide', '96'),
+               ('101 Station 1a', 'Station 1a', '101', ('123', '0000', '1759')),
+               ('101 Station 1b', 'Station 1b', '101', ('123', '1800', '2359')),
+               ('102 Station 2a', 'Station 2a', '102', ('12345', '0000', '2359')),
+               ('102 Station 2b', 'Station 2b', '102', ('67', '0000', '2359')),
+               ('103 Station 3a', 'Station 3a', '103', ('1234567', '0000', '1559'), ('1234567', '2200', '2359')),
+               ('103 Station 3b', 'Station 3b', '103', ('1234567', '1600', '2159'))]
 
 
 # ======================================================================
