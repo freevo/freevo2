@@ -262,14 +262,12 @@ class RPCServer:
         """
         ret = []
         for i in range(len(val)):
-            print pattern[i]
             if pattern[i] == str:
                 ret.append(unicode(val[i], 'UTF8').\
                            encode(sysconfig.ENCODING, 'replace'))
             elif pattern[i] == unicode:
                 ret.append(unicode(val[i], 'UTF8'))
             elif pattern[i] == bool:
-                print 'check', val[i]
                 if val[i] in ( 'TRUE', 'True', 'true', '1', 1,
                                'YES', 'Yes', 'yes'):
                     ret.append(True)
