@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/01/19 11:27:21  dischi
+# Removed some debug.
+#
 # Revision 1.9  2003/01/11 10:54:39  dischi
 # small bugfix
 #
@@ -342,7 +345,6 @@ class MenuWidget:
                 print 'No action.. '
                 self.refresh()
             else:
-                print 'Calling action "%s"' % str(action)
                 if hasattr(menu.selected, 'action_arg'):
                     action( arg=menu.selected.action_arg, menuw=self )
                 else:
@@ -372,7 +374,6 @@ class MenuWidget:
         else:
             action = menu.selected.eventhandler
             if action:
-                print 'Calling action "%s"' % str(action)
                 if hasattr(menu.selected, 'eventhandler_args'):
                     action(event = event, arg=menu.selected.eventhandler_args,
                            menuw=self)
