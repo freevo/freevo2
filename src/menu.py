@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/04/19 19:03:38  dischi
+# bugfix
+#
 # Revision 1.36  2003/04/15 20:00:20  dischi
 # make MenuItem inherit from Item
 #
@@ -535,18 +538,9 @@ class MenuWidget(GUIObject):
 
 
         elif event == rc.ENTER:
-            try:
-                actions = menu.selected.actions()
-                if config.FREEVO_PLUGINS.has_key(menu.selected.type):
-                    for a in config.FREEVO_PLUGINS[menu.selected.type]:
-                        try:
-                            actions += a(menu.selected)
-                        except:
-                            traceback.print_exc()
-                if len(actions) > 1:
-                    self.make_submenu(menu.selected.name, actions, menu.selected)
-            except:
-                pass
+            actions = menu.selected.actions()
+            if len(actions) > 1:
+                self.make_submenu(menu.selected.name, actions, menu.selected)
             
 
         elif event == rc.DISPLAY and len(self.menustack) > 1:
