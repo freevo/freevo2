@@ -30,6 +30,7 @@ main (int ac, char *av[])
   struct stat statbuf;
   char logfile[256];
   char cmd_str[1000];
+  char currdir[1000];
   
   
   /* Does the logdir exist? */
@@ -42,8 +43,10 @@ main (int ac, char *av[])
   }
   
   fp = fopen (logfile, "a");
+
   
   fprintf (fp, "PATH = %s\n", getenv ("PATH"));
+  fprintf (fp, "CWD = %s\n", getcwd (currdir, sizeof (currdir)));
   
   cmd_str[0] = 0;
   
