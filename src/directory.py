@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2004/02/13 17:18:38  dischi
+# do not skip after . for directories
+#
 # Revision 1.113  2004/02/12 12:20:11  dischi
 # fix item counter for different display_types
 #
@@ -192,7 +195,7 @@ class DirItem(Playlist):
         elif self.info['title:filename']:
             self.name = self.info['title:filename']
         else:
-            self.name = Unicode(util.getname(directory))
+            self.name = util.getname(directory, skip_ext=False)
             
         if add_args == None and hasattr(parent, 'add_args'): 
             add_args = parent.add_args

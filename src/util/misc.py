@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/02/13 17:18:39  dischi
+# do not skip after . for directories
+#
 # Revision 1.27  2004/02/08 06:12:31  outlyer
 # Missing the text... it looks like other shows are tomorrow, when they're
 # really not.
@@ -228,12 +231,12 @@ def getimage(base, default=None):
     return default
 
 
-def getname(file):
+def getname(file, skip_ext=True):
     """
     make a nicer display name from file
     """
     # basename without ext
-    if file.rfind('/') < file.rfind('.'):
+    if file.rfind('/') < file.rfind('.') and skip_ext:
         name = file[file.rfind('/')+1:file.rfind('.')]
     else:
         name = file[file.rfind('/')+1:]
