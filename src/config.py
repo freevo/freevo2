@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.108  2004/06/20 18:19:53  rshortt
+# Bugfix: 'config' has no namespace here, we are config.  UMASK is a local from
+# freevo_config.py or local_conf.py.
+#
 # Revision 1.107  2004/06/20 15:52:14  dischi
 # set umask as early as possible
 #
@@ -545,7 +549,7 @@ else:
 
 
 # set the umask
-os.umask(config.UMASK)
+os.umask(UMASK)
 
 
 if not HELPER:
