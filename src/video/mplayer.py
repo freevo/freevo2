@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/04/12 18:30:04  dischi
+# add support for audio/subtitle selection for avis, too
+#
 # Revision 1.30  2003/04/06 21:13:04  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -460,17 +463,36 @@ class MPlayerParser:
         self.RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: "+\
                                       "([a-z][a-z])").match
         self.RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
+        self.RE_AVI_AUIDIO = re.compile("^==> Found audio stream: ([0-9]*)").match
+        self.RE_VOBSUB = re.compile("^\[vobsub\] subtitle \(vobsubid\): "+\
+                                    "([0-9]*) language ([a-z][a-z])").match
         self.RE_EXIT = re.compile("^Exiting\.\.\. \((.*)\)$").match
+        self.RE_START = re.compile("^Starting playback\.\.\.").match
+
+        self.parse_additional_data = not (self.item.available_audio_tracks or \
+                                          self.item.available_subtitles )
 
     def parse(self, line):
-        m = self.RE_AUDIO(line)
-        if m: self.item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
+        if self.parse_additional_data:
+            m = self.RE_AUDIO(line)
+            if m: self.item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
 
-        m = self.RE_SUBTITLE(line)
-        if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
+            m = self.RE_SUBTITLE(line)
+            if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
 
-        m = self.RE_CHAPTER(line)
-        if m: self.item.available_chapters = int(m.group(1))
+            m = self.RE_CHAPTER(line)
+            if m: self.item.available_chapters = int(m.group(1))
+
+            m = self.RE_AVI_AUIDIO(line)
+            if m: self.item.available_audio_tracks += [ (m.group(1),
+                                                         'stream %s' % m.group(1)) ]
+
+            m = self.RE_VOBSUB(line)
+            if m: self.item.available_subtitles += [ (m.group(1), m.group(2)) ]
+
+            if self.RE_START(line):
+                print 'data parsing done'
+                self.parse_additional_data = FALSE
 
     def end_type(self, str):
         m = self.RE_EXIT(str)

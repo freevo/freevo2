@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2003/04/12 18:30:04  dischi
+# add support for audio/subtitle selection for avis, too
+#
 # Revision 1.32  2003/04/06 21:13:06  dischi
 # o Switched to the new main skin
 # o some cleanups (removed unneeded inports)
@@ -199,6 +202,7 @@ class VideoItem(Item):
         # variables only for VideoItem
         self.label = ''
         
+        self.scanned = FALSE
         self.available_audio_tracks = []
         self.available_subtitles    = []
         self.available_chapters     = 0
@@ -351,6 +355,9 @@ class VideoItem(Item):
                     rc.post_event(rc.PLAY_END)
                     return
 
+            elif self.media:
+                util.mount(os.path.dirname(self.filename))
+
         elif self.mode == 'dvd' or self.mode == 'vcd':
             if not self.media:
                 media = util.check_media(self.media_id)
@@ -374,9 +381,11 @@ class VideoItem(Item):
             mplayer_options += ' -cdrom-device %s -dvd-device %s' % \
                                (self.media.devicename, self.media.devicename)
 
-        if self.selected_subtitle:
+        if self.selected_subtitle and self.mode == 'file':
+            mplayer_options += ' -vobsubid %s' % self.selected_subtitle
+        elif self.selected_subtitle:
             mplayer_options += ' -sid %s' % self.selected_subtitle
-
+            
         if self.selected_audio:
             mplayer_options += ' -aid %s' % self.selected_audio
 
@@ -589,27 +598,38 @@ class VideoItem(Item):
         if not self.menuw:
             self.menuw = menuw
         pop = None
-        if (self.mode == 'dvd' or self.mode == 'vcd') and not self.available_audio_tracks:
+        if not self.scanned:
+            self.scanned = TRUE
             
             # Use the uid to make a user-unique filename
             uid = os.getuid()
 
-            pop = PopupBox(text='Scanning disc, be patient...',
-                           icon='skins/icons/misc/cdrom_mount.png')
+            if self.media:
+                pop = PopupBox(text='Scanning disc, be patient...',
+                               icon='skins/icons/misc/cdrom_mount.png')
+                if not (self.mode == 'dvd' or self.mode == 'vcd'):
+                    util.mount(os.path.dirname(self.filename))
+            else:
+                pop = PopupBox(text='Scanning file, be patient...')
+    
             pop.show()
-
 
             os.system('rm -f /tmp/mplayer_dvd_%s.log /tmp/mplayer_dvd_done_%s' % (uid, uid))
 
             file = self.filename
+
             if not file:
                 file = '1'
 
             cmd = config.MPLAYER_CMD + ' -v -nocache -nolirc -vo null -frames 0 '
             cmd += ' -cdrom-device %s -dvd-device %s' % \
                    (self.media.devicename, self.media.devicename)
-            cmd += ' -%s %s 2> /dev/null > /tmp/mplayer_dvd_%s.log' % \
-                   (self.mode, file, uid)
+            if self.mode == 'dvd' or self.mode == 'vcd':
+                cmd += ' -%s %s' % (self.mode, file)
+            else:
+                cmd += ' "%s"' % file
+
+            cmd += ' 2> /dev/null > /tmp/mplayer_dvd_%s.log' % uid
 
             os.system(cmd + (' ; touch /tmp/mplayer_dvd_done_%s' % uid))
 

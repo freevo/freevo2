@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/04/12 18:30:04  dischi
+# add support for audio/subtitle selection for avis, too
+#
 # Revision 1.8  2003/03/31 20:44:52  dischi
 # shorten time between pop.destroy and menu drawing
 #
@@ -182,28 +185,4 @@ def get_main_menu(item, menuw, xml_file):
     global current_xml_file
     current_xml_file = xml_file
     return menu.Menu('CONFIG MENU', main_menu_generate(item), xml_file=xml_file)
-    
-
-###########################
-
-
-
-RE_AUDIO = re.compile("^\[open\] audio stream: [0-9] audio format:(.*)aid: ([0-9]*)").match
-RE_SUBTITLE = re.compile("^\[open\] subtitle.*: ([0-9]) language: ([a-z][a-z])").match
-RE_CHAPTER = re.compile("^There are ([0-9]*) chapters in this DVD title.").match
-
-
-#
-# parser
-#
-
-def parse(str, item):
-    m = self.RE_AUDIO(str)
-    if m: item.available_audio_tracks += [ (m.group(2), m.group(1)) ]
-
-    m = self.RE_SUBTITLE(str)
-    if m: item.available_subtitles += [ (m.group(1), m.group(2)) ]
-
-    m = self.RE_CHAPTER(str)
-    if m: item.available_chapters = int(m.group(1))
     
