@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/07/25 20:54:29  dischi
+# make audio selection work for files, too
+#
 # Revision 1.11  2003/06/29 20:43:30  dischi
 # o mmpython support
 # o mplayer is now a plugin
@@ -78,6 +81,10 @@ def audio_selection_menu(arg=None, menuw=None):
     global current_xml_file
     items = []
     for a in arg.info['audio']:
+        if not a['id']:
+            a['id'] = arg.info['audio'].index(a) + 1
+        if not a['language']:
+            a['language'] = 'Unknown'
         txt = '%s (channels=%s, codec=%s, id=%s)' % (a['language'], a['channels'],
                                                      a['codec'], a['id'])
         items.append(menu.MenuItem(txt, audio_selection, (arg, a['id'])))
