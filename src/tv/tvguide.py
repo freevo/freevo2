@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/02/23 03:54:25  rshortt
+# Use ProgramItem and display_program rather than clunky popup-gui.  Because
+# of this the tvguide does no longer need to extend GUIObject.  For now it
+# needs to extend Item unless we make each program block into a distinctive
+# ProgramItem which may unnesseccarily increase overhead.
+#
 # Revision 1.24  2004/02/16 18:10:54  outlyer
 # Patch from James A. Laska to make the TV Guide behave intuitively when
 # clicking on a future program. As you would expect, it now pops up the record
@@ -90,7 +96,8 @@ import event as em
 # The Electronic Program Guide
 import epg_xmltv, epg_types
 
-import program_display
+from item import Item
+from program_display import ProgramItem
 import record_client as ri
 
 skin = skin.get_singleton()
@@ -98,9 +105,9 @@ skin.register('tv', ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info',
 
 CHAN_NO_DATA = _('This channel has no data loaded')
 
-class TVGuide(gui.GUIObject):
+class TVGuide(Item):
     def __init__(self, start_time, player, menuw):
-        gui.GUIObject.__init__(self)
+        Item.__init__(self)
 
         self.n_items, hours_per_page = skin.items_per_page(('tv', self))
         stop_time = start_time + hours_per_page * 60 * 60
@@ -123,6 +130,7 @@ class TVGuide(gui.GUIObject):
 
         self.type = 'tv'
         self.menuw = menuw
+        self.visible = True
 
         self.update_schedules(force=True)
         
@@ -208,7 +216,6 @@ class TVGuide(gui.GUIObject):
             self.event_PageDown()
             self.menuw.refresh()
 
-        #elif event == em.MENU_SUBMENU or event == em.TV_START_RECORDING:
         elif event == em.MENU_SUBMENU:
             
             pass
@@ -351,12 +358,15 @@ class TVGuide(gui.GUIObject):
             except:
                 pass
 
+
     def event_RECORD(self):
         if self.selected.scheduled:
-            program_display.ProgramDisplay(parent=self, context='recording',
-                                              prog=self.selected).show()
+            pi = ProgramItem(self, prog=self.selected, context='schedule')
         else:
-            program_display.ProgramDisplay(parent=self, prog=self.selected).show()
+            pi = ProgramItem(self, prog=self.selected, context='guide')
+        pi.display_program(menuw=self.menuw)
+
+
     def event_RIGHT(self):
         start_time    = self.start_time
         stop_time     = self.stop_time
@@ -400,7 +410,6 @@ class TVGuide(gui.GUIObject):
             to_info = CHAN_NO_DATA
 
         self.rebuild(start_time, stop_time, start_channel, prg)
-        
 
 
     def event_LEFT(self):
