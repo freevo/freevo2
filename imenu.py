@@ -30,6 +30,9 @@ from playlist import read_playlist
 # The Freevo image viewer
 import iview
 
+# The bins discriptions loader
+import bins
+
 # Set to 1 for debug output
 DEBUG = config.DEBUG
 
@@ -201,6 +204,8 @@ def cwd(arg=None, menuw=None):
 
     for dirname in dirnames:
         title = '[' + os.path.basename(dirname) + ']'
+	if os.path.isfile(dirname+'/album.xml'):
+	    title = '[' + bins.get_album_title(dirname) + ']'
         items += [menu.MenuItem(title, cwd, dirname, type = 'dir')]
 
     if len(files) > 1:
