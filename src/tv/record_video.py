@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/05/31 20:53:03  outlyer
+# Fix what I hope is the last event-related crash. Choosing shows to record
+# works again.
+#
 # Revision 1.15  2003/05/27 17:53:35  dischi
 # Added new event handler module
 #
@@ -111,6 +115,8 @@ import record_daemon
 
 # Schedule editor
 import record_schedule
+
+import event as em
 
 from gui.PopupBox import PopupBox
 
