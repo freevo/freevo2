@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.123  2004/02/27 21:38:16  dischi
+# remove debug
+#
 # Revision 1.122  2004/02/27 20:11:19  dischi
 # o fix umount while scanning the dir
 # o shorten name if they start similar
@@ -641,7 +644,6 @@ class DirItem(Playlist):
 
         # normal DirItems
         for filename in files:
-            print filename
             if os.path.isdir(filename):
                 d = DirItem(filename, self, display_type = self.display_type)
                 self.dir_items.append(d)
