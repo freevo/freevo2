@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.63  2004/02/08 17:39:09  dischi
+# add count to Mimetype
+#
 # Revision 1.62  2004/02/01 17:07:42  dischi
 # add dirconfig for mimetype plugins
 #
@@ -174,7 +177,7 @@ class ItemPlugin(Plugin):
     
 class DaemonPlugin(Plugin):
     """
-    Plugin class for daemon objects who will be activae in the
+    Plugin class for daemon objects who will be activate in the
     background while Freevo is running
 
     A DaemonPlugin can have the following functions:
@@ -207,9 +210,10 @@ class MimetypePlugin(Plugin):
     should be displayed, [] for always.
     """
     def __init__(self):
+        import util
         Plugin.__init__(self)
         self.display_type = []
-
+        self.find_matches = util.find_matches
 
     def suffix(self):
         """
@@ -224,6 +228,13 @@ class MimetypePlugin(Plugin):
         """
         return []
 
+
+    def count(self, parent, files):
+        """
+        return how many items will be build on files
+        """
+        return len(self.find_matches(files, self.suffix()))
+            
 
     def dirinfo(self, diritem):
         """
@@ -361,11 +372,15 @@ def init_special_plugin(id):
     
     __plugin_basedir__ = os.environ['FREEVO_PYTHON']
 
+    try:
+        id = int(id)
+    except ValueError:
+        pass
     for i in range(len(__all_plugins__)):
         name, type, level, args, number = __all_plugins__[i]
-        if number == int(id):
-            del __all_plugins__[i]
+        if number == id or name == id:
             __load_plugin__(name, type, level, args, number)
+            del __all_plugins__[i]
             break
         
     # sort plugins in extra function (exec doesn't like to be

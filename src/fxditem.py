@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/08 17:39:11  dischi
+# add count to Mimetype
+#
 # Revision 1.11  2004/01/31 16:38:49  dischi
 # removed unneeded attr
 #
@@ -103,10 +106,6 @@ class Mimetype(plugin.MimetypePlugin):
         """
         return a list of items based on the files
         """
-        if not hasattr(parent, 'display_type'):
-            # don't know what to do here
-            return []
-
         # get the list of fxd files
         fxd_files = util.find_matches(files, ['fxd'])
 
@@ -132,11 +131,25 @@ class Mimetype(plugin.MimetypePlugin):
             return []
 
 
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return [ 'fxd' ]
+
+    
+    def count(self, parent, files):
+        """
+        return how many items will be build on files
+        """
+        return len(self.get(parent, files))
+
+    
     def parse(self, parent, fxd_files, duplicate_check=[], display_type=None):
         """
         return a list of items that belong to a fxd files
         """
-        if not display_type:
+        if not display_type and hasattr(parent, 'display_type'):
             display_type = parent.display_type
             if display_type == 'tv':
                 display_type = 'video'
