@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/07/07 20:19:52  dischi
+# some small speed enhancements
+#
 # Revision 1.12  2003/07/07 16:25:10  dischi
 # changes to work with the new drawstringframed
 #
@@ -96,6 +99,7 @@ import config
 import objectcache
 
 import xml_skin
+import time
 
 # Create the OSD object
 osd = osd.get_singleton()
@@ -133,12 +137,12 @@ class Screen:
 
         self.drawlist = []
         self.avoid_list = []
+
         
     def clear(self):
         self.update_bg      = None
         self.update_alpha   = []
         self.update_content = []
-
         self.drawlist = []
 
 
@@ -156,7 +160,7 @@ class Screen:
                 self.update_bg = ( min(self.update_bg[0], rect[0]),
                                    min(self.update_bg[1], rect[1]),
                                    max(self.update_bg[2], rect[2]),
-                                   max(self.update_bg[3], rect[3]) )
+                                   max(self.update_bg[3], rect[3]))
             else:
                 self.update_bg = rect
 
@@ -181,20 +185,12 @@ class Screen:
         """
         the main drawing function
         """
-
         if osd.must_lock:
             self.s_bg.lock()
             self.s_alpha.lock()
             self.s_content.lock()
             osd.screen.lock()
         
-        objects = SkinObjects()
-        for area in self.drawlist:
-            objects.bgimages   += area.bgimages
-            objects.rectangles += area.rectangles
-            objects.images     += area.images
-            objects.text       += area.text
-            
         if force_redraw:
             self.update_bg      = (0,0,osd.width, osd.height)
             self.update_alpha   = []
@@ -205,9 +201,10 @@ class Screen:
         # if the background has some changes ...
         if self.update_bg:
             ux1, uy1, ux2, uy2 = self.update_bg 
-            for x1, y1, x2, y2, image in objects.bgimages:
-                if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
-                    self.s_bg.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
+            for area in self.drawlist:
+                for x1, y1, x2, y2, image in area.bgimages:
+                    if not (x2 < ux1 or y2 < uy1 or x1 > ux2 or y1 > uy2):
+                        self.s_bg.blit(image, (ux1, uy1), (ux1-x1, uy1-y1, ux2-ux1, uy2-uy1))
 
             update_area.append(self.update_bg)
             
@@ -215,19 +212,20 @@ class Screen:
             # clear it
             self.s_alpha.fill((0,0,0,0))
 
-            for x1, y1, x2, y2, bgcolor, size, color, radius in objects.rectangles:
-                # only redraw if necessary
-                if self.in_update(x1, y1, x2, y2, update_area):
-                    # if the radius and the border is not inside the update area,
-                    # use drawbox, it's faster
-                    if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
-                                      y2-size-radius, update_area, full=TRUE):
-                        osd.drawbox(x1, y1, x2, y2, color=bgcolor, fill=1,
-                                    layer=self.s_alpha)
-                    else:
-                        osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
-                                         border_size=size, border_color=color,
-                                         radius=radius, layer=self.s_alpha)
+            for area in self.drawlist:
+                for x1, y1, x2, y2, bgcolor, size, color, radius in area.rectangles:
+                    # only redraw if necessary
+                    if self.in_update(x1, y1, x2, y2, update_area):
+                        # if the radius and the border is not inside the update area,
+                        # use drawbox, it's faster
+                        if self.in_update(x1+size+radius, y1+size+radius, x2-size-radius,
+                                          y2-size-radius, update_area, full=TRUE):
+                            osd.drawbox(x1, y1, x2, y2, color=bgcolor, fill=1,
+                                        layer=self.s_alpha)
+                        else:
+                            osd.drawroundbox(x1, y1, x2, y2, color=bgcolor,
+                                             border_size=size, border_color=color,
+                                             radius=radius, layer=self.s_alpha)
 
             # and than blit only the changed parts of the screen
             for x0, y0, x1, y1 in update_area:
@@ -240,23 +238,25 @@ class Screen:
 
         # if something changed redraw all content objects
         if update_area:
-            for x1, y1, x2, y2, image in objects.images:
-                if self.in_update(x1, y1, x2, y2, update_area):
-                    layer.blit(image, (x1, y1))
+            for area in self.drawlist:
+                for x1, y1, x2, y2, image in area.images:
+                    if self.in_update(x1, y1, x2, y2, update_area):
+                        layer.blit(image, (x1, y1))
 
-            for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
-                ellipses in objects.text:
-                if self.in_update(x1, y1, x2, y2, update_area):
-                    width = x2 - x1
-                    if font.shadow.visible:
-                        width -= font.shadow.x
-                        osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
-                                             width, height, font.font, font.shadow.color,
-                                             None, align_h = align_h, align_v = align_v,
-                                             mode=mode, ellipses=ellipses, layer=layer)
-                    osd.drawstringframed(text, x1, y1, width, height, font.font, font.color,
-                                         None, align_h = align_h, align_v = align_v,
-                                         mode=mode, ellipses=ellipses, layer=layer)
+                for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
+                        ellipses in area.text:
+                    if self.in_update(x1, y1, x2, y2, update_area):
+                        width = x2 - x1
+                        if font.shadow.visible:
+                            width -= font.shadow.x
+                            osd.drawstringframed(text, x1+font.shadow.x, y1+font.shadow.y,
+                                                 width, height, font.font, font.shadow.color,
+                                                 None, align_h = align_h, align_v = align_v,
+                                                 mode=mode, ellipses=ellipses, layer=layer)
+                        osd.drawstringframed(text, x1, y1, width, height, font.font,
+                                             font.color, None, align_h = align_h,
+                                             align_v = align_v, mode=mode,
+                                             ellipses=ellipses, layer=layer)
 
         for x0, y0, x1, y1 in update_area:
             osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
@@ -324,19 +324,19 @@ class Skin_Area:
                 self.infoitem  = self.menu.selected
             item_type  = self.menu.item_types
             self.scan_for_text_view(self.menu)
+
         elif widget_type == 'tv':
             self.menuw = obj
             self.menu  = obj
             item_type = None
             self.viewitem = obj.selected
             self.infoitem = obj.selected
+
         else:
             item_type = None
             self.viewitem = obj
             self.infoitem = obj
 
-        self.tmp_objects = SkinObjects()
-        
         self.redraw = force_redraw
         
         area = self.area_val
@@ -365,6 +365,7 @@ class Skin_Area:
             self.objects = SkinObjects()
             return
 
+        self.tmp_objects = SkinObjects()
         self.draw_background()
 
         # dependencies haven't changed
@@ -389,9 +390,8 @@ class Skin_Area:
                             max(bg_rect[2], b[2]), max(bg_rect[3], b[3]) )
 
         for b in self.objects.bgimages:
-            if not b in self.tmp_objects.bgimages:
-                bg_rect = ( min(bg_rect[0], b[0]), min(bg_rect[1], b[1]),
-                            max(bg_rect[2], b[2]), max(bg_rect[3], b[3]) )
+            bg_rect = ( min(bg_rect[0], b[0]), min(bg_rect[1], b[1]),
+                        max(bg_rect[2], b[2]), max(bg_rect[3], b[3]) )
 
 
 
@@ -403,9 +403,8 @@ class Skin_Area:
                            max(a_rect[2], b[2]), max(a_rect[3], b[3]) )
 
         for b in self.objects.rectangles:
-            if not b in self.tmp_objects.rectangles:
-                a_rect = ( min(a_rect[0], b[0]), min(a_rect[1], b[1]),
-                           max(a_rect[2], b[2]), max(a_rect[3], b[3]) )
+            a_rect = ( min(a_rect[0], b[0]), min(a_rect[1], b[1]),
+                       max(a_rect[2], b[2]), max(a_rect[3], b[3]) )
 
 
 
@@ -417,9 +416,8 @@ class Skin_Area:
                            max(c_rect[2], b[2]), max(c_rect[3], b[3]) )
 
         for b in self.objects.images:
-            if not b in self.tmp_objects.images:
-                c_rect = ( min(c_rect[0], b[0]), min(c_rect[1], b[1]),
-                           max(c_rect[2], b[2]), max(c_rect[3], b[3]) )
+            c_rect = ( min(c_rect[0], b[0]), min(c_rect[1], b[1]),
+                       max(c_rect[2], b[2]), max(c_rect[3], b[3]) )
 
 
 
@@ -431,9 +429,8 @@ class Skin_Area:
                            max(c_rect[2], b[2]), max(c_rect[3], b[3]) )
 
         for b in self.objects.text:
-            if not b in self.tmp_objects.text:
-                c_rect = ( min(c_rect[0], b[0]), min(c_rect[1], b[1]),
-                           max(c_rect[2], b[2]), max(c_rect[3], b[3]) )
+            c_rect = ( min(c_rect[0], b[0]), min(c_rect[1], b[1]),
+                       max(c_rect[2], b[2]), max(c_rect[3], b[3]) )
 
 
 
@@ -462,9 +459,11 @@ class Skin_Area:
         must be greater 5. With that the skin will fall back to text view for
         e.g. mp3s inside a folder with cover file
         """
-        if hasattr(menu, 'skin_force_text_view'):
+        try:
             self.use_text_view = menu.skin_force_text_view
             return
+        except:
+            pass
         image  = None
         folder = 0
         if len(menu.choices) < 5:
@@ -503,11 +502,15 @@ class Skin_Area:
         if copy_object:
             object = copy.copy(object)
 
-        MAX = self.area_val.width
-        object.width = eval('%s' % object.width)
+        try:
+            object.width = self.area_val.width + int(object.width[4:])
+        except TypeError:
+            pass
 
-        MAX = self.area_val.height
-        object.height = eval('%s' % object.height)
+        try:
+            object.height = self.area_val.height + int(object.height[4:])
+        except TypeError:
+            pass
 
         object.x += self.area_val.x
         object.y += self.area_val.y
@@ -539,14 +542,26 @@ class Skin_Area:
         if not r.height:
             r.height = item_h
 
-        MAX = item_w
-        r.x = int(eval('%s' % r.x))
-        r.width = int(eval('%s' % r.width))
+        try:
+            r.x = item_w + int(r.x[4:])
+        except TypeError:
+            pass
             
-        MAX = item_h
-        r.y = int(eval('%s' % r.y))
-        r.height = int(eval('%s' % r.height))
+        try:
+            r.width = item_w + int(r.width[4:])
+        except TypeError:
+            pass
+            
+        try:
+            r.y = item_h + int(r.y[4:])
+        except TypeError:
+            pass
 
+        try:
+            r.height = item_h + int(r.height[4:])
+        except TypeError:
+            pass
+            
         if r.x < 0:
             item_w -= r.x
 
@@ -614,11 +629,12 @@ class Skin_Area:
                 area = area[0]
 
         try:
-            area = eval('area.%s' % self.area_name)
+            area = getattr(area, self.area_name)
         except AttributeError:
             area = xml_skin.XML_area(self.area_name)
             area.visible = FALSE
             
+
         if (not self.area_val) or area != self.area_val:
             self.area_val = area
             redraw = TRUE
@@ -646,15 +662,21 @@ class Skin_Area:
 
         last_watermark = None
 
-        if hasattr(self, 'watermark') and self.watermark:
-            last_watermark = self.watermark
+        try:
+            if self.watermark:
+                last_watermark = self.watermark
 
-	    if hasattr(self.menu.selected,'image') and \
-               self.menu.selected.image != self.watermark:
-                self.watermark = None
-                self.redraw = TRUE
-            
-        for bg in copy.deepcopy(self.layout.background):
+                try:
+                    if self.menu.selected.image != self.watermark:
+                        self.watermark = None
+                        self.redraw = TRUE
+                except:
+                    pass
+        except:
+            pass
+        
+        for bg in self.layout.background:
+            bg = copy.copy(bg)
             if isinstance(bg, xml_skin.XML_image) and bg.visible:
                 self.calc_geometry(bg)
                 imagefile = ''
@@ -785,10 +807,14 @@ class Skin_Area:
             self.tmp_objects.images.append((val[0], val[1], val[0] + image.get_width(),
                                             val[1] + image.get_height(), image))
             return
+
+        try:
+            if val.label == 'background':
+                self.tmp_objects.bgimages.append((val.x, val.y, val.x + val.width,
+                                                  val.y + val.height, image))
+                return
+        except:
+            pass
         
-        elif hasattr(val, 'label') and val.label == 'background':
-            self.tmp_objects.bgimages.append((val.x, val.y, val.x + val.width,
-                                             val.y + val.height, image))
-        else:
-            self.tmp_objects.images.append((val.x, val.y, val.x + val.width,
-                                            val.y + val.height, image))
+        self.tmp_objects.images.append((val.x, val.y, val.x + val.width,
+                                        val.y + val.height, image))
