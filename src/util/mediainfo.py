@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/02/05 19:26:42  dischi
+# fix unicode handling
+#
 # Revision 1.16  2004/02/03 20:49:37  dischi
 # do not simplifiy dvds on disc/vcds cue/bin
 #
@@ -329,7 +332,7 @@ class MMCache(Cache):
             if not k in self.uncachable_keys and getattr(object,k) != None:
                 value = getattr(object,k)
                 if isinstance(value, str) or isinstance(value, unicode):
-                    value = value.replace('\0', '').lstrip().rstrip()
+                    value = Unicode(value.replace('\0', '').lstrip().rstrip())
                 if value:
                     ret[k] = value
 
@@ -353,7 +356,7 @@ class MMCache(Cache):
         info = mmpython.Factory().create(filename)
         if info:
             info = self.simplify(info)
-            info['title:filename'] = util.getname(filename)
+            info['title:filename'] = Unicode(util.getname(filename))
             if info.has_key('video'):
                 for video in info['video']:
                     for variable in ('width', 'height', 'length', 'aspect'):

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2004/02/05 19:26:42  dischi
+# fix unicode handling
+#
 # Revision 1.40  2003/12/31 16:08:08  rshortt
 # Use a fifth field in TV_CHANNELS to specify an optional VideoGroup
 # (VIDEO_GROUPS index).  Also fix a frequency bug in channels.py.
@@ -415,8 +418,11 @@ def timestr2secs_utc(str):
         # handle time zones. There is no obvious function that does. Therefore
         # this bug is left in for someone else to solve.
 
-        secs = time.mktime(strptime.strptime(str, xmltv.date_format))
-
+        try:
+            secs = time.mktime(strptime.strptime(str, xmltv.date_format))
+        except ValueError:
+            str  = str.replace('EST', '')
+            secs = time.mktime(strptime.strptime(str, xmltv.date_format))
     return secs
 
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/02/05 19:26:42  dischi
+# fix unicode handling
+#
 # Revision 1.8  2004/01/02 11:19:40  dischi
 # import popen3
 #
@@ -18,23 +21,6 @@
 #
 # Revision 1.6  2003/11/23 16:57:36  dischi
 # move xml help stuff to new fxdparser
-#
-# Revision 1.5  2003/11/22 20:34:08  dischi
-# use new vfs
-#
-# Revision 1.4  2003/11/02 10:50:40  dischi
-# remove debug
-#
-# Revision 1.3  2003/11/02 09:24:35  dischi
-# Check for libs and make it possible to install runtime from within
-# freevo
-#
-# Revision 1.2  2003/10/18 13:04:42  dischi
-# add distutils
-#
-# Revision 1.1  2003/10/11 11:20:11  dischi
-# move util.py into a directory and split it into two files
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -64,14 +50,35 @@ import sys
 # with util in only one file
 
 if sys.argv[0].find('setup.py') == -1 and sys.argv[0].find('install.py') == -1:
-    import vfs
+    import config
     import __builtin__
-    __builtin__.__dict__['vfs'] = vfs
-    
+
+    def Unicode(string, encoding=config.encoding):
+        if type(string) == str:
+            try:
+                return unicode(string, encoding)
+            except Exception, e:
+                _debug_( "Could not convert %s to unicode using \"%s\" encoding: %s" % \
+                         ( repr(string), encoding, e ))
+        return string
+
+    def String(string, encoding=config.encoding):
+        if type(string) == unicode:
+            try:
+                return string.encode(encoding)
+            except Exception, e:
+                _debug_( "Could not convert %s to string using \"%s\" encoding: %s" % \
+                         ( repr(string), encoding, e ))
+        return string
+
+    import vfs
     from misc import *
     from fileops import *
 
     import fxdparser
     import objectcache
     import popen3
-    
+
+    __builtin__.__dict__['vfs']     = vfs
+    __builtin__.__dict__['Unicode'] = Unicode
+    __builtin__.__dict__['String']  = String

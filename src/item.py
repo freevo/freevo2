@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2004/02/05 19:26:41  dischi
+# fix unicode handling
+#
 # Revision 1.63  2004/02/05 07:17:23  gsbarbieri
 # typo
 #
@@ -109,12 +112,13 @@
 import os
 import gettext
 import shutil
-import util.mediainfo
 
 import config
 from event import *
 import plugin
 import util
+
+from util import mediainfo, vfs, Unicode
 
 class FileInformation:
     """
@@ -201,10 +205,10 @@ class Item:
         self.name         = ''              # name in menu
         self.parent       = parent          # parent item to pass unmapped event
         self.icon         = None
-        if info and isinstance(info, util.mediainfo.Info):
+        if info and isinstance(info, mediainfo.Info):
             self.info     = copy.copy(info)
         else:
-            self.info     = util.mediainfo.Info(None, None, info)
+            self.info     = mediainfo.Info(None, None, info)
         self.menuw        = None
         self.description  = ''
 
@@ -241,7 +245,7 @@ class Item:
             skin_info = settings.mainmenu.items
             if skin_info.has_key(skin_type):
                 skin_info  = skin_info[skin_type]
-                self.name  = skin_info.name
+                self.name  = Unicode(skin_info.name)
                 self.image = skin_info.image
                 if skin_info.icon:
                     self.icon = os.path.join(settings.icon_dir, skin_info.icon)
@@ -288,18 +292,10 @@ class Item:
                                                '/cover', self.image)
             self.mimetype = self.filename[self.filename.rfind('.')+1:].lower()
             if info:
-                self.info = util.mediainfo.get(self.filename)
+                self.info = mediainfo.get(self.filename)
                 try:
                     if self.parent.DIRECTORY_USE_MEDIAID_TAG_NAMES:
                         self.name = self.info['title'] or self.name
-                        if type( self.name ) == str:
-                            try:
-                                self.name = unicode( self.name, config.encoding )
-                            except UnicodeDecodeError, e:
-                                _debug_( "WARNING: " + \
-                                         "Could not convert %s to unicode using \"%s\" encoding: %s" % \
-                                         ( repr( self.name ), encoding, e )
-                                         )
                 except:
                     pass
                 if not self.name:
@@ -312,7 +308,7 @@ class Item:
             self.filename     = ''
             self.mimetype     = self.type
             if not self.name:
-                self.name     = self.url
+                self.name     = Unicode(self.url)
 
             
     def __setitem__(self, key, value):
@@ -334,7 +330,7 @@ class Item:
         """
         store the key/value in metadata
         """
-        if isinstance(self.info, util.mediainfo.Info):
+        if isinstance(self.info, mediainfo.Info):
             if not self.info.store(key, value):
                 _debug_('unable to store info for \'%s\'' % self.name, 0)
         else:
@@ -345,7 +341,7 @@ class Item:
         """
         delete entry for metadata
         """
-        if isinstance(self.info, util.mediainfo.Info):
+        if isinstance(self.info, mediainfo.Info):
             return self.info.delete(key)
         else:
             print 'unable to delete info for that kind of item'
@@ -516,13 +512,4 @@ class Item:
             return self.__getitem__(attr)
         else:
             r = self.__getitem__(attr)
-            if type( r ) == str:
-                try:
-                    r = unicode( r, config.encoding )
-                except UnicodeDecodeError, e:
-                    _debug_( "WARNING: " + \
-                             "Could not convert %s to unicode using \"%s\" encoding: %s" % \
-                             ( repr( r ), encoding, e )
-                             )
-                             
-            return r
+            return Unicode(r)

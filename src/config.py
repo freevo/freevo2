@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2004/02/05 19:26:41  dischi
+# fix unicode handling
+#
 # Revision 1.93  2004/02/05 02:52:20  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
@@ -861,11 +864,9 @@ except:
         try:
             encoding = os.environ[ 'LC_ALL' ].split( '.' )[ 1 ]
         except:
-            encoding = sys.getdefaultencoding()
-            print "WARNING:" + \
-                   "Could not determine system encoding! Did look in FREEVO_LOCALE, LANG and LC_ALL environment variables for 'language.encoding' pair, but nothing found! Using %s" % encoding
+            encoding = LOCALE
 
 if not encoding:
-    encoding = sys.getdefaultencoding()
+    encoding = LOCALE
 
 _debug_( "Using '%s' encoding" % encoding )

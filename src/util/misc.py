@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/02/05 19:26:42  dischi
+# fix unicode handling
+#
 # Revision 1.22  2004/02/05 05:44:26  gsbarbieri
 # Fixes some bugs related to handling unicode internally.
 # NOTE: Many of the bugs are related to using str() everywhere, so please stop doing that.
@@ -225,7 +228,7 @@ def getname(file):
             name = m.group(1) + ' ' + m.group(2).upper() + m.group(3)
     if name.endswith('_'):
         name = name[:-1]
-    return name
+    return Unicode(name)
 
 
 def killall(appname, sig=9):

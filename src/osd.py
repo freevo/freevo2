@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.133  2004/02/05 19:26:41  dischi
+# fix unicode handling
+#
 # Revision 1.132  2004/02/05 02:52:25  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
@@ -1259,9 +1262,6 @@ class OSD:
         """
         if not pygame.display.get_init():
             return None
-
-        if type( url ) == unicode:
-            url = url.encode( config.encoding )
 
         thumbnail = False
         filename  = url

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/05 19:26:42  dischi
+# fix unicode handling
+#
 # Revision 1.14  2004/02/05 02:52:26  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
@@ -160,15 +163,6 @@ def freespace(path):
     Return the number of bytes available to the user on the file system
     pointed to by path.
     """
-    encoding = config.encoding
-    try:
-        if type( path ) == unicode:
-            path = path.encode( encoding )
-    except Exception, e:
-        print "ERROR:" + \
-              "Could not encode %s to \"%s\" encoding: %s" % \
-              ( repr( path ), encoding, e )
-        
     s = os.statvfs(path)
     return s[statvfs.F_BAVAIL] * long(s[statvfs.F_BSIZE])
         
@@ -180,15 +174,6 @@ def totalspace(path):
     pointed to by path.
     """
     
-    encoding = config.encoding
-    try:
-        if type( path ) == unicode:
-            path = path.encode( encoding )
-    except Exception, e:
-        print "ERROR:" + \
-              "Could not encode %s to \"%s\" encoding: %s" % \
-              ( repr( path ), encoding, e )
-        
     s = os.statvfs(path)
     return s[statvfs.F_BLOCKS] * long(s[statvfs.F_BSIZE])
         
