@@ -24,6 +24,12 @@ import osd
 # sends commands to
 import rc
 
+# The actual skin implementation is imported from the file
+# as defined in freevo_config.py
+sys.path += [os.path.dirname(config.OSD_SKIN)]
+modname = os.path.basename(config.OSD_SKIN)[:-3]
+exec('import ' + modname  + ' as skinimpl')
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -41,53 +47,30 @@ rc = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
- 
-# Module variable that contains an initialized Skin() object
-_singleton = None
+# Create the skin implementation object
+impl = skinimpl.Skin()
 
-def get_singleton():
-    global _singleton
-
-    # One-time init
-    if _singleton == None:
-        _singleton = Skin()  # The Skin() class is defined in freevo_skin.py
-        
-    return _singleton
+OSD_DEFAULT_FONTNAME = impl.OSD_FONTNAME
+OSD_DEFAULT_FONTSIZE = impl.OSD_FONTSIZE
+items_per_page = impl.items_per_page
 
 
-# This is the base skin class, it contains templates for the necessary
-# functions etc.
-class SkinBase:
+# This function is called from the rc module and other places
+def HandleEvent(ev):
+    # Handle event (remote control, timer, msg display...)
+    # Some events are handled directly (volume control),
+    # RC cmds are handled using the menu lib, and events
+    # might be passed directly to a foreground application
+    # that handles its' own graphics
+    impl.HandleEvent(ev)
 
 
-    items_per_page = 10  # Used by the menu module
-    
-    def __init__(self):
-       # Push main menu items
-       pass
+# Called from the MenuWidget class to draw a menu page on the
+# screen
+def DrawMenu(menuw):
+    impl.DrawMenu(menuw)
 
 
-    # This function is called from the rc module and other places
-    def HandleEvent(self, ev):
-        # Handle event (remote control, timer, msg display...)
-        # Some events are handled directly (volume control),
-        # RC cmds are handled using the menu lib, and events
-        # might be passed directly to a foreground application
-        # that handles its' own graphics
-        pass
-
-
-    # Called from the MenuWidget class to draw a menu page on the
-    # screen
-    def DrawMenu(self, menuw):
-        pass
-    
-
-    def DrawMP3(self, info):
-        pass
-    
-
-# The actual skin code is imported from the skin dir (configurable)
-# This has to be last in this file because of the dependencies
-sys.path += config.OSD_SKIN_DIR
-execfile(config.OSD_SKIN_DIR + '/freevo_skin.py', globals(), locals())
+# Called from the MP3 player to update the MP3 info
+def DrawMP3(info):
+    impl.DrawMP3(info)

@@ -61,9 +61,6 @@ rc = rc.get_singleton()
 # Create the OSD object
 osd = osd.get_singleton()
 
-# Create the skin object
-skin = skin.get_singleton()
-
 # Create the MenuWidget object
 menuwidget = menu.get_singleton()
 

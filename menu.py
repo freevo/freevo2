@@ -24,9 +24,6 @@ import rc
 # Create the remote control object
 rc = rc.get_singleton()
 
-# Create the skin object
-skin = skin.get_singleton()
-
 # Create the OSD object
 osd = osd.get_singleton()
 
