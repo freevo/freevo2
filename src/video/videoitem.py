@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.114  2004/01/09 21:05:09  dischi
+# override folder.fxd with tv show version
+#
 # Revision 1.113  2004/01/07 17:11:20  mikeruelle
 # make screensaver videos not blowup
 #
@@ -149,7 +152,7 @@ class VideoItem(Item):
                         self.info[i] = tvinfo[1][i]
                     if not self.image:
                         self.image = tvinfo[0]
-                    if not self.fxd_file:
+                    if not self.fxd_file or self.fxd_file.endswith('folder.fxd'):
                         self.fxd_file = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
 
