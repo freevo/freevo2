@@ -9,8 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.7  2003/02/21 21:15:41  outlyer
-# Fixed flicker; not configurable, and confined to 768x576, but it works.
+# Revision 1.8  2003/02/24 06:09:41  outlyer
+# Flicker-free skin for the toolbar. Only redraws the "menu region" rather than
+# the entire screen. It's pretty much a requirement to use my new skin with the
+# idle class without driving yourself insane with the flickering.
 #
 # Revision 1.84  2003/02/21 19:42:21  outlyer
 # Added a small note/reminder to figure out why we do this.
@@ -744,7 +746,7 @@ class Skin:
                                y0 + h)
             x0 += 190
 
-        osd.update()
+        osd.update((0,76,768,500))
         
 
     def DrawMP3(self, info):
@@ -843,8 +845,8 @@ class Skin:
             # remember the surface to redraw it
             self.time_y = top
             self.time_surface = osd.getsurface(left, top, 100, spacing)
-            
-                
+
+
         else:
 
             # redraw the surface on some positions
