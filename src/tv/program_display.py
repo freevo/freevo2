@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/23 23:34:10  rshortt
+# More acurate handling of when to display schedule or remove options.
+#
 # Revision 1.29  2004/02/23 21:41:10  dischi
 # start some unicode fixes, still not working every time
 #
@@ -71,6 +74,7 @@ class ProgramItem(Item):
             self.scheduled = prog.scheduled
         else:
             self.scheduled = False
+        self.favorite = False
 
         self.start = time.strftime(config.TV_DATETIMEFORMAT,
                                    time.localtime(prog.start))
@@ -95,10 +99,18 @@ class ProgramItem(Item):
 
     def display_program(self, arg=None, menuw=None):
         items = []
-        if self.context == 'schedule':
+
+        (got_schedule, schedule) = record_client.getScheduledRecordings()
+        if got_schedule:
+            (result, message) = record_client.isProgScheduled(self.prog, 
+                                                              schedule.getProgramList())
+            if result:
+                self.scheduled = True
+
+        if self.scheduled:
 	    items.append(menu.MenuItem(_('Remove from schedule'), 
                                        action=self.remove_program))
-        elif self.context == 'guide':
+        else:
 	    items.append(menu.MenuItem(_('Schedule for recording'), 
                                        action=self.schedule_program))
 
@@ -106,8 +118,18 @@ class ProgramItem(Item):
             items.append(menu.MenuItem(_('Search for more of this program'), 
                                        action=self.find_more))
 
-        items.append(menu.MenuItem(_('Add to favorites'), 
-                                   action=self.add_favorite))
+        (got_favs, favs) = record_client.getFavorites()
+        if got_favs:
+            (result, junk) = record_client.isProgAFavorite(self.prog, favs)
+            if result:
+                self.favorite = True
+
+        if self.favorite:
+            items.append(menu.MenuItem(_('Remove from favorites'), 
+                                       action=self.rem_favorite))
+        else:
+            items.append(menu.MenuItem(_('Add to favorites'), 
+                                       action=self.add_favorite))
 
         program_menu = menu.Menu(_('Program Menu'), items, 
                                  item_types = 'tv program menu')
@@ -117,6 +139,10 @@ class ProgramItem(Item):
 
 
     def add_favorite(self, arg=None, menuw=None):
+        pass
+
+
+    def rem_favorite(self, arg=None, menuw=None):
         pass
 
 
