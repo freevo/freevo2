@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/11/30 13:07:27  rshortt
+# Make the search function check the sub_title of the programs.
+#
 # Revision 1.18  2003/11/24 01:59:59  rshortt
 # Adding support for the padding of recordings with X minutes before and
 # after the show.  Thanks to Eirik Meland for the initial patch.
@@ -298,7 +301,8 @@ class RecordServer(xmlrpc.XMLRPC):
             for prog in ch.programs:
                 if prog.stop < now:
                     continue
-                if regex.match(prog.title) or regex.match(prog.desc):
+                if regex.match(prog.title) or regex.match(prog.desc) \
+                   or regex.match(prog.sub_title):
                     if DEBUG: log.debug('PROGRAM MATCH: %s' % prog)
                     matches.append(prog)
 
