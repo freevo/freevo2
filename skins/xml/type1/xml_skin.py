@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/02/17 05:32:11  gsbarbieri
+# Now supports the <preview width='<int>' height='<int>'/> into the <extendedmenu><listing><table><content>
+#
 # Revision 1.22  2003/02/08 23:31:36  gsbarbieri
 # hanged the Image menu to ExtendedMenu.
 #
@@ -578,7 +581,8 @@ class XML_listingmenuitem(XML_menuitem):
         self.border_size = 1
         self.spacing = 0
         self.indicator = { }
-
+        self.preview_height = 100
+        self.preview_width  = 100
 
     def parse_content(self, node, scale):
         self.parse(node, scale)
@@ -590,7 +594,12 @@ class XML_listingmenuitem(XML_menuitem):
                     bkp = self.indicator[type]
                     
                 self.indicator[type] = attr_str(subnode,'image', bkp)
-
+            elif subnode.name == u'preview':
+                self.preview_height = attr_int(subnode, 'height', self.preview_height,
+                                               min(scale[0], scale[1]))
+                self.preview_width = attr_int(subnode, 'width', self.preview_width,
+                                              min(scale[0], scale[1]))
+                
 
     def parse(self, node, scale, c_dir=''):
         XML_menuitem.parse(self, node, scale, c_dir)
