@@ -4,6 +4,11 @@ Freevo Changelog
 $Id$
 
 
+Release 1.2.4 (2002-06-XX):
+---------------------------
+o Fixed a problem where zombie (defunct) processes were created
+
+
 Release 1.2.3 (2002-06-01):
 ---------------------------
 o Fixed a big memory leak in the OSD server
