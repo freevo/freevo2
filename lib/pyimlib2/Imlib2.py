@@ -41,7 +41,7 @@ class Image:
 		elif type(image_or_filename) == _Imlib2.Image:
 			self._image = image_or_filename
 		else:
-			raise ValueError, "Unsupported image type", type(image)
+			raise ValueError, "Unsupported image type %s" % type(image_or_filename)
 
 		self.font = None
 
