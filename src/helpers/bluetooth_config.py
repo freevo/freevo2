@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/12/30 20:47:58  dischi
+# remove python 2.3 warning
+#
 # Revision 1.1  2003/12/23 15:11:35  dischi
 # new bluetooth plugin
 #
@@ -43,29 +46,29 @@
 import time, os, re, socket, sys, config
 
 
-global BLUE_RFCOMM
-
-
-
 def init_sock():
+    global BLUE_RFCOMM
 
     #Open the blutooth device. rfcomm is used to set a connection BEFORE this is used.
     print 'bluetooth: opening', BLUE_RFCOMM
     try:
-        bluefd = os.open(BLUE_RFCOMM, os.O_RDWR); global bluefd
+        global bluefd
+        bluefd = os.open(BLUE_RFCOMM, os.O_RDWR)
+
+        #Sends the initstring to the phone telling it to return all keypad events.
+        os.write(bluefd, "AT+CMER=3,2,0,0,0\r")
+
     except OSError:
         print 'bluetooth: CRITICAL ERROR (Could not open device ', BLUE_RFCOMM, ')'
         sys.exit(1) 
-
-    #Sends the initstring to the phone telling it to return all keypad events.
-    os.write(bluefd, "AT+CMER=3,2,0,0,0\r")
 	
 
 def read_conf():
 	
     #rfcomm device path
     if config.BLUE_RFCOMM != '':
-        BLUE_RFCOMM = config.BLUE_RFCOMM; global BLUE_RFCOMM
+        global BLUE_RFCOMM
+        BLUE_RFCOMM = config.BLUE_RFCOMM; 
     else:
         print 'bluetooth: WARNING (Could not read BLUE_RFCOMM from config, using default!)'
 	BLUE_RFCOMM = '/dev/bluetooth/rfcomm/1' 
@@ -94,8 +97,9 @@ print
 read_conf()
 init_sock()
     
+global bluefd
+
 try:
-    global bluefd
     bluefd = os.open(BLUE_RFCOMM, os.O_RDWR)
 except OSError:
     print 'bluetooth: CRITICAL ERROR (Could not open device ', BLUE_RFCOMM, ')'
