@@ -49,6 +49,7 @@ case "$1" in
         # Run the script to setup a Matrox G400 adapter for TV-out
         #
         cd /usr/local/freevo/matrox_g400
+        #/usr/local/freevo/matrox_g400/mga_ntsc_640x480.sh > /dev/null 2>&1
         /usr/local/freevo/matrox_g400/mga_ntsc_768x576.sh > /dev/null 2>&1
 
         #
