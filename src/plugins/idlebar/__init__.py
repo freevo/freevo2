@@ -17,6 +17,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/08/01 10:48:21  dischi
+# Move idlebar to new gui code:
+# o it is not drawn inside the area (a.k.a skin) code anymore
+# o it updates/removes itself if needed
+#
+# Some plugins are not changed to the new draw interface of the
+# idlebar. They are deactivated. Feel free to send an updated version.
+#
 # Revision 1.21  2004/07/25 18:22:27  dischi
 # changes to reflect gui update
 #
@@ -68,26 +76,34 @@ import plugin
 import skin
 import util.tv_util as tv_util
 import util.pymetar as pymetar
+import gui
+import eventhandler
+from event import *
 
-from pygame import image,transform
 
 class PluginInterface(plugin.DaemonPlugin):
     """
-    global idlebar plugin.
+    To activate the idle bar, put the following in your local_conf.py:
+        plugin.activate('idlebar')
+    You can then add various plugins. Plugins inside the idlebar are
+    sorted based on the level (except the clock, it's always on the
+    right side). Use 'freevo plugins -l' to see all available plugins,
+    and 'freevo plugins -i idlebar.<plugin>' for a specific plugin.
     """
     def __init__(self):
         """
         init the idlebar
         """
         plugin.DaemonPlugin.__init__(self)
-        self.poll_interval  = 3000
-        self.poll_menu_only = False
-        self.plugins = None
         plugin.register(self, 'idlebar')
-        self.visible = True
-        self.bar     = None
-        self.barfile = ''
-
+        eventhandler.register(self, SCREEN_CONTENT_CHANGE)
+        
+        self.poll_interval  = 300
+        self.poll_menu_only = False
+        self.plugins        = None
+        self.visible        = False
+        self.bar            = None
+        self.barfile        = ''
         # Getting current LOCALE
         try:
             locale.resetlocale()
@@ -95,44 +111,107 @@ class PluginInterface(plugin.DaemonPlugin):
             pass
 
 
-    def draw(self, (type, object), osd):
+    def update(self):
         """
         draw a background and all idlebar plugins
         """
-        w = osd.width + 2 * osd.x
-        h = osd.y + 60
+        screen  = gui.get_screen()
+        changed = False
 
+        if not self.visible:
+            _debug_('clear idlebar')
+            for p in plugin.get('idlebar'):
+                p.clear()
+            if self.bar:
+                self.bar.screen.remove(self.bar)
+                self.bar = None
+                self.barfile = ''
+            return True
+        
+        w = screen.width
+        h = config.OSD_OVERSCAN_Y + 60
         f = skin.get_image('idlebar')
 
         if self.barfile != f:
+            if self.bar:
+                screen.remove(self.bar)
             self.barfile = f
-            try:
-                self.bar = transform.scale(image.load(f).convert_alpha(), (w,h))
-            except:
-                self.bar = None
-                
-        # draw the cached barimage
-        if self.bar:
-            osd.drawimage(self.bar, (0, 0, w, h), background=True)
+            bg = screen.renderer.loadbitmap(f, False, w, h)
+            if bg:
+                self.bar = gui.Image(0, 0, w, h, bg)
+                self.bar.layer = 5
+                screen.add(self.bar)
+            changed = True
 
-        if not self.plugins:
-            self.plugins = plugin.get('idlebar')
+        x1 = config.OSD_OVERSCAN_X
+        y1 = config.OSD_OVERSCAN_Y
+        x2 = screen.width - config.OSD_OVERSCAN_X
+        y2 = h
 
-        x = osd.x + 10
-        for p in self.plugins:
-            add_x = p.draw((type, object), x, osd)
-            if add_x:
-                x += add_x + 20
-        self.free_space = x
+        for p in plugin.get('idlebar'):
+            width = p.draw(x2 - x1, y2 - y1)
+            if width == p.NO_CHANGE:
+                if p.align == 'left':
+                    x1 = x1 + p.width
+                else:
+                    x2 = x2 - p.width
+                continue
 
+            if width > x2 - x1:
+                # FIXME
+                continue
+
+            if p.align == 'left':
+                for o in p.objects:
+                    o.set_position(o.x1 + x1, o.y1 + y1, o.x2 + x1, o.y2 + y1)
+                    o.layer = 6
+                    screen.add(o)
+                x1 = x1 + width
+            else:
+                m = x2 - width
+                for o in p.objects:
+                    o.set_position(o.x1 + m, o.y1 + y1, o.x2 + m, o.y2 + y1)
+                    o.layer = 6
+                    screen.add(o)
+                x2 = x2 - width
+            p.width = width
+            changed = True
+
+        return changed
+            
+
+    def show(self):
+        if self.visible:
+            return
+        self.visible = True
+        self.update()
+        
+
+    def hide(self):
+        if not self.visible:
+            return
+        self.visible = False
+        self.update()
+        
 
     def eventhandler(self, event, menuw=None):
         """
         catch the IDENTIFY_MEDIA event to redraw the skin (maybe the cd status
         plugin wants to redraw)
         """
-        if plugin.isevent(event) == 'IDENTIFY_MEDIA' and skin.active:
-            skin.redraw()
+        if event == SCREEN_CONTENT_CHANGE:
+            app, fullscreen = event.arg
+            if fullscreen == self.visible:
+                _debug_('set visible %s' % (not fullscreen))
+                self.visible = not fullscreen
+                self.update()
+            return
+        
+        if not self.visible:
+            return False
+        if plugin.isevent(event) == 'IDENTIFY_MEDIA':
+            if self.update():
+                gui.get_screen().update()
         return False
 
 
@@ -140,27 +219,32 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         update the idlebar every 30 secs even if nothing happens
         """
-        if skin.active:
-            skin.redraw()
-
+        if not self.visible:
+            return
+        if self.update():
+            gui.get_screen().update()
 
 
 
 class IdleBarPlugin(plugin.Plugin):
-    """
-    To activate the idle bar, put the following in your local_conf.py:
-        plugin.activate('idlebar')
-    You can then add various plugins. Plugins inside the idlebar are
-    sorted based on the level (except the clock, it's always on the
-    right side). Use "freevo plugins -l" to see all available plugins,
-    and "freevo plugins -i idlebar.<plugin>" for a specific plugin.
-    """
     def __init__(self):
         plugin.Plugin.__init__(self)
-        self._type = 'idlebar'
+        self._type     = 'idlebar'
+        self.objects   = []
+        self.NO_CHANGE = -1
+        self.align     = 'left'
 
-    def draw(self, (type, object), x, osd):
-        return
+        
+    def draw(self, width, height):
+        return self.NO_CHANGE
+
+
+    def clear(self):
+        for o in self.objects:
+            o.screen.remove(o)
+        self.objects = []
+        
+            
 
 
 class clock(IdleBarPlugin):
@@ -179,24 +263,32 @@ class clock(IdleBarPlugin):
                 format ='%a %H:%M'
             else:
                 format ='%a %I:%M %P'
-        self.timeformat = format
+        self.format = format
+        self.object = None
+        self.align  = 'right'
+        self.width  = 0
 
-    def draw(self, (type, object), x, osd):
-        clock = time.strftime(self.timeformat)
-        font  = osd.get_font('clock')
-        pad_x = 10
-        idlebar_height = 60
 
-        w = font.stringsize( clock )
+    def draw(self, width, height):
+        clock  = time.strftime(self.format)
+
+        if self.objects and self.objects[0].text == clock:
+            return self.NO_CHANGE
+
+        self.clear()
+
+        screen = gui.get_screen()
+        font   = gui.get_font('clock')
+
+        w = font.stringsize(clock)
         h = font.font.height
-        if h > idlebar_height:
-            h = idlebar_height
-        osd.drawstring( clock, font, None,
-                       ( osd.x + osd.width - w -pad_x ),
-                       ( osd.y + ( idlebar_height - h ) / 2 ),
-                       ( w + 1 ), h , 'right', 'center')
-        self.clock_left_position = osd.x + osd.width - w - pad_x
-        return 0
+        if h > height:
+            h = height
+
+        txt = gui.Text(0, 0, w, h, clock, font, align_v='center', align_h='right')
+        self.objects.append(txt)
+        return w
+
 
 
 class cdstatus(IdleBarPlugin):
@@ -207,6 +299,9 @@ class cdstatus(IdleBarPlugin):
     plugin.activate('idlebar.cdstatus')
     """
     def __init__(self):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
         icondir = os.path.join(config.ICON_DIR, 'status')
         self.cdimages ={}
@@ -246,6 +341,9 @@ class mail(IdleBarPlugin):
 
     """
     def __init__(self, mailbox):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
         self.NO_MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_dimmed.png')
         self.MAILIMAGE = os.path.join(config.ICON_DIR, 'status/newmail_active.png')
@@ -290,41 +388,58 @@ class tv(IdleBarPlugin):
         IdleBarPlugin.__init__(self)
 
         self.listings_threshold = listings_threshold
-        self.next_guide_check = 0
-        self.listings_expire = 0
-        self.tvlockfile = config.FREEVO_CACHEDIR + '/record'
-        icondir = os.path.join(config.ICON_DIR, 'status')
-        self.TVLOCKED     = os.path.join(icondir, 'television_active.png')
-        self.TVFREE       = os.path.join(icondir, 'television_inactive.png')
-        self.NEAR_EXPIRED = os.path.join(icondir, 'television_near_expired.png')
-        self.EXPIRED      = os.path.join(icondir, 'television_expired.png')
+        self.next_guide_check   = 0
+        self.listings_expire    = 0
+        self.tvlockfile         = config.FREEVO_CACHEDIR + '/record'
+        self.status             = None
+        
+        self.TVLOCKED     = 'television_active.png'
+        self.TVFREE       = 'television_inactive.png'
+        self.NEAR_EXPIRED = 'television_near_expired.png'
+        self.EXPIRED      = 'television_expired.png'
 
+
+    def clear(self):
+        IdleBarPlugin.clear(self)
+        self.status = None
+
+        
     def checktv(self):
         if os.path.exists(self.tvlockfile):
             return 1
         return 0
 
-    def draw(self, (type, object), x, osd):
 
+    def draw(self, width, height):
+        status = 'inactive'
         if self.checktv() == 1:
-            return osd.drawimage(self.TVLOCKED, (x, osd.y + 10, -1, -1))[0]
+            status = 'active'
 
         if self.listings_threshold != -1:
             now = time.time()
 
             if now > self.next_guide_check:
-                _debug_('TV: checking guide')
                 self.listings_expire = tv_util.when_listings_expire()
-                _debug_('TV: listings expire in %s hours' % self.listings_expire)
                 # check again in 10 minutes
                 self.next_guide_check = now + 10*60
 
-            if self.listings_expire == 0:
-                return osd.drawimage(self.EXPIRED, (x, osd.y + 10, -1, -1))[0]
-            elif self.listings_expire <= self.listings_threshold:
-                return osd.drawimage(self.NEAR_EXPIRED, (x, osd.y + 10, -1, -1))[0]
+            if self.listings_expire <= self.listings_threshold:
+                status = 'near_expired'
 
-        return osd.drawimage(self.TVFREE, (x, osd.y + 10, -1, -1))[0]
+            if self.listings_expire == 0:
+                status = 'expired'
+
+        if self.status == status:
+            return self.NO_CHANGE
+
+        self.clear()
+        self.status = status
+        i = gui.get_icon('status/television_%s' % status)
+        i = gui.get_screen().renderer.loadbitmap(i, None, None, height)
+        
+        w,h  = i.get_size()
+        self.objects.append(gui.Image(0, 0, w, h, i))
+        return w
 
 
 
@@ -339,6 +454,9 @@ class weather(IdleBarPlugin):
     You can also set the unit as second parameter in args ('C', 'F', or 'K')
     """
     def __init__(self, zone='CYYZ', units='C'):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
+
         IdleBarPlugin.__init__(self)
         self.TEMPUNITS = units
         self.METARCODE = zone
@@ -443,6 +561,8 @@ class holidays(IdleBarPlugin):
       ('12-25',  'christmas.png')]
     """
     def __init__(self):
+        self.reason = 'draw() function needs update to work with new interface'
+        return
         IdleBarPlugin.__init__(self)
 
     def config(self):
@@ -479,11 +599,29 @@ class logo(IdleBarPlugin):
     """
     def __init__(self, image=None):
         IdleBarPlugin.__init__(self)
-        self.image = image
+        self.image  = image
+        self.file   = file
+        self.object = None
 
-    def draw(self, (type, object), x, osd):
+
+    def draw(self, width, height):
         if not self.image:
-            image = osd.settings.images['logo']
+            image = gui.get_image('logo')
         else:
             image = os.path.join(config.IMAGE_DIR, self.image)
-        return osd.drawimage(image, (x, osd.y + 5, -1, 75))[0]
+
+        if self.objects and self.file == image:
+            return self.NO_CHANGE
+
+        self.file = image
+        self.clear()
+            
+        screen = gui.get_screen()
+        i = screen.renderer.loadbitmap(image, None, None, height + 10)
+        if not i:
+            return 0
+
+        w,h  = i.get_size()
+        self.objects.append(gui.Image(0, 0, w, h, i))
+        print 'add', self.objects
+        return w
