@@ -45,7 +45,7 @@ def add_favorite(prog):
             for c in config.TV_CHANNELS:
                 channel.append(c[0])
         else:
-            channel = [ prog.channel.chan_id ]
+            channel = [ prog.channel.id ]
         days = (_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'),
                 _('Sat'), _('Sun'))
         if prog.days in days:
@@ -72,7 +72,7 @@ def schedule_recording(prog):
     if prog['subtitle']:
         info['subtitle'] = prog['subtitle']
     try:
-        return server.recording_add(prog.title, prog.channel.chan_id, 1000,
+        return server.recording_add(prog.title, prog.channel.id, 1000,
                                     prog.start, prog.stop, info)
     except mcomm.MException, e:
         print e

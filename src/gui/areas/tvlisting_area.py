@@ -40,6 +40,7 @@ __all__ = [ 'TvlistingArea' ]
 
 import copy
 import os
+import pyepg
 
 import time
 import config
@@ -317,7 +318,7 @@ class TvlistingArea(Area):
 
         # selected program:
         selected_prog = menu.selected
-        all_channels = config.TV_CHANNELLIST.get_all()
+        all_channels = pyepg.channels
 
         start_channel = all_channels.index(menu.channel) / num_rows * num_rows
 

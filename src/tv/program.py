@@ -43,7 +43,7 @@ from gui import AlertBox
 # tv imports
 import recordings
 import favorite
-import channels
+import pyepg
 
 class ProgramItem(Item):
     """
@@ -62,7 +62,7 @@ class ProgramItem(Item):
         self.info['subtitle'] = program.subtitle
         self.info['description'] = program.description
 
-        key = '%s%s%s' % (program.channel.chan_id, program.start, program.stop)
+        key = '%s%s%s' % (program.channel.id, program.start, program.stop)
         if recordings.recordings.has_key(key):
             self.scheduled = recordings.recordings[key]
         else:
@@ -97,7 +97,7 @@ class ProgramItem(Item):
         """
         compare function, return 0 if the objects are identical, 1 otherwise
         """
-        if not isinstance(other, (ProgramItem, channels.Program)):
+        if not isinstance(other, (ProgramItem, pyepg.Program)):
             return 1
 
         return self.title != other.title or \

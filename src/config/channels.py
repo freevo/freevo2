@@ -33,9 +33,10 @@
 # -----------------------------------------------------------------------------
 
 import logging
+import pyepg
 
+import sysconfig
 import config
-from tv.channels import ChannelList
 
 log = logging.getLogger('config')
 
@@ -77,10 +78,10 @@ def add_uri(channel, uri):
 def refresh():
     log.info('Detecting TV channels.')
 
-    config.TV_CHANNELLIST = ChannelList(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
-    log.debug('got %d channels' % len(config.TV_CHANNELLIST.channel_list))
-
-    for c in config.TV_CHANNELLIST:
+    pyepg.connect(sysconfig.datafile('epgdb'))
+    pyepg.load(config.TV_CHANNELS, config.TV_CHANNELS_EXCLUDE)
+    
+    for c in pyepg.channels:
         c.uri = []
         if isinstance(c.access_id, (list, tuple)):
             for a_id in c.access_id:
@@ -91,11 +92,12 @@ def refresh():
     # add all possible channels to the cards
     for card in config.TV_CARDS:
         channels = {}
-        for chan in config.TV_CHANNELLIST.get_all():
+        for chan in pyepg.channels:
             for u in chan.uri:
-                if u.find(':') == -1: continue  # safeguard, shouldn't happen
+                if u.find(':') == -1:
+                    continue  # safeguard, shouldn't happen
                 if card == u.split(':')[0]:
-                    channels[String(chan.chan_id)] = u.split(':', 1)[1]
+                    channels[String(chan.id)] = u.split(':', 1)[1]
     
         config.TV_CARDS[card].channels = channels
 

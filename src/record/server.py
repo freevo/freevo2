@@ -84,8 +84,6 @@ class RecordServer(RPCServer):
         RPCServer.__init__(self, 'recordserver')
         config.detect('tvcards', 'channels')
         plugin.init(exclusive = [ 'record' ])
-        # db access to match favorites
-        self.epgdb = pyepg.get_epg(EPGDB)
         # file to load / save the recordings and favorites
         self.fxdfile = sysconfig.datafile('recordserver.fxd')
         # get list of best recorder for each channel
@@ -193,22 +191,20 @@ class RecordServer(RPCServer):
         """
         log.info('recordserver.check_favorites')
         for f in copy.copy(self.favorites):
-            for entry in self.epgdb.search_programs(f.name):
-                dbid, channel, title, subtitle, descr, episode, \
-                      start, stop = entry[:8]
-                if not f.match(title, channel, start):
+            for p in pyepg.guide.search_programs(f.name):
+                if not f.match(p.title, p.channel.id, p.start):
                     continue
-                r = Recording(self.rec_id, title, channel, f.priority,
-                              start, stop)
+                r = Recording(self.rec_id, p.title, p.channel.id, f.priority,
+                              p.start, p.stop)
                 if r in self.recordings:
                     # This does not only avoids adding recordings twice, it
                     # also prevents from added a deleted favorite as active
                     # again.
                     continue
-                r.episode  = episode
-                r.subtitle = subtitle
-                log.info('added %s: %s (%s)' % (String(channel),
-                                                String(title), start))
+                r.episode  = p.episode
+                r.subtitle = p.subtitle
+                log.info('added %s: %s (%s)' % (String(p.channel.id),
+                                                String(p.title), p.start))
                 f.add_data(r)
                 self.recordings.append(r)
                 self.rec_id += 1
@@ -330,7 +326,7 @@ class RecordServer(RPCServer):
             dbid, priority, info = \
                   self.parse_parameter(val, ( int, int, dict ))
             channel, name, subtitle, descr, episode, \
-                     start, stop = self.epgdb.get_programs_by_id(dbid)[1:8]
+                     start, stop = pyepg.guide.get_programs_by_id(dbid)[1:8]
             if subtitle and not info.has_key('subtitle'):
                 info['subtitle'] = subtitle
             if descr and not info.has_key('description'):

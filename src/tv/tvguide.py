@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2004/12/09 20:26:33  dischi
+# Merged tv/channels into pyepg. It returns now nice channel and program
+# items. Much cleanup is needed were pyepg is used. I also removed
+# config.TV_CHANNELLIST, you can use pyepg.channels or pyepg.guide to
+# access the channel listing / guide
+#
 # Revision 1.64  2004/12/05 17:10:06  dischi
 # start extract channellist to be independed
 #
@@ -122,6 +128,8 @@ import os
 import time
 import traceback
 
+import pyepg
+
 import config
 import util
 import gui
@@ -168,20 +176,15 @@ class TVGuide(MenuApplication):
         box = gui.PopupBox(text=_('Preparing the program guide'))
         box.show()
 
-        if not config.TV_CHANNELLIST:
-            box.destroy()
-            gui.AlertBox(text=_('TV Guide is corrupt!')).show()
-            return False
-
         self.current_time = int(time.time())
         start_time = self.current_time - 1800
         stop_time  = self.current_time + 3*3600
 
         # current channel is the first one
-        self.channel  = config.TV_CHANNELLIST[0]
+        self.channel  = pyepg.channels[0]
 
         # current program is the current running
-        self.selected = ProgramItem(self.channel.get(self.current_time)[0])
+        self.selected = ProgramItem(self.channel.get(self.current_time))
 
         box.destroy()
         return True
@@ -225,13 +228,13 @@ class TVGuide(MenuApplication):
             pass
             
         if event == MENU_UP:
-            self.channel = config.TV_CHANNELLIST.get(-1, self.channel)
-            self.selected = ProgramItem(self.channel.get(self.current_time)[0])
+            self.channel = pyepg.guide.get_channel(-1, self.channel)
+            self.selected = ProgramItem(self.channel.get(self.current_time))
             self.refresh()
 
         elif event == MENU_DOWN:
-            self.channel = config.TV_CHANNELLIST.get(1, self.channel)
-            self.selected = ProgramItem(self.channel.get(self.current_time)[0])
+            self.channel = pyepg.guide.get_channel(1, self.channel)
+            self.selected = ProgramItem(self.channel.get(self.current_time))
             self.refresh()
 
         elif event == MENU_LEFT:
