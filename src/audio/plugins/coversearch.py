@@ -13,6 +13,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/01/16 12:20:16  dischi
+# o catch all exceptions inside amazon.py
+# o add plugin for 'dir' if album and artist are set
+#
 # Revision 1.24  2004/01/03 17:43:15  dischi
 # OVERLAY_DIR is always used
 #
@@ -184,6 +188,10 @@ class PluginInterface(plugin.ItemPlugin):
                 if config.DEBUG:
                     print _( "WARNING" ) + ": " +\
                           _( "Unknown CD, cover searching is disabled" )
+
+        if item.type == 'dir' and item.getattr('album') and item.getattr('artist'):
+            return [ ( self.cover_search_file, _( 'Find a cover for this music' ),
+                       'imdb_search_or_cover_search') ]
         return []
 
 
@@ -194,12 +202,11 @@ class PluginInterface(plugin.ItemPlugin):
         box = PopupBox(text=_( 'searching Amazon...' ) )
         box.show()
 
-        if self.item.type == 'audio':
-            album = self.item.info['album']
-        else:
-            album = self.item.info['title']
+        album = self.item.getattr('album')
+        if not album:
+            album = self.item.getattr('title')
 
-        artist = self.item.info['artist']
+        artist = self.item.getattr('artist')
 
         search_string = '%s %s' % (artist,album)
         search_string = re.sub('[\(\[].*[\)\]]', '', search_string)
@@ -217,6 +224,14 @@ class PluginInterface(plugin.ItemPlugin):
         except amazon.ParseError:
             box.destroy()
             box = PopupBox(text=_( 'The cover provider returned bad information.' ) )
+            box.show()
+            time.sleep(2)
+            box.destroy()
+            return
+
+        except:
+            box.destroy()
+            box = PopupBox(text=_( 'Unknown error while searching.' ) )
             box.show()
             time.sleep(2)
             box.destroy()
@@ -296,6 +311,8 @@ class PluginInterface(plugin.ItemPlugin):
         if self.item.type == 'audiocd':
             filename = '%s/mmpython/disc/%s.jpg' % (config.FREEVO_CACHEDIR,
                                                     self.item.info['id'])
+        elif self.item.type == 'dir':
+            filename = os.path.join(self.item.dir, 'cover.jpg')
         else:
             filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
 
@@ -305,10 +322,9 @@ class PluginInterface(plugin.ItemPlugin):
         m.close()
         fp.close()
 
-        if self.item.type == 'audiocd':
+        if self.item.type in ('audiocd', 'dir'):
             self.item.image = filename
-            
-        if not self.item.type == 'audiocd' and self.item.parent.type == 'dir':
+        elif self.item.parent.type == 'dir':
             # set the new cover to all items
             self.item.parent.image = filename
             for i in self.item.parent.menu.choices:
