@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2004/01/10 13:19:52  dischi
+# use new skin.set_base_fxd function
+#
 # Revision 1.103  2004/01/07 18:15:41  dischi
 # add mmpython warning
 #
@@ -152,7 +155,7 @@ class SkinSelectItem(Item):
         Load the new skin and rebuild the main menu
         """
         import plugin
-        skin.settings = skin.load(self.skin, copy_content = False)
+        skin.set_base_fxd(self.skin)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
 
         menuw.menustack[0].choices = []
