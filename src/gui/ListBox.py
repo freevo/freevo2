@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/07 11:17:02  dischi
+# use normal button height as item height
+#
 # Revision 1.16  2003/06/02 03:28:41  rshortt
 # Fixes for event changes.
 #
@@ -147,7 +150,7 @@ class ListBox(RegionScroller):
 
         self.h_margin                 = 2
         self.v_margin                 = 2
-        self.items_height             = 25
+        self.items_height             = Button('foo').height
         self.x_scroll_interval        = 25
         self.y_scroll_interval        = self.items_height
         if not self.items: self.items = []
@@ -234,7 +237,8 @@ class ListBox(RegionScroller):
                             self.bg_color, self.fg_color, 
                             self.selected_bg_color, self.selected_fg_color, 
                             h_margin=h_margin)
-
+            if item.border:
+                item.border.thickness = 1
         self.items.append(item)
         self.add_child(item)
 

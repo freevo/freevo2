@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/07 11:17:02  dischi
+# use normal button height as item height
+#
 # Revision 1.10  2003/05/21 00:04:26  rshortt
 # General improvements to layout and drawing.
 #
@@ -97,7 +100,7 @@ class ListItem(Button):
     """
 
     
-    def __init__(self, text=' ', value=None, width=75, height=25, 
+    def __init__(self, text=' ', value=None, width=75, height=None, 
                  bg_color=None, fg_color=None, selected_bg_color=None,
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None, h_margin=None):
