@@ -17,7 +17,7 @@ KEYWORDS="x86"
 DEPEND=">=dev-python/pygame-1.5.5
 	>=media-libs/freetype-2.1.4
 	>=dev-python/Imaging-1.1.3
-	>=dev-python/PyXML-0.8.1
+	>=dev-python/pyxml-0.8.1
 	>=dev-python/twisted-1.0.6
 	>=media-libs/libsdl-1.2.5
 	>=dev-python/pysqlite-0.4.1
