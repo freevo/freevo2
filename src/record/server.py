@@ -7,6 +7,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/23 01:33:16  rshortt
+# Changes for new TV_SETTINGS:
+# -Support multiple recordings on different devices (ie: ivtv0 and dvb0).
+# -Use some finctions in tv.channels for retrieving settings and using lock files.
+#
 # Revision 1.5  2004/08/14 01:20:08  rshortt
 # Get the channels list / epg from memory or disk cache.
 #
@@ -77,7 +82,8 @@ import util.tv_util as tv_util
 import plugin
 import util.popen3
 from   util.videothumb import snapshot
-from tv.channels import get_channels
+from tv.channels import get_channels, is_locked, lock_device, unlock_device, \
+                        get_settings_by_id, get_settings_by_name
 
 def _debug_(text):
     if config.DEBUG:
@@ -88,12 +94,14 @@ appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 logfile = '%s/%s-%s.log' % (config.LOGDIR, appname, os.getuid())
 log.startLogging(open(logfile, 'a'))
 
-# XXX: change this to use tv0.lock (ivtvX/dvbX/etc..) where
-#      it may need it.
-tv_lock_file = config.FREEVO_CACHEDIR + '/record'
 
 
 class RecordServer(xmlrpc.XMLRPC):
+
+    def __init__(self):
+        xmlrpc.XMLRPC.__init__(self)
+        self.current_recordings = {}
+
 
     # note: add locking and r/rw options to get/save funs
     def getScheduledRecordings(self):
@@ -223,7 +231,7 @@ class RecordServer(xmlrpc.XMLRPC):
         # if prog.start <= now and prog.stop >= now and recording:
         if recording:
             _debug_('stopping current recording')
-            eh.post(Event('STOP_RECORDING', arg=prog))
+            self.stop_record(prog)
        
         return (TRUE, 'recording removed')
    
@@ -349,7 +357,7 @@ class RecordServer(xmlrpc.XMLRPC):
                         # our new recording should start no later than now!
                         sr.removeProgram(currently_recording, 
                                          tv_util.getKey(currently_recording))
-                        eh.post(Event('STOP_RECORDING', arg=prog))
+                        self.stop_record(prog)
 
                         # XXX:  Don't sleep (block) if we don't have to.
                         #       Keep an eye on this.
@@ -369,7 +377,7 @@ class RecordServer(xmlrpc.XMLRPC):
                             if overlap <= (config.TV_RECORD_PADDING/2):
                                 sr.removeProgram(currently_recording, 
                                                  tv_util.getKey(currently_recording))
-                                eh.post(Event('STOP_RECORDING', arg=prog))
+                                self.stop_record(prog)
                                 # time.sleep(5)
                                 _debug_('CALLED RECORD STOP 2')
                             else: 
@@ -413,7 +421,31 @@ class RecordServer(xmlrpc.XMLRPC):
                 self.removeScheduledRecording(rec_prog)
                 return
 
-            eh.post(Event('RECORD', arg=rec_prog))
+            self.record(rec_prog)
+
+
+    def record(self, prog):
+        post_to = None
+        # expect types to be ordered by priority
+        types = get_settings_by_id(prog.channel_id)
+
+        for which in types:
+            if is_locked(which):
+                _debug_('Cannot record on %s, it is busy.' % which)
+                continue
+
+            else:
+                post_to = which
+                break
+
+        if post_to:
+            eh.post(Event('RECORD', arg=(prog, which)))
+
+
+    def stop_record(self, prog):
+        for t, p in self.current_recordings.items():
+            if prog == p:
+                eh.post(Event('STOP_RECORDING', arg=(p, t)))
 
 
     def addFavorite(self, name, prog, exactchan=FALSE, exactdow=FALSE, exacttod=FALSE):
@@ -940,16 +972,22 @@ class RecordServer(xmlrpc.XMLRPC):
 
         elif event == RECORD_START:
             _debug_('Handling event RECORD_START')
-            prog = event.arg
-            open(tv_lock_file, 'w').close()
+            prog = event.arg[0]
+            which = event.arg[1]
+
+            lock_device(which)
             self.create_fxd(prog)
+
             if config.VCR_PRE_REC:
                 util.popen3.Popen3(config.VCR_PRE_REC)
 
+            self.current_recordings[which] = prog
+
         elif event == RECORD_STOP:
             _debug_('Handling event RECORD_STOP')
-            os.remove(tv_lock_file)
-            prog = event.arg
+            prog = event.arg[0]
+            which = event.arg[1]
+            unlock_device(which)
             try:
                 snapshot(prog.filename)
             except:
@@ -960,6 +998,8 @@ class RecordServer(xmlrpc.XMLRPC):
 
             if config.VCR_POST_REC:
                 util.popen3.Popen3(config.VCR_POST_REC)
+
+            del self.current_recordings[which]
 
 
 
