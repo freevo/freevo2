@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2004/07/27 11:10:11  dischi
+# fix application import
+#
 # Revision 1.41  2004/07/26 18:10:18  dischi
 # move global event handling to eventhandler.py
 #
@@ -82,7 +85,7 @@ import epg_xmltv, epg_types
 from item import Item
 from program_display import ProgramItem
 import record_client as ri
-import application
+
 
 skin = skin.get_singleton()
 skin.register('tv', ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info', 'plugin'))
