@@ -10,6 +10,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2004/02/08 06:12:31  outlyer
+# Missing the text... it looks like other shows are tomorrow, when they're
+# really not.
+#
 # Revision 1.26  2004/02/07 13:24:21  dischi
 # better directory name building
 #
@@ -485,6 +489,7 @@ def comingup(items=None):
                 str(time.strftime('%I:%M%p',time.localtime(m.start))) + '\n'
            
     if len(later) > 0:
+        result = result + 'This Week:\n'
         for m in later:
             sub_title = ''
             if m.sub_title:
