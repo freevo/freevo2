@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/18 16:54:19  dischi
+# Search the config file for the remote in different directories:
+# ~/freevo, /etc/freevo and ./rc_client
+#
 # Revision 1.6  2003/01/09 05:04:06  krister
 # Added an option to play all movies in a dir, and generate random playlists for them.
 #
@@ -242,8 +246,13 @@ else:
                 sys.exit(1)
 
 
-if REMOTE and os.path.isfile('rc_client/%s.py' % REMOTE):
-    execfile('rc_client/%s.py' % REMOTE, globals(), locals())
+for dir in ( os.path.expanduser('~/.freevo'), '/etc/freevo', './rc_client' ):
+    if REMOTE and os.path.isfile('%s/%s.py' % (dir, REMOTE)):
+        print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
+        execfile('%s/%s.py' % (dir, REMOTE), globals(), locals())
+        break
+    else:
+        print 'no REMOTE file %s/%s.py' % (dir, REMOTE)
     
 
 #
