@@ -14,6 +14,21 @@ if ! [ -e src/identifymedia.py ]; then
     cd `dirname $0`
 fi
 
+if [ "$1" = "update" ] ; then
+    if [ "$2" = "" ]; then
+	echo "usage: freevo update path-of-freevo-binary-release"
+	echo
+	echo "warning: the update will delete all files in the src and"
+	echo "and the skin directory except the personal plugins."
+	exit 1
+    fi
+    echo "updating freevo binary release in $2"
+    find $2/src | grep -v /plugins/ | xargs rm -rf
+    rm -rf $2/src/skins/main1 $2/src/xml
+    cp -r * $2
+    exit 0
+fi
+
 # Is runapp present? If not it needs to be compiled
 if ! [ -e runapp ]; then
     echo
