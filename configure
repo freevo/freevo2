@@ -15,7 +15,7 @@ RUNTIME_VERSION=3
 RT_DIR=../freevo_runtime$RUNTIME_VERSION
 
 # First check if the runtime is installed
-if test -d $RT_DIR/freevo_python ; then
+if test -f $RT_DIR/freevo_python ; then
 
     # Double-check that we have the correct runtime version
     rt_ver=`cat $RT_DIR/VERSION`
