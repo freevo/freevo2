@@ -52,12 +52,20 @@ class Move(BaseAnimation):
         self.max_frames  = frames
         self.frame       = 0
         self.pos         = 0
+        # make sure all objects are visible
+        map(lambda o: o.show(), objects)
 
         
     def update(self):
         """
         update the animation
         """
+        self.frame += 1
+        if not self.max_frames:
+            # if there are no frames, remove the
+            # animation, it can't run
+            self.remove()
+            return
         new_pos = int(self.frame * (float(self.pixel) / self.max_frames))
         move = new_pos - self.pos
 
@@ -72,16 +80,17 @@ class Move(BaseAnimation):
         if self.frame == self.max_frames:
             self.remove()
 
-        self.frame += 1
 
 
     def finish(self):
         """
         finish the animation
         """
-        self.frame = self.max_frames
+        self.frame = self.max_frames - 1
         self.update()
         BaseAnimation.finish(self)
+
+
 
 
 class Fade(BaseAnimation):
@@ -97,27 +106,46 @@ class Fade(BaseAnimation):
         self.frame       = 0
         self.diff        = stop - start
         self.start_alpha = start
-        for o in objects:
-            o.set_alpha(start)
-            
+        # make sure all objects are visible
+        map(lambda o: o.show(), objects)
+        if frames:
+            # set start alpha value to all objects
+            map(lambda o: o.set_alpha(start), objects)
+        else:
+            # no frames, set stop alpha value to all frames
+            map(lambda o: o.set_alpha(stop), objects)
+            if stop == 0:
+                # if stop is 0, we can also hide the objects
+                map(lambda o: o.hide(), objects)
+
 
     def update(self):
         """
         update the animation
         """
+        self.frame += 1
+        if not self.max_frames:
+            # if there are no frames, remove the
+            # animation, it can't run
+            self.remove()
+            return
+        # calculate the new alpha
         alpha = self.start_alpha + int(self.frame * (float(self.diff) / self.max_frames))
         for o in self.objects:
             o.set_alpha(alpha)
         if self.frame == self.max_frames:
             self.remove()
-        self.frame += 1
+            if self.start_alpha - self.diff == 0:
+                if self.start_alpha == 255:
+                    map(lambda o: o.set_alpha(255), objects)
+                map(lambda o: o.hide, objects)
 
 
     def finish(self):
         """
         finish the animation
         """
-        self.frame = self.max_frames
+        self.frame = self.max_frames - 1
         self.update()
         BaseAnimation.finish(self)
 

@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2004/08/23 20:35:33  dischi
+# o support for displays too slow to do the animation.
+# o add wait function to wait until an animation is finshed, or
+#   until application fadinf animations are done
+#
 # Revision 1.6  2004/08/23 15:10:34  dischi
 # remove callback and add wait function
 #
@@ -81,7 +86,8 @@ class BaseAnimation:
         self.active       = False  # Should it be updated in the poll
         self.delete       = False  # Delete from list on next poll
         self.next_update  = 0      # timestamp for next update
-
+        self.application  = False  # True when it's for app show/hide
+        
 
     def set_fps(self, fps):
         """

@@ -16,6 +16,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/08/23 20:35:33  dischi
+# o support for displays too slow to do the animation.
+# o add wait function to wait until an animation is finshed, or
+#   until application fadinf animations are done
+#
 # Revision 1.5  2004/08/23 15:10:50  dischi
 # remove callback and add wait function
 #
@@ -123,6 +128,7 @@ class Render:
         for a in copy.copy(self.animations):
             # XXX something should be done to clean up the mess
             if a.delete:
+                a.active = False
                 self.animations.remove(a)
                 if len(self.animations) == 0:
                     # no more animations, unregister ourself to the main loop:
@@ -130,7 +136,12 @@ class Render:
                 continue
 
             if a.active:
-                update_screen = a.poll(timer) or update_screen
+                # no animation possible, finish the animation at once
+                if not self.display.animation_possible:
+                    a.finish()
+                    update_screen = True
+                else:
+                    update_screen = a.poll(timer) or update_screen
                     
             # XXX something might be done to handle stopped animations
             else:
@@ -192,14 +203,14 @@ class Render:
         if len(self.animations) == 1:
             # first animation, register ourself to the main loop:
             rc.register(self.update, True, 0)
-        # no animation possible, finish the animation at once
-        if not self.display.animation_possible:
-            anim_object.finish()
 
 
-    def wait(self, anim_objects):
+    def wait(self, anim_objects=None):
         """
         wait until the given animations are finished
         """
+        if anim_objects == None:
+            # wait for all application show/hide animations
+            anim_objects = filter(lambda a: a.application, self.animations)
         while filter(lambda a: a.running(), anim_objects):
             self.update()
