@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/06 18:59:52  dischi
+# remove import rc
+#
 # Revision 1.9  2004/07/25 19:47:40  dischi
 # use application and not rc.app
 #
@@ -48,7 +51,7 @@
 
 
 import os
-import config, plugin, menu, rc
+import config, plugin, menu
 import tv.record_client as record_client
 
 from gui import AlertBox

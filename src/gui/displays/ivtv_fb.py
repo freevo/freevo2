@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/10/06 18:59:52  dischi
+# remove import rc
+#
 # Revision 1.1  2004/09/25 05:26:03  rshortt
 # Move ivtv_osd to ivtv_fb to avoid confusion with other OSD interfaces.
 #
@@ -50,7 +53,6 @@ from mevas.displays.ivtvcanvas import IvtvCanvas
 
 # Freevo imports
 import config
-import rc
 
 
 class Display(IvtvCanvas):

@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/06 18:59:52  dischi
+# remove import rc
+#
 # Revision 1.2  2004/09/02 00:05:26  rshortt
 # *** empty log message ***
 #
@@ -47,7 +50,6 @@ from mevas.displays.ivtvcanvas import IvtvCanvas
 
 # Freevo imports
 import config
-import rc
 
 
 class Display(IvtvCanvas):

@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/10/06 18:59:52  dischi
+# remove import rc
+#
 # Revision 1.22  2004/08/05 17:39:17  dischi
 # deactivate
 #
@@ -69,7 +72,7 @@ from xml.dom.ext.reader import Sax2
 import urllib
 
 #freevo modules
-import config, menu, rc, plugin, util
+import config, menu, plugin, util
 from gui import PopupBox
 from item import Item
 import eventhandler
