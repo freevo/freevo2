@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.65  2003/07/11 20:35:58  dischi
+# fixed some height problems in drawstringframed
+#
 # Revision 1.64  2003/07/07 16:24:16  dischi
 # More cleanups:
 # o drawstringframed now needs an OSDFont object as font info. This
@@ -740,15 +743,17 @@ class OSD:
         if not string:
             return '', (0,0,0,0)
 
-        line_height = font.height * 1.1
-
         if height == -1:
-            height = line_height
+            height = font.height
 
-        if width <= 0 or height < line_height:
+        line_height = font.height * 1.1
+        if int(line_height) < line_height:
+            line_height = int(line_height) + 1
+
+        if width <= 0 or height < font.height:
             return string, (0,0,0,0)
             
-        num_lines_left = int(height / line_height)
+        num_lines_left = int((height+line_height-font.height) / line_height)
         lines = []
         current_ellipses = ''
         hard = mode == 'hard'
@@ -776,7 +781,7 @@ class OSD:
                 break
 
         # calc the height we want to draw (based on different align_v)
-        height_needed = (int(height / line_height) - num_lines_left) * line_height
+        height_needed = (len(lines) - 1) * line_height + font.height
         if align_v == 'bottom':
             y += (height - height_needed)
         elif align_v == 'center':
@@ -790,6 +795,8 @@ class OSD:
             layer = self.screen
 
         for w, l in lines:
+            if not l:
+                continue
             if align_h == 'left' or align_h == 'justified' or not align_h:
                 x0 = x
             elif align_h == 'right':
@@ -810,17 +817,13 @@ class OSD:
                     layer.blit(font.font.render(l, 1, self._sdlcol(fgcolor)), (x0, y0))
                 except:
                     print "Render failed, skipping..."    
-
             if x0 < min_x:
                 min_x = x0
             if x0 + w > max_x:
                 max_x = x0 + w
             y0 += line_height
 
-        max_y = int(y+height_needed)
-        if max_y < y+height_needed:
-            max_y += 1
-        return r, (min_x, y, max_x, max_y)
+        return r, (min_x, y, max_x, y+height_needed)
     
 
 
