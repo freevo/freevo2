@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/04/21 13:28:54  dischi
+# Make it possible to inherit a plugin from Plugin(). This plugin will only
+# be loaded, nothing else!
+#
 # Revision 1.10  2003/04/21 13:00:06  dischi
 # mainmenu plugins can also have global eventhandlers
 #
@@ -224,16 +228,17 @@ def init():
             if level:
                 p._level = level
 
-            if not ptl.has_key(p._type):
-                ptl[p._type] = []
-            type = ptl[p._type]
-            
-            for i in range(len(type)):
-                if type[i]._level > p._level:
-                    type.insert(i, p)
-                    break
-            else:
-                type.append(p)
+            if p._type:
+                if not ptl.has_key(p._type):
+                    ptl[p._type] = []
+                type = ptl[p._type]
+
+                for i in range(len(type)):
+                    if type[i]._level > p._level:
+                        type.insert(i, p)
+                        break
+                else:
+                    type.append(p)
 
             if p.plugin_name:
                 named_plugins[p.plugin_name] = p
