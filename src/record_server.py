@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 #if 0 /*
 # -----------------------------------------------------------------------
 # record_server.py - A network aware TV recording server.
@@ -8,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.1  2003/08/13 13:08:36  rshortt
+# Moving record_server.py into the main src directory to resolve some nasty
+# namespace issues that was preventing it from import needed modules, use
+# the plugin system, and in some cases find a way to create an osd singleton
+# and init the display (bad!).
+#
 # Revision 1.11  2003/08/11 18:07:09  rshortt
 # Use config.LOGDIR.
 #
@@ -93,12 +97,20 @@ import epg_xmltv
 import tv_util
 import plugin
 
-# We won't be needing this!!!  If you are using the freevo distributed
-# mencoder you may need to comment this line out until we give you 
-# a staticly compiled one.
+# We won't be needing LD_PRELOAD.
 os.environ['LD_PRELOAD'] = ''
 
-print 'PLUGIN_RECORD: %s' % config.plugin_record
+DEBUG = config.DEBUG
+
+TRUE = 1
+FALSE = 0
+
+if DEBUG: print 'PLUGIN_RECORD: %s' % config.plugin_record
+
+
+appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+logfile = '%s/internal-%s-%s.log' % (config.LOGDIR, appname, os.getuid())
+log.startLogging(open(logfile, 'a'))
 
 
 def load_plugin(id):
@@ -108,16 +120,6 @@ def load_plugin(id):
             return
 
 load_plugin(config.plugin_record)
-
-
-DEBUG = 1
-
-TRUE = 1
-FALSE = 0
-
-appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-logfile = '%s/internal-%s-%s.log' % (config.LOGDIR, appname, os.getuid())
-log.startLogging(open(logfile, 'a'))
 
 
 ## Note: config.RECORD_SCHEDULE is an xml file.
