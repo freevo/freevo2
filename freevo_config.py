@@ -204,12 +204,12 @@ SHUTDOWN_SYS_CMD = 'shutdown -h now'  # set this to 'sudo shutdown -h now' if
 # ROM drive support
 
 # autostarter when inserting roms while Freevo is in the MAIN MENU
-autostart_plugin = plugin.activate('identifymedia.autostart')
+autostart_plugin = plugin.activate('rom_drives.autostart')
 
 # add the rom drives to each sub main menu
 rom_plugins = {}
 for type in ('video', 'audio', 'image', 'games'):
-    rom_plugins[type] = plugin.activate('identifymedia.rom_items',
+    rom_plugins[type] = plugin.activate('rom_drives.rom_items',
                                         type='mainmenu_%s' % type, level=50)
 
 
@@ -224,7 +224,8 @@ plugin_shutdown = plugin.activate('base.shutdown', level=50)
 if CONF.xmame_SDL or CONF.snes:
     plugin_games = plugin.activate('mediamenu', level=45, args=('games', ))
 
-
+# mixer
+mixer_plugin = plugin.activate('mixer')
 
 # ======================================================================
 # Freevo directory settings:
