@@ -94,13 +94,16 @@ class Skin(skin_test1.Skin):
         if menu.packrows:
             spacing = selection_height / menuw.items_per_page
         else:
-            spacing = selection_height / max(len(menuw.menu_items),1)
+            spacing = selection_height / min(4, max(len(menuw.menu_items),1))
 
         # image to display
         image = None
         
         for choice in menuw.menu_items:
             if len(menuw.menustack) == 1:
+                if y0 > 450:
+                    y0 = 100
+                    x0 = 384
                 ptscale = 2.0
             else:
                 ptscale = 1.0
@@ -121,8 +124,12 @@ class Skin(skin_test1.Skin):
                            font=self.OSD_FONTNAME_ITEMS,
                            ptsize=fontsize)
 	    if menu.selected == choice:
-                osd.drawbox(x0 - 8 + w, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
-                            color=((160 << 24) | osd.COL_BLUE))
+                if len(menuw.menustack) == 1:
+                    osd.drawbox(x0 + w, y0 - 3, x0 + 300, y0 + fontsize*1.5, width=-1,
+                                color=((160 << 24) | osd.COL_BLUE))
+                else:
+                    osd.drawbox(x0 - 8 + w, y0 - 3, 705, y0 + fontsize*1.5, width=-1,
+                                color=((160 << 24) | osd.COL_BLUE))
 
                 if choice.image != None:
                     (type, image) = choice.image
