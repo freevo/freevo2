@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/09/08 19:37:11  rshortt
+# Made helper 'updateguide'.  This can be used as './freevo updateguide' in
+# place of './freevo execute src/tv/epg_xmltv.py' to greate the program guide.
+#
 # Revision 1.34  2003/09/07 13:36:09  dischi
 # use ignore not replace for encode error handling
 #
@@ -411,7 +415,8 @@ def find_favorites():
                     if REGEXP.match(b.title):
                         print tvgrep.make_schedule(b)
 
-if __name__ == '__main__':
+
+def main():
     sys.stdout = sys.__stdout__
     # Remove a pickled file (if any) if we're trying to list all channels
     if not config.TV_CHANNELS:
@@ -451,3 +456,6 @@ if __name__ == '__main__':
         for prog in progs:
             print prog
 
+
+if __name__ == '__main__':
+    main()
