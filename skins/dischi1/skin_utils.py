@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/03/15 17:13:57  dischi
+# use rom drive images for rom drive items
+#
 # Revision 1.4  2003/03/14 19:36:57  dischi
 # some improvements for image loading
 #
@@ -69,7 +72,12 @@ def format_image(settings, item, width, height, force=0):
         if not force:
             return None
 
-        if item.type == 'dir':
+        if hasattr(item, 'media') and item.media and item.media.info == item and \
+           os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)):
+            image = '%s/mimetypes/%s.png' % (settings.icon_dir, item.media.type)
+            
+
+        elif item.type == 'dir':
             if os.path.isfile('%s/mimetypes/folder_%s.png' % \
                               (settings.icon_dir, item.display_type)):
                 image = '%s/mimetypes/folder_%s.png' % \
