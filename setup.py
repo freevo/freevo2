@@ -113,6 +113,7 @@ data_files = []
 for f in ('BUGS', 'COPYING', 'ChangeLog', 'INSTALL', 'README'):
     data_files.append(('share/doc/freevo-%s' % version.__version__, ['%s' % f ]))
 data_files.append(('share/doc/freevo-%s' % version.__version__, ['Docs/CREDITS' ]))
+data_files.append(('share/fxd', ['share/fxd/webradio.fxd']))
 
 # copy freevo_config.py to share/freevo. It's the best place to put it
 # for now, but the location should be changed
