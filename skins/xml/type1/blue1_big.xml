@@ -15,7 +15,7 @@
         visible="yes" icon="skins/icons/AquaFusion/images.png"  />
       <item pos="4" name="Games"   action="MediaMenu().main_menu" arg="games" 
         visible="no" icon="skins/icons/AquaFusion/package_games.png"  />
-      <item pos="5" name="Shutdown" action="shutdown" arg="" 
+      <item pos="5" name="Shutdown" action="ShutdownItem" arg="" 
 	visible="yes" icon="skins/icons/AquaFusion/shutdown.png"  />
     </main>
     

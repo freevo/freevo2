@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/12 18:29:41  dischi
+# Make shutdown inherit from Item. Now you have an item menu to select
+# freevo or system shutdown. The default isn't changed
+#
 # Revision 1.6  2003/01/09 18:56:19  dischi
 # Make the autostart work again. If you close a cd tray while you are at the
 # main menu, the disc will be autostart (show dir or play dvd)
@@ -70,8 +74,8 @@ import tv.tv   # The TV module
 import identifymedia
 import signal
 
-# new stuff from code cleanup
 from mediamenu import MediaMenu
+from item import Item
 
 DEBUG = config.DEBUG
 
@@ -118,7 +122,13 @@ menuwidget = menu.get_singleton()
 # Identify_Thread
 im_thread = None
 
+
+
+
 def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
+    """
+    function to shut down freevo or the hole system
+    """
     osd.clearscreen(color=osd.COL_BLACK)
     osd.drawstring('shutting down...', osd.width/2 - 90, osd.height/2 - 10,
                    fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
@@ -126,9 +136,14 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
 
     time.sleep(0.5)
     osd.shutdown() # SDL must be shutdown to restore video modes etc
-    
+
+    if arg == None:
+        sys_shutdown = allow_sys_shutdown and 'ENABLE_SHUTDOWN_SYS' in dir(config)
+    else:
+        sys_shutdown = arg
+        
     # XXX temporary kludge so it won't break on old config files
-    if allow_sys_shutdown and 'ENABLE_SHUTDOWN_SYS' in dir(config):  
+    if sys_shutdown:  
         if config.ENABLE_SHUTDOWN_SYS:
             os.system(config.SHUTDOWN_SYS_CMD)
             # let freevo be killed by init, looks nicer if the picture
@@ -151,11 +166,42 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
         time.sleep(1)
         
 
+
+class ShutdownItem(Item):
+    """
+    Item for shutdown
+    """
+    def actions(self):
+        """
+        return a list of actions for this item
+        """
+        items = [ ( self.shutdown_freevo, 'Shutdown Freevo' ),
+                  ( self.shutdown_system, 'Shutdown system' ) ]
+        if config.ENABLE_SHUTDOWN_SYS:
+            items.reverse()
+        return items
+
+
+    def shutdown_freevo(self, arg=None, menuw=None):
+        """
+        shutdown freevo, don't shutdown the system
+        """
+        shutdown(menuw=menuw, arg=FALSE)
+
+        
+    def shutdown_system(self, arg=None, menuw=None):
+        """
+        shutdown the complete system
+        """
+        shutdown(menuw=menuw, arg=TRUE)
+    
+
 #
 # Eventhandler for stuff like CD inserted
 #
 def eventhandler(event = None, menuw=None, arg=None):
-    """Automatically perform actions depending on the event, e.g. play DVD
+    """
+    Automatically perform actions depending on the event, e.g. play DVD
     """
 
     global im_thread
@@ -185,10 +231,24 @@ def getcmd():
     for i in menu_items:
         if menu_items[i].visible:
             print menu_items[i].action
-            items += [menu.MenuItem(menu_items[i].name, eval(menu_items[i].action),\
-                                    menu_items[i].arg, eventhandler,
-                                    None, 'main', menu_items[i].icon)]
-            
+
+            # if it's has actions() it is an item already
+            if hasattr(eval(menu_items[i].action), 'actions'):
+                item = eval(menu_items[i].action)(None)
+                if menu_items[i].icon:
+                    item.icon = menu_items[i].icon
+                if menu_items[i].name:
+                    item.name = menu_items[i].name
+                item.eventhandler = eventhandler
+                
+                items += [ item ]
+
+            else:
+                items += [menu.MenuItem(menu_items[i].name, eval(menu_items[i].action),\
+                                        menu_items[i].arg, eventhandler,
+                                        None, 'main', menu_items[i].icon)]
+
+    
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
     menuwidget.pushmenu(mainmenu)
 
