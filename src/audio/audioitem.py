@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/09/10 19:35:49  dischi
+# fix length during runtime
+#
 # Revision 1.34  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -181,6 +184,9 @@ class AudioItem(Item):
         return the specific attribute as string or an empty string
         """
         if attr  == 'length' and self.length:
+            # maybe the length was wrong
+            if self.length < self.elapsed:
+                self.length = self.elapsed
             return '%d:%02d' % (int(self.length / 60), int(self.length % 60))
 
         if attr  == 'elapsed':
