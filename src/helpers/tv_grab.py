@@ -74,7 +74,7 @@ def grab_xmltv():
         print 'Loading data into epgdb, this may take a while'
 
         shutil.move(xmltvtmp, config.XMLTV_FILE)
-        pyepg.update('xmltv', config.XMLTV_FILE,)
+        pyepg.update('xmltv', config.XMLTV_FILE)
 
 
 def grab_vdr():
