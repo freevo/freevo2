@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/10/19 12:46:30  rshortt
+# Calling popen from the main loop now but signals still aren't getting thgough.
+#
 # Revision 1.13  2003/10/18 21:33:33  rshortt
 # Subscribe to events and poll them from a callback method.
 #
@@ -93,7 +96,7 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-import sys, string, random, time, os, re, popen2
+import sys, string, random, time, os, re
 
 from twisted.web import xmlrpc, server
 from twisted.internet.app import Application
@@ -113,6 +116,7 @@ import tv.record_types
 import tv.epg_xmltv
 import tv.tv_util
 import plugin
+import util.popen3
 
 from event import *
 
@@ -733,11 +737,19 @@ class RecordServer(xmlrpc.XMLRPC):
     def eventNotice(self):
         print 'RECORDSERVER GOT EVENT NOTICE'
 
+        # Use callLater so that handleEvents will get called the next time
+        # through the main loop.
+        reactor.callLater(0, self.handleEvents) 
+
+
+    def handleEvents(self):
+        print 'RECORDSERVER HANDLING EVENT'
+
         event, event_repeat_count = rc_object.poll()
 
         if event and event == OS_EVENT_POPEN2:
-            print 'popen2 %s' % event.arg[1]
-            event.arg[0].child = popen2.Popen3(event.arg[1], 1, 100)
+            print 'popen %s' % event.arg[1]
+            event.arg[0].child = util.popen3.Popen3(event.arg[1])
         else:
             print 'not handling event %s' % str(event)
             return
