@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/07/02 22:05:50  dischi
+# o better cache handling
+# o shorter label for tv show discs
+#
 # Revision 1.12  2003/06/30 15:30:54  dischi
 # some checking to avoid endless scanning
 #
@@ -231,6 +235,7 @@ class RemovableMedia:
         self.info      = None
         self.videoinfo = None
         self.type      = 'empty_cdrom'
+        self.cached   = FALSE
 
     def is_tray_open(self):
         if self.tray_open and self.info:
@@ -329,6 +334,7 @@ class Identify_Thread(threading.Thread):
         media.type      = 'empty_cdrom'
         media.info      = None
         media.videoinfo = None
+        media.cached    = FALSE
 
         # Is there a disc present?
         if s != CDS_DISC_OK:
@@ -451,7 +457,7 @@ class Identify_Thread(threading.Thread):
                         mp3_files.append(file)
                     if util.match_suffix(file, config.SUFFIX_IMAGE_FILES):
                         image_files.append(file)
-                    
+            media.cached = TRUE
                 
         else:
             # Disc is data of some sort. Mount it to get the file info
@@ -481,16 +487,33 @@ class Identify_Thread(threading.Thread):
                 show_name = ""
                 the_same  = 1
                 volumes   = ''
+                start_ep = 0
+                end_ep   = 0
                 for movie in mplayer_files:
                     if config.TV_SHOW_REGEXP_MATCH(movie):
                         show = config.TV_SHOW_REGEXP_SPLIT(os.path.basename(movie))
 
-                        if show_name and show_name != show[0]: the_same = 0
-                        if not show_name: show_name = show[0]
-                        if volumes: volumes += ', '
+                        if show_name and show_name != show[0]:
+                            the_same = 0
+                        if not show_name:
+                            show_name = show[0]
+                        if volumes:
+                            volumes += ', '
+                        current_ep = int(show[1]) * 100 + int(show[2])
+                        if end_ep and current_ep == end_ep + 1:
+                            end_ep = current_ep
+                        elif not end_ep:
+                            end_ep = current_ep
+                        else:
+                            end_ep = -1
+                        if not start_ep:
+                            start_ep = end_ep
                         volumes += show[1] + "x" + show[2]
 
                 if show_name and the_same:
+                    if end_ep > 0:
+                        volumes = '%dx%02d - %dx%02d' % (start_ep / 100, start_ep % 100,
+                                                         end_ep / 100, end_ep % 100)
                     k = config.TV_SHOW_DATA_DIR + show_name
                     if os.path.isfile((k + ".png").lower()):
                         image = (k + ".png").lower()
