@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.11  2003/04/24 19:56:23  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -107,59 +112,21 @@ class ListBox(RegionScroller):
                  selected_fg_color=None, border=None, bd_color=None, 
                  bd_width=None, show_h_scrollbar=None, show_v_scrollbar=None):
 
-        GUIObject.__init__(self, None, None, width, height)
-
         self.items             = items
-        self.width             = width
-        self.height            = height
-        self.border            = border
-        self.bd_color          = bd_color
-        self.bd_width          = bd_width
-        self.bg_color          = bg_color
-        self.fg_color          = fg_color
-        self.selected_fg_color = selected_fg_color
-        self.selected_bg_color = selected_bg_color
         self.show_h_scrollbar  = show_h_scrollbar
         self.show_v_scrollbar  = show_v_scrollbar
-
-
-        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
-
-        if not self.bg_color:
-            if self.skin_info_widget.rectangle.bgcolor:
-                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
-            else:
-                self.bg_color = Color(self.osd.default_bg_color)
-
-        if not self.fg_color:
-            if self.skin_info_widget.font.color:
-                self.fg_color = Color(self.skin_info_widget.font.color)
-            else:
-                self.fg_color = Color(self.osd.default_fg_color)
-
-        if not self.selected_bg_color:
-            if self.skin_info_widget_selected.rectangle.bgcolor:
-                self.selected_bg_color = Color(self.skin_info_widget_selected.rectangle.bgcolor)
-            else:
-                self.selected_bg_color = Color((0,255,0,128))
-
-        if not self.selected_fg_color:
-            if self.skin_info_widget_selected.font.color:
-                self.selected_fg_color = Color(self.skin_info_widget_selected.font.color)
-            else:
-                self.selected_fg_color = Color(self.osd.default_fg_color)
-
 
         if self.show_h_scrollbar != 0 and not self.show_h_scrollbar:
             self.show_h_scrollbar = 0
         if self.show_v_scrollbar != 0 and not self.show_v_scrollbar:
             self.show_v_scrollbar = 1
 
+        self.set_surface(pygame.Surface(self.get_size(), 0, 32))
+
         RegionScroller.__init__(self, self.surface, left, top, self.width, 
                                 self.height, self.bg_color, self.fg_color,
                                 border, bd_color, bd_width,
                                 self.show_h_scrollbar, self.show_v_scrollbar)
-
 
         self.h_margin                 = 2
         self.v_margin                 = 2
@@ -301,23 +268,6 @@ class ListBox(RegionScroller):
             item.draw(self.surface)
 
         RegionScroller._draw(self)
-
-
-    def _erase(self):
-        """
-        Erasing us from the canvas without deleting the object.
-        """
-
-        if DEBUG: print "  Inside PopupBox._erase..."
-        # Only update the part of screen we're at.
-        self.osd.screen.blit(self.bg_image, self.get_position(),
-                        self.get_rect())
-        
-        if self.border:
-            if DEBUG: print "    Has border, doing border erase."
-            self.border._erase()
-
-        if DEBUG: print "    ...", self
 
 
     def destroy(self):

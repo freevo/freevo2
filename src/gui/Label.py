@@ -9,6 +9,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.5  2003/04/24 19:56:20  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -107,23 +112,26 @@ class Label(GUIObject):
     draw is called an exception is raised.
     """
     
-    def __init__(self, text=None, h_align=None, v_align=None, parent=None):
+    def __init__(self, text=None, width=-1, height=-1, h_align=None, 
+                 v_align=None, parent=None):
+
         self.h_align  = Align.LEFT
-        self.v_align  = Align.MIDDLE
+        self.v_align  = Align.CENTER
         self.text     = None
         self.font     = None # This is a OSD.Font object not pygame.
-        self.surface  = None
+        self.font_name = None
+        self.font_size = None
+        self.selected_font_name = None
+        self.selected_font_size = None
         self.parent   = None
         self.v_margin = 0
         self.h_margin = 0
         
-        GUIObject.__init__(self)
+        GUIObject.__init__(self, width=width, height=height)
 
         if h_align: self.set_h_align(align)
         if v_align: self.set_v_align(align)
         if text:    self.set_text(text)
-
-        # self.set_foreground_color(Color( (0,0,0,255) ))
 
 
     def get_text(self):
@@ -143,8 +151,12 @@ class Label(GUIObject):
         else:
             raise TypeError, type(text)
 
+        # self.width = -1
+        # self.height = -1
+        self.surface_changed = 1
 
-    def set_font(self, font=None, size=None, color=None):
+
+    def set_font(self, state='normal', font=None, size=None, color=None):
         """
         font  String. Filename of font to use.
         size  Size in pixels to render font.
@@ -154,15 +166,28 @@ class Label(GUIObject):
         """
         if type(font) is StringType and type(size) is IntType:
             if self.surface: self.surface = None
-            # self.font = self._get_osd_font(font, size)
             self.font = self.osd._getfont(font, size)
         else:
             raise TypeError, 'font'
 
-        if isinstance(color, Color):
-            self.set_foreground_color(color)
-        else:
-            self.set_foreground_color(self.parent.get_foreground_color())
+        if state == 'normal':
+            if isinstance(color, Color):
+                self.fg_color = color
+            else:
+                self.fg_color = self.parent.fg_color
+
+            self.font_name = font
+            self.font_size = size
+        elif state == 'selected':
+            if isinstance(color, Color):
+                self.selected_fg_color = color
+            else:
+                self.selected_fg_color = self.parent.selected_fg_color
+
+            self.selected_font_name = font
+            self.selected_font_size = size
+
+        self.surface_changed = 1
 
             
     def get_font(self):
@@ -174,64 +199,72 @@ class Label(GUIObject):
         return self.font
 
 
-    def _get_osd_font(self, filename, size):
-        """
-        filename  Filename of font
-        size      Size of font in pixels.
-        
-        Small reimplement of OSD._getfont.
+    def render(self, dummy_surface=None):
+        if DEBUG: print 'Label::_draw %s' % self
+        if DEBUG: print '       text=%s' % self.text
 
-        This is just a temporary workaround since I wnat the whole OSD.Font
-        object in osd not just the pygame.font.Font
-        """
-        for f in self.osd.fontcache:
-            if f.filename == filename and f.ptsize == size:
-                return f
-
-        font       = pygame.font.Font(filename, size)
-        f          = Font()
-        f.filename = filename
-        f.ptsize   = size
-        f.font     = font
-
-        self.osd.fontcache.append(f)
-        return f
-
-
-    def render(self):
-        """
-        Mainly an internal function. Frontend to the fonts own render
-        function.
-        """
         if not self.font: raise TypeError, 'Oops, no font.'
         if not self.text: raise TypeError, 'Oops, no text.'
-        fgc = self.fg_color.get_color_sdl()
-        # print 'LABEL: fgc="%s,%s,%s,%s"' % fgc
-        # self.surface = self.font.font.render(self.text, 1, fgc)
-        self.surface = self.font.render(self.text, 1, fgc)
-        self.set_size(self.surface.get_size())
-        self.set_position(self.calc_position())
-        
 
-    def _draw(self, surface=None):
-        """
-        Our default _draw function.
+        if self.width < 0:
+            self.surface_changed = 1
+            return
 
-        Add handling to check if font, size or text has changed.
-        """
-        if not self.surface:
-            # XXX Currently we don't use background color since that
-            # XXX Should be transparent
-            self.render()
-
-        
-        # print 'LABEL._draw: "%s" parent x,y=%s' % (self.text, self.parent.get_position())
-        # print 'LABEL._draw: "%s" x,y=%s' % (self.text, self.get_position())
-        # XXX Fix h_align and stuff.
-        if surface:
-            surface.blit(self.surface, self.get_position())
+        if self.parent.selected: 
+            if DEBUG: print '       SELECTED'
+            fgc = self.selected_fg_color.get_color_trgb()
+            font = self.selected_font_name
+            size = self.selected_font_size
         else:
-            self.osd.screen.blit(self.surface, self.get_position())
+            if DEBUG: print '       NOT SELECTED'
+            fgc = self.fg_color.get_color_trgb()
+            font = self.font_name
+            size = self.font_size
+
+        if DEBUG: print '       fgc=%s' % fgc
+
+        if dummy_surface:
+            self.surface = pygame.Surface(self.parent.get_size(), 0, 32)
+        else:
+            self.surface = self.parent.surface.subsurface((0, 0, self.width, self.height))
+            if DEBUG: print '      surfaceXX=%s' % self.surface
+
+        (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
+        self.osd.drawstringframed(self.text,
+                                  self.left,
+                                  self.top,
+                                  self.width,
+                                  self.height,
+                                  fgcolor=fgc,
+                                  bgcolor=None,
+                                  font=font, 
+                                  ptsize=size, 
+                                  align_h='center',
+                                  align_v='center',
+                                  mode='soft',
+                                  layer=self.surface)
+
+        if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,return_x1,return_y1)
+        # LABEL: ,71,17,294,43
+        # self.width = return_x1 - return_x0
+        self.width = return_x1
+        self.height = return_y1 - return_y0
+        # self.height = return_y1 
+
+        if DEBUG: print '       parent="%s"' % self.parent
+        if DEBUG: print '       self.surface="%s"' % self.surface
+        if DEBUG: print '       surface.rect: %s' % self.surface.get_rect()
+        if DEBUG: print '       self.rect: %s,%s,%s,%s' % self.get_rect()
+        if DEBUG: print '       parent.surface="%s"' % self.parent.surface
+        if DEBUG: print '       position="%s,%s"' % self.get_position()
+
+
+    def _draw(self):
+        self.render()
+
+        # self.parent.surface.blit(self.surface, (0, 0))
+        if DEBUG: print '       draw position="%s,%s"' % self.get_position()
+        self.parent.surface.blit(self.surface, self.get_position(), self.get_rect())
         
  
     def _erase(self):

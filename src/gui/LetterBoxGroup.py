@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.9  2003/04/24 19:56:22  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -69,19 +74,15 @@
 import pygame
 import config
 
-from GUIObject          import *
-from Color              import *
-from Border             import *
-from Label              import * 
+from Container          import Container
+from LayoutManagers     import LayoutManager
 from LetterBox          import * 
 from PasswordLetterBox  import * 
-from types              import * 
-from osd import         Font
 
 DEBUG = 0
 
 
-class LetterBoxGroup(GUIObject):
+class LetterBoxGroup(Container):
     """
     left      x coordinate. Integer
     top       y coordinate. Integer
@@ -99,46 +100,27 @@ class LetterBoxGroup(GUIObject):
     
     def __init__(self, numboxes=7, text=None, handler=None, type=None, 
                  left=None, top=None, width=None, height=None, bg_color=None, 
-                 fg_color=None, border=None, bd_color=None, bd_width=None):
+                 fg_color=None, selected_bg_color=None, selected_fg_color=None,
+                 border=None, bd_color=None, bd_width=None):
 
-        GUIObject.__init__(self, left, top, width, height)
+        Container.__init__(self, 'widget', left, top, width, height, bg_color,
+                           fg_color, selected_bg_color, selected_fg_color,
+                           border, bd_color, bd_width)
+
+        self.h_margin  = 0
+        self.v_margin  = 0
+        self.h_spacing = 0
+        self.v_spacing = 0
+
+
 
         # XXX: text not supported yet
         self.text     = text
-        self.handler  = handler
         self.type     = type
-        self.bg_color = bg_color
-        self.fg_color = fg_color
-        self.border   = border
-        self.bd_color = bd_color
-        self.bd_width = bd_width
         self.numboxes = numboxes
         self.boxes    = []
 
-
-        if not self.bg_color:
-            if self.skin_info_widget.rectangle.bgcolor:
-                self.bg_color = Color(self.skin_info_widget.rectangle.bgcolor)
-            else:
-                self.bg_color = Color(self.osd.default_bg_color)
-
-        if not self.fg_color:
-            if self.skin_info_widget.font.color:
-                self.fg_color = Color(self.skin_info_widget.font.color)
-            else:
-                self.fg_color = Color(self.osd.default_fg_color)
-
-        if not self.bd_color: 
-            if self.skin_info_widget.rectangle.color:
-                self.bd_color = Color(self.skin_info_widget.rectangle.color)
-            else:
-                self.bd_color = Color(self.osd.default_fg_color)
-
-        if not self.bd_width: 
-            if self.skin_info_widget.rectangle.size:
-                self.bd_width = self.skin_info_widget.rectangle.size
-            else:
-                self.bd_width = 1
+        self.set_layout(LetterBoxLayout(self))
 
         l = 0
         h = 0
@@ -156,10 +138,6 @@ class LetterBoxGroup(GUIObject):
 
         self.width = l
         self.height = h
-
-        if not self.border:   
-            self.border = Border(self, Border.BORDER_FLAT,
-                                 self.bd_color, self.bd_width)
 
         self.set_h_align(Align.CENTER)
 
@@ -196,7 +174,7 @@ class LetterBoxGroup(GUIObject):
     def get_word(self):
         word = ''
         for box in self.boxes:
-            if isinstance(self.border, PasswordLetterBox):
+            if isinstance(box, PasswordLetterBox):
                 word += box.real_char
             else:
                 word = word + box.get_text()
@@ -209,74 +187,26 @@ class LetterBoxGroup(GUIObject):
         The actual internal draw function.
 
         """
-        if not self.width or not self.height:
-            raise TypeError, 'Not all needed variables set.'
+        self.surface = self.parent.surface.subsurface((self.left,
+                                                       self.top,
+                                                       self.width,
+                                                       self.height))
 
-        if self.selected:
-            c = self.selected_color.get_color_sdl()
-            a = self.selected_color.get_alpha()
-        else:
-            c = self.bg_color.get_color_sdl()
-            a = self.bg_color.get_alpha()
+        Container._draw(self)
 
-        box = pygame.Surface(self.get_size(), 0, 32)
-        box.fill(c)
-        box.set_alpha(a)
-
-        self.osd.screen.blit(box, self.get_position())
-
-        if self.border: self.border.draw()
-        for box in self.boxes:
-            box.draw()
+        self.parent.surface.blit(self.surface, self.get_position())
 
     
-    def set_border(self, bs):
-        """
-        bs  Border style to create.
-        
-        Set which style to draw border around object in. If bs is 'None'
-        no border is drawn.
-        
-        Default for PopubBox is to have no border.
-        """
-        if isinstance(self.border, Border):
-            self.border.set_style(bs)
-        elif not bs:
-            self.border = None
-        else:
-            self.border = Border(self, bs)
-            
+class LetterBoxLayout(LayoutManager):
 
-    def set_position(self, left, top):
-        """
-        Overrides the original in GUIBorder to update the border as well.
-        """
-        GUIObject.set_position(self, left, top)
-        if isinstance(self.border, Border):
-            if DEBUG: print "updating borders set_postion as well"
-            self.border.set_position(left, top)
+    def __init__(self, container):
+        self.container = container
 
-        l = 0
-        for box in self.boxes:
-            left = self.left + l
+
+    def layout(self):
+        top = l = 0
+        for box in self.container.boxes:
+            left = l
             l = l + box.width
             box.set_position(left, top)
-
-        
-    def _erase(self):
-        """
-        Erasing us from the canvas without deleting the object.
-        """
-
-        if DEBUG: print "  Inside PopupBox._erase..."
-        # Only update the part of screen we're at.
-        self.osd.screen.blit(self.bg_image, self.get_position(),
-                        self.get_rect())
-        
-        if self.border:
-            if DEBUG: print "    Has border, doing border erase."
-            self.border._erase()
-
-        if DEBUG: print "    ...", self
-
 

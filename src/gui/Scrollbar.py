@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/02 01:09:03  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.7  2003/04/24 19:56:29  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -131,7 +136,7 @@ class Scrollbar(GUIObject):
     def get_handle_rect(self):
         (a, b, c) = self.parent.get_view_percent(self.orientation)
 
-        # print 'a,b,c="%s,%s,%s"' % (a, b, c)
+        print 'SB: a,b,c = %s,%s,%s' % (a, b, c)
 
         if a == 100 or b == 100 or c == 100:
             return self.get_rect()
@@ -139,26 +144,31 @@ class Scrollbar(GUIObject):
         if self.orientation == 'vertical':
             fg_width = self.width
             fg_height = b * self.height / 100
-            fg_x = self.left
-            fg_y = self.top + (a * self.height / 100)
+            # fg_x = self.left
+            fg_x = 0
+            # fg_y = self.top + (a * self.height / 100)
+            fg_y = (a * self.height / 100)
         else:
             fg_width = b * self.width / 100
             fg_height = self.height
-            fg_x = self.left + (a * self.width / 100)
-            fg_y = self.top
+            # fg_x = self.left + (a * self.width / 100)
+            fg_x = (a * self.width / 100)
+            # fg_y = self.top
+            fg_y = 0
 
+        print 'SB: handle_rect = %s,%s,%s,%s' % (fg_x, fg_y, fg_width, fg_height)
         return (fg_x, fg_y, fg_width, fg_height)
 
 
     def get_handle_size(self):
         (a, b, c, d) = self.get_handle_rect()
-        # print 'get_handle_size: c,d="%s,%s"' % (c, d)
+        # print 'SB: get_handle_size: c,d="%s,%s"' % (c, d)
         return (c, d)
 
 
     def get_handle_coords(self):
         (a, b, c, d) = self.get_handle_rect()
-        # print 'get_handle_coords: a,b="%s,%s"' % (a, b)
+        # print 'SB: get_handle_coords: a,b="%s,%s"' % (a, b)
         return (a, b)
 
 
@@ -169,20 +179,26 @@ class Scrollbar(GUIObject):
             self.height = self.parent.height
             if self.parent.show_h_scrollbar:
                 self.height = self.height - self.parent.h_scrollbar.thickness
-            self.left = self.parent.left + self.parent.width - self.width
-            self.top = self.parent.top
+            self.left = self.parent.width - self.width
+            # self.top = self.parent.top
+            self.top = 0
         else:
             self.width = self.parent.width
             if self.parent.show_v_scrollbar:
                 self.width = self.width - self.parent.v_scrollbar.thickness
             self.height = self.thickness
-            self.left = self.parent.left
-            self.top = self.parent.top + self.parent.height - self.height
+            # self.left = self.parent.left
+            self.left = 0
+            self.top = self.parent.height - self.height
 
         if isinstance(self.border, Border):
-            self.border.set_position(self.left, self.top)
+            # self.border.set_position(self.left, self.top)
+            self.border.set_position(0, 0)
             self.border.width = self.width
             self.border.height = self.height
+
+        print 'SB: parent_rect = %s,%s,%s,%s' % (self.parent.left, self.parent.top, self.parent.width, self.parent.height)
+        print 'SB: self_rect = %s,%s,%s,%s' % (self.left, self.top, self.width, self.height)
 
 
     def _draw(self):
@@ -190,29 +206,32 @@ class Scrollbar(GUIObject):
         The actual internal draw function.
 
         """
-        if not self.width or not self.height:
-            raise TypeError, 'Not all needed variables set.'
+        # if not self.width or not self.height:
+        #     raise TypeError, 'Not all needed variables set.'
+
+        self.calculate_position()
 
         bg_c = self.bg_color.get_color_sdl()
         bg_a = self.bg_color.get_alpha()
 
-        bg_box = pygame.Surface(self.get_size(), 0, 32)
-        bg_box.fill(bg_c)
-        bg_box.set_alpha(bg_a)
+        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        self.surface.fill(bg_c)
+        self.surface.set_alpha(bg_a)
 
         fg_c = self.fg_color.get_color_sdl()
-        # print 'fg_c="%s,%s,%s,%s"' % fg_c
+        print 'SB: fg_c = %s,%s,%s,%s' % fg_c
         fg_a = self.fg_color.get_alpha()
 
         fg_box = pygame.Surface(self.get_handle_size(), 0, 32)
         fg_box.fill(fg_c)
         fg_box.set_alpha(fg_a)
 
-        # bg_box.blit(fg_box, self.get_handle_coords())
-        self.osd.screen.blit(bg_box, self.get_position())
-        self.osd.screen.blit(fg_box, self.get_handle_coords())
-
+        self.surface.blit(fg_box, self.get_handle_coords())
         if self.border: self.border.draw()
+
+        print 'SB::_draw: pos=%s,%s' % (self.left, self.top)
+        self.parent.surface.blit(self.surface, self.get_position())
+
 
     
 

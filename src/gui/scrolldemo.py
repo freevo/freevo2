@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/02 01:09:03  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.7  2003/04/24 19:56:31  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -91,7 +96,7 @@ class scrolldemo(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, parent=None, text=" ", left=None, top=None, width=500, 
+    def __init__(self, parent='osd', text=' ', left=None, top=None, width=500, 
                  height=350, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
@@ -101,10 +106,8 @@ class scrolldemo(PopupBox):
 
         self.set_h_align(Align.CENTER)
 
-        self.label.top = self.top + 25
-
         surf = self.osd.getsurface(0, 0, 700, 500)
-        self.pb = RegionScroller(surf, self.left+25, self.top+75, 450, 250)
+        self.pb = RegionScroller(surf, 50,50, width=450, height=250)
         self.add_child(self.pb)
 
 

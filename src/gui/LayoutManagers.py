@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.3  2003/04/24 19:56:20  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -44,11 +49,11 @@
 
 import config
 from Border    import *
+from Scrollbar import *
 from GUIObject import *
-from Label    import *
+from Label     import *
 
-DEBUG = config.DEBUG
-DEBUG = 1
+DEBUG = 0
 
 
 class LayoutManager:
@@ -71,7 +76,9 @@ class FlowLayout(LayoutManager):
         num_children = len(self.container.children)
         if j < num_children - 1:
             next = self.container.children[j+1]
-            if (isinstance(next, Border) or not next.is_visible()) \
+            if (isinstance(next, Border) \
+               or isinstance(next, Scrollbar) \
+               or not next.is_visible()) \
                and j < num_children - 2:
                 next = self.get_next_child(j+1)
             else:
@@ -92,13 +99,18 @@ class FlowLayout(LayoutManager):
         num_children = len(self.container.children)
         for i in range(num_children):
             child = self.container.children[i]
-            print 'FlowLayout: container="%s"' % self.container
-            print '            child="%s"' % child
-            print '            child is %sx%s' % (child.width,child.height)
+            if DEBUG: print 'FlowLayout: container="%s"' % self.container
+            if DEBUG: print '            child="%s"' % child
+            if DEBUG: print '            child is %sx%s' % (child.width,child.height)
 
             if not child.is_visible():
+                if DEBUG: print '            skipping something invisible'
                 continue
             if isinstance(child, Border):
+                if DEBUG: print '            skipping border'
+                continue
+            if isinstance(child, Scrollbar):
+                if DEBUG: print '            skipping scrollbar'
                 continue
 
             x = next_x
@@ -107,31 +119,30 @@ class FlowLayout(LayoutManager):
             next = self.get_next_child(i)
 
             if child.width == -1:
-                if DEBUG:
-                    print '            child width not set'
+                if DEBUG: print '            child width not set'
                 if next and next.h_align == Align.RIGHT and next.width > 0:
-                    print '            next align is RIGHT'
+                    if DEBUG: print '            next align is RIGHT'
                     child.width = self.container.width - \
                                   2 * self.container.h_margin - \
                                   next.width - x
                 else:
                     child.width = self.container.width - \
                                   self.container.h_margin - x
-                print '            child width set to %s' % child.width
+                if DEBUG: print '            child width set to %s' % child.width
 
 
             if child.height == -1 and isinstance(child, Label):
                 child.height = self.container.height - \
                                self.container.v_margin - y
-                print '            child height set to %s' % child.height
+                if DEBUG: print '            child height set to %s' % child.height
                 child.render('dummy')
-                print '            child now %sx%s' % (child.width,child.height)
+                if DEBUG: print '            child now %sx%s' % (child.width,child.height)
         
             end = x + child.width + self.container.h_margin 
-            print '            end is %s' % end
+            if DEBUG: print '            end is %s' % end
 
             if end > self.container.width:
-                print '            new row'
+                if DEBUG: print '            new row'
                 row += 1
                 self.table.append([])
                 x = self.container.h_margin
@@ -140,7 +151,7 @@ class FlowLayout(LayoutManager):
 
             if child.height > line_height:
                 line_height = child.height
-                print '            line_height now %s' % line_height
+                if DEBUG: print '            line_height now %s' % line_height
 
             if y + child.height > \
                self.container.height - self.container.v_margin:
@@ -149,7 +160,7 @@ class FlowLayout(LayoutManager):
             next_x = x + child.width + self.container.h_spacing
             next_y = y
                 
-            print '            position="%s,%s"' % (x, y)
+            if DEBUG: print '            position="%s,%s"' % (x, y)
             child.set_position(x, y)
             self.table[row].append(child)
 
@@ -172,7 +183,7 @@ class FlowLayout(LayoutManager):
                     x_offset = self.container.width / 2 - \
                                (child.left + child.width / 2)
                     child.left += x_offset
-                    print '            moved right by %s' % x_offset
+                    if DEBUG: print '            moved right by %s' % x_offset
 
                 if child.h_align == Align.LEFT:
                     pass
@@ -183,7 +194,7 @@ class FlowLayout(LayoutManager):
                     y_offset = self.container.height / 2 - \
                                (child.top + child.height / 2)
                     child.top += y_offset 
-                    print '            moved down by %s' % y_offset
+                    if DEBUG: print '            moved down by %s' % y_offset
 
 
         for row in self.table:
@@ -199,7 +210,7 @@ class FlowLayout(LayoutManager):
 
                 for child in row:
                     child.left += x_offset 
-                    print '            moved right by %s' % x_offset
+                    if DEBUG: print '            moved right by %s' % x_offset
 
 
 class GridLayout(LayoutManager):

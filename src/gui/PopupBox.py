@@ -10,6 +10,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.15  2003/04/24 19:56:27  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -79,6 +84,8 @@ __author__  = """Thomas Malt <thomas@malt.no>"""
 import config
 
 from GUIObject import *
+from Container import *
+from Panel     import *
 from Color     import *
 from Border    import *
 from Label     import *
@@ -87,7 +94,7 @@ from types     import *
 DEBUG = 0
 
 
-class PopupBox(GUIObject):
+class PopupBox(Container):
     """
     left      x coordinate. Integer
     top       y coordinate. Integer
@@ -108,14 +115,18 @@ class PopupBox(GUIObject):
                  bg_color=None, fg_color=None, icon=None, border=None, 
                  bd_color=None, bd_width=None):
 
-        if parent:
-            self.parent = parent
-            
-        GUIObject.__init__(self, left, top, width, height, bg_color, fg_color)
+        Container.__init__(self, 'frame', left, top, width, height, bg_color, 
+                           fg_color, None, None, border, bd_color, bd_width)
 
-        self.border   = border
-        self.bd_color = bd_color
-        self.bd_width = bd_width
+        if not parent or parent == 'osd':
+            parent = self.osd.focused_app
+        parent.add_child(self)
+
+        if DEBUG: print 'set focus to %s' % self
+        self.osd.focused_app = self
+
+
+        self.internal_h_align = Align.CENTER
 
         # In the future we will support duration where the popup
         # will destroy() after x seconds.
@@ -125,25 +136,6 @@ class PopupBox(GUIObject):
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
 
-        if not self.bd_color: 
-            # XXX TODO: background type 'image' is not supported here yet
-            if self.skin_info_background[0] == 'rectangle':
-                self.bd_color = Color(self.skin_info_background[1].color)
-            else:
-                self.bd_color = Color(self.osd.default_fg_color)
-
-        if not self.bd_width: 
-            if self.skin_info_background[0] == 'rectangle' \
-                and self.skin_info_background[1].size:
-                self.bd_width = self.skin_info_background[1].size
-            else:
-                self.bd_width = 2
-
-        if not self.border:   
-            self.border = Border(self, Border.BORDER_FLAT,
-                                 self.bd_color, self.bd_width)
-
-        
         if type(text) is StringType:
             if text: self.set_text(text)
         elif not text:
@@ -154,14 +146,13 @@ class PopupBox(GUIObject):
         if self.skin_info_font:       
             self.set_font(self.skin_info_font.name, 
                           self.skin_info_font.size, 
-                          Color(self.skin_info_font.color))
+                          self.fg_color)
         else:
             self.set_font(config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
                 
         self.label.set_h_align(Align.CENTER)
         self.label.set_v_align(Align.TOP)
- 
 
         if icon:
             self.set_icon(icon)
@@ -186,8 +177,6 @@ class PopupBox(GUIObject):
 
         """
         if DEBUG: print "Text: ", text
-        # XXX Hm.. I should try to do more intelligent parsing and quessing
-        # XXX here.
         if type(text) is StringType:
             self.text = text
         else:
@@ -195,11 +184,15 @@ class PopupBox(GUIObject):
 
         if not self.label:
             self.label = Label(text)
-            self.label.set_parent(self)
-            # XXX Set the background color to none so it is transparent.
             self.label.set_background_color(None)
             self.label.set_h_margin(self.h_margin)
             self.label.set_v_margin(self.v_margin)
+            label_panel = Panel() 
+            label_panel.width = 280
+            label_panel.height = 30
+            label_panel.internal_h_align = Align.CENTER
+            label_panel.add_child(self.label)
+            self.add_child(label_panel)
         else:
             self.label.set_text(text)
 
@@ -220,7 +213,7 @@ class PopupBox(GUIObject):
         Just hands the info down to the label. Might raise an exception.
         """
         if self.label:
-            self.label.set_font(file, size, color)
+            self.label.set_font('normal', file, size, color)
         else:
             raise TypeError, file
 
@@ -259,61 +252,31 @@ class PopupBox(GUIObject):
         self.icon = pygame.transform.scale(self.icon, (ix, iy))
 
 
-    def set_border(self, bs):
-        """
-        bs  Border style to create.
-        
-        Set which style to draw border around object in. If bs is 'None'
-        no border is drawn.
-        
-        Default for PopubBox is to have no border.
-        """
-        if isinstance(self.border, Border):
-            self.border.set_style(bs)
-        elif not bs:
-            self.border = None
-        else:
-            self.border = Border(self, bs)
-            
-
-    def set_position(self, left, top):
-        """
-        Overrides the original in GUIBorder to update the border as well.
-        """
-        GUIObject.set_position(self, left, top)
-        if isinstance(self.border, Border):
-            if DEBUG: print "updating borders set_postion as well"
-            self.border.set_position(left, top)
-        
-
     def _draw(self):
         """
         The actual internal draw function.
 
         """
+        if DEBUG: print 'PopupBox::_draw %s' % self
+
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
 
+        self.surface = pygame.Surface(self.get_size(), 0, 32)
+
         c   = self.bg_color.get_color_sdl()
         a   = self.bg_color.get_alpha()
-
-        box = pygame.Surface(self.get_size(), 0, 32)
-
-        box.fill(c)
-        box.set_alpha(a)
-
-        self.osd.screen.blit(box, self.get_position())
+        self.surface.fill(c)
+        self.surface.set_alpha(a)
         
         if self.icon:
-            ix,iy = self.get_position()
-            self.osd.screen.blit(self.icon, (ix+self.h_margin,iy+self.v_margin)) 
+            # ix,iy = self.get_position()
+            self.surface.blit(self.icon, (self.h_margin, self.v_margin)) 
 
-        if self.label:  self.label.draw()
-        if self.border: self.border.draw()
+        Container._draw(self)
 
-        if self.children:
-            for child in self.children:
-                child.draw()
+        # self.parent.surface.blit(self.surface, self.get_position())
+        self.osd.screen.blit(self.surface, self.get_position())
 
     
     def _erase(self):

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.10  2003/04/24 19:56:15  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -114,20 +119,12 @@ class AlertBox(PopupBox):
                  height=110, bg_color=None, fg_color=None, icon=None, 
                  border=None, bd_color=None, bd_width=None):
 
-        if parent:
-            self.parent = parent
-            
-        PopupBox.__init__(self, self.parent, text, left, top, width, height, bg_color, 
+        PopupBox.__init__(self, parent, text, left, top, width, height, bg_color, 
                           fg_color, icon, border, bd_color, bd_width)
 
         self.set_h_align(Align.CENTER)
 
-        self.label.top = self.top + 25
-
         b1 = Button('OK')
-        bleft = self.left + self.width/2 - b1.width/2
-        btop = self.top + self.height - b1.height - 25
-        b1.set_position(bleft, btop) 
         b1.toggle_selected()
 
         self.add_child(b1)

@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.4  2003/04/24 19:56:26  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -81,13 +86,10 @@ class PasswordInputBox(PopupBox):
     """
 
         
-    def __init__(self, parent='osd', text=" ", handler=None, left=None, top=None, 
+    def __init__(self, parent='osd', text=' ', handler=None, left=None, top=None, 
                  width=300, height=160, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
-        if parent:
-            self.parent = parent
-            
         self.handler = handler
 
         PopupBox.__init__(self, parent, text, left, top, width, height, 
@@ -97,12 +99,7 @@ class PasswordInputBox(PopupBox):
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.CENTER)
 
-        self.label.top = self.top + 25
-
         self.lbg = LetterBoxGroup(type='password')
-        bleft = self.left + self.width/2 - self.lbg.width/2
-        btop = self.top + self.height - self.lbg.height - 25
-        self.lbg.set_position(bleft, btop) 
         self.add_child(self.lbg)
 
 
@@ -110,13 +107,13 @@ class PasswordInputBox(PopupBox):
 
         if event == rc.LEFT or event == rc.UP:
             self.lbg.change_selected_box('left')
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         elif event == rc.RIGHT or event == rc.DOWN:
             self.lbg.change_selected_box('right')
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         elif event == rc.ENTER or event == rc.SELECT:
             self.destroy()
@@ -132,8 +129,8 @@ class PasswordInputBox(PopupBox):
             the_box.cycle_phone_char(event)
             if self.lbg.boxes.index(the_box) != len(self.lbg.boxes)-1:
                 self.lbg.change_selected_box('right')
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         else:
             return self.parent.eventhandler(event)

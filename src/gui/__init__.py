@@ -19,6 +19,11 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/02 01:09:03  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.7  2003/04/24 19:56:29  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -93,6 +98,7 @@ import os.path
 from gui.Border            import *
 from gui.Color             import *
 from gui.GUIObject         import *
+from gui.Container         import *
 from gui.PopupBox          import *
 from gui.AlertBox          import *
 from gui.ConfirmBox        import *
@@ -105,6 +111,7 @@ from gui.RegionScroller    import *
 from gui.Scrollbar         import *
 from gui.InputBox          import *
 from gui.PasswordInputBox  import *
+from gui.LayoutManagers    import *
 from gui.exceptions        import *
 from gui.scrolldemo        import *
 from gui.listboxdemo       import *

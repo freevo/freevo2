@@ -7,6 +7,11 @@
 # Todo: o Make a get_thickness set_thickness function pair.
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.5  2003/04/24 19:56:17  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -113,7 +118,6 @@ class Border(GUIObject):
         else:
             self.thickness = 1
             
-        self.parent    = parent
         self.style     = self.BORDER_FLAT
         self.rect      = None
         self.shadow_ho = 6          # Horisontal offset for dropshadow
@@ -121,8 +125,10 @@ class Border(GUIObject):
 
         if style and style in self.bd_types: self.style = style
 
-        GUIObject.__init__(self, parent.left, parent.top, parent.width,
+        GUIObject.__init__(self, 0, 0, parent.width,
                            parent.height)
+
+        parent.add_child(self)
 
         self.color     = Color(self.osd.default_fg_color)
 
@@ -161,7 +167,7 @@ class Border(GUIObject):
         else: raise TypeError, style
 
         
-    def _draw(self, surface=None):
+    def _draw(self):
         """
         Draws the border around the parent.
 
@@ -170,16 +176,13 @@ class Border(GUIObject):
         if DEBUG: print "  Inside Border.draw..."
         if DEBUG: print "  Border type: ", self.style
 
-        if surface:
-            draw_to = surface
-        else:
-            draw_to = self.osd.screen
-        
         # XXX Hack to make border draw inside the areas we expect.
         if self.style == self.BORDER_FLAT:
             c = self.color.get_color_sdl()
-            self.rect = pygame.draw.rect(draw_to, c, self.get_rect(),
+            self.rect = pygame.draw.rect(self.parent.surface, c, 
+                                         self.parent.surface.get_rect(),
                                          self.thickness)
+        if DEBUG: print 'Border: x=%s, y=%s, w=%s, h=%s' % (self.left, self.top, self.width, self.height)
 
         # if self.style == self.BORDER_SHADOW:
         #    self.rect = pygame.draw.rect(self.osd.screen, color, rect,

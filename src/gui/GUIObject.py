@@ -7,6 +7,11 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.19  2003/04/26 16:46:24  dischi
 # added refresh bugfix from Matthieu Weber
 #
@@ -90,15 +95,13 @@ class GUIObject:
         self.label          = None
         self.selected_label = None
         self.icon           = None
+        self.surface        = None
+        self.surface_changed = 1
         self.bg_surface     = None
         self.bg_image       = None
 
-        if not hasattr(self, 'parent'):
-            self.parent = None
+        self.parent = None
 
-        elif self.parent == 'osd':
-            self.parent = self.osd.focused_app
-            
         self.children       = []
         self.enabled        = 1
         self.selected       = 0
@@ -149,11 +152,6 @@ class GUIObject:
         
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.NONE)
-
-        if self.parent:
-            self.parent.add_child(self)
-            if DEBUG: print 'set focus to %s' % self
-            self.osd.focused_app = self
 
 
     def get_rect(self):
@@ -311,6 +309,8 @@ class GUIObject:
         else:
             self.selected = 1
 
+        self.surface_changed = 1
+
 
     def redraw(self):
         """
@@ -329,7 +329,9 @@ class GUIObject:
 
 
     def draw(self, surface=None):
-        if self.is_visible() == 0: return
+        if DEBUG: print 'GUIObject::draw %s' % self
+
+        if self.is_visible() == 0: return FALSE
 
         if self.bg_surface:
             if DEBUG: print 'GUIObject::draw: have bg_surface'
@@ -339,6 +341,8 @@ class GUIObject:
             self._draw(surface)
         else:
             self._draw()
+
+        self.surface_changed = 0
 
 
     def _draw(self, surface=None):
@@ -439,7 +443,8 @@ class GUIObject:
         """
         Sets vertical alignment of text.
         """
-        if type(align) is IntType and (align == 1000 or (align > 1003 and align < 1007)):
+        # XXX: fix this ugly statement
+        if type(align) is IntType and (align == 1000 or align == 1001 or (align > 1003 and align < 1007)):
             self.v_align = align
         else:
             raise TypeError, align
@@ -535,6 +540,5 @@ class Align:
     RIGHT  = 1003
     TOP    = 1004
     BOTTOM = 1005
-    MIDDLE = 1006
 
 

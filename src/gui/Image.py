@@ -11,6 +11,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.2  2003/04/24 19:56:20  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -57,7 +62,7 @@ class Image(GUIObject):
                            height = self.surface.get_height())
 
 
-    set_size(self, width, height)
+    def set_size(self, width, height):
         aspect = (self.width / self.height)
 
         if(width > height):

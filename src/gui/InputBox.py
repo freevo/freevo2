@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/05/02 01:09:02  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.7  2003/04/24 19:56:20  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -95,7 +100,7 @@ class InputBox(PopupBox):
     """
 
         
-    def __init__(self, parent=None, text=" ", handler=None, left=None, top=None, 
+    def __init__(self, parent='osd', text=" ", handler=None, left=None, top=None, 
                  width=300, height=160, bg_color=None, fg_color=None, icon=None,
                  border=None, bd_color=None, bd_width=None):
 
@@ -108,12 +113,7 @@ class InputBox(PopupBox):
         self.set_v_align(Align.NONE)
         self.set_h_align(Align.CENTER)
 
-        self.label.top = self.top + 25
-
         self.lbg = LetterBoxGroup()
-        bleft = self.left + self.width/2 - self.lbg.width/2
-        btop = self.top + self.height - self.lbg.height - 25
-        self.lbg.set_position(bleft, btop) 
         self.add_child(self.lbg)
 
 
@@ -121,13 +121,13 @@ class InputBox(PopupBox):
 
         if event == rc.LEFT:
             self.lbg.change_selected_box('left')
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         elif event == rc.RIGHT:
             self.lbg.change_selected_box('right')
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         elif event == rc.ENTER or event == rc.SELECT:
             self.destroy()
@@ -138,20 +138,20 @@ class InputBox(PopupBox):
             return
         elif event == rc.UP:
             self.lbg.get_selected_box().charUp()
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         elif event == rc.DOWN:
             self.lbg.get_selected_box().charDown()
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             return
         elif [rc.K1, rc.K2, rc.K3, rc.K4, rc.K5, 
               rc.K6, rc.K7, rc.K8, rc.K9, 
               rc.K0].count(event) > 0:
             self.lbg.get_selected_box().cycle_phone_char(event)
-            self.lbg.draw()
-            self.osd.update(self.lbg.get_rect())
+            self.draw()
+            self.osd.update(self.get_rect())
             # a,b,c,d = self.lbg.get_selected_box().get_rect()
             # print 'rectangle: %s' % dir(self.lbg.get_selected_box().get_rect())
             # if DEBUG: print 'a: "%s", b: "%s", c: "%s", d: "%s"' % (a,b,c,d)

@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/05/02 01:09:03  rshortt
+# Changes in the way these objects draw.  They all maintain a self.surface
+# which they then blit onto their parent or in some cases the screen.  Label
+# should also wrap text semi decently now.
+#
 # Revision 1.10  2003/04/24 19:56:28  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -77,6 +82,7 @@ import pygame
 import config
 
 from GUIObject import *
+from Container import *
 from Scrollbar import *
 from Color     import *
 from Border    import *
@@ -89,7 +95,7 @@ import rc
 DEBUG = 0
 
 
-class RegionScroller(GUIObject):
+class RegionScroller(Container):
     """
     left      x coordinate. Integer
     top       y coordinate. Integer
@@ -106,40 +112,20 @@ class RegionScroller(GUIObject):
     """
 
     
-    def __init__(self, surface=None, left=None, top=None, width=300, 
+    def __init__(self, region_surface=None, left=None, top=None, width=300, 
                  height=160, bg_color=None, fg_color=None, border=None, 
                  bd_color=None, bd_width=None, show_h_scrollbar=None, 
                  show_v_scrollbar=None):
 
-        self.surface          = surface
-        self.border           = border
-        self.bd_color         = bd_color
-        self.bd_width         = bd_width
-        self.bg_color         = bg_color
-        self.fg_color         = fg_color
         self.show_h_scrollbar = show_h_scrollbar
         self.show_v_scrollbar = show_v_scrollbar
 
-        GUIObject.__init__(self, left, top, width, height,
-                           self.bg_color, self.fg_color)
+        Container.__init__(self, 'widget', left, top, width, height, bg_color,
+                           fg_color, border=border, bd_color=bd_color, 
+                           bd_width=bd_width)
 
-
-        if not self.bd_color: 
-            if self.skin_info_widget.rectangle.color:
-                self.bd_color = Color(self.skin_info_widget.rectangle.color)
-            else:
-                self.bd_color = Color(self.osd.default_fg_color)
-
-        if not self.bd_width: 
-            if self.skin_info_widget.rectangle.size:
-                self.bd_width = self.skin_info_widget.rectangle.size
-            else:
-                self.bd_width = 2
-
-        if not self.border:   
-            self.border = Border(self, Border.BORDER_FLAT,
-                                 self.bd_color, self.bd_width)
-
+        self.internal_h_align = Align.NONE
+        self.internal_v_align = Align.NONE
 
         if self.show_h_scrollbar != 0 and not self.show_h_scrollbar:
             self.show_h_scrollbar = 1
@@ -147,7 +133,7 @@ class RegionScroller(GUIObject):
             self.show_v_scrollbar = 1
 
 
-        self.set_surface(surface)
+        self.set_surface(region_surface)
         self.x_scroll_interval = 25
         self.y_scroll_interval = 25
         self.h_margin = 2
@@ -166,11 +152,11 @@ class RegionScroller(GUIObject):
         self.filler.fill(fc_c)
         self.filler.set_alpha(fc_a)
 
-        if self.show_v_scrollbar:
-            if self.v_scrollbar: self.v_scrollbar.calculate_position()
+        # if self.show_v_scrollbar:
+            # if self.v_scrollbar: self.v_scrollbar.calculate_position()
 
-        if self.show_h_scrollbar:
-            if self.h_scrollbar: self.h_scrollbar.calculate_position()
+        # if self.show_h_scrollbar:
+            # if self.h_scrollbar: self.h_scrollbar.calculate_position()
 
 
     def get_view_percent(self, orientation):
@@ -229,9 +215,10 @@ class RegionScroller(GUIObject):
 
 
     def set_surface(self, surface):
-        self.surface = surface
+        self.region_surface = surface
 
-        (None, None, self.s_w, self.s_h) = self.surface_rect = self.surface.get_rect()
+        (None, None, self.s_w, self.s_h) = self.region_surface_rect \
+                                         = self.region_surface.get_rect()
 
         self.v_x = 0
         self.v_y = 0
@@ -240,7 +227,6 @@ class RegionScroller(GUIObject):
 
 
     def get_location(self):
-        # return self.view_coords
         return (self.v_x, self.v_y)
 
 
@@ -249,13 +235,17 @@ class RegionScroller(GUIObject):
         The actual internal draw function.
 
         """
-        if not self.width or not self.height or not self.surface:
+        if not self.width or not self.height or not self.region_surface:
             raise TypeError, 'Not all needed variables set.'
 
+        self.set_position(self.left,self.top)
         (x, y) = self.get_location()
-        box = self.surface.subsurface(x, y, self.width, self.height)
+        self.surface = pygame.Surface(self.get_size(), 0, 32)
+        # self.surface = self.region_surface.subsurface(x, y, self.width, self.height)
+        # self.surface.fill((255,255,255,255))
+        # self.surface.set_alpha(255)
+        self.surface.blit(self.region_surface, (0, 0),  (x, y, self.width, self.height))
 
-        self.osd.screen.blit(box, self.get_position())
 
         if self.show_v_scrollbar:
             if self.v_scrollbar: self.v_scrollbar.draw()
@@ -264,30 +254,14 @@ class RegionScroller(GUIObject):
             if self.h_scrollbar: self.h_scrollbar.draw()
 
         if self.show_v_scrollbar and self.show_h_scrollbar:
-            self.osd.screen.blit(self.filler,
-                             (self.left+self.width-self.v_scrollbar.thickness,
-                              self.top+self.height-self.h_scrollbar.thickness))
+            self.surface.blit(self.filler,
+                             (self.width-self.v_scrollbar.thickness,
+                              self.height-self.h_scrollbar.thickness))
 
         if self.border: self.border.draw()
 
+        self.parent.surface.blit(self.surface, self.get_position())
     
-
-    def set_border(self, bs):
-        """
-        bs  Border style to create.
-        
-        Set which style to draw border around object in. If bs is 'None'
-        no border is drawn.
-        
-        Default is to have no border.
-        """
-        if isinstance(self.border, Border):
-            self.border.set_style(bs)
-        elif not bs:
-            self.border = None
-        else:
-            self.border = Border(self, bs)
-            
 
     def set_position(self, left, top):
         """
@@ -298,36 +272,19 @@ class RegionScroller(GUIObject):
             if DEBUG: print "updating borders set_postion as well"
             self.border.set_position(left, top)
 
-        if self.show_h_scrollbar:
-            if self.h_scrollbar: self.h_scrollbar.calculate_position()
-        if self.show_v_scrollbar:
-            if self.v_scrollbar: self.v_scrollbar.calculate_position()
+        # if self.show_h_scrollbar:
+            # if self.h_scrollbar: self.h_scrollbar.calculate_position()
+        # if self.show_v_scrollbar:
+            # if self.v_scrollbar: self.v_scrollbar.calculate_position()
         
-
-    def _erase(self):
-        """
-        Erasing us from the canvas without deleting the object.
-        """
-
-        if DEBUG: print "  Inside PopupBox._erase..."
-        # Only update the part of screen we're at.
-        self.osd.screen.blit(self.bg_image, self.get_position(),
-                        self.get_rect())
-        
-        if self.border:
-            if DEBUG: print "    Has border, doing border erase."
-            self.border._erase()
-
-        if DEBUG: print "    ...", self
-
 
     def eventhandler(self, event):
 
         scrolldirs = [rc.UP, rc.DOWN, rc.LEFT, rc.RIGHT]
         if scrolldirs.count(event) > 0:
             self.scroll(event)
-            self.draw()
-            self.osd.update(self.get_rect())
+            self.parent.draw()
+            self.osd.update(self.parent.get_rect())
             return
         else:
             return self.parent.eventhandler(event)
