@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/06 21:01:32  mikeruelle
+# it would help if the developer could keep his variables straight.
+#
 # Revision 1.2  2003/09/05 02:48:13  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -118,7 +121,7 @@ class GenreResource(FreevoResource):
         acelltime=mfrnextguide + 60
         aftercell='&nbsp;&nbsp;&nbsp;<a href="genre.rpy?stime=%i%s"><img src="images/RightArrow.png" border="0"></a>' % (acelltime, keepcat)
         if mfrprevguide > 0:
-            bforcell='<a href="genre.rpy?stime=%i%s"><img src="images/LeftArrow.png" border="0"></a>&nbsp;&nbsp;&nbsp;' % (mfrprevguide, category)
+            bforcell='<a href="genre.rpy?stime=%i%s"><img src="images/LeftArrow.png" border="0"></a>&nbsp;&nbsp;&nbsp;' % (mfrprevguide, keepcat)
         
         fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
         fv.tableRowOpen('class="chanrow"')
