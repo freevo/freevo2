@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/27 02:03:03  outlyer
+# Added support for the xmltv 'sub-title' tag which sometimes contains the
+# episode title for TV shows. Its not always there, but if it is, we can use
+# it, and I'll show it if it's available in the extended menu.
+#
 # Revision 1.9  2003/02/16 22:21:45  krister
 # Bugfix for XMLTV data handling during config (tunerid)
 #
@@ -276,6 +281,8 @@ def load_guide():
         prog.title = p['title'][0][0].encode('Latin-1')
         if p.has_key('desc'):
             prog.desc = p['desc'][0][0].encode('Latin-1')
+        if p.has_key('sub-title'):
+            prog.sub_title = p['sub-title'][0][0].encode('Latin-1')
         try:
             prog.start = timestr2secs_utc(p['start'])
             try:

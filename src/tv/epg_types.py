@@ -10,6 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/27 02:03:04  outlyer
+# Added support for the xmltv 'sub-title' tag which sometimes contains the
+# episode title for TV shows. Its not always there, but if it is, we can use
+# it, and I'll show it if it's available in the extended menu.
+#
 # Revision 1.1  2002/11/24 13:58:45  dischi
 # code cleanup
 #
@@ -63,6 +68,7 @@ class TvProgram:
     channel_id = ''
     title = ''
     desc = ''
+    sub_title = ''
     start = 0.0
     stop = 0.0
 
