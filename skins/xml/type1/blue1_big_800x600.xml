@@ -87,7 +87,7 @@
 	</mask>
       </background>
 
-      <cover visible="yes" x="475" y="200" width="310" height="300" 
+      <cover visible="yes" x="475" y="200" width="300" height="300" 
 	border_color="0x000000" border_size="1"> 
 	<mask>
 	  <rectangle x="460" y="185" width="400" height="330" 
