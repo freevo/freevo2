@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2002/11/20 03:44:57  krister
+# Dirty fix in the skin to display the new icons better, the icons should be resized instead.
+#
 # Revision 1.59  2002/11/19 22:04:15  dischi
 # Some changes I had to made to integrate a first version of my code
 # cleanup. This shouldn't break anything and it should work as before.
@@ -493,7 +496,7 @@ class Skin:
             icon_size = 28
         else:
             spacing = height / max(len(menuw.menu_items),1)
-            icon_size = 64
+            icon_size = 48  # XXX Quick hack to make the new icons look OK, fix!
 
 
         for choice in menuw.menu_items:
