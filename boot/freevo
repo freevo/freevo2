@@ -8,7 +8,7 @@
 test -f /etc/freevo/boot_config || exit 0
 . /etc/freevo/boot_config
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/games
 DAEMON=$FREEVO_HOME/freevo
 NAME=freevo
 DESC=freevo
