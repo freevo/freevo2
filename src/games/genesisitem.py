@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/25 21:20:45  mikeruelle
+# fix crash for missing arg
+#
 # Revision 1.1  2003/09/05 20:47:29  mikeruelle
 # new games system additions
 #
@@ -123,7 +126,7 @@ class GenesisItem(Item):
         return [ ( self.play, 'Play' ) ]
     
 
-    def play(self, menuw=None):
+    def play(self, arg=None, menuw=None):
         self.parent.current_item = self
 
         if not self.menuw:
