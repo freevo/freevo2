@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/01/10 13:20:52  dischi
+# better skin cache function and set_base_fxd to load a basic skin
+#
 # Revision 1.30  2004/01/09 20:04:18  dischi
 # add overscan to cache name
 #
@@ -121,28 +124,17 @@ class Skin:
 
         # load the fxd file
         self.settings = xml_skin.XMLSkin()
-        
-        # try to find the skin xml file
-        if not self.settings.load(config.SKIN_XML_FILE, clear=True):
-            print "skin not found, using fallback skin"
-            self.settings.load('blue.fxd', clear=True)
-            config.SKIN_XML_FILE = 'blue.fxd'
-            
-        for dir in config.cfgfilepath:
-            local_skin = '%s/local_skin.fxd' % dir
-            if os.path.isfile(local_skin):
-                _debug_('Skin: Add local config %s to skin' % local_skin,2)
-                self.settings.load(local_skin)
-                break
+        self.set_base_fxd(config.SKIN_XML_FILE)
 
 
     def cachename(self, filename):
         """
         create cache name
         """
-        return vfs.getoverlay('%s.skin-%sx%s-%s-%s' % (filename, osd.width, osd.height,
-                                                       config.OSD_OVERSCAN_X,
-                                                       config.OSD_OVERSCAN_Y))
+        geo  = '%sx%s-%s-%s' % (osd.width, osd.height, config.OSD_OVERSCAN_X,
+                                config.OSD_OVERSCAN_Y)
+        return vfs.getoverlay('%s.skin-%s-%s' % (filename, config.SKIN_XML_FILE, geo))
+
         
     def save_cache(self, settings, filename):
         """
@@ -166,6 +158,9 @@ class Skin:
         """
         load a skin cache file
         """
+        if hasattr(self, '__last_load_cache__') and self.__last_load_cache__[0] == filename:
+            return self.__last_load_cache__[1]
+            
         cache = self.cachename(filename)
         if not cache:
             return None
@@ -198,6 +193,7 @@ class Skin:
         for f in settings.font:
             settings.font[f].font = osd.getfont(settings.font[f].name,
                                                 settings.font[f].size)
+        self.__last_load_cache__ = filename, settings
         return settings
 
         
@@ -219,11 +215,33 @@ class Skin:
         """
         exec('del self.%s_areas' % type)
 
+
+    def set_base_fxd(self, name):
+        """
+        set the basic skin fxd file
+        """
+        config.SKIN_XML_FILE = os.path.splitext(os.path.basename(name))[0]
+        _debug_('load basic skin settings: %s' % config.SKIN_XML_FILE)
+        
+        # try to find the skin xml file
+        if not self.settings.load(name, clear=True):
+            print "skin not found, using fallback skin"
+            self.settings.load('blue.fxd', clear=True)
+            
+        for dir in config.cfgfilepath:
+            local_skin = '%s/local_skin.fxd' % dir
+            if os.path.isfile(local_skin):
+                _debug_('Skin: Add local config %s to skin' % local_skin,2)
+                self.settings.load(local_skin)
+                break
+
+        
         
     def load(self, filename, copy_content = 1):
         """
         return an object with new skin settings
         """
+        _debug_('load additional skin info: %s' % filename)
         if filename and vfs.isfile(vfs.join(filename, 'folder.fxd')):
             filename = vfs.abspath(os.path.join(filename, 'folder.fxd'))
 
