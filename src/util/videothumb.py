@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/04 13:07:14  dischi
+# make image max 300x300
+#
 # Revision 1.1  2004/01/04 11:16:32  dischi
 # add function to create a thumbnail from videofiles
 #
@@ -45,7 +48,7 @@ import shutil
 
 import config
 import popen3
-
+import Image
 
 def snapshot(videofile, imagefile, pos=None):
     """
@@ -59,7 +62,17 @@ def snapshot(videofile, imagefile, pos=None):
                          os.path.abspath(__file__) ] + args)
     if out:
         print out
-
+    if vfs.isfile(imagefile):
+        try:
+            image = Image.open(imagefile)
+            if image.size[0] > 300 and image.size[1] > 300:
+                image.thumbnail((300,300), Image.ANTIALIAS)
+            if image.mode == 'P':
+                image = image.convert('RGB')
+            image = image.crop((5, 0, image.size[0]-10, image.size[1]))
+            image.save(imagefile)
+        except:
+            pass
 
 
 #
@@ -93,7 +106,7 @@ if __name__ == "__main__":
         try:
             shutil.copy(capture, imagefile)
         except:
-            shutil.copy(capture, os.path.join(config.OVERLAY_DIR, imagefile[1:]))
+            shutil.copy(capture, vfs.getoverlay(imagefile[1:]))
     else:
         print "error creating capture for %s" % filename
 
