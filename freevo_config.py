@@ -637,12 +637,30 @@ SUFFIX_IMAGE_SSHOW = [ 'ssr' ]
 #                ('Carmel 2002',  '/video/SlideShows/carmel.ssr'),
 #                ('Pics',  '/video/SlideShows') ]
 
-
-# Speed for blending one picture into the new one. Set it to 0 to
-# disable, or to 25, 10, 5 too make the blend slower.
-
-IMAGEVIEWER_BLEND_SPEED = 50
-
+# XXX Set this to 0 to select the new style blending controls
+if 1:
+    # Speed for blending one picture into the new one. Set it to 0 to
+    # disable, or to 25, 10, 5 too make the blend slower.
+    
+    IMAGEVIEWER_BLEND_SPEED = 50
+    # XXX New style blend settings.
+    # The number of blend steps between images.
+    IMAGEVIEWER_BLEND_STEPS = 0
+    
+    # Total time in seconds for blending from one image to the next
+    IMAGEVIEWER_BLEND_TIME = 0
+else:
+    # Speed for blending one picture into the new one. Set it to 0 to
+    # disable, or to 25, 10, 5 too make the blend slower.
+    
+    IMAGEVIEWER_BLEND_SPEED = 0
+    # XXX New style blend settings.
+    # The number of blend steps between images.
+    IMAGEVIEWER_BLEND_STEPS = 4
+    
+    # Total time in seconds for blending from one image to the next
+    IMAGEVIEWER_BLEND_TIME = 0.75
+    
 # ======================================================================
 # Freevo games settings:
 # ======================================================================

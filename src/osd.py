@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.106  2003/11/23 19:48:59  krister
+# Added optional new blend settings (nr of steps and total time), must be enabled explicitly in freevo_config
+#
 # Revision 1.105  2003/11/23 18:44:37  krister
 # Fixed blending bug where the final update contained a shadow of the previous image.
 #
@@ -948,18 +951,55 @@ class OSD:
 
 
 
-    def update(self, rect=None, blend_surface=None, blend_speed=0):
+    def update(self, rect=None, blend_surface=None, blend_speed=0,
+               blend_steps=0, blend_time=None):
         """
         update the screen
         """
+
+        # XXX New style blending
+        if blend_surface and blend_steps:
+            blend_last_screen = self.screen.convert()
+            blend_next_screen = blend_surface.convert()
+            blend_surface = self.screen.convert()
+
+            blend_start_time = time.time()
+            time_step = float(blend_time) / (blend_steps+1) 
+            step_size = 255.0 / (blend_steps+1)
+            blend_alphas = [int(x*step_size) for x in range(1, blend_steps+1)]
+            blend_alphas.append(255) # The last step must be 255
+
+            for i in range(len(blend_alphas)):
+                alpha = blend_alphas[i]
+                blend_last_screen.set_alpha(255 - alpha)
+                blend_next_screen.set_alpha(alpha)
+                blend_surface.fill((0,0,0,0))
+                blend_surface.blit(blend_last_screen, (0, 0))
+                blend_surface.blit(blend_next_screen, (0, 0))
+
+                self.screen.blit(blend_surface, (0,0))
+                if plugin.getbyname('osd'):
+                    plugin.getbyname('osd').draw(('osd', None), self)
+                pygame.display.flip()
+                if blend_time:
+                    # At what time does the next frame start?
+                    t_next = blend_start_time + time_step*(i+1)
+                    # How much time left until next frame starts?
+                    now = time.time()
+                    t_rem = t_next - now
+                    # Delay if needed
+                    if t_rem > 0.0:
+                        time.sleep(t_rem)
+            return
+            
         if blend_surface and blend_speed:
             blend_last_screen = self.screen.convert()
             blend_next_screen = blend_surface.convert()
             blend_surface = self.screen.convert()
 
-            blend_steps = 255 / blend_speed
-            for i in range(1, blend_steps+1):
-                if i == blend_steps:
+            blend_num_steps = 255 / blend_speed
+            for i in range(1, blend_num_steps+1):
+                if i == blend_num_steps:
                     blend_last_screen.set_alpha(0)
                     blend_next_screen.set_alpha(255)
                 else:
