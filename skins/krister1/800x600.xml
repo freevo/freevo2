@@ -1,41 +1,89 @@
 <?xml version="1.0" ?>
 <freevo>
-  <skin>
 
-    <!-- Settings for a normal menu -->
-    <menu>
-      <bgbitmap>../images/aubin_bg1_800x600.png</bgbitmap>
-      <title visible="yes" x="160" y="50">
-	<font name="a010013l.pfb" size="22" color="0x000000"/>
-      </title>
-      <items x="60" y="110" height="390">
-	<font name="SF Arborcrest Medium" size="15" color="0x000000"/>
-	<selection length="685" color="0x0000ff"/>
-      </items>
-      <cover>
-	<movie visible="yes" x="570" y="100" width="200" height="280"/>
-	<music visible="yes" x="570" y="100" width="200" height="200"/>
-	<image visible="yes" x="570" y="100" width="200" height="160"/>
-      </cover>
-      <submenu x="40" y="535">
-	<font name="RUBTTS__" size="18" color="0x000000"/>
-	<selection length="154" color="0x0000ff"/>
-      </submenu>
-    </menu>
-    
-        <main>        
+   <skin>
+
+    <main>        
       <item pos="0" name="TV"       action="tv.main_menu"  arg="" visible="yes" icon="icons/tv.png"   />
-      <item pos="1" name="Movie"    action="movie.main_menu" arg="" visible="yes" icon="icons/movies.png"  />
+      <item pos="1" name="Movies"   action="movie.main_menu" arg="" visible="yes" icon="icons/movies.png"  />
       <item pos="2" name="Music"    action="music.main_menu" arg="" visible="yes" icon="icons/mp3.png"  />
-      <item pos="3" name="Image"    action="imenu.main_menu" arg="" visible="yes" icon="icons/images.png"  />
+      <item pos="3" name="Images"   action="imenu.main_menu" arg="" visible="yes" icon="icons/images.png"  />
       <item pos="4" name="Shutdown" action="shutdown" arg="" visible="yes" icon="icons/shutdown2.png"  />
     </main>
+    
+    <!-- Settings for a normal menu -->
+    <menu>
 
+      <bgbitmap>../images/aubin_bg1_800x600.png</bgbitmap>
+
+      <title visible="yes" x="-1" y="15">
+	<font name="impact" size="38" color="0x000000"/>
+      </title>
+
+      <item_main x="260">
+        <font name="arialbd" size="32" color="0x38474c"/>
+        <selection length="300" color="0xffffff" bgcolor="0x38474c">
+          <font name="arialbd" size="28" color="0xffffff"/>
+          <shadow visible="yes" mode="solid" color="0x000000" x="3" y="3"/> <!-- mode= solid | translucent -->
+        </selection>
+        <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+      </item_main>
+
+      <item_dir x="60" >
+        <font name="impact" size="16" color="0x38474c"/>
+        <selection length="653" bgcolor="0x38474c">
+           <font name="impact" size="18" color="0xffffff"/>
+           <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+        </selection>
+        <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+      </item_dir>
+
+      <item_pl x="60" >
+         <font name="arialbi" size="14" color="0x58677c"/>
+ 	 <selection length="653" color="0xffffff" bgcolor="0x38474c">
+            <font name="arialbi" size="15" color="0xffffff"/>
+            <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+         </selection>
+         <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+      </item_pl>
+
+      <items x="60" y="110" height="390">
+	<font name="arial" size="15" color="0x000000"/>
+	<selection length="653" color="0xffffff" bgcolor="0x000000">
+     	   <font name="arial" size="15" color="0xffffff"/>
+           <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+        </selection>
+        <shadow visible="no" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+      </items>
+
+      <cover>
+	<movie visible="yes" x="538" y="100" width="200" height="280"/>
+	<music visible="yes" x="538" y="100" width="200" height="200"/>
+	<image visible="yes" x="538" y="100" width="200" height="160"/>
+      </cover>
+
+      <submenu x="40" y="520">
+	<font name="RUBTTS__" size="20" color="0x000000"/>
+	<selection length="154" bgcolor="0x08171c" color="0xffffff">
+           <font name="RUBTTS__" size="20" color="0xffffff"/>
+           <shadow visible="yes" mode="solid" color="0x000000" x="2" y="2"/> <!-- mode= solid | translucent -->
+        </selection>
+      </submenu>
+
+    </menu>   
 
     <!-- Settings for the mp3 player -->
-    <!-- (nothing more than the bgbitmap right now) -->
     <mp3>
+      <title visible="yes" x="-1" y="15">
+	<font name="impact" size="32" color="0x000000"/>
+      </title>
       <bgbitmap>../images/aubin_bg1_800x600.png</bgbitmap>
+      <font name="arialbd" size="16" color="0x58677c"/>
+      <shadow visible="yes" mode="solid" color="0x000000" x="1" y="1"/> <!-- mode= solid | translucent -->
+      <progressbar visible="yes" x="0" y="490" width="799" height="5"      
+      color="0x58677c" bgcolor="0xffffff" 
+      border_color="0x000000" border_size="1"/>
     </mp3>
   </skin>
+
 </freevo>
