@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.61  2003/08/16 12:55:06  dischi
+# wait when shutdown
+#
 # Revision 1.60  2003/08/15 19:23:20  dischi
 # support --force-fs for freevo -fs
 #
@@ -197,6 +200,8 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
 
             os.system(config.SHUTDOWN_SYS_CMD)
             # let freevo be killed by init, looks nicer for mga
+            while 1:
+                time.sleep(1)
             return
 
     # SDL must be shutdown to restore video modes etc
