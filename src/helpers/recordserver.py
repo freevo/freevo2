@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/06/20 21:51:38  dischi
+# do call minutecheck, check yourself
+#
 # Revision 1.42  2004/06/20 13:56:24  dischi
 # add self.minuteCheck right after scheduling
 #
@@ -183,7 +186,11 @@ class RecordServer(xmlrpc.XMLRPC):
         self.saveScheduledRecordings(scheduledRecordings)
 
         # check, maybe we need to start right now
-        self.minuteCheck()
+        rec_prog = self.checkToRecord()
+        if rec_prog:
+            _debug_('start recording')
+            self.record_app = plugin.getbyname('RECORD')
+            self.record_app.Record(rec_prog)
         return (TRUE, 'recording scheduled')
     
 
