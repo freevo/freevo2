@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/10 18:32:57  outlyer
+# Anyone notice that the entire content was missing? Apparently Mozilla is
+# more forgiving than IE... this <span> was used to hide some text so people
+# who wanted to make a different skin could do so. I didn't close it and it
+# was styled to "display: none" so it made the whole page invisible.
+#
 # Revision 1.20  2004/02/09 21:29:32  outlyer
 # New web functions...
 #
@@ -153,7 +159,7 @@ class HTMLResource:
         self.res += '\n\n\n\n<body>\n'
         # Header
         self.res += '<!-- Header Logo and Status Line -->\n'
-        self.res += '<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></div>\n'
+        self.res += '<div id="titlebar"><span class="name"><a href="http://freevo.sourceforge.net/" target="_blank">Freevo</a></span></div>\n'
      
         items = [('Home','Home','%sindex.rpy' % str(strprefix)),
                  ('TV Guide','View TV Listings','%sguide.rpy' % str(strprefix)),
