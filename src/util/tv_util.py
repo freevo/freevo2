@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/08 19:48:31  rshortt
+# Make this work again (for now).
+#
 # Revision 1.8  2004/08/08 19:04:25  rshortt
 # Adding get_guide() and caching here temporarily until we have a working
 # replacement since various parts of Freevo need it and I need it to fix
@@ -151,11 +154,7 @@ def get_chan_displayname(channel_id):
 
 def when_listings_expire():
 
-    # FIXME!!!!!!!!!!!
-    return 0
-
-
-    guide = tv.epg_xmltv.get_guide()
+    guide = get_guide()
     last = 0
     left = 0
 
