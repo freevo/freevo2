@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2005/02/02 02:13:16  rshortt
+# Revive search page, add more search options.
+#
 # Revision 1.6  2005/01/13 20:19:33  rshortt
 # Place the authentication into www/server.py to protect mote than just
 # the .py files.
@@ -119,7 +122,7 @@ class HTMLResource:
 #                  (_('Favorites'),_('View Favorites'),'%sfavorites.rpy' % str(strprefix)),
 #                  (_('Media Library'),_('View Media Library'),'%slibrary.rpy' % str(strprefix)),
 #                  (_('Manual Recording'),_('Schedule a Manual Recording'),'%smanualrecord.rpy' % str(strprefix)),
-#                  (_('Search'),_('Advanced Search Page'),'%ssearch.rpy' % str(strprefix)),
+                 (_('Search'),_('Advanced Search Page'),'%ssearch' % str(strprefix)),
                  (_('Doc'),_('View Online Help and Documentation'),'%sdoc' % str(strprefix))]
 
         try:
@@ -138,20 +141,7 @@ class HTMLResource:
             self.res += "<a href=\"%s\" title=\"%s\">%s</a></li>\n" % (i[2], i[1],i[0])
         self.res += '</ul>\n</div>'
         
-        #self.res += '<li id="current"><a href="#">Home</a></li>\n'
-        #self.res += '<li><a href="#">TV Guide</a></li>\n'
-        #self.res += '<li><a href="#">Scheduled Recordings</a></li>\n'
-        #self.res += '<li><a href="#">Media Library</a></li>\n'
-        #self.res += '<li><a href="#">Manual Record</a></li>\n'
-        #self.res += '<li><a href="#">Help</a></li>\n'
-        #self.res += '</ul>\n'
-        #self.res += '</div>\n<br/>'
- 
-        #self.res += '<div id="subtitle">\n'
-        #self.res += str(title) + '\n'
-        #self.res += '</div>\n'
         self.res += '\n<!-- Main Content -->\n';
-
 
 
     def tableOpen(self, opts=''):
@@ -216,20 +206,41 @@ class HTMLResource:
     
     def printSearchForm(self):
         self.res += """
-    <form id="SearchForm" action="search.rpy" method="get">
-    <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20" /></div>
+    <form id="SearchForm" action="search" method="get">
+    <div class="searchform"><b>"""+_('Search')+""":</b>
+    <input type="text" name="find" size="20" />
+    <input type="hidden" name="search_title" value="on" />
+    <input type="hidden" name="search_subtitle" value="on" />
+    <input type="hidden" name="search_description" value="on" /></div>
     </form>
     """
 
     def printAdvancedSearchForm(self):
         self.res += """
-    <form id="SearchForm" action="search.rpy" method="get">
-    <div class="searchform"><b>"""+_('Search')+""":</b><input type="text" name="find" size="20" />
-    <input type="checkbox" selected=0 name="movies_only" />"""+_('Movies only')+"""
-    <input type="submit" value=" """+_('Go!')+""" " />
-    </div>
-    </form>
-    """
+        <form id="SearchForm" action="search" method="get">
+        <div class="searchform">
+        <table border="0">
+          <tr><td align="left"><b>"""+ _('Search')+ """:</b>
+          <input type="text" name="find" size="20" /></td></tr>
+          <tr><td align="left">
+            <input type="checkbox" checked=1 name="search_title" />
+            """+ _('Search title') +"""
+          </td></tr>
+          <tr><td align="left">
+            <input type="checkbox" checked=1 name="search_subtitle" />
+            """+ _('Search subtitle') +"""
+          </td></tr>
+          <tr><td align="left">
+            <input type="checkbox" checked=1 name="search_description" />
+            """+ _('Search description') +"""
+          </td></tr>
+          <tr><td align="left">
+            <input type="submit" value=" """+ _('Go!') +""" " />
+          </td></tr>
+        </table>
+        </div>
+        </form>
+        """
 
     def printMessages( self, messages ):
         self.res += "<h4>"+_("Messages")+":</h4>\n"
