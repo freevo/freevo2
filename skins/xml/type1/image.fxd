@@ -113,6 +113,7 @@
     <font label="default" name="bluehigh" size="20" color="default"/>
 
     <color label="selected" value="0xffffff"/>
+    <color label="selection bar" value="0xa0000000"/>
     <color label="item" value="0xffffff"/>
     <color label="default" value="0xffffff"/>
     <color label="background" value="0xa0ffffff"/>
