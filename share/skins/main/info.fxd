@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <skin include="blue" geometry="800x600">
+  <skin include="basic" geometry="800x600">
 
     <!-- 
     *******************************************************
@@ -10,17 +10,12 @@
 
     <!-- definition of the main menu item names and watermarks -->
     <main>
-      <item label="tv" name="Watch TV" icon="" 
-	image="watermarks/tv.png"/>
-      <item label="video" name="Watch a Movie" icon=""
-	image="watermarks/movie.png"/>
-      <item label="audio" name="Listen to Music" icon="" 
-	image="watermarks/music.png"/>
-      <item label="image" name="Look at Pictures" icon="" 
-	image="watermarks/image.png"/>
-      <item label="games" name="Games" icon="" image=""/>
-      <item label="shutdown" name="Shutdown" icon="" 
-	image="watermarks/shutdown.png" visible="no"/> 
+      <item label="tv" name="Watch TV" image="watermarks/tv.png"/>
+      <item label="video" name="Watch a Movie" image="watermarks/movie.png"/>
+      <item label="audio" name="Listen to Music" image="watermarks/music.png"/>
+      <item label="image" name="Look at Pictures" image="watermarks/image.png"/>
+      <item label="games" name="Games" image=""/>
+      <item label="shutdown" name="Shutdown" image="watermarks/shutdown.png"/> 
     </main>
 
     <!-- change the menuset to use a new background and listing area -->
@@ -62,60 +57,41 @@
     ** MENU
     ******************************************************* -->
 
-    <menu type="default no image">
-      <style text="plain text style"/>
-    </menu>
+    <!-- default description: make listing area smaller, show info area -->
+    <menuset label="default description">
+      <listing height="340"/>
+      <info x="40" y="460" width="750" height="120" />
+    </menuset>
 
-    <menu type="default description no image">
-      <style text="plain text style with info"/>
-    </menu>
-
+    <!-- default description no image: mix between the two above -->
+    <menuset label="default description no image">
+      <listing height="340"/>
+      <info x="40" y="460" width="750" height="120" />
+    </menuset>
+    
     <!-- special settings for audio. The default style is an image based style -->
     <!-- with an info area. By pressing DISPLAY this can be toggled to the default view -->
     <menu type="audio">
-      <style image="audio menu with info" text="text with info style"/>
-      <style text="text with info style"/>
+      <style image="audio menu with info" text="default description"/>
+      <style text="default description"/>
     </menu>
 
     <menu type="video">
-      <style image="video menu with info" text="text with info style"/>
-      <style text="text with info style"/>
-      <style image="video details" text="text with info style"/>
+      <style image="video menu with info" text="default description"/>
+      <style text="default description"/>
+      <style image="video details" text="default description"/>
     </menu>
 
     <menu type="image">
-      <style image="image menu with info" text="normal text style"/>
-      <style text="text with info style"/>
+      <style image="image menu with info" text="default description"/>
+      <style text="default description"/>
     </menu>
 
 
-    <!-- a style without view area for sub menus -->
-    <menuset label="plain text style" inherits="normal text style">
-      <listing width="700"/>
-      <view visible="no"/>
-    </menuset>
-
-    <menuset label="plain text style with info" inherits="plain text style">
-      <listing height="330">
-	<image y="max-32" label="downarrow"/>
-      </listing>
-      <info visible="yes" layout="info" x="40" y="460" width="750" height="120"/>
-    </menuset>
-
-    <!-- Now the "text with info style" -->
-    <menuset label="text with info style" inherits="normal text style">
-      <!-- 4. listing area: the list of all items -->
-      <listing height="330">
-	<image y="max-32" label="downarrow"/>
-      </listing>
-      <info layout="info" x="40" y="460" width="750" height="120"/>
-    </menuset>
-
-
-    <!-- The "video menu with info", it's like "text with info style" only with -->
+    <!-- The "video menu with info", it's like "default description" only with -->
     <!-- different listing area and a subtitle -->
-    <menuset label="video menu with info" inherits="text with info style">
-      <subtitle layout="title1" x="45" y="100" width="470" height="40"/>
+    <menuset label="video menu with info" inherits="default description">
+      <subtitle layout="subtitle" x="45" y="100" width="470" height="40"/>
       <listing layout="video list" y="140" height="290">
 	<image label="uparrow" y="140"/>
 	<image label="downarrow" y="max-32"/>
@@ -125,7 +101,7 @@
 
     <!-- Now the "video details" (DISPLAY 3 for video)-->
     <menuset label="video details" inherits="normal text style">
-      <subtitle layout="title1" x="10" y="100" width="780" height="60"/>
+      <subtitle layout="subtitle" x="10" y="100" width="780" height="60"/>
 
       <listing layout="video list" x="500" y="450" width="290" height="140">
 	<image label="uparrow" filename=""/>
@@ -139,26 +115,21 @@
 
     <!-- Now the "audio menu with info" used by audio-->
     <menuset label="audio menu with info" inherits="video menu with info">
-      <listing layout="audio list">
-	<image y="max-32" label="downarrow"/>
-      </listing>
+      <listing layout="audio list"/>
       <view y="145"/>
     </menuset>
 
 
     <!-- Now the "image menu with info" used by image-->
     <menuset label="image menu with info" inherits="video menu with info">
-      <listing width="745" layout="image list">
-	<image y="max-32" label="downarrow"/>
-      </listing>
+      <listing width="745" layout="image list"/>
       <view visible="no"/>
     </menuset>
 
 
-
     <!-- subtitle for image view areas -->
-    <layout label="title1">
-      <content type="short item" font="title small" align="left"/>
+    <layout label="subtitle">
+      <content type="short item" font="subtitle" align="left"/>
     </layout>
 
     <!-- listing area for audio with images -->
@@ -197,12 +168,260 @@
     </layout>
 
 
+    <!-- 
+    *******************************************************
+    ** Fonts/Colors
+    ******************************************************* -->
+
+    <!-- some needed fonts -->
+    <font label="title area">
+      <shadow x="2" y="2" color="0x000000" visible="yes"/>
+    </font>
+
+    <font label="subtitle" name="VeraBd.ttf" size="22" color="0xffffff">
+      <shadow visible="yes" color="0x000000" x="1" y="1"/>
+    </font>
+
+    <!-- use blurr background -->
+    <image label="background" filename="blurrback.jpg"/>
+
 
     <!-- 
     *******************************************************
     ** MENU info areas
     ******************************************************* -->
 
+    <layout label="info">
+      <content x="0" y="0" type="text" spacing="20" font="default">
+
+	<item type="audio">
+	  <if expression="description">
+	    <text font="info tagline" expression="description"/>
+	    <newline/>
+	  </if>
+	  <if expression="artist">
+	    <text width="130" font="info label">Artist:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="artist"/>
+	    <newline/>
+	  </if>
+	  <if expression="album">
+	    <text width="130" font="info label">Album:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="album"/>
+	    <if expression="year">
+	      <text font="info value"> (</text>
+	      <text font="info value" expression="year"/>
+	      <text font="info value">)</text>
+	    </if>
+	    <newline/>
+	  </if>
+	  <if expression="length">
+	    <text width="130" font="info label">Length:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="length"/>
+	    <newline/>
+	  </if>
+	  <if expression="bitrate">
+	    <text width="130" font="info label">Bitrate:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="bitrate"/>
+	    <text width="130" font="info value">kb/s</text>
+	    <newline/>
+	  </if>
+	  <if expression="link">
+	    <text width="130" font="info label">Link:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="link"/>
+	    <newline/>
+	  </if>
+	  <if expression="language">
+	    <text width="130" font="info label">Language:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="language"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="video">
+	  <if expression="tagline">
+	    <text font="info tagline" expression="tagline"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="not plot and description">
+	    <text font="info tagline" expression="description"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="plot and not tv_show_name">
+	    <text height="max" font="info plot" mode="soft" expression="plot"/>
+	    <newline/>
+	  </if>
+
+	  <if expression="not plot or tv_show_name">
+	    <if expression="len(name)>25">
+	      <if expression="tv_show_ep">
+		<text width="140" font="info label">Episode:</text>
+		<goto_pos x="10" mode="relative"/>
+		<text font="info value" expression="tv_show_ep"/>
+		<newline/>
+	      </if>
+	      <if expression="not tv_show_ep">
+		<text width="140" font="info label">Name:</text>
+		<goto_pos x="10" mode="relative"/>
+		<text font="info value" expression="name"/>
+		<newline/>
+	      </if>
+	    </if>
+
+	    <if expression="runtime">
+	      <text width="140" font="info label">Runtime:</text>
+	      <goto_pos x="10" mode="relative"/>
+	      <text font="info value" expression="runtime"/>
+	      <newline/>
+	    </if>
+	    <text width="140" font="info label">Type:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="type"/>
+	    <newline/>
+	    <if expression="geometry">
+	      <text width="140" font="info label">Resolution:</text>
+	      <goto_pos x="10" mode="relative"/>
+	      <text font="info value" expression="geometry"/>
+	      <if expression="aspect">
+		<text font="info value"> (</text>
+		<text font="info value" expression="aspect"/>
+		<text font="info value">)</text>
+	      </if>
+	      <newline/>
+	    </if>
+	  </if>
+	</item>
+
+	<item type="track">
+	  <if expression="length">
+	    <text width="130" font="info label">Runtime:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="length"/>
+	    <text font="info value"> min. </text>
+	  </if>
+	  <if expression="len(audio)">
+	    <text font="info value" expression="len(audio)"/>
+	    <text font="info value"> Audiotracks, </text>
+	  </if>
+	  <if expression="len(subtitles)">
+	    <text font="info value" expression="len(subtitles)"/>
+	    <text font="info value"> Subtitles, </text>
+	  </if>
+	  <if expression="chapters">
+	    <text font="info value" expression="chapters"/>
+	    <text font="info value"> Chapter</text>
+	  </if>
+	</item>
+
+	<item type="image">
+	  <if expression="width and height">
+	    <text width="100" font="info label">Size:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="width"/>
+	    <text font="info value">x</text>
+	    <text font="info value" expression="height"/>
+	    <newline/>
+	  </if>
+	  <if expression="date">
+	    <text width="100" font="info label">Date:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="date"/>
+	    <newline/>
+	  </if>
+	  <if expression="description">
+	    <text font="info plot" height="max" mode="soft" expression="description"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="dir">
+	  <text font="info label" expression="type"/>
+	  <newline/>
+	  <if expression="totalspace"> <!-- 0 if rom drive -->
+	    <text font="info label" expression="freespace"/>
+	    <text font="info label"> of </text>
+	    <text font="info label" expression="totalspace"/>
+	    <text font="info label"> MB free</text>
+	    <newline/>
+	  </if>
+	  <goto_pos y="20" mode="relative"/>
+	  <if expression="tagline">
+	    <text font="info tagline" width="max" expression="tagline"/>
+	    <newline/>
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+	  <if expression="plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="plot"/>
+	    <newline/>
+	  </if>
+	  <if expression="content and not plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="content"/>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="audiocd">
+	  <if expression="title">
+	    <text width="130" font="info label">Title:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="title"/>
+	    <newline/>
+	  </if>
+	  <if expression="artist">
+	    <text width="130" font="info label">Artist:</text>
+	    <goto_pos x="10" mode="relative"/>
+	    <text font="info value" expression="artist"/>
+	    <newline/>
+	  </if>
+	  <text width="130" font="info label">Tracks:</text>
+	  <goto_pos x="10" mode="relative"/>
+	  <text font="info value" expression="len(tracks)"/>
+	  <newline/>
+	  <text width="130" font="info label">Disc ID:</text>
+	  <goto_pos x="10" mode="relative"/>
+	  <text font="info value" expression="id"/>
+	  <newline/>
+	</item>
+
+	<item type="playlist">
+	  <if expression="description">
+	    <text font="info plot" height="max" mode="soft" expression="description"/>
+	    <newline/>
+	  </if>
+	  <if expression="len(playlist)>0">
+	    <text font="info value" expression="len(playlist)"/>
+	    <text font="info value"> items in this playlist</text>
+	    <newline/>
+	  </if>
+	  <if expression="len(playlist)==0 and len(unplayed)>0">
+	    <text font="info value" expression="len(unplayed)"/>
+	    <text font="info value"> items in this playlist</text>
+	    <newline/>
+	  </if>
+	  <if expression="len(playlist)==0 and len(unplayed)==0">
+	    <text font="info value">This playlist is empty!</text>
+	    <newline/>
+	  </if>
+	</item>
+
+	<item type="default">
+	  <if expression="description">
+	    <text font="info plot" height="max" mode="soft" expression="description"/>
+	    <newline/>
+	  </if>
+	</item>
+
+      </content>
+    </layout>
 
     <layout label="video info">
       <content x="0" y="0" type="text" spacing="20" font="default">
@@ -320,50 +539,41 @@
       </content>
     </layout>
 
-
-    <!-- some needed fonts -->
-    <font label="title">
-      <shadow x="2" y="2" color="0x000000" visible="yes"/>
-    </font>
-    <font label="title small" name="VeraBd.ttf" size="22" color="0xffffff">
+    <!-- font used in the info area -->
+    <font label="info plot"    name="VeraBd.ttf" size="16" color="0xffffff"/>
+    <font label="info tagline" name="VeraBI.ttf" size="18" color="0xffffff">
       <shadow visible="yes" color="0x000000" x="1" y="1"/>
     </font>
-    <font label="info tagline">
-      <shadow visible="yes" color="0x000000" x="1" y="1"/>
-    </font>
-
-    <!-- use blurr background -->
-    <image label="background" filename="blurrback.jpg"/>
-
-
+    <font label="info label"   name="VeraBd.ttf" size="14" color="0xffffff"/>
+    <font label="info value"   name="VeraBd.ttf" size="14" color="0xffffaa"/>
 
     <!-- 
     *******************************************************
     ** TV MENU
     ******************************************************* -->
 
-    <tv>
-      <style text="tv menu"/>
-      <style text="tv menu more info"/>
-    </tv>
+<!--     <tv> -->
+<!--       <style text="tv menu"/> -->
+<!--       <style text="tv menu more info"/> -->
+<!--     </tv> -->
 
-    <menuset label="tv menu">
-      <screen layout="screen0" x="0" y="0" width="800" height="600"/>
-      <info layout="tv info" x="10" y="400" width="780" height="190"/>
-      <title layout="title0" x="10" y="10" width="780" height="60"/>
-    </menuset>
+<!--     <menuset label="tv menu"> -->
+<!--       <screen layout="screen" x="0" y="0" width="800" height="600"/> -->
+<!--       <info layout="tv info" x="10" y="400" width="780" height="190"/> -->
+<!--       <title layout="title" x="10" y="10" width="780" height="60"/> -->
+<!--     </menuset> -->
 
-    <menuset label="tv menu more info" inherits="tv menu">
-      <listing height="150"/>
-      <info layout="tv info" y="250" height="340"/>
-    </menuset>
+<!--     <menuset label="tv menu more info" inherits="tv menu"> -->
+<!--       <listing height="150"/> -->
+<!--       <info layout="tv info" y="250" height="340"/> -->
+<!--     </menuset> -->
 
-    <layout label="tv info">
-      <background/>
-      <content x="0" y="0" height="max" width="max"/>
-    </layout>
+<!--     <layout label="tv info"> -->
+<!--       <background/> -->
+<!--       <content x="0" y="0" height="max" width="max"/> -->
+<!--     </layout> -->
 
-    <font label="tv title" size="22"/>
+<!--     <font label="tv title" size="22"/> -->
 
   </skin>
 </freevo>

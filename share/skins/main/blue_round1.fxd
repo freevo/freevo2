@@ -7,20 +7,12 @@
   menu style
    -->
 
-  <skin include="blue" geometry="800x600">
+  <skin include="basic" geometry="800x600">
 
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
-      <!-- screen0 is already defined in blue1_big -->
-      <screen layout="screen0"/>
-
-      <!-- 
-      title0 is already defined in blue1_big, but there will
-      is a new definition of the font from the layout (white big)
-      -->
-      <title layout="title0" x="10" y="10" width="780" height="60"/> 
-      <view layout="view0" x="545" y="90" width="245" height="450"/> 
-      <listing layout="transparent listing" x="10" y="130" width="550" height="450">
+      <view x="545" y="90" width="245" height="450"/> 
+      <listing x="10" y="130" width="550" height="450">
 	<image x="15" y="155" width="16" height="16" label="uparrow" 
 	  filename="up.png"/>
 	<image x="15" y="max-16" width="16" height="16" label="downarrow" 
@@ -28,6 +20,11 @@
       </listing>
       <info visible="no"/>
     </menuset>
+
+    <!-- remove no image settings and description, they don't work -->
+    <menuset label="default no image" inherits="normal text style"/>
+    <menuset label="default description" inherits="normal text style"/>
+    <menuset label="default description no image" inherits="normal text style"/>
 
     <!-- 
     the main menu isn't redefined, the area is the same.
@@ -38,7 +35,7 @@
     <!-- LAYOUT DEFINITIONS -->
 
 
-    <layout label="view0">
+    <layout label="view">
       <content align="left" valign="top">
 	<item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="10" x="-15" y="-15"
@@ -48,7 +45,7 @@
     </layout>
     
     <!-- default listing area -->
-    <layout label="transparent listing">
+    <layout label="listing">
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
@@ -64,8 +61,8 @@
 
 
     <!-- redefine the main menu listing area -->
-    <layout label="list_main">
-      <content type="text" spacing="10">
+    <layout label="main listing">
+      <content type="text" spacing="1">
 	<item type="default" font="white shadow1 big"/>
 	<item type="selected" font="white shadow3 big">
 	  <rectangle bgcolor="0xa0000000" size="0" y="-5" x="-10"
@@ -74,6 +71,7 @@
       </content>
     </layout>
 
+
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
@@ -81,16 +79,15 @@
       <shadow visible="yes" color="0x00000000" x="1" y="1"/>
     </font>
 
-    <font label="white shadow1 big" name="Vera" size="28" color="0xffffff">
+    <font label="white shadow1 big" name="Vera" size="24" color="0xffffff">
       <shadow visible="yes" color="0xaa000000" x="1" y="1"/>
     </font>
 
-    <font label="white shadow3 big" name="Vera" size="28" color="0xffffff">
+    <font label="white shadow3 big" name="Vera" size="24" color="0xffffff">
       <shadow visible="yes" color="0x000000" x="3" y="3"/>
     </font>
 
-    <!-- this font is used by the title -->
-    <font label="title" name="VeraSeBd" size="24" color="0xffffff">
+    <font label="title area" name="VeraSeBd" size="24" color="0xffffff">
       <shadow visible="yes" color="0x80000000" x="3" y="3"/>
     </font>
 

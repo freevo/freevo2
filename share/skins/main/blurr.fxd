@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <skin include="blue" geometry="800x600">
+  <skin include="basic" geometry="800x600">
     <iconset theme="blurr"/>
     <main>
       <item label="tv" name="Watch TV" icon="" 
@@ -19,19 +19,17 @@
     
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
-      <screen layout="screen0" visible="no"/>
-
-      <!-- 
-      title0 is already defined in blue1_big, but there will
-      is a new definition of the font from the layout (white big)
-      -->
-      <title visible="no"/>
       <view x="20" y="100" width="300" height="300"/> 
       <listing layout="listing" x="330" y="110" width="460" height="430">
 	<image filename="blurr-up.png" label="uparrow" x="290" y="110"/>
 	<image filename="blurr-down.png" label="downarrow" x="290" y="max-32"/>
       </listing>
     </menuset>
+
+    <!-- no special defaults right now -->
+    <menuset label="default no image" inherits="normal text style"/>
+    <menuset label="default description" inherits="normal text style"/>
+    <menuset label="default description no image" inherits="normal text style"/>
 
 
     <!-- definition of the main menu -->
@@ -52,7 +50,7 @@
     </tv>
 
     <menuset label="tv menu">
-      <screen layout="screen blank" x="0" y="0" width="800" height="600"/>
+      <screen layout="screen" x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
       <info layout="tv info" x="10" y="80" width="760" height="115"/>
       <listing layout="tv listing" x="10" y="220" width="750" height="320">
@@ -280,6 +278,10 @@
     <font label="tv time" name="Arial_Bold" size="14" color="0xffffff"/>
     <font label="tv title" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="clock"   name="Arial_Bold" size="16" color="0xffffff"/>
+
+    <font label="title area">
+      <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
 
   </skin>
 </freevo>

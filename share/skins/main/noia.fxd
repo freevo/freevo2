@@ -6,7 +6,7 @@
 
     <image label="background" filename="blurr_naxos"/>
     
-    <font label="title" name="VeraBd" size="29" color="0xffffff">
+    <font label="title area" name="VeraBd" size="22" color="0xffffff">
       <shadow visible="yes" color="0x80000000" x="3" y="3"/>
     </font>
 
@@ -71,7 +71,7 @@
     </layout>
 
     <menuset label="tv menu">
-      <subtitle layout="title1" x="10" y="90" width="780" height="30"/>
+      <subtitle layout="subtitle" x="10" y="90" width="780" height="30"/>
       <listing y="140">
 	<image y="140" label="uparrow"/>
       </listing>
@@ -79,7 +79,7 @@
     </menuset>
 
     <menuset label="tv menu more info">
-      <subtitle layout="title1" x="10" y="90" width="780" height="30"/>
+      <subtitle layout="subtitle" x="10" y="90" width="780" height="30"/>
       <listing y="140">
 	<image y="140" label="uparrow"/>
       </listing>

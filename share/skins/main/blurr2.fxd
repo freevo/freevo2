@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <skin include="info" geometry="800x600">
+  <skin include="basic" geometry="800x600">
     <iconset theme="blurr"/>
     <main>
       <item label="tv" name="Watch TV" icon="" 
@@ -19,13 +19,6 @@
     
     <!-- Redefine of the type default -->
     <menuset label="normal text style">
-      <screen layout="screen0" visible="no"/>
-
-      <!-- 
-      title0 is already defined in blue1_big, but there will
-      is a new definition of the font from the layout (white big)
-      -->
-      <title visible="no"/>
       <view x="20" y="100" width="300" height="300"/> 
       <listing layout="listing" x="330" y="110" width="460" height="430">
 	<image filename="blurr-up.png" label="uparrow" x="290" y="110"/>
@@ -33,6 +26,10 @@
       </listing>
     </menuset>
 
+    <!-- no special defaults right now -->
+    <menuset label="default no image" inherits="normal text style"/>
+    <menuset label="default description" inherits="normal text style"/>
+    <menuset label="default description no image" inherits="normal text style"/>
 
     <!-- definition of the main menu -->
     <menuset label="main menu">
@@ -46,13 +43,8 @@
       <view visible="no"/>
     </menuset>
 
-
-    <tv>
-      <style text="tv menu"/>
-    </tv>
-
     <menuset label="tv menu">
-      <screen layout="screen blank" x="0" y="0" width="800" height="600"/>
+      <screen layout="screen" x="0" y="0" width="800" height="600"/>
       <title visible="no"/>
       <info layout="tv info" x="10" y="80" width="760" height="115"/>
       <listing layout="tv listing" x="10" y="220" width="750" height="320">
@@ -71,7 +63,6 @@
       <style text="text with info style"/>
     </menu>
 
-      
     <menu type="audio">
         <style text="audio"/>
     </menu>
@@ -109,30 +100,6 @@
       <screen layout="tv menu screen"/>
     </menuset>
       
-
-    <!-- INFO -->
-    <!-- no needed
-    <menuset label="video menu with info" inherits="text with info style">
-      <subtitle layout="title1" x="45" y="100" width="470" height="40"/>
-      <listing x="30" y="350" width="700" height="300">
-        <image label="uparrow" y="140"/>
-        <image label="downarrow" y="max-32"/>
-      </listing>
-    </menuset>
-
-    <menuset label="video details" inherits="normal text style">
-      <subtitle layout="title1" x="10" y="100" width="780" height="60"/>
-      
-      <listing layout="video list" x="500" y="450" width="290" height="140">
-        <image label="uparrow" filename=""/>
-        <image label="downarrow" filename=""/>
-      </listing>
-      
-      <view x="545" y="150"/>
-      <info layout="video info" x="10" y="160" width="480" height="430"/>
-    </menuset>
-    -->
-
     <menuset label="text with info style" inherits="normal text style">
       <!-- 4. listing area: the list of all items -->
       <screen layout="video screen" visible="yes"/>
@@ -294,25 +261,6 @@
     </layout>
 
 
-    <!-- outdated format 
-    <layout label="player info">
-      <background>
-	<rectangle size="0" bgcolor="0x80000000" radius="20" width="max"/>
-      </background>
-      <content x="55" y="10" height="max-50" width="max-90" type="text"
-	spacing="10" font="player">
-	<item type="default">
-	  Title:   \t@title@
-	  Artist:  \t@artist@
-	  Album:   \t@album@  (@year@)
-	  Track:   \t@track@/@trackof@
-	  
-	  Elapsed: \t@elapsed@  (@length@)
-	</item>
-      </content>
-    </layout>
-    -->
-       
     <!-- main menu listing area -->
     <layout label="list_main">
       <content align="center" type="text" spacing="10">
@@ -360,6 +308,7 @@
 	</item>
       </content>
     </layout>
+
 
     <!-- tv info area -->
     <layout label="tv info">
@@ -427,6 +376,7 @@
         <shadow visible="yes" color="0x000000" border="yes"/>
     </font>
      
+
     <!-- info area -->
     <font label="info plot"    name="Arial_Bold" size="13" color="0xffffff"/>
     <font label="info tagline" name="Arial_Bold" size="16" color="0xffffff"/>
