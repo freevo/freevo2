@@ -16,6 +16,9 @@ import config
 # Various utilities
 import util
 
+# The OSD class, used to communicate with the OSD daemon
+import osd
+
 # The menu widget class
 import menu
 
@@ -31,6 +34,9 @@ DEBUG = 1
 TRUE = 1
 FALSE = 0
 
+
+# Create the OSD object
+osd = osd.get_singleton()
 
 # Create the ImageViewer object
 iview = iview.get_singleton()
@@ -67,6 +73,12 @@ def main_menu(arg=None, menuw=None):
 def cwd(arg=None, menuw=None):
     dir = arg
 
+    # This could take some time...
+    osd.clearscreen(color=osd.COL_BLACK)
+    osd.drawstring('please wait...', osd.width/2 - 60, osd.height/2 - 10,
+                   fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+    osd.update()
+    
     # remove old cache and thumbnail files
     for file in util.match_files(config.FREEVO_CACHEDIR, [ '/image-viewer-[0-9]*' ]):
         os.remove(file)
