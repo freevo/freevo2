@@ -13,6 +13,9 @@
 #    3) Better (and more) LCD screens.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/09/01 20:35:28  gsbarbieri
+# Video Player support
+#
 # Revision 1.8  2003/09/01 16:55:42  gsbarbieri
 # Better support for broken MP3 tags
 #
@@ -70,8 +73,11 @@ import copy
 import pylcd
 import time
 import plugin
+from event import *
 import config
-DEBUG=1
+
+DEBUG=config.DEBUG
+
 # Configuration: (Should move to freevo_conf.py?)
 sep_str = " | " # use as separator between two strings. Like: "Length: 123<sep_str>Plot: ..."
 
@@ -234,6 +240,45 @@ layouts = { 4 : # 4 lines display
                                    "animation_audioplayer_chars[" +
                                    " player.elapsed % len(animation_audioplayer_chars)]")
                   },
+
+                "video_player"  :
+                { "video_l"   : ( "string",
+                                  "2 1 'VIDEO: '",
+                                  None ),
+                  "tag_l"     : ( "string",
+                                  "2 2 '  TAG: '",
+                                  None ),
+                  "genre_l"   : ( "string",
+                                  "1 3 'GENRE: '",
+                                  None ),
+                  "video_v"   : ( "scroller",
+                                  "9 1 %d 1 h 2 \"%s\"",
+                                "( self.width, title )" ),
+                  "tag_v"     : ( "scroller",
+                                  "9 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, player.getattr('tagline') )" ),
+                  "genre_v"   : ( "scroller",
+                                  "9 3 %d 3 h 2 \"%s\"",
+                                  "( self.width, player.getattr('genre') )" ),
+                  "time_v1"   : ( "string",
+                                  "2 4 '%s/'",
+                                  "( length )" ),
+                  "time_v2"   : ( "string",
+                                  "10 4 '%s'",
+                                  "( elapsed )" ),
+                  "time_v3"   : ( "string",
+                                   "18 4 '( %2d%%)'",
+                                   "( int( percentage * 100 ) )" ),
+                  "timebar1_v": ( "string", "26 4 '['", None),
+                  "timebar2_v": ( "string", "40 4 ']'", None),
+                  "timebar3_v": ( "hbar",
+                                  "27 4 '%d'","( int( percentage * 70 ) )"),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 4 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },
+
                 
                 "tv"            :
                 { "chan_l"   : ( "string",
@@ -317,6 +362,28 @@ layouts = { 4 : # 4 lines display
                   "animation_v": ( "string", "1 4 '%s'",
                                    "animation_audioplayer_chars[player.elapsed % len(animation_audioplayer_chars)]")
                   },
+
+                "video_player"  :
+                { "video_v"   : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                "( self.width, title )" ),
+                  "tag_v"     : ( "scroller",
+                                  "1 2 %d 2 h 2 \"%s\"",
+                                  "( self.width, player.getattr('tagline') )" ),
+                  "genre_v"   : ( "scroller",
+                                  "1 3 %d 3 h 2 \"%s\"",
+                                  "( self.width, player.getattr('genre') )" ),
+                  "time_v1"   : ( "string",
+                                  "3 4 '%s /'",
+                                  "( length )" ),
+                  "time_v2"   : ( "string",
+                                  "12 4 '%s'",
+                                  "( elapsed )" ),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 4 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },
                 
                 "tv"            :
                 { "chan_v"   : ( "scroller",
@@ -370,6 +437,23 @@ layouts = { 4 : # 4 lines display
                                    " player.elapsed % len(animation_audioplayer_chars)]")
                    },
 
+                "video_player"  :
+                { "video_v"   : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"" ,
+                                  "( self.width, title )" ),
+                  "time_v2"   : ( "string",
+                                  "2 2 '%s'",
+                                  "( elapsed )" ),
+                  "time_v3"   : ( "string",
+                                   "11 2 '( %2d%%)'",
+                                   "( int( percentage * 100 ) )" ),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 2 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },                
+
+
                  "tv"            :
                  { "chan_v"   : ( "scroller",
                                   "1 1 %d 1 h 2 \"%s\"",
@@ -415,6 +499,23 @@ layouts = { 4 : # 4 lines display
                                    "animation_audioplayer_chars[" +
                                    " player.elapsed % len(animation_audioplayer_chars)]")
                    },
+
+                "video_player"  :
+                { "video_v"   : ( "scroller",
+                                  "1 1 %d 1 h 2 \"%s\"",
+                                "( self.width, title )" ),
+                  "time_v1"   : ( "string",
+                                  "3 2 '%s /'",
+                                  "( length )" ),
+                  "time_v2"   : ( "string",
+                                  "12 2 '%s'",
+                                  "( elapsed )" ),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 2 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },
+
 
                  "tv":
                  { "chan_v"   : ( "scroller",
@@ -468,12 +569,41 @@ layouts = { 4 : # 4 lines display
                   "timebar1_v": ( "string", "21 2 '['", None),
                   "timebar2_v": ( "string", "40 2 ']'", None),
                   "timebar3_v": ( "hbar",
-                                  "22 2 '%d'","(int(player.elapsed *90 / player.length))"),
+                                  "22 2 '%d'","(int(player.elapsed * 90 / player.length))"),
                   # animation at the begining of the time line
                   "animation_v": ( "string", "1 2 '%s'",
                                    "animation_audioplayer_chars[" +
                                    " player.elapsed % len(animation_audioplayer_chars)]")
                   },
+
+
+                "video_player"  :
+                { "video_l"   : ( "string",
+                                  "2 1 'VIDEO: '",
+                                  None ),
+                  "video_v"   : ( "scroller",
+                                  "9 1 %d 1 h 2 \"%s\"",
+                                "( self.width, title )" ),
+                  "time_v1"   : ( "string",
+                                  "2 2 '%s/'",
+                                  "( length )" ),
+                  "time_v2"   : ( "string",
+                                  "10 2 '%s'",
+                                  "( elapsed )" ),
+                  "time_v3"   : ( "string",
+                                   "18 2 '( %2d%%)'",
+                                   "( int( percentage * 100 ) )" ),
+                  "timebar1_v": ( "string", "26 2 '['", None),
+                  "timebar2_v": ( "string", "40 2 ']'", None),
+                  "timebar3_v": ( "hbar",
+                                  "27 2 '%d'","( int( percentage * 70 ) )"),
+                  # animation at the begining of the time line
+                  "animation_v": ( "string", "1 2 '%s'",
+                                   "animation_audioplayer_chars[" +
+                                   " player.elapsed % len(animation_audioplayer_chars)]")
+                  },
+
+                
 
                 "tv":
                 { "chan_l"   : ( "string",
@@ -508,8 +638,6 @@ poll_widgets = { 4 : {
     20 : { "welcome" : [ "clock" ] },    
     },
                  }
-
-DEBUG = config.DEBUG
 
 def get_info( item, list ):
     info = ""
@@ -547,15 +675,21 @@ class PluginInterface( plugin.DaemonPlugin ):
             self.lcd.getinfo()
             print ""
             
-        plugin.register( self, "lcd" )
-
         self.poll_interval = 10
+        self.poll_menu_only = 0
         self.disable = 0
         self.height = self.lcd.d_height
         self.width  = self.lcd.d_width
+        self.playitem = None
         self.generate_screens()
-        if self.disable:
+        if self.disable:            
             return
+        else:
+            self.event_listener = 1
+            
+        plugin.register( self, "lcd" )
+
+
         
         # Show welcome screen:
         for w in self.screens[ "welcome" ]:
@@ -629,8 +763,23 @@ class PluginInterface( plugin.DaemonPlugin ):
             title  = player.getattr( 'title' )
             if not title:
                 title = player.getattr( 'name' )
-            if player.getattr( 'trackno' ):
-                title = "%s - %s" % ( player.getattr( 'trackno' ), title )                
+                
+            if player.type == 'audio':
+                if player.getattr( 'trackno' ):
+                    title = "%s - %s" % ( player.getattr( 'trackno' ), title )
+                    
+            elif player.type == 'video':
+                length = player.getattr( 'length' )
+                elapsed = player.elapsed
+                if elapsed / 3600:
+                    elapsed ='%d:%02d:%02d' % ( elapsed / 3600, ( elapsed % 3600 ) / 60,
+                                                elapsed % 60)
+                else:
+                    elapsed = '%d:%02d' % ( elapsed / 60, elapsed % 60)
+                try:
+                    percentage = float( player.elapsed / player.info.video[0].length )
+                except:
+                    percentage = None
 
             
         elif type == 'tv':
@@ -678,6 +827,9 @@ class PluginInterface( plugin.DaemonPlugin ):
         
     def poll( self ):
         if self.disable: return
+
+        if self.playitem:
+            self.draw( ( 'player', self.playitem ), None )
 
         try:
             screens = poll_widgets[ self.lines ][ self.columns ]
@@ -752,4 +904,12 @@ class PluginInterface( plugin.DaemonPlugin ):
         for w in widgets:
             type, param, val = self.screens[ s ][ w ]
             self.lcd.widget_add( s, w, type )
+
         
+    def eventhandler( self, event, menuw=None ):
+        if event == PLAY_START:
+            self.playitem = event.arg
+        elif event == PLAY_END or event == STOP:
+            self.playitem = None
+
+        return 0
