@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/01/31 03:27:53  krister
+# Committed Jens Axboe's image viewer overscan fix.
+#
 # Revision 1.9  2003/01/14 18:54:38  dischi
 # Added gphoto support from Thomas Schüppel. You need gphoto and the
 # Python bindings to get this working. I added try-except to integrate
@@ -416,7 +419,10 @@ class ImageViewer:
 	
 	# Now sort the text into lines of length line_length
         line = 0
-        line_length = 80 
+	if config.OVERSCAN_X:
+	    line_length = 55
+	else:
+	    line_length = 80
         prt_line = ['']
 
         for textstr in osdstring:
@@ -438,13 +444,13 @@ class ImageViewer:
                     prt_line[line] += '   ' + textstr
 
         # Create a black box for text
-        osd.drawbox(0, osd.height - (25 + (len(prt_line) * 30)),
+        osd.drawbox(config.OVERSCAN_X, osd.height - (config.OVERSCAN_X + 25 + (len(prt_line) * 30)),
                 osd.width, osd.height, width=-1, 
                 color=((60 << 24) | osd.COL_BLACK))
 
 	# Now print the Text
         for line in range(len(prt_line)):
-            h=osd.height - (50 + ( (len(prt_line) - line - 1) * 30))
-            osd.drawstring(prt_line[line], 10, h, fgcolor=osd.COL_ORANGE)
+            h=osd.height - (40 + config.OVERSCAN_Y + ((len(prt_line) - line - 1) * 30))
+            osd.drawstring(prt_line[line], 15 + config.OVERSCAN_X, h, fgcolor=osd.COL_ORANGE)
 
 
