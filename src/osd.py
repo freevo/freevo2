@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.148  2004/03/14 13:10:41  dischi
+# more dim/ellipse fixes
+#
 # Revision 1.147  2004/03/14 12:59:34  dischi
 # fix crash
 #
@@ -25,10 +28,6 @@
 # Revision 1.143  2004/02/27 20:12:16  dischi
 # reworked rc.py to make several classes
 #
-# Revision 1.142  2004/02/19 04:57:55  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
 # Revision 1.141  2004/02/18 21:55:44  dischi
 # Some osd updates for new gui code
 #
@@ -43,117 +42,6 @@
 #
 # o Filesystems are case sensitive; we can't arbitrarily set them to lower.
 # o If we're using the extra font path for osd.py, we need to use it in xml_skin
-#
-# Revision 1.137  2004/02/11 21:21:56  dischi
-# deactivate arialbd fix, font is broken
-#
-# Revision 1.136  2004/02/11 14:23:33  dischi
-# search system for fonts
-#
-# Revision 1.135  2004/02/07 11:50:57  dischi
-# fix geometry calculation for border fonts
-#
-# Revision 1.134  2004/02/06 18:24:39  dischi
-# make to possible to override busy icon with skin
-#
-# Revision 1.133  2004/02/05 19:26:41  dischi
-# fix unicode handling
-#
-# Revision 1.132  2004/02/05 02:52:25  gsbarbieri
-# Handle filenames internally as unicode objects.
-#
-# This does *NOT* affect filenames that have only ASCII chars, since the
-# translation ASCII -> Unicode is painless. However this *DOES* affect files
-# with accents
-#
-# I tested with Video, Images and Music modules, but *NOT* with Games, so if you
-# have the games modules, give it a try.
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL,
-# which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
-#
-# Revision 1.131  2004/02/04 17:32:35  dischi
-# fix crash for deactivated osd and fix busy icon redraw
-#
-# Revision 1.130  2004/02/01 17:11:31  dischi
-# cosmetic changes
-#
-# Revision 1.129  2004/01/30 20:42:38  dischi
-# add debug
-#
-# Revision 1.128  2004/01/25 13:09:04  dischi
-# unicode support for filenames
-#
-# Revision 1.127  2004/01/19 20:29:11  dischi
-# cleanup, reduce cache size
-#
-# Revision 1.126  2004/01/18 16:49:22  dischi
-# more verbose
-#
-# Revision 1.125  2004/01/16 12:19:09  dischi
-# fix crash when filename already is an image object
-#
-# Revision 1.124  2004/01/13 19:11:19  dischi
-# backup screen before osd shutdown
-#
-# Revision 1.123  2004/01/12 19:10:35  dischi
-# support spaces inside a string after a \n
-#
-# Revision 1.122  2004/01/11 20:23:31  dischi
-# move skin font handling to osd to avoid duplicate code
-#
-# Revision 1.121  2004/01/11 20:01:28  dischi
-# make bmovl work again
-#
-# Revision 1.120  2004/01/10 14:57:23  dischi
-# better debug messages
-#
-# Revision 1.119  2004/01/10 13:14:50  dischi
-# change print to _debug_
-#
-# Revision 1.118  2004/01/04 17:18:15  dischi
-# make it possible that image is already a .raw file
-#
-# Revision 1.117  2004/01/03 17:43:14  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.116  2004/01/02 14:29:20  dischi
-# correct font outline drawing
-#
-# Revision 1.115  2004/01/01 17:40:24  dischi
-# added border support for drawstringframed
-#
-# Revision 1.114  2004/01/01 15:53:18  dischi
-# move the shadow code into osd.py
-#
-# Revision 1.111  2003/12/07 14:48:49  dischi
-# clean up the busy icon
-#
-# Revision 1.110  2003/12/07 14:45:57  dischi
-# make the busy icon thread save
-#
-# Revision 1.109  2003/12/07 12:26:55  dischi
-# add osd busy icon (work in progress)
-#
-# Revision 1.108  2003/12/01 19:19:37  dischi
-# first grep the keymap
-#
-# Revision 1.107  2003/11/29 11:27:40  dischi
-# move objectcache to util
-#
-# Revision 1.106  2003/11/23 19:48:59  krister
-# Added optional new blend settings (nr of steps and total time), must be
-# enabled explicitly in freevo_config
-#
-# Revision 1.105  2003/11/23 18:44:37  krister
-# Fixed blending bug where the final update contained a shadow of the previous image.
-#
-# Revision 1.104  2003/11/21 12:22:15  dischi
-# move blending effect to osd.py
-#
-# Revision 1.103  2003/11/21 11:42:06  dischi
-# bgcolor support for drawstringframed
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -978,6 +866,7 @@ class OSD:
             dim = True
             # XXX pixels to dim, this should probably be tweaked
             dim_size = 25
+
         elif ellipses == 'dim':
             ellipses = '...'
             
@@ -1024,6 +913,10 @@ class OSD:
         current_ellipses = ''
         hard = mode == 'hard'
 
+        if num_lines_left > 1 and dim:
+            dim      = False
+            ellipses = '...'
+            
         while(num_lines_left):
             # calc each line and put the rest into the next
             if num_lines_left == 1:

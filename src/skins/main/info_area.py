@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/03/14 13:10:41  dischi
+# more dim/ellipse fixes
+#
 # Revision 1.20  2004/02/27 20:15:03  dischi
 # more unicode fixes
 #
@@ -155,7 +158,8 @@ class Info_Area(Skin_Area):
                                  ( self.content.x + i.x), ( self.content.y + i.y ),
                                  i.width , i.height,
                                  align_v = i.valign, align_h = i.align,
-                                 mode = i.mode )
+                                 mode = i.mode,
+                                 ellipses = i.ellipses )
 
             elif isinstance( i, xml_skin.FormatImg ):
                 if i.src:

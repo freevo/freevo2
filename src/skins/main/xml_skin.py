@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/03/14 13:10:41  dischi
+# more dim/ellipse fixes
+#
 # Revision 1.32  2004/02/12 17:18:48  dischi
 # Move watermark information to python ocde to avoid duplicate code here
 #
@@ -26,21 +29,6 @@
 #
 # Revision 1.28  2004/01/11 15:43:16  dischi
 # better display type handling, added type main menu
-#
-# Revision 1.27  2004/01/10 13:21:19  dischi
-# cleanup
-#
-# Revision 1.26  2004/01/05 18:03:43  dischi
-# support for extra fxd files for plugins
-#
-# Revision 1.25  2004/01/02 14:29:44  dischi
-# add border to font.h
-#
-# Revision 1.24  2004/01/01 17:41:05  dischi
-# add border support for Font
-#
-# Revision 1.23  2004/01/01 12:25:07  dischi
-# store version information and list of depending files
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -315,6 +303,7 @@ XML_types = {
     'visible'  : ('visible', 0),
     'border'   : ('visible', 0),
     'icon'     : ('str', 0),    
+    'ellipses' : ('str', 0),    
 }
 
 class XML_data:
@@ -628,11 +617,13 @@ class Content(XML_data):
 # Formating
 class FormatText(XML_data):
     def __init__( self ):
-        XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height' ) )
-        self.mode   = 'hard'
-        self.align  = 'left'
-        self.height = -1
-        self.text = ''
+        XML_data.__init__( self, ( 'align', 'valign', 'font', 'width', 'height',
+                                   'ellipses') )
+        self.mode     = 'hard'
+        self.align    = 'left'
+        self.ellipses = 'dim'
+        self.height   = -1
+        self.text     = ''
         self.expression = None
         self.expression_analized = 0
         self.x = 0
