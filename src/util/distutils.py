@@ -66,6 +66,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/10/19 14:04:19  dischi
+# bugfix
+#
 # Revision 1.3  2003/10/18 15:37:14  dischi
 # doc fix
 #
@@ -119,7 +122,8 @@ def data_finder(result, dirname, names):
     files = []
     for name in names:
         if os.path.isfile(os.path.join(dirname, name)):
-            if name != 'freevo.pot':
+            if dirname.find('i18n') == -1 or (name.find('pot') == -1 and \
+                                              name.find('update.py') == -1):
                 files.append(os.path.join(dirname, name))
             
     if files and dirname.find('/CVS') == -1:
