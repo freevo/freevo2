@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/07/03 22:44:52  dischi
+# Oops
+#
 # Revision 1.54  2003/07/03 21:58:10  dischi
 # small fixes for very short strings in dsf
 #
@@ -1766,7 +1769,7 @@ class OSD:
             layer = self.screen
 
         for w, l in lines:
-            if align_h == 'left' or align_h == 'justified':
+            if align_h == 'left' or align_h == 'justified' or not align_h:
                 x0 = x
             elif align_h == 'right':
                 x0 = x + (width - w)
