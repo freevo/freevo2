@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/04/18 08:23:44  dischi
+# fix unicode problem
+#
 # Revision 1.36  2004/03/13 22:36:44  dischi
 # fix crashes on debug (unicode again)
 #
@@ -475,9 +478,9 @@ class RecordServer(xmlrpc.XMLRPC):
                              
                         
                 if delay_recording:
-                    _debug_('delaying: %s' % prog)
+                    _debug_('delaying: %s' % String(prog))
                 else:
-                    _debug_('going to record: %s' % prog)
+                    _debug_('going to record: %s' % String(prog))
                     prog.isRecording = TRUE
                     prog.rec_duration = duration
                     prog.filename = tv_util.getProgFilename(prog)
