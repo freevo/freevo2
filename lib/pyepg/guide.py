@@ -31,11 +31,9 @@
 #
 # -----------------------------------------------------------------------------
 
-
-import os
+# python imports
 import time
 import logging
-
 from types import *
 
 try:
@@ -45,32 +43,12 @@ except:
     # Fallback for stand alone epg usage
     import config
 
+# pyepg imports
 from channel import Channel
 from program import Program
 
 # get logging object
 log = logging.getLogger('pyepg')
-
-
-def escape_query(sql):
-    """
-    Escape a SQL query in a manner suitable for sqlite
-    """
-    if not type(sql) in StringTypes:
-        return sql
-
-    # sql = sql.replace('\'','\'\'')
-    sql = sql.replace('\'','')
-    return sql
-
-
-def escape_value(val):
-    """
-    Escape a SQL value in a manner to be quoted inside a query
-    """
-    if not type(val) in StringTypes:
-        return val
-    return val.replace('"', '').replace('\'', '')
 
 
 class Guide:
@@ -115,8 +93,34 @@ class Guide:
         self.db.close()
 
 
+    def __escape_query(self.sql):
+        """
+        Escape a SQL query in a manner suitable for sqlite
+        """
+        if not type(sql) in StringTypes:
+            return sql
+        sql = sql.replace('\'','')
+        return sql
+
+
+    def __escape_value(self.val):
+        """
+        Escape a SQL value in a manner to be quoted inside a query
+        """
+        if not type(val) in StringTypes:
+            return val
+        return val.replace('"', '').replace('\'', '')
+
+
+    #
+    # SQL functions
+    #
+    # This functions will return a sql result and should not by used
+    # outside pyepg
+    #
+
     def sql_execute(self, query, close=False):
-        query = escape_query(query)
+        query = self.__escape_query(query)
 
 	try:
             result = self.db.execute(query)
@@ -187,10 +191,10 @@ class Guide:
     def sql_add_program(self, channel_id, title, start, stop, subtitle='',
                         description='', episode=''):
         now = time.time()
-        title = escape_value(title)
-        subtitle = escape_value(subtitle)
-        description = escape_value(description)
-        episode = escape_value(episode)
+        title = self.__escape_value(title)
+        subtitle = self.__escape_value(subtitle)
+        description = self.__escape_value(description)
+        episode = self.__escape_value(episode)
 
         old_prog = None
 
@@ -292,7 +296,7 @@ class Guide:
             log.exception('trace:')
 
 
-    def get_programs(self, channels, start=0, stop=-1):
+    def sql_get_programs(self, channels, start=0, stop=-1):
         if not start:
             start = time.time()
 
@@ -326,14 +330,6 @@ class Guide:
             return []
 
         return self.sql_execute('%s order by start' % query)
-
-
-    def sql_get_programs_by_id(self, id):
-        query = 'select * from programs where id="%s"' % id
-        result = self.sql_execute(query)
-        if result:
-            return result[0]
-        return []
 
 
     def sql_remove_program(self, id):
@@ -410,19 +406,32 @@ class Guide:
         self.sql_commit()
 
 
+    #
+    # User Interface
+    #
+    # Interface functions to get channels / programs
+    #
+
     def add_data(self, backend, *args, **kwargs):
+        """
+        Add data with the given backend to the database. The code for the
+        real adding is in source_`backend`.py
+        """
         exec('import source_%s as backend' % backend)
         backend.add_data(self, *args, **kwargs)
         self.sql_expire_programs()
 
 
     def sort_channels(self):
+        """
+        Sort the internal channel list (not implemented yet)
+        """
         pass
 
 
     def add_channel(self, channel):
         """
-        add a channel to the list
+        Add a channel to the list
         """
         if not self.channel_dict.has_key(channel.id):
             # Add the channel to both the dictionary and the list. This works
@@ -432,10 +441,22 @@ class Guide:
 
 
     def __getitem__(self, key):
-        return self.channel_list[key]
+        """
+        Get a channel by position in the list (integer) or by the database
+        id (string)
+        """
+        if isinstance(key, int):
+            return self.channel_list[key]
+        else:
+            return self.channel_dict[key]
 
 
     def get_channel(self, pos, start=None):
+        """
+        Get a channel relative to the given channel 'start'. The function
+        will start from the beginning of the list if the index is greater
+        as the channel list length and wrap to the end if lower zero.
+        """
         if not start:
             start = self.channel_list[0]
         cpos = self.channel_list.index(start)
@@ -443,13 +464,20 @@ class Guide:
         return self.channel_list[pos]
 
 
-    def search_programs(self, subs, by_chan=None):
+    def search_programs(self, title, by_chan=None):
+        """
+        Return a list of programs with a title similar to the given parameter.
+        If by_chan is given, it has no by a valid channel id and only programs
+        from this channel will be returned. Result is a list of 'Program's.
+        This function will only return programs with a stop time greater the
+        current time.
+        """
         now = time.time()
         clause = 'where stop > %d' % now
         if by_chan:
             clause = '%s and channel_id="%s"' % (clause, by_chan)
 
-        clause = '%s and title like "%%%s%%"' % (clause, subs)
+        clause = '%s and title like "%%%s%%"' % (clause, title)
 
         query = 'select * from programs %s order by channel_id, start' % clause
         result = []
@@ -460,3 +488,20 @@ class Guide:
                                       description=p['description'],
                                       channel=self.channel_dict[p.channel_id]))
         return result
+
+
+    def get_program_by_id(self, id):
+        """
+        Get a program by a database id. Return None if the program is not
+        found.
+        """
+        query = 'select * from programs where id="%s"' % id
+        result = self.sql_execute(query)
+        if result:
+            p = result[0]
+            if self.channel_dict.has_key(p.channel_id):
+                return Program(p.id, p.title, p.start, p.stop,
+                               p.episode, p.subtitle,
+                               description=p['description'],
+                               channel=self.channel_dict[p.channel_id])
+        return None

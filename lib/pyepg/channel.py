@@ -4,6 +4,22 @@
 # -----------------------------------------------------------------------------
 # $Id$
 #
+# This file defines a channel class for usage inside the guide. The channel
+# has support for pynotifier and will call the step function on longer
+# operations.
+# 
+# The channel has the following attributes:
+#   id          id inside the database
+#   access_id   access id for tuner etc.
+#   logo        url of a logo
+#   name        channel name
+#   title       channel display name
+# 
+# To get programs from the epg about the channel use
+#   channel[time]       get the programm running at 'time'
+#   channel[start:stop] get the programms between start and stop
+#   channel[start:]     get all programms beginning at start
+#
 # -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
 # Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
@@ -31,7 +47,15 @@
 # -----------------------------------------------------------------------------
 
 
-import notifier
+# Try to import the notifier or set the variable notifier to None. If
+# 'notifier' is not None and 'notifier.step' is not None, call the step
+# function to keep the notifier alive
+
+try:
+    import notifier
+except ImportError:
+    notifier = None
+    
 from program import Program
 
 
@@ -39,22 +63,27 @@ class Channel:
     """
     Information about one specific channel, also containing
     epg informations.
+
+    The channel has the following attributes:
+    id          id inside the database
+    access_id   access id for tuner etc.
+    logo        url of a logo
+    name        channel name
+    title       channel display name
+
+    To get programs from the epg about the channel use
+    channel[time]       get the programm running at 'time'
+    channel[start:stop] get the programms between start and stop
+    channel[start:]     get all programms beginning at start
     """
     def __init__(self, id, display_name, access_id, epg):
-        self.id   = id
+        self.id        = id
         self.access_id = access_id
         self.programs  = []
         self.logo      = ''
-        self.epg       = epg
-        # XXX Change this to config.TV_CHANNEL_DISPLAY_FORMAT or something as
-        # XXX many people won't want to see the access_id.
-        # XXX What should we use, name or title, or both?
-        self.name = self.title = display_name
-
-
-    def __sort_programs(self):
-        f = lambda a, b: cmp(a.start, b.start)
-        self.programs.sort(f)
+        self.__epg     = epg
+        self.name      = display_name
+        self.title     = display_name
 
 
     def __get_dummy_programs(self, start, stop):
@@ -97,13 +126,13 @@ class Channel:
         # keep the notifier alive
         notifier_counter = 0
         if not progs:
-            progs = self.epg.get_programs(self.id, start, stop)
+            progs = self.__epg.sql_get_programs(self.id, start, stop)
         for p in progs:
             i = Program(p.id, p.title, p.start, p.stop, p.episode, p.subtitle,
                         p['description'], channel=self)
             new_progs.append(i)
             notifier_counter = (notifier_counter + 1) % 500
-            if not notifier_counter:
+            if not notifier_counter and notifier and notifier.step:
                 notifier.step(False, False)
             # TODO: add information about program being recorded which
             #       comes from another DB table - same with categories,
@@ -119,7 +148,7 @@ class Channel:
 
             for p in new_progs:
                 notifier_counter = (notifier_counter + 1) % 500
-                if not notifier_counter:
+                if not notifier_counter and notifier and notifier.step:
                     notifier.step(False, False)
                 if p == p0:
                     # fill gaps before
@@ -154,14 +183,24 @@ class Channel:
                 continue
             self.programs.append(p)
 
-        self.__sort_programs()
+        # sort the programs
+        self.programs.sort(lambda a, b: cmp(a.start, b.start))
 
 
-    def get(self, start, stop=0):
+    def __getitem__(self, key):
         """
-        get programs between start and stop time or if stop=0, get
-        the program running at 'start'
+        Get a program or a list of programs. Possible usage is
+        channel[time] to get the programm running at 'time'
+        channel[start:stop] to get the programms between start and stop
+        channel[start:] to get all programms beginning at start
         """
+        if isinstance(key, slice):
+            start = key.start
+            stop  = key.stop
+        else:
+            start = key
+            stop  = 0
+
         # get programs
         if self.programs:
             # see if we're missing programs before start
@@ -170,8 +209,8 @@ class Channel:
                 self.__import_programs(start - 60, p.start)
             # see if we're missing programs after end
             p = self.programs[-1]
-            if stop == -1:
-                self.__import_programs(p.stop, stop)
+            if stop == None:
+                self.__import_programs(p.stop, -1)
             elif stop == 0 and p.stop < start + 60:
                 self.__import_programs(p.stop, start + 60)
             elif p.stop < stop:
@@ -186,7 +225,7 @@ class Channel:
         if stop == 0:
             # only get what's running at time start
             return filter(lambda x: x.start <= start, self.programs)[-1]
-        elif stop == -1:
+        elif stop == None:
             # get everything from time start onwards
             return filter(lambda x: x.stop > start, self.programs)
 
@@ -197,21 +236,3 @@ class Channel:
                           (x.start < stop and x.stop >= stop),
                           self.programs)
         raise Exception('bad request: %s-%s' % (start, stop))
-
-
-
-    def get_relative(self, pos, prog):
-        new_pos = self.programs.index(prog) + pos
-        if new_pos < 0:
-            # requested program before start
-            self.__import_programs(prog.start-3*3600, prog.start)
-            return self.get_relative(pos, prog)
-        if new_pos >= len(self.programs):
-            # requested program after end
-            last = self.programs[-1]
-            self.__import_programs(last.stop, last.stop+3*3600)
-            return self.get_relative(pos, prog)
-        return self.programs[new_pos]
-
-
-

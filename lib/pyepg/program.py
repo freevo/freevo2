@@ -33,7 +33,7 @@
 
 class Program:
     """
-    A tv program item for the tv guide and other parts of the tv submenu.
+    A Program with informations from the EPG.
     """
     def __init__(self, id, title, start, stop, episode, subtitle,
                  description, channel):
@@ -48,9 +48,6 @@ class Program:
         self.description = description
         self.episode     = episode
 
-        # FIXME: remove that information
-        self.scheduled = False
-
         # TODO: add category support (from epgdb)
         self.categories = ''
         # TODO: add ratings support (from epgdb)
@@ -59,7 +56,7 @@ class Program:
 
     def __cmp__(self, other):
         """
-        compare function, return 0 if the objects are identical, 1 otherwise
+        Compare function, return 0 if the objects are identical, 1 otherwise
         """
         try:
             return self.title != other.title or \
