@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/08/28 18:11:36  dischi
+# use util.py pickle function now and remove the uid from filename
+#
 # Revision 1.27  2003/08/24 19:08:38  mikeruelle
 # populate the rating and categories entries for TvProgram objects.
 #
@@ -70,7 +73,6 @@ import sys
 import time
 import os
 import traceback
-import cPickle as pickle
 import calendar
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -84,10 +86,8 @@ import util
 # XXX Remove when we are ready to require Python 2.3
 if float(sys.version[0:3]) < 2.3:
     import strptime
-    PICKLE_PROTOCOL = 1
 else:
     import _strptime as strptime
-    PICKLE_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 # The XMLTV handler from openpvr.sourceforge.net
 import xmltv
@@ -128,7 +128,7 @@ def get_guide(popup=None):
          cached_guide.timestamp != os.path.getmtime(config.XMLTV_FILE))):
 
         # No, is there a pickled version ("file cache") in a file?
-        pname = '%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid())
+        pname = '%s/TV.xml.pickled' % config.FREEVO_CACHEDIR
         
         got_cached_guide = FALSE
         if (os.path.isfile(config.XMLTV_FILE) and
@@ -139,16 +139,7 @@ def get_guide(popup=None):
             if popup:
                 popup.show()
 
-            try:
-                fd = open(pname, 'r')
-            except:
-                print 'DEBUG: failed open of %s' % pname
-                traceback.print_exc()
-            try:		 
-                cached_guide = pickle.load(fd)
-            except:		
-                print 'DEBUG: failed load of the pickle'
-                traceback.print_exc()
+            cached_guide = util.read_pickle(pname)
 
             if popup:
                 popup.destroy()
@@ -193,12 +184,7 @@ def get_guide(popup=None):
                 traceback.print_exc()
             else:
                 # Dump a pickled version for later reads
-                try:
-                    pickle.dump(cached_guide, open(pname, 'w'), PICKLE_PROTOCOL)
-                except:
-                    print 'strange cPickle error...try pickle'
-                    import pickle as pypickle
-                    pypickle.dump(cached_guide, open(pname, 'w'), PICKLE_PROTOCOL)
+                util.save_pickle(cached_guide, pname)
 
     if not cached_guide:
         # An error occurred, return an empty guide
@@ -390,8 +376,8 @@ if __name__ == '__main__':
     sys.stdout = sys.__stdout__
     # Remove a pickled file (if any) if we're trying to list all channels
     if not config.TV_CHANNELS:
-        if os.path.isfile('%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid())):
-            os.remove('%s/TV.xml-%s.pickled' % (config.FREEVO_CACHEDIR, os.getuid()))
+        if os.path.isfile('%s/TV.xml.pickled' % config.FREEVO_CACHEDIR):
+            os.remove('%s/TV.xml.pickled' % config.FREEVO_CACHEDIR)
 
     print
     print 'Getting the TV Guide, this can take a couple of minutes...'
