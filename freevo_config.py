@@ -326,8 +326,11 @@ plugin_record = plugin.activate('tv.generic_record')
 #
 # Example:
 # <freevo>
-#   <folder>
+#   <folder title="Title of the directory" img-cover="nice-cover.png">
 #     <setvar name="directory_autoplay_single_item" val="0"/>
+#     <info>
+#       <content>A small description of the directory</content>
+#     </info>
 #   </folder>
 # </freevo>
 
