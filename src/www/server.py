@@ -44,88 +44,7 @@ import os
 import traceback
 
 import notifier
-
-
-class ResultStream:
-    """
-    A wrapper class for sending a result to the www client. It is possible
-    to send strings using the write function. After that, it is also possible
-    to use the writefd function to send the content of a file descriptor
-    to the client. You can only call writefd once and can not use write after
-    using writefd.
-    """
-    def __init__(self, sock):
-        self.sock      = sock
-        self.closed    = 1
-        self.buffer    = cStringIO.StringIO()
-        self.__blocked = False
-        self.__datafd  = None
-        self.__close   = False
-
-
-    def write(self, data):
-        """
-        Send data to the client
-        """
-        if self.__blocked:
-            return self.buffer.write(data)
-        try:
-            return self.sock.send(data)
-        except socket.error, e:
-            self.__blocked = True
-            notifier.addSocket(self.sock, self.__nf_callback, notifier.IO_OUT)
-            return self.buffer.write(data)
-
-
-    def writefd(self, fd):
-        """
-        Send the content of the fd to the client. The fd will be closed
-        after everything is sent.
-        """
-        if self.__blocked:
-            self.__datafd = fd
-        else:
-            self.__blocked = True
-            self.buffer = fd
-            notifier.addSocket(self.sock, self.__nf_callback, notifier.IO_OUT)
-
-
-    def close(self):
-        """
-        Wrapper for close(). This won't really close the fd, it will still
-        try to send all blocked data to the client.
-        """
-        if self.__blocked:
-            self.__close = True
-        else:
-            self.sock.close()
-
-            
-    def __nf_callback(self, sock):
-        """
-        Internal callback for notifier
-        """
-        data = self.buffer.read(16384)
-        if not data:
-            # no more data in the buffer. Check if we have a fd
-            # the send more data from
-            if self.__datafd:
-                self.buffer.close()
-                self.buffer = self.__datafd 
-                self.__datafd = None
-                return True
-            self.__blocked = False
-            if self.__close:
-                self.buffer.close()
-                self.sock.close()
-            return False
-        try:
-            return self.sock.send(data)
-        except socket.error, e:
-            # This function has called because it is possible to send.
-            # If it still doesn't work, the connection is broken
-            self.sock.close()
-            return False
+import util.fsocket as fsocket
 
             
 class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -135,21 +54,11 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.connection=conn
         self.connection.setblocking(0)
         self.server=server
-        self.wfile=ResultStream(conn)
-        self.buffer=cStringIO.StringIO()
-        notifier.addSocket(conn, self.read_socket)
+        self.rfile=fsocket.Socket(conn)
+        self.rfile.set_condition(lambda x: x.find('\r\n\r\n') != -1,
+                                 self.handle_request_line)
+        self.wfile=self.rfile
 
-
-    def read_socket(self, socket):
-        data = socket.recv(1000)
-        if len(data) == 0:
-            self.finish()
-            return False
-        self.buffer.write(data)
-        if data.find('\r\n\r\n') != -1:
-            self.handle_request_line()
-        return True
-    
 
     def do_GET(self):
         """
@@ -179,6 +88,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.writefd(f)
+            print f.tell()
             return None
             
         if os.path.isdir(self.server.scripts[0] + path):
@@ -251,12 +161,11 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         return res
 
 
-    def handle_request_line(self):
+    def handle_request_line(self, socket):
         """
         Called when the http request line and headers have been received
         """
         # prepare attributes needed in parse_request()
-        self.rfile=cStringIO.StringIO(self.buffer.getvalue())
         self.raw_requestline=self.rfile.readline()
         self.parse_request()
 
@@ -278,7 +187,6 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
     def finish(self):
-        notifier.removeSocket( self.connection )
         self.wfile.close()
 
 
