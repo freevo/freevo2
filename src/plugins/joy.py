@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/07/24 00:40:10  rshortt
+# bugfix
+#
 # Revision 1.6  2003/07/20 14:57:50  rshortt
 # Set poll_interval to 0 until we pass some checks.
 #
@@ -109,7 +112,7 @@ class PluginInterface(plugin.DaemonPlugin):
     
         print 'using joystick', config.JOY_DEV
     
-        self.poll_intervall = 3
+        self.poll_interval = 1
         self.poll_menu_only = FALSE
 
 
