@@ -13,38 +13,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.32  2004/07/09 11:09:56  dischi
+# use vfs.open to make sure we can write the image
+#
 # Revision 1.31  2004/05/15 18:01:13  outlyer
 # Trap a potential crash if the "guessed" filename doesn't exist.
-#
-# Revision 1.30  2004/02/19 04:57:56  gsbarbieri
-# Support Web Interface i18n.
-# To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
-#
-# Revision 1.29  2004/02/14 19:29:39  dischi
-# kill some debug
-#
-# Revision 1.28  2004/02/07 13:24:39  dischi
-# unicode fix
-#
-# Revision 1.27  2004/01/25 20:16:32  dischi
-# typo
-#
-# Revision 1.26  2004/01/25 15:37:06  dischi
-# adjust to vfs and amazon changes
-#
-# Revision 1.25  2004/01/16 12:20:16  dischi
-# o catch all exceptions inside amazon.py
-# o add plugin for 'dir' if album and artist are set
-#
-# Revision 1.24  2004/01/03 17:43:15  dischi
-# OVERLAY_DIR is always used
-#
-# Revision 1.23  2003/12/29 22:09:19  dischi
-# move to new Item attributes
-#
-# Revision 1.20  2003/10/20 14:23:08  outlyer
-# Tolerate 404 errors from Amazon without crashing. Sorry this is so ugly,
-# this whole algorithm needs to be cleaned up.
 #
 # Revision 1.3  2003/06/12 16:47:04  outlyer
 # Tried to make the Amazon search more intelligent.
@@ -337,7 +310,7 @@ class PluginInterface(plugin.ItemPlugin):
             filename = '%s/cover.jpg' % (os.path.dirname(self.item.filename))
 
         fp = urllib2.urlopen(str(arg))
-        m = open(filename,'wb')
+        m = vfs.open(filename,'wb')
         m.write(fp.read())
         m.close()
         fp.close()
