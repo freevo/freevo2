@@ -4,6 +4,9 @@
 # $Id$
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2002/08/19 02:08:38  krister
+# Added killall for freevo_xwin at shutdown. Fixed tabs.
+#
 # Revision 1.54  2002/08/17 02:57:52  krister
 # Gustavi Barbieris changes for getting the main menu items from the skin.
 #
@@ -162,8 +165,9 @@ def shutdown(menuw=None, arg=None):
     os.system('touch /tmp/freevo-shutdown') 
     # XXX kludge to shutdown the runtime version (no linker)
     os.system('killall -9 freevo_rt 2&> /dev/null') 
+    os.system('killall -9 freevo_xwin 2&> /dev/null')  # X11 helper app
     # XXX Kludge to shutdown if started with "python main.py"
-    os.system('kill -9 `pgrep -f "python main.py" -d" "` 2&> /dev/null') 
+    os.system('kill -9 `pgrep -f "python*main.py" -d" "` 2&> /dev/null') 
 
     # Just wait until we're dead. SDL cannot be polled here anyway.
     while 1:
@@ -196,6 +200,12 @@ def getcmd():
     if config.OSD_SKIN == 'skins/barbieri/skin_barbieri.py':
         menu_items = skin.settings.mainmenu.items
         for i in menu_items:
+            if i.visible:
+                items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
+    elif 0 and config.OSD_SKIN == 'skins/krister1/skin_krister1.py':
+        menu_items = skin.settings.mainmenu.items
+        for i in menu_items:
+            print i
             if i.visible:
                 items += [menu.MenuItem(i.name,eval(i.action), i.arg, None, ('main',''), i.icon)]
     else:
@@ -300,12 +310,12 @@ def main_func():
 
     # Make sure there's no mplayer process lying around.
     os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
-    						  # my mplayer command is actually
-						  # nice --10 mplayer, to run mplayer
-						  # with higher priority, but won't be
-						  # killed by this. 
-						  # If I'm the only one, add this:
-						  # ...-9 %s... ' % config.MPLAYER_CMD)
+                                                  # my mplayer command is actually
+                                                  # nice --10 mplayer, to run mplayer
+                                                  # with higher priority, but won't be
+                                                  # killed by this. 
+                                                  # If I'm the only one, add this:
+                                                  # ...-9 %s... ' % config.MPLAYER_CMD)
 
     # Kick off the main menu loop
     print 'Main loop starting...'
