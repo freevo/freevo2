@@ -67,10 +67,10 @@ class Menu:
         self.choices = choices          # List of MenuItem:s
         self.page_start = 0
         self.packrows = packrows
-        self.background = None
+        self.skin_settings = None
 
-    def setBackgroundImage(self, background):
-        self.background = background
+    def set_skin_settings(self, file):
+        self.skin_settings = skin.ParseXML(file)
 
 
 #

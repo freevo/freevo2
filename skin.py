@@ -65,6 +65,11 @@ def HandleEvent(ev):
     impl.HandleEvent(ev)
 
 
+# Load special settings for this menu
+def ParseXML(file):
+    return impl.ParseXML(file)
+
+
 # Called from the MenuWidget class to draw a menu page on the
 # screen
 def DrawMenu(menuw):

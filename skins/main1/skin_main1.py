@@ -78,6 +78,12 @@ class Skin:
         pass
 
 
+
+    # Parse XML files with additional settings
+    def ParseXML(self, file):
+        return None
+
+    
     # Called from the MenuWidget class to draw a menu page on the
     # screen
     def DrawMenu(self, menuw):
@@ -92,9 +98,6 @@ class Skin:
         if self.bgbitmap[0]:
             apply(osd.drawbitmap, self.bgbitmap)
         
-        if menu.background != None:
-            osd.drawbitmap(util.resize(menu.background, 768, 405), 0, 85)
-            
         # Menu heading
         osd.drawstring(menu.heading, 160, 50,
                        font=self.OSD_FONTNAME_HDR,

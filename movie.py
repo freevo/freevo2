@@ -186,9 +186,7 @@ def cwd(arg=None, menuw=None):
     
     moviemenu = menu.Menu('MOVIE MENU', items)
 
-    if os.path.isfile(os.path.join(dir, "background.jpg")):
-        moviemenu.setBackgroundImage(os.path.join(dir, "background.jpg"))
-    elif os.path.isfile(os.path.join(dir, "background.png")):
-        moviemenu.setBackgroundImage(os.path.join(dir, "background.png"))
+    if os.path.isfile(os.path.join(dir, "skin.xml")):
+        moviemenu.set_skin_settings(os.path.join(dir, "skin.xml"))
 
     menuw.pushmenu(moviemenu)
