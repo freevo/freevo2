@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.7  2004/02/22 07:13:27  gsbarbieri
 # Fix bugs introduced by i18n changes.
 #
@@ -108,7 +111,9 @@ class GenreResource(FreevoResource):
         fv.printHeader(_('TV Genre for %s') % time.strftime('%a %b %d', time.localtime(mfrguidestart)), config.WWW_STYLESHEET, config.WWW_JAVASCRIPT)
 
         if not got_schedule:
-            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
+            fv.printMessages(
+                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
+                )
 
         allcategories = []
         for chan in guide.chan_list:
@@ -183,7 +188,7 @@ class GenreResource(FreevoResource):
                     fv.tableCell(chan.displayname, 'class="channel"')
                     popid = '%s:%s' % (prog.channel_id, prog.start)
                     if prog.desc == '':
-                        desc = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
+                        desc = _('Sorry, the program description for %s is unavailable.') % ('<b>'+prog.title+'</b>')
                     else:
                         desc = prog.desc
                         pops += ( u"<div id=\"%s\" class=\"proginfo\">\n"\

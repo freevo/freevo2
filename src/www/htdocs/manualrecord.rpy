@@ -66,12 +66,9 @@ class ManualRecordResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader(_('Manual Record'), 'styles/main.css',selected=_("Manual Record"))
-            fv.res += '&nbsp;<br/>\n'
-            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
-            fv.printSearchForm()
-            fv.printLinks()
-            fv.printFooter()
-
+            fv.printMessagesFinish(
+                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
+                )
             return String( fv.res )
 
         curtime_epoch = time.time()

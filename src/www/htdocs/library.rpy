@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.20  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -242,14 +245,14 @@ class LibraryResource(FreevoResource):
                     if action_newfile:
                         newfile_loc = os.path.join(action_dir, action_newfile)
                         if os.path.isfile(newfile_loc):
-                            messages += [ _( '<b>%s</b> already exists! File not renamed.' ) % newfile_loc ]
+                            messages += [ _( '%s already exists! File not renamed.' ) % ('<b>'+newfile_loc+'</b>') ]
                         else:
-                            messages += [ _( 'Rename <b>%s</b> to <b>%s</b>.' ) % (file_loc, newfile_loc) ]
+                            messages += [ _( 'Rename %s to %s.' ) % ('<b>'+file_loc+'</b>', '<b>'+newfile_loc+'</b>') ]
                             os.rename(file_loc, newfile_loc)
                     else:
-                        messages += [ _('ERROR') + ': ' +_('No new file specified.') ]
+                        messages += [ '<b>'+_('ERROR') + '</b>: ' +_('No new file specified.') ]
                 elif action == 'delete':
-                    messages += [ _( 'Delete <b>%s</b>.' ) % file_loc ]
+                    messages += [ _( 'Delete %s.' ) % ('<b>'+file_loc+'</b>') ]
                     if os.path.exists(file_loc): os.unlink(file_loc)
                 elif action == 'download':
                     sys.stderr.write('download %s\n' % String(file_loc))
@@ -257,9 +260,9 @@ class LibraryResource(FreevoResource):
                     return static.File(file_loc).render(request)
                     #request.finish()
             else:
-                messages += [ _('ERROR') + ': ' + _( '<b>%s</b> does not exist. No action taken.') % file_loc ]
+                messages += [ '<b>'+_('ERROR') + '</b>: ' + _( '%s does not exist. No action taken.') % ('<b>'+file_loc+'</b>') ]
         elif action_file:
-            messages += [ _('ERROR')+': ' +_( 'I do not process names (%s) with slashes for security reasons.') % action_file ]
+            messages += [ '<b>'+_('ERROR')+'</b>: ' +_( 'I do not process names (%s) with slashes for security reasons.') % action_file ]
 
         directories = []
         if action_mediatype:

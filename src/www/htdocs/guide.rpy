@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.23  2004/02/22 06:25:15  gsbarbieri
 # Fix bugs introduced by i18n changes.
 #
@@ -191,7 +194,9 @@ class GuideResource(FreevoResource):
         fv.res += '<div id="content">\n';
         fv.res += '&nbsp;<br/>\n'
         if not got_schedule:
-            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
+            fv.printMessages(
+                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
+                )
 
         pops = ''
         desc = ''
@@ -280,7 +285,7 @@ class GuideResource(FreevoResource):
 
                         if prog.desc == '':
                             desc = (_('Sorry, the program description for ' \
-                                      '<b>%s</b> is unavailable.')) % prog.title
+                                      '%s is unavailable.')) % ('<b>'+prog.title+'</b>')
                         else:
                             desc = prog.desc
 

@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.14  2004/02/22 23:28:12  gsbarbieri
 # Better unicode handling, better (i18n) messages.
 # Still no unicode with non-ascii names in Favorite(), marmelade problems.
@@ -119,11 +122,9 @@ class EditFavoriteResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader(_('Edit Favorite'), 'styles/main.css')
-            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
-            fv.printSearchForm()
-            fv.printLinks()
-            fv.printFooter()
-
+            fv.printMessagesFinish(
+                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
+                )
             return String( fv.res )
 
         chan = Unicode(fv.formValue(form, 'chan'))
@@ -144,24 +145,15 @@ class EditFavoriteResource(FreevoResource):
 
 	    if not result:
                 fv.printHeader('Edit Favorite', 'styles/main.css')
-                fv.res += "<h4>"+_("Messages")+":</h4>\n"
-                fv.res += "<ul>\n"
-
-                fv.res += '\t<li>' + \
-                          _('ERROR') + ': ' + \
-                          ( _('no program found on <b>%s</b> at <b>%s</b>. (%s)')%\
-                            (chan,
-                             time.strftime('%x %X', time.localtime(int(start))),
-                             prog
-                             )
-                           )+\
-                           '</li>\n'
-                
-                fv.res += "</ul>\n"
-
-                fv.printSearchForm()
-                fv.printLinks()
-                fv.printFooter()
+                fv.printMessagesFinish(
+                    [ '<b>'+_('ERROR') + '</b>: ' + \
+                      ( _('No program found on %s at %s.')%\
+                        ( '<b>'+chan+'</b>',
+                          '<b>'+time.strftime('%x %X',
+                                              time.localtime(int(start))) + \
+                          '</b>'
+                         )
+                        ) + (' <i>(%s)</i>' % prog) ] )
                 return String(fv.res)
 
             if prog:
@@ -177,21 +169,13 @@ class EditFavoriteResource(FreevoResource):
 
         if not result:
             fv.printHeader('Edit Favorite', 'styles/main.css')
-            fv.res += "<h4>"+_("Messages")+":</h4>\n"
-            fv.res += "<ul>\n"
-
-            fv.res += '\t<li>' + \
-                      _('ERROR') + ': ' + \
-                      ( _('Favorite <b>%s</b> doesn\'t exists. (%s)') % \
-                        (name, fav)
-                        )+\
-                        '</li>\n'
-            
-            fv.res += "</ul>\n"
-            
-            fv.printSearchForm()
-            fv.printLinks()
-            fv.printFooter()
+            fv.printMessagesFinish(
+                [ '<b>'+_('ERROR') + '</b>: ' + \
+                  ( _('Favorite %s doesn\'t exists.') % \
+                    ( '<b>'+name+'</b>' )
+                    )+\
+                  ( ' <i>(%s)</i>' % fav )
+                  ] )
             return String(fv.res)
 
 

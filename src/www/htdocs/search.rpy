@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.15  2004/02/19 04:57:59  gsbarbieri
 # Support Web Interface i18n.
 # To use this, I need to get the gettext() translations in unicode, so some changes are required to files that use "print _('string')", need to make them "print String(_('string'))".
@@ -184,7 +187,7 @@ class SearchResource(FreevoResource):
                 fv.tableCell(prog.title, 'class="'+status+'" colspan="1"')
     
                 if prog.desc == '':
-                    cell = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
+                    cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+prog.title+'</b>')
                 else:
                     cell = prog.desc
                 fv.tableCell(cell, 'class="'+status+'" colspan="1"')

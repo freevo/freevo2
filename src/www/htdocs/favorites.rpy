@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.13  2004/02/22 23:29:31  gsbarbieri
 # Better unicode support, still no non-ascii in names in Favorite() due
 # marmelade problems.
@@ -117,10 +120,9 @@ class FavoritesResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader(_('Favorites'), 'styles/main.css', selected=_('Favorites'))
-            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
-            fv.printSearchForm()
-            fv.printLinks()
-            fv.printFooter()
+            fv.printMessagesFinish(
+                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
+                )
 
             return String( fv.res )
 

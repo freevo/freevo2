@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/02/23 08:33:21  gsbarbieri
+# i18n: help translators job.
+#
 # Revision 1.12  2004/02/22 23:36:49  gsbarbieri
 # Now support listing of non-ascii names/descriptions.
 # So far you can have manual recordings with non-ascii names, but no programs
@@ -123,10 +126,9 @@ class RecordResource(FreevoResource):
         (server_available, message) = ri.connectionTest()
         if not server_available:
             fv.printHeader('Scheduled Recordings', 'styles/main.css')
-            fv.res += '<h4>'+_('ERROR')+': '+_('recording server is unavailable')+'</h4>'
-            fv.printSearchForm()
-            fv.printLinks()
-            fv.printFooter()
+            fv.printMessagesFinish(
+                [ '<b>'+_('ERROR')+'</b>: '+_('Recording server is unavailable.') ]
+                )
 
             return String( fv.res )
 
@@ -145,24 +147,17 @@ class RecordResource(FreevoResource):
 
 	    if not status:
                 fv.printHeader('Scheduled Recordings', 'styles/main.css')
-                fv.res += "<h4>"+_("Messages")+":</h4>\n"
-                fv.res += "<ul>\n"
-
-                fv.res += '\t<li>' + \
-                          _('ERROR') + ': ' + \
-                          ( _('no program found on <b>%s</b> at <b>%s</b>. (%s)')%\
-                            (chan,
-                             time.strftime('%x %X', time.localtime(int(start))),
-                             prog
-                             )
+                fv.printMessagesFinish(
+                    [ '<b>'+_('ERROR') + '</b>: ' + \
+                      ( _('No program found on %s at %s.')%\
+                        ( '<b>'+chan+'</b>',
+                          '<b>'+time.strftime('%x %X',
+                                              time.localtime(int(start)))+\
+                          '</b>'
+                          )
                            )+\
-                           '</li>\n'
-                
-                fv.res += "</ul>\n"
+                      ( ' <i>(%s)</i>' % prog ) ] )
 
-                fv.printSearchForm()
-                fv.printLinks()
-                fv.printFooter()
                 return String(fv.res)
 
             
@@ -215,7 +210,7 @@ class RecordResource(FreevoResource):
             fv.tableCell(Unicode(prog.title), 'class="'+status+'" colspan="1"')
     
             if prog.desc == '':
-                cell = _('Sorry, the program description for <b>%s</b> is unavailable.') % prog.title
+                cell = _('Sorry, the program description for %s is unavailable.') % ('<b>'+prog.title+'</b>')
             else:
                 cell = Unicode(prog.desc)
             fv.tableCell(cell, 'class="'+status+'" colspan="1"')
