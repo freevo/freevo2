@@ -5,21 +5,26 @@
 
 # The JPEG support will not be finished for a while.
 
-CFLAGS = -O2 -Wall -I/usr/local/include/freetype2 
+CFLAGS = -O2 -Wall `freetype-config --cflags`
+LIBS = -lm -lpng -lz `freetype-config --libs`
+XLIBS = -L/usr/X11/lib -lX11 
 
-all: osds_x11 osds_fb 
+all: osds_fb
 
 osds_fb: main.c ft.c ft.h fb.c fb.h readpng.c readpng.h
-	gcc -DOSD_FB $(CFLAGS) -Wall main.c ft.c fb.c readpng.c -o osds_fb -lm -lpng -lz -L/usr/local/lib -lfreetype 
+	gcc -DOSD_FB $(CFLAGS) -Wall main.c ft.c fb.c readpng.c -o osds_fb $(LIBS)
 
 osds_x11: main.c ft.c ft.h x11.c x11.h readpng.c readpng.h
-	gcc -DOSD_X11 $(CFLAGS) main.c ft.c x11.c -o osds_x11 readpng.c -lm -L/usr/X11/lib -lX11 -lpng -lz -L/usr/local/lib -lfreetype 
+	gcc -DOSD_X11 $(CFLAGS) main.c ft.c x11.c -o osds_x11 readpng.c $(XLIBS) $(LIBS)
 
 x11test: x11.c x11.h readpng.c readpng.h
-	gcc $(CFLAGS) -DTEST x11.c readpng.c -o x11test -lm -L/usr/X11/lib -lX11 -lpng -lz
+	gcc $(CFLAGS) -DTEST x11.c readpng.c -o x11test $(XLIBS) $(LIBS)
 
 fttest: ft.c
-	gcc $(CFLAGS) -g  -L/usr/local/lib -lfreetype -Wall ft.c -o fttest -DTEST 
+	gcc $(CFLAGS) -g  `freetype-config --cflags` -Wall ft.c -o fttest -DTEST 
+
+pngtest: readpng.c readpng.h
+	gcc -DPNGTEST $(CFLAGS) -Wall readpng.c -o pngtest $(LIBS)
 
 clean:
 	-rm -f *.o *.pyc osds_fb osds_x11 x11test pngtest fttest

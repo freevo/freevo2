@@ -8,7 +8,12 @@ SUBDIRS = matrox_g400 rc_client osd_server
 
 all: subdirs runapp
 
-.PHONY: all subdirs $(SUBDIRS) clean release install
+x11: all osds_x11
+
+.PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean release install
+
+osds_x11:
+	cd osd_server ; $(MAKE) osds_x11
 
 subdirs: $(SUBDIRS)
 
