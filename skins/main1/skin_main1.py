@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2002/10/19 17:10:51  dischi
+# some small bugfixes
+#
 # Revision 1.42  2002/10/19 15:09:55  dischi
 # added alpha mask support
 #
@@ -331,7 +334,7 @@ class Skin:
                         i_val = val.cover_music
 
 
-        return image_x, i_val, i_file
+        return max(0, image_x-val.items.default.selection.spacing), i_val, i_file
 
 
     
@@ -499,7 +502,11 @@ class Skin:
             DrawText(menu.heading, val.title, layer=layer)
 
         if val.logo.image and val.logo.visible:
-            osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y, layer=layer)
+            if val.logo.width and val.logo.height:
+                osd.drawbitmap(util.resize(val.logo.image, val.logo.width, val.logo.height),
+                               val.logo.x, val.logo.y)
+            else:
+                osd.drawbitmap(val.logo.image, val.logo.x, val.logo.y, layer=layer)
 
         if image_file:
             osd.drawbitmap(image_file, image_val.x, image_val.y, layer=layer)
