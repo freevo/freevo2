@@ -15,36 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.15  2003/07/08 20:02:27  dischi
-# small bugfix
+# Revision 1.16  2003/07/12 11:20:14  dischi
+# switch to new imdb helper
 #
-# Revision 1.14  2003/07/05 17:04:57  dischi
-# catch exceptions
-#
-# Revision 1.13  2003/06/29 20:43:30  dischi
-# o mmpython support
-# o mplayer is now a plugin
-#
-# Revision 1.12  2003/06/27 11:34:09  dischi
-# some small fixes for movies on rom drive
-#
-# Revision 1.11  2003/06/26 13:23:21  dischi
-# remove 'the' and 'a' from the imdb search string (add more in local_conf.py
-# if you like) because they mess up the results. Also fixed the filename
-# included in the fxd
-#
-# Revision 1.10  2003/06/24 18:39:42  dischi
-# some small fixes
-#
-# Revision 1.9  2003/06/23 19:52:55  dischi
-# change event key to imdb_search_or_cover_search
-#
-# Revision 1.8  2003/06/09 14:45:16  dischi
-# add support for DVD/VCD
-#
-# Revision 1.7  2003/06/07 11:32:48  dischi
-# reactivated the plugin
-#
+# Revision 1.16 2003/07/10 15:00:00 den_RDC
+# rewrite to use fxdimdb
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -74,28 +49,23 @@ import menu
 import config
 import plugin
 import re
+import time
+from video.fxdimdb import FxdImdb, makeVideo, makePart, point_maker
 
 from gui.PopupBox import PopupBox
 
-
-def point_maker(matching):
-    """
-    small help function to split a movie name into parts
-    """
-    return '%s.%s' % (matching.groups()[0], matching.groups()[1])
-
-
+FALSE = 0
+TRUE = 1
 
 class PluginInterface(plugin.ItemPlugin):
+    
     def imdb_get_disc_searchstring(self, item):
         name  = item.media.label
         name  = re.sub('([a-z])([A-Z])', point_maker, name)
         name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
         name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
-
         for r in config.IMDB_REMOVE_FROM_LABEL:
             name  = re.sub(r, '', name)
-
         parts = re.split('[\._ -]', name)
         
         name = ''
@@ -106,111 +76,50 @@ class PluginInterface(plugin.ItemPlugin):
             return name[:-1]
         else:
             return ''
-
         
+
     def actions(self, item):
         self.item = item
         if item.type == 'video'  and not hasattr(item, 'fxd_file'):
-            print item.mode
             if item.mode == 'file':
-                return [ ( self.imdb_search_file, 'Search IMDB for this file',
+                return [ ( self.imdb_search , 'Search IMDB for this file',
                            'imdb_search_or_cover_search') ]
             if item.mode in ('dvd', 'vcd'):
                 s = self.imdb_get_disc_searchstring(self.item)
-                print s
                 if s:
-                    return [ ( self.imdb_search_disc, 'Search IMDB for [%s]' % s,
+                    return [ ( self.imdb_search , 'Search IMDB for [%s]' % s,
                                'imdb_search_or_cover_search') ]
         return []
 
-
-    def imdb_search_disc(self, arg=None, menuw=None):
-        """
-        search imdb for this disc item
-        """
-        import helpers.imdb
-
-        box = PopupBox(text='searching IMDB...')
-        box.show()
-        
-        name = self.imdb_get_disc_searchstring(self.item)
-        items = []
-        try:
-            for id,name,year,type in helpers.imdb.search(name):
-                items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
-                                         self.imdb_create_fxd_disc, (id, year)) ]
-            moviemenu = menu.Menu('IMDB QUERY', items)
-        except:
-            box.destroy()
-            box = PopupBox(text='Unknown error while connecting to IMDB')
-            box.show()
-            time.sleep(2)
-            box.destroy()
-            return
-
-        box.destroy()
-        menuw.pushmenu(moviemenu)
-
-
-    def imdb_create_fxd_disc(self, arg=None, menuw=None):
-        """
-        create fxd file for the disc item
-        """
-        import helpers.imdb
-
-        box = PopupBox(text='getting data...')
-        box.show()
-        
-        filename = os.path.join(config.MOVIE_DATA_DIR, self.item.media.id)
-
-        # bad hack to set the drive, helpers/imdb.py really needs
-        # a bigger update
-        helpers.imdb.drive = self.item.media.devicename
-        helpers.imdb.get_data_and_write_fxd(arg[0], filename,
-                                            self.item.media.devicename,
-                                            None, (self.item.mode, ), None)
-
-        # check if we have to go one menu back (called directly) or
-        # two (called from the item menu)
-        back = 1
-        if menuw.menustack[-2].selected != self.item:
-            back = 2
             
-        # go back in menustack
-        for i in range(back):
-            menuw.delete_menu()
-        
-        box.destroy()
-
-            
-    def imdb_search_file(self, arg=None, menuw=None):
+    def imdb_search(self, arg=None, menuw=None):
         """
         search imdb for this item
         """
-        import helpers.imdb
-
+        fxd = FxdImdb()
+        
         box = PopupBox(text='searching IMDB...')
         box.show()
-        
-        name = self.item.name
-        
-        name  = os.path.basename(os.path.splitext(name)[0])
-        name  = re.sub('([a-z])([A-Z])', point_maker, name)
-        name  = re.sub('([a-zA-Z])([0-9])', point_maker, name)
-        name  = re.sub('([0-9])([a-zA-Z])', point_maker, name.lower())
-        parts = re.split('[\._ -]', name)
-        
-        name = ''
-        for p in parts:
-            if not p.lower() in config.IMDB_REMOVE_FROM_SEARCHSTRING:
-                name += '%s ' % p
 
         items = []
+        
+        if self.item.mode in ('dvd', 'vcd'):
+            disc = TRUE
+        else:
+            disc = FALSE
 
         try:
-            for id,name,year,type in helpers.imdb.search(name):
-                items += [ menu.MenuItem('%s (%s, %s)' % (name, year, type),
-                                         self.imdb_create_fxd, (id, year)) ]
+            duplicates = []
+            for id,name,year,type in fxd.guessImdb(self.item.name, disc):
+                try:
+                    for i in self.item.parent.play_items:
+                        if hasattr(i, 'fxd_file') and i.name == name:
+                            if not i in duplicates:
+                                duplicates.append(i)
+                except:
+                    pass
+                items.append(menu.MenuItem('%s (%s, %s)' % (name, year, type),
+                                           self.imdb_create_fxd, (id, year)))
         except:
             box.destroy()
             box = PopupBox(text='Unknown error while connecting to IMDB')
@@ -219,6 +128,12 @@ class PluginInterface(plugin.ItemPlugin):
             box.destroy()
             return
         
+        # for d in duplicates:
+        #     items = [ menu.MenuItem('Add to "%s"' % d.name,
+        #                             self.imdb_add_to_fxd, (d, 'add')),
+        #               menu.MenuItem('Variant to "%s"' % d.name,
+        #                             self.imdb_add_to_fxd, (d, 'variant')) ] + items
+
         box.destroy()
         if len(items) == 1:
             self.imdb_create_fxd(arg=items[0].arg, menuw=menuw)
@@ -236,28 +151,11 @@ class PluginInterface(plugin.ItemPlugin):
         return
 
 
-    def imdb_create_fxd(self, arg=None, menuw=None):
+    def imdb_menu_back(self, menuw):
         """
-        create fxd file for the item
+        check how many menus we have to go back to see the item
         """
-        import helpers.imdb
         import directory
-        
-        box = PopupBox(text='getting data...')
-        box.show()
-        
-        if self.item.media and self.item.media.id: #if this exists we got a cdrom/dvdrom
-            filename = os.path.join(config.MOVIE_DATA_DIR, self.item.media.id)
-            device   = self.item.media.devicename
-            # bad hack to set the drive, helpers/imdb.py really needs
-            # a bigger update
-            helpers.imdb.drive = self.item.media.devicename
-        else:
-            filename = os.path.splitext(self.item.filename)[0]
-            device   = None
-
-        helpers.imdb.get_data_and_write_fxd(arg[0], filename, device, None,
-                                            (os.path.basename(self.item.filename), ), None)
 
         # check if we have to go one menu back (called directly) or
         # two (called from the item menu)
@@ -278,4 +176,62 @@ class PluginInterface(plugin.ItemPlugin):
         for i in range(back):
             menuw.delete_menu()
         
+        
+    def imdb_create_fxd(self, arg=None, menuw=None):
+        """
+        create fxd file for the item
+        """
+        fxd = FxdImdb()
+        
+        box = PopupBox(text='getting data...')
+        box.show()
+
+        #if this exists we got a cdrom/dvdrom
+        if self.item.media and self.item.media.devicename: 
+            devicename = self.item.media.devicename
+        else: devicename = None
+        
+        fxd.setImdbId(arg[0])
+        
+        if self.item.mode in ('dvd', 'vcd'):
+            fxd.setDiscset(devicename, None)
+        else:
+            video = makeVideo('file', 'f1', self.item.filename, device=devicename)
+            fxd.setVideo(video)
+
+        fxd.writeFxd()
+        self.imdb_menu_back(menuw)
         box.destroy()
+
+
+    def imdb_add_to_fxd(self, arg=None, menuw=None):
+        """
+        add item to fxd file
+        BROKEN, PLEASE FIX
+        """
+
+        #if this exists we got a cdrom/dvdrom
+        if self.item.media and self.item.media.devicename: 
+            devicename = self.item.media.devicename
+        else: devicename = None
+        
+        fxd = FxdImdb()
+        fxd.setFxdFile(arg[0].fxd_file)
+
+        if self.item.mode in ('dvd', 'vcd'):
+            fxd.setDiscset(devicename, None)
+        else:
+            num = len(fxd.video) + 1
+            video = makeVideo('file', 'f%s' % num, self.item.filename, device=devicename)
+            fxd.setVideo(video)
+
+            if arg[1] == 'variant':
+                part = makePart('Variant %d' % num, 'f%s' % num)
+
+                if fxd.variant:
+                    part = [ makePart('Variant 1', 'f1'), part ]
+
+                fxd.setVariants(part)
+            
+        fxd.writeFxd()
+        self.imdb_menu_back(menuw)
