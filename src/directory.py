@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.104  2004/01/26 20:56:24  dischi
+# do not crash when deleting last item
+#
 # Revision 1.103  2004/01/25 15:38:57  dischi
 # prevent endless checking for overlay change
 #
@@ -183,8 +186,8 @@ class DirItem(Playlist):
         # Check for a cover in current dir
         image = util.getimage(os.path.join(directory, 'cover'))
         if image:
-            self.image       = image
-            
+            self.image = image
+            self.files.image = image
         self.folder_fxd = directory+'/folder.fxd'
         if vfs.isfile(directory+'/folder.fxd'): 
             self.set_fxd_file(self.folder_fxd)
@@ -661,8 +664,12 @@ class DirItem(Playlist):
                     pos = max(0, min(selected_pos-1, len(items)-1))
                     if items:
                         self.menu.selected = items[pos]
-
-            self.menuw.rebuild_page()
+                    else:
+                        self.menu.selected = None
+            if self.menu.selected:
+                self.menuw.rebuild_page()
+            else:
+                self.menuw.init_page()
             self.menuw.refresh()
                 
 
