@@ -40,9 +40,8 @@ import sys
 import os
 import mmpython
 import glob
-import shutil
-import Image
 import popen2
+import mevas
 
 from stat import *
 
@@ -66,56 +65,20 @@ if __name__ != "__main__":
             Process.__init__(self, app)
 
         def stdout_cb(self, line):
-            if line[:-1]:
-                print '>>', line[:-1]
+            line.strip(' \t\n')
+            if line:
+                log.info('>>' % line)
 
         def stderr_cb(self, line):
-            if line[:-1]:
-                print '>>', line[:-1]
+            line.strip(' \t\n')
+            if line:
+                log.info('>>' % line)
 
         def finished(self):
             global _runqueue
             _runqueue = _runqueue[1:]
 
-            if vfs.isfile(self.imagefile):
-                imagefile = self.imagefile
-                try:
-                    image = Image.open(imagefile)
-                    if image.size[0] > 255 or image.size[1] > 255:
-                        image.thumbnail((255,255), Image.ANTIALIAS)
-
-                    if image.mode == 'P':
-                        image = image.convert('RGB')
-
-                    if image.size[0] * 3 > image.size[1] * 4:
-                        # fix image with blank bars to be 4:3
-                        ni = Image.new('RGB', (image.size[0],
-                                               (image.size[0]*3)/4))
-                        ni.paste(image, (0,(((image.size[0]*3)/4)-\
-                                            image.size[1])/2))
-                        image = ni
-                    elif image.size[0] * 3 < image.size[1] * 4:
-                        # strange aspect, let's guess it's 4:3
-                        new_size = (image.size[0], (image.size[0]*3)/4)
-                        image = Image.open(imagefile).resize(new_size,
-                                                             Image.ANTIALIAS)
-
-                    # crob some pixels, looks better that way
-                    image = image.crop((4, 3, image.size[0]-8,
-                                        image.size[1]-6))
-                    if imagefile.endswith('.raw.tmp'):
-                        f = vfs.open(imagefile[:-4], 'w')
-                        f.write('FRI%s%s%5s' % (chr(image.size[0]),
-                                                chr(image.size[1]),
-                                                image.mode))
-                        f.write(image.tostring())
-                        f.close()
-                        os.unlink(imagefile)
-                    else:
-                        image.save(imagefile)
-                except (OSError, IOError), e:
-                    log.exception('saving image')
-            else:
+            if not vfs.isfile(self.imagefile):
                 log.warning('no imagefile found')
             if _runqueue:
                 MplayerThumbnail(*_runqueue[0])
@@ -129,7 +92,7 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
     """
     global _runqueue
     if not imagefile:
-        imagefile = vfs.getoverlay(videofile + '.raw')
+        imagefile = os.path.splitext(videofile)[0] + '.jpg'
 
     if not update and os.path.isfile(imagefile) and \
            os.stat(videofile)[ST_MTIME] <= os.stat(imagefile)[ST_MTIME]:
@@ -142,17 +105,18 @@ def snapshot(videofile, imagefile=None, pos=None, update=True):
         if r_image == imagefile:
             return
     
-    print 'generate', imagefile
+    log.info('generate %s' % imagefile)
     args = [ config.MPLAYER_CMD, videofile, imagefile ]
 
     if pos != None:
         args.append(str(pos))
 
-    _runqueue.append((([os.environ['FREEVO_SCRIPT'], 'execute',
-                        os.path.abspath(__file__) ] + args), imagefile))
+    job = (([os.environ['FREEVO_SCRIPT'], 'execute',
+             os.path.abspath(__file__) ] + args), imagefile)
+    _runqueue.append(job)
     if len(_runqueue) == 1:
         MplayerThumbnail(*_runqueue[0])
-        
+
 
 
         
@@ -198,23 +162,43 @@ if __name__ == "__main__":
     child.fromchild.close()
     child.childerr.close()
     child.tochild.close()
+
     # store the correct thumbnail
     captures = glob.glob('000000??.png')
-    if captures:
-        capture = captures[-1]
+    if not captures:
+        print "error creating capture for %s" % filename
+        sys.exit(1)
+    
+    capture = captures[-1]
+
+    try:
+        image = mevas.imagelib.open(capture)
+        if image.width > 255 or image.height > 255:
+            image.scale_preserve_aspect((255,255))
+        if image.width * 3 > image.height * 4:
+            # fix image with blank bars to be 4:3
+            nh = (image.width*3)/4
+            ni = mevas.imagelib.new((image.width, nh))
+            ni.blend(image, (0,(nh- image.height) / 2))
+            image = ni
+        elif image.width * 3 < image.height * 4:
+            # strange aspect, let's guess it's 4:3
+            new_size = (image.width, (image.width*3)/4)
+            image.scale((new_size))
         try:
-            shutil.copy(capture, imagefile)
+            image.save(imagefile)
         except:
             try:
                 import config
                 import vfs
                 if not os.path.isdir(os.path.dirname(imagefile)):
                     os.makedirs(os.path.dirname(imagefile))
-                shutil.copy(capture, imagefile)
+                image.save(imagefile)
             except Exception, e:
-                print 'unable to write file %s: %s' % (vfs.getoverlay(imagefile), e)
-    else:
-        print "error creating capture for %s" % filename
+                print 'unable to write file %s: %s' % \
+                      (vfs.getoverlay(imagefile), e)
+    except (OSError, IOError), e:
+        print 'saving image', e
 
     for capture in captures:
         try:
