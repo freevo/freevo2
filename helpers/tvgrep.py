@@ -87,7 +87,7 @@ def make_schedule (b=None):
 #
 # hardcoded to -0, some people might not process the guide as root.
 #
-picklefile = config.XMLTV_FILE + '-0.pickled'
+picklefile = config.FREEVO_CACHEDIR + '/TV.xml-0.pickled'
 
 # Ugly.
 
