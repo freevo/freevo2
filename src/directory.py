@@ -1058,12 +1058,14 @@ class Dirwatcher(plugin.DaemonPlugin):
         else:
             changed = True
 
-        if changed:
-            log.info('directory has changed')
-            self.item.build(menuw=self.menuw, arg='update')
         self.last_time = vfs.mtime(self.dir)
         self.item.__dirwatcher_last_time  = self.last_time
         self.files = self.listoverlay()
+
+        if changed:
+            log.info('directory has changed')
+            self.item.build(menuw=self.menuw, arg='update')
+
         self.item.__dirwatcher_last_files = self.files
 
 
