@@ -57,7 +57,7 @@ class Skin:
     # OSD background bitmap. Must be PNG.
     # Format: (filename, x, y)  x=y=-1 means integer tiling
 
-    OSD_BGBITMAP = ('skins/test2/mainbg3.png', -1, -1)
+    OSD_BGBITMAP = ('skins/images/aubin_bg1.png', -1, -1)
 
     bgbitmap = OSD_BGBITMAP
     items_per_page = 13
