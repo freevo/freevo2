@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.46  2004/01/10 13:14:17  dischi
+# o set self.fxd_file to None as default. It's very confusing to have one
+#   fxd_file, but maybe different files with skin settings, so I added
+# o self.skin_fxd to point to the updated skin informations
+# o add runtime attribute
+#
 # Revision 1.45  2004/01/08 17:03:31  rshortt
 # Bugfix for outicons.
 #
@@ -23,41 +29,6 @@
 #
 # Revision 1.41  2004/01/01 16:47:31  dischi
 # do not replace name with None
-#
-# Revision 1.40  2003/12/31 16:40:49  dischi
-# major speed enhancements
-#
-# Revision 1.39  2003/12/30 22:31:09  dischi
-# speedup
-#
-# Revision 1.38  2003/12/30 15:33:01  dischi
-# remove unneeded copy function, make id a function
-#
-# Revision 1.37  2003/12/29 22:31:10  dischi
-# do not delete empty strings as file
-#
-# Revision 1.36  2003/12/29 22:06:01  dischi
-# Add support for url inside an item. This is usefull for items depending
-# on files or other types of url. If set_url is used, other special
-# attributes are set.
-#
-# Revision 1.35  2003/12/06 13:46:47  dischi
-# return nothing if there is no length (e.g. webradio)
-#
-# Revision 1.34  2003/11/30 14:34:29  dischi
-# but the skin parsing (e.g. outicon) in Item to avoid duplicate code
-#
-# Revision 1.33  2003/11/28 20:08:56  dischi
-# renamed some config variables
-#
-# Revision 1.32  2003/10/28 19:32:36  dischi
-# do not inherit watermark images
-#
-# Revision 1.31  2003/10/19 14:03:25  dischi
-# external i18n support for plugins
-#
-# Revision 1.30  2003/10/17 18:48:37  dischi
-# every item has a description now
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -195,19 +166,21 @@ class Item:
                    self.image.find('watermark') > 0:
                 self.image = None
             self.handle_type = parent.handle_type
-            self.fxd_file    = parent.fxd_file
+            self.skin_fxd    = parent.skin_fxd
             self.media       = parent.media
             if hasattr(parent, '_'):
                 self._ = parent._
         else:
             self.image        = None            # imagefile
-            self.fxd_file     = None            # skin informationes etc.
+            self.skin_fxd     = None            # skin informationes etc.
             self.handle_type  = None            # handle item in skin as video, audio, image
                                                 # e.g. a directory has all video info like
                                                 # directories of a cdrom
             self.media        = None
 
                 
+        self.fxd_file = None
+
         if skin_type:
             import skin
             settings  = skin.get_singleton().settings
@@ -388,6 +361,30 @@ class Item:
         """
         return the specific attribute as string or an empty string
         """
+        if attr == 'runtime':
+            length = None
+            if self.info and hasattr(self.info, 'runtime'):
+                length = self.info['runtime']
+            if not length and self.info and hasattr(self.info, 'length'):
+                length = self.info['length']
+            if not length and self.info and hasattr(self.info, 'video') and \
+                   self.info['video']:
+                length = self.info['video'][0]['length']
+            if not length and hasattr(self, 'length'):
+                length = self.length
+            if not length:
+                return ''
+            if isinstance(length, int) or isinstance(length, float):
+                length = str(int(length) / 60)
+            if length.find('min') == -1:
+                length = '%s min' % length
+            if length.find('/') > 0:
+                length = length[:length.find('/')].rstrip()
+            if length.find(':') > 0:
+                length = length[length.find(':')+1:]
+            return length
+
+        
         if attr == 'length':
             try:
                 length = int(self.info['length'])
