@@ -72,6 +72,7 @@ class RemoteControl:
     STOP     = 'STOP'
     REC      = 'REC'      
     EJECT    = 'EJECT'
+    OSD      = 'OSD'
 
     
     # Application generated codes

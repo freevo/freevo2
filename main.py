@@ -40,6 +40,9 @@ import movie
 # The TV module
 import tv
 
+# The Image viewer module
+import imenu
+
 # Set to 1 for debug output
 DEBUG = 1
 
@@ -78,6 +81,8 @@ def getcmd():
     items += [menu.MenuItem('DVD/CD', movie.play_movie, ('dvd', '1', []),'icons/dvd.png',0)]  # XXX Add DVD title handling
     #items += [menu.MenuItem('VCD', movie.play_movie, ('vcd', '1', []))]
     #items += [menu.MenuItem('RECORD MOVIE', tv.main_menu, 'record')]
+
+    items += [menu.MenuItem('IMAGES', imenu.main_menu)]
 
     mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0)
     menuwidget.pushmenu(mainmenu)

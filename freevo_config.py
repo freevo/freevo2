@@ -138,6 +138,14 @@ CD_MOUNT_POINT = '/mnt/cdrom'
 SUFFIX_MPG123_FILES = [ '/*.[mM][pP]3' ]
 SUFFIX_MPG123_PLAYLISTS = [ '/*.[mM]3[uU]' ]
 
+
+#
+# The list of filename suffixes that are used to match the files that
+# are used for the image viewer. They are used as the argument to glob.glob()
+# 
+SUFFIX_IMAGE_FILES = [ '/*.[jJ][pP][gG]' ]
+
+
 #
 # Watching TV
 #
@@ -237,6 +245,11 @@ DIR_MP3 = [ ('Test Music', './testfiles/Music') ]
 DIR_MOVIES = [ ('Test Movies', './testfiles/Movies') ]
 
 #
+# Where the image files can be found.
+#
+DIR_IMAGES = [ ('Test Images', './testfiles/Images') ]
+
+#
 # This is where recorded video is written.
 #
 DIR_RECORD = './testfiles/Movies/Recorded'
@@ -308,6 +321,7 @@ RC_CMDS = {
     'pause'       : 'PAUSE',
     'stop'        : 'STOP',
     'rec'         : 'REC',
-    'eject'       : 'EJECT'
+    'eject'       : 'EJECT',
+    'osd'         : 'OSD'
     }
 
