@@ -232,6 +232,11 @@
 	<!-- logo -->
 	<image label="logo" filename="logo.png"/>
 
+	<!-- bmovl -->
+	<font label="bmovl title" name="Vera" size="18" color="0xffffff"/>
+	<font label="bmovl text" name="Vera" size="14" color="0xffffff"/>
+	<font label="bmovl timer" name="Vera Mono" size="12" color="0xffffff"/>
+	<font label="bmovl clock" name="Vera Mono" size="14" color="0xffffff"/>
 
 
 

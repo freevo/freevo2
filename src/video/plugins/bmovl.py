@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/07/09 21:12:18  dischi
+# more bmovl fixes, still unstable
+#
 # Revision 1.9  2004/07/08 19:30:54  dischi
 # o make some changes to make it look better
 # o secure write with try except
@@ -94,8 +97,54 @@ class OSDbmovl(OSD):
         self.screen.fill((0,0,0,0))
 
         self.bmovl  = os.open('/tmp/bmovl', os.O_WRONLY)
+        self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
 
 
+    def load_scaled_image(self, filename, width, height):
+        i = self.loadbitmap(filename)
+        if not i:
+            return None
+        scale = max(float(i.get_width()) / width, float(i.get_height()) / height)
+        return pygame.transform.scale(i, (int(i.get_width() / scale),
+                                          int(i.get_height() / scale)))
+
+
+
+    def calc_update_area(self, x0, y0, x1, y1):
+        self.x0 = min(x0, self.x0)
+        self.y0 = min(y0, self.y0)
+        self.x1 = max(x1, self.x1)
+        self.y1 = max(y1, self.y1)
+
+
+    def screenblit(self, source, destpos, sourcerect=None):
+        if sourcerect:
+            w = sourcerect[2]
+            h = sourcerect[3]
+            ret = self.screen.blit(source, destpos, sourcerect)
+        else:
+            w, h = source.get_size()
+            ret = self.screen.blit(source, destpos)
+        self.calc_update_area(destpos[0], destpos[1], destpos[0] + w, destpos[1] + h)
+        return ret
+
+
+    def drawbox(self, x0, y0, x1, y1, width=None, color=None, fill=0, layer=None):
+        if layer == None:
+            self.calc_update_area(x0, y0, x1, y1)
+        return OSD.drawbox(self, x0, y0, x1, y1, width, color, fill, layer)
+
+
+    def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
+                         bgcolor=None, align_h='left', align_v='top', mode='hard',
+                         layer=None, ellipses='...', dim=True):
+        ret = OSD.drawstringframed(self, string, x, y, width, height, font, fgcolor,
+                                   bgcolor, align_h, align_v, mode, layer, ellipses, dim)
+        if not layer:
+            self.calc_update_area(ret[1][0], ret[1][1], ret[1][2], ret[1][3])
+        return ret
+    
+        
     def close(self):
         print 'close'
         os.close(self.bmovl)
@@ -122,8 +171,15 @@ class OSDbmovl(OSD):
             pass
 
         
-    def update(self, rect):
+    def update(self, rect=None):
+        if not rect:
+            if self.x0 > self.x1:
+                return
+            rect = self.x0, self.y0, self.x1 - self.x0, self.y1 - self.y0
+            self.x0, self.y0, self.x1, self.y1 = self.width, self.height, 0, 0
+        
         update = self.screen.subsurface(rect)
+
         try:
             os.write(self.bmovl, 'RGBA32 %d %d %d %d %d %d\n' % \
                      (update.get_width(), update.get_height(), rect[0], rect[1], 0, 0))
@@ -168,9 +224,16 @@ class PluginInterface(plugin.Plugin):
         self.osd_visible = False
         self.bmovl = None
 
-        self.start = 0
-        if self.player.item_info and hasattr(self.player.item_info, 'ts_start'):
-            self.start = self.player.item_info.ts_start
+        self.start  = 0
+        try:
+            self.length = int(self.item.info['length'])
+        except:
+            self.lebgth = 0
+        if self.player.item_info:
+            length = int(self.player.item_info.length)
+            if hasattr(self.player.item_info, 'ts_start'):
+                self.start = self.player.item_info.ts_start
+
         self.last_timer = self.start
         
         self.bg  = None
@@ -197,9 +260,7 @@ class PluginInterface(plugin.Plugin):
         bg = self.bmovl.loadbitmap(skin.get_singleton().settings.images['background'])
         bg = pygame.transform.scale(bg, (self.bmovl.width, self.bmovl.height))
 
-        self.bmovl.screen.blit(bg, (0,0))
-
-        self.clockfont = skin.get_singleton().get_font('clock')
+        self.clockfont = skin.get_singleton().get_font('bmovl timer')
 
         # bar at the bottom
         self.height  = config.OSD_OVERSCAN_Y + 100 + self.clockfont.height
@@ -207,6 +268,9 @@ class PluginInterface(plugin.Plugin):
         self.x0      = config.OSD_OVERSCAN_X + 10
         self.width   = self.bmovl.width - 2 * self.x0
         
+        self.bmovl.screenblit(bg, (0, self.y0), (0, self.y0, self.bmovl.width,
+                                                 self.bmovl.height - self.y0))
+
         self.bmovl.drawbox(0, self.y0 + 1, self.bmovl.width, self.y0 + 1,
                            width=1, color=0x000000)
 
@@ -214,15 +278,17 @@ class PluginInterface(plugin.Plugin):
                            self.y0 + self.clockfont.height + 4, width=1, color=0x000000)
 
 
-        self.bmovl.update((0, self.bmovl.height-self.height, self.bmovl.width, self.height))
+        # draw movie image
+        f = os.path.join(config.IMAGE_DIR, 'gant/movie.png')
+        i = self.bmovl.load_scaled_image(f, 90, 90)
+        if i:
+            self.bmovl.screenblit(i, (self.x0 + self.width - i.get_width(), self.y0 + 30))
 
         # draw movie image
-        i = self.bmovl.loadbitmap(os.path.join(config.IMAGE_DIR, 'gant/movie.png'))
-        scale = max(float(i.get_width()) / 200, float(i.get_height()) / \
-                    (self.height-config.OSD_OVERSCAN_Y-30))
-        image = pygame.transform.scale(i, (int(i.get_width() / scale),
-                                           int(i.get_height() / scale)))
-        self.bmovl.screen.blit(image, (self.x0, self.y0+30))
+        f = skin.get_singleton().settings.images['logo']
+        i = self.bmovl.load_scaled_image(f, 200, 90)
+        if i:
+            self.bmovl.screenblit(i, (self.x0, self.y0 + 30))
 
         title   = self.item.name
         
@@ -230,14 +296,21 @@ class PluginInterface(plugin.Plugin):
             show     = config.VIDEO_SHOW_REGEXP_SPLIT(self.item.name)
             title    = String(show[0]) + " " + String(show[1]) + "x" + \
                        String(show[2]) + ' - ' + String(show[3])
-            
-        font = skin.get_singleton().get_font('title')
-        pos  = self.bmovl.drawstringframed(title, self.x0 + 100, self.y0 + 40,
-                                           self.width - 100, -1, font)
 
-        self.bmovl.update((0, self.bmovl.height-self.height, self.bmovl.width, self.height))
+        offset = 20 + i.get_width()
 
-        self.elapsed(self.last_timer)
+        font = skin.get_singleton().get_font('bmovl title')
+        pos  = self.bmovl.drawstringframed(title, self.x0 + offset, self.y0 + 40,
+                                           self.width - offset, -1, font)
+
+        font = skin.get_singleton().get_font('bmovl text')
+        pos  = self.bmovl.drawstringframed('%s min.' % (self.length / 60),
+                                           self.x0 + offset, self.y0 + 80,
+                                           self.width - offset, -1, font)
+
+        self.elapsed(self.last_timer, update=False)
+
+        self.bmovl.update()
 
         # and show it
         self.bmovl.show()
@@ -303,7 +376,7 @@ class PluginInterface(plugin.Plugin):
             return '%d:%02d' % (timer / 60, timer % 60)
 
         
-    def elapsed(self, timer):
+    def elapsed(self, timer, update=True):
         """
         update osd
         """
@@ -312,13 +385,13 @@ class PluginInterface(plugin.Plugin):
             
         if self.osd_visible:
             start = self.start
-            end   = self.start + int(self.item.info['length'])
+            end   = self.start + self.length
 
             if not self.bg:
                 self.bg = pygame.Surface((self.width, 30))
                 self.bg.blit(self.bmovl.screen, (0, 0), (self.x0, self.y0, self.width, 30))
             else:
-                self.bmovl.screen.blit(self.bg, (self.x0, self.y0))
+                self.bmovl.screenblit(self.bg, (self.x0, self.y0))
 
             # new calc the bar
             pos = (max(timer - start, 0) * (self.width - 200)) / (end - start)
@@ -354,26 +427,28 @@ class PluginInterface(plugin.Plugin):
                                         self.y0 + 3, 120, -1, font,
                                         align_v='center', align_h='center')
 
-            self.bmovl.update((self.x0, self.y0, self.width, 30))
+            if update:
+                self.bmovl.update()
 
-
+            font = skin.get_singleton().get_font('bmovl clock')
 	    if time.strftime('%P') =='':
                 format ='%a %H:%M'
             else:
                 format ='%a %I:%M %P'
-            
+
             if not self.cbg:
-                self.cbg = pygame.Surface((self.bmovl.width - 110, 65))
+                self.cbg = pygame.Surface((200, 30))
                 self.cbg.blit(self.bmovl.screen, (0, 0),
-                              (self.x0 + self.width - 200, self.y0 + 65, 200, 30))
+                              (self.x0 + self.width - 200, self.y0 + 78, 200, 30))
             else:
-                self.bmovl.screen.blit(self.cbg, (self.x0 + self.width - 200, self.y0 + 65))
+                self.bmovl.screenblit(self.cbg, (self.x0 + self.width - 200, self.y0 + 78))
 
             self.bmovl.drawstringframed(time.strftime(format),
-                                        self.x0 + self.width - 200, self.y0 + 68,
+                                        self.x0 + self.width - 200, self.y0 + 80,
                                         200, -1, font, align_h='right')
 
-            self.bmovl.update((self.x0 + self.width - 200, self.y0 + 65, 200, 30))
+            if update:
+                self.bmovl.update()
 
         else:
             self.last_timer = timer
