@@ -50,8 +50,7 @@ class PluginInterface(plugin.ItemPlugin):
 
         infolist = xml_parser.save_parseMovieFile(file, os.path.dirname(file),[])
         for info in infolist:
-            print info.image
-            box = AlertBox(icon=info.image, width=550, height=400, text=' %s\n \n %s\n \n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s' % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
+            box = AlertBox(icon=info.image, width=550, height=400, text='%s\n \n \n  %s\n \n \n----\n Year: %s\n Genre: %s\n Rating: %s\n Runtime: %s' % (info.name,info.info['plot'],info.info['year'],info.info['genre'],info.info['rating'],info.info['length']))
             box.show()
         return
 
