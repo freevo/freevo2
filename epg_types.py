@@ -118,7 +118,7 @@ class TvGuide:
             c.tunerid = chan.tunerid
             c.logo = chan.logo
             # Copy the programs that are inside the indicated time bracket
-            f = lambda p: not (p.start > stop or p.stop < start)
+            f = lambda p, a=start, b=stop: not (p.start > b or p.stop < a)
             c.programs = filter(f, chan.programs)
 
             channels.append(c)
