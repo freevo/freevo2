@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.34  2003/03/30 17:00:34  dischi
+# typo
+#
 # Revision 1.33  2003/03/30 16:15:30  dischi
 # make it possible to define image filenames extra
 #
@@ -604,7 +607,7 @@ class XML_rectangle(XML_data):
 
     def prepare(self, color, search_dirs=None, image_names=None):
         if color.has_key(self.color):
-            self.color = color[seld.color]
+            self.color = color[self.color]
         if color.has_key(self.bgcolor):
             self.bgcolor = color[self.bgcolor]
 
