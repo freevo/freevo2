@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.78  2003/10/14 17:58:04  dischi
+# more debug
+#
 # Revision 1.77  2003/10/04 18:37:28  dischi
 # i18n changes and True/False usage
 #
@@ -290,6 +293,7 @@ def main_func():
             event, event_repeat_count = rc_object.poll()
             # OK, now we have a repeat_count... to whom could we give it?
             if event:
+                _debug_('handling event %s' % str(event), 2)
                 break
 
             for p in poll_plugins:

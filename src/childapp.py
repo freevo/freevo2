@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/10/14 17:57:32  dischi
+# more debug
+#
 # Revision 1.27  2003/10/11 11:21:14  dischi
 # use util killall function
 #
@@ -97,6 +100,7 @@ import os
 import popen2
 import threading, thread
 import signal
+import traceback
 
 import config
 import osd
@@ -131,6 +135,10 @@ class ChildApp:
         __all_childapps__.append(self)
 
         self.lock = thread.allocate_lock()
+
+        if config.DEBUG > 1:
+            _debug_('starting new child: %s', app)
+            traceback.print_stack()
 
         prio = 0
         if app.find('--prio=') == 0 and not config.RUNAPP:
@@ -203,20 +211,27 @@ class ChildApp:
         if self in __all_childapps__:
             __all_childapps__.remove(self)
             
+        if config.DEBUG > 1:
+            _debug_('killing my child')
+            traceback.print_stack()
+
         # killed already
         if not self.child:
+            _debug_('already dead', 2)
             return
 
         self.lock.acquire()
         # maybe child is dead and only waiting?
         try:
             if os.waitpid(self.child.pid, os.WNOHANG)[0] == self.child.pid:
+                _debug_('done the easy way', 2)
                 self.child = None
                 if not self.infile.closed:
                     self.infile.close()
                 self.lock.release()
                 return
         except OSError:
+            _debug_('OSError, already dead', 2)
             # Already dead?
             self.child = None
             self.lock.release()
@@ -228,6 +243,7 @@ class ChildApp:
                 _debug_('childapp: killing pid %s signal %s' % (self.child.pid, signal))
                 os.kill(self.child.pid, signal)
         except OSError:
+            _debug_('OSError, already dead? This should never happen', 2)
             # Already dead?
             self.child = None
             self.lock.release()
@@ -377,6 +393,10 @@ class ChildThread(threading.Thread):
 
 
     def stop(self, cmd=None):
+        if config.DEBUG > 1:
+            _debug_('got stop command')
+            traceback.print_stack()
+            
         if self.mode != 'play':
             _debug_('not playing anymore')
             return

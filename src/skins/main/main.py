@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/10/14 17:57:32  dischi
+# more debug
+#
 # Revision 1.15  2003/10/12 11:01:20  dischi
 # Don't show black screen between selecting and playing an audio file
 #
@@ -571,6 +574,7 @@ class Skin:
         """
         clean the screen
         """
+        _debug_('clear: %s' % osd_update, 2)
         self.force_redraw = TRUE
         osd.clearscreen(osd.COL_BLACK)
         if osd_update:
@@ -581,6 +585,7 @@ class Skin:
         """
         redraw the current screen
         """
+        _debug_('redraw', 2)
         if self.last_draw[0] and self.last_draw[1]:
             self.draw(self.last_draw)
 
@@ -592,6 +597,7 @@ class Skin:
         the audio player
         """
 
+        _debug_('draw', 2)
         if not self.settings.prepared:
             self.settings.prepare()
             

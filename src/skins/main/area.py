@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/14 17:57:32  dischi
+# more debug
+#
 # Revision 1.9  2003/10/11 12:34:36  dischi
 # Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to config
 # to add more control when to switch to text view.
@@ -166,6 +169,7 @@ class Screen:
             osd.screen.lock()
 
         if force_redraw:
+            _debug_('show, force update', 2)
             self.update_bg      = (0,0,osd.width, osd.height)
             self.update_alpha   = []
             self.update_content = []
