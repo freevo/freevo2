@@ -7,6 +7,10 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/03/30 17:43:44  rshortt
+# Passing self to skin.GetPopupBoxStyle in an attempt to get the skin
+# properties of the current menu in case we are using a menu based skin.
+#
 # Revision 1.12  2003/03/30 15:54:07  rshortt
 # Added 'parent' as a constructor argument for PopupBox and all of its
 # derivatives.
@@ -180,7 +184,7 @@ class GUIObject:
         # This if/else should be removed when the new skin is in place.
         if config.NEW_SKIN:
             ((bg_type, skin_bg), skin_spacing, skin_color, BLAH, BLAH, BLAH) = \
-             self.skin.GetPopupBoxStyle()
+             self.skin.GetPopupBoxStyle(self)
         else:
             skin_spacing = None
             if not self.bg_color:
