@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/01/08 22:17:55  mikeruelle
+# not needed and is now annoying because of new osd behavior in new tvtime releases.
+#
 # Revision 1.27  2004/01/06 00:58:40  mikeruelle
 # better osd message support
 #
@@ -665,4 +668,3 @@ class TVTimeApp(childapp.ChildApp2):
     def setchannel(self, channelno):
         cmd = 'CHANNEL_%s\n' % channelno
         self.write(cmd)
-        self.write('enter\n')
