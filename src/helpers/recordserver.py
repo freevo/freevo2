@@ -7,6 +7,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.66  2004/11/14 15:57:25  dischi
+# better chuid handling
+#
 # Revision 1.65  2004/11/12 20:39:21  dischi
 # recordserver is working now
 #
@@ -59,11 +62,6 @@ import time
 import os
 import pwd
 import traceback
-import config
-import plugin
-import childapp
-import notifier
-import record.server
 
 # change uid
 try:
@@ -74,6 +72,12 @@ try:
         os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
 except Exception, e:
     print e
+
+import config
+import plugin
+import childapp
+import notifier
+import record.server
 
 while 1:
     try:
