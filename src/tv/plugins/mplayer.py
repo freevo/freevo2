@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/10/28 19:43:52  dischi
+# remove broken imports
+#
 # Revision 1.43  2004/10/06 19:01:33  dischi
 # use new childapp interface
 #
@@ -60,8 +63,6 @@ import util    # Various utilities
 
 import event as em
 import childapp # Handle child applications
-import tv.epg_xmltv as epg # The Electronic Program Guide
-from tv.channels import FreevoChannels
 import tv.ivtv as ivtv
 import plugin
 import eventhandler
@@ -89,7 +90,7 @@ class PluginInterface(plugin.Plugin):
 class MPlayer(TVPlayer):
 
     def __init__(self):
-        TVPlayer.__init__('mplayer')
+        TVPlayer.__init__(self, 'mplayer')
         
 
     def rate(self):
