@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2004/08/23 20:38:56  dischi
+# fix osd stop/restart
+#
 # Revision 1.59  2004/08/23 12:39:59  dischi
 # remove osd.py dep
 #
@@ -372,11 +375,11 @@ class ChildApp2(ChildApp):
         if stop_osd == 2: 
             self.is_video = 1
             eventhandler.post(Event(VIDEO_START))
-            stop_osd = config.OSD_STOP_WHEN_PLAYING
+            stop_osd = 1
 
         self.stop_osd = stop_osd
         if self.stop_osd:
-           gui.display.stop()
+            gui.display.hide()
         
         if hasattr(self, 'item'):
             eventhandler.post(Event(PLAY_START, arg=self.item))
@@ -432,7 +435,7 @@ class ChildApp2(ChildApp):
 
         # Ok, we can use the OSD again.
         if self.stop_osd:
-            gui.display.restart()
+            gui.display.show()
 
         if self.is_video:
             eventhandler.post(Event(VIDEO_END))
