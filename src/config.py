@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.112  2004/08/09 14:02:52  dischi
+# first draft of new tv card setup
+#
 # Revision 1.111  2004/08/01 10:57:12  dischi
 # add messages for deactivated plugins
 #
@@ -179,6 +182,7 @@ class VideoGroup:
         self.tuner = None
 
 
+
 def print_config_changes(conf_version, file_version, changelist):
     """
     print changes made between version on the screen
@@ -302,6 +306,46 @@ def _debug_function_(s, level=1):
 
             
 __builtin__.__dict__['_debug_']= _debug_function_
+
+
+#
+# TV card settup
+#
+
+class TVSettings(dict):
+    def __setitem__(self, key, val):
+        # FIXME: key has to end with number or we crash here
+        number = key[-1]
+        dict.__setitem__(self, key, val(number))
+    
+
+class TVCard:
+    def __init__(self, number):
+        self.vdev = '/dev/video' + number
+        self.adev = None
+
+        
+class DVBCard:
+    def __init__(self, number):
+        self.adapter = '/dev/dvb/adapter' + number
+        _debug_('register dvb device %s' % self.adapter)
+
+TV_SETTINGS = TVSettings()
+
+# auto-load TV_SETTINGS:
+for i in range(10):
+    if os.path.isdir('/dev/dvb/adapter%s' % i):
+        TV_SETTINGS['dvb%s' % i] = DVBCard
+    if os.path.isdir('/dev/video%s' % i):
+        TV_SETTINGS['tv%s' % i]  = TVCard
+
+
+# TESTCODE FOR freevo_config.py:
+TV_SETTINGS['tv0']  = TVCard
+TV_SETTINGS['tv0'].adev = '/dev/dsp'
+TV_SETTINGS['dvb0'] = DVBCard
+
+
 
 
 #
