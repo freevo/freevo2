@@ -22,6 +22,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2003/09/14 20:08:11  dischi
+# o add TRUE and FALSE to the buildin objects for Python < 2.3
+# o add a _debug_ function to buildin. All files can use _debug_ to write
+#   debug messages. Even with DEBUG=0, debugs will be made to the logfile
+#   (but not stdout)
+#
 # Revision 1.48  2003/09/11 15:50:25  dischi
 # delete LD_PRELOADS after startup
 #
@@ -56,6 +62,8 @@
 
 import sys, os, time, re
 import setup_freevo
+import traceback
+import __builtin__
 
 class Logger:
     """
@@ -65,24 +73,25 @@ class Logger:
     def __init__(self, logtype='(unknown)'):
         self.lineno = 1
         self.logtype = logtype
+        appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+        logfile = '%s/%s-%s.log' % (LOGDIR, appname, os.getuid())
+        self.logfile = logfile
         try:
-            appname = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-            logfile = '%s/internal-%s-%s.log' % (LOGDIR, appname, os.getuid())
             self.fp = open(logfile, 'a')
-            if DEBUG: print 'Logging info in %s' % logfile
         except IOError:
             print 'Could not open logfile: %s' % logfile
             self.fp = open('/dev/null','a')
         self.softspace = 0
-        ts = time.asctime(time.localtime(time.time()))
-        if DEBUG: self.write('-' * 79 + '\n')
-        if DEBUG: self.write('Starting %s at %s\n' % (logtype, ts))
-        
         
     def write(self, msg):
         global DEBUG_STDOUT
         if DEBUG_STDOUT:
             sys.__stdout__.write(msg)
+        self.fp.write(msg)
+        self.fp.flush()
+        return
+
+    def log(self, msg):
         self.fp.write(msg)
         self.fp.flush()
         return
@@ -136,7 +145,6 @@ def print_config_changes(conf_version, file_version, changelist):
             print
     print
             
-    
 
 #
 # get information about what is started here:
@@ -167,6 +175,11 @@ DEBUG_STDOUT = 1
 #
 DEBUG = 0
 
+# add TRUE and FALSE to __builtin__ for older python versions
+if float(sys.version[0:3]) < 2.3:
+    __builtin__.__dict__['TRUE']  = 1
+    __builtin__.__dict__['FALSE'] = 0
+
 #
 # find the log directory
 #
@@ -184,6 +197,23 @@ else:
 if not HELPER:
     sys.stdout = Logger(sys.argv[0] + ':stdin')
     sys.stderr = Logger(sys.argv[0] + ':stderr')
+    ts = time.asctime(time.localtime(time.time()))
+    sys.stdout.log('-' * 79 + '\n')
+    sys.stdout.log('Freevo start at %s\n' % ts)
+    sys.stdout.log('-' * 79 + '\n')
+
+def _debug_function_(s, level=1):
+    if DEBUG > 0:
+        # add the current trace to the string
+        where =  traceback.extract_stack(limit = 2)[0]
+        s = '%s (%s): %s' % (where[0][where[0].rfind('/')+1:], where[1], s)
+    if DEBUG >= level:
+        print s
+    elif DEBUG == 0 and level == 1:
+        if isinstance(sys.stderr, Logger):
+            sys.stderr.log(s+'\n')
+            
+__builtin__.__dict__['_debug_']= _debug_function_
 
 
 #
@@ -230,8 +260,8 @@ for dirname in [os.path.expanduser('~/.freevo'), '/etc/freevo']:
 #
 # Search for freevo.conf:
 #
-for dir in cfgfilepath:
-    freevoconf = dir + '/freevo.conf'
+for dirname in cfgfilepath:
+    freevoconf = dirname + '/freevo.conf'
     if os.path.isfile(freevoconf):
         if DEBUG:
             print 'Loading configure settings: %s' % freevoconf
@@ -284,7 +314,7 @@ if not HELPER:
                   'has no DISPLAY set.'
             print 'Setting display to fbdev.'
             CONF.display='fbdev'
-   
+
 #
 # Load freevo_config.py:
 #
@@ -342,6 +372,10 @@ else:
     print 'the location of freevo_config.py is %s' % os.environ['FREEVO_CONFIG']
     print
 
+
+if not HELPER:
+    _debug_('Logging to %s' % sys.stdout.logfile)
+   
 
 #
 # force fullscreen when freevo is it's own windowmanager
