@@ -26,5 +26,12 @@ typedef float float32;
   printf ("%s:%s():%d: %s\n", __FILE__, __FUNCTION__, __LINE__, tmp);         \
 }
 
+#define EXIT(str, args...) {                                                  \
+  char tmp[100000] ;                                                          \
+  sprintf (tmp, str, ## args);                                                \
+  printf ("%s:%s():%d: %s\n", __FILE__, __FUNCTION__, __LINE__, tmp);         \
+  exit (1);                                                                   \
+}
+
 
 #endif /* _FREEVO_PORTABLE_H_ */
