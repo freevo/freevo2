@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.21  2004/05/20 15:52:35  outlyer
+# Use the user-specified time format... date is still hardcoded though.
+#
 # Revision 1.20  2004/03/22 05:33:59  outlyer
 # Removed a line of debug.
 #
@@ -124,6 +127,7 @@ import util.tv_util as tv_util
 
 import tv.record_client as ri
 from www.web_types import HTMLResource, FreevoResource
+import config
 
 TRUE = 1
 FALSE = 0
@@ -199,10 +203,11 @@ class SearchResource(FreevoResource):
     
                 if ri.isProgAFavorite(prog, favs):
                     status = 'favorite'
-    
+   
+
                 fv.tableRowOpen('class="chanrow"')
-                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
-                fv.tableCell(time.strftime('%b %d %H:%M', time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
+                fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(prog.start)), 'class="'+status+'" colspan="1"')
+                fv.tableCell(time.strftime('%b %d ' + config.TV_TIMEFORMAT, time.localtime(prog.stop)), 'class="'+status+'" colspan="1"')
 
                 chan = tv_util.get_chan_displayname(prog.channel_id)
                 if not chan: chan = 'UNKNOWN'
