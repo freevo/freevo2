@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.36  2003/04/23 06:30:45  krister
+# Changed fullscreen toggling, the state is kept throughout stop/restart display, and can be queried so that other apps (e.g. tvtime) can start up in the correct state.
+#
 # Revision 1.35  2003/04/21 12:57:16  dischi
 # moved SynchronizedObject to util.py
 #
@@ -283,7 +286,7 @@ class OSD:
 
 
     def __init__(self):
-
+        self.fullscreen = 0 # Keep track of fullscreen state
         self.focused_app = None
 
         self.fontcache = objectcache.ObjectCache(300, desc='font')
@@ -322,7 +325,7 @@ class OSD:
         self.must_lock = self.screen.mustlock()
         
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
-            pygame.display.toggle_fullscreen()
+            self.toggle_fullscreen()
 
         help = ['z = Toggle Fullscreen']
         help += ['Arrow Keys = Move']
@@ -386,7 +389,7 @@ class OSD:
                 if event.key == K_h:
                     self._helpscreen()
                 elif event.key == K_z:
-                    pygame.display.toggle_fullscreen()
+                    self.toggle_fullscreen()
                 elif event.key == K_F10:
                     # Take a screenshot
                     pygame.image.save(self.screen,
@@ -413,10 +416,24 @@ class OSD:
         self.height = config.CONF.height
         self.screen = pygame.display.set_mode((self.width, self.height), self.hw,
                                               self.depth)
+        # We need to go back to fullscreen mode if that was the mode before the shutdown
+        if self.fullscreen:
+            pygame.display.toggle_fullscreen()
+            
         
     def stopdisplay(self):
         pygame.display.quit()
 
+    def toggle_fullscreen(self):
+        # Toggle between 0/1
+        self.fullscreen = (self.fullscreen+1) % 2
+        if pygame.display.get_init():
+            pygame.display.toggle_fullscreen()
+        if DEBUG: print 'OSD: Setting fullscreen mode to %s' % self.fullscreen
+
+    def get_fullscreen(self):
+        return self.fullscreen
+    
     def clearscreen(self, color=None):
         if not pygame.display.get_init():
             return None
@@ -425,7 +442,7 @@ class OSD:
             color = self.default_bg_color
         self.screen.fill(self._sdlcol(color))
         
-
+    
     def setpixel(self, x, y, color):
         pass # XXX Not used anywhere
 
