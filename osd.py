@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2002/08/31 17:18:29  dischi
+# added function to delete a bitmap from cache
+#
 # Revision 1.15  2002/08/21 04:58:26  krister
 # Massive changes! Obsoleted all osd_server stuff. Moved vtrelease and matrox stuff to a new dir fbcon. Updated source to use only the SDL OSD which was moved to osd.py. Changed the default TV viewing app to mplayer_tv.py. Changed configure/setup_build.py/config.py/freevo_config.py to generate and use a plain-text config file called freevo.conf. Updated docs. Changed mplayer to use -vo null when playing music. Fixed a bug in music playing when the top dir was empty.
 #
@@ -554,7 +557,12 @@ class OSD:
 
         return image
 
-    
+    def _deletefromcache(self, filename):
+        for i in range(len(self.bitmapcache)):
+            fname, image = self.bitmapcache[i]
+            if fname == filename:
+                del self.bitmapcache[i]
+        
     def _helpscreen(self):
         self._help = {0:1, 1:0}[self._help]
         
