@@ -7,6 +7,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2004/08/13 12:29:14  rshortt
+# This should keep updateFavoritesSchedule from stopping a running recording
+# if it is a favorite.
+#
 # Revision 1.3  2004/08/09 12:11:41  rshortt
 # -Add some TODO comments.
 # -Remove .decode() call on prog objects as it isn't there anymore.  It is also possible that we must access the prog object in a different manner now.
@@ -614,7 +618,9 @@ class RecordServer(xmlrpc.XMLRPC):
     
             # if prog.start <= last and favorite:
             (isFav, favorite) = self.isProgAFavorite(prog, favs)
-            if prog.start <= last and isFav:
+            now = time.time()
+            if prog.start <= last and isFav and \
+               not (prog.start <= now and prog.stop > now):
                 self.removeScheduledRecording(prog)
     
         for ch in guide.chan_list:
