@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2002/10/20 16:03:20  outlyer
+# Force seconds in mp3 player to be displayed as two digits. (Previously, if
+# a track was 2 min, 03 sec, it would show as 2:3, now it's 2:03)
+#
 # Revision 1.44  2002/10/20 09:19:12  dischi
 # bugfix
 #
@@ -644,7 +648,7 @@ class Skin:
 
             top += spacing
             DrawText('Length: ', iv, x=left, y=top, align='right')
-            DrawText('%s:%s ' % (info.length / 60, info.length % 60), \
+            DrawText('%d:%02d ' % (int(info.length / 60), int(info.length % 60)), \
                           iv, x=left, y=top)
 
             top += spacing
