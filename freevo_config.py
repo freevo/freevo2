@@ -1203,6 +1203,7 @@ TV_DATETIMEFORMAT = '%A %b %d %I:%M %p' # Thursday September 24 8:54 am
 # More can be found at: http://www.python.org/doc/current/lib/module-time.html
 
 TV_RECORDFILE_MASK = '%%m-%%d %%H:%%M %(progname)s - %(title)s'
+TV_RECORDFILE_SUFFIX = '.avi'
 
 # if using the persitant recordserver
 TV_RECORD_SCHEDULE = '%s/record_schedule.xml' % FREEVO_CACHEDIR
@@ -1269,7 +1270,7 @@ VCR_CMD = (CONF.mencoder + ' ' +
            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
-           '-o %(filename)s.avi ')         # Filled in by Freevo
+           '-o %(filename)s')         # Filled in by Freevo
 
 
 #

@@ -821,7 +821,7 @@ IMAGEVIEWER_BLEND_MODE = -1
 #            'br=128:cbr:mode=3 ' +          # MP3 const. bitrate, 128 kbit/s
 #            '-ffourcc divx ' +              # Force 'divx' ident, better compat.
 #            '-endpos %(seconds)s ' +        # only mencoder uses this so do it here.
-#            '-o %(filename)s.avi ')         # Filled in by Freevo
+#            '-o %(filename)s')         # Filled in by Freevo
 
 
 #
