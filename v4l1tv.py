@@ -91,7 +91,8 @@ class V4L1TV:
         elif mode == 'vcr':
             command = config.WATCH_TV_APP + ' "' + config.VCR_SETTINGS + ' 2"'  # Channel isn't used
         else:
-            outfile = time.strftime("0_rec_%Y-%m-%d_%H%M%S.avi", time.localtime())
+            now = time.localtime(time.time())
+            outfile = time.strftime("0_rec_%Y-%m-%d_%H%M%S.avi", now)
             outfile = config.DIR_RECORD + '/' + outfile
             command = (config.VIDREC_MQ % outfile)
 
