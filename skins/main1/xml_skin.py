@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/05/04 16:45:10  dischi
+# added font scale
+#
 # Revision 1.4  2003/04/24 19:57:54  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -91,6 +94,19 @@ def attr_int(node, attr, default, scale=0.0):
             else:
                 return int(val)
 
+    except ValueError:
+        pass
+    return default
+
+
+def attr_float(node, attr, default):
+    """
+    return the attribute as integer
+    """
+    try:
+        if node.attrs.has_key(('', attr)):
+            return float(node.attrs[('', attr)])
+        
     except ValueError:
         pass
     return default
@@ -552,9 +568,10 @@ class XML_font(XML_data):
             if subnode.name == u'shadow':
                 self.shadow.parse(subnode, scale, current_dir)
 
-    def prepare(self, color, search_dirs=None, image_names=None):
+    def prepare(self, color, search_dirs=None, image_names=None, scale=1.0):
         if color.has_key(self.color):
             self.color = color[self.color]
+        self.size = int(float(self.size) * scale)
         self.h = osd.stringsize('Ajg', self.name, self.size)[1]
 
         if self.shadow.visible:
@@ -723,11 +740,15 @@ class XMLSkin:
         if not os.path.isfile(file):
             return 0
 
+        font_scale = 1.0
+        
         try:
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
+
+                    font_scale = attr_float(freevo_type, "fontscale", 1.0)
 
                     file_geometry = attr_str(freevo_type, "geometry", '')
 
@@ -776,7 +797,7 @@ class XMLSkin:
             search_dirs = self.skin_directories + [ 'skins/images', self.icon_dir, '.' ]
 
             for f in font:
-                font[f].prepare(self._color)
+                font[f].prepare(self._color, scale=font_scale)
                 
             for l in layout:
                 layout[l].prepare(font, self._color, search_dirs, self._images)
