@@ -60,7 +60,7 @@ v4l1tv = v4l1tv.get_singleton()
 def start_tv(menuw=None, arg=None):
     mode = arg[0]
     channel = arg[1]
-    v4l1tv.play(mode, channel)
+    v4l1tv.Play(mode, channel)
     
 
 def main_menu(arg, menuw):

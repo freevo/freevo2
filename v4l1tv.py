@@ -73,20 +73,43 @@ class V4L1TV:
     def __init__(self):
         self.thread = V4L1TV_Thread()
         self.thread.start()
-        self.channel_pos = 0
+        self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         
 
-    def play(self, mode, channel=None):
+    def TunerSetChannel(self, tuner_channel):
+        for pos in range(len(config.TV_CHANNELS)):
+            channel = config.TV_CHANNELS[pos]
+            if channel[2] == tuner_channel:
+                self.tuner_chidx = pos
+                return
+        print 'ERROR: Cannot find tuner channel "%s" in the TV channel listing' % tuner_channel
+        self.tuner_chidx = 0
 
-        if channel != None:
+
+    def TunerGetChannel(self):
+        return config.TV_CHANNELS[self.tuner_chidx][2]
+
+
+    def TunerNextChannel(self):
+        self.tuner_chidx = (self.tuner_chidx+1) % len(config.ch_idx)
+
+
+    def TunerPrevChannel(self):
+        self.tuner_chidx = (self.tuner_chidx-1) % len(config.ch_idx)
+
+        
+    def Play(self, mode, tuner_channel=None):
+
+        if tuner_channel != None:
+            
             try:
-                self.channel_pos = config.TV_CHANNELS.index(channel)
+                self.TunerSetChannel(tuner_channel)
             except ValueError:
                 pass
             
         if mode == 'tv':
-            channel_name = config.TV_CHANNELS[self.channel_pos]
-            inital_channel = '"' + config.TV_SETTINGS + ' ' + channel_name + '"'
+            tuner_channel = self.TunerGetChannel()
+            inital_channel = '"' + config.TV_SETTINGS + ' ' + tuner_channel + '"'
             command = config.WATCH_TV_APP + ' ' + inital_channel
         elif mode == 'vcr':
             command = config.WATCH_TV_APP + ' "' + config.VCR_SETTINGS + ' 2"'  # Channel isn't used
@@ -109,7 +132,7 @@ class V4L1TV:
         self.thread.command = command
         self.thread.mode_flag.set()
         
-        rc.app = self.eventhandler
+        rc.app = self.EventHandler
 
         # Suppress annoying audio clicks
         time.sleep(0.5)
@@ -120,7 +143,7 @@ class V4L1TV:
         print 'started %s app' % self.mode
         
         
-    def stop(self):
+    def Stop(self):
         mixer.setPcmVolume(100)
         mixer.setLineinVolume(0)
         mixer.setMicVolume(0)
@@ -132,36 +155,36 @@ class V4L1TV:
         print 'stopped %s app' % self.mode
 
 
-    def eventhandler(self, event):
+    def EventHandler(self, event):
         print '%s app got %s event' % (self.mode, event)
         if event == rc.MENU or event == rc.STOP or event == rc.SELECT or event == rc.PLAY_END:
-            self.stop()
+            self.Stop()
             rc.app = None
             menuwidget.refresh()
         elif event == rc.CHUP:
             if self.mode == 'vcr':
                 return
             # Go to the next channel in the list
-            self.channel_pos = (self.channel_pos+1) % len(config.TV_CHANNELS)
-            channel = config.TV_CHANNELS[self.channel_pos]
+            self.TunerNextChannel()
+            tuner_channel = self.TunerGetChannel()
             mixer.setLineinVolume(0)
-            self.thread.app.write(config.TV_SETTINGS + ' ' + channel + '\n')
+            self.thread.app.write(config.TV_SETTINGS + ' ' + tuner_channel + '\n')
             time.sleep(0.1)
             mixer.setLineinVolume(90)
         elif event == rc.CHDOWN:
             if self.mode == 'vcr':
                 return
             # Go to the previous channel in the list
-            self.channel_pos = (self.channel_pos-1) % len(config.TV_CHANNELS)
-            channel = config.TV_CHANNELS[self.channel_pos]
+            self.TunerPrevChannel()
             mixer.setLineinVolume(0)
-            self.thread.app.write(config.TV_SETTINGS + ' ' + channel + '\n')
+            tuner_channel = self.TunerGetChannel()
+            self.thread.app.write(config.TV_SETTINGS + ' ' + tuner_channel + '\n')
             time.sleep(0.1)
             mixer.setLineinVolume(90)
         elif event == rc.LEFT:
             if self.mode == 'vcr':
                 return
-            # Fintune minus
+            # Finetune minus
             mixer.setLineinVolume(0)
             self.thread.app.write(config.TV_SETTINGS + ' ' + 'fine_minus' + '\n')
             time.sleep(0.1)
@@ -169,7 +192,7 @@ class V4L1TV:
         elif event == rc.RIGHT:
             if self.mode == 'vcr':
                 return
-            # Fintune minus
+            # Finetune minus
             mixer.setLineinVolume(0)
             self.thread.app.write(config.TV_SETTINGS + ' ' + 'fine_plus' + '\n')
             time.sleep(0.1)
