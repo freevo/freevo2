@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/06 21:41:54  dischi
+# Set AUDIO_CACHE_VERSION to 2 to audio-rebuild the cache if the
+# audio cache is from older versions to avoid crash and manual
+# removal of the cache files
+#
 # Revision 1.2  2003/04/21 18:17:50  dischi
 # Moved the code from interface.py for video/audio/image/games to __init__.py
 #
@@ -45,7 +50,7 @@ import os
 
 from audioitem import AudioItem
 
-AUDIO_CACHE_VERSION = 1
+AUDIO_CACHE_VERSION = 2
 
 def cwd(parent, files):
     """
