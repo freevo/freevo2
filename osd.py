@@ -12,6 +12,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2002/09/24 03:21:46  gsbarbieri
+# Changed stringsize() to _stringsize(). The stringsize() is still avaiable,
+# but now it uses the charsize() to cache values.
+# charsize() use dictionaries to store calculated values. charsize() actually
+# stores everything (char or strings) in the cache structure, but please make
+# the correct use of it, only pass chars to it. To get string's size, please
+# use stringsize().
+#
 # Revision 1.21  2002/09/21 10:12:11  dischi
 # Moved osd.popup_box to skin.PopupBox. A popup box should be part of the
 # skin.
@@ -198,6 +206,8 @@ class OSD:
     COL_MEDIUM_GREEN = 0x54D35D
     COL_DARK_GREEN = 0x038D11
 
+    stringsize_cache = { }
+
 
     def __init__(self):
 
@@ -300,13 +310,13 @@ class OSD:
         pygame.quit()
 
     def restartdisplay(self):
-	pygame.display.init()
+        pygame.display.init()
         self.width = config.CONF.width
         self.height = config.CONF.height
         self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
 
     def stopdisplay(self):
-	pygame.display.quit()
+        pygame.display.quit()
 
     def clearscreen(self, color=None):
         if not pygame.display.get_init():
@@ -515,9 +525,40 @@ class OSD:
 
         return surf
 
-        
+    # Return a (width, height) tuple for the given char, font, size. Use CACHE to speed up things
+    # Gustavo: This function make use of dictionaries to cache values, so we don't have to calculate them all the time
+    def charsize(self, char, font=None, ptsize=0):
+        if self.stringsize_cache.has_key(font):
+            if self.stringsize_cache[font].has_key(ptsize):
+                if not self.stringsize_cache[font][ptsize].has_key(char):
+                    self.stringsize_cache[font][ptsize][char] = self._stringsize(char,font,ptsize)
+            else:
+                self.stringsize_cache[font][ptsize] = {}
+                self.stringsize_cache[font][ptsize][char] = self._stringsize(char,font,ptsize)
+        else:
+            self.stringsize_cache[font] = {}
+            self.stringsize_cache[font][ptsize] = {}
+            self.stringsize_cache[font][ptsize][char] = self._stringsize(char,font,ptsize)
+        return self.stringsize_cache[font][ptsize][char]
+
+
     # Return a (width, height) tuple for the given string, font, size
+    # Gustavo: use the charsize() to speed up things
     def stringsize(self, string, font=None, ptsize=0):
+        size_w = 0
+        size_h = 0
+        for i in range(len(string)):
+            size_w_tmp, size_h_tmp = self.charsize(string[i], font, ptsize)
+            size_w += size_w_tmp
+            if size_h_tmp > size_h:
+                size_h = size_h_tmp
+                
+        return (size_w, size_h)
+    
+
+    # Return a (width, height) tuple for the given string, font, size
+    # Gustavo: Don't use this function directly. Use stringsize(), it is faster (use cache)
+    def _stringsize(self, string, font=None, ptsize=0):
         if not pygame.display.get_init():
             return None
 
