@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2005/01/31 20:00:30  dischi
+# delete files in the background
+#
 # Revision 1.23  2004/11/20 18:23:03  dischi
 # use python logger module for debug
 #
@@ -46,7 +49,6 @@
 # ----------------------------------------------------------------------- */
 
 
-import os
 import config
 import plugin
 import util
@@ -104,25 +106,19 @@ class PluginInterface(plugin.ItemPlugin):
         ConfirmBox(text=_('Delete image about\n \'%s\'?') % self.item.name,
                    handler=self.delete_image, default_choice=1).show()
 
-    def safe_unlink(self, filename):
-        try:
-            os.unlink(filename)
-        except:
-            log.error('can\'t delete %s' % filename)
-        
     def delete_file(self):
         self.item.files.delete()
         if self.menuw:
             self.menuw.delete_submenu(True, True)
 
     def delete_info(self):
-        self.safe_unlink(self.item.files.image)
-        self.safe_unlink(self.item.files.fxd_file)
+        util.unlink(self.item.files.image)
+        util.unlink(self.item.files.fxd_file)
         if self.menuw:
             self.menuw.delete_submenu(True, True)
 
     def delete_image(self):
-        self.safe_unlink(self.item.files.image)
+        util.unlink(self.item.files.image)
         if self.item.parent:
             self.item.image = self.item.parent.image
         else:

@@ -136,13 +136,7 @@ class FileInformation:
         for f in self.files + [ self.fxd_file, self.image ]:
             if not f:
                 continue
-            if os.path.isdir(f) and not os.path.islink(f):
-                shutil.rmtree(f, ignore_errors=1)
-            else:
-                try:
-                    os.unlink(f)
-                except:
-                    log.error('can\'t delete %s' % f)
+            util.unlink(f)
 
 
 class Action:

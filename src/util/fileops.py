@@ -41,11 +41,16 @@ import copy
 import fnmatch
 import gzip
 import stat
+import logging
 
 # freevo imports
 import sysconfig
 import misc
 import vfs
+import popen
+
+# get logging object
+log = logging.getLogger()
 
 
 #
@@ -167,6 +172,19 @@ def rmrf(top=None):
             except (IOError, OSError), e:
                 print 'fileops.rmrf: %s' % e
 
+
+def unlink(filename):
+    try:
+        if os.stat(filename)[stat.ST_SIZE] > 1000000:
+            name = os.path.join(os.path.dirname(filename),
+                                '.' + os.path.basename(filename) + '.freevo~')
+            os.rename(filename, name)
+            popen.Process(['rm', '-rf', name])
+        else:
+            os.unlink(filename)
+    except (OSError, IOError):
+        log.error('can\'t delete %s' % filename)
+        
 
 #
 # find files by pattern or suffix
