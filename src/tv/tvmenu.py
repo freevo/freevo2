@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/11/06 06:08:38  krister
+# Added testcode for viewing the VCR/Composite1 input on the TV card
+#
 # Revision 1.7  2003/10/20 01:41:55  rshortt
 # Moving tv_util from src/tv/ to src/util/.
 #
@@ -178,6 +181,8 @@ class TVMenu(Item):
         items = []
         if config.TV_CHANNELS:
             items.append(menu.MenuItem(_('TV Guide'), action=self.start_tvguide))
+        if 0:
+            items.append(menu.MenuItem(_('View VCR Input'), action=self.start_vcr))
         items.append(DirItem(config.DIR_RECORD, None, name = _('Recorded Shows'),
                              display_type='tv'))
         items.append(menu.MenuItem(_('Scheduled Recordings'), 
@@ -231,3 +236,8 @@ class TVMenu(Item):
             return
 
         TVGuide(self.get_start_time(), start_tv, menuw)
+
+
+    def start_vcr(self, arg, menuw):
+        _debug_('tvmenu: mode=vcr')
+        plugin.getbyname(plugin.TV).Play('vcr', None)

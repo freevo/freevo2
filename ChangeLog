@@ -3,6 +3,12 @@ Freevo Changelog
 
 $Id$
 
+Release XXX (200X-XX-XX):
+-------------------------------
+ * Added testcode for viewing the Composite input on the TV card
+  * Change src/tv/tvmenu.py:181 to enable it
+	
+
 Release 1.4.0-rc3 (2003-11-03):
 -------------------------------
  * Bugfix release:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/11/06 06:08:38  krister
+# Added testcode for viewing the VCR/Composite1 input on the TV card
+#
 # Revision 1.22  2003/10/28 16:08:14  mikeruelle
 # convert to new thread system
 #
@@ -202,20 +205,22 @@ class MPlayer:
                 tmp = { 'television':0, 'composite1':1, 'composite2':2,
                         's-video':3}[cf_input.lower()]
             input = 'input=%s' % tmp
-            chanlist = 'chanlist=%s' % cf_clist
             device= 'device=%s' % cf_device
 
             w, h = config.TV_VIEW_SIZE
             outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
             
-            tvcmd = ('-tv on:driver=%s:%s:%s:%s:'
+            tvcmd = ('tv:// -tv driver=%s:%s:%s:'
                      '%s:width=%s:height=%s:%s %s' %
-                     (config.TV_DRIVER, device, input, norm, chanlist, w, h, outfmt, config.TV_OPTS))
+                     (config.TV_DRIVER, device, input, norm, w, h, outfmt, config.TV_OPTS))
 
-            args = (config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                    config.MPLAYER_VO_DEV_OPTS, tvcmd,
-                    config.MPLAYER_ARGS_TVVIEW)
-            mpl = '%s -vo %s%s -fs %s %s' % args
+            args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
+                    config.MPLAYER_VO_DEV_OPTS, tvcmd)
+
+            if config.MPLAYER_ARGS.has_key('tv'):
+                args += (config.MPLAYER_ARGS['tv'],)
+
+            mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
