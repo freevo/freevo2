@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2003/10/29 03:37:46  krister
+# Added confirmation of shutdown. Do we need an option to disable this?
+#
 # Revision 1.7  2003/10/04 18:37:29  dischi
 # i18n changes and True/False usage
 #
@@ -55,6 +58,7 @@ from plugin import MainMenuPlugin
 import config
 import skin
 import os
+from gui.ConfirmBox import ConfirmBox
 
 skin = skin.get_singleton()
 
@@ -68,28 +72,47 @@ class ShutdownItem(Item):
         """
         return a list of actions for this item
         """
-        items = [ ( self.shutdown_freevo, _('Shutdown Freevo') ),
-                  ( self.shutdown_system, _('Shutdown system') ) ]
+        items = [ (self.confirm_freevo, _('Shutdown Freevo') ),
+                  (self.confirm_system, _('Shutdown system') ) ]
         if config.ENABLE_SHUTDOWN_SYS:
             items.reverse()
         return items
 
 
-    def shutdown_freevo(self, arg=None, menuw=None):
+    def confirm_freevo(self, arg=None, menuw=None):
+        """
+        Pops up a ConfirmBox.
+        """
+        self.menuw = menuw
+        what = _('Do you really want to shut down Freevo?')
+        ConfirmBox(text=what, handler=self.shutdown_freevo, default_choice=1).show()
+        
+        
+    def confirm_system(self, arg=None, menuw=None):
+        """
+        Pops up a ConfirmBox.
+        """
+        self.menuw = menuw
+        what = _('Do you really want to shut down the system?')
+        ConfirmBox(text=what, handler=self.shutdown_system, default_choice=1).show()
+        
+
+    def shutdown_freevo(self):
         """
         shutdown freevo, don't shutdown the system
         """
         import main
-        main.shutdown(menuw=menuw, arg=False)
+        main.shutdown(menuw=self.menuw, arg=False)
 
         
-    def shutdown_system(self, arg=None, menuw=None):
+    def shutdown_system(self):
         """
         shutdown the complete system
         """
         import main
-        main.shutdown(menuw=menuw, arg=True)
-    
+        main.shutdown(menuw=self.menuw, arg=True)
+        
+        
 
 
 #
