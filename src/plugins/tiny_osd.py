@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/10/08 20:19:35  dischi
+# register to OSD_MESSAGE only
+#
 # Revision 1.15  2004/10/06 19:24:02  dischi
 # switch from rc.py to pyNotifier
 #
@@ -72,10 +75,12 @@ class PluginInterface(plugin.DaemonPlugin):
         init the osd
         """
         plugin.DaemonPlugin.__init__(self)
-        self.message    = ''
+        self.events = [ 'OSD_MESSAGE' ]
+        self.message = ''
         self.gui_object = None
         self._timer_id  = None
 
+        
     def update(self):
         """
         update the display

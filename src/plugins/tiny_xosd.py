@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/10/08 20:19:35  dischi
+# register to OSD_MESSAGE only
+#
 # Revision 1.2  2004/07/10 12:33:40  dischi
 # header cleanup
 #
@@ -103,6 +106,7 @@ class PluginInterface(plugin.DaemonPlugin):
         init the osd
         """
         plugin.DaemonPlugin.__init__(self)
+        self.events = [ 'OSD_MESSAGE' ]
         self.plugin_name = 'OSD_MESSAGE'
 
         # Initializing the screen
@@ -166,6 +170,5 @@ class PluginInterface(plugin.DaemonPlugin):
 
         _debug_('%s: %s app got %s event' % (time.time(), self.plugin_name, event))
         if event == OSD_MESSAGE :
-            self.poll_counter = 1
             self.message = event.arg
             self.draw_osd()
