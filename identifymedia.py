@@ -157,7 +157,8 @@ class Identify_Thread(threading.Thread):
                     image = (config.TV_SHOW_IMAGES + show_name + ".png").lower()
                 elif os.path.isfile((config.TV_SHOW_IMAGES + show_name + ".jpg").lower()):
                     image = (config.TV_SHOW_IMAGES + show_name + ".jpg").lower()
-                info = RemovableMediaInfo("DIVX", show_name + ' ('+ volumes + ')', image)
+                info = RemovableMediaInfo("DIVX", show_name + ' ('+ volumes + ')', image,
+                                          xml_file = xml_filename)
 
             else:
                 # nothing found, return the label
