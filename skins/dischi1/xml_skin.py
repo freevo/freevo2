@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/03/23 20:50:07  dischi
+# bugfix
+#
 # Revision 1.29  2003/03/23 19:57:11  dischi
 # Moved skin xml files to skins/xml/type1 and all stuff for blue_round2 to
 # skins/xml/blue_round2
@@ -699,7 +702,7 @@ class XMLSkin:
                 if type == 'all':
                     # if type is all, all types except default are deleted and
                     # the settings will be loaded for default
-                    self.menu = {}
+                    self._menu = {}
                     type = 'default'
                     
                 self._menu[type] = XML_menu()
