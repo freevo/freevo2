@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.121  2004/02/25 17:57:11  dischi
+# bugfix: call parse() for fxd files
+#
 # Revision 1.120  2004/02/23 19:59:33  dischi
 # unicode fixes
 #
@@ -148,7 +151,7 @@ class DirItem(Playlist):
         
         self.dir  = os.path.abspath(directory)
         self.info = mediainfo.get_dir(directory)
-        
+
         if name:
             self.name = Unicode(name)
         elif self.info['title:filename']:
@@ -190,7 +193,7 @@ class DirItem(Playlist):
             self.image = image
             self.files.image = image
         self.folder_fxd = directory+'/folder.fxd'
-        if vfs.isfile(directory+'/folder.fxd'): 
+        if vfs.isfile(self.folder_fxd):
             self.set_fxd_file(self.folder_fxd)
             
         # Check mimetype plugins if they want to add something
@@ -218,6 +221,7 @@ class DirItem(Playlist):
                 parser = util.fxdparser.FXD(self.folder_fxd)
                 parser.set_handler('folder', self.read_folder_fxd)
                 parser.set_handler('skin', self.read_folder_fxd)
+                parser.parse()
             except:
                 print "fxd file %s corrupt" % self.folder_fxd
                 traceback.print_exc()
@@ -237,7 +241,6 @@ class DirItem(Playlist):
 	  </folder>
 	</freevo>
         '''
-
         if node.name == 'skin':
             self.skin_fxd = self.folder_fxd
             return
