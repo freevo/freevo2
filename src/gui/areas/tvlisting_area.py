@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/03 10:16:48  dischi
+# remove old code we do not need anymore
+#
 # Revision 1.9  2004/09/07 18:47:36  dischi
 # fix missing import
 #
@@ -80,8 +83,19 @@ import os
 import time
 import config
 import math
-from area import Area, Geometry
+from area import Area
 from gui import Rectangle
+
+class Geometry:
+    """
+    Simple object with x, y, with, height values
+    """
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width  = width
+        self.height = height
+
 
 class TVListing_Area(Area):
     """
@@ -89,7 +103,7 @@ class TVListing_Area(Area):
     """
 
     def __init__(self):
-        Area.__init__(self, 'listing', imagecachesize=20)
+        Area.__init__(self, 'listing')
         self.last_choices = ( None, None )
         self.last_settings = None
         self.last_items_geometry = None
@@ -221,19 +235,23 @@ class TVListing_Area(Area):
 
         leftarrow = None
         leftarrow_size = (0,0)
-        if area.images['leftarrow']:
-            i = area.images['leftarrow']
-            leftarrow = self.loadimage(i.filename, i)
-            if leftarrow:
-                leftarrow_size = (leftarrow.get_width(), leftarrow.get_height())
+
+        # FIXME: there is no self.loadimage anymore
+        # if area.images['leftarrow']:
+        #     i = area.images['leftarrow']
+        #     leftarrow = self.loadimage(i.filename, i)
+        #     if leftarrow:
+        #         leftarrow_size = (leftarrow.get_width(), leftarrow.get_height())
 
         rightarrow = None
         rightarrow_size = (0,0)
-        if area.images['rightarrow']:
-            i = area.images['rightarrow']
-            rightarrow = self.loadimage(i.filename, i)
-            if rightarrow:
-                rightarrow_size = (rightarrow.get_width(), rightarrow.get_height())
+
+        # FIXME: there is no self.loadimage anymore
+        # if area.images['rightarrow']:
+        #     i = area.images['rightarrow']
+        #     rightarrow = self.loadimage(i.filename, i)
+        #     if rightarrow:
+        #         rightarrow_size = (rightarrow.get_width(), rightarrow.get_height())
 
 
         x_contents = content.x + content.spacing
@@ -345,21 +363,19 @@ class TVListing_Area(Area):
                             r.height-2*r.size ]
                     
 
-            channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
-            if os.path.isfile(channel_logo):
-                channel_logo = self.loadimage(channel_logo, (r.width+1-2*r.size,
-                                                              item_h-2*r.size))
-            else:
-                channel_logo = None
+            channel_logo = None
 
+            # FIXME: there is no self.loadimage anymore
+            # channel_logo = config.TV_LOGOS + '/' + channel.id + '.png'
+            # if os.path.isfile(channel_logo):
+            #    channel_logo = self.loadimage(channel_logo, (r.width+1-2*r.size,
+            #                                                   item_h-2*r.size))
+            # if channel_logo:
+            #    self.objects.append(self.drawimage(channel_logo, (logo_geo[0], logo_geo[1])))
 
-            if channel_logo:
-                self.objects.append(self.drawimage(channel_logo, (logo_geo[0], logo_geo[1])))
-
-
-            else:
-                self.objects.append(self.drawstring(channel.name, label_val.font, content,
-                                x=tx0, y=ty0, width=r.width+2*r.x, height=item_h))
+            self.objects.append(self.drawstring(channel.name, label_val.font, content,
+                                                x=tx0, y=ty0, width=r.width+2*r.x,
+                                                height=item_h))
 
             self.objects.append(self.drawbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r))
             try:

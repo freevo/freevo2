@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/10/03 10:16:48  dischi
+# remove old code we do not need anymore
+#
 # Revision 1.5  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -58,7 +61,7 @@ class Screen_Area(Area):
     this area is the screen or background of the skin
     """
     def __init__(self):
-        Area.__init__(self, 'screen', imagecachesize=3)
+        Area.__init__(self, 'screen')
 
 
 

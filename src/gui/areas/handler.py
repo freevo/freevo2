@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/10/03 10:16:48  dischi
+# remove old code we do not need anymore
+#
 # Revision 1.13  2004/10/03 09:53:33  dischi
 # use only two layer for speed improvement
 #
@@ -327,11 +330,7 @@ class AreaHandler:
             if len(area_definitions.style) > style:
                 area_definitions = area_definitions.style[style]
             else:
-                try:
-                    area_definitions = area_definitions.style[0]
-                except IndexError:
-                    _debug_('index error for %s %s' % (style, 'menu'), 0)
-                    raise
+                area_definitions = area_definitions.style[0]
 
             if area_definitions[0] and area_definitions[1]:
                 self.__scan_for_text_view__(object)
@@ -370,7 +369,7 @@ class AreaHandler:
             if self.visible:
                 self.canvas.update()
             t3 = time.time()
-            _debug_('time debug: %s %s' % (t2-t1, t3-t2), 1)
+            _debug_('time debug: %s %s' % (t2-t1, t3-t2), 2)
 
         except UnicodeError, e:
             print '******************************************************************'

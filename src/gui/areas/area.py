@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/10/03 10:16:48  dischi
+# remove old code we do not need anymore
+#
 # Revision 1.15  2004/10/03 09:53:33  dischi
 # use only two layer for speed improvement
 #
@@ -46,50 +49,6 @@
 # Made the fxdsettings in gui the theme engine and made a better
 # integration for it. There is also an event now to let the plugins
 # know that the theme is changed.
-#
-# Revision 1.9  2004/08/23 12:36:09  dischi
-# crop bg image if the screen area is smaller than the screen
-#
-# Revision 1.8  2004/08/22 20:06:18  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.7  2004/08/14 15:07:34  dischi
-# New area handling to prepare the code for mevas
-# o each area deletes it's content and only updates what's needed
-# o work around for info and tvlisting still working like before
-# o AreaHandler is no singleton anymore, each type (menu, tv, player)
-#   has it's own instance
-# o clean up old, not needed functions/attributes
-#
-# Revision 1.6  2004/08/05 17:30:24  dischi
-# cleanup
-#
-# Revision 1.5  2004/07/27 18:52:30  dischi
-# support more layer (see README.txt in backends for details
-#
-# Revision 1.4  2004/07/25 18:17:34  dischi
-# interface update
-#
-# Revision 1.3  2004/07/24 17:49:05  dischi
-# interface cleanup
-#
-# Revision 1.2  2004/07/24 12:21:30  dischi
-# use new renderer and screen features
-#
-# Revision 1.1  2004/07/22 21:13:39  dischi
-# move skin code to gui, update to new interface started
-#
-# Revision 1.1  2004/07/16 19:51:54  dischi
-# new screen design test code, read future_ideas
-#
-# Revision 1.41  2004/07/10 12:33:41  dischi
-# header cleanup
-#
-# Revision 1.40  2004/04/25 12:38:22  dischi
-# move idlebar image to background
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -127,47 +86,18 @@ from gui import theme_engine as fxdparser
 from gui import Rectangle, Text, Textbox, Image
 
 
-class SkinObjects:
-    """
-    object which stores the different types of objects
-    an area wants to draw
-    """
-    def __init__(self):
-        self.bgimages   = []
-        self.rectangles = []
-        self.images     = []
-        self.text       = []
-
-
-class Geometry:
-    """
-    Simple object with x, y, with, height values
-    """
-    def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width  = width
-        self.height = height
-
-
 class Area:
     """
     the base call for all areas. Each child needs two functions:
-
-    def update_content_needed
-    def update_content
     """
-    def __init__(self, name, imagecachesize=5):
+    def __init__(self, name):
         self.area_name   = name
         self.area_values = None
         self.layout      = None
         self.name        = name
         self.screen      = None
         self.imagelib    = None
-        self.objects     = SkinObjects()
         self.__background__ = []
-        self.imagecache = util.objectcache.ObjectCache(imagecachesize,
-                                                       desc='%s_image' % self.name)
 
 
     def set_screen(self, screen, bg_layer, content_layer):
@@ -181,19 +111,6 @@ class Area:
         self.bg_layer = bg_layer
         self.content_layer = content_layer
         
-    def update_content_needed(self):
-        """
-        this area needs a content update
-        """
-        return True
-
-
-    def update_content(self):
-        """
-        there is no content in this area
-        """
-        return True
-    
 
     def update(self):
         """
@@ -233,16 +150,7 @@ class Area:
         self.viewitem = viewitem
         self.infoitem = infoitem
             
-        if self.area_values:
-            visible = self.area_values.visible
-        else:
-            visible = False
-
-        redraw = self.init_vars(settings, area_definitions)
-
-        # maybe we are NOW invisible
-        if visible and not self.area_values.visible:
-            _debug_('FIXME: handle %s' % self.area_values.name, 0)
+        self.init_vars(settings, area_definitions)
 
         if not self.area_values.visible or not self.layout:
             self.clear_all()
@@ -340,7 +248,6 @@ class Area:
         """
         check which layout is used and set variables for the object
         """
-        redraw = False
         self.settings = settings
 
         try:
@@ -354,21 +261,11 @@ class Area:
                 area.visible = False
 
         if (not self.area_values) or area != self.area_values:
+            area.r = (area.x, area.y, area.width, area.height)
             self.area_values = area
-            redraw = True
 
-        if not area.layout:
-            return redraw
-
-        old_layout  = self.layout
         self.layout = area.layout
-
-        if old_layout and old_layout != self.layout:
-            redraw = True
-
-        area.r = (area.x, area.y, area.width, area.height)
-
-        return redraw
+        return
         
 
     def __draw_background__(self):
@@ -376,7 +273,6 @@ class Area:
         draw the <background> of the area
         """
         area   = self.area_values
-        redraw = True
 
         background_image = []
         background_rect  = []
@@ -396,7 +292,6 @@ class Area:
                     bg.height += 2 * config.OSD_OVERSCAN_Y
                 if bg.label == 'watermark' and self.menu.selected.image:
                     imagefile = self.menu.selected.image
-                    redraw    = True    # bg changed
                 else:
                     imagefile = bg.filename
 
@@ -502,34 +397,6 @@ class Area:
 
     
 
-    def loadimage(self, image, val):
-        """
-        load an image (use self.imagecache)
-        """
-        return None
-        if image.find(config.ICON_DIR) == 0 and image.find(self.settings.icon_dir) == -1:
-            new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
-            if os.path.isfile(new_image):
-                image = new_image
-
-        if isinstance(val, tuple) or isinstance(val, list):
-            w = val[0]
-            h = val[1]
-        else:
-            w = val.width
-            h = val.height
-
-        if w == -1:
-            w = None
-        if h == -1:
-            h = None
-
-        if h == None and w == None:
-            return None
-
-        return self.imagelib.load(image, (w, h), self.imagecache)
-
-        
     def drawimage(self, image, val, background=False):
         """
         draws an image ... or better stores the information about this call
@@ -539,12 +406,12 @@ class Area:
             return None
 
         # FIXME: that doesn't belong here
-        if isstring(image) and image.find(config.ICON_DIR) == 0 and \
-               image.find(self.settings.icon_dir) == -1:
-            # replace the icon
-            new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
-            if os.path.isfile(new_image):
-                image = new_image
+        # if isstring(image) and image.find(config.ICON_DIR) == 0 and \
+        #        image.find(self.settings.icon_dir) == -1:
+        #     # replace the icon
+        #     new_image = os.path.join(self.settings.icon_dir, image[len(config.ICON_DIR)+1:])
+        #     if os.path.isfile(new_image):
+        #         image = new_image
 
         if isinstance(val, tuple):
             if len(val) == 2:

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/03 10:16:48  dischi
+# remove old code we do not need anymore
+#
 # Revision 1.9  2004/09/07 18:45:17  dischi
 # some design improvements, needs still much works
 #
@@ -413,16 +416,17 @@ class Listing_Area(Area):
                        choice.parent.type != 'mediamenu':
                         text = '[%s]' % text
 
-                if choice != menu.selected and hasattr( choice, 'outicon' ) and \
-                       choice.outicon:
-                    icon = self.loadimage(choice.outicon, (vspace-content.spacing,
-                                                            vspace-content.spacing))
-                elif choice.icon:
-                    icon = self.loadimage(choice.icon, (vspace-content.spacing,
-                                                         vspace-content.spacing))
-                if not icon and icon_type:
-                    icon = self.loadimage(settings.icon_dir + '/' + icon_type,
-                                          (vspace-content.spacing, vspace-content.spacing))
+                # FIXME: there is no self.loadimage anymore
+                # if choice != menu.selected and hasattr( choice, 'outicon' ) and \
+                #        choice.outicon:
+                #     icon = self.loadimage(choice.outicon, (vspace-content.spacing,
+                #                                             vspace-content.spacing))
+                # elif choice.icon:
+                #     icon = self.loadimage(choice.icon, (vspace-content.spacing,
+                #                                          vspace-content.spacing))
+                # if not icon and icon_type:
+                #     icon = self.loadimage(settings.icon_dir + '/' + icon_type,
+                #                           (vspace-content.spacing, vspace-content.spacing))
 
                 #
                 # display an icon for the item
