@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2004/08/14 01:26:02  rshortt
+# Oops, we don't need a reference to the epg.
+#
 # Revision 1.8  2004/08/14 01:18:07  rshortt
 # Make tv_grab helper work again, now with pyepg.
 #
@@ -86,7 +89,7 @@ def grab():
 
         print 'caching data, this may take a while'
 
-        epg = pyepg.load(xmltvtmp, os.path.join(config.FREEVO_CACHEDIR, 'epg'))
+        pyepg.load(xmltvtmp, os.path.join(config.FREEVO_CACHEDIR, 'epg'))
         shutil.move(xmltvtmp, config.XMLTV_FILE)
 
 
