@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/04/03 09:13:21  dischi
+# oops
+#
 # Revision 1.29  2003/04/03 09:11:40  dischi
 # lock the surface if necessary and reduce the bitmap cache size to 3 if
 # we use the new skin.
@@ -322,7 +325,7 @@ class OSD:
         self.stringcache = objectcache.ObjectCache(100, desc='string')
         if config.NEW_SKIN:
             self.bitmapcache = objectcache.ObjectCache(3, desc='bitmap')
-        else
+        else:
             self.bitmapcache = objectcache.ObjectCache(30, desc='bitmap')
         
         self.default_fg_color = self.COL_BLACK
