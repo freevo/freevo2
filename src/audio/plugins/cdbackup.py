@@ -5,12 +5,6 @@
 # -----------------------------------------------------------------------
 # $Id$
 # 
-# Revision 1.1  2003/06/25 17:53:35  cornejo
-# Changed from MainMenuPlugin to be an ItemPlugin
-# When ripping to .mp3, made the temporary .wav file reside in /tmp instead of user defined directory
-# Changed get_formatted_cd_info to use mmpython instead of my own function.
-# 
-# 
 # Notes: This is the cdbackup module which can be accessed from the audio menu 
 # by hitting 'e' or enter (not return) whilst a CD is selected.
 # 
@@ -33,6 +27,9 @@
 # Albums with more than one Artist aren't handled very well.
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/07/01 04:34:48  outlyer
+# Fixed header
+#
 # Revision 1.2  2003/07/01 04:31:48  outlyer
 # Cleanup comments, add 'if DEBUG:' to most print statements and change
 # os.system(rm ...) to os.unlink(...)
