@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.129  2004/11/15 03:11:27  rshortt
+# Fixed crash for when DVB device nodes exist but no card of driver is attached.
+#
 # Revision 1.128  2004/11/13 15:57:11  dischi
 # add possible dvb or tv channel settings to TV_SETTINGS
 #
@@ -437,7 +440,13 @@ for i in range(10):
         continue
 
     if os.path.isdir('/dev/dvb/adapter%s' % i):
-        TV_SETTINGS['dvb%s' % i] = DVBCard
+        try:
+            TV_SETTINGS['dvb%s' % i] = DVBCard
+        except OSError: 
+            # likely no device attached
+            continue
+        except: 
+            traceback.print_exc()
 
     vdev = '/dev/video%s' % i
     if os.path.exists(vdev):
