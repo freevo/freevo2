@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/08/08 18:56:37  rshortt
+# Add some quick recordserver events.  I'm planning on reviewing them and
+# adding more with names that make sense.
+#
 # Revision 1.49  2004/08/01 10:56:17  dischi
 # add SCREEN_CONTENT_CHANGE
 #
@@ -570,6 +574,8 @@ OS_EVENT_POPEN2  = Event('OS_EVENT_POPEN2')
 OS_EVENT_WAITPID = Event('OS_EVENT_WAITPID')
 OS_EVENT_KILL    = Event('OS_EVENT_KILL')
 
+RECORD           = Event('RECORD')
+STOP_RECORDING   = Event('STOP_RECORDING')
 RECORD_START     = Event('RECORD_START')
 RECORD_STOP      = Event('RECORD_STOP')
 
