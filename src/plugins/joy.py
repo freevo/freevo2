@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/20 14:37:25  rshortt
+# Patch from Dan Eriksen that:
+# - crash when plugin is activated, but no device is specified in config
+# - bad/confusing error message
+# - treat joystick axis as bool input (adds a dead zone, fixes jitter problems with analog joysticks)
+#
 # Revision 1.4  2003/07/11 02:02:29  rshortt
 # Fix for new events, we must call rc.key_event_mapper for the right event
 # for what context we are in.
@@ -83,7 +89,7 @@ class PluginInterface(plugin.DaemonPlugin):
                                       os.O_RDONLY|os.O_NONBLOCK)
         except OSError:
             print 'Unable to open %s, trying /dev/js%s...' % \
-                  (self.device_name, self.device_name)
+                  (self.device_name, str((config.JOY_DEV - 1)))
             self.device_name = '/dev/js'+str((config.JOY_DEV - 1))
 
             try:
@@ -118,16 +124,16 @@ class PluginInterface(plugin.DaemonPlugin):
             command = config.JOY_CMDS.get(button, '')
             sleep(0.3) # the direction pad can use lower debounce time
         if data[2] == 2:
-            if ((data[3] == 1) & (data[1] < 0)):
+            if ((data[3] == 1) & (data[1] < -16384)):
                 button = 'up'
                 command = config.JOY_CMDS['up']
-            if ((data[3] == 1) & (data[1] > 0)):
+            if ((data[3] == 1) & (data[1] > 16384)):
                 button = 'down'
                 command = config.JOY_CMDS['down']
-            if ((data[3] == 0) & (data[1] < 0)):
+            if ((data[3] == 0) & (data[1] < -16384)):
                 button = 'left'
                 command = config.JOY_CMDS['left']
-            if ((data[3] == 0) & (data[1] > 0)):
+            if ((data[3] == 0) & (data[1] > 16384)):
                 button = 'right'
                 command = config.JOY_CMDS['right']
         if command != '':
