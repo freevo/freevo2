@@ -3,7 +3,7 @@ Freevo Changelog
 
 $Id$
 
-Release 1.4.0-rc? (2003-??-??):
+Release 1.4.0-rc2 (2003-10-22):
 -------------------------------
  * Added a playlist plugin
  * TvTime plugin redo:
@@ -13,13 +13,14 @@ Release 1.4.0-rc? (2003-??-??):
      merges stationlist.xml and tvtime.xml if they exist already
      set tvtime xml parameters if you have 0.9.10 or newer
      added support for custom tuned channels using FREQUENCY_TABLE
+ * Additional translations: da, de, fi, it
 
 	
 Release 1.4.0-rc1 (2003-10-05):
 -------------------------------
  * changes in the directory structure
  * setup.py for normal python installation
- * i18n support: fr, es, sv, nl, pt_BR, no
+ * i18n support: es, fr, nl, no, pt_BR, sv
  * new record server
  * idlebar plugin for lmsensors
  * Merged latest xmltv parsing support
