@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/12 16:31:32  dischi
+# use skin logo as default
+#
 # Revision 1.11  2004/02/08 18:45:23  dischi
 # do not use font.font.stringsize, there is no border calculated, use font.stringsize
 #
@@ -477,9 +480,13 @@ class logo(IdleBarPlugin):
     """
     Display the freevo logo in the idlebar
     """
-    def __init__(self, image='logo.png'):
+    def __init__(self, image=None):
         IdleBarPlugin.__init__(self)
-        self.image = os.path.join(config.IMAGE_DIR, image)
+        self.image = image
         
     def draw(self, (type, object), x, osd):
-        return osd.draw_image(self.image, (x, osd.y + 5, 163, 80))[0]
+        if not self.image:
+            image = osd.settings.images['logo']
+        else:
+            image = os.path.join(config.IMAGE_DIR, self.image)
+        return osd.draw_image(image, (x, osd.y + 5, 163, 80))[0]
