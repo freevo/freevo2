@@ -302,8 +302,9 @@ def _find_recording(event):
 def start_event(event):
     rec, server = _find_recording(event)
     server.start_recording(rec)
-
+    return True
 
 def stop_event(event):
     rec, server = _find_recording(event)
     server.stop_recording(rec)
+    return True
