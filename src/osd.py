@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.135  2004/02/07 11:50:57  dischi
+# fix geometry calculation for border fonts
+#
 # Revision 1.134  2004/02/06 18:24:39  dischi
 # make to possible to override busy icon with skin
 #
@@ -903,7 +906,7 @@ class OSD:
         if height == -1:
             height = font.height
         elif border_color != None:
-            height -= border_radius
+            height -= border_radius * 2
         else:
             height -= abs(shadow_y)
 
@@ -926,7 +929,7 @@ class OSD:
         lines            = []
         current_ellipses = ''
         hard = mode == 'hard'
-        
+
         while(num_lines_left):
             # calc each line and put the rest into the next
             if num_lines_left == 1:
@@ -947,7 +950,6 @@ class OSD:
                     # still nothing? Use the 'hard' way
                     (w, s, r, n) = self.__drawstringframed_line__(string, width, font,
                                                                   'hard', None, ' ')
-
             lines.append((w, s))
             while r and r[0] == '\n':
                 lines.append((0, ' '))
@@ -980,10 +982,9 @@ class OSD:
         if not layer and layer != '':
             layer = self.screen
 
-        if layer:
-            fgcolor  = self._sdlcol(fgcolor)
-            if border_color != None:
-                border_color = self._sdlcol(border_color)
+        fgcolor  = self._sdlcol(fgcolor)
+        if border_color != None:
+            border_color = self._sdlcol(border_color)
                 
         for w, l in lines:
             if not l:
@@ -1035,7 +1036,7 @@ class OSD:
             y0 += line_height
 
         # change max_x, min_x, y and height_needed to reflect the
-        # changes from border and shadow
+        # changes from shadow
         if shadow_x:
             if shadow_x < 0:
                 min_x += shadow_x
@@ -1048,12 +1049,13 @@ class OSD:
             else:
                 height_needed += shadow_y
 
+        # add border radius for each line
         if border_color:
             max_x += border_radius
             min_x -= border_radius
             y     -= border_radius
             height_needed += border_radius * 2
-            
+
         return r, (min_x, y, max_x, y+height_needed)
     
 
