@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/10/14 17:40:11  mikeruelle
+# enable network remote to work.
+#
 # Revision 1.23  2003/09/14 20:09:36  dischi
 # removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
 #
@@ -220,7 +223,7 @@ class RemoteControl:
                     print 'Lost the connection'
                     self.conn.close()
                 else:
-                    return self.key_event_mapper(data)
+                    return self.key_event_mapper(data), None
             except:
                 # No data available
                 pass
