@@ -2,14 +2,25 @@
 %define display  x11
 %define tv_norm  ntsc
 %define chanlist us-cable
-%define runtimever 4
+
+# Set the following variables for each new build
+%define freevover 1.3.2
+%define freevorel pre2
+%define runtimever 4.01
+
+%define prerelease %(echo %{freevorel} | grep -c pre)
+
 Summary:	Freevo
 Name:		freevo
-Version:	1.3.2
-Release:	pre1
+Version:	%{freevover}
+Release:	%{freevorel}
 License:	GPL
 Group:		Applications/Multimedia
-Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{release}.tar.gz
+%if %{prerelease}
+Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{freevorel}.tar.gz
+%else
+Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
+%endif
 Patch0:		%{name}-%{version}-runtime.patch
 Patch1:		%{name}-%{version}-Makefile.patch
 URL:		http://freevo.sourceforge.net/
@@ -31,7 +42,11 @@ and audio.
 
 %prep
 #%setup  -n %{name}
-%setup  -n %{name}-%{version}-%{release}
+%if %{prerelease}
+%setup  -n %{name}-%{version}-%{freevorel}
+%else
+%setup  -n %{name}-%{version}
+%endif
 %patch0 -p0
 %patch1 -p0
 
@@ -102,13 +117,14 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,helpers,rc_client}
+mkdir -p %{buildroot}%{_prefix}/{boot,contrib/lirc,helpers,rc_client}
 mkdir -p %{buildroot}%{_prefix}/{runtime/apps,runtime/dll,runtime/lib}
 mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games/rominfo,gui,image,tv,video/plugins,www/bin,www/htdocs/images,www/htdocs/scripts,www/htdocs/styles}
 mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
 mkdir -p %{buildroot}%{_prefix}/skins/{fonts,icons,images,main1,xml/type1}
+mkdir -p %{buildroot}%{_prefix}/skins/images/{aubin,status}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
-mkdir -p %{buildroot}%{_prefix}/skins/icons/{AquaFusion,gnome,misc,old}
+mkdir -p %{buildroot}%{_prefix}/skins/icons/{AquaFusion/mimetypes,gnome,misc,old}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
@@ -152,21 +168,26 @@ install -m 644 src/www/htdocs/scripts/* %{buildroot}%{_prefix}/src/www/htdocs/sc
 install -m 644 src/www/htdocs/styles/* %{buildroot}%{_prefix}/src/www/htdocs/styles
 
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
-install -m 644 skins/icons/AquaFusion/* %{buildroot}%{_prefix}/skins/icons/AquaFusion
+install -m 644 skins/icons/AquaFusion/*.png skins/icons/AquaFusion/AquaFusion_Icons* %{buildroot}%{_prefix}/skins/icons/AquaFusion
+install -m 644 skins/icons/AquaFusion/mimetypes/* %{buildroot}%{_prefix}/skins/icons/AquaFusion/mimetypes
 install -m 644 skins/icons/misc/* %{buildroot}%{_prefix}/skins/icons/misc
 install -m 644 skins/icons/gnome/* %{buildroot}%{_prefix}/skins/icons/gnome
 install -m 644 skins/icons/old/* %{buildroot}%{_prefix}/skins/icons/old
-install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
+install -m 644 skins/images/*.png %{buildroot}%{_prefix}/skins/images
+install -m 644 skins/images/aubin/* %{buildroot}%{_prefix}/skins/images/aubin
+install -m 644 skins/images/status/* %{buildroot}%{_prefix}/skins/images/status
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
 install -m 644 skins/xml/type1/* %{buildroot}%{_prefix}/skins/xml/type1
 install -m 644 skins/aubin1/* %{buildroot}%{_prefix}/skins/aubin1
 install -m 644 skins/barbieri/* %{buildroot}%{_prefix}/skins/barbieri
+install -m 644 skins/dischi1/* %{buildroot}%{_prefix}/skins/dischi1
 install -m 644 skins/malt1/* %{buildroot}%{_prefix}/skins/malt1
 
 install -m 644 freevo.conf local_conf.py boot/boot_config %{buildroot}%{_sysconfdir}/freevo
 install -m 644 boot/URC-7201B00 %{buildroot}%{_prefix}/boot
-install -m755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
+install -m 755 boot/freevo %{buildroot}%{_sysconfdir}/rc.d/init.d
+install -m 755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
+install -m 755 contrib/lirc/* %{buildroot}%{_prefix}/contrib/lirc
 
 
 install -m 644 testfiles/Images/*.jpg %{buildroot}%{_cachedir}/freevo/testfiles/Images
@@ -174,7 +195,7 @@ install -m 644 testfiles/Images/*.ssr %{buildroot}%{_cachedir}/freevo/testfiles/
 install -m 644 testfiles/Images/Show/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
 install -m 644 testfiles/Images/Bins/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Bins
 install -m 644 testfiles/Mame/* %{buildroot}%{_cachedir}/freevo/testfiles/Mame
-install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
+install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.fxd %{buildroot}%{_cachedir}/freevo/testfiles/Movies
 install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
 install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/Music
 install -m 644 testfiles/Music/*.png %{buildroot}%{_cachedir}/freevo/testfiles/Music
@@ -222,7 +243,9 @@ find %{_prefix}/runtime -name "*.pyc" |xargs rm -f
 
 %files apps
 %defattr(755,root,root,755)
+%{_prefix}/runtime/apps/aumix
 %{_prefix}/runtime/apps/cdparanoia
+%{_prefix}/runtime/apps/jpegtran
 %{_prefix}/runtime/apps/lame
 %{_prefix}/runtime/apps/mplayer
 
@@ -259,6 +282,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Tue Feb 25 2003 TC Wan <tcwan@cs.usm.my>
+- Updated for 1.3.2 builds, automatically detect -pre builds
+
 * Thu Feb 13 2003 TC Wan <tcwan@cs.usm.my>
 - Updated for 1.3.1 release, added missing cgi scripts
 
