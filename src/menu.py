@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.82  2004/02/04 22:32:42  gsbarbieri
+# Changed LEFT/RIGHT behaviour.
+# Now in single column mode it behaves like BACK_ONE_MENU/SELECT and in multi-column mode (2d menus) it goes one item LEFT/RIGHT (as before).
+#
+# This was asked in freevo-devel because it improve usability and it really does, since you just have to use arrows (UP/DOWN,LEFT/RIGHT) to navigate.
+#
 # Revision 1.81  2004/02/01 17:07:13  dischi
 # cosmetic changes
 #
@@ -361,7 +367,8 @@ class MenuWidget(GUIObject):
             self.goto_main_menu()
             return
         
-        if event == MENU_BACK_ONE_MENU:
+        if event == MENU_BACK_ONE_MENU \
+               or (event == MENU_LEFT and self.cols == 1):
             self.back_one_menu()
             return
 
@@ -442,39 +449,25 @@ class MenuWidget(GUIObject):
             return
 
 
-        elif event == MENU_LEFT or event == MENU_PAGEUP:
+        elif event == MENU_PAGEUP:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
             
-            if event == MENU_LEFT and self.cols > 1:
-                curr_selected = self.all_items.index(menu.selected)
-                if curr_selected == 0:
-                    self.goto_prev_page(arg='no_refresh')
-                    try:
-                        curr_selected = self.all_items.index(menu.selected)
-                        if self.rows == 1:
-                            curr_selected = len(self.all_items)
-                    except ValueError:
-                        curr_selected += self.cols
-                curr_selected = max(curr_selected-1, 0)
+            curr_selected = self.all_items.index(menu.selected)
+
+            # Move to the previous page if the current position is at the
+            # top of the list, otherwise move to the top of the list.
+            if curr_selected == 0:
+                self.goto_prev_page()
+            else:
+                curr_selected = 0
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
-
-            else:
-                curr_selected = self.all_items.index(menu.selected)
-
-                # Move to the previous page if the current position is at the
-                # top of the list, otherwise move to the top of the list.
-                if curr_selected == 0:
-                    self.goto_prev_page()
-                else:
-                    curr_selected = 0
-                    menu.selected = self.all_items[curr_selected]
-                    self.refresh()
             return
 
-        elif event == MENU_RIGHT or event == MENU_PAGEDOWN:
+
+        elif event == MENU_PAGEDOWN:
             # Do nothing for an empty file list
             if not len(self.menu_items):
                 return
@@ -482,40 +475,66 @@ class MenuWidget(GUIObject):
             if menu.selected == menu.choices[-1]:
                 return
             
-            if event == MENU_RIGHT and self.cols > 1:
-                curr_selected = self.all_items.index(menu.selected)
-                if curr_selected == len(self.all_items)-1:
-                    self.goto_next_page(arg='no_refresh')
-                    try:
-                        curr_selected = self.all_items.index(menu.selected)
-                        if self.rows == 1:
-                            curr_selected -= 1
-                    except ValueError:
-                        curr_selected -= self.cols
+            curr_selected = self.all_items.index(menu.selected)
+            bottom_index = self.menu_items.index(self.menu_items[-1])
 
-                curr_selected = min(curr_selected+1, len(self.all_items)-1)
+            # Move to the next page if the current position is at the
+            # bottom of the list, otherwise move to the bottom of the list.
+            if curr_selected >= bottom_index:
+                self.goto_next_page()
+            else:
+                curr_selected = bottom_index
                 menu.selected = self.all_items[curr_selected]
                 self.refresh()
+            return
 
-            else:
-                curr_selected = self.all_items.index(menu.selected)
-                bottom_index = self.menu_items.index(self.menu_items[-1])
 
-                # Move to the next page if the current position is at the
-                # bottom of the list, otherwise move to the bottom of the list.
-                if curr_selected >= bottom_index:
-                    self.goto_next_page()
-                else:
-                    curr_selected = bottom_index
-                    menu.selected = self.all_items[curr_selected]
-                    self.refresh()
+        elif event == MENU_LEFT and self.cols > 1:
+            # Do nothing for an empty file list
+            if not len(self.menu_items):
+                return
+
+            curr_selected = self.all_items.index(menu.selected)
+            if curr_selected == 0:
+                self.goto_prev_page(arg='no_refresh')
+                try:
+                    curr_selected = self.all_items.index(menu.selected)
+                    if self.rows == 1:
+                        curr_selected = len(self.all_items)
+                except ValueError:
+                    curr_selected += self.cols
+            curr_selected = max(curr_selected-1, 0)
+            menu.selected = self.all_items[curr_selected]
+            self.refresh()
+            return
+        
+
+        elif event == MENU_RIGHT and self.cols > 1:
+            # Do nothing for an empty file list
+            if not len(self.menu_items):
+                return
+
+            curr_selected = self.all_items.index(menu.selected)
+            if curr_selected == len(self.all_items)-1:
+                self.goto_next_page(arg='no_refresh')
+                try:
+                    curr_selected = self.all_items.index(menu.selected)
+                    if self.rows == 1:
+                        curr_selected -= 1
+                except ValueError:
+                    curr_selected -= self.cols
+
+            curr_selected = min(curr_selected+1, len(self.all_items)-1)
+            menu.selected = self.all_items[curr_selected]
+            self.refresh()
             return
 
 
         elif event == MENU_PLAY_ITEM and hasattr(menu.selected, 'play'):
             menu.selected.play(menuw=self)
             
-        elif event == MENU_SELECT or event == MENU_PLAY_ITEM:
+        elif event == MENU_SELECT or event == MENU_PLAY_ITEM \
+                 or (event == MENU_RIGHT and self.cols == 1):
             action = None
             arg    = None
 
