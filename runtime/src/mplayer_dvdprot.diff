@@ -1,16 +1,4 @@
-diff -Naur mplayer-orig/cfg-common.h mplayer/cfg-common.h
---- mplayer-orig/cfg-common.h	Sat Feb  8 14:52:25 2003
-+++ mplayer/cfg-common.h	Thu Feb 13 22:43:25 2003
-@@ -22,6 +22,8 @@
- 	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
- 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
- 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
-+	{"dvdprotection-override", &dvdprotection_override, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-+	{"nodvdprotection-override", &dvdprotection_override, CONF_TYPE_FLAG, 0, 1, 0, NULL},
- #else
- 	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
- #endif
-diff -Naur mplayer-orig/libmpdemux/stream.h mplayer/libmpdemux/stream.h
+diff -Naur libmpdemux/stream.h libmpdemux/stream.h.prot
 --- mplayer-orig/libmpdemux/stream.h	Sat Jan  4 14:11:06 2003
 +++ mplayer/libmpdemux/stream.h	Thu Feb 13 22:43:55 2003
 @@ -206,6 +206,13 @@
@@ -27,9 +15,20 @@ diff -Naur mplayer-orig/libmpdemux/stream.h mplayer/libmpdemux/stream.h
  #ifdef USE_MPDVDKIT
  #if (USE_MPDVDKIT == 2)
  #include "../libmpdvdkit2/dvd_reader.h"
-diff -Naur mplayer-orig/libmpdvdkit2/libdvdcss.c mplayer/libmpdvdkit2/libdvdcss.c
---- mplayer-orig/libmpdvdkit2/libdvdcss.c	Tue Feb 11 09:25:23 2003
-+++ mplayer/libmpdvdkit2/libdvdcss.c	Thu Feb 13 22:41:41 2003
+--- cfg-common.h	Thu Jun  5 22:30:32 2003
++++ cfg-common.h.prot	Thu Jun  5 22:27:52 2003
+@@ -25,6 +25,9 @@
+ 	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+ #endif
+ 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
++        {"dvdprotection-override", &dvdprotection_override, CONF_TYPE_FLAG, 0, 0, 1, NULL},
++        {"nodvdprotection-override", &dvdprotection_override, CONF_TYPE_FLAG, 0, 1, 0, NULL},
++
+ 
+ #ifdef HAVE_LIBCSS
+         {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
+--- libmpdvdkit2/libdvdcss.c	Thu Jun  5 22:33:10 2003
++++ libmpdvdkit2/libdvdcss.c.prot	Thu Jun  5 22:29:08 2003
 @@ -105,6 +105,8 @@
  #include <unistd.h>
  #include <limits.h>
@@ -39,7 +38,7 @@ diff -Naur mplayer-orig/libmpdvdkit2/libdvdcss.c mplayer/libmpdvdkit2/libdvdcss.
  #include "dvdcss.h"
  
  #include "common.h"
-@@ -129,6 +131,10 @@
+@@ -135,6 +137,10 @@
   */
  char * dvdcss_interface_2 = VERSION;
  
@@ -50,7 +49,7 @@ diff -Naur mplayer-orig/libmpdvdkit2/libdvdcss.c mplayer/libmpdvdkit2/libdvdcss.
  /**
   * \brief Open a DVD device or directory and return a dvdcss instance.
   *
-@@ -272,6 +278,20 @@
+@@ -278,6 +284,20 @@
          }
      }
  
