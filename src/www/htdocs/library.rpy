@@ -11,6 +11,9 @@
 #       -stream tv, video and music somehow
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/03/21 23:45:56  mikeruelle
+# remove non dir items from the list of dirs gets rid of webradio oddity
+#
 # Revision 1.22  2004/03/21 23:40:00  mikeruelle
 # unicode breaks several key test rework the interface to cope.
 #
@@ -170,28 +173,23 @@ class LibraryResource(FreevoResource):
         dirs2 = []
 
         if media == 'movies':
-            dirs.extend(config.VIDEO_ITEMS)
+            dirs2.extend(config.VIDEO_ITEMS)
         elif media == 'music':
-            dirs.extend(config.AUDIO_ITEMS)
+            dirs2.extend(config.AUDIO_ITEMS)
         elif media == 'rectv':
-            dirs = [ ('Recorded TV', config.TV_RECORD_DIR) ]
+            dirs2 = [ ('Recorded TV', config.TV_RECORD_DIR) ]
         elif media == 'images':
             dirs2.extend(config.IMAGE_ITEMS)
-            #strip out ssr files
-            for d in dirs2:
-                (title, tdir) = d
-                if os.path.isdir(tdir):
-                    dirs.append(d)
         elif media == 'download':
-            dirs.extend(config.VIDEO_ITEMS)
-            dirs.extend(config.AUDIO_ITEMS)
-            dirs.extend( [ ('Recorded TV', config.TV_RECORD_DIR) ])
+            dirs2.extend(config.VIDEO_ITEMS)
+            dirs2.extend(config.AUDIO_ITEMS)
+            dirs2.extend( [ ('Recorded TV', config.TV_RECORD_DIR) ])
             dirs2.extend(config.IMAGE_ITEMS)
-            #strip out ssr files
-            for d in dirs2:
-                (title, tdir) = d
-                if os.path.isdir(tdir):
-                    dirs.append(d)            
+        #strip out ssr and fxd files
+        for d in dirs2:
+            (title, tdir) = d
+            if os.path.isdir(tdir):
+                dirs.append(d)            
         return dirs
 
     def check_dir(self, media, dir):
