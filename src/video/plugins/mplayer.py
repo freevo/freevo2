@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2004/08/27 14:24:04  dischi
+# more bmovl support
+#
 # Revision 1.84  2004/08/25 12:51:46  dischi
 # moved Application for eventhandler into extra dir for future templates
 #
@@ -22,45 +25,6 @@
 #
 # Revision 1.81  2004/08/23 15:54:15  dischi
 # hide osd on startup
-#
-# Revision 1.80  2004/08/23 14:30:38  dischi
-# support bmovl2
-#
-# Revision 1.79  2004/08/23 12:40:24  dischi
-# add bmovl osd info
-#
-# Revision 1.78  2004/08/22 20:13:09  dischi
-# support for display change (bmovl)
-#
-# Revision 1.77  2004/08/09 14:38:08  dischi
-# fix mplayer version detection
-#
-# Revision 1.76  2004/08/01 10:45:19  dischi
-# make the player an "Application"
-#
-# Revision 1.75  2004/07/26 18:10:20  dischi
-# move global event handling to eventhandler.py
-#
-# Revision 1.74  2004/07/25 19:47:41  dischi
-# use application and not rc.app
-#
-# Revision 1.73  2004/07/10 12:33:43  dischi
-# header cleanup
-#
-# Revision 1.72  2004/07/10 10:36:31  dischi
-# reset elapsed time on restart
-#
-# Revision 1.71  2004/07/08 19:29:43  dischi
-# make sure plugins are stopped
-#
-# Revision 1.70  2004/06/23 19:46:17  dischi
-# prevent mplayer from seeking after the end of a growing file
-#
-# Revision 1.69  2004/06/13 00:36:14  outlyer
-# Without this change, mplayer won't play files on a data DVD. I.e. I have
-# a burned DVD-R with some AVI files on it, but mplayer breaks if I try to play
-# something because the devicename is being passed and mplayer becomes
-# confused.
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -97,7 +61,7 @@ import gui
 
 from application import Application
 from event import *
-
+import rc
 
 class PluginInterface(plugin.Plugin):
     """
@@ -164,7 +128,7 @@ class MPlayer(Application):
         self.seek       = 0
         self.app        = None
         self.plugins    = []
-        
+        self.hide_osd_cb = False
 
     def rate(self, item):
         """
@@ -388,6 +352,16 @@ class MPlayer(Application):
         self.app = None
 
 
+    def hide_osd(self):
+        """
+        Hide the seek osd. This is a rc callback after pressing seek
+        """
+        if not self.osd_visible and self.app and self.app.area_handler:
+            self.app.area_handler.hide()
+            gui.get_display().update()
+        self.hide_osd_cb = False
+        
+        
     def eventhandler(self, event, menuw=None):
         """
         eventhandler for mplayer control. If an event is not bound in this
@@ -424,14 +398,16 @@ class MPlayer(Application):
         if event == TOGGLE_OSD:
             self.osd_visible = not self.osd_visible
             if self.osd_visible:
-                plugin.getbyname('idlebar').show()
-                self.app.write('osd 3\n')
+                #plugin.getbyname('idlebar').show()
+                self.app.area_handler.display_style['video'] = 1
+                self.app.area_handler.draw(self.item)
                 self.app.area_handler.show()
             else:
-                plugin.getbyname('idlebar').hide()
-                self.app.write('osd 1\n')
+                #plugin.getbyname('idlebar').hide()
                 self.app.area_handler.hide()
-            gui.get_display().update()
+                gui.get_display().update()
+                self.app.area_handler.display_style['video'] = 0
+                self.app.area_handler.draw(self.item)
             return True
 
         if event == PAUSE or event == PLAY:
@@ -465,6 +441,14 @@ class MPlayer(Application):
                     # FIXME:
                     # self.app.write('osd_show_text "%s"\n' % _('Seeking not possible'))
                     return False
+                
+            if not self.osd_visible:
+                if self.hide_osd_cb:
+                    rc.unregister(self.hide_osd)
+                else:
+                    self.app.area_handler.show()
+                rc.register(self.hide_osd, False, 200)
+                self.hide_osd_cb = True
                 
             self.app.write('seek %s\n' % event.arg)
             return True
@@ -513,7 +497,7 @@ class Progressbar(Area):
         self.bar_position = gui.theme_engine.Rectangle(bgcolor=0x6e9441L, radius=4)
         self.bar          = None
         self.last_width   = 0
-
+        self.last_layout  = None
         
     def clear(self):
         """
@@ -533,6 +517,14 @@ class Progressbar(Area):
         """
         content = self.calc_geometry(self.layout.content, copy_object=True)
 
+        if self.last_layout != (content.x, content.y, content.width, content.height):
+            _debug_('layout change')
+            for c in self.content:
+                c.unparent()
+            self.content = []
+            self.last_layout = content.x, content.y, content.width, content.height
+            self.last_width = 0
+            
         if not self.content:
             self.content.append(self.drawbox(content.x, content.y, content.width,
                                              content.height, self.bar_border))
@@ -639,6 +631,7 @@ class MPlayerApp(childapp.ChildApp2):
         self.area_handler.screen.frames_per_fade = 10
         self.area_handler.hide(False)
         self.area_handler.draw(self.item)
+        self.write('osd 0\n')
         
 
     def stdout_cb(self, line):
