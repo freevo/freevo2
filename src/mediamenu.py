@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/12/11 16:06:54  dischi
+# First version of a RandomPlaylist. You can access the random playlist
+# from the item menu of the directory. The non-recursive random playlist
+# should be added there, too, but there are some problems, so it's still
+# inside the directory.
+#
 # Revision 1.11  2002/12/11 10:25:28  dischi
 # Sort directories and playlists, too
 #
@@ -80,7 +86,7 @@ import string
 import skin
 
 from item import Item
-from playlist import Playlist
+from playlist import Playlist, RandomPlaylist
 
 import video.interface
 import audio.interface
@@ -257,8 +263,20 @@ class DirItem(Playlist):
             
 
     def actions(self):
-        return [ ( self.cwd, 'browse directory' ) ]
+        items = [ ( self.cwd, 'Browse directory' ) ]
+
+        # this doen't work right now because we have no playlist
+        # at this point :-(
         
+        # if self.playlist and len(self.playlist) > 1:
+        #     items += [ (RandomPlaylist(self.playlist, self),
+        #                 'Random play all items' ) ]
+
+        if not self.display_type or self.display_type == 'audio':
+            items += [ (RandomPlaylist((self.dir, config.SUFFIX_AUDIO_FILES), self),
+                        'Recursive random play all items' ) ]
+        return items
+    
             
     def cwd(self, arg=None, menuw=None):
         """

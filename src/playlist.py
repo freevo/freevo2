@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2002/12/11 16:06:54  dischi
+# First version of a RandomPlaylist. You can access the random playlist
+# from the item menu of the directory. The non-recursive random playlist
+# should be added there, too, but there are some problems, so it's still
+# inside the directory.
+#
 # Revision 1.4  2002/12/03 19:15:17  dischi
 # Give all menu callback functions the parameter arg
 #
@@ -62,6 +68,13 @@ import util
 import config
 
 from item import Item
+
+import video.interface
+import audio.interface
+import image.interface
+import games.interface
+
+# FIXME: remove this and use the interface.py
 from audio.audioitem import AudioItem
 from video.videoitem import VideoItem
 from image.imageitem import ImageItem
@@ -312,3 +325,88 @@ class Playlist(Item):
 
         # give the event to the next eventhandler in the list
         return Item.eventhandler(self, event, menuw)
+
+
+
+
+
+class RandomPlaylist(Playlist):
+    def __init__(self, playlist, parent):
+        Item.__init__(self, parent)
+        self.type     = 'playlist'
+
+        # variables only for Playlist
+        self.current_item = None
+        self.playlist = []
+        self.autoplay = TRUE
+        self.unplayed = playlist
+
+        
+    def actions(self):
+        return [ ( self.play, 'Play' ) ]
+
+
+    def play_next(self, arg=None, menuw=None):
+        element = random.choice(self.unplayed)
+        self.unplayed.remove(element)
+        if not callable(element):
+            # try to get the item for this file
+            files = [ element, ]
+            play_items = []
+            for t in ( 'video', 'audio', 'image', 'games' ):
+                play_items += eval(t + '.interface.cwd(self, files)')
+
+            if not play_items:
+                print 'FIXME: this should never happen'
+                return FALSE
+                
+            element = play_items[0]
+                
+        self.playlist += [ element ]
+        self.current_item = element
+        element.parent = self
+        element(menuw=menuw)
+        return TRUE
+        
+
+    def play(self, arg=None, menuw=None):
+        if isinstance(self.unplayed, tuple):
+            dir, prefix = self.unplayed
+            self.unplayed = util.match_files_recursively(dir, prefix)
+
+        # reset playlist
+        self.unplayed += self.playlist
+        self.playlist = []
+
+        # play
+        if self.unplayed:
+            return self.play_next(arg=arg, menuw=menuw)
+        return FALSE
+
+
+    def cache_next(self):
+        pass
+
+
+    def eventhandler(self, event, menuw=None):
+        if (event == rc.DOWN or event == rc.PLAY_END) and self.unplayed:
+            if self.current_item:
+                self.current_item.parent = self.parent
+            return self.play_next(menuw=menuw)
+        
+        # end and no next item
+        if event == rc.PLAY_END:
+            if self.current_item:
+                self.current_item.parent = self.parent
+            self.current_item = None
+            menuwidget = menu.get_singleton()
+            menuwidget.refresh()
+            return TRUE
+            
+        if event == rc.UP:
+            print 'random playlist up: not implemented yet'
+            return FALSE
+
+        # give the event to the next eventhandler in the list
+        return Item.eventhandler(self, event, menuw)
+    
