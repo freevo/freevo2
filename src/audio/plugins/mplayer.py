@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/07/21 11:18:26  dischi
+# fix unicode error
+#
 # Revision 1.37  2004/07/10 12:33:38  dischi
 # header cleanup
 #
@@ -108,7 +111,7 @@ class MPlayer:
         filename       = item.filename
 
         if filename and not os.path.isfile(filename):
-            return _('%s\nnot found!') % item.url
+            return _('%s\nnot found!') % Unicode(item.url)
             
         if not filename:
             filename = item.url
