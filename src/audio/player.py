@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/08/27 15:27:08  mikeruelle
+# Start of Radio Support
+#
 # Revision 1.4  2003/04/24 19:56:01  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -65,7 +68,10 @@ class PlayerGUI(GUIObject):
 
         self.menuw = menuw
         self.item = item
-        self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
+        if item.type == 'radio':
+            self.player = plugin.getbyname(plugin.RADIO_PLAYER)
+        else:
+            self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
         self.running = FALSE
         
     def play(self):

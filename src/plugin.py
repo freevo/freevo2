@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/08/27 15:25:47  mikeruelle
+# Start of Radio Support
+#
 # Revision 1.29  2003/08/23 12:51:41  dischi
 # removed some old CVS log messages
 #
@@ -130,6 +133,7 @@ VIDEO_PLAYER = 'VIDEO_PLAYER'
 DVD_PLAYER   = 'DVD_PLAYER'
 VCD_PLAYER   = 'VCD_PLAYER'
 TV           = 'TV'
+RADIO_PLAYER   = 'RADIO_PLAYER'
 
 
 
