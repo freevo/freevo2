@@ -208,7 +208,7 @@ LOCAL_CONF_CHANGES = [
      now. Also added OSD_EXTRA_FONT_PATH to search for fonts'''),
     (5.08,
      '''Change MENU_ARROW_NAVIGATION to old style and make blurr the new default
-     skin. Also added RESTART_SYS_CMD.''') ]
+     skin. Also added RESTART_SYS_CMD and OSD_DIM_TEXT.''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -825,7 +825,10 @@ OSD_STOP_WHEN_PLAYING = 0
 
 if CONF.display in ( 'dfbmga', 'dxr3', 'dga' ):
     OSD_STOP_WHEN_PLAYING = 1
-    
+
+# Dim text that doesn't fit instead of using ellipses. 
+OSD_DIM_TEXT = 1
+
 # ======================================================================
 # Remote control section
 # ======================================================================

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.146  2004/03/14 12:55:11  dischi
+# dim support for texts
+#
 # Revision 1.145  2004/03/12 18:33:56  dischi
 # text input patch from Viggo Frederiksen
 #
@@ -544,7 +547,6 @@ class OSD:
         self._screenshotnum = 1
         self.active = True
 
-
         # some functions from pygame
         self.Surface = pygame.Surface
         self.polygon = pygame.draw.polygon
@@ -912,9 +914,29 @@ class OSD:
 
             
 
+    def __draw_transparent_text__(self, surface, pixels=30):
+        """
+        Helper for drawing a transparency gradient end for strings
+        which don't fit it's content area.
+        """
+        #n = time.time()
+        opaque_mod = float(1)
+        opaque_stp = opaque_mod/float(pixels)
+        w, h       = surface.get_size()
+        alpha      = pygame.surfarray.pixels_alpha(surface)
+
+        # transform all the alpha values in x,y range
+        # any speedup could help alot
+        for x in range((w-pixels), w):
+            for y in range(1, h):
+                if alpha[x,y][0] != 0:
+                    alpha[x,y] = int(alpha[x,y][0]*opaque_mod)
+            opaque_mod -= opaque_stp
+
+
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
-                         layer=None, ellipses='...'):
+                         layer=None, ellipses='dim'):
         """
         draws a string (text) in a frame. This tries to fit the
         string in lines, if it can't, it truncates the text,
@@ -947,6 +969,15 @@ class OSD:
         border_color  = None
         border_radius = 0
 
+        dim = False
+        if config.OSD_DIM_TEXT and ellipses == 'dim':
+            ellipses = ''
+            dim = True
+            # XXX pixels to dim, this should probably be tweaked
+            dim_size = 25
+        elif ellipses == 'dim':
+            ellipses = '...'
+            
         if hasattr(font, 'shadow'):
             # skin font
             if font.shadow.visible:
@@ -1028,6 +1059,9 @@ class OSD:
                 # finished, everything fits
                 break
 
+        if len(r) == 0 and dim:
+            dim = False
+
         # calc the height we want to draw (based on different align_v)
         height_needed = (len(lines) - 1) * line_height + font.height
         if align_v == 'bottom':
@@ -1045,11 +1079,18 @@ class OSD:
         fgcolor  = self._sdlcol(fgcolor)
         if border_color != None:
             border_color = self._sdlcol(border_color)
-                
+
+        line_pos = 0
+        dim_line = False
         for w, l in lines:
             if not l:
                 continue
 
+            if dim:
+                line_pos += 1
+                if line_pos == len(lines):
+                    dim_line = True
+                    
             x0 = x
             if layer:
                 try:
@@ -1071,29 +1112,59 @@ class OSD:
                         self.drawbox(x0, y0, x0+render.get_size()[0],
                                      y0+render.get_size()[1], color=bgcolor, fill=1,
                                      layer=layer)
+
                     if border_color:
                         # draw the text 8 times with the border_color to get
                         # the border effect
-                        for ox in (-border_radius, 0, border_radius):
-                            for oy in (-border_radius, 0, border_radius):
-                                if ox or oy:
-                                    layer.blit(font.font.render(l, 1, border_color),
-                                               (x0+ox, y0+oy))
+                        re = font.font.render(l, 1, border_color)
+                        if dim_line:
+                            # draw on a tmp surface if we need to dim. It looks
+                            # bad if we don't do that
+                            tmp = pygame.Surface((render.get_size()[0] + \
+                                                  2 * border_radius,
+                                                  render.get_size()[1] + \
+                                                  2 * border_radius)).convert_alpha()
+                            tmp.fill((255, 0, 0, 0))
+                            
+                            for ox in (0, border_radius, border_radius*2):
+                                for oy in (0, border_radius, border_radius*2):
+                                    if ox or oy:
+                                        tmp.blit(re, (ox, oy))
+                            tmp.blit(render, (border_radius, border_radius))
+                            self.__draw_transparent_text__(tmp,dim_size)
+                            layer.blit(tmp, (x0-border_radius, y0-border_radius))
+
+                        else:
+                            for ox in (-border_radius, 0, border_radius):
+                                for oy in (-border_radius, 0, border_radius):
+                                    if ox or oy:
+                                        layer.blit(re, (x0+ox, y0+oy))
+                                    
                     if shadow_x or shadow_y:
                         # draw the text in the shadow_color to get a shadow
-                        layer.blit(font.font.render(l, 1, shadow_color),
-                                   (x0+shadow_x, y0+shadow_y))
+                        re = font.font.render(l, 1, shadow_color)
+                        if dim_line:
+                            self.__draw_transparent_text__(re, dim_size)
+                        layer.blit(re, (x0+shadow_x, y0+shadow_y))
 
                     # draw the text in the fgcolor
-                    layer.blit(render, (x0, y0))
-                except:
-                    print 'Render failed, skipping \'%s\'...' % l
+                    if not (border_color and dim_line):
+                        if dim_line:
+                            self.__draw_transparent_text__(render, dim_size)
+                        layer.blit(render, (x0, y0))
 
+                except Exception, e:
+                    print 'Render failed, skipping \'%s\'...' % l
+                    print e
+                    if config.DEBUG:
+                        traceback.print_exc()
+                    
             if x0 < min_x:
                 min_x = x0
             if x0 + w > max_x:
                 max_x = x0 + w
             y0 += line_height
+
 
         # change max_x, min_x, y and height_needed to reflect the
         # changes from shadow

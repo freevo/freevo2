@@ -483,6 +483,8 @@ VIDEO_SHOW_DATA_DIR = None
 # devices need this. After playback, the osd will be restored
 # OSD_STOP_WHEN_PLAYING = 0
 
+# Dim text that doesn't fit instead of using ellipses. 
+# OSD_DIM_TEXT = 1
     
 # ======================================================================
 # Remote control section

@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2004/03/14 12:55:11  dischi
+# dim support for texts
+#
 # Revision 1.37  2004/03/14 10:52:53  dischi
 # Make it possible to have a background image above the background rect.
 #
@@ -657,7 +660,7 @@ class Skin_Area:
 
             
     def drawstring(self, text, font, content, x=-1, y=-1, width=None, height=None,
-                   align_h = None, align_v = None, mode='hard', ellipses='...'):
+                   align_h = None, align_v = None, mode='hard', ellipses='dim'):
         """
         writes a text ... or better stores the information about this call
         in a variable. The real drawing is done inside draw()
