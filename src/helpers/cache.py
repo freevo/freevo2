@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.40  2004/09/07 18:57:10  dischi
+# use new thumbnail util
+#
 # Revision 1.39  2004/08/29 18:38:15  dischi
 # make cache helper work again
 #
@@ -63,7 +66,8 @@ import stat
 import time
 import copy
 
-import util.mediainfo
+from util import mediainfo, thumbnail
+
 import plugin
 import directory
 import playlist
@@ -155,7 +159,7 @@ def cache_directories(rebuild):
     if rebuild:
         print 'deleting cache files..................................',
         sys.__stdout__.flush()
-        util.mediainfo.del_cache()
+        mediainfo.del_cache()
         print 'done'
 
     all_dirs = []
@@ -164,7 +168,7 @@ def cache_directories(rebuild):
     for d in config.VIDEO_ITEMS + config.AUDIO_ITEMS + config.IMAGE_ITEMS:
         if os.path.isdir(d[1]):
             all_dirs.append(d[1])
-    util.mediainfo.cache_recursive(all_dirs, verbose=True)
+    mediainfo.cache_recursive(all_dirs, verbose=True)
     
 
 def cache_thumbnails():
@@ -190,14 +194,8 @@ def cache_thumbnails():
 
     files = util.misc.unique(files)
     for filename in copy.copy(files):
-        sinfo = os.stat(filename)
-        thumb = vfs.getoverlay(filename + '.raw')
-        try:
-            if os.stat(thumb)[stat.ST_MTIME] > sinfo[stat.ST_MTIME]:
-                files.remove(filename)
-        except OSError:
-            pass
-
+        if thumbnail.get_name(filename):
+            files.remove(filename)
         for bad_dir in ('.xvpics', '.thumbnails', '.pics'):
             if filename.find('/' + bad_dir + '/') > 0:
                 try:
@@ -212,8 +210,7 @@ def cache_thumbnails():
         if len(fname) > 65:
             fname = fname[:20] + ' [...] ' + fname[-40:]
         print '  %4d/%-4d %s' % (files.index(filename)+1, len(files), fname)
-
-        util.cache_image(filename)
+        thumbnail.create(filename)
 
     if files:
         print
@@ -451,7 +448,7 @@ if __name__ == "__main__":
 #     create_tv_pickle()
     
 # close db
-util.mediainfo.sync()
+mediainfo.sync()
 
 # save cache info
 try:
