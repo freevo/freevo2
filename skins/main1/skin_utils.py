@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/21 13:25:28  dischi
+# use "unknown" icon to always have an icon
+#
 # Revision 1.3  2003/04/20 15:01:08  dischi
 # small fix
 #
@@ -100,6 +103,9 @@ def format_image(settings, item, width, height, force=0):
         elif os.path.isfile('%s/mimetypes/%s.png' % (settings.icon_dir, item.type)):
             imagefile = '%s/mimetypes/%s.png' % (settings.icon_dir, item.type)
 
+        elif os.path.isfile('%s/mimetypes/unknown.png' % settings.icon_dir):
+            imagefile = '%s/mimetypes/unknown.png' % settings.icon_dir
+            
         if not imagefile:
             return None, 0, 0
 
