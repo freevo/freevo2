@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/08/23 22:27:06  gsbarbieri
+# Match (CD|DVD) by mount point
+#
 # Revision 1.41  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
 #
@@ -304,6 +307,8 @@ if not ROM_DRIVES:
         re_dvd       = re.compile( '^(/dev/dvd[0-9]*)[ \t]+([^ \t]+)[ \t]+', re.I )
         re_iso       = re.compile( '^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660', re.I )
         re_automount = re.compile( '^none[ \t]+([^ \t]+) supermount dev=([^,]+)', re.I )
+        re_bymountcd = re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*cdrom[0-9]*)[ \t]+', re.I )
+        re_bymountdvd= re.compile( '^(/dev/[^ \t]+)[ \t]+([^ ]*dvd[0-9]*)[ \t]+', re.I )
         fd_fstab = open('/etc/fstab')
         for line in fd_fstab:
             # Match on the devices /dev/cdrom, /dev/dvd, and fstype iso9660
@@ -312,18 +317,22 @@ if not ROM_DRIVES:
             match_dvd       = re_dvd.match(line)
             match_iso       = re_iso.match(line)
             match_automount = re_automount.match(line)
+            match_bymountcd = re_bymountcd.match(line)
+            match_bymountdvd= re_bymountdvd.match(line)
             mntdir = devname = ''
-            if match_cd:
-                mntdir = match_cd.group(2)
-                devname = match_cd.group(1)
+            if match_cd or match_bymountcd:
+                m = match_cd or match_bymountcd
+                mntdir = m.group(2)
+                devname = m.group(1)
                 dispname = 'CD-%s' % (len(ROM_DRIVES)+1)
             elif match_cdrec: 
                 mntdir = match_cdrec.group(2)
                 devname = match_cdrec.group(1)
                 dispname = 'CDREC-%s' % (len(ROM_DRIVES)+1)
-            elif match_dvd:
-                mntdir = match_dvd.group(2)
-                devname = match_dvd.group(1)
+            elif match_dvd or match_bymountdvd:
+                m = match_dvd or match_bymountdvd
+                mntdir = m.group(2)
+                devname = m.group(1)
                 dispname = 'DVD-%s' % (len(ROM_DRIVES)+1)
             elif match_iso:
                 mntdir = match_iso.group(2)
