@@ -54,6 +54,9 @@ Latest config (20020716)
 ./configure --enable-largefiles --with-extraincdir=/usr/local/include \
   --with-extralibdir=/usr/local/lib
 
+20020812:
+./configure --enable-tv-v4l --enable-mga --enable-runtime-cpudetection
+
 mga_vid driver:
 mknod /dev/mga_vid c 178 0
 
