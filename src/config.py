@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.133  2004/11/21 10:12:46  dischi
+# improve system detect, use config.detect now
+#
 # Revision 1.132  2004/11/20 18:22:58  dischi
 # use python logger module for debug
 #
@@ -112,6 +115,7 @@ import input
 import sysconfig
 import logging
 import util.ioctl as ioctl
+import system
 
 import logging
 log = logging.getLogger()
@@ -625,6 +629,9 @@ except NameError, e:
     pass
 
 OVERLAY_DIR = sysconfig.VFS_DIR
+
+# auto detect function
+detect = system.detect
 
 # make sure USER and HOME are set
 os.environ['USER'] = pwd.getpwuid(os.getuid())[0]

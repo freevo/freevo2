@@ -108,97 +108,95 @@ class DVBCard:
         log.debug('register dvb device %s' % self.adapter)
 
 
-def detect():
-    # auto-load TV_SETTINGS:
-    tvn = 0
-    ivtvn = 0
-    for i in range(10):
-        if os.uname()[0] == 'FreeBSD':
-            if os.path.exists('/dev/bktr%s' % i):
-                key = 'tv%s' % i
-                config.TV_SETTINGS[key] = TVCard
-                config.TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
-                config.TV_SETTINGS[key].driver = 'bsdbt848'
-                config.TV_SETTINGS[key].input = 1
-                log.debug('BSD TV card detected as %s' % key)
-    
+# auto-load TV_SETTINGS:
+tvn = 0
+ivtvn = 0
+for i in range(10):
+    if os.uname()[0] == 'FreeBSD':
+        if os.path.exists('/dev/bktr%s' % i):
+            key = 'tv%s' % i
+            config.TV_SETTINGS[key] = TVCard
+            config.TV_SETTINGS[key].vdev = '/dev/bktr%s' % i
+            config.TV_SETTINGS[key].driver = 'bsdbt848'
+            config.TV_SETTINGS[key].input = 1
+            log.debug('BSD TV card detected as %s' % key)
+
+        continue
+
+    if os.path.isdir('/dev/dvb/adapter%s' % i):
+        try:
+            config.TV_SETTINGS['dvb%s' % i] = DVBCard
+            log.debug('DVB card detected as dvb%s' % i)
+        except OSError:
+            # likely no device attached
+            pass
+        except:
+            traceback.print_exc()
+
+    vdev = '/dev/video%s' % i
+    if os.path.exists(vdev):
+        type = 'tv'
+        driver = None
+        try:
+            import tv.v4l2
+            v = tv.v4l2.Videodev(device=vdev)
+            driver = v.driver
+            if string.find(driver, 'ivtv') != -1:
+                type = 'ivtv'
+            v.close()
+            del v
+        except OSError:
+            # likely no device attached
             continue
-    
-        if os.path.isdir('/dev/dvb/adapter%s' % i):
-            try:
-                config.TV_SETTINGS['dvb%s' % i] = DVBCard
-                log.debug('DVB card detected as dvb%s' % i)
-            except OSError:
-                # likely no device attached
-                pass
-            except:
-                traceback.print_exc()
-    
-        vdev = '/dev/video%s' % i
-        if os.path.exists(vdev):
-            type = 'tv'
-            driver = None
-            try:
-                import tv.v4l2
-                v = tv.v4l2.Videodev(device=vdev)
-                driver = v.driver
-                if string.find(driver, 'ivtv') != -1:
-                    type = 'ivtv'
-                v.close()
-                del v
-            except OSError:
-                # likely no device attached
+        except IOError:
+            # found something that doesn't speak v4l2
+            continue
+        except:
+            traceback.print_exc()
+
+        if type == 'ivtv':
+            key = '%s%s' % (type,ivtvn)
+            log.debug('IVTV card detected as %s' % key)
+            config.TV_SETTINGS[key]  = IVTVCard
+            if ivtvn != i:
+                config.TV_SETTINGS[key].vdev = vdev
+            ivtvn = ivtvn + 1
+
+        else:
+            # Default to 'tv' type as set above.
+            key = '%s%s' % (type,tvn)
+            log.debug('TV card detected as %s' % key)
+            config.TV_SETTINGS[key]  = TVCard
+            if tvn != i:
+                config.TV_SETTINGS[key].vdev = vdev
+            tvn = tvn + 1
+
+        config.TV_SETTINGS[key].driver = driver
+
+for type in ['dvb0', 'tv0', 'ivtv0']:
+    if type in config.TV_SETTINGS.keys():
+        config.TV_DEFAULT_SETTINGS = type
+        break
+
+device_re = re.compile('^((dvb|tv|ivtv)([0-9])?:)?(.*)')
+
+# add all possible channels to the cards
+for card in config.TV_SETTINGS:
+    channels = {}
+    for c in config.TV_CHANNELS:
+        for freq in c[2:]:
+            device, type, number, freq = device_re.match(String(freq)).groups()
+            if number and device[:-1] != card:
                 continue
-            except IOError:
-                # found something that doesn't speak v4l2
+            if type and not card.startswith(type):
                 continue
-            except:
-                traceback.print_exc()
-    
-            if type == 'ivtv':
-                key = '%s%s' % (type,ivtvn)
-                log.debug('IVTV card detected as %s' % key)
-                config.TV_SETTINGS[key]  = IVTVCard
-                if ivtvn != i:
-                    config.TV_SETTINGS[key].vdev = vdev
-                ivtvn = ivtvn + 1
-    
-            else:
-                # Default to 'tv' type as set above.
-                key = '%s%s' % (type,tvn)
-                log.debug('TV card detected as %s' % key)
-                config.TV_SETTINGS[key]  = TVCard
-                if tvn != i:
-                    config.TV_SETTINGS[key].vdev = vdev
-                tvn = tvn + 1
-    
-            config.TV_SETTINGS[key].driver = driver
-    
-    for type in ['dvb0', 'tv0', 'ivtv0']:
-        if type in config.TV_SETTINGS.keys():
-            config.TV_DEFAULT_SETTINGS = type
-            break
-    
-    device_re = re.compile('^((dvb|tv|ivtv)([0-9])?:)?(.*)')
-
-    # add all possible channels to the cards
-    for card in config.TV_SETTINGS:
-        channels = {}
-        for c in config.TV_CHANNELS:
-            for freq in c[2:]:
-                device, type, number, freq = device_re.match(String(freq)).groups()
-                if number and device[:-1] != card:
+            try:
+                freq = int(freq)
+                if card.startswith('dvb'):
                     continue
-                if type and not card.startswith(type):
+            except ValueError:
+                if not card.startswith('dvb'):
                     continue
-                try:
-                    freq = int(freq)
-                    if card.startswith('dvb'):
-                        continue
-                except ValueError:
-                    if not card.startswith('dvb'):
-                        continue
-                channels[c[0]] = freq
+            channels[c[0]] = freq
 
-        config.TV_SETTINGS[card].channels = channels
-
+    config.TV_SETTINGS[card].channels = channels

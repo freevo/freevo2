@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2004/11/21 10:12:47  dischi
+# improve system detect, use config.detect now
+#
 # Revision 1.56  2004/11/20 18:23:05  dischi
 # use python logger module for debug
 #
@@ -88,6 +91,7 @@ class PluginInterface(plugin.Plugin):
     Xine plugin for the video player.
     """
     def __init__(self):
+        config.detect('xine')
 
         try:
             config.XINE_COMMAND

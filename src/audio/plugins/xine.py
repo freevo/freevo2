@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/11/21 10:12:46  dischi
+# improve system detect, use config.detect now
+#
 # Revision 1.22  2004/10/06 19:13:41  dischi
 # use config auto detection for xine version
 #
@@ -57,6 +60,8 @@ class PluginInterface(plugin.Plugin):
     Xine plugin for the audio player.
     """
     def __init__(self):
+        config.detect('xine')
+
         try:
             if not config.CONF.fbxine:
                 raise Exception

@@ -9,8 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/11/21 10:12:47  dischi
+# improve system detect, use config.detect now
+#
 # Revision 1.2  2004/10/25 16:30:05  rshortt
-# Fix crash if freevo.conf entries exist but aren't valid.  Maybe we should also print a warning?
+# Fix crash if freevo.conf entries exist but aren't valid.
+# Maybe we should also print a warning?
 #
 # Revision 1.1  2004/09/28 18:30:24  dischi
 # add autodetect system settings module
@@ -41,37 +45,42 @@ import popen2
 import os
 import stat
 
+import sysconfig
 import config
+import util.cache
 
-def probe(cache):
-    if config.CONF.xine and os.path.exists(config.CONF.xine):
-        timestamp = os.stat(config.CONF.xine)[stat.ST_MTIME]
-        if timestamp != cache['_XINE_TIMESTAMP']:
-            cache['XINE_USE_LIRC'] = 0
-            cache['XINE_VERSION']  = ''
-            child = popen2.Popen3([config.CONF.xine, '--help'])
-            for line in child.fromchild.readlines():
-                if line.find('--no-lirc') > 0:
-                    cache['XINE_USE_LIRC'] = 1
-            child.wait()
+cache = util.cache.Cache(sysconfig.cachefile('xine', True), config, 1)
 
-            child = popen2.Popen3([config.CONF.xine, '--version'])
-            for line in child.fromchild.readlines():
-                if line.find('X11 gui') > 0 and line.rfind(' v') > 0:
-                    cache['XINE_VERSION'] = line[line.rfind(' v')+2:-2]
-            child.wait()
-            cache['_XINE_TIMESTAMP'] = timestamp
-            
-    if config.CONF.fbxine and os.path.exists(config.CONF.fbxine):
-        timestamp = os.stat(config.CONF.fbxine)[stat.ST_MTIME]
-        if timestamp != cache['_FBXINE_TIMESTAMP']:
-            cache['FBXINE_USE_LIRC'] = 0
-            cache['FBXINE_VERSION']  = ''
-            child = popen2.Popen3([config.CONF.fbxine, '--help'])
-            for line in child.fromchild.readlines():
-                if line.find('--no-lirc') > 0:
-                    cache['FBXINE_USE_LIRC'] = 1
-                if line.startswith('fbxine '):
-                    cache['FBXINE_VERSION'] = line[7:line[8:].find(' ')+8]
-            child.wait()
-            cache['_FBXINE_TIMESTAMP'] = timestamp
+if config.CONF.xine and os.path.exists(config.CONF.xine):
+    timestamp = os.stat(config.CONF.xine)[stat.ST_MTIME]
+    if timestamp != cache['_XINE_TIMESTAMP']:
+        cache['XINE_USE_LIRC'] = 0
+        cache['XINE_VERSION']  = ''
+        child = popen2.Popen3([config.CONF.xine, '--help'])
+        for line in child.fromchild.readlines():
+            if line.find('--no-lirc') > 0:
+                cache['XINE_USE_LIRC'] = 1
+        child.wait()
+
+        child = popen2.Popen3([config.CONF.xine, '--version'])
+        for line in child.fromchild.readlines():
+            if line.find('X11 gui') > 0 and line.rfind(' v') > 0:
+                cache['XINE_VERSION'] = line[line.rfind(' v')+2:-2]
+        child.wait()
+        cache['_XINE_TIMESTAMP'] = timestamp
+
+if config.CONF.fbxine and os.path.exists(config.CONF.fbxine):
+    timestamp = os.stat(config.CONF.fbxine)[stat.ST_MTIME]
+    if timestamp != cache['_FBXINE_TIMESTAMP']:
+        cache['FBXINE_USE_LIRC'] = 0
+        cache['FBXINE_VERSION']  = ''
+        child = popen2.Popen3([config.CONF.fbxine, '--help'])
+        for line in child.fromchild.readlines():
+            if line.find('--no-lirc') > 0:
+                cache['FBXINE_USE_LIRC'] = 1
+            if line.startswith('fbxine '):
+                cache['FBXINE_VERSION'] = line[7:line[8:].find(' ')+8]
+        child.wait()
+        cache['_FBXINE_TIMESTAMP'] = timestamp
+
+cache.save()

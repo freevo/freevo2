@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/11/21 10:12:47  dischi
+# improve system detect, use config.detect now
+#
 # Revision 1.11  2004/08/05 17:27:16  dischi
 # Major (unfinished) tv update:
 # o the epg is now taken from pyepg in lib
@@ -61,7 +64,11 @@ class PluginInterface(plugin.MainMenuPlugin):
         """
         return the tv menu
         """
+        import config
         import tvmenu
         import menu
+
+        config.detect('tvcards')
+
         return [ menu.MenuItem('', action=tvmenu.TVMenu().main_menu,
                                type='main', parent=parent, skin_type='tv') ]

@@ -117,6 +117,9 @@ class Cache:
         self.data = load(filename, version)
         if not self.data:
             self.data = {}
+        for key in self.data:
+            if self.module and not key.startswith('_'):
+                setattr(self.module, key, self.data[key])
 
 
     def __getitem__(self, key):

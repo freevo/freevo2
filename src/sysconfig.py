@@ -279,7 +279,7 @@ def cachefile(name, uid=False):
     If uid is True, the uid will be added to the name.
     """
     if uid:
-        return os.path.join(CONF.cachedir, name + '-' + os.getuid())
+        return os.path.join(CONF.cachedir, name + '-' + str(os.getuid()))
     else:
         return os.path.join(CONF.cachedir, name)
 
