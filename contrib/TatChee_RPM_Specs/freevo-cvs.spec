@@ -2,17 +2,14 @@
 %define display  x11
 %define tv_norm  pal
 %define chanlist europe-west
-%define _cvsdate 20021120
+%define _cvsdate 20021129
 Summary:	Freevo
 Name:		freevo
-Version:	1.3.0
+Version:	1.3.1
 Release:	CVS%{_cvsdate}
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}-%{_cvsdate}.tar.gz
-#Patch0:		%{name}-%{version}-configure.patch
-#Patch1:		%{name}-%{version}-configure.patch
-#Patch2:		%{name}-%{version}-freevo_config.py.patch
 URL:		http://freevo.sourceforge.net/
 Requires:	freevo_runtime >= 3
 BuildRequires:	freevo_runtime
@@ -30,16 +27,18 @@ and audio.
 
 %prep
 %setup  -n %{name}
-#%patch0 -p1
-#%patch1 -p0
-#%patch2 -p0
 
 ./configure --geometry=%{geometry} --display=%{display} \
 	--tv=%{tv_norm} --chanlist=%{chanlist}
 
 %build
 make clean; make
-cd plugins/cddb; make
+pushd plugins/cddb
+	make
+popd
+pushd rominfosrc
+	make
+popd
 
 %package boot
 Summary: Files to enable a standalone Freevo system (started from initscript)
@@ -65,36 +64,39 @@ Test files that came with freevo. Placed in %{_cachedir}/freevo
 rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_prefix}
 mkdir -p %{buildroot}%{_prefix}/fbcon/matroxset
-mkdir -p %{buildroot}%{_prefix}/{boot,eyed3,fbcon,gui,helpers,icons,image,plugins,rc_client,skins,tv,video}
-mkdir -p %{buildroot}%{_prefix}/icons/64x64
-mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather}
-mkdir -p %{buildroot}%{_prefix}/plugins/weather/icons
-mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,xml}
-mkdir -p %{buildroot}%{_prefix}/skins/xml/type1
+mkdir -p %{buildroot}%{_prefix}/{boot,gui,helpers,rc_client,rominfosrc}
+mkdir -p %{buildroot}%{_prefix}/src/{audio/eyed3,games,image,tv,video}
+mkdir -p %{buildroot}%{_prefix}/icons/{64x64,gnome}
+mkdir -p %{buildroot}%{_prefix}/plugins/{cddb,weather/icons}
+mkdir -p %{buildroot}%{_prefix}/skins/{fonts,images,main1,xml/type1}
 mkdir -p %{buildroot}%{_prefix}/skins/{aubin1,barbieri,dischi1,krister1,malt1}
 mkdir -p %{buildroot}%{_sysconfdir}/freevo
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images,Movies,Music,tv-show-images}
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
-mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
+mkdir -p %{buildroot}%{_cachedir}/freevo/testfiles/{Images/Show,Images/Bins,Mame,Movies/skin.xml_Test,Music,tv-show-images}
 
-install -m 755 freevo freevo_xwin runapp skin.py strptime.py [A-Z,a-e,g-r,t-z]*.py %{buildroot}%{_prefix}
+install -m 755 freevo freevo_xwin runapp makelogos.py %{buildroot}%{_prefix}
 install -m 644 fbcon/fbset.db %{buildroot}%{_prefix}/fbcon
-install -m 755 fbcon/vtrelease %{buildroot}%{_prefix}/fbcon
-install -m 755 fbcon/*.sh %{buildroot}%{_prefix}/fbcon
+install -m 755 fbcon/vtrelease fbcon/*.sh %{buildroot}%{_prefix}/fbcon
 install -m 755 fbcon/matroxset/matroxset %{buildroot}%{_prefix}/fbcon/matroxset
 install -m 644 gui/* %{buildroot}%{_prefix}/gui
-install -m 644 eyed3/* %{buildroot}%{_prefix}/eyed3
 install -m 644 helpers/* %{buildroot}%{_prefix}/helpers
-install -m 644 image/* %{buildroot}%{_prefix}/image
-install -m 644 tv/* %{buildroot}%{_prefix}/tv
-install -m 644 video/* %{buildroot}%{_prefix}/video
-install -m 644 icons/[a-z]* %{buildroot}%{_prefix}/icons
+install -m 644 icons/*.png %{buildroot}%{_prefix}/icons
 install -m 644 icons/64x64/* %{buildroot}%{_prefix}/icons/64x64
+install -m 644 icons/gnome/* %{buildroot}%{_prefix}/icons/gnome
 install -m 755 plugins/cddb/*.py plugins/cddb/cdrom.so %{buildroot}%{_prefix}/plugins/cddb
 install -m 644 plugins/weather/*.py plugins/weather/librarydoc.txt %{buildroot}%{_prefix}/plugins/weather
 install -m 644 plugins/weather/icons/* %{buildroot}%{_prefix}/plugins/weather/icons
 install -m 644 rc_client/* %{buildroot}%{_prefix}/rc_client
+install -m 644 rominfosrc/rominfo* %{buildroot}%{_prefix}/rominfosrc
+
+install -m 644 src/*.py %{buildroot}%{_prefix}/src
+install -m 644 src/audio/*.py %{buildroot}%{_prefix}/src/audio
+install -m 644 src/audio/eyed3/*.py %{buildroot}%{_prefix}/src/audio/eyed3
+install -m 644 src/games/*.py %{buildroot}%{_prefix}/src/games
+install -m 644 src/image/*.py %{buildroot}%{_prefix}/src/image
+install -m 644 src/tv/*.py %{buildroot}%{_prefix}/src/tv
+install -m 644 src/video/*.py %{buildroot}%{_prefix}/src/video
+
 install -m 644 skins/fonts/* %{buildroot}%{_prefix}/skins/fonts
 install -m 644 skins/images/* %{buildroot}%{_prefix}/skins/images
 install -m 644 skins/main1/* %{buildroot}%{_prefix}/skins/main1
@@ -113,10 +115,12 @@ install -m755 boot/freevo_dep %{buildroot}%{_sysconfdir}/rc.d/init.d
 
 install -m 644 testfiles/Images/*.jpg %{buildroot}%{_cachedir}/freevo/testfiles/Images
 install -m 644 testfiles/Images/*.ssr %{buildroot}%{_cachedir}/freevo/testfiles/Images
-install -m 644 testfiles/Images/Show/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+install -m 644 testfiles/Images/Show/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Show
+install -m 644 testfiles/Images/Bins/* %{buildroot}%{_cachedir}/freevo/testfiles/Images/Bins
+install -m 644 testfiles/Mame/* %{buildroot}%{_cachedir}/freevo/testfiles/Mame
 install -m 644 testfiles/Movies/*.avi testfiles/Movies/*.jpg testfiles/Movies/*.xml %{buildroot}%{_cachedir}/freevo/testfiles/Movies
 install -m 644 testfiles/Movies/skin.xml_Test/* %{buildroot}%{_cachedir}/freevo/testfiles/Movies/skin.xml_Test
-install -m 644 testfiles/Music/*.* %{buildroot}%{_cachedir}/freevo/testfiles/Music
+install -m 644 testfiles/Music/*.mp3 %{buildroot}%{_cachedir}/freevo/testfiles/Music
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -133,40 +137,13 @@ rm -rf %{_logdir}/freevo
 find %{_prefix} -name "*.pyc" |xargs rm -f
 
 %files
-%defattr(644,root,root,755)
-%attr(755,root,root) %dir %{_prefix}
-%attr(755,root,root) %dir %{_prefix}/fbcon
-%attr(755,root,root) %dir %{_prefix}/plugins
-%attr(755,root,root) %dir %{_prefix}/plugins/cddb
-%{_prefix}/eyed3
-%{_prefix}/gui
-%{_prefix}/helpers
-%{_prefix}/icons
-%{_prefix}/image
-%{_prefix}/rc_client
-%{_prefix}/skins
-%{_prefix}/tv
-%{_prefix}/video
-
+%defattr(-,root,root,755)
+%{_prefix}/[c-z]*
 
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
-
-%attr(755,root,root) %{_prefix}/freevo
-%attr(755,root,root) %{_prefix}/freevo_xwin
-%attr(755,root,root) %{_prefix}/runapp
-%attr(644,root,root) %{_prefix}/*.py
-%attr(644,root,root) %{_prefix}/fbcon/fbset.db
-%attr(755,root,root) %{_prefix}/fbcon/vtrelease
-%attr(755,root,root) %{_prefix}/fbcon/*.sh
-%attr(755,root,root) %{_prefix}/fbcon/matroxset
-
-%attr(755,root,root) %{_prefix}/plugins/cddb/cdrom.so
-%attr(644,root,root) %{_prefix}/plugins/cddb/*.py
-%{_prefix}/plugins/weather
-
-%config %{_sysconfdir}/freevo/freevo_config.py
-%config %{_sysconfdir}/freevo/freevo.conf
-%doc BUGS ChangeLog COPYING FAQ INSTALL* README TODO Docs/*
+%attr(644,root,root) %config %{_sysconfdir}/freevo/freevo_config.py
+%attr(644,root,root) %config %{_sysconfdir}/freevo/freevo.conf
+%attr(644,root,root) %doc BUGS ChangeLog COPYING FAQ INSTALL README TODO Docs/*
 
 %files boot
 %defattr(644,root,root,755)
@@ -201,6 +178,9 @@ ln -sf %{_cachedir}/freevo/testfiles %{_prefix}
 rm -f %{_prefix}/testfiles
 
 %changelog
+* Fri Nov 29 2002 TC Wan <tcwan@cs.usm.my>
+- Complete revamp for new directory structure
+
 * Wed Nov 20 2002 TC Wan <tcwan@cs.usm.my>
 - Cleaned up files directive
 
