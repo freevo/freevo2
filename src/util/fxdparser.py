@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/14 18:42:47  dischi
+# add new helper function
+#
 # Revision 1.7  2004/01/10 13:17:43  dischi
 # o always check if fxd file contains <skin>
 # o add filename to fxd object
@@ -268,6 +271,18 @@ class FXD:
         return ret
 
 
+    def get_or_create_child(self, node, name):
+        """
+        return the first child with name or create it (and add it)
+        """
+        for child in node.children:
+            if child.name == name:
+                return child
+        child = XMLnode(name)
+        self.add(child, node)
+        return child
+    
+        
     def childcontent(self, node, name):
         """
         return the content of the child node with the given name
