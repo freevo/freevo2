@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/08/14 16:54:47  rshortt
+# Remove encode() call on program object.
+#
 # Revision 1.47  2004/08/14 15:12:55  dischi
 # use new AreaHandler
 #
@@ -192,7 +195,7 @@ class TVGuide(MenuApplication):
         if got_schedule:
             l = schedule.getProgramList()
             for k in l:
-                self.scheduled_programs.append(l[k].encode())
+                self.scheduled_programs.append(l[k])
 
         
     def eventhandler(self, event):
