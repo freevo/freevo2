@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/03/23 06:28:02  gsbarbieri
+# Corrected drawstringframedhard() truncate.
+#
 # Revision 1.24  2003/03/20 19:27:19  dischi
 # Fix drawstringframedhard: the ellipses must fit the width, too
 #
@@ -959,6 +962,8 @@ class OSD:
         return_y0 = 0
         return_x1 = 0
         return_y1 = 0
+        plain_tab = '   '
+
 
         if DEBUG >= 3:
             print 'drawstringframedhard (%d;%d; w=%d; h=%d) "%s"' % (x, y, width,
@@ -990,42 +995,51 @@ class OSD:
         # Fit chars in lines
         lines = [ '' ]
         line_number = 0
-        ellipse_size = self.stringsize(ellipses, font, ptsize)[0]
+        ellipses_size = self.stringsize(ellipses, font, ptsize)[0]
         for i in range(len(string)):
-            char_size, char_height = self.charsize(string[i], font, ptsize)
-            if ((occupied_size + char_size + ellipse_size) <= width) and (string[i] != '\n'):
+            char = string[i]
+            if string[i] == '\t':
+                char = plain_tab
+            else:
+                char = string[i]
+
+            char_size, char_height = self.charsize(char, font, ptsize)
+
+            if ((occupied_size + char_size) <= width) and (char != '\n'):
+
                 occupied_size += char_size
-                if string[i] == '\t':
-                    lines[line_number] += '   '
-                else:
-                    lines[line_number] += string[i] 
+                lines[line_number] += char
+                
             else:
                 if (occupied_height + char_height) <= height:
-                    occupied_height += word_height
+                    # we can add one more line
+                    occupied_height += word_height                    
                     line_number += 1
                     lines += [ '' ]
-                    if string[i] == '\n':
+                    if char == '\n':
                         # Linebreak due to CR
                         occupied_size = 0
                     else:
                         # Linebreak due to the last character didn't fit,
                         # put it on the next line
                         occupied_size = char_size
-                        lines[line_number] = string[i]
+                        lines[line_number] = char
                 else:
+                    # we can NOT add more lines :(
+                    # add the ellipses indicating we did truncate
                     j = 1
                     len_line = len(lines[line_number])
                     for j in range(len_line):
-                        if (occupied_size + ellipse_size) <= width:
+                        if (occupied_size + ellipses_size) <= width:
                             break
                         char_size = self.charsize(lines[line_number][len_line-j-1],
                                                   font, ptsize)[0]
                         occupied_size -= char_size
                     lines[line_number] = lines[line_number][0:len_line-j]
                     if ellipses:
-                        while ellipses and ellipse_size >= width:
+                        while ellipses and ellipses_size >= width:
                             ellipses = ellipses[:-1]
-                            ellipse_size = self.stringsize(ellipses, font, ptsize)[0]
+                            ellipses_size = self.stringsize(ellipses, font, ptsize)[0]
                         lines[line_number] += ellipses
                     break
         rest_words = string[i:len(string)]
@@ -1038,6 +1052,7 @@ class OSD:
             y0 = y + (height - (line_number+1) * word_height)/ 2
         elif align_v == 'bottom':
             y0 = y + (height - (line_number+1) * word_height)
+
         
         for line in lines:
             # FIXME:
@@ -1048,10 +1063,10 @@ class OSD:
             if align_h == 'left':
                 x0 = x
             elif align_h == 'center' or align_h == 'justified':
-                line_size, line_heigt = self.stringsize(line, font, ptsize)
+                line_size, line_heigth = self.stringsize(line, font, ptsize)
                 x0 = x + (width - line_size) / 2
             elif align_h == 'right':
-                line_size, line_heigt = self.stringsize(line, font, ptsize)
+                line_size, line_heigth = self.stringsize(line, font, ptsize)
                 x0 = x + (width - line_size)
             self.drawstring(line, x0, y0, fgcolor, None, font, ptsize, layer=layer)
             y0 += word_height
