@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.74  2003/02/07 20:18:23  dischi
+# break after a local_skin is found
+#
 # Revision 1.73  2003/02/07 19:27:29  dischi
 # use config.cfgfilepath to find local_skin.xml
 #
@@ -142,7 +145,8 @@ class Skin:
         if os.path.isfile(local_skin):
             if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
             settings.load(local_skin)
-
+            break
+        
     hold = 0
 
 
