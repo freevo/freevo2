@@ -13,6 +13,19 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/06/12 16:47:04  outlyer
+# Tried to make the Amazon search more intelligent.
+#
+# Problem:
+#     If a cover is not available, Amazon returns an 807b GIF file instead
+#     of saying so
+#
+# Solution:
+#     What we do now is check the content length of the file
+#     before downloading and remove those entries from the list.
+#
+# I've also removed the example, since the plugin itself works better.
+#
 # Revision 1.2  2003/06/10 13:13:55  outlyer
 # Initial revision is complete, current main problem is that it only
 # writes 'cover.jpg' someone could add a submenu to choose between
@@ -71,6 +84,8 @@ import os
 import menu
 import plugin
 import re
+import urllib2
+import time
 
 from gui.PopupBox import PopupBox
 
@@ -99,14 +114,29 @@ class PluginInterface(plugin.ItemPlugin):
         amazon.setLicense('...') # must get your own key!
         cover = amazon.searchByKeyword('%s %s' % (artist,album) , product_line="music")
         items = []
-        for i in range(len(cover)):
-            items += [ menu.MenuItem('%s' % cover[i].ProductName,
-                                     self.cover_create, cover[i].ImageUrlLarge) ]
-        moviemenu = menu.Menu('Cover Results', items)
+        
+        # Check if they're valid before presenting the list to the user
+        # Grrr I wish Amazon wouldn't return an empty gif (807b)
 
-        box.destroy()
-        menuw.pushmenu(moviemenu)
-        return
+        for i in range(len(cover)):
+            m = urllib2.urlopen(cover[i].ImageUrlLarge)
+            if not (m.info()['Content-Length'] == '807'):
+                items += [ menu.MenuItem('%s' % cover[i].ProductName,
+                                     self.cover_create, cover[i].ImageUrlLarge) ]
+            else:
+                print "Image Placeholder for '%s - %s' skipped" % ( artist,album)
+       
+            box.destroy()
+        if items: 
+            moviemenu = menu.Menu('Cover Results', items)
+            menuw.pushmenu(moviemenu)
+            return
+        else:
+            box = PopupBox(text='No covers available from Amazon')
+            box.show()
+            time.sleep(2)
+            box.destroy()
+            return
 
 
     def cover_create(self, arg=None, menuw=None):
@@ -115,7 +145,6 @@ class PluginInterface(plugin.ItemPlugin):
         """
         import amazon
         import directory
-        import urllib2 
         # image Image, cStringIO  # Required if you want to convert the file into something, Amazon
                                  # only has JPEGs so it's a wasted step.
         
