@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2004/02/16 18:10:54  outlyer
+# Patch from James A. Laska to make the TV Guide behave intuitively when
+# clicking on a future program. As you would expect, it now pops up the record
+# dialog.
+#
 # Revision 1.23  2004/02/06 20:55:28  dischi
 # move debug to 2
 #
@@ -209,25 +214,29 @@ class TVGuide(gui.GUIObject):
             pass
 
         elif event == em.TV_START_RECORDING:
-            if self.selected.scheduled:
-                program_display.ProgramDisplay(parent=self, context='recording',
-                                                  prog=self.selected).show()
-            else:
-                program_display.ProgramDisplay(parent=self, prog=self.selected).show()
+            self.event_RECORD()
+            self.menuw.refresh()
  
         elif event == em.MENU_SELECT or event == em.PLAY:
             tvlockfile = config.FREEVO_CACHEDIR + '/record'
 
-            if os.path.exists(tvlockfile):
+            # jlaska -- START
+            # Check if the selected program is >7 min in the future
+            # if so, bring up the record dialog
+            now = time.time() + (7*60)
+            if self.selected.start > now:
+                self.event_RECORD()
+            # jlaska -- END
+            elif os.path.exists(tvlockfile):
                 # XXX: In the future add the options to watch what we are
                 #      recording or cencel it and watch TV.
                 AlertBox(text=_('Sorry, you cannot watch TV while recording. ')+ \
                               _('If this is not true then remove ') + \
                               tvlockfile + '.', height=200).show()
                 return TRUE
-
-            self.hide()
-            self.player('tv', self.selected.channel_id)
+            else:
+                self.hide()
+                self.player('tv', self.selected.channel_id)
         
         elif event == em.PLAY_END:
             self.show()
@@ -342,6 +351,12 @@ class TVGuide(gui.GUIObject):
             except:
                 pass
 
+    def event_RECORD(self):
+        if self.selected.scheduled:
+            program_display.ProgramDisplay(parent=self, context='recording',
+                                              prog=self.selected).show()
+        else:
+            program_display.ProgramDisplay(parent=self, prog=self.selected).show()
     def event_RIGHT(self):
         start_time    = self.start_time
         stop_time     = self.stop_time
