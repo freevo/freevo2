@@ -69,7 +69,7 @@ def load(url, size=None, cache=False, vfs_save=False):
             key = 'scaled://%s-%s-%s' % (url, width, height)
         else:
             key = url
-        key += os.stat(url)[stat.ST_MTIME]
+        key += str(os.stat(url)[stat.ST_MTIME])
         
         s = cache[key]
         if s:
