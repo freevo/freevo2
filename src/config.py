@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/02/07 19:26:56  dischi
+# check freevo.conf version _before_ parsing freevo_config.py and REMOTE ist
+# searched using cfgfilepath
+#
 # Revision 1.9  2003/02/07 17:09:19  dischi
 # Changed the config file loading based on the guidelines from Krister.
 #
@@ -222,17 +226,6 @@ if os.path.isfile(cfgfilename):
     print 'Loading cfg: %s' % cfgfilename
     execfile(cfgfilename, globals(), locals())
 
-    if int(str(CONF.version).split('.')[0]) != \
-       int(str(FREEVO_CONF_VERSION).split('.')[0]):
-        print '\nERROR: The version informations in freevo_config.py doesn\'t'
-        print 'match the version in %s.' % freevoconf
-        print 'please rerun configure to generate a new freevo.conf'
-        sys.exit(1)
-
-    if int(str(CONF.version).split('.')[1]) != \
-       int(str(FREEVO_CONF_VERSION).split('.')[1]):
-        print 'WARNING: freevo_config.py was changed, please rerun ./configure'
-    
 else:
     print '\nERROR: can\' find freevo_config.py'
     sys.exit(1)
@@ -272,10 +265,14 @@ else:
 
 #search the remote
 if REMOTE:
-    for dir in ( os.path.expanduser('~/.freevo'), '/etc/freevo', './rc_client' ):
+    for dir in cfgfilepath:
         if os.path.isfile('%s/%s.py' % (dir, REMOTE)):
             print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
             execfile('%s/%s.py' % (dir, REMOTE), globals(), locals())
+            break
+        if os.path.isfile('%s/rc_client/%s.py' % (dir, REMOTE)):
+            print 'load REMOTE file %s/%s.py' % (dir, REMOTE)
+            execfile('%s/rc_client/%s.py' % (dir, REMOTE), globals(), locals())
             break
     else:
         print 'No remote config found'
