@@ -9,6 +9,25 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/26 18:35:43  outlyer
+# A bunch of in progress stuff.  I've been using it for a couple of days, and
+# just thought I'd commit it here since anyone using 'skin_aubin1' is probably
+# unafraid of some in progress stuff.
+#
+# o The TV and Music players both use surfaces rather than redrawing the entire
+#    screen, so the idle bar works
+# o DrawMenu_Cover() shows the album information when you're in a folder of
+#    MP3s. This means that the little box on the left side under the cover has
+#    the album, artist, year and length of the album under it.
+#
+# Current problems:
+# o It doesn't seem to get rid of the album information when you go up into a
+#    directory of directories. It's a noticeable problem if you have your
+#    MP3s organized by Artist/Album, but otherwise you won't see it.
+# o We don't show the MP3 info for a directory, only when you're actually IN
+#    the directory. This is different than how the cover image stuff works.
+#    I have a feeling I'd have to make bigger changes to work around this.
+#
 # Revision 1.8  2003/02/24 06:09:41  outlyer
 # Flicker-free skin for the toolbar. Only redraws the "menu region" rather than
 # the entire screen. It's pretty much a requirement to use my new skin with the
@@ -208,6 +227,7 @@ class Skin:
         self.image = main1_image.Skin_Image()
         self.video = main1_video.Skin_Video()
         self.extended_menu = FALSE
+        self.mysurface = None
         pass
 
 
@@ -405,6 +425,7 @@ class Skin:
         image_x = 0
         val = settings
         menu = menuw.menustack[-1]
+        artist,album,year,length = None, None, None, None
 
         i_val = None
         i_file = None
@@ -483,8 +504,21 @@ class Skin:
                                              val.cover_music.height)
                         i_val = val.cover_music
 
+                    try:
+                        if item.playlist:
+                            length = 0
+                            for bob in item.playlist:
+                                if artist != bob.artist:
+                                    artist='Various'
+                                artist = bob.artist
+                                # IF the artists aren't the same, it's a comp.
+                                album = bob.album
+                                year = bob.year
+                                length += bob.length
+                    except:
+                        continue
 
-        return i_file, max(0, image_x-val.items.default.selection.spacing), i_val
+        return i_file, max(0, image_x-val.items.default.selection.spacing), i_val, artist, album, year, length
 
 
     
@@ -660,7 +694,7 @@ class Skin:
             val = val.menu["default"]
 
 
-        image_object, image_x, image_val = self.DrawMenu_Cover(menuw, val)
+        image_object, image_x, image_val,art,alb,year,length = self.DrawMenu_Cover(menuw, val)
 
         if not menu.surface:
             if image_val:
@@ -699,6 +733,15 @@ class Skin:
                             image_val.y + image_val.height + image_val.border_size,
                             width = image_val.border_size,
                             color = image_val.border_color)
+
+        if art and image_object: # and alb and year and length:
+            #osd.drawstring(art,50,315,fgcolor=0xdddddd,ptsize=12)
+            #osd.drawstring(alb,50,335,fgcolor=0xdddddd,ptsize=12)
+            #osd.drawstring(year,50,355,fgcolor=0xdddddd,ptsize=12)
+            #osd.drawstring('%i:%i' % (int(length/60),int(length%60)),50,375,fgcolor=0xdddddd,ptsize=12)
+            osd.drawstringframedsoft('%s\n%s\n%s\n%i:%i' % (art,alb,year,int(length/60),int(length%60)), 50,315,
+                image_val.width + image_val.border_size, image_val.height + image_val.border_size,
+                fgcolor=0xdddddd,ptsize=12)
             
 
         # Draw the menu choices for the main selection
@@ -774,10 +817,15 @@ class Skin:
 
         if info.drawall:
 
-            if info.image:
+            if not self.mysurface:
                 InitScreen(val, (val.background.mask,val.cover.mask), info.image)
+                self.mysurface = osd.getsurface(0,76,768,500)
+                print "making new"
             else:
-                InitScreen(val, (val.background.mask,), info.image)
+                osd.putsurface(self.mysurface,0,76) 
+                print "using cached"
+            #else:
+            #    InitScreen(val, (val.background.mask,), info.image)
             
             if val.title.visible:
                 osd.drawstring('Playing Music', val.title.x, val.title.y,
