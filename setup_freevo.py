@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/06/27 10:58:06  rshortt
+# MOved tvtime command into the config.
+#
 # Revision 1.5  2003/06/20 18:18:23  dischi
 # add comment about the xmame change to force the user to rerun setup
 #
@@ -162,6 +165,7 @@ def main():
     print 'System path first=%s' % ( ['NO','YES'][sysfirst])
     
     check_program(conf, "mplayer", "mplayer", 1, sysfirst)
+    check_program(conf, "tvtime", "tvtime", 0, sysfirst)
     check_program(conf, "jpegtran", "jpegtran", 0, sysfirst)
     check_program(conf, "xmame.x11", "xmame", 0, sysfirst)
     check_program(conf, "xmame.SDL", "xmame", 0, sysfirst)
@@ -244,7 +248,8 @@ def create_config(conf):
 def check_program(conf, name, variable, necessary, sysfirst):
 
     # Check for programs both in the path and the runtime apps dir
-    search_dirs_runtime = ['./runtime/apps', './runtime/apps/mplayer']
+    search_dirs_runtime = ['./runtime/apps', './runtime/apps/mplayer',
+                           './runtime/apps/tvtime']
     if sysfirst:
         search_dirs = os.environ['PATH'].split(':') + search_dirs_runtime
     else:

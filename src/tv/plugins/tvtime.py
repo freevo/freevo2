@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/06/27 10:58:06  rshortt
+# MOved tvtime command into the config.
+#
 # Revision 1.9  2003/06/24 11:58:21  outlyer
 # Setup the output plugin by default to fix Wan Tat Chee's crash.
 #
@@ -216,7 +219,8 @@ class TVTime:
             if config.CONF.display == 'dfbmga':
                 outputplugin = 'directfb'
 
-            command = 'tvtime -D %s -k -I %s -n %s -d %s -f %s -c %s' % (outputplugin,
+            command = '%s -D %s -k -I %s -n %s -d %s -f %s -c %s' % (config.TVTIME_CMD,
+                                                                   outputplugin,
                                                                    w,
                                                                    s_norm,
                                                                    cf_device,
