@@ -2,7 +2,7 @@ Freevo Dependency List
 ----------------------
 $Id$
 
-Version 0.54 2003/11/03	TC Wan (tcwan at cs dot usm dot my)
+Version 0.55 2003/11/29	TC Wan (tcwan at cs dot usm dot my)
 
 > Contributed by Jorn A Hansen (jornh at person dot dk)
 >
@@ -53,10 +53,10 @@ pygame / python-game	http://dag.wieers.com/home-made/apt/
 													# SDL_ttf-2.0.6-1.src.rpm
 													# SDL_ttf-2.0.6-1.i386.rpm
 													# SDL_ttf-devel-2.0.6-1.i386.rpm
-								Freetype 2.1.4				RH RawHide Mirror - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
-													# freetype-2.1.4-4.1.src.rpm
-													# freetype-2.1.4-4.1.i386.rpm
-													# freetype-devel-2.1.4-4.1.i386.rpm
+								Freetype 2.1.4				RH RawHide Mirror - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/Fedora/RPMS/
+													# freetype-2.1.4-5.src.rpm
+													# freetype-2.1.4-5.i386.rpm
+													# freetype-devel-2.1.4-5.i386.rpm
 								SDL_mixer 1.2.5				http://www.libsdl.org/projects/SDL_mixer/
 													# SDL_mixer-1.2.5-1.src.rpm
 													# SDL_mixer-1.2.5-1.i386.rpm
@@ -72,7 +72,7 @@ pygame / python-game	http://dag.wieers.com/home-made/apt/
 mmpython		http://www.sf.net/projects/mmpython
 
 PyXML / python-xml	PyXML-0.8.3 
-			RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/RedHat/RPMS/
+			RH Rawhide - ftp://speakeasy.rpmfind.net/linux/rawhide/1.0/i386/Fedora/RPMS/
 			http://pyxml.sourceforge.net/
 
 
@@ -90,9 +90,9 @@ python-twisted		http://twistedmatrix.com/products/download
 			[1.1.0, RPMs available from freevo downloads]
 
 libexif			http://freshrpms.net/
-			# libexif-0.5.10-1.fr.src.rpm
-			# libexif-0.5.10-1.fr.i386.rpm
-			# libexif-devel-0.5.10-1.fr.i386.rpm
+			# libexif-0.5.12-1.fr.src.rpm
+			# libexif-0.5.12-1.fr.i386.rpm
+			# libexif-devel-0.5.12-1.fr.i386.rpm
 			
 jpegtran		libjpeg-6b (comes with RH 9)
 
