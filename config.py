@@ -35,7 +35,9 @@ def ConfigInit(videotools = 'sim'):
     print 'VIDEOTOOLS = %s' % videotools
 
     global MPLAYER_CMD, MPLAYER_ARGS_MPG, MPLAYER_ARGS_DVD, MPLAYER_ARGS_DVDNAV, VIDREC_MQ, VIDREC_HQ
-    
+
+    # There are two sets of tool settings, one for a real box, and one for development.
+    # 
     if videotools == 'real':
         MPLAYER_CMD = '/usr/local/bin/mplayer'
         MPLAYER_ARGS_MPG = '-nolirc -nobps -idx -framedrop -cache 10000 -vo mga -screenw 768 -screenh 576 -fs -ao oss:/dev/dsp0'
@@ -107,24 +109,17 @@ WATCH_TV_APP = './matrox_g400/v4l1_to_mga'
 #
 # Format: [ ('Title1', 'directory1'), ('Title2', 'directory2'), ... ]
 #
-DIR_MP3 = [ ('Krister', '/hdc/krister_mp3/mp3'),
-            ('Mary', '/hdc/mary') ]
+DIR_MP3 = [ ('Main', './testfiles/Music') ]
 
 #
 # Where the movie files can be found.
 #
-DIR_MOVIES = [ ('Local', '/movies_local'),
-               ('Linux Movies', '/movies'),
-               ('Linux HDC Movies', '/hdc/Movies'),
-               ('Linux HDC Unsorted', '/hdc/Unsorted'),
-               ('Linux HDD', '/hdd/Movies'),
-               ('CD-ROM files', '/dev/cdrom'),
-               ]
+DIR_MOVIES = [ ('Main', './testfiles/Movies') ]
 
 #
 # This is where recorded video is written.
 #
-DIR_RECORD = '/movies_local/recorded'
+DIR_RECORD = './testfiles/Movies/Recorded'
 
 
 #
