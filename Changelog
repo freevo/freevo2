@@ -4,7 +4,7 @@ Freevo Changelog
 $Id$
 
 
-Release 1.2.4 (2002-06-XX):
+Release 1.2.4 (2002-07-XX):
 ---------------------------
 o Fixed a problem where zombie (defunct) processes were created
 o Changed the osd_server/Makefile to use /usr/X11R6 instead of /usr/X11,
@@ -23,6 +23,7 @@ o Added icons to default skin
 o Added PAL support
 o Fullscreen X support
 o Added the install.py script to check dependencies and compile Freevo
+o Changed logfile handling
 
 
 Release 1.2.3 (2002-06-01):
