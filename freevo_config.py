@@ -360,7 +360,7 @@ DIR_AUDIO = [ ('Test Files', 'testfiles/Music') ]
 # The list of filename suffixes that are used to match the files that
 # are played as audio.
 # 
-SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a' ]
+SUFFIX_AUDIO_FILES     = [ 'mp3', 'ogg', 'wav','m4a' ,'fxd']
 SUFFIX_AUDIO_PLAYLISTS = [ 'm3u' ]
 
 # This regexp should recognize filenames which are likely to be covers
