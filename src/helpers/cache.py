@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2004/02/09 20:14:40  dischi
+# add xmltv
+#
 # Revision 1.21  2004/02/08 17:41:55  dischi
 # add more caching:
 # o playlist metainfo
@@ -367,6 +370,16 @@ def create_metadata():
 
     print 'done'
 
+
+
+def create_tv_pickle():
+    print 'caching xmltv database................................',
+    sys.__stdout__.flush()
+
+    import tv.epg_xmltv
+    tv.epg_xmltv.get_guide(verbose=False)
+    print 'done'
+    
     
 if __name__ == "__main__":
     os.umask(config.UMASK)
@@ -439,6 +452,13 @@ if __name__ == "__main__":
         print
         print
 
+    print 'Freevo cache'
+    print
+    print 'Freevo will now generate a metadata cache for all your files and'
+    print 'create thumbnails from images for faster access.'
+    print
+    start = time.clock()
+    
     activate_plugins = []
     for type in ('video', 'audio', 'image', 'games'):
         if plugin.is_active(type):
@@ -460,7 +480,7 @@ if __name__ == "__main__":
     cache_directories(rebuild)
     cache_thumbnails()
     create_metadata()
-
+    create_tv_pickle()
     
 # close db
 util.mediainfo.sync()
@@ -472,3 +492,6 @@ try:
                       int(time.time()), complete_update), cachefile)
 except ImportError:
     print 'WARNING: please update mmpython'
+
+print
+print 'caching complete after %s seconds' % (time.clock() - start)
