@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/09/05 03:32:15  rshortt
+# Updating to use the tv. namespace.
+#
 # Revision 1.29  2003/09/03 21:07:50  dischi
 # Make sure the user can write the file. It may happen that the user has
 # no permission at all (try except is protecting us here), but maybe he
@@ -97,12 +100,12 @@ else:
     import _strptime as strptime
 
 # The XMLTV handler from openpvr.sourceforge.net
-import xmltv
+import tv.xmltv as xmltv
 
 # The EPG data types. They need to be in an external module in order for
 # pickling to work properly when run from inside this module and from the
 # tv.py module.
-import epg_types
+import tv.epg_types as epg_types
 
 
 # Set to 1 for debug output
