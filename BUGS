@@ -15,3 +15,5 @@ o Mount checking does not work with supermount
 o Identifymedia fails on some drives (still? report to dmeyer@tzi.de please)
 o Freevo fails on drives that are not valid devices for freevo_config.ROM_DRIVES
 o The menus do not have the same number of files per page.
+o Some Python modules like PyXMMS and encodings.py are missing from the 
+  runtime.
