@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/02/08 12:16:27  dischi
+# chdir to tmp to call mplayer
+#
 # Revision 1.7  2004/02/08 12:09:01  dischi
 # o let mplayer keep the aspect of the movie
 # o add bars/resize to fit 4:3 so all thumbnails have the same geometry
@@ -146,6 +149,9 @@ if __name__ == "__main__":
                 position = '10'
             else:
                 position = str(int(position))
+
+    # chdir to tmp so we have write access
+    os.chdir('/tmp')
 
     # call mplayer to get the image
     child = popen2.Popen3((mplayer, '-nosound', '-vo', 'png', '-frames', '8',
