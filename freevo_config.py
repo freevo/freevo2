@@ -1128,6 +1128,21 @@ FREQUENCY_TABLE = {
 }
 
 
+# VIDEO_GROUPS is a new setting to handle multiple arbitrary groups of devices
+# for viewing or recording.  It will be possible to have different Freevo
+# channels use different Video Groups.
+
+VIDEO_GROUPS = [
+    VideoGroup(vdev=TV_DEVICE,
+               adev=AUDIO_DEVICE,
+               input_type='tuner',
+               tuner_norm=CONF.tv,
+               tuner_chanlist=CONF.chanlist,
+               desc='Default Video Group',
+               recordable=True),
+]
+
+
 #
 # TV Channels. This list contains a mapping from the displayed channel name
 # to the actual channel name as used by the TV watching application.
