@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.69  2004/06/13 00:36:14  outlyer
+# Without this change, mplayer won't play files on a data DVD. I.e. I have
+# a burned DVD-R with some AVI files on it, but mplayer breaks if I try to play
+# something because the devicename is being passed and mplayer becomes
+# confused.
+#
 # Revision 1.68  2004/05/31 17:15:20  dischi
 # support strange config.MPLAYER_AO_DEV
 #
@@ -267,7 +273,7 @@ class MPlayer:
                 # if defined
                 additional_args += [ '-slang', config.DVD_SUBTITLE_PREF ]
 
-        if hasattr(item.media, 'devicename'):
+        if hasattr(item.media, 'devicename') and mode != 'file':
             additional_args += [ '-dvd-device', item.media.devicename ]
         elif mode == 'dvd':
             # dvd on harddisc
