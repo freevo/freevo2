@@ -30,7 +30,7 @@ function cvs_tag {
 function cleanup_and_pack {
     echo cleaning up
     cd /tmp/freevo-$version
-    rm freevo.conf* local_*
+    rm freevo.conf* local_conf.py local_skin.fxd
     find /tmp/freevo-$version -type d -name CVS | xargs rm -rf
     find /tmp/freevo-$version -name .cvsignore  | xargs rm -rf
     find /tmp/freevo-$version -name '.#*'       | xargs rm -rf
@@ -39,6 +39,8 @@ function cleanup_and_pack {
     rm -rf find /tmp/freevo-$version/WIP /tmp/freevo-$version/dischi1 \
 	/tmp/freevo-$version/aubin1 /tmp/freevo-$version/contrib/gentoo
 
+    ./autogen.sh
+    rm ./autogen.sh
     sudo chown -R root.root /tmp/freevo-$version
 
     cd /tmp/

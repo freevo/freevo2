@@ -1,18 +1,13 @@
-DESCRIPTION="Freevo"
-FREEVO_INSTALL_DIR="${D}/opt/freevo"
+DESCRIPTION="Digital video jukebox (PVR, DVR)."
+HOMEPAGE="http://www.freevo.org/"
 
-IUSE="matrox"
-
-PV=`echo ${PV} | sed 's/_\(pre[0-9]\)/-\1/' | sed 's/_\(test[0-9]\)/-\1/'`
-S="${WORKDIR}/freevo-${PV}"
-
-SRC_URI="mirror://sourceforge/freevo/freevo-src-${PV}.tgz"
+PV2=`echo $PV | sed 's/_/-/'`
+SRC_URI="mirror://sourceforge/${PN}/${PN}-src-${PV2}.tgz"
 
 LICENSE="GPL-2"
-
 SLOT="0"
-
 KEYWORDS="x86"
+IUSE="matrox dvd encode lirc X"
 
 DEPEND=">=dev-python/pygame-1.5.5
 	>=media-libs/freetype-2.1.4
@@ -21,21 +16,22 @@ DEPEND=">=dev-python/pygame-1.5.5
 	>=dev-python/twisted-1.0.6
 	>=media-libs/libsdl-1.2.5
 	>=dev-python/pysqlite-0.4.1
-	>=dev-python/mmpython-0.1
+	>=dev-python/mmpython-0.2
 	matrox? ( >=media-video/matroxset-0.3 )
-	>=media-video/mplayer-0.90"
-
-if [ -f /usr/include/lirc/lirc_client.h ]
-then
-    DEPEND="$DEPEND
-            >=dev-python/pylirc-0.0.3"
-fi
+	>=media-video/mplayer-0.91
+	>=media-tv/xmltv-0.5.16
+	>=sys-apps/sed-4
+	dvd? ( >=media-video/xine-ui-0.9.22 )
+	encode? ( >=media-sound/cdparanoia-3.9.8 >=media-sound/lame-3.93.1 )
+	lirc? ( app-misc/lirc >=dev-python/pylirc-0.0.3 )
+	X? ( virtual/x11 )"
 
 
 inherit distutils
 
 src_unpack() {
-	unpack freevo-src-${PV}.tgz
+	unpack freevo-src-${PV2}.tgz
+	ln -s freevo-${PV2} freevo-${PV}
 }
 
 src_install() {
@@ -46,18 +42,9 @@ src_install() {
 
  	# install boot scripts
  	install -d ${D}/etc/init.d
- 	install -m 755 boot/gentoo-recordserver ${D}/etc/init.d/freevo-recordserver
- 	install -m 755 boot/gentoo-webserver ${D}/etc/init.d/freevo-webserver
- 	use matrox && install -m 755 boot/gentoo-freevo-mga ${D}/etc/init.d/freevo
-
-	mydocs="BUGS COPYING ChangeLog FAQ INSTALL README TODO VERSION"
-	mydocs="$mydocs Docs/CREDITS Docs/NOTES Docs/html/"
-	dodoc $mydocs
-
-        dodir /usr/share/doc/${PF}/html
-        mv Docs/html/* ${D}/usr/share/doc/${PF}/html/
-	mv Docs/freevo_howto ${D}/usr/share/doc/${PF}/
-
+ 	install -m 755 boot/gentoo-freevo ${D}/etc/init.d/freevo
+ 	install -d ${D}/etc/conf.d
+ 	install -m 755 boot/gentoo-conf.d ${D}/etc/conf.d/freevo
 }
 
 pkg_postinst() {
@@ -100,6 +87,12 @@ pkg_postinst() {
 
 	if [ -e /etc/freevo/freevo_config.py ]; then
 		ewarn "Please remove /etc/freevo/freevo_config.py"
+		sleep 5
+	fi
+
+	if [ -e /etc/init.d/freevo-webserver ]; then
+		ewarn "Please remove /etc/init.d/freevo-webserver and"
+		ewarn "/etc/init.d/freevo-recordserver."
 		sleep 5
 	fi
 
