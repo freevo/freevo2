@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.54  2003/11/30 14:38:36  dischi
+# o new plugin type: MimetypePlugin to handle what files to display in
+#   what kinds of menus
+# o new functions to register and get callbacks to avoid duplicate code
+#
 # Revision 1.53  2003/11/29 18:37:29  dischi
 # build config.VIDEO_SUFFIX in config on startup
 #
@@ -170,6 +175,41 @@ class DaemonPlugin(Plugin):
 
 
 
+
+class MimetypePlugin(Plugin):
+    """
+    Plugin class for mimetypes handled in a directory/playlist.
+    self.display_type is a list of display types where this mimetype
+    should be displayed, [] for always.
+    """
+    def __init__(self):
+        Plugin.__init__(self)
+        self.display_type = []
+        register(self, MIMETYPE, True)
+
+
+    def suffix(self):
+        """
+        return the list of suffixes this class handles
+        """
+        return []
+
+    
+    def get(self, parent, files):
+        """
+        return a list of items based on the files
+        """
+        return []
+
+
+    def update(self, parent, new_files, del_files, new_items, del_items, current_items):
+        """
+        update a directory. Add items to del_items if they had to be removed based on
+        del_files or add them to new_items based on new_files
+        """
+        pass
+
+
 #
 # Some plugin names to avoid typos
 #
@@ -178,7 +218,7 @@ AUDIO_PLAYER   = 'AUDIO_PLAYER'
 RADIO_PLAYER   = 'RADIO_PLAYER'
 VIDEO_PLAYER   = 'VIDEO_PLAYER'
 TV             = 'TV'
-
+MIMETYPE       = 'MIMETYPE'
 
 
 #
@@ -244,18 +284,18 @@ def is_active(name, arg=None):
     for p in __all_plugins__:
         if p[0] == name:
             if not arg:
-                return True
+                return p
             if isinstance(arg, list) or isinstance(arg, tuple):
                 try:
                     for i in range(len(arg)):
                         if arg[i] != p[3][i]:
                             break
                     else:
-                        return True
+                        return p
                 except:
                     pass
             if arg == p[3]:
-                return True
+                return p
     return False
                 
     
@@ -362,6 +402,27 @@ def register(plugin, name, multiple_choises=0):
     else:
         __named_plugins__[name] = plugin
 
+
+def register_callback(name, *args):
+    """
+    register a callback to the callback handler 'name'. The format of
+    *args depends on the callback
+    """
+    global __callbacks__
+    if not __callbacks__.has_key(name):
+        __callbacks__[name] = []
+    __callbacks__[name].append(args)
+
+
+def get_callbacks(name):
+    """
+    return all callbacks registered with 'name'
+    """
+    global __callbacks__
+    if not __callbacks__.has_key(name):
+        __callbacks__[name] = []
+    return __callbacks__[name]
+
     
 def event(name):
     """
@@ -393,8 +454,9 @@ __all_plugins__        = []
 __plugin_number__      = 0
 __plugin_type_list__   = {}
 __named_plugins__      = {}
-
+__callbacks__          = {}
 __plugin_basedir__     = ''
+
 
 def __add_to_ptl__(type, object):
     """
