@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/25 20:16:04  dischi
+# add type back to the plugin item
+#
 # Revision 1.11  2003/12/15 03:53:18  outlyer
 # Added Viggo Fredriksen's very cool detachbar plugin... it shows a
 # mini-player in the bottom corner of the screen if you detach a music player.
@@ -65,7 +68,7 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         config.EVENTS['audio']['DISPLAY'] = Event(FUNCTION_CALL, arg=self.detach)
         self.show_item = menu.MenuItem(_('Show player'), action=self.show)
-
+        self.type = 'detached_player'
 
     def detach(self):
         # start detachbar
