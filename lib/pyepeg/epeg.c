@@ -20,12 +20,17 @@ static PyObject *epeg_jpeg_thumbnail(PyObject *self, PyObject *args) {
     return PyErr_SetString(PyExc_ValueError, "image error"), (PyObject*)NULL;
 
   epeg_size_get(im, &w, &h);
-  
-  if (w / dest_w > h / dest_h)
-    dest_h = (h * dest_w) / w;
-  else if (w / dest_w < h / dest_h)
-    dest_w = (w * dest_h) / h;
-  
+
+  if (w > dest_w || h > dest_h) {
+    if (w / dest_w > h / dest_h)
+      dest_h = (h * dest_w) / w;
+    else if (w / dest_w < h / dest_h)
+      dest_w = (w * dest_h) / h;
+  } else {
+    dest_w = w;
+    dest_h = h;
+  }
+
   epeg_decode_size_set(im, dest_w, dest_h);
   epeg_quality_set(im, 80);
   epeg_thumbnail_comments_enable(im, 1);
