@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/18 09:35:30  dischi
+# handling to show scheduled recordings
+#
 # Revision 1.11  2003/09/21 18:19:36  dischi
 # Oops. remove debug
 #
@@ -106,13 +109,13 @@ class TVListing_Area(Skin_Area):
         area      = self.area_val
         content   = self.calc_geometry(layout.content, copy_object=TRUE)
 
-        label_val    = content.types['label']
-        head_val     = content.types['head']
-        selected_val = content.types['selected']
-        default_val  = content.types['default']
+        label_val     = content.types['label']
+        head_val      = content.types['head']
+        selected_val  = content.types['selected']
+        default_val   = content.types['default']
+        scheduled_val = content.types['scheduled']
 
-        self.all_vals = label_val, label_val.font, head_val, head_val.font, selected_val, \
-                        selected_val.font, default_val, default_val.font
+        self.all_vals = label_val, head_val, selected_val, default_val, scheduled_val
         
         font_h = max(selected_val.font.h, default_val.font.h, label_val.font.h)
 
@@ -184,8 +187,7 @@ class TVListing_Area(Skin_Area):
         font_h, label_width, label_txt_width, y0, num_rows, item_h, head_h = \
                 self.get_items_geometry(settings, menu)[:-1]
 
-        label_val, label_font, head_val, head_font, selected_val, \
-                   selected_font, default_val, default_font = self.all_vals
+        label_val, head_val, selected_val, default_val, scheduled_val = self.all_vals
 
 
         leftarraw = None
@@ -245,7 +247,7 @@ class TVListing_Area(Skin_Area):
 
         # use label padding for x; head padding for y
         self.write_text( time.strftime( dateformat, time.localtime( to_listing[ 0 ][ 1 ] ) ),
-                         head_font, content,
+                         head_val.font, content,
                          x=( x_contents  - r.width + pad_x ),
                          y=( y_contents - r.height + ig.y ),
                          width=( r.width - 2 * pad_x ), height=-1,
@@ -263,7 +265,7 @@ class TVListing_Area(Skin_Area):
 
             self.write_text( time.strftime( timeformat,
                                             time.localtime( to_listing[ 0 ][ i + 1 ] ) ),
-                             head_font, content,
+                             head_val.font, content,
                              x=( x0 + ig.x ), y=( ty0 + ig.y ),
                              width=ig.width, height=-1,
                              align_v='center', align_h=head_val.align)
@@ -311,7 +313,7 @@ class TVListing_Area(Skin_Area):
 
 
             else:
-                self.write_text(to_listing[i].displayname, label_font, content,
+                self.write_text(to_listing[i].displayname, label_val.font, content,
                                 x=tx0, y=ty0, width=r.width+2*r.x, height=item_h)
 
             self.drawroundbox(tx0 + r.x, ty0 + r.y, r.width+1, item_h, r)
@@ -343,11 +345,13 @@ class TVListing_Area(Skin_Area):
                        prg.stop == selected_prog.stop:
 
                         val = selected_val
-                        font = selected_font
 
+                    elif prg.scheduled:
+                        val = scheduled_val
                     else:
                         val = default_val
-                        font = default_font
+
+                    font = val.font
 
                     # Not at all elegant.
                     # TODO:
