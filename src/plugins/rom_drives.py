@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/09/25 09:48:42  dischi
+# handling if CDROM.py is missing
+#
 # Revision 1.34  2003/09/23 13:45:20  outlyer
 # Making more informational text quiet by default.
 #
@@ -94,8 +97,27 @@ import threading
 import thread
 import string
 import copy
-if os.uname()[0] != 'FreeBSD':
+try:
     from CDROM import *
+except ImportError:
+    if os.uname()[0] == 'FreeBSD':
+        # FreeBSD ioctls - there is no CDROM.py...
+        CDIOCEJECT = 0x20006318
+        CDIOCCLOSE = 0x2000631c
+        CDIOREADTOCENTRYS = 0xc0086305
+        CD_LBA_FORMAT = 1
+        CD_MSF_FORMAT = 2
+        CDS_NO_DISC = 1
+        CDS_DISC_OK = 4
+    else:
+        # strange ioctrls missing
+        CDROMEJECT = 0x5309
+        CDROMCLOSETRAY = 0x5319
+        CDROM_DRIVE_STATUS = 0x5326
+        CDROM_SELECT_SPEED = 0x5322
+        CDS_NO_DISC = 1
+        CDS_DISC_OK = 4
+        
 import traceback
 
 import config
@@ -118,15 +140,6 @@ LABEL_REGEXP = re.compile("^(.*[^ ]) *$").match
 
 from struct import *
 import array
-if os.uname()[0] == 'FreeBSD':
-    # FreeBSD ioctls - there is no CDROM.py...
-    CDIOCEJECT = 0x20006318
-    CDIOCCLOSE = 0x2000631c
-    CDIOREADTOCENTRYS = 0xc0086305
-    CD_LBA_FORMAT = 1
-    CD_MSF_FORMAT = 2
-    CDS_NO_DISC = 1
-    CDS_DISC_OK = 4
 
 # Identify_Thread
 im_thread = None
