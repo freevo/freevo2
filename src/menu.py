@@ -9,8 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
+# Revision 1.2  2002/11/25 02:17:54  krister
+# Minor bugfixes. Synced to changes made in the main tree.
+#
+# Revision 1.41  2002/11/24 06:34:04  krister
+# Added an option to reload a parent menu when returning from a submenu, useful for setting options etc.
 #
 #
 # -----------------------------------------------------------------------
@@ -32,9 +35,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ----------------------------------------------------------------------- */
-#endif
-
 
 import sys, os, time
 
@@ -107,7 +107,8 @@ class MenuItem:
 
 class Menu:
 
-    def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0):
+    def __init__(self, heading, choices, xml_file=None, packrows=1, umount_all = 0,
+                 reload_func = None):
         # XXX Add a list of eventhandlers?
         self.heading = heading
         self.choices = choices          # List of MenuItem:s
@@ -120,6 +121,7 @@ class Menu:
             self.skin_settings = skin.LoadSettings(xml_file)
         else:
             self.skin_settings = None
+        self.reload_func = reload_func  # Called when a child menu returns
 
 
 #
@@ -139,13 +141,24 @@ class MenuWidget:
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
+
+            if menu.reload_func:
+                self.menustack[-1] = menu.reload_func()
+                
             self.init_page()
 
     def back_one_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
             menu = self.menustack[-1]
-            self.init_page()
+
+            if menu.reload_func:
+                menu = self.menustack[-1] = menu.reload_func()
+                self.init_page()
+                menu.selected = self.all_items[0]
+            else:
+                self.init_page()
+
             self.refresh()
 
     def goto_main_menu(self, arg=None, menuw=None):
@@ -177,7 +190,7 @@ class MenuWidget:
     
     def pushmenu(self, menu):
         menu.page_start = 0
-        self.menustack += [menu]
+        self.menustack.append(menu)
         self.init_page()
         menu.selected = self.all_items[0]
         self.refresh()

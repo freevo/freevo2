@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/11/25 02:17:54  krister
+# Minor bugfixes. Synced to changes made in the main tree.
+#
 # Revision 1.2  2002/11/24 17:00:15  dischi
 # Copied the new transparent gif support to the code cleanup tree
 #
@@ -246,7 +249,7 @@ def getExifThumbnail(file, x0=0, y0=0):
     import Image
 
     # EXIF parser
-    import exif
+    from image import exif
 
     f=open(file, 'rb')
     tags=exif.process_file(f)

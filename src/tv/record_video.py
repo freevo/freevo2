@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2002/11/25 02:17:54  krister
+# Minor bugfixes. Synced to changes made in the main tree.
+#
 # Revision 1.1  2002/11/25 01:56:03  krister
 # Updated from old src tree.
 #
@@ -61,7 +64,6 @@ import mixer
 import rc
 
 # The TV application
-import mplayer_tv
 import tv
 
 # The Skin
