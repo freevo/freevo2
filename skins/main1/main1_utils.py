@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2003/02/15 20:45:30  dischi
+# speedup
+#
 # Revision 1.8  2002/12/02 21:41:17  dischi
 # Small fix
 #
@@ -131,7 +134,6 @@ def InitScreen(settings, masks, cover_visible = 0):
     global last_alpha
 
 
-
     # generate an id of the screen to draw: background+masks,logo
     screen_id = [ settings.background.image ]
     
@@ -145,7 +147,7 @@ def InitScreen(settings, masks, cover_visible = 0):
                         visible = cover_visible
                     
                     if visible:
-                        screen_id += [ r ]
+                        screen_id += [ r.x, r.y, r.width, r.height ]
             else:
                 screen_id += [ i ]
 
