@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/01 17:27:29  dischi
+# *** empty log message ***
+#
 # Revision 1.19  2003/03/01 17:26:40  dischi
 # _getbitmap now generates and stores thumbnails for large images without
 # EXIF header and thumb:// in the url. This speeds up the image menu
@@ -1383,27 +1386,25 @@ class OSD:
                 tmp = util.getExifThumbnail(filename)
                 if tmp:
                     filename = tmp
-                elif thumbs_fchksum:
-                    if os.stat(filename)[stat.ST_SIZE] > 50000:
-                        thumb = os.path.join('%s/%s.thumb.png' % \
-                                             (config.FREEVO_CACHEDIR,
-                                              fchksum.fmd5t(filename)[0]))
-                        if not os.path.isfile(thumb):
-                            # convert with Imaging, pygame doesn't work
-                            image = Image.open(filename)
-                            width  = 300
-                            height = 300
+                elif thumbs_fchksum and os.stat(filename)[stat.ST_SIZE] > 50000:
+                    thumb = os.path.join('%s/%s.thumb.png' % \
+                                         (config.FREEVO_CACHEDIR,
+                                          fchksum.fmd5t(filename)[0]))
+                    if not os.path.isfile(thumb):
+                        # convert with Imaging, pygame doesn't work
+                        image = Image.open(filename)
+                        width  = 300
+                        height = 300
 
-                            w, h = image.size
-                            if int(float(width * h) / w) > height:
-                                width = int(float(height * w) / h)
-                            else:
-                                height = int(float(width * h) / w)
-                            image = image.resize((width, height), Image.BICUBIC)
-                            image.save(thumb, 'PNG')
+                        w, h = image.size
+                        if int(float(width * h) / w) > height:
+                            width = int(float(height * w) / h)
+                        else:
+                            height = int(float(width * h) / w)
+                        image = image.resize((width, height), Image.BICUBIC)
+                        image.save(thumb, 'PNG')
 
-                            
-                        filename = thumb
+                    filename = thumb
 
                             
             tmp = pygame.image.load(filename)  # XXX Cannot load everything
