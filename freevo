@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.87  2003/10/11 12:49:25  dischi
+# check for valid parameter
+#
 # Revision 1.86  2003/10/05 10:36:37  dischi
 # search for correct python binary
 #
@@ -221,9 +224,7 @@ if [ -e "$script" ]; then
     exit 0
 fi
 
-
-# Help
-if [ "$1" = "--help" -o "$1" = "-" ] ; then
+help() {
     echo "freevo [ script | options]"
     echo "options:"
     echo "  -fs            start freevo in a new x session in fullscreen"
@@ -256,6 +257,12 @@ if [ "$1" = "--help" -o "$1" = "-" ] ; then
     echo "After that, you can run freevo without parameter."
     echo
     exit 0
+}
+
+
+# Help
+if [ "$1" = "--help" -o "$1" = "-" ] ; then
+    help
 fi
 
 # option setup. 
@@ -373,6 +380,24 @@ if [ "$1" = "start" ]; then
     echo $! > $PID_FILE
     disown
     exit 0
+fi
+
+valid_parameter=1
+if [ "$1" != "" ]; then
+    valid_parameter=0
+    for known_parameter in "--force-fs" "--trace" "--doc"; do
+	if [ "$1" == "$known_parameter" ]; then
+	    valid_parameter=1
+	    break
+	fi
+    done
+fi
+
+if [ "$valid_parameter" == 0 ]; then
+    echo "unknown parameter: $1"
+    echo
+    echo "usage:"
+    help
 fi
 
 # Start the main freevo application
