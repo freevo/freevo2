@@ -6,6 +6,28 @@ $Id$
 This file contains random notes that are useful when dealing with Freevo
 
 ----------------------------------------------------------------------
+Dependencies:
+
+Freevo:
+  MPlayer
+    libdvdread (?)
+    libdvdcss
+    ffmpeg (copy into src tree)
+    libdvdnav
+  NVrec-20020510-freevo
+    ./configure --without-avifile --without-rte --without-divx4linux --without-quicktime --without-sdl --without-mad --without--ffmpeg
+      make NUVrec
+
+    (xvid_20020412 
+      ffmpeg
+        ./configure --enable-mp3lame
+      make install
+      cp xvid_20020412/xvidcore/src/divx4.h /usr/local/include/encore2.h 
+      cd /usr/local/lib ; cp libxvidcore.so libdivxencore.so
+      ldconfig
+      nasm-0.98)
+
+----------------------------------------------------------------------
 
 Mixed stuff:
 
