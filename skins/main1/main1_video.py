@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/17 18:32:55  dischi
+# Display some example xml infos
+#
 # Revision 1.1  2003/02/17 05:40:45  gsbarbieri
 # main1_image: now the image_{width,height} are not hardcoded anymore
 #
@@ -177,8 +180,12 @@ class Skin_Video:
             if item.type == 'video':
                 DrawTextFramed('Video: %s' % item.name, val, x, y, w, h)
                 y += str_h
-                DrawTextFramed('File: %s' % item.filename, val, x, y, w, h)
-                y += str_h
+                if 'year' in item.info:
+                    DrawTextFramed('Year: %s' % item.info["year"], val, x, y, w, h)
+                    y += str_h
+                if 'tagline' in item.info:
+                    DrawTextFramed('Tagline: %s' % item.info["tagline"], val, x, y, w, h)
+                    y += str_h
                 
                 if item.available_audio_tracks:
                     text = 'Audio: '
