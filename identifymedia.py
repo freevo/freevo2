@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2002/10/20 18:08:29  dischi
+# nothing important
+#
 # Revision 1.16  2002/10/06 14:58:51  dischi
 # Lots of changes:
 # o removed some old cvs log messages
@@ -122,7 +125,7 @@ class Identify_Thread(threading.Thread):
         if s == CDS_AUDIO:
             os.close(fd)
             # XXX add cddb informations here
-            media.info = RemovableMediaInfo('AUDIO-CD')
+            media.info = RemovableMediaInfo('AUDIO-CD', 'Audio CD')
             return
 
         mediatypes = [('VCD', '/mpegav/', 'vcd'), ('SVCD','/SVCD/', 'vcd'), 
