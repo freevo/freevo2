@@ -535,9 +535,9 @@
         <menuset label="tv menu">
             <screen layout="screen" x="0" y="0" width="800" height="600"/>
             <title visible="no"/>
-            <info layout="tv info" x="10" y="80" width="760" height="115"/>
-            <listing layout="tv listing" x="10" y="220" width="750" height="350">
-                <image x="765" y="220" width="32" height="32" label="uparrow"
+            <info layout="tv info" x="10" y="80" width="760" height="140"/>
+            <listing layout="tv listing" x="10" y="240" width="750" height="350">
+                <image x="765" y="240" width="32" height="32" label="uparrow"
 	            filename="up.png"/>
                 <image x="765" y="max-32" width="32" height="32" label="downarrow" 
 	            filename="down.png"/>
