@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/08/20 02:30:25  krister
+# Fixed the sound for tv/vcr viewing.
+#
 # Revision 1.3  2002/08/19 02:06:57  krister
 # Added X11 TV viewing. Use the TV norm, chanlist etc from the config file.
 #
@@ -108,6 +111,7 @@ class MPlayer:
         self.thread = MPlayer_Thread()
         self.thread.start()
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
+        self.xwin_wid = 0
         
 
     def TunerSetChannel(self, tuner_channel):
@@ -132,7 +136,7 @@ class MPlayer:
         self.tuner_chidx = (self.tuner_chidx-1) % len(config.TV_CHANNELS)
 
         
-    def Play(self, mode, tuner_channel=None):
+    def Play(self, mode, tuner_channel=None, channel_change=0):
 
         if tuner_channel != None:
             
@@ -189,7 +193,11 @@ class MPlayer:
             return
 
         # Support for X11, getting the keyboard events
-        if os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':
+        if self.xwin_wid:  # This is set to 0 when freevo_xwin is killed
+            # Already got a freevo_xwin up and running
+            wid = self.xwin_wid
+            mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
+        elif os.path.isfile('./freevo_xwin') and osd.sdl_driver == 'x11':
             if DEBUG: print 'Got freevo_xwin and x11'
             os.system('rm -f /tmp/freevo.wid')
             os.system('./freevo_xwin  0 0 %s %s > /tmp/freevo.wid &' %
@@ -214,6 +222,7 @@ class MPlayer:
             if DEBUG: print 'Got freevo.wid'
             try:
                 wid = int(open('/tmp/freevo.wid').read().strip(), 16)
+                self.xwin_wid = wid
                 mpl += ' -wid 0x%08x -xy %s -monitoraspect 4:3' % (wid, osd.width)
                 if DEBUG: print 'Got WID = 0x%08x' % wid
             except:
@@ -225,21 +234,17 @@ class MPlayer:
         self.mode = mode
 
         # XXX Mixer manipulation code.
-        linein_vol = mixer.getLineinVolume()
-        igain_vol  = mixer.getIgainVolume()
+        # TV is on line in
+        # VCR is mic in
+        # btaudio (different dsp device) will be added later
         if config.MAJOR_AUDIO_CTRL == 'VOL':
-            mixer.setPcmVolume(0)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            mixer_vol = mixer.getMainVolume()
             mixer.setMainVolume(0)
-        if config.CONTROL_ALL_AUDIO:
-            mixer.setLineinVolume(0)
-            mixer.setIgainVolume(0)
-            mixer.setMicVolume(0)
+        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            mixer_vol = mixer.getPcmVolume()
+            mixer.setPcmVolume(0)
 
-        # XXX Should be moved out in appropriate functions.
-        #osd.clearscreen(color=osd.COL_BLACK)
-        #osd.drawstring('Running the "%s" application' % mode, 30, 280,
-        # fgcolor=osd.COL_ORANGE, bgcolor=osd.COL_BLACK)
+        # Start up the TV task
         self.thread.mode = 'play'
         self.thread.command = command
         self.thread.mode_flag.set()
@@ -247,27 +252,30 @@ class MPlayer:
         rc.app = self.EventHandler
 
         # Suppress annoying audio clicks
-        time.sleep(0.3)
+        time.sleep(0.2)
         # XXX Hm.. This is hardcoded and very unflexible.
         if mode == 'vcr':
             mixer.setMicVolume(config.VCR_IN_VOLUME)
         else:
-            mixer.setLineinVolume(linein_vol)
-            mixer.setIgainVolume(igain_vol)
+            mixer.setLineinVolume(config.TV_IN_VOLUME)
+            mixer.setIgainVolume(config.TV_IN_VOLUME)
             
+        if config.MAJOR_AUDIO_CTRL == 'VOL':
+            mixer.setMainVolume(mixer_vol)
+        elif config.MAJOR_AUDIO_CTRL == 'PCM':
+            mixer.setPcmVolume(mixer_vol)
+
         if DEBUG: print '%s: started %s app' % (time.time(), self.mode)
 
         skin.hold = TRUE  # Prevent the skin from drawing stuff while TV is on
         
         
-    def Stop(self):
-        if config.MAJOR_AUDIO_CTRL == 'VOL':
-            mixer.setPcmVolume(config.MAX_VOLUME)
-        elif config.MAJOR_AUDIO_CTRL == 'PCM':
-            mixer.setMainVolume(config.MAX_VOLUME)
-        mixer.setLineinVolume(0)
-        mixer.setMicVolume(0)
-        mixer.setIgainVolume(0) # Input on emu10k cards.
+    def Stop(self, channel_change=0):
+        # XXX Kludge for now. do real channelchange in mplayer later
+        if not channel_change:
+            mixer.setLineinVolume(0)
+            mixer.setMicVolume(0)
+            mixer.setIgainVolume(0) # Input on emu10k cards.
 
         self.thread.mode = 'stop'
         self.thread.mode_flag.set()
@@ -282,6 +290,8 @@ class MPlayer:
         if (event == rc.MENU or event == rc.STOP or event == rc.EXIT or
             event == rc.SELECT or event == rc.PLAY_END):
             self.Stop()
+            os.system('killall -9 freevo_xwin 2&> /dev/null')
+            self.xwin_wid = 0
             skin.hold = FALSE  # Allow drawing again
             rc.app = None
             menuwidget.refresh()
@@ -292,7 +302,7 @@ class MPlayer:
             
             # Go to the next channel in the list
             self.TunerNextChannel()
-            self.Stop()
+            self.Stop(channel_change=1)
             self.Play(mode='tv')  # Mplayer can only set the channel when starting up
             
         elif event == rc.CHDOWN:
@@ -301,7 +311,7 @@ class MPlayer:
             
             # Go to the previous channel in the list
             self.TunerPrevChannel()
-            self.Stop()
+            self.Stop(channel_change=1)
             self.Play(mode='tv')
             
         elif event == rc.VOLUP:
@@ -327,7 +337,6 @@ class MPlayerApp(childapp.ChildApp):
         childapp.ChildApp.kill(self, signal.SIGINT)
         # XXX Krister testcode for proper X11 video
         if DEBUG: print 'Killing mplayer'
-        os.system('killall -9 freevo_xwin 2&> /dev/null')
 
     # def stdout_cb
 
