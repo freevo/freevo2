@@ -1,7 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# InputBox.py - a popup box that has a message and allows the user
-#               to input using the remote control
+# progressbar.py - a simple progress bar
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -10,7 +9,7 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2004/07/25 18:14:05  dischi
+# Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
 #
@@ -36,16 +35,44 @@
 # ----------------------------------------------------------------------- */
 
 
-from event import *
-from PopupBox import PopupBox
+from base import GUIObject
 
-class InputBox(PopupBox):
+class Progressbar(GUIObject):
     """
     """
-    def __init__(self, text, handler=None, type='text', x=None, y=None, width=0, height=0,
-                 icon=None, vertical_expansion=1, text_prop=None, input_text='',
-                 numboxes=0, parent='osd'):
 
-        PopupBox.__init__(self, 'input box not working', handler, x, y, width, height,
-                          icon, vertical_expansion, text_prop, parent)
+    def __init__(self, x1, y1, x2, y2, full, style):
         
+        GUIObject.__init__(self, x1, y1, x2, y2)
+
+        self.bar_position = 0
+        self.full         = full
+        self.style        = style
+
+
+    def draw(self, rect=None):
+        if not self.layer:
+            raise TypeError, 'no layer defined for %s' % self
+
+        r = self.style.rectangle
+        self.layer.drawbox(self.x1, self.y1, self.x2, self.y2,
+                           color=0xaa000000, border_size=r.size,
+                           border_color=r.color, radius=r.radius)
+
+        # catch division by zero error.
+        if not self.full:
+            return
+        
+        position = min((self.bar_position * 100) / self.full, 100)
+
+        width = ((self.x2 - self.x1) * position ) / 100
+        if width > r.size * 2:
+            self.layer.drawbox(self.x1, self.y1, self.x1 + width, self.y2,
+                               color=r.bgcolor, border_size=r.size,
+                               border_color=r.color, radius=r.radius)
+
+    def tick(self):
+        if self.bar_position < self.full:
+            self.bar_position += 1
+        self.modified()
+

@@ -7,34 +7,8 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.3  2004/07/24 17:49:06  dischi
-# interface cleanup
-#
-# Revision 1.2  2004/07/24 12:22:16  dischi
-# gui update
-#
-# Revision 1.1  2004/07/22 21:12:35  dischi
-# move all widget into subdir, code needs update later
-#
-# Revision 1.4  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.3  2004/06/23 20:23:57  dischi
-# handle crash
-#
-# Revision 1.2  2004/06/13 19:21:39  dischi
-# prevent strange crash
-#
-# Revision 1.1  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
+# Revision 1.4  2004/07/25 18:14:05  dischi
+# make some widgets and boxes work with the new gui interface
 #
 #
 # -----------------------------------------------------------------------
@@ -61,147 +35,166 @@
 
 import copy
 
-import config
 import rc
+import gui
 
-from GUIObject import GUIObject, Align
-from Container import Container
-
+from base import GUIObject
 
 class Window(GUIObject):
     """
-    x         x coordinate. Integer
-    y         y coordinate. Integer
-    width     Integer
-    height    Integer
     """
-    
-    def __init__(self, parent='osd', x=None, y=None, width=0, height=0):
-        GUIObject.__init__(self, x, y, width, height)
+    def __init__(self, x1=None, y1=None, width=None, height=None):
+        self.screen_width  = gui.get_screen().width
+        self.screen_height = gui.get_screen().height
+        self.app_mode = 'input'
 
-        if not parent or parent == 'osd':
-            parent = rc.app_list[0]
+        self.center_on_screen = False
 
-        parent.add_child(self)
-        
-        rc.add_app(self)
+        if width == None:
+            width  = self.screen_width / 2
 
-        self.event_context = 'input'
-        rc.set_context(self.event_context) 
+        if height == None:
+            height = self.screen_height / 4
 
-        if not width:
-            self.width  = self.osd.width / 2
+        if x1 == None:
+            x1 = self.screen_width/2 - width/2
 
-        if not height:
-            self.height = self.osd.height / 4
-
-        if not self.left:
-            self.left = self.osd.width/2 - self.width/2
-
-        if not self.top:
-            self.top  = self.osd.height/2 - self.height/2
+        if y1 == None:
+            y1  = self.screen_height/2 - height/2
             self.center_on_screen = True
 
-        self.internal_h_align = Align.CENTER
-        self.internal_v_align = Align.CENTER
+        GUIObject.__init__(self, x1, y1, x1 + width, y1 + height)
 
+        self.width  = width
+        self.height = height
 
-    def add_child(self, child):
-        if self.content:
-            self.content.add_child(child)
+        self.__set_popupbox_style__()
 
-    def __init__content__(self):
-        x, y, width, height = self.content_layout.x, self.content_layout.y, \
-                              self.content_layout.width, self.content_layout.height
-        width  = eval(str(width),  { 'MAX': self.width }) or self.width
-        height = eval(str(height), { 'MAX': self.height }) or self.height
+        self.widget_normal   = self.content_layout.types['widget']
+        self.widget_selected = self.content_layout.types['selected']
+        self.button_normal   = self.content_layout.types['button']
+        self.button_selected = self.content_layout.types['button selected']
 
-        self.content = Container('frame', x, y, width, height, vertical_expansion=1)
-        GUIObject.add_child(self, self.content)
-
-        # adjust left to content
-        self.left += (self.width - width-x) / 2
-
-        self.content.internal_h_align = Align.CENTER
-        self.content.internal_v_align = Align.CENTER
-
-
-    def set_size(self, width, height):
-        width  -= self.width
-        height -= self.height
-
-        self.width  += width
-        self.height += height
-
-        width, height = self.content_layout.width, self.content_layout.height
-        self.content.width  = eval(str(width),  { 'MAX': self.width }) or self.width
-        self.content.height = eval(str(height), { 'MAX': self.height }) or self.height
-        
-        self.left = self.osd.width/2 - self.width/2
-        self.top  = self.osd.height/2 - self.height/2
-
-        # adjust left to content
-        self.left += (self.width - self.content.width-self.content.left) / 2
+        self.objects = []
+        self.screen  = None
+        self.add(self)
 
         
+    def add(self, object):
+        object.position = 100
+        self.objects.append(object)
+        if self.screen:
+            self.screen.add('content', object)
+            
 
-    def _draw(self):
+    def remove(self, object):
+        self.objects.remove(object)
+        if self.screen:
+            self.screen.remove('content', object)
+
+
+    def draw(self, rect=None):
         """
-        The actual internal draw function.
-
+        The draw function.
         """
         _debug_('Window::_draw %s' % self, 2)
-
-        if not self.width or not self.height:
-            raise TypeError, 'Not all needed variables set.'
-
-        cheight = self.content.height
-        self.content.layout()
-
-        # resize when content changed the height because of the layout()
-        if self.content.height - cheight > 0:
-            self.height += self.content.height - cheight
-
-        self.surface = self.osd.Surface(self.get_size()).convert_alpha()
-        self.surface.fill((0,0,0,0))
-            
+        
         for o in self.background_layout:
             if o[0] == 'rectangle':
                 r = copy.deepcopy(o[1])
-                r.width  = eval(str(r.width),  { 'MAX' : self.get_size()[0] })
-                r.height = eval(str(r.height), { 'MAX' : self.get_size()[1] })
-                if not r.width:
-                    r.width  = self.get_size()[0]
-                if not r.height:
-                    r.height = self.get_size()[1]
-                if r.x + r.width > self.get_size()[0]:
-                    r.width = self.get_size()[0] - r.x
-                if r.y + r.height > self.get_size()[1]:
-                    r.height = self.get_size()[1] - r.y
-#                 self.osd.drawroundbox(r.x, r.y, r.x+r.width, r.y+r.height,
-#                                       r.bgcolor, r.size, r.color, r.radius,
-#                                       self.surface)
+                r.width  = eval(str(r.width),  { 'MAX' : self.width })
+                r.height = eval(str(r.height), { 'MAX' : self.height })
 
-        self.get_selected_child = self.content.get_selected_child
-        if not self.content.parent:
-            print '******************************************************************'
-            print 'Error: content has no parent, fixing...'
-            print 'If you can reproduce this error message, please send a'
-            print 'mail with the subject \'[Freevo-Bugreport] GUI\' to'
-            print 'freevo@dischi-home.de.'
-            print '******************************************************************'
-            self.content.parent = self
-            
-        if not self.parent:
-            print '******************************************************************'
-            print 'Error: window has no parent, not showing...'
-            print 'If you can reproduce this error message, please send a'
-            print 'mail with the subject \'[Freevo-Bugreport] GUI\' to'
-            print 'freevo@dischi-home.de.'
-            print '******************************************************************'
+                if not r.width:
+                    r.width  = self.width
+                if not r.height:
+                    r.height = self.height
+                if r.x + r.width > self.width:
+                    r.width = self.width - r.x
+                if r.y + r.height > self.height:
+                    r.height = self.height - r.y
+
+            self.layer.drawbox(r.x + self.x1, r.y + self.y1,
+                               r.x + r.width + self.x1,
+                               r.y + r.height + self.y1,
+                               r.bgcolor, r.size, r.color, r.radius)
+
+    def show(self):
+        if self.screen:
             return
-            
-        self.content.surface = self.content.get_surface()
-        self.content.draw()
-        self.blit_parent()
         
+        # FIXME: Begin clean this up
+        self.prev_app = rc.app()
+        self.parent_handler = rc.app()
+        if not self.parent_handler:
+            self.parent_handler = rc.focused_app().eventhandler
+        self.parent = rc.focused_app()
+        rc.app(self)
+        # FIXME: End clean this up
+
+        self.screen = gui.get_screen()
+
+        for o in self.objects:
+            self.screen.add('content', o)
+        self.screen.update()
+        
+
+    def destroy(self):
+        # FIXME: Begin clean this up
+        rc.app(self.prev_app)
+        # FIXME: End clean this up
+
+        for o in self.objects:
+            self.screen.remove('content', o)
+        self.screen.update()
+        self.screen = None
+        
+
+    def __find_current_menu__(self, widget):
+        if not widget:
+            return None
+        if not hasattr(widget, 'menustack'):
+            return self.__find_current_menu__(widget.parent)
+        return widget.menustack[-1]
+        
+
+    def __set_popupbox_style__(self, widget=None):
+        """
+        This function returns style information for drawing a popup box.
+
+        return backround, spacing, color, font, button_default, button_selected
+        background is ('image', Image) or ('rectangle', Rectangle)
+
+        Image attributes: filename
+        Rectangle attributes: color (of the border), size (of the border),
+           bgcolor (fill color), radius (round box for the border). There are also
+           x, y, width and height as attributes, but they may not be needed for the
+           popup box
+
+        button_default, button_selected are XML_item
+        attributes: font, rectangle (Rectangle)
+
+        All fonts are Font objects
+        attributes: name, size, color, shadow
+        shadow attributes: visible, color, x, y
+        """
+        import gui
+        from gui import fxdparser
+        menu = self.__find_current_menu__(widget)
+
+        if menu and hasattr(menu, 'skin_settings') and menu.skin_settings:
+            settings = menu.skin_settings
+        else:
+            settings = gui.settings.settings
+
+        layout = settings.popup
+
+        background = []
+        for bg in layout.background:
+            if isinstance(bg, fxdparser.Image):
+                background.append(( 'image', bg))
+            elif isinstance(bg, fxdparser.Rectangle):
+                background.append(( 'rectangle', bg))
+
+        self.content_layout   = layout.content
+        self.background_layout = background

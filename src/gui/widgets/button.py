@@ -1,7 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # -----------------------------------------------------------------------
-# InputBox.py - a popup box that has a message and allows the user
-#               to input using the remote control
+# Button.py - a simple button class
 # -----------------------------------------------------------------------
 # $Id$
 #
@@ -10,7 +9,7 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.2  2004/07/25 18:14:05  dischi
+# Revision 1.1  2004/07/25 18:14:05  dischi
 # make some widgets and boxes work with the new gui interface
 #
 #
@@ -36,16 +35,27 @@
 # ----------------------------------------------------------------------- */
 
 
-from event import *
-from PopupBox import PopupBox
+from label import Label
 
-class InputBox(PopupBox):
+class Button(Label):
     """
     """
-    def __init__(self, text, handler=None, type='text', x=None, y=None, width=0, height=0,
-                 icon=None, vertical_expansion=1, text_prop=None, input_text='',
-                 numboxes=0, parent='osd'):
+    def __init__(self, x1, y1, x2, y2, text, style):
+        Label.__init__(self, x1, y1, x2, y2, text, style, 'center', 'center')
 
-        PopupBox.__init__(self, 'input box not working', handler, x, y, width, height,
-                          icon, vertical_expansion, text_prop, parent)
+        # enhance the space for the button to fit the border
+        self.x1 -= 10
+        self.y1 -= 2
+        self.x2 += 10
+        self.y2 += 2
+        self.height += 4
+        self.width  += 10
         
+
+    def draw(self, rect=None):
+        self.layer.drawbox(self.x1, self.y1, self.x2, self.y2,
+                           color=self.style.rectangle.bgcolor,
+                           border_size=self.style.rectangle.size,
+                           border_color=self.style.rectangle.color,
+                           radius=self.style.rectangle.radius)
+        Label.draw(self, rect)

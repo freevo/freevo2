@@ -10,14 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2004/07/22 21:12:35  dischi
-# move all widget into subdir, code needs update later
+# Revision 1.2  2004/07/25 18:14:05  dischi
+# make some widgets and boxes work with the new gui interface
 #
-# Revision 1.24  2004/07/10 12:33:38  dischi
-# header cleanup
-#
-# Revision 1.23  2004/02/24 18:56:09  dischi
-# add hfill to text_prop
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -41,72 +36,85 @@
 # ----------------------------------------------------------------------- */
 
 
-import config
 from event import *
 
-from GUIObject import *
-from PopupBox  import *
-from Button    import *
-
+from PopupBox  import PopupBox
+from button    import Button
 
 class ConfirmBox(PopupBox):
     """
-    x         x coordinate. Integer
-    y         y coordinate. Integer
-    width     Integer
-    height    Integer
-    text      String to print.
-    icon      icon
-    text_prop A dict of 4 elements composing text proprieties:
-              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode, 'hfill': hfill }
-                 align_v = text vertical alignment
-                 align_h = text horizontal alignment
-                 mode    = hard (break at chars); soft (break at words)
-                 hfill   = True (don't shorten width) or False
-
-    If 'handler_message' is set, the box will transform into a normal popup
-    showing this text while 'handler' is called and will destry itself after that. 
     """
     def __init__(self, text, handler=None, handler_message=None, default_choice=0,
-                 x=None, y=None, width=0, height=0, icon=None, vertical_expansion=1,
-                 text_prop=None, parent='osd'):
+                 x=None, y=None, width=None, height=None, icon=None, vertical_expansion=1,
+                 text_prop=None):
 
         PopupBox.__init__(self, text, handler, x, y, width, height,
-                          icon, vertical_expansion, text_prop, parent)
+                          icon, vertical_expansion, text_prop)
 
+        self.b0 = Button(self.x1, self.y1, self.x2, self.y2, _('OK'),
+                         self.button_normal)
+        self.add(self.b0)
+
+        self.b1 = Button(self.x1, self.y1, self.x2, self.y2, _('Cancel'),
+                         self.button_normal)
+        self.add(self.b1)
+
+        # FIXME: that can't be correct
+        space = self.content_layout.spacing * 2
+
+        # get height of the button and set it to set bottom
+        ydiff = self.b0.y2 - (self.y2 - space)
+
+        # both buttons should have the same width
+        bwidth = (self.x2 - self.x1 - 3 * space) / 2
+        b1x    = self.x1 + space
+        b2x    = self.x1 + 2 * space + bwidth
+
+        self.b0.set_position(b1x, self.b0.y1 - ydiff,
+                             b1x + bwidth, self.b0.y2 - ydiff)
+
+        self.b1.set_position(b2x, self.b1.y1 - ydiff,
+                             b2x + bwidth, self.b1.y2 - ydiff)
+
+        # resize label to fill the rest of the box
+        self.label.set_position(self.x1 + space, self.y1 + space, self.x2 - space,
+                                self.y2 - space + ydiff - space)
+        
         self.handler_message = handler_message
-
-        # XXX: It may be nice if we could choose between
-        #      OK/CANCEL and YES/NO
-
-        self.b0 = Button(_('OK'), width=(self.width-60)/2)
-        self.b0.set_h_align(Align.NONE)
-        self.add_child(self.b0)
-
-        self.b1 = Button(_('CANCEL'), width=(self.width-60)/2)
-        self.b1.set_h_align(Align.NONE)
-        self.add_child(self.b1)
-        select = 'self.b%s.toggle_selected()' % default_choice
-        eval(select)
+        getattr(self, 'b%s' % default_choice).set_style(self.button_selected)
+        self.selected = default_choice
 
 
     def eventhandler(self, event):
         if event in (INPUT_LEFT, INPUT_RIGHT):
-            self.b0.toggle_selected()
-            self.b1.toggle_selected()
-            self.draw()
+            self.selected = (self.selected + 1) % 2
+            if self.selected == 0:
+                self.b0.set_style(self.button_selected)
+                self.b1.set_style(self.button_normal)
+            else:
+                self.b0.set_style(self.button_normal)
+                self.b1.set_style(self.button_selected)
+            self.update()
             return
+
         
         elif event == INPUT_EXIT:
             self.destroy()
 
+
         elif event == INPUT_ENTER:
-            if self.b0.selected:
+            if self.selected == 0:
                 if self.handler and self.handler_message:
-                    self.content.children = []
-                    self.label = Label(self.handler_message, self, Align.CENTER,
-                                       Align.CENTER, text_prop=self.text_prop)
-                    self.draw()
+                    # resize the label to fit the whole box
+                    space = self.content_layout.spacing
+                    self.label.set_position(self.x1 + space, self.y1 + space,
+                                            self.x2 - space, self.y2 - space)
+                    # set new next
+                    self.label.set_text(self.handler_message)
+                    # remove buttons
+                    self.remove(self.b0)
+                    self.remove(self.b1)
+                    self.update()
                 else:
                     self.destroy()
 
@@ -118,4 +126,4 @@ class ConfirmBox(PopupBox):
                 self.destroy()
 
         else:
-            return self.parent.eventhandler(event)
+            return self.parent_handler(event)

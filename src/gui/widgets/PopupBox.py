@@ -4,34 +4,11 @@
 # -----------------------------------------------------------------------
 # $Id$
 #
-# Todo: o Add sanitychecking on all arguments.
-#       o Add actual support for icons, not just brag about it.
-#       o Start using the OSD imagecache for rectangles.
-#
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.1  2004/07/22 21:12:35  dischi
-# move all widget into subdir, code needs update later
+# Revision 1.2  2004/07/25 18:14:05  dischi
+# make some widgets and boxes work with the new gui interface
 #
-# Revision 1.40  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.39  2004/02/24 18:56:09  dischi
-# add hfill to text_prop
-#
-# Revision 1.38  2004/02/19 19:39:50  dischi
-# more gui cleanup
-#
-# Revision 1.37  2004/02/18 21:52:04  dischi
-# Major GUI update:
-# o started converting left/right to x/y
-# o added Window class as basic for all popup windows which respects the
-#   skin settings for background
-# o cleanup on the rendering, not finished right now
-# o removed unneeded files/functions/variables/parameter
-# o added special button skin settings
-#
-# Some parts of Freevo may be broken now, please report it to be fixed
 #
 # -----------------------------------------------------------------------
 #
@@ -56,120 +33,42 @@
 # ----------------------------------------------------------------------
 
 
-import config
-import rc
 from event import *
 
-from GUIObject import *
-from Window    import *
-from Label     import *
+from Window import Window
+from label  import Label
 
 
 class PopupBox(Window):
     """
-    x         x coordinate. Integer
-    y         y coordinate. Integer
-    width     Integer
-    height    Integer
-    text      String to print.
-    icon      icon
-    text_prop A dict of 4 elements composing text proprieties:
-              { 'align_h' : align_h, 'align_v' : align_v, 'mode' : mode, 'hfill': hfill }
-                 align_v = text vertical alignment
-                 align_h = text horizontal alignment
-                 mode    = hard (break at chars); soft (break at words)
-                 hfill   = True (don't shorten width) or False
-    
     Trying to make a standard popup/dialog box for various usages.
     """
-    
-    def __init__(self, text, handler=None, x=None, y=None, width=0, height=0,
-                 icon=None, vertical_expansion=1, text_prop=None, parent='osd'):
+    def __init__(self, text, handler=None, x=None, y=None, width=None, height=None,
+                 icon=None, vertical_expansion=1, text_prop=None):
 
         self.handler = handler
-        Window.__init__(self, parent, x, y, width, height)
+        Window.__init__(self, x, y, width, height)
+
         self.text_prop = text_prop or { 'align_h': 'center',
                                         'align_v': 'center',
                                         'mode'   : 'soft',
                                         'hfill'  : True }
 
-        self.font = None
-        if self.skin_info_font:
-            self.set_font(self.skin_info_font.name, 
-                          self.skin_info_font.size, 
-                          Color(self.skin_info_font.color))
-        else:
-            self.set_font(config.OSD_DEFAULT_FONTNAME,
-                          config.OSD_DEFAULT_FONTSIZE)
-                
-        if not width:
-            tw = self.font.stringsize(text) + self.h_margin*2
-            if tw < self.osd.width * 2 / 3:
-                self.width = max(self.osd.width / 2, tw)
-            
-        self.__init__content__()
+        self.label = Label(self.x1, self.y1, self.x2, self.y2, text,
+                           self.widget_normal, 'center', 'center',
+                           text_prop=self.text_prop)
+        self.add(self.label)
 
-        if type(text) in StringTypes:
-            self.label = Label(text, self, Align.CENTER, Align.CENTER,
-                               text_prop=self.text_prop)
-        else:
-            raise TypeError, text
-
-        if icon:
-            self.set_icon(icon)
+        # resize label to fill the whole box
+        space = self.content_layout.spacing
+        self.label.set_position(self.x1 + space, self.y1 + space,
+                                self.x2 - space, self.y2 - space)
         
-
-    def get_text(self):
-        """
-        Get the text to display
-
-        Arguments: None
-          Returns: text
-        """
-        return self.label.text
-
-
-    def get_font(self):
-        """
-        Does not return OSD.Font object, but the filename and size as list.
-        """
-        return ('normal', self.font.name, int(self.font.size), self.font.color)
-
-
-    def set_font(self, file, size, color):
-        """
-        Set the font.
-
-        Just hands the info down to the label. Might raise an exception.
-        """
-        if not self.font:
-            self.font = self.osd.getfont(file, size)
-
-        self.font.size = size
-        self.font.color = color
-
-
-    def get_icon(self):
-        """
-        Returns the icon of the popupbox (if set).
-        """
-        return self.icon
-
-
-    def set_icon(self, image):
-        """
-        Set the icon of the popupbox.
-        Also scales the icon to fit the size of the box.
-        
-        Not working right now
-        """
-        pass
-
 
     def eventhandler(self, event):
-        _debug_('PopupBox: event = %s' % event, 2)
+        _debug_('PopupBox: event = %s' % event, 1)
 
         if event == INPUT_EXIT:
             self.destroy()
         else:
-            return self.parent.eventhandler(event)
+            return self.parent_handler(event)
