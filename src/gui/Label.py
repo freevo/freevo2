@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/07/02 20:11:43  dischi
+# use now the calc part of drawstringframed
+#
 # Revision 1.13  2003/06/26 01:46:49  rshortt
 # Set DEBUG back to 0 as to not annoy everyone with my insane debug statements
 # which I still need to help with gui development. :)
@@ -234,22 +237,14 @@ class Label(GUIObject):
 
 
     def get_rendered_size(self):
-        (rest_words, (return_x0,return_y0, return_x1, return_y1)) = \
-        self.osd.drawstringframed(self.text,
-                                  0,
-                                  0,
-                                  self.width,
-                                  self.height,
-                                  fgcolor=None,
-                                  bgcolor=None,
-                                  font=self.font_name,
-                                  ptsize=self.font_size,
-                                  align_h='left',
-                                  align_v='top',
-                                  mode='hard',
-                                  layer='null layer')
+        (return_x0,return_y0, return_x1, return_y1) = \
+                              self.osd.dsf_calc(self.text, 0, 0, self.width,
+                                                self.height, fgcolor=None,
+                                                bgcolor=None, font=self.font_name,
+                                                ptsize=self.font_size,
+                                                align_h='left', align_v='top',
+                                                mode='hard')[2]
 
-        if DEBUG: print '       %s,%s,%s,%s,%s' % (rest_words,return_x0,return_y0,return_x1,return_y1)
         # LABEL: ,71,17,294,43
         self.width = return_x1 - return_x0
         # self.width = return_x1
