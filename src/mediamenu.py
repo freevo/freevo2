@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/02/18 05:51:21  gsbarbieri
+# now we add '[' and ']' to dirname ([dirname]) only if the menu is in the old display mode. (But you must toggle the extended menu mode *before* enter the desired dir)
+#
 # Revision 1.29  2003/02/15 04:03:02  krister
 # Joakim Berglunds patch for finding music/movie cover pics.
 #
@@ -282,12 +285,15 @@ class DirItem(Playlist):
             self.name = name
 	elif os.path.isfile(dir + '/album.xml'):
             try:
-                self.name = '[' + bins.get_bins_desc(dir)['desc']['title'] + ']'
+                self.name = bins.get_bins_desc(dir)['desc']['title']
             except:
-                self.name = '[' + os.path.basename(dir) + ']'
+                self.name = os.path.basename(dir)
         else:
-            self.name = '[' + os.path.basename(dir) + ']'
+            self.name = os.path.basename(dir)
 
+        if not name and skin.GetDisplayStyle() == 0:
+            self.name = '[%s]' % (self.name)
+        
         # Check for cover in COVER_DIR
         if os.path.isfile(config.COVER_DIR+os.path.basename(dir)+'.png'):
             self.image = config.COVER_DIR+os.path.basename(dir)+'.png'
