@@ -9,6 +9,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/08/22 19:22:50  dischi
+# small check to prevent crashes
+#
 # Revision 1.2  2003/04/24 19:55:51  dischi
 # comment cleanup for 1.3.2-pre4
 #
@@ -61,21 +64,25 @@ class ObjectCache:
         if not key in self.cache:
             return None
         else:
-            del self.lru[self.lru.index(key)]
-            self.lru.append(key)
-            return self.cache[key]
-
+            try:
+                del self.lru[self.lru.index(key)]
+                self.lru.append(key)
+                return self.cache[key]
+            except:
+                return None
 
     def __setitem__(self, key, object):
-        # Do we need to delete the oldest item?
-        if len(self.cache) > self.cachesize:
-            # Yes
-            lru_key = self.lru[0]
-            del self.cache[lru_key]
-            del self.lru[0]
-
-        self.cache[key] = object
-        self.lru.append(key)
+        try:
+            # Do we need to delete the oldest item?
+            if len(self.cache) > self.cachesize:
+                # Yes
+                lru_key = self.lru[0]
+                del self.cache[lru_key]
+                del self.lru[0]
+            self.cache[key] = object
+            self.lru.append(key)
+        except:
+            pass
         
 
     def __delitem__(self, key):
