@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/02/01 17:05:53  dischi
+# make it possible to keep all cachefiles in memory
+#
 # Revision 1.11  2004/01/31 16:36:34  dischi
 # simplify mmpython data to speed up caching
 #
@@ -75,10 +78,6 @@ from mmpython.disc.discinfo import cdrom_disc_id
 import config
 import util
 
-
-class FileNotFoundException(Exception):
-    pass
-
 class FileOutdatedException(Exception):
     pass
 
@@ -97,10 +96,11 @@ class Cache:
         self.uncachable_keys    = {}
 
         # file database
-        self.__need_update__ = self.fileDB_need_update
-        self.save_cache      = self.fileDB_save_cache
-        self.load_cache      = self.fileDB_load_cache
-
+        self.__need_update__  = self.fileDB_need_update
+        self.save_cache       = self.fileDB_save_cache
+        self.load_cache       = self.fileDB_load_cache
+        self.all_directories  = {}
+                
 
     def __get_filename__(self, dirname):
         """
@@ -136,11 +136,15 @@ class Cache:
                 if os.path.isfile(self.current_cachefile):
                     os.unlink(self.current_cachefile)
                 self.cache_modified = False
+                if config.MEDIAINFO_USE_MEMORY:
+                    self.all_directories[self.current_cachefile] = self.current_objects
                 return
         if self.cache_modified:
             _debug_('save cache %s' % self.current_cachefile, 2)
             util.save_pickle(self.current_objects, self.current_cachefile)
             self.cache_modified = False
+            if config.MEDIAINFO_USE_MEMORY:
+                self.all_directories[self.current_cachefile] = self.current_objects
 
 
     def fileDB_load_cache(self, dirname):
@@ -155,10 +159,16 @@ class Cache:
             
         cachefile = self.__get_filename__(dirname)
         _debug_('load cache %s' % cachefile, 2)
-        if os.path.isfile(cachefile):
-            self.current_objects = util.read_pickle(cachefile)
+
+        if config.MEDIAINFO_USE_MEMORY and self.all_directories.has_key(cachefile):
+            self.current_objects = self.all_directories[cachefile]
         else:
-            self.current_objects = {}
+            if os.path.isfile(cachefile):
+                self.current_objects = util.read_pickle(cachefile)
+            else:
+                self.current_objects = {}
+            if config.MEDIAINFO_USE_MEMORY:
+                self.all_directories[cachefile] = self.current_objects
             
         self.current_cachefile = cachefile
         self.current_cachedir  = dirname
@@ -178,7 +188,7 @@ class Cache:
             fullname  = os.path.join(directory, filename)
             try:
                 info = self.find(filename, directory, fullname)
-            except (FileNotFoundException, FileOutdatedException):
+            except (KeyError, FileOutdatedException):
                 new += 1
             except (OSError, IOError):
                 pass
@@ -203,7 +213,7 @@ class Cache:
                 key       = filename
 
                 info = self.find(filename, directory, fullname)
-            except FileNotFoundException:
+            except KeyError:
                 info = self.create(fullname)
                 if callback:
                     callback()
@@ -238,22 +248,30 @@ class Cache:
         get info about a file
         """
         fullname  = filename
-        dirname   = os.path.dirname(filename)
-        filename  = os.path.basename(filename)
+
+        # we know this are absolute paths, so we speed up
+        # by not using the os.path functions.
+        dirname  = filename[:filename.rfind('/')]
+        filename = filename[filename.rfind('/')+1:]
+
+        if dirname != self.current_cachedir:
+            self.load_cache(dirname)
+
         if create:
             try:
-                return self.find(filename, dirname, fullname)
-            except FileNotFoundException:
+                obj, t = self.current_objects[filename]
+                if not self.update_needed(fullname, t):
+                    return obj
+                else:
+                    self.update(fullname, obj)
+            except KeyError:
                 info = self.create(fullname)
-            except FileOutdatedException:
-                info = self.find(filename, dirname, fullname, update_check=False)
-                info = self.update(fullname, info)
             except (IOError, OSError):
-                return None
+                return {}
             self.set(filename, dirname, fullname, info)
             return info
         try:
-            return self.find(filename, dirname, fullname)
+            return self.current_objects[filename][0]
         except:
             return {}
             
@@ -262,20 +280,17 @@ class Cache:
         """
         Search the cache for informations about that file. The functions
         returns that information. Because the information can be 'None',
-        the function raises a FileNotFoundException if the cache has
+        the function raises a KeyError if the cache has
         no or out-dated informations.
         """
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
 
-        if self.current_objects.has_key(filename):
-            obj, t = self.current_objects[filename]
-            if update_check:
-                if self.update_needed(fullname, t):
-                    raise FileOutdatedException
-            return obj
-        else:
-            raise FileNotFoundException
+        obj, t = self.current_objects[filename]
+        if update_check:
+            if self.update_needed(fullname, t):
+                raise FileOutdatedException
+        return obj
 
 
 class MMCache(Cache):
@@ -535,6 +550,14 @@ def get(filename):
                 meta_cache.get(filename, create=False))
 
         
+def get_dir(dirname):
+    """
+    return an Info object with all the informations Freevo has about
+    the directory
+    """
+    return Info(dirname, {}, meta_cache.get(dirname, create=False))
+
+        
 def set(filename, key, value):
     """
     set a variable (key) in the meta_cache to value and saves the cache
@@ -553,4 +576,12 @@ def sync():
     """
     mmpython_cache.save_cache()
     meta_cache.save_cache()
+    
+
+def load_cache(dirname):
+    """
+    load the cache for dirname
+    """
+    mmpython_cache.load_cache(dirname)
+    meta_cache.load_cache(dirname)
     
