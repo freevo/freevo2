@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/09/21 18:17:50  dischi
+# only update skin when something changes
+#
 # Revision 1.1  2003/09/21 13:14:00  dischi
 # a small osd to display messages on screen
 #
@@ -116,8 +119,9 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         clear the osd after 2 seconds
         """
-        self.message = ''
-        skin.get_singleton().redraw()
+        if self.message:
+            self.message = ''
+            skin.get_singleton().redraw()
         
 
 
