@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/07/08 11:03:02  dischi
+# use .tmp filename and new freevo raw format
+#
 # Revision 1.11  2004/06/23 21:09:29  dischi
 # handle mplayer TS, PES problems
 #
@@ -92,6 +95,9 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
            os.stat(videofile)[ST_MTIME] <= os.stat(imagefile)[ST_MTIME]:
         return
 
+    if imagefile.endswith('.raw'):
+        imagefile += '.tmp'
+        
     if popup:
         pop = gui.PopupBox(text='Creating thumbnail for \'%s\'...' % \
                            os.path.basename(videofile),
@@ -111,7 +117,12 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
     if vfs.isfile(imagefile):
         try:
             image = Image.open(imagefile)
-            image.thumbnail((300,300), Image.ANTIALIAS)
+            if image.size[0] > 255 or image.size[1] > 255:
+                image.thumbnail((255,255), Image.ANTIALIAS)
+
+            if image.mode == 'P':
+                image = image.convert('RGB')
+
             if image.size[0] * 3 > image.size[1] * 4:
                 # fix image with blank bars to be 4:3
                 ni = Image.new('RGB', (image.size[0], (image.size[0]*3)/4))
@@ -121,13 +132,15 @@ def snapshot(videofile, imagefile=None, pos=None, update=True, popup=None):
                 # strange aspect, let's guess it's 4:3
                 image = Image.open(imagefile).resize((image.size[0], (image.size[0]*3)/4),
                                                      Image.ANTIALIAS)
-            if image.mode == 'P':
-                image = image.convert('RGB')
+
             # crob some pixels, looks better that way
             image = image.crop((4, 3, image.size[0]-8, image.size[1]-6))
-            if imagefile.endswith('.raw'):
-                data = (image.tostring(), image.size, image.mode)
-                util.save_pickle(data, imagefile)
+            if imagefile.endswith('.raw.tmp'):
+                f = vfs.open(imagefile[:-4], 'w')
+                f.write('FRI%s%s%5s' % (chr(image.size[0]), chr(image.size[1]), image.mode))
+                f.write(image.tostring())
+                f.close()
+                os.unlink(imagefile)
             else:
                 image.save(imagefile)
         except (OSError, IOError), e:
