@@ -562,7 +562,7 @@ TV_REC_OUTFMT = 'yuy2'
 #
 # If you want to generate a list of all the channels in the XMLTV guide in
 # this format you can run the following command:
-#    "freevo execute epg_xmltv.py config"
+#    "freevo execute src/tv/epg_xmltv.py config"
 # You must have an XMLTV listing in /tmp/TV.xml before running it, and
 # TV_CHANNELS below must be set to None. The output contains guesses for the
 # displayed name and TV channel name. You can edit this list, delete lines,

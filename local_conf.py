@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/16 22:00:56  krister
+# Updated TV guide instructions.
+#
 # Revision 1.1  2003/02/11 04:37:28  krister
 # Added an empty local_conf.py template for new users. It is now an error if freevo_config.py is found in /etc/freevo etc. Changed DVD protection to use a flag. MPlayer stores debug logs in FREEVO_STARTDIR, and stops with an error if they cannot be written.
 #
@@ -237,7 +240,7 @@ CONFIG_VERSION = 1.0
 #
 # If you want to generate a list of all the channels in the XMLTV guide in
 # this format you can run the following command:
-#    "freevo execute epg_xmltv.py config"
+#    "freevo execute src/tv/epg_xmltv.py config"
 # You must have an XMLTV listing in /tmp/TV.xml before running it, and
 # TV_CHANNELS below must be set to None. The output contains guesses for the
 # displayed name and TV channel name. You can edit this list, delete lines,
