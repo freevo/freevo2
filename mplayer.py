@@ -177,6 +177,8 @@ class MPlayer:
                 self.stop()
                 pos = self.playlist.index(self.filename)
                 last_file = (pos == len(self.playlist)-1)
+
+                # Don't continue if at the end of the list
                 if self.playlist == [] or (last_file and not self.repeat):
                     rc.app = None
                     menuwidget.refresh()
