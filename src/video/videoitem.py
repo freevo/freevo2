@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.71  2003/08/16 23:53:32  outlyer
+# Fix a typo causing a crash.
+#
 # Revision 1.70  2003/08/03 13:46:04  dischi
 # fix tv show detection
 #
@@ -463,7 +466,7 @@ class VideoItem(Item):
             # options
             if self.current_subitem.mplayer_options:
                 if self.mplayer_options:
-                    self.current_subitem.mplayer_options += ' ' + self.mplayer_opions
+                    self.current_subitem.mplayer_options += ' ' + self.mplayer_options
             else:
                 self.current_subitem.mplayer_options = self.mplayer_options
             # When playing a subitem, the menu must be hidden. If it is not,
