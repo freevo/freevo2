@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/11/01 20:16:58  dischi
+# add missing import
+#
 # Revision 1.15  2004/10/29 18:17:48  dischi
 # moved misc util to this file
 #
@@ -62,6 +65,7 @@
 import os, time, copy
 import mmpython
 
+import sysconfig
 import plugin
 import config
 import util
