@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/14 19:36:57  dischi
+# some improvements for image loading
+#
 # Revision 1.3  2003/03/07 22:54:12  dischi
 # First version of the extended menu with image support. Try the music menu
 # and press DISPLAY
@@ -81,25 +84,28 @@ def format_image(settings, item, width, height, force=0):
             return
 
         image = osd.loadbitmap('thumb://%s' % image)
+        if not image:
+            return
 
-    
+    else:
+        force = 0
+
     if type == 'audio':
         m = min(height, width)
         height = m
         width  = m
 
-    else:
-        if type == 'video':
+    elif image:
+        i_w, i_h = image.get_size()
+        if type == 'video' and not force and i_w < i_h:
             # aspect 7:5
             i_w = 5
             i_h = 7
-        else:
-            i_w, i_h = image.get_size()
 
         if int(float(width * i_h) / i_w) > height:
             width = int(float(height * i_w) / i_h)
         else:
             height = int(float(width * i_h) / i_w)
-    
+
     return pygame.transform.scale(image, (width, height))
     
