@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/10/20 01:41:55  rshortt
+# Moving tv_util from src/tv/ to src/util/.
+#
 # Revision 1.18  2003/10/18 09:33:34  dischi
 # fix some parent handling and remove the PopupBox
 #
@@ -78,7 +81,8 @@
 
 import time
 
-import config, tv.edit_favorite, tv.tv_util
+import config, tv.edit_favorite
+import util.tv_util as tv_util
 import tv.record_client as record_client
 import tv.view_favorites, tv.program_search
 import event as em
@@ -142,7 +146,7 @@ class ProgramDisplay(PopupBox):
                           color=self.font.color)
 
         chan = Label('Channel:  %s' % \
-                      tv.tv_util.get_chan_displayname(self.prog.channel_id), 
+                      tv_util.get_chan_displayname(self.prog.channel_id), 
                                                    self, Align.LEFT)
         chan.set_font(font=self.font.name, size=self.font.size -2,
                       color=self.font.color)
@@ -361,7 +365,7 @@ class ScheduledRecordings(PopupBox):
                 self.results.add_item(text='%s %s: %s' % \
                                       (time.strftime(config.TV_DATETIMEFORMAT,
                                                      time.localtime(prog.start)),
-                                       tv.tv_util.get_chan_displayname(prog.channel_id),
+                                       tv_util.get_chan_displayname(prog.channel_id),
                                        prog.title),
                                       value=prog)
 

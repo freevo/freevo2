@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/10/20 01:41:55  rshortt
+# Moving tv_util from src/tv/ to src/util/.
+#
 # Revision 1.16  2003/10/19 16:15:52  rshortt
 # Added OS_EVENT_KILL.  recordserver will now kill and wait.
 #
@@ -122,7 +125,7 @@ from tv.record_types import ScheduledRecordings
 
 import tv.record_types
 import tv.epg_xmltv
-import tv.tv_util
+import util.tv_util as tv_util
 import plugin
 import util.popen3
 
@@ -208,7 +211,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 prog.tunerid = chan.tunerid
     
         scheduledRecordings = self.getScheduledRecordings()
-        scheduledRecordings.addProgram(prog, tv.tv_util.getKey(prog))
+        scheduledRecordings.addProgram(prog, tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
        
         return (TRUE, 'recording scheduled')
@@ -219,7 +222,7 @@ class RecordServer(xmlrpc.XMLRPC):
             return (FALSE, 'no prog')
 
         scheduledRecordings = self.getScheduledRecordings()
-        scheduledRecordings.removeProgram(prog, tv.tv_util.getKey(prog))
+        scheduledRecordings.removeProgram(prog, tv_util.getKey(prog))
         self.saveScheduledRecordings(scheduledRecordings)
         now = time.time()
         try:
@@ -339,7 +342,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 if DEBUG: log.debug('going to record: %s' % prog)
                 prog.isRecording = TRUE
                 prog.rec_duration = duration
-                prog.filename = tv.tv_util.getProgFilename(prog)
+                prog.filename = tv_util.getProgFilename(prog)
                 rec_prog = prog
 
 
@@ -348,7 +351,7 @@ class RecordServer(xmlrpc.XMLRPC):
             if prog.stop < now:
                 if DEBUG: log.debug('found a program to clean')
                 cleaned = TRUE
-                del progs[tv.tv_util.getKey(prog)]
+                del progs[tv_util.getKey(prog)]
 
         if rec_prog or cleaned:
             scheduledRecordings.setProgramList(progs)
@@ -483,7 +486,7 @@ class RecordServer(xmlrpc.XMLRPC):
         for fav in favs.values():
     
             if prog.title == fav.title:    
-                if fav.channel == tv.tv_util.get_chan_displayname(prog.channel_id) \
+                if fav.channel == tv_util.get_chan_displayname(prog.channel_id) \
                    or fav.channel == 'ANY':
                     if fav.dow == dow or fav.dow == 'ANY':
                         if fav.mod == min_of_day or fav.mod == 'ANY':

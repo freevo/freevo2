@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/10/20 01:41:55  rshortt
+# Moving tv_util from src/tv/ to src/util/.
+#
 # Revision 1.6  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -112,7 +115,7 @@ import rc
 
 import plugin
 
-import tv.tv_util
+import util.tv_util as tv_util
 
 # The Electronic Program Guide
 import tv.epg_xmltv
@@ -146,7 +149,7 @@ def get_tunerid(channel_id):
 
 
 def get_friendly_channel(channel_id):
-    channel_name = tv.tv_util.get_chan_displayname(channel_id)
+    channel_name = tv_util.get_chan_displayname(channel_id)
 
     if not channel_name: 
         AlertBox(text=_('Could not find TV channel %s') % channel_id).show()

@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2003/10/20 01:41:55  rshortt
+# Moving tv_util from src/tv/ to src/util/.
+#
 # Revision 1.44  2003/10/18 11:16:37  dischi
 # patch from Cyril Lacoux to support locale for the clock
 #
@@ -69,7 +72,7 @@ import string
 import types
 import mailbox
 import skin
-import tv.tv_util as tv_util
+import util.tv_util as tv_util
 
 import plugin
 

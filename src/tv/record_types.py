@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/10/20 01:41:55  rshortt
+# Moving tv_util from src/tv/ to src/util/.
+#
 # Revision 1.5  2003/09/05 02:48:12  rshortt
 # Removing src/tv and src/www from PYTHONPATH in the freevo script.  Therefore any module that was imported from src/tv/ or src/www that didn't have a leading 'tv.' or 'www.' needed it added.  Also moved tv/tv.py to tv/tvmenu.py to avoid namespace conflicts.
 #
@@ -39,7 +42,7 @@
 #endif
 
 import sys, time, os, string
-import tv.tv_util
+import util.tv_util as tv_util
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
@@ -146,7 +149,7 @@ class Favorite:
             self.title = prog.title
 
 	    if exactchan:
-                self.channel = tv.tv_util.get_chan_displayname(prog.channel_id)
+                self.channel = tv_util.get_chan_displayname(prog.channel_id)
             else:
                 self.channel = 'ANY'
           

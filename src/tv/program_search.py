@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/10/20 01:41:55  rshortt
+# Moving tv_util from src/tv/ to src/util/.
+#
 # Revision 1.9  2003/09/07 11:18:27  dischi
 # many optical improvements
 #
@@ -48,7 +51,8 @@
 
 import time
 
-import config, tv.program_display, tv.tv_util
+import config, tv.program_display
+import util.tv_util as tv_util
 import tv.record_client as record_client
 import event as em
 
@@ -144,7 +148,7 @@ class ProgramSearch(PopupBox):
                 self.results.add_item(text='%s %s: %s' % \
                                         (time.strftime('%b %d %I:%M %p', 
                                            time.localtime(prog.start)), 
-                                         tv.tv_util.get_chan_displayname(prog.channel_id),
+                                         tv_util.get_chan_displayname(prog.channel_id),
                                          prog.title),
                                       value=prog)
 
