@@ -13,6 +13,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/02/14 19:29:39  dischi
+# kill some debug
+#
 # Revision 1.28  2004/02/07 13:24:39  dischi
 # unicode fix
 #
@@ -186,7 +189,7 @@ class PluginInterface(plugin.ItemPlugin):
                     return [ ( self.cover_search_file, _( 'Find a cover for this music' ),
                                'imdb_search_or_cover_search') ]
                 else:
-                    if config.DEBUG:
+                    if config.DEBUG > 1:
                         print _( "WARNING" ) + ": "+\
                               _( "Plugin 'coversearch' was disabled for this item! " \
                                  "'coversearch' needs an item with " \
@@ -195,7 +198,7 @@ class PluginInterface(plugin.ItemPlugin):
                                  "So you need a file with a ID3 tag (mp3) or an Ogg Info. "  \
                                  "Maybe you must fix this file (%s) tag?" ) % item.filename 
             except KeyError:
-                if config.DEBUG:
+                if config.DEBUG > 1:
                     print _( "WARNING" ) + ": " +\
                           _( "Plugin 'coversearch' was disabled for this item! " \
                              "'coversearch' needs an item with " \
@@ -204,7 +207,7 @@ class PluginInterface(plugin.ItemPlugin):
                              "So you need a file with a ID3 tag (mp3) or an Ogg Info. " \
                              "Maybe you must fix this file (%s) tag?" ) % item.filename
             except AttributeError:
-                if config.DEBUG:
+                if config.DEBUG > 1:
                     print _( "WARNING" ) + ": " +\
                           _( "Unknown CD, cover searching is disabled" )
         return []
