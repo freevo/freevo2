@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/01/17 03:50:21  krister
+# Doh! The X11 menus were slow because of stupid SDL event handling, fixed!
+#
 # Revision 1.6  2003/01/13 00:34:20  krister
 # Applied Thomas Schuppels patch for improved bitmap handling.
 #
@@ -304,27 +307,31 @@ class OSD:
         else:
             if time.time() > self.mousehidetime:
                 pygame.mouse.set_visible(0)
-        
-        event = pygame.event.poll()
-        if event.type == NOEVENT:
-            return None
 
-        if event.type == KEYDOWN:
-            if event.key == K_h:
-                self._helpscreen()
-            elif event.key == K_z:
-                pygame.display.toggle_fullscreen()
-            elif event.key == K_F10:
-                # Take a screenshot
-                pygame.image.save(self.screen,
-                                  '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
-                self._screenshotnum += 1
-            elif event.key in cmds_sdl.keys():
-                # Turn off the helpscreen if it was on
-                if self._help:
+        # Return the next key event, or None if the queue is empty.
+        # Everything else (mouse etc) is discarded.
+        while 1:
+            event = pygame.event.poll()
+
+            if event.type == NOEVENT:
+                return None
+
+            if event.type == KEYDOWN:
+                if event.key == K_h:
                     self._helpscreen()
-                    
-                return cmds_sdl[event.key]
+                elif event.key == K_z:
+                    pygame.display.toggle_fullscreen()
+                elif event.key == K_F10:
+                    # Take a screenshot
+                    pygame.image.save(self.screen,
+                                      '/tmp/freevo_ss%s.bmp' % self._screenshotnum)
+                    self._screenshotnum += 1
+                elif event.key in cmds_sdl.keys():
+                    # Turn off the helpscreen if it was on
+                    if self._help:
+                        self._helpscreen()
+
+                    return cmds_sdl[event.key]
 
     
     def _send(arg1, *arg, **args): # XXX remove
