@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/09/14 11:12:00  dischi
+# add a function to get fonts from the skin settings
+#
 # Revision 1.10  2003/09/13 10:08:23  dischi
 # i18n support
 #
@@ -539,6 +542,17 @@ class Skin:
 
         
 
+    def GetFont(self, name):
+        """
+        Get the skin font object 'name'. Return the default object if
+        a font with this name doesn't exists.
+        """
+        try:
+            return self.settings.font[name]
+        except:
+            return self.settings.font['default']
+
+        
     def items_per_page(self, (type, object)):
         """
         returns the number of items per menu page
