@@ -27,6 +27,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/12/04 21:49:18  dischi
+# o remove BlankScreen and the Splashscreen
+# o make it possible to register objects as areas
+#
 # Revision 1.16  2003/12/03 21:50:44  dischi
 # rework of the loading/selecting
 # o all objects that need a skin need to register what they areas they need
@@ -270,6 +274,20 @@ class Skin_Area:
         self.imagecache = util.objectcache.ObjectCache(imagecachesize,
                                                        desc='%s_image' % self.name)
 
+
+    def update_content_needed(self):
+        """
+        this area needs never a content update
+        """
+        return True
+
+
+    def update_content(self):
+        """
+        there is no content in this area
+        """
+        pass
+    
 
     def draw(self, settings, obj, display_style=0, widget_type='menu', force_redraw=FALSE):
         """
