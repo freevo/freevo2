@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/09/06 19:54:04  rshortt
+# Don't crash if there's no description.
+#
 # Revision 1.11  2003/09/06 17:31:17  rshortt
 # Removed 'Description: ' and added a close button.
 #
@@ -96,8 +99,8 @@ class ProgramDisplay(PopupBox):
             subtitle_txt = 'Subtitle:  %s' % self.prog.sub_title
             subtitle = Label(subtitle_txt, self, Align.LEFT)
 
-        # desc = Label('Description:  %s' % self.prog.desc, self, Align.LEFT)
-        desc = Label(self.prog.desc, self, Align.LEFT)
+        if self.prog.desc:
+            desc = Label(self.prog.desc, self, Align.LEFT)
 
         chan = Label('Channel:  %s' % \
                       tv.tv_util.get_chan_displayname(self.prog.channel_id), 
