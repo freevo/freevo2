@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/08/23 19:42:09  dischi
+# make a config option HIDE_UNUSABLE_DISCS
+#
 # Revision 1.13  2003/08/23 12:51:42  dischi
 # removed some old CVS log messages
 #
@@ -62,16 +65,7 @@ TRUE  = 1
 FALSE = 0
 
 import plugin
-
-import plugins
-# Types that will be displayed when in 'key' display_type
-# Use this to avoid displaying empty cdroms, audiocd in video menu, ...
-dir_types = {
-    'audio': [ 'dir', 'audiocd', None ],
-    'video': [ 'dir', 'video', 'vcd', 'dvd', None ],
-    'image': [ 'dir', None ],
-    'mame' : [ 'dir', None ],
-    }
+import plugins.rom_drives
 
 #
 # Plugin interface to integrate the MediaMenu into Freevo
@@ -120,6 +114,19 @@ class MediaMenu(Item):
         """
         items = copy.copy(self.normal_items)
 
+        if config.HIDE_UNUSABLE_DISCS:
+            dir_types = {
+                'audio': [ 'dir', 'audiocd', 'audio' ],
+                'video': [ 'dir', 'video', 'vcd', 'dvd' ],
+                'image': [ 'dir', None ],
+                'games': [ 'dir', None ],
+                }
+        else:
+            dir_types = {}
+            for type in ('audio', 'video', 'image', 'games'):
+                dir_types[type] = [ 'dir', 'audiocd', 'audio', 'video',
+                                    'vcd', 'dvd', None ]
+                
         if self.display_type:
             plugins_list = plugin.get('mainmenu_%s' % self.display_type)
         else:
@@ -131,10 +138,9 @@ class MediaMenu(Item):
             
             if isinstance( p, plugins.rom_drives.rom_items ):
                 # do not show media from other menus
-                l = p.items( self )
-                for i in l:
+                for i in p.items( self ):
                     if i.type in dir_type:
-                        items += [ i ]
+                        items.append(i)
             else:
                 items += p.items( self )
 
