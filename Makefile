@@ -1,4 +1,4 @@
-all: site-packages/_Imlib2module.so links optional_packages
+all: site-packages/_Imlib2module.so optional_packages links
 
 links:
 	test -e site-packages || mkdir site-packages
@@ -8,6 +8,7 @@ links:
 	-(test -e lib/pylibvisual/libvisual.so && ln -sf ../lib/pylibvisual/libvisual.so site-packages)
 	ln -sf ../lib/mevas/mevas ../lib/pyepg site-packages
 	ln -sf ../src site-packages/freevo
+	echo make successfull
 
 optional_packages:
 	-(cd lib/pyepeg ; make )
