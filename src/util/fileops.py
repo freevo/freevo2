@@ -10,11 +10,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/03 17:41:01  dischi
+# add helper to get all subdirs recursive
+#
 # Revision 1.10  2003/12/31 16:43:49  dischi
 # major speed enhancements
-#
-# Revision 1.9  2003/12/30 15:28:34  dischi
-# support for OVERLAY_DIR_STORE_THUMBNAILS
 #
 # Revision 1.8  2003/12/12 19:11:20  dischi
 # rewrote find_matches. It's not 100% correct because it doesn't use splitext
@@ -275,6 +275,20 @@ def match_files_recursively(dir, suffix_list):
     return matches
 
 
+def get_subdirs_recursively(dir):
+    """
+    get all subdirectories recursively in the given directory
+    """
+    all_files = []
+    os.path.walk(dir, match_files_recursively_helper, all_files)
+
+    matches = misc.unique([f for f in all_files if os.path.isdir(f) ])
+
+    matches.sort(lambda l, o: cmp(l.upper(), o.upper()))
+
+    return matches
+
+
 def recursefolders(root, recurse=0, pattern='*', return_folders=0):
     """
     Before anyone asks why I didn't use os.path.walk; it's simple, 
@@ -422,11 +436,6 @@ def read_pickle(file):
         except:
             data = pickle.load(f)
         f.close()
-        if not config.OVERLAY_DIR_STORE_THUMBNAILS:
-            try:
-                os.utime(file, None)
-            except OSError:
-                _debug_('can change access time for %s' % file)
         return data
     except:
         return None
