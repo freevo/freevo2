@@ -207,7 +207,7 @@
 	    <newline/>
 	  </if>
 
-	  <goto_pos y="10" mode="relative"/>
+	  <goto_pos y="20" mode="relative"/>
 	  <if expression="year">
 	    <text width="130" align="right" font="info value">Year:</text>
 	    <goto_pos x="10" mode="relative"/>
@@ -227,7 +227,10 @@
 	    <newline/>
 	  </if>
 
-	  <goto_pos y="10" mode="relative"/>
+	  <if expression="year or genre or rating">
+	    <goto_pos y="10" mode="relative"/>
+	  </if>
+
 	  <if expression="length">
 	    <text width="130" align="right" font="info value">Runtime:</text>
 	    <goto_pos x="10" mode="relative"/>
@@ -261,9 +264,6 @@
 	</item>
 
 	<item type="dir">
-	  <text font="info label" expression="type"/>
-	  <newline/>
-	  <goto_pos y="20" mode="relative"/>
 	  <if expression="tagline">
 	    <text font="info tagline" width="max" expression="tagline"/>
 	    <newline/>
@@ -272,6 +272,22 @@
 	  <if expression="plot">
 	    <text font="info plot" height="max" mode="soft" 
 	      align="justified" expression="plot"/>
+	    <newline/>
+	  </if>
+	  <if expression="content and not plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="content"/>
+	    <newline/>
+	  </if>
+	  <newline/>
+	  <goto_pos y="20" mode="relative"/>
+	  <text font="info value" expression="type"/>
+	  <newline/>
+	  <if expression="totalspace"> <!-- 0 if rom drive -->
+	    <text font="info value" expression="freespace"/>
+	    <text font="info value"> of </text>
+	    <text font="info value" expression="totalspace"/>
+	    <text font="info value"> MB free</text>
 	    <newline/>
 	  </if>
 	</item>

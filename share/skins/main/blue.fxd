@@ -271,6 +271,13 @@
 	<item type="dir">
 	  <text font="info label" expression="type"/>
 	  <newline/>
+	  <if expression="totalspace"> <!-- 0 if rom drive -->
+	    <text font="info label" expression="freespace"/>
+	    <text font="info label"> of </text>
+	    <text font="info label" expression="totalspace"/>
+	    <text font="info label"> MB free</text>
+	    <newline/>
+	  </if>
 	  <goto_pos y="20" mode="relative"/>
 	  <if expression="tagline">
 	    <text font="info tagline" width="max" expression="tagline"/>
@@ -280,6 +287,11 @@
 	  <if expression="plot">
 	    <text font="info plot" height="max" mode="soft" 
 	      align="justified" expression="plot"/>
+	    <newline/>
+	  </if>
+	  <if expression="content and not plot">
+	    <text font="info plot" height="max" mode="soft" 
+	      align="justified" expression="content"/>
 	    <newline/>
 	  </if>
 	</item>
