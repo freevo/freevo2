@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2003/12/03 21:52:08  dischi
+# rename some skin function calls
+#
 # Revision 1.30  2003/10/12 10:56:19  dischi
 # change debug to use _debug_ and set level to 2
 #
@@ -151,7 +154,7 @@ class GUIObject:
 
         # XXX: skin settings
         # This if/else should be removed when the new skin is in place.
-        self.skin_info                 = self.skin.GetPopupBoxStyle(self)
+        self.skin_info                 = self.skin.get_popupbox_style(self)
         self.skin_info_background      = self.skin_info[0]
         self.skin_info_spacing         = self.skin_info[1]
         self.skin_info_color           = self.skin_info[2]

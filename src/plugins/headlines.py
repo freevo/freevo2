@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2003/12/03 21:52:08  dischi
+# rename some skin function calls
+#
 # Revision 1.12  2003/11/30 14:35:43  dischi
 # new skin handling
 #
@@ -157,8 +160,8 @@ class ShowHeadlineDetails(skin.BlankScreen):
         """
         draw the description
         """
-        font = skin.GetFont('default')
-        titlefont = skin.GetFont('title')
+        font = skin.get_font('default')
+        titlefont = skin.get_font('title')
         x0 += 10
         y0 += 10
         x1 -= 10

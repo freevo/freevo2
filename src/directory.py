@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2003/12/03 21:52:07  dischi
+# rename some skin function calls
+#
 # Revision 1.69  2003/12/01 19:06:46  dischi
 # better handling of the MimetypePlugin
 #
@@ -652,7 +655,7 @@ class DirItem(Playlist):
                                   force_skin_layout = self.DIRECTORY_FORCE_SKIN_LAYOUT)
 
             if self.xml_file:
-                item_menu.skin_settings = skin.LoadSettings(self.xml_file)
+                item_menu.skin_settings = skin.load(self.xml_file)
 
             if menuw:
                 menuw.pushmenu(item_menu)

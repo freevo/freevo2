@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/12/03 21:52:08  dischi
+# rename some skin function calls
+#
 # Revision 1.4  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -157,7 +160,7 @@ class PluginInterface(plugin.Plugin):
         self.bmovl.drawbox(0, height-1, osd.width, height-1, width=1, color=0x000000)
 
         clock       = time.strftime('%a %I:%M %P')
-        clock_font  = skin.get_singleton().GetFont('clock')
+        clock_font  = skin.get_singleton().get_font('clock')
         clock_width = clock_font.font.stringsize(clock)
         
         self.bmovl.drawstringframed(clock, self.bmovl.width-config.OVERSCAN_X-10-clock_width,
@@ -189,8 +192,8 @@ class PluginInterface(plugin.Plugin):
             title   = show[0] + " " + show[1] + "x" + show[2]
             tagline = show[3]
         
-        title_font   = skin.get_singleton().GetFont('title')
-        tagline_font = skin.get_singleton().GetFont('info tagline')
+        title_font   = skin.get_singleton().get_font('title')
+        tagline_font = skin.get_singleton().get_font('info tagline')
 
         pos = self.bmovl.drawstringframed(title, x0, y0, width, -1, title_font.font,
                                           title_font.color)

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.94  2003/12/03 21:52:07  dischi
+# rename some skin function calls
+#
 # Revision 1.93  2003/11/30 14:39:54  dischi
 # load the fxditem
 #
@@ -240,7 +243,7 @@ class SkinSelectItem(Item):
         """
         Load the new skin and rebuild the main menu
         """
-        skin.settings = skin.LoadSettings(self.skin, copy_content = False)
+        skin.settings = skin.load(self.skin, copy_content = False)
         pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
         menuw.menustack[0].choices = get_main_menu(self.parent)
         menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
@@ -271,7 +274,7 @@ class MainMenu(Item):
         # (only for the new skin code)
         if event == MENU_CHANGE_STYLE:
             items = []
-            for name, image, skinfile in skin.GetSkins():
+            for name, image, skinfile in skin.get_skins():
                 items += [ SkinSelectItem(self, name, image, skinfile) ]
 
             menuw.pushmenu(menu.Menu('SKIN SELECTOR', items))
