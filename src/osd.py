@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.27  2003/04/02 11:52:38  dischi
+# - use hardware layer (it will be deactivated if not possible by pygame)
+# - don't convert images to alpha layers. If the image format supports that
+#   they already are alpha layers, if not, it makes no sense to convert
+#
 # Revision 1.26  2003/03/24 00:39:29  rshortt
 # Put try/catch in update() for updating rects in case the rect has a bad value for one of its properties.
 #
@@ -326,7 +331,7 @@ class OSD:
         pygame.display.init()
         pygame.font.init()
 
-        self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
+        self.screen = pygame.display.set_mode((self.width, self.height), 1, 32)
 
         if config.CONF.display == 'x11' and config.START_FULLSCREEN_X == 1:
             pygame.display.toggle_fullscreen()
@@ -418,7 +423,7 @@ class OSD:
         pygame.display.init()
         self.width = config.CONF.width
         self.height = config.CONF.height
-        self.screen = pygame.display.set_mode((self.width, self.height), 0, 32)
+        self.screen = pygame.display.set_mode((self.width, self.height), 1, 32)
 
     def stopdisplay(self):
         pygame.display.quit()
@@ -1453,8 +1458,8 @@ class OSD:
                         filename = thumb
 
                             
-            tmp = pygame.image.load(filename)  # XXX Cannot load everything
-            image = tmp.convert_alpha()  # XXX Cannot load everything
+            image = pygame.image.load(filename)  # XXX Cannot load everything
+            #image = tmp.convert_alpha()  # XXX Cannot load everything
 
         except pygame.error, e:
             print 'SDL image load problem: %s' % e
