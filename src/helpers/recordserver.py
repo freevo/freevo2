@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/02/23 21:46:22  dischi
+# start some unicode fixes, still not working every time
+#
 # Revision 1.30  2004/02/11 04:20:46  outlyer
 # Yet another place where we aren't following the user's time format... fixed now.
 #
@@ -203,9 +206,12 @@ class RecordServer(xmlrpc.XMLRPC):
         scheduledRecordings = None
 
         if os.path.isfile(config.TV_RECORD_SCHEDULE):
-            if DEBUG: log.debug('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
-            scheduledRecordings = marmalade.unjellyFromXML(open(config.TV_RECORD_SCHEDULE, 'r'))
-    
+            if DEBUG:
+                log.debug('GET: reading cached file (%s)' % config.TV_RECORD_SCHEDULE)
+            f = open(config.TV_RECORD_SCHEDULE, 'r')
+            scheduledRecordings = marmalade.unjellyFromXML(f)
+            f.close()
+            
             try:
                 file_ver = scheduledRecordings.TYPES_VERSION
             except AttributeError:
@@ -238,9 +244,14 @@ class RecordServer(xmlrpc.XMLRPC):
             if DEBUG: print 'SAVE: making a new ScheduledRecordings'
             scheduledRecordings = ScheduledRecordings()
     
-        if DEBUG: log.debug('SAVE: saving cached file (%s)' % config.TV_RECORD_SCHEDULE)
-        if DEBUG: log.debug("SAVE: ScheduledRecordings has %s items." % len(scheduledRecordings.programList))
-        marmalade.jellyToXML(scheduledRecordings, open(config.TV_RECORD_SCHEDULE, 'w'))
+        if DEBUG:
+            log.debug('SAVE: saving cached file (%s)' % config.TV_RECORD_SCHEDULE)
+        if DEBUG:
+            log.debug("SAVE: ScheduledRecordings has %s items." % \
+                      len(scheduledRecordings.programList))
+        f = open(config.TV_RECORD_SCHEDULE, 'w')
+        marmalade.jellyToXML(scheduledRecordings, f)
+        f.close()
         return TRUE
 
  
@@ -318,7 +329,7 @@ class RecordServer(xmlrpc.XMLRPC):
                 for prog in ch.programs:
                     if start == '%s' % prog.start:
                         if DEBUG: log.debug('PROGRAM MATCH')
-                        return (TRUE, prog)
+                        return (TRUE, prog.decode())
 
         return (FALSE, 'prog not found')
 
@@ -346,8 +357,12 @@ class RecordServer(xmlrpc.XMLRPC):
                     continue
                 if regex.match(prog.title) or regex.match(prog.desc) \
                    or regex.match(prog.sub_title):
-                    if DEBUG: log.debug('PROGRAM MATCH: %s' % prog)
-                    matches.append(prog)
+                    if DEBUG:
+                        log.debug('PROGRAM MATCH: %s' % prog)
+                    matches.append(prog.decode())
+
+        if DEBUG:
+            log.debug('return: %s' % str(matches))
 
         if matches:
             return (TRUE, matches)
