@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/12/03 21:51:31  dischi
+# register to the skin and rename some skin function calls
+#
 # Revision 1.10  2003/11/22 15:30:55  dischi
 # support more than one player
 #
@@ -71,6 +74,8 @@ import plugin
 import event
 
 skin = skin.get_singleton()
+
+skin.register('player', ('screen', 'title', 'subtitle', 'view', 'info'))
 
 
 class PlayerGUI(GUIObject):

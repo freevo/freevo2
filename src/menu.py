@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2003/12/03 21:51:31  dischi
+# register to the skin and rename some skin function calls
+#
 # Revision 1.69  2003/12/01 19:09:10  dischi
 # accept all items in submenus
 #
@@ -55,6 +58,9 @@ import skin
 from event import *
 from item import Item
 from gui import GUIObject, AlertBox
+
+skin = skin.get_singleton()
+skin.register('menu', ('screen', 'title', 'subtitle', 'view', 'listing', 'info'))
 
 
 class MenuItem(Item):
@@ -104,11 +110,9 @@ class Menu:
         self.previous_page_start = []
         self.previous_page_start.append(0)
         self.umount_all = umount_all    # umount all ROM drives on display?
-        self.skin = skin.get_singleton()
+        self.skin_settings = None
         if xml_file:
-            self.skin_settings = self.skin.LoadSettings(xml_file)
-        else:
-            self.skin_settings = None
+            self.skin_settings = skin.load(xml_file)
 
         # special items for the new skin to use in the view or info
         # area. If None, menu.selected will be taken
@@ -120,7 +124,7 @@ class Menu:
         self.reload_func = reload_func  
         self.item_types = item_types
         self.force_skin_layout = force_skin_layout
-        self.display_style = self.skin.GetDisplayStyle(self)
+        self.display_style = skin.get_display_style(self)
 
         # How many menus to go back when 'BACK_ONE_MENU' is called
         self.back_one_menu = 1
@@ -147,7 +151,7 @@ class Menu:
             
 
     def items_per_page(self):
-        return self.skin.items_per_page(('menu', self))
+        return skin.items_per_page(('menu', self))
     
 
     def add_item(self, item, pos):
@@ -178,7 +182,7 @@ class MenuWidget(GUIObject):
         self.visible = 1
         self.eventhandler_plugins = None
         self.event_context = 'menu'
-        self.skin = skin.get_singleton()
+
         
     def show(self):
         if not self.visible:
@@ -189,7 +193,7 @@ class MenuWidget(GUIObject):
         if self.visible:
             self.visible = 0
             if clear:
-                self.skin.clear(osd_update=clear)
+                skin.clear(osd_update=clear)
         
     def delete_menu(self, arg=None, menuw=None, allow_reload=True):
         if len(self.menustack) > 1:
@@ -220,7 +224,7 @@ class MenuWidget(GUIObject):
                 menu.refresh()
                 return True
             
-            if self.skin.GetDisplayStyle(menu) != menu.display_style:
+            if skin.get_display_style(menu) != menu.display_style:
                 self.rebuild_page()
                 
             if menu.reload_func:
@@ -301,7 +305,7 @@ class MenuWidget(GUIObject):
         menu = self.menustack[-1]
 
         if not isinstance(menu, Menu):
-            return self.skin.draw((menu.type, menu))
+            return skin.draw((menu.type, menu))
 
         if self.menustack[-1].umount_all == 1:
             util.umount_all()
@@ -313,7 +317,7 @@ class MenuWidget(GUIObject):
                     self.menustack[-1] = reload
             self.init_page()
 
-        self.skin.draw(('menu', self))
+        skin.draw(('menu', self))
 
         # Draw any child UI objects
         for child in self.children:
@@ -580,7 +584,7 @@ class MenuWidget(GUIObject):
                     
         elif event == MENU_CHANGE_STYLE and len(self.menustack) > 1:
             # did the menu change?
-            if self.skin.ToggleDisplayStyle(menu):
+            if skin.toggle_display_style(menu):
                 self.rebuild_page()
                 self.refresh()
                 return
@@ -621,7 +625,7 @@ class MenuWidget(GUIObject):
 
         menu.selected = current
         self.init_page()
-        menu.display_style = self.skin.GetDisplayStyle(menu)
+        menu.display_style = skin.get_display_style(menu)
         
 
     def init_page(self):
@@ -653,3 +657,4 @@ class MenuWidget(GUIObject):
 
         if not menu.choices:
             menu.selected = self.all_items[0]
+

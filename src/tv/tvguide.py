@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/12/03 21:51:31  dischi
+# register to the skin and rename some skin function calls
+#
 # Revision 1.19  2003/11/16 17:38:48  dischi
 # i18n patch from David Sagnol
 #
@@ -75,10 +78,10 @@ import epg_xmltv, epg_types
 import program_display
 import record_client as ri
 
-skin = skin.get_singleton() # Create the Skin object
+skin = skin.get_singleton()
+skin.register('tv', ('screen', 'title', 'subtitle', 'view', 'tvlisting', 'info'))
 
 CHAN_NO_DATA = _('This channel has no data loaded')
-
 
 class TVGuide(gui.GUIObject):
     def __init__(self, start_time, player, menuw):
@@ -131,7 +134,7 @@ class TVGuide(gui.GUIObject):
         _debug_('TVGUIDE EVENT is %s' % event)
 
         if event == em.MENU_CHANGE_STYLE:
-            if skin.ToggleDisplayStyle('tv'):
+            if skin.toggle_display_style('tv'):
                 start_time    = self.start_time
                 stop_time     = self.stop_time
                 start_channel = self.start_channel
