@@ -44,6 +44,12 @@ if test -a $RT_DIR/freevo_python ; then
     # Execute using the runtime:
     echo "Using the Freevo runtime ($RT_DIR)"
     
+    # Support for using just Python
+    if [ $1 = prompt ] ; then
+        $RT_DIR/freevo_python 
+        exit 0
+    fi
+    
     # Start the lirc remote control app if the device is present
     if test -S /dev/lircd ; then
         echo Found a lirc device, starting the remote control daemon
