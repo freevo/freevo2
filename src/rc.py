@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/10/26 17:04:26  dischi
+# Patch from Soenke Schwardt to use the time to fix repeat problems with
+# some remote receiver.
+#
 # Revision 1.25  2003/10/18 21:23:38  rshortt
 # Added a subscribe method so that you can get a callback when events are
 # posted.  Also rework __init__ sligntly.
@@ -51,6 +55,7 @@ import config
 import util
 from event import Event, BUTTON
 import osd
+import time
 
 PYLIRC = 1
 try:
@@ -139,15 +144,11 @@ class RemoteControl:
         self.previous_code = None;
         self.repeat_count = 0
         self.event_callback = None
-
-        # Take into consideration only 1 event out of ``modulo''
-        self.default_repeat_modulo = 4 # Config
-
-        # After how many repeats do we decrease the modulo?
-        self.repeat_modulo_decrease_threshhold = 5 # Config
-        
-        self.repeat_modulo = self.default_repeat_modulo
-
+        self.firstkeystroke = 0.0
+        self.lastkeystroke = 0.0
+        self.lastkeycode = ''
+        self.default_keystroke_delay1 = 0.25  # Config
+        self.default_keystroke_delay2 = 0.25  # Config
 
     def set_app(self, app, context):
         self.app     = app
@@ -219,17 +220,36 @@ class RemoteControl:
         
         if self.pylirc:
             list, flag = self.get_last_code()
-            if flag == 1:
-                self.repeat_count = 0
-                self.repeat_modulo = self.default_repeat_modulo
 
+            if list == None:
+                nowtime = 0.0
+                nowtime = time.time()
+                if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime) and (self.firstkeystroke != 0.0):
+                    self.firstkeystroke = 0.0
+                    self.lastkeystroke = 0.0
+                    self.repeat_count = 0
+                
             if list != None:
-                if self.repeat_count > self.repeat_modulo_decrease_threshhold * \
-                  (self.default_repeat_modulo - self.repeat_modulo + 1) \
-                  and self.repeat_modulo > 1:
-                      self.repeat_modulo -= 1
-                if self.repeat_count % self.repeat_modulo != 0:
-                    list = []
+                
+                nowtime = time.time()
+
+                if (list != None) and (list != []):
+                    for code in list:
+                        if ( self.lastkeycode != code ):
+                            self.lastkeycode = code
+                            self.lastkeystroke = nowtime
+                            self.firstkeystoke = nowtime
+
+                if self.firstkeystroke == 0.0 :
+                    self.firstkeystroke = time.time()
+                else:
+                    if (self.firstkeystroke + self.default_keystroke_delay1 > nowtime):
+                        list = []
+                    else:
+                        if (self.lastkeystroke + self.default_keystroke_delay2 < nowtime):
+                            self.firstkeystroke = nowtime
+                    
+                self.lastkeystroke = nowtime
                 self.repeat_count += 1
 
                 for code in list:
