@@ -12,6 +12,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2002/10/03 17:34:37  dischi
+# Small update to support more resolutions. I tried to get 720x576 working,
+# but for some reason I can't see a freevo on my tv, mplayer works fine.
+# Strange....
+#
 # Revision 1.27  2002/09/30 09:28:02  dischi
 # small ugly fix to work around the unicode-escape problem. The is only
 # a temporal fix to make freevo working again.
@@ -291,7 +296,10 @@ class OSD:
         self.update()
 
         if config.OSD_SDL_EXEC_AFTER_STARTUP:
-            os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
+            if os.path.isfile(config.OSD_SDL_EXEC_AFTER_STARTUP):
+                os.system(config.OSD_SDL_EXEC_AFTER_STARTUP)
+            else:
+                print "ERROR: %s: no such file" % config.OSD_SDL_EXEC_AFTER_STARTUP
 
         self.sdl_driver = pygame.display.get_driver()
 

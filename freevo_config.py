@@ -15,6 +15,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.73  2002/10/03 17:34:37  dischi
+# Small update to support more resolutions. I tried to get 720x576 working,
+# but for some reason I can't see a freevo on my tv, mplayer works fine.
+# Strange....
+#
 # Revision 1.72  2002/10/02 02:40:55  krister
 # Applied Alex Polite's patch for using XMMS instead of MPlayer for music playing and visualization.
 #
@@ -272,10 +277,7 @@ OSD_SDL_EXEC_AFTER_STARTUP = ""
 # use the framebuffer and have a PAL tv may set this to
 # './matrox_g400/mga_pal_768x576.sh' OSD_SDL_EXEC_AFTER_STARTUP=''
 if CONF.display == 'mga':
-    if CONF.tv == 'ntsc':
-        OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_ntsc_768x576.sh'
-    elif CONF.tv == 'pal':
-        OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_pal_768x576.sh'
+    OSD_SDL_EXEC_AFTER_STARTUP='./fbcon/mga_%s_%s.sh' % (CONF.tv, CONF.geometry)
 
 
 # ======================================================================
