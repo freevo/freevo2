@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/28 18:37:50  krister
+# Bugfix
+#
 # Revision 1.1  2003/02/28 17:51:55  krister
 # Test of the new internal python webserver.
 #
@@ -64,12 +67,16 @@ def run_cgi():
         recordings = ri.getScheduledRecordings()
         progs = recordings.getProgramList()
 
+        prog = None
         for what in progs.values():
             if start == '%s' % what.start and chan == '%s' % what.channel_id:
                 prog = what
 
         print 'want to remove prog: %s' % prog
-        ri.removeScheduledRecording(prog)
+        if prog:
+            ri.removeScheduledRecording(prog)
+        else:
+            print 'Could not find program to remove!'
     else:
         prog = ri.findProg(chan, start)
         ri.scheduleRecording(prog)
