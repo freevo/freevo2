@@ -25,7 +25,7 @@ ifdef xSDL_FULLSCREEN
 endif
 
 SDLLIBS = -lSDL -lpthread
-				
+
 all: osds_fb vtrelease
 
 osds_fb: main.c ft.c ft.h fb.c fb.h readpng.c readpng.h
