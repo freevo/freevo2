@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys,os,time
 import string,re
 import cPickle as pickle
@@ -47,7 +48,12 @@ def make_schedule (b=None):
         return
 
     # Time stuff
-    len_secs = b.stop-b.start
+    #start_time = time.mktime(time.strptime(b.start, '%Y-%m-%d %H:%M'))
+    start_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(b.start))
+
+
+
+    len_secs = int(b.stop-b.start)
     temp = len_secs - 1
     hour = int(temp/3600)
     minu = int(temp/60)
@@ -71,8 +77,11 @@ def make_schedule (b=None):
                    'filename' : rec_name,
                    'seconds'  : len_secs,
                    'timecode' : timecode_format }
-    
-    return config.VCR_CMD % cl_options
+   
+    scheduleline = start_time + "," + str(len_secs) + "," + config.VCR_CMD % cl_options + "," + b.channel_id
+    return scheduleline
+
+    #return config.VCR_CMD % cl_options
 
 # Using this is about a million times faster than using XMLTV natively.
 #
