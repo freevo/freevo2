@@ -104,7 +104,7 @@ class Skin(skin_test1.Skin):
 		osd.drawbitmap(choice.icon, x0, y0)
 		# Align the logo based on image size
 		
-            osd.drawstring(choice.name, (x0+w), y0,
+            osd.drawstring(choice.name, (x0+w+10), y0,
                            font=self.OSD_FONTNAME_ITEMS,
                            ptsize=fontsize)
 	    if menu.selected == choice:
