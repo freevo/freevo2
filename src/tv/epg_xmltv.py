@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/03 05:13:04  krister
+# Changed so that the EPG can be run standalone again. Disabled mplayer process killing, not good on a multiuser machine.
+#
 # Revision 1.2  2002/11/24 17:00:16  dischi
 # Copied the new transparent gif support to the code cleanup tree
 #
@@ -39,7 +42,9 @@
 #endif
 
 import sys
-import time, os, string
+import time
+import os
+import traceback
 import cPickle as pickle
 
 # Configuration file. Determines where to look for AVI/MP3 files, etc
@@ -102,6 +107,7 @@ def get_guide():
                 epg_ver = cached_guide.EPG_VERSION
             except AttributeError:
                 print 'EPG does not have a version number, must be reloaded'
+                print dir(cached_guide)
 
             if epg_ver != epg_types.EPG_VERSION:
                 print (('EPG version number %s is stale (new is %s), must ' +
@@ -127,9 +133,12 @@ def get_guide():
 	    except:
 	    	# Don't violently crash on a incomplete or empty TV.xml please.
 	    	cached_guide = None
-
-            # Dump a pickled version for later reads
-            pickle.dump(cached_guide, open(pname, 'w'))
+                print "Couldn't load the TV Guide, got an exception!"
+                print
+                traceback.print_exc()
+            else:
+                # Dump a pickled version for later reads
+                pickle.dump(cached_guide, open(pname, 'w'))
 
     if not cached_guide:
         # An error occurred, return an empty guide

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/03 05:13:03  krister
+# Changed so that the EPG can be run standalone again. Disabled mplayer process killing, not good on a multiuser machine.
+#
 # Revision 1.2  2002/11/24 20:30:52  dischi
 # automouter still not working :-(
 #
@@ -343,10 +346,10 @@ def main_func():
 
     # Remove the ROM_DRIVES member to make sure it is not used by
     # legacy code!
-    del config.ROM_DRIVES
+    del config.ROM_DRIVES   # XXX Remove later
     
     # Make sure there's no mplayer process lying around.
-    os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
+    #os.system('killall -9 mplayer 2&> /dev/null') # XXX This is hardcoded, because
                                                   # my mplayer command is actually
                                                   # nice --10 mplayer, to run mplayer
                                                   # with higher priority, but won't be
