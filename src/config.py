@@ -22,6 +22,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.60  2003/10/08 03:29:21  outlyer
+# Just move all FutureWarnings to config. This removes all the silly hex
+# constant warnings.
+#
 # Revision 1.59  2003/10/04 17:55:14  dischi
 # small fixes
 #
@@ -61,6 +65,10 @@ import setup_freevo
 import traceback
 import __builtin__
 import version
+
+if float(sys.version[0:3]) >= 2.3:
+    import warnings
+    warnings.simplefilter("ignore", category=FutureWarning)
 
 VERSION = version.__version__
 

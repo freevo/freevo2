@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/10/08 03:29:22  outlyer
+# Just move all FutureWarnings to config. This removes all the silly hex
+# constant warnings.
+#
 # Revision 1.11  2003/10/08 03:14:17  outlyer
 # Filter out annoying warnings in Python >= 2.3
 #
@@ -53,11 +57,6 @@ import os
 import struct
 import fcntl
 import sys
-
-if float(sys.version[0:3]) >= 2.3:
-    import warnings
-    warnings.filterwarnings("ignore", category=FutureWarning, module=__name__)
-
 
 import config
 
