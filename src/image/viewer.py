@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2002/12/29 00:06:54  krister
+# Bugfixes, variable names were mismatched.
+#
 # Revision 1.6  2002/12/03 14:32:03  dischi
 # stop slideshow when moving up/down the playlist
 #
@@ -96,7 +99,7 @@ class ImageViewer:
     slideshow = TRUE                    # currently in slideshow mode
 
     def view(self, item, zoom=0, rotation=0):
-        filename = item.file
+        filename = item.filename
 
         self.fileitem = item
 
@@ -215,7 +218,7 @@ class ImageViewer:
 
     def cache(self, fileitem):
         # cache the next image (most likely we need this)
-        osd.bitmapsize(fileitem.file)
+        osd.bitmapsize(fileitem.filename)
         
 
     def signalhandler(self, signum, frame):
