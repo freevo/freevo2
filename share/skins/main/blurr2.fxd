@@ -397,7 +397,7 @@
 
     <!-- default view area -->
     <layout label="view">
-      <content align="center" valign="topr">
+      <content align="center" valign="middle">
         <item type="default">
 	  <rectangle size="0" bgcolor="0x80000000" radius="8" x="-10" y="-10"
 	    width="max+20" height="max+20"/>
@@ -468,6 +468,9 @@
     <font label="title" name="Arial_Bold" size="18" color="0xffffff">
         <shadow visible="yes" color="0x000000" border="yes"/>  
     </font>
+    <font label="subtitle" name="Arial_Bold" size="18" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
     <font label="main" name="Arial_Bold" size="16" color="0xffffff">
         <shadow visible="yes" color="0x000000" border="yes"/>
     </font>
@@ -514,6 +517,31 @@
     <font label="tv time" name="Arial_Bold" size="14" color="0xffffff"/>
     <font label="tv title" name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="clock"   name="Arial_Bold" size="16" color="0xffffff"/>
+
+    <!-- Basic Fonts -->
+
+    <font label="small0"  name="Arial_Bold" size="12" color="default0"/>
+    <font label="small1"  name="Arial_Bold" size="12" color="default1"/>
+    <font label="small2"  name="Arial_Bold" size="12" color="default2"/>
+
+    <font label="medium0" name="Arial_Bold" size="16" color="default0"/>
+    <font label="medium1" name="Arial_Bold" size="16" color="default1"/>
+    <font label="medium2" name="Arial_Bold" size="16" color="default2"/>
+
+    <font label="large0"  name="Arial_Bold" size="20" color="default0"/>
+    <font label="large1"  name="Arial_Bold" size="20" color="default1"/>
+    <font label="large2"  name="Arial_Bold" size="20" color="default2"/>
+
+    <font label="huge0"  name="Arial_Bold" size="28" color="default0"/>
+    <font label="huge1"  name="Arial_Bold" size="28" color="default1"/>
+    <font label="huge2"  name="Arial_Bold" size="28" color="default2"/>
+
+    <color label="default0" value="0xffffff"/>
+    <color label="default1" value="0xffffaa"/>
+    <color label="default2" value="0xcccccc"/>
+
+
+
 
   </skin>
 </freevo>
