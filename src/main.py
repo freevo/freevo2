@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.137  2004/08/05 17:37:55  dischi
+# remove a bad skin hack
+#
 # Revision 1.136  2004/08/01 10:57:59  dischi
 # show menu application on startup
 #
@@ -210,6 +213,7 @@ class MainMenu(Item):
             i.is_mainmenu_item = True
 
         mainmenu = menu.Menu(_('Freevo Main Menu'), items, item_types='main', umount_all = 1)
+        mainmenu.item_types = 'main'
         menuw.pushmenu(mainmenu)
         menuw.show()
         
