@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/07/14 17:08:45  rshortt
+# Remove setting the framerate and rely on the card's initialized defaults instead.
+#
 # Revision 1.4  2003/07/14 11:44:42  rshortt
 # Add some init and print methods to Videodev and IVTV.
 #
@@ -139,7 +142,8 @@ class IVTV(v4l2.Videodev):
         codec.dnr_spatial   = opts['dnr_spatial']
         codec.dnr_temporal  = opts['dnr_temporal']
         codec.dnr_type      = opts['dnr_type']
-        codec.framerate     = opts['framerate']
+        # XXX: Ignore framerate for now, use the card's initialized default.
+        # codec.framerate     = opts['framerate']
         codec.framespergop  = opts['framespergop']
         codec.gop_closure   = opts['gop_closure']
         codec.pulldown      = opts['pulldown']
