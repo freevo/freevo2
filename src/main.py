@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2003/10/23 17:58:14  dischi
+# kill/stop threads before exit
+#
 # Revision 1.84  2003/10/23 17:28:41  dischi
 # correct shutdown
 #
@@ -168,7 +171,7 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
     # Shutdown any daemon plugins that need it.
     plugin.shutdown()
 
-    # Shutdown all chilfren still running
+    # Shutdown all children still running
     childapp.shutdown()
 
     # SDL must be shutdown to restore video modes etc
@@ -177,6 +180,12 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
 
     for t in traceback.extract_stack():
         if t[2].find('signal_handler') == 0:
+            import threading
+            for th in threading.enumerate():
+                if hasattr(th, 'kill'):
+                    th.kill()
+                elif th.getName() != 'MainThread' and hasattr(th, '_Thread__stop'):
+                    th._Thread__stop()
             sys.exit(0)
 
     os.system('%s stop' % os.environ['FREEVO_SCRIPT'])
@@ -347,6 +356,8 @@ def main_func():
             if app:
                 try:
                     app.eventhandler(event)
+                except SystemExit:
+                    return
                 except:
                     if config.FREEVO_EVENTHANDLER_SANDBOX:
                         traceback.print_exc()
