@@ -226,6 +226,17 @@ class VideoItem(MediaItem):
             aspect = str(self.info['aspect'])
             return aspect[:aspect.find(' ')].replace('/', ':')
 
+        if key  == 'elapsed':
+            elapsed = self.elapsed
+            if self.info['start']:
+                # FIXME: overflow
+                elapsed = elapsed - self.info['start']
+            if elapsed / 3600:
+                return '%d:%02d:%02d' % ( elapsed / 3600, (elapsed % 3600) / 60,
+                                          elapsed % 60)
+            else:
+                return '%d:%02d' % (int(elapsed / 60), int(elapsed % 60))
+
         if key == 'runtime':
             length = None
 
