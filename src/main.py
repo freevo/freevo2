@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.64  2003/08/22 18:21:24  dischi
+# fix to prevent pygame from crashing
+#
 # Revision 1.63  2003/08/22 17:51:29  dischi
 # Some changes to make freevo work when installed into the system
 #
@@ -203,6 +206,9 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
                 os.system('%s runapp matroxset -f /dev/fb0 -m 1' % \
                           os.environ['FREEVO_SCRIPT'])
                 time.sleep(1)
+
+            osd.shutdown()
+            plugin.shutdown()
 
             os.system(config.SHUTDOWN_SYS_CMD)
             # let freevo be killed by init, looks nicer for mga
