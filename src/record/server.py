@@ -88,8 +88,8 @@ class RecordServer(RPCServer):
 
         # add external event handling
         mbus = self.mbus_instance
-        mbus.register_event('vdr.start_recording', external.start_event)
-        mbus.register_event('vdr.stop_recording', external.stop_event)
+        mbus.register_event('vdr.started', external.start_event)
+        mbus.register_event('vdr.stopped', external.stop_event)
         # add notify callback
         mbus.register_entity_notification(self.entity_update)
 
