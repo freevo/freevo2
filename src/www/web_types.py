@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/09/23 18:22:42  dischi
+# use absolute path names
+#
 # Revision 1.14  2003/09/12 20:34:16  dischi
 # start internal help system
 #
@@ -117,19 +120,19 @@ class HTMLResource:
         self.res += '<html>\n\t<head>\n'
         self.res += '<title>Freevo | '+title+'</title>\n'
         if style != None:
-            self.res += '<link rel="stylesheet" href="styles/main.css" type="text/css" />\n'
+            self.res += '<link rel="stylesheet" href="/styles/main.css" type="text/css" />\n'
         if script != None:
             self.res += '<script language="JavaScript" src="'+script+'"></script>\n'
         self.res += '</head>\n'
         self.res += '\n\n\n\n<body>\n'
         # Header
         self.res += '<!-- Header Logo and Status Line -->'
-        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headerbg.png"')
+        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="/images/headerbg.png"')
         self.tableRowOpen()
-        self.tableCell('<a target="_new" href="http://freevo.sf.net/"><img src="images/headerfreevo.png" width="313" height="101" border="0"/></a>')
+        self.tableCell('<a target="_new" href="http://freevo.sf.net/"><img src="/images/headerfreevo.png" width="313" height="101" border="0"/></a>')
         self.tableRowClose()
         self.tableClose()
-        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="images/headertxtbg.png"')
+        self.tableOpen('width="100%" border="0" cellspacing="0" cellpadding="0" background="/images/headertxtbg.png"')
         self.tableRowOpen()
         self.tableCell('<center>' + title + '</center>','height=22')
         self.tableRowClose()
@@ -213,24 +216,24 @@ class HTMLResource:
     <center>
     <table border="0" cellpadding="0" cellspacing="0">
       <tr>
-        <td height="24" width="11" background="images/round_left.png">&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'index.rpy\'">&nbsp;&nbsp;Home&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'guide.rpy\'">&nbsp;&nbsp;TV Guide&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'record.rpy\'">&nbsp;&nbsp;Scheduled Recordings&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'favorites.rpy\'">&nbsp;&nbsp;Favorites&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'library.rpy\'">&nbsp;&nbsp;Media Library&nbsp;&nbsp;</td>
-        <td class="tablelink" onClick="document.location=\'manualrecord.rpy\'">&nbsp;&nbsp;Manually Record&nbsp;&nbsp;</td>
+        <td height="24" width="11" background="/images/round_left.png">&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'/index.rpy\'">&nbsp;&nbsp;Home&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'/guide.rpy\'">&nbsp;&nbsp;TV Guide&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'/record.rpy\'">&nbsp;&nbsp;Scheduled Recordings&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'/favorites.rpy\'">&nbsp;&nbsp;Favorites&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'/library.rpy\'">&nbsp;&nbsp;Media Library&nbsp;&nbsp;</td>
+        <td class="tablelink" onClick="document.location=\'/manualrecord.rpy\'">&nbsp;&nbsp;Manually Record&nbsp;&nbsp;</td>
      """
         try:
             if config.ICECAST_WWW_PAGE:
-                self.res += '<td class="tablelink" onClick="document.location=\'iceslistchanger.rpy\'">&nbsp;&nbsp;Change&nbsp;Icecast&nbsp;List&nbsp;&nbsp;</td>'
+                self.res += '<td class="tablelink" onClick="document.location=\'/iceslistchanger.rpy\'">&nbsp;&nbsp;Change&nbsp;Icecast&nbsp;List&nbsp;&nbsp;</td>'
         except AttributeError:
             pass
 
-        self.res += '<td class="tablelink" onClick="document.location=\'help.rpy\'">&nbsp;&nbsp;Help&nbsp;&nbsp;</td>'
+        self.res += '<td class="tablelink" onClick="document.location=\'/help/\'">&nbsp;&nbsp;Help&nbsp;&nbsp;</td>'
 
         self.res += """
-	<td height="24" width="11" background="images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
+	<td height="24" width="11" background="/images/round_right.png" cellpadding=0 cellspacing=0>&nbsp;</td>
       </tr>
     </table>
     </center>
