@@ -234,16 +234,36 @@
     <!-- ********************************************** -->
     <!-- FONT DEFINITIONS -->
 
-    <font label="default" name="Arial_Bold" size="16" color="0xffffff"/>
-    <font label="main" name="Arial_Bold" size="16" color="0xffffff"/>
-    <font label="main selected" name="Arial_Bold" size="16" color="0xffffff"/>
-    <font label="grey" name="Arial_Bold" size="16" color="0xdddddd"/>
-    <font label="white" name="Arial_Bold" size="16" color="0xffffff"/>
-    <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd"/>
-    <font label="white big" name="Arial_Bold" size="18" color="0xffffff"/>
-    <font label="player" name="Arial_Bold" size="18" color="0xffffff"/>
-    <font label="widget" name="Arial_Bold" size="12"/>
-    <font label="widget selected" name="Arial_Bold" size="12"/>
+    <font label="default" name="Arial_Bold" size="16" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="main" name="Arial_Bold" size="16" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="main selected" name="Arial_Bold" size="16" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="grey" name="Arial_Bold" size="16" color="0xdddddd">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="white" name="Arial_Bold" size="16" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="grey big" name="Arial_Bold" size="18" color="0xdddddd">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="white big" name="Arial_Bold" size="18" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="player" name="Arial_Bold" size="18" color="0xffffff">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="widget" name="Arial_Bold" size="12">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
+    <font label="widget selected" name="Arial_Bold" size="12">
+        <shadow visible="yes" color="0x000000" border="yes"/>
+    </font>
      
     <!-- info area -->
     <font label="info plot"    name="Arial_Bold" size="14" color="0xffffff"/>
