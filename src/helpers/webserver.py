@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/12/19 16:39:39  dischi
+# adjust to new record.client module
+#
 # Revision 1.16  2004/12/19 11:27:09  dischi
 # add new htdocs dir
 #
@@ -63,9 +66,8 @@ from www.server import Server, RequestHandler
 # init notifier
 notifier.init( notifier.GENERIC )
 
-# import recordings to attach to the mbus
-# FIXME: this is bad!
-import tv.recordings
+# import record.client to attach to the mbus
+import record.client
 
 cgi_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../www'))
 htdocs  = [ os.path.join(cgi_dir, 'htdocs'),

@@ -5,7 +5,7 @@ import sys, time
 from www.base import HTMLResource, FreevoResource
 import config
 import util
-import tv.recordings as recordserver
+import record.client
 
 class IndexResource(FreevoResource):
     def _render(self, request):
@@ -16,7 +16,7 @@ class IndexResource(FreevoResource):
         fv.res += '<br/><br/><h2>'+( _('Freevo Web Status as of %s') % \
                 time.strftime('%B %d ' + config.TV_TIMEFORMAT, time.localtime()) ) +'</h2>'
 
-        if recordserver.server:
+        if record.client.server:
             fv.res += '<p class="normal">'\
                       +_('The recording server is up and running.')+'</p>\n'
         else:

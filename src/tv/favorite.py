@@ -37,7 +37,7 @@ from item import Item
 from gui import AlertBox
 
 # tv imports
-import recordings
+import record.client
 
 
 class FavoriteItem(Item):
@@ -89,7 +89,7 @@ class FavoriteItem(Item):
 
 
     def add(self, arg=None, menuw=None):
-        (result, msg) = recordings.add_favorite(self)
+        (result, msg) = record.client.favorites.add(self)
         if result:
             AlertBox(text=_('"%s" has been scheduled as favorite') % \
                      self.title).show()

@@ -45,7 +45,7 @@ from item import Item
 from gui import AlertBox
 
 # tv imports
-import recordings
+from record.client import recordings
 import favorite
 import pyepg
 
@@ -66,11 +66,9 @@ class ProgramItem(Item):
         self.info['subtitle'] = program.subtitle
         self.info['description'] = program.description
 
-        key = '%s%s%s' % (program.channel.id, program.start, program.stop)
-        if recordings.recordings.has_key(key):
-            self.scheduled = recordings.recordings[key]
-        else:
-            self.scheduled = False
+        
+        self.scheduled = recordings.get(program.channel.id,
+                                        program.start, program.stop)
 
         # TODO: add category support (from epgdb)
         self.categories = ''
@@ -176,7 +174,7 @@ class ProgramItem(Item):
 
 
     def schedule(self, arg=None, menuw=None):
-        (result, msg) = recordings.schedule_recording(self)
+        (result, msg) = recordings.schedule(self)
         if result:
             AlertBox(text=_('"%s" has been scheduled for recording') % \
                          self.title).show()
@@ -186,7 +184,7 @@ class ProgramItem(Item):
 
 
     def remove(self, arg=None, menuw=None):
-        (result, msg) = recordings.remove_recording(self)
+        (result, msg) = recordings.remove(self.scheduled.id)
         if result:
             AlertBox(text=_('"%s" has been removed as recording') % \
                          self.title).show()
