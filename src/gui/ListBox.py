@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/02/24 11:58:28  rshortt
+# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
+# objects.
+#
 # Revision 1.2  2003/02/23 18:30:45  rshortt
 # Fixed a really annoying bug where items got reused and appended to.  I have about a zillion lines of debug print statements to remove. :)  Thanks to Krister for the help nailing it.
 #
@@ -51,6 +55,7 @@ from Label          import *
 from ListItem       import * 
 from types          import * 
 from osd import     Font
+import pygame
 
 DEBUG = 1
 
@@ -238,6 +243,8 @@ class ListBox(RegionScroller):
         Lets alter the surface then get our superclass to do the draw.
 
         """
+        if self.is_visible() == 0: return
+
         if not self.width or not self.height or not self.surface:
             raise TypeError, 'Not all needed variables set.'
 

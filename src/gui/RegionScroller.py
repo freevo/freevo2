@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/02/24 11:58:28  rshortt
+# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
+# objects.
+#
 # Revision 1.3  2003/02/23 18:21:50  rshortt
 # Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
 #
@@ -55,7 +59,7 @@ from Label     import *
 from types     import * 
 from osd import Font
 
-DEBUG = 1
+DEBUG = 0
 
 
 class RegionScroller(GUIObject):
@@ -156,6 +160,10 @@ class RegionScroller(GUIObject):
         print '  self.s_h="%s"' % self.s_h
         print '  self.v_x="%s"' % self.v_x
         print '  self.v_y="%s"' % self.v_y
+        print '  self.width="%s"' % self.width
+        print '  self.height="%s"' % self.height
+        print '  self.top="%s"' % self.top
+        print '  self.left="%s"' % self.left
         print '  self.max_x_offset="%s"' % self.max_x_offset
         print '  self.max_y_offset="%s"' % self.max_y_offset
 
@@ -258,9 +266,9 @@ class RegionScroller(GUIObject):
             if DEBUG: print "updating borders set_postion as well"
             self.border.set_position(left, top)
 
-        if self.show_h_scrollbars:
+        if self.show_h_scrollbar:
             if self.h_scrollbar: self.h_scrollbar.calculate_position()
-        if self.show_v_scrollbars:
+        if self.show_v_scrollbar:
             if self.v_scrollbar: self.v_scrollbar.calculate_position()
         
 

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/02/24 11:58:28  rshortt
+# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
+# objects.
+#
 # Revision 1.1  2003/02/23 18:24:04  rshortt
 # New classes.  ListBox is a subclass of RegionScroller so that it can scroll though a list of ListItems which are drawn to a surface.  Also included is a listboxdemo to demonstrate and test everything.
 #
@@ -123,9 +127,9 @@ class ListItem(GUIObject):
         if not self.width or not self.height or not self.text:
             raise TypeError, 'Not all needed variables set.'
 
-        surface = self.parent.surface
+        if not surface:
+            surface = self.parent.surface
 
-        self.label._draw(surface)
         if self.selected:
             c = self.selected_bg_color.get_color_sdl()
             a = self.selected_bg_color.get_alpha()
@@ -142,6 +146,7 @@ class ListItem(GUIObject):
         else:
             self.osd.screen.blit(box, self.get_position())
 
+        # XXX: need to fix support for 'selected label'
         # if self.selected and self.selected_label:  
         #     print 'self.selected and self.selected_label'
         #     self.selected_label._draw(surface)

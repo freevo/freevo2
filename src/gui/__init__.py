@@ -19,6 +19,10 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/02/24 11:58:28  rshortt
+# Adding OptionBox and optiondemo.  Also some minor cleaning in a few other
+# objects.
+#
 # Revision 1.4  2003/02/23 18:21:50  rshortt
 # Some code cleanup, better OOP, influenced by creating a subclass of RegionScroller called ListBox.
 #
@@ -121,6 +125,7 @@ from gui.InputBox       import *
 from gui.exceptions     import *
 from gui.scrolldemo     import *
 from gui.listboxdemo    import *
+from gui.optiondemo     import *
 
 
 if DEBUG:
