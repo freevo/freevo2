@@ -167,7 +167,7 @@ def listdir(directory, handle_exception=True, include_dot_files=False,
         if include_dot_files:
             for f in os.listdir(directory):
                 if not f in ('CVS', '.xvpics', '.thumbnails', '.pics',
-                             'folder.fxd'):
+                             'folder.fxd', 'lost+found'):
                     files.append(directory + f)
         else:
             for f in os.listdir(directory):

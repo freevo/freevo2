@@ -218,8 +218,10 @@ def _match_files_recursively_helper(result, dirname, names):
     help function for match_files_recursively
     """
     for name in names:
-        fullpath = vfs.join(dirname, name)
-        result.append(fullpath)
+        if not name in ('CVS', '.xvpics', '.thumbnails', '.pics',
+                        'folder.fxd', 'lost+found'):
+            fullpath = vfs.join(dirname, name)
+            result.append(fullpath)
     return result
 
 
