@@ -8,6 +8,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2004/07/24 17:17:48  dischi
+# move doc into backends
+#
 # Revision 1.2  2004/07/24 12:22:15  dischi
 # gui update
 #
@@ -39,79 +42,6 @@
 import traceback
 import config
 
-class Layer:
-    def blit(self, layer, *arg1, **arg2):
-        """
-        Interface for the objects to blit something on the layer
-        """
-        raise TypeError, 'member function blit not defined for layer'
-            
-
-    def drawroundbox(self, *arg1, **arg2):
-        """
-        Interface for the objects draw a round box
-        """
-        raise TypeError, 'member function drawroundbox not defined for layer'
-
-
-    def drawstringframed(self, *arg1, **arg2):
-        """
-        Interface for the objects draw a string
-        """
-        raise TypeError, 'member function drawstringframed not defined for layer'
-
-
-    def add(self, object):
-        """
-        Add an object to this layer
-        """
-        raise TypeError, 'member function add not defined for layer'
-
-
-    def remove(self, object):
-        """
-        Add an object from this layer
-        """
-        raise TypeError, 'member function remove not defined for layer'
-        
-
-    def clear(self):
-        """
-        Add an object from this layer
-        """
-        raise TypeError, 'member function clear not defined for layer'
-
-
-
-class Screen:
-    def clear(self):
-        """
-        Clear the complete screen
-        """
-        raise TypeError, 'member function clear not defined for layer'
-
-
-    def add(self, layer, object):
-        """
-        Add object to a specific layer.
-        """
-        raise TypeError, 'member function add not defined for layer'
-    
-            
-    def remove(self, layer, object):
-        """
-        Remove an object from the screen
-        """
-        raise TypeError, 'member function remove not defined for layer'
-
-
-    def show(self):
-        """
-        Show the screen
-        """
-        raise TypeError, 'member function show not defined for layer'
-
-        
 
 class GUIObject:
     """
