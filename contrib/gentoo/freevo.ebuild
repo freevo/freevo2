@@ -15,7 +15,7 @@ DEPEND=">=dev-python/pygame-1.5.3
 	>=dev-python/PyXML-0.7.1
 	>=media-libs/libsdl-1.2.4
 	>=media-video/mplayer-0.90_rc2
-	=freevo_runtime-1
+	=freevo_runtime-1.1
 	ogg? (>=media-libs/pyvorbis-1.1)"
 
 
@@ -38,9 +38,9 @@ src_install() {
 	install -d $FREEVO_INSTALL_DIR
 	cp -r * $FREEVO_INSTALL_DIR
 
-	install -d ${D}/usr/bin
-	install ${FILESDIR}/freevo ${D}/usr/bin
-	install ${FILESDIR}/freevo $FREEVO_INSTALL_DIR
+	# install -d ${D}/usr/bin
+	# install ${FILESDIR}/freevo ${D}/usr/bin
+	# install ${FILESDIR}/freevo $FREEVO_INSTALL_DIR
 
 	install -m 0777 -d ${D}/var/log/freevo
 	install -m 0777 -d ${D}/var/cache/freevo
