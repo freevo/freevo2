@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/03/31 03:02:35  rshortt
+# Inside the item menu added the option to delete the file.  This pops up
+# a confirm box to make sure.
+#
 # Revision 1.27  2003/03/30 18:04:46  dischi
 # update to new gui interface
 #
@@ -153,6 +157,7 @@ if not config.NEW_SKIN:
 
 
 from gui.PopupBox import PopupBox
+from gui.ConfirmBox import ConfirmBox
 from item import Item
 import configure
 
@@ -272,6 +277,9 @@ class VideoItem(Item):
         return a list of possible actions on this item.
         """
         items = [ (self.play, 'Play'), (self.settings, 'Change play settings') ]
+        if config.NEW_SKIN:
+            if self.filename:
+                items += [ (self.confirm_delete, 'Delete file') ]
         if self.variants:
             items += [ (self.show_variants, 'Show variants') ]
 
@@ -296,6 +304,20 @@ class VideoItem(Item):
                 items += [( self.bookmark_menu, 'Bookmarks ')] 
 
         return items
+
+
+    def confirm_delete(self, arg=None, menuw=None):
+        confirm = ConfirmBox(menuw,
+                             'Do you wish to delete %s?' % self.name,
+                             self.delete_file)
+        confirm.show()
+        self.menuw = menuw
+
+
+    def delete_file(self):
+        print 'Deleting %s' % self.filename
+        self.menuw.back_one_menu()
+        os.remove(self.filename)
 
 
     def show_variants(self, arg=None, menuw=None):
