@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/21 18:40:33  dischi
+# use plugin name structure to find the real player
+#
 # Revision 1.1  2003/04/21 13:26:12  dischi
 # mplayer is now a plugin
 #
@@ -58,11 +61,18 @@ mplayer = None
 
 
 class PluginInterface(plugin.Plugin):
+    """
+    Mplayer plugin for the audio player. Use mplayer to play all audio
+    files.
+    """
     def __init__(self):
         global mplayer
+        # create the mplayer object
         plugin.Plugin.__init__(self)
         mplayer = util.SynchronizedObject(MPlayer())
-        config.AUDIO_PLAYER = mplayer
+
+        # register it as the object to play audio
+        plugin.register(mplayer, plugin.AUDIO_PLAYER)
 
 
 class MPlayer:

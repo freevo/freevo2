@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/04/21 18:40:32  dischi
+# use plugin name structure to find the real player
+#
 # Revision 1.1  2003/04/21 13:27:48  dischi
 # o make it possible to hide() the audio player
 # o mplayer is now a plugin, controlled by the PlayerGUI
@@ -39,8 +42,8 @@
 from gui.GUIObject import GUIObject
 
 import skin
-import config
 import rc
+import plugin
 
 skin = skin.get_singleton()
 
@@ -57,7 +60,7 @@ class PlayerGUI(GUIObject):
 
         self.menuw = menuw
         self.item = item
-        self.player = config.AUDIO_PLAYER
+        self.player = plugin.getbyname(plugin.AUDIO_PLAYER)
         
     def play(self):
         if self.player.is_playing():
