@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/03/20 15:44:09  dischi
+# use the new text format function for desc
+#
 # Revision 1.13  2003/03/15 10:26:48  dischi
 # moved pickled file to cache dir
 #
@@ -300,7 +303,7 @@ def load_guide():
         prog.channel_id = p['channel'].encode('Latin-1')
         prog.title = p['title'][0][0].encode('Latin-1')
         if p.has_key('desc'):
-            prog.desc = p['desc'][0][0].encode('Latin-1')
+            prog.desc = util.format_text(p['desc'][0][0].encode('Latin-1'))
         if p.has_key('sub-title'):
             prog.sub_title = p['sub-title'][0][0].encode('Latin-1')
         try:
