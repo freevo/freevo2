@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/09/05 16:29:28  dischi
+# make special function to init only one specific plugin
+#
 # Revision 1.36  2003/09/03 20:10:13  dischi
 # Make sure a plugin is only loaded once with the same args and type
 #
@@ -244,6 +247,29 @@ def init(callback = None):
     # in the same function is 'lambda' 
     __sort_plugins__()
 
+
+
+def init_special_plugin(id):
+    """
+    load only the plugin 'id'
+    """
+    global __all_plugins__
+    global __initialized__
+    global __plugin_basedir__
+    
+    __plugin_basedir__ = os.environ['FREEVO_PYTHON']
+
+    for i in range(len(__all_plugins__)):
+        name, type, level, args, number = __all_plugins__[i]
+        if number == int(id):
+            del __all_plugins__[i]
+            __load_plugin__(name, type, level, args, number)
+            break
+        
+    # sort plugins in extra function (exec doesn't like to be
+    # in the same function is 'lambda' 
+    __sort_plugins__()
+    
 
 def shutdown(plugin_name=None):
     """
