@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/08/23 00:15:29  rshortt
+# Prevent crash if removing a program that has already ended.
+#
 # Revision 1.18  2004/08/04 13:26:46  outlyer
 # Add "Search" to actions for scheduled recordings to find alternate airings
 # of the program.
@@ -152,12 +155,14 @@ class RecordResource(FreevoResource):
             (status, recordings) = ri.getScheduledRecordings()
             progs = recordings.getProgramList()
     
+            prog = None
             for what in progs.values():
                 if start == '%s' % what.start and chan == '%s' % what.channel_id:
                     prog = what
 
-            print 'want to remove prog: %s' % String(prog)
-            ri.removeScheduledRecording(prog)
+            if prog:
+                print 'want to remove prog: %s' % String(prog)
+                ri.removeScheduledRecording(prog)
         elif action == 'add':
             (status, prog) = ri.findProg(chan, start)
 
