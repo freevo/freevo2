@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/15 04:33:34  outlyer
+# Check for  the filename before trying to read it... without it, I couldn't
+# use fxd files which were only in my overlay, but not in the path.
+#
 # Revision 1.11  2004/01/14 21:20:36  dischi
 # fix writing
 #
@@ -112,7 +116,7 @@ class FXDtree(qp_xml.Parser):
         else:
             self.tree = None
             cache = vfs.getoverlay(filename + '.raw')
-            if os.path.isfile(cache) and \
+            if os.path.isfile(filename) and os.path.isfile(cache) and \
                    os.stat(cache)[stat.ST_MTIME] >= os.stat(filename)[stat.ST_MTIME]:
                 self.tree = util.read_pickle(cache)
             if not self.tree:
