@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/09/30 16:51:22  mikeruelle
+# add some default options
+#
 # Revision 1.9  2003/09/22 20:28:46  mikeruelle
 # adding help document strings for the web interface
 #
@@ -107,6 +110,14 @@ class PluginInterface(plugin.DaemonPlugin):
             print 'Crash!'
             traceback.print_exc()
             sleep(1)
+
+    def config(self):
+        return [ ('ICECAST_WWW_PAGE', 1, 'boolean to show www page to change list'),
+                 ('ICECAST_CMD', '/usr/local/icecast/bin/icecast', 'location of the icecast server binary'),
+                 ('ICECAST_CONF_DIR', '/usr/local/icecast/conf', 'location of the icecast server conf directory'),
+                 ('ICES_CMD', '/usr/local/icecast/bin/ices', 'location of the ices binary'),
+                 ('ICES_DEF_LIST', '/usr/local/freevo_data/Music/ROCK/mymix.m3u', 'default list to start ices with'),
+                 ('ICES_OPTIONS', [ '-d', 'FreevoIcecast', '-g', 'Rock', '-m', '/freevo', '-n', 'Freevo_Music_Collection', '-P', 'hackme', '-s', '-r' ], 'default options to start ices with') ]
 
     def poll(self):
         #see if we got a change list request
