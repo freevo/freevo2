@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/01/11 10:45:55  dischi
+# Add a thread to watch the directory. When something changes, the update
+# function will be called. The DirItem update function will add remove
+# items based on the directory cahnges.
+#
 # Revision 1.16  2003/01/09 05:04:06  krister
 # Added an option to play all movies in a dir, and generate random playlists for them.
 #
@@ -32,41 +37,6 @@
 #
 # Revision 1.11  2002/12/11 10:25:28  dischi
 # Sort directories and playlists, too
-#
-# Revision 1.10  2002/12/09 14:23:53  dischi
-# Added games patch from Rob Shortt to use the interface.py and snes support
-#
-# Revision 1.9  2002/12/07 11:32:59  dischi
-# Added interface.py into video/audio/image/games. The file contains a
-# function cwd to return the items for the list of files. games support
-# is still missing
-#
-# Revision 1.8  2002/12/03 19:17:05  dischi
-# Added arg to all menu callback function
-#
-# Revision 1.7  2002/12/02 18:25:11  dischi
-# Added bins/exif patch from John M Cooper
-#
-# Revision 1.6  2002/11/28 19:56:12  dischi
-# Added copy function
-#
-# Revision 1.5  2002/11/26 16:28:10  dischi
-# added patch for better bin support
-#
-# Revision 1.4  2002/11/26 12:17:57  dischi
-# re-added bin album.xml support
-#
-# Revision 1.3  2002/11/24 19:10:19  dischi
-# Added mame support to the new code. Since the hole new code is
-# experimental, mame is activated by default. Change local_skin.xml
-# to deactivate it after running ./cleanup
-#
-# Revision 1.2  2002/11/24 15:15:31  dischi
-# skin.xml support re-added
-#
-# Revision 1.1  2002/11/24 13:58:44  dischi
-# code cleanup
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -116,6 +86,8 @@ FALSE = 0
 
 rc = rc.get_singleton()
 skin = skin.get_singleton()
+
+dirwatcher_thread = None
 
 class MediaMenu(Item):
     """
@@ -278,6 +250,9 @@ class DirItem(Playlist):
             
 
     def actions(self):
+        """
+        return a list of actions for this item
+        """
         items = [ ( self.cwd, 'Browse directory' ) ]
 
         # this doen't work right now because we have no playlist
@@ -292,14 +267,12 @@ class DirItem(Playlist):
                         'Recursive random play all items' ) ]
         return items
     
-            
+
     def cwd(self, arg=None, menuw=None):
         """
         make a menu item for each file in the directory
         """
         
-        items = []
-
         # are we on a ROM_DRIVE and have to mount it first?
         for media in config.REMOVABLE_MEDIA:
             if string.find(self.dir, media.mountdir) == 0:
@@ -309,6 +282,7 @@ class DirItem(Playlist):
         try:
             files = ([ os.path.join(self.dir, fname)
                        for fname in os.listdir(self.dir) ])
+            self.all_files = copy.copy(files)
         except OSError:
             print 'util:match_files(): Got error on dir = "%s"' % self.dir
             return
@@ -330,38 +304,48 @@ class DirItem(Playlist):
 
         files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
-        # add sub-directories
+
+        # build items for sub-directories
+        dir_items = []
         for dir in files:
             if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
-                items += [ DirItem(dir, self, display_type = self.display_type) ]
+                dir_items += [ DirItem(dir, self, display_type = self.display_type) ]
+
+        dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
 
 
-        # playlists (only active for images and audio, video is configurable)
-        if (not self.display_type or self.display_type == 'audio' or
-            (config.MOVIE_PLAYLISTS and self.display_type == 'video')):
-            self.playlist = play_items
-
-            if self.display_type != 'video':
-                for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
-                    items += [ Playlist(pl, self) ]
-
-            # random playlist
-            if len(play_items) > 1 and self.display_type:
-                pl = Playlist(play_items, self)
-                pl.randomize()
-                pl.autoplay = TRUE
-                items += [ pl ]
+        # build items for playlists
+        pl_items = []
+        if not self.display_type or self.display_type == 'audio':
+            for pl in util.find_matches(files, config.SUFFIX_AUDIO_PLAYLISTS):
+                pl_items += [ Playlist(pl, self) ]
 
         if not self.display_type or self.display_type == 'image':
-            self.playlist = play_items
-
             for file in util.find_matches(files, config.SUFFIX_IMAGE_SSHOW):
                 pl = Playlist(file, self)
                 pl.autoplay = TRUE
-                items += [ pl ]
+                pl_items += [ pl ]
 
-        # add play_items to items
-        items += play_items
+        pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+
+
+        # all items together
+        items = []
+
+        # random playlist (only active for audio)
+        if (not self.display_type or self.display_type == 'audio') and \
+           len(play_items) > 1 and self.display_type:
+            pl = Playlist(play_items, self)
+            pl.randomize()
+            pl.autoplay = TRUE
+            items += [ pl ]
+
+        items += dir_items + pl_items + play_items
+
+        self.dir_items  = dir_items
+        self.pl_items   = pl_items
+        self.play_items = play_items
+
 
         title = self.name
         if title[0] == '[' and title[-1] == ']':
@@ -371,9 +355,194 @@ class DirItem(Playlist):
         if len(items) == 1 and items[0].actions():
             items[0].actions()[0][0](menuw=menuw)
         else:
-            item_menu = menu.Menu(title, items)
+            item_menu = menu.Menu(title, items, reload_func=self.reload)
             if self.xml_file:
                 item_menu.skin_settings = skin.LoadSettings(self.xml_file)
 
             menuw.pushmenu(item_menu)
-            
+
+            global dirwatcher_thread
+            if not dirwatcher_thread:
+                dirwatcher_thread = DirwatcherThread(menuw)
+                dirwatcher_thread.start()
+
+            dirwatcher_thread.cwd(self, item_menu, self.dir, self.all_files)
+            self.menu = item_menu
+
+
+    def reload(self):
+        """
+        called when we return to this menu
+        """
+        global dirwatcher_thread
+        dirwatcher_thread.cwd(self, self.menu, self.dir, self.all_files)
+        dirwatcher_thread.scan()
+
+        # we changed the menu, don't build a new one
+        return None
+
+        
+    def update(self, new_files, del_files, all_files):
+        """
+        update the current item set. Maybe this function can share some code
+        with cwd in the future, but it's easier now the way it is
+        """
+        new_items = []
+        del_items = []
+
+        self.all_files = all_files
+
+        # check modules if they know something about the deleted/new files
+        for t in ( 'video', 'audio', 'image', 'games' ):
+            if not self.display_type or self.display_type == t:
+                del_items += eval(t + '.interface.remove(del_files, self.menu.choices)')
+                new_items += eval(t + '.interface.cwd(self, new_files)')
+
+        # delete play items from the menu
+        for i in del_items:
+            self.menu.delete_item(i)
+            self.play_items.remove(i)
+
+        # delete dir items from the menu
+        for dir in del_files:
+            for item in self.dir_items:
+                if item.dir == dir:
+                    self.menu.delete_item(item)
+                    self.dir_items.remove(item)
+
+        # delete playlist items from the menu
+        for pl in del_files:
+            for item in self.pl_items:
+                if item.filename == pl:
+                    self.menu.delete_item(item)
+                    self.pl_items.remove(item)
+
+
+                    
+        # add new play items to the menu
+        if new_items:
+            self.play_items += new_items
+            if 0: # sort by date
+                self.play_items.sort(lambda l, o: cmp(l.sort('date').upper(),
+                                                      o.sort('date').upper()))
+            else:
+                self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
+                                                      o.sort().upper()))
+                
+
+        # add new dir items to the menu
+        new_dir_items = []
+        for dir in new_files:
+            if os.path.isdir(dir) and os.path.basename(dir) != '.xvpics':
+                new_dir_items += [ DirItem(dir, self, display_type = self.display_type) ]
+
+        if new_dir_items:
+            self.dir_items += new_dir_items
+            self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
+
+
+        # add new playlist items to the menu
+        new_pl_items = []
+        if not self.display_type or self.display_type == 'audio':
+            for pl in util.find_matches(new_files, config.SUFFIX_AUDIO_PLAYLISTS):
+                new_pl_items += [ Playlist(pl, self) ]
+
+        if not self.display_type or self.display_type == 'image':
+            for file in util.find_matches(new_files, config.SUFFIX_IMAGE_SSHOW):
+                pl = Playlist(file, self)
+                pl.autoplay = TRUE
+                new_pl_items += [ pl ]
+
+        if new_pl_items:
+            self.pl_items += new_pl_items
+            self.pl_items.sort(lambda l, o: cmp(l.name.upper(), o.name.upper()))
+
+
+        
+        items = []
+
+        # random playlist (only active for audio)
+        if (not self.display_type or self.display_type == 'audio') and \
+           len(self.play_items) > 1 and self.display_type:
+
+            # some files changed, rebuild playlist
+            if new_items or del_items:
+                pl = Playlist(play_items, self)
+                pl.randomize()
+                pl.autoplay = TRUE
+                items += [ pl ]
+
+            # reuse old playlist
+            else:
+                items += self.menu.choices[0]
+
+
+        # build a list of all items
+        items += self.dir_items + self.pl_items + self.play_items
+
+        # finally add the items
+        for i in new_items + new_dir_items + new_pl_items:
+            self.menu.add_item(i, items.index(i))
+                    
+        # reload the menu, use an event to avoid problems because this function
+        # was called by a thread
+        rc.post_event(rc.REBUILD_SCREEN)
+
+
+
+
+import threading
+import thread
+import time
+
+class DirwatcherThread(threading.Thread):
+                
+    def __init__(self, menuw):
+        threading.Thread.__init__(self)
+        self.item = None
+        self.menuw = menuw
+        self.item_menu = None
+        self.dir = None
+        self.files = None
+        self.lock = thread.allocate_lock()
+        
+    def cwd(self, item, item_menu, dir, files):
+        self.lock.acquire()
+
+        self.item = item
+        self.item_menu = item_menu
+        self.dir = dir
+        self.files = files
+
+        self.lock.release()
+
+    def scan(self):
+        self.lock.acquire()
+        
+        files = ([ os.path.join(self.dir, fname)
+                   for fname in os.listdir(self.dir) ])
+        new_files = []
+        del_files = []
+        
+        for f in files:
+            if not f in self.files:
+                new_files += [ f ]
+        for f in self.files:
+            if not f in files:
+                del_files += [ f ]
+
+        if new_files or del_files:
+            print 'directory has changed'
+            self.item.update(new_files, del_files, files)
+                    
+        self.files = files
+        self.lock.release()
+        
+    def run(self):
+        while 1:
+            if self.dir and self.menuw and self.menuw.menustack[-1] == self.item_menu and \
+               not rc.app:
+                self.scan()
+            time.sleep(2)
+
+    
