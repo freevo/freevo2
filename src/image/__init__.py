@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/01/18 16:51:48  dischi
+# (re)move unneeded variables
+#
 # Revision 1.16  2004/01/10 13:16:15  dischi
 # remove self.fxd_file, not needed anymore
 #
@@ -123,7 +126,6 @@ class PluginInterface(plugin.MimetypePlugin):
                 image = vfs.join(diritem.dir, info['sampleimage'])
                 if vfs.isfile(image):
                     diritem.image       = image
-                    diritem.handle_type = diritem.display_type
 
             if info.has_key('title') and info['title']:
                 diritem.name = info['title']

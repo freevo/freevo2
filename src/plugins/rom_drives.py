@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/01/18 16:51:05  dischi
+# (re)move unneeded variables
+#
 # Revision 1.51  2004/01/17 20:30:18  dischi
 # use new metainfo
 #
@@ -451,7 +454,6 @@ class Identify_Thread(threading.Thread):
                                        devicename=media.devicename,
                                        display_type='audio')
             media.type = media.item.type
-            media.item.handle_type = 'audio'
             media.item.media = media
             if data.title:
                 media.item.name = data.title
@@ -535,42 +537,25 @@ class Identify_Thread(threading.Thread):
             media.item.num_titles = len(data.tracks)
             return
 
-        if data.tracks:
-            mplayer_files = []
-            mp3_files     = []
-            image_files   = []
-            for t in data.tracks:
-                if t and t['url']:
-                    file = t['url'][len(media.devicename)+6:].replace(':', '/')
-                    if util.match_suffix(file, config.VIDEO_SUFFIX):
-                        mplayer_files.append(file)
-                    if util.match_suffix(file, config.AUDIO_SUFFIX):
-                        mp3_files.append(file)
-                    if util.match_suffix(file, config.IMAGE_SUFFIX):
-                        image_files.append(file)
-            media.cached = True
-                
-        else:
-            # Disc is data of some sort. Mount it to get the file info
-            util.mount(media.mountdir, force=True)
-
-            # Check for movies/audio/images on the disc
-            mplayer_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
-            mp3_files = util.match_files(media.mountdir, config.AUDIO_SUFFIX)
-            image_files = util.match_files(media.mountdir, config.IMAGE_SUFFIX)
-
-            util.umount(media.mountdir)
-
-
+        # Disc is data of some sort. Mount it to get the file info
+        util.mount(media.mountdir, force=True)
+        
+        # Check for movies/audio/images on the disc
+        mplayer_files = util.match_files(media.mountdir, config.VIDEO_SUFFIX)
+        mp3_files = util.match_files(media.mountdir, config.AUDIO_SUFFIX)
+        image_files = util.match_files(media.mountdir, config.IMAGE_SUFFIX)
+        
         _debug_('identifymedia: mplayer = "%s"' % mplayer_files, level = 2)
         _debug_('identifymedia: mp3="%s"' % mp3_files, level = 2)
         _debug_('identifymedia: image="%s"' % image_files, level = 2)
             
         media.item = DirItem(media.mountdir, None)
+        media.item.info = disc_info
+        util.umount(media.mountdir)
         
         # Is this a movie disc?
         if mplayer_files and not mp3_files:
-            media.item.handle_type = 'video'
+            media.type = 'video'
 
             # try to find out if it is a series cd
             if not title:
@@ -632,22 +617,22 @@ class Identify_Thread(threading.Thread):
 
         # XXX add more intelligence to cds with audio files
         elif (not mplayer_files) and mp3_files:
-            media.item.handle_type = 'audio'
+            media.type = 'audio'
             title = '%s [%s]' % (media.drivename, label)
 
         # XXX add more intelligence to cds with image files
         elif (not mplayer_files) and (not mp3_files) and image_files:
-            media.item.handle_type = 'image'
+            media.type = 'image'
             title = '%s [%s]' % (media.drivename, label)
 
         # Mixed media?
         elif mplayer_files or image_files or mp3_files:
-            media.item.handle_type = None
+            media.type = None
             title = '%s [%s]' % (media.drivename, label)
         
         # Strange, no useable files
         else:
-            media.item.handle_type = None
+            media.type = None
             title = '%s [%s]' % (media.drivename, label)
 
 
@@ -656,7 +641,7 @@ class Identify_Thread(threading.Thread):
         if image:
             media.item.image = image
         if more_info:
-            media.item.info = more_info
+            media.item.info.set_variables(more_info)
         if fxd_file and not media.item.fxd_file:
             media.item.set_fxd_file(fxd_file)
             
@@ -675,7 +660,7 @@ class Identify_Thread(threading.Thread):
             if image:
                 media.videoitem.image = image
             if more_info:
-                media.videoitem.info = more_info
+                media.videoitem.set_variables(more_info)
             if fxd_file:
                 media.videoitem.fxd_file = fxd_file
                 

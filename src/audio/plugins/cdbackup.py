@@ -28,6 +28,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.31  2004/01/18 16:51:48  dischi
+# (re)move unneeded variables
+#
 # Revision 1.30  2004/01/17 20:29:12  dischi
 # renamed media.info to media.item
 #
@@ -332,7 +335,7 @@ class main_backup_thread(threading.Thread):
         path_head = ''
         for media in config.REMOVABLE_MEDIA:
             if media.devicename == device:
-                media.item.handle_type = 'cdrip'
+                media.type = 'cdrip'
         
         # Get the artist, album and song_names	
         (discid, artist, album, genre, song_names) = self.get_formatted_cd_info(device)
@@ -481,7 +484,7 @@ class main_backup_thread(threading.Thread):
         
         for media in config.REMOVABLE_MEDIA:
             if media.devicename == device:
-                media.item.handle_type = 'audio'
+                media.type = 'audio'
 
         # done
         rc.post_event(Event(OSD_MESSAGE, arg=_('Ripping complete')))

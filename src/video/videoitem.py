@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.117  2004/01/18 16:51:48  dischi
+# (re)move unneeded variables
+#
 # Revision 1.116  2004/01/17 20:30:19  dischi
 # use new metainfo
 #
@@ -93,11 +96,10 @@ class VideoItem(Item):
         if info:
             self.info.set_variables(info)
 
-        self.handle_type       = 'video'
-
         self.variants          = []         # if this item has variants
         self.subitems          = []         # more than one file/track to play
         self.current_subitem   = None
+        self.media_id          = ''
 
         self.subtitle_file     = {}         # text subtitles
         self.audio_file        = {}         # audio dubbing

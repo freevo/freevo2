@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.52  2004/01/18 16:50:10  dischi
+# (re)move unneeded variables
+#
 # Revision 1.51  2004/01/17 20:30:18  dischi
 # use new metainfo
 #
@@ -156,7 +159,7 @@ class FileInformation:
         for f in self.files + [ self.fxd_file, self.image ]:
             if not f:
                 continue
-            if os.path.isdir(f):
+            if os.path.isdir(f) and not os.path.islink(f):
                 shutil.rmtree(f, ignore_errors=1)
             else:
                 try:
@@ -186,7 +189,7 @@ class Item:
 
         self.name         = ''              # name in menu
         self.icon         = None
-        if isinstance(info, util.mediainfo.Info):
+        if info and isinstance(info, util.mediainfo.Info):
             self.info     = copy.copy(info)
         else:
             self.info     = util.mediainfo.Info(None, None, info)
@@ -206,7 +209,6 @@ class Item:
                    self.image.startswith(config.IMAGE_DIR) and \
                    self.image.find('watermark') > 0:
                 self.image = None
-            self.handle_type = parent.handle_type
             self.skin_fxd    = parent.skin_fxd
             self.media       = parent.media
             if hasattr(parent, '_'):
@@ -214,9 +216,6 @@ class Item:
         else:
             self.image        = None            # imagefile
             self.skin_fxd     = None            # skin informationes etc.
-            self.handle_type  = None            # handle item in skin as video, audio, image
-                                                # e.g. a directory has all video info like
-                                                # directories of a cdrom
             self.media        = None
 
                 
@@ -245,7 +244,6 @@ class Item:
         self.network_play = True        # network url, like http
         self.url          = url         # the url itself
         self.filename     = ''          # filename if it's a file:// url
-        self.media_id     = ''
 
         if not url:
             self.mode     = ''          # the type of the url (file, http, dvd...)
