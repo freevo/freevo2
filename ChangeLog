@@ -6,6 +6,13 @@ $Id$
 Release 1.4.0-rc? (2003-??-??):
 -------------------------------
  * Added a playlist plugin
+ * TvTime plugin redo:
+     use new childthread
+     writes tvtime.xml to keep in sync with freevo channels
+     writes stationlist.xml to keep in sync with freevo channels
+     merges stationlist.xml and tvtime.xml if they exist already
+     set tvtime xml parameters if you have 0.9.10 or newer
+     added support for custom tuned channels using FREQUENCY_TABLE
 
 	
 Release 1.4.0-rc1 (2003-10-05):
