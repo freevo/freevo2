@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/11 10:37:48  dischi
+# added event to reload a menu
+#
 # Revision 1.2  2002/11/26 22:02:10  dischi
 # Added key to enable/disable subtitles. This works only with mplayer pre10
 # (maybe pre9). Keyboard: l (for language) or remote SUBTITLE
@@ -118,6 +121,7 @@ class RemoteControl:
     PLAY_END = 'PLAY_END'     # Reached end of song, movie, etc
     IDENTIFY_MEDIA = 'IDENTIFY_MEDIA'
     REFRESH_SCREEN = 'REFRESH_SCREEN'
+    REBUILD_SCREEN = 'REBUILD_SCREEN'
 
     def __init__(self, port=config.REMOTE_CONTROL_PORT):
         self.port = port
