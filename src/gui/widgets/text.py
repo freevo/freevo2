@@ -1,48 +1,17 @@
 # -*- coding: iso-8859-1 -*-
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # text.py - A text widget
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # $Id$
 #
-# -----------------------------------------------------------------------
-# $Log$
-# Revision 1.11  2005/01/07 20:42:55  dischi
-# better new line handling
 #
-# Revision 1.10  2004/11/20 18:23:02  dischi
-# use python logger module for debug
-#
-# Revision 1.9  2004/10/05 19:50:55  dischi
-# Cleanup gui/widgets:
-# o remove unneeded widgets
-# o move window and boxes to the gui main level
-# o merge all popup boxes into one file
-# o rename popup boxes
-#
-# Revision 1.8  2004/10/03 15:54:00  dischi
-# make PopupBoxes work again as they should
-#
-# Revision 1.7  2004/09/07 18:48:57  dischi
-# internal colors are now lists, not int
-#
-# Revision 1.6  2004/08/26 18:12:13  dischi
-# make sure we create valid sizes
-#
-# Revision 1.5  2004/08/26 15:30:06  dischi
-# bug fix for very small sizes
-#
-# Revision 1.4  2004/08/22 20:06:21  dischi
-# Switch to mevas as backend for all drawing operations. The mevas
-# package can be found in lib/mevas. This is the first version using
-# mevas, there are some problems left, some popup boxes and the tv
-# listing isn't working yet.
-#
-# Revision 1.3  2004/08/01 10:37:08  dischi
-# smaller changes to stuff I need
-#
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -59,20 +28,24 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+__all__ = [ 'Text' ]
+
+# python imports
 import os
-import traceback
+import logging
 
+# mevas imports
 import mevas
 from mevas.image import CanvasImage
 
-import config
-
-import logging
+# get logging object
 log = logging.getLogger('gui')
 
-dim_image = None
+# alpha channel image for fading out text
+_dim_image = None
+
 
 class Text(CanvasImage):
     """
@@ -125,7 +98,7 @@ class Text(CanvasImage):
         try:
             self._calculate_vars()
         except Exception, e:
-            log.error(e)
+            log.exception(e)
 
         if stringsize == 0:
             CanvasImage.__init__(self, (1, 1))
@@ -140,15 +113,17 @@ class Text(CanvasImage):
         try:
             self._render(text, (0, 0), (stringsize, font.height))
         except Exception, e:
-            log.error(e)
+            log.exception(e)
 
         if dim:
-            global dim_image
-            if not dim_image:
-                f = os.path.join(config.IMAGE_DIR, 'blend.png')
-                dim_image = mevas.imagelib.open(f)
-                dim_image.scale((25, 1000))
-            self.image.draw_mask(dim_image, (stringsize - 25, 0))
+            global _dim_image
+            if not _dim_image:
+                image_data = ''
+                for i in range(250, 9, -10):
+                    image_data += '%c%c%c' % (chr(i), chr(i), chr(i))
+                _dim_image = mevas.imagelib.new((25, 1), image_data, 'RGB')
+                _dim_image.scale((25, 1000))
+            self.image.draw_mask(_dim_image, (stringsize - 25, 0))
 
         self.set_pos((x, y))
 
