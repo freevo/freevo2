@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/07/11 13:53:52  dischi
+# do not change menu start/stop times for CHAN_NO_DATA
+#
 # Revision 1.36  2004/07/11 11:46:03  dischi
 # decrease record server calling
 #
@@ -381,7 +384,6 @@ class TVGuide(Item):
                 if i + value < len(programs):
                     prg = programs[i+value]
                 elif full_scan:
-                    print 'Oops'
                     prg = programs[-1]
                 else:
                     return self.event_change_program(value, True)
@@ -389,7 +391,6 @@ class TVGuide(Item):
                 if i+value >= 0:
                     prg = programs[i+value]
                 elif full_scan:
-                    print 'Oops'
                     prg = programs[0]
                 else:
                     return self.event_change_program(value, True)
@@ -400,6 +401,21 @@ class TVGuide(Item):
                 procdesc = prg.desc
             to_info = (prg.title, procdesc)
             self.select_time = prg.start
+
+            # set new (better) start / stop times
+            extra_space = 0
+            if prg.stop - prg.start > self.col_time * 60:
+                extra_space = self.col_time * 60
+
+            while prg.start + extra_space >= stop_time:
+                start_time += (self.col_time * 60)
+                stop_time += (self.col_time * 60)
+
+            while prg.start + extra_space <= start_time:
+                start_time -= (self.col_time * 60)
+                stop_time -= (self.col_time * 60)
+
+
         else:
             prg = epg_types.TvProgram()
             prg.channel_id = channel.id            
@@ -408,19 +424,6 @@ class TVGuide(Item):
             prg.title = CHAN_NO_DATA
             prg.desc = ''
             to_info = CHAN_NO_DATA
-
-        # set new (better) start / stop times
-        extra_space = 0
-        if prg.stop - prg.start > self.col_time * 60:
-            extra_space = self.col_time * 60
-                
-        while prg.start + extra_space >= stop_time:
-            start_time += (self.col_time * 60)
-            stop_time += (self.col_time * 60)
-
-        while prg.start + extra_space <= start_time:
-            start_time -= (self.col_time * 60)
-            stop_time -= (self.col_time * 60)
 
         self.rebuild(start_time, stop_time, start_channel, prg)
 
