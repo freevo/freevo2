@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
 
-   <skin include="blue1_big_800x600">
+   <skin include="blue1_big" geometry="800x600">
 
     <!-- Settings for a normal menu -->
     <menu type="all">

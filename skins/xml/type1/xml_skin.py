@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2002/12/20 15:42:32  dischi
+# The skin files are geometry independed now. They can be used for every
+# resolution (e.g. 720x576 and 720x480)
+#
 # Revision 1.18  2002/11/12 06:36:31  krister
 # Changed the default font from Arial to a builtin font.
 #
@@ -205,12 +209,28 @@ def attr_str(node, attr, default):
         return node.attrs[('', attr)].encode('latin-1')
     return default
 
-def attr_file(node, attr, default, c_dir):
+def attr_file(node, attr, default, c_dir, geometry=None):
     if node.attrs.has_key(('', attr)):
         file = node.attrs[('', attr)].encode('latin-1')
         if file:
-            return os.path.join(c_dir, file)
-        return ""
+            file=os.path.join(c_dir, file)
+            if os.path.isfile(file):
+                return file
+            if geometry and os.path.isfile("%s_%sx%s.png" % \
+                                           (file, geometry[0], geometry[1])):
+                return "%s_%sx%s.png" % (file, geometry[0], geometry[1])
+            if geometry and os.path.isfile("%s_%sx%s.jpg" % \
+                                           (file, geometry[0], geometry[1])):
+                return "%s_%sx%s.jpg" % (file, geometry[0], geometry[1])
+            if geometry and geometry[0] == 720 and os.path.isfile("%s_768x576.png" % file):
+                return "%s_768x576.png" % file
+            if geometry and geometry[0] == 720 and os.path.isfile("%s_768x576.jpg" % file):
+                return "%s_768x576.jpg" % file
+            if os.path.isfile("%s_800x600.png" % file):
+                return "%s_800x600.png" % file
+            if os.path.isfile("%s_800x600.jpg" % file):
+                return "%s_800x600.jpg" % file
+        return file
     return default
 
 def attr_font(node, attr, default):
@@ -271,27 +291,28 @@ class XML_data:
         self.spacing = 10
         
         
-    def parse(self, node, scale = 0.0, c_dir=''):
-        self.x = attr_int(node, "x", self.x, scale)
-        self.y = attr_int(node, "y", self.y, scale)
-        self.height = attr_int(node, "height", self.height, scale)
-        self.width = attr_int(node, "width", self.width, scale)
-        self.length = attr_int(node, "length", self.length, scale)
-        self.radius = attr_int(node, "radius", self.radius, scale)
-        self.spacing = attr_int(node, "spacing", self.spacing, scale)
+    def parse(self, node, scale, c_dir='', geometry=None):
+        self.x = attr_int(node, "x", self.x, scale[0])
+        self.y = attr_int(node, "y", self.y, scale[1])
+        self.width = attr_int(node, "width", self.width, scale[0])
+        self.height = attr_int(node, "height", self.height, scale[1])
+        self.length = attr_int(node, "length", self.length, scale[0])
+        self.radius = attr_int(node, "radius", self.radius, min(scale[0], scale[1]))
+        self.spacing = attr_int(node, "spacing", self.spacing, min(scale[0], scale[1]))
 
         self.visible = attr_visible(node, "visible", self.visible)
         self.bgcolor = attr_hex(node, "bgcolor", self.bgcolor)
         self.color = attr_hex(node, "color", self.color) # will be overrided by font
         self.border_color = attr_hex(node, "border_color", self.border_color)
         self.border_size = attr_int(node, "border_size", self.border_size)
-        self.image = attr_file(node, "image", self.image, c_dir)
-        self.mask = attr_file(node, "mask", self.mask, c_dir)
+        self.image = attr_file(node, "image", self.image, c_dir, geometry)
+        self.mask = attr_file(node, "mask", self.mask, c_dir, geometry)
 
         for subnode in node.children:
             if subnode.name == u'font':
                 self.color = attr_hex(subnode, "color", self.color)
-                self.size = attr_int(subnode, "size", self.size, scale)
+                self.size = attr_int(subnode, "size", self.size,
+                                     min(scale[0], scale[1]))
                 self.font = attr_font(subnode, "name", self.font)
                 self.align = attr_str(subnode, "align", self.align)
                 self.valign = attr_str(subnode, "valign", self.valign)
@@ -306,12 +327,13 @@ class XML_data:
                 self.shadow_pad_y = attr_int(subnode, "y", self.shadow_pad_y)
             if subnode.name == u'background':
                 self.bgcolor = attr_hex(subnode, "color", self.bgcolor)                
-                self.radius = attr_int(subnode, "radius", self.radius)                
+                self.radius = attr_int(subnode, "radius", self.radius,
+                                       min(scale[0], scale[1]))      
             if subnode.name == u'geometry':
-                self.x = attr_int(subnode, "x", self.x, scale)
-                self.y = attr_int(subnode, "y", self.y, scale)
-                self.width = attr_int(subnode, "width", self.width, scale)
-                self.height = attr_int(subnode, "height", self.height, scale)
+                self.x = attr_int(subnode, "x", self.x, scale[0])
+                self.y = attr_int(subnode, "y", self.y, scale[1])
+                self.width = attr_int(subnode, "width", self.width, scale[0])
+                self.height = attr_int(subnode, "height", self.height, scale[1])
 
 
 
@@ -322,7 +344,7 @@ class XML_menuitem(XML_data):
         XML_data.__init__(self)
         self.selection = XML_data()
 
-    def parse(self, node, scale = 0.0, c_dir=''):
+    def parse(self, node, scale, c_dir=''):
         XML_data.parse(self, node, scale, c_dir)
         
 
@@ -333,7 +355,7 @@ class XML_cover(XML_data):
         XML_data.__init__(self)
         self.mask = None
 
-    def parse(self, node, scale = 0.0, c_dir=''):
+    def parse(self, node, scale, c_dir=''):
         XML_data.parse(self, node, scale, c_dir)
         for subnode in node.children:
             if subnode.name == u'mask':
@@ -354,11 +376,11 @@ class XML_menuitems:
         self.dir = XML_menuitem()
         self.pl = XML_menuitem()
 
-    def parse(self, node, scale = 0.0, c_dir=''):
-        self.x = attr_int(node, "x", self.x, scale)
-        self.y = attr_int(node, "y", self.y, scale)
-        self.height = attr_int(node, "height", self.height, scale)
-        self.width  = attr_int(node, "width", self.width, scale)
+    def parse(self, node, scale, c_dir=''):
+        self.x = attr_int(node, "x", self.x, scale[0])
+        self.y = attr_int(node, "y", self.y, scale[1])
+        self.width  = attr_int(node, "width", self.width, scale[0])
+        self.height = attr_int(node, "height", self.height, scale[1])
 
         for subnode in node.children:
             if subnode.name == u'item':
@@ -384,9 +406,9 @@ class XML_background:
         self.image     = ''
         self.mask      = None
 
-    def parse(self, node, scale = 0.0, c_dir=''):
-        self.image = attr_file(node, "image", self.image, c_dir)
-        tmp = attr_file(node, "mask", None, c_dir)
+    def parse(self, node, scale, c_dir='', geometry=None):
+        self.image = attr_file(node, "image", self.image, c_dir, geometry)
+        tmp = attr_file(node, "mask", None, c_dir, geometry)
         if not tmp == None:
             self.mask = tmp
         for subnode in node.children:
@@ -414,10 +436,10 @@ class XML_menu:
         self.cover_image = XML_cover()
         self.submenu = XML_menuitem()
 
-    def parse(self, menu_node, scale = 0.0, c_dir=''):
+    def parse(self, menu_node, scale, c_dir='', geometry=None):
         for node in menu_node.children:
             if node.name == u'background':
-                self.background.parse(node, scale, c_dir)
+                self.background.parse(node, scale, c_dir, geometry)
 
             if node.name == u'logo':
                 self.logo.parse(node, scale, c_dir)
@@ -459,7 +481,7 @@ class XML_mp3:
         self.info  = XML_data()
         self.logo  = XML_data()
 
-    def parse(self, menu_node, scale = 0.0, c_dir=''):
+    def parse(self, menu_node, scale, c_dir=''):
         for node in menu_node.children:
             if node.name == u'background':
                 self.background.parse(node, scale, c_dir)
@@ -487,7 +509,7 @@ class XML_popup(XML_data):
         XML_data.__init__(self)
         self.message = XML_data()    
 
-    def parse(self, node, scale = 0.0, c_dir=''):
+    def parse(self, node, scale, c_dir=''):
         XML_data.parse(self, node, scale, c_dir)
 
         for subnode in node.children:
@@ -507,11 +529,12 @@ class XML_mainmenuitem:
         self.action = None
         self.arg = None
 
-    def parse(self, node, scale = 0.0, c_dir=''):
+    def parse(self, node, scale, c_dir=''):
         self.name = attr_str(node, "name", self.name)
         self.visible = attr_visible(node, "visible", self.visible)
         self.icon = attr_str(node, "icon", self.icon)
         self.pos = attr_int(node, "pos", self.pos)
+
         self.action = attr_str(node,"action", self.action)
         self.arg = attr_str(node,"arg", self.arg)
 
@@ -522,13 +545,14 @@ class XML_mainmenu:
     def __init__(self):
         self.items = {}
 
-    def parse(self, menu_node, scale = 0.0, c_dir=''):
+    def parse(self, menu_node, scale, c_dir=''):
         for node in menu_node.children:
             if node.name == u'item':
                 item = XML_mainmenuitem()
                 item.parse(node, scale, c_dir)
                 self.items[item.pos] = item                
 
+    
 # ======================================================================
 
 class XML_listingmenuitem(XML_menuitem):
@@ -561,14 +585,16 @@ class XML_listingmenuitem(XML_menuitem):
                     self.up_arrow = attr_str(subnode,'image', self.up_arrow)
 
 
-    def parse(self, node, scale = 0.0, c_dir=''):
+    def parse(self, node, scale, c_dir=''):
         XML_menuitem.parse(self, node, scale, c_dir)
         for subnode in node.children:
             if subnode.name == u'expand':
                 self.expand.parse(subnode, scale)
 
             elif subnode.name == u'table':
-                self.spacing = attr_int(subnode,'spacing', self.spacing, scale)
+                self.spacing = attr_int(subnode,'spacing', self.spacing,
+                                        min(scale[0], scale[1]))
+
                 self.parse(subnode, scale)
 
                 for subsubnode in subnode.children:
@@ -591,7 +617,7 @@ class XML_extendedmenu:
         self.info = XML_data()
         self.listing = XML_listingmenuitem()
 
-    def parse(self, menu_node, scale = 0.0, c_dir=''):
+    def parse(self, menu_node, scale, c_dir=''):
         for node in menu_node.children:
             if node.name == u'background':
                 self.background.parse(node, scale, c_dir)
@@ -627,7 +653,7 @@ class XMLSkin:
         self.e_menu = { }
 
         
-    def parse(self, freevo_type, scale, c_dir, copy_content):
+    def parse(self, freevo_type, scale, c_dir, geometry, copy_content):
         for node in freevo_type.children:
             if node.name == u'menu':
                 type = attr_str(node, "type", "all")
@@ -635,11 +661,11 @@ class XMLSkin:
                     if copy_content:
                         self.menu_default = copy.deepcopy(self.menu_default)
                         self.menu_main = copy.deepcopy(self.menu_main)
-                    self.menu_default.parse(node, scale, c_dir)
-                    self.menu_main.parse(node, scale, c_dir)
+                    self.menu_default.parse(node, scale, c_dir, geometry)
+                    self.menu_main.parse(node, scale, c_dir, geometry)
 
                 if type == "main":
-                    self.menu_main.parse(node, scale, c_dir)
+                    self.menu_main.parse(node, scale, c_dir, geometry)
 
             if node.name == u'mp3':
                 if copy_content:
@@ -669,46 +695,40 @@ class XMLSkin:
     #
     # parse the skin file
     #
-    def load(self, file, copy_content = 0, scale=0.0):
+    def load(self, file, geometry, copy_content = 0):
+        if not os.path.isfile(file):
+            if os.path.isfile(file+".xml"):
+                file += ".xml"
+            else:
+                file = "skins/xml/type1/%s" % file
+                if os.path.isfile(file+".xml"):
+                    file += ".xml"
+
         if not os.path.isfile(file):
             return 0
-        
         try:
             parser = qp_xml.Parser()
             box = parser.parse(open(file).read())
             for freevo_type in box.children:
                 if freevo_type.name == 'skin':
 
-                    new_scale = attr_float(freevo_type, "scale", 0.0)
-                    include = attr_file(freevo_type, "include", "", \
-                                             os.path.dirname(file))
+                    file_geometry = attr_str(freevo_type, "geometry", '')
 
-                    if scale and new_scale:
-                        new_scale = scale * new_scale
-                    elif scale:
-                        new_scale = scale
+                    if file_geometry:
+                        w, h = file_geometry.split('x')
+                        scale = (float(geometry[0])/float(w),
+                                 float(geometry[1])/float(h))
+                    else:
+                        scale = (0.0,0.0)
 
+                        
+                    include  = attr_file(freevo_type, "include", "", \
+                                         os.path.dirname(file))
                     if include:
-                        # locate the skin file we need
-                        if os.path.isfile(include+".xml"):
-                            include += ".xml"
-
-                        in2 = "skins/xml/type1/%s" % os.path.basename(include)
-                        if os.path.isfile(in2):
-                            include = in2
-
-                        if os.path.isfile(in2+".xml"):
-                            include = "%s.xml" % in2
-
-                        if not os.path.isfile(include):
-                            print "can't find skin file %s" % include
-
-                        else:
-                            print "load %s with scale %s" % (include, new_scale)
-                            self.load(include, copy_content, new_scale)
+                        self.load(include, geometry, copy_content)
 
                     self.parse(freevo_type, scale, os.path.dirname(file),
-                               copy_content)
+                               geometry, copy_content)
 
         except:
             print "ERROR: XML file corrupt"

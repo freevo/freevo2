@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
   
-  <skin>
+  <skin geometry="800x600">
 
     <!-- Items of the main menu (will change soon) -->
     <main>        
@@ -22,7 +22,7 @@
     <!-- Settings for a normal menu -->
     <menu type="all">
 
-      <background image="../../images/aubin_bg2_800x600.png"/>
+      <background image="../../images/aubin_bg2"/>
       <logo visible="yes" x="20" y="20" image="../../images/logo.png"/>
 
       <title visible="no" x="400" y="19">
@@ -81,7 +81,7 @@
 	<font name="Arial_Bold" size="38" color="0xffffff" align="center"/>
       </title>
 
-      <background image="../../images/aubin_bg2_800x600.png">
+      <background image="../../images/aubin_bg2">
 	<mask>
 	  <rectangle x="-25" y="88" width="666" height="232" color="0x80000000" radius="20"/>
 	</mask>
@@ -115,7 +115,7 @@
 
 
     <extendedmenu type="tv">
-      <background image="../../images/aubin_bg2_800x600.png" mask=""/>
+      <background image="../../images/aubin_bg2" mask=""/>
       <logo visible="yes" x="20" y="20" image="../../images/logo_100x50.png"/>
 
       <header>

@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.70  2002/12/20 15:43:47  dischi
+# The skin files are geometry independed now. They can be used for every
+# resolution (e.g. 720x576 and 720x480)
+#
 # Revision 1.69  2002/12/02 22:09:41  dischi
 # DrawStringFramed should now work for the title and the items
 #
@@ -121,16 +125,13 @@ class Skin:
 
     # try to find the skin xml file
     
-    if not settings.load(config.SKIN_XML_FILE):
-        if not settings.load("%s%s.xml" % (config.SKIN_XML_FILE, config.CONF.geometry)):
-            if not settings.load("%s/%s_%s.xml" % (XML_SKIN_DIRECTORY, config.SKIN_XML_FILE, \
-                                                   config.CONF.geometry)):
-                print "skin not found, using fallback skin"
-                settings.load("%s/grey1_%s.xml" % (XML_SKIN_DIRECTORY, config.CONF.geometry))
+    if not settings.load(config.SKIN_XML_FILE, (osd.width, osd.height)):
+        print "skin not found, using fallback skin"
+        settings.load("%s/grey1.xml" % XML_SKIN_DIRECTORY, (osd.width, osd.height))
         
     if os.path.isfile("local_skin.xml"):
         if DEBUG: print 'Skin: Add local config to skin'
-        settings.load("local_skin.xml")
+        settings.load("local_skin.xml", (osd.width, osd.height))
 
     hold = 0
 
@@ -156,11 +157,11 @@ class Skin:
     def LoadSettings(self, dir):
         if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
             settings = copy.copy(self.settings)
-            settings.load(os.path.join(dir, "skin.xml"), 1)
+            settings.load(os.path.join(dir, "skin.xml"), (osd.width, osd.height), 1)
             return settings
         elif dir and os.path.isfile(dir):
             settings = copy.copy(self.settings)
-            settings.load(dir, 1)
+            settings.load(dir, (osd.width, osd.height), 1)
             return settings
         return None
 

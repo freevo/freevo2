@@ -22,7 +22,7 @@
     <!-- Settings for a normal menu -->
     <menu type="all">
 
-      <background image="../../images/aubin_bg1_800x600.png" mask=""/>
+      <background image="../../images/aubin_bg1" mask=""/>
       <logo visible="no"/>
 
       <title visible="yes" x="400" y="18">
@@ -99,7 +99,7 @@
       <title visible="yes" x="400" y="15">
 	<font name="oliversb" size="38" color="0x000000" align="center"/>
       </title>
-      <background image="../../images/aubin_bg1_800x600.png"/>
+      <background image="../../images/aubin_bg1"/>
       <cover visible="yes" x="466" y="191" width="289"
 	height="289" border_color="0x000000" border_size="1"/> 
 
@@ -126,7 +126,7 @@
     <!-- setup for the extended menu tv -->
 
     <extendedmenu type="tv">
-      <background image="../../images/aubin_bg1_800x600.png" mask=""/>
+      <background image="../../images/aubin_bg1" mask=""/>
       <logo visible="no"/>
 
       <header>
