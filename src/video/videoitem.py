@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.115  2004/01/10 13:22:17  dischi
+# reflect self.fxd_file changes
+#
 # Revision 1.114  2004/01/09 21:05:09  dischi
 # override folder.fxd with tv show version
 #
@@ -152,8 +155,7 @@ class VideoItem(Item):
                         self.info[i] = tvinfo[1][i]
                     if not self.image:
                         self.image = tvinfo[0]
-                    if not self.fxd_file or self.fxd_file.endswith('folder.fxd'):
-                        self.fxd_file = tvinfo[3]
+                    self.skin_fxd = tvinfo[3]
                     self.mplayer_options = tvinfo[2]
 
                 self.tv_show       = True
@@ -322,7 +324,7 @@ class VideoItem(Item):
         """
         if not self.menuw:
             self.menuw = menuw
-        m = menu.Menu(self.name, self.variants, reload_func=None, fxd_file=self.fxd_file)
+        m = menu.Menu(self.name, self.variants, reload_func=None, fxd_file=self.skin_fxd)
         m.item_types = 'video'
         self.menuw.pushmenu(m)
 
@@ -552,7 +554,7 @@ class VideoItem(Item):
             i.name = _('Play Title %s') % title
             items += [i]
 
-        moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.fxd_file)
+        moviemenu = menu.Menu(self.name, items, umount_all = 1, fxd_file=self.skin_fxd)
         moviemenu.item_types = 'video'
         self.menuw.pushmenu(moviemenu)
 
@@ -563,7 +565,7 @@ class VideoItem(Item):
         """
         if not self.menuw:
             self.menuw = menuw
-        confmenu = configure.get_menu(self, self.menuw, self.fxd_file)
+        confmenu = configure.get_menu(self, self.menuw, self.skin_fxd)
         self.menuw.pushmenu(confmenu)
         
 

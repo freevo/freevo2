@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2004/01/10 13:22:17  dischi
+# reflect self.fxd_file changes
+#
 # Revision 1.22  2004/01/09 21:05:27  dischi
 # set directory skin_settings for tv shows
 #
@@ -128,8 +131,8 @@ class PluginInterface(plugin.MimetypePlugin):
             diritem.info = tvinfo[1]
             if not diritem.image:
                 diritem.image = tvinfo[0]
-            if not diritem.skin_settings:
-                diritem.skin_settings = tvinfo[3]
+            if not diritem.skin_fxd:
+                diritem.skin_fxd = tvinfo[3]
 
 
 def hash_fxd_movie_database():
@@ -183,9 +186,9 @@ def hash_fxd_movie_database():
     if config.VIDEO_SHOW_DATA_DIR:
         files = util.recursefolders(config.VIDEO_SHOW_DATA_DIR,1, '*.fxd',1)
         for info in fxditem.mimetype.parse(None, files, display_type='video'):
-            k = vfs.splitext(vfs.basename(info.fxd_file))[0]
+            k = vfs.splitext(vfs.basename(info.files.fxd_file))[0]
             tv_show_informations[k] = (info.image, info.info, info.mplayer_options,
-                                       info.fxd_file)
+                                       info.skin_fxd)
             if hasattr(info, '__fxd_rom_info__'):
                 for fo in info.__fxd_files_options__:
                     discset_informations[fo['file-id']] = fo['mplayer-options']

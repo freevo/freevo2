@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/10 13:23:23  dischi
+# reflect self.fxd_file changes
+#
 # Revision 1.7  2003/12/29 22:08:54  dischi
 # move to new Item attributes
 #
@@ -155,7 +158,7 @@ class PluginInterface(plugin.ItemPlugin):
             items.append(file)
 
         if items:
-            moviemenu = menu.Menu(self.item.name, items, fxd_file=self.item.fxd_file)
+            moviemenu = menu.Menu(self.item.name, items, fxd_file=self.item.skin_fxd)
             menuw.pushmenu(moviemenu)
         return
 

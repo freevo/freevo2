@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/01/10 13:23:23  dischi
+# reflect self.fxd_file changes
+#
 # Revision 1.32  2004/01/08 17:33:15  outlyer
 # Moved fxdimdb.py to util; it doesn't use the OSD, and having in video
 # makes it import video/__init__...
@@ -91,9 +94,7 @@ class PluginInterface(plugin.ItemPlugin):
     def actions(self, item):
         self.item = item
 
-        if item.type == 'video' and (not item.fxd_file or \
-                                     item.fxd_file.endswith('folder.fxd')):
-
+        if item.type == 'video' and (not item.files or not item.files.fxd_file):
             if item.mode == 'file':
                 self.disc_set = False
                 return [ ( self.imdb_search , _('Search IMDB for this file'),
@@ -136,7 +137,7 @@ class PluginInterface(plugin.ItemPlugin):
             for id,name,year,type in fxd.guessImdb(self.searchstring, self.disc_set):
                 try:
                     for i in self.item.parent.play_items:
-                        if hasattr(i, 'fxd_file') and i.name == name:
+                        if i.name == name:
                             if not i in duplicates:
                                 duplicates.append(i)
                 except:

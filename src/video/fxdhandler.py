@@ -9,32 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/10 13:22:17  dischi
+# reflect self.fxd_file changes
+#
 # Revision 1.11  2004/01/04 11:16:53  dischi
 # do not override image with nothing
-#
-# Revision 1.10  2003/12/30 15:36:01  dischi
-# remove unneeded copy function, small bugfix
-#
-# Revision 1.9  2003/12/29 22:29:25  dischi
-# small bugfix
-#
-# Revision 1.8  2003/12/29 22:08:54  dischi
-# move to new Item attributes
-#
-# Revision 1.7  2003/12/22 13:27:34  dischi
-# patch for better support of fxd files with more discs from Matthieu Weber
-#
-# Revision 1.6  2003/12/09 19:43:01  dischi
-# patch from Matthieu Weber
-#
-# Revision 1.5  2003/12/07 12:28:25  dischi
-# bugfix
-#
-# Revision 1.4  2003/12/06 16:25:45  dischi
-# support for type=url and <playlist> and <player>
-#
-# Revision 1.3  2003/11/30 14:41:10  dischi
-# use new Mimetype plugin interface
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -112,11 +91,11 @@ def parse_movie(fxd, node):
 
     item = VideoItem('', fxd.getattr(None, 'parent', None), parse=False)
 
-    fxd_file = fxd.getattr(None, 'filename', '')
-    dirname  = os.path.dirname(fxd_file)
+    dirname  = os.path.dirname(fxd.filename)
 
     image      = ''
-    item.name  = fxd.getattr(node, 'title')
+    title      = fxd.getattr(node, 'title')
+    item.name  = title
     item.image = fxd.childcontent(node, 'cover-img')
     if item.image:
         item.image = os.path.join(dirname, item.image)
@@ -223,6 +202,7 @@ def parse_movie(fxd, node):
             parse_video_child(fxd, video[0], dirname)
         mminfo = item.info
         item.set_url(url)
+        item.name = title
         for key in mminfo:
             item.info[key] = mminfo[key]
             
@@ -252,7 +232,8 @@ def parse_movie(fxd, node):
     if not item.files:
         item.files = FileInformation()
     item.files.files     = files
-    item.files.fxd_file  = fxd_file
+
+    item.files.fxd_file  = fxd.filename
     if image:
         item.files.image = image
     
@@ -264,7 +245,8 @@ def parse_movie(fxd, node):
         except:
             pass
         
-    item.fxd_file = fxd_file
+    if fxd.is_skin_fxd:
+        item.skin_fxd = fxd.filename
     fxd.getattr(None, 'items', []).append(item)
 
 
@@ -277,8 +259,7 @@ def parse_disc_set(fxd, node):
     """
     item = VideoItem('', fxd.getattr(None, 'parent', None), parse=False)
 
-    fxd_file = fxd.getattr(None, 'filename', '')
-    dirname  = os.path.dirname(fxd_file)
+    dirname  = os.path.dirname(fxd.filename)
     
     item.name  = fxd.getattr(node, 'title')
     item.image = fxd.childcontent(node, 'cover-img')
@@ -322,5 +303,9 @@ def parse_disc_set(fxd, node):
             # of files defined in the file-opt elements
             item.mplayer_options = ''
     
-    item.fxd_file = fxd_file
+    if not item.files:
+        item.files = FileInformation()
+    item.files.fxd_file  = fxd.filename
+    if fxd.is_skin_fxd:
+        item.skin_fxd = fxd.filename
     fxd.getattr(None, 'items', []).append(item)
