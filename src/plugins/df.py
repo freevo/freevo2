@@ -12,6 +12,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/07/15 16:52:47  dischi
+# removed some debug
+#
 # Revision 1.3  2003/07/05 17:00:01  dischi
 # added doc
 #
@@ -60,7 +63,6 @@ class PluginInterface(plugin.ItemPlugin):
                          ((util.totalspace(item.dir) /1024) /1024))
             return  [ ( self.dud, diskfree) ]
         else:
-            print item.type
             return []
 
 
