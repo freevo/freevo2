@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/01/02 14:29:44  dischi
+# add border to font.h
+#
 # Revision 1.24  2004/01/01 17:41:05  dischi
 # add border support for Font
 #
@@ -818,7 +821,9 @@ class Font(XML_data):
         if self.shadow.visible:
             if color.has_key(self.shadow.color):
                 self.shadow.color = color[self.shadow.color]
-            self.h += self.shadow.y
+                self.h += (self.size / 10) * 2
+            else:
+                self.h += self.shadow.y
         self.height = self.h
         
 
