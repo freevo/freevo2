@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.57  2003/07/04 00:46:48  outlyer
+# I think Dischi left a debug line in, I only commented it out in case it's
+# for something else.
+#
 # Revision 1.56  2003/07/03 23:07:51  dischi
 # convert 8 bit images (e.g. gif) to rgb, pygame cannot handle 8 bit
 #
@@ -1782,7 +1786,7 @@ class OSD:
             elif align_h == 'center':
                 x0 = x + int((width-w)/2)
             else:
-                print 'what align_h is that: %s' % align_h
+                #print 'what align_h is that: %s' % align_h
                 x0 = x
 
             if layer != '':
