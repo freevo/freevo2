@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/12/03 21:50:44  dischi
+# rework of the loading/selecting
+# o all objects that need a skin need to register what they areas they need
+# o remove all 'player' and 'tv' stuff to make it more generic
+# o renamed some skin function names
+#
 # Revision 1.18  2003/11/28 20:08:58  dischi
 # renamed some config variables
 #
@@ -828,34 +834,26 @@ class XML_font(XML_data):
 # ======================================================================
 
 
-class XML_player:
+class AreaSet:
     """
-    player tag for the audio play skin
+    A tag with different area pointer in it, e.g. used for <player>
     """
     def __init__(self):
-        self.content = ( 'screen', 'title', 'subtitle', 'view', 'info' )
-        for c in self.content:
-            setattr(self, c, XML_area(c))
-
+        self.areas = {}
 
     def parse(self, node, scale, current_dir):
         for subnode in node.children:
-            for c in self.content:
-                if subnode.name == c:
-                    eval('self.%s.parse(subnode, scale, current_dir)' % c)
+            if not self.areas.has_key(subnode.name):
+                self.areas[subnode.name] = XML_area(subnode.name)
+                self.areas[subnode.name].visible = True
+            self.areas[subnode.name].parse(subnode, scale, current_dir)
 
     def prepare(self, layout):
-        for c in self.content:
-            eval('self.%s.prepare(layout)' % c)
+        for c in self.areas:
+            self.areas[c].prepare(layout)
 
+    
 # ======================================================================
-
-
-class XML_tv(XML_menu):
-    """
-    tv tag for the tv menu
-    """
-    pass
 
 
 class XMLSkin:
@@ -871,8 +869,7 @@ class XMLSkin:
         self._menuset = {}
         self._menu = {}
         self._popup = ''
-        self._player = XML_player()
-        self._tv = XML_tv()
+        self._sets = {}
         self._mainmenu = XML_mainmenu()
         self.skin_directories = []
         self.icon_dir = ""
@@ -886,7 +883,7 @@ class XMLSkin:
             if node.name == u'main':
                 self._mainmenu.parse(node, scale, c_dir)
 
-            if node.name == u'menu':
+            elif node.name == u'menu':
                 type = attr_str(node, 'type', 'default')
 
                 if type == 'all':
@@ -899,7 +896,7 @@ class XMLSkin:
                 self._menu[type].parse(node, scale, c_dir)
 
 
-            if node.name == u'menuset':
+            elif node.name == u'menuset':
                 label   = attr_str(node, 'label', '')
                 inherit = attr_str(node, 'inherits', '')
                 if inherit:
@@ -909,7 +906,7 @@ class XMLSkin:
                 self._menuset[label].parse(node, scale, c_dir)
 
 
-            if node.name == u'layout':
+            elif node.name == u'layout':
                 label = attr_str(node, 'label', '')
                 if label:
                     if not self._layout.has_key(label):
@@ -917,54 +914,54 @@ class XMLSkin:
                     self._layout[label].parse(node, scale, c_dir)
                         
 
-            if node.name == u'font':
+            elif node.name == u'font':
                 label = attr_str(node, 'label', '')
                 if label:
                     if not self._font.has_key(label):
                         self._font[label] = XML_font(label)
                     self._font[label].parse(node, scale, c_dir)
 
-            if node.name == u'color':
+            elif node.name == u'color':
                 label = attr_str(node, 'label', '')
                 if label:
                     value = attr_col(node, 'value', '')
                     self._color[label] = value
                         
-            if node.name == u'image':
+            elif node.name == u'image':
                 label = attr_str(node, 'label', '')
                 if label:
                     value = attr_col(node, 'filename', '')
                     self._images[label] = value
                         
-            if node.name == u'iconset':
+            elif node.name == u'iconset':
                 self.icon_dir = attr_str(node, 'theme', self.icon_dir)
 
-            if node.name == u'popup':
+            elif node.name == u'popup':
                 self._popup = attr_str(node, 'layout', self._popup)
 
-            if node.name == u'player':
-                self._player.parse(node, scale, c_dir)
-
-            if node.name == u'tv':
-                self._tv = XML_tv()
-                self._tv.parse(node, scale, c_dir)
-
-            if node.name == u'setvar':
+            elif node.name == u'setvar':
                 for v in self.all_variables:
                     if node.attrs[('', 'name')].upper() == v.upper():
                         try:
                             setattr(self, v, int(node.attrs[('', 'val')]))
                         except ValueError:
                             setattr(self, v, node.attrs[('', 'val')])
-                
+
+            else:
+                if node.children and node.children[0].name == 'style':
+                    self._sets[node.name] = XML_menu()
+                elif not self._sets.has_key(node.name):
+                    self._sets[node.name] = AreaSet()
+                self._sets[node.name].parse(node, scale, c_dir)
+
+
     def prepare(self):
         self.prepared = TRUE
-        self.menu   = copy.deepcopy(self._menu)
-        self.tv     = copy.deepcopy(self._tv)
-        self.player = copy.deepcopy(self._player)
+        self.menu     = copy.deepcopy(self._menu)
+        self.sets     = copy.deepcopy(self._sets)
         
-        self.font   = copy.deepcopy(self._font)
-        layout      = copy.deepcopy(self._layout)
+        self.font     = copy.deepcopy(self._font)
+        layout        = copy.deepcopy(self._layout)
 
         if not os.path.isdir(self.icon_dir):
             self.icon_dir = os.path.join(config.ICON_DIR, 'themes', self.icon_dir)
@@ -987,15 +984,19 @@ class XMLSkin:
                                                                self._images)
                         
                 
-        self.player.prepare(layout)
-        self.tv.prepare(self._menuset, layout)
-        # prepare listing area images
-        for s in self.tv.style:
-            for i in range(2):
-                if s[i] and hasattr(s[i], 'listing'):
-                    for image in s[i].listing.images:
-                        s[i].listing.images[image].prepare(None, search_dirs,
-                                                           self._images)
+        for s in self.sets:
+            if isinstance(self.sets[s], AreaSet):
+                # prepare an areaset
+                self.sets[s].prepare(layout)
+            else:
+                # prepare a menu
+                self.sets[s].prepare(self._menuset, layout)
+                for s in self.sets[s].style:
+                    for i in range(2):
+                        if s[i] and hasattr(s[i], 'listing'):
+                            for image in s[i].listing.images:
+                                s[i].listing.images[image].prepare(None, search_dirs,
+                                                                   self._images)
 
         self.popup = layout[self._popup]
         
@@ -1031,15 +1032,14 @@ class XMLSkin:
 
         if include:
             if clear:
-                self._layout = {}
-                self._font = {}
-                self._color = {}
-                self._images = {}
+                self._layout  = {}
+                self._font    = {}
+                self._color   = {}
+                self._images  = {}
                 self._menuset = {}
-                self._menu = {}
-                self._popup = ''
-                self._player = XML_player()
-                self._tv = XML_tv()
+                self._menu    = {}
+                self._popup   = ''
+                self._sets    = {}
                 self._mainmenu = XML_mainmenu()
                 self.skin_directories = []
             self.load(include, copy_content, prepare = FALSE)

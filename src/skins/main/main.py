@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.22  2003/12/03 21:50:44  dischi
+# rework of the loading/selecting
+# o all objects that need a skin need to register what they areas they need
+# o remove all 'player' and 'tv' stuff to make it more generic
+# o renamed some skin function names
+#
 # Revision 1.21  2003/11/29 11:27:41  dischi
 # move objectcache to util
 #
@@ -23,30 +29,6 @@
 #
 # Revision 1.17  2003/10/31 17:00:20  dischi
 # splashscreen for bsd
-#
-# Revision 1.16  2003/10/14 17:57:32  dischi
-# more debug
-#
-# Revision 1.15  2003/10/12 11:01:20  dischi
-# Don't show black screen between selecting and playing an audio file
-#
-# Revision 1.14  2003/09/24 18:13:44  outlyer
-# Fix hex constant (endian independent as per Python >= 2.3 requirement)
-#
-# Revision 1.13  2003/09/23 13:42:01  outlyer
-# Removed more chatter.
-#
-# Revision 1.12  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.11  2003/09/14 11:12:00  dischi
-# add a function to get fonts from the skin settings
-#
-# Revision 1.10  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.9  2003/09/07 16:02:11  dischi
-# fix hiding for idlebar
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -71,21 +53,17 @@
 #endif
 
 
-
-# Configuration file. Determines where to look for AVI/MP3 files, etc
-# Logging is initialized here, so it should be imported first
-import config
-
 import sys, os, copy
-
-# Various utilities
-import util
-
-# The OSD class, used to communicate with the OSD daemon
-import osd
+import stat
 import pygame
 
-import stat
+import config
+import util
+import osd
+import plugin
+
+from area import Skin_Area, Screen
+from gui  import GUIObject
 
 # XML parser for skin informations
 sys.path.append('skins/main1')
@@ -95,14 +73,6 @@ import xml_skin
 # Create the OSD object
 osd = osd.get_singleton()
 
-from area import Skin_Area, Screen
-
-from listing_area import Listing_Area
-from tvlisting_area import TVListing_Area
-from view_area import View_Area
-from info_area import Info_Area
-
-import plugin
 
 class Screen_Area(Skin_Area):
     """
@@ -148,7 +118,7 @@ class Title_Area(Skin_Area):
         menu      = self.menu
         layout    = self.layout
         area      = self.area_val
-        content   = self.calc_geometry(layout.content, copy_object=TRUE)
+        content   = self.calc_geometry(layout.content, copy_object=True)
 
         text = ''
         try:
@@ -210,7 +180,7 @@ class Plugin_Area(Skin_Area):
         """
         this area needs never a content update
         """
-        return TRUE
+        return True
 
     def update_content(self):
         """
@@ -219,13 +189,8 @@ class Plugin_Area(Skin_Area):
         if self.plugins == None:
             self.plugins = plugin.get('daemon_draw')
 
-        if self.widget_type == 'player':
-            object = self.infoitem
-        else:
-            object = self.menuw
-            
         for p in self.plugins:
-            p.draw((self.widget_type, object), self)
+            p.draw((self.widget_type, self.menuw), self)
 
 
 
@@ -292,7 +257,7 @@ class BlankScreen(Skin_Area):
 
     def init_vars(self, settings, display_type, widget_type):
         self.area_val = xml_skin.XML_area(self.area_name)
-        self.area_val.visible = TRUE
+        self.area_val.visible = True
         self.area_val.r = (0, 0, osd.width, osd.height)
         self.layout = 1
         return 1
@@ -316,7 +281,7 @@ class BlankScreen(Skin_Area):
         self.bg. The class inheriting from this may override self.bg
         later to add something to it.
         """
-        self.skin_engine.draw((self, self))
+        self.skin_engine.draw(('', self))
 
         
 
@@ -356,7 +321,7 @@ class Splashscreen(BlankScreen):
                                  osd.getfont(config.OSD_DEFAULT_FONTNAME, 20),
                                  fgcolor=0xffffff, align_h='center',
                                  align_v='bottom', layer=self.bg.image)
-            self.initialized = TRUE
+            self.initialized = True
 
         pos = 0
         if self.pos:
@@ -389,34 +354,33 @@ class Skin:
         pass
     
     def __init__(self):
+        """
+        init the skin engine
+        """
         global skin_engine
         skin_engine = self
         
-        self.display_style = config.SKIN_START_LAYOUT
-        self.tv_display_style = 0
-        self.force_redraw = TRUE
-        self.last_draw = None, None
-        self.screen = Screen()
-        self.xml_cache = util.objectcache.ObjectCache(3, desc='xmlskin')
-
-        self.normal_areas = []
-        self.tv_areas = []
-
+        self.display_style = { 'menu' : config.SKIN_START_LAYOUT }
+        self.force_redraw  = True
+        self.last_draw     = None, None
+        self.screen        = Screen()
+        self.xml_cache     = util.objectcache.ObjectCache(3, desc='xmlskin')
+        self.areas         = {}
         self.freevo_active = False
-        
-        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info', 'plugin'):
-            o = eval('%s%s_Area(self, self.screen)' % (a[0].upper(), a[1:]))
-            self.normal_areas.append(o)
-            if a == 'listing':
-                self.listing_area = o
-                o = TVListing_Area(self, self.screen)
-                self.tvlisting = o
-            self.tv_areas.append(o)
-            if a == 'plugin':
-                self.plugin_area = o
-                
-        _debug_('Skin: Loading XML file %s' % config.SKIN_XML_FILE,2)
-    
+
+        # load default areas
+        from listing_area   import Listing_Area
+        from tvlisting_area import TVListing_Area
+        from view_area      import View_Area
+        from info_area      import Info_Area
+        for a in ( 'screen', 'title', 'subtitle', 'view', 'listing', 'info'):
+            self.areas[a] = eval('%s%s_Area(self, self.screen)' % \
+                                 (a[0].upper(), a[1:]))
+        self.areas['tvlisting'] = TVListing_Area(self, self.screen)
+        self.plugin_area = Plugin_Area(self, self.screen)
+
+
+        # load the fxd file
         self.settings = xml_skin.XMLSkin()
         
         # try to find the skin xml file
@@ -431,8 +395,18 @@ class Skin:
                 self.settings.load(local_skin)
                 break
 
-    
-    def LoadSettings(self, dir, copy_content = 1):
+
+    def register(self, type, areas):
+        """
+        register a new type objects to the skin
+        """
+        setattr(self, '%s_areas' % type, [])
+        for a in areas:
+            getattr(self, '%s_areas' % type).append(self.areas[a])
+        getattr(self, '%s_areas' % type).append(self.plugin_area)
+        
+            
+    def load(self, dir, copy_content = 1):
         """
         return an object with new skin settings
         """
@@ -449,7 +423,7 @@ class Skin:
             settings = self.xml_cache[cname]
             if not settings:
                 settings = copy.copy(self.settings)
-                if not settings.load(file, copy_content, clear=TRUE):
+                if not settings.load(file, copy_content, clear=True):
                     return None
                 self.xml_cache[cname] = settings
         else:
@@ -457,7 +431,7 @@ class Skin:
             settings = self.xml_cache[cname]
             if not settings:
                 settings = xml_skin.XMLSkin()
-                if not settings.load(file, copy_content, clear=TRUE):
+                if not settings.load(file, copy_content, clear=True):
                     return None
                 self.xml_cache[cname] = settings
 
@@ -465,16 +439,12 @@ class Skin:
     
 
 
-    def GetSkins(self):
+    def get_skins(self):
         """
         return a list of all possible skins with name, image and filename
         """
         ret = []
         skin_files = util.match_files(os.path.join(config.SKIN_DIR, 'main'), ['fxd'])
-        # for d in util.getdirnames('skins/xml'):
-        #     skin = os.path.join(d, os.path.basename(d)+'.fxd')
-        #     if os.path.isfile(skin):
-        #         skin_files += [ skin ]
 
         # image is not usable stand alone
         skin_files.remove(os.path.join(config.SKIN_DIR, 'main/image.fxd'))
@@ -491,14 +461,15 @@ class Skin:
         return ret
     
         
-    def ToggleDisplayStyle(self, menu):
+    def toggle_display_style(self, menu):
         """
         Toggle display style
         """
-
-        if menu == 'tv':
-            self.tv_display_style = (self.tv_display_style + 1) % \
-                                    len(self.settings.tv.style)
+        if isinstance(menu, str):
+            if not self.display_style.has_key(menu):
+                self.display_style[menu] = 0
+            self.display_style[menu] = (self.display_style[menu] + 1) % \
+                                       len(self.settings.sets[menu].style)
             return 1
             
         if menu.force_skin_layout != -1:
@@ -515,33 +486,36 @@ class Skin:
         else:
             area = settings.menu['default']
 
-        if self.display_style >=  len(area.style):
-            self.display_style = 0
-        self.display_style = (self.display_style + 1) % len(area.style)
+        if self.display_style['menu'] >=  len(area.style):
+            self.display_style['menu'] = 0
+        self.display_style['menu'] = (self.display_style['menu'] + 1) % len(area.style)
         return 1
 
 
-    def GetDisplayStyle(self, menu=None):
+    def get_display_style(self, menu=None):
         """
         return current display style
         """
-        if menu == 'tv':
-            return self.tv_display_style
+        if isinstance(menu, str):
+            if not self.display_style.has_key(menu):
+                self.display_style[menu] = 0
+            return self.display_style[menu]
+        
         if menu:            
             if menu.force_skin_layout != -1:
                 return menu.force_skin_layout
-        return self.display_style
+        return self.display_style['menu']
 
 
-    def FindCurrentMenu(self, widget):
+    def __find_current_menu__(self, widget):
         if not widget:
             return None
         if not hasattr(widget, 'menustack'):
-            return self.FindCurrentMenu(widget.parent)
+            return self.__find_current_menu__(widget.parent)
         return widget.menustack[-1]
         
 
-    def GetPopupBoxStyle(self, widget=None):
+    def get_popupbox_style(self, widget=None):
         """
         This function returns style information for drawing a popup box.
 
@@ -562,7 +536,7 @@ class Skin:
         shadow attributes: visible, color, x, y
         """
 
-        menu = self.FindCurrentMenu(widget)
+        menu = self.__find_current_menu__(widget)
 
         if menu and menu.skin_settings:
             settings = menu.skin_settings
@@ -596,7 +570,7 @@ class Skin:
 
         
 
-    def GetFont(self, name):
+    def get_font(self, name):
         """
         Get the skin font object 'name'. Return the default object if
         a font with this name doesn't exists.
@@ -613,13 +587,10 @@ class Skin:
         (cols, rows) for normal menu and
         rows         for the tv menu
         """
-        if not object:
-            osd.drawstring(_('INTERNAL ERROR, NO MENU!'), 100, osd.height/2)
-            return
-        
         if type == 'tv':
-            info = self.tvlisting.get_items_geometry(self.settings, object,
-                                                     self.GetDisplayStyle('tv'))
+            info = self.areas['tvlisting']
+            info = info.get_items_geometry(self.settings, object,
+                                           self.get_display_style('tv'))
             return (info[4], info[-1])
 
         if object.skin_settings:
@@ -631,8 +602,9 @@ class Skin:
         if type == 'menu':
             menu = object
 
-        rows, cols = self.listing_area.get_items_geometry(settings, object,
-                                                          self.GetDisplayStyle( menu ))[:2]
+        info = self.areas['listing']
+        rows, cols = info.get_items_geometry(settings, object,
+                                             self.get_display_style( menu ))[:2]
         return (cols, rows)
 
 
@@ -642,7 +614,7 @@ class Skin:
         clean the screen
         """
         _debug_('clear: %s' % osd_update, 2)
-        self.force_redraw = TRUE
+        self.force_redraw = True
         osd.clearscreen(osd.COL_BLACK)
         if osd_update:
             osd.update()
@@ -664,62 +636,47 @@ class Skin:
         the audio player
         """
 
-        _debug_('draw', 2)
         if not self.settings.prepared:
             self.settings.prepare()
+
+        if isinstance(object, GUIObject):
+            # handling for gui objects: are they visible? what about children?
+            if not object.visible:
+                return
+
+            draw_allowed = True
+            for child in object.children:
+                draw_allowed = draw_allowed and not child.visible
+
+            if not draw_allowed:
+                self.force_redraw = True
+                return
+
+        settings = self.settings
             
-        menu = None
         if type == 'menu':
             if not self.freevo_active:
                 self.freevo_active = True
                 self.settings.prepare()
-                
-            menuw = object
-            
-            if not menuw.visible:
-                return
-
-            draw_allowed = TRUE
-            for child in menuw.children:
-                draw_allowed = draw_allowed and not child.visible
-
-            if not draw_allowed:
-                self.force_redraw = TRUE
-                return
-
-            menu = menuw.menustack[-1]
-
-            if not menu:
-                osd.drawstring(_('INTERNAL ERROR, NO MENU!'), 100, osd.height/2)
-                return
-
+            menu = object.menustack[-1]
             if menu.skin_settings:
                 settings = menu.skin_settings
-            else:
-                settings = self.settings
-
-            # FIXME
-            if len(menuw.menustack) == 1:
+            # XXX FIXME
+            if len(object.menustack) == 1:
                 menu.item_types = 'main'
-
+            style = self.get_display_style(menu)
 
         else:
-            settings = self.settings
+            try:
+                if not object.visible:
+                    return
+            except AttributeError:
+                pass
+            style = self.get_display_style(type)
 
-        if type == 'tv':
-            if not object.visible:
-                return
-            all_areas = self.tv_areas
-            style = self.GetDisplayStyle('tv')
-        elif type == 'player':
-            all_areas = self.normal_areas
-            style = 0
-        else:
-            all_areas = self.normal_areas
-            style = self.GetDisplayStyle(menu)
 
         if self.last_draw[0] != type:
-            self.force_redraw = TRUE
+            self.force_redraw = True
 
         self.last_draw = type, object
 
@@ -730,10 +687,14 @@ class Skin:
             if object.allow_plugins:
                 self.plugin_area.draw(settings, object, style, type, self.force_redraw)
         else:
+            all_areas = getattr(self, '%s_areas' % type)
             for a in all_areas:
                 a.draw(settings, object, style, type, self.force_redraw)
             
         self.screen.show(self.force_redraw)
 
         osd.update()
-        self.force_redraw = FALSE
+        self.force_redraw = False
+
+
+

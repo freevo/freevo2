@@ -27,6 +27,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/12/03 21:50:44  dischi
+# rework of the loading/selecting
+# o all objects that need a skin need to register what they areas they need
+# o remove all 'player' and 'tv' stuff to make it more generic
+# o renamed some skin function names
+#
 # Revision 1.15  2003/11/29 11:27:41  dischi
 # move objectcache to util
 #
@@ -41,32 +47,6 @@
 #
 # Revision 1.11  2003/10/17 18:51:33  dischi
 # check for default with description area
-#
-# Revision 1.10  2003/10/14 17:57:32  dischi
-# more debug
-#
-# Revision 1.9  2003/10/11 12:34:36  dischi
-# Add SKIN_FORCE_TEXTVIEW_STYLE and SKIN_MEDIAMENU_FORCE_TEXTVIEW to config
-# to add more control when to switch to text view.
-#
-# Revision 1.8  2003/09/14 20:09:37  dischi
-# removed some TRUE=1 and FALSE=0 add changed some debugs to _debug_
-#
-# Revision 1.7  2003/09/13 10:08:23  dischi
-# i18n support
-#
-# Revision 1.6  2003/09/07 15:43:06  dischi
-# tv guide can now also have different styles
-#
-# Revision 1.5  2003/08/24 16:36:25  dischi
-# add support for y=max-... in listing area arrows
-#
-# Revision 1.4  2003/08/24 10:04:05  dischi
-# added font_h as variable for y and height settings
-#
-# Revision 1.3  2003/08/23 12:51:42  dischi
-# removed some old CVS log messages
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -319,17 +299,16 @@ class Skin_Area:
             item_type  = self.menu.item_types
             self.scan_for_text_view(self.menu)
 
-        elif widget_type == 'tv':
-            self.menuw = obj
-            self.menu  = obj
-            item_type = None
-            self.viewitem = obj.selected
-            self.infoitem = obj.selected
-
         else:
-            item_type = None
-            self.viewitem = obj
-            self.infoitem = obj
+            self.menuw    = obj
+            self.menu     = obj
+            item_type     = None
+            if hasattr(obj, 'selected'):
+                self.viewitem = obj.selected
+                self.infoitem = obj.selected
+            else:
+                self.viewitem = obj
+                self.infoitem = obj
 
         self.redraw = force_redraw
         
@@ -625,15 +604,7 @@ class Skin_Area:
         redraw = self.redraw
         self.settings = settings
 
-        if widget_type == 'player':
-            area = settings.player
-        elif widget_type == 'tv':
-            try:
-                area = settings.tv.style[self.display_style][1]
-            except:
-                area = settings.tv.style[0][1]
-
-        else:
+        if widget_type == 'menu':
             # get the correct <menu>
             try:
                 area = settings.menu[display_type]
@@ -671,6 +642,13 @@ class Skin_Area:
                 print 'want to fall back, but no text view defined'
                 area = area[0]
 
+        else:
+            area = settings.sets[widget_type]
+            if hasattr(area, 'style'):
+                try:
+                    area = area.style[self.display_style][1]
+                except:
+                    area = area.style[0][1]
 
 
         if self.area_name == 'plugin':
@@ -683,9 +661,12 @@ class Skin_Area:
             try:
                 area = getattr(area, self.area_name)
             except AttributeError:
-                area = xml_skin.XML_area(self.area_name)
-                area.visible = FALSE
-            
+                try:
+                    area = area.areas[self.area_name]
+                except (KeyError, AttributeError):
+                    print 'no skin information for %s:%s' % (widget_type, self.area_name)
+                    area = xml_skin.XML_area(self.area_name)
+                    area.visible = FALSE
 
         if (not self.area_val) or area != self.area_val:
             self.area_val = area
