@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/02/21 19:37:01  dischi
+# only draw border when needed
+#
 # Revision 1.18  2004/02/18 21:52:04  dischi
 # Major GUI update:
 # o started converting left/right to x/y
@@ -148,9 +151,14 @@ class Button(Container):
             rect = self.content_layout.types['button'].rectangle
 
         self.surface = self.get_surface()
-        self.osd.drawroundbox(0, 0, self.width, self.height,
-                              rect.bgcolor, rect.size, rect.color,
-                              rect.radius, self.surface)
+        if not self.border:
+            self.osd.drawroundbox(0, 0, self.width, self.height,
+                                  rect.bgcolor, rect.size, rect.color,
+                                  rect.radius, self.surface)
+        else:
+            self.osd.drawroundbox(0, 0, self.width, self.height,
+                                  rect.bgcolor, 0, rect.color,
+                                  0, self.surface)
         Container._draw(self)
 
     
