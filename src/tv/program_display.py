@@ -9,6 +9,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/06/04 12:10:38  rshortt
+# ScheduledRecordings needs to be bigger until i fix a known bug.
+#
 # Revision 1.3  2003/06/03 01:55:19  rshortt
 # More realistic height's.
 #
@@ -193,7 +196,7 @@ class ScheduledRecordings(PopupBox):
 
         
     def __init__(self, parent='osd', text=None, handler=None, 
-                 left=None, top=None, width=600, height=360, bg_color=None, 
+                 left=None, top=None, width=600, height=400, bg_color=None, 
                  fg_color=None, icon=None, border=None, bd_color=None, 
                  bd_width=None):
 
