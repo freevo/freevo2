@@ -24,7 +24,7 @@ static PyObject *epeg_jpeg_thumbnail(PyObject *self, PyObject *args) {
   if (w > dest_w || h > dest_h) {
     if (w / dest_w > h / dest_h)
       dest_h = (h * dest_w) / w;
-    else if (w / dest_w < h / dest_h)
+    else
       dest_w = (w * dest_h) / h;
   } else {
     dest_w = w;
