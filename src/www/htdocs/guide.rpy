@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2004/08/08 19:07:55  rshortt
+# Use tv_util to cache the guide.
+#
 # Revision 1.25  2004/03/12 03:05:50  outlyer
 # Use the episode title where available.
 #
@@ -87,7 +90,6 @@ from twisted.web.woven import page
 import util.tv_util as tv_util
 import util
 import config 
-import tv.epg_xmltv 
 import tv.record_client as ri
 from twisted.web import static
 
@@ -188,7 +190,7 @@ class GuideResource(FreevoResource):
         if mfrprevguide < now2:
             mfrprevguide = 0
 
-        guide = tv.epg_xmltv.get_guide()
+        guide = tv_util.get_guide()
         (got_schedule, schedule) = ri.getScheduledRecordings()
         if got_schedule:
             schedule = schedule.getProgramList()
