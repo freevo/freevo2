@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.42  2003/04/21 12:59:35  dischi
+# better plugin event handling
+#
 # Revision 1.41  2003/04/20 12:43:32  dischi
 # make the rc events global in rc.py to avoid get_singleton. There is now
 # a function app() to get/set the app. Also the events should be passed to
@@ -455,6 +458,7 @@ class MenuWidget(GUIObject):
             curr_selected = max(curr_selected-self.cols, 0)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
+            return
 
 
         elif event == rc.DOWN:
@@ -475,6 +479,7 @@ class MenuWidget(GUIObject):
             curr_selected = min(curr_selected+self.cols, len(self.all_items)-1)
             menu.selected = self.all_items[curr_selected]
             self.refresh()
+            return
 
 
         elif event == rc.LEFT or event == rc.CHUP:
@@ -507,7 +512,7 @@ class MenuWidget(GUIObject):
                     curr_selected = 0
                     menu.selected = self.all_items[curr_selected]
                     self.refresh()
-
+            return
 
         elif event == rc.RIGHT or event == rc.CHDOWN:
             # Do nothing for an empty file list
@@ -544,6 +549,7 @@ class MenuWidget(GUIObject):
                     curr_selected = bottom_index
                     menu.selected = self.all_items[curr_selected]
                     self.refresh()
+            return
 
 
         elif event == rc.SELECT or event == rc.PLAY:
@@ -560,6 +566,7 @@ class MenuWidget(GUIObject):
                 AlertBox(text='No action defined for this choice!').show()
             else:
                 action( menuw=self )
+            return
 
 
         elif event == rc.ENTER:
@@ -578,6 +585,7 @@ class MenuWidget(GUIObject):
 
             if len(actions) > 1:
                 self.make_submenu(menu.selected.name, actions, menu.selected)
+            return
             
 
         elif event == rc.DISPLAY and len(self.menustack) > 1:
@@ -585,21 +593,21 @@ class MenuWidget(GUIObject):
             if skin.ToggleDisplayStyle(menu):
                 self.rebuild_page()
                 self.refresh()
+                return
                 
 
         elif hasattr(menu.selected, 'eventhandler') and menu.selected.eventhandler:
             if menu.selected.eventhandler(event = event, menuw=self):
                 return
             
-        else:
-            if self.eventhandler_plugins == None:
-                self.eventhandler_plugins = plugin.get('daemon_eventhandler')
+        if self.eventhandler_plugins == None:
+            self.eventhandler_plugins = plugin.get('daemon_eventhandler')
 
-            for p in self.eventhandler_plugins:
-                if p.eventhandler(event=event, menuw=self):
-                    return
+        for p in self.eventhandler_plugins:
+            if p.eventhandler(event=event, menuw=self):
+                return
 
-            print 'no eventhandler for event %s' % event
+        print 'no eventhandler for event %s' % event
         return 0
 
 
