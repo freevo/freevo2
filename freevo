@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.121  2004/10/09 16:26:54  dischi
+# remove unsupported parameter -trace and -doc
+#
 # Revision 1.120  2004/09/27 18:57:49  dischi
 # add make hint on startup
 #
@@ -121,8 +124,6 @@ def show_help():
 freevo [ script | options]
 options:
   -fs            start freevo in a new x session in fullscreen
-  -doc           create api documentation (for developers)
-  -trace         activate full trace (usefull for debugging)
   setup          run freevo setup to scan your environment
   start          start freevo as daemon in background
   stop           stop the current freevo process
@@ -465,7 +466,7 @@ elif arg and name == 'freevo' and not arg.startswith('-'):
             sys.argv = [ sys.argv[0] ] + sys.argv[2:]
 
 
-elif arg and name == 'freevo' and not (arg in ['-force-fs', '-trace', '-doc']):
+elif arg and name == 'freevo' and not (arg in ['-force-fs',]):
     # ok, don't know about that arg, freevo should be started, but
     # it's also no freevo arg
     print 'unknown command line option: %s' % sys.argv[1:]
