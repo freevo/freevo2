@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2004/01/04 11:16:53  dischi
+# do not override image with nothing
+#
 # Revision 1.10  2003/12/30 15:36:01  dischi
 # remove unneeded copy function, small bugfix
 #
@@ -248,9 +251,10 @@ def parse_movie(fxd, node):
 
     if not item.files:
         item.files = FileInformation()
-    item.files.files    = files
-    item.files.fxd_file = fxd_file
-    item.files.image    = image
+    item.files.files     = files
+    item.files.fxd_file  = fxd_file
+    if image:
+        item.files.image = image
     
     # remove them from the filelist (if given)
     duplicates = fxd.getattr(None, 'duplicate_check', [])
