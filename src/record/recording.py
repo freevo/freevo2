@@ -83,7 +83,7 @@ class Recording:
         self.stop_padding  = config.TV_RECORD_STOP_PADDING
         for i in info:
             if i == 'subtitle':
-                self.subtitle = info[i]
+                self.subtitle = Unicode(info[i])
             elif i == 'url':
                 self.url = String(info[i])
             elif i == 'start-padding':
@@ -91,7 +91,7 @@ class Recording:
             elif i == 'stop-padding':
                 self.stop_padding = int(info[i])
             else:
-                self.info[i] = info[i]
+                self.info[i] = Unicode(info[i])
         self.recorder = None
 
 
@@ -147,6 +147,7 @@ class Recording:
             # missed
             self.status = 'missed'
 
+        
     def __str__(self):
         """
         A simple string representation for a recording for debugging in the
@@ -161,7 +162,7 @@ class Recording:
             name = name[:20] + u'...'
         name = u'"' + name + u'"'
         status = self.status
-        if status == 'scheduled':
+        if status == 'scheduled' and self.recorder:
             status = self.recorder[0].name
         return '%3d %10s %-25s %4d %s-%s %s' % \
                (self.id, String(channel), String(name),
@@ -188,7 +189,7 @@ class Recording:
         fxd.add(padding, node)
         info = fxdparser.XMLnode('info')
         for i in self.info:
-            subnode = fxdparser.XMLnode(i, [], self.info[i] )
+            subnode = fxdparser.XMLnode(i, [], Unicode(self.info[i]) )
             fxd.add(subnode, info)
         fxd.add(info, node)
         return node
