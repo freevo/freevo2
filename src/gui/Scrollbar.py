@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/03/23 23:18:11  rshortt
+# Uses skin properties now.
+#
 # Revision 1.3  2003/03/09 21:37:06  rshortt
 # Improved drawing.  draw() should now be called instead of _draw(). draw()
 # will check to see if the object is visible as well as replace its bg_surface
@@ -71,33 +74,53 @@ class Scrollbar(GUIObject):
 
     
     def __init__(self, parent, orientation, thickness=10, left=None, top=None,
-                 width=None, height=None, bg_color=None, fg_color=None):
-
-        GUIObject.__init__(self)
+                 width=None, height=None, bg_color=None, fg_color=None,
+                 border=None, bd_color=None, bd_width=1):
 
         if orientation != "vertical" and orientation != "horizontal":
             raise TypeError, 'orientation'
         
-        self.orientation    = orientation
-        self.width          = width
-        self.height         = height
-        self.left           = left
-        self.top            = top
-        self.bg_color       = bg_color
-        self.fg_color       = fg_color
-        self.thickness      = thickness
+        self.orientation = orientation
+        self.bg_color    = bg_color
+        self.fg_color    = fg_color
+        self.thickness   = thickness
+        self.border      = border
+        self.bd_color    = bd_color
+        self.bd_width    = bd_width
 
-        # XXX: Place a call to the skin object here then set the defaults
-        #      acodringly. self.skin is set in the superclass.
+        self.skin = skin.get_singleton()
 
-        if not self.width:    self.width  = 25
-        if not self.height:   self.height = 25
-        if not self.left:     self.left   = -100
-        if not self.top:      self.top    = -100
-        if not self.bg_color: self.bg_color = Color(self.osd.default_bg_color)
-        if not self.fg_color: self.fg_color = Color(self.osd.default_fg_color)
- 
-        self.fg_color = Color((0,0,0,255))
+        (BLAH, BLAH, BLAH, BLAH,
+         button_default, BLAH) = \
+         self.skin.GetPopupBoxStyle()
+
+        if not self.bg_color:
+            if button_default.rectangle.bgcolor:
+                self.bg_color = Color(button_default.rectangle.bgcolor)
+            else:
+                self.bg_color = Color(self.osd.default_bg_color)
+
+        if not self.fg_color:
+            if button_default.font.color:
+                self.fg_color = Color(button_default.font.color)
+            else:
+                self.fg_color = Color(self.osd.default_fg_color)
+
+
+        GUIObject.__init__(self, left, top, width, height, 
+                           self.bg_color, self.fg_color)
+
+
+        if not self.bd_color: 
+            if button_default.rectangle.color:
+                self.bd_color = Color(button_default.rectangle.color)
+            else:
+                self.bd_color = Color(self.osd.default_fg_color)
+
+        if not self.border:   
+            self.border = Border(self, Border.BORDER_FLAT,
+                                 self.bd_color, self.bd_width)
+
 
     def set_handle_position(self, pos):
         self.handle_position = pos
@@ -154,6 +177,11 @@ class Scrollbar(GUIObject):
             self.left = self.parent.left
             self.top = self.parent.top + self.parent.height - self.height
 
+        if isinstance(self.border, Border):
+            self.border.set_position(self.left, self.top)
+            self.border.width = self.width
+            self.border.height = self.height
+
 
     def _draw(self):
         """
@@ -181,6 +209,8 @@ class Scrollbar(GUIObject):
         # bg_box.blit(fg_box, self.get_handle_coords())
         self.osd.screen.blit(bg_box, self.get_position())
         self.osd.screen.blit(fg_box, self.get_handle_coords())
+
+        if self.border: self.border.draw()
 
     
 
