@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/03/08 19:15:14  dischi
+# fix popup input focus
+#
 # Revision 1.27  2004/02/25 17:44:30  dischi
 # add special event mapping for tvmenu
 #
@@ -274,9 +277,10 @@ class TVGuide(Item):
         
 
     def refresh(self):
-        rc.set_context('tvmenu')
         self.update_schedules(force=True)
-        self.menuw.refresh()
+        if not self.menuw.children:
+            rc.set_context('tvmenu')
+            self.menuw.refresh()
 
 
     def rebuild(self, start_time, stop_time, start_channel, selected):
