@@ -164,6 +164,12 @@
 	    <shadow visible="no"/>
 	  </label>
 	  
+	  <head bgcolor="0x88000066">
+	    <font name="bluehigh" size="18" color="0xffffff" align="left" 
+	      valign="center"/>
+	    <shadow visible="no"/>
+	  </head>
+
 	  <content>
 	    <font name="bluehigh" size="18" color="0x111111" align="left"/>
 	    <shadow visible="no"/>
