@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2004/05/12 18:56:36  dischi
+# add keys to move inside a zoom image in image viewer
+#
 # Revision 1.43  2004/03/05 04:01:37  rshortt
 # Make comment match example and fix typo.
 #
@@ -229,6 +232,7 @@ IMAGE_NO_ZOOM          = Event('IMAGE_NO_ZOOM')
 IMAGE_ROTATE           = Event('IMAGE_ROTATE')
 IMAGE_SAVE             = Event('IMAGE_SAVE')
 
+IMAGE_MOVE             = Event('IMAGE_MOVE')
 
 #
 # Games module
@@ -463,6 +467,31 @@ IMAGE_EVENTS = {
     'REC'       : IMAGE_SAVE,
     'UP'        : PLAYLIST_PREV,
     'DOWN'      : PLAYLIST_NEXT,
+    'CH+'       : PLAYLIST_PREV,
+    'CH-'       : PLAYLIST_NEXT
+    }
+
+IMAGE_ZOOM_EVENTS = {
+    'STOP'      : STOP,
+    'EXIT'      : STOP,
+    'PLAY'      : PLAY,
+    'PAUSE'     : PAUSE,
+    'LEFT'      : Event(IMAGE_MOVE, arg=(-10,  0)),
+    'RIGHT'     : Event(IMAGE_MOVE, arg=( 10,  0)),
+    'UP'        : Event(IMAGE_MOVE, arg=(  0,-10)),
+    'DOWN'      : Event(IMAGE_MOVE, arg=(  0, 10)),
+    '1'         : IMAGE_ZOOM_GRID1,
+    '2'         : IMAGE_ZOOM_GRID2,
+    '3'         : IMAGE_ZOOM_GRID3,
+    '4'         : IMAGE_ZOOM_GRID4,
+    '5'         : IMAGE_ZOOM_GRID5,
+    '6'         : IMAGE_ZOOM_GRID6,
+    '7'         : IMAGE_ZOOM_GRID7,
+    '8'         : IMAGE_ZOOM_GRID8,
+    '9'         : IMAGE_ZOOM_GRID9,
+    '0'         : IMAGE_NO_ZOOM,
+    'DISPLAY'   : TOGGLE_OSD,
+    'REC'       : IMAGE_SAVE,
     'CH+'       : PLAYLIST_PREV,
     'CH-'       : PLAYLIST_NEXT
     }

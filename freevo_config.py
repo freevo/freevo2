@@ -292,17 +292,18 @@ ENABLE_SHUTDOWN_SYS = 0  # Performs a whole system shutdown at SHUTDOWN!
 #
 # See src/event.py for a list of all possible events.
 EVENTS = {
-    'menu'    : MENU_EVENTS,
-    'tvmenu'  : TVMENU_EVENTS,
-    'input'   : INPUT_EVENTS,
-    'tv'      : TV_EVENTS,
-    'video'   : VIDEO_EVENTS,
-    'dvd'     : DVD_EVENTS,             # only used by xine
-    'vcd'     : VCD_EVENTS,             # only used by xine
-    'audio'   : AUDIO_EVENTS,
-    'games'   : GAMES_EVENTS,
-    'image'   : IMAGE_EVENTS,
-    'global'  : GLOBAL_EVENTS
+    'menu'       : MENU_EVENTS,
+    'tvmenu'     : TVMENU_EVENTS,
+    'input'      : INPUT_EVENTS,
+    'tv'         : TV_EVENTS,
+    'video'      : VIDEO_EVENTS,
+    'dvd'        : DVD_EVENTS,             # only used by xine
+    'vcd'        : VCD_EVENTS,             # only used by xine
+    'audio'      : AUDIO_EVENTS,
+    'games'      : GAMES_EVENTS,
+    'image'      : IMAGE_EVENTS,
+    'image_zoom' : IMAGE_ZOOM_EVENTS,
+    'global'     : GLOBAL_EVENTS
     }
 
 #

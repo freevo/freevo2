@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.48  2004/05/12 18:56:36  dischi
+# add keys to move inside a zoom image in image viewer
+#
 # Revision 1.47  2004/05/11 19:01:50  dischi
 # make sure we have a menu
 #
@@ -112,6 +115,11 @@ class ImageViewer(GUIObject):
 
         
     def view(self, item, zoom=0, rotation=0):
+        if zoom:
+            self.app_mode    = 'image_zoom'
+        else:
+            self.app_mode    = 'image'
+
         filename = item.filename
 
         self.fileitem = item
@@ -163,8 +171,11 @@ class ImageViewer(GUIObject):
                        4:(0,1), 5:(1,1), 6:(2,1),
                        7:(0,2), 8:(1,2), 9:(2,2) }
 
-            h, v = bb[zoom]
-
+            if isinstance(zoom, int):
+                h, v = bb[zoom]
+            else:
+                h, v = bb[zoom[0]]
+                
             # Bounding box center
             bbcx = ([1, 3, 5][h]) * width / 6
             bbcy = ([1, 3, 5][v]) * height / 6
@@ -228,6 +239,30 @@ class ImageViewer(GUIObject):
         
         last_image = self.last_image[1]
 
+
+        if not isinstance(zoom, int):
+            # change zoom based on rotation
+            if self.rotation == 90:  
+                zoom = zoom[0], -zoom[2], zoom[1]
+            if self.rotation == 180:  
+                zoom = zoom[0], -zoom[1], -zoom[2]
+            if self.rotation == 270:  
+                zoom = zoom[0], zoom[2], -zoom[1]
+
+            # don't move outside the image
+            if bbx + zoom[1] < 0:
+                zoom = zoom[0], -bbx, zoom[2]
+            if bbx + zoom[1] > width - bbw:
+                zoom = zoom[0], width - (bbw + bbx), zoom[2]
+            if bby + zoom[2] < 0:
+                zoom = zoom[0], zoom[1], -bby
+            if bby + zoom[2] > height - bbh:
+                zoom = zoom[0], zoom[1], height - (bbh + bby)
+
+            # change bbx
+            bbx += zoom[1]
+            bby += zoom[2]
+            
         if (last_image and self.last_image[0] != item and
             config.IMAGEVIEWER_BLEND_MODE != None):
             screen = self.osd.screen.convert()
@@ -274,6 +309,15 @@ class ImageViewer(GUIObject):
             item.parent.menu.selected = item
             item.menuw.force_page_rebuild = True
 
+        # save zoom, but revert the rotation mix up
+        if not isinstance(zoom, int) and self.rotation:
+            if self.rotation == 90:  
+                zoom = zoom[0], zoom[2], -zoom[1]
+            if self.rotation == 180:  
+                zoom = zoom[0], -zoom[1], -zoom[2]
+            if self.rotation == 270:  
+                zoom = zoom[0], -zoom[2], zoom[1]
+        self.zoom = zoom
         return None
 
 
@@ -297,7 +341,7 @@ class ImageViewer(GUIObject):
         #    self.alertbox.destroy()
         #    self.alertbox = None
         #    return True
-        
+
         if event == PAUSE or event == PLAY:
             if self.slideshow:
                 rc.post_event(Event(OSD_MESSAGE, arg=_('pause')))
@@ -356,6 +400,15 @@ class ImageViewer(GUIObject):
                 self.view(self.fileitem, zoom=0, rotation = self.rotation)
             return True                
 
+        elif event == IMAGE_MOVE:
+            coord = event.arg
+            if isinstance(self.zoom, int):
+                self.zoom = self.zoom, coord[0], coord[1]
+            else:
+                self.zoom = self.zoom[0], self.zoom[1] + coord[0], self.zoom[2] + coord[1]
+            self.view(self.fileitem, zoom=self.zoom, rotation = self.rotation)
+            return True
+        
         # save the image with the current rotation
         elif event == IMAGE_SAVE:
             if self.rotation and os.path.splitext(self.filename)[1] == ".jpg":
@@ -383,7 +436,8 @@ class ImageViewer(GUIObject):
 	    # Here we set up the tags that we want to put in the display
 	    # Using the following fields
             tags_check = [[_('Title')+': ',      'name'],
-                          [_('Description')+': ','description']
+                          [_('Description')+': ','description'],
+                          [_('Author')+': ',     'author']
                           ]
 
 
@@ -392,10 +446,10 @@ class ImageViewer(GUIObject):
            # This is where we add a caption.  Only if playlist is empty
 	   # create an array with Exif tags as above
 	   osdstring = []
-           tags_check = [ [_('Title')+': ',   'name'],
-                          [_('Date')+': ' ,   'date'],
-	                  ['W:',           'width'],
-			  ['H:',           'height'],
+           tags_check = [ [_('Title')+': ',    'name'],
+                          [_('Date')+': ' ,    'date'],
+	                  ['W:',               'width'],
+			  ['H:',               'height'],
 			  [_('Model')+': ',    'hardware'],
 			  [_('Software')+': ', 'software']
 			 ]
