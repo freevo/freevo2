@@ -26,6 +26,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/12/06 13:45:09  dischi
+# add <info> tag to a container
+#
 # Revision 1.5  2003/12/01 19:06:46  dischi
 # better handling of the MimetypePlugin
 #
@@ -196,7 +199,7 @@ class Container(item.Item):
         self.name     = fxd.getattr(node, 'title', 'no title')
         self.type     = fxd.getattr(node, 'type', '')
         self.xml_file = fxd.getattr(None, 'filename', '')
-
+        
         self.image    = fxd.childcontent(node, 'cover-img')
         if self.image:
             self.image = vfs.join(vfs.dirname(self.xml_file), self.image)
@@ -216,7 +219,9 @@ class Container(item.Item):
                        child.name == tag:
                     handler(fxd, child)
                     break
-                
+
+        fxd.parse_info(fxd.get_children(node, 'info', 1), self)
+
         # restore settings
         fxd.setattr(None, 'parent', self.parent)
         fxd.setattr(None, 'items', parent_items)
