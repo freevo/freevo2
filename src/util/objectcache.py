@@ -10,6 +10,9 @@
 # 
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/04/20 17:11:21  dischi
+# fix strange crash
+#
 # Revision 1.5  2004/02/04 17:20:24  dischi
 # fix crash when object is None
 #
@@ -83,13 +86,13 @@ class ObjectCache:
         if isinstance(key, str):
             key = unicode(key, config.LOCALE)
 
-        if not key in self.cache:
+        try:
+            del self.lru[self.lru.index(key)]
+            self.lru.append(key)
+            return self.cache[key]
+        except:
             return None
         
-        del self.lru[self.lru.index(key)]
-        self.lru.append(key)
-        return self.cache[key]
-
 
     def __setitem__(self, key, object):
         if isinstance(key, str):

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/04/20 17:13:34  dischi
+# fix strange crash
+#
 # Revision 1.36  2004/04/12 05:44:34  dischi
 # unicode problems with mp3 tag fix
 #
@@ -363,7 +366,7 @@ def tagmp3 (filename, title=None, artist=None, album=None, track=None,
     """
     import mmpython.audio.eyeD3 as eyeD3   # Until mmpython has an interface for this.
 
-    tag = eyeD3.Tag(filename)
+    tag = eyeD3.Tag(String(filename))
     tag.header.setVersion(eyeD3.ID3_V2_3)
     if artist: tag.setArtist(String(artist))
     if album:  tag.setAlbum(String(album))
