@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/10/03 09:53:33  dischi
+# use only two layer for speed improvement
+#
 # Revision 1.14  2004/09/07 18:47:10  dischi
 # each area has it's own layer (CanvasContainer) now
 #
@@ -147,15 +150,6 @@ class Geometry:
         self.height = height
 
 
-class CanvasContainer(mevas.CanvasContainer):
-    def __init__(self, name):
-        self.name = name
-        mevas.CanvasContainer.__init__(self)
-
-    def __str__(self):
-        return 'AreaContainer %s' % self.name
-
-    
 class Area:
     """
     the base call for all areas. Each child needs two functions:
@@ -171,15 +165,12 @@ class Area:
         self.screen      = None
         self.imagelib    = None
         self.objects     = SkinObjects()
-        self.layer       = CanvasContainer(name)
-        if name == 'screen':
-            self.layer.set_zindex(-10)
         self.__background__ = []
         self.imagecache = util.objectcache.ObjectCache(imagecachesize,
                                                        desc='%s_image' % self.name)
 
 
-    def set_screen(self, screen):
+    def set_screen(self, screen, bg_layer, content_layer):
         """
         move this area to a new screen object
         """
@@ -187,7 +178,8 @@ class Area:
             self.clear_all()
         self.screen   = screen
         self.imagelib = screen.imagelib
-
+        self.bg_layer = bg_layer
+        self.content_layer = content_layer
         
     def update_content_needed(self):
         """
@@ -256,8 +248,9 @@ class Area:
             self.clear_all()
             return
 
-
+        self.layer = self.bg_layer
         self.__draw_background__()
+        self.layer = self.content_layer
         self.update()
 
 

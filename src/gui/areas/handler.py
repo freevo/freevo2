@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.13  2004/10/03 09:53:33  dischi
+# use only two layer for speed improvement
+#
 # Revision 1.12  2004/09/07 18:47:10  dischi
 # each area has it's own layer (CanvasContainer) now
 #
@@ -54,6 +57,16 @@ import config
 import util
 import gui.animation as animation 
 
+
+class CanvasContainer(mevas.CanvasContainer):
+    def __init__(self, name):
+        self.name = name
+        mevas.CanvasContainer.__init__(self)
+
+    def __str__(self):
+        return 'AreaContainer %s' % self.name
+
+    
 class AreaHandler:
     """
     main skin class
@@ -71,7 +84,13 @@ class AreaHandler:
 
         self.canvas = screen
         
-        self.layer = []
+        self.layer = (CanvasContainer('bg'), CanvasContainer('content'))
+        self.layer[0].set_zindex(-10)
+
+        for c in self.layer:
+            c.sticky = True
+            c.hide()
+            self.canvas.add_child(c)
 
         self.imagelib  = imagelib
         self.width     = self.canvas.width
@@ -91,12 +110,7 @@ class AreaHandler:
                 self.areas.append(a)
 
         for a in self.areas:
-            a.set_screen(self)
-            c = a.layer
-            c.sticky = True
-            c.hide()
-            self.layer.append(c)
-            self.canvas.add_child(c)
+            a.set_screen(self, self.layer[0], self.layer[1])
             
         self.storage_file = os.path.join(config.FREEVO_CACHEDIR, 'skin-%s' % os.getuid())
         self.storage = util.read_pickle(self.storage_file)
@@ -356,7 +370,7 @@ class AreaHandler:
             if self.visible:
                 self.canvas.update()
             t3 = time.time()
-            _debug_('time debug: %s %s' % (t2-t1, t3-t2), 2)
+            _debug_('time debug: %s %s' % (t2-t1, t3-t2), 1)
 
         except UnicodeError, e:
             print '******************************************************************'
