@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2004/02/28 17:30:59  dischi
+# fix crash for helper
+#
 # Revision 1.29  2004/02/27 20:12:16  dischi
 # reworked rc.py to make several classes
 #
@@ -272,10 +275,13 @@ class RemoteControl:
         if use_pylirc:
             try:
                 self.inputs.append(Lirc())
-            except Exception, e:
+            except:
                 pass
 
-        self.inputs.append(Keyboard())
+        try:
+            self.inputs.append(Keyboard())
+        except:
+            pass
 
         if use_netremote and config.ENABLE_NETWORK_REMOTE and \
                config.REMOTE_CONTROL_PORT:
