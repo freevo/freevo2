@@ -111,19 +111,20 @@ def main():
             continue
 
         vals = s.strip().split(',')
-        item = ScheduleItem(vals[0], vals[1], vals[2])
-        log('Parsed entry %s: "%s"' % (num, item))
+        if not vals == ['']: 
+            item = ScheduleItem(vals[0], vals[1], vals[2])
+            log('Parsed entry %s: "%s"' % (num, item))
 
         # Should this item be started?
-        if item.check_time():
-            cmd = item.make_cmd()
-            log('  Starting item (%s)' % cmd)
-            os.system(cmd)
-            s = '#' + s
-        log()
-        num += 1
+            if item.check_time():
+                cmd = item.make_cmd()
+                log('  Starting item (%s)' % cmd)
+                os.system(cmd)
+                s = '#' + s
+                log()
+                num += 1
 
-        new_schedule += s
+            new_schedule += s
 
     fd = open(SCHEDULE, 'w')
     fd.write(new_schedule)
