@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2003/09/01 18:52:05  dischi
+# set default height and width to 0 == new Popup detection code
+#
 # Revision 1.16  2003/07/20 09:46:11  dischi
 # Some default width fixes to match the current new default font. It would
 # be great if a box without width and height could be as big as needed
@@ -135,7 +138,7 @@ class AlertBox(PopupBox):
     """
 
     def __init__(self, parent='osd', text=" ", handler=None, left=None, 
-                 top=None, width=400, height=150, bg_color=None, fg_color=None,
+                 top=None, width=0, height=0, bg_color=None, fg_color=None,
                  icon=None, border=None, bd_color=None, bd_width=None,
                  vertical_expansion=1):
 
