@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2004/10/18 01:21:50  rshortt
+# Load data into new pyepg database.
+#
 # Revision 1.9  2004/08/14 01:26:02  rshortt
 # Oops, we don't need a reference to the epg.
 #
@@ -50,7 +53,9 @@ import os
 import shutil
 
 import config
+
 import pyepg
+epg = pyepg.get_epg(os.path.join(config.FREEVO_CACHEDIR, 'epgdb'))
 
 
 def usage():
@@ -87,10 +92,10 @@ def grab():
         else:
             print 'Not configured to use tv_sort, skipping.'
 
-        print 'caching data, this may take a while'
+        print 'Loading data into epgdb, this may take a while'
 
-        pyepg.load(xmltvtmp, os.path.join(config.FREEVO_CACHEDIR, 'epg'))
         shutil.move(xmltvtmp, config.XMLTV_FILE)
+        epg.add_data_xmltv(config.XMLTV_FILE)
 
 
 if __name__ == '__main__':
