@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.80  2003/02/17 18:54:26  dischi
+# Make it possible to have borders around a selection
+#
 # Revision 1.79  2003/02/17 05:40:45  gsbarbieri
 # main1_image: now the image_{width,height} are not hardcoded anymore
 #
@@ -522,6 +525,7 @@ class Skin:
                 drawroundbox(x0 - obj.spacing + icon_present * icon_size * 1.2,
                              top - 2, x0 + obj.spacing + width,
                              top + font_h + 2, color = obj.bgcolor,
+                             border_size=obj.border_size, border_color=obj.border_color,
                              radius=obj.radius)
 
             if not text:
