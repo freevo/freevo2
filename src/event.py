@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2003/10/18 10:44:11  dischi
+# renamed POPEN2 to OS_EVENT_POPEN2
+#
 # Revision 1.24  2003/10/18 09:44:44  dischi
 # add POPEN2 event
 #
@@ -501,4 +504,4 @@ OSD_MESSAGE     = Event('OSD_MESSAGE')
 VIDEO_START     = Event('VIDEO_START')
 VIDEO_END       = Event('VIDEO_END')
 
-POPEN2          = Event('POPEN2')
+OS_EVENT_POPEN2 = Event('OS_EVENT_POPEN2')
