@@ -178,9 +178,9 @@ class Image:
 			raise ValueError, "Invalid scale size specified %s" % repr((w,h))
 		aspect = float(self.width) / float(self.height)
 		if aspect >= 1.0:
-			img = self._image.scale(w, h / aspect)
+			img = self._image.scale(0, 0, self.width, self.height, w, h / aspect)
 		else:
-			img = self._image.scale(w * aspect, h)
+			img = self._image.scale(0, 0, self.width, self.height, w * aspect, h)
 
 		return img
 
