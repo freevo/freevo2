@@ -22,11 +22,12 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	export SDL_NOKEYBOARD=true
 	export SDL_VIDEODRIVER=fbcon
-	(cd $FREEVO_HOME && $DAEMON >> $FREEVO_LOG 2>&1 &)
+	(cd /tmp && $DAEMON >> $FREEVO_LOG 2>&1 &)
 	echo "$NAME."
 	;;
   stop)
 	echo -n "Stopping $DESC: "
+        killall freevo_loader &> /dev/null
         killall freevo_python &> /dev/null
         killall freevo_xwin &> /dev/null
         killall mplayer &> /dev/null
