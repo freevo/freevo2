@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/04/24 05:20:57  krister
+# Bugfix for fullscreen/windowed mode using the new tvtime option '-M'. Added a translation table for the different freq table names.
+#
 # Revision 1.2  2003/04/23 06:33:55  krister
 # More fixes, TV viewing with tvtime seems to work pretty good now using tvtime 0.9.8-rc12 + a patch from me which has been sent to the tvtime team. tvtime 0.9.8 will be released soon, hopefully without needing special freevo patches. Unlike MPlayer, tvtime sends keypress events back to freevo for better integration.
 #
@@ -147,37 +150,40 @@ class TVTime:
 
             w, h = config.TV_VIEW_SIZE
             cf_norm, cf_input, cf_clist, cf_device = config.TV_SETTINGS.split()
+
+            s_norm = cf_norm.upper()
+            # XXX I'm just guessing for some of these, fix later...
+            clist_conv = { 'us-bcast' : 'us-broadcast',
+                           'us-cable' : 'us-cable',
+                           'us-cable-hrc' : 'us-cable',
+                           'japan-bcast' : 'japan-broadcast',
+                           'japan-cable' : 'japan-cable',
+                           'europe-west' : 'europe',
+                           'europe-east' : 'europe',
+                           'italy' : 'europe',
+                           'newzealand' : 'newzealand',
+                           'australia' : 'australia',
+                           'ireland' : 'europe',
+                           'france' : 'france',
+                           'china-bcast' : 'europe',
+                           'southafrica' : 'europe',
+                           'argentina' : 'europe',
+                           'canada-cable' : 'us-cable'}
+            s_clist = clist_conv.get(cf_clist, 'us-cable')
+            if DEBUG:
+                print 'TVTIME, using chanlist "%s" for given choice "%s"' % (cf_clist, s_clist)
+                
             # XXX cf_norm, cf_clist doesn't fully correspond to MPlayer!
+            # Most of these options are only available in tvtime ver >= 0.9.8
             command = 'tvtime -k -I %s -n %s -d %s -f %s -c %s' % (w,
-                                                                   cf_norm.upper(),
+                                                                   s_norm,
                                                                    cf_device,
-                                                                   cf_clist,
+                                                                   s_clist,
                                                                    tuner_channel)
             if osd.get_fullscreen() == 1:
                 command += ' -m'
-
-            if 0: # XXX Later...
-
-                # Convert to MPlayer TV setting strings
-                norm = 'norm=%s' % cf_norm.upper()
-                tmp = { 'television':0, 'composite1':1, 'composite2':2,
-                        's-video':3}[cf_input.lower()]
-                input = 'input=%s' % tmp
-                chanlist = 'chanlist=%s' % cf_clist
-                device = 'device=%s' % cf_device
-
-                w, h = config.TV_VIEW_SIZE
-                outfmt = 'outfmt=%s' % config.TV_VIEW_OUTFMT
-
-                tvcmd = ('-tv on:driver=v4l:%s:%s:%s:channel=%s:'
-                         '%s:width=%s:height=%s:%s' %
-                         (device, input, norm, tuner_channel, chanlist, w, h, outfmt))
-            
-                # Build the MPlayer command
-                args = (config.MPLAYER_NICE, config.MPLAYER_CMD, config.MPLAYER_VO_DEV,
-                        config.MPLAYER_VO_DEV_OPTS, tvcmd, config.MPLAYER_ARGS_TVVIEW)
-                mpl = '--prio=%s %s -vo %s%s -fs %s %s -slave' % args
-
+            else:
+                command += ' -M'
 
         else:
             print 'Mode "%s" is not implemented' % mode  # XXX ui.message()
