@@ -90,6 +90,6 @@ os.system('echo "all:\n\tmake -f Makefile.in %s" > Makefile' % buildops)
 print 'done'
 
 print
-print 'Now you can type "make" to build and "make install" as root ',
+print 'Now you can type "make" to build and "make install" as root\n',
 print 'to put the binaries into /usr/local/freevo or run them from here'
 print
