@@ -16,6 +16,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/12/30 15:28:48  dischi
+# remove old code
+#
 # Revision 1.4  2003/12/18 18:21:33  outlyer
 # I'm assuming these were supposed to be debug messages.
 #
@@ -27,7 +30,6 @@
 #
 # Revision 1.1  2003/11/22 20:33:53  dischi
 # new vfs
-#
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -63,26 +65,14 @@ def getoverlay(item):
     if not config.OVERLAY_DIR:
         return ''
 
-    if isinstance(item, str) or isinstance(item, unicode):
-        # it's a directory, return it
-        directory = os.path.abspath(item)
-        for media in config.REMOVABLE_MEDIA:
-            if directory.startswith(media.mountdir):
-                directory = directory[len(media.mountdir):]
-                return os.path.join(config.OVERLAY_DIR, 'disc', media.id + directory)
-        return os.path.join(config.OVERLAY_DIR, directory[1:])
-        
-    directory = item.dir
-    
-    if item.media:
-        directory = directory[len(item.media.mountdir):]
-        if len(directory) and directory[0] == '/':
-            directory = directory[1:]
-        return os.path.join(config.OVERLAY_DIR, 'disc', item.media.id, directory)
-    else:
-        if len(directory) and directory[0] == '/':
-            directory = directory[1:]
-        return os.path.join(config.OVERLAY_DIR, directory)
+    directory = os.path.abspath(item)
+    if directory.startswith(config.OVERLAY_DIR):
+        return directory
+    for media in config.REMOVABLE_MEDIA:
+        if directory.startswith(media.mountdir):
+            directory = directory[len(media.mountdir):]
+            return os.path.join(config.OVERLAY_DIR, 'disc', media.id + directory)
+    return os.path.join(config.OVERLAY_DIR, directory[1:])
 
 
 def abspath(name):
@@ -130,7 +120,7 @@ def open(name, mode='r'):
             raise OSError
         try:
             if not os.path.isdir(os.path.dirname(overlay)):
-                os.makedirs(os.path.dirname(overlay))
+                os.makedirs(os.path.dirname(overlay), mode=04775)
         except IOError:
             print 'error creating dir %s' % os.path.dirname(overlay)
             raise IOError
