@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.25  2004/08/23 01:23:31  rshortt
+# -Add functions for lockfile handling based on the device used.
+# -Convenience functions to retrieve settings based on channel id or name.
+# -Function to get the actual channel (tuner id) based on a channel id and
+#  type (ie: tv0 or dvb1).
+#
 # Revision 1.24  2004/08/14 01:19:04  rshortt
 # Add a simple but effective memory cache.
 #
@@ -71,6 +77,7 @@ import os
 import time
 import stat
 import string
+import traceback
 
 import config
 import tv.freq, tv.v4l2
@@ -81,26 +88,140 @@ import plugin
 import pyepg
 
 
+DEBUG = config.DEBUG
+
 _channels_cache = None
 
 def get_channels():
     global _channels_cache
+    reload = False
     pickle = os.path.join(config.FREEVO_CACHEDIR, 'epg')
 
     if not _channels_cache:
         _debug_('no epg in memory, caching')
-        _channels_cache = ChannelList()
+        reload = True
 
     elif not os.path.isfile(pickle):
         _debug_('no epg "%s", will try to rebuild' % pickle)
-        _channels_cache = ChannelList()
+        reload = True
 
     elif os.stat(pickle)[stat.ST_MTIME] > _channels_cache.load_time:
         _debug_('epg newer than memory cache, reloading')
+        reload = True
+
+    if reload:
+        if DEBUG:
+            stime = time.time()
         _channels_cache = ChannelList()
+        if DEBUG:
+            _debug_('epg load took %s seconds' % (time.time()-stime))
 
     return _channels_cache
 
+
+def get_settings_by_id(chan_id):
+    settings = []
+
+    for c in get_channels().get_all():
+        if c.id == chan_id:
+            for f in c.freq:
+                which = string.split(f, ':')[0]
+                settings.append(which)
+            return settings
+
+
+def get_settings_by_name(chan_name):
+    settings = []
+
+    for c in get_channels().get_all():
+        if c.name == chan_id:
+            for f in c.freq:
+                which = string.split(f, ':')[0]
+                settings.append(which)
+            return settings
+
+
+def get_lockfile(which):
+    #  In this function we must figure out which device these settings use
+    #  because we are allowed to have multiple settings for any particular
+    #  device, usually for different inputs (tuner, composite, svideo).
+
+    dev_lock = False
+    settings = config.TV_SETTINGS.get(which)
+    
+    if not settings:
+        _debug_('No settings for %s' % which)
+
+    if isinstance(settings, config.DVBCard):
+        dev = settings.adapter
+        dev_lock = True
+
+    elif isinstance(settings, config.TVCard):
+        dev = settings.vdev
+        dev_lock = True
+
+    else:
+        print 'Unknown settings for %s!!  This could cause problems!' % which
+
+    if dev_lock:
+        lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % \
+                   string.replace(dev, os.sep, '_'))
+    else:
+        lockfile = os.path.join(config.FREEVO_CACHEDIR, 'lock.%s' % which)
+
+    _debug_('lockfile for %s is %s' % (which, lockfile))
+    return lockfile
+
+
+def lock_device(which):
+    lockfile = get_lockfile(which)
+
+    if os.path.exists(lockfile):
+        return False
+
+    else:
+        try:
+            open(lockfile, 'w').close()
+            return True
+        except:
+            print 'ERROR: cannot open lockfile for %s' % which
+            traceback.print_exc()
+            return False
+
+
+def unlock_device(which):
+    lockfile = get_lockfile(which)
+
+    if os.path.exists(lockfile):
+        try:
+            os.remove(lockfile)
+            return True
+        except:
+            print 'ERROR: cannot remove lockfile for %s' % which
+            traceback.print_exc()
+            return False
+
+    else:
+        return False
+
+
+def is_locked(which):
+    lockfile = get_lockfile(which)
+
+    if os.path.exists(lockfile):
+        return True
+
+    else:
+        return False
+
+
+def get_actual_channel(channel_id, which):
+    
+    for chan in get_channels().get_all():
+        if chan.id == channel_id:
+            for f in chan.freq:
+                if string.split(f, ':')[0] == which:
+                    return string.lstrip(f, '%s:' % which)
 
 
 class Channel:
