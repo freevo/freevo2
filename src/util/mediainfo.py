@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2004/01/17 21:19:56  dischi
+# small bugfix
+#
 # Revision 1.1  2004/01/17 20:27:45  dischi
 # new file to handle meta information
 #
@@ -82,6 +85,7 @@ class Cache:
         """
         save a modified cache file
         """
+        print 'save %s' % self.current_cachefile
         if not store_empty:
             for key in copy.copy(self.current_objects):
                 if not self.current_objects[key][0]:
@@ -102,6 +106,7 @@ class Cache:
             return
 
         if self.cache_modified:
+            print 'mod'
             self.save_cache()
             
         cachefile = self.__get_filename__(dirname)
@@ -180,6 +185,7 @@ class Cache:
         self.current_cachefile = cachefile
         self.current_cachedir  = directory
         self.cache_modified    = False
+        print 's'
         self.save_cache()
         return objects
 
@@ -190,10 +196,9 @@ class Cache:
         """
         if dirname != self.current_cachedir:
             self.load_cache(dirname)
-        if os.path.isfile(fullname):
-            self.current_objects[filename] = (info, os.stat(fullname)[stat.ST_MTIME])
-        else:
-            self.current_objects[filename] = (info, 0)
+        self.current_objects[filename] = (info, os.stat(fullname)[stat.ST_MTIME])
+        print 'set: %s' % filename
+        print self.current_cachefile
         self.cache_modified = True
         
         
@@ -214,6 +219,7 @@ class Cache:
                 info = self.update(fullname, info)
             except (IOError, OSError):
                 return None
+            print 'do %s' % filename
             self.set(filename, dirname, fullname, info)
             return info
         try:
