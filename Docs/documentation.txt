@@ -90,7 +90,7 @@ Freevo can use the XMLTV format for TV listings. Please read the file XMLTV for
 detailed information.
 
 German users don't need XMLTV, just start
-wget http://yasd.cc/xmltv/tv_`date +%Y%m%d`.xml.gz --output-document=- | gzip -d < /tmp/TV.xml
+wget http://yasd.cc/xmltv/tv_`date +%Y%m%d`.xml.gz --output-document=- | gzip -d > /tmp/TV.xml
 to get the listing for today and set TV_CHANNELS in local_conf.py to the
 station you have.
 
