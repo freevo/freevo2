@@ -1,8 +1,48 @@
 #!/usr/bin/env python
-
+#if 0 /*
+# -----------------------------------------------------------------------
+# imdbp.py - IMDB helper script to generate fxd files
+# -----------------------------------------------------------------------
+# $Id$
+#
+# Notes:
+#
+# Todo:        
+#
+# -----------------------------------------------------------------------
+# $Log$
+# Revision 1.22  2003/06/24 16:15:07  dischi
+# o updated by den_RDC - changed code to urllib2 - exceptions are handled by
+#   urllib2, including 302 redirection -- proxy servers ,including transparant
+#   proxies now work
+# o added support for better image finder. Right now there we can also get
+#   posters from www.impawards.com
+#
+#
+# -----------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ----------------------------------------------------------------------- */
+#endif
 
 import re
-import httplib, urllib
+import urllib2, urlparse
 import sys
 import string
 import codecs
@@ -11,7 +51,15 @@ import os
 freevo_version = '1.3.2'
 
 imdb_title_list = '/tmp/imdb-movies.list'
+imdb_title_list_url = 'ftp://ftp.funet.fi/pub/mirrors/ftp.imdb.com/pub/movies.list.gz'
 imdb_titles = None
+
+# headers for urllib2
+txdata = None
+txheaders = {   
+    'User-Agent': 'freevo %s (%s)' % (freevo_version, sys.platform),
+    'Accept-Language': 'en-us',
+}
 
 def getCDID(drive):
     """
@@ -61,29 +109,15 @@ def search(name):
     search imdb title database for the given name
     """
 
-    conn = httplib.HTTPConnection("www.imdb.com")
-    headers = { 'User-Agent': 'freevo %s (%s)' % (freevo_version, sys.platform) }
-
     results = []
-    params = urllib.urlencode({'title': name, 'restrict': 'Movies and TV'})
 
-    conn.request("GET", '/Tsearch?%s' % params, params, headers)
-    response = conn.getresponse()
+    url = 'http://us.imdb.com/Tsearch?title=%s&restrict=Movies+and+TV' % name
+    req = urllib2.Request(url, txdata, txheaders)
 
-    if response.status == 302 and response.getheader('Location', ''):
-        m = re.compile('^.*Title\?([0-9]*)').match(response.getheader('Location'))
-        if not m:
-            print response.status
-            print response.reason
-            print response.msg
-            return results
-        (title, info, image_urls) = get_data(m.group(1))
-        return [ ( m.group(1), title, info['year'], '' ) ]
-
-    if response.status != 200:
-        print response.status
-        print response.reason
-        print response.msg
+    try:
+        response = urllib2.urlopen(req)
+    except urllib2.HTTPError, error:
+        print error 
         return results
         
     regexp_title = re.compile('.*<LI><A HREF="/Title\?([0-9]*)">(.*) '+
@@ -101,6 +135,7 @@ def search(name):
                 type = 'Movie'
             elif type == 'TV-Movies':
                 type = 'TV-Movie'
+
         m = regexp_title.match(line)
 
         if m and not type == 'Video Games':
@@ -123,6 +158,7 @@ def search(name):
 
 
 imdb_info_tags = ('year', 'genre', 'tagline', 'plot', 'rating', 'runtime');
+image_url_handler = {}
 
 def get_data(id):
     """
@@ -150,23 +186,15 @@ def get_data(id):
     regexp_dvd     = re.compile('.*<a href="/DVD\?', re.I)
 
     regexp_dvd_image = re.compile('.*(http://images.amazon.com.*?ZZZZZ.*?)"')
+    regexp_url   = re.compile('.*href="(http.*?)"', re.I)
 
-    # connect to IMDb 
-    conn = httplib.HTTPConnection("www.imdb.com")
-
-    # set user agent
-    headers = { 'User-Agent': 'freevo %s (%s)' % (freevo_version, sys.platform) }
-
-
-    #
-    # Get and parse the information from the site
-    #
+    url = 'http://us.imdb.com/Title?%s' % id
+    req = urllib2.Request(url, txdata, txheaders)
     
-    conn.request("GET", "/Title?"+id, "", headers)
-    r = conn.getresponse()
-    if r.status != 200:
-        print r.status
-        print r.reason
+    try:
+        r = urllib2.urlopen(req)
+    except urllib2.HTTPError, error:
+        print error
         return None
 
     next_line_is = None
@@ -213,18 +241,41 @@ def get_data(id):
         if m: image_urls += [ m.group(1) ]
 
     if dvd:
-        conn.request("GET", "/DVD?"+id, "", headers)
-        r = conn.getresponse()
-        if r.status != 200:
-            print r.status
-            print r.reason
+
+        url = 'http://us.imdb.com/DVD?%s' % id
+        req = urllib2.Request(url, txdata, txheaders)
+        
+        try:
+            r = urllib2.urlopen(req)
+        except urllib2.HTTPError, error:
+            print error
             return None
 
         for line in r.read().split("\n"):
 
             m = regexp_dvd_image.match(line)
             if m: image_urls += [ m.group(1) ]
-            
+
+    global image_url_handler
+    if not image_url_handler:
+        return (title, info, image_urls)
+
+    url = 'http://us.imdb.com/Posters?%s' % id
+    req = urllib2.Request(url, txdata, txheaders)
+        
+    try:
+        r = urllib2.urlopen(req)
+    except urllib2.HTTPError, error:
+        print error
+        return (title, info, image_urls)
+
+    for line in r.read().split("\n"):
+        m = regexp_url.match(line)
+        if m:
+            url = urlparse.urlsplit(m.group(1))
+            if url[0] == 'http' and image_url_handler.has_key(url[1]):
+                image_urls += image_url_handler[url[1]](url[1], url[2])
+
     return (title, info, image_urls)
 
 
@@ -243,33 +294,28 @@ def download_image(url, filename):
     # get the image
     url = (url.group(1), url.group(2))
 
-    conn = httplib.HTTPConnection(url[0])
-    headers = { 'User-Agent': 'freevo %s (%s)' % (freevo_version, sys.platform) }
-    conn.request("GET", "/"+url[1], "", headers)
-    r = conn.getresponse()
-    if r.status == 200:
-        i = open(filename, 'w')
-        i.write(r.read())
-        i.close()
-        conn.close()
-
-        # try to crop the image to avoid borders by imdb
-        try:
-            import Image
-            image = Image.open(filename)
-            width, height = image.size
-            image.crop((2,2,width-4, height-4)).save(filename)
-        except:
-            pass
-        return url[0]
-
-    else:
-        print "image download failed"
-        print r.status
-        print r.reason
-        conn.close()
+    req = urllib2.Request('http://' + url[0] + '/' + url[1], txdata, txheaders)
+    try:
+        r = urllib2.urlopen(req)
+    except urllib2.HTTPError, error:
+        print "Image download failed"
+        print error
         return None
-    
+        
+    i = open(filename, 'w')
+    i.write(r.read())
+    i.close()
+
+    # try to crop the image to avoid borders by imdb and unidented tot return
+    try:
+        import Image
+        image = Image.open(filename)
+        width, height = image.size
+        image.crop((2,2,width-4, height-4)).save(filename)
+    except:
+        pass
+    return url[0]
+  
 
 def print_video(file, part):
     if file[:3]== 'dvd':
@@ -451,6 +497,7 @@ def add(fxd_file, files):
 def point_maker(matching):
     return '%s.%s' % (matching.groups()[0], matching.groups()[1])
 
+
 def load_imdb_titles():
     movie_data = re.compile('^.*[12][0-9][0-9][0-9]$', re.I)
     data = []
@@ -461,6 +508,7 @@ def load_imdb_titles():
     except IOError:
         return None
     return data
+
     
 def local_search(name):
     global imdb_titles
@@ -472,7 +520,7 @@ def local_search(name):
     parts = re.split('[\._ -]', name)
 
     if imdb_titles == None:
-    	imdb_titles = load_imdb_titles()
+        imdb_titles = load_imdb_titles()
 
     matches = imdb_titles
 
@@ -525,25 +573,25 @@ def find_best_match(title, matches):
     return best
 
 def guess(filename):
-	print "searching " + filename
-	keys = local_search(filename)
-	if keys == None:
-	    print 'Local database not found. Please download movies.list.gz'
-	    print 'from the imdb interface website, unpack it and move it to'
-	    print '%s.' % imdb_title_list
-	    print 'To get the file go to http://www.imdb.com/interfaces'
-	    sys.exit(1)
+    print "searching " + filename
+    keys = local_search(filename)
+    if keys == None:
+        print 'Local database not found. Please download movies.list.gz'
+        print 'from the imdb interface website, unpack it and move it to'
+        print '%s.' % imdb_title_list
+        print 'To get the file go to http://www.imdb.com/interfaces'
+        sys.exit(1)
 
-	print 'keywords: %s' % keys
-	data = []
-	for result in search(keys):
-	    data.append('%s   %s (%s)' % (result[0], result[1], result[2]))
-	match = find_best_match(filename, data)
-	print 'best match: %s' % match
-	imdb_number = match[:7]
-	files = [ filename ]
-	filename = os.path.splitext(filename)[0]
-	get_data_and_write_fxd(imdb_number, filename, drive, type, files, '')
+    print 'keywords: %s' % keys
+    data = []
+    for result in search(keys):
+        data.append('%s   %s (%s)' % (result[0], result[1], result[2]))
+    match = find_best_match(filename, data)
+    print 'best match: %s' % match
+    imdb_number = match[:7]
+    files = [ filename ]
+    filename = os.path.splitext(filename)[0]
+    get_data_and_write_fxd(imdb_number, filename, drive, type, files, '')
 
 
 def usage():
@@ -559,6 +607,26 @@ def usage():
     print '  add files to fxd-file.fxd'
     print
     sys.exit(1)
+
+
+
+def impawards(host, path):
+    """
+    parser for posters from www.impawards.com. TODO: check for licences
+    of each poster and add all posters
+    """
+    path = '%s/posters/%s.jpg' % (path[:path.rfind('/')], \
+                                  path[path.rfind('/')+1:path.rfind('.')])
+    return [ 'http://%s%s' % (host, path) ]
+
+
+
+
+image_url_handler['www.impawards.com'] = impawards
+
+
+
+
 
 
 #
@@ -597,10 +665,10 @@ if __name__ == "__main__":
             search_arg = a
 
         if o == '--list-guess':
-	    if task:
-	        usage()
-	    task = 'list-guess'
-	    search_arg = a
+            if task:
+                usage()
+            task = 'list-guess'
+            search_arg = a
 
         if o == '--rom-drive':
             drive=a
@@ -625,8 +693,8 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if task == 'list-guess':
-    	import fileinput
-	for filename in fileinput.input(search_arg):
+        import fileinput
+        for filename in fileinput.input(search_arg):
             try:
                 # check for already existing .fxd file and skip if exists
                 open(os.path.splitext(filename)[0] + '.fxd', 'r')
@@ -643,9 +711,8 @@ if __name__ == "__main__":
         if len(args) != 0:
             usage()
 
-	guess(search_arg)
-			
-	sys.exit(0)
+        guess(search_arg)
+        sys.exit(0)
         
     # normal usage
     if len(args) < 2:
