@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/03/15 17:20:07  dischi
+# renamed skin.xml to folder.fxd
+#
 # Revision 1.36  2003/03/13 21:02:05  dischi
 # misc cleanups
 #
@@ -261,7 +264,7 @@ class Skin:
             self.settings.load("%s/blue1_big.xml" % self.XML_SKIN_DIRECTORY)
         
         for dir in config.cfgfilepath:
-            local_skin = '%s/local_skin.xml' % dir
+            local_skin = '%s/local_skin.fxd' % dir
             if os.path.isfile(local_skin):
                 if DEBUG: print 'Skin: Add local config %s to skin' % local_skin
                 self.settings.load(local_skin)
@@ -285,8 +288,8 @@ class Skin:
         else:
             settings = xml_skin.XMLSkin()
             
-        if dir and os.path.isfile(os.path.join(dir, "skin.xml")):
-            settings.load(os.path.join(dir, "skin.xml"), copy_content)
+        if dir and os.path.isfile(os.path.join(dir, 'folder.fxd')):
+            settings.load(os.path.join(dir, 'folder.fxd'), copy_content)
 
             # add the height to each font
             for font_name in settings.font:

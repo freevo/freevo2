@@ -10,8 +10,6 @@ Some tag names are the same as in the movie definitions. I will
 change the area names from e.g. title to titlearea to have _one_
 clean DTD for all our xml files.
 
-The skin.xml files will be renamed to folder.fxd
-
 All skins will be renamed from xml to fxd
 
 No "this directory is empty" handling yet (you only see nothing)
