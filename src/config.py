@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/03/15 10:03:40  dischi
+# create subdirs in the cache directory
+#
 # Revision 1.19  2003/03/01 10:45:43  dischi
 # new variable config.NEW_SKIN to integrate the gui code
 #
@@ -426,5 +429,20 @@ TV_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + TV_SHOW_REGEXP + "[\.\- ]*").spli
 #
 
 FREEVO_PLUGINS = {}
+
+
+#
+# create cache subdirs
+#
+
+if not os.path.isdir('%s/thumbnails/' % FREEVO_CACHEDIR):
+    import stat
+    os.mkdir('%s/thumbnails/' % FREEVO_CACHEDIR,
+             stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
+
+if not os.path.isdir('%s/audio/' % FREEVO_CACHEDIR):
+    import stat
+    os.mkdir('%s/audio/' % FREEVO_CACHEDIR,
+             stat.S_IMODE(os.stat(FREEVO_CACHEDIR)[stat.ST_MODE]))
 
 NEW_SKIN = (OSD_SKIN == 'skins/dischi1/skin_dischi1.py')
