@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.7  2003/09/05 02:36:12  mikeruelle
+# load the item plugin automatically so we can change the playlist from inside freevo
+#
 # Revision 1.6  2003/08/25 15:49:51  mikeruelle
 # shutdown ices first since it can cause both to not shutdown and make zombie processes
 #
@@ -58,6 +61,7 @@ class PluginInterface(plugin.DaemonPlugin):
         plugin.DaemonPlugin.__init__(self)
         self.icecast_pid = None
         self.ices_pid = None
+        plugin.activate('icecastchanger')
 
         try:
             # start icecast
