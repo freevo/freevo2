@@ -344,18 +344,7 @@ if CONF.display == 'dfbmga' or CONF.display == 'dxr3':
 
 
 #
-# Config file for the remote. This file should contain RC_CMDS and
-# RC_MPLAYER_CMDS. The location of the file is rc_client, right now the only
-# remote in there is realmagic.py. The choose this remote, set the variable to
-# 'realmagic'. Please send files for other remotes to the freevo mailing list
-#
-
-REMOTE = ''
-
-
-#
-# If you use the new lirc client library method of remote control, you need a
-# lircrc file, like this:
+# you need a lircrc file, like this:
 #
 # begin
 #       prog = freevo
@@ -363,34 +352,26 @@ REMOTE = ''
 #       config = SELECT
 # end
 #
+# Check contrib/lirc for examples and helpers/freevo2lirc.pl for a converter
+# script.
+
 LIRCRC = '/etc/freevo/lircrc'
 
 #
-# Remote control commands translation table. Replace this with the commands that
-# lirc sends for your remote. NB: The .lircrc file is not used.
+# List of mplayer commands. It's a simple mapping from buttons on your
+# remote to mplayer slave commands.
 #
-# Change the commands in the *LEFT* column, the right column is what Freevo
-# expects to see! If the lirc command is identical (case insensitiv) with the
-# Freevo commands, the commands don't need to be in this list
+# lirc comand : ( 'mplayer slave command', 'description')
 #
-# Universal remote "ONE FOR ALL", model "Cinema 7" (URC-7201B00 on the back),
-# bought from Walmart ($17.00).
-# Programmed to code TV "0150". (VCR needs to be programmed too?)
+# For a list of possible mplayer commands read input/input.c from the
+# mplayer source tree -- don't believe the manual ;-)
 #
-# There is a config file for lirc for this remote in freevo/boot/URC-7201B00.
-# Please see the Freevo website for information about buying or building a
-# remote control receiver.
+# Example to use the SUB button to toggle subtitle visibility:
 #
-RC_CMDS = {
-    'prog_guide'  : 'GUIDE',
-    'sel'         : 'SELECT',
-    'tv_vcr'      : 'EJECT',
-    'ff'          : 'FFWD',
-    }
+# RC_MPLAYER_CMDS = {
+#     'SUB'         : ( 'sub_visibility', 'Toggle subtitle visibility' )
+# }
 
-#
-# List of mplayer commands
-#
 RC_MPLAYER_CMDS = {}
 
 # XXX This is experimental, please send in testreports!
