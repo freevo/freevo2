@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2004/06/29 18:07:03  dischi
+# reload cache if cache helper runs while running freevo
+#
 # Revision 1.49  2004/06/09 20:09:10  dischi
 # cleanup
 #
@@ -707,6 +710,57 @@ def del_cache():
     cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
     util.save_pickle((mmpython.version.CHANGED, 0, 0, 0), cachefile)
 
+
+__last_status_check__ = 0
+
+def check_cache_status():
+    """
+    check if cache got updated with helper while freevo is running
+    """
+    global __last_status_check__
+    if not rc.app:
+        return
+    try:
+        cachefile = os.path.join(config.FREEVO_CACHEDIR, 'mediainfo')
+        if os.stat(cachefile)[stat.ST_MTIME] <= __last_status_check__:
+            return
+        if not __last_status_check__:
+            __last_status_check__ = os.stat(cachefile)[stat.ST_MTIME]
+            return
+    except:
+        __last_status_check__ = 1
+        return
+        
+    __last_status_check__ = os.stat(cachefile)[stat.ST_MTIME]
+    open_cache_files = []
+
+    for cache in mmpython_cache, meta_cache:
+        # save current cache
+        cache.save_cache()
+        # delete all info about loaded objects
+        cache.current_objects    = {}
+        cache.current_cachefile  = None
+        cache.current_cachedir   = None
+        cache.cache_modified     = False
+        
+        # file database
+        for d in cache.all_directories:
+            if d and not os.path.dirname(vfs.normalize(d)) in open_cache_files:
+                open_cache_files.append(os.path.dirname(vfs.normalize(d)))
+        cache.all_directories  = {}
+
+    # create ProgressBox for reloading
+    from gui import ProgressBox
+    box = ProgressBox(text=_('Reloading cache files, be patient...'), full=len(open_cache_files))
+    box.show()
+
+    # reload already open cache files
+    for d in open_cache_files:
+        load_cache(d)
+        box.tick()
+    box.destroy()
+
+    
 #
 # setup mmpython
 #
@@ -776,3 +830,6 @@ if __freevo_app__ == 'main':
         print 'Some functions in Freevo may not work or even crash!'
         print
         print
+
+    import rc
+    rc.register(check_cache_status, True, 100)
