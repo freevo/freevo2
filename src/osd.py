@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.85  2003/09/01 14:02:16  outlyer
+# Another warning. Make sure we use int where it's required.
+#
 # Revision 1.84  2003/08/26 20:19:25  outlyer
 # Found the cause of the hang when initializing Freevo; Freevo was hanging
 # on the set_mode call in Pygame, and it turns out it was simply because we didn't
@@ -647,7 +650,7 @@ class OSD:
             r,g,b,a = self._sdlcol(color)
             w = x1 - x0
             h = y1 - y0
-            box = pygame.Surface((w, h))
+            box = pygame.Surface((int(w), int(h)))
             box.fill((r,g,b))
             box.set_alpha(a)
             if layer:
