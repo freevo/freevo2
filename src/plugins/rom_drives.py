@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/08/24 05:20:15  gsbarbieri
+# Empty cdroms type is now 'empty_cdrom' instead of None
+#
 # Revision 1.23  2003/08/23 19:57:41  dischi
 # fix audiocd type setting
 #
@@ -199,6 +202,7 @@ class rom_items(plugin.MainMenuPlugin):
             else:
                 m = Item(parent)
                 m.name = 'Drive %s (no disc)' % media.drivename
+                m.type = media.type
                 m.media = media
                 media.info = m
 

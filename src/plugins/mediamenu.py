@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/08/24 05:20:15  gsbarbieri
+# Empty cdroms type is now 'empty_cdrom' instead of None
+#
 # Revision 1.15  2003/08/24 05:03:36  gsbarbieri
 # List empty roms in video|audio menus.
 #
@@ -119,10 +122,10 @@ class MediaMenu(Item):
 
         if config.HIDE_UNUSABLE_DISCS:
             dir_types = {
-                'audio': [ 'dir', 'audiocd', 'audio', None ],
-                'video': [ 'dir', 'video', 'vcd', 'dvd', None ],
-                'image': [ 'dir', None ],
-                'games': [ 'dir', None ],
+                'audio': [ 'dir', 'audiocd', 'audio', 'empty_cdrom' ],
+                'video': [ 'dir', 'video', 'vcd', 'dvd', 'empty_cdrom' ],
+                'image': [ 'dir', 'empty_cdrom' ],
+                'games': [ 'dir',  'empty_cdrom' ],
                 }
         else:
             dir_types = {}
