@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.23  2003/02/07 20:35:18  dischi
+# moved python_compile to install
+#
 # Revision 1.22  2003/02/07 06:15:36  krister
 # Added a realclean target, removes freevo.conf
 #
@@ -73,7 +76,7 @@ CACHEDIR = /var/cache/freevo
 
 .PHONY: all subdirs x11 osd_x1 $(SUBDIRS) clean realclean release install
 
-all: subdirs runapp freevo_xwin python_compile
+all: subdirs runapp freevo_xwin
 
 python_compile: runapp
 	./runapp python setup_build.py --compile=$(OPTIMIZE),$(PREFIX)
@@ -111,7 +114,7 @@ release: clean
 
 
 
-install: all
+install: all python_compile
 	-rm -rf $(PREFIX)
 	-mkdir -p $(PREFIX)
 
