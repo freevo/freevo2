@@ -17,6 +17,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/12/07 08:57:20  dischi
+# add config.XINE_ARGS_DEF
+#
 # Revision 1.29  2003/12/07 08:32:14  dischi
 # make keybindings work for files and urls
 #
@@ -74,6 +77,7 @@
 import time, os
 import signal
 import popen2, re
+import copy
 
 import config     # Configuration handler. reads config file.
 import util       # Various utilities
@@ -159,16 +163,11 @@ class Xine:
         self.xine_type    = type
         self.xine_version = version
 
-        command = config.XINE_COMMAND
-        if self.xine_version > 921:
-            if self.xine_type == 'X':
-                command = '%s --no-splash' % config.XINE_COMMAND
-            command = '%s --stdctl' % command
-            if rc.PYLIRC:
-                command = '%s --no-lirc' % command
+        self.command = [ '--prio=%s' % config.MPLAYER_NICE ] + \
+                       config.XINE_COMMAND.split(' ') + \
+                       [ '--stdctl', '-V', config.XINE_VO_DEV, '-A', config.XINE_AO_DEV ] +\
+                       config.XINE_ARGS_DEF.split(' ')
 
-        self.command = '--prio=%s %s -V %s -A %s' % (config.MPLAYER_NICE, command,
-                                                     config.XINE_VO_DEV, config.XINE_AO_DEV)
 
     def rate(self, item):
         """
@@ -198,29 +197,31 @@ class Xine:
         """
         play a dvd with xine
         """
-        # set keymap
+        self.item     = item
         self.app_mode = item.mode
         if item.mode in ('file', 'url'):
              self.app_mode = 'video'
-        self.item     = item
 
         if plugin.getbyname('MIXER'):
             plugin.getbyname('MIXER').reset()
 
-        command = self.command
+        command = copy.copy(self.command)
 
         if item.deinterlace and (self.xine_type == 'X' or self.xine_version > 922):
-            command = '%s -D' % command
+            command.append('-D')
 
-        if self.xine_version > 922:
-            command = '%s --post=pp:quality=10,expand' % command
-            
-        command = command.split(' ')
+        if not rc.PYLIRC and '--no-lirc' in command:
+            command.remove('--no-lirc')
 
-        self.max_audio = 0
-        self.current_audio = -1
-
-        self.max_subtitle = 0
+        if self.xine_version < 922:
+            for arg in command:
+                if arg.startswith('--post'):
+                    command.remove(arg)
+                    break
+                
+        self.max_audio        = 0
+        self.current_audio    = -1
+        self.max_subtitle     = 0
         self.current_subtitle = -1
 
         if item.mode == 'dvd' and item.url == 'dvd://':

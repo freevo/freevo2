@@ -109,7 +109,7 @@ from event import *
 # of the config file doesn't match, Freevo won't start. If the minor version
 # is different, there will be only a warning
 
-LOCAL_CONF_VERSION  = 5.01
+LOCAL_CONF_VERSION  = 5.02
 
 # Description of changes in each new version
 FREEVO_CONF_CHANGES = [
@@ -188,7 +188,9 @@ LOCAL_CONF_CHANGES = [
      always run \'./freevo convert_config\' to convert your local_conf.py to
      change the variable names'''),
     (5.01,
-     '''Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu''')]
+     '''Add AUDIO_SHOW_VIDEOFILES to enable video files in the audio menu'''),
+    (5.02,
+     '''Add XINE_ARGS_DEF to set xine arguments''') ]
 
 
 # NOW check if freevo.conf is up-to-date. An older version may break the next
@@ -924,8 +926,10 @@ if CONF.display == 'dxr3' and CONF.fbxine:
     
 if CONF.display == 'x11' and CONF.xine:
     XINE_VO_DEV  = 'xv'
-    XINE_COMMAND = '%s -pq -g -B --geometry %sx%s+0+0' % \
+    XINE_COMMAND = '%s -pq -g -B --geometry %sx%s+0+0 --no-splash' % \
                    (CONF.xine, CONF.width, CONF.height)
+
+XINE_ARGS_DEF = '--no-lirc --post=pp:quality=10,expand'
 
 XINE_AO_DEV = 'oss'                     # alsa or oss
 XINE_USE_VCDNAV = 0                     # use xine for VCD nav playback
