@@ -22,17 +22,22 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2004/02/07 17:12:16  dischi
+# remove non ascii chars from log message
+#
 # Revision 1.94  2004/02/05 19:26:41  dischi
 # fix unicode handling
 #
 # Revision 1.93  2004/02/05 02:52:20  gsbarbieri
 # Handle filenames internally as unicode objects.
 #
-# This does *NOT* affect filenames that have only ASCII chars, since the translation ASCII -> Unicode is painless. However this *DOES* affect files with accents, like é (e acute, \xe9) and others.
+# This does *NOT* affect filenames that have only ASCII chars, since the
+# translation ASCII -> Unicode is painless. However this *DOES* affect files
+# with accents
 #
-# I tested with Video, Images and Music modules, but *NOT* with Games, so if you have the games modules, give it a try.
-#
-# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING", like "pt_BR.UTF-8", and others.
+# It determines the encoding based on (in order) FREEVO_LOCALE, LANG and
+# LC_ALL, which may have the form: "LANGUAGE_CODE.ENCODING",
+# like "pt_BR.UTF-8"
 #
 # Revision 1.92  2004/01/17 20:30:18  dischi
 # use new metainfo
@@ -48,24 +53,6 @@
 #
 # Which is nice to know, but is non-trivial to implement so let's not see
 # it every time we start an app.
-#
-# Also removed some old CVS log messages
-#
-# Revision 1.89  2004/01/09 19:49:30  dischi
-# add name of the app/helper
-#
-# Revision 1.88  2004/01/08 14:18:32  dischi
-# do not fix path for games
-#
-# Revision 1.87  2004/01/05 17:18:52  dischi
-# also create parent dir
-#
-# Revision 1.86  2004/01/03 17:38:17  dischi
-# Freevo now needs the vfs active. OVERLAY_DIR is set to ~/.freevo/vfs as
-# default value.
-#
-# Revision 1.85  2004/01/01 12:27:05  dischi
-# make absolute pathnames
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -595,8 +582,8 @@ if not TV_RECORD_DIR:
     if not HELPER and plugin.is_active('tv'):
         print
         print 'Error: TV_RECORD_DIR not set'
-        print 'Please set TV_RECORD_DIR to the directory, where recordings should be stored or'
-        print 'remove the tv plugin. Autoset variable to %s.' % TV_RECORD_DIR
+        print 'Please set TV_RECORD_DIR to the directory, where recordings should be stored'
+        print 'or remove the tv plugin. Autoset variable to %s.' % TV_RECORD_DIR
         print
         
 if not VIDEO_SHOW_DATA_DIR and not HELPER:
@@ -829,6 +816,13 @@ VIDEO_SHOW_REGEXP_SPLIT = re.compile("[\.\- ]*" + VIDEO_SHOW_REGEXP + "[\.\- ]*"
 # create cache subdirs
 #
 
+if not OVERLAY_DIR or OVERLAY_DIR == '/':
+    print
+    print 'ERROR: bad OVERLAY_DIR.'
+    print 'Set OVERLAY_DIR it to a directory on the local filesystem where Freevo'
+    print 'can store the metadata. Make sure this filesystem has about 100 MB free space'
+    sys.exit(0)
+    
 if not os.path.isdir(OVERLAY_DIR):
     os.makedirs(OVERLAY_DIR)
     
@@ -844,9 +838,6 @@ if not os.path.isdir(OVERLAY_DIR + '/disc'):
 if not os.path.isdir(OVERLAY_DIR + '/disc-set'):
     os.makedirs(OVERLAY_DIR + '/disc-set')
 
-if not os.path.isdir(os.path.join(FREEVO_CACHEDIR, 'disc')):
-    os.makedirs(os.path.join(FREEVO_CACHEDIR, 'disc'))
-    
 #
 # delete LD_PRELOAD for all helpers, main.py does it after
 # starting the display
