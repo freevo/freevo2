@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/09/03 19:50:36  dischi
+# make the progressbar look nicer and add some text
+#
 # Revision 1.5  2003/08/31 14:17:16  dischi
 # added Splashscreen support
 #
@@ -228,24 +231,30 @@ class Skin:
         def __init__(self):
             self.x0 = config.OVERSCAN_X + 20
             self.x1 = osd.width - 2 * (config.OVERSCAN_X + 20)
-            self.y0 = osd.height - 100 - config.OVERSCAN_Y
+            self.y0 = osd.height - 130 - config.OVERSCAN_Y
             self.y1 = self.y0 + 30
 
             osd.clearscreen(color=osd.COL_BLACK)
             image = osd.loadbitmap(os.path.join(config.IMAGE_DIR, 'splashscreen.jpg'))
             image = pygame.transform.scale(image, (osd.width, osd.height))
             osd.drawbitmap(image, 0, 0)
+            osd.drawstringframed('Starting Freevo, please wait ...',
+                                 self.x0, self.y0-50, self.x1-self.x0, 40,
+                                 osd.getfont(config.OSD_DEFAULT_FONTNAME, 20),
+                                 fgcolor=0xffffff, align_h='center',
+                                 align_v='bottom')
             osd.update()
             self.bg = pygame.Surface((self.x1 - self.x0, self.y1 - self.y0))
             self.bg.blit(osd.screen, (0, 0), (self.x0, self.y0, self.x1 - self.x0,
                                               self.y1 - self.y0))
 
+
         def progress(self, pos):
             pos = round(float((self.x1 - self.x0 - 2)) / (float(100) / pos))
             osd.screen.blit(self.bg, (self.x0, self.y0))
-            osd.drawbox(self.x0, self.y0, self.x1, self.y1, 1)
-            osd.drawbox(self.x0+1, self.y0+1, self.x0 + 1 + pos, self.y1-1,
+            osd.drawbox(self.x0, self.y0, self.x0 + pos, self.y1,
                         color=0xa0000000, fill=TRUE)
+            osd.drawbox(self.x0, self.y0, self.x1, self.y1, 2)
             osd.update()
 
 
