@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2002/10/23 06:58:03  krister
+# Added OSD stop/start patch from Michael Hunold.
+#
 # Revision 1.40  2002/10/21 05:09:50  krister
 # Started adding support for playing network audio files (i.e. radio stations). Added one station in freevo_config.py, seems to work. Need to fix audioinfo.py with title, time etc. Need to look at using xml files for this too.
 #
@@ -455,6 +458,11 @@ class MPlayer_Thread(threading.Thread):
             if self.mode == 'idle':
                 self.mode_flag.wait()
                 self.mode_flag.clear()
+
+                # The DXR3 device cannot be shared between our SDL session
+                # and MPlayer.
+                if osd.sdl_driver == 'dxr3':
+                    osd.stopdisplay()
                 
             elif self.mode == 'play':
 
@@ -470,6 +478,10 @@ class MPlayer_Thread(threading.Thread):
                             self.audioinfo.draw()        
                     time.sleep(0.1)
 
+                # Ok, we can use the OSD again.
+                if osd.sdl_driver == 'dxr3':
+                    osd.restartdisplay()
+                
                 self.app.kill()
 
                 if self.mode == 'play':
