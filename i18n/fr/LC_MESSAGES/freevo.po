@@ -641,8 +641,7 @@ msgstr "Aucun écran trouvé pour ce LCD (%dx%d) !"
 
 #: plugins/lcd.py:921 plugins/lcd.py:934
 #, python-format
-msgid "Could not find screens
- for %d lines and %d columns LCD!"
+msgid "Could not find screens for %d lines and %d columns LCD!"
 msgstr "Impossible de trouver l'écran pour un LCD de %d lignes et %d colonnes"
 
 #: plugins/mediamenu.py:190

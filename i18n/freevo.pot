@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-11-10 19:42+0100\n"
+"POT-Creation-Date: 2003-11-15 18:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgid "Get CDs available for ripping"
 msgstr ""
 
 #: audio/plugins/cdbackup.py:244 audio/plugins/cdbackup.py:558
-#: audio/plugins/mplayer.py:244 audio/plugins/xine.py:85
+#: audio/plugins/mplayer.py:251 audio/plugins/xine.py:85
 #: audio/plugins/xine.py:109 plugins/lcd.py:716 plugins/lcd.py:913
 #: plugins/lcd.py:924 plugins/lcd.py:935 skins/main/info_area.py:135
 #: video/plugins/mplayer.py:429 video/plugins/mplayer.py:483
@@ -183,29 +183,29 @@ msgstr ""
 msgid "Show player"
 msgstr ""
 
-#: audio/plugins/mplayer.py:145
+#: audio/plugins/mplayer.py:148
 #, python-format
 msgid ""
 "%s\n"
 "not found!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:175
+#: audio/plugins/mplayer.py:182
 msgid "Invalid audio file"
 msgstr ""
 
-#: audio/plugins/mplayer.py:244 video/plugins/mplayer.py:429
+#: audio/plugins/mplayer.py:251 video/plugins/mplayer.py:429
 #, python-format
 msgid "Cannot open \"%s\" and \"%s\" for MPlayer logging!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:247
+#: audio/plugins/mplayer.py:254
 msgid ""
 "Please set MPLAYER_DEBUG=0 in local_conf.py, or start Freevo from a "
 "directory that is writeable!"
 msgstr ""
 
-#: audio/plugins/mplayer.py:251 video/plugins/mplayer.py:426
+#: audio/plugins/mplayer.py:258 video/plugins/mplayer.py:426
 #, python-format
 msgid "MPlayer logging to \"%s\" and \"%s\""
 msgstr ""
@@ -501,31 +501,12 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: gui/ConfirmBox.py:166
+#: gui/ConfirmBox.py:166 tv/program_display.py:189
 msgid "CANCEL"
 msgstr ""
 
-#: image/plugins/gphoto.py:122 image/imageitem.py:110
+#: image/plugins/gphoto.py:122
 msgid "View Image"
-msgstr ""
-
-#: image/viewer.py:118
-#, python-format
-msgid ""
-"Can't Open Image\n"
-"'%s'"
-msgstr ""
-
-#: image/viewer.py:351
-msgid "Title: "
-msgstr ""
-
-#: image/viewer.py:352
-msgid "Description: "
-msgstr ""
-
-#: image/viewer.py:386
-msgid "No information available"
 msgstr ""
 
 #: plugins/idlebar/system.py:116
@@ -873,6 +854,63 @@ msgstr ""
 msgid "This channel has no data loaded"
 msgstr ""
 
+#: tv/program_display.py:157
+#, python-format
+msgid "Channel:  %s"
+msgstr ""
+
+#: tv/program_display.py:163
+#, python-format
+msgid "Start:  %s"
+msgstr ""
+
+#: tv/program_display.py:169
+#, python-format
+msgid "Stop:  %s"
+msgstr ""
+
+#: tv/program_display.py:179
+msgid "Record"
+msgstr ""
+
+#: tv/program_display.py:183
+msgid "Remove"
+msgstr ""
+
+#: tv/program_display.py:209
+#, python-format
+msgid "ProgramDisplay: event = %s"
+msgstr ""
+
+#: tv/program_display.py:239
+#, python-format
+msgid "\"%s\" has been scheduled for recording"
+msgstr ""
+
+#: tv/program_display.py:243
+#, python-format
+msgid "Scheduling Failed: %s"
+msgstr ""
+
+#: tv/program_display.py:286
+#, python-format
+msgid "Remove Failed: %s"
+msgstr ""
+
+#: tv/program_display.py:321 tv/tvmenu.py:188
+msgid "Scheduled Recordings"
+msgstr ""
+
+#: tv/program_display.py:331
+#, python-format
+msgid "Record server unavailable: %s"
+msgstr ""
+
+#: tv/program_display.py:356
+#, python-format
+msgid "Get recordings failed: %s"
+msgstr ""
+
 #: tv/tvguide.py:87
 msgid "Preparing the program guide"
 msgstr ""
@@ -896,10 +934,6 @@ msgstr ""
 
 #: tv/tvmenu.py:186
 msgid "Recorded Shows"
-msgstr ""
-
-#: tv/tvmenu.py:188
-msgid "Scheduled Recordings"
 msgstr ""
 
 #: tv/tvmenu.py:190
