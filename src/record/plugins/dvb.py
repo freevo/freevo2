@@ -1,11 +1,62 @@
+# -*- coding: iso-8859-1 -*-
+# -----------------------------------------------------------------------------
+# dvb.py - plugin for recording one program for dvb
+# -----------------------------------------------------------------------------
+# $Id$
+#
+# This plugin will use mplayer with the dumpstream option for recording the
+# program. For DVB-T it can also use tzap for recording. And when tzap is
+# used and replex is found in the path, the plugin will pipe the tzap output
+# through replex to transform the mpeg-ts to mpeg2. Mplayer can seek much
+# better in mpeg2 files.
+#
+# -----------------------------------------------------------------------------
+# Freevo - A Home Theater PC framework
+# Copyright (C) 2002-2004 Krister Lagerstrom, Dirk Meyer, et al.
+#
+# First Edition: Dirk Meyer <dmeyer@tzi.de>
+# Maintainer:    Dirk Meyer <dmeyer@tzi.de>
+#
+# Please see the file freevo/Docs/CREDITS for a complete list of authors.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MER-
+# CHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# -----------------------------------------------------------------------------
+
+# python imports
 import os
+import logging
+import time
+
+# freevo imports
 import config
+
+# utils
+from util.fileops import find_file_in_path
+from util.popen import Process
+
+# basic recorder
 import generic
 
-import util.fileops
+# get logging object
+log = logging.getLogger('record')
 
 class PluginInterface(generic.PluginInterface):
-
+    """
+    Plugin for dvb recording
+    """
     def __init__(self, device='dvb0', rating=0):
         self.name = device
         self.device = config.TV_CARDS[device]
@@ -18,7 +69,7 @@ class PluginInterface(generic.PluginInterface):
         if self.device.type == 'DVB-T':
             rating = rating or 8
 	    self.program = 'tzap'
-            self.program_file = util.fileops.find_file_in_path( self.program )
+            self.program_file = find_file_in_path( self.program )
             if self.program_file:
                 pathes.insert( 0, os.path.join( home, '.tzap' ) )
         elif self.device.type == 'DVB-C':
@@ -30,14 +81,19 @@ class PluginInterface(generic.PluginInterface):
 	    self.program = 'mplayer'
 	    self.program_file = config.CONF.mplayer
 	
-	self.configfile = util.fileops.find_file_in_path( 'channels.conf',
-							  pathes )
+	self.configfile = find_file_in_path( 'channels.conf', pathes )
 	if not self.configfile:
 	    self.reason = 'no channels configuration found'
 	    return
 
         generic.PluginInterface.__init__(self)
-        self.suffix = '.ts'
+        self.replex = find_file_in_path( 'replex' )
+
+        if self.replex and self.program == 'tzap':
+            log.info('using replex')
+            self.suffix = '.mpg'
+        else:
+            self.suffix = '.ts'
 
         channels = []
         for c in self.device.channels:
@@ -46,6 +102,9 @@ class PluginInterface(generic.PluginInterface):
 
         
     def get_cmd(self, rec):
+        """
+        Return a command for recording.
+        """
         channel = self.device.channels[rec.channel]
         if rec.url.startswith('file:'):
             filename = rec.url[5:]
@@ -53,13 +112,53 @@ class PluginInterface(generic.PluginInterface):
             filename = rec.url
 
         if self.program == 'mplayer':
+            # use mplayer -dumpstream
             return [ self.program_file, '-dumpstream', '-dumpfile',
                      filename, 'dvb://' + String(channel) ]
+        
+        elif self.program == 'tzap' and self.replex:
+            # use tzap + replex
+            self.record_fifo = '/tmp/record-%s-%s-%s' % \
+                               (self.device.number, os.getpid(),
+                                int(time.time()))
+            # create tzap -> replex fifo
+            if os.path.exists(self.record_fifo):
+                os.unlink(self.record_fifo)
+            os.mkfifo(self.record_fifo)
+
+            # start replex program
+            self.replex_child = Process([ self.replex, '-x', '-t', 'DVD',
+                                          '--of', filename, self.record_fifo ])
+	    return [ self.program_file, '-o', self.record_fifo, '-c',
+                     self.configfile, '-a', self.device.number,
+                     String( channel ) ]
+            
         elif self.program == 'tzap':
+            # use tzap
 	    return [ self.program_file, '-o', filename, '-c', self.configfile,
 	             '-a', self.device.number, String( channel ) ]
 
     
     def get_channel_list(self):
+        """
+        Return list of possible channels for this plugin.
+        """
         return [ self.channels ]
 
+
+    def stopped(self):
+        """
+        Callback when the recording has stopped
+        """
+        generic.PluginInterface.stopped(self)
+        if self.program == 'tzap' and self.replex:
+            # cleanup for tzap + replex
+            if self.record_fifo:
+                # clean up the fifo
+                if os.path.exists(self.record_fifo):
+                    os.unlink(self.record_fifo)
+                self.record_fifo = None
+            if self.replex_child:
+                # stop replex child
+                self.replex_child.stop()
+                self.replex_child = None
