@@ -9,6 +9,10 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.20  2003/07/09 20:36:49  gsbarbieri
+# anged Item.getattr() behaviour, now "len(attr)" returns an integer.
+# There should be no problems here since it's only used in info_area
+#
 # Revision 1.19  2003/06/29 20:45:14  dischi
 # mmpython support
 #
@@ -209,7 +213,8 @@ class Item:
                     return ''
                 
             if r != None:
-                return str(len(r))
+                #return str(len(r))
+                return len(r)
 
         else:
             try:
