@@ -56,6 +56,7 @@ class Guide:
     Class for working with the EPG database
     """
     def __init__(self):
+        self.selected_index = 0
         self.channel_list = []
         self.channel_dict = {}
 
@@ -452,17 +453,24 @@ class Guide:
             return self.channel_dict[key]
 
 
-    def get_channel(self, start, pos):
+    def get_channel(self, start=None, pos=0):
         """
         Get a channel relative to the given channel 'start'. The function
         will start from the beginning of the list if the index is greater
         as the channel list length and wrap to the end if lower zero.
+        If start is not given it will return the channel based on the 
+        selected_index, which is also updated every method call.
         """
-        if not start:
-            start = self.channel_list[0]
-        cpos = self.channel_list.index(start)
-        pos  = (cpos + pos) % len(self.channel_list)
-        return self.channel_list[pos]
+        if type(start) in StringTypes:
+            start = self.channel_dict.get(start)
+
+        if start:
+            cpos = self.channel_list.index(start)
+        else:
+            cpos = self.selected_index
+
+        self.selected_index = (cpos + pos) % len(self.channel_list)
+        return self.channel_list[self.selected_index]
 
 
     def search(self, title, by_chan=None):
