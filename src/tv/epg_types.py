@@ -10,6 +10,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.17  2004/03/05 20:49:11  rshortt
+# Add support for searching by movies only.  This uses the date field in xmltv
+# which is what tv_imdb uses and is really acurate.  I added a date property
+# to TvProgram for this and updated findMatches in the record_client and
+# recordserver.
+#
 # Revision 1.16  2004/02/23 21:41:10  dischi
 # start some unicode fixes, still not working every time
 #
@@ -75,7 +81,7 @@ import config
 
 # The file format version number. It must be updated when incompatible
 # changes are made to the file format.
-EPG_VERSION = 3
+EPG_VERSION = 4
 
 TRUE = 1
 FALSE = 0
@@ -101,6 +107,7 @@ class TvProgram:
     ratings    = {}
     categories = []
     scheduled  = False
+    date       = None
 
     def __str__(self):
         bt = time.localtime(self.start)   # Beginning time tuple

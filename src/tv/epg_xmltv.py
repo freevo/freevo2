@@ -9,6 +9,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.47  2004/03/05 20:49:11  rshortt
+# Add support for searching by movies only.  This uses the date field in xmltv
+# which is what tv_imdb uses and is really acurate.  I added a date property
+# to TvProgram for this and updated findMatches in the record_client and
+# recordserver.
+#
 # Revision 1.46  2004/02/23 21:41:10  dischi
 # start some unicode fixes, still not working every time
 #
@@ -264,8 +270,10 @@ def load_guide(verbose=True):
         prog = epg_types.TvProgram()
         prog.channel_id = p['channel']
         prog.title = Unicode(p['title'][0][0])
+        if p.has_key('date'):
+            prog.date = Unicode(p['date'][0][0])
         if p.has_key('category'):
-             prog.categories = [ cat[0] for cat in p['category'] ]
+            prog.categories = [ cat[0] for cat in p['category'] ]
         if p.has_key('desc'):
             prog.desc = Unicode(util.format_text(p['desc'][0][0]))
         if p.has_key('sub-title'):

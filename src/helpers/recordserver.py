@@ -6,6 +6,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.33  2004/03/05 20:49:11  rshortt
+# Add support for searching by movies only.  This uses the date field in xmltv
+# which is what tv_imdb uses and is really acurate.  I added a date property
+# to TvProgram for this and updated findMatches in the record_client and
+# recordserver.
+#
 # Revision 1.32  2004/03/04 05:10:54  rshortt
 # Make it work with rc.py changes.
 #
@@ -337,14 +343,14 @@ class RecordServer(xmlrpc.XMLRPC):
         return (FALSE, 'prog not found')
 
 
-    def findMatches(self, find=None):
+    def findMatches(self, find=None, movies_only=None):
         global guide
 
         if DEBUG: log.debug('findMatches: %s' % find)
     
         matches = []
 
-        if not find:
+        if not find and not movies_only:
             if DEBUG: log.debug('nothing to find')
             return (FALSE, 'no search string')
 
@@ -358,11 +364,17 @@ class RecordServer(xmlrpc.XMLRPC):
             for prog in ch.programs:
                 if prog.stop < now:
                     continue
-                if regex.match(prog.title) or regex.match(prog.desc) \
+                if not find or regex.match(prog.title) or regex.match(prog.desc) \
                    or regex.match(prog.sub_title):
                     if DEBUG:
-                        log.debug('PROGRAM MATCH: %s' % prog)
-                    matches.append(prog.decode())
+                        log.debug('PROGRAM MATCH: %s' % prog.decode())
+                    if movies_only:
+                        if hasattr(prog, 'date') and prog.date:
+                            matches.append(prog.decode())
+                    else:
+                        # We should never get here if not find and not 
+                        # movies_only.
+                        matches.append(prog.decode())
 
         if DEBUG:
             log.debug('return: %s' % str(matches))
@@ -758,8 +770,8 @@ class RecordServer(xmlrpc.XMLRPC):
             return (status, 'RecordServer::findProg: %s' % response)
 
 
-    def xmlrpc_findMatches(self, find):
-        (status, response) = self.findMatches(find)
+    def xmlrpc_findMatches(self, find, movies_only):
+        (status, response) = self.findMatches(find, movies_only)
 
         if status:
             return (status, marmalade.jellyToXML(response))

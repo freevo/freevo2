@@ -11,6 +11,12 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2004/03/05 20:49:11  rshortt
+# Add support for searching by movies only.  This uses the date field in xmltv
+# which is what tv_imdb uses and is really acurate.  I added a date property
+# to TvProgram for this and updated findMatches in the record_client and
+# recordserver.
+#
 # Revision 1.14  2004/02/23 21:41:10  dischi
 # start some unicode fixes, still not working every time
 #
@@ -188,9 +194,9 @@ def findProg(chan, start):
     return returnFromJelly(status, response)
     
 
-def findMatches(find=None):
+def findMatches(find='', movies_only=0):
     try:
-        (status, response) = server.findMatches(find)
+        (status, response) = server.findMatches(find, movies_only)
     except Exception, e:
         print 'Search error for \'%s\'' % find
         print e
@@ -317,5 +323,18 @@ if __name__ == '__main__':
     if function == "test":
         (result, response) = connectionTest('connection test')
         print 'result: %s, response: %s ' % (result, response)
+
+    if function == "moviesearch":
+        if len(sys.argv) >= 3:
+            find = sys.argv[2]
+        else:
+            find = ''
+
+        (result, response) = findMatches(find, 1)
+        if result:
+            for prog in response:
+                print 'Prog: %s' % prog.title
+        else:
+            print 'result: %s, response: %s ' % (result, response)
 
 
