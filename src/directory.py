@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2003/10/12 09:42:37  dischi
+# added DIRECTORY_REVERSE_SORT
+#
 # Revision 1.43  2003/10/11 09:54:22  dischi
 # just to be save
 #
@@ -95,7 +98,7 @@ all_variables = ('MOVIE_PLAYLISTS', 'DIRECTORY_SORT_BY_DATE',
                  'DIRECTORY_AUTOPLAY_SINGLE_ITEM', 'COVER_DIR',
                  'AUDIO_RANDOM_PLAYLIST', 'FORCE_SKIN_LAYOUT',
                  'AUDIO_FORMAT_STRING','DIRECTORY_SMART_SORT',
-                 'USE_MEDIAID_TAG_NAMES')
+                 'USE_MEDIAID_TAG_NAMES', 'DIRECTORY_REVERSE_SORT')
 
 possible_display_types = [ ]
 
@@ -498,6 +501,9 @@ class DirItem(Playlist):
             play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                              o.sort().upper()))
 
+        if self.DIRECTORY_REVERSE_SORT:
+            play_items.reverse()
+            
         files.sort(lambda l, o: cmp(l.upper(), o.upper()))
 
         # add all playable items to the playlist of the directory
@@ -523,8 +529,9 @@ class DirItem(Playlist):
         else:
             dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
  
-
-
+        if self.DIRECTORY_REVERSE_SORT:
+            dir_items.reverse()
+            
         # build items for playlists
         pl_items = []
         if not self.display_type or self.display_type == 'audio':
@@ -663,7 +670,6 @@ class DirItem(Playlist):
             else:
                 self.play_items.sort(lambda l, o: cmp(l.sort().upper(),
                                                       o.sort().upper()))
-                
 
         # add new dir items to the menu
         new_dir_items = []
@@ -680,6 +686,9 @@ class DirItem(Playlist):
             self.dir_items += new_dir_items
             self.dir_items.sort(lambda l, o: cmp(l.dir.upper(), o.dir.upper()))
 
+        if self.DIRECTORY_REVERSE_SORT:
+            self.play_items.reverse()
+            self.dir_items.reverse()
 
         # add new playlist items to the menu
         new_pl_items = []

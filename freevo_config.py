@@ -390,6 +390,11 @@ AUDIO_RANDOM_PLAYLIST = 1
 DIRECTORY_SORT_BY_DATE = 2
 
 #
+# Show the items in the list in reverse order
+#
+DIRECTORY_REVERSE_SORT = 0
+
+#
 # Should we use "smart" sorting to ignore 'The' in directories
 # 0 = no, 1 = yes
 #
