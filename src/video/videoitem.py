@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2003/09/20 17:31:00  dischi
+# add play with max cache for network streams
+#
 # Revision 1.87  2003/09/20 17:02:09  dischi
 # make it possible to deactivate mmpython for an item
 #
@@ -301,7 +304,9 @@ class VideoItem(Item):
 
 
         items += configure.get_items(self)
- 
+        if self.mode == 'file' and self.filename.find('://') > 0:
+            items.append((self.play_max_cache, _('Play with maximum cache')))
+            
         if self.variants and len(self.variants) > 1:
             items = [ (self.show_variants, 'Show variants') ] + items
 
@@ -316,6 +321,9 @@ class VideoItem(Item):
         self.menuw.pushmenu(m)
 
 
+    def play_max_cache(self, arg=None, menuw=None):
+        self.play(menuw=menuw, arg='-cache 65536')
+        
     def play(self, arg=None, menuw=None):
         """
         play the item.
