@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2003/03/24 01:53:15  rshortt
+# Added support in the contructor to have either button selected by default instead of assuming 'OK' to be the default all the time.
+#
 # Revision 1.5  2003/03/23 23:11:10  rshortt
 # Better default height now.
 #
@@ -86,8 +89,8 @@ class ConfirmBox(PopupBox):
     bd_width  Border width Integer
     """
 
-    def __init__(self, text=" ", handler=None, left=None, top=None, 
-                 width=300, height=110, bg_color=None, fg_color=None, 
+    def __init__(self, text=" ", handler=None, default_choice=0, left=None, 
+                 top=None, width=300, height=110, bg_color=None, fg_color=None, 
                  icon=None, border=None, bd_color=None, bd_width=None):
 
         self.handler = handler
@@ -106,18 +109,20 @@ class ConfirmBox(PopupBox):
         # XXX: It may be nice if we could choose between
         #      OK/CANCEL and YES/NO
 
-        self.b1 = Button('OK')
-        bleft = self.left + self.width/2 - (self.b1.width + button_spacing/2)
+        self.b0 = Button('OK')
+        bleft = self.left + self.width/2 - (self.b0.width + button_spacing/2)
+        btop = self.top + self.height - self.b0.height - 25
+        self.b0.set_position(bleft, btop) 
+        # self.b0.toggle_selected()
+        self.add_child(self.b0)
+
+        self.b1 = Button('CANCEL')
+        bleft = self.left + self.width/2 + button_spacing/2
         btop = self.top + self.height - self.b1.height - 25
         self.b1.set_position(bleft, btop) 
-        self.b1.toggle_selected()
         self.add_child(self.b1)
-
-        self.b2 = Button('CANCEL')
-        bleft = self.left + self.width/2 + button_spacing/2
-        btop = self.top + self.height - self.b2.height - 25
-        self.b2.set_position(bleft, btop) 
-        self.add_child(self.b2)
+        select = 'self.b%s.toggle_selected()' % default_choice
+        eval(select)
 
 
     def eventhandler(self, event):
@@ -127,13 +132,13 @@ class ConfirmBox(PopupBox):
         if trapped.count(event) > 0:
             return
         elif event == self.rc.LEFT or event == self.rc.RIGHT:
+            self.b0.toggle_selected()
             self.b1.toggle_selected()
-            self.b2.toggle_selected()
             self.draw()
             self.osd.update(self.get_rect())
             return
         elif event == self.rc.ENTER or event == self.rc.SELECT:
-            if self.b1.selected:
+            if self.b0.selected:
                 if DEBUG: print 'HIT OK'
                 self.destroy()
                 if self.handler: self.handler()
