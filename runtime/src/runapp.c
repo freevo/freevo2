@@ -61,7 +61,6 @@ main (int ac, char *av[])
   char currdir[1000];
   int newprio;
   int got_runtime;
-  int static_linked = 0;
   int use_preloads = 0;         /* Full runtime preloads */
   struct exec exec;
   FILE *fp;
@@ -157,41 +156,11 @@ main (int ac, char *av[])
     /* No, it is a regular app. Check if it is in the runtime */
     if (strstr (av[ac_idx], "runtime/apps/") != (char *) NULL) {
 
-      /* lets see is this app is staticly linked */
-      /* this check is taken from lddlibc4.c of glibc-2.2.5 */
+      /* Yes, so the executable to start is the freevo_loader. */
+      newav[newac++] = "./runtime/dll/freevo_loader";
+      use_preloads = 1;
 
-      /* First see whether this is really an a.out binary.  */
-      fp = fopen (av[ac_idx], "rb");
-      if (fp == NULL) {
-        LOG ("cannot open `%s'", av[1]);
-        exit (1);
-      }
-
-      /* Read the program header.  */
-      if (fread (&exec, sizeof exec, 1, fp) < 1) {
-        LOG ("cannot read header from `%s'", av[1]);
-      }
-      /* Test for the magic numbers.  */
-      else if (N_MAGIC (exec) != ZMAGIC && N_MAGIC (exec) != QMAGIC
-         && N_MAGIC (exec) != OMAGIC) {
-        LOG ("Looks like a staticly linked executable");
-        static_linked = 1;
-      }
-
-      /* We don't need the file open anymore.  */
-      fclose (fp);
-
-      if(!static_linked) {
-        /* Yes, so the executable to start is the freevo_loader. */
-        newav[newac++] = "./runtime/dll/freevo_loader";
-        use_preloads = 1;
-
-        LOG ("Runtime app, must use preloads"); 
-      }
-      else {
-        /* Just a plain old app. It will be copied to newav[] below */
-        LOG ("Static app, no preloads"); 
-      }
+      LOG ("Runtime app, must use preloads"); 
     } else {
       /* Just a plain old app. It will be copied to newav[] below */
       LOG ("Regular app, no preloads"); 
@@ -200,7 +169,7 @@ main (int ac, char *av[])
   }
   
   /* Check if LD_PRELOAD needs to be set to the full runtime preloads */
-  if (use_preloads && !static_linked) {
+  if (use_preloads) {
     char *pPreloads;
 
     
