@@ -65,8 +65,8 @@
       <title layout="title1" x="10" y="100" width="780" height="60"/>
 
       <listing layout="video list" x="500" y="450" width="290" height="140">
-	<image label="uparrow" x="755" y="150" width="32" height="32" filename="up.png"/>
-	<image label="downarrow" x="755" y="378" width="32" height="32" filename="down.png"/>
+	<image label="uparrow" x="470" y="450" width="24" height="24" filename="up.png"/>
+	<image label="downarrow" x="470" y="550" width="24" height="24" filename="down.png"/>
       </listing>
 
       <view layout="view0" x="545" y="150" width="200" height="290"/>
