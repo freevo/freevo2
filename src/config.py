@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2002/12/09 14:25:58  dischi
+# Added default for snes
+#
 # Revision 1.2  2002/12/07 13:29:49  dischi
 # Make a new database with all movies, even without id and label
 #
@@ -152,6 +155,7 @@ CONF.chanlist = 'us-cable'
 CONF.xmame_SDL = ''
 CONF.jpegtran = ''
 CONF.mplayer = ''
+CONF.snes = ''
 
 def read_config(filename, conf):
     if DEBUG: print 'Reading config file %s' % filename
