@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/12/05 17:08:53  dischi
+# wait when db is locked
+#
 # Revision 1.11  2004/12/04 01:31:49  rshortt
 # -get_channels() roughly sorts the channels returned.  We will add sorting
 #  options to Freevo.
@@ -136,9 +139,37 @@ try:
 except:
     print "Python SQLite not installed!"
 
-from sqlite import IntegrityError
+from sqlite import IntegrityError, OperationalError
+import notifier
 
 
+class _SQLite:
+    def __init__(self, dbpath):
+        while 1:
+            try:
+                self.db = sqlite.connect(dbpath, client_encoding='utf-8',
+                                         timeout=10)
+                break
+            except OperationalError, e:
+                notifier.step(False, False)
+        self.cursor = self.db.cursor()
+
+
+    def commit(self):
+        self.db.commit()
+
+    def close(self):
+        self.db.close()
+
+    def execute(self, query):
+        while 1:
+            try:
+                self.cursor.execute(query)
+                return self.cursor.fetchall()
+            except OperationalError, e:
+                notifier.step(False, False)
+
+        
 class EPGDB:
     """ 
     Class for working with the EPG database 
@@ -150,34 +181,30 @@ class EPGDB:
             scheme = os.path.join(os.path.dirname(__file__), 'epg_schema.sql')
             os.system('sqlite %s < %s 2>/dev/null >/dev/null' % (dbpath, scheme))
             print 'done'
-            
-        self.db = sqlite.connect(dbpath, client_encoding='utf-8', timeout=10)
-        self.cursor = self.db.cursor()
+        self.db = _SQLite(dbpath)
 
 
     def execute(self, query, close=False):
         query = escape_query(query)
 
 	try:
-            self.cursor.execute(query)
+            result = self.db.execute(query)
         except TypeError:
             traceback.print_exc()
             return False
 
         if close:
             # run a single query then close
-            result = self.cursor.fetchall()
             self.db.commit()           
             self.db.close()
             return result
         else:
-            return self.cursor.fetchall()
+            return result
         
 
     def close(self):
         self.db.commit()
         self.db.close()
-
 
     def commit(self):
         self.db.commit()
@@ -187,9 +214,8 @@ class EPGDB:
         if not table:
             return False
         # verify the table exists
-        self.cursor.execute('select name from sqlite_master where \
-                             name="%s" and type="table"' % table)
-        if not self.cursor.fetchone():
+        if not self.db.execute('select name from sqlite_master where ' + \
+                               'name="%s" and type="table"' % table):
             return None
         return table
 
@@ -212,9 +238,7 @@ class EPGDB:
 
     def get_channels(self):
         query = 'select * from channels order by access_id'
-
-        rows = self.execute(query)
-        return rows
+        return self.execute(query)
 
 
     def remove_channel(self, id):
@@ -344,6 +368,7 @@ class EPGDB:
             print 'Program for (%s, %s) exists:' % (String(channel_id), start)
             rows = self.execute('select * from programs where channel_id="%s" \
                                  and start=%s' % (channel_id, start))
+            self.commit()
             for row in rows:
                 print '    %s' % row
             traceback.print_exc()
