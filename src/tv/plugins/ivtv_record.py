@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/11/23 19:55:27  rshortt
+# Changes to use src/tv/channels.py and VIDEO_GROUPS.
+#
 # Revision 1.14  2003/10/15 12:49:53  rshortt
 # Patch from Eirik Meland that stops recording when you remove a recording
 # program from the recording schedule.  There exists a race condition where
@@ -64,6 +67,8 @@ import config
 import tv.ivtv
 import childapp 
 import plugin 
+
+from tv.channels import FreevoChannels
 
 DEBUG = config.DEBUG
 
@@ -130,6 +135,9 @@ class Record_Thread(threading.Thread):
             elif self.mode == 'record':
                 print 'Record_Thread::run: started recording'
 
+                fc = FreevoChannels()
+                print 'CHAN: %s' % fc.getChannel()
+
                 tv_lock_file = config.FREEVO_CACHEDIR + '/record'
                 open(tv_lock_file, 'w').close()
 
@@ -144,7 +152,7 @@ class Record_Thread(threading.Thread):
                 v.init_settings()
 
                 print 'Setting Channel to %s' % self.prog.tunerid
-                v.setchannel(self.prog.tunerid)
+                fc.chanSet(str(self.prog.tunerid))
 
                 if DEBUG: v.print_settings()
 
