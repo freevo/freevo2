@@ -184,7 +184,7 @@ class Mame_Thread(threading.Thread):
                 self.app = MameApp(self.command)
                 time.sleep(2.0)
                 osd.restartdisplay()
-		#time.sleep(1.0)
+                #time.sleep(1.0)
                 #os.system('./fbcon/mga_ntsc_768x576.sh')
 
                 while self.mode == 'play' and self.app.isAlive():

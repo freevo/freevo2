@@ -10,6 +10,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2002/10/01 02:32:52  krister
+# Tabs -> spaces.
+#
 # Revision 1.9  2002/09/24 00:39:56  gsbarbieri
 # Now mixer doesn't change all the volumes to zero when a new class is intantiated.
 # That was annoying when you use CONTROL_ALL_AUDIO = 0.
@@ -99,7 +102,7 @@ class Mixer:
         self.igainVolume  = 0 # XXX Used on SB Live
         self.ogainVolume  = 0 # XXX Ditto
         
-	# Gustavo: By default, don't change the values to zero
+        # Gustavo: By default, don't change the values to zero
         # self.setMainVolume(self.mainVolume)
         # self.setPcmVolume(self.pcmVolume)
         # self.setLineinVolume(self.lineinVolume)

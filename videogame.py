@@ -217,8 +217,8 @@ def cwd(arg=None, menuw=None):
         image = None
         rominfo = os.popen('./rominfo ' + file , 'r')
         matched = 0
-	partial = 0
-	for line in rominfo.readlines():
+        partial = 0
+        for line in rominfo.readlines():
             if string.find(line, 'Error:') != -1:
                 print 'MAME:rominfosrc: "%s"' % line.strip()
             if string.find(line, 'KNOWN:') != -1:
@@ -228,7 +228,7 @@ def cwd(arg=None, menuw=None):
                 print 'MAME:rominfosrc: "%s"' % line.strip()
                 partial = 1
         rominfo.close()
-	if matched == 1 or partial == 1:
+        if matched == 1 or partial == 1:
             # find image for this file
             if os.path.isfile(os.path.splitext(file)[0] + ".png"):
                 image = os.path.splitext(file)[0] + ".png"
