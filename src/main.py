@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/03/02 22:09:19  dischi
+# Reload main menu on skin change, too
+#
 # Revision 1.25  2003/03/02 21:33:17  dischi
 # The main menu is a class of its own, all items in the main menu inherit
 # from Item. If the new skin code is active, DISPLAY will pop up a skin
@@ -201,6 +204,37 @@ def shutdown(menuw=None, arg=None, allow_sys_shutdown=1):
         
 
 
+def get_main_menu(parent):
+    """
+    function to get the items on the main menu based on the settings
+    in the skin
+    """
+
+    items = []
+    menu_items = skin.settings.mainmenu.items
+
+    for i in menu_items:
+        if menu_items[i].visible:
+
+            # if it's has actions() it is an item already
+            if hasattr(eval(menu_items[i].action), 'actions'):
+                item = eval(menu_items[i].action)(None)
+                if menu_items[i].icon:
+                    item.icon = menu_items[i].icon
+                if menu_items[i].name:
+                    item.name = menu_items[i].name
+                item.parent = parent
+                items += [ item ]
+
+            else:
+                items += [ MainMenuItem(parent, menu_items[i].name,
+                                        menu_items[i].icon,
+                                        menu_items[i].image,
+                                        eval(menu_items[i].action),
+                                        menu_items[i].arg) ]
+    return items
+    
+
 class ShutdownItem(Item):
     """
     Item for shutdown
@@ -264,7 +298,13 @@ class SkinSelectItem(Item):
         return [ ( self.select, '' ) ]
 
     def select(self, arg=None, menuw=None):
+        """
+        Load the new skin and rebuild the main menu
+        """
         skin.settings = skin.LoadSettings(self.skin, copy_content = FALSE)
+        pos = menuw.menustack[0].choices.index(menuw.menustack[0].selected)
+        menuw.menustack[0].choices = get_main_menu(self.parent)
+        menuw.menustack[0].selected = menuw.menustack[0].choices[pos]
         menuw.back_one_menu()
 
         
@@ -278,31 +318,7 @@ class MainMenu(Item):
         Setup the main menu and handle events (remote control, etc)
         """
         
-        items = []
-
-        # Load the main menu items from the skin
-        menu_items = skin.settings.mainmenu.items
-
-        for i in menu_items:
-            if menu_items[i].visible:
-
-                # if it's has actions() it is an item already
-                if hasattr(eval(menu_items[i].action), 'actions'):
-                    item = eval(menu_items[i].action)(None)
-                    if menu_items[i].icon:
-                        item.icon = menu_items[i].icon
-                    if menu_items[i].name:
-                        item.name = menu_items[i].name
-                    item.parent = self
-                    items += [ item ]
-
-                else:
-                    items += [ MainMenuItem(self, menu_items[i].name,
-                                            menu_items[i].icon,
-                                            menu_items[i].image,
-                                            eval(menu_items[i].action),
-                                            menu_items[i].arg) ]
-                                            
+        items = get_main_menu(self)
 
         mainmenu = menu.Menu('FREEVO MAIN MENU', items, packrows=0, umount_all = 1)
         menuwidget.pushmenu(mainmenu)
