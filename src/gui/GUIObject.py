@@ -7,6 +7,9 @@
 # Todo: o Add move function 
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/03/07 18:31:08  dischi
+# even more debug
+#
 # Revision 1.34  2004/03/07 18:25:49  dischi
 # more debug
 #
@@ -372,6 +375,10 @@ class GUIObject:
             while c:
                 print '  %s: %s' % (c, c.get_rect())
                 c = c.parent
+            print
+            print 'Configuration: %sx%s %s %s' % \
+                  (self.osd.width, self.osd.height, config.OSD_OVERSCAN_X,
+                   config.OSD_OVERSCAN_Y)
             print
             raise Exception, e
 
