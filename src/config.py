@@ -22,6 +22,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.50  2003/09/14 20:47:48  outlyer
+# * TRUE/FALSE wasn't working in Python 2.3...
+# * Wrapped the tagging function in a try: except because it failed on a data
+#    track and Freevo needed to be restarted to rip another CD.
+#
 # Revision 1.49  2003/09/14 20:08:11  dischi
 # o add TRUE and FALSE to the buildin objects for Python < 2.3
 # o add a _debug_ function to buildin. All files can use _debug_ to write
@@ -176,7 +181,7 @@ DEBUG_STDOUT = 1
 DEBUG = 0
 
 # add TRUE and FALSE to __builtin__ for older python versions
-if float(sys.version[0:3]) < 2.3:
+if float(sys.version[0:3]) < 2.4:
     __builtin__.__dict__['TRUE']  = 1
     __builtin__.__dict__['FALSE'] = 0
 

@@ -28,6 +28,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.18  2003/09/14 20:47:48  outlyer
+# * TRUE/FALSE wasn't working in Python 2.3...
+# * Wrapped the tagging function in a try: except because it failed on a data
+#    track and Freevo needed to be restarted to rip another CD.
+#
 # Revision 1.17  2003/09/13 10:08:22  dischi
 # i18n support
 #
@@ -388,10 +393,15 @@ class main_backup_thread(threading.Thread):
 
                 if DEBUG: 'lame: %s' %lame_command                          
                 os.system(lame_command)
-               
-                util.tagmp3(pathname+path_tail+'.mp3', title=song_names[i],
+                try: 
+                    util.tagmp3(pathname+path_tail+'.mp3', title=song_names[i],
                             artist=artist, album=album, track=track, 
                             tracktotal=len(song_names))
+                except IOError:
+                    # This sometimes fails if the CD has a data track
+                    # This is not a 100% fix, but temporary until I figure out why
+                    # it's trying to tag a data track
+                    pass
                     
                 # Remove the .wav file.
                 rm_command = '%s%s.wav' % (pathname_cdparanoia, path_tail_cdparanoia)
