@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.93  2003/04/21 13:31:04  dischi
+# moved audio name parser to audioitem until the skin has better support for it
+#
 # Revision 1.92  2003/04/19 21:24:59  dischi
 # small changes at the plugin interface
 #
@@ -493,33 +496,3 @@ class Skin:
 
 
             
-    def format_track (self, array):
-        """ Return a formatted string for use in music.py """
-	# This is the default - track name only
-	formatstr = '%(t)s'
-       	# This will show the track number as well 
-	#formatstr = '%(n)s - %(t)s'
-
-	# Since we can't specify the length of the integer in the
-	# format string (Python doesn't seem to recognize it) we
-	# strip it out first, when we see the only thing that can be
-	# a number.
-
-
-        # Before we begin, make sure track is an integer
-    
-        if array.track:
-            try:
-    	        mytrack = ('%0.2d' % int(array.track))
-            except ValueError:
-    	        mytrack = None
-        else:
-           mytrack = None
-    
-        song_info = {  'a'  : array.artist,
-       	               'l'  : array.album,
-    	               'n'  : mytrack,
-    	               't'  : array.title,
-    	               'y'  : array.year }
-   
-        return formatstr % song_info
