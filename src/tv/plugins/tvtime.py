@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.24  2003/12/10 20:40:57  mikeruelle
+# remove childthread use new childapp2 class
+#
 # Revision 1.23  2003/12/03 20:40:34  mikeruelle
 # a hack for those who do not use freevo -fs
 #
@@ -375,8 +378,6 @@ class TVTime:
     __igainvol = 0
     
     def __init__(self):
-        self.thread = childapp.ChildThread()
-        self.thread.stop_osd = True
         self.tuner_chidx = 0    # Current channel, index into config.TV_CHANNELS
         self.app_mode = 'tv'
         
@@ -485,7 +486,7 @@ class TVTime:
             mixer.setPcmVolume(0)
 
         # Start up the TV task
-        self.thread.start(TVTimeApp, (command))        
+        self.app=TVTimeApp(command)        
 
         self.prev_app = rc.app() # ???
         rc.app(self)
@@ -514,7 +515,7 @@ class TVTime:
             mixer.setMicVolume(0)
             mixer.setIgainVolume(0) # Input on emu10k cards.
 
-        self.thread.stop('quit\n')
+        self.app.stop('quit\n')
         rc.app(self.prev_app)
 
     def eventhandler(self, event, menuw=None):
@@ -531,23 +532,23 @@ class TVTime:
             # Go to the prev/next channel in the list
             if event == em.TV_CHANNEL_UP:
                 self.TunerPrevChannel()
-                self.thread.app.setchannel('UP')
+                self.app.setchannel('UP')
             else:
                 self.TunerNextChannel()
-                self.thread.app.setchannel('DOWN')
+                self.app.setchannel('DOWN')
 
             return True
             
         elif event == em.TOGGLE_OSD:
-            self.thread.app.write('DISPLAY_INFO\n')
+            self.app.write('DISPLAY_INFO\n')
             return True
         
         elif event == em.BUTTON:
 	    if re.search('^\d+$', event.arg) and int(event.arg) in range(10):
-                self.thread.app.write('CHANNEL_%s\n' % event.arg)
+                self.app.write('CHANNEL_%s\n' % event.arg)
                 return True
             if event.arg == 'PREV_CH':
-                self.thread.app.write('CHANNEL_PREV\n')
+                self.app.write('CHANNEL_PREV\n')
                 return True
 	        
 
@@ -556,7 +557,7 @@ class TVTime:
             
 
 # ======================================================================
-class TVTimeApp(childapp.ChildApp):
+class TVTimeApp(childapp.ChildApp2):
     """
     class controlling the in and output from the tvtime process
     """
@@ -578,7 +579,7 @@ class TVTimeApp(childapp.ChildApp):
             else:
                 print 'TVTime logging to "%s" and "%s"' % (fname_out, fname_err)
 
-        childapp.ChildApp.__init__(self, app)
+        childapp.ChildApp2.__init__(self, app)
         
 
     def kill(self):
