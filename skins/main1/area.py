@@ -27,6 +27,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2003/04/20 19:33:43  dischi
+# use a different layer to draw. It is slower but avoids ugly texts
+#
 # Revision 1.3  2003/04/20 15:02:07  dischi
 # fall back to text view
 #
@@ -206,23 +209,16 @@ class Screen:
             for x0, y0, x1, y1 in update_area:
                 self.s_content.blit(self.s_bg, (x0, y0), (x0, y0, x1-x0, y1-y0))
                 self.s_content.blit(self.s_alpha, (x0, y0), (x0, y0, x1-x0, y1-y0))
-                osd.screen.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
 
-        # if the content has changed ...
-        if self.update_content:
-            # ... blit back the alphabg surface
-            for x0, y0, x1, y1 in self.update_content:
-                osd.screen.blit(self.s_content, (x0, y0), (x0, y0, x1-x0, y1-y0))
-
-
+        layer = self.s_content.convert()
         update_area += self.update_content
 
         # if something changed redraw all content objects
         if update_area:
             for x1, y1, x2, y2, image in objects.images:
                 if self.in_update(x1, y1, x2, y2, update_area):
-                    osd.screen.blit(image, (x1, y1))
+                    layer.blit(image, (x1, y1))
 
             for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
                 ellipses in objects.text:
@@ -233,11 +229,14 @@ class Screen:
                                              width, height, font.shadow.color, None,
                                              font=font.name, ptsize=font.size,
                                              align_h = align_h, align_v = align_v,
-                                             mode=mode, ellipses=ellipses)
+                                             mode=mode, ellipses=ellipses, layer=layer)
                     osd.drawstringframed(text, x1, y1, width, height, font.color, None,
                                          font=font.name, ptsize=font.size,
                                          align_h = align_h, align_v = align_v,
-                                         mode=mode, ellipses=ellipses)
+                                         mode=mode, ellipses=ellipses, layer=layer)
+
+        for x0, y0, x1, y1 in update_area:
+            osd.screen.blit(layer, (x0, y0), (x0, y0, x1-x0, y1-y0))
 
         if osd.must_lock:
             self.s_bg.unlock()
