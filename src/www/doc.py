@@ -14,14 +14,17 @@ re_link = re.compile('(href *= *")([^:]*?.html)"')
 
 class DocResource(FreevoResource):
     def replace_link(self, reg):
-        return '%sdoc?file=%s"' % reg.groups()
+        href, url = reg.groups()
+        url = os.path.join(os.path.dirname(self.page), url)
+        url = os.path.normpath(url)
+        return '%sdoc?file=%s"' % (href, url)
 
 
     def _render(self, request):
         if request.query.has_key('file'):
-            page = request.query['file']
+            self.page = request.query['file']
         else:
-            page = 'Index.html'
+            self.page = 'Index.html'
 
         fv = HTMLResource()
         fv.printHeader(_('Documentation'), None, selected=_('Doc'))
@@ -39,7 +42,7 @@ class DocResource(FreevoResource):
 
         fv.res += '<p>&nbsp;</p>\n'
 
-        src = os.path.join(config.DOC_DIR, 'html/%s' % page)
+        src = os.path.join(config.DOC_DIR, 'html/%s' % self.page)
         src = open(src)
         p = False
         for line in src.readlines():
