@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/01/07 19:45:17  dischi
+# small bugfix
+#
 # Revision 1.4  2002/12/22 12:23:30  dischi
 # Added deinterlacing in the config menu
 #
@@ -135,8 +138,8 @@ def toggle(arg=None, menuw=None):
 
 def add_toogle(name, item, var):
     if getattr(item, var):
-        return menu.MenuItem("Turn on %s" % name, toggle, (item, var))
-    return menu.MenuItem("Turn off %s" % name, toggle, (item, var))
+        return menu.MenuItem("Turn off %s" % name, toggle, (item, var))
+    return menu.MenuItem("Turn on %s" % name, toggle, (item, var))
 
     
 #

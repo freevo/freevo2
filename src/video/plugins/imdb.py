@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/07 19:44:29  dischi
+# small bugfix
+#
 # Revision 1.2  2002/12/30 15:57:06  dischi
 # Added search for DVD/VCD to the item menu. You can only search the disc
 # label and you can't insert your own search text
@@ -53,7 +56,7 @@ current_media = None
 
 def actions(item):
     global current_media
-    if (not item.type == 'video') or item.mode == file or item.rom_id or item.rom_label:
+    if (not item.type == 'video') or item.mode == 'file' or item.rom_id or item.rom_label:
         return []
     current_media = item.media
     return [ (imdb_search_disc, 'Search IMDB for [%s]' % item.label),
