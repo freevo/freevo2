@@ -205,8 +205,8 @@ def identifymedia(dir):
             return media[0], '%s [%s]' % (media[0], label), image, (media[2], 1, [])
         
     mplayer_files = match_files(dir, config.SUFFIX_MPLAYER_FILES)
-    mp3_files = match_files(dir, config.SUFFIX_MPG123_FILES)
-    image_files = match_files(dir, config.SUFFIX_IMAGE_FILES)
+    mp3_files = match_files(dir, config.SUFFIX_AUDIO_FILES)
+    image_files = match_files(dir, config.SUFFIX_AUDIO_FILES)
     
     if mplayer_files and not mp3_files:
         if title:
