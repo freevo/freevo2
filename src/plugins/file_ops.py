@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/09/03 18:03:06  dischi
+# fix crash in DEBUG
+#
 # Revision 1.2  2003/08/31 17:18:33  dischi
 # exception handling
 #
@@ -77,7 +80,7 @@ class PluginInterface(plugin.ItemPlugin):
         
     def delete_file(self):
         if config.DEBUG:
-            print 'Deleting %s' % self.filename
+            print 'Deleting %s' % self.item.filename
 
         if self.item.type in ('video', 'audio'):
             base = os.path.splitext(self.item.filename)[0] + '.'
