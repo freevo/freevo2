@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.55  2003/09/20 15:21:08  dischi
+# bugfix
+#
 # Revision 1.54  2003/09/20 15:08:25  dischi
 # some adjustments to the missing testfiles
 #
@@ -453,13 +456,13 @@ if not DIR_RECORD:
               'where recordings should be stored or remove the tv plugin. ',
               'Autoset variable to /tmp.')
 
-if not TV_SHOW_DATA_DIR:
+if not TV_SHOW_DATA_DIR and not HELPER:
     error('TV_SHOW_DATA_DIR not found')
     
-if not COVER_DIR:
+if not COVER_DIR and not HELPER:
     error('COVER_DIR not found')
     
-if not MOVIE_DATA_DIR:
+if not MOVIE_DATA_DIR and not HELPER:
     error('MOVIE_DATA_DIR not found')
     
 #

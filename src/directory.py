@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/09/20 15:21:08  dischi
+# bugfix
+#
 # Revision 1.36  2003/09/20 15:08:25  dischi
 # some adjustments to the missing testfiles
 #
@@ -192,7 +195,7 @@ class DirItem(Playlist):
                     image = os.path.join(dir, covers[0])
             self.image = image
 
-        if not self.image and TV_SHOW_DATA_DIR:
+        if not self.image and config.TV_SHOW_DATA_DIR:
             self.image = util.getimage(os.path.join(config.TV_SHOW_DATA_DIR,
                                                     os.path.basename(dir).lower()))
 
