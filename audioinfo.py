@@ -16,6 +16,9 @@
 #          * Add support for Ogg-Vorbis
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2002/09/07 06:13:53  krister
+# Added check for divide by zero. Cleanups.
+#
 # Revision 1.11  2002/08/18 06:10:58  krister
 # Converted tabs to spaces. Please use tabnanny in the future!
 #
@@ -272,37 +275,40 @@ class AudioInfo:
             return 1        
         return 0
 
-    def is_mp3( self ):
+    def is_mp3(self):
         if re.match( '.*[mM][pP]3$', self.filename ):
             return 1
         return 0
             
-    def get_elapsed( self ):
+    def get_elapsed(self):
         if self.pause:
             return self.elapsed
         return (time.time() - self.start)
 
-    def get_remain( self ):
+    def get_remain(self):
         if( self.elapsed > self.length ):
             self.elapsed = self.length
         return (self.length - self.elapsed)
 
-    def get_done( self ):
-        if( self.elapsed > self.length ):
+    def get_done(self):
+        if not self.length:
+            return 0
+        
+        if self.elapsed > self.length:
             self.elapsed = self.length
-        return ((self.elapsed/self.length)*100.0)
+        return (self.elapsed/self.length)*100.0
 
-    def ffwd( self, len=0 ):
+    def ffwd(self, len=0):
         # Hm.. funny timetravel stuff here :)
         self.start = self.start-len
         
-    def rwd( self, len=0 ):
+    def rwd(self, len=0):
         # and here.
         self.start = self.start+len
         if self.start > time.time():
             self.start = time.time()
             
-    def draw( self ):
+    def draw(self):
         """
         Give information to the skin..
         """
