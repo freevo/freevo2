@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/01/28 03:45:35  krister
+# Work in progress...
+#
 # Revision 1.2  2003/01/24 07:30:56  krister
 # Create missing folders.
 #
@@ -114,9 +117,9 @@ python_copy:
 mplayer_copy:
 	@echo Copying mplayer/mencoder
 	-mkdir -p apps/mplayer
-	cp build/main/{mplayer,mencoder} ./apps/mplayer/
-	cp build/main/README ./apps/mplayer/README.mplayer
-	cp build/main/etc/{codecs.conf,input.conf} ./apps/mplayer/
+	cp build/mplayer/{mplayer,mencoder} ./apps/mplayer/
+	cp build/mplayer/README ./apps/mplayer/README.mplayer
+	cp build/mplayer/etc/{codecs.conf,input.conf} ./apps/mplayer/
 
 
 ################################################################################
