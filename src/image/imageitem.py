@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.11  2003/07/23 07:12:12  gsbarbieri
+# Added support for 'geometry' attribute ( getattr() now returns 'widthxheight', like videoitem )
+#
 # Revision 1.10  2003/07/02 20:10:28  dischi
 # added to mmpython support, removed old stuff
 #
@@ -72,6 +75,21 @@ class ImageItem(Item):
             self.name = util.getname(filename)
 
         self.image_viewer = viewer.get_singleton()
+
+    def getattr(self, attr):
+        """
+        return the specific attribute as string or an empty string
+        """
+        if attr in [ "geometry" ]:
+            try:
+                image = self.info
+                if attr == 'geometry':
+                    print "geometry=%sx%s" % (image.width, image.height)
+                    return '%sx%s' % (image.width, image.height)
+            except:
+                pass
+            
+        return Item.getattr(self, attr)
         
 
     def copy(self, obj):
