@@ -147,7 +147,7 @@ class Favorite:
         text = re.sub('%\([a-z]*\)', lambda x: x.group(0)+'s', text)
         text = text % options
         return text.rstrip(' -_:')
-    
+
 
     def add_data(self, rec):
         """
@@ -172,8 +172,8 @@ class Favorite:
                 print 'Error setting recording fxd name:', e
                 rec.fxdname = ''
         return True
-    
-        
+
+
     def __str__(self):
         """
         A simple string representation for a favorite for debugging in the
