@@ -41,6 +41,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2003/08/24 19:59:43  outlyer
+# Fixed this to be endian independent, as required by Python 2.3 (prevents
+# another warning)
+#
+# Here's the warning in case anyone is curious:
+# /usr/local/freevo/src/plugins/idlebar.py:115: FutureWarning: hex/oct
+# constants > sys.maxint will return positive values in Python 2.4 and up
+#
 # Revision 1.36  2003/08/24 19:56:38  outlyer
 # Adjust to the renamed 'type' of empty cdrom drives.
 #
@@ -115,7 +123,7 @@ class PluginInterface(plugin.DaemonPlugin):
         """
         draw a background and all idlebar plugins
         """
-        osd.drawroundbox(0, 0, osd.width + 2 * osd.x, osd.y + 60, (0x80000000, 0, 0, 0))
+        osd.drawroundbox(0, 0, osd.width + 2 * osd.x, osd.y + 60, (0x80000000L, 0, 0, 0))
         if not self.plugins:
             self.plugins = plugin.get('idlebar')
         x = osd.x + 10
