@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2004/07/11 19:39:47  dischi
+# reflect mmpython changes
+#
 # Revision 1.13  2004/07/10 12:33:43  dischi
 # header cleanup
 #
@@ -224,8 +227,8 @@ class PluginInterface(plugin.Plugin):
             self.lebgth = 0
         if self.player.item_info:
             length = int(self.player.item_info.length)
-            if hasattr(self.player.item_info, 'ts_start'):
-                self.start = self.player.item_info.ts_start
+            if hasattr(self.player.item_info, 'start'):
+                self.start = self.player.item_info.start
 
         self.last_timer = self.start
         
