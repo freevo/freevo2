@@ -6,7 +6,7 @@
 Summary:	Freevo
 Name:		freevo
 Version:	1.3.1
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Multimedia
 Source:		http://freevo.sourceforge.net/%{name}-%{version}.tar.gz
@@ -35,8 +35,6 @@ and audio.
 %patch0 -p0
 %patch1 -p0
 
-./configure --geometry=%{geometry} --display=%{display} \
-	--tv=%{tv_norm} --chanlist=%{chanlist}
 
 %build
 find . -name CVS | xargs rm -rf
@@ -47,6 +45,9 @@ popd
 pushd src/games/rominfo
 	make
 popd
+
+./configure --geometry=%{geometry} --display=%{display} \
+	--tv=%{tv_norm} --chanlist=%{chanlist}
 
 %package runtime
 Summary: Libraries used by freevo executable. Must be installed for freevo to work.
@@ -149,6 +150,7 @@ install -m 644 src/video/plugins/*.py %{buildroot}%{_prefix}/src/video/plugins
 
 install -m 644 src/www/*.py %{buildroot}%{_prefix}/src/www
 install -m 644 src/www/bin/* %{buildroot}%{_prefix}/src/www/bin
+install -m 644 src/www/htdocs/*.cgi %{buildroot}%{_prefix}/src/www/htdocs
 install -m 644 src/www/htdocs/images/* %{buildroot}%{_prefix}/src/www/htdocs/images
 install -m 644 src/www/htdocs/scripts/* %{buildroot}%{_prefix}/src/www/htdocs/scripts
 install -m 644 src/www/htdocs/styles/* %{buildroot}%{_prefix}/src/www/htdocs/styles
@@ -261,7 +263,7 @@ rm -f %{_prefix}/testfiles
 
 %changelog
 * Thu Feb 13 2003 TC Wan <tcwan@cs.usm.my>
-- Updated for 1.3.1 release
+- Updated for 1.3.1 release, added missing cgi scripts
 
 * Fri Feb  7 2003 TC Wan <tcwan@cs.usm.my>
 - Moved *.py bytecompilation to post-install to reduce RPM size
