@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2003/10/17 18:50:10  dischi
+# random playlist can now be non-recursive, too
+#
 # Revision 1.27  2003/10/17 17:29:03  dischi
 # do not include games in playlist
 #
@@ -327,16 +330,16 @@ class Playlist(Item):
 
 
 class RandomPlaylist(Playlist):
-    def __init__(self, playlist, parent, add_args = None):
+    def __init__(self, playlist, parent, add_args = None, recursive = True):
         Item.__init__(self, parent)
         self.type     = 'playlist'
 
         # variables only for Playlist
         self.current_item = None
-        self.playlist = []
-        self.autoplay = True
-        self.unplayed = playlist
-
+        self.playlist     = []
+        self.autoplay     = True
+        self.unplayed     = playlist
+        self.recursive    = recursive
         
     def actions(self):
         return [ ( self.play, _('Play') ) ]
@@ -368,7 +371,10 @@ class RandomPlaylist(Playlist):
     def play(self, arg=None, menuw=None):
         if isinstance(self.unplayed, tuple):
             dir, prefix = self.unplayed
-            self.unplayed = util.match_files_recursively(dir, prefix)
+            if self.recursive:
+                self.unplayed = util.match_files_recursively(dir, prefix)
+            else:
+                self.unplayed = util.match_files(dir, prefix)
 
         # reset playlist
         self.unplayed += self.playlist
