@@ -5,31 +5,21 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.28  2004/08/27 14:22:01  dischi
+# The complete image code is working again and should not crash. The zoom
+# handling got a complete rewrite. Only the gphoto plugin is not working
+# yet because my camera is a storage device.
+#
 # Revision 1.27  2004/08/23 20:36:42  dischi
 # rework application handling
 #
-# Revision 1.26  2004/08/01 10:44:20  dischi
-# remove menuw hiding
-#
-# Revision 1.25  2004/07/17 08:18:56  dischi
-# unicode fixes
-#
-# Revision 1.24  2004/07/10 12:33:39  dischi
-# header cleanup
-#
-# Revision 1.23  2004/02/13 20:27:30  dischi
-# fix attr geometry and add formated date
-#
-# Revision 1.22  2004/01/24 18:56:45  dischi
-# rotation is now stored in mediainfo
-#
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -49,33 +39,35 @@
 # ----------------------------------------------------------------------- */
 
 
+# python imports
 import util
 import os
 import time
 
+# freevo imports
 import config
-import viewer
-
-from item import Item
+from item import MediaItem
 from event import *
+from viewer import *
 
 
-class ImageItem(Item):
+class ImageItem(MediaItem):
+    """
+    An item for image files
+    """
     def __init__(self, url, parent, name = None, duration = 0):
-        self.type = 'image'
+        # set autovars to 'rotation' so that this value is
+        # stored between Freevo sessions
         self.autovars = [ ( 'rotation', 0 ) ]
-        Item.__init__(self, parent)
-
+        MediaItem.__init__(self, 'image', parent)
         if name:
             self.name = name
-
         self.set_url(url, search_image=False)
-
         if self.mode == 'file':
             self.image = self.filename
         self.duration = duration
 
-        
+
     def __getitem__(self, key):
         """
         return the specific attribute as string or an empty string
@@ -84,25 +76,26 @@ class ImageItem(Item):
             if self['width'] and self['height']:
                 return '%sx%s' % (self['width'], self['height'])
             return ''
-        
+
         if key == "date":
             try:
-                t = str(Item.__getitem__(self, key))
+                t = str(MediaItem.__getitem__(self, key))
                 if t:
-                    return time.strftime(config.TV_DATETIMEFORMAT,
-                                         time.strptime(t, '%Y:%m:%d %H:%M:%S'))
+                    t = time.strptime(t, '%Y:%m:%d %H:%M:%S')
+                    return time.strftime(config.TV_DATETIMEFORMAT, t)
             except:
                 pass
-            
-        return Item.__getitem__(self, key)
-        
+
+        return MediaItem.__getitem__(self, key)
+
 
     def sort(self, mode=None):
         """
         Returns the string how to sort this item
         """
         if mode == 'date':
-            return u'%s%s' % (os.stat(self.filename).st_ctime, Unicode(self.filename))
+            return u'%s%s' % (os.stat(self.filename).st_ctime,
+                              Unicode(self.filename))
         return Unicode(self.filename)
 
 
@@ -117,7 +110,7 @@ class ImageItem(Item):
         """
         caches (loads) the next image
         """
-        viewer.get_singleton().cache(self)
+        imageviewer().cache(self)
 
 
     def view(self, arg=None, menuw=None):
@@ -128,7 +121,7 @@ class ImageItem(Item):
             self.menuw = menuw
         self.parent.current_item = self
 
-        viewer.get_singleton().view(self, rotation=self['rotation'])
+        imageviewer().view(self, rotation=self['rotation'])
 
         if self.parent and hasattr(self.parent, 'cache_next'):
             self.parent.cache_next()
@@ -138,4 +131,4 @@ class ImageItem(Item):
         """
         stop viewing this item
         """
-        viewer.get_singleton().stop()
+        imageviewer().stop()

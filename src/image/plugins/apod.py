@@ -8,6 +8,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/08/27 14:22:01  dischi
+# The complete image code is working again and should not crash. The zoom
+# handling got a complete rewrite. Only the gphoto plugin is not working
+# yet because my camera is a storage device.
+#
 # Revision 1.7  2004/08/01 10:43:13  dischi
 # deactivate plugin
 #
@@ -22,7 +27,7 @@
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -43,16 +48,15 @@
 
 
 import os
-import config
+
 import plugin
 import menu
 import urllib
-import rc
 import re
 
 from item import Item
 from image.imageitem import ImageItem
-from gui import AlertBox
+from gui import AlertBox, PopupBox
 
 class ApodMainMenuItem(Item):
     """
@@ -60,27 +64,26 @@ class ApodMainMenuItem(Item):
     of commands in a submenu.
     """
     def __init__(self, parent, apoddir):
-        self.reason = config.REDESIGN_UNKNOWN
-        return
-
         Item.__init__(self, parent, skin_type='image')
         self.name = _( 'APOD' )
         self.title = _( 'APOD' )
         self.apoddir = apoddir
-        self.info = { 'name' : 'APOD', 'description' : 'Astronomy Picture of the day', 'title' : 'APOD' }
+        self.info = { 'name' : 'APOD',
+                      'description' : 'Astronomy Picture of the day',
+                      'title' : 'APOD' }
         self.type = 'image'
 
     def actions(self):
         return [ ( self.create_apod_menu , 'APOD Pictures' ) ]
 
     def create_apod_menu(self, arg=None, menuw=None):
-        apodmenuitems = []
-        apodmenuitems += [menu.MenuItem(_('Current Picture'), action=self.fetchCurrentPicture)]
-        apodmenuitems += [menu.MenuItem(_('Previous Pictures'), action=self.browsePictureDir)]
+        current = menu.MenuItem(_('Current Picture'), self.fetchCurrentPicture)
+        current.description = _('Download the current picture')
+        previous = menu.MenuItem(_('Previous Pictures'), self.browsePictureDir)
+        previous.description = _('Browse all previously downloaded images')
+        apodmenuitems = [ current, previous ]
         apod_menu = menu.Menu( _( 'Apod Pictures' ), apodmenuitems)
-        rc.app(None)
         menuw.pushmenu(apod_menu)
-        menuw.refresh()
 
     def browsePictureDir(self, arg=None, menuw=None):
         apodpic_items = []
@@ -90,26 +93,27 @@ class ApodMainMenuItem(Item):
             img_item = ImageItem(os.path.join(self.apoddir,apodpic), self)
             apodpic_items += [ img_item ]
         if (len(apodpic_items) == 0):
-            apodpic_items += [menu.MenuItem(_('No Images found'),
-                                             menuw.back_one_menu, 0)]
+            apodpic_items.append(menu.MenuItem(_('No Images found'),
+                                               menuw.back_one_menu, 0))
         apodpic_menu = menu.Menu(_('Apod Pictures'), apodpic_items,
-                                     reload_func=menuw.back_one_menu )
-        rc.app(None)
+                                 reload_func=menuw.back_one_menu )
         menuw.pushmenu(apodpic_menu)
-        menuw.refresh()
 
     def fetchCurrentPicture(self, arg=None, menuw=None):
         url = 'http://antwrp.gsfc.nasa.gov/apod/%s'
         apodpichref = ''
+        box = PopupBox(text=_('Getting picture, please wait'))
+        box.show()
         try:
             myfile=urllib.urlopen(url % 'index.html')
             apodpage=myfile.read()
             result = re.search("a href=\"(image.*)\"", apodpage)
             apodpichref = result.group(1)
-        except:
+        except Exception, e:
             #unreachable or url error
             realurl = url % 'index.html'
-            print 'APOD ERROR: could not open %s' % realurl
+            print 'APOD ERROR: could not open %s: %s' % (realurl, e)
+            box.destroy()
             AlertBox(text=_('Unable to open URL')).show()
             return
 
@@ -118,11 +122,13 @@ class ApodMainMenuItem(Item):
         try:
             urllib.urlretrieve(url % apodpichref, apodfile)
             imgitem = ImageItem(apodfile, self)
+            box.destroy()
             imgitem.view(menuw=menuw)
-        except:
+        except Exception, e:
             #unreachable or url error
             realurl = url % apodpichref
-            print 'APOD ERROR: could not open %s' % realurl
+            print 'APOD ERROR: could not open %s: %s' % (realurl, e)
+            box.destroy()
             AlertBox(text=_('Unable to open URL')).show()
             return
 
@@ -139,13 +145,15 @@ class PluginInterface(plugin.MainMenuPlugin):
         if not apoddir:
             self.reason = _('Need a directory to store APOD pictures.')
             return
-    
+
         if not os.path.isdir(apoddir):
             self.reason = _('directory %s does not exist.') % apoddir
             return
 
         if not os.access(apoddir, os.R_OK|os.W_OK|os.X_OK):
-            self.reason = _('directory %s must be able to be read, written to and executed by the user running freevo.') % apoddir
+            self.reason = _('directory %s must be able to be read, ' + \
+                            'written to and executed by the user running ' + \
+                            'freevo.') % apoddir
             return
 
         self.apoddir = apoddir
@@ -155,6 +163,4 @@ class PluginInterface(plugin.MainMenuPlugin):
 
     def items(self, parent):
         return [ ApodMainMenuItem(parent, self.apoddir) ]
-                                                                                        
-
 

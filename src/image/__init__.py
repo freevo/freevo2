@@ -5,19 +5,19 @@
 # $Id$
 #
 # Notes:
-# Todo:        
+# Todo:
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.20  2004/07/10 12:33:39  dischi
-# header cleanup
+# Revision 1.21  2004/08/27 14:21:50  dischi
+# The complete image code is working again and should not crash. The zoom
+# handling got a complete rewrite. Only the gphoto plugin is not working
+# yet because my camera is a storage device.
 #
-# Revision 1.19  2004/03/14 17:32:39  dischi
-# unicode fix
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
-# Copyright (C) 2002 Krister Lagerstrom, et al. 
+# Copyright (C) 2002 Krister Lagerstrom, et al.
 # Please see the file freevo/Docs/CREDITS for a complete list of authors.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -58,11 +58,13 @@ class PluginInterface(plugin.MimetypePlugin):
         self.display_type = [ 'image' ]
 
         # register the callbacks
-        plugin.register_callback('fxditem', ['image'], 'slideshow', self.fxdhandler)
+        plugin.register_callback('fxditem', ['image'], 'slideshow',
+                                 self.fxdhandler)
 
         # activate the mediamenu for image
-        plugin.activate('mediamenu', level=plugin.is_active('image')[2], args='image')
-        
+        level = plugin.is_active('image')[2]
+        plugin.activate('mediamenu', level=level, args='image')
+
 
     def suffix(self):
         """
@@ -87,16 +89,21 @@ class PluginInterface(plugin.MimetypePlugin):
         set informations for a diritem based on album.xml
         """
         if vfs.isfile(diritem.dir + '/album.xml'):
+            # Add album.xml information from bins to the
+            # directory informations
             info  = bins.get_bins_desc(diritem.dir)
             if not info.has_key('desc'):
                 return
 
             info = info['desc']
             if info.has_key('sampleimage') and info['sampleimage']:
+                # Check if the album.xml defines a sampleimage.
+                # If so, use it as image for the directory
                 image = vfs.join(diritem.dir, info['sampleimage'])
                 if vfs.isfile(image):
-                    diritem.image       = image
+                    diritem.image = image
 
+            # set the title from album.xml
             if info.has_key('title') and info['title']:
                 diritem.name = info['title']
 
@@ -123,17 +130,19 @@ class PluginInterface(plugin.MimetypePlugin):
           </slideshow>
         </freevo>
         """
-        items    = []
-        dirname  = os.path.dirname(fxd.getattr(None, 'filename', ''))
+        items = []
+        dirname = os.path.dirname(fxd.getattr(None, 'filename', ''))
         children = fxd.get_children(node, 'files')
         if children:
             children = children[0].children
 
+        # Create a list of all images for the slideshow
         for child in children:
             try:
                 citems = []
                 fname  = os.path.join(dirname, String(fxd.gettext(child)))
                 if child.name == 'directory':
+                    # for directories add all files in it
                     if fxd.getattr(child, 'recursive', 0):
                         f = util.match_files_recursively(fname, self.suffix())
                     else:
@@ -141,25 +150,27 @@ class PluginInterface(plugin.MimetypePlugin):
                     citems = self.get(None, f)
 
                 elif child.name == 'file':
+                    # add the given filename
                     citems = self.get(None, [ fname ])
 
+                # set duration until the next images comes up
                 duration = fxd.getattr(child, 'duration', 0)
                 if duration:
                     for i in citems:
                         i.duration = duration
                 items += citems
-                
+
             except OSError, e:
                 print 'slideshow error:'
                 print e
 
+        # create the playlist based on the parsed file list
         pl = Playlist('', items, fxd.getattr(None, 'parent', None),
                       random=fxd.getattr(node, 'random', 0),
                       repeat=fxd.getattr(node, 'repeat', 0))
         pl.autoplay = True
-
-        pl.name     = fxd.getattr(node, 'title')
-        pl.image    = fxd.childcontent(node, 'cover-img')
+        pl.name = fxd.getattr(node, 'title')
+        pl.image = fxd.childcontent(node, 'cover-img')
         if pl.image:
             pl.image = vfs.join(vfs.dirname(fxd.filename), pl.image)
 
@@ -190,8 +201,9 @@ class PluginInterface(plugin.MimetypePlugin):
                 print e
 
         if files:
-            pl.background_playlist = Playlist(playlist=files, random = random,
-                                              repeat=True, display_type='audio')
+            bg = Playlist(playlist=files, random = random,
+                          repeat=True, display_type='audio')
+            pl.background_playlist = bg
 
         # add item to list
         fxd.parse_info(fxd.get_children(node, 'info', 1), pl)
