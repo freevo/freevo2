@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/10/07 17:13:22  dischi
+# fix howto path lookup
+#
 # Revision 1.1  2003/09/23 18:24:07  dischi
 # moved help to a new directory and add more docs
 #
@@ -50,7 +53,7 @@ import version
 from www.web_types import HTMLResource, FreevoResource
 import util, config
 
-SEARCH_PATH = (os.path.join(config.SHARE_DIR, '../freevo-%s' % version.__version__),
+SEARCH_PATH = (os.path.join(config.SHARE_DIR, '../doc/freevo-%s' % version.__version__),
                os.path.join(config.SHARE_DIR, '../Docs'))
 
 class HowtoResource(FreevoResource):
@@ -60,6 +63,8 @@ class HowtoResource(FreevoResource):
         for d in SEARCH_PATH:
             if os.path.isdir(os.path.join(d, 'freevo_howto')):
                 self.BASEDIR = os.path.join(d, 'freevo_howto')
+            elif os.path.isdir(os.path.join(d, 'howto')):
+                self.BASEDIR = os.path.join(d, 'howto')
         
     def _render(self, request):
         fv = HTMLResource()
