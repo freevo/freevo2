@@ -1,0 +1,763 @@
+# translation of da.po to Danish
+# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
+# Esben Jensen <esben.jon@privat.dk>, 2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: da\n"
+"POT-Creation-Date: 2003-10-04 20:35+0200\n"
+"PO-Revision-Date: 2003-10-05 10:38+0200\n"
+"Last-Translator: Esben Jensen <esben.jon@privat.dk>\n"
+"Language-Team: Danish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.0.2\n"
+
+#: audio/audiodiskitem.py:60
+msgid "Unknown CD Album"
+msgstr "Ukendt CD"
+
+#: audio/audiodiskitem.py:95 directory.py:371 image/plugins/gphoto.py:155
+msgid "Browse directory"
+msgstr "Gennemse katalog"
+
+#: audio/xmms.py:156 games/game.py:99
+#, python-format
+msgid "File \"%s\" not found!"
+msgstr "Filen \"%s\" blev ikke fundet"
+
+#: audio/plugins/cdbackup.py:207
+msgid "Rip the CD to the hard drive"
+msgstr "Gem CD på harddisken"
+
+#: audio/plugins/cdbackup.py:208
+msgid "Get CDs available for ripping"
+msgstr "Vis tilgængelige CD'er"
+
+#: audio/plugins/cdbackup.py:233
+msgid "Backup CD to hard drive in mp3 format"
+msgstr "Gem CD i mp3 format"
+
+#: audio/plugins/cdbackup.py:236
+msgid "Backup CD to hard drive in Ogg format"
+msgstr "Gem CD i ogg format"
+
+#: audio/plugins/cdbackup.py:239
+msgid "Backup CD to hard drive in FLAC format"
+msgstr "Gem CD i FLAC format"
+
+#: audio/plugins/cdbackup.py:241
+msgid "Backup CD to hard drive in wav format"
+msgstr "Gem CD i wav format"
+
+#: audio/plugins/cdbackup.py:244
+msgid "CD Backup"
+msgstr "CD-backup"
+
+#: audio/plugins/detach.py:63
+msgid "Show player"
+msgstr "Vis afspiller"
+
+#: audio/plugins/mplayer.py:131
+#, python-format
+msgid ""
+"%s\n"
+"not found!"
+msgstr ""
+"%s\n"
+"blev ikke fundet!"
+
+#: audio/plugins/mplayer.py:158
+msgid "Invalid audio file"
+msgstr "Ugyldig lydfil"
+
+#: audio/plugins/vux.py:90
+msgid "[VUX] Start playing"
+msgstr "[VUX] Start afspilning"
+
+#: audio/plugins/vux.py:91
+msgid "[VUX] Stop playing"
+msgstr "[VUX] Stop afspilning"
+
+#: audio/plugins/vux.py:92
+msgid "[VUX] Next (rating down)"
+msgstr "[VUX] Næste (formindsk rating)"
+
+#: audio/plugins/vux.py:93
+msgid "[VUX] Next (rating intact)"
+msgstr "[VUX] Næste (bibehold rating)"
+
+#: audio/plugins/vux.py:94
+msgid "[VUX] Next (rating up)"
+msgstr "[VUX] Næste (forhøj rating)"
+
+#: audio/plugins/vux.py:95
+msgid "[VUX] Playing item rating up"
+msgstr "[VUX] Forhøj rating på spor der afspilles"
+
+#: audio/plugins/vux.py:96
+msgid "[VUX] Playing item rating down"
+msgstr "[VUX] Formindsk rating på spor der afspilles"
+
+#: audio/plugins/vux.py:97
+#, fuzzy
+msgid "[VUX] a dir item do not select"
+msgstr "[VUX] et katalog-element kan ikke vælges"
+
+#: audio/plugins/vux.py:98
+msgid "[VUX] an audio item, do not select"
+msgstr "[VUX] et lyd element kan ikke vælges"
+
+#: directory.py:352
+#, python-format
+msgid "Directory on disc [%s]"
+msgstr "Katalog på disk [%s]"
+
+#: directory.py:353
+msgid "Directory"
+msgstr "Katalog"
+
+#: directory.py:377
+msgid "Recursive random play all items"
+msgstr "Tilfældig afspilning af alle underelementer"
+
+#: directory.py:378
+msgid "Configure directory"
+msgstr "Opsætning af katalog"
+
+#: directory.py:401
+msgid "Enter Password"
+msgstr "Indtast adgangskode"
+
+#: directory.py:426
+msgid "Password incorrect"
+msgstr "Ugyldig adgangskode"
+
+#: directory.py:468
+msgid "Scanning disc, be patient..."
+msgstr "Skanner disk, vent venligst..."
+
+#: directory.py:470
+msgid "Scanning directory, be patient..."
+msgstr "Skanner katalog, vent venligst..."
+
+#: directory.py:781 directory.py:818
+msgid "on"
+msgstr "til"
+
+#: directory.py:783 directory.py:786 directory.py:820 directory.py:823
+msgid "off"
+msgstr "fra"
+
+#: directory.py:788 directory.py:825
+msgid "auto"
+msgstr "auto"
+
+#: directory.py:827
+msgid "Configure"
+msgstr "Opsæt"
+
+#: menu.py:547
+msgid "No action defined for this choice!"
+msgstr "Der findes ingen handling for dette valg!"
+
+#: osd.py:398
+msgid "z = Toggle Fullscreen"
+msgstr "z = Skift mellem fuld skærm"
+
+#: osd.py:399
+msgid "Arrow Keys = Move"
+msgstr "Piletaster = Flyt"
+
+#: osd.py:400
+msgid "Spacebar = Select"
+msgstr "Mellemrum = Vælg"
+
+#: osd.py:401
+msgid "Escape = Stop/Prev. Menu"
+msgstr "Escape = Stop/Forrige menu"
+
+#: osd.py:402
+msgid "h = Help"
+msgstr "h = Hjælp"
+
+#: playlist.py:230
+msgid "Random Playlist"
+msgstr "Tilfældig afspilningsliste"
+
+#: playlist.py:235 playlist.py:239 playlist.py:337 video/configure.py:175
+#: video/videoitem.py:287
+#, fuzzy
+#, Alternativt 'Play'
+msgid "Play"
+msgstr "Afspil"
+
+#: playlist.py:236 playlist.py:238
+msgid "Browse Playlist"
+msgstr "Gennemse afspilningsliste"
+
+#: games/mame_cache.py:170
+msgid "Generating MAME cache, please wait."
+msgstr "Opretter MAME cache, vent venligst."
+
+#: gui/AlertBox.py:161 gui/ConfirmBox.py:161 plugins/commands.py:171
+msgid "OK"
+msgstr "O.K."
+
+#: gui/ConfirmBox.py:165
+msgid "CANCEL"
+msgstr "ANNULLER"
+
+#: image/plugins/gphoto.py:119 image/imageitem.py:110
+msgid "View Image"
+msgstr "Vis billede"
+
+#: image/viewer.py:118
+#, python-format
+msgid ""
+"Can't Open Image\n"
+"'%s'"
+msgstr ""
+"Kan ikke åbne billede\n"
+"'%s'"
+
+#: image/viewer.py:351
+msgid "Title: "
+msgstr "Titel: "
+
+#: image/viewer.py:352
+msgid "Description: "
+msgstr "Beskrivelse: "
+
+#: image/viewer.py:386
+msgid "No information available"
+msgstr "Ingen tilgængelige oplysninger"
+
+#: plugins/commands.py:156
+msgid "Command finished"
+msgstr "Kommando afsluttet"
+
+#: plugins/commands.py:172
+msgid "Show Stderr"
+msgstr "Vis standardfejl"
+
+#: plugins/commands.py:173
+msgid "Show Stdout"
+msgstr "Vis standarduddata"
+
+#: plugins/commands.py:187
+msgid "Stdout File"
+msgstr "Standarduddata-fil"
+
+#: plugins/commands.py:191
+msgid "Stderr File"
+msgstr "Standardfejl-fil"
+
+#: plugins/commands.py:245
+msgid "Run Command"
+msgstr "Kør kommando"
+
+#: plugins/commands.py:268
+msgid "Command Failed"
+msgstr "Kommando fejlet"
+
+#: plugins/commands.py:271
+msgid "Command Completed"
+msgstr "Kommando udført"
+
+#: plugins/commands.py:296
+msgid "No Commands found"
+msgstr "Ingen kommandoer fundet"
+
+#: plugins/commands.py:297 plugins/commands.py:323
+msgid "Commands"
+msgstr "Kommandoer"
+
+#: plugins/df.py:70
+#, python-format
+msgid "%i of %i Mb free"
+msgstr "%i af %i Mb fri"
+
+#: plugins/idlebar.py:465
+#, python-format
+msgid "%iM"
+msgstr "%iM"
+
+#: plugins/idlebar.py:490
+#, python-format
+msgid "%s%%"
+msgstr "%s%%"
+
+#: plugins/mediamenu.py:183
+msgid "Media"
+msgstr "Medier"
+
+#: plugins/mediamenu.py:189
+msgid "Movie"
+msgstr "Film"
+
+#: plugins/mediamenu.py:192
+msgid "Audio"
+msgstr "Audio"
+
+#: plugins/mediamenu.py:195
+msgid "Image"
+msgstr "Billeder"
+
+#: plugins/mediamenu.py:198
+msgid "Games"
+msgstr "Spil"
+
+#: plugins/mediamenu.py:218
+#, python-format
+msgid "%s Main Menu"
+msgstr "%s Hovedmenu"
+
+#: plugins/headlines.py:111 plugins/headlines.py:277
+msgid "Headlines"
+msgstr "Overskrifter"
+
+#: plugins/headlines.py:200
+#, fuzzy
+msgid "Show Sites Headlines"
+msgstr "Vis overskrifter for steder"
+
+#: plugins/headlines.py:275
+msgid "No Headlines found"
+msgstr "Ingen overskrifter fundet"
+
+#: plugins/headlines.py:304
+#, fuzzy
+msgid "No Headlines Sites found"
+msgstr "Ingen overskriftssteder fundet"
+
+#: plugins/headlines.py:306
+msgid "Headlines Sites"
+msgstr "Overskriftssteder"
+
+#: plugins/rom_drives.py:254
+#, python-format
+msgid "Drive %s (no disc)"
+msgstr "Drev %s (ingen disk)"
+
+#: plugins/rom_drives.py:317
+#, python-format
+msgid "Ejecting disc in drive %s"
+msgstr "Åbner drev %s"
+
+#: plugins/rom_drives.py:350
+#, python-format
+msgid "Reading disc in drive %s"
+msgstr "Aflæser disk i drev %s"
+
+#: plugins/file_ops.py:73
+msgid "Delete file"
+msgstr "Slet fil"
+
+#: plugins/file_ops.py:75
+msgid "Delete info"
+msgstr "Slet info"
+
+#: plugins/file_ops.py:81
+#, python-format
+msgid ""
+"Do you wish to delete\n"
+" '%s'?"
+msgstr ""
+"Vil du slette\n"
+" '%s'?"
+
+#: plugins/file_ops.py:86
+#, python-format
+msgid ""
+"Delete info about\n"
+" '%s'?"
+msgstr ""
+"Slet info om\n"
+" '%s'?"
+
+#: plugins/base.py:68
+msgid "Shutdown Freevo"
+msgstr "Afslut Freevo"
+
+#: plugins/base.py:69
+msgid "Shutdown system"
+msgstr "Luk system ned"
+
+#: tv/record_schedule.py:98
+msgid "View Recording Schedule"
+msgstr "Vis programmerede optagelser"
+
+#: tv/record_schedule.py:100
+msgid "Delete Scheduled Item"
+msgstr "Slet programmeret optagelse"
+
+#: tv/record_schedule.py:102
+msgid "RECORDING SCHEDULE"
+msgstr "OPTAGELSESPROGRAMMERING"
+
+#: tv/record_schedule.py:175
+msgid "VIEW RECORDING SCHEDULE"
+msgstr "VIS PROGRAMMEREDE OPTAGELSER"
+
+#: tv/record_schedule.py:178
+msgid "DELETE SCHEDULED ITEM"
+msgstr "SLET PROGRAMMERET OPTAGELSE"
+
+#: tv/record_schedule.py:182
+msgid "All Currently Recording Items Have Been Killed!"
+msgstr "Alle igangværende optagelser er stoppet!"
+
+#: tv/tvguide.py:73 tv/tvguide.py:490 tv/tvguide.py:492
+#: skins/main/tvlisting_area.py:363
+msgid "This channel has no data loaded"
+msgstr "Ingen data for kanal"
+
+#: tv/tvguide.py:83
+msgid "Preparing the program guide"
+msgstr "Forbereder program-guide"
+
+#: tv/tvguide.py:87
+msgid "TV Guide is corrupt!"
+msgstr "TV-guiden er fejlbehæftet"
+
+#: tv/tvmenu.py:144 tv/tvmenu.py:152
+#, python-format
+msgid "Could not find TV channel %s"
+msgstr "Kunne ikke finde TV-kanalen %s"
+
+#: tv/tvmenu.py:177
+msgid "TV Guide"
+msgstr "TV-guide"
+
+#: tv/tvmenu.py:178
+msgid "Recorded Shows"
+msgstr "Optagede udsendelser"
+
+#: tv/tvmenu.py:180
+msgid "Scheduled Recordings"
+msgstr "Programmerede optagelser"
+
+#: tv/tvmenu.py:182
+msgid "Search Guide"
+msgstr "Gennemsøg guide"
+
+#: tv/tvmenu.py:185
+msgid "TV Main Menu"
+msgstr "TV Hovedmenu"
+
+#: tv/tvmenu.py:221
+msgid "The list of TV channels is invalid!\n"
+msgstr "Listen af TV-kanaler er ugyldig!\n"
+
+#: tv/tvmenu.py:222
+msgid "Please check the config file."
+msgstr "Kontrollér venligst opsætningsfilen."
+
+#: video/plugins/imdb_info.py:72
+msgid "Show info for this file"
+msgstr "Vis egenskaber for denne fil"
+
+#: video/plugins/imdb_info.py:86
+msgid "There is no IMDB information for this file."
+msgstr "Der findes ingen IMDB-oplysninger for denne fil."
+
+#: video/plugins/imdb.py:109
+msgid "Search IMDB for this file"
+msgstr "Slå denne fil op i IMDB"
+
+#: video/plugins/imdb.py:116 video/plugins/imdb.py:122
+#, python-format
+msgid "Search IMDB for [%s]"
+msgstr "Slå [%s] op i IMDB"
+
+#: video/plugins/imdb.py:133
+msgid "searching IMDB..."
+msgstr "gennemsøger IMDB..."
+
+#: video/plugins/imdb.py:157
+msgid "Unknown error while connecting to IMDB"
+msgstr "Ukendt fejl ved forbindelse til IMDB"
+
+#: video/plugins/imdb.py:179
+msgid "No information available from IMDB"
+msgstr "Der fandtes ingen tilgængelige oplysninger hos IMDB"
+
+#: video/plugins/imdb.py:218
+msgid "getting data..."
+msgstr "henter data..."
+
+#: video/plugins/mover.py:64
+#, python-format
+msgid "Move to [%s]"
+msgstr "Flyt til [%s]"
+
+#: video/plugins/bookmarker.py:96
+msgid "Resume playback"
+msgstr "Fortsæt afspilning"
+
+#: video/plugins/bookmarker.py:101
+msgid "Bookmarks"
+msgstr "Bogmærker"
+
+#: video/plugins/bookmarker.py:136
+#, python-format
+msgid "Jump to %s"
+msgstr "Gå til %s"
+
+#: video/plugins/linkbrowser.py:152
+msgid "Downloading link list..."
+msgstr "Henter liste med lænker..."
+
+#: video/plugins/linkbrowser.py:159
+#, python-format
+msgid "Failed to download %s"
+msgstr "Kunne ikke hente %s"
+
+#: video/configure.py:80
+msgid "Audio Menu"
+msgstr "Lydspor-menu"
+
+#: video/configure.py:96
+msgid "no subtitles"
+msgstr "ingen undertekster"
+
+#: video/configure.py:99
+msgid "Subtitle Menu"
+msgstr "Undertekst-menu"
+
+#: video/configure.py:115
+#, python-format
+msgid "Play chapter %s"
+msgstr "Afspil scene %s"
+
+#: video/configure.py:117
+msgid "Chapter Menu"
+msgstr "Scene-menu"
+
+#: video/configure.py:144
+#, python-format
+msgid "Turn off %s"
+msgstr "Slå %s fra"
+
+#: video/configure.py:145
+#, python-format
+msgid "Turn on %s"
+msgstr "Slå %s til"
+
+#: video/configure.py:160
+msgid "Audio selection"
+msgstr "Valg af lydspor"
+
+#: video/configure.py:162
+msgid "Subtitle selection"
+msgstr "Valg af undertekst"
+
+#: video/configure.py:165
+msgid "Chapter selection"
+msgstr "Valg af scene"
+
+#: video/configure.py:167
+msgid "deinterlacing"
+msgstr "deinterlacing"
+
+#: video/configure.py:176
+msgid "Config Menu"
+msgstr "Opsætningsmenu"
+
+#: video/videoitem.py:291
+msgid "Play DVD"
+msgstr "Afspil DVD"
+
+#: video/videoitem.py:292 video/videoitem.py:294
+msgid "DVD title list"
+msgstr "DVD titeloversigt"
+
+#: video/videoitem.py:295 video/videoitem.py:303
+msgid "Play default track"
+msgstr "Afspil standardspor"
+
+#: video/videoitem.py:299
+msgid "Play VCD"
+msgstr "Afspil VCD"
+
+#: video/videoitem.py:300 video/videoitem.py:302
+msgid "VCD title list"
+msgstr "VCD titeloversigt"
+
+#: video/videoitem.py:308
+msgid "Play with maximum cache"
+msgstr "Afspil med maksimal cache"
+
+#: video/videoitem.py:311
+msgid "Show variants"
+msgstr "Vis varianter"
+
+#: video/videoitem.py:392
+msgid "Wait while detecting media..."
+msgstr "Undersøger medie..."
+
+#: video/videoitem.py:414
+#, python-format
+msgid "Media not found for file \"%s\".\n"
+msgstr "Mediet for filen \"%s\" blev ikke fundet.\n"
+
+#: video/videoitem.py:415
+msgid "Please insert the media."
+msgstr "Indsæt medie."
+
+#: video/videoitem.py:431
+#, python-format
+msgid "Media not found for %s track %s"
+msgstr "Mediet for %s spor %s blev ikke fundet"
+
+#: video/videoitem.py:551
+#, python-format
+msgid "Play Title %s"
+msgstr "Afspil titel %s"
+
+#: main.py:117
+msgid "shutting down..."
+msgstr "lukker ned..."
+
+#: main.py:223
+msgid "Freevo Main Menu"
+msgstr "Freevo Hovedmenu"
+
+#: skins/main/main.py:154
+msgid "TV GUIDE"
+msgstr "TV-GUIDE"
+
+#: skins/main/main.py:284
+msgid "Starting Freevo, please wait ..."
+msgstr "Starter Freevo, vent venligst ..."
+
+#: skins/main/main.py:544 skins/main/main.py:612
+msgid "INTERNAL ERROR, NO MENU!"
+msgstr "INTERN FEJL, INGEN MENU!"
+
+#: skins/main/listing_area.py:249
+msgid "This directory is empty"
+msgstr "Dette katalog er tomt"
+
+# Manualy added from fxd skin files
+msgid "TV"
+msgstr "TV"
+
+msgid "Movies"
+msgstr "Film"
+
+msgid "Music"
+msgstr "Musik"
+
+msgid "Images"
+msgstr "Billeder"
+
+msgid "Shutdown"
+msgstr "Luk ned"
+
+msgid "Watch TV"
+msgstr "Se TV"
+
+msgid "Watch a Movie"
+msgstr "Se en film"
+
+msgid "Listen to Music"
+msgstr "Lyt til musik"
+
+msgid "Look at Pictures"
+msgstr "Se billeder"
+
+#, fuzzy
+msgid " of "
+msgstr " af "
+
+msgid " MB free"
+msgstr " MB fri"
+
+msgid "Artist:"
+msgstr "Kunstner:"
+
+msgid "Album:"
+msgstr "Album:"
+
+msgid " musics in this playlist."
+msgstr " numre i denne afspilningsliste."
+
+msgid "Just one music in this playlist."
+msgstr "Der er kun et nummer i denne afspilningsliste."
+
+msgid "This playlist is empty!"
+msgstr "Denne afspilningsliste er tom!"
+
+msgid " movies in this playlist."
+msgstr " film i denne afspilningsliste."
+
+msgid "Just one movie in this playlist."
+msgstr "Der er kun en film i denne afspilningsliste."
+
+msgid "Year:"
+msgstr "År:"
+
+msgid "Genre:"
+msgstr "Genre:"
+
+msgid "Rating:"
+msgstr "Rating:"
+
+msgid "Runtime:"
+msgstr "Længde:"
+
+msgid "Type:"
+msgstr "Type:"
+
+msgid "Resolution:"
+msgstr "Opløsning:"
+
+msgid "Copyright:"
+msgstr "Copyright:"
+
+msgid "Geometry:"
+msgstr "Geometri:"
+
+msgid "Date:"
+msgstr "Dato:"
+
+msgid " pictures in this slideshow."
+msgstr " billeder i denne sekvens."
+
+msgid "Just one picture in this slideshow."
+msgstr "Kun et billede i denne sekvens."
+
+msgid "This slideshow is empty!"
+msgstr "Denne sekvens er tom!"
+
+msgid "Track:"
+msgstr "Spor:"
+
+msgid "Length:"
+msgstr "Længde:"
+
+msgid "Elapsed:"
+msgstr "Tid gået:"
+
+msgid " min. "
+msgstr " min. "
+
+msgid " Audiotracks, "
+msgstr " Lydspor, "
+
+msgid " Subtitles, "
+msgstr " Undertekster, "
+
+msgid " Chapter"
+msgstr " Scene"
+
+msgid "Size:"
+msgstr "Størrelse:"
+
+msgid " items in this playlist"
+msgstr " elementer i denne afspilningsliste"
+
