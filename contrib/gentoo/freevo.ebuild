@@ -40,7 +40,7 @@ src_install() {
  	install -d ${D}/etc/freevo
  	install -m 644 local_conf.py.example ${D}/etc/freevo
 
-	use lircd || perl -pi -e 's/use lircd//' boot/gentoo-freevo
+	use lirc || perl -pi -e 's/need lircd//' boot/gentoo-freevo
 
  	# install boot scripts
  	install -d ${D}/etc/init.d
@@ -50,7 +50,7 @@ src_install() {
 }
 
 pkg_postinst() {
-	local myconf="--geometry=800x600 --display=sdl"
+	local myconf="--geometry=800x600 --display=x11"
 	use matrox && myconf="--geometry=768x576 --display=mga"
 
 	/bin/ls -l /etc/localtime | grep Europe >/dev/null 2>/dev/null && \
