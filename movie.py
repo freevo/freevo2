@@ -11,6 +11,9 @@
 #
 # ----------------------------------------------------------------------
 # $Log$
+# Revision 1.41  2002/09/27 08:46:00  dischi
+# add debug
+#
 # Revision 1.40  2002/09/22 18:14:57  dischi
 # Renamed dvd_vcd_menu_generate to dvd_vcd_handler with more
 # intelligence: count the number of mpg files _and_ the number of
@@ -364,6 +367,10 @@ def main_menu_generate():
     for media in config.REMOVABLE_MEDIA:
         if media.info:
 
+            if not media.info.label:
+                print "WARNING: no title for %s given, setting to default" % media.mountdir
+                media.info.label = media.mountdir
+                
             # Right now we only display the title if we have one and
             # the title contains the name of the drive for unknown
             # discs. Should we display more infos even on known discs?
