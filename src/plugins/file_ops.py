@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2004/01/30 20:42:03  dischi
+# set item.image to parent when deleting it
+#
 # Revision 1.15  2004/01/09 21:11:45  dischi
 # crash on debug: item may have no url
 #
@@ -145,5 +148,9 @@ class PluginInterface(plugin.ItemPlugin):
 
     def delete_image(self):
         self.safe_unlink(self.item.files.image)
+        if self.item.parent:
+            self.item.image = self.item.parent.image
+        else:
+            self.item.image = None
         if self.menuw:
             self.menuw.back_one_menu(arg='reload')
