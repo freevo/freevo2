@@ -9,11 +9,14 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
-# Revision 1.57  2004/01/15 20:46:02  outlyer
-# Added a "RATING" event... press a number from 0-5 to have the sqlite
-# database keep track of your score. The idea is to be able to build
-# playlists automatically of "top rated" songs. When you press the number,
-# the score is printed on the screen via tiny_osd
+# Revision 1.58  2004/01/15 21:15:28  outlyer
+# Fixed to use proper audio context buttons.
+#
+# Note: Is is possible to do this without adding code to playlist.py? All I need
+# is the filename and an event, but because no existing event sends the filename,
+# and the plugin doesn't know about it, I have to pass it along somehow.
+#
+# Anyone want to chime in with an idea on how?
 #
 # Revision 1.55  2004/01/10 13:16:14  dischi
 # remove self.fxd_file, not needed anymore
@@ -471,7 +474,7 @@ class Playlist(Item):
             if (self.current_item.type == 'audio'):
                 rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
 
-        if event == BUTTON and event.arg and hasattr(self.current_item,'type'):
+        if event in (INPUT_1, INPUT_2, INPUT_3, INPUT_4, INPUT_5) and event.arg and hasattr(self.current_item,'type'):
             if (self.current_item.type == 'audio'):
                 rc.post_event(Event(RATING,(event.arg,self.current_item.filename)))
 

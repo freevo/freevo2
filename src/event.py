@@ -9,6 +9,15 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.37  2004/01/15 21:15:28  outlyer
+# Fixed to use proper audio context buttons.
+#
+# Note: Is is possible to do this without adding code to playlist.py? All I need
+# is the filename and an event, but because no existing event sends the filename,
+# and the plugin doesn't know about it, I have to pass it along somehow.
+#
+# Anyone want to chime in with an idea on how?
+#
 # Revision 1.36  2004/01/15 20:46:02  outlyer
 # Added a "RATING" event... press a number from 0-5 to have the sqlite
 # database keep track of your score. The idea is to be able to build
@@ -431,7 +440,16 @@ AUDIO_EVENTS = {
     'CH-'       : PLAYLIST_NEXT,
     'VOL+'      : MIXER_VOLUP,
     'VOL-'      : MIXER_VOLDOWN,
-    'MUTE'      : MIXER_MUTE
+    'MUTE'      : MIXER_MUTE,
+    '1'         : INPUT_1,
+    '2'         : INPUT_2,
+    '3'         : INPUT_3,
+    '4'         : INPUT_4,
+    '5'         : INPUT_5,
+    '6'         : INPUT_6,
+    '7'         : INPUT_7,
+    '8'         : INPUT_8,
+    '9'         : INPUT_9,
     }
     
 IMAGE_EVENTS = {
