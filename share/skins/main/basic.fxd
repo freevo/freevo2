@@ -39,7 +39,7 @@
 	image definition is present, it will be used except when all items
 	have the same or no image
 	-->
-	<menu type="all">
+	<menu type="default">
 	    <style text="normal text style"/>
 	</menu>
 
