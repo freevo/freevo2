@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/09/14 20:08:34  dischi
+# draw rectangle before image
+#
 # Revision 1.5  2004/08/22 20:06:18  dischi
 # Switch to mevas as backend for all drawing operations. The mevas
 # package can be found in lib/mevas. This is the first version using
@@ -148,9 +151,10 @@ class View_Area(Area):
         x0 += addx
         y0 += addy
 
-        self.content.append(self.drawimage(image, (x0, y0)))
-
         if val.rectangle:
             r.width  -= width  - i_w
             r.height -= height - i_h
             self.content.append(self.drawbox(r.x + addx, r.y + addy, r.width, r.height, r))
+
+        self.content.append(self.drawimage(image, (x0, y0)))
+
