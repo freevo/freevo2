@@ -3,6 +3,7 @@ Todo list for Freevo
 
 Short-term
 ----------
+o Add rcs id to all files!
 o Channel guide layout
 o Installation instructions, clean up config stuff
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
