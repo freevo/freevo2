@@ -10,6 +10,9 @@
 #
 #-----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2003/05/21 00:02:02  rshortt
+# Labels are now handled better and there is no need for the Panel class here.
+#
 # Revision 1.18  2003/05/04 23:18:19  rshortt
 # Change some height values (temporarily) to avoid some crashes.
 #
@@ -83,9 +86,6 @@
 """
 A Dialog box type class for Freevo.
 """ 
-__date__    = "$Date$"
-__version__ = "$Revision$" 
-__author__  = """Thomas Malt <thomas@malt.no>"""
 
 import config
 
@@ -117,9 +117,11 @@ class PopupBox(Container):
     Trying to make a standard popup/dialog box for various usages.
     """
     
-    def __init__(self, parent='osd', text=" ", left=None, top=None, width=360, height=120,
-                 bg_color=None, fg_color=None, icon=None, border=None, 
-                 bd_color=None, bd_width=None):
+    def __init__(self, parent='osd', text=' ', handler=None, left=None, 
+                 top=None, width=360, height=120, bg_color=None, fg_color=None,
+                 icon=None, border=None, bd_color=None, bd_width=None):
+
+        self.handler = handler
 
         Container.__init__(self, 'frame', left, top, width, height, bg_color, 
                            fg_color, None, None, border, bd_color, bd_width)
@@ -142,13 +144,7 @@ class PopupBox(Container):
         if not self.top:      self.top    = self.osd.height/2 - self.height/2
 
 
-        if type(text) is StringType:
-            if text: self.set_text(text)
-        elif not text:
-            self.text = None
-        else:
-            raise TypeError, text
-
+        self.font = None
         if self.skin_info_font:       
             self.set_font(self.skin_info_font.name, 
                           self.skin_info_font.size, 
@@ -157,8 +153,10 @@ class PopupBox(Container):
             self.set_font(config.OSD_DEFAULT_FONTNAME,
                           config.OSD_DEFAULT_FONTSIZE)
                 
-        self.label.set_h_align(Align.CENTER)
-        self.label.set_v_align(Align.TOP)
+        if type(text) is StringType:
+            self.label = Label(text, self, Align.CENTER, Align.CENTER)
+        else:
+            raise TypeError, text
 
         if icon:
             self.set_icon(icon)
@@ -171,45 +169,14 @@ class PopupBox(Container):
         Arguments: None
           Returns: text
         """
-        return self.text
-
-
-    def set_text(self, text):
-        """
-        text  Text to display.
-        
-        Set text to display. If a Label is not not instanced a Label object
-        is created.
-
-        """
-        if DEBUG: print "Text: ", text
-        if type(text) is StringType:
-            self.text = text
-        else:
-            raise TypeError, type(text)
-
-        if not self.label:
-            self.label = Label(text)
-            self.label.set_background_color(None)
-            self.label.set_h_margin(self.h_margin)
-            self.label.set_v_margin(self.v_margin)
-            label_panel = Panel() 
-            label_panel.width = 280
-            label_panel.height = 90
-            label_panel.internal_h_align = Align.CENTER
-            label_panel.add_child(self.label)
-            self.add_child(label_panel)
-        else:
-            self.label.set_text(text)
-
-        self.label.set_h_align(Align.CENTER)
+        return self.label.text
 
 
     def get_font(self):
         """
         Does not return OSD.Font object, but the filename and size as list.
         """
-        return (self.label.font.filename, self.label.font.ptsize)
+        return ('normal', self.font.filename, int(self.font.size), self.font.color)
 
 
     def set_font(self, file, size, color):
@@ -218,10 +185,17 @@ class PopupBox(Container):
 
         Just hands the info down to the label. Might raise an exception.
         """
-        if self.label:
-            self.label.set_font('normal', file, size, color)
-        else:
-            raise TypeError, file
+        if not self.font:
+            self.font = Font()
+
+        self.font.filename = file
+        self.font.size = size
+        self.font.color = color
+
+        # if self.label:
+        #     self.label.set_font('normal', file, size, color)
+        # else:
+        #     raise TypeError, file
 
 
     def get_icon(self):
@@ -265,7 +239,7 @@ class PopupBox(Container):
         """
         if DEBUG: print 'PopupBox::_draw %s' % self
 
-        if not self.width or not self.height or not self.text:
+        if not self.width or not self.height:
             raise TypeError, 'Not all needed variables set.'
 
         self.surface = pygame.Surface(self.get_size(), 0, 32)
