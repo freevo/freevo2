@@ -21,8 +21,15 @@
 # switch to PAL
 `dirname $0`/matroxset/matroxset 1
 
+#find fbset
+fbset=/usr/sbin/fbset
+
+if [ -x /usr/bin/fbset ]; then
+    fbset=/usr/bin/fbset
+fi
+
 # set the 768x576 output
-/usr/sbin/fbset -fb /dev/fb0 -depth 32 -left 23 -right -5 -upper 39 -lower 10 \
+$fbset -fb /dev/fb0 -depth 32 -left 23 -right -5 -upper 39 -lower 10 \
     -hslen 46 -vslen 4 -xres 768 -yres 576 -vxres 768 -vyres 576 -depth 32 \
     -laced false -bcast true
 
