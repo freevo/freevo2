@@ -178,7 +178,7 @@ LOCAL_CONF_CHANGES = [
     logic is now in TV_CHANNELS. Removed old not needed variables (please
     check this file). The default audio device is now alsa not oss. 
     Some record and tv variables changed (like padding). See this sections in
-    the freevo_config.py for details.
+    the freevo_config.py for details. Add MPLAYER_RESAMPLE_AUDIO.
     ''' ),
     ]
 
@@ -1066,6 +1066,12 @@ MPLAYER_AUTOCROP = 0
 #
 MPLAYER_SET_AUDIO_DELAY = 0
 
+#
+# Resample audio channel if the samplerate is lower than 40kHz to a values
+# between 41100Hz and 48000Hz. This is needed for some external digital
+# receiver. It will only work if mmpython can detect the samplerate
+#
+MPLAYER_RESAMPLE_AUDIO = 0
 
 # ======================================================================
 # Xine settings:

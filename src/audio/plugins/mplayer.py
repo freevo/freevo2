@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.44  2005/01/01 15:06:19  dischi
+# add MPLAYER_RESAMPLE_AUDIO
+#
 # Revision 1.43  2004/10/17 02:45:19  outlyer
 # Small changes...
 #
@@ -55,6 +58,7 @@
 # python imports
 import os
 import re
+import logging
 
 # freevo imports
 import config
@@ -62,6 +66,8 @@ import childapp
 import plugin
 from event import *
 
+# the logging object
+log = logging.getLogger('audio')
 
 class PluginInterface(plugin.Plugin):
     """
@@ -161,6 +167,13 @@ class MPlayer:
 
         if is_playlist:
             command.append('-playlist')
+
+        if config.MPLAYER_RESAMPLE_AUDIO and item.info['samplerate'] and \
+           item.info['samplerate'] < 40000:
+            srate = max(41000, min(item.info['samplerate'] * 2, 48000))
+            log.info('resample audio from %s to %s', item.info['samplerate'], srate)
+            command += [ '-srate', str(srate) ]
+
         command.append(filename)
 
         for p in plugin.get('mplayer_audio'):

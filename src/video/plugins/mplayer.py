@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.95  2005/01/01 15:06:19  dischi
+# add MPLAYER_RESAMPLE_AUDIO
+#
 # Revision 1.94  2004/12/31 11:57:44  dischi
 # renamed SKIN_* and OSD_* variables to GUI_*
 #
@@ -239,6 +242,15 @@ class MPlayer(Application):
 
         if hasattr(item, 'is_playlist') and item.is_playlist:
             command.append('-playlist')
+
+        if config.MPLAYER_RESAMPLE_AUDIO and self.item_info and \
+               self.item_info.audio and \
+               hasattr(self.item_info.audio[0], 'samplerate') and \
+               self.item_info.audio[0].samplerate < 40000:
+            srate = max(41000, min(self.item_info.audio[0].samplerate * 2, 48000))
+            log.info('resample audio from %s to %s',
+                     self.item_info.audio[0].samplerate, srate)
+            command += [ '-srate', str(srate) ]
 
         # add the file to play
         command.append(url)
