@@ -54,7 +54,7 @@
 
    -->
 
-  <skin include="blue1_big" geometry="800x600">
+  <skin include="blue" geometry="800x600">
 
     <menu type="all">
       <style text="bgimage style"/>
@@ -65,7 +65,7 @@
 
       <listing layout="normal listing" x="45" y="110" width="515" height="470"/>
 
-      <info visible="no"/>
+      <info visible="no" layout="info" x="40" y="460" width="750" height="120"/>
       <title visible="no"/>
       <view visible="no"/>
 
@@ -101,25 +101,11 @@
       </content>
     </layout>
 
-    <layout label="popup">
-      <background>
-        <rectangle color="0x000000" size="1" bgcolor="popup background"/>
-      </background>
-      <content type="text" spacing="10" color="popup font" font="default"/>
-    </layout>
-
-    <font label="item" name="bluehigh" size="20" color="item"/>
-    <font label="selected" name="bluehigh" size="20" color="selected"/>
-    <font label="default" name="bluehigh" size="20" color="default"/>
-
-    <color label="selected" value="0xffffff"/>
-    <color label="selection bar" value="0xa0000000"/>
-    <color label="item" value="0xffffff"/>
-    <color label="default" value="0xffffff"/>
-    <color label="background" value="0xa0ffffff"/>
-
-    <color label="popup background" value="0xa0ffffff"/>
-    <color label="popup font" value="0xff0000"/>
-
+    <font label="info label">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
+    <font label="info value">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
   </skin>
 </freevo>

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <skin include="blue1_small" geometry="800x600">
+  <skin include="blue" geometry="800x600">
 
     <!-- 
     *******************************************************
@@ -11,16 +11,16 @@
     <!-- definition of the main menu item names and watermarks -->
     <main>
       <item label="tv" name="Watch TV" icon="" 
-	image="../blue_round2/tv_watermark.png"/>
+	image="watermarks/tv.png"/>
       <item label="video" name="Watch a Movie" icon=""
-	image="../blue_round2/movie_watermark.png"/>
+	image="watermarks/movie.png"/>
       <item label="audio" name="Listen to Music" icon="" 
-	image="../blue_round2/music_watermark.png"/>
+	image="watermarks/music.png"/>
       <item label="image" name="Look at Pictures" icon="" 
-	image="../blue_round2/image_watermark.png"/>
+	image="watermarks/image.png"/>
       <item label="games" name="Games" icon="" image=""/>
       <item label="shutdown" name="Shutdown" icon="" 
-	image="../blue_round2/shutdown_watermark.png" visible="no"/> 
+	image="watermarks/shutdown.png" visible="no"/> 
     </main>
 
     <!-- change the menuset to use a new background and listing area -->
@@ -49,10 +49,10 @@
     </layout>
 
     <!-- the main menu fonts -->
-    <font label="main" name="Arial_Bold" size="20" color="0xdddddd">
+    <font label="main" size="20" color="0xdddddd">
       <shadow x="1" y="1" color="0x000000" visible="yes"/>
     </font>
-    <font label="main selected" name="Arial_Bold" size="20" color="0xffffff">
+    <font label="main selected" size="20" color="0xffffff">
       <shadow x="1" y="1" color="0x000000" visible="yes"/>
     </font>
 
@@ -185,138 +185,6 @@
     ******************************************************* -->
 
 
-    <!-- normal info area -->
-    <layout label="info">
-      <content x="0" y="0" type="text" spacing="20" font="default">
-
-	<item type="audio">
-	  <if expression="artist">
-	    <text width="100" font="info label">Artist:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="artist"/>
-	    <newline/>
-	  </if>
-	  <if expression="album">
-	    <text width="100" font="info label">Album:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="album"/>
-	    <if expression="year">
-	      <text font="info value"> (</text>
-	      <text font="info value" expression="year"/>
-	      <text font="info value">)</text>
-	    </if>
-	    <newline/>
-	  </if>
-	  <if expression="length">
-	    <text width="100" font="info label">Length:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="length"/>
-	    <newline/>
-	  </if>
-	</item>
-
-	<item type="video">
-	  <if expression="tagline">
-	    <text font="info tagline" expression="tagline"/>
-	    <newline/>
-	    <goto_pos y="10" mode="relative"/>
-	  </if>
-	  <if expression="plot">
-	    <text height="max" font="info plot" mode="soft" expression="plot"/>
-	    <newline/>
-	  </if>
-	  <if expression="not plot">
-	    <text width="100" font="info label">Type:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="type"/>
-	    <newline/>
-	    <if expression="length">
-	      <text width="100" font="info label">Runtime:</text>
-	      <goto_pos x="10" mode="relative"/>
-	      <text font="info value" expression="length"/>
-	      <text font="info value"> min.</text>
-	      <newline/>
-	    </if>
-	    <if expression="geometry">
-	      <text width="100" font="info label">Resolution:</text>
-	      <goto_pos x="10" mode="relative"/>
-	      <text font="info value" expression="geometry"/>
-	      <if expression="aspect">
-		<text font="info value"> (</text>
-		<text font="info value" expression="aspect"/>
-		<text font="info value">)</text>
-	      </if>
-	      <newline/>
-	    </if>
-	  </if>
-	</item>
-
-	<item type="track">
-	  <if expression="length">
-	    <text width="100" font="info label">Runtime:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="length"/>
-	    <text font="info value"> min.</text>
-	  </if>
-	  <if expression="len(audio)">
-	    <text font="info value" expression="len(audio)"/>
-	    <text font="info value"> Audiotracks, </text>
-	  </if>
-	  <if expression="len(subtitles)">
-	    <text font="info value" expression="len(subtitles)"/>
-	    <text font="info value"> Subtitles, </text>
-	  </if>
-	  <if expression="chapters">
-	    <text font="info value" expression="chapters"/>
-	    <text font="info value"> Chapter</text>
-	  </if>
-	</item>
-
-	<item type="image">
-	  <if expression="width and height">
-	    <text width="100" font="info label">Geometry:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="width"/>
-	    <text font="info value">x</text>
-	    <text font="info value" expression="height"/>
-	    <newline/>
-	  </if>
-	  <if expression="date">
-	    <text width="100" font="info label">Date:</text>
-	    <goto_pos x="10" mode="relative"/>
-	    <text font="info value" expression="date"/>
-	    <newline/>
-	  </if>
-	  <if expression="description">
-	    <text font="info plot" height="max" mode="soft" expression="description"/>
-	    <newline/>
-	  </if>
-	</item>
-
-	<item type="dir">
-	  <text font="info label">Directory</text>
-	  <newline/>
-	</item>
-
-	<item type="playlist">
-	  <if expression="len(playlist)>0">
-  	     <text font="info value" expression="len(playlist)"/>
-  	     <text font="info value"> items in this playlist</text>
-   	     <newline/>
-	  </if>
-	  <if expression="len(playlist)==0">
-	    <text font="info value">This playlist is empty!</text>
-	    <newline/>
-	  </if>
-	</item>
-
-	<item type="default"/>
-
-      </content>
-    </layout>
-
-
-
     <layout label="video info">
       <content x="0" y="0" type="text" spacing="20" font="default">
 	<item type="video">
@@ -411,14 +279,11 @@
     <font label="title">
       <shadow x="2" y="2" color="0x000000" visible="yes"/>
     </font>
-    <font label="title small" name="Arial_Bold" size="22" color="0xffffff">
+    <font label="title small" name="kimberly_alt" size="22" color="0xffffff">
       <shadow visible="yes" color="0x000000" x="1" y="1"/>
     </font>
-    <font label="info tagline" name="Arial_Bold" size="18" color="0xffffaa">
+    <font label="info tagline">
       <shadow visible="yes" color="0x000000" x="1" y="1"/>
-    </font>
-    <font label="info title" name="Arial_Bold" size="22" color="0xffffff">
-      <shadow x="1" y="1" color="0x000000" visible="yes"/>
     </font>
 
     <!-- use blurr background -->
@@ -445,5 +310,8 @@
       <background/>
       <content x="0" y="0" height="max" width="max"/>
     </layout>
+
+    <font label="tv title" size="22"/>
+
   </skin>
 </freevo>

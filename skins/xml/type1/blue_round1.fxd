@@ -3,11 +3,11 @@
 
   <!-- 
   This is the blue round 1 skin
-  It includes blue_round1 for the background, some fonts and the main
+  It includes blue for the background, some fonts and the main
   menu style
    -->
 
-  <skin include="blue1_small" geometry="800x600">
+  <skin include="blue" geometry="800x600">
 
     <!-- Redefine of the type default -->
     <menuset label="normal text style">

@@ -1,20 +1,20 @@
 <?xml version="1.0" ?>
 <freevo>
 
-  <skin include="blue1_big" geometry="800x600">
+  <skin include="blue" geometry="800x600">
     <iconset dir="skins/icons/blurr/"/>
     <main>
       <item label="tv" name="Watch TV" icon="" 
-	image="../blue_round2/tv_watermark.png"/>
+	image="watermarks/tv.png"/>
       <item label="video" name="Watch a Movie" icon=""
-	image="../blue_round2/movie_watermark.png"/>
+	image="watermarks/movie.png"/>
       <item label="audio" name="Listen to Music" icon="" 
-	image="../blue_round2/music_watermark.png"/>
+	image="watermarks/music.png"/>
       <item label="image" name="Look at Pictures" icon="" 
-	image="../blue_round2/image_watermark.png"/>
+	image="watermarks/image.png"/>
       <item label="games" name="Games" icon="" image=""/>
       <item label="shutdown" name="Shutdown" icon="" 
-	image="../blue_round2/shutdown_watermark.png" visible="no"/> 
+	image="watermarks/shutdown.png" visible="no"/> 
     </main>
     
     <!-- Redefine of the type default -->
@@ -48,19 +48,18 @@
 
 
      <tv>
-            <screen layout="tv screen" x="0" y="0" width="800" height="600"/>
-            <info layout="tv info" x="10" y="80" width="760" height="115"/>
-            <listing layout="tv listing" x="10" y="220" width="750" height="370">
-            <image x="765" y="220" width="32" height="32" label="uparrow"
-                filename="blurr-up.png"/>
-                                    <title visible="no"/>
-
-            <image x="765" y="544" width="32" height="32" label="downarrow" 
-                filename="blurr-down.png"/>
-            <image width="16" height="16" label="leftarrow" filename="left.png"/>
-            <image width="16" height="16" label="rightarrow" filename="right.png"/>
-            </listing>
-      </tv>
+      <screen layout="screen blank" x="0" y="0" width="800" height="600"/>
+      <title visible="no"/>
+      <info layout="tv info" x="10" y="80" width="760" height="115"/>
+      <listing layout="tv listing" x="10" y="220" width="750" height="370">
+	<image x="765" y="220" width="32" height="32" label="uparrow"
+	  filename="blurr-up.png"/>
+	<image x="765" y="544" width="32" height="32" label="downarrow" 
+	  filename="blurr-down.png"/>
+	<image width="16" height="16" label="leftarrow" filename="left.png"/>
+	<image width="16" height="16" label="rightarrow" filename="right.png"/>
+      </listing>
+    </tv>
 
     <!-- definition of video/audio/image menu. The same as default, but with a -->
     <!-- different background -->
@@ -120,7 +119,7 @@
     <layout label="video screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="../blue_round2/movie_watermark.png" x="435" y="230" width="370"
+	<image filename="watermarks/movie.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
@@ -128,7 +127,7 @@
     <layout label="audio screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="../blue_round2/music_watermark.png" x="435" y="230" width="370"
+	<image filename="watermarks/music.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
@@ -136,7 +135,7 @@
     <layout label="image screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="../blue_round2/image_watermark.png" x="435" y="230" width="370"
+	<image filename="watermarks/image.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
@@ -144,7 +143,7 @@
     <layout label="tv menu screen">
       <background>
 	<image image="background" x="0" y="0" label="background"/>
-	<image filename="../blue_round2/tv_watermark.png" x="435" y="230" width="370"
+	<image filename="watermarks/tv.png" x="435" y="230" width="370"
 	  height="380"/>
       </background>
     </layout>
@@ -218,16 +217,12 @@
     </layout>
 
     <!-- tv listing area -->
-  <layout label="tv info">
+    <layout label="tv info">
       <background>
 	<rectangle size="0" bgcolor="0x80000000" radius="10" width="max"/>
       </background>
       <content x="10" y="10" height="max-20" width="max-20" type="text"
 	spacing="10" font="tv">
-	<item type="default">
-	  @title@ "@sub_title@"            		        @start@ - @stop@
-	  @desc@
-	</item>
       </content>
     </layout> 
 
@@ -248,17 +243,14 @@
     <font label="widget" name="Arial_Bold" size="12"/>
     <font label="widget selected" name="Arial_Bold" size="12"/>
      
-
-
     <!-- info area -->
+    <!-- AUBIN: please update to the new names
     <font label="info title"       name="Arial_Bold" size="16" color="0xffffff"/>
     <font label="info plot"        name="Arial_Bold" size="14" color="0xffffff" />
     <font label="info tagline"     name="Arial_Bold" size="14" color="0xffffff" />
     <font label="info description" name="Arial_Bold" size="14" color="0xffffff" />
     <font label="info label"       name="Arial_Bold" size="14" color="0xffffff" />
     <font label="info value"       name="Arial_Bold" size="14" color="0xffffff" />
-
-
-
+    -->
   </skin>
 </freevo>

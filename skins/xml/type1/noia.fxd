@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<freevo>
+
+  <skin include="info" geometry="800x600">
+    <iconset dir="skins/icons/Noia"/>
+
+    <image label="background" filename="blurr_naxos"/>
+    
+    <font label="title" name="oliversb" size="29" color="0xffdc71">
+      <shadow visible="yes" color="0x80000000" x="3" y="3"/>
+    </font>
+
+    <font label="info value" color="0xffdc71">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
+    
+    <font label="info label">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
+    
+    <font label="info tagline">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
+    
+    <font label="info plot">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
+    
+    <color label="tv selection" value="0xa0000000"/>
+    <font label="tv selected" color="0xffdc71"/>
+    <font label="tv time" color="0xffdc71">
+      <shadow x="1" y="1" color="0x000000" visible="yes"/>
+    </font>
+
+    <color label="widget background" value="0xffdc71"/>
+    <font label="widget" name="kimberly_alt" size="16" color="0x000000"/>
+    <color label="widget text" value="0x000000"/>
+
+    <font label="default" name="bluehigh" size="18" color="0xffffff"/>
+
+  </skin>
+</freevo>
