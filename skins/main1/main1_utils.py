@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.4  2002/10/19 15:09:55  dischi
+# added alpha mask support
+#
 # Revision 1.3  2002/10/16 20:00:00  dischi
 # use mode='soft' for drawstringframed for info
 #
@@ -57,7 +60,7 @@ osd = osd.get_singleton()
 
 
 # Draws a text based on the settings in the XML file
-def DrawText(text, settings, x=-1, y=-1, align=''):
+def DrawText(text, settings, x=-1, y=-1, align='', layer=None):
     if x == -1: x = settings.x
     if y == -1: y = settings.y
     if not align: align = settings.align
@@ -65,9 +68,9 @@ def DrawText(text, settings, x=-1, y=-1, align=''):
     if settings.shadow_visible:
         osd.drawstring(text, x+settings.shadow_pad_x, y+settings.shadow_pad_y,
                        settings.shadow_color, None, settings.font,
-                       settings.size, align)
+                       settings.size, align, layer)
     osd.drawstring(text, x, y, settings.color, None, settings.font,
-                   settings.size, align)
+                   settings.size, align, layer)
 
 
 # Draws a text inside a frame based on the settings in the XML file
@@ -88,14 +91,33 @@ def DrawTextFramed(text, settings, x=-1, y=-1, width=-1, height=-1, mode='hard')
                          align_h=settings.align, align_v=settings.valign, mode=mode)
 
 
-def InitScreen(settings):
+def InitScreen(settings, masks, cover_visible = 0):
     osd.clearscreen(osd.COL_BLACK)
 
     if settings.background.image:
         apply(osd.drawbitmap, (settings.background.image, -1, -1))
 
-    if settings.background.mask:
-        osd.drawbitmap(settings.background.mask,-1,-1)
+    layer = None
+    
+    for i in masks:
+        if i:
+            if not layer:
+                layer = osd.createlayer()
+
+            if isinstance(i, list):
+
+                for r in i:
+                    visible = r.visible
+
+                    if visible=='cover':
+                        visible = cover_visible
+                    
+                    if visible:
+                        osd.drawroundbox(r.x, r.y, r.x+r.width, r.y+r.height, r.color,
+                                         r.border_size, r.border_color, r.radius, layer)
+                    
+            else:
+                osd.drawbitmap(i,-1,-1, layer=layer)
 
     val = settings.logo
     if val.image and val.visible:
@@ -104,10 +126,23 @@ def InitScreen(settings):
                            val.x, val.y)
         else:
             osd.drawbitmap(val.image, val.x, val.y)
-    
+
+    return layer
+
 
 def DrawBox(x0, y0, x1, y1, color = None, border_size = 0, border_color = None):
     osd.drawbox(x0, y0, x1, y1, width=-1, color=color)
     if border_size >= 0:
         osd.drawbox(x0, y0, x1, y1, width=border_size, color=border_color)
     
+
+
+def PutLayer(layer):
+    if layer:
+        osd.putlayer(layer)
+    return None
+    
+def ShowScreen(layer):
+    if layer:
+        osd.putlayer(layer)
+    osd.update()
