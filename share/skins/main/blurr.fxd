@@ -29,7 +29,7 @@
       <view x="20" y="100" width="300" height="300"/> 
       <listing layout="listing" x="330" y="110" width="460" height="450">
 	<image filename="blurr-up.png" label="uparrow" x="290" y="110"/>
-	<image filename="blurr-down.png" label="downarrow" x="290" y="520"/>
+	<image filename="blurr-down.png" label="downarrow" x="290" y="max-32"/>
       </listing>
     </menuset>
 
@@ -54,7 +54,7 @@
       <listing layout="tv listing" x="10" y="220" width="750" height="370">
 	<image x="765" y="220" width="32" height="32" label="uparrow"
 	  filename="blurr-up.png"/>
-	<image x="765" y="544" width="32" height="32" label="downarrow" 
+	<image x="765" y="max-32" width="32" height="32" label="downarrow" 
 	  filename="blurr-down.png"/>
 	<image width="16" height="16" label="leftarrow" filename="left.png"/>
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>
@@ -95,7 +95,7 @@
       <view visible="no"/>
       <listing x="100" width="680">
 	<image label="uparrow" x="290" y="110"/>
-	<image label="downarrow" x="290" y="520"/>
+	<image label="downarrow" x="max-32" y="520"/>
       </listing>
       <screen layout="tv menu screen"/>
     </menuset>

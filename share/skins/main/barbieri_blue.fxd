@@ -31,7 +31,7 @@
          <listing layout="tv listing" x="10" y="220" width="750" height="370">
 	    <image x="765" y="220" width="32" height="32" label="uparrow"
 	           filename="up.png"/>
-	    <image x="765" y="558" width="32" height="32" label="downarrow"
+	    <image x="765" y="max-32" width="32" height="32" label="downarrow"
 	           filename="down.png"/>
 	    <image width="16" height="16" label="leftarrow" filename="left.png"/>
 	    <image width="16" height="16" label="rightarrow" filename="right.png"/>

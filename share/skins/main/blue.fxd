@@ -58,7 +58,7 @@
       <listing layout="list0" x="50" y="110" width="510" height="470">
 	<image x="10" y="110" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
-	<image x="10" y="544" width="32" height="32" label="downarrow"
+	<image x="10" y="max-32" width="32" height="32" label="downarrow"
 	  filename="down.png"/>
       </listing>
       <!-- 5. info area: additional info. This area is invisible in the default -->
@@ -452,7 +452,7 @@
       <listing layout="tv listing" x="10" y="100" width="750" height="300">
 	<image x="765" y="100" width="32" height="32" label="uparrow"
 	  filename="up.png"/>
-	<image x="765" y="354" width="32" height="32" label="downarrow"
+	<image x="765" y="max-32" width="32" height="32" label="downarrow"
 	  filename="down.png"/>
 	<image width="16" height="16" label="leftarrow" filename="left.png"/>
 	<image width="16" height="16" label="rightarrow" filename="right.png"/>

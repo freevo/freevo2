@@ -95,7 +95,7 @@
     <menuset label="text with info style" inherits="normal text style">
       <!-- 4. listing area: the list of all items -->
       <listing height="330">
-	<image y="405" label="downarrow"/>
+	<image y="max-32" label="downarrow"/>
       </listing>
       <info layout="info" x="40" y="460" width="750" height="120"/>
     </menuset>
@@ -107,7 +107,7 @@
       <subtitle layout="title1" x="45" y="100" width="470" height="40"/>
       <listing layout="video list" y="140" height="290">
 	<image label="uparrow" y="140"/>
-	<image label="downarrow" y="363"/>
+	<image label="downarrow" y="max-32"/>
       </listing>
     </menuset>
 
@@ -129,7 +129,7 @@
     <!-- Now the "audio menu with info" used by audio-->
     <menuset label="audio menu with info" inherits="video menu with info">
       <listing layout="audio list">
-	<image y="336" label="downarrow"/>
+	<image y="max-32" label="downarrow"/>
       </listing>
       <view y="145"/>
     </menuset>
@@ -138,7 +138,7 @@
     <!-- Now the "image menu with info" used by image-->
     <menuset label="image menu with info" inherits="video menu with info">
       <listing width="745" layout="image list">
-	<image y="380" label="downarrow"/>
+	<image y="max-32" label="downarrow"/>
       </listing>
       <view visible="no"/>
     </menuset>
