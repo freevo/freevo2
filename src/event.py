@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2004/01/15 00:49:01  outlyer
+# An audio event which passed along the filename of files which have completed
+# playing normally. This is the foundation for something which will end up in
+# my WIP soon.
+#
 # Revision 1.34  2003/12/14 17:27:19  dischi
 # cleanup
 #
@@ -204,6 +209,7 @@ PREV                   = Event('PREV')
 #
 
 AUDIO_SEND_MPLAYER_CMD = Event('AUDIO_SEND_MPLAYER_CMD')
+AUDIO_LOG              = Event('AUDIO_LOG')
 
 
 #

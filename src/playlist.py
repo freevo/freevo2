@@ -9,6 +9,11 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.56  2004/01/15 00:49:01  outlyer
+# An audio event which passed along the filename of files which have completed
+# playing normally. This is the foundation for something which will end up in
+# my WIP soon.
+#
 # Revision 1.55  2004/01/10 13:16:14  dischi
 # remove self.fxd_file, not needed anymore
 #
@@ -460,6 +465,10 @@ class Playlist(Item):
         """
         Handle playlist specific events
         """
+
+        if event == PLAY_END:
+            rc.post_event(Event(AUDIO_LOG, arg=self.current_item.filename))
+
         if not menuw:
             menuw = self.menuw
             
