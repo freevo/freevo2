@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.30  2003/10/17 18:48:37  dischi
+# every item has a description now
+#
 # Revision 1.29  2003/10/04 18:37:28  dischi
 # i18n changes and True/False usage
 #
@@ -71,7 +74,8 @@ class Item:
         self.xml_file = None            # skin informationes etc.
         self.menuw    = None
         self.eventhandler_plugins = []
-
+        self.description = ''
+        
         if not info:
             self.info = {}
         else:
