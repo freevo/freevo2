@@ -15,6 +15,9 @@
 # for a full list of tested sites see Docs/plugins/headlines.txt
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2003/11/30 14:35:43  dischi
+# new skin handling
+#
 # Revision 1.11  2003/11/22 12:02:11  dischi
 # make the skin blankscreen a real plugin area
 #
@@ -93,6 +96,7 @@ osd  = osd.get_singleton()
 #check every 30 minutes
 MAX_HEADLINE_AGE = 1800
 
+
 class PluginInterface(plugin.MainMenuPlugin):
     """
     A plugin to list headlines from an XML (RSS) feed.
@@ -114,21 +118,13 @@ class PluginInterface(plugin.MainMenuPlugin):
         plugin.MainMenuPlugin.__init__(self)
         
     def config(self):
-        return [('HEADLINES_LOCATIONS', [ ("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"), ("Freshmeat", "http://freshmeat.net/backend/fm.rdf") ], 'where to get the news')]
+        return [('HEADLINES_LOCATIONS',
+                 [ ("DVD Review", "http://www.dvdreview.com/rss/newschannel.rss"),
+                   ("Freshmeat", "http://freshmeat.net/backend/fm.rdf") ],
+                 'where to get the news')]
 
     def items(self, parent):
-        menu_items = skin.settings.mainmenu.items
-
-        item = HeadlinesMainMenuItem()
-        item.name = _('Headlines')
-        if menu_items.has_key('headlines') and menu_items['headlines'].icon:
-            item.icon = os.path.join(skin.settings.icon_dir, menu_items['headlines'].icon)
-        if menu_items.has_key('headlines') and menu_items['headlines'].image:
-            item.image = menu_items['headlines'].image
-        if menu_items.has_key('headlines') and menu_items['headlines'].outicon:
-            item.outicon = os.path.join(skin.settings.icon_dir, menu_items['headlines'].outicon)
-        item.parent = parent
-        return [ item ]
+        return [ HeadlinesMainMenuItem(parent) ]
 
 
 class ShowHeadlineDetails(skin.BlankScreen):
@@ -297,6 +293,10 @@ class HeadlinesMainMenuItem(Item):
     this is the item for the main menu and creates the list
     of Headlines Sites in a submenu.
     """
+    def __init__(self, parent):
+        Item.__init__(self, parent, skin_type='headlines')
+        self.name = _('Headlines')
+
     def actions(self):
         """
         return a list of actions for this item

@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.10  2003/11/30 14:36:42  dischi
+# new skin handling
+#
 # Revision 1.9  2003/10/29 20:47:44  dischi
 # make it possible to bypass confirmation of shutdown
 #
@@ -56,22 +59,23 @@
 # ----------------------------------------------------------------------- */
 #endif
 
-from plugin import MainMenuPlugin
+import os
 
 import config
-import skin
-import os
-from gui.ConfirmBox import ConfirmBox
 
-skin = skin.get_singleton()
-
+from gui import ConfirmBox
 from item import Item
+from plugin import MainMenuPlugin
+
 
 class ShutdownItem(Item):
     """
     Item for shutdown
     """
-    menuw = None
+    def __init__(self, parent=None):
+        Item.__init__(self, parent, skin_type='shutdown')
+        self.menuw = None
+
 
     def actions(self):
         """
@@ -138,20 +142,6 @@ class shutdown(MainMenuPlugin):
     """
 
     def items(self, parent):
-        menu_items = skin.settings.mainmenu.items
-
-        item = ShutdownItem()
-        item.name = menu_items['shutdown'].name        
-        if menu_items['shutdown'].icon:
-            item.icon = os.path.join(skin.settings.icon_dir, menu_items['shutdown'].icon)
-        if menu_items['shutdown'].image:
-            item.image = menu_items['shutdown'].image
-        if menu_items['shutdown'].outicon:
-            item.outicon = os.path.join(skin.settings.icon_dir, menu_items['shutdown'].outicon)
-        else:
-            item.outicon = None
-        item.parent = parent
-        
-        return [ item ]
+        return [ ShutdownItem(parent) ]
 
 

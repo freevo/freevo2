@@ -14,6 +14,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.3  2003/11/30 14:35:43  dischi
+# new skin handling
+#
 # Revision 1.2  2003/11/29 11:41:04  dischi
 # use the given menuw and not a global one
 #
@@ -77,22 +80,14 @@
 #python modules
 import os, popen2, fcntl, select, time
 import pygame
-import osd
 
 #freevo modules
-import config, menu, rc, plugin, skin, util
+import config, menu, rc, plugin, util
 
-import event as em
+from event import *
 from item import Item
+from gui import AlertBox, RegionScroller, ListBox, PopupBox, Align
 
-from gui.AlertBox import AlertBox
-from gui.RegionScroller import RegionScroller
-from gui.ListBox import ListBox
-from gui.AlertBox import PopupBox
-from gui.GUIObject import Align
-
-#get the sinfletons so we can add our menu and get skin info
-skin = skin.get_singleton()
 
 
 def islog(name):
@@ -163,10 +158,10 @@ class LogScroll(PopupBox):
 
     def eventhandler(self, event, menuw=None):
 
-        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT ):
+        if event in (INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT ):
            return self.pb.eventhandler(event)
 
-        elif event == em.INPUT_ENTER or event == em.INPUT_EXIT:
+        elif event == INPUT_ENTER or event == INPUT_EXIT:
             self.destroy()
 
         else:
@@ -207,9 +202,9 @@ class CommandOptions(PopupBox):
 
     def eventhandler(self, event, menuw=None):
                                                                                 
-        if event in (em.INPUT_UP, em.INPUT_DOWN, em.INPUT_LEFT, em.INPUT_RIGHT):
+        if event in (INPUT_UP, INPUT_DOWN, INPUT_LEFT, INPUT_RIGHT):
             return self.results.eventhandler(event)
-        elif event == em.INPUT_ENTER:
+        elif event == INPUT_ENTER:
             selection = self.results.get_selected_item().value
             #print selection
             if selection == 'ok':
@@ -222,17 +217,19 @@ class CommandOptions(PopupBox):
                 LogScroll(os.path.join(config.LOGDIR,'command_stderr.log'),
                           text=_('Stderr File')).show()
                 return
-        elif event == em.INPUT_EXIT:
+        elif event == INPUT_EXIT:
             self.destroy()
         else:
             return self.parent.eventhandler(event)
                                                                                 
 
 
-# This is the class that actually runs the commands. Eventually
-# hope to add actions for different ways of running commands
-# and for displaying stdout and stderr of last command run.
 class CommandItem(Item):
+    """
+    This is the class that actually runs the commands. Eventually
+    hope to add actions for different ways of running commands
+    and for displaying stdout and stderr of last command run.
+    """
     def __init__(self, command, directory):
         Item.__init__(self)
         self.name = command
@@ -321,15 +318,23 @@ class CommandItem(Item):
             CommandOptions(text=message).show()
         
 
-# this is the item for the main menu and creates the list
-# of commands in a submenu.
 class CommandMainMenuItem(Item):
+    """
+    this is the item for the main menu and creates the list
+    of commands in a submenu.
+    """
+    def __init__(self, parent):
+        Item.__init__(self, parent, skin_type='commands')
+        self.name = _('Commands')
+
+        
     def actions(self):
         """
         return a list of actions for this item
         """
         items = [ ( self.create_commands_menu , 'commands' ) ]
         return items
+
  
     def create_commands_menu(self, arg=None, menuw=None):
         command_items = []
@@ -349,7 +354,8 @@ class CommandMainMenuItem(Item):
         menuw.pushmenu(command_menu)
         menuw.refresh()
 
-# our plugin wrapper, just creates the main menu item and adds it.
+
+
 class PluginInterface(plugin.MainMenuPlugin):
     """
     A small plugin to run commands from the main menu. Currently supports only small
@@ -367,19 +373,7 @@ class PluginInterface(plugin.MainMenuPlugin):
     in a particular location.
     """
     def items(self, parent):
-        menu_items = skin.settings.mainmenu.items
-
-        item = CommandMainMenuItem()
-        item.name = _('Commands')
-        if menu_items.has_key('commands') and menu_items['commands'].icon:
-            item.icon = os.path.join(skin.settings.icon_dir, menu_items['commands'].icon)
-        if menu_items.has_key('commands') and menu_items['commands'].image:
-            item.image = menu_items['commands'].image
-        if menu_items.has_key('commands') and menu_items['commands'].outicon:
-            item.outicon = os.path.join(skin.settings.icon_dir,
-                                        menu_items['commands'].outicon)
-        item.parent = parent
-        return [ item ]
+        return [ CommandMainMenuItem(parent) ]
 
     def config(self):
         return [ ('COMMANDS_DIR', '/usr/local/bin', 'The directory to show commands from.') ]
