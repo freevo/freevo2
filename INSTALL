@@ -17,7 +17,6 @@ o Test the video4linux driver using xawtv
   o Freevo uses its' own tables for channels
 
 o Compile and install all the programs in apps/
-  o Install XviD
   o Install MPlayer
     o Test with the MGA graphics driver
   o Install mpg321 (or alternately, mpg123)
@@ -40,9 +39,23 @@ o Compile Freevo
     o http://www.python.org/ftp/python/2.2.1/Python-2.2.1.tgz
   o Python Imaging Library (Tested with 1.1.3)
     o http://www.pythonware.com/downloads/Imaging-1.1.3.tar.gz
+      o Installation should use the following method, not from the BUILDME:
+      o tar xvzf Imaging-1.1.3.tar.gz
+      o cd Imaging-1.1.3/libImaging
+      o ./configure
+      o make
+      o cd ..
+      o python setup.py build
+      o (as root): python setup.py install
+  o Python Checksum Library (Tested with 1.6.1)
+    o http://www.azstarnet.com/~donut/programs/fchksum/python-fchksum-1.6.1.tar.gz
+      o tar xvzf python-fchksum-1.6.1.tar.gz
+      o cd python-fchksum-1.6.1
+      o python setup.py build
+      o (as root): python setup.py install
   o Test the remote using the lirc application irw, and using the 
     remote_control_lirc.py Freevo application
-  o Test the text OSD test driver
+  o Test the X11 OSD test driver
   o Test the MGA G400 OSD framebuffer driver
 
 o Test matrox_g400/v4l1_to_mga  (Video4Linux1 -> Framebuffer)
