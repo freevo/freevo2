@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.35  2003/03/30 19:21:16  dischi
+# remember all skin paths for image searching
+#
 # Revision 1.34  2003/03/30 17:00:34  dischi
 # typo
 #
@@ -709,7 +712,7 @@ class XMLSkin:
         self._player = XML_player()
         self._tv = XML_tv()
         self._mainmenu = XML_mainmenu()
-
+        self.skin_directories = []
         self.icon_dir = ""
 
         
@@ -818,7 +821,7 @@ class XMLSkin:
                              float(config.CONF.height-2*config.OVERSCAN_Y)/float(h))
 
                     include  = attr_str(freevo_type, 'include', '')
-
+                    
                     if include:
                         if clear:
                             self._layout = {}
@@ -831,11 +834,15 @@ class XMLSkin:
                             self._player = XML_player()
                             self._tv = XML_tv()
                             self._mainmenu = XML_mainmenu()
+                            self.skin_directories = []
                             
                         self.load(include, copy_content, prepare = FALSE)
 
                     self.parse(freevo_type, scale, os.path.dirname(file), copy_content)
-
+                    if not os.path.dirname(file) in self.skin_directories:
+                        self.skin_directories = [ os.path.dirname(file) ] + \
+                                                self.skin_directories
+                    
             if not prepare:
                 return 1
         
@@ -846,7 +853,8 @@ class XMLSkin:
             font        = copy.deepcopy(self._font)
             layout      = copy.deepcopy(self._layout)
 
-            search_dirs = (os.path.dirname(file), 'skins/images', self.icon_dir, '.')
+            search_dirs = self.skin_directories + [ 'skins/images', self.icon_dir, '.' ]
+
             for f in font:
                 font[f].prepare(self._color)
                 
