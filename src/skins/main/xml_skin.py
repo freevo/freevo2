@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.16  2003/10/22 18:23:56  dischi
+# speedup and less debug
+#
 # Revision 1.15  2003/10/21 23:46:22  gsbarbieri
 # Info_Area now support images as
 #    <img src="file" x="1" y="2" width="123" height="456" />
@@ -250,7 +253,7 @@ def search_file(file, search_dirs):
         if os.path.isfile("%s.jpg" % dfile):
             return "%s.jpg" % dfile
 
-    print 'can\'t find image %s' % file
+    _debug_('can\'t find image %s' % file)
     return ''
 
 
@@ -1019,7 +1022,7 @@ class XMLSkin:
             return 0
 
         font_scale = 1.0
-        
+
         try:
             parser = qp_xml.Parser()
             f = open(file)
@@ -1063,7 +1066,11 @@ class XMLSkin:
                     if not os.path.dirname(file) in self.skin_directories:
                         self.skin_directories = [ os.path.dirname(file) ] + \
                                                 self.skin_directories
-                    
+                    break
+            else:
+                # no new skin settings loaded, return without action
+                return 1
+            
             if not prepare:
                 return 1
             self.font_scale = font_scale
