@@ -22,6 +22,17 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.90  2004/01/10 04:30:32  outlyer
+# Newer versions of twisted print this message:
+# "/usr/lib/python2.3/site-packages/freevo/helpers/webserver.py:106:
+# exceptions.DeprecationWarning: twisted.internet.app is deprecated,
+# use twisted.application instead."
+#
+# Which is nice to know, but is non-trivial to implement so let's not see
+# it every time we start an app.
+#
+# Also removed some old CVS log messages
+#
 # Revision 1.89  2004/01/09 19:49:30  dischi
 # add name of the app/helper
 #
@@ -37,102 +48,6 @@
 #
 # Revision 1.85  2004/01/01 12:27:05  dischi
 # make absolute pathnames
-#
-# Revision 1.84  2003/12/30 22:31:44  dischi
-# OVERLAY_DIRS needs specific format for speedup
-#
-# Revision 1.83  2003/12/30 15:27:47  dischi
-# reset OVERLAY_DIR usage if OVERLAY_DIR is not set
-#
-# Revision 1.82  2003/12/22 13:30:32  dischi
-# supermount patch from Erwan Velu
-#
-# Revision 1.81  2003/12/14 17:13:51  dischi
-# second supermount patch for mandrake
-#
-# Revision 1.80  2003/12/14 12:49:37  dischi
-# supermount patch for mandrake
-#
-# Revision 1.79  2003/11/29 18:37:29  dischi
-# build config.VIDEO_SUFFIX in config on startup
-#
-# Revision 1.78  2003/11/28 20:23:43  dischi
-# renamed more config variables
-#
-# Revision 1.77  2003/11/28 20:08:54  dischi
-# renamed some config variables
-#
-# Revision 1.76  2003/11/28 19:26:36  dischi
-# renamed some config variables
-#
-# Revision 1.75  2003/11/27 03:12:40  rshortt
-# Add the property group_type to the VideoGroup class to easier handle special
-# capture cards like those based on ivtv chipsets and dvb cards.
-#
-# Revision 1.74  2003/11/25 01:08:11  rshortt
-# Added a input_num property to the VideoGroup class because it can vary
-# between OS and cards.  We default to 0 which is common for the tv tuner in
-# Linux.  For BSD this is often 1, for ivtv cards often 4.
-#
-# Revision 1.73  2003/11/24 19:23:07  dischi
-# remove the MOVIE_XXX variables, they are in video/__init__ now
-#
-# Revision 1.72  2003/11/23 19:12:22  rshortt
-# Make sure VideoGroup gets the norm as upper case.
-#
-# Revision 1.71  2003/11/23 18:56:33  rshortt
-# Cleanup VideoGroup class a bit.
-#
-# Revision 1.70  2003/11/22 20:35:10  dischi
-# config changes for the use new vfs
-#
-# Revision 1.69  2003/11/21 17:55:09  dischi
-# new VIDEO_SUFFIX layout
-#
-# Revision 1.68  2003/11/09 22:34:17  rshortt
-# We need True/False defs a bit higher up.
-#
-# Revision 1.67  2003/11/09 17:08:24  dischi
-# add /usr/local/etc/freevo as search path
-#
-# Revision 1.66  2003/11/01 16:28:43  dischi
-# encode program names to avoid a crash in the web guide
-#
-# Revision 1.65  2003/10/24 03:28:08  krister
-# Fixed a bug where the ROM drives autodetection would crash if ROM_DRIVES=None
-#
-# Revision 1.64  2003/10/22 19:08:33  dischi
-# make it possible to deactivate rom drive support
-#
-# Revision 1.63  2003/10/19 11:17:37  dischi
-# move gettext into config so that everything has _()
-#
-# Revision 1.62  2003/10/18 21:37:53  rshortt
-# Fixing some logic for HELPERS because recordserver and webserver are also
-# helpers.
-#
-# Also adding a VideoGroup class (WIP) that will help in centralizing Freevo's
-# channel list and add support for multiple v4l devices.  I will talk more
-# about this after the 1.4 release.
-#
-# Revision 1.61  2003/10/18 10:44:54  dischi
-# bugfix to detect if we are (web|record)server or not
-#
-# Revision 1.60  2003/10/08 03:29:21  outlyer
-# Just move all FutureWarnings to config. This removes all the silly hex
-# constant warnings.
-#
-# Revision 1.59  2003/10/04 17:55:14  dischi
-# small fixes
-#
-# Revision 1.58  2003/09/26 10:02:26  dischi
-# no auto debug to file to keep Aubin from changing all debugs to 2
-#
-# Revision 1.57  2003/09/23 19:41:31  dischi
-# add more help
-#
-# Revision 1.56  2003/09/22 20:17:04  dischi
-# do not use dxr3 output for helpers
 #
 # -----------------------------------------------------------------------
 # Freevo - A Home Theater PC framework
@@ -165,6 +80,7 @@ import version
 if float(sys.version[0:3]) >= 2.3:
     import warnings
     warnings.simplefilter("ignore", category=FutureWarning)
+    warnings.simplefilter("ignore", category=DeprecationWarning)
 
 VERSION = version.__version__
 
