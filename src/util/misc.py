@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.43  2004/07/11 18:43:52  dischi
+# fix usb storage detection
+#
 # Revision 1.42  2004/07/11 11:46:03  dischi
 # decrease record server calling
 #
@@ -277,9 +280,12 @@ def list_usb_devices():
 def is_usb_storage_device():
     fd = open('/proc/bus/usb/devices', 'r')
     for line in fd.readlines():
+           if line.lower().find('mass-storage') != -1:
+               fd.close()
+               return 0
            if line.lower().find('mass storage') != -1:
-                   fd.close()
-                   return 0
+               fd.close()
+               return 0
     fd.close()
     return -1
 
