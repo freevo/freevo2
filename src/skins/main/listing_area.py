@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/01/17 12:36:29  dischi
+# add shadow support for image listing
+#
 # Revision 1.18  2004/01/10 13:20:21  dischi
 # fix stringsize for tv shows and blurr2
 #
@@ -454,7 +457,8 @@ class Listing_Area(Skin_Area):
                     self.drawroundbox(x0 + r.x, y0 + r.y, r.width, r.height, r)
 
                 image, i_w, i_h = format_image(settings, choice, val.width,
-                                               val.height, force=True)
+                                               val.height, shadow=val.shadow,
+                                               force=True)
                 if image:
                     addx = 0
                     addy = 0
@@ -498,8 +502,7 @@ class Listing_Area(Skin_Area):
             if menuw.menu_items[-1] != menu.choices[-1] and area.images['downarrow']:
                 if isinstance(area.images['downarrow'].y, str):
                     v = copy.copy(area.images['downarrow'])
-                    MAX=item_y0-vskip
-                    v.y = eval(v.y)
+                    v.y = eval(v.y, {'MAX':(item_y0-vskip)})
                 else:
                     v = area.images['downarrow']
                 self.drawimage(area.images['downarrow'].filename, v)

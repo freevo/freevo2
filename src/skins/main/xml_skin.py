@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.29  2004/01/17 12:36:29  dischi
+# add shadow support for image listing
+#
 # Revision 1.28  2004/01/11 15:43:16  dischi
 # better display type handling, added type main menu
 #
@@ -528,7 +531,8 @@ class Content(XML_data):
                     self.types[type] = XML_data(('font', 'align', 'valign', 'height',
                                                  'width', 'icon' ))
                     self.types[type].rectangle = None
-                    self.types[type].cdata = ''
+                    self.types[type].shadow    = None
+                    self.types[type].cdata     = ''
                 if type:
                     self.types[type].parse(subnode, scale, current_dir)
                     self.types[type].cdata = subnode.textof()
@@ -537,6 +541,10 @@ class Content(XML_data):
                         if rnode.name == u'rectangle':
                             self.types[type].rectangle = Rectangle()
                             self.types[type].rectangle.parse(rnode, scale, current_dir)
+                        if rnode.name == u'shadow':
+                            self.types[type].shadow = XML_data(('visible', 'color', 'x', 'y'))
+                            self.types[type].shadow.parse(rnode, scale, current_dir)
+                            
                         elif rnode.name in ( u'if', u'text', u'newline',
                                              u'goto_pos', u'img' ):
                             if (not hasattr( self.types[ type ], 'fcontent' )) or \
@@ -561,7 +569,8 @@ class Content(XML_data):
         if not self.types.has_key('default'):
             self.types['default'] = XML_data(('font',))
             self.types['default'].rectangle = None
-            self.types['default'].cdata = ''
+            self.types['default'].shadow    = None
+            self.types['default'].cdata     = ''
         
 
     def prepare(self, font, color, search_dirs):
