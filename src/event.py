@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.49  2004/08/01 10:56:17  dischi
+# add SCREEN_CONTENT_CHANGE
+#
 # Revision 1.48  2004/07/21 11:32:31  dischi
 # fix dvd events for language settings
 #
@@ -72,7 +75,7 @@ class Event:
         if handler:
             self.handler = handler
 
-
+            
     def __str__(self):
         """
         return the event as string
@@ -570,3 +573,7 @@ OS_EVENT_KILL    = Event('OS_EVENT_KILL')
 RECORD_START     = Event('RECORD_START')
 RECORD_STOP      = Event('RECORD_STOP')
 
+
+SCREEN_CONTENT_CHANGE = Event('SCREEN_CONTENT_CHANGE')
+
+                         
