@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.5  2003/10/21 23:46:21  gsbarbieri
+# Info_Area now support images as
+#    <img src="file" x="1" y="2" width="123" height="456" />
+# x and y are optional and will be set to "pen position" when not specified.
+# width and height are also optional and defaults to the image size.
+# file is the filename.
+#
+# <img> will define FLOAT images, not inline ones. You can simulate inline
+# images with <goto_pos>... Maybe someday, if needed, someone can implement it.
+#
 # Revision 1.4  2003/10/03 10:55:10  dischi
 # i18n fix
 #
@@ -106,14 +116,25 @@ class Info_Area(Skin_Area):
         list = self.return_formatedtext( self.sellist )
 
         for i in list:
-            if i.y + i.height > self.content.height:
-                break
-            self.write_text( i.text,
-                             i.font, self.content,
-                             ( self.content.x + i.x), ( self.content.y + i.y ),
-                             i.width , i.height,
-                             align_v = i.valign, align_h = i.align,
-                             mode = i.mode )    
+            if isinstance( i, xml_skin.XML_FormatText ):
+                if i.y + i.height > self.content.height:
+                    break
+                self.write_text( i.text,
+                                 i.font, self.content,
+                                 ( self.content.x + i.x), ( self.content.y + i.y ),
+                                 i.width , i.height,
+                                 align_v = i.valign, align_h = i.align,
+                                 mode = i.mode )
+                
+            elif isinstance( i, xml_skin.XML_FormatImg ):
+                if i.src:
+                    tmp = ( self.content.x + i.x, self.content.y + i.y,
+                            i.width, i.height )
+                    self.draw_image( i.src, tmp )
+                else:
+                    print _( "ERROR" ) + ": missing 'src' attribute in skin tag!"
+                    
+                    
         self.last_item = self.infoitem
 
         # always set this to 0 because we don't call update_content
@@ -291,7 +312,7 @@ class Info_Area(Skin_Area):
                 element = element[ i[ -1 ][ 0 ] ]
             else:
                 element = element[ i[ -1 ] ]
-            
+
             #
             # Tag: <goto_pos>
             #
@@ -307,6 +328,30 @@ class Info_Area(Skin_Area):
                         x += element.x
                     if element.y != None:
                         y = y + element.y
+            #
+            # Tag: <img>
+            #
+            elif isinstance( element, xml_skin.XML_FormatImg ):
+                # Image is a float object
+                if element.x == None:
+                    element.x = x
+                    
+                if element.y == None:
+                    element.y = y
+                else:
+                    my_y = y
+
+                if element.width == None or element.height == None:
+                    image = osd.loadbitmap( element.src, True )
+                    size = image.get_size()
+                    
+                    if element.width == None:
+                        element.width = size[ 0 ]
+                        
+                    if element.height == None:
+                        element.height = size[ 1 ]                    
+                    
+                ret_list += [ element ]
 
             #
             # Tag: <newline>
@@ -368,7 +413,7 @@ class Info_Area(Skin_Area):
 
                 x += element.width
                 ret_list += [ element ]
-
+            
 
             # We should shrink the width and go next line (overflow)
             if x > self.content.width:
@@ -384,9 +429,11 @@ class Info_Area(Skin_Area):
                 new_last_newline = len( ret_list )
                 last_line = ret_list[ last_newline : new_last_newline ]
                 for j in last_line:
-                    font = j.font
-                    if j.text and j.height > newline_height:
-                        newline_height = j.height
+                    if isinstance( j, xml_skin.XML_FormatText ):
+                        font = j.font
+                        if j.text and j.height > newline_height:
+                            newline_height = j.height
+                            
                 y = y + newline_height
                 last_newline = new_last_newline
                 # update the height of the elements in this line,

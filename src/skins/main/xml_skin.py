@@ -9,6 +9,16 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.15  2003/10/21 23:46:22  gsbarbieri
+# Info_Area now support images as
+#    <img src="file" x="1" y="2" width="123" height="456" />
+# x and y are optional and will be set to "pen position" when not specified.
+# width and height are also optional and defaults to the image size.
+# file is the filename.
+#
+# <img> will define FLOAT images, not inline ones. You can simulate inline
+# images with <goto_pos>... Maybe someday, if needed, someone can implement it.
+#
 # Revision 1.14  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -269,7 +279,7 @@ class XML_mainmenuitem:
         self.image = attr_str(node, "image", self.image)
         self.outicon  = attr_str(node, "outicon",  self.outicon)
 
-    def prepaire(self, search_dirs, image_names):
+    def prepare(self, search_dirs, image_names):
         if self.image:
             self.image = search_file(self.image, search_dirs)
             
@@ -289,7 +299,7 @@ class XML_mainmenu:
 
     def prepare(self, search_dirs, image_names):
         for i in self.items:
-            self.items[i].prepaire(search_dirs, image_names)
+            self.items[i].prepare(search_dirs, image_names)
     
 # ======================================================================
 # ======================================================================
@@ -524,7 +534,7 @@ class XML_layout:
                 self.content.parse(subnode, scale, current_dir)
 
     def prepare(self, font, color, search_dirs, image_names):
-        self.content.prepare(font, color)
+        self.content.prepare(font, color, search_dirs)
         for b in self.background:
             b.prepare(color, search_dirs, image_names)
             
@@ -561,7 +571,7 @@ class XML_content(XML_data):
                         if rnode.name == u'rectangle':
                             self.types[type].rectangle = XML_rectangle()
                             self.types[type].rectangle.parse(rnode, scale, current_dir)
-                        elif rnode.name in ( u'if', u'text', u'newline', u'goto_pos' ):
+                        elif rnode.name in ( u'if', u'text', u'newline', u'goto_pos', u'img' ):
                             if (not hasattr( self.types[ type ], 'fcontent' )) or \
                                    delete_fcontent:
                                 self.types[ type ].fcontent = [ ]
@@ -575,17 +585,19 @@ class XML_content(XML_data):
                                 child = XML_FormatNewline()
                             elif rnode.name == u'goto_pos':
                                 child = XML_FormatGotopos()
+                            elif rnode.name == u'img':
+                                child = XML_FormatImg()
 
                             self.types[ type ].fcontent += [ child ]
                             self.types[ type ].fcontent[-1].parse(rnode, scale, current_dir)
-                            
+
         if not self.types.has_key('default'):
             self.types['default'] = XML_data(('font',))
             self.types['default'].rectangle = None
             self.types['default'].cdata = ''
         
 
-    def prepare(self, font, color):
+    def prepare(self, font, color, search_dirs):
         XML_data.prepare(self)
         if self.font:
             try:
@@ -610,7 +622,7 @@ class XML_content(XML_data):
 
             if hasattr( self.types[type], 'fcontent' ):
                 for i in self.types[type].fcontent:
-                    i.prepare( font, color )
+                    i.prepare( font, color, search_dirs )
 
 
 
@@ -641,7 +653,7 @@ class XML_FormatText(XML_data):
         self.expression = attr_str( node, 'expression', self.expression )
         if self.expression: self.expression = self.expression.strip()
 
-    def prepare(self, font, color):
+    def prepare(self, font, color, search_dirs):
         if self.font:
             try:
                 self.font = font[self.font]
@@ -668,7 +680,7 @@ class XML_FormatGotopos(XML_data):
         if self.mode != 'relative' and self.mode != 'absolute':
             self.mode = 'relative'
         
-    def prepare(self, font, color):
+    def prepare(self, font, color, search_dirs):
         pass
     
 class XML_FormatNewline:
@@ -678,8 +690,25 @@ class XML_FormatNewline:
     def parse( self, node, scale, c_dir = '' ):
         pass
 
-    def prepare(self, font, color):
+    def prepare(self, font, color, search_dirs):
         pass
+
+class XML_FormatImg( XML_data ):
+    def __init__( self ):
+        XML_data.__init__( self, ( 'x', 'y', 'width', 'height' ) )
+        self.x = None
+        self.y = None
+        self.width = None
+        self.height = None
+        self.src = ''
+        
+    def parse( self, node, scale, c_dir = '' ):
+        XML_data.parse( self, node, scale, c_dir )
+        self.src = attr_str( node, 'src', self.src )
+        
+    def prepare(self, font, color, search_dirs ):
+        self.src = search_file( self.src, search_dirs )
+        
 
 
 class XML_FormatIf:
@@ -699,13 +728,15 @@ class XML_FormatIf:
                 child = XML_FormatNewline()
             elif subnode.name == u'goto_pos':
                 child = XML_FormatGotopos()
+            elif subnode.name == u'img':
+                child = XML_FormatImg()
             
             child.parse( subnode, scale, c_dir )
             self.content += [ child ]
 
-    def prepare(self, font, color):
+    def prepare(self, font, color, search_dirs):
         for i in self.content:
-            i.prepare( font, color )
+            i.prepare( font, color, search_dirs )
 
                               
 
