@@ -11,6 +11,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.14  2003/09/06 18:00:13  mikeruelle
+# plugging a small gap
+#
 # Revision 1.13  2003/09/06 17:53:58  mikeruelle
 # plugin in the genre page if we have categories
 #
@@ -204,7 +207,7 @@ class GuideResource(FreevoResource):
         pops = ''
         desc = ''
 
-        fv.tableOpen('border="0" cellpadding="4" cellspacing="1" width="100%"')
+        fv.tableOpen('border="0" cellpadding="0" cellspacing="0" width="100%"')
         fv.tableRowOpen('class="chanrow"')
         fv.tableCell('<form>Jump&nbsp;to:&nbsp;' + self.maketimejumpboxday(now) + self.maketimejumpboxoffset(now) + '<input type=submit value="Change"></form>', 'class="guidehead"')
         categorybox =  self.makecategorybox(guide.chan_list)
