@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/10/26 17:40:52  dischi
+# small fix
+#
 # Revision 1.37  2003/10/03 16:46:13  dischi
 # moved the encoding type (latin-1) to the config file config.LOCALE
 #
@@ -319,8 +322,10 @@ def load_guide():
     if gotfile:
         if DEBUG:
             print 'reading xmltv data'
-        xmltv_programs = xmltv.read_programmes(util.gzopen(config.XMLTV_FILE))
-    
+        f = util.gzopen(config.XMLTV_FILE)
+        xmltv_programs = xmltv.read_programmes(f)
+        f.close()
+        
     # Was the guide read successfully?
     if not xmltv_programs:
         return guide    # Return the guide, it has the channels at least...
@@ -376,7 +381,7 @@ def timestr2secs_utc(str):
         raise EPG_TIME_EXC
 
     if tz == 'CET':
-        tz='+2'
+        tz='+1'
     # Is it the '+1' format?
     if tz[0] == '+' or tz[0] == '-':
         tmTuple = ( int(tval[0:4]), int(tval[4:6]), int(tval[6:8]), 
