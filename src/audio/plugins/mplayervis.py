@@ -29,7 +29,8 @@
 try:
     import pygoom
 except:
-    raise Exception('[audio.mplayervis]: Pygoom not available, please install or remove this plugin.')
+    raise Exception('[audio.mplayervis]: Pygoom not available, please install '+
+                    'or remove this plugin.')
 
 
 # pygame  modules
@@ -43,16 +44,16 @@ from animation      import render, BaseAnimation
 
 mmap_file = '/tmp/mpav'
 skin = skin.get_singleton()
-osd = osd.get_singleton()
+osd  = osd.get_singleton()
 
 
 class mpv_Goom(BaseAnimation):
     message    = None
     coversurf  = None
 
-    blend      = 122
+    blend      = 255
     blend_step = -2
-    max_blend  = 120
+    max_blend  = 250
     c_timeout  = 8         # seconds on cover
     v_timeout  = 30        # seconds on visual
     timeout    = v_timeout # start waiting with cover
@@ -114,7 +115,7 @@ class mpv_Goom(BaseAnimation):
         if self.coverfile:
             self.coversurf = transform.scale(image.load(self.coverfile),
                                              (self.rect.width, self.rect.height))
-        self.max_blend = 120
+        self.max_blend = 250
 
         self.c_timer = time.time()
 
@@ -147,7 +148,8 @@ class mpv_Goom(BaseAnimation):
                 if self.blend > self.max_blend:
                     self.blend = self.max_blend
                 elif self.blend < 0:
-                    self.blend = 0
+                    self.blend     = 0
+                    self.max_blend = 120
 
                 if time.time() - self.c_timer > self.timeout:
                     if self.timeout == self.c_timeout:
