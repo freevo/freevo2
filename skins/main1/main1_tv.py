@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.9  2002/11/13 14:28:53  krister
+# Fixed the channel logos to be sized better.
+#
 # Revision 1.8  2002/10/28 19:34:55  dischi
 # The tv info area now shows info and description with the extra words info
 # and description. The title will be writen in a larger font than the
@@ -262,17 +265,21 @@ class Skin_TV:
             if not os.path.isfile(channel_logo):
                 channel_logo = None
 
-            padding = 0
+            logo_w, logo_h = 0, 0
             if channel_logo:
-                channel_logo_size = osd.bitmapsize(channel_logo)
-                padding = channel_logo_size[0]
-                osd.drawbitmap(util.resize(channel_logo, padding, padding),
-                               conf_x + val.spacing, y0 + val.spacing + \
-                               (str_h - padding)/2)
+                # Get logo size
+                logo_w, logo_h = osd.bitmapsize(channel_logo)
+                # Resize according to the available height
+                scalefac = float(y1 - y0 - 2) / logo_h
+                logo_w = int(logo_w * scalefac)
+                logo_h = int(logo_h * scalefac)
+                osd.drawbitmap(util.resize(channel_logo, logo_w, logo_h),
+                               conf_x + val.spacing, y0 + val.spacing +
+                               (str_h - logo_h)/2)
 
             DrawTextFramed(to_listing[i].displayname, val.label,
-                           conf_x + val.spacing + padding, y0 + val.spacing,
-                           val.label.width - 2 * val.spacing - padding, str_h)
+                           conf_x + val.spacing + logo_w, y0 + val.spacing,
+                           val.label.width - 2 * val.spacing - logo_h, str_h)
 
             # Border is drawn afterwards to delineate the icons
             drawroundbox(conf_x, y0, conf_x+val.label.width, y1, border_size=1,
