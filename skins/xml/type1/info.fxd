@@ -62,6 +62,10 @@
     ** MENU
     ******************************************************* -->
 
+    <menu type="default">
+      <style text="plain text style"/>
+    </menu>
+
     <!-- special settings for audio. The default style is an image based style -->
     <!-- with an info area. By pressing DISPLAY this can be toggled to the default view -->
     <menu type="audio">
@@ -81,14 +85,18 @@
     </menu>
 
 
+    <!-- a style without view area for sub menus -->
+    <menuset label="plain text style" inherits="normal text style">
+      <listing width="700"/>
+      <view visible="no"/>
+    </menuset>
+
     <!-- Now the "text with info style" -->
     <menuset label="text with info style" inherits="normal text style">
       <!-- 4. listing area: the list of all items -->
       <listing height="330">
 	<image y="405" label="downarrow"/>
       </listing>
-      <!-- 5. info area: additional info. This area is invisible in the default -->
-      <!-- menu, it's only visible in the extended menus -->
       <info layout="info" x="40" y="460" width="750" height="120"/>
     </menuset>
 
