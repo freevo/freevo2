@@ -15,6 +15,7 @@ o mp3_id.py: http://id3-py.sourceforge.net/
 o jpgtn, used in part by osd_server: http://jpgtn.sourceforge.net/
 o OSD image scaling, Dr Dobbs article in the April 1997 issue
   by Dean Clark, <71160.2426@compuserve.com>
+o EXIF support from Thierry Bousch <bousch@topo.math.u-psud.fr>
 
 
 People:
