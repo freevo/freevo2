@@ -96,6 +96,12 @@ class MenuWidget:
         self.main_menu = MenuItem('Main', self.goto_main_menu)
 
 
+    def delete_menu(self, arg=None, menuw=None):
+        if len(self.menustack) > 1:
+            self.menustack = self.menustack[:-1]
+            menu = self.menustack[-1]
+            self.init_page()
+
     def back_one_menu(self, arg=None, menuw=None):
         if len(self.menustack) > 1:
             self.menustack = self.menustack[:-1]
