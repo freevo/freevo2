@@ -1,5 +1,7 @@
 import os
 import socket
+from select import select
+from select import error as select_error
 import cStringIO
 import fcntl
 import notifier
@@ -117,7 +119,7 @@ class Socket:
 
 
     def __write_socket(self, s):
-        data = self.out_buffer.read(1000)
+        data = self.out_buffer.read(2000)
         if not data:
             if self.out_fd:
                 self.out_buffer.close()
@@ -131,6 +133,18 @@ class Socket:
         try:
             if isinstance(self.socket, int):
                 os.write(self.socket, data)
+                while True:
+                    try:
+                        r, w, e = select([], [ self.socket ], [], 0)
+                        if w:
+                            data = self.out_buffer.read(2000)
+                            if not data:
+                                return True
+                            os.write(self.socket, data)
+                        else:
+                            return True
+                    except ValueError, select_error:
+                        return True
             else:
                 self.socket.send(data)
             return True
