@@ -1,0 +1,12 @@
+recursive-include src *.py
+recursive-include src/www/htdocs *
+recursive-include share *
+recursive-include Docs *
+recursive-include boot *
+recursive-include contrib *
+recursive-include i18n *
+
+include BUGS local_conf.py.example setup.py COPYING FAQ README freevo share INSTALL TODO
+include ChangeLog  MANIFEST freevo_config.py
+
+
