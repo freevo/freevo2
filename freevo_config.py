@@ -968,6 +968,15 @@ OSD_UPDATE_COMPLETE_REDRAW = 0
 if CONF.display in ( 'dxr3', 'dga' ):
     OSD_UPDATE_COMPLETE_REDRAW = 1
 
+#
+# Output display to use. Possible values are SDL (using pygame),
+# Imlib2 (X only), Bmovl and Bmovl2. The two Bmovl displays also need
+# a background video set in OSD_BACKGROUND_VIDEO
+#
+OSD_DISPLAY = 'SDL'
+OSD_BACKGROUND_VIDEO = ''
+
+
 # ======================================================================
 # Freevo remote control settings:
 # ======================================================================
