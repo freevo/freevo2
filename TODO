@@ -6,21 +6,14 @@ $Id$
 
 Short-term
 ----------
-o Check that the applications exist in startup.py, now it will
-  just loop forever trying to start them
 o Add version info to freevo_config.py and refuse to start if the 
   found version does not match the requirement.
   o We're constantly adding new parameters etc that
     breaks if the user has an old freevo_config.py
     in /etc/freevo
-o Finish the basic skin support
-o Add proper X11 support for mplayer and tv-watching
-o Add a freevo exit command
-  o Shutdown implemented for standalone boxen, add for X11/SDL too
 o Add rcs id to all files!
   o Use the new Docs/fileheader after it has been approved by all
     authors
-o Make the OSD/skins support adapt to the OSD resolution
 o Channel guide layout
 o Use btaudio for audio recording from the video card
 o Select packages for release (mplayer, xvid, nvrec, ffmpeg)
@@ -37,10 +30,6 @@ o Add DVD backups
   o mencoder works fine with XviD/FFMPEG, but it cannot be started from Freevo yet
 o Add a digital filter to remove 50/60 Hz line-noise from audio line input
   o Is only a problem for connecting line in to a VCR?
-o Finish LICENSE
-o Website:
-  o Add an animated GIF of the system being used instead?
-  o New favicon
  
 
 Mid-term
