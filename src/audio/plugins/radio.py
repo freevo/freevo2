@@ -18,6 +18,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.6  2004/01/14 20:37:11  mikeruelle
+# add url for preffered player stuff.
+#
 # Revision 1.5  2003/11/30 14:41:10  dischi
 # use new Mimetype plugin interface
 #
@@ -126,6 +129,7 @@ class RadioMainMenuItem(Item):
             radio_item = RadioItem()
             radio_item.name = rstation[0]
             radio_item.station = rstation[1]
+            radio_item.url = 'radio://' + str(rstation[1])
             radio_item.type = 'radio'
             radio_item.station_index = config.RADIO_STATIONS.index(rstation)
             radio_item.length = 0
