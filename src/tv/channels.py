@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.19  2004/07/11 12:33:29  dischi
+# no tuner id is ok for dvb
+#
 # Revision 1.18  2004/07/10 12:33:41  dischi
 # header cleanup
 #
@@ -153,10 +156,16 @@ class FreevoChannels:
             if clist:
                 freq = clist.get(chan)
             else:
-                print String(_('ERROR')+': '+(_('Unable to get channel list for %s.') % vg.tuner_chanlist))
+                if vg.group_type != 'dvb':
+                    print String(_('ERROR')+': ' + \
+                                 (_('Unable to get channel list for %s.') % \
+                                  vg.tuner_chanlist))
                 return 0
             if not freq:
-                print String(_('ERROR')+': '+(_('Unable to get frequency for channel %s.') % chan))
+                if vg.group_type != 'dvb':
+                    print String(_('ERROR')+': ' + \
+                                 (_('Unable to get channel list for %s.') % \
+                                  vg.tuner_chanlist))
                 return 0
             if DEBUG:
                 print String('USING STANDARD FREQUENCY: chan="%s", freq="%s"' % \
