@@ -6,6 +6,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/11 20:23:31  dischi
+# move skin font handling to osd to avoid duplicate code
+#
 # Revision 1.7  2004/01/01 17:41:05  dischi
 # add border support for Font
 #
@@ -208,17 +211,9 @@ class Screen:
             for x1, y1, x2, y2, text, font, height, align_h, align_v, mode, \
                     ellipses in self.drawlist.text:
                 if self.in_update(x1, y1, x2, y2, update_area):
-                    shadow = None
-                    border = None
-                    if font.shadow.visible:
-                        if font.shadow.border:
-                            border = font.shadow.color
-                        else:
-                            shadow = (font.shadow.x, font.shadow.y, font.shadow.color)
-                    osd.drawstringframed(text, x1, y1, x2 - x1, height, font.font,
-                                         font.color, font.bgcolor, align_h = align_h,
+                    osd.drawstringframed(text, x1, y1, x2 - x1, height, font,
+                                         align_h = align_h,
                                          align_v = align_v, mode=mode,
-                                         shadow=shadow, border_color=border,
                                          ellipses=ellipses, layer=layer)
 
         for x0, y0, x1, y1 in update_area:

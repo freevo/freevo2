@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.12  2004/01/11 20:23:31  dischi
+# move skin font handling to osd to avoid duplicate code
+#
 # Revision 1.11  2004/01/11 10:57:58  dischi
 # support for function calls (e.g. comingup)
 #
@@ -393,16 +396,11 @@ class Info_Area(Skin_Area):
                 else:
                     height = -1
 
-                if element.font.shadow.visible:
-                    shadow = (element.font.shadow.x, element.font.shadow.y,
-                              element.font.shadow.color)
-                else:
-                    shadow = None
                 size = osd.drawstringframed( _(element.text), 0, 0,
                                              r.width, r.height,
-                                             element.font.font, None, None,
+                                             element.font, None, None,
                                              element.align, element.valign,
-                                             element.mode, shadow=shadow, layer='' )[ 1 ]
+                                             element.mode, layer='' )[ 1 ]
                 m_width  = size[ 2 ] - size[ 0 ]
                 m_height = size[ 3 ] - size[ 1 ]
 

@@ -10,6 +10,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.122  2004/01/11 20:23:31  dischi
+# move skin font handling to osd to avoid duplicate code
+#
 # Revision 1.121  2004/01/11 20:01:28  dischi
 # make bmovl work again
 #
@@ -787,7 +790,7 @@ class OSD:
 
     def drawstringframed(self, string, x, y, width, height, font, fgcolor=None,
                          bgcolor=None, align_h='left', align_v='top', mode='hard',
-                         shadow=None, border_color=None, layer=None, ellipses='...'):
+                         layer=None, ellipses='...'):
         """
         draws a string (text) in a frame. This tries to fit the
         string in lines, if it can't, it truncates the text,
@@ -806,24 +809,31 @@ class OSD:
         - align_v: vertical align. Can be top, bottom, center or middle
         - mode: the way we should break lines/truncate. Can be 'hard'(based on chars)
           or 'soft' (based on words)
-        - shadow can be a list of (x, y, color)
-        - border_color is a border around the text.
-
-        You can't use border_color and shadow at the same time
         """
         if not string:
             return '', (x,y,x,y)
 
-        if shadow:
-            shadow_x, shadow_y = shadow[:2]
-        else:
-            shadow_x = 0
-            shadow_y = 0
-
+        shadow_x      = 0
+        shadow_y      = 0
+        border_color  = None
         border_radius = 0
-        if border_color != None:
-            border_radius = int(font.ptsize/10)
-            
+
+        if hasattr(font, 'shadow'):
+            # skin font
+            if font.shadow.visible:
+                if font.shadow.border:
+                    border_color  = font.shadow.color
+                    border_radius = int(font.font.ptsize/10)
+                else:
+                    shadow_x     = font.shadow.y
+                    shadow_y     = font.shadow.x
+                    shadow_color = self._sdlcol(font.shadow.color)
+            if not fgcolor:
+                fgcolor = font.color
+            if not bgcolor:
+                bgcolor = font.bgcolor
+            font    = font.font
+
         if height == -1:
             height = font.height
         elif border_color != None:
@@ -895,8 +905,6 @@ class OSD:
 
         if layer:
             fgcolor  = self._sdlcol(fgcolor)
-            if shadow:
-                shadow_color = self._sdlcol(shadow[2])
             if border_color != None:
                 border_color = self._sdlcol(border_color)
                 
@@ -933,7 +941,7 @@ class OSD:
                                 if ox or oy:
                                     layer.blit(font.font.render(l, 1, border_color),
                                                (x0+ox, y0+oy))
-                    if shadow:
+                    if shadow_x or shadow_y:
                         # draw the text in the shadow_color to get a shadow
                         layer.blit(font.font.render(l, 1, shadow_color),
                                    (x0+shadow_x, y0+shadow_y))
@@ -951,11 +959,12 @@ class OSD:
 
         # change max_x, min_x, y and height_needed to reflect the
         # changes from border and shadow
-        if shadow:
+        if shadow_x:
             if shadow_x < 0:
                 min_x += shadow_x
             else:
                 max_x += shadow_x
+        if shadow_y:
             if shadow_y < 0:
                 y += shadow_y
                 height_needed -= shadow_y

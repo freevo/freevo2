@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.8  2004/01/11 20:23:31  dischi
+# move skin font handling to osd to avoid duplicate code
+#
 # Revision 1.7  2004/01/11 20:01:28  dischi
 # make bmovl work again
 #
@@ -170,18 +173,9 @@ class PluginInterface(plugin.Plugin):
         clock_font  = skin.get_singleton().get_font('clock')
         clock_width = clock_font.stringsize(clock)
 
-        shadow = None
-        border = None
-        if clock_font.shadow.visible:
-            if clock_font.shadow.border:
-                border = clock_font.shadow.color
-            else:
-                shadow = (clock_font.shadow.x, clock_font.shadow.y, clock_font.shadow.color)
-        
         self.bmovl.drawstringframed(clock, self.bmovl.width-config.OSD_OVERSCAN_X-10-\
                                     clock_width, config.OSD_OVERSCAN_Y+10,
-                                    clock_width, -1, clock_font.font, clock_font.color,
-                                    shadow=shadow, border_color=border)
+                                    clock_width, -1, clock_font)
 
         self.bmovl.update((0, 0, self.bmovl.width, height))
 
@@ -211,33 +205,12 @@ class PluginInterface(plugin.Plugin):
             title   = show[0] + " " + show[1] + "x" + show[2]
             tagline = show[3]
         
-        font   = skin.get_singleton().get_font('title')
-
-        shadow = None
-        border = None
-        if font.shadow.visible:
-            if font.shadow.border:
-                border = font.shadow.color
-            else:
-                shadow = (font.shadow.x, font.shadow.y, font.shadow.color)
-        
-        pos = self.bmovl.drawstringframed(title, x0, y0, width, -1, font.font,
-                                          font.color, shadow=shadow, border_color=border)
+        font = skin.get_singleton().get_font('title')
+        pos  = self.bmovl.drawstringframed(title, x0, y0, width, -1, font)
 
         if tagline:
             font = skin.get_singleton().get_font('info tagline')
-
-            shadow = None
-            border = None
-            if font.shadow.visible:
-                if font.shadow.border:
-                    border = font.shadow.color
-                else:
-                    shadow = (font.shadow.x, font.shadow.y, font.shadow.color)
-
-            self.bmovl.drawstringframed(tagline, x0, pos[1][3]+5, width, -1,
-                                        font.font, font.color,
-                                        shadow=shadow, border_color=border)
+            self.bmovl.drawstringframed(tagline, x0, pos[1][3]+5, width, -1, font)
             
         self.bmovl.update((0, self.bmovl.height-height, self.bmovl.width, height))
 
