@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.38  2003/08/20 13:33:48  outlyer
+# Patch from Lars Eggert to support FreeBSD device naming conventions.
+#
 # Revision 1.37  2003/08/15 19:25:14  dischi
 # search all the share stuff in $FREEVO_SHARE now
 #
@@ -341,7 +344,7 @@ OSD_DEFAULT_FONTNAME = os.path.join(FONT_DIR, OSD_DEFAULT_FONTNAME)
 # Autodetect the CD/DVD drives in the system if not given in local_conf.py
 if not ROM_DRIVES:
     if os.path.isfile('/etc/fstab'):
-        RE_CD = '^(/dev/cdrom)[ \t]+([^ \t]+)[ \t]+'
+        RE_CD = '^(/dev/cdrom|/dev/a?cd\dc?)[ \t]+([^ \t]+)[ \t]+'
         RE_CDREC ='^(/dev/cdrecorder)[ \t]+([^ \t]+)[ \t]+'
         RE_DVD ='^(/dev/dvd)[ \t]+([^ \t]+)[ \t]+'
         RE_ISO ='^([^ \t]+)[ \t]+([^ \t]+)[ \t]+iso9660'
@@ -382,6 +385,10 @@ if not ROM_DRIVES:
                 else:
                     mntdir = devname = dispname = ''
 
+	    # FreeBSD mount point is device name + "c"
+            if os.uname()[0] == 'FreeBSD':
+                devname = devname[:-1]
+ 
             # Weed out duplicates
             for rd_mntdir, rd_devname, rd_dispname in ROM_DRIVES:
                 if os.path.realpath(rd_devname) == os.path.realpath(devname):
