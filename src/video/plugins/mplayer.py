@@ -20,6 +20,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.26  2003/09/23 13:47:48  outlyer
+# Remove this for now...
+#
 # Revision 1.25  2003/09/23 13:39:51  outlyer
 # Remove more informational chatter.
 #
@@ -161,7 +164,7 @@ class MPlayer:
 
         self.mode = mode   # setting global var to mode.
 
-        _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename))
+        _debug_('MPlayer.play(): mode=%s, filename=%s' % (mode, filename),2)
 
         if mode == 'file' and not os.path.isfile(filename) and not network_play:
             # This event allows the videoitem which contains subitems to
@@ -265,7 +268,7 @@ class MPlayer:
 
         self.item  = item
 
-        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command)
+        _debug_('MPlayer.play(): Starting thread, cmd=%s' % command,2)
         rc.app(self)
 
         return None
