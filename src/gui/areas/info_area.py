@@ -54,10 +54,6 @@ class InfoArea(Area):
     def __init__(self):
         Area.__init__(self, 'info')
         self.last_item = None
-        self.last_content = None
-        self.content = None
-        self.layout_content = None
-        self.list = None
         self.canvas = None
 
 
@@ -75,71 +71,27 @@ class InfoArea(Area):
         """
         Update the information area.
         """
-        self.set_list(self.set_content())
-
-        if self.canvas and self.infoitem == self.last_item and \
-           self.content == self.last_content:
-            self.canvas.rebuild()
+        if not self.settings.changed and self.infoitem == self.last_item:
             return
 
-        t = InfoText((self.content.x, self.content.y),
-                     (self.content.width, self.content.height),
-                     self.infoitem, self.list, function_calls)
+        # get key of the items based on item attributes
+        key = 'default'
+        if hasattr( self.infoitem, 'info_type'):
+            key = self.infoitem.info_type or key
+        elif hasattr( self.infoitem, 'type' ):
+            key = self.infoitem.type or key
+
+        # get the values for that item
+        if self.settings.types.has_key(key):
+            val = self.settings.types[ key ]
+        else:
+            val = self.settings.types[ 'default' ]
 
         if self.canvas:
             self.canvas.unparent()
-        self.canvas = t
-        self.layer.add_child(t)
+
+        self.canvas = InfoText((self.settings.x, self.settings.y),
+                               (self.settings.width, self.settings.height),
+                               self.infoitem, val.fcontent, function_calls)
+        self.layer.add_child(self.canvas)
         self.last_item = self.infoitem
-        self.last_content = self.content
-
-
-    def set_content( self ):
-        """
-        Set self.content and self.layout_content if they need to be set
-        (return 1) or does nothing (return 0)
-        """
-        update=0
-        if self.content and self.area_values and \
-               (self.content.width != self.area_values.width or \
-                self.content.height != self.area_values.height or \
-                self.content.x != self.area_values.x or \
-                self.content.y != self.area_values.y):
-            update=1
-
-        if self.layout_content is not self.layout.content or update:
-            types = self.layout.content.types
-            self.content = self.calc_geometry(self.layout.content,
-                                              copy_object=True)
-            # backup types, which have the previously calculated fcontent
-            self.content.types = types
-            self.layout_content = self.layout.content
-            return 1
-        return 0
-
-
-    def set_list( self, force = 0 ):
-        """
-        Set self.list if need (return 1) or does nothing (return 0)
-        """
-        if force or self.infoitem is self.infoitem != self.last_item:
-            key = 'default'
-            if hasattr( self.infoitem, 'info_type'):
-                key = self.infoitem.info_type or key
-
-            elif hasattr( self.infoitem, 'type' ):
-                key = self.infoitem.type or key
-
-            if self.content.types.has_key(key):
-                val = self.content.types[ key ]
-            else:
-                val = self.content.types[ 'default' ]
-
-            if not hasattr( val, 'fcontent' ):
-                self.list = None
-                return 1
-
-            self.list = val.fcontent
-            return 1
-
-        return 0
