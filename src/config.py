@@ -22,6 +22,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.88  2004/01/08 14:18:32  dischi
+# do not fix path for games
+#
 # Revision 1.87  2004/01/05 17:18:52  dischi
 # also create parent dir
 #
@@ -635,7 +638,9 @@ for type in ('video', 'audio', 'image', 'games'):
             print
         if type == 'video':
             VIDEO_ONLY_SCAN_DATADIR = True
-    else:
+
+    elif type != 'games':
+        # The algorithm doesn't work for GAMES_ITEMS, so we leave it out
         abs = []
         for d in x:
             if isinstance(d, str):
