@@ -89,10 +89,10 @@ $Id$
          contains a XML file with attributes like color, font,
          positions etc. 
 
-	 The file skins/main1/768x576.xml contains the settings for
+	 The file skins/xml/type1/768x576.xml contains the settings for
 	 the current skin for 768x576 pixel resolutions. Currently
-	 there is only support for the menu in the XML file, the mp3
-	 player and image viewer are unsupported right now.
+	 there is only support for the menu and mp3 player in the XML
+	 file, the image viewer is unsupported right now.
 
 	 WARNING: 
 	 the XML file depends on the python skin. Other skins may have
