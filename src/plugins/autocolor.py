@@ -15,6 +15,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.2  2003/11/30 14:37:10  dischi
+# do not iclude stuff you don't need
+#
 # Revision 1.1  2003/09/25 14:07:02  outlyer
 # My autocolor plugin which allows me to run a system command before plaaying
 # video. It doesn't have to be a color command, you can change mixer settings
@@ -49,7 +52,6 @@ import sys
 import copy
 
 import config
-import skin
 import plugin
 
 from event import *
