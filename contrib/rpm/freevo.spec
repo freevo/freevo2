@@ -39,7 +39,7 @@ BuildRoot: %{_tmppath}/%{name}-buildroot
 Requires: SDL >= 1.2.6, SDL_image >= 1.2.3, SDL_ttf >= 2.0.6, SDL_mixer >= 1.2.5
 Requires: smpeg >= 0.4.4, freetype >= 2.1.4, util-linux
 Requires: python >= 2.3, python-game >= 1.5.6, python-imaging >= 1.1.4, PyXML
-Requires: mmpython >= 0.4.3, mx >= 2.0.5, python-numeric >= 23.1,
+Requires: mmpython >= 0.4.4, mx >= 2.0.5, python-numeric >= 23.1,
 Requires: aumix >= 2.8, libjpeg >= 6b, libexif >= 0.5.10
 Requires: python-Twisted >= 1.1.0
 Requires: lsdvd
@@ -127,8 +127,11 @@ cat >>INSTALLED_FILES <<EOF
 #%doc BUGS COPYING ChangeLog FAQ INSTALL README TODO Docs local_conf.py.example
 #%doc contrib/lirc 
 %attr(644,root,root) %{_docdir}/local_conf.py.example
+%attr(755,root,root) %dir %{_docdir}/installation
+%attr(755,root,root) %dir %{_docdir}/plugin_writing
+%attr(755,root,root) %dir %{_contribdir}/fbcon
 %attr(755,root,root) %dir %{_contribdir}/lirc
-%attr(644,root,root) %{_contribdir}/*
+%attr(644,root,root) %{_contribdir}/lirc/*
 %attr(755,root,root) %dir %{_sysconfdir}/freevo
 %attr(777,root,root) %dir %{_logdir}/freevo
 %attr(777,root,root) %dir %{_cachedir}/freevo
@@ -200,6 +203,9 @@ if [ "$1" = 0 ] ; then
 fi
 
 %changelog
+* Fri Jul 2 2004 TC Wan <tcwan@cs.usm.my>
+- Added docs subdir for package cleanup, fixed contrib dir build warnings
+
 * Tue Jun 29 2004 TC Wan <tcwan@cs.usm.my>
 - Added python-numeric dependency, backup freevo.conf 
   just before creating new default copy
