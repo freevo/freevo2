@@ -9,6 +9,9 @@
 #
 # -----------------------------------------------------------------------
 # $Log$
+# Revision 1.45  2004/01/08 17:03:31  rshortt
+# Bugfix for outicons.
+#
 # Revision 1.44  2004/01/07 18:13:25  dischi
 # respect overlay files and create dir if needed
 #
@@ -216,7 +219,7 @@ class Item:
                 if skin_info.icon:
                     self.icon = os.path.join(settings.icon_dir, skin_info.icon)
                 if skin_info.outicon:
-                    self.outicon = os.path.join(settings.icon_dir, skin_info.icon)
+                    self.outicon = os.path.join(settings.icon_dir, skin_info.outicon)
             
 
 
